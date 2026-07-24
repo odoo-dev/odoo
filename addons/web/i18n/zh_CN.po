@@ -24,8 +24,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 03:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-master/web/zh_Hans/>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/projects/odoo-master/web/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -208,18 +207,18 @@ msgstr "<em class=\"d-block my-3 small text-center text-muted\">- 或 -</em>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (html)"
-msgstr "<i class=\"fa fa-download\"/> (html)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (html)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (html)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (json)"
-msgstr "<i class=\"fa fa-download\"/> (json)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (json)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (json)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
-msgid "<i class=\"fa fa-repeat\"/> Reset"
-msgstr "<i class=\"fa fa-repeat\"/> 重置"
+msgid "<i class=\"oi\" data-icon=\"redo\"/> Reset"
+msgstr "<i class=\"oi\" data-icon=\"redo\"/> 重置"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -229,34 +228,34 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">1,400.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">1,400.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">240.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -286,10 +285,8 @@ msgstr "<span class=\"text-nowrap\">税 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
-"Barbara\n"
-"                                Rd<br/>Pleasant Hill CA 94523<br/>United "
-"States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
+"                                Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 
 #. module: web
@@ -301,9 +298,9 @@ msgstr "<span id=\"line_tax_ids\">15%</span>"
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all samples."
-"<br/>It can lead to partially invalid result in case of concurrent profiles."
-"<br/>Use with caution </span>"
+"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all "
+"samples.<br/>It can lead to partially invalid result in case of concurrent "
+"profiles.<br/>Use with caution </span>"
 msgstr ""
 
 #. module: web
@@ -316,8 +313,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        Chair floor protection<br/>\n"
-"                                        Office chairs can harm your floor: "
-"protect it\n"
+"                                        Office chairs can harm your floor: protect it\n"
 "                                    </span>"
 msgstr ""
 
@@ -326,8 +322,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_7777] Office Chair<br/>\n"
-"                                        Comfortable yellow chair for daily "
-"work\n"
+"                                        Comfortable yellow chair for daily work\n"
 "                                    </span>"
 msgstr ""
 
@@ -336,8 +331,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_8999] Three-Seat Sofa<br/>\n"
-"                                        Three Seater Sofa with Lounger in "
-"Steel Grey Colour\n"
+"                                        Three Seater Sofa with Lounger in Steel Grey Colour\n"
 "                                    </span>"
 msgstr ""
 
@@ -397,16 +391,14 @@ msgstr "<span>单价</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                    Four person modern office workstation</"
-"span>"
+"                                    Four person modern office workstation</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">\n"
-"                                                    $ <span "
-"class=\"oe_currency_value\">27,703.50</span>\n"
+"                                                    $ <span class=\"oe_currency_value\">27,703.50</span>\n"
 "                                                </strong>"
 msgstr ""
 
@@ -1190,10 +1182,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is base64-"
-"encoded. That does not seem to be the case for %s."
-msgstr ""
-"二进制字段不能导出到Excel，除非它们的内容是Base64编码。这似乎不适用于 %s。"
+"Binary fields can not be exported to Excel unless their content is "
+"base64-encoded. That does not seem to be the case for %s."
+msgstr "二进制字段不能导出到Excel，除非它们的内容是Base64编码。这似乎不适用于 %s。"
 
 #. module: web
 #. odoo-javascript
@@ -1256,13 +1247,12 @@ msgstr "按钮类型："
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
-"a valid electronic representation of my hand-written signature/initials for "
-"all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
+" a valid electronic representation of my hand-written signature/initials for"
+" all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
-"通过单击“采纳并签名”按钮，我同意所选的签字/姓名首字母将是我的手写签字/姓名首"
-"字母的有效电子表示，用于文件（包括具有法律约束力的合同）的所有目的。"
+"通过单击“采纳并签名”按钮，我同意所选的签字/姓名首字母将是我的手写签字/姓名首字母的有效电子表示，用于文件（包括具有法律约束力的合同）的所有目的。"
 
 #. module: web
 #. odoo-javascript
@@ -2224,9 +2214,7 @@ msgstr ""
 msgid ""
 "Defines the minimum number of characters to perform the search. If not set, "
 "the search is performed on focus."
-msgstr ""
-"设定执行搜寻最少需要的字符数目。 若未设定，字段获得焦点时（focus）便会进行搜"
-"寻。"
+msgstr "设定执行搜寻最少需要的字符数目。 若未设定，字段获得焦点时（focus）便会进行搜寻。"
 
 #. module: web
 #. odoo-javascript
@@ -2995,8 +2983,7 @@ msgstr "不支持字段属性"
 msgid ""
 "Field that holds the maximum value of the progress bar. If set, will be "
 "displayed next to the progress bar (e.g. 10 / 200)."
-msgstr ""
-"保存进度条最大值的字段。如果设置，将显示在进度条旁边（例如 10 / 200）。"
+msgstr "保存进度条最大值的字段。如果设置，将显示在进度条旁边（例如 10 / 200）。"
 
 #. module: web
 #. odoo-javascript
@@ -3098,8 +3085,7 @@ msgstr "显示在所有报表下方的页脚文字。"
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than "
-"16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
@@ -3119,8 +3105,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid ""
-"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
-"to \"3\"."
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated"
+" to \"3\"."
 msgstr ""
 
 #. module: web
@@ -3415,9 +3401,7 @@ msgid ""
 "Houston, we have a database naming issue! Make sure you only use letters, "
 "numbers, underscores, hyphens, or dots in the database name, and you'll be "
 "golden."
-msgstr ""
-"休斯顿，我们遇到了数据库命名问题！确保在数据库名称中只使用字母、数字、下划"
-"线、连字符或点，这样就万无一失了。"
+msgstr "休斯顿，我们遇到了数据库命名问题！确保在数据库名称中只使用字母、数字、下划线、连字符或点，这样就万无一失了。"
 
 #. module: web
 #. odoo-javascript
@@ -3485,7 +3469,8 @@ msgstr "图标"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid "If True, the url will be used as it is, without any prefix added to it."
+msgid ""
+"If True, the url will be used as it is, without any prefix added to it."
 msgstr "如果为 True，URL 将按原样使用，不添加任何前缀。"
 
 #. module: web
@@ -3503,8 +3488,7 @@ msgstr ""
 msgid ""
 "If checked, users will not be able to create records based on the text "
 "input; they will still be able to create records via a popup form."
-msgstr ""
-"如果选中该选项，用户将无法根据文本输入创建记录；但仍可通过弹出表单创建记录。"
+msgstr "如果选中该选项，用户将无法根据文本输入创建记录；但仍可通过弹出表单创建记录。"
 
 #. module: web
 #. odoo-javascript
@@ -3513,9 +3497,7 @@ msgstr ""
 msgid ""
 "If checked, users will not be able to create records based through a popup "
 "form; they will still be able to create records based on the text input."
-msgstr ""
-"如果选中此选项，用户将无法通过弹出式表单创建记录；但仍可根据文本输入创建记"
-"录。"
+msgstr "如果选中此选项，用户将无法通过弹出式表单创建记录；但仍可根据文本输入创建记录。"
 
 #. module: web
 #. odoo-javascript
@@ -3756,16 +3738,11 @@ msgstr "伊斯兰教徒"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall "
-"time of the\n"
-"            template. Because the global time (in the drop down) does not "
-"take into account the\n"
-"            duration which is not in the rendering (look for the template, "
-"read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes "
-"part of the time to make\n"
-"            the profile as well as some part not logged in the function "
-"generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
+"            template. Because the global time (in the drop down) does not take into account the\n"
+"            duration which is not in the rendering (look for the template, read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes part of the time to make\n"
+"            the profile as well as some part not logged in the function generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3780,8 +3757,8 @@ msgstr "似乎找不到 ID 为%s的记录。它们可能已被删除。"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid ""
-"It will be removed for everyone using the \"%(parentName)s\" %"
-"(parentFieldLabel)s."
+"It will be removed for everyone using the \"%(parentName)s\" "
+"%(parentFieldLabel)s."
 msgstr ""
 
 #. module: web
@@ -5162,8 +5139,7 @@ msgstr "Odoo首先需要您的授权。"
 msgid ""
 "Of the %(selectedRecord)s selected records, only the first %(firstRecords)s "
 "have been archived/unarchived."
-msgstr ""
-"在所选的 %(selectedRecord)s 项记录中，只归档/取消归档了 %(firstRecords)s 项。"
+msgstr "在所选的 %(selectedRecord)s 项记录中，只归档/取消归档了 %(firstRecords)s 项。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.webclient_offline
@@ -5216,18 +5192,17 @@ msgstr "只刪除了 %(count)s 项记录（在全部所选的 %(total)s 项记�
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type "
+"%(field_type)s)"
 msgstr "只支持类型为%(supported_types)s的分类（发现类型为%(field_type)s）"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type %"
-"(field_type)s)"
-msgstr ""
-"只支持类型为 %(supported_types)s 的筛选条件 (发现类型为 %(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type "
+"%(field_type)s)"
+msgstr "只支持类型为 %(supported_types)s 的筛选条件 (发现类型为 %(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -5517,12 +5492,9 @@ msgstr "请输入字段列表的名称"
 #: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
 msgid ""
 "Please note that your view includes invalid locators.<br/>\n"
-"                    These nodes could not be anchored to the parent view and "
-"have no effect.<br/>\n"
-"                    This issue may have arisen as a result of manual "
-"modifications or during the upgrade process.<br/>\n"
-"                    For your reference, invalid xpath nodes are highlighted "
-"in red."
+"                    These nodes could not be anchored to the parent view and have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted in red."
 msgstr ""
 "请注意，您的视图包含无效定位器。<br/>\n"
 "                    这些节点无法锚定到母视图且不会产生任何效果。<br/>\n"
@@ -5740,8 +5712,8 @@ msgstr "紫色"
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/notification_alert/notification_alert.xml:0
 msgid ""
-"Push notifications are blocked. Enable them in your browser settings to stay "
-"updated when you're away."
+"Push notifications are blocked. Enable them in your browser settings to stay"
+" updated when you're away."
 msgstr ""
 
 #. module: web
@@ -5830,8 +5802,7 @@ msgstr "只读："
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid ""
-"Ready to make your record disappear into thin air? Are you sure? It will be "
-"gone forever!\n"
+"Ready to make your record disappear into thin air? Are you sure? It will be gone forever!\n"
 "    \n"
 "Think twice before you click that 'Delete' button!"
 msgstr ""
@@ -6382,11 +6353,9 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid ""
-"Select <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
-msgstr ""
-"选择 <i class=\"fa fa-database\" role=\"img\" aria-label=\"数据库\" "
-"title=\"数据库\"/>"
+"Select <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
+msgstr "选择 <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-label=\"数据库\" title=\"数据库\"/>"
 
 #. module: web
 #. odoo-javascript
@@ -6563,7 +6532,8 @@ msgstr "设置优先权..."
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if empty."
+"Set to true the full range input has to be display by default, even if "
+"empty."
 msgstr "设置为真（true）时，即使为空，也必须默认显示全范围输入。"
 
 #. module: web
@@ -7058,8 +7028,7 @@ msgstr "该应用程序似乎已安装在您的设备上"
 msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
-msgstr ""
-"对于XLSX文件，此单元格的内容太长（超过%s个字符）。请使用此导出的CSV格式。"
+msgstr "对于XLSX文件，此单元格的内容太长（超过%s个字符）。请使用此导出的CSV格式。"
 
 #. module: web
 #. odoo-javascript
@@ -7089,8 +7058,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/res_users_settings_embedded_action.py:0
 msgid ""
-"The ids in %(field_name)s must only be integers or \"false\": “%"
-"(action_ids)s”"
+"The ids in %(field_name)s must only be integers or \"false\": "
+"“%(action_ids)s”"
 msgstr ""
 
 #. module: web
@@ -7098,8 +7067,8 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation "
-"is taking too much time."
+"The operation was interrupted. This usually means that the current operation"
+" is taking too much time."
 msgstr "操作被中断了。这通常意味着当前的操作花费了太多时间。"
 
 #. module: web
@@ -7124,8 +7093,8 @@ msgstr "所选字段将用于预填签名"
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
-"(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size "
+"(%(maxSize)sB)."
 msgstr "选择的文件（%(size)s B）超过文件大小上限（%(maxSize)s B）。"
 
 #. module: web
@@ -7135,9 +7104,7 @@ msgid ""
 "The style compilation failed. This is an administrator or developer error "
 "that must be fixed for the entire database before continuing working. See "
 "browser console or server logs for details."
-msgstr ""
-"样式编译失败。这是管理员或开发人员的错误，必须修复整个数据库的错误后才能继续"
-"工作。有关详情，请查看浏览器控制台或服务器日志。"
+msgstr "样式编译失败。这是管理员或开发人员的错误，必须修复整个数据库的错误后才能继续工作。有关详情，请查看浏览器控制台或服务器日志。"
 
 #. module: web
 #: model:ir.model.constraint,message:web.constraint_res_users_settings_embedded_action_res_user_settings_e_91890fa3
@@ -7153,8 +7120,7 @@ msgid ""
 "There are too many rows (%(count)s rows, limit: %(limit)s) to export as "
 "Excel 2007-2013 (.xlsx) format. Consider splitting the export."
 msgstr ""
-"尝试导出为 Excel 2007-2013（.xlsx）格式的列数太多（%(count)s 列，上限：%"
-"(limit)s）。可考虑分拆导出。"
+"尝试导出为 Excel 2007-2013（.xlsx）格式的列数太多（%(count)s 列，上限：%(limit)s）。可考虑分拆导出。"
 
 #. module: web
 #. odoo-javascript
@@ -7268,8 +7234,7 @@ msgstr "时间间隔"
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies "
-"in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
 msgstr ""
 "时区不匹配：时区与您的浏览器不同。\n"
 "请设置与浏览器相同的时区，以避免系统中的时间差异。"
@@ -7711,19 +7676,15 @@ msgstr "使用 \"用户友好格式 \"选项可自定义格式。"
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
 msgid ""
-"Use the operators \"+=\", \"-=\" to update the current date by days (%"
-"(days)s), \n"
-"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours "
-"(%(hours)s), \n"
+"Use the operators \"+=\", \"-=\" to update the current date by days (%(days)s), \n"
+"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours (%(hours)s), \n"
 "            minutes (%(minutes)s) and seconds (%(seconds)s)."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid ""
-"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
-"value."
+msgid "Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current value."
 msgstr ""
 
 #. module: web
@@ -8121,8 +8082,8 @@ msgstr ""
 msgid ""
 "You are currently using a non-secure context. As a result, some Odoo "
 "features may be unavailable or function improperly. For more information, "
-"please visit: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/"
-"Secure_Contexts"
+"please visit: https://developer.mozilla.org/en-"
+"US/docs/Web/Security/Defenses/Secure_Contexts"
 msgstr ""
 
 #. module: web
@@ -27282,11 +27243,9 @@ msgstr ""
 
 #~ msgid ""
 #~ "The Tax Identification Number. Values here will be validated based on the "
-#~ "country format. You can use '/' to indicate that the partner is not "
-#~ "subject to tax."
-#~ msgstr ""
-#~ "税务识别号。此处的值将根据国家格式进行验证。可以使用“/”表示合作伙伴无需纳"
-#~ "税。"
+#~ "country format. You can use '/' to indicate that the partner is not subject "
+#~ "to tax."
+#~ msgstr "税务识别号。此处的值将根据国家格式进行验证。可以使用“/”表示合作伙伴无需纳税。"
 
 #~ msgid "Custom"
 #~ msgstr "自定义"
@@ -27316,8 +27275,7 @@ msgstr ""
 #~ msgstr "自动保存"
 
 #~ msgid ""
-#~ "If checked, the record will be saved immediately when the field is "
-#~ "modified."
+#~ "If checked, the record will be saved immediately when the field is modified."
 #~ msgstr "如果选中，则在修改字段时将立即保存记录。"
 
 #~ msgid "Invalid data"

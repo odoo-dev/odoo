@@ -20,14 +20,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-18 21:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/"
-"base_automation/hr/>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/base_automation/hr/>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_automation
@@ -56,8 +54,8 @@ msgid ""
 "\"On live update\" automation rules can only be used with \"Execute Python "
 "Code\" action type."
 msgstr ""
-"Pravila automatizacije \"Pri izmjeni uživo\" mogu se koristiti samo s vrstom "
-"radnje \"Izvrši Python kod\"."
+"Pravila automatizacije \"Pri izmjeni uživo\" mogu se koristiti samo s vrstom"
+" radnje \"Izvrši Python kod\"."
 
 #. module: base_automation
 #. odoo-javascript
@@ -83,8 +81,8 @@ msgstr "<code>env</code>: okruženje u kojem se radnja pokreće"
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is "
-"a void recordset"
+"<code>model</code>: model of the record on which the action is triggered; is"
+" a void recordset"
 msgstr ""
 "<code>model</code>: model zapisa nad kojim se radnja pokreće; prazan je "
 "recordset"
@@ -112,30 +110,30 @@ msgstr ""
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Radnje\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"Actions\"/>"
+msgstr "<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" title=\"Radnje\"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
+"<i class=\"oi\" data-icon=\"info\"/> The default target record getter will "
+"work out-of-the-box for any webhook coming from another Odoo instance."
 msgstr ""
-"<i class=\"fa fa-info-circle\"/> Zadani getter ciljanog zapisa radit će "
+"<i class=\"oi\" data-icon=\"info\"/> Zadani getter ciljanog zapisa radit će "
 "odmah za bilo koji webhook koji dolazi s druge Odoo instance."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automation rules triggered by UI "
+"changes will be executed <em>every time</em> the watched fields change, "
+"<em>whether you save or not</em>."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Pravila automatizacije pokrenuta izmjenama u "
-"sučelju izvršit će se <em>svaki put</em> kada se promatrana polja promijene, "
-"<em>bez obzira spremate li ili ne</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Pravila automatizacije pokrenuta "
+"izmjenama u sučelju izvršit će se <em>svaki put</em> kada se promatrana "
+"polja promijene, <em>bez obzira spremate li ili ne</em>."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_server_action_form
@@ -464,8 +462,8 @@ msgstr "Ako je označeno neke poruke mogu imati grešku u dostavi."
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
 #, fuzzy
 msgid ""
-"If present, this condition must be satisfied before executing the automation "
-"rule."
+"If present, this condition must be satisfied before executing the automation"
+" rule."
 msgstr ""
 "Ako postoji, ovaj uvjet mora biti zadovoljen prije izvršavanja pravila "
 "automatizacije."
@@ -573,8 +571,8 @@ msgstr "Naziv modela"
 #: code:addons/base_automation/models/ir_actions_server.py:0
 #, fuzzy
 msgid ""
-"Model of action %(action_name)s should match the one from automated rule %"
-"(rule_name)s."
+"Model of action %(action_name)s should match the one from automated rule "
+"%(rule_name)s."
 msgstr ""
 "Model radnje %(action_name)s treba odgovarati onome iz automatiziranog "
 "pravila %(rule_name)s."
@@ -785,8 +783,7 @@ msgstr "Odaberite polja..."
 #, fuzzy
 msgid ""
 "Send an email when an object changes state, archive records\n"
-"                after a month of inactivity or remind yourself to follow-up "
-"on\n"
+"                after a month of inactivity or remind yourself to follow-up on\n"
 "                tasks when a specific tag is added."
 msgstr ""
 "Pošaljite e-poštu kada objekt promijeni stanje, arhivirajte zapise\n"
@@ -797,8 +794,8 @@ msgstr ""
 #: model_terms:digest.tip,tip_description:base_automation.digest_tip_base_automation_0
 #, fuzzy
 msgid ""
-"Send an email when an object changes state, archive records after a month of "
-"inactivity or remind yourself to follow-up on tasks when a specific tag is "
+"Send an email when an object changes state, archive records after a month of"
+" inactivity or remind yourself to follow-up on tasks when a specific tag is "
 "added.<br>With Automation Rules, you can automate any workflow."
 msgstr ""
 "Pošaljite e-poštu kada objekt promijeni stanje, arhivirajte zapise nakon "
@@ -831,8 +828,8 @@ msgstr ""
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
 #, fuzzy
 msgid ""
-"Some triggers need a reference to another field. This field is used to store "
-"it."
+"Some triggers need a reference to another field. This field is used to store"
+" it."
 msgstr ""
 "Neki okidači trebaju referencu na drugo polje. Ovo polje se koristi za "
 "njezino pohranjivanje."
@@ -885,7 +882,8 @@ msgstr "Ciljani zapis"
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
-msgid "Target model of actions %(action_names)s are different from rule model."
+msgid ""
+"Target model of actions %(action_names)s are different from rule model."
 msgstr "Ciljani model radnji %(action_names)s razlikuje se od modela pravila."
 
 #. module: base_automation
@@ -893,8 +891,8 @@ msgstr "Ciljani model radnji %(action_names)s razlikuje se od modela pravila."
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
 msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%"
-"(state_value)s\" action type"
+"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
+"\"%(state_value)s\" action type"
 msgstr ""
 "\"%(trigger_value)s\" %(trigger_label)s može se koristiti samo s vrstom "
 "radnje \"%(state_value)s\""
@@ -1065,12 +1063,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "When should the condition be triggered.\n"
-"                If present, will be checked by the scheduler. If empty, will "
-"be checked at creation and update."
+"                If present, will be checked by the scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "Kada uvjet treba biti pokrenut.\n"
-"                Ako je postavljen, provjerit će ga planer. Ako je prazan, "
-"provjeravat će se pri kreiranju i ažuriranju."
+"                Ako je postavljen, provjerit će ga planer. Ako je prazan, provjeravat će se pri kreiranju i ažuriranju."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active

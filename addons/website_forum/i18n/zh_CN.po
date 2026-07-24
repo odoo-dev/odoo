@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 23:47+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-master/website_forum/zh_Hans/>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/projects/odoo-master/website_forum/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -257,18 +256,17 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Sign up</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Sign up</a>"
 msgstr ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">注册</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">注册</a>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or "
-"reject this answer."
+"                            As a moderator, you can either validate or reject this answer."
 msgstr ""
 "<b class=\"d-block \">此答案已被标记</b>\n"
 "                            作为版主，您可以确认或拒绝此答案。"
@@ -277,8 +275,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your "
-"previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">您有待处理的帖子</b>\n"
 "                        请等待管理员验证确认您的前一个帖子被允许回答问题。"
@@ -313,11 +310,10 @@ msgstr "<b>答案不应评论其他答案</b>。而应在别人的答案下增�
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please "
-"use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please"
+" use commenting facility."
 msgstr ""
-"<b>答案不应引发辩论</b>此社区问答不是讨论组。请避免在您的答案中进行辩论，因为"
-"它们往往会淡化问题和答案的本质。对于简短的讨论，请使用评论工具。"
+"<b>答案不应引发辩论</b>此社区问答不是讨论组。请避免在您的答案中进行辩论，因为它们往往会淡化问题和答案的本质。对于简短的讨论，请使用评论工具。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -325,65 +321,58 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional "
-"information."
+"to include links to other questions or answers providing relevant additional"
+" information."
 msgstr ""
-"<b>答案不应只是指向其他问题</b>。而应添加问题的评论表明“可能的重复......”。然"
-"而，它可以包含链接至提供相关更多信息的其他问题或答案。"
+"<b>答案不应只是指向其他问题</b>。而应添加问题的评论表明“可能的重复......”。然而，它可以包含链接至提供相关更多信息的其他问题或答案。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
-"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
+" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
-"<b>答案不应该只是指向其他问题</b>。而是添加一个注释，指出 <i>“可能重复...”。"
-"但是，最好包含指向其他问题或答案的链接，以提供相关的附加信息。"
+"<b>答案不应该只是指向其他问题</b>。而是添加一个注释，指出 "
+"<i>“可能重复...”。但是，最好包含指向其他问题或答案的链接，以提供相关的附加信息。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
-"solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
+" solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
 "<b>回复中不应只提供\n"
-" 解决方案链接。</b>回复中还应该提供解决方案说明文本，即使该文本只是经复制/粘"
-"贴的文本。链接固然受欢迎，但应与回复互补，从而引用来源或其他阅读资料。"
+" 解决方案链接。</b>回复中还应该提供解决方案说明文本，即使该文本只是经复制/粘贴的文本。链接固然受欢迎，但应与回复互补，从而引用来源或其他阅读资料。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your "
-"own question."
-msgstr ""
-"<b>在您提问之前 - 请确保搜索类似的问题。 </b>您可以按标题或标签搜索问题。也可"
-"以回答您自己的问题。"
+"You can search questions by their title or tags. It’s also OK to answer your"
+" own question."
+msgstr "<b>在您提问之前 - 请确保搜索类似的问题。 </b>您可以按标题或标签搜索问题。也可以回答您自己的问题。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and argumentative</"
-"b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and "
+"argumentative</b> or not relevant to this community."
 msgstr "<b>请避免提出过于主观和争论性</b>或与该社区无关的问题。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
-"the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can "
-"always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please "
-"<b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
 "<b>请大家尽量给个实质性的回答。</b>如果您想回答这个问题或发表评论，只需\n"
@@ -405,12 +394,10 @@ msgstr "<b>您已经有一个待处理的帖子。</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -424,31 +411,31 @@ msgstr "返回所有帖文"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
-msgid "<i class=\"fa fa-arrow-right\"/> Go To Forums"
-msgstr "<i class=\"fa fa-arrow-right\"/> 转至论坛"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Go To Forums"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> 转至论坛"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
-msgid "<i class=\"fa fa-bug me-1\"/>Filter Tool"
-msgstr "<i class=\"fa fa-bug me-1\"/>筛选工具"
+msgid "<i class=\"oi me-1\" data-icon=\"bug_report\"/>Filter Tool"
+msgstr "<i class=\"me-1 oi\" data-icon=\"bug_report\"/>筛选工具"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Downvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Downvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Downvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Downvote\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Upvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Upvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Upvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Upvote\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -458,138 +445,138 @@ msgstr "<i j=\"0/\">接受</i>"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Be less specific in your wording for a "
-"wider search result."
-msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>为了获得更广泛的搜索结果，搜索关键词需要"
-"尽可能笼统。"
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Check your spelling and try again."
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>请检查拼写，然后再试。"
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Be less specific in your "
+"wording for a wider search result."
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>为了获得更广泛的搜索结果，搜索关键词需要尽可能笼统。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>尝试搜索一两个词。"
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Check your spelling and try "
+"again."
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>请检查拼写，然后再试。"
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
+msgid ""
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Try searching for one or two"
+" words."
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>尝试搜索一两个词。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-msgid "<i class=\"fa fa-check me-1\"/>Solved"
-msgstr "<i class=\"fa fa-check me-1\"/>已解决"
+msgid "<i class=\"oi me-1\" data-icon=\"check\"/>Solved"
+msgstr "<i class=\"me-1 oi\" data-icon=\"check\"/>已解决"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-check\"/> Accept"
-msgstr "<i class=\"fa fa-check\"/> 接受"
+msgid "<i class=\"oi\" data-icon=\"check\"/> Accept"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> 接受"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
-msgstr "<i class=\"fa fa-check\"/> 如何配置TPS和TVQ的加拿大税？"
+"<i class=\"oi\" data-icon=\"check\"/> How to configure TPS and TVQ's "
+"canadian taxes?"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> 如何配置TPS和TVQ的加拿大税？"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-check\"/><span class=\"ms-2\">Accept</span>"
-msgstr "<i class=\"fa fa-check\"/><span class=\"ms-2\">接受</span>"
+msgid "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Accept</span>"
+msgstr "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">接受</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"forum\" title=\"Forum\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"forum\" title=\"Forum\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"visibility\" title=\"Views\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"visibility\" title=\"Views\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-flag\"/> Country"
-msgstr "<i class=\"fa fa-flag\"/> 国家"
+msgid "<i class=\"oi oi-filled\" data-icon=\"flag\"/> Country"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"flag\"/> 国家"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-font\"/> Text"
-msgstr "<i class=\"fa fa-font\"/> 文本"
+msgid "<i class=\"oi\" data-icon=\"text_fields\"/> Text"
+msgstr "<i class=\"oi\" data-icon=\"text_fields\"/> 文本"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
-msgid "<i class=\"fa fa-fw fa-check me-1\"/>Following"
-msgstr "<i class=\"fa fa-fw fa-check me-1\"/>关注中"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Following"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>关注中"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Website\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_mobile
-msgid "<i class=\"fa fa-info-circle fa-fw\"/> About this forum"
-msgstr "<i class=\"fa fa-info-circle fa-fw\"/> 关于此论坛区"
+msgid "<i class=\"oi oi-fw\" data-icon=\"info\"/> About this forum"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"info\"/> 关于此论坛区"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your "
-"answer</span>"
+"<i class=\"oi oi-filled\" data-icon=\"edit\"/>\n"
+"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
 msgstr ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                编辑您<span class=\"d-none d-lg-inline\"> 的"
-"答案</span>"
+"<i class=\"oi-filled oi\" data-icon=\"edit\"/>\n"
+"                                编辑您<span class=\"d-none d-lg-inline\"> 的答案</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"oi me-1 d-lg-none\" data-icon=\"reply\"/>\n"
 "                0"
 msgstr ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"me-1 d-lg-none oi\" data-icon=\"reply\"/>\n"
 "                0"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr "<i class=\"fa fa-reply me-1\"/>回复"
+msgid "<i class=\"oi me-1\" data-icon=\"reply\"/>Reply"
+msgstr "<i class=\"me-1 oi\" data-icon=\"reply\"/>回复"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Share\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Share\"/>"
 msgstr ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Share\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Share\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-shield fa-fw opacity-50\"/> Badges"
-msgstr "<i class=\"fa fa-shield fa-fw opacity-50\"/> 徽章"
+msgid "<i class=\"oi oi-fw opacity-50\" data-icon=\"security\"/> Badges"
+msgstr "<i class=\"opacity-50 oi-fw oi\" data-icon=\"security\"/> 徽章"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"oi oi-filled text-danger ms-3\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"text-danger ms-3 oi-filled oi\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"oi oi-filled text-success\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"赞成票\" "
-"title=\"赞成票\"/>"
+"<i class=\"text-success oi-filled oi\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"赞成票\" title=\"赞成票\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -600,56 +587,54 @@ msgstr "<i j=\"0/\">拒绝</i>"
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-times\"/> Good morning to all! Please, can someone help "
-"solve my tax computation problem in Canada? Thanks!"
-msgstr ""
-"<i class=\"fa fa-times\"/> 大家早上好！请问，谁能帮助解决我在加拿大的税务计算"
-"问题？谢谢!"
+"<i class=\"oi\" data-icon=\"close\"/> Good morning to all! Please, can "
+"someone help solve my tax computation problem in Canada? Thanks!"
+msgstr "<i class=\"oi\" data-icon=\"close\"/> 大家早上好！请问，谁能帮助解决我在加拿大的税务计算问题？谢谢!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-times\"/> Reject"
-msgstr "<i class=\"fa fa-times\"/> 拒绝"
+msgid "<i class=\"oi\" data-icon=\"close\"/> Reject"
+msgstr "<i class=\"oi\" data-icon=\"close\"/> 拒绝"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Offensive</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">冒犯言论</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Offensive</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">冒犯言论</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Reject</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">拒绝</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Reject</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">拒绝</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-user\"/> User"
-msgstr "<i class=\"fa fa-user\"/> 用户"
+msgid "<i class=\"oi oi-filled\" data-icon=\"person\"/> User"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"person\"/> 用户"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-users fa-fw opacity-50\"/> People"
-msgstr "<i class=\"fa fa-users fa-fw opacity-50\"/>人"
+msgid "<i class=\"oi oi-filled oi-fw opacity-50\" data-icon=\"group\"/> People"
+msgstr "<i class=\"opacity-50 oi-fw oi-filled oi\" data-icon=\"group\"/>人"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "<i class=\"oi oi-arrow-right d-inline-block\"/> Go to Forums"
-msgstr "<i class=\"oi oi-arrow-right d-inline-block\"/> 前往论坛区"
+msgid "<i class=\"oi d-inline-block\" data-icon=\"east\"/> Go to Forums"
+msgstr "<i class=\"d-inline-block oi\" data-icon=\"east\"/> 前往论坛区"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.404
 msgid ""
-"<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
-"list"
+"<i class=\"oi display-inline-block\" data-icon=\"east\"/> Return to "
+"questions list"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 msgid ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"More\"/>"
 msgstr ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"更多\"/>"
 
 #. module: website_forum
@@ -688,8 +673,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid ""
-"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr "<span class=\"flex-grow-1\">我可以在这里问什么样的问题？</span>"
 
 #. module: website_forum
@@ -708,8 +692,8 @@ msgstr "<span class=\"flex-grow-1\">我在提问时应该避免什么？</span>"
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
-"span>"
+"<span class=\"flex-grow-1\">Why can other people edit my "
+"questions/answers?</span>"
 msgstr "<span class=\"flex-grow-1\">为什么其他人可以编辑我的问题/答案？</span>"
 
 #. module: website_forum
@@ -718,38 +702,33 @@ msgstr "<span class=\"flex-grow-1\">为什么其他人可以编辑我的问题/�
 msgid ""
 "<span class=\"form-text small text-muted d-block\">consider adding an "
 "example.</span>"
-msgstr ""
-"<span class=\"form-text small text-muted d-block\">可考虑加入例子。</span>"
+msgstr "<span class=\"form-text small text-muted d-block\">可考虑加入例子。</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format it."
-"</span>"
-msgstr ""
-"<span class=\"form-text small text-muted d-block\">选取文字，以设定其格式。</"
-"span>"
+"<span class=\"form-text small text-muted d-block\">select text to format "
+"it.</span>"
+msgstr "<span class=\"form-text small text-muted d-block\">选取文字，以设定其格式。</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
-"</span>"
-msgstr ""
-"<span class=\"form-text small text-muted d-block\">使用 “/”（斜线）插入图片。"
-"</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert "
+"images.</span>"
+msgstr "<span class=\"form-text small text-muted d-block\">使用 “/”（斜线）插入图片。</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Tip:</span>"
 msgstr ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> 提示：</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> 提示：</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -876,8 +855,7 @@ msgstr "新增评论"
 msgid ""
 "After posting the user will be proposed to share its question or answer on "
 "social networks, enabling social network propagation of the forum content."
-msgstr ""
-"发帖后，用户将提议分享其问题或社交网络上的回答，使论坛内容以社会化网络传播。"
+msgstr "发帖后，用户将提议分享其问题或社交网络上的回答，使论坛内容以社会化网络传播。"
 
 #. module: website_forum
 #. odoo-python
@@ -1769,10 +1747,10 @@ msgstr "开明的"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
 "Example\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 msgstr ""
 "示例\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 
 #. module: website_forum
 #. odoo-javascript
@@ -1834,9 +1812,7 @@ msgstr "收藏"
 msgid ""
 "Field to keep track of a post's last activity. Updated whenever it is "
 "replied to, or when a comment is added on the post or one of its replies."
-msgstr ""
-"用于追踪帖文最新活动的字段。每当有新回复，或对帖文或任何回复加入评论，便会更"
-"新。"
+msgstr "用于追踪帖文最新活动的字段。每当有新回复，或对帖文或任何回复加入评论，便会更新。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
@@ -1924,10 +1900,8 @@ msgid ""
 "accumulated for a question or answer per day. The table given at the end "
 "explains reputation point requirements for each type of moderation task."
 msgstr ""
-"例如，如果您提出了一个有趣的问题，或提供了有帮助的答案，您发布的内容就会被正"
-"评。相反，如果答案具有误导性，则会被负评。每个正评当作 10 分计算，每个负评会"
-"扣 2 分。一个问题或答案每天最多可累积 200 分。有关各类版主审批权限的最低信誉"
-"积分要求，请见文末列表。"
+"例如，如果您提出了一个有趣的问题，或提供了有帮助的答案，您发布的内容就会被正评。相反，如果答案具有误导性，则会被负评。每个正评当作 10 "
+"分计算，每个负评会扣 2 分。一个问题或答案每天最多可累积 200 分。有关各类版主审批权限的最低信誉积分要求，请见文末列表。"
 
 #. module: website_forum
 #. odoo-python
@@ -2203,14 +2177,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then "
-"you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then"
+" you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
-"如果您符合这些示例之一，或者您提出问题的动机是“我想参加关于 ______ 的讨论”，"
-"那么您不应该在这里提问，而是在我们的邮件列表中提问。但是，如果您的动机是“我希"
-"望其他人向我解释______”，那么您可能很棒的。"
+"如果您符合这些示例之一，或者您提出问题的动机是“我想参加关于 ______ "
+"的讨论”，那么您不应该在这里提问，而是在我们的邮件列表中提问。但是，如果您的动机是“我希望其他人向我解释______”，那么您可能很棒的。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.mark_as_offensive
@@ -2715,7 +2688,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before continuing."
+"Please wait for a moderator to validate your previous post before "
+"continuing."
 msgstr "请等待版主验证您之前的帖子后再继续。"
 
 #. module: website_forum
@@ -2849,8 +2823,7 @@ msgstr "公开"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected "
-"group"
+"Some users: Forum and their content are hidden for non members of selected group"
 msgstr ""
 "公开。论坛是公开的\n"
 "已登录。论坛对已登录的用户是可见的\n"
@@ -3203,8 +3176,8 @@ msgstr "分享和讨论最佳内容和新营销理念，打造专业形象，共
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page "
-"and attract more visitors."
+"Share this content to increase your chances to be featured on the front page"
+" and attract more visitors."
 msgstr "分享此内容以增加你在头版的机会，并且吸引更多的访客。"
 
 #. module: website_forum
@@ -3357,8 +3330,7 @@ msgstr "标签"
 msgid ""
 "Tap into the collective knowledge of our community by asking your questions "
 "in our forums,<br/> where helpful members are ready to assist you."
-msgstr ""
-"在我们的论坛提问，运用集体智慧解决问题，<br/>论坛成员随时为您提供帮助。"
+msgstr "在我们的论坛提问，运用集体智慧解决问题，<br/>论坛成员随时为您提供帮助。"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_32
@@ -3439,14 +3411,13 @@ msgstr "找不到符合指定搜索条件的标签。"
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced "
-"users of this site in order to improve the overall quality of the knowledge "
-"base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
-"因此，本网站的有经验用户可以像 wiki 网页一样编辑问题和答案，以提高知识库内容"
-"的整体质量。此类特权是根据用户业力级别授予的：一旦您的业力变得足够高，您就可"
-"以这样做。"
+"因此，本网站的有经验用户可以像 wiki "
+"网页一样编辑问题和答案，以提高知识库内容的整体质量。此类特权是根据用户业力级别授予的：一旦您的业力变得足够高，您就可以这样做。"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -3462,9 +3433,7 @@ msgid ""
 "This community is for professionals and enthusiasts of our products and "
 "services. Share and discuss the best content and new marketing ideas, build "
 "your professional profile and become a better marketer together."
-msgstr ""
-"本社区是为专业人士和我们产品和服务的爱好者而设。分享并讨论最好的内容和新营销"
-"思路，建立自己的专业简介，并一起成为更好的营销人员。"
+msgstr "本社区是为专业人士和我们产品和服务的爱好者而设。分享并讨论最好的内容和新营销思路，建立自己的专业简介，并一起成为更好的营销人员。"
 
 #. module: website_forum
 #: model:ir.model.fields,help:website_forum.field_forum_forum__relevancy_post_vote
@@ -3472,9 +3441,7 @@ msgid ""
 "This formula is used in order to sort by relevance. The variable 'votes' "
 "represents number of votes for a post, and 'days' is number of days since "
 "the post creation"
-msgstr ""
-"这个公式中使用相关性搜索。变量'投票'表示为一个帖子的票数，'天'是自帖子创建后"
-"的天数"
+msgstr "这个公式中使用相关性搜索。变量'投票'表示为一个帖子的票数，'天'是自帖子创建后的天数"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.header
@@ -3502,8 +3469,7 @@ msgstr "此帖文正在审核中"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or "
-"<b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
 msgstr ""
 "本帖正在等待审核，尚未发布。<br/>\n"
 "                    作为版主，您可以选择<b>批准</b>或<b>阻止</b>此帖文。"
@@ -3732,8 +3698,8 @@ msgstr "视图"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "View my answer <i class=\"oi oi-arrow-right ms-1\"/>"
-msgstr "查看我的答案<i class=\"oi oi-arrow-right ms-1\"/>"
+msgid "View my answer <i class=\"oi ms-1\" data-icon=\"east\"/>"
+msgstr "查看我的答案<i class=\"ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__views
@@ -3844,9 +3810,7 @@ msgid ""
 "rough measure of the community trust to him/her. Various moderation tasks "
 "are gradually assigned to the users based on those points."
 msgstr ""
-"当一个问题或答案被点赞时，发布它们的用户将获得一些积分，这些积分被称为“业力积"
-"分”。这些点可以粗略地衡量社区对他/她的信任。根据这些点，逐步将各种审核任务分"
-"配给用户。"
+"当一个问题或答案被点赞时，发布它们的用户将获得一些积分，这些积分被称为“业力积分”。这些点可以粗略地衡量社区对他/她的信任。根据这些点，逐步将各种审核任务分配给用户。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -3930,12 +3894,10 @@ msgstr "您需要有足够的业力来编辑标签"
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems "
-"that you face. Chatty, open-ended questions diminish the usefulness of this "
-"site and push other questions off the front page."
-msgstr ""
-"您应该只根据您面临的实际问题提出实际的、可回答的问题。喋喋不休的开放式问题会"
-"降低该网站的实用性，并将其他问题推到首页之外。"
+"You should only ask practical, answerable questions based on actual problems"
+" that you face. Chatty, open-ended questions diminish the usefulness of this"
+" site and push other questions off the front page."
+msgstr "您应该只根据您面临的实际问题提出实际的、可回答的问题。喋喋不休的开放式问题会降低该网站的实用性，并将其他问题推到首页之外。"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
@@ -4251,9 +4213,7 @@ msgstr "经验值"
 msgid ""
 "your answer is provided along with the question, and you expect more "
 "answers: “I use ______ for ______, what do you use?”"
-msgstr ""
-"您的答案是伴随着问题提供，您希望有更多的答案：“我为________用____________的，"
-"您用什么？”"
+msgstr "您的答案是伴随着问题提供，您希望有更多的答案：“我为________用____________的，您用什么？”"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma

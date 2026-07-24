@@ -25,20 +25,18 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-21 08:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/"
-"fleet/hr/>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/fleet/hr/>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Lokacija\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Lokacija\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -483,8 +481,8 @@ msgstr "Kategorije"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
 "Kategorije će vam pomoći učinkovitije upravljati voznim parkom i "
 "organizirati vaša vozila."
@@ -532,7 +530,8 @@ msgstr "Odaberite da li je ugovor još uvijek valjan ili ne"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr "Odaberite da li se usluga odnosi na ugovore, servise vozila ili oboje"
 
 #. module: fleet
@@ -852,8 +851,8 @@ msgstr "Datum od kad vrijedi pokriće ugovorom"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr "Datum kad ističe ugovor (zadano: 1 godina nakon datuma početka)"
 
 #. module: fleet
@@ -2362,8 +2361,8 @@ msgstr "Zamjena svjećica"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 
 #. module: fleet
@@ -2564,8 +2563,7 @@ msgstr "Putni pomoćnik"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Pratite sve servise odrađene na Vašem vozilu. Servisi mogu biti različitog "
 "tipa: povremena popravka, redovno održavanje, itd."

@@ -25,8 +25,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 05:20+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/hr/"
-"fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/hr/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -78,10 +77,8 @@ msgid ""
 "\n"
 "Please either:\n"
 "\n"
-"- Change the start date so that it doesn't overlap with the existing "
-"contract, or\n"
-"- Create a new employee if this employee should have multiple active "
-"contracts."
+"- Change the start date so that it doesn't overlap with the existing contract, or\n"
+"- Create a new employee if this employee should have multiple active contracts."
 msgstr ""
 "%s در طول بازه انتخاب‌شده، قرارداد فعالی دارد.\n"
 "\n"
@@ -176,132 +173,141 @@ msgstr ""
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid ""
-"<i class=\"d-none d-md-block fa fa-envelope\" title=\"Work Email\" "
-"invisible=\"not work_email\"/>"
+"<i class=\"oi oi-filled d-none d-md-block\" data-icon=\"mail\" title=\"Work "
+"Email\" invisible=\"not work_email\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid ""
-"<i class=\"d-none d-md-block fa fa-mobile\" title=\"Work Mobile\" "
-"invisible=\"not mobile_phone\"/>"
+"<i class=\"oi d-none d-md-block\" data-icon=\"smartphone\" title=\"Work "
+"Mobile\" invisible=\"not mobile_phone\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid ""
-"<i class=\"d-none d-md-block fa fa-phone\" title=\"Work Phone\" "
-"invisible=\"not work_phone\"/>"
+"<i class=\"oi oi-filled d-none d-md-block\" data-icon=\"phone\" title=\"Work"
+" Phone\" invisible=\"not work_phone\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 msgid ""
-"<i class=\"d-none d-md-inline-flex fa fa-envelope fa-fw\" title=\"Work "
-"Email\"/>"
+"<i class=\"oi oi-filled d-none d-md-inline-flex\" data-icon=\"mail\" "
+"title=\"Work Email\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid ""
-"<i class=\"d-none d-md-inline-flex fa fa-envelope\" title=\"Work Email\"/>"
+"<i class=\"oi oi-filled d-none d-md-inline-flex\" data-icon=\"mail\" "
+"title=\"Work Email\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 msgid ""
-"<i class=\"d-none d-md-inline-flex fa fa-mobile fa-fw\" title=\"Work "
-"Mobile\"/>"
+"<i class=\"oi d-none d-md-inline-flex\" data-icon=\"smartphone\" "
+"title=\"Work Mobile\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid ""
-"<i class=\"d-none d-md-inline-flex fa fa-mobile\" title=\"Work Mobile\"/>"
+"<i class=\"oi d-none d-md-inline-flex\" data-icon=\"smartphone\" "
+"title=\"Work Mobile\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 msgid ""
-"<i class=\"d-none d-md-inline-flex fa fa-phone fa-fw\" title=\"Work Phone\"/>"
+"<i class=\"oi oi-filled d-none d-md-inline-flex\" data-icon=\"phone\" "
+"title=\"Work Phone\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
-msgid "<i class=\"d-none d-md-inline-flex fa fa-phone\" title=\"Work Phone\"/>"
+msgid ""
+"<i class=\"oi oi-filled d-none d-md-inline-flex\" data-icon=\"phone\" "
+"title=\"Work Phone\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
-msgid "<i class=\"d-none d-md-inline-flex fa fa-tags\" title=\"Tags\"/>"
+msgid "<i class=\"oi d-none d-md-inline-flex\" data-icon=\"sell\" title=\"Tags\"/>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid ""
-"<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Company\" "
+"<i class=\"oi\" data-icon=\"business\" role=\"img\" aria-label=\"Company\" "
 "title=\"Company\"/>"
 msgstr ""
-"<i class=\"fa fa-building-o\" role=\"img\" aria-label=\"Company\" "
+"<i class=\"oi\" data-icon=\"business\" role=\"img\" aria-label=\"Company\" "
 "title=\"Company\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
-msgid ""
-"<i class=\"fa fa-fw me-2 fa-birthday-cake text-primary\" title=\"Birthday\"/>"
-msgstr ""
-"<i class=\"fa fa-fw me-2 fa-birthday-cake text-primary\" title=\"Birthday\"/>"
+msgid "<i class=\"oi oi-fw me-2 text-primary\" data-icon=\"cake\" title=\"Birthday\"/>"
+msgstr "<i class=\"me-2 text-primary oi-fw oi\" data-icon=\"cake\" title=\"Birthday\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
-msgid ""
-"<i class=\"fa fa-fw me-2 fa-briefcase text-primary\" title=\"Contract\"/>"
-msgstr ""
-"<i class=\"fa fa-fw me-2 fa-briefcase text-primary\" title=\"Contract\"/>"
+msgid "<i class=\"oi oi-fw me-2 text-primary\" data-icon=\"work\" title=\"Contract\"/>"
+msgstr "<i class=\"me-2 text-primary oi-fw oi\" data-icon=\"work\" title=\"Contract\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
-msgid "<i class=\"fa fa-fw me-2 fa-envelope text-primary\" title=\"Email\"/>"
-msgstr "<i class=\"fa fa-fw me-2 fa-envelope text-primary\" title=\"Email\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-2 text-primary\" data-icon=\"mail\" "
+"title=\"Email\"/>"
+msgstr ""
+"<i class=\"me-2 text-primary oi-fw oi oi-filled\" data-icon=\"mail\" "
+"title=\"Email\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_kanban
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
-msgid "<i class=\"fa fa-fw me-2 fa-phone text-primary\" title=\"Phone\"/>"
-msgstr "<i class=\"fa fa-fw me-2 fa-phone text-primary\" title=\"Phone\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-2 text-primary\" data-icon=\"phone\" "
+"title=\"Phone\"/>"
+msgstr ""
+"<i class=\"me-2 text-primary oi-fw oi oi-filled\" data-icon=\"phone\" "
+"title=\"Phone\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_kanban_view_employees
 msgid ""
-"<i class=\"fa fa-fw me-2 fa-suitcase text-primary\" title=\"Job Position\"/>"
+"<i class=\"oi oi-fw me-2 text-primary\" data-icon=\"luggage\" title=\"Job "
+"Position\"/>"
 msgstr ""
-"<i class=\"fa fa-fw me-2 fa-suitcase text-primary\" title=\"Job Position\"/>"
+"<i class=\"me-2 text-primary oi-fw oi\" data-icon=\"luggage\" title=\"Job "
+"Position\"/>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid ""
-"<i class=\"fa fa-share-alt fa-rotate-90 ms-1 mt-1\" role=\"img\" aria-"
-"label=\"Full Chart\"/>\n"
+"<i class=\"oi oi-filled oi-rotate-90 ms-1 mt-1\" data-icon=\"share\" role=\"img\" aria-label=\"Full Chart\"/>\n"
 "                                                Full Chart"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 msgid ""
-"<i class=\"fa fa-sitemap me-1 mt-1\"/>\n"
-"                                                        <span class=\"fw-"
-"bolder\">Zoom</span>"
+"<i class=\"oi me-1 mt-1\" data-icon=\"account_tree\"/>\n"
+"                                                        <span class=\"fw-bolder\">Zoom</span>"
 msgstr ""
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid ""
-"<i class=\"oi oi-arrow-right ms-1\"/>\n"
+"<i class=\"oi ms-1\" data-icon=\"east\"/>\n"
 "                                            Cancel Departure"
 msgstr ""
 
@@ -309,17 +315,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid ""
 "<span class=\"d-flex w-50\">\n"
-"                                                    <span "
-"invisible=\"is_trusted_bank_account\" class=\"text-muted\">Untrusted</span>\n"
-"                                                    <span invisible=\"not "
-"is_trusted_bank_account\" class=\"text-success\">Trusted</span>\n"
+"                                                    <span invisible=\"is_trusted_bank_account\" class=\"text-muted\">Untrusted</span>\n"
+"                                                    <span invisible=\"not is_trusted_bank_account\" class=\"text-success\">Trusted</span>\n"
 "                                                </span>"
 msgstr ""
 "<span class=\"d-flex w-50\">\n"
-"    <span invisible=\"is_trusted_bank_account\" class=\"text-muted\">غیرقابل "
-"اعتماد</span>\n"
-"    <span invisible=\"not is_trusted_bank_account\" class=\"text-"
-"success\">قابل اعتماد</span>\n"
+"    <span invisible=\"is_trusted_bank_account\" class=\"text-muted\">غیرقابل اعتماد</span>\n"
+"    <span invisible=\"not is_trusted_bank_account\" class=\"text-success\">قابل اعتماد</span>\n"
 "</span>"
 
 #. module: hr
@@ -547,31 +549,19 @@ msgstr "<strong class=\"s_rating_title\">استراتژی فناوری</strong>"
 #. module: hr
 #: model_terms:hr.job,description:hr.job_hrm
 msgid ""
-"A Human Resources (HR) Manager is responsible for overseeing an "
-"organization's workforce and ensuring\n"
-"                that all HR functions are effectively managed. This includes "
-"recruiting, hiring, onboarding, and\n"
-"                training new employees, as well as managing employee "
-"relations, performance, and compensation. The HR\n"
-"                manager also ensures compliance with labor laws and company "
-"policies, while fostering a positive work\n"
-"                environment. They may handle conflict resolution, conduct "
-"employee evaluations, and implement programs\n"
-"                to improve employee engagement and retention. Additionally, "
-"HR managers play a strategic role in\n"
-"                aligning the workforce with the organization's goals and "
-"objectives."
+"A Human Resources (HR) Manager is responsible for overseeing an organization's workforce and ensuring\n"
+"                that all HR functions are effectively managed. This includes recruiting, hiring, onboarding, and\n"
+"                training new employees, as well as managing employee relations, performance, and compensation. The HR\n"
+"                manager also ensures compliance with labor laws and company policies, while fostering a positive work\n"
+"                environment. They may handle conflict resolution, conduct employee evaluations, and implement programs\n"
+"                to improve employee engagement and retention. Additionally, HR managers play a strategic role in\n"
+"                aligning the workforce with the organization's goals and objectives."
 msgstr ""
-"مدیر منابع انسانی (Human Resources Manager) مسئول نظارت بر نیروی کار سازمان "
-"و اطمینان از مدیریت مؤثر تمامی عملکردهای مرتبط با منابع انسانی است.\n"
-"این مسئولیت شامل **جذب، استخدام، آموزش و ورود کارکنان جدید**، همچنین "
-"**مدیریت روابط کاری، ارزیابی عملکرد و جبران خدمات (حقوق و مزایا)** می‌باشد.\n"
-"مدیر منابع انسانی همچنین وظیفه دارد از **رعایت قوانین کار و سیاست‌های داخلی "
-"شرکت** اطمینان حاصل کرده و **محیط کاری مثبت و انگیزشی** ایجاد نماید.\n"
-"از دیگر وظایف این نقش می‌توان به **رسیدگی به تعارضات، ارزیابی عملکرد کارکنان، "
-"و اجرای برنامه‌هایی برای افزایش مشارکت و نگهداشت نیروهای انسانی** اشاره کرد.\n"
-"علاوه بر این، مدیر منابع انسانی نقش راهبردی در **هم‌راستا کردن نیروی انسانی "
-"با اهداف و استراتژی‌های کلان سازمان** ایفا می‌کند."
+"مدیر منابع انسانی (Human Resources Manager) مسئول نظارت بر نیروی کار سازمان و اطمینان از مدیریت مؤثر تمامی عملکردهای مرتبط با منابع انسانی است.\n"
+"این مسئولیت شامل **جذب، استخدام، آموزش و ورود کارکنان جدید**، همچنین **مدیریت روابط کاری، ارزیابی عملکرد و جبران خدمات (حقوق و مزایا)** می‌باشد.\n"
+"مدیر منابع انسانی همچنین وظیفه دارد از **رعایت قوانین کار و سیاست‌های داخلی شرکت** اطمینان حاصل کرده و **محیط کاری مثبت و انگیزشی** ایجاد نماید.\n"
+"از دیگر وظایف این نقش می‌توان به **رسیدگی به تعارضات، ارزیابی عملکرد کارکنان، و اجرای برنامه‌هایی برای افزایش مشارکت و نگهداشت نیروهای انسانی** اشاره کرد.\n"
+"علاوه بر این، مدیر منابع انسانی نقش راهبردی در **هم‌راستا کردن نیروی انسانی با اهداف و استراتژی‌های کلان سازمان** ایفا می‌کند."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
@@ -730,8 +720,7 @@ msgid ""
 "Activity plans are used to assign a list of activities in just a few clicks\n"
 "                    (e.g. \"Onboarding\", \"Offboarding\", ...)"
 msgstr ""
-"برنامه‌های فعالیت برای اختصاص فهرستی از فعالیت‌ها تنها با چند کلیک استفاده "
-"می‌شوند\n"
+"برنامه‌های فعالیت برای اختصاص فهرستی از فعالیت‌ها تنها با چند کلیک استفاده می‌شوند\n"
 "(مثلاً «آغاز به کار»، «خاتمه همکاری» و ...)"
 
 #. module: hr
@@ -854,7 +843,8 @@ msgstr "یک کارمند نمی‌تواند چندین نسخه فعال با 
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/radio_followed_by_element.js:0
 msgid "An object to link select options and element id to move"
-msgstr "یک شیء برای اتصال گزینه‌های انتخابی به شناسه‌ی عنصری که باید جابجا شود"
+msgstr ""
+"یک شیء برای اتصال گزینه‌های انتخابی به شناسه‌ی عنصری که باید جابجا شود"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -1171,7 +1161,8 @@ msgstr "بر اساس وضعیت کاربر در سیستم"
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid ""
-"Before creating a new contract, close the current one by setting an end date."
+"Before creating a new contract, close the current one by setting an end "
+"date."
 msgstr ""
 "پیش از ایجاد قرارداد جدید، قرارداد فعلی را با تعیین تاریخ پایان ببندید."
 
@@ -1227,8 +1218,8 @@ msgid ""
 "Cannot modify multiple versions contract dates with different contracts at "
 "once."
 msgstr ""
-"نمی‌توان تاریخ قرارداد نسخه‌های مختلف را به‌صورت هم‌زمان در قراردادهای متفاوت "
-"ویرایش کرد."
+"نمی‌توان تاریخ قرارداد نسخه‌های مختلف را به‌صورت هم‌زمان در قراردادهای "
+"متفاوت ویرایش کرد."
 
 #. module: hr
 #. odoo-python
@@ -1814,8 +1805,8 @@ msgid ""
 "Define the allowed IP to be displayed as Present. In case of multiple "
 "addresses, separate them by a coma."
 msgstr ""
-"تعیین IP مجاز برای نمایش به‌عنوان «حاضر». در صورت وجود چند آدرس، آن‌ها را با "
-"ویرگول از هم جدا کنید."
+"تعیین IP مجاز برای نمایش به‌عنوان «حاضر». در صورت وجود چند آدرس، آن‌ها را با"
+" ویرگول از هم جدا کنید."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -2104,19 +2095,15 @@ msgstr "مقدار درصد باید عددی بین ۰ تا ۱۰۰ باشد."
 #: model_terms:hr.job,website_description:hr.job_trainee
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                            You can make a real contribution to the success "
-"of the company.\n"
+"                            You can make a real contribution to the success of the company.\n"
 "                            <br>\n"
-"                            Several activities are often organized all over "
-"the year, such as weekly\n"
-"                            sports sessions, team building events, monthly "
-"drink, and much more."
+"                            Several activities are often organized all over the year, such as weekly\n"
+"                            sports sessions, team building events, monthly drink, and much more."
 msgstr ""
 "هر کارمند این فرصت را دارد که تأثیر کار خود را ببیند.\n"
 "شما می‌توانید سهم واقعی در موفقیت شرکت داشته باشید.\n"
 "<br>\n"
-"در طول سال فعالیت‌های گوناگونی برگزار می‌شود؛ از جمله جلسات ورزشی هفتگی، "
-"رویدادهای تیم‌سازی، گردهمایی‌های ماهانه و بسیاری برنامه‌های دیگر."
+"در طول سال فعالیت‌های گوناگونی برگزار می‌شود؛ از جمله جلسات ورزشی هفتگی، رویدادهای تیم‌سازی، گردهمایی‌های ماهانه و بسیاری برنامه‌های دیگر."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_trainee
@@ -2489,8 +2476,8 @@ msgstr "اطمینان از انطباق با قوانین کار"
 #: model:ir.model.fields,help:hr.field_hr_employee__identification_id
 #: model:ir.model.fields,help:hr.field_hr_version__identification_id
 msgid ""
-"Enter the employee's National Identification Number issued by the government "
-"(e.g., Aadhaar, SIN, NIN). This is used for official records and statutory "
+"Enter the employee's National Identification Number issued by the government"
+" (e.g., Aadhaar, SIN, NIN). This is used for official records and statutory "
 "compliance."
 msgstr ""
 "شماره‌ی ملی کارمند را که توسط دولت صادر شده است (مانند Aadhaar، SIN، NIN) "
@@ -2590,7 +2577,8 @@ msgstr ""
 msgid ""
 "External user with limited access, created only for the purpose of sharing "
 "data."
-msgstr "کاربر خارجی با دسترسی محدود، ایجادشده صرفاً برای اشتراک‌گذاری داده‌ها."
+msgstr ""
+"کاربر خارجی با دسترسی محدود، ایجادشده صرفاً برای اشتراک‌گذاری داده‌ها."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
@@ -2742,8 +2730,8 @@ msgid ""
 "For %(channels)s, channel_type should be 'channel' to have the department "
 "auto-subscription."
 msgstr ""
-"برای %(channels)s، مقدار channel_type باید برابر با 'channel' باشد تا اشتراک "
-"خودکار دپارتمان فعال شود."
+"برای %(channels)s، مقدار channel_type باید برابر با 'channel' باشد تا اشتراک"
+" خودکار دپارتمان فعال شود."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__phone_formatted
@@ -3098,8 +3086,8 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive "
-"mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive"
+" mass mailing sms anymore, from any list"
 msgstr ""
 
 #. module: hr
@@ -3918,7 +3906,8 @@ msgid ""
 "Number of days prior to the contract end date that a contract expiration "
 "warning is triggered."
 msgstr ""
-"تعداد روزهایی که قبل از تاریخ پایان قرارداد، هشدار انقضای قرارداد فعال می‌شود."
+"تعداد روزهایی که قبل از تاریخ پایان قرارداد، هشدار انقضای قرارداد فعال "
+"می‌شود."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -4001,28 +3990,28 @@ msgstr "ورود/خروج به/از سازمان"
 #: code:addons/hr/models/hr_employee.py:0
 msgid "Only HR users can access first version date on an employee."
 msgstr ""
-"فقط کاربران منابع انسانی می‌توانند تاریخ نسخه اول را در پروفایل کارمند مشاهده "
-"کنند."
+"فقط کاربران منابع انسانی می‌توانند تاریخ نسخه اول را در پروفایل کارمند "
+"مشاهده کنند."
 
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_employee_location_uniq_exceptional_per_day
 msgid ""
-"Only one default work location and one exceptional work location per day per "
-"employee."
+"Only one default work location and one exceptional work location per day per"
+" employee."
 msgstr ""
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/mail_activity_plan_template.py:0
 msgid ""
-"Oops! It seems there is a problem with your team "
-"structure.                        We found a circular reporting loop and no "
-"one in that loop is linked to a user.                        Please double-"
-"check that everyone reports to the correct manager."
+"Oops! It seems there is a problem with your team structure."
+"                        We found a circular reporting loop and no one in "
+"that loop is linked to a user.                        Please double-check "
+"that everyone reports to the correct manager."
 msgstr ""
 "اوه! به نظر می رسد ساختار تیم شما مشکل دارد.                        ما یک "
-"حلقه گزارش دایره ای پیدا کردیم و هیچ کس در آن حلقه به یک کاربر مرتبط "
-"نیست.                       لطفاً دوباره بررسی کنید که همه به مدیر صحیح گزارش "
+"حلقه گزارش دایره ای پیدا کردیم و هیچ کس در آن حلقه به یک کاربر مرتبط نیست."
+"                       لطفاً دوباره بررسی کنید که همه به مدیر صحیح گزارش "
 "دهند."
 
 #. module: hr
@@ -4098,8 +4087,8 @@ msgstr "پین کد"
 #: model:ir.model.fields,help:hr.field_hr_employee__pin
 #: model:ir.model.fields,help:hr.field_res_users__pin
 msgid ""
-"PIN used to Check In/Out in the Kiosk Mode of the Attendance application (if "
-"enabled in Configuration) and to change the cashier in the Point of Sale "
+"PIN used to Check In/Out in the Kiosk Mode of the Attendance application (if"
+" enabled in Configuration) and to change the cashier in the Point of Sale "
 "application."
 msgstr ""
 "کد PIN مورد استفاده برای ورود/خروج در حالت کیوسک نرم‌افزار حضور و غیاب (در "
@@ -4272,8 +4261,8 @@ msgid ""
 "Plan activities %(template_names)s cannot use coach, manager or employee "
 "responsible as it is used only for employee plans."
 msgstr ""
-"فعالیت‌های برنامه %(template_names)s نمی‌توانند از مربی، مدیر یا مسئول کارکنان "
-"استفاده کنند، زیرا فقط برای برنامه‌های کارکنان قابل استفاده است."
+"فعالیت‌های برنامه %(template_names)s نمی‌توانند از مربی، مدیر یا مسئول "
+"کارکنان استفاده کنند، زیرا فقط برای برنامه‌های کارکنان قابل استفاده است."
 
 #. module: hr
 #. odoo-javascript
@@ -4309,8 +4298,7 @@ msgid ""
 "Policy to post a message on the document using the mailgateway.\n"
 "- everyone: everyone can post\n"
 "- partners: only authenticated partners\n"
-"- followers: only followers of the related document or members of following "
-"channels\n"
+"- followers: only followers of the related document or members of following channels\n"
 msgstr ""
 "خط مشی ارسال پیام در سند با استفاده از mailgateway.\n"
 "- همه: همه می توانند پست کنند\n"
@@ -5147,12 +5135,9 @@ msgstr ""
 #. module: hr
 #: model_terms:hr.job,description:hr.job_marketing
 msgid ""
-"The Marketing Manager defines the mid- to long-term marketing strategy for "
-"his covered market segments\n"
-"                in the World. He develops and monitors the annual budget in "
-"collaboration with Sales. He defines the\n"
-"                products and customers portfolio according to the marketing "
-"plan. This mission requires strong\n"
+"The Marketing Manager defines the mid- to long-term marketing strategy for his covered market segments\n"
+"                in the World. He develops and monitors the annual budget in collaboration with Sales. He defines the\n"
+"                products and customers portfolio according to the marketing plan. This mission requires strong\n"
 "                collaboration with Technical Service and Sales."
 msgstr ""
 
@@ -5165,9 +5150,9 @@ msgstr "پین‌کد باید دنباله‌ای از ارقام باشد."
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_job__recruiter_id
 msgid ""
-"The Recruiter will be the default value for all Applicants in this "
-"job             position. The Recruiter is automatically added to all "
-"meetings with the Applicant."
+"The Recruiter will be the default value for all Applicants in this job"
+"             position. The Recruiter is automatically added to all meetings "
+"with the Applicant."
 msgstr ""
 
 #. module: hr
@@ -5319,10 +5304,8 @@ msgstr "این کارمند قبلاً یک کاربر دارد."
 #. odoo-python
 #: code:addons/hr/models/hr_employee_type.py:0
 msgid ""
-"This employee type is used in another company, you can't modify the country "
-"where it's applicable for now.\n"
-"Change the employee type on the employees of the other company to be able to "
-"modify this."
+"This employee type is used in another company, you can't modify the country where it's applicable for now.\n"
+"Change the employee type on the employees of the other company to be able to modify this."
 msgstr ""
 
 #. module: hr
@@ -5404,11 +5387,12 @@ msgstr "برای تمدید"
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid ""
-"To avoid multi company issues (losing the access to your previous contracts, "
-"leaves, ...), you should create another employee in the new company instead."
+"To avoid multi company issues (losing the access to your previous contracts,"
+" leaves, ...), you should create another employee in the new company "
+"instead."
 msgstr ""
-"برای جلوگیری از مشکلات چندشرکتی (از دست دادن دسترسی به قراردادها، مرخصی‌ها و "
-"غیره)، باید یک کارمند جدید در شرکت جدید ایجاد کنید."
+"برای جلوگیری از مشکلات چندشرکتی (از دست دادن دسترسی به قراردادها، مرخصی‌ها و"
+" غیره)، باید یک کارمند جدید در شرکت جدید ایجاد کنید."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_version_search_view
@@ -5798,10 +5782,8 @@ msgstr "هشدار"
 #. module: hr
 #: model_terms:hr.job,description:hr.job_consultant
 msgid ""
-"We are looking for a Consultant to provide expert advice and strategic "
-"solutions,\n"
-"                driving business growth. Strong analytical skills and a "
-"proven track record in delivering results are\n"
+"We are looking for a Consultant to provide expert advice and strategic solutions,\n"
+"                driving business growth. Strong analytical skills and a proven track record in delivering results are\n"
 "                essential."
 msgstr ""
 
@@ -5809,8 +5791,7 @@ msgstr ""
 #: model_terms:hr.job,description:hr.job_developer
 msgid ""
 "We are looking for an experience developer to join our Web team.\n"
-"                Someone who can snap out of coding and perform analysis or "
-"meet clients to explain the technical\n"
+"                Someone who can snap out of coding and perform analysis or meet clients to explain the technical\n"
 "                possibilities that can meet their needs."
 msgstr ""
 
@@ -6134,70 +6115,42 @@ msgstr ""
 #. module: hr
 #: model_terms:hr.job,description:hr.job_trainee
 msgid ""
-"You participate to the update of our tutorial tools and pre-sales tools "
-"after the launch of a new version of Odoo. Indeed, any new version of the "
-"software brings significant improvements in terms of functionalities, "
-"ergonomics and configuration.\n"
-"You will have to become familiar with the existing tools (books, class "
-"supports, Odoo presentation’s slides, commercial tools),\n"
-"to participate to the update of those tools in order to make them "
-"appropriate for the new version of the software and, for sure,\n"
+"You participate to the update of our tutorial tools and pre-sales tools after the launch of a new version of Odoo. Indeed, any new version of the software brings significant improvements in terms of functionalities, ergonomics and configuration.\n"
+"You will have to become familiar with the existing tools (books, class supports, Odoo presentation’s slides, commercial tools),\n"
+"to participate to the update of those tools in order to make them appropriate for the new version of the software and, for sure,\n"
 "to suggest improvements in order to cover the new domains of the software.\n"
-"You join the Implementation Assistance department. This team of 3 people go "
-"with Odoo’s clients in the set up of the software. Your role will be\n"
-"to animate webinars in order to show the different functionalities of the "
-"software.\n"
+"You join the Implementation Assistance department. This team of 3 people go with Odoo’s clients in the set up of the software. Your role will be\n"
+"to animate webinars in order to show the different functionalities of the software.\n"
 "to be involved in the support of the customers and\n"
 "to answer to their questions.\n"
 "You help the support manager to set up new support services by\n"
 "being involved in the treatment of new cases,\n"
 "contributing to the set up of a new politic,\n"
-"being involved into satisfaction surveys in order to have a better knowledge "
-"of how the support given is seen by the customers."
+"being involved into satisfaction surveys in order to have a better knowledge of how the support given is seen by the customers."
 msgstr ""
-"شما در به‌روزرسانی ابزارهای آموزشی و پیش‌فروش ما پس از راه‌اندازی نسخه جدیدی از "
-"Odoo مشارکت می‌کنید. واقعاً، هر نسخه جدیدی از نرم‌افزار بهبودهای قابل توجهی در "
-"زمینه عملکردها، ارگونومی و پیکربندی به همراه دارد.\n"
-"شما باید با ابزارهای موجود (کتاب‌ها، پشتیبانی‌های کلاس، اسلایدهای ارائه Odoo، "
-"ابزارهای تجاری) آشنا شوید،\n"
-"در به‌روزرسانی این ابزارها برای مناسب‌سازی آن‌ها برای نسخه جدید نرم‌افزار مشارکت "
-"کنید و، مطمئناً،\n"
+"شما در به‌روزرسانی ابزارهای آموزشی و پیش‌فروش ما پس از راه‌اندازی نسخه جدیدی از Odoo مشارکت می‌کنید. واقعاً، هر نسخه جدیدی از نرم‌افزار بهبودهای قابل توجهی در زمینه عملکردها، ارگونومی و پیکربندی به همراه دارد.\n"
+"شما باید با ابزارهای موجود (کتاب‌ها، پشتیبانی‌های کلاس، اسلایدهای ارائه Odoo، ابزارهای تجاری) آشنا شوید،\n"
+"در به‌روزرسانی این ابزارها برای مناسب‌سازی آن‌ها برای نسخه جدید نرم‌افزار مشارکت کنید و، مطمئناً،\n"
 "پیشنهادهایی برای بهبود جهت پوشش دامنه‌های جدید نرم‌افزار ارائه دهید.\n"
-"شما به بخش کمک به پیاده‌سازی ملحق می‌شوید. این تیم ۳ نفره به مشتریان Odoo در "
-"راه‌اندازی نرم‌افزار کمک می‌کند. نقش شما این خواهد بود\n"
+"شما به بخش کمک به پیاده‌سازی ملحق می‌شوید. این تیم ۳ نفره به مشتریان Odoo در راه‌اندازی نرم‌افزار کمک می‌کند. نقش شما این خواهد بود\n"
 ".وبینارها را برای نشان دادن عملکردهای مختلف نرم‌افزار برگزاری کنید\n"
 ".در پشتیبانی مشتریان درگیر شوید و\n"
 ".به سوالات آنها پاسخ دهید\n"
 "شما به مدیر پشتیبانی در راه‌اندازی خدمات پشتیبانی جدید با\n"
 ".درگیر شدن در رسیدگی به موارد جدید،\n"
 ".سهم‌گذاری در راه‌اندازی یک سیاست جدید،\n"
-".و درگیر شدن در نظرسنجی‌های رضایت به منظور آگاهی بهتر از چگونگی دیده شدن "
-"پشتیبانی ارائه‌شده توسط مشتریان کمک می‌کنید"
+".و درگیر شدن در نظرسنجی‌های رضایت به منظور آگاهی بهتر از چگونگی دیده شدن پشتیبانی ارائه‌شده توسط مشتریان کمک می‌کنید"
 
 #. module: hr
 #: model_terms:hr.job,description:hr.job_cto
 msgid ""
-"You will take part in the consulting services we provide to our partners and "
-"customers: design, analysis, development, testing, project management, "
-"support/coaching. You will work autonomously as well as coordinate and "
-"supervise small distributed development teams for some projects. Optionally, "
-"you will deliver Odoo training sessions to partners and customers (8-10 "
-"people/session). You will report to the Head of Professional Services and "
-"work closely with all developers and consultants.\n"
+"You will take part in the consulting services we provide to our partners and customers: design, analysis, development, testing, project management, support/coaching. You will work autonomously as well as coordinate and supervise small distributed development teams for some projects. Optionally, you will deliver Odoo training sessions to partners and customers (8-10 people/session). You will report to the Head of Professional Services and work closely with all developers and consultants.\n"
 "\n"
-"The job is located in Grand-Rosière (1367), Belgium (between Louvain-La-"
-"Neuve and Namur)."
+"The job is located in Grand-Rosière (1367), Belgium (between Louvain-La-Neuve and Namur)."
 msgstr ""
-"شما در خدمات مشاوره‌ای که به شرکا و مشتریان خود ارائه می‌دهیم، مشارکت خواهید "
-"کرد: طراحی، تحلیل، توسعه، آزمایش، مدیریت پروژه، پشتیبانی/مربی‌گری. شما به "
-"صورت مستقل کار خواهید کرد و همچنین تیم‌های توسعه کوچکی که در پراکندگی قرار "
-"دارند را هماهنگ و نظارت خواهید کرد. به صورت اختیاری، شما جلسات آموزشی اودو "
-"را به شرکا و مشتریان (8-10 نفر در هر جلسه) ارائه خواهید کرد. شما به رئیس "
-"خدمات حرفه‌ای گزارش خواهید داد و به طور نزدیک با تمامی توسعه‌دهندگان و مشاوران "
-"همکاری خواهید کرد.\n"
+"شما در خدمات مشاوره‌ای که به شرکا و مشتریان خود ارائه می‌دهیم، مشارکت خواهید کرد: طراحی، تحلیل، توسعه، آزمایش، مدیریت پروژه، پشتیبانی/مربی‌گری. شما به صورت مستقل کار خواهید کرد و همچنین تیم‌های توسعه کوچکی که در پراکندگی قرار دارند را هماهنگ و نظارت خواهید کرد. به صورت اختیاری، شما جلسات آموزشی اودو را به شرکا و مشتریان (8-10 نفر در هر جلسه) ارائه خواهید کرد. شما به رئیس خدمات حرفه‌ای گزارش خواهید داد و به طور نزدیک با تمامی توسعه‌دهندگان و مشاوران همکاری خواهید کرد.\n"
 "\n"
-"این کار در Grand-Rosière (1367)، بلژیک (بین Louvain-La-Neuve و Namur) قرار "
-"دارد."
+"این کار در Grand-Rosière (1367)، بلژیک (بین Louvain-La-Neuve و Namur) قرار دارد."
 
 #. module: hr
 #. odoo-python

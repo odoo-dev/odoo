@@ -31,14 +31,14 @@ msgstr ""
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.event_confirmation
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
 msgstr ""
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.registration_attendee_details
 msgid ""
 "<span>Sign In</span>\n"
-"                <span class=\"fa fa-sign-in\"/>"
+"                <span class=\"oi\" data-icon=\"login\"/>"
 msgstr ""
 
 #. module: website_event_sale
@@ -151,8 +151,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_event_sale/models/sale_order.py:0
 msgid ""
-"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s "
-"ticket for the %(event)s event%(slot)s."
+"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s"
+" ticket for the %(event)s event%(slot)s."
 msgstr ""
 
 #. module: website_event_sale

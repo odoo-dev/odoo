@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 07:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/hi/>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/im_livechat/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,8 +22,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -116,7 +114,8 @@ msgstr "%s (कॉपी)"
 #: code:addons/im_livechat/models/chatbot_script.py:0
 #, fuzzy
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr "'%(input_email)s' मान्य ईमेल नहीं लगता. कृपया दोबारा कोशिश करें?"
 
 #. module: im_livechat
@@ -138,10 +137,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* ''दिखाएं' चैट बटन को पेज पर दिखाता है.\n"
@@ -157,30 +154,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
 #, fuzzy
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>'बदलाव करें' मोड पर वापस जाएं"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>'बदलाव करें' मोड पर वापस जाएं"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
 msgstr ""
 
 #. module: im_livechat
@@ -208,44 +205,41 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
-msgstr "<span>रिमाइंडर: यह चरण केवल तभी चलेगा जब कोई ऑपरेटर उपलब्ध न हो.</span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
+msgstr ""
+"<span>रिमाइंडर: यह चरण केवल तभी चलेगा जब कोई ऑपरेटर उपलब्ध न हो.</span>"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
+#, fuzzy
+msgid ""
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
+msgstr ""
+"<span>सलाह: बॉट द्वारा जटिल क्रियाएं (ऑपरेटर को भेजना, आदि) करने से पहले कम से कम एक इंटरैक्शन (सवाल, ईमेल, वगैरह) ज़रूरी है. </span>\n"
+"                    <span>अगर आप चाहते हैं कि बॉट केवल ऑपरेटर उपलब्ध न होने पर ही बात करे, तो चैनल नियम इस्तेमाल करें.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 #, fuzzy
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
-"<span>सलाह: बॉट द्वारा जटिल क्रियाएं (ऑपरेटर को भेजना, आदि) करने से पहले कम से कम एक "
-"इंटरैक्शन (सवाल, ईमेल, वगैरह) ज़रूरी है. </span>\n"
-"                    <span>अगर आप चाहते हैं कि बॉट केवल ऑपरेटर उपलब्ध न होने पर ही "
-"बात करे, तो चैनल नियम इस्तेमाल करें.</span>"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
-#, fuzzy
-msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
-msgstr ""
-"<span>सलाह: बॉट द्वारा जटिल क्रियाएं (ऑपरेटर को भेजना, वगैरह) करने से पहले कम से कम एक "
-"इंटरैक्शन (सवाल, ईमेल, वगैरह) ज़रूरी है.</span>"
+"<span>सलाह: बॉट द्वारा जटिल क्रियाएं (ऑपरेटर को भेजना, वगैरह) करने से पहले "
+"कम से कम एक इंटरैक्शन (सवाल, ईमेल, वगैरह) ज़रूरी है.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
-"<span>सलाह: अगर कोई ऑपरेटर उपलब्ध न हो, तो बॉट के लिए आगे के चरण प्लान करें.</span>"
+"<span>सलाह: अगर कोई ऑपरेटर उपलब्ध न हो, तो बॉट के लिए आगे के चरण प्लान "
+"करें.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
@@ -354,7 +348,8 @@ msgstr "सभी देश"
 msgid ""
 "Alternatively, share this URL with your customers or suppliers via email:"
 msgstr ""
-"वैकल्पिक रूप से, यह यूआरएल अपने ग्राहकों या सप्लायरों को ईमेल के ज़रिए साझा करें:"
+"वैकल्पिक रूप से, यह यूआरएल अपने ग्राहकों या सप्लायरों को ईमेल के ज़रिए साझा "
+"करें:"
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__im_livechat_channel_rule__chatbot_enabled_condition__always
@@ -480,7 +475,8 @@ msgstr "कैन्ड रिस्पॉन्स"
 msgid ""
 "Cannot create history as it is only available for live chats: %(histories)s."
 msgstr ""
-"इतिहास नहीं बना सकते, क्योंकि यह केवल लाइव चैट के लिए उपलब्ध है: %(histories)s।"
+"इतिहास नहीं बना सकते, क्योंकि यह केवल लाइव चैट के लिए उपलब्ध है: "
+"%(histories)s।"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__livechat_channel_id
@@ -522,11 +518,11 @@ msgstr "चैनल"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"चैट दो लोगों के लिए निजी है. ग्रुप कुछ चुने हुए लोगों के लिए निजी है. चैनल में कोई भी शामिल "
-"हो सकता है (सेटिंग पर निर्भर करता है)।"
+"चैट दो लोगों के लिए निजी है. ग्रुप कुछ चुने हुए लोगों के लिए निजी है. चैनल "
+"में कोई भी शामिल हो सकता है (सेटिंग पर निर्भर करता है)।"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -905,8 +901,9 @@ msgid ""
 "selected action must be 'Open automatically' otherwise this parameter will "
 "not be taken into account."
 msgstr ""
-"बातचीत की विंडो को अपने-आप खोलने में देरी (सेकंड में). ध्यान दें: चुनी गई कार्रवाई 'अपने-आप "
-"खोलें' होनी चाहिए, नहीं तो इस पैरामीटर पर ध्यान नहीं दिया जाएगा।"
+"बातचीत की विंडो को अपने-आप खोलने में देरी (सेकंड में). ध्यान दें: चुनी गई "
+"कार्रवाई 'अपने-आप खोलें' होनी चाहिए, नहीं तो इस पैरामीटर पर ध्यान नहीं दिया "
+"जाएगा।"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1168,8 +1165,8 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"मिलते-जुलते नियम को खोजने का क्रम दिया गया है. अगर यूआरएल/देश के लिए 2 नियम मिलते हैं, "
-"तो सबसे कम सीक्वेंस वाले नियम को चुना जाएगा।"
+"मिलते-जुलते नियम को खोजने का क्रम दिया गया है. अगर यूआरएल/देश के लिए 2 नियम "
+"मिलते हैं, तो सबसे कम सीक्वेंस वाले नियम को चुना जाएगा।"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1179,8 +1176,9 @@ msgid ""
 "<strong>Settings</strong> &gt; <strong>Email</strong> &amp; "
 "<strong>Marketing.</strong>"
 msgstr ""
-"<strong>वेबसाइट</strong> &gt; <strong>कॉन्फ़िगरेशन</strong> &gt; <strong>सेटिंग</"
-"strong> &gt; <strong>ईमेल</strong> &amp; <strong>मार्केटिंग</strong> पर जाएं."
+"<strong>वेबसाइट</strong> &gt; <strong>कॉन्फ़िगरेशन</strong> &gt; "
+"<strong>सेटिंग</strong> &gt; <strong>ईमेल</strong> &amp; "
+"<strong>मार्केटिंग</strong> पर जाएं."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1303,7 +1301,8 @@ msgstr ""
 msgid ""
 "Hmmm, let me check if I can find someone that could help you with that..."
 msgstr ""
-"हम्म, मुझे देखने दें कि क्या मैं किसी को ढूंढ सकता हूं जो इसमें आपकी मदद कर सके..।"
+"हम्म, मुझे देखने दें कि क्या मैं किसी को ढूंढ सकता हूं जो इसमें आपकी मदद कर "
+"सके..।"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_agent_history_view_search
@@ -1603,7 +1602,8 @@ msgid ""
 "Learn how to display a live chat bubble on your website and start chatting "
 "with visitors in a few easy steps."
 msgstr ""
-"कुछ आसान चरणों में अपनी वेबसाइट पर लाइव चैट बबल दिखाना और विज़िटर से चैट करना सीखें।"
+"कुछ आसान चरणों में अपनी वेबसाइट पर लाइव चैट बबल दिखाना और विज़िटर से चैट "
+"करना सीखें।"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2584,8 +2584,7 @@ msgstr "हर ऑपरेटर के हिसाब से सेशन"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2737,13 +2736,13 @@ msgstr "बातचीत भेजी गई।"
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
-"यह नियम सिर्फ़ इन देशों के लिए लागू होगा. उदाहरण: अगर आप 'बेल्जियम' और 'संयुक्त राज्य' "
-"चुनते हैं और कार्रवाई को 'छिपाएं' पर सेट करते हैं, तो चैट बटन इन 2 देशों में मौजूद विज़िटर से "
-"दिए गए यूआरएल पर छिपा दिया जाएगा. इस सुविधा के लिए आपके सर्वर पर GeoIP इंस्टॉल होना "
-"ज़रूरी है।"
+"यह नियम सिर्फ़ इन देशों के लिए लागू होगा. उदाहरण: अगर आप 'बेल्जियम' और "
+"'संयुक्त राज्य' चुनते हैं और कार्रवाई को 'छिपाएं' पर सेट करते हैं, तो चैट "
+"बटन इन 2 देशों में मौजूद विज़िटर से दिए गए यूआरएल पर छिपा दिया जाएगा. इस "
+"सुविधा के लिए आपके सर्वर पर GeoIP इंस्टॉल होना ज़रूरी है।"
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -2764,8 +2763,9 @@ msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
 msgstr ""
-"विकल्प पर क्लिक करने पर, विज़िटर को इस लिंक पर रीडायरेक्ट किया जाएगा (ध्यान दें कि अगर "
-"लिंक लाइवचैट वेबसाइट के बाहर का है, तो स्क्रिप्ट समाप्त हो जाएगी)।"
+"विकल्प पर क्लिक करने पर, विज़िटर को इस लिंक पर रीडायरेक्ट किया जाएगा (ध्यान "
+"दें कि अगर लिंक लाइवचैट वेबसाइट के बाहर का है, तो स्क्रिप्ट समाप्त हो "
+"जाएगी)।"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_lang_ids
@@ -2774,8 +2774,8 @@ msgid ""
 "These languages, in addition to your main language, will be used to assign "
 "you to Live Chat sessions."
 msgstr ""
-"आपकी मुख्य भाषा के अलावा, इन भाषाओं का इस्तेमाल आपको लाइव चैट सेशन के लिए असाइन करने के "
-"लिए किया जाएगा।"
+"आपकी मुख्य भाषा के अलावा, इन भाषाओं का इस्तेमाल आपको लाइव चैट सेशन के लिए "
+"असाइन करने के लिए किया जाएगा।"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__default_message
@@ -2784,8 +2784,8 @@ msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
 msgstr ""
-"यह एक ऐसा मैसेज है जो अपने-आप भेजा जाता है. जब कोई विज़िटर आपके साथ चैट शुरू करेगा, तो "
-"उसे सबसे पहले यही मैसेज दिखेगा।"
+"यह एक ऐसा मैसेज है जो अपने-आप भेजा जाता है. जब कोई विज़िटर आपके साथ चैट शुरू "
+"करेगा, तो उसे सबसे पहले यही मैसेज दिखेगा।"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2803,7 +2803,8 @@ msgstr "यह मैसेज हटाया जा चुका है"
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_username
 #, fuzzy
 msgid "This username will be used as your name in the livechat channels."
-msgstr "इस यूज़रनेम का उपयोग लाइवचैट चैनलों में आपके नाम के रूप में किया जाएगा।"
+msgstr ""
+"इस यूज़रनेम का उपयोग लाइवचैट चैनलों में आपके नाम के रूप में किया जाएगा।"
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__discuss_channel__livechat_week_day__3
@@ -2849,12 +2850,8 @@ msgstr "टाइटल का रंग"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat
@@ -2866,8 +2863,8 @@ msgid ""
 "Track and improve live chat performance with insights on session activity, "
 "response times, customer ratings, and call interactions."
 msgstr ""
-"सेशन की गतिविधि, जवाब देने के समय, ग्राहक की रेटिंग और कॉल इंटरैक्शन की जानकारी से लाइव "
-"चैट के परफ़ॉर्मेंस को ट्रैक करें और बेहतर बनाएं।"
+"सेशन की गतिविधि, जवाब देने के समय, ग्राहक की रेटिंग और कॉल इंटरैक्शन की "
+"जानकारी से लाइव चैट के परफ़ॉर्मेंस को ट्रैक करें और बेहतर बनाएं।"
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_answer_troubleshooting_demo
@@ -2900,7 +2897,8 @@ msgid ""
 "URL to a static page where you client can discuss with the operator of the "
 "channel."
 msgstr ""
-"उस स्टैटिक पेज का यूआरएल जहां आपका ग्राहक चैनल के ऑपरेटर से चर्चा कर सकता है।"
+"उस स्टैटिक पेज का यूआरएल जहां आपका ग्राहक चैनल के ऑपरेटर से चर्चा कर सकता "
+"है।"
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_utm_mixin
@@ -3111,8 +3109,8 @@ msgid ""
 "When forwarding live chat conversations, the chatbot will prioritize users "
 "with matching expertise."
 msgstr ""
-"लाइव चैट बातचीत को आगे भेजते समय, चैटबॉट समान विशेषज्ञता वाले उपयोगकर्ताओं को "
-"प्राथमिकता देगा।"
+"लाइव चैट बातचीत को आगे भेजते समय, चैटबॉट समान विशेषज्ञता वाले उपयोगकर्ताओं "
+"को प्राथमिकता देगा।"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__has_call

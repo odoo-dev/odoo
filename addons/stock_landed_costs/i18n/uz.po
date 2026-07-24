@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 00:04+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"stock_landed_costs/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/stock_landed_costs/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,10 +40,8 @@ msgstr ""
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
 #, fuzzy
-msgid ""
-"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-msgstr ""
-"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgid "<i class=\"oi\" data-icon=\"schedule\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgstr "<i class=\"oi\" data-icon=\"schedule\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
@@ -276,7 +273,8 @@ msgstr "Standart taqsimlash usuli"
 #: model:ir.model.fields,help:stock_landed_costs.field_product_template__split_method_landed_cost
 #, fuzzy
 msgid "Default Split Method when used for Landed Cost"
-msgstr "Yetkazib berish xarajati uchun ishlatilganda standart taqsimlash usuli"
+msgstr ""
+"Yetkazib berish xarajati uchun ishlatilganda standart taqsimlash usuli"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__name
@@ -331,10 +329,11 @@ msgid ""
 "By Weight: Cost will be divided depending on its weight.\n"
 "By Volume: Cost will be divided depending on its volume."
 msgstr ""
-"Teng: xarajat teng taqsimlanadi. Miqdor bo‘yicha: Xarajat mahsulot miqdoriga "
-"qarab taqsimlanadi. Joriy narx bo‘yicha: Xarajat mahsulotning joriy narxiga "
-"muvofiq taqsimlanadi. Vazn bo‘yicha: Xarajat mahsulotning vazniga qarab "
-"taqsimlanadi. Hajm bo‘yicha: Xarajat mahsulotning hajmiga qarab taqsimlanadi."
+"Teng: xarajat teng taqsimlanadi. Miqdor bo‘yicha: Xarajat mahsulot miqdoriga"
+" qarab taqsimlanadi. Joriy narx bo‘yicha: Xarajat mahsulotning joriy narxiga"
+" muvofiq taqsimlanadi. Vazn bo‘yicha: Xarajat mahsulotning vazniga qarab "
+"taqsimlanadi. Hajm bo‘yicha: Xarajat mahsulotning hajmiga qarab "
+"taqsimlanadi."
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__message_follower_ids
@@ -517,7 +516,8 @@ msgid ""
 "customs duties, etc) into the cost of the product."
 msgstr ""
 "Qo‘shimcha xarajatlar mahsulot tannarxiga qo‘shimcha xarajatlarni (yuk "
-"tashish, sug‘urta, bojxona to‘lovlari va boshqalar) qo‘shish imkonini beradi."
+"tashish, sug‘urta, bojxona to‘lovlari va boshqalar) qo‘shish imkonini "
+"beradi."
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__write_uid
@@ -676,7 +676,8 @@ msgstr "Iltimos, %s mahsulot uchun zaxira xarajatlari hisobini sozlang."
 #, fuzzy
 msgid "Please define %s on which those additional costs should apply."
 msgstr ""
-"Iltimos, bu qo‘shimcha xarajatlar qo‘llanilishi kerak bo‘lgan %sni belgilang."
+"Iltimos, bu qo‘shimcha xarajatlar qo‘llanilishi kerak bo‘lgan %sni "
+"belgilang."
 
 #. module: stock_landed_costs
 #: model:ir.model.fields.selection,name:stock_landed_costs.selection__stock_landed_cost__state__done
@@ -867,16 +868,16 @@ msgid ""
 "You cannot apply landed costs on the chosen %s(s). Landed costs can only be "
 "applied for products with FIFO or average costing method."
 msgstr ""
-"Siz tanlangan %s(lar)ga qo‘shimcha xarajatlarni qo‘llay olmaysiz. Qo‘shimcha "
-"xarajatlar faqat FIFO yoki o‘rtacha tannarx usulida baholanadigan "
+"Siz tanlangan %s(lar)ga qo‘shimcha xarajatlarni qo‘llay olmaysiz. Qo‘shimcha"
+" xarajatlar faqat FIFO yoki o‘rtacha tannarx usulida baholanadigan "
 "mahsulotlarga qo‘llanilishi mumkin."
 
 #. module: stock_landed_costs
 #. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 msgid ""
-"You cannot change the product type or disable landed cost option because the "
-"product is used in a journal item."
+"You cannot change the product type or disable landed cost option because the"
+" product is used in a journal item."
 msgstr ""
 
 #, fuzzy

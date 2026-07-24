@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 09:31+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"base_automation/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/base_automation/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -76,8 +75,8 @@ msgstr "<code>env</code>: harakat amalga oshiriladigan muhit"
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is "
-"a void recordset"
+"<code>model</code>: model of the record on which the action is triggered; is"
+" a void recordset"
 msgstr ""
 "<code>model</code>: harakat ishga tushirilgan yozuv modeli; bo‘sh yozuvlar "
 "to‘plami"
@@ -105,30 +104,34 @@ msgstr ""
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Amallar\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"Actions\"/>"
+msgstr ""
+"<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" "
+"title=\"Amallar\"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
+"<i class=\"oi\" data-icon=\"info\"/> The default target record getter will "
+"work out-of-the-box for any webhook coming from another Odoo instance."
 msgstr ""
-"<i class=\"fa fa-info-circle\"/> Standart maqsadli yozuv oluvchisi boshqa "
-"Odoo nusxasidan keladigan har qanday veb-ilgak uchun avtomatik ishlaydi."
+"<i class=\"oi\" data-icon=\"info\"/> Standart maqsadli yozuv oluvchisi "
+"boshqa Odoo nusxasidan keladigan har qanday veb-ilgak uchun avtomatik "
+"ishlaydi."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automation rules triggered by UI "
+"changes will be executed <em>every time</em> the watched fields change, "
+"<em>whether you save or not</em>."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Foydalanuvchi interfeysi o‘zgarishi bilan ishga "
-"tushadigan avtomatlashtirish qoidalari kuzatilgan maydonlar <em>har safar</"
-"em> o‘zgarganda, <em>saqlasangiz ham, saqlamasangiz ham</em> bajariladi."
+"<i class=\"oi\" data-icon=\"warning\"/> Foydalanuvchi interfeysi o‘zgarishi "
+"bilan ishga tushadigan avtomatlashtirish qoidalari kuzatilgan maydonlar "
+"<em>har safar</em> o‘zgarganda, <em>saqlasangiz ham, saqlamasangiz ham</em> "
+"bajariladi."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_server_action_form
@@ -495,8 +498,8 @@ msgstr "Agar belgilansa, ba'zi xabarlarda yetkazib berish xatosi mavjud"
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
 #, fuzzy
 msgid ""
-"If present, this condition must be satisfied before executing the automation "
-"rule."
+"If present, this condition must be satisfied before executing the automation"
+" rule."
 msgstr ""
 "Agar mavjud bo‘lsa, avtomatlashtirish qoidasini bajarishdan oldin ushbu "
 "shart bajarilishi kerak"
@@ -617,8 +620,8 @@ msgstr "Model nomi"
 #: code:addons/base_automation/models/ir_actions_server.py:0
 #, fuzzy
 msgid ""
-"Model of action %(action_name)s should match the one from automated rule %"
-"(rule_name)s."
+"Model of action %(action_name)s should match the one from automated rule "
+"%(rule_name)s."
 msgstr ""
 "%(action_name)s harakatining modeli %(rule_name)s avtomatik qoidasiga mos "
 "kelishi kerak"
@@ -847,8 +850,7 @@ msgstr "Maydonlarni tanlang..."
 #, fuzzy
 msgid ""
 "Send an email when an object changes state, archive records\n"
-"                after a month of inactivity or remind yourself to follow-up "
-"on\n"
+"                after a month of inactivity or remind yourself to follow-up on\n"
 "                tasks when a specific tag is added."
 msgstr ""
 "Obyekt holati o‘zgarganda xabar yuboring, bir oylik faolsizlikdan so‘ng "
@@ -859,8 +861,8 @@ msgstr ""
 #: model_terms:digest.tip,tip_description:base_automation.digest_tip_base_automation_0
 #, fuzzy
 msgid ""
-"Send an email when an object changes state, archive records after a month of "
-"inactivity or remind yourself to follow-up on tasks when a specific tag is "
+"Send an email when an object changes state, archive records after a month of"
+" inactivity or remind yourself to follow-up on tasks when a specific tag is "
 "added.<br>With Automation Rules, you can automate any workflow."
 msgstr ""
 "Obyekt holati o‘zgarganda xabar yuboring, bir oylik faolsizlikdan so‘ng "
@@ -887,15 +889,15 @@ msgid ""
 "Some triggers need a reference to a selection field. This field is used to "
 "store it."
 msgstr ""
-"Ba'zi ishga tushirgichlar tanlash maydoniga havolani talab qiladi. Bu maydon "
-"uni saqlash uchun ishlatiladi."
+"Ba'zi ishga tushirgichlar tanlash maydoniga havolani talab qiladi. Bu maydon"
+" uni saqlash uchun ishlatiladi."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
 #, fuzzy
 msgid ""
-"Some triggers need a reference to another field. This field is used to store "
-"it."
+"Some triggers need a reference to another field. This field is used to store"
+" it."
 msgstr ""
 "Ba'zi ishga tushirgichlar uchun boshqa maydonga havola kerak. Bu maydon uni "
 "saqlash uchun ishlatiladi."
@@ -947,17 +949,19 @@ msgstr "Maqsadli yozuv"
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
-msgid "Target model of actions %(action_names)s are different from rule model."
+msgid ""
+"Target model of actions %(action_names)s are different from rule model."
 msgstr ""
-"%(action_names)s harakatlarining maqsadli modeli qoida modelidan farq qiladi."
+"%(action_names)s harakatlarining maqsadli modeli qoida modelidan farq "
+"qiladi."
 
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
 msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%"
-"(state_value)s\" action type"
+"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
+"\"%(state_value)s\" action type"
 msgstr ""
 "\"%(trigger_value)s\" %(trigger_label)s faqat \"%(state_value)s\" harakat "
 "turi bilan ishlatilishi mumkin"
@@ -1138,12 +1142,11 @@ msgstr ""
 #, fuzzy
 msgid ""
 "When should the condition be triggered.\n"
-"                If present, will be checked by the scheduler. If empty, will "
-"be checked at creation and update."
+"                If present, will be checked by the scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "Shart qachon ishga tushirilishi kerak. Agar mavjud bo‘lsa, rejalashtiruvchi "
-"tomonidan tekshiriladi. Agar bo‘sh bo‘lsa, yaratilish va yangilanish paytida "
-"tekshiriladi."
+"tomonidan tekshiriladi. Agar bo‘sh bo‘lsa, yaratilish va yangilanish paytida"
+" tekshiriladi."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active

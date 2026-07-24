@@ -14,14 +14,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 03:54+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/"
-"resource/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/resource/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: resource
@@ -64,7 +62,7 @@ msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_multi_create_form
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
 msgstr ""
 
 #. module: resource
@@ -253,8 +251,8 @@ msgid ""
 "Define the working schedule of the resource. If not set, the resource will "
 "have fully flexible working hours."
 msgstr ""
-"قم بتحديد جدول عمل المَورِد. إذا لم يتم تعيين جدول عمل، سيتمتع بساعات عمل مرنة "
-"بالكامل."
+"قم بتحديد جدول عمل المَورِد. إذا لم يتم تعيين جدول عمل، سيتمتع بساعات عمل "
+"مرنة بالكامل."
 
 #. module: resource
 #: model_terms:ir.actions.act_window,help:resource.action_resource_calendar_form
@@ -402,8 +400,8 @@ msgid ""
 "If empty, this is a generic time off for the company. If a resource is set, "
 "the time off is only for this resource"
 msgstr ""
-"إذا كان فارغاً، هذا يعني أنه هناك أيام إجازة عامة للشركة. إذا كان هناك مَورِد "
-"معين، تكون الإجازة للمَورِد فقط"
+"إذا كان فارغاً، هذا يعني أنه هناك أيام إجازة عامة للشركة. إذا كان هناك "
+"مَورِد معين، تكون الإجازة للمَورِد فقط"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource__active
@@ -500,7 +498,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as fulltime."
+"Number of hours to work on the company schedule to be considered as "
+"fulltime."
 msgstr ""
 "عدد الساعات التي يجب إتمامها في جدول الشركة ليتم اعتبارك موظفاً بدوام كامل."
 
@@ -741,7 +740,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_resource.py:0
 msgid ""
-"The average hours per day is too low compared to the number of hours per week"
+"The average hours per day is too low compared to the number of hours per "
+"week"
 msgstr ""
 
 #. module: resource
@@ -770,8 +770,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid ""
-"This date is excluded of the recurrency, to start a new one on this date you "
-"should create it from scratch"
+"This date is excluded of the recurrency, to start a new one on this date you"
+" should create it from scratch"
 msgstr ""
 
 #. module: resource
@@ -797,9 +797,9 @@ msgid ""
 "minutes."
 msgstr ""
 "يستخدم هذا الحقل لاحتساب المدة المتوقع أن يستغرقها إتمام أمر العمل في مركز "
-"العمل هذا. مثلًا، إذا كان أمر العمل يستغرق ساعة واحدة وكان عامل الكفاءة 100%، "
-"ستكون المدة المتوقعة ساعة واحدة. وإذا كان عامل الكفاءة 200%، ستكون المدة "
-"المتوقعة 30 دقيقة."
+"العمل هذا. مثلًا، إذا كان أمر العمل يستغرق ساعة واحدة وكان عامل الكفاءة "
+"100%، ستكون المدة المتوقعة ساعة واحدة. وإذا كان عامل الكفاءة 200%، ستكون "
+"المدة المتوقعة 30 دقيقة."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__3
@@ -892,7 +892,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__count_as
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: formation)"
+"Whether this should be computed as a time off or as work time (eg: "
+"formation)"
 msgstr "ما إذا كان يجب احتساب ذلك كإجازة أو كوقت عمل (مثال: التدريب)"
 
 #. module: resource
@@ -985,18 +986,18 @@ msgstr ""
 #~ msgstr "<span>ساعات/الأسبوع</span>"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 1-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 1-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
-#~ "هل أنت متأكد من أنك ترغب في الانتقال إلى تقويم الأسبوع الواحد؟ سوف تفقد "
-#~ "كافة قيود العمل."
+#~ "هل أنت متأكد من أنك ترغب في الانتقال إلى تقويم الأسبوع الواحد؟ سوف تفقد كافة"
+#~ " قيود العمل."
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 2-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 2-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
-#~ "هل أنت متأكد من أنك ترغب في الانتقال إلى تقويم الأسبوعين؟ سوف تفقد كافة "
-#~ "قيود العمل."
+#~ "هل أنت متأكد من أنك ترغب في الانتقال إلى تقويم الأسبوعين؟ سوف تفقد كافة قيود"
+#~ " العمل."
 
 #~ msgid "Attendances can't overlap."
 #~ msgstr "لا يمكن أن يتداخل الحضور"

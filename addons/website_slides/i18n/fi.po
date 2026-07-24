@@ -40,8 +40,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 23:21+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/"
-"website_slides/fi/>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/website_slides/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -256,16 +255,12 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been enrolled to a new course: <t t-"
-"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been enrolled to a new course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "<div style=\"margin: 32px 0px 32px 0px;\">\n"
-"    <a t-att-href=\"object.invitation_link\" style=\"background-color: "
-"#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; "
-"border-radius: 5px; font-size:13px;\">\n"
-"        <t t-if=\"enroll_mode\"> Click here to start the course </t> <t t-"
-"else=\"\"> Click here to get started </t>\n"
+"    <a t-att-href=\"object.invitation_link\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"        <t t-if=\"enroll_mode\"> Click here to start the course </t> <t t-else=\"\"> Click here to get started </t>\n"
 "    </a>\n"
 "</div>\n"
 "<div style=\"margin: 0px; padding: 0px; font-size:13px;\">\n"
@@ -277,16 +272,12 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hei<br/><br/>\n"
-"        Olet ilmoittautunut uudelle kurssille: <t t-"
-"out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</t>.\n"
+"        Olet ilmoittautunut uudelle kurssille: <t t-out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</t>.\n"
 "    </p>\n"
 "</div>\n"
 "<div style=\"margin: 32px 0px 32px 0px;\">\n"
-"    <a t-att-href=\"object.invitation_link\" style=\"background-color: "
-"#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; "
-"border-radius: 5px; font-size:13px;\">\n"
-"        <t t-if=\"enroll_mode\"> Klikkaa tästä aloittaaksesi kurssin </t> <t "
-"t-else=\"\"> Klikkaa tästä aloittaaksesi </t>\n"
+"    <a t-att-href=\"object.invitation_link\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"        <t t-if=\"enroll_mode\"> Klikkaa tästä aloittaaksesi kurssin </t> <t t-else=\"\"> Klikkaa tästä aloittaaksesi </t>\n"
 "    </a>\n"
 "</div>\n"
 "<div style=\"margin: 0px; padding: 0px; font-size:13px;\">\n"
@@ -301,16 +292,12 @@ msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hello<br/><br/>\n"
-"        You have been invited to check out this course: <t t-"
-"out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
+"        You have been invited to check out this course: <t t-out=\"object.channel_id.name or ''\">Basics of Gardening</t>.\n"
 "    </p>\n"
 "</div>\n"
 "<div style=\"margin: 32px 0px 32px 0px;\">\n"
-"    <a t-att-href=\"object.invitation_link\" style=\"background-color: "
-"#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; "
-"border-radius: 5px; font-size:13px;\">\n"
-"        <t t-if=\"enroll_mode\"> Click here to start the course </t> <t t-"
-"else=\"\"> Click here to get started </t>\n"
+"    <a t-att-href=\"object.invitation_link\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"        <t t-if=\"enroll_mode\"> Click here to start the course </t> <t t-else=\"\"> Click here to get started </t>\n"
 "    </a>\n"
 "</div>\n"
 "<div style=\"margin: 0px; padding: 0px; font-size:13px;\">\n"
@@ -322,16 +309,12 @@ msgstr ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "        Hei<br/><br/>\n"
-"        Sinut on kutsuttu katsomaan tätä kurssia: <t t-"
-"out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</t>.\n"
+"        Sinut on kutsuttu katsomaan tätä kurssia: <t t-out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</t>.\n"
 "    </p>\n"
 "</div>\n"
 "<div style=\"margin: 32px 0px 32px 0px;\">\n"
-"    <a t-att-href=\"object.invitation_link\" style=\"background-color: "
-"#875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; "
-"border-radius: 5px; font-size:13px;\">\n"
-"        <t t-if=\"enroll_mode\"> Klikkaa tästä aloittaaksesi kurssin </t> <t "
-"t-else=\"\"> Klikkaa tästä aloittaaksesi </t>\n"
+"    <a t-att-href=\"object.invitation_link\" style=\"background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;\">\n"
+"        <t t-if=\"enroll_mode\"> Klikkaa tästä aloittaaksesi kurssin </t> <t t-else=\"\"> Klikkaa tästä aloittaaksesi </t>\n"
 "    </a>\n"
 "</div>\n"
 "<div style=\"margin: 0px; padding: 0px; font-size:13px;\">\n"
@@ -344,63 +327,42 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.mail_template_channel_completed
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
-"                        <p style=\"margin: 0px;\">Hello <t t-"
-"out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        <p style=\"margin: 0px;\">Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>Congratulations!</b></p>\n"
-"                        <p>You've completed the course <b t-"
-"out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
+"                        <p>You've completed the course <b t-out=\"object.channel_id.name or ''\">Basics of Gardening</b></p>\n"
 "                        <p>Check out the other available courses.</p><br/>\n"
 "\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a href=\"/slides\" t-attf-style=\"background-"
-"color: {{object.channel_id.user_id.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; "
-"border-radius: 5px;\">\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a href=\"/slides\" t-attf-style=\"background-color: {{object.channel_id.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">\n"
 "                                Explore courses\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
 "                        <t t-if=\"object.channel_id.user_id.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\">Mitchell "
-"Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    </div>\n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
-"                        <p style=\"margin: 0px;\">Hei <t t-"
-"out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
+"                    <div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                        <p style=\"margin: 0px;\">Hei <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,</p><br/>\n"
 "                        <p><b>Onneksi olkoon!</b></p>\n"
-"                        <p>Olet suorittanut kurssin <b t-"
-"out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</b></p>\n"
-"                        <p>Tutustu muihin tarjolla oleviin kursseihin.</"
-"p><br/>\n"
+"                        <p>Olet suorittanut kurssin <b t-out=\"object.channel_id.name or ''\">Puutarhanhoidon perusteet</b></p>\n"
+"                        <p>Tutustu muihin tarjolla oleviin kursseihin.</p><br/>\n"
 "\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a href=\"/slides\" t-attf-style=\"background-"
-"color: {{object.channel_id.user_id.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; "
-"border-radius: 5px;\">\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a href=\"/slides\" t-attf-style=\"background-color: {{object.channel_id.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.channel_id.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">\n"
 "                                Tutustu kursseihin\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        Nauti tästä ainutlaatuisesta sisällöstä!\n"
 "                        <t t-if=\"object.channel_id.user_id.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\">Mitchell "
-"Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"object.channel_id.user_id.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    </div>\n"
 "                </div>\n"
@@ -410,66 +372,42 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.mail_template_channel_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
-"shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <strong t-out=\"object.name or ''\">document</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
 "                            <a t-att-href=\"object.website_absolute_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
-"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"object.website_absolute_url\" t-"
-"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
-"text-decoration: none; color: {{user.company_id.email_primary_color or "
-"'#FFFFFF'}}; border-radius: 5px;\">\n"
-"                                View <strong t-out=\"object.name or "
-"''\">Document</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-attf-style=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: {{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                View <strong t-out=\"object.name or ''\">Document</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hei<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
-"jakoi <strong t-out=\"object.name or ''\">asiakirjan</strong> kanssasi!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> jakoi <strong t-out=\"object.name or ''\">asiakirjan</strong> kanssasi!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
 "                            <a t-att-href=\"object.website_absolute_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/"
-"image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.channel/{{ object.id }}/image_256\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"object.website_absolute_url\" t-"
-"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px;                                 "
-"text-decoration: none; color: {{user.company_id.email_primary_color or "
-"'#FFFFFF'}}; border-radius: 5px;\">\n"
-"                                Katso <strong t-out=\"object.name or "
-"''\">Asiakirja</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_absolute_url\" t-attf-style=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px;                                 text-decoration: none; color: {{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">\n"
+"                                Katso <strong t-out=\"object.name or ''\">Asiakirja</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -479,68 +417,40 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_shared
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hello<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
-"shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-"
-"out=\"object.name or ''\">Trees</strong> with you!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> shared the <t t-out=\"object.slide_category or ''\">document</t> <strong t-out=\"object.name or ''\">Trees</strong> with you!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
-"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
-"\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-attf-style=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">View <strong t-out=\"object.name or ''\">Trees</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hei<br/><br/>\n"
-"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> "
-"jakoi <t t-out=\"object.slide_category or ''\">asiakirjan</t> <strong t-"
-"out=\"object.name or ''\">Puita</strong> kanssasi!\n"
-"                        </p><div style=\"margin: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                        <t t-out=\"user.name or ''\">Mitchell Admin</t> jakoi <t t-out=\"object.slide_category or ''\">asiakirjan</t> <strong t-out=\"object.name or ''\">Puita</strong> kanssasi!\n"
+"                        </p><div style=\"margin: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\">\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"(object.website_share_url + '?"
-"fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-"
-"attf-style=\"background-color: {{user.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
-"\">Katso <strong t-out=\"object.name or ''\">Puita</strong></a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"(object.website_share_url + '?fullscreen=1') if ctx.get('fullscreen') else object.website_share_url\" t-attf-style=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">Katso <strong t-out=\"object.name or ''\">Puita</strong></a>\n"
 "                        </div>\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -550,76 +460,48 @@ msgstr ""
 #: model:mail.template,body_html:website_slides.slide_template_published
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hello<br/><br/>\n"
-"                        There is something new in the course <strong t-"
-"out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you "
-"are following:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or "
-"''\">Trees</strong></center>\n"
+"                        There is something new in the course <strong t-out=\"object.channel_id.name or ''\">Trees, Wood and Gardens</strong> you are following:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">Trees</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" t-"
-"attf-style=\"background-color: "
-"{{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
-"8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
-"radius: 5px;\">View content</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-attf-style=\"background-color: {{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">View content</a>\n"
 "                        </div>\n"
 "                        Enjoy this exclusive content!\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
-"\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "                        Hei<br/><br/>\n"
-"                        Seuraamallasi kurssilla <strong t-"
-"out=\"object.channel_id.name or ''\">Metsät, puut ja puutarhat</strong> on "
-"uutta sisältöä:<br/><br/>\n"
-"                        </p><center><strong t-out=\"object.name or "
-"''\">Puut</strong></center>\n"
+"                        Seuraamallasi kurssilla <strong t-out=\"object.channel_id.name or ''\">Metsät, puut ja puutarhat</strong> on uutta sisältöä:<br/><br/>\n"
+"                        </p><center><strong t-out=\"object.name or ''\">Puut</strong></center>\n"
 "                        <t t-if=\"object.image_1024\">\n"
-"                            <div style=\"padding: 16px 8px 16px 8px; text-"
-"align: center;\">\n"
+"                            <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
 "                                <a t-att-href=\"object.website_share_url\">\n"
-"                                <img t-att-alt=\"object.name\" t-attf-"
-"src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/"
-"image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
+"                                <img t-att-alt=\"object.name\" t-attf-src=\"{{ ctx.get('base_url') }}/web/image/slide.slide/{{ object.id }}/image_1024\" style=\"height:auto; width:150px; margin: 16px;\"/>\n"
 "                            </a>\n"
 "                        </div>\n"
 "                        </t>\n"
-"                        <div style=\"padding: 16px 8px 16px 8px; text-align: "
-"center;\">\n"
-"                            <a t-att-href=\"object.website_share_url\" t-"
-"attf-style=\"background-color: "
-"{{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: "
-"8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
-"radius: 5px;\">Katso sisältö</a>\n"
+"                        <div style=\"padding: 16px 8px 16px 8px; text-align: center;\">\n"
+"                            <a t-att-href=\"object.website_share_url\" t-attf-style=\"background-color: {{object.user_id.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.user_id.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;\">Katso sisältö</a>\n"
 "                        </div>\n"
 "                        Nauti tästä ainutlaatuisesta sisällöstä!\n"
 "                        <t t-if=\"user.signature\">\n"
 "                            <br/>\n"
-"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
-"quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "                        </t>\n"
 "                    \n"
 "                </div>\n"
@@ -627,308 +509,307 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
-msgid "<i class=\"fa fa-arrow-right\"/> Start Learning"
-msgstr "<i class=\"fa fa-arrow-right\"/> Aloita opiskelu"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Start Learning"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Aloita opiskelu"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-bar-chart\"/> Statistics"
-msgstr "<i class=\"fa fa-bar-chart\"/> Tilastot"
+msgid "<i class=\"oi\" data-icon=\"bar_chart\"/> Statistics"
+msgstr "<i class=\"oi\" data-icon=\"bar_chart\"/> Tilastot"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
+"<i class=\"oi\" data-icon=\"menu\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Lessons</span>"
 msgstr ""
-"<i class=\"fa fa-bars\"/><span class=\"d-none d-md-inline-block "
+"<i class=\"oi\" data-icon=\"menu\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Oppitunnit</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_card
-msgid "<i class=\"fa fa-check me-1\"/>Completed"
-msgstr "<i class=\"fa fa-check me-1\"/>Valmis"
+msgid "<i class=\"oi me-1\" data-icon=\"check\"/>Completed"
+msgstr "<i class=\"me-1 oi\" data-icon=\"check\"/>Valmis"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_card
-msgid "<i class=\"fa fa-check\" aria-hidden=\"true\"/> Completed"
-msgstr "<i class=\"fa fa-check\" aria-hidden=\"true\"/> Valmis"
+msgid "<i class=\"oi\" data-icon=\"check\" aria-hidden=\"true\"/> Completed"
+msgstr "<i class=\"oi\" data-icon=\"check\" aria-hidden=\"true\"/> Valmis"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
-msgid "<i class=\"fa fa-check\"/> Completed"
-msgstr "<i class=\"fa fa-check\"/> Valmis"
+msgid "<i class=\"oi\" data-icon=\"check\"/> Completed"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> Valmis"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
-msgid "<i class=\"fa fa-circle-o-notch fa-spin me-2\"/><b>Loading...</b>"
-msgstr "<i class=\"fa fa-circle-o-notch fa-spin me-2\"/><b>Ladataan...</b>"
+msgid "<i class=\"oi oi-spin me-2\" data-icon=\"autorenew\"/><b>Loading...</b>"
+msgstr "<i class=\"me-2 oi oi-spin\" data-icon=\"autorenew\"/><b>Ladataan...</b>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-clock-o me-2\" aria-label=\"Duration\" role=\"img\" "
-"title=\"Duration\"/>"
+"<i class=\"oi me-2\" data-icon=\"schedule\" aria-label=\"Duration\" "
+"role=\"img\" title=\"Duration\"/>"
 msgstr ""
-"<i class=\"fa fa-clock-o me-2\" aria-label=\"Duration\" role=\"img\" "
-"title=\"Duration\"/>"
+"<i class=\"me-2 oi\" data-icon=\"schedule\" aria-label=\"Duration\" "
+"role=\"img\" title=\"Duration\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-msgid "<i class=\"fa fa-cloud-upload me-1\"/>Add Content"
-msgstr "<i class=\"fa fa-cloud-upload me-1\"/>Lisää sisältöä"
+msgid "<i class=\"oi me-1\" data-icon=\"cloud_upload\"/>Add Content"
+msgstr "<i class=\"me-1 oi\" data-icon=\"cloud_upload\"/>Lisää sisältöä"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-comments\"/> Comments"
-msgstr "<i class=\"fa fa-comments\"/> Kommentit"
+msgid "<i class=\"oi oi-filled\" data-icon=\"forum\"/> Comments"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"forum\"/> Kommentit"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-desktop me-xl-2 my-1\"/>\n"
+"<i class=\"oi me-xl-2 my-1\" data-icon=\"desktop_windows\"/>\n"
 "                <span class=\"d-none d-xl-inline-block\">Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-desktop me-xl-2 my-1\"/>\n"
+"<i class=\"me-xl-2 my-1 oi\" data-icon=\"desktop_windows\"/>\n"
 "                <span class=\"d-none d-xl-inline-block\">Koko näyttö</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-msgid "<i class=\"fa fa-eraser me-1\"/>Clear filters"
-msgstr "<i class=\"fa fa-eraser me-1\"/>Tyhjennä suodattimet"
+msgid "<i class=\"oi me-1\" data-icon=\"ink_eraser\"/>Clear filters"
+msgstr "<i class=\"me-1 oi\" data-icon=\"ink_eraser\"/>Tyhjennä suodattimet"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide_forbidden
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-"
-"label=\"Attention\" title=\"Attention\"/> This document is private."
+"<i class=\"oi\" data-icon=\"warning\" role=\"img\" aria-label=\"Attention\" "
+"title=\"Attention\"/> This document is private."
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-"
-"label=\"Attention\" title=\"Attention\"/> Tämä dokumentti on yksityinen."
+"<i class=\"oi\" data-icon=\"warning\" role=\"img\" aria-label=\"Attention\" "
+"title=\"Attention\"/> Tämä dokumentti on yksityinen."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-eye me-2\" aria-label=\"Views\" role=\"img\" "
-"title=\"Views\"/>"
+"<i class=\"oi me-2\" data-icon=\"visibility\" aria-label=\"Views\" "
+"role=\"img\" title=\"Views\"/>"
 msgstr ""
-"<i class=\"fa fa-eye me-2\" aria-label=\"Näkymä\" role=\"img\" "
-"title=\"Näkymä\"/>"
+"<i class=\"me-2 oi\" data-icon=\"visibility\" aria-label=\"Näkymä\" "
+"role=\"img\" title=\"Näkymä\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-code-o me-2\" aria-label=\"article\" role=\"img\" "
+"<i class=\"oi me-2\" data-icon=\"code\" aria-label=\"article\" role=\"img\" "
 "title=\"Article\"/>"
 msgstr ""
-"<i class=\"fa fa-file-code-o me-2\" aria-label=\"article\" role=\"img\" "
+"<i class=\"me-2 oi\" data-icon=\"code\" aria-label=\"article\" role=\"img\" "
 "title=\"Artikkeli\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infographic\" role=\"img\" "
-"title=\"Infographic\"/>"
+"<i class=\"oi me-2\" data-icon=\"image\" aria-label=\"Infographic\" "
+"role=\"img\" title=\"Infographic\"/>"
 msgstr ""
-"<i class=\"fa fa-file-image-o me-2\" aria-label=\"Infografiikka\" "
+"<i class=\"me-2 oi\" data-icon=\"image\" aria-label=\"Infografiikka\" "
 "role=\"img\" title=\"Infografiikka\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-pdf-o me-2\" aria-label=\"Document\" role=\"img\" "
-"title=\"Document\"/>"
+"<i class=\"oi me-2\" data-icon=\"picture_as_pdf\" aria-label=\"Document\" "
+"role=\"img\" title=\"Document\"/>"
 msgstr ""
-"<i class=\"fa fa-file-pdf-o me-2\" aria-label=\"Dokumentti\" role=\"img\" "
-"title=\"Dokumentti\"/>"
+"<i class=\"me-2 oi\" data-icon=\"picture_as_pdf\" aria-label=\"Dokumentti\" "
+"role=\"img\" title=\"Dokumentti\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-file-video-o me-2\" aria-label=\"Video\" role=\"img\" "
+"<i class=\"oi me-2\" data-icon=\"movie\" aria-label=\"Video\" role=\"img\" "
 "title=\"Video\"/>"
 msgstr ""
-"<i class=\"fa fa-file-video-o me-2\" aria-label=\"Video\" role=\"img\" "
+"<i class=\"me-2 oi\" data-icon=\"movie\" aria-label=\"Video\" role=\"img\" "
 "title=\"Video\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-flag me-2\" aria-label=\"Quiz\" role=\"img\" title=\"Quiz\"/"
-">"
+"<i class=\"oi oi-filled me-2\" data-icon=\"flag\" aria-label=\"Quiz\" "
+"role=\"img\" title=\"Quiz\"/>"
 msgstr ""
-"<i class=\"fa fa-flag me-2\" aria-label=\"Koe\" role=\"img\" title=\"Koe\"/>"
+"<i class=\"me-2 oi-filled oi\" data-icon=\"flag\" aria-label=\"Koe\" "
+"role=\"img\" title=\"Koe\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_aside_training_category
-msgid "<i class=\"fa fa-flag text-warning\"/> Quiz"
-msgstr "<i class=\"fa fa-flag text-warning\"/> Tietovisa"
+msgid "<i class=\"oi oi-filled text-warning\" data-icon=\"flag\"/> Quiz"
+msgstr "<i class=\"text-warning oi-filled oi\" data-icon=\"flag\"/> Tietovisa"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen_sidebar_category
-msgid "<i class=\"fa fa-flag-checkered text-warning\"/>Quiz"
-msgstr "<i class=\"fa fa-flag-checkered text-warning\"/>Tietovisa"
+msgid "<i class=\"oi text-warning\" data-icon=\"sports_score\"/>Quiz"
+msgstr "<i class=\"text-warning oi\" data-icon=\"sports_score\"/>Tietovisa"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
-msgid "<i class=\"fa fa-folder-o me-1\"/><span>Add Section</span>"
-msgstr "<i class=\"fa fa-folder-o me-1\"/><span>Lisää osio</span>"
+msgid "<i class=\"oi me-1\" data-icon=\"folder\"/><span>Add Section</span>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"folder\"/><span>Lisää osio</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
-msgid "<i class=\"fa fa-folder-o me-1\"/>Add a section"
-msgstr "<i class=\"fa fa-folder-o me-1\"/>Lisää osio"
+msgid "<i class=\"oi me-1\" data-icon=\"folder\"/>Add a section"
+msgstr "<i class=\"me-1 oi\" data-icon=\"folder\"/>Lisää osio"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Verkkosivu\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Verkkosivu\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-home\"/> About"
-msgstr "<i class=\"fa fa-home\"/> Tietoa"
+msgid "<i class=\"oi\" data-icon=\"home\"/> About"
+msgstr "<i class=\"oi\" data-icon=\"home\"/> Tietoa"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
-msgid "<i class=\"fa fa-home\"/> Course"
-msgstr "<i class=\"fa fa-home\"/> Kurssi"
+msgid "<i class=\"oi\" data-icon=\"home\"/> Course"
+msgstr "<i class=\"oi\" data-icon=\"home\"/> Kurssi"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block ms-1\">Back "
-"to course</span>"
+"<i class=\"oi\" data-icon=\"home\"/><span class=\"d-none d-md-inline-block "
+"ms-1\">Back to course</span>"
 msgstr ""
-"<i class=\"fa fa-home\"/><span class=\"d-none d-md-inline-block "
+"<i class=\"oi\" data-icon=\"home\"/><span class=\"d-none d-md-inline-block "
 "ms-1\">Takaisin kurssille</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
 msgid ""
-"<i class=\"fa fa-lock\"/>\n"
+"<i class=\"oi\" data-icon=\"lock\"/>\n"
 "                        <span>Course Locked</span>"
 msgstr ""
-"<i class=\"fa fa-lock\"/>\n"
+"<i class=\"oi\" data-icon=\"lock\"/>\n"
 "                        <span>Kurssi lukittu</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
 msgid ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-block\">Add "
-"Content</span>"
+"<i class=\"oi me-1\" data-icon=\"add\"/> <span class=\"d-none d-md-inline-"
+"block\">Add Content</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-1\"/> <span class=\"d-none d-md-inline-"
+"<i class=\"me-1 oi\" data-icon=\"add\"/> <span class=\"d-none d-md-inline-"
 "block\">Lisää sisältöä</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
-msgid "<i class=\"fa fa-plus me-1\"/><span>Add Content</span>"
-msgstr "<i class=\"fa fa-plus me-1\"/><span>Lisää sisältöä</span>"
+msgid "<i class=\"oi me-1\" data-icon=\"add\"/><span>Add Content</span>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"add\"/><span>Lisää sisältöä</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_content_quiz_add_buttons
 msgid ""
-"<i class=\"fa fa-plus me-2\"/>\n"
+"<i class=\"oi me-2\" data-icon=\"add\"/>\n"
 "            <span>Add Question</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-2\"/>\n"
+"<i class=\"me-2 oi\" data-icon=\"add\"/>\n"
 "            <span>Lisää kysymys</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.lesson_content_quiz_add_buttons
 msgid ""
-"<i class=\"fa fa-plus me-2\"/>\n"
+"<i class=\"oi me-2\" data-icon=\"add\"/>\n"
 "            <span>Add Quiz</span>"
 msgstr ""
-"<i class=\"fa fa-plus me-2\"/>\n"
+"<i class=\"me-2 oi\" data-icon=\"add\"/>\n"
 "            <span>Lisää tietovisa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_slide_view_kanban
 msgid ""
-"<i class=\"fa fa-question me-2\" aria-label=\"Number of Questions\" "
+"<i class=\"oi me-2\" data-icon=\"help\" aria-label=\"Number of Questions\" "
 "role=\"img\" title=\"Number of Questions\"/>"
 msgstr ""
-"<i class=\"fa fa-question me-2\" aria-label=\"Kysymysten määrä\" "
+"<i class=\"me-2 oi\" data-icon=\"help\" aria-label=\"Kysymysten määrä\" "
 "role=\"img\" title=\"Kysymysten määrä\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-share-alt me-xl-2 my-1\"/>\n"
+"<i class=\"oi me-xl-2 my-1\" data-icon=\"family_history\"/>\n"
 "                <span class=\"d-none d-xl-inline-block\">Share</span>"
 msgstr ""
-"<i class=\"fa fa-share-alt me-xl-2 my-1\"/>\n"
+"<i class=\"me-xl-2 my-1 oi\" data-icon=\"family_history\"/>\n"
 "                <span class=\"d-none d-xl-inline-block\">Jaa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>\n"
+"<i class=\"oi\" data-icon=\"share\" aria-label=\"Share\" title=\"Share\"/>\n"
 "                                            Share"
 msgstr ""
-"<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>\n"
+"<i class=\"oi\" data-icon=\"share\" aria-label=\"Share\" title=\"Share\"/>\n"
 "                                            Jaa"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">Share</"
-"span>"
+"<i class=\"oi\" data-icon=\"family_history\"/>\n"
+"                        <span class=\"d-none d-md-inline-block ms-2\">Share</span>"
 msgstr ""
-"<i class=\"fa fa-share-alt\"/>\n"
-"                        <span class=\"d-none d-md-inline-block ms-2\">Jaa</"
-"span>"
+"<i class=\"oi\" data-icon=\"family_history\"/>\n"
+"                        <span class=\"d-none d-md-inline-block ms-2\">Jaa</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_sidebar
-msgid "<i class=\"fa fa-share-alt\"/> Share"
-msgstr "<i class=\"fa fa-share-alt\"/> Jaa"
+msgid "<i class=\"oi\" data-icon=\"family_history\"/> Share"
+msgstr "<i class=\"oi\" data-icon=\"family_history\"/> Jaa"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Exit Fullscreen</span>"
+"<i class=\"oi\" data-icon=\"logout\"/><span class=\"d-none d-md-inline-block"
+" ms-1\">Exit Fullscreen</span>"
 msgstr ""
-"<i class=\"fa fa-sign-out\"/><span class=\"d-none d-md-inline-block "
-"ms-1\">Poistu koko ruudun tilasta</span>"
+"<i class=\"oi\" data-icon=\"logout\"/><span class=\"d-none d-md-inline-block"
+" ms-1\">Poistu koko ruudun tilasta</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_search_tags
 msgid ""
-"<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+"<i class=\"oi me-2 text-muted\" data-icon=\"label\"/>\n"
 "          My Courses"
 msgstr ""
-"<i class=\"fa fa-tag me-2 text-muted\"/>\n"
+"<i class=\"me-2 text-muted oi\" data-icon=\"label\"/>\n"
 "                      Omat kurssit"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Courses"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Kaikki kurssit"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Courses"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Kaikki kurssit"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<i class=\"oi oi-chevron-left me-2\"/> <span class=\"d-none d-sm-inline-"
-"block\">Prev</span>"
+"<i class=\"oi me-2\" data-icon=\"chevron_backward\"/> <span class=\"d-none "
+"d-sm-inline-block\">Prev</span>"
 msgstr ""
-"<i class=\"oi oi-chevron-left me-2\"/> <span class=\"d-none d-sm-inline-"
-"block\">Edellinen</span>"
+"<i class=\"me-2 oi\" data-icon=\"chevron_backward\"/> <span class=\"d-none "
+"d-sm-inline-block\">Edellinen</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid ""
-"<small class=\"text-muted d-none d-md-inline\"><i class=\"fa fa-check me-1\" "
-"role=\"img\"/>You are enrolled</small>"
+"<small class=\"text-muted d-none d-md-inline\"><i class=\"oi me-1\" data-"
+"icon=\"check\" role=\"img\"/>You are enrolled</small>"
 msgstr ""
-"<small class=\"text-muted d-none d-md-inline\"><i class=\"fa fa-check me-1\" "
-"role=\"img\"/>Olet ilmoittautunut</small>"
+"<small class=\"text-muted d-none d-md-inline\"><i class=\"me-1 oi\" data-"
+"icon=\"check\" role=\"img\"/>Olet ilmoittautunut</small>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_join
@@ -944,36 +825,37 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
 msgid ""
-"<small><span class=\"badge text-bg-success fw-normal\"><i class=\"fa fa-"
-"check\"/> Completed</span></small>"
+"<small><span class=\"badge text-bg-success fw-normal\"><i class=\"oi\" data-"
+"icon=\"check\"/> Completed</span></small>"
 msgstr ""
-"<small><span class=\"badge text-bg-success fw-normal\"><i class=\"fa fa-"
-"check\"/> Valmistunut</span></small>"
+"<small><span class=\"badge text-bg-success fw-normal\"><i class=\"oi\" data-"
+"icon=\"check\"/> Valmistunut</span></small>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid ""
 "<span class=\"badge fw-bold m-1 text-bg-warning\">\n"
-"                            <i class=\"fa fa-fw fa-flag\"/> 10 xp\n"
+"                            <i class=\"oi oi-filled oi-fw\" data-icon=\"flag\"/> 10 xp\n"
 "                        </span>"
 msgstr ""
 "<span class=\"badge fw-bold m-1 text-bg-warning\">\n"
-"                            <i class=\"fa fa-fw fa-flag\"/> 10 xp\n"
+"                            <i class=\"oi-fw oi-filled oi\" data-icon=\"flag\"/> 10 xp\n"
 "                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">New</span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal "
+"m-1\">New</span>"
 msgstr ""
-"<span class=\"badge text-bg-info badge-arrow-right fw-normal m-1\">Uusi</"
-"span>"
+"<span class=\"badge text-bg-info badge-arrow-right fw-normal "
+"m-1\">Uusi</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add Quiz</"
-"span>"
+"<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Add "
+"Quiz</span>"
 msgstr ""
 "<span class=\"badge text-bg-primary badge-hide fw-normal m-1\">Lisää "
 "tietovisa</span>"
@@ -981,11 +863,11 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
 msgid ""
-"<span class=\"badge text-bg-success fw-normal m-1\"><span>Preview</span></"
-"span>"
+"<span class=\"badge text-bg-success fw-normal "
+"m-1\"><span>Preview</span></span>"
 msgstr ""
-"<span class=\"badge text-bg-success fw-normal m-1\"><span>Esikatselu</span></"
-"span>"
+"<span class=\"badge text-bg-success fw-normal "
+"m-1\"><span>Esikatselu</span></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -996,19 +878,19 @@ msgstr "<span class=\"badge text-bg-success fw-normal m-1\">Esikatselu</span>"
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid ""
 "<span class=\"d-none d-md-inline me-2 me-md-0\">Start now</span><i "
-"class=\"oi oi-arrow-right d-md-none\" aria-hidden=\"true\"/>"
+"class=\"oi d-md-none\" data-icon=\"east\" aria-hidden=\"true\"/>"
 msgstr ""
 "<span class=\"d-none d-md-inline me-2 me-md-0\">Aloita nyt</span><i "
-"class=\"oi oi-arrow-right d-md-none\" aria-hidden=\"true\"/>"
+"class=\"d-md-none oi\" data-icon=\"east\" aria-hidden=\"true\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid ""
-"<span class=\"d-none d-sm-inline-block\">Next</span> <i class=\"oi oi-"
-"chevron-right ms-2\"/>"
+"<span class=\"d-none d-sm-inline-block\">Next</span> <i class=\"oi ms-2\" "
+"data-icon=\"chevron_forward\"/>"
 msgstr ""
-"<span class=\"d-none d-sm-inline-block\">Seuraava</span> <i class=\"oi oi-"
-"chevron-right ms-2\"/>"
+"<span class=\"d-none d-sm-inline-block\">Seuraava</span> <i class=\"ms-2 "
+"oi\" data-icon=\"chevron_forward\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_main
@@ -1018,11 +900,11 @@ msgstr "<span class=\"fw-normal\">Viimeisin päivitys:</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid ""
-"<span class=\"me-2 d-none d-md-inline\">Continue</span><i class=\"oi oi-"
-"arrow-right\" aria-hidden=\"true\"/>"
+"<span class=\"me-2 d-none d-md-inline\">Continue</span><i class=\"oi\" data-"
+"icon=\"east\" aria-hidden=\"true\"/>"
 msgstr ""
-"<span class=\"me-2 d-none d-md-inline\">Jatka</span><i class=\"oi oi-arrow-"
-"right\" aria-hidden=\"true\"/>"
+"<span class=\"me-2 d-none d-md-inline\">Jatka</span><i class=\"oi\" data-"
+"icon=\"east\" aria-hidden=\"true\"/>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list
@@ -1084,10 +966,8 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid ""
-"<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
-msgstr ""
-"<span class=\"text-muted fw-bold col-4 col-md-3\">Ulkoiset lähteet</span>"
+msgid "<span class=\"text-muted fw-bold col-4 col-md-3\">External sources</span>"
+msgstr "<span class=\"text-muted fw-bold col-4 col-md-3\">Ulkoiset lähteet</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
@@ -1097,34 +977,32 @@ msgstr "<span class=\"text-muted fw-bold me-3\">Luokitus</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Invited\">Invited</"
-"span>"
+"<span class=\"text-muted text-truncate mw-100\" "
+"title=\"Invited\">Invited</span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Invited\">Kutsuttu</"
-"span>"
+"<span class=\"text-muted text-truncate mw-100\" "
+"title=\"Invited\">Kutsuttu</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
 msgid ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Ongoing\">Ongoing</"
-"span>"
+"<span class=\"text-muted text-truncate mw-100\" "
+"title=\"Ongoing\">Ongoing</span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Ongoing\">Jatkuva</"
-"span>"
+"<span class=\"text-muted text-truncate mw-100\" "
+"title=\"Ongoing\">Jatkuva</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_view_kanban
-msgid ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
+msgid "<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Total</span>"
 msgstr ""
-"<span class=\"text-muted text-truncate mw-100\" title=\"Total\">Yhteensä</"
-"span>"
+"<span class=\"text-muted text-truncate mw-100\" "
+"title=\"Total\">Yhteensä</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
 msgid "<span class=\"text-muted\">Common tasks for a computer scientist</span>"
-msgstr ""
-"<span class=\"text-muted\">Yleisiä tehtäviä tietojenkäsittelijälle</span>"
+msgstr "<span class=\"text-muted\">Yleisiä tehtäviä tietojenkäsittelijälle</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_sample
@@ -1134,68 +1012,42 @@ msgstr "<span class=\"text-muted\">Tietojenkäsittelytieteen osat</span>"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-"
-"label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></"
-"span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 "
-"mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" "
-"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-"
-"sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i "
-"class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-"
-"sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i "
-"class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"First slide\" aria-label=\"First slide\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Previous slide\" aria-label=\"Previous slide\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Next slide\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Last slide\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
 msgstr ""
-"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"Ensimmäinen dia\" aria-"
-"label=\"Ensimmäinen dia\" role=\"button\"><i class=\"fa fa-step-backward\"/"
-"></span>\n"
-"                                        <span id=\"previous\" class=\"mx-1 "
-"mx-sm-2\" title=\"Edellinen dia\" aria-label=\"Edellinen dia\" "
-"role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
-"                                        <span id=\"next\" class=\"mx-1 mx-"
-"sm-2\" title=\"Seuraava dia\" aria-label=\"Next slide\" role=\"button\"><i "
-"class=\"fa fa-arrow-circle-right\"/></span>\n"
-"                                        <span id=\"last\" class=\"mx-1 mx-"
-"sm-2\" title=\"Viimeinen dia\" aria-label=\"Last slide\" role=\"button\"><i "
-"class=\"fa fa-step-forward\"/></span>"
+"<span id=\"first\" class=\"me-1 me-sm-2\" title=\"Ensimmäinen dia\" aria-label=\"Ensimmäinen dia\" role=\"button\"><i class=\"fa fa-step-backward\"/></span>\n"
+"                                        <span id=\"previous\" class=\"mx-1 mx-sm-2\" title=\"Edellinen dia\" aria-label=\"Edellinen dia\" role=\"button\"><i class=\"fa fa-arrow-circle-left\"/></span>\n"
+"                                        <span id=\"next\" class=\"mx-1 mx-sm-2\" title=\"Seuraava dia\" aria-label=\"Next slide\" role=\"button\"><i class=\"fa fa-arrow-circle-right\"/></span>\n"
+"                                        <span id=\"last\" class=\"mx-1 mx-sm-2\" title=\"Viimeinen dia\" aria-label=\"Last slide\" role=\"button\"><i class=\"fa fa-step-forward\"/></span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" "
-"aria-label=\"Fullscreen\" role=\"button\">\n"
-"                                            <i class=\"fa fa-arrows-alt\"/>\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"View fullscreen\" aria-label=\"Fullscreen\" role=\"button\">\n"
+"                                            <i class=\"oi\" data-icon=\"open_with\"/>\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"Näytä koko näytöllä\" "
-"aria-label=\"Koko näyttö\" role=\"button\">\n"
-"                                            <i class=\"fa fa-arrows-alt\"/>\n"
+"<span id=\"fullscreen\" class=\"ms-1 ms-sm-2\" title=\"Näytä koko näytöllä\" aria-label=\"Koko näyttö\" role=\"button\">\n"
+"                                            <i class=\"oi\" data-icon=\"open_with\"/>\n"
 "                                        </span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.embed_slide
 msgid ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-"
-"label=\"Zoom out\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/"
-">\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Zoom out\" aria-label=\"Zoom out\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/>\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-"
-"inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/"
-">\n"
+"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Zoom in\" aria-label=\"Zoom in\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/>\n"
 "                                        </span>"
 msgstr ""
-"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Loitonna\" aria-"
-"label=\"Loitonna\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-minus\"/"
-">\n"
+"<span id=\"zoomout\" class=\"d-inline ms-2 me-2\" title=\"Loitonna\" aria-label=\"Loitonna\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-minus\"/>\n"
 "                                        </span>\n"
-"                                        <span id=\"zoomin\" class=\"d-"
-"inline\" title=\"Suurenna\" aria-label=\"Suurenna\" role=\"button\">\n"
-"                                            <i class=\"fa fa-search-plus\"/"
-">\n"
+"                                        <span id=\"zoomin\" class=\"d-inline\" title=\"Suurenna\" aria-label=\"Suurenna\" role=\"button\">\n"
+"                                            <i class=\"fa fa-search-plus\"/>\n"
 "                                        </span>"
 
 #. module: website_slides
@@ -1210,11 +1062,11 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
 msgid ""
-"<span name=\"members_completed_count_label\" class=\"o_stat_text\">Finished</"
-"span>"
+"<span name=\"members_completed_count_label\" "
+"class=\"o_stat_text\">Finished</span>"
 msgstr ""
-"<span name=\"members_completed_count_label\" class=\"o_stat_text\">Valmis</"
-"span>"
+"<span name=\"members_completed_count_label\" "
+"class=\"o_stat_text\">Valmis</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
@@ -1361,7 +1213,8 @@ msgstr "Lapio"
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_slide_exclusion_html_content_and_url
 msgid "A slide is either filled with a url or HTML content. Not both."
-msgstr "Dia täytetään joko URL-osoitteella tai HTML-sisällöllä. Ei molemmilla."
+msgstr ""
+"Dia täytetään joko URL-osoitteella tai HTML-sisällöllä. Ei molemmilla."
 
 #. module: website_slides
 #: model:slide.answer,text_value:website_slides.slide_slide_demo_0_4_question_1_1
@@ -1641,8 +1494,7 @@ msgstr "Kaikkiin kysymyksiin on vastattava!"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"All questions must have at least one correct answer and one incorrect "
-"answer: \n"
+"All questions must have at least one correct answer and one incorrect answer: \n"
 "%s\n"
 msgstr ""
 "Kaikissa kysymyksissä on oltava vähintään yksi oikea ja yksi väärä vastaus:\n"
@@ -1652,16 +1504,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_slides.user_profile_content
 msgid ""
 "All the courses you attend will appear here. <br/>\n"
-"                        <a href=\"/slides/\" class=\"btn-link "
-"o_translate_inline\">\n"
-"                            <i class=\"fa fa-arrow-right\"/> Start Learning\n"
+"                        <a href=\"/slides/\" class=\"btn-link o_translate_inline\">\n"
+"                            <i class=\"oi\" data-icon=\"arrow_forward\"/> Start Learning\n"
 "                        </a>"
 msgstr ""
 "Kaikki kurssit, joille olet ilmoittautunut, näkyvät täällä.<br/>\n"
-"                        <a href=\"/slides/\" class=\"btn-link "
-"o_translate_inline\">\n"
-"                               <i class=\"fa fa-arrow-right\"/> Aloita "
-"oppiminen\n"
+"                        <a href=\"/slides/\" class=\"btn-link o_translate_inline\">\n"
+"                               <i class=\"oi\" data-icon=\"arrow_forward\"/> Aloita oppiminen\n"
 "                         </a>"
 
 #. module: website_slides
@@ -2385,8 +2234,8 @@ msgstr "Onnittelut, olet saavuttanut viimeisen tason!"
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/tours/slides_tour.js:0
 msgid ""
-"Congratulations, you've created your first course.<br/>Click on the title of "
-"this content to see it in fullscreen mode."
+"Congratulations, you've created your first course.<br/>Click on the title of"
+" this content to see it in fullscreen mode."
 msgstr ""
 "Onnittelut, olet luonut ensimmäisen kurssisi.<br/>Klikkaa tämän sisällön "
 "otsikkoa nähdäksesi se koko näytön tilassa."
@@ -2468,12 +2317,10 @@ msgstr "Sisällön tyyppi"
 #: model_terms:ir.actions.act_window,help:website_slides.slide_slide_action
 msgid ""
 "Content are the lessons that compose a course\n"
-"                    <br>and can be of different types (presentations, "
-"documents, videos, ...)."
+"                    <br>and can be of different types (presentations, documents, videos, ...)."
 msgstr ""
 "Sisältö koostuu oppitunneista, jotka muodostavat kurssin\n"
-"                   <br> ja ne voivat olla erityyppisiä (esityksiä, "
-"asiakirjoja, videoita, ...)."
+"                   <br> ja ne voivat olla erityyppisiä (esityksiä, asiakirjoja, videoita, ...)."
 
 #. module: website_slides
 #: model:ir.actions.act_window,name:website_slides.slide_slide_action
@@ -3292,7 +3139,8 @@ msgstr "Arvioitu valmistumisaika"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Evaluate the knowledge of your Attendees and certify their skills."
-msgstr "Arvioi osallistujien tietotaitoa ja luo todistus heidän osaamisestaan."
+msgstr ""
+"Arvioi osallistujien tietotaitoa ja luo todistus heidän osaamisestaan."
 
 #. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_channel__visibility__public
@@ -3769,7 +3617,8 @@ msgid ""
 "content, you can add a Quiz on the lesson. Click on <b>Add Quiz</b>."
 msgstr ""
 "Jos haluat olla varma, että osallistujat ovat ymmärtäneet ja sisäistäneet "
-"sisällön, voit lisätä oppituntiin tietovisan. Klikkaa <b>Lisää tietovisa</b>."
+"sisällön, voit lisätä oppituntiin tietovisan. Klikkaa <b>Lisää "
+"tietovisa</b>."
 
 #. module: website_slides
 #. odoo-javascript
@@ -3827,8 +3676,8 @@ msgstr "Kuvan lähde"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"Impossible to send emails. Select a \"Channel Share Template\" for courses %"
-"(course_names)s first"
+"Impossible to send emails. Select a \"Channel Share Template\" for courses "
+"%(course_names)s first"
 msgstr ""
 "Sähköpostien lähettäminen on mahdotonta. Valitse ensin \"Kanavan jakamisen "
 "mallipohja\" kursseille %(course_names)s"
@@ -3837,8 +3686,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Impossible to send emails. Select a \"Share Template\" for courses %"
-"(course_names)s first"
+"Impossible to send emails. Select a \"Share Template\" for courses "
+"%(course_names)s first"
 msgstr ""
 "Sähköpostien lähettäminen on ei onnistu. Valitse ensin \"Jaa mallpohja\" "
 "kursseille %(course_names)s"
@@ -3935,8 +3784,7 @@ msgid ""
 "Internal server error, please try again later or contact administrator.\n"
 "Here is the error message: %s"
 msgstr ""
-"Sisäinen palvelinvirhe, yritä myöhemmin uudestaan tai ota yhteyttä "
-"järjestelmän ylläpitäjään.\n"
+"Sisäinen palvelinvirhe, yritä myöhemmin uudestaan tai ota yhteyttä järjestelmän ylläpitäjään.\n"
 "Tässä virheilmoitus: %s"
 
 #. module: website_slides
@@ -4129,22 +3977,20 @@ msgstr "Tunne itsesi"
 #: model_terms:slide.channel,description:website_slides.slide_channel_demo_3_furn0
 #: model_terms:slide.channel,description_short:website_slides.slide_channel_demo_3_furn0
 msgid ""
-"Knowing which kind of wood to use depending on your application is "
-"important. In this course you\n"
+"Knowing which kind of wood to use depending on your application is important. In this course you\n"
 "will learn the basics of wood characteristics."
 msgstr ""
-"On tärkeää tietää, millaista puuta käytetään käyttötarkoituksesta riippuen. "
-"Tällä kurssilla\n"
+"On tärkeää tietää, millaista puuta käytetään käyttötarkoituksesta riippuen. Tällä kurssilla\n"
 "opit puun ominaisuuksien perusteet."
 
 #. module: website_slides
 #: model_terms:slide.slide,description:website_slides.slide_slide_demo_2_3
 msgid ""
-"Knowing wood characteristics is a requirement in order to know which kind of "
-"wood to use in a given situation."
+"Knowing wood characteristics is a requirement in order to know which kind of"
+" wood to use in a given situation."
 msgstr ""
-"Puun ominaisuuksien tunteminen on vaatimus, jotta tiedetään, millaista puuta "
-"voidaan käyttää tietyssä tilanteessa."
+"Puun ominaisuuksien tunteminen on vaatimus, jotta tiedetään, millaista puuta"
+" voidaan käyttää tietyssä tilanteessa."
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_digest_digest__kpi_nbr_of_certified_attendees_value
@@ -4309,7 +4155,8 @@ msgstr "Linkki"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__document_google_url
-msgid "Link of the document (we currently only support Google Drive as source)"
+msgid ""
+"Link of the document (we currently only support Google Drive as source)"
 msgstr "Asiakirjan linkki (tällä hetkellä tuemme vain Google Drivea lähteenä)"
 
 #. module: website_slides
@@ -4569,8 +4416,8 @@ msgstr "Uusi kurssi"
 msgid ""
 "New {{ object.slide_category }} published on {{ object.channel_id.name }}"
 msgstr ""
-"Uusi {{ object.slide_category }} julkaistiin kanavassa "
-"{{ object.channel_id.name }}"
+"Uusi {{ object.slide_category }} julkaistiin kanavassa {{ "
+"object.channel_id.name }}"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -4850,8 +4697,8 @@ msgid ""
 msgstr ""
 "Valinnainen käännöskieli (ISO-koodi) sähköpostia lähetettäessä. Jos sitä ei "
 "ole määritetty, käytetään pääyhteistyökumppanin kieltä. Tämän pitäisi "
-"yleensä olla sopivan kielen tarjoava paikkamerkki, esim. "
-"{{ object.partner_id.lang }}."
+"yleensä olla sopivan kielen tarjoava paikkamerkki, esim. {{ "
+"object.partner_id.lang }}."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_channel_form
@@ -4916,8 +4763,8 @@ msgid ""
 "Please %(a_login_open)slogin%(a_login_close)s or %(a_signup_open)screate an "
 "account%(a_signup_close)s to vote for this lesson"
 msgstr ""
-"Ole hyvä ja %(a_login_open)skirjaudu sisään%(a_login_close)s tai %"
-"(a_signup_open)sluo tili%(a_signup_close)s äänestääksesi tätä oppituntia"
+"Ole hyvä ja %(a_login_open)skirjaudu sisään%(a_login_close)s tai "
+"%(a_signup_open)sluo tili%(a_signup_close)s äänestääksesi tätä oppituntia"
 
 #. module: website_slides
 #. odoo-javascript
@@ -5286,9 +5133,11 @@ msgstr "Resurssi"
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide_resource.py:0
-msgid "Resource %(resource_name)s is a link and should not contain a data file"
+msgid ""
+"Resource %(resource_name)s is a link and should not contain a data file"
 msgstr ""
-"Resurssi %(resource_name)s on linkki, eikä sen pitäisi sisältää datatiedostoa"
+"Resurssi %(resource_name)s on linkki, eikä sen pitäisi sisältää "
+"datatiedostoa"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_slide_resource__resource_type
@@ -5805,7 +5654,8 @@ msgstr "Diaesityksen kuva"
 #. odoo-python
 #: code:addons/website_slides/controllers/main.py:0
 msgid ""
-"Slide with questions must be marked as done when submitting all good answers "
+"Slide with questions must be marked as done when submitting all good answers"
+" "
 msgstr ""
 "Diaesitys, jossa on kysymyksiä, on merkittävä valmiiksi, kun lähetät kaikki "
 "hyvät vastaukset "
@@ -5929,8 +5779,8 @@ msgstr "Tilaajien tiedot"
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__slide_type
 msgid ""
-"Subtype of the slide category, allows more precision on the actual file "
-"type / source type."
+"Subtype of the slide category, allows more precision on the actual file type"
+" / source type."
 msgstr ""
 "Diaesityksen luokan alityyppi, joka mahdollistaa tarkemmat tiedot "
 "todellisesta tiedostotyypistä/lähdetyypistä."
@@ -5969,8 +5819,8 @@ msgstr "Tunnisteen nimi"
 #: model:ir.model.fields,help:website_slides.field_slide_channel_tag__color
 msgid ""
 "Tag color used in both backend and website. No color means no display in "
-"kanban or front-end, to distinguish internal tags from public categorization "
-"tags"
+"kanban or front-end, to distinguish internal tags from public categorization"
+" tags"
 msgstr ""
 "Tunnisteen väri, jota käytetään sekä palvelinpuolen järjestelmässä että "
 "verkkosivustolla. Ei väriä tarkoittaa, että sitä ei näytetä kanbanissa tai "
@@ -6058,15 +5908,15 @@ msgid ""
 "you want.</br>A <b>Preview</b> of your file is available on the right side "
 "of the screen."
 msgstr ""
-"Oppitunnin <b>otsikko</b> täytetään automaattisesti, mutta voit muuttaa sitä "
-"halutessasi.</br>Tiedoston<b>esikatselu</b> on käytettävissä näytön oikeassa "
-"reunassa."
+"Oppitunnin <b>otsikko</b> täytetään automaattisesti, mutta voit muuttaa sitä"
+" halutessasi.</br>Tiedoston<b>esikatselu</b> on käytettävissä näytön "
+"oikeassa reunassa."
 
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_check_enroll
 msgid ""
-"The Enroll Policy should be set to 'On Invitation' when visibility is set to "
-"'Course Attendees'"
+"The Enroll Policy should be set to 'On Invitation' when visibility is set to"
+" 'Course Attendees'"
 msgstr ""
 "Ilmoittautumiskäytäntö tulisi asettaa arvoon 'Kutsusta', kun näkyvyys on "
 "asetettu arvoon 'Kurssin osallistujat'"
@@ -6083,7 +5933,8 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.constraint,message:website_slides.constraint_slide_channel_partner_check_completion
 msgid ""
-"The completion of a channel is a percentage and should be between 0% and 100."
+"The completion of a channel is a percentage and should be between 0% and "
+"100."
 msgstr ""
 "Kanavan valmiusaste on prosenttiosuus. Sen tulisi olla 0% ja 100:n välillä."
 
@@ -6129,7 +5980,8 @@ msgstr ""
 #: model:ir.model.fields,help:website_slides.field_slide_slide__website_url
 msgid "The full relative URL to access the document through the website."
 msgstr ""
-"Täydellinen relatiivinen URL-osoite asiakirjan avaamiseen verkkosivun kautta."
+"Täydellinen relatiivinen URL-osoite asiakirjan avaamiseen verkkosivun "
+"kautta."
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_slide__can_self_mark_completed
@@ -6248,7 +6100,8 @@ msgstr "Tämä on oikea vastaus, onnittelut"
 #. odoo-python
 #: code:addons/website_slides/models/slide_question.py:0
 msgid ""
-"This question must have at least one correct answer and one incorrect answer."
+"This question must have at least one correct answer and one incorrect "
+"answer."
 msgstr ""
 "Tässä kysymyksessä on oltava vähintään yksi oikea ja yksi väärä vastaus."
 
@@ -6440,7 +6293,8 @@ msgstr "Päivitä"
 #: model_terms:ir.ui.view,arch_db:website_slides.res_config_settings_view_form
 msgid "Update all your Attendees at once through mass mailings."
 msgstr ""
-"Päivitä kaikkien osallistujien tiedot kerralla joukkosähköpostitusten avulla."
+"Päivitä kaikkien osallistujien tiedot kerralla joukkosähköpostitusten "
+"avulla."
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_cards
@@ -6518,7 +6372,8 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__tag_ids
 msgid "Used to categorize and filter displayed channels/courses"
-msgstr "Käytetään näytettyjen kanavien/kurssien luokitteluun ja suodattamiseen"
+msgstr ""
+"Käytetään näytettyjen kanavien/kurssien luokitteluun ja suodattamiseen"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__color
@@ -6860,8 +6715,8 @@ msgstr "Kyllä"
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid ""
-"You are not allowed to add members to this course. Please contact the course "
-"responsible or an administrator."
+"You are not allowed to add members to this course. Please contact the course"
+" responsible or an administrator."
 msgstr ""
 "Et saa lisätä jäseniä tälle kurssille. Ota yhteyttä kurssin vastuuhenkilöön "
 "tai ylläpitäjään."
@@ -6913,7 +6768,8 @@ msgstr "Et voi merkitä diaesitystä valmiiksi, jos et ole sen jäsen."
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
 "You cannot mark a slide as uncompleted if you are not among its members."
-msgstr "Et voi merkitä diaesitystä keskeneräiseksi, jos et kuulu sen jäseniin."
+msgstr ""
+"Et voi merkitä diaesitystä keskeneräiseksi, jos et kuulu sen jäseniin."
 
 #. module: website_slides
 #. odoo-python
@@ -6928,8 +6784,8 @@ msgid ""
 "You cannot mark a slide quiz as completed if you are not among its members "
 "or it is unpublished."
 msgstr ""
-"Et voi merkitä diatietovisaa valmiiksi, jos et ole sen jäsen tai jos sitä ei "
-"ole julkaistu."
+"Et voi merkitä diatietovisaa valmiiksi, jos et ole sen jäsen tai jos sitä ei"
+" ole julkaistu."
 
 #. module: website_slides
 #. odoo-python
@@ -6938,8 +6794,8 @@ msgid ""
 "You cannot mark a slide quiz as not completed if you are not among its "
 "members or it is unpublished."
 msgstr ""
-"Et voi merkitä diakyselyä keskeneräiseksi, jos et ole sen jäsen tai jos sitä "
-"ei ole julkaistu."
+"Et voi merkitä diakyselyä keskeneräiseksi, jos et ole sen jäsen tai jos sitä"
+" ei ole julkaistu."
 
 #. module: website_slides
 #. odoo-python
@@ -7082,8 +6938,7 @@ msgid ""
 "                    Upload content, set up rewards, manage attendees..."
 msgstr ""
 "Verkko-oppimisalustasi alku alkaa tästä!<br>\n"
-"                    Lataa sisältöä, määritä palkkinnot, hallinnoi "
-"osallistujia..."
+"                    Lataa sisältöä, määritä palkkinnot, hallinnoi osallistujia..."
 
 #. module: website_slides
 #. odoo-javascript
@@ -7109,16 +6964,16 @@ msgid ""
 "Click on <b>Add Content</b> to upload a document, create an article or link "
 "a video."
 msgstr ""
-"Ensimmäinen osio on luotu, nyt on aika lisätä oppitunteja kurssille. Klikkaa "
-"<b>Lisää sisältöä</b> ladataksesi asiakirjan, luodaksesi artikkelin tai "
+"Ensimmäinen osio on luotu, nyt on aika lisätä oppitunteja kurssille. Klikkaa"
+" <b>Lisää sisältöä</b> ladataksesi asiakirjan, luodaksesi artikkelin tai "
 "linkittääksesi videon."
 
 #. module: website_slides
 #. odoo-python
 #: code:addons/website_slides/models/slide_slide.py:0
 msgid ""
-"Your video could not be found on Vimeo, please check the link and/or privacy "
-"settings"
+"Your video could not be found on Vimeo, please check the link and/or privacy"
+" settings"
 msgstr ""
 "Videotasi ei löydy Vimeosta, tarkista linkki ja/tai yksityisyysasetukset"
 
@@ -7252,8 +7107,8 @@ msgstr "esim. Tietotekniikka lapsille"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.view_slide_slide_form
 msgid ""
-"e.g. In this video, we'll give you the keys on how Odoo can help you to grow "
-"your business. At the end, we'll propose you a quiz to test your knowledge."
+"e.g. In this video, we'll give you the keys on how Odoo can help you to grow"
+" your business. At the end, we'll propose you a quiz to test your knowledge."
 msgstr ""
 "esim. Tässä videossa annamme sinulle avaimet, kuinka Odoo voi auttaa sinua "
 "kasvattamaan liiketoimintaasi. Lopuksi ehdotamme sinulle tietovisaa, jolla "

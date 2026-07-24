@@ -15,14 +15,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 03:42+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/"
-"base_automation/it/>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/base_automation/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
-"0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_automation
@@ -72,11 +70,11 @@ msgstr "<code>env</code>: ambiente nel quale viene attivata l'azione"
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is "
-"a void recordset"
+"<code>model</code>: model of the record on which the action is triggered; is"
+" a void recordset"
 msgstr ""
-"<code>model</code>: modello del record per il quale viene attivata l'azione; "
-"è un insieme di record vuoto"
+"<code>model</code>: modello del record per il quale viene attivata l'azione;"
+" è un insieme di record vuoto"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -98,29 +96,31 @@ msgstr ""
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"Actions\"/>"
+msgstr ""
+"<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" "
+"title=\"Actions\"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
+"<i class=\"oi\" data-icon=\"info\"/> The default target record getter will "
+"work out-of-the-box for any webhook coming from another Odoo instance."
 msgstr ""
-"<i class=\"fa fa-info-circle\"/> Il getter di record di destinazione "
+"<i class=\"oi\" data-icon=\"info\"/> Il getter di record di destinazione "
 "predefinito funzionerà immediatamente per qualsiasi webhook proveniente da "
 "un'altra istanza di Odoo."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automation rules triggered by UI "
+"changes will be executed <em>every time</em> the watched fields change, "
+"<em>whether you save or not</em>."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Le regole di automazione attivate dai "
-"cambiamenti UI verranno eseguite <em>ogni volta</em> che i campi sorvegliati "
-"cambiano, <em>se salvi o meno</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Le regole di automazione attivate "
+"dai cambiamenti UI verranno eseguite <em>ogni volta</em> che i campi "
+"sorvegliati cambiano, <em>se salvi o meno</em>."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_server_action_form
@@ -431,11 +431,11 @@ msgstr "Se selezionata, alcuni messaggi presentano un errore di consegna."
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
 msgid ""
-"If present, this condition must be satisfied before executing the automation "
-"rule."
+"If present, this condition must be satisfied before executing the automation"
+" rule."
 msgstr ""
-"Se presente, questa condizione deve essere soddisfatta prima dell'esecuzione "
-"della regola di automazione."
+"Se presente, questa condizione deve essere soddisfatta prima dell'esecuzione"
+" della regola di automazione."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_pre_domain
@@ -444,8 +444,8 @@ msgid ""
 "record. Not checked on record creation."
 msgstr ""
 "Se presente, questa condizione deve essere soddisfatta prima "
-"dell'aggiornamento del record. Non contrassegnata al momento della creazione "
-"del record."
+"dell'aggiornamento del record. Non contrassegnata al momento della creazione"
+" del record."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -535,8 +535,8 @@ msgstr "Nome modello"
 #. odoo-python
 #: code:addons/base_automation/models/ir_actions_server.py:0
 msgid ""
-"Model of action %(action_name)s should match the one from automated rule %"
-"(rule_name)s."
+"Model of action %(action_name)s should match the one from automated rule "
+"%(rule_name)s."
 msgstr ""
 "Il modello d'azione %(action_name)s dovrebbe corrispondere a quello della "
 "regola di automazione %(rule_name)s."
@@ -728,20 +728,18 @@ msgstr "Seleziona campi..."
 #: model_terms:ir.actions.act_window,help:base_automation.base_automation_act
 msgid ""
 "Send an email when an object changes state, archive records\n"
-"                after a month of inactivity or remind yourself to follow-up "
-"on\n"
+"                after a month of inactivity or remind yourself to follow-up on\n"
 "                tasks when a specific tag is added."
 msgstr ""
 "Invia un'e-mail quando un oggetto cambia stato, archivia i record\n"
-"                dopo un mese di inattività o ricorda a te stesso di dover "
-"eseguire il follow-up di\n"
+"                dopo un mese di inattività o ricorda a te stesso di dover eseguire il follow-up di\n"
 "                di attività quando viene aggiunto un tag specifico."
 
 #. module: base_automation
 #: model_terms:digest.tip,tip_description:base_automation.digest_tip_base_automation_0
 msgid ""
-"Send an email when an object changes state, archive records after a month of "
-"inactivity or remind yourself to follow-up on tasks when a specific tag is "
+"Send an email when an object changes state, archive records after a month of"
+" inactivity or remind yourself to follow-up on tasks when a specific tag is "
 "added.<br>With Automation Rules, you can automate any workflow."
 msgstr ""
 "Invia un'e-mail quando un oggetto cambia stato, archivia i record dopo un "
@@ -771,11 +769,11 @@ msgstr ""
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
 msgid ""
-"Some triggers need a reference to another field. This field is used to store "
-"it."
+"Some triggers need a reference to another field. This field is used to store"
+" it."
 msgstr ""
-"Alcuni trigger necessitano del riferimento ad un altro campo. Questo campo è "
-"utilizzato per l'archiviazione."
+"Alcuni trigger necessitano del riferimento ad un altro campo. Questo campo è"
+" utilizzato per l'archiviazione."
 
 #. module: base_automation
 #: model:ir.model.fields.selection,name:base_automation.selection__base_automation__trigger__on_stage_set
@@ -819,7 +817,8 @@ msgstr "Record di destinazione"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid "Target model of actions %(action_names)s are different from rule model."
+msgid ""
+"Target model of actions %(action_names)s are different from rule model."
 msgstr ""
 "Il modello di destinazione delle azioni %(action_names)s è diverso dal "
 "modello di regola."
@@ -828,11 +827,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%"
-"(state_value)s\" action type"
+"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
+"\"%(state_value)s\" action type"
 msgstr ""
-"L'%(trigger_label)s di tipo \"%(trigger_value)s\" può essere utilizzata solo "
-"con l'azione \"%(state_value)s\""
+"L'%(trigger_label)s di tipo \"%(trigger_value)s\" può essere utilizzata solo"
+" con l'azione \"%(state_value)s\""
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trigger_field_ids
@@ -867,7 +866,8 @@ msgid ""
 "This code will be run to find on which record the automation rule should be "
 "run."
 msgstr ""
-"Il codice verrà eseguito per individuare il record su cui eseguire la regola."
+"Il codice verrà eseguito per individuare il record su cui eseguire la "
+"regola."
 
 #. module: base_automation
 #. odoo-javascript
@@ -984,12 +984,10 @@ msgstr ""
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id
 msgid ""
 "When should the condition be triggered.\n"
-"                If present, will be checked by the scheduler. If empty, will "
-"be checked at creation and update."
+"                If present, will be checked by the scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "Quando deve essere attivata la condizione.\n"
-"                Se presente, viene controllata dal pianificatore. Se vuoto, "
-"viene controllata alla creazione e all'aggiornamento."
+"                Se presente, viene controllata dal pianificatore. Se vuoto, viene controllata alla creazione e all'aggiornamento."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active

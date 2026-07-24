@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 17:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/"
-"stock_picking_batch/lo/>\n"
+"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/lo/>\n"
 "Language: lo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +27,9 @@ msgstr ""
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -108,24 +109,20 @@ msgstr "<strong>→</strong>"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"ການໂອນຍ້າຍຈະບໍ່ຖືກເພີ່ມເຂົ້າໃນຊຸດ (Batch) ໂດຍອັດຕະໂນມັດ "
-"ຖ້າການໂອນຍ້າຍນັ້ນເຮັດໃຫ້ຈຳນວນລາຍການເກີນຄ່າທີ່ກຳນົດໄວ້.\n"
+"ການໂອນຍ້າຍຈະບໍ່ຖືກເພີ່ມເຂົ້າໃນຊຸດ (Batch) ໂດຍອັດຕະໂນມັດ ຖ້າການໂອນຍ້າຍນັ້ນເຮັດໃຫ້ຈຳນວນລາຍການເກີນຄ່າທີ່ກຳນົດໄວ້.\n"
 "ໃຫ້ຕັ້ງຄ່າເປັນ '0' ຖ້າບໍ່ຕ້ອງການກຳນົດຂີດຈຳກັດຂອງລາຍການ."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"ການໂອນຍ້າຍຈະບໍ່ຖືກເພີ່ມເຂົ້າໃນຊຸດ (Batch) ໂດຍອັດຕະໂນມັດ "
-"ຖ້າເຮັດໃຫ້ຈຳນວນການໂອນຍ້າຍເກີນຄ່າທີ່ກຳນົດໄວ້.\n"
+"ການໂອນຍ້າຍຈະບໍ່ຖືກເພີ່ມເຂົ້າໃນຊຸດ (Batch) ໂດຍອັດຕະໂນມັດ ຖ້າເຮັດໃຫ້ຈຳນວນການໂອນຍ້າຍເກີນຄ່າທີ່ກຳນົດໄວ້.\n"
 "ໃຫ້ຕັ້ງຄ່າເປັນ '0' ຖ້າບໍ່ຕ້ອງການກຳນົດຂີດຈຳກັດການໂອນຍ້າຍ."
 
 #. module: stock_picking_batch
@@ -619,7 +616,9 @@ msgstr "ຖ້າໝາຍເອົາ, ບາງຂໍ້ຄວາມມີຂ�
 msgid ""
 "If the Automatic Batches feature is enabled, at least one 'Group by' option "
 "must be selected."
-msgstr "ຖ້າເປີດໃຊ້ງານຄຸນສົມບັດສ້າງຊຸດອັດຕະໂນມັດ, ຕ້ອງເລືອກຢ່າງໜ້ອຍໜຶ່ງຕົວເລືອກ 'ຈັດກຸ່ມຕາມ'."
+msgstr ""
+"ຖ້າເປີດໃຊ້ງານຄຸນສົມບັດສ້າງຊຸດອັດຕະໂນມັດ, ຕ້ອງເລືອກຢ່າງໜ້ອຍໜຶ່ງຕົວເລືອກ "
+"'ຈັດກຸ່ມຕາມ'."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1005,7 +1004,8 @@ msgstr "ການໃຫ້ຄະແນນ"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1051,18 +1051,13 @@ msgstr "ວັນທີກຳນົດໄວ້"
 #, fuzzy
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "ວັນທີກຳນົດສຳລັບການໂອນຍ້າຍທີ່ຈະປະມວນຜົນ.\n"
-"              - ຖ້າຕັ້ງຄ່າດ້ວຍຕົນເອງ, "
-"ວັນທີກຳນົດສຳລັບທຸກການໂອນຍ້າຍໃນຊຸດຈະຖືກອັບເດດເປັນວັນທີນີ້ໂດຍອັດຕະໂນມັດ.\n"
-"              - ຖ້າບໍ່ໄດ້ປ່ຽນແປງດ້ວຍຕົນເອງ ແລະ ມີການເພີ່ມ/ລຶບ/ອັບເດດການໂອນຍ້າຍ, "
-"ວັນທີນີ້ຈະເປັນວັນທີກຳນົດທີ່ໄວທີ່ສຸດຂອງພວກເຂົາ\n"
+"              - ຖ້າຕັ້ງຄ່າດ້ວຍຕົນເອງ, ວັນທີກຳນົດສຳລັບທຸກການໂອນຍ້າຍໃນຊຸດຈະຖືກອັບເດດເປັນວັນທີນີ້ໂດຍອັດຕະໂນມັດ.\n"
+"              - ຖ້າບໍ່ໄດ້ປ່ຽນແປງດ້ວຍຕົນເອງ ແລະ ມີການເພີ່ມ/ລຶບ/ອັບເດດການໂອນຍ້າຍ, ວັນທີນີ້ຈະເປັນວັນທີກຳນົດທີ່ໄວທີ່ສຸດຂອງພວກເຂົາ\n"
 "                ແຕ່ວັນທີກຳນົດນີ້ຈະບໍ່ຖືກຕັ້ງໃຫ້ກັບທຸກການໂອນຍ້າຍໃນຊຸດ."
 
 #. module: stock_picking_batch
@@ -1126,8 +1121,8 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr ""
 
 #. module: stock_picking_batch
@@ -1221,8 +1216,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""

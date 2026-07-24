@@ -13,8 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 12:03+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/tr/>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/pos_online_payment/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,7 +35,8 @@ msgstr "<strong>Hata:</strong> Para birimi eksik veya geçersiz."
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_config.py:0
 msgid "A POS config cannot have more than one online payment method."
-msgstr "Bir POS yapılandırması birden fazla çevrim içi ödeme yöntemi içeremez."
+msgstr ""
+"Bir POS yapılandırması birden fazla çevrim içi ödeme yöntemi içeremez."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -47,8 +47,10 @@ msgstr "Bir ödeme türü belirlenmelidir."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
-msgstr "Doğrulama ödemesi, Satış Noktası çevrim içi ödemesi için kullanılamaz."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
+msgstr ""
+"Doğrulama ödemesi, Satış Noktası çevrim içi ödemesi için kullanılamaz."
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment
@@ -64,8 +66,8 @@ msgid ""
 "set, of the POS config."
 msgstr ""
 "Çevrim içi bir ödeme yöntemi için yapılandırılan tüm ödeme sağlayıcıları, "
-"POS yapılandırmasının Satış Yevmiyesi veya ayarlanmamışsa şirket para birimi "
-"ile aynı para birimini kullanmalıdır."
+"POS yapılandırmasının Satış Yevmiyesi veya ayarlanmamışsa şirket para birimi"
+" ile aynı para birimini kullanmalıdır."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -301,7 +303,7 @@ msgstr "Sunucu hatası"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -323,8 +325,8 @@ msgid ""
 "The POS online payment (tx.id=%d) could not be saved correctly because the "
 "online payment method could not be found"
 msgstr ""
-"Çevrim içi ödeme yöntemi bulunamadığı için POS çevrim içi ödemesi (tx.id=%d) "
-"doğru şekilde kaydedilemedi."
+"Çevrim içi ödeme yöntemi bulunamadığı için POS çevrim içi ödemesi (tx.id=%d)"
+" doğru şekilde kaydedilemedi."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -496,8 +498,8 @@ msgid ""
 "published payment provider supporting the currency of that POS config."
 msgstr ""
 "Bir POS yapılandırmasında çevrim içi bir ödeme yöntemi kullanmak için, söz "
-"konusu POS yapılandırmasının para birimini destekleyen en az bir yayınlanmış "
-"ödeme sağlayıcısına sahip olması gerekir."
+"konusu POS yapılandırmasının para birimini destekleyen en az bir yayınlanmış"
+" ödeme sağlayıcısına sahip olması gerekir."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -554,10 +556,8 @@ msgstr "Etkinleştirmediniz:"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

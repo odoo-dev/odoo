@@ -23,23 +23,19 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 16:54+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-master/"
-"hr_expense/pt/>\n"
+"Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-master/hr_expense/pt/>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
 
@@ -78,9 +74,11 @@ msgstr ""
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr ""
-"%(user)s confirma que esta despesa não é a duplicação de uma despesa similar."
+"%(user)s confirma que esta despesa não é a duplicação de uma despesa "
+"similar."
 
 #. module: hr_expense
 #: model:ir.actions.report,print_report_name:hr_expense.action_report_hr_expense
@@ -109,7 +107,7 @@ msgstr ""
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
 msgstr ""
 
 #. module: hr_expense
@@ -284,10 +282,8 @@ msgstr "Ocorreu um erro durante o carregamento"
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
 
 #. module: hr_expense
@@ -417,8 +413,8 @@ msgid ""
 "Both price-included and price-excluded taxes will behave as price-included "
 "taxes for expenses."
 msgstr ""
-"Os impostos com preço incluído ou não se comportarão como impostos com preço "
-"incluído em despesas."
+"Os impostos com preço incluído ou não se comportarão como impostos com preço"
+" incluído em despesas."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense
@@ -631,9 +627,9 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
-"Não guarde mais seus recibos de despesas no bolso: basta tirar uma foto dele "
-"e deixar que Odoo o digitalize para você. O OCR e a Inteligência Artificial "
-"preencherão os dados automaticamente."
+"Não guarde mais seus recibos de despesas no bolso: basta tirar uma foto dele"
+" e deixar que Odoo o digitalize para você. O OCR e a Inteligência Artificial"
+" preencherão os dados automaticamente."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -1510,8 +1506,7 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
@@ -1768,8 +1763,8 @@ msgid ""
 "navigate."
 msgstr ""
 "Pronto? Você pode salvá-lo manualmente ou descartar as modificações aqui. "
-"Você <em>não precisa salvar</em> – o Odoo salvará tudo para você quando você "
-"sair."
+"Você <em>não precisa salvar</em> – o Odoo salvará tudo para você quando você"
+" sair."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1913,13 +1908,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
-"Selecione o usuário responsável pela aprovação de “Despesas” deste "
-"funcionário.\n"
-"Se estiver vazio, a aprovação é feita por um Administrador ou Aprovador "
-"(determinado nas definições/usuários)."
+"Selecione o usuário responsável pela aprovação de “Despesas” deste funcionário.\n"
+"Se estiver vazio, a aprovação é feita por um Administrador ou Aprovador (determinado nas definições/usuários)."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2114,14 +2106,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr ""
 "O diário padrão da empresa usado quando é criada uma despesa de funcionário."
 
@@ -2157,8 +2150,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
 
@@ -2187,8 +2179,7 @@ msgstr "A soma após o fechamento da divisão deve permanecer a mesma"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
 
@@ -2307,8 +2298,7 @@ msgstr "Tipo da atividade de exceção registrada."
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 
 #. module: hr_expense
@@ -2385,14 +2375,14 @@ msgstr ""
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
 
 #. module: hr_expense

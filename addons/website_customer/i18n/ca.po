@@ -23,8 +23,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 01:37+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
-"website_customer/ca/>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/website_customer/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,27 +34,25 @@ msgstr ""
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the "
-"selected country. Displaying results across all countries instead."
+"<i class=\"oi me-2\" data-icon=\"info\"/>\n"
+"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
 msgstr ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        No s'ha trobat cap client per al país seleccionat. "
-"S'estan mostrant els resultats de tots els països."
+"<i class=\"me-2 oi\" data-icon=\"info\"/>\n"
+"                        No s'ha trobat cap client per al país seleccionat. S'estan mostrant els resultats de tots els països."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
 msgid ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 msgstr ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"oi oi-chevron-left me-2\"/>Tornar a les referències"
+msgid "<i class=\"oi me-2\" data-icon=\"chevron_backward\"/>Back to references"
+msgstr "<i class=\"me-2 oi\" data-icon=\"chevron_backward\"/>Tornar a les referències"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -266,8 +263,8 @@ msgid ""
 "Manage contact tags to better classify them for tracking and analysis "
 "purposes."
 msgstr ""
-"Gestiona etiquetes de contacte per classificar-los millor amb el propòsit de "
-"fer seguiments i anàlisis,"
+"Gestiona etiquetes de contacte per classificar-los millor amb el propòsit de"
+" fer seguiments i anàlisis,"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index

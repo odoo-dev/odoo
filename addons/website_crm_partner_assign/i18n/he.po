@@ -24,14 +24,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:47+0000\n"
 "PO-Revision-Date: 2026-06-20 01:19+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-master/"
-"website_crm_partner_assign/he/>\n"
+"Language-Team: Hebrew <https://translate.odoo.com/projects/odoo-master/website_crm_partner_assign/he/>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && "
-"n % 10 == 0) ? 2 : 3));\n"
+"Plural-Forms: nplurals=4; plural=(n == 1) ? 0 : ((n == 2) ? 1 : ((n > 10 && n % 10 == 0) ? 2 : 3));\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_crm_partner_assign
@@ -53,72 +51,59 @@ msgstr "&amp;nbsp;&amp;nbsp;"
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.index_content
 msgid ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"            There are no matching partners found for the selected country. "
-"Displaying results across all countries instead."
+"<i class=\"oi oi-filled me-2\" data-icon=\"info\"/>\n"
+"            There are no matching partners found for the selected country. Displaying results across all countries instead."
 msgstr ""
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.ref_country
 msgid ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 msgstr ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_opportunity
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/>ערוך"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>Edit"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>ערוך"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.partner_detail
-msgid "<i class=\"oi oi-chevron-left me-2\"/>Back"
+msgid "<i class=\"oi me-2\" data-icon=\"chevron_backward\"/>Back"
 msgstr ""
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_lead
-msgid ""
-"<span class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
-msgstr ""
-"<span class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+msgid "<span class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
+msgstr "<span class=\"fa fa-envelope\" role=\"img\" aria-label=\"Email\" title=\"Email\"/>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_lead
-msgid ""
-"<span class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" "
-"title=\"Phone\"/>"
-msgstr ""
-"<span class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" "
-"title=\"Phone\"/>"
+msgid "<span class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
+msgstr "<span class=\"fa fa-phone\" role=\"img\" aria-label=\"Phone\" title=\"Phone\"/>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_opportunity
 msgid ""
 "<span class=\"input-group-text o_input_group_date_icon\">\n"
-"                                                        <span class=\"fa fa-"
-"calendar\" role=\"img\" aria-label=\"Calendar\" title=\"Calendar\"/>\n"
+"                                                        <span class=\"fa fa-calendar\" role=\"img\" aria-label=\"Calendar\" title=\"Calendar\"/>\n"
 "                                                    </span>"
 msgstr ""
 "<span class=\"input-group-text o_input_group_date_icon\">\n"
-"                                                        <span class=\"fa fa-"
-"calendar\" role=\"img\" aria-label=\"Calendar\" title=\"Calendar\"/>\n"
+"                                                        <span class=\"fa fa-calendar\" role=\"img\" aria-label=\"Calendar\" title=\"Calendar\"/>\n"
 "                                                    </span>"
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.ui.view,arch_db:website_crm_partner_assign.portal_my_opportunity
 msgid ""
 "<span class=\"input-group-text o_input_group_date_icon\">\n"
-"                                                        <span class=\"fa fa-"
-"calendar\" role=\"img\" aria-label=\"Calendar\"/>\n"
+"                                                        <span class=\"fa fa-calendar\" role=\"img\" aria-label=\"Calendar\"/>\n"
 "                                                    </span>"
 msgstr ""
 "<span class=\"input-group-text o_input_group_date_icon\">\n"
-"                                                        <span class=\"fa fa-"
-"calendar\" role=\"img\" aria-label=\"Calendar\"/>\n"
+"                                                        <span class=\"fa fa-calendar\" role=\"img\" aria-label=\"Calendar\"/>\n"
 "                                                    </span>"
 
 #. module: website_crm_partner_assign
@@ -188,45 +173,24 @@ msgstr "<strong class=\"col-12 col-sm-4\">עדיפות</strong>"
 msgid ""
 "<t>\n"
 "Hello,<br/>\n"
-"We have been contacted by those prospects that are in your region. Thus, the "
-"following leads have been assigned to <t t-out=\"ctx['partner_id'].name if "
-"ctx.get('partner_id') else ''\"/>:<br/>\n"
+"We have been contacted by those prospects that are in your region. Thus, the following leads have been assigned to <t t-out=\"ctx['partner_id'].name if ctx.get('partner_id') else ''\"/>:<br/>\n"
 "<ol>\n"
-"    <li t-foreach=\"ctx.get('partner_leads', [])\" t-as=\"lead\"><a t-att-"
-"href=\"lead['lead_link']\" t-out=\"lead['lead_id'].name or 'Subject "
-"Undefined'\">Subject Undefined</a>, <t t-out=\"lead['lead_id'].partner_name "
-"or lead['lead_id'].contact_name or 'Contact Name Undefined'\">Contact Name "
-"Undefined</t>, <t t-out=\"lead['lead_id'].country_id and "
-"lead['lead_id'].country_id.name or 'Country Undefined'\">Country Undefined</"
-"t>, <t t-out=\"lead['lead_id'].email_from or 'Email Undefined' or ''\">Email "
-"Undefined</t>, <t t-out=\"lead['lead_id'].phone or ''\">+1 650-123-4567</t> "
-"</li><br/>\n"
+"    <li t-foreach=\"ctx.get('partner_leads', [])\" t-as=\"lead\"><a t-att-href=\"lead['lead_link']\" t-out=\"lead['lead_id'].name or 'Subject Undefined'\">Subject Undefined</a>, <t t-out=\"lead['lead_id'].partner_name or lead['lead_id'].contact_name or 'Contact Name Undefined'\">Contact Name Undefined</t>, <t t-out=\"lead['lead_id'].country_id and lead['lead_id'].country_id.name or 'Country Undefined'\">Country Undefined</t>, <t t-out=\"lead['lead_id'].email_from or 'Email Undefined' or ''\">Email Undefined</t>, <t t-out=\"lead['lead_id'].phone or ''\">+1 650-123-4567</t> </li><br/>\n"
 "</ol>\n"
 "<t t-if=\"ctx.get('partner_in_portal')\">\n"
-"    Please connect to your <a t-att-href=\"'%s?db=%s' % "
-"(object.get_base_url(), object.env.cr.dbname)\">Partner Portal</a> to get "
-"details.\n"
-"    <t t-if=\"any(lead['lead_id'].type == 'lead' for lead in "
-"ctx['partner_leads'])\">On each lead, there are two buttons that you should "
-"press after contacting the lead: \"I'm interested\" &amp; \"I'm not "
-"interested\".</t><br/>\n"
+"    Please connect to your <a t-att-href=\"'%s?db=%s' % (object.get_base_url(), object.env.cr.dbname)\">Partner Portal</a> to get details.\n"
+"    <t t-if=\"any(lead['lead_id'].type == 'lead' for lead in ctx['partner_leads'])\">On each lead, there are two buttons that you should press after contacting the lead: \"I'm interested\" &amp; \"I'm not interested\".</t><br/>\n"
 "</t>\n"
 "<t t-else=\"\">\n"
 "    You do not have yet a portal access to our database. Please contact\n"
-"    <t t-out=\"ctx.get('partner_id') and ctx['partner_id'].user_id and "
-"ctx['partner_id'].user_id.email and 'your account manager %s (%s)' % "
-"(ctx['partner_id'].user_id.name,ctx['partner_id'].user_id.email) or "
-"'us'\">us</t>.<br/>\n"
+"    <t t-out=\"ctx.get('partner_id') and ctx['partner_id'].user_id and ctx['partner_id'].user_id.email and 'your account manager %s (%s)' % (ctx['partner_id'].user_id.name,ctx['partner_id'].user_id.email) or 'us'\">us</t>.<br/>\n"
 "</t>\n"
-"The lead will be sent to another partner if you do not contact the lead "
-"before 20 days.<br/><br/>\n"
+"The lead will be sent to another partner if you do not contact the lead before 20 days.<br/><br/>\n"
 "Thank you,<br/>\n"
-"<t t-out=\"ctx.get('partner_id') and ctx['partner_id'].user_id and "
-"ctx['partner_id'].user_id.signature or ''\"/>\n"
+"<t t-out=\"ctx.get('partner_id') and ctx['partner_id'].user_id and ctx['partner_id'].user_id.signature or ''\"/>\n"
 "<br/>\n"
 "<t t-if=\"not ctx.get('partner_id') or not ctx['partner_id'].user_id\">\n"
-"    PS: It looks like you do not have an account manager assigned to you, "
-"please contact us.\n"
+"    PS: It looks like you do not have an account manager assigned to you, please contact us.\n"
 "</t>\n"
 "            </t>"
 msgstr ""
@@ -574,7 +538,8 @@ msgstr "פעילויות עתידיות"
 
 #. module: website_crm_partner_assign
 #: model:mail.template,subject:website_crm_partner_assign.email_template_lead_forward_mail
-msgid "Fwd: Lead: {{ ctx['partner_id'].name if ctx.get('partner_id') else ''}}"
+msgid ""
+"Fwd: Lead: {{ ctx['partner_id'].name if ctx.get('partner_id') else ''}}"
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -849,8 +814,8 @@ msgstr "אינך מורשה לעדכן את השדה(ות) הבאים: %s."
 #. odoo-python
 #: code:addons/website_crm_partner_assign/models/crm_lead.py:0
 msgid ""
-"Only users with commercial partner which is a parent of the assigned partner "
-"can edit this lead."
+"Only users with commercial partner which is a parent of the assigned partner"
+" can edit this lead."
 msgstr ""
 
 #. module: website_crm_partner_assign
@@ -1187,8 +1152,8 @@ msgid ""
 "This should be a numerical value greater than 0 which will decide the "
 "contention for this partner to take this lead/opportunity."
 msgstr ""
-"זה צריך להיות ערך מספרי גדול מ-0 שיכריע את הטענה של שותף זה לקחת את ההזדמנות "
-"הזו."
+"זה צריך להיות ערך מספרי גדול מ-0 שיכריע את הטענה של שותף זה לקחת את ההזדמנות"
+" הזו."
 
 #. module: website_crm_partner_assign
 #: model_terms:ir.actions.act_window,help:website_crm_partner_assign.res_partner_activation_act

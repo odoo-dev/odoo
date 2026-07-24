@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 00:34+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
-"product/ko/>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/product/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -42,10 +41,8 @@ msgstr "# 품목"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
 "%(base)s에 %(discount)s과 %% %(discount_type)s 및 %(surcharge)s 추가 요금\n"
 "예: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
@@ -54,11 +51,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
-msgstr ""
-"%(item_name)s: 종료 날짜 (%(end_date)s)는 시작 날짜 (%(start_date)s) 이후여"
-"야 합니다."
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
+msgstr "%(item_name)s: 종료 날짜 (%(end_date)s)는 시작 날짜 (%(start_date)s) 이후여야 합니다."
 
 #. module: product
 #. odoo-python
@@ -139,27 +134,21 @@ msgstr "- %(amount)s 리베이트"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
-msgstr ""
-"- 바코드 \"%(barcode)s\"가 이미 제품에 할당되었습니다: %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgstr "- 바코드 \"%(barcode)s\"가 이미 제품에 할당되었습니다: %(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
 "- 즉시: 모든 가능한 사양은 속성과 그 값이 품목에 추가되는 즉시 생성됩니다.\n"
-"        - 동적: 각 사양은 해당 속성과 값이 판매 주문서에 추가될 때만 생성됩니"
-"다.\n"
+"        - 동적: 각 사양은 해당 속성과 값이 판매 주문서에 추가될 때만 생성됩니다.\n"
 "        - 사용 안함: 사양에 대한 변형은 생성되지 않습니다\n"
-"         참고: 하나 이상의 품목에서 특성을 사용한 후에는 파생 품목 생성 모드"
-"를 변경할 수 없습니다."
+"         참고: 하나 이상의 품목에서 특성을 사용한 후에는 파생 품목 생성 모드를 변경할 수 없습니다."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -237,8 +226,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
 "o_translate_inline\">Contact Us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">문의"
-"하기</a>"
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">문의하기</a>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -248,19 +237,19 @@ msgstr "<b>팁: 9.99달러로 반올림하고 싶으신가요?</b>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"화살표 아"
-"이콘\" title=\"화살표\"/>"
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"화살표 아이콘\" "
+"title=\"화살표\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 
 #. module: product
@@ -282,11 +271,11 @@ msgstr "<span class=\"o_stat_text\">품목</span>"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 #, fuzzy
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">세부사"
-"항 기준</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">세부사항 "
+"기준</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
@@ -348,12 +337,10 @@ msgstr "콤보 품목에는 콤보 선택 품목이 최소 1개 이상 포함되
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
-msgstr ""
-"고객에게 전달하고자 하는 품목 설명. 이 설명은 모든 판매 주문, 배송 주문 및 고"
-"객 청구서/대변전표에 복사됩니다"
+msgstr "고객에게 전달하고자 하는 품목 설명. 이 설명은 모든 판매 주문, 배송 주문 및 고객 청구서/대변전표에 복사됩니다"
 
 #. module: product
 #. odoo-python
@@ -364,15 +351,11 @@ msgstr "이미 바코드가 사용되고 있는 포장입니다"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"가격은 품목, 품목 카테고리, 날짜 및 주문 수량을 기반으로 판매 주문 내역의 가"
-"격을 계산하기 위한 판매 가격 또는 규칙의 모음입니다. 여러 가격, 계절 할인 등"
-"을 처리 할 수 있는 완벽한 도구입니다."
+"가격은 품목, 품목 카테고리, 날짜 및 주문 수량을 기반으로 판매 주문 내역의 가격을 계산하기 위한 판매 가격 또는 규칙의 모음입니다. "
+"여러 가격, 계절 할인 등을 처리 할 수 있는 완벽한 도구입니다."
 
 #. module: product
 #. odoo-python
@@ -380,9 +363,7 @@ msgstr ""
 msgid ""
 "A pricelist item with \"Other Pricelist\" as base must have a "
 "base_pricelist_id."
-msgstr ""
-"가격표 항목이 '기타 가격표' 에 해당하는 경우 반드시 base_pricelist_id 가 있어"
-"야 합니다."
+msgstr "가격표 항목이 '기타 가격표' 에 해당하는 경우 반드시 base_pricelist_id 가 있어야 합니다."
 
 #. module: product
 #. odoo-python
@@ -698,9 +679,7 @@ msgstr "품목 공급업체 목록에 우선 순위를 지정합니다."
 msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
-msgstr ""
-"최대 %s 수량을 동시에 표시할 수 있습니다. 다른 항목을 추가하려면 선택한 수량"
-"을 삭제하시기 바랍니다."
+msgstr "최대 %s 수량을 동시에 표시할 수 있습니다. 다른 항목을 추가하려면 선택한 수량을 삭제하시기 바랍니다."
 
 #. module: product
 #: model:ir.model,name:product.model_ir_attachment
@@ -777,20 +756,14 @@ msgstr "속성 및 세부 옵션"
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 #, fuzzy
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"가용 수량(보유 수량 - 출고 + 입고 - 예약 수량- 반출 수량으로 계산)단일 재고 "
-"위치인 상황에서는 해당 위치 또는 그 하위 위치에 보관되어 있는 품목까지 포함합"
-"니다.단일 창고인 상황에서는 해당 창고 또는 그 하위 위치에 보관 되어 있는 품목"
-"까지 포함합니다.기타의 경우, '내부' 유형으로 모든 재고 위치에 보관 중인 품목"
-"이 포함됩니다."
+"가용 수량(보유 수량 - 출고 + 입고 - 예약 수량- 반출 수량으로 계산)단일 재고 위치인 상황에서는 해당 위치 또는 그 하위 위치에 "
+"보관되어 있는 품목까지 포함합니다.단일 창고인 상황에서는 해당 창고 또는 그 하위 위치에 보관 되어 있는 품목까지 포함합니다.기타의 "
+"경우, '내부' 유형으로 모든 재고 위치에 보관 중인 품목이 포함됩니다."
 
 #. module: product
 #. odoo-javascript
@@ -986,15 +959,11 @@ msgstr "의자 세트"
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"품목 단위를 변경하면 %(old_uom_name)s 1개 = 1 %(new_uom_name)s로 변환하여 적"
-"용됩니다.\n"
-"이 품목을 사용하고 있는 모든 기존 레코드(판매주문서, 구매발주서 등)는 단위 이"
-"름을 교체하여 업데이트됩니다."
+"품목 단위를 변경하면 %(old_uom_name)s 1개 = 1 %(new_uom_name)s로 변환하여 적용됩니다.\n"
+"이 품목을 사용하고 있는 모든 기존 레코드(판매주문서, 구매발주서 등)는 단위 이름을 교체하여 업데이트됩니다."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1089,9 +1058,7 @@ msgstr "콤보 제품에는 속성을 추가할 수 없습니다."
 msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
-msgstr ""
-"콤보를 사용하면 카테고리별 여러 가지 항목 중에서 하나의 품목을 선택할 수 있습"
-"니다."
+msgstr "콤보를 사용하면 카테고리별 여러 가지 항목 중에서 하나의 품목을 선택할 수 있습니다."
 
 #. module: product
 #: model:product.template,description_sale:product.product_delivery_01_product_template
@@ -1314,23 +1281,16 @@ msgstr "통화"
 #: model:ir.model.fields,help:product.field_product_product__qty_available
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "품목의 현재 수량입니다.\n"
-"재고 위치가 하나 뿐인 경우, 해당 위치 또는 하위 위치에 보관된 품목이 모두 포"
-"함됩니다.\n"
-"창고가 하나 뿐인 경우에는, 해당 창고의 재고 위치 또는 하위 재고 위치에 보관"
-"된 품목이 모두 포함됩니다.\n"
+"재고 위치가 하나 뿐인 경우, 해당 위치 또는 하위 위치에 보관된 품목이 모두 포함됩니다.\n"
+"창고가 하나 뿐인 경우에는, 해당 창고의 재고 위치 또는 하위 재고 위치에 보관된 품목이 모두 포함됩니다.\n"
 "상점의 창고 재고 위치 또는 그 하위의 재고 위치에 모두 보관됩니다.\n"
-"그 외에는 '내부' 유형인 모든 보관 위치에 보관되어 있는 품목이 모두 포함됩니"
-"다."
+"그 외에는 '내부' 유형인 모든 보관 위치에 보관되어 있는 품목이 모두 포함됩니다."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1415,7 +1375,8 @@ msgstr "모든 재고 운용에 사용되는 기본 단위입니다."
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
 #, fuzzy
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr "측정 단위 당 가격 필드에 표시할 사용자 지정 단위를 설정합니다."
 
 #. module: product
@@ -1578,11 +1539,9 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 #, fuzzy
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
-msgstr ""
-"설정한 경우에는 품목에 사용자가 정의한 단위를 표시하고 그렇지 않은 경우 선택"
-"한 측정 단위를 표시합니다."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
+msgstr "설정한 경우에는 품목에 사용자가 정의한 단위를 표시하고 그렇지 않은 경우 선택한 측정 단위를 표시합니다."
 
 #. module: product
 #. odoo-python
@@ -1676,8 +1635,8 @@ msgstr "종료일"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1745,11 +1704,9 @@ msgstr "추가 요금"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
-msgstr ""
-"판매 가격에 이 속성 값이 있는 파생품의 추가 가격입니다. 예. 추가 가격 200, "
-"1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
+msgstr "판매 가격에 이 속성 값이 있는 파생품의 추가 가격입니다. 예. 추가 가격 200, 1000 + 200 = 1200."
 
 #. module: product
 #: model:product.attribute,name:product.pa_fabric
@@ -1831,31 +1788,23 @@ msgstr "멋진 아이콘 폰트 예: fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"규칙을 적용하려면 구매/판매 수량이 이 필드에 지정된 최소 수량 이상이어야 합니"
-"다.\n"
+"규칙을 적용하려면 구매/판매 수량이 이 필드에 지정된 최소 수량 이상이어야 합니다.\n"
 "품목의 기본 단위로 표현됩니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"예측 수량(보유 수량 - 출고 + 입고 - 반출 수량으로 계산)단일 재고 위치인 상황"
-"에서는 해당 위치 또는 그 하위 위치에 보관되어 있는 품목까지 포함합니다.단일 "
-"창고인 상황에서는 해당 창고 또는 그 하위 위치에 보관 되어 있는 품목까지 포함"
-"합니다.기타의 경우, '내부' 유형으로 모든 재고 위치에 보관 중인 품목이 포함됩"
-"니다."
+"예측 수량(보유 수량 - 출고 + 입고 - 반출 수량으로 계산)단일 재고 위치인 상황에서는 해당 위치 또는 그 하위 위치에 보관되어 있는"
+" 품목까지 포함합니다.단일 창고인 상황에서는 해당 창고 또는 그 하위 위치에 보관 되어 있는 품목까지 포함합니다.기타의 경우, '내부' "
+"유형으로 모든 재고 위치에 보관 중인 품목이 포함됩니다."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
@@ -1962,9 +1911,7 @@ msgstr "제품"
 msgid ""
 "Goods are tangible materials and merchandise you provide.\n"
 "A service is a non-material product you provide."
-msgstr ""
-"상품이란 상대에게 제공하는 유형적인 자재와 물품을 말합니다. 서비스는 상대에"
-"게 제공하는 비물질적 상품입니다."
+msgstr "상품이란 상대에게 제공하는 유형적인 자재와 물품을 말합니다. 서비스는 상대에게 제공하는 비물질적 상품입니다."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_color_gray
@@ -2015,9 +1962,7 @@ msgstr "높이"
 msgid ""
 "Here you can set a specific HTML color index (e.g. #ff0000) to display the "
 "color if the attribute type is 'Color'."
-msgstr ""
-"속성 유형이 '색깔'인 경우, 특정한 HTML 색 색인(예를 들어 #ff0000)을 설정할 "
-"수 있습니다."
+msgstr "속성 유형이 '색깔'인 경우, 특정한 HTML 색 색인(예를 들어 #ff0000)을 설정할 수 있습니다."
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_12_product_template
@@ -2109,9 +2054,7 @@ msgstr "이 옵션을 선택하면 일부 정보가 전달 오류를 생성합�
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_id
 msgid ""
 "If not set, the vendor price will apply to all variants of this product."
-msgstr ""
-"설정하지 않는 경우, 공급업체 가격은 해당 제품의 모든 세부선택사항에 적용됩니"
-"다."
+msgstr "설정하지 않는 경우, 공급업체 가격은 해당 제품의 모든 세부선택사항에 적용됩니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__active
@@ -2414,8 +2357,7 @@ msgid ""
 "receipt of the products in your warehouse. Used by the scheduler for "
 "automatic computation of the purchase order planning."
 msgstr ""
-"구매주문 확인 후 창고로 제품이 입고될 때까지의 리드타임입니다. 계획서에서 구"
-"매 주문 계획을 자동으로 계산하는 데 사용됩니다."
+"구매주문 확인 후 창고로 제품이 입고될 때까지의 리드타임입니다. 계획서에서 구매 주문 계획을 자동으로 계산하는 데 사용됩니다."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_fabric_leather
@@ -2488,9 +2430,7 @@ msgstr "물류"
 msgid ""
 "Looking for a custom bamboo stain to match existing furniture? Contact us "
 "for a quote."
-msgstr ""
-"기존 가구와 어울리는 맞춤형 대나무색 염료를 찾고 있으신가요? 견적 관련하여 연"
-"락주시기 바랍니다."
+msgstr "기존 가구와 어울리는 맞춤형 대나무색 염료를 찾고 있으신가요? 견적 관련하여 연락주시기 바랍니다."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_size_m
@@ -2729,9 +2669,7 @@ msgstr "Nivea"
 msgid ""
 "No product to print, if the product is archived please unarchive it before "
 "printing its label."
-msgstr ""
-"인쇄할 품목이 없습니다. 품목이 보관 처리된 경우, 라벨을 인쇄하기 전에 보관 취"
-"소해야 합니다."
+msgstr "인쇄할 품목이 없습니다. 품목이 보관 처리된 경우, 라벨을 인쇄하기 전에 보관 취소해야 합니다."
 
 #. module: product
 #. odoo-javascript
@@ -2880,28 +2818,25 @@ msgstr "보유 중"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
-"%(product)s 품목에서 %(value)s 값이 일치하지 않기 때문에 %(attribute)s 속성"
-"과 연결할 수 없습니다."
+"%(product)s 품목에서 %(value)s 값이 일치하지 않기 때문에 %(attribute)s 속성과 연결할 수 없습니다."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
-"%(product)s 품목에서 %(attribute_src)s 속성을 %(attribute_dest)s 속성으로 변"
-"경할 수 없습니다."
+"%(product)s 품목에서 %(attribute_src)s 속성을 %(attribute_dest)s 속성으로 변경할 수 없습니다."
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.js:0
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
-msgstr ""
-"이런! '%(fileName)s'  형식은 허용되지 않으므로 업로드를 하지 못했습니다."
+msgstr "이런! '%(fileName)s'  형식은 허용되지 않으므로 업로드를 하지 못했습니다."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
@@ -3609,18 +3544,13 @@ msgstr "이미 존재하는 수량 (%s)."
 #: model:ir.model.fields,help:product.field_product_product__incoming_qty
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "계획된 입고 품목의 수량.\n"
-"단일 재고 공간이 있는 상황에서, 이 공간나 그 하위 공간에 도착한 품목이 여기"
-"에 포함됩니다.\n"
-"단일 창고의 경우, 이 창고의 재고 공간 또는 그 하위 공간에 도착한 품목이 여기"
-"에 포함됩니다.\n"
+"단일 재고 공간이 있는 상황에서, 이 공간나 그 하위 공간에 도착한 품목이 여기에 포함됩니다.\n"
+"단일 창고의 경우, 이 창고의 재고 공간 또는 그 하위 공간에 도착한 품목이 여기에 포함됩니다.\n"
 "그렇지 않으면 '내부' 유형의 재고 공간에 도착한 품목이 포함됩니다."
 
 #. module: product
@@ -3628,20 +3558,14 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "계획 출고되는 체품의 수량.\n"
-"단일 재고 공간이 있는 상황에서 이 공간를 떠나는 품목 또는 그 하위 공간의 품목"
-"을 포함합니다.\n"
-"단일 창고가 있는 환경에서 이 창고의 재고 공간을 떠나는 품목 또는 그 하위 공간"
-"을 포함합니다.\n"
-"그렇지 않은 경우, 이 것은 '내부' 유형의 모든 재고 공간를 벗어나는 품목을 포함"
-"합니다."
+"단일 재고 공간이 있는 상황에서 이 공간를 떠나는 품목 또는 그 하위 공간의 품목을 포함합니다.\n"
+"단일 창고가 있는 환경에서 이 창고의 재고 공간을 떠나는 품목 또는 그 하위 공간을 포함합니다.\n"
+"그렇지 않은 경우, 이 것은 '내부' 유형의 모든 재고 공간를 벗어나는 품목을 포함합니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -3690,11 +3614,9 @@ msgstr "기준 단위"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
-msgstr ""
-"공급업체로부터 요청받은 각각의 품목에 대한 단가를, 수량과 기간에 맞춰 등록합"
-"니다."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
+msgstr "공급업체로부터 요청받은 각각의 품목에 대한 단가를, 수량과 기간에 맞춰 등록합니다."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__product_tmpl_ids
@@ -3884,8 +3806,7 @@ msgid ""
 msgstr ""
 "가격을 이 값의 배수로 설정합니다.\n"
 "반올림은 할인 후와 추가 요금 전에 적용됩니다.\n"
-"9.99로 끝나는 가격의 경우 10.00으로 반올림하고 -0.01의 추가 할인을 적용합니"
-"다."
+"9.99로 끝나는 가격의 경우 10.00으로 반올림하고 -0.01의 추가 할인을 적용합니다."
 
 #. module: product
 #: model:product.attribute,name:product.pa_shoe_size
@@ -3967,34 +3888,29 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"이 규칙이 이 카테고리 또는 해당 하위 카테고리에 속하는 품목에만 적용되는 경"
-"우 품목 카테고리를 지정하십시오. 그렇지 않으면 비워 두십시오."
+"이 규칙이 이 카테고리 또는 해당 하위 카테고리에 속하는 품목에만 적용되는 경우 품목 카테고리를 지정하십시오. 그렇지 않으면 비워 "
+"두십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
 msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
-msgstr ""
-"이 규칙이 하나의 품목에만 적용되는 경우 품목을 지정하십시오. 그렇지 않으면 비"
-"워 두십시오."
+msgstr "이 규칙이 하나의 품목에만 적용되는 경우 품목을 지정하십시오. 그렇지 않으면 비워 두십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
 msgid ""
 "Specify a template if this rule only applies to one product template. Keep "
 "empty otherwise."
-msgstr ""
-"이 규칙이 하나의 품목 양식에만 적용되는 경우 양식을 지정하십시오. 그렇지 않으"
-"면 비워 두십시오."
+msgstr "이 규칙이 하나의 품목 양식에만 적용되는 경우 양식을 지정하십시오. 그렇지 않으면 비워 두십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
 msgid ""
 "Specify the fixed amount to add or subtract (if negative) to the amount "
 "calculated with the discount."
-msgstr ""
-"할인 계산 금액을 더하거나 뺄 경우 (음수인 경우)의 고정 금액을 지정하십시오."
+msgstr "할인 계산 금액을 더하거나 뺄 경우 (음수인 경우)의 고정 금액을 지정하십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -4141,11 +4057,9 @@ msgstr "참조 '%s'가 이미 존재합니다."
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
-msgstr ""
-"%(attribute)s 속성에는 %(product)s 품목에 해당하는 값이 하나 이상 있어야 합니"
-"다."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
+msgstr "%(attribute)s 속성에는 %(product)s 품목에 해당하는 값이 하나 이상 있어야 합니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -4168,9 +4082,8 @@ msgid ""
 "since the 5 boxes are loose, you can move and place them in the way that "
 "suits you and your things best."
 msgstr ""
-"책상 정리대는 어떤 종류든 작은 물품들을 보관하기에 알맞으며 5개의 상자가 느슨"
-"하게 연결되어 있어서 사용자가 물품에 가장 적합한 방식으로 옮기며 정리할 수 있"
-"습니다."
+"책상 정리대는 어떤 종류든 작은 물품들을 보관하기에 알맞으며 5개의 상자가 느슨하게 연결되어 있어서 사용자가 물품에 가장 적합한 방식으로"
+" 옮기며 정리할 수 있습니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -4184,8 +4097,8 @@ msgstr "품목 구성기에서 사용되는 디스플레이 유형입니다."
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4193,8 +4106,7 @@ msgstr ""
 msgid ""
 "The minimum height is 65 cm, and for standing work the maximum height "
 "position is 125 cm."
-msgstr ""
-"최소 높이는 65 cm 이고, 스탠딩으로 바꿀 경우에는 최대 높이는 125 cm 입니다."
+msgstr "최소 높이는 65 cm 이고, 스탠딩으로 바꿀 경우에는 최대 높이는 125 cm 입니다."
 
 #. module: product
 #. odoo-python
@@ -4207,12 +4119,11 @@ msgstr "최소 마진은 최대 마진보다 낮아야 합니다."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
-"이 콤보의 제품 중 최저 가격은 콤보 제품 내의 다른 콤보와 비교하여 콤보의 가격"
-"을 비례 배분하는 데 활용됩니다. 이 방식은 사용자가 콤보에서 어떤 제품을 선택"
-"하든 가격이 일관되게 유지되도록 보장합니다."
+"이 콤보의 제품 중 최저 가격은 콤보 제품 내의 다른 콤보와 비교하여 콤보의 가격을 비례 배분하는 데 활용됩니다. 이 방식은 사용자가 "
+"콤보에서 어떤 제품을 선택하든 가격이 일관되게 유지되도록 보장합니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__product_count
@@ -4225,14 +4136,13 @@ msgstr "이 카테고리에 속하는 품목 수 (하위 카테고리는 고려�
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
-"생성할 파생 상품 수가 허용 한도를 초과합니다. 각 조합에 대한 파생 상품을 생성"
-"하지 않거나 판매 주문의 요청에 따라 생성해야 합니다. 이렇게 하려면 속성의 양"
-"식 보기를 열고 *파생 상품 만들기* 모드를 변경합니다."
+"생성할 파생 상품 수가 허용 한도를 초과합니다. 각 조합에 대한 파생 상품을 생성하지 않거나 판매 주문의 요청에 따라 생성해야 합니다. "
+"이렇게 하려면 속성의 양식 보기를 열고 *파생 상품 만들기* 모드를 변경합니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -4248,13 +4158,12 @@ msgstr "품목 양식이 보관되어 있어서 조합할 수 없습니다."
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
-"단가를 활용하기 위해 이 공급업체로부터 구매할 수량입니다. 공급업체 단위를 설"
-"정한 경우, 수량은 해당 단위로 지정해야 하며, 그렇지 않은 경우에는 제품의 기"
-"본 단위로 입력해야 합니다."
+"단가를 활용하기 위해 이 공급업체로부터 구매할 수량입니다. 공급업체 단위를 설정한 경우, 수량은 해당 단위로 지정해야 하며, 그렇지 않은"
+" 경우에는 제품의 기본 단위로 입력해야 합니다."
 
 #. module: product
 #. odoo-python
@@ -4276,20 +4185,16 @@ msgstr ""
 msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
-msgstr ""
-"%(value)s 값이 %(product)s 품목의 %(attribute)s 속성에 대해 정의되지 않았습니"
-"다."
+msgstr "%(value)s 값이 %(product)s 품목의 %(attribute)s 속성에 대해 정의되지 않았습니다."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
-msgstr ""
-"기본 단위 수긔 값은 0보다 커야 합니다. 이 품목의 단위 당 가격을 숨기려면 0을 "
-"입력하십시오."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
+msgstr "기본 단위 수긔 값은 0보다 커야 합니다. 이 품목의 단위 당 가격을 숨기려면 0을 입력하십시오."
 
 #. module: product
 #. odoo-python
@@ -4325,8 +4230,8 @@ msgid ""
 "to no possible variant. Please archive or delete your product directly if "
 "intended."
 msgstr ""
-"이러한 품목 속성과 값 및 예외 사항에 대한 구성 때문에 사용할 수 있는 세부 사"
-"양이 없습니다. 필요한 경우, 품목을 직접 보관 처리하거나 삭제하십시오."
+"이러한 품목 속성과 값 및 예외 사항에 대한 구성 때문에 사용할 수 있는 세부 사양이 없습니다. 필요한 경우, 품목을 직접 보관 "
+"처리하거나 삭제하십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__price_extra
@@ -4355,18 +4260,14 @@ msgstr "이 제품은 콤보 메뉴의 일부이므로 유형을 \"콤보\"로 �
 msgid ""
 "This vendor's product code will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
-msgstr ""
-"이 공급업체의 품목 코드는 견적요청서를 인쇄할 때 사용됩니다. 내부용으로 사용"
-"하려면 비워 두십시오."
+msgstr "이 공급업체의 품목 코드는 견적요청서를 인쇄할 때 사용됩니다. 내부용으로 사용하려면 비워 두십시오."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_name
 msgid ""
 "This vendor's product name will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
-msgstr ""
-"이 공급업체의 품목명은 견적요청서를 인쇄할 때 사용됩니다. 내부용으로 사용하려"
-"면 비워 두십시오."
+msgstr "이 공급업체의 품목명은 견적요청서를 인쇄할 때 사용됩니다. 내부용으로 사용하려면 비워 두십시오."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__thumbnail
@@ -4652,13 +4553,11 @@ msgstr "값 수"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "품목 가치입니다 (AVCO에서 자동 계산). \n"
-"          매입가를 모를 경우 품목 가치 평가를 하기 위해 사용합니다 (예: 재고 "
-"조정 시). \n"
+"          매입가를 모를 경우 품목 가치 평가를 하기 위해 사용합니다 (예: 재고 조정 시). \n"
 "           판매주문서에서 마진을 계산할 때 사용합니다."
 
 #. module: product
@@ -4852,11 +4751,9 @@ msgstr "주의"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
-msgstr ""
-"세부 디테일을 꼼꼼하게 따져 만들어진 저희 책상 제품은 최고의 품질을 자랑합니"
-"다."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
+msgstr "세부 디테일을 꼼꼼하게 따져 만들어진 저희 책상 제품은 최고의 품질을 자랑합니다."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight
@@ -4936,8 +4833,7 @@ msgstr "노란색"
 msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
-msgstr ""
-"%(product_count)s 품목에 \"%(attribute_value)s\" 값을 추가하려고 합니다."
+msgstr "%(product_count)s 품목에 \"%(attribute_value)s\" 값을 추가하려고 합니다."
 
 #. module: product
 #. odoo-python
@@ -4951,8 +4847,7 @@ msgstr "%s 품목의 추가 가격을 업데이트하려고 합니다."
 msgid ""
 "You are deactivating the pricelist feature. Every active pricelist will be "
 "archived."
-msgstr ""
-"가격표 기능이 비활성화된 상태입니다. 모든 사용 중인 가격표 보관 처리됩니다."
+msgstr "가격표 기능이 비활성화된 상태입니다. 모든 사용 중인 가격표 보관 처리됩니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
@@ -4970,18 +4865,14 @@ msgstr "비용에 가격 인상을 적용할 수 있습니다."
 msgid ""
 "You can assign pricelists to your customers or select one when creating a "
 "new sales quotation."
-msgstr ""
-"고객에게 가격표를 배정하거나 새 판매 견적을 작성할 때 가격표를 선택할 수 있습"
-"니다."
+msgstr "고객에게 가격표를 배정하거나 새 판매 견적을 작성할 때 가격표를 선택할 수 있습니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_document__type
 msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
-msgstr ""
-"컴퓨터에서 파일을 업로드하거나 인터넷 링크를 복사하여 파일에 붙여넣기 할 수 "
-"있습니다."
+msgstr "컴퓨터에서 파일을 업로드하거나 인터넷 링크를 복사하여 파일에 붙여넣기 할 수 있습니다."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__image
@@ -5024,30 +4915,26 @@ msgstr "아직 연결된 품목이 있으므로 이 속성을 보관할 수 없�
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"다음 품목에서 사용되고 있으므로 %(attribute)s 속성의 세부 사양 생성 모드를 변"
-"경할 수 없습니다:\n"
+"다음 품목에서 사용되고 있으므로 %(attribute)s 속성의 세부 사양 생성 모드를 변경할 수 없습니다:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
-msgstr ""
-"다음 품목에서 사용되고 있으므로 %(value)s 값의 속성을 변경할 수 없습니다: %"
-"(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
+msgstr "다음 품목에서 사용되고 있으므로 %(value)s 값의 속성을 변경할 수 없습니다: %(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5062,17 +4949,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
-msgstr ""
-"%(product)s 품목에 설정되어 있는 %(value)s 값의 품목은 변경할 수 없습니다."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
+msgstr "%(product)s 품목에 설정되어 있는 %(value)s 값의 품목은 변경할 수 없습니다."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
 msgstr "%(product)s 품목에 설정되어 있는 %(value)s 값은 변경할 수 없습니다."
 
 #. module: product
@@ -5093,8 +4979,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
 "다음 품목에서 사용되고 있으므로 %(attribute)s 속성을 삭제할 수 없습니다:\n"
@@ -5104,8 +4989,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
 "다음 품목에서 사용되고 있으므로 %(value)s 값을 삭제할 수 없습니다:\n"
@@ -5115,11 +4999,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
-"%(product_src)s 품목에서 %(product_dest)s 품목으로 %(attribute)s 속성을 이동"
-"할 수 없습니다."
+"%(product_src)s 품목에서 %(product_dest)s 품목으로 %(attribute)s 속성을 이동할 수 없습니다."
 
 #. module: product
 #. odoo-python
@@ -5127,8 +5010,7 @@ msgstr ""
 msgid ""
 "You cannot update related variants from the values. Please update related "
 "values from the variants."
-msgstr ""
-"값에서 관련 파생을 갱신할 수 없습니다. 파생에서 관련 값을 갱신하십시오."
+msgstr "값에서 관련 파생을 갱신할 수 없습니다. 파생에서 관련 값을 갱신하십시오."
 
 #. module: product
 #. odoo-javascript
@@ -5136,12 +5018,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "판매 또는 구매할 품목을 모두 정의해야 합니다.\n"
-"                           저장 가능 품목, 소모품, 서비스 등 모든 품목에 대"
-"해 지정하세요."
+"                           저장 가능 품목, 소모품, 서비스 등 모든 품목에 대해 지정하세요."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_template_action
@@ -5157,15 +5037,12 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
 "판매 또는 구매할 품목을 반드시 모두 지정해야 합니다.\n"
 "                 저장 가능 품목이나 소모품, 서비스 중에서 지정하세요. \n"
-"                 판매 프로세스를 간소화할 수 있는 품목 양식 정보는 다음과 같"
-"습니다: \n"
+"                 판매 프로세스를 간소화할 수 있는 품목 양식 정보는 다음과 같습니다: \n"
 "                 가격, 견적서 메모, 회계 정보, 조달 방식 등을 활용해 보세요."
 
 #. module: product

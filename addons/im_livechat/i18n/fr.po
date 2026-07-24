@@ -17,14 +17,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-20 05:29+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/fr/>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-master/im_livechat/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: im_livechat
@@ -32,15 +30,12 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
 "\n"
-"La note du Live Chat doit être égale à 1 (Insatisfait), 3 (Neutre), 5 "
-"(Satisfait) ou être vide et ne peut être définie que sur les canaux de Live "
-"Chat.\n"
+"La note du Live Chat doit être égale à 1 (Insatisfait), 3 (Neutre), 5 (Satisfait) ou être vide et ne peut être définie que sur les canaux de Live Chat.\n"
 "        "
 
 #. module: im_livechat
@@ -125,7 +120,8 @@ msgstr "%s (copie)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
 "'%(input_email)s' ne ressemble pas à un e-mail valide. Pourriez-vous "
 "réessayer ?"
@@ -137,8 +133,8 @@ msgid ""
 "'%(input_phone)s' does not look like a valid phone number. Can you please "
 "try again?"
 msgstr ""
-"'%(input_phone)s' ne semble pas être un numéro de téléphone valide. Veuillez "
-"réessayer."
+"'%(input_phone)s' ne semble pas être un numéro de téléphone valide. Veuillez"
+" réessayer."
 
 #. module: im_livechat
 #. odoo-python
@@ -150,17 +146,13 @@ msgstr "'%s' n’est pas un numéro de téléphone valide."
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Afficher' affiche le bouton de chat sur les pages.\n"
-"* 'Afficher avec notification' est 'Afficher' en plus d'un texte flottant "
-"juste à côté du bouton.\n"
-"* 'Ouvrir automatiquement' affiche le bouton et ouvre automatiquement le "
-"volet de conversation.\n"
+"* 'Afficher avec notification' est 'Afficher' en plus d'un texte flottant juste à côté du bouton.\n"
+"* 'Ouvrir automatiquement' affiche le bouton et ouvre automatiquement le volet de conversation.\n"
 "* 'Masquer' cache le bouton de chat sur les pages.\n"
 
 #. module: im_livechat
@@ -172,34 +164,34 @@ msgstr "< 1min"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
-msgstr "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Rejoindre"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
+msgstr "<i class=\"o-me-1_5 oi\" data-icon=\"login\" role=\"img\"/>Rejoindre"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
-msgstr "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Quitter"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
+msgstr "<i class=\"o-me-1_5 oi\" data-icon=\"logout\" role=\"img\"/>Quitter"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-"
-"label=\"Satisfait\"/>"
+"<i class=\"text-success oi\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Satisfait\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Retour au mode édition"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Retour au mode édition"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Supprimer l'opérateur\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Supprimer l'opérateur\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -224,8 +216,8 @@ msgstr "<span>Sessions en cours :</span>"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Rappel : Cette étape ne sera jouée que si aucun opérateur n'est "
 "disponible</span>"
@@ -233,25 +225,18 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>Astuce : Au moins une interaction (Question, E-mail, ...) est "
-"nécessaire avant que le Bot puisse effectuer des actions plus complexes "
-"(Transférer à un opérateur, ...).</span>\n"
-"<span>Utilisez les règles de canal si vous souhaitez que le bot "
-"n'interagisse avec les visiteurs que lorsque aucun opérateur n'est "
-"disponible.</span>"
+"<span>Astuce : Au moins une interaction (Question, E-mail, ...) est nécessaire avant que le Bot puisse effectuer des actions plus complexes (Transférer à un opérateur, ...).</span>\n"
+"<span>Utilisez les règles de canal si vous souhaitez que le bot n'interagisse avec les visiteurs que lorsque aucun opérateur n'est disponible.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Astuce : Au moins une interaction (Question, E-mail, ...) est "
 "nécessaire avant que le Bot puisse effectuer des actions plus complexes "
@@ -260,8 +245,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Astuce : Planifiez d'autres étapes pour le Bot au cas où aucun "
 "opérateur n'est disponible.</span>"
@@ -522,11 +507,11 @@ msgstr "Canaux"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"Le chat est privé et unique entre 2 personnes. Le groupe est privé parmi les "
-"personnes invitées. Le canal peut être librement rejoint (selon sa "
+"Le chat est privé et unique entre 2 personnes. Le groupe est privé parmi les"
+" personnes invitées. Le canal peut être librement rejoint (selon sa "
 "configuration)."
 
 #. module: im_livechat
@@ -633,7 +618,8 @@ msgstr "Chatbots"
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid "Choose the live chat channel you want to display on your website."
 msgstr ""
-"Choisissez le canal Live Chat que vous souhaitez afficher sur votre site web."
+"Choisissez le canal Live Chat que vous souhaitez afficher sur votre site "
+"web."
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_troubleshooting_answer_chrome_demo
@@ -842,8 +828,7 @@ msgstr "Date : la semaine dernière"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__livechat_looking_for_help_since_dt
 msgid "Datetime when the chat entered the 'Looking for help' status."
-msgstr ""
-"Date et heure auxquelles le chat est passé à l’état \"Recherche d’aide\"."
+msgstr "Date et heure auxquelles le chat est passé à l’état \"Recherche d’aide\"."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_agent_history_view_search
@@ -1129,8 +1114,8 @@ msgid ""
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
 "Donne l'ordre pour trouver une règle correspondante. Si 2 règles "
-"correspondent à l'URL/pays donné, celle avec la séquence la plus petite sera "
-"choisie."
+"correspondent à l'URL/pays donné, celle avec la séquence la plus petite sera"
+" choisie."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1140,8 +1125,8 @@ msgid ""
 "<strong>Marketing.</strong>"
 msgstr ""
 "Allez dans <strong>Site web</strong> > <strong>Configuration</strong> > "
-"<strong>Paramètres</strong> > <strong>E-mail</strong> & <strong>Marketing</"
-"strong>."
+"<strong>Paramètres</strong> > <strong>E-mail</strong> & "
+"<strong>Marketing</strong>."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1545,8 +1530,8 @@ msgid ""
 "Learn how to display a live chat bubble on your website and start chatting "
 "with visitors in a few easy steps."
 msgstr ""
-"Découvrez comment afficher une bulle de chat sur votre site web et commencer "
-"à discuter avec les visiteurs en quelques étapes simples."
+"Découvrez comment afficher une bulle de chat sur votre site web et commencer"
+" à discuter avec les visiteurs en quelques étapes simples."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1795,8 +1780,8 @@ msgid ""
 "Looking for help date should only be set if the channel is looking for help "
 "and must be empty otherwise."
 msgstr ""
-"La date de recherche d’aide ne doit être définie que lorsque le canal est en "
-"état \"Recherche d’aide\" et doit être vide dans les autres cas."
+"La date de recherche d’aide ne doit être définie que lorsque le canal est en"
+" état \"Recherche d’aide\" et doit être vide dans les autres cas."
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_discuss_channel_rtc_session
@@ -2233,8 +2218,8 @@ msgstr "Lien de redirection"
 msgid ""
 "Regular expression specifying the web pages this rule will be applied on."
 msgstr ""
-"Expression régulière précisant les pages web sur lesquelles cette règle sera "
-"appliquée."
+"Expression régulière précisant les pages web sur lesquelles cette règle sera"
+" appliquée."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__mail_message_id
@@ -2480,14 +2465,11 @@ msgstr "Sessions par opérateur"
 #, fuzzy
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
-"Configurez un bot avec un script défini pour discuter avec les visiteurs de "
-"votre site Web.\n"
-"Qualifiez les conversations et transférez-les à vos agents de Live Chat, "
-"puis générez automatiquement des pistes ou des tickets d'assistance."
+"Configurez un bot avec un script défini pour discuter avec les visiteurs de votre site Web.\n"
+"Qualifiez les conversations et transférez-les à vos agents de Live Chat, puis générez automatiquement des pistes ou des tickets d'assistance."
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_answer_setup_demo
@@ -2625,8 +2607,8 @@ msgstr "La conversation a été envoyée."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "La règle sera uniquement appliquée pour ces pays. Exemple : Si vous "
 "sélectionnez 'Belgique' et 'États-Unis' et si vous définissez l'action sur "
@@ -2728,20 +2710,11 @@ msgstr "Couleur du titre"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
-"Pour appliquer la règle uniquement à certaines pages de votre site web, "
-"saisissez une expression régulière d’URL comme /shop. Cela correspondra à "
-"toute page commençant par /shop, comme /shop/product. Laissez le champ vide "
-"pour appliquer la règle à toutes les pages.<br/>\n"
-"Pour les bases de données on-premise, GeoIP doit être installé sur votre "
-"serveur pour géolocaliser les visiteurs. Sans cela, les règles incluant des "
-"restrictions par pays seront ignorées."
+"Pour appliquer la règle uniquement à certaines pages de votre site web, saisissez une expression régulière d’URL comme /shop. Cela correspondra à toute page commençant par /shop, comme /shop/product. Laissez le champ vide pour appliquer la règle à toutes les pages.<br/>\n"
+"Pour les bases de données on-premise, GeoIP doit être installé sur votre serveur pour géolocaliser les visiteurs. Sans cela, les règles incluant des restrictions par pays seront ignorées."
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_agent_history_action
@@ -2782,8 +2755,8 @@ msgid ""
 "URL to a static page where you client can discuss with the operator of the "
 "channel."
 msgstr ""
-"URL vers une page statique où votre client peut discuter avec l'opérateur de "
-"la chaîne."
+"URL vers une page statique où votre client peut discuter avec l'opérateur de"
+" la chaîne."
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_utm_mixin

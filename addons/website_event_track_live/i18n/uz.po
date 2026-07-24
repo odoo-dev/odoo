@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 06:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"website_event_track_live/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/website_event_track_live/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,10 +29,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event_track_live.event_track_content
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/>\n"
+"<i class=\"oi oi-spin position-relative\" data-icon=\"autorenew\"/>\n"
 "                <span class=\"ps-2\">Loading Video...</span>"
 msgstr ""
-"<i class=\"fa fa-spin fa-circle-o-notch position-relative\"/> <span "
+"<i class=\"position-relative oi oi-spin\" data-icon=\"autorenew\"/> <span "
 "class=\"ps-2\">Video yuklanmoqda...</span>"
 
 #. module: website_event_track_live
@@ -69,8 +68,8 @@ msgstr "Tadbir yo‘li"
 #: model:ir.model.fields,help:website_event_track_live.field_event_track__youtube_video_id
 #, fuzzy
 msgid ""
-"Extracted from the video URL and used to infer various links (embed/"
-"thumbnail/...)"
+"Extracted from the video URL and used to infer various links "
+"(embed/thumbnail/...)"
 msgstr ""
 "Video URL manzilidan olingan va turli havolalarni (joylashtirish/eskiz/...) "
 "aniqlash uchun foydalaniladi"

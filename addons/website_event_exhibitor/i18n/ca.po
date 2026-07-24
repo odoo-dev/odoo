@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 00:38+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
-"website_event_exhibitor/ca/>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/website_event_exhibitor/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,18 +40,13 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
 msgstr ""
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
@@ -799,12 +793,10 @@ msgstr "Patrocinadors"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid ""
 "Sponsors are advertised on your event pages.<br>\n"
-"    Exhibitors have a dedicated page a with chat room for people to connect "
-"with them."
+"    Exhibitors have a dedicated page a with chat room for people to connect with them."
 msgstr ""
 "Els patrocinadors s'anuncien a les pàgines de l'esdeveniment.<br>\n"
-"    Els exhibitors tenen una pàgina dedicada a amb sala de xat perquè la "
-"gent es connecti amb ells."
+"    Els exhibitors tenen una pàgina dedicada a amb sala de xat perquè la gent es connecti amb ells."
 
 #. module: website_event_exhibitor
 #. odoo-javascript

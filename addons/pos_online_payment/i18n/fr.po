@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 16:10+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/fr/>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-master/pos_online_payment/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,10 +45,11 @@ msgstr "Un mode de paiement doit être précisé."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr ""
-"Un paiement de validation ne peut pas être utilisé pour un paiement en ligne "
-"du Point de vente."
+"Un paiement de validation ne peut pas être utilisé pour un paiement en ligne"
+" du Point de vente."
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment
@@ -65,8 +65,8 @@ msgid ""
 "set, of the POS config."
 msgstr ""
 "Tous les fournisseurs de paiement configurés pour un mode de paiement en "
-"ligne doivent utiliser la même devise que le journal des ventes ou la devise "
-"de l'entreprise si elle n'est pas définie, dans la configuration du PdV."
+"ligne doivent utiliser la même devise que le journal des ventes ou la devise"
+" de l'entreprise si elle n'est pas définie, dans la configuration du PdV."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -121,8 +121,8 @@ msgid ""
 "Could not create an online payment method (company_id=%(company_id)d, "
 "pos_config_id=%(pos_config_id)d)"
 msgstr ""
-"Impossible de créer un mode de paiement en ligne (company_id=%(company_id)d, "
-"pos_config_id=%(pos_config_id)d)"
+"Impossible de créer un mode de paiement en ligne (company_id=%(company_id)d,"
+" pos_config_id=%(pos_config_id)d)"
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_account_payment__display_name
@@ -309,7 +309,7 @@ msgstr "Erreur de serveur"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -392,7 +392,8 @@ msgstr "La commande n'a pas pu être enregistrée correctement sur le serveur."
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_session.py:0
 msgid "The partner of the POS online payment (id=%d) could not be found"
-msgstr "Impossible de trouver le partenaire du paiement en ligne du PdV (id=%d)"
+msgstr ""
+"Impossible de trouver le partenaire du paiement en ligne du PdV (id=%d)"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -482,8 +483,8 @@ msgstr ""
 msgid ""
 "There is no online payment method configured for this Point of Sale order."
 msgstr ""
-"Aucun mode de paiement en ligne n'est configuré pour cette commande du point "
-"de vente."
+"Aucun mode de paiement en ligne n'est configuré pour cette commande du point"
+" de vente."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -567,10 +568,8 @@ msgstr "Vous n'avez activé aucun"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

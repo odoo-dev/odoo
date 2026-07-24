@@ -20,14 +20,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 12:12+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"hr_timesheet/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/hr_timesheet/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_timesheet
@@ -106,8 +104,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
 msgstr ""
 "Planul/planurile analitice '%(missing_plan_names)s' sunt necesare pe "
 "proiectul '%(project_name)s' asociat fișei de pontaj."
@@ -131,27 +129,20 @@ msgstr "2 ore"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> Vizualizare detalii"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> Vizualizare detalii"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -276,12 +267,10 @@ msgstr "Aplicabilități ale planului analitic"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
 msgstr ""
-"Analizați proiectele și sarcinile la care angajații dvs. petrec timpul. "
-"<br>\n"
+"Analizați proiectele și sarcinile la care angajații dvs. petrec timpul. <br>\n"
 "Evaluați care parte este facturabilă și ce costuri reprezintă."
 
 #. module: hr_timesheet
@@ -507,7 +496,8 @@ msgstr "Timp suplimentar"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr ""
 "Generează fișe de pontaj pentru cereri de concediu validate și sărbători "
 "legale"
@@ -951,8 +941,8 @@ msgstr "Proiectul intern al unei companii ar trebui să fie în acea companie."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr ""
 "Proiectul, sarcina și conturile analitice ale fișei de pontaj trebuie să "
 "aparțină aceleiași companii."
@@ -966,8 +956,8 @@ msgstr "Nu există fișe de pontaj"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
 msgstr ""
 "Aceste proiecte au unele intrări de fișe de pontaj care le referă. Înainte "
 "de a elimina aceste proiecte, trebuie să eliminați aceste intrări din fișa "
@@ -1002,8 +992,8 @@ msgstr "Anul acesta"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
 msgstr ""
 "Acest proiect are câteva intrări de fișă de timp referitoare la el. Înainte "
 "de a elimina acest proiect, trebuie să eliminați aceste intrări din fișa de "
@@ -1022,12 +1012,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
 msgstr ""
-"Această sarcină nu poate fi ștersă deoarece este legată de fișele de pontaj. "
-"Vă rugăm să contactați o persoană cu acces superior pentru a elimina mai "
+"Această sarcină nu poate fi ștersă deoarece este legată de fișele de pontaj."
+" Vă rugăm să contactați o persoană cu acces superior pentru a elimina mai "
 "întâi fișele de pontaj, iar apoi veți putea șterge sarcina."
 
 #. module: hr_timesheet
@@ -1035,12 +1025,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_timesheet.field_res_config_settings__project_time_mode_id
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "Acesta va seta unitatea de măsură folosită în proiecte și sarcini.\n"
-"Dacă folosiți fișa de pontaj asociată proiectelor, nu uitați să setați "
-"unitatea de masură corectă la angajații dumneavoastră."
+"Dacă folosiți fișa de pontaj asociată proiectelor, nu uitați să setați unitatea de masură corectă la angajații dumneavoastră."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1277,7 +1265,8 @@ msgstr "Fișele de pontaj nu pot fi create pe o sarcină privată."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr ""
 "Fișele de pontaj trebuie create cu un angajat activ în companiile selectate."
 
@@ -1306,8 +1295,8 @@ msgid ""
 "timesheets feature."
 msgstr ""
 "Pentru a folosi funcționalitatea fișelor de pontaj, aveți nevoie de un cont "
-"analitic pentru proiectul dvs. Vă rugăm să configurați unul în planul '%"
-"(plan_name)s' sau să dezactivați funcționalitatea fișelor de pontaj."
+"analitic pentru proiectul dvs. Vă rugăm să configurați unul în planul "
+"'%(plan_name)s' sau să dezactivați funcționalitatea fișelor de pontaj."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1360,8 +1349,8 @@ msgstr "Total:"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_line_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr ""
 "Urmăriți orele de lucru pe proiecte în fiecare zi și facturați acest timp "
 "clienților dvs."
@@ -1384,8 +1373,7 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 
 #. module: hr_timesheet
@@ -1413,14 +1401,11 @@ msgstr "Vizualizare detalii"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_from_employee
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
-"Puteți înregistra și urmări orele de lucru pe proiect în fiecare zi. "
-"Fiecare\n"
-"                    dată petrecută pe un proiect va deveni o cheltuială și "
-"poate fi re-facturat\n"
+"Puteți înregistra și urmări orele de lucru pe proiect în fiecare zi. Fiecare\n"
+"                    dată petrecută pe un proiect va deveni o cheltuială și poate fi re-facturat\n"
 "                    clienților dacă este necesar."
 
 #. module: hr_timesheet
@@ -1432,26 +1417,23 @@ msgstr "Nu puteți accesa fișele de timp care nu sunt ale dvs."
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
-"Nu puteți înregistra fișe de pontaj pe acest proiect deoarece este legat de "
-"un cont analitic inactiv.<br/>\n"
-"                            Vă rugăm să schimbați contul sau să reactivați "
-"contul curent pentru a putea înregistra fișe de pontaj pe proiect."
+"Nu puteți înregistra fișe de pontaj pe acest proiect deoarece este legat de un cont analitic inactiv.<br/>\n"
+"                            Vă rugăm să schimbați contul sau să reactivați contul curent pentru a putea înregistra fișe de pontaj pe proiect."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
 msgstr ""
 "Nu puteți înregistra fișe de pontaj pe acest proiect deoarece este legat de "
 "un cont analitic inactiv.<br/> Vă rugăm să schimbați acest cont sau să "
-"reactivați contul curent pentru a putea înregistra fișe de pontaj pe proiect."
+"reactivați contul curent pentru a putea înregistra fișe de pontaj pe "
+"proiect."
 
 #. module: hr_timesheet
 #. odoo-python

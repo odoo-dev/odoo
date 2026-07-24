@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 23:31+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
-"projects/odoo-master/website_profile/zh_Hant/>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/projects/odoo-master/website_profile/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,33 +57,33 @@ msgstr ". 請嘗試其他搜尋條件."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
-msgstr "<i class=\"fa fa-arrow-right\"/> 獲取獎章"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Get Badges"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> 獲取獎章"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
-msgstr "<i class=\"fa fa-pencil me-1\"/> 編輯"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>EDIT"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/> 編輯"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/> 編輯"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>Edit"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/> 編輯"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
-msgstr "<i class=\"fa fa-pencil me-2\"/> 編輯個人檔案"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"edit\"/>EDIT PROFILE"
+msgstr "<i class=\"me-2 oi-filled oi\" data-icon=\"edit\"/> 編輯個人檔案"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/> 所有獎章"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Badges"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/> 所有獎章"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
-msgstr "<i class=\"oi oi-arrow-right\"/> 所有獎章"
+msgid "<i class=\"oi\" data-icon=\"east\"/> All Badges"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> 所有獎章"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -131,9 +130,7 @@ msgstr "<span class=\"text-muted\">經驗值</span>"
 msgid ""
 "<span id=\"email_validated_message\">Congratulations! Your email has just "
 "been validated.</span>"
-msgstr ""
-"<span id=\"email_validated_message\">恭喜您！你的電子郵件剛剛經過驗證。</"
-"span>"
+msgstr "<span id=\"email_validated_message\">恭喜您！你的電子郵件剛剛經過驗證。</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
@@ -144,19 +141,11 @@ msgstr "<strong class=\"mb-3 text-white me-2\">排名依據：</strong>"
 #: model:mail.template,body_html:website_profile.validation_email
 msgid ""
 "<t>\n"
-"                            Hello <t t-out=\"object.name or ''\">Marc Demo</"
-"t>,<br/><br/>\n"
-"                            You have been invited to validate your email in "
-"order to get access to \"<t t-out=\"object.company_id.name or "
-"''\">YourCompany</t>\" website.\n"
-"                            To validate your email, please click on the "
-"button below:\n"
+"                            Hello <t t-out=\"object.name or ''\">Marc Demo</t>,<br/><br/>\n"
+"                            You have been invited to validate your email in order to get access to \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\" website.\n"
+"                            To validate your email, please click on the button below:\n"
 "                            <div style=\"margin: 32px 0px 32px 0px;\">\n"
-"                                <a t-att-href=\"ctx.get('token_url')\" t-"
-"attf-style=\"background-color: {{object.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\">\n"
+"                                <a t-att-href=\"ctx.get('token_url')\" t-attf-style=\"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\">\n"
 "                                    Validate my account\n"
 "                                </a>\n"
 "                            </div>\n"
@@ -227,13 +216,11 @@ msgstr "獎章代表你的一系列成就，應該自豪展示！<br/>"
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
-"                        you receive badges for being especially helpful.<br "
-"class=\"d-none d-lg-inline-block\"/>Badges\n"
+"                        you receive badges for being especially helpful.<br class=\"d-none d-lg-inline-block\"/>Badges\n"
 "                        appear on your profile page, and your posts."
 msgstr ""
-"除了通過您的問題和答案贏得聲譽之外，您還會因特別有幫助而獲得成就。<br "
-"class=\"d-none d-lg-inline-block\"/>成就將顯示在您的個人資料頁面和您的貼文"
-"上。"
+"除了通過您的問題和答案贏得聲譽之外，您還會因特別有幫助而獲得成就。<br class=\"d-none d-lg-inline-"
+"block\"/>成就將顯示在您的個人資料頁面和您的貼文上。"
 
 #. module: website_profile
 #. odoo-javascript
@@ -682,6 +669,4 @@ msgstr "└ 使用者"
 #~ "You can score more points by answering quizzes at the end of each course "
 #~ "content. Points can also be earned on the forum. Follow this link to the "
 #~ "guidelines of the forum."
-#~ msgstr ""
-#~ "您可以通過在每個課程結束時回答測驗來獲取更多積分。也可以在論壇上賺取積分。"
-#~ "請按照此連結連結到論壇指南。"
+#~ msgstr "您可以通過在每個課程結束時回答測驗來獲取更多積分。也可以在論壇上賺取積分。請按照此連結連結到論壇指南。"

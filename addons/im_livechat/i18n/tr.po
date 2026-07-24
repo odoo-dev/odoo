@@ -32,8 +32,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 13:12+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/tr/>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/im_livechat/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,8 +44,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -133,7 +131,8 @@ msgstr "%s (kopya)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
 "'%(input_email)s' geçerli bir e-posta gibi görünmüyor. Lütfen tekrar "
 "deneyebilir misiniz?"
@@ -156,17 +155,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Göster' sayfalarında sohbet düğmesini görüntüler.\n"
-"* 'Bildirimle göster', düğmenin hemen yanındaki kayan bir metne ek olarak "
-"'Göster'dir.\n"
-"* 'Otomatik olarak aç' düğmesini görüntüler ve otomatik olarak konuşma "
-"bölmesini açar.\n"
+"* 'Bildirimle göster', düğmenin hemen yanındaki kayan bir metne ek olarak 'Göster'dir.\n"
+"* 'Otomatik olarak aç' düğmesini görüntüler ve otomatik olarak konuşma bölmesini açar.\n"
 "* 'Gizle' sayfalardaki sohbet düğmesini gizler.\n"
 
 #. module: im_livechat
@@ -177,30 +172,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Düzenleme moduna geri dönün"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Düzenleme moduna geri dönün"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Remove operator\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -225,41 +220,35 @@ msgstr "<span>Devam eden oturumlar:</span>"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr "<span>Hatırlatma: Bu adım yalnızca operatör yoksa oynatılır.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>İpucu: Botun daha karmaşık eylemler gerçekleştirebilmesi için en az "
-"bir etkileşim (Soru, E-posta, ...) gereklidir (Bir Operatöre İletme, ...). </"
-"span>\n"
-"                    <span>Botun ziyaretçilerle yalnızca operatör olmadığında "
-"etkileşim kurmasını istiyorsanız Kanal Kuralları'nı kullanın.</span>"
+"<span>İpucu: Botun daha karmaşık eylemler gerçekleştirebilmesi için en az bir etkileşim (Soru, E-posta, ...) gereklidir (Bir Operatöre İletme, ...). </span>\n"
+"                    <span>Botun ziyaretçilerle yalnızca operatör olmadığında etkileşim kurmasını istiyorsanız Kanal Kuralları'nı kullanın.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>İpucu: Botun daha karmaşık eylemler gerçekleştirebilmesi için en az "
-"bir etkileşim (Soru, E-posta, ...) gereklidir (Bir Operatöre İletme, ...).</"
-"span>"
+"bir etkileşim (Soru, E-posta, ...) gereklidir (Bir Operatöre İletme, "
+"...).</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>İpucu: Operatör olmaması durumunda Bot için daha fazla adım "
 "planlayın.</span>"
@@ -366,8 +355,8 @@ msgstr "Tüm ülkeler"
 msgid ""
 "Alternatively, share this URL with your customers or suppliers via email:"
 msgstr ""
-"Alternatif olarak, bu URL'yi müşterilerinizle veya tedarikçilerinizle e-"
-"posta yoluyla paylaşın:"
+"Alternatif olarak, bu URL'yi müşterilerinizle veya tedarikçilerinizle "
+"e-posta yoluyla paylaşın:"
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__im_livechat_channel_rule__chatbot_enabled_condition__always
@@ -480,8 +469,8 @@ msgstr "Hazır Cevaplar"
 msgid ""
 "Cannot create history as it is only available for live chats: %(histories)s."
 msgstr ""
-"Yalnızca canlı sohbetler için mevcut olduğundan geçmiş oluşturulamıyor: %"
-"(histories)s."
+"Yalnızca canlı sohbetler için mevcut olduğundan geçmiş oluşturulamıyor: "
+"%(histories)s."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__livechat_channel_id
@@ -521,8 +510,8 @@ msgstr "Kanallar"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "Sohbet 2 kişi arasında özel ve benzersizdir. Grup, davet edilen kişiler "
 "arasında özeldir. Kanal serbestçe birleştirilebilir (yapılandırmasına bağlı "
@@ -1119,8 +1108,8 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"Eşleşen kuralı bulmak için verilen sıralama. Şayet 2 kural, belirtilen url/"
-"ülke için aynı şekilde eşleşiyorsa, ilk başta sıralaması en düşük olan "
+"Eşleşen kuralı bulmak için verilen sıralama. Şayet 2 kural, belirtilen "
+"url/ülke için aynı şekilde eşleşiyorsa, ilk başta sıralaması en düşük olan "
 "seçilir."
 
 #. module: im_livechat
@@ -1249,8 +1238,8 @@ msgstr ""
 msgid ""
 "Hmmm, let me check if I can find someone that could help you with that..."
 msgstr ""
-"Hmmm, bu konuda sana yardımcı olabilecek birini bulup bulamayacağımı kontrol "
-"etmeme izin ver..."
+"Hmmm, bu konuda sana yardımcı olabilecek birini bulup bulamayacağımı kontrol"
+" etmeme izin ver..."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_agent_history_view_search
@@ -1339,7 +1328,8 @@ msgstr ""
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_documentation_exit
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_documentation_exit_demo
 msgid "If you need anything else, feel free to get back in touch"
-msgstr "Başka bir şeye ihtiyacınız varsa, tekrar iletişime geçmekten çekinmeyin"
+msgstr ""
+"Başka bir şeye ihtiyacınız varsa, tekrar iletişime geçmekten çekinmeyin"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_script__image_1920
@@ -2065,7 +2055,8 @@ msgstr "(yalnız"
 #. odoo-python
 #: code:addons/im_livechat/models/im_livechat_channel.py:0
 msgid "Only Live Chat operators can join Live Chat channels"
-msgstr "Canlı Sohbet kanallarına yalnızca Canlı Sohbet operatörleri katılabilir"
+msgstr ""
+"Canlı Sohbet kanallarına yalnızca Canlı Sohbet operatörleri katılabilir"
 
 #. module: im_livechat
 #. odoo-python
@@ -2448,8 +2439,7 @@ msgstr "Operatör Başına Oturumlar"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2588,8 +2578,8 @@ msgstr "Konuşma gönderildi."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "Kural sadece bu ülkeler için geçerlidir. Örneğin: Belçika ve Amerika "
 "seçerseniz ve Butonu Gizle aksiyonu seçilirse, sohbet butonu bu 2 ülkeden "
@@ -2612,8 +2602,8 @@ msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
 msgstr ""
-"Ziyaretçi, seçeneğe tıklandığında bu bağlantıya yönlendirilecektir (bağlantı "
-"canlı sohbet web sitesinin dışındaysa komut dosyasının sona ereceğini "
+"Ziyaretçi, seçeneğe tıklandığında bu bağlantıya yönlendirilecektir (bağlantı"
+" canlı sohbet web sitesinin dışındaysa komut dosyasının sona ereceğini "
 "unutmayın)."
 
 #. module: im_livechat
@@ -2631,8 +2621,8 @@ msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
 msgstr ""
-"Bu, ziyaretçilerinizin yeni bir sohbet başlattıklarında görecekleri otomatik "
-"hoş geldin mesajıdır."
+"Bu, ziyaretçilerinizin yeni bir sohbet başlattıklarında görecekleri otomatik"
+" hoş geldin mesajıdır."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2691,20 +2681,11 @@ msgstr "Başlık Rengi"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
-"Kuralı web sitenizin yalnızca belirli sayfalarına uygulamak için /shop gibi "
-"bir URL regex girin. Bu, /shop/product gibi /shop ile başlayan tüm "
-"sayfalarla eşleşecektir. Kuralı tüm sayfalara uygulamak için alanı boş "
-"bırakın.<br/>\n"
-"                                    Şirket içi veritabanlarında, "
-"ziyaretçilerin coğrafi konumunu belirlemek için sunucunuzda GeoIP yüklü "
-"olmalıdır. Bu olmadan, ülke kısıtlamaları içeren kurallar yok sayılacaktır."
+"Kuralı web sitenizin yalnızca belirli sayfalarına uygulamak için /shop gibi bir URL regex girin. Bu, /shop/product gibi /shop ile başlayan tüm sayfalarla eşleşecektir. Kuralı tüm sayfalara uygulamak için alanı boş bırakın.<br/>\n"
+"                                    Şirket içi veritabanlarında, ziyaretçilerin coğrafi konumunu belirlemek için sunucunuzda GeoIP yüklü olmalıdır. Bu olmadan, ülke kısıtlamaları içeren kurallar yok sayılacaktır."
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_agent_history_action

@@ -29,15 +29,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 23:58+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"event_sale/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/event_sale/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: event_sale
@@ -51,8 +48,8 @@ msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
-msgid "<i class=\"fa fa-arrow-right\"/> Configure Events &amp; Tickets"
-msgstr "<i class=\"fa fa-arrow-right\"/> Skonfiguruj wydarzenia i bilety"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Configure Events &amp; Tickets"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Skonfiguruj wydarzenia i bilety"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
@@ -150,7 +147,8 @@ msgid ""
 "Choose an event and it will automatically create a registration for this "
 "event."
 msgstr ""
-"Wybierz wydarzenie, co automatycznie utworzy rejestrację dla tego wydarzenia."
+"Wybierz wydarzenie, co automatycznie utworzy rejestrację dla tego "
+"wydarzenia."
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_sale_order_line__event_slot_id
@@ -370,16 +368,16 @@ msgstr "ID"
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid slot choice \"%(slot_name)s\" for event \"%(event_name)s\"."
 msgstr ""
-"Nieprawidłowy wybór przedziału czasowego \"%(slot_name)s\" dla wydarzenia \"%"
-"(event_name)s\"."
+"Nieprawidłowy wybór przedziału czasowego \"%(slot_name)s\" dla wydarzenia "
+"\"%(event_name)s\"."
 
 #. module: event_sale
 #. odoo-python
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid ticket choice \"%(ticket_name)s\" for event \"%(event_name)s\"."
 msgstr ""
-"Nieprawidłowy wybór biletu \"%(ticket_name)s\" na wydarzenie \"%(event_name)"
-"s\"."
+"Nieprawidłowy wybór biletu \"%(ticket_name)s\" na wydarzenie "
+"\"%(event_name)s\"."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
@@ -635,8 +633,8 @@ msgid ""
 "ticket and a slot in case the event has multiple time slots."
 msgstr ""
 "Element zamówienia sprzedaży z produktem %(product_name)s potrzebuje "
-"wydarzenia, biletu i przedziału czasowego, w przypadku, że wydarzenie będzie "
-"mieć więcej niż jeden przedział."
+"wydarzenia, biletu i przedziału czasowego, w przypadku, że wydarzenie będzie"
+" mieć więcej niż jeden przedział."
 
 #. module: event_sale
 #. odoo-python
@@ -669,14 +667,12 @@ msgstr "Niepotwierdzony"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__state
 msgid ""
-"Unconfirmed: registrations in a pending state waiting for an action "
-"(specific case, notably with sale status)\n"
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
 "Registered: registrations considered taken by a client\n"
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
 msgstr ""
-"Niepotwierdzone: rejestracje w stanie oczekującym, czekające na działanie "
-"(konkretny przypadek, zwłaszcza ze statusem sprzedaży)\n"
+"Niepotwierdzone: rejestracje w stanie oczekującym, czekające na działanie (konkretny przypadek, zwłaszcza ze statusem sprzedaży)\n"
 "Zarejestrowane: rejestracje uważane za dokończone przez klienta\n"
 "Wziął udział: rejestracje w których uczestnik wziął udział w wydarzeniu\n"
 "Anulowane: rejestracje anulowane ręcznie"

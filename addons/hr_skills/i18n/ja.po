@@ -13,8 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 13:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"hr_skills/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/hr_skills/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,12 +34,8 @@ msgstr "'履歴書 - %s' % (object.name)"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"矢印アイコン\" "
-"title=\"矢印\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"矢印アイコン\" title=\"矢印\"/>"
 
 #. module: hr_skills
 #. odoo-python
@@ -53,10 +48,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_employee_skill.py:0
 msgid ""
-"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. "
-"Navigate to Skill types!</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. Navigate to Skill types!</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Show Skill Types\n"
 "                </a>"
 msgstr ""
@@ -98,9 +91,7 @@ msgstr "Allen-Keller"
 msgid ""
 "Allows to encrypt/decrypt plain text or files. Available as a web app or as "
 "an API."
-msgstr ""
-"プレーンテキストやファイルを暗号化/復号化できます。ウェブアプリまたはAPIとし"
-"て利用可能です。"
+msgstr "プレーンテキストやファイルを暗号化/復号化できます。ウェブアプリまたはAPIとして利用可能です。"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_jth_goodman_inc
@@ -714,9 +705,7 @@ msgid ""
 "Enter your finance data and the app tries to forecast what will be your "
 "future incomes/expenses. The application uses machine learning to train "
 "itself."
-msgstr ""
-"財務データを入力すると、アプリが将来の収入/支出を予測しようとします。このアプ"
-"リは機械学習を使って自主学習します。"
+msgstr "財務データを入力すると、アプリが将来の収入/支出を予測しようとします。このアプリは機械学習を使って自主学習します。"
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_qdp_evans_cooper_and_white
@@ -988,8 +977,7 @@ msgstr "ITテクニカルサポート担当"
 msgid ""
 "If checked, this level will be the default one selected when choosing this "
 "skill."
-msgstr ""
-"チェックした場合、このスキルの選択時にこのレベルがデフォルトで選択されます。"
+msgstr "チェックした場合、このスキルの選択時にこのレベルがデフォルトで選択されます。"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1002,9 +990,7 @@ msgstr ""
 msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
-msgstr ""
-"有効項目をFalse にセットすると、リソースレコードは削除することなく非表示にで"
-"きます。"
+msgstr "有効項目をFalse にセットすると、リソースレコードは削除することなく非表示にできます。"
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1072,37 +1058,27 @@ msgstr "職位"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied "
-"production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative "
-"to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using "
-"MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 "職位: 開発チームリーダー\n"
-"- 様々なプロダクションサポートに関する問題(Java、Perl、Shellスクリプト、SQL)"
-"の調査と修正で技術業務をサポート。\n"
-"- 全体的なシステム構築や取引システムの変更/新規開発に関連する複数の同時進行プ"
-"ロジェクトの品質保証計画を主導。\n"
-"- ポートフォリオマネジャーからの提供を受け、MATLABとSQLを使用してビジネスに関"
-"わる重要なアルファ・モデルとリスクモデルを設定、リリース。"
+"- 様々なプロダクションサポートに関する問題(Java、Perl、Shellスクリプト、SQL)の調査と修正で技術業務をサポート。\n"
+"- 全体的なシステム構築や取引システムの変更/新規開発に関連する複数の同時進行プロジェクトの品質保証計画を主導。\n"
+"- ポートフォリオマネジャーからの提供を受け、MATLABとSQLを使用してビジネスに関わる重要なアルファ・モデルとリスクモデルを設定、リリース。"
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system "
-"environments from development to production.\n"
+"- Coordinated and managed software deployment across five system environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial "
-"installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
 msgstr ""
 "職位: プロダクトマネジャー\n"
-"- 開発から生産まで、5つのシステム環境にまたがるソフトウェアのデプロイメントを"
-"調整、管理。\n"
+"- 開発から生産まで、5つのシステム環境にまたがるソフトウェアのデプロイメントを調整、管理。\n"
 "- Javaレベルのプログラミング作業を支援するストアドプロシージャを開発。\n"
-"- 商業施設や防衛関連の複数の再生可能エネルギープラントのアーキテクチャを開"
-"発。"
+"- 商業施設や防衛関連の複数の再生可能エネルギープラントのアーキテクチャを開発。"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
@@ -1303,8 +1279,7 @@ msgstr "マーティン、スタンリー、ダンカン"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through "
-"machine learning"
+"            Master thesis: Better grid management and control through machine learning"
 msgstr ""
 "電気工学修士\n"
 "　　　修士論文: 機械学習によるより良いグリッド管理と制御"
@@ -2087,8 +2062,7 @@ msgstr "終了日は開始日より後にしてください。"
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid ""
-"The following skills can't be created as they overlap or exactly match "
-"existing skills:\n"
+"The following skills can't be created as they overlap or exactly match existing skills:\n"
 "%(collisions)s"
 msgstr ""
 "以下のスキルは、既存のスキルと重複または完全一致しているため作成できません:\n"
@@ -2107,9 +2081,7 @@ msgstr "以下のスキルは、有効な開始日より前に有効な終了日
 #: code:addons/hr_skills/models/hr_skill_type.py:0
 msgid ""
 "The following skills type must contain at least one skill and one level: %s"
-msgstr ""
-"次のスキルタイプには、少なくとも1つのスキルと1つのレベルが含まれている必要が"
-"あります: %s"
+msgstr "次のスキルタイプには、少なくとも1つのスキルと1つのレベルが含まれている必要があります: %s"
 
 #. module: hr_skills
 #. odoo-python
@@ -2121,8 +2093,7 @@ msgstr "スキル %(name)s とスキルタイプ %(type)s が一致しません�
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
-msgstr ""
-"スキルレベル %(level)s は、スキルタイプ %(type)s に対して有効ではありません。"
+msgstr "スキルレベル %(level)s は、スキルタイプ %(type)s に対して有効ではありません。"
 
 #. module: hr_skills
 #: model:ir.model.constraint,message:hr_skills.constraint_hr_resume_line_date_check

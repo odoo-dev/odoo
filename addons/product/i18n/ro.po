@@ -19,14 +19,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 07:23+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"product/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/product/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: product
@@ -45,22 +43,18 @@ msgstr "# Produse"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
-"%(base)s cu un %(discount)s %% %(discount_type)s și o taxă suplimentară de %"
-"(surcharge)s\n"
-"Exemplu: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s cu un %(discount)s %% %(discount_type)s și o taxă suplimentară de %(surcharge)s\n"
+"Exemplu: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
 msgstr ""
 "%(item_name)s: data de sfârșit (%(end_date)s) trebuie să fie după data de "
 "început (%(start_date)s)"
@@ -145,29 +139,23 @@ msgstr "- %(amount)s rabat"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
-"- Codul de bare \"%(barcode)s\" este deja atribuit produselor: %"
-"(product_list)s"
+"- Codul de bare \"%(barcode)s\" este deja atribuit produselor: "
+"%(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
-"- Instantaneu: Toate variantele posibile sunt create imediat ce atributul și "
-"valorile sale sunt adăugate unui produs.\n"
-"        - Dinamic: Fiecare variantă este creată numai atunci când atributele "
-"și valorile corespunzătoare sunt adăugate unei comenzi de vânzare.\n"
+"- Instantaneu: Toate variantele posibile sunt create imediat ce atributul și valorile sale sunt adăugate unui produs.\n"
+"        - Dinamic: Fiecare variantă este creată numai atunci când atributele și valorile corespunzătoare sunt adăugate unei comenzi de vânzare.\n"
 "        - Niciodată: Variantele nu sunt niciodată create pentru atribut.\n"
-"        Notă: acest lucru nu poate fi schimbat odată ce atributul este "
-"folosit pe un produs."
+"        Notă: acest lucru nu poate fi schimbat odată ce atributul este folosit pe un produs."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -256,20 +244,20 @@ msgstr "<b>Sfat: doriți să rotunjiți la 9,99?</b>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Moneda\" title=\"Moneda\"/"
-">"
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Moneda\" "
+"title=\"Moneda\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
@@ -290,11 +278,11 @@ msgstr "<span class=\"o_stat_text\">Produse</span>"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 #, fuzzy
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Bazat "
-"pe variante</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Bazat"
+" pe variante</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
@@ -357,8 +345,8 @@ msgstr "Un produs combo trebuie să conțină cel puțin o opțiune combo."
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
 "O descriere a produsului pe care doriți să o comunicați clienților dvs. "
@@ -374,14 +362,11 @@ msgstr "Un ambalaj folosește deja codul de bare"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"Un preț este un set de prețuri de vânzare sau reguli pentru a calcula prețul "
-"linie de comandă de vânzare pe baza produselor, categoriilor de produse, "
+"Un preț este un set de prețuri de vânzare sau reguli pentru a calcula prețul"
+" linie de comandă de vânzare pe baza produselor, categoriilor de produse, "
 "datelor și cantităților comandate."
 
 #. module: product
@@ -391,8 +376,8 @@ msgid ""
 "A pricelist item with \"Other Pricelist\" as base must have a "
 "base_pricelist_id."
 msgstr ""
-"Un element de listă de prețuri cu „Altă listă de prețuri” ca bază trebuie să "
-"aibă un base_pricelist_id."
+"Un element de listă de prețuri cu „Altă listă de prețuri” ca bază trebuie să"
+" aibă un base_pricelist_id."
 
 #. module: product
 #. odoo-python
@@ -531,8 +516,7 @@ msgid ""
 "Add products using the \"Add Products\" button at the top right to\n"
 "                                include them in the report."
 msgstr ""
-"Adăugați produse folosind butonul „Adăugați produse” din dreapta sus pentru "
-"a\n"
+"Adăugați produse folosind butonul „Adăugați produse” din dreapta sus pentru a\n"
 "                                le include în raport."
 
 #. module: product
@@ -791,24 +775,15 @@ msgstr "Atribute & variante"
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 #, fuzzy
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Cantitate disponibilă (calculată ca Cantitate la dispoziție - cantitate "
-"rezervată - cantitate de eliminat)\n"
-"Într-un context cu o singură locație de stoc, aceasta include bunuri "
-"depozitate în această locație sau în oricare dintre locațiile sale copii.\n"
-"Într-un context cu un singur depozit, aceasta include bunuri depozitate în "
-"locația de stoc a acestui depozit sau în oricare dintre locațiile sale "
-"copii.\n"
-"În caz contrar, aceasta include bunuri depozitate în orice locație de stoc "
-"cu tip 'intern'."
+"Cantitate disponibilă (calculată ca Cantitate la dispoziție - cantitate rezervată - cantitate de eliminat)\n"
+"Într-un context cu o singură locație de stoc, aceasta include bunuri depozitate în această locație sau în oricare dintre locațiile sale copii.\n"
+"Într-un context cu un singur depozit, aceasta include bunuri depozitate în locația de stoc a acestui depozit sau în oricare dintre locațiile sale copii.\n"
+"În caz contrar, aceasta include bunuri depozitate în orice locație de stoc cu tip 'intern'."
 
 #. module: product
 #. odoo-javascript
@@ -896,8 +871,7 @@ msgstr ""
 "Preț de bază pentru calcul.\n"
 "Preț de vânzare: Prețul de bază va fi prețul de vânzare.\n"
 "Preț de cost: Prețul de bază va fi prețul de cost.\n"
-"Altă listă de prețuri: Calculul prețului de bază se bazează pe o altă listă "
-"de prețuri."
+"Altă listă de prețuri: Calculul prețului de bază se bazează pe o altă listă de prețuri."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_item__base
@@ -1006,16 +980,11 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"Schimbarea unității de măsură pentru produsul dvs. va aplica o conversie 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"Toate înregistrările existente (comenzi de vânzare, comenzi de cumpărare, "
-"etc.) care utilizează acest produs vor fi actualizate prin înlocuirea "
-"numelui unității."
+"Schimbarea unității de măsură pentru produsul dvs. va aplica o conversie 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"Toate înregistrările existente (comenzi de vânzare, comenzi de cumpărare, etc.) care utilizează acest produs vor fi actualizate prin înlocuirea numelui unității."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1338,24 +1307,16 @@ msgstr "Moneda"
 #, fuzzy
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "Cantitatea actuală de produse.\n"
-"Într-un context cu o singură locație de stoc, aceasta include bunurile "
-"stocate la această locație sau la oricare dintre copiii săi.\n"
-"Într-un context cu un singur depozit, aceasta include mărfuri stocate în "
-"stocul locației acestui depozit sau oricare dintre copiii săi.\n"
-"păstrat în stocul locației depozitului acestui magazin sau a oricăruia "
-"dintre copiii săi.\n"
-"În caz contrar, aceasta include mărfuri stocate în orice locație de stoc cu "
-"tip „intern”."
+"Într-un context cu o singură locație de stoc, aceasta include bunurile stocate la această locație sau la oricare dintre copiii săi.\n"
+"Într-un context cu un singur depozit, aceasta include mărfuri stocate în stocul locației acestui depozit sau oricare dintre copiii săi.\n"
+"păstrat în stocul locației depozitului acestui magazin sau a oricăruia dintre copiii săi.\n"
+"În caz contrar, aceasta include mărfuri stocate în orice locație de stoc cu tip „intern”."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1441,7 +1402,8 @@ msgstr "Unitatea de măsură implicită folosită în toate operațiunile stocul
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
 #, fuzzy
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr ""
 "Definiți o unitate personalizată pentru a fi afișată în câmpul preț per "
 "unitate de măsură."
@@ -1606,8 +1568,8 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 #, fuzzy
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
 msgstr ""
 "Afișează unitatea personalizată pentru produse, dacă este definită, sau "
 "unitatea de măsură selectată în caz contrar."
@@ -1686,7 +1648,8 @@ msgstr "Dyson"
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_template_attribute_value_attribute_value_unique
 msgid "Each value should be defined only once per attribute per product."
-msgstr "Fiecare valoare trebuie definită o singură dată pe atribut per produs."
+msgstr ""
+"Fiecare valoare trebuie definită o singură dată pe atribut per produs."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
@@ -1704,8 +1667,8 @@ msgstr "Dată sfârșit"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1774,8 +1737,8 @@ msgstr "Preț suplimentar"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
 msgstr ""
 "Preț suplimentar pentru varianta cu această valoare a atributului la prețul "
 "de vânzare. de exemplu. 200 preț suplimentar, 1000 + 200 = 1200."
@@ -1860,36 +1823,25 @@ msgstr "Pictogramă minunată pentru font, de ex. fa-sarcini"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"Pentru ca regula să se aplice, cantitatea cumpărată / vândută trebuie să fie "
-"mai mare sau egală cu cantitatea minimă specificată în acest câmp.\n"
+"Pentru ca regula să se aplice, cantitatea cumpărată / vândută trebuie să fie mai mare sau egală cu cantitatea minimă specificată în acest câmp.\n"
 " Exprimat în unitatea de măsură implicită a produsului."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 #, fuzzy
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Cantitate previzionată (calculată ca Cantitate la dispoziție - Ieșiri + "
-"Intrări - Cantitate de eliminat)\n"
-"Într-un context cu o singură locație de stocare, aceasta include bunurile "
-"depozitate în această locație sau în oricare dintre locațiile sale copii.\n"
-"Într-un context cu un singur depozit, aceasta include bunurile depozitate în "
-"locația de stocare a acestui depozit sau în oricare dintre locațiile sale "
-"copii.\n"
-"În caz contrar, aceasta include bunurile depozitate în orice locație de "
-"stocare cu tip 'intern'."
+"Cantitate previzionată (calculată ca Cantitate la dispoziție - Ieșiri + Intrări - Cantitate de eliminat)\n"
+"Într-un context cu o singură locație de stocare, aceasta include bunurile depozitate în această locație sau în oricare dintre locațiile sale copii.\n"
+"Într-un context cu un singur depozit, aceasta include bunurile depozitate în locația de stocare a acestui depozit sau în oricare dintre locațiile sale copii.\n"
+"În caz contrar, aceasta include bunurile depozitate în orice locație de stocare cu tip 'intern'."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
@@ -2170,7 +2122,8 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__active
 msgid ""
 "If unchecked, it will allow you to hide the product without removing it."
-msgstr "Dacă ramâne nebifat, vă permite să ascundeți produsul fără a-l șterge."
+msgstr ""
+"Dacă ramâne nebifat, vă permite să ascundeți produsul fără a-l șterge."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__image
@@ -2924,18 +2877,18 @@ msgstr "În stoc"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
-"Pe produsul %(product)s nu puteți asocia valoarea %(value)s cu atributul %"
-"(attribute)s deoarece acestea nu se potrivesc."
+"Pe produsul %(product)s nu puteți asocia valoarea %(value)s cu atributul "
+"%(attribute)s deoarece acestea nu se potrivesc."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
 "Pe produsul %(product)s nu puteți transforma atributul %(attribute_src)s în "
 "atributul %(attribute_dest)s."
@@ -3667,40 +3620,28 @@ msgstr "Cantitatea deja prezentă (%s)."
 #, fuzzy
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "Cantitatea produselor primite planificate.\n"
-"Într-un context cu o singură locație de stoc, aceasta include bunurile care "
-"sosesc în această locație sau oricare dintre copiii săi.\n"
-"Într-un context cu un singur depozit, acestea includ mărfurile care sosesc "
-"la locația stocului acestui depozit sau la oricare dintre copiii săi.\n"
-"În caz contrar, aceasta include mărfurile care sosesc în orice locație de "
-"stoc cu tip „intern”."
+"Într-un context cu o singură locație de stoc, aceasta include bunurile care sosesc în această locație sau oricare dintre copiii săi.\n"
+"Într-un context cu un singur depozit, acestea includ mărfurile care sosesc la locația stocului acestui depozit sau la oricare dintre copiii săi.\n"
+"În caz contrar, aceasta include mărfurile care sosesc în orice locație de stoc cu tip „intern”."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__outgoing_qty
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "Cantitatea produselor de ieșire planificate.\n"
-"Într-un context cu o singură locație de stoc, aceasta include bunurile care "
-"părăsesc această locație sau oricare dintre copiii săi.\n"
-"Într-un context cu un singur depozit, aceasta include mărfuri care părăsesc "
-"Locul de stoc al acestui depozit sau oricare dintre copiii săi.\n"
-"În caz contrar, aceasta include mărfuri care părăsesc orice locație de stoc "
-"cu tip „intern”."
+"Într-un context cu o singură locație de stoc, aceasta include bunurile care părăsesc această locație sau oricare dintre copiii săi.\n"
+"Într-un context cu un singur depozit, aceasta include mărfuri care părăsesc Locul de stoc al acestui depozit sau oricare dintre copiii săi.\n"
+"În caz contrar, aceasta include mărfuri care părăsesc orice locație de stoc cu tip „intern”."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -3749,8 +3690,8 @@ msgstr "Unitate de referință"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
 msgstr ""
 "Înregistrați prețurile solicitate de furnizorii dvs. pentru fiecare produs, "
 "în funcție de cantitate și perioadă."
@@ -3943,8 +3884,7 @@ msgid ""
 msgstr ""
 "Setează prețul astfel încât să fie un multiplu al acestei valori.\n"
 "Rotunjirea se aplică după discount și înainte de adaos.\n"
-"Pentru a avea prețuri care se termină în 9.99, rotunjiți la 10.00 și setați "
-"un supliment de -0.01"
+"Pentru a avea prețuri care se termină în 9.99, rotunjiți la 10.00 și setați un supliment de -0.01"
 
 #. module: product
 #: model:product.attribute,name:product.pa_shoe_size
@@ -4039,8 +3979,8 @@ msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
 msgstr ""
-"Specificati un produs daca aceasta regula se aplica doar unui produs. In caz "
-"contrar, lasati necompletat."
+"Specificati un produs daca aceasta regula se aplica doar unui produs. In caz"
+" contrar, lasati necompletat."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
@@ -4205,11 +4145,11 @@ msgstr "Referința '%s' există deja."
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
 msgstr ""
-"Atributul %(attribute)s trebuie să aibă cel puțin o valoare pentru produsul %"
-"(product)s."
+"Atributul %(attribute)s trebuie să aibă cel puțin o valoare pentru produsul "
+"%(product)s."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -4250,8 +4190,8 @@ msgstr "Tipul de afișare utilizat în Configuratorul de produs."
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4274,8 +4214,8 @@ msgstr "Limita minimă ar trebui sa fie mai mica decât limita maximă."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
 "Prețul minim dintre produsele din acest combo. Această valoare va fi "
 "folosită pentru a repartiza prețul acestui combo în raport cu celelalte "
@@ -4295,15 +4235,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
-"Numărul de variante de generat depășește limita permisă. Ar trebui fie să nu "
-"generați variante pentru fiecare combinație, fie să le generați la cerere "
-"din comanda de vânzare. Pentru aceasta, deschideți formularul atributelor și "
-"schimbați modul *Creare variante*."
+"Numărul de variante de generat depășește limita permisă. Ar trebui fie să nu"
+" generați variante pentru fiecare combinație, fie să le generați la cerere "
+"din comanda de vânzare. Pentru aceasta, deschideți formularul atributelor și"
+" schimbați modul *Creare variante*."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -4321,12 +4261,12 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
-"Cantitatea de achiziționat de la acest furnizor pentru a beneficia de prețul "
-"pe unitate. Dacă este setată o unitate de furnizor, cantitatea trebuie "
+"Cantitatea de achiziționat de la acest furnizor pentru a beneficia de prețul"
+" pe unitate. Dacă este setată o unitate de furnizor, cantitatea trebuie "
 "specificată în această unitate, altfel trebuie specificată în unitatea "
 "implicită a produsului."
 
@@ -4359,8 +4299,8 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
 msgstr ""
 "Valoarea de bază a numărului de unități trebuie să fie mai mare decât 0. "
 "Utilizați 0 pentru a ascunde prețul pe unitate pentru acest produs."
@@ -4737,13 +4677,11 @@ msgstr "Număr valori"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "Valoarea produsului (calculată automat în AVCO).\n"
-"        Folosită pentru evaluarea produsului atunci când costul de achiziție "
-"nu este cunoscut (ex: ajustare de stoc).\n"
+"        Folosită pentru evaluarea produsului atunci când costul de achiziție nu este cunoscut (ex: ajustare de stoc).\n"
 "        Folosită pentru calculul marjelor în comenzile de vânzare."
 
 #. module: product
@@ -4937,11 +4875,11 @@ msgstr "Atenționări"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr ""
-"Acordăm o atenție deosebită detaliilor, de aceea birourile noastre sunt de o "
-"calitate superioară."
+"Acordăm o atenție deosebită detaliilor, de aceea birourile noastre sunt de o"
+" calitate superioară."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight
@@ -5114,20 +5052,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Nu puteți schimba modul de creare a variantelor pentru atributul %"
-"(attribute)s deoarece este folosit pe următoarele produse:\n"
+"Nu puteți schimba modul de creare a variantelor pentru atributul %(attribute)s deoarece este folosit pe următoarele produse:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
 msgstr ""
 "Nu puteți schimba atributul valorii %(value)s deoarece este folosit pe "
 "următoarele produse: %(products)s"
@@ -5136,8 +5072,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5152,18 +5088,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
-"Nu puteți schimba produsul pentru valoarea %(value)s setată pe produsul %"
-"(product)s."
+"Nu puteți schimba produsul pentru valoarea %(value)s setată pe produsul "
+"%(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
 msgstr "Nu puteți schimba valoarea %(value)s setată pe produsul %(product)s."
 
 #. module: product
@@ -5184,32 +5120,28 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Nu puteți șterge atributul %(attribute)s deoarece este folosit pe "
-"următoarele produse:\n"
+"Nu puteți șterge atributul %(attribute)s deoarece este folosit pe următoarele produse:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
-"Nu puteți șterge valoarea %(value)s deoarece este folosită pe următoarele "
-"produse:\n"
+"Nu puteți șterge valoarea %(value)s deoarece este folosită pe următoarele produse:\n"
 "%(products)s\n"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
 "Nu puteți muta atributul %(attribute)s de la produsul %(product_src)s la "
 "produsul %(product_dest)s."
@@ -5230,8 +5162,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, fie "
 "că este un produs stocabil, un consumabil sau un serviciu."
@@ -5250,15 +5181,11 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
-"Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, "
-"indiferent dacă este un produs stocabil, un consumabil sau un serviciu.\n"
-"Formularul de produs conține informații pentru simplificarea procesului de "
-"vânzare: preț, note pentru ofertă, date contabile, metode de achiziție etc."
+"Trebuie să definiți un produs pentru tot ceea ce vindeți sau cumpărați, indiferent dacă este un produs stocabil, un consumabil sau un serviciu.\n"
+"Formularul de produs conține informații pentru simplificarea procesului de vânzare: preț, note pentru ofertă, date contabile, metode de achiziție etc."
 
 #. module: product
 #. odoo-javascript

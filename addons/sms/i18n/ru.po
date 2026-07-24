@@ -13,15 +13,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 01:02+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/sms/"
-"ru/>\n"
+"Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/sms/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: sms
@@ -59,49 +56,48 @@ msgstr "%s недействительные получатели"
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"fa fa-warning\"/> An error occurred with your account. Please "
-"contact the support for more information..."
+"<i class=\"oi\" data-icon=\"warning\"/> An error occurred with your account."
+" Please contact the support for more information..."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Произошла ошибка с вашим аккаунтом. Пожалуйста, "
-"свяжитесь со службой поддержки для получения дополнительной информации..."
+"<i class=\"oi\" data-icon=\"warning\"/> Произошла ошибка с вашим аккаунтом. "
+"Пожалуйста, свяжитесь со службой поддержки для получения дополнительной "
+"информации..."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"fa fa-warning\"/> You cannot send SMS while your account is not "
-"registered."
+"<i class=\"oi\" data-icon=\"warning\"/> You cannot send SMS while your "
+"account is not registered."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Вы не можете отправлять СМС, пока ваш аккаунт "
-"не зарегистрирован."
+"<i class=\"oi\" data-icon=\"warning\"/> Вы не можете отправлять СМС, пока "
+"ваш аккаунт не зарегистрирован."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Register"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Зарегистрировать"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Set Sender Name"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Установить имя отправителя"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\" >Добавить</span>\n"
-"                                <span class=\"o_stat_text\">Действие с "
-"текстом</span>"
+"                                <span class=\"o_stat_text\">Действие с текстом</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
@@ -112,40 +108,30 @@ msgstr "<span class=\"o_stat_text\">Предварительный просмо�
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\" >Удалить</span>\n"
-"                                <span class=\"o_stat_text\">Действие с "
-"текстом</span>"
+"                                <span class=\"o_stat_text\">Действие с текстом</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
-msgid ""
-"<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
-msgstr ""
-"<span class=\"text-warning\" invisible=\"not no_record\">Нет записей</span>"
+msgid "<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
+msgstr "<span class=\"text-warning\" invisible=\"not no_record\">Нет записей</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
 msgid ""
 "<span invisible=\"sms_method != 'sms'\">\n"
-"                                    The message will be sent as an SMS to "
-"the recipients of the template\n"
-"                                    and will not appear in the messaging "
-"history.\n"
+"                                    The message will be sent as an SMS to the recipients of the template\n"
+"                                    and will not appear in the messaging history.\n"
 "                                </span>\n"
 "                                <span invisible=\"sms_method != 'note'\">\n"
-"                                    The SMS will not be sent, it will only "
-"be posted as an\n"
+"                                    The SMS will not be sent, it will only be posted as an\n"
 "                                    internal note in the messaging history.\n"
 "                                </span>\n"
-"                                <span invisible=\"sms_method != "
-"'comment'\">\n"
-"                                    The SMS will be sent as an SMS to the "
-"recipients of the\n"
-"                                    template and it will also be posted as "
-"an internal note\n"
+"                                <span invisible=\"sms_method != 'comment'\">\n"
+"                                    The SMS will be sent as an SMS to the recipients of the\n"
+"                                    template and it will also be posted as an internal note\n"
 "                                    in the messaging history.\n"
 "                                </span>"
 msgstr ""
@@ -387,7 +373,8 @@ msgstr ""
 #. module: sms
 #: model:sms.template,body:sms.sms_template_demo_0
 msgid "Dear {{ object.display_name }} this is an automated SMS."
-msgstr "Уважаемый {{ object.display_name }}, это автоматическое SMS-сообщение."
+msgstr ""
+"Уважаемый {{ object.display_name }}, это автоматическое SMS-сообщение."
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__sent
@@ -485,7 +472,8 @@ msgstr "Тип отказа"
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__template_fs
-msgid "File from where the template originates. Used to reset broken template."
+msgid ""
+"File from where the template originates. Used to reset broken template."
 msgstr ""
 "Файл, из которого происходит шаблон. Используется для сброса сломанного "
 "шаблона."
@@ -775,8 +763,8 @@ msgstr "Числовое поле"
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__res_ids_count
 msgid ""
-"Number of recipients that will receive the SMS if sent in mass mode, without "
-"applying the Active Domain value"
+"Number of recipients that will receive the SMS if sent in mass mode, without"
+" applying the Active Domain value"
 msgstr ""
 "Количество адресатов, которые получат SMS при массовой отправке, без "
 "применения значения Active Domain"
@@ -796,8 +784,8 @@ msgid ""
 msgstr ""
 "Опциональный язык перевода (код ISO), выбираемый при отправке e-mail. Если "
 "не установлен, будет использоваться язык основного партнера. Обычно это "
-"выражение-заполнитель, предоставляющее нужный язык, напр. "
-"{{ object.partner_id.lang }}."
+"выражение-заполнитель, предоставляющее нужный язык, напр. {{ "
+"object.partner_id.lang }}."
 
 #. module: sms
 #: model:ir.model,name:sms.model_sms_sms
@@ -1357,7 +1345,8 @@ msgstr "Страна назначения не поддерживается."
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
 msgid "The number you're trying to reach is not correctly formatted."
-msgstr "Номер, по которому вы пытаетесь связаться, отформатирован неправильно."
+msgstr ""
+"Номер, по которому вы пытаетесь связаться, отформатирован неправильно."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__model_id
@@ -1430,29 +1419,22 @@ msgid ""
 "- 'Update a Record': update the values of a record\n"
 "- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': "
-"add or remove followers to a record (Discuss)\n"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
 "- 'Create Record': create a new record with new values\n"
 "- 'Execute Code': a block of Python code that will be executed\n"
-"- 'Send Webhook Notification': send a POST request to an external system, "
-"also known as a Webhook\n"
-"- 'Multi Actions': define an action that triggers several other server "
-"actions\n"
+"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+"- 'Multi Actions': define an action that triggers several other server actions\n"
 msgstr ""
 "Тип действия сервера. Доступны следующие значения:\n"
 "- 'Обновить запись': обновить значения полей выбранной записи\n"
 "- 'Создать дело': запланировать дело (модуль Обсуждения)\n"
-"- 'Отправить e-mail': опубликовать сообщение или отправить e-mail (модуль "
-"Обсуждения)\n"
+"- 'Отправить e-mail': опубликовать сообщение или отправить e-mail (модуль Обсуждения)\n"
 "- 'Отправить СМС': отправить СМС и внести заметку в документ\n"
-"- 'Добавить/удалить наблюдателей': добавить или удалить пользователей, "
-"которые следят за данной записью (модуль Обсуждения)\n"
+"- 'Добавить/удалить наблюдателей': добавить или удалить пользователей, которые следят за данной записью (модуль Обсуждения)\n"
 "- 'Создать запись': создать новую запись с новыми значениями\n"
 "- 'Выполнить код': выполнить блок Python-кода\n"
-"- 'Отправить вебхук-уведомление': отправить POST-запрос во внешнюю систему "
-"(вебхук)\n"
-"- 'Групповое действие': определить действие, которое запускает сразу "
-"несколько действий сервера\n"
+"- 'Отправить вебхук-уведомление': отправить POST-запрос во внешнюю систему (вебхук)\n"
+"- 'Групповое действие': определить действие, которое запускает сразу несколько действий сервера\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__uuid
@@ -1496,19 +1478,15 @@ msgid ""
 "'comment': generated by user input e.g. through discuss or composer\n"
 "'email_outgoing': generated by a mailing\n"
 "'notification': generated by system e.g. tracking messages\n"
-"'auto_comment': generated by automated notification mechanism e.g. "
-"acknowledgment\n"
+"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
 "'user_notification': generated for a specific recipient"
 msgstr ""
 "Используется для классификации генераторов сообщений\n"
-"'email': генерируется входящим электронным письмом, например, через "
-"mailgateway\n"
-"'comment': генерируется в результате пользовательского ввода, например, "
-"через discuss или composer\n"
+"'email': генерируется входящим электронным письмом, например, через mailgateway\n"
+"'comment': генерируется в результате пользовательского ввода, например, через discuss или composer\n"
 "'email_outgoing': генерируется почтовой рассылкой\n"
 "'notification': генерируется системой, например, сообщениями отслеживания\n"
-"'auto_comment': генерируется механизмом автоматического уведомления, "
-"например, подтверждением\n"
+"'auto_comment': генерируется механизмом автоматического уведомления, например, подтверждением\n"
 "'user_notification': генерируется для конкретного получателя"
 
 #. module: sms
@@ -1554,7 +1532,8 @@ msgid ""
 "Will automatically be deleted, while notifications will not be deleted in "
 "any case."
 msgstr ""
-"Будут автоматически удалены, а уведомления не будут удалены ни в коем случае."
+"Будут автоматически удалены, а уведомления не будут удалены ни в коем "
+"случае."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_composer_view_form
@@ -1585,7 +1564,8 @@ msgstr "На вашем IAP-аккаунте недостаточно креди
 #. odoo-python
 #: code:addons/sms/tools/sms_api.py:0
 msgid "You tried too many times. Please retry later."
-msgstr "Вы сделали слишком много попыток. Пожалуйста, повторите попытку позже."
+msgstr ""
+"Вы сделали слишком много попыток. Пожалуйста, повторите попытку позже."
 
 #. module: sms
 #. odoo-javascript
@@ -1626,15 +1606,11 @@ msgstr ""
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_sender_view_form
 msgid ""
-"Your sender name must be between 3 and 11 characters long and only contain "
-"alphanumeric characters.\n"
-"                        It must fit your company name, and you aren't "
-"allowed to modify it once you registered one, choose it carefully."
+"Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters.\n"
+"                        It must fit your company name, and you aren't allowed to modify it once you registered one, choose it carefully."
 msgstr ""
-"Имя отправителя должно быть длиной от 3 до 11 символов и содержать только "
-"буквенно-цифровые символы.\n"
-"                        Оно должно соответствовать названию вашей компании, "
-"и вы не сможете изменить его после регистрации. Выбирайте его внимательно."
+"Имя отправителя должно быть длиной от 3 до 11 символов и содержать только буквенно-цифровые символы.\n"
+"                        Оно должно соответствовать названию вашей компании, и вы не сможете изменить его после регистрации. Выбирайте его внимательно."
 
 #. module: sms
 #. odoo-python

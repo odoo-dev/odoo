@@ -21,8 +21,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 17:44+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/"
-"sales_team/hu/>\n"
+"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/sales_team/hu/>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,36 +43,42 @@ msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-building\" title=\"Company\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Email\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"mail\" title=\"Email\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Phone\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"phone\" title=\"Phone\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-users\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
-msgid "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-primary\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
 
 #. module: sales_team
@@ -121,7 +126,8 @@ msgstr "Csapattag hozzáadása"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid "Add members to automatically assign their documents to this sales team."
+msgid ""
+"Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Tagok hozzáadásával automatikusan hozzárendelésre kerülnek a dokumentumaik "
 "ehhez az értékesítési csapathoz"
@@ -273,7 +279,8 @@ msgstr "Kedvenc tagok"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid "Favorite teams to display them in the dashboard and access them easily."
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
 msgstr ""
 "A kedvencként jelölt csapatok megjelennek a kezelőpulton és könnyebben "
 "elérhetők."
@@ -324,7 +331,8 @@ msgstr "Ha be van jelölve, akkor az új üzenetek figyelmet igényelnek."
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Ha be van jelölve, akkor néhány üzenetnél kézbesítési hiba lépett fel."
+msgstr ""
+"Ha be van jelölve, akkor néhány üzenetnél kézbesítési hiba lépett fel."
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__active
@@ -332,8 +340,8 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the Sales "
 "Team without removing it."
 msgstr ""
-"Ha az aktív mező hamisra van állítva, akkor el lehet rejteni az értékesítési "
-"csapatot annak eltávolítása nélkül."
+"Ha az aktív mező hamisra van állítva, akkor el lehet rejteni az értékesítési"
+" csapatot annak eltávolítása nélkül."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__image_1920
@@ -376,8 +384,8 @@ msgid ""
 "Main user sales team. Used notably for pipeline, or to set sales team in "
 "invoicing or subscription."
 msgstr ""
-"Felhasználó fő értékesítési csapata. Felhasználásra kerül például a folyamat "
-"megjelenítésében, számlázás során és előfizetések kezelésekor is."
+"Felhasználó fő értékesítési csapata. Felhasználásra kerül például a folyamat"
+" megjelenítésében, számlázás során és előfizetések kezelésekor is."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__member_company_ids
@@ -601,7 +609,8 @@ msgstr "Csapat tagjai"
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_member_action
 msgid "Team Members are salespersons assigned to specific teams."
 msgstr ""
-"A csapattagok olyan értékesítők, akik specifikus csapatokhoz vannak rendelve."
+"A csapattagok olyan értékesítők, akik specifikus csapatokhoz vannak "
+"rendelve."
 
 #. module: sales_team
 #: model:ir.actions.act_window,name:sales_team.crm_team_action_pipeline
@@ -658,7 +667,8 @@ msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid "Use Sales Teams to organize your sales departments and draw up reports."
+msgid ""
+"Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
 "Használjon értékesítési csapatokat az értékesítés megszervezéséhez és "
 "kimutatások elkészítéséhez."
@@ -745,9 +755,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that %"
-"(duplicates)s already exist(s)."
-msgstr "Duplikált tagságot próbál létrehozni. Lézető rekordok: %(duplicates)s."
+"You are trying to create duplicate membership(s). We found that "
+"%(duplicates)s already exist(s)."
+msgstr ""
+"Duplikált tagságot próbál létrehozni. Lézető rekordok: %(duplicates)s."
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
@@ -783,8 +794,8 @@ msgstr ""
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
 msgstr ""
 "a felhasználónak hozzáférése lesz az értékesítés konfigurálásához és a "
 "statisztikai riportokhoz."

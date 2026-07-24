@@ -39,15 +39,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:25+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"website_forum/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/website_forum/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_forum
@@ -282,31 +279,27 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Sign up</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Sign up</a>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or "
-"reject this answer."
+"                            As a moderator, you can either validate or reject this answer."
 msgstr ""
 "<b class=\"d-block \">Ta odpowiedź została oznaczona</b>\n"
-"                           Jako moderator, możesz zatwierdzić albo odrzucić "
-"tę odpowiedź."
+"                           Jako moderator, możesz zatwierdzić albo odrzucić tę odpowiedź."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your "
-"previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">Masz oczekujący post</b>\n"
-"Poczekaj na zatwierdzenie poprzedniego postu przez moderatora, aby móc "
-"odpowiadać na pytania."
+"Poczekaj na zatwierdzenie poprzedniego postu przez moderatora, aby móc odpowiadać na pytania."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -345,8 +338,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please "
-"use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please"
+" use commenting facility."
 msgstr ""
 "<b>Odpowiedzi nie powinny rozpoczynać debat </b>Ta społeczność Q&amp;A nie "
 "jest grupą dyskusyjną. Prosimy o unikanie debat w odpowiedziach, ponieważ "
@@ -359,8 +352,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional "
-"information."
+"to include links to other questions or answers providing relevant additional"
+" information."
 msgstr ""
 "<b>Odpowiedzi nie powinny wskazywać tylko na inne pytania</b>. Zamiast tego "
 "dodaj komentarz do pytania \"Możliwy duplikat ...\". Można jednak dołączyć "
@@ -371,8 +364,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
-"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
+" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -385,14 +378,14 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
-"solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
+" solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
-"<b>Odpowiedzi nie powinny jedynie zawierać linku do rozwiązania</b>. Zamiast "
-"tego podaj tekst opisu rozwiązania w swojej odpowiedzi, nawet jeśli jest to "
-"tylko kopiowanie / wklejanie. Linki są mile widziane, ale powinny być "
+"<b>Odpowiedzi nie powinny jedynie zawierać linku do rozwiązania</b>. Zamiast"
+" tego podaj tekst opisu rozwiązania w swojej odpowiedzi, nawet jeśli jest to"
+" tylko kopiowanie / wklejanie. Linki są mile widziane, ale powinny być "
 "komplementarne w stosunku do odpowiedzi, źródeł odsyłających lub dodatkowej "
 "lektury."
 
@@ -401,40 +394,34 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your "
-"own question."
+"You can search questions by their title or tags. It’s also OK to answer your"
+" own question."
 msgstr ""
-"<b>Zanim zadasz pytanie - upewnij się, że wyszukałeś podobne pytanie. </"
-"b>Pytania można wyszukiwać według tytułu lub tagów. Można również "
+"<b>Zanim zadasz pytanie - upewnij się, że wyszukałeś podobne pytanie. "
+"</b>Pytania można wyszukiwać według tytułu lub tagów. Można również "
 "odpowiedzieć na własne pytanie."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and argumentative</"
-"b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and "
+"argumentative</b> or not relevant to this community."
 msgstr ""
-"<b>Prosimy o unikanie zadawania pytań, które są zbyt subiektywne i kłótliwe</"
-"b> lub nie mają związku z tą społecznością."
+"<b>Prosimy o unikanie zadawania pytań, które są zbyt subiektywne i "
+"kłótliwe</b> lub nie mają związku z tą społecznością."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
-"the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can "
-"always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please "
-"<b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
-"<b>Postaraj się udzielić merytorycznej odpowiedzi. </b>Jeśli chcesz "
-"skomentować pytanie lub odpowiedź, po prostu\n"
-"<b>użyj narzędzia do komentowania.</b> Pamiętaj, że zawsze możesz <b>zmienić "
-"swoje odpowiedzi</b>\n"
-"- nie trzeba odpowiadać dwa razy na to samo pytanie. <b>Nie zapomnij również "
-"zagłosować</b>\n"
+"<b>Postaraj się udzielić merytorycznej odpowiedzi. </b>Jeśli chcesz skomentować pytanie lub odpowiedź, po prostu\n"
+"<b>użyj narzędzia do komentowania.</b> Pamiętaj, że zawsze możesz <b>zmienić swoje odpowiedzi</b>\n"
+"- nie trzeba odpowiadać dwa razy na to samo pytanie. <b>Nie zapomnij również zagłosować</b>\n"
 "- to naprawdę pomaga wybrać najlepsze pytania i odpowiedzi!"
 
 #. module: website_forum
@@ -451,12 +438,10 @@ msgstr "<b>Masz już oczekujący post.</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Złota odznaka\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Złota odznaka\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -465,236 +450,244 @@ msgstr "<br/>przez"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-angle-left me-2\"/>Back to All Posts"
-msgstr "<i class=\"fa fa-angle-left me-2\"/> Powrót do wszystkich postów"
+msgid "<i class=\"oi me-2\" data-icon=\"keyboard_arrow_left\"/>Back to All Posts"
+msgstr ""
+"<i class=\"me-2 oi\" data-icon=\"keyboard_arrow_left\"/> Powrót do "
+"wszystkich postów"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
-msgid "<i class=\"fa fa-arrow-right\"/> Go To Forums"
-msgstr "<i class=\"fa fa-arrow-right\"/> Idź do forów"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Go To Forums"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Idź do forów"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
-msgid "<i class=\"fa fa-bug me-1\"/>Filter Tool"
-msgstr "<i class=\"fa fa-bug me-1\"/>Narzędzie filtrowania"
+msgid "<i class=\"oi me-1\" data-icon=\"bug_report\"/>Filter Tool"
+msgstr "<i class=\"me-1 oi\" data-icon=\"bug_report\"/>Narzędzie filtrowania"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Downvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Downvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Głosuj przeciwko\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Głosuj przeciwko\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Upvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Upvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Głosuj za\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Głosuj za\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Accept"
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>Akceptuj"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Accept"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Akceptuj"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Be less specific in your wording for a "
-"wider search result."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Be less specific in your "
+"wording for a wider search result."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Aby uzyskać szersze wyniki "
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Aby uzyskać szersze wyniki "
 "wyszukiwania, używaj mniej precyzyjnych sformułowań."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Check your spelling and try again."
+msgid ""
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Check your spelling and try "
+"again."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Sprawdź pisownię i spróbuj ponownie"
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Sprawdź pisownię i spróbuj "
+"ponownie"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Try searching for one or two"
+" words."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Spróbuj wyszukać jedno lub dwa słowa"
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Spróbuj wyszukać jedno lub "
+"dwa słowa"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-msgid "<i class=\"fa fa-check me-1\"/>Solved"
-msgstr "<i class=\"fa fa-check me-1\"/>Rozwiązane"
+msgid "<i class=\"oi me-1\" data-icon=\"check\"/>Solved"
+msgstr "<i class=\"me-1 oi\" data-icon=\"check\"/>Rozwiązane"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-check\"/> Accept"
-msgstr "<i class=\"fa fa-check\"/> Akceptuj"
+msgid "<i class=\"oi\" data-icon=\"check\"/> Accept"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> Akceptuj"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+"<i class=\"oi\" data-icon=\"check\"/> How to configure TPS and TVQ's "
+"canadian taxes?"
 msgstr ""
-"<i class=\"fa fa-check\"/> Jak skonfigurować kanadyjskie podatki TPS i TVQ?"
+"<i class=\"oi\" data-icon=\"check\"/> Jak skonfigurować kanadyjskie podatki "
+"TPS i TVQ?"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-check\"/><span class=\"ms-2\">Accept</span>"
-msgstr "<i class=\"fa fa-check\"/><span class=\"ms-2\">Akceptuj</span>"
+msgid "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Accept</span>"
+msgstr "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Akceptuj</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"forum\" title=\"Forum\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"forum\" title=\"Forum\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"visibility\" title=\"Views\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"visibility\" title=\"Views\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-flag\"/> Country"
-msgstr "<i class=\"fa fa-flag\"/>Kraj"
+msgid "<i class=\"oi oi-filled\" data-icon=\"flag\"/> Country"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"flag\"/>Kraj"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-font\"/> Text"
-msgstr "<i class=\"fa fa-font\"/> Tekst"
+msgid "<i class=\"oi\" data-icon=\"text_fields\"/> Text"
+msgstr "<i class=\"oi\" data-icon=\"text_fields\"/> Tekst"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
-msgid "<i class=\"fa fa-fw fa-check me-1\"/>Following"
-msgstr "<i class=\"fa fa-fw fa-check me-1\"/>Obserwowane"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Following"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Obserwowane"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Strona\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Strona\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_mobile
-msgid "<i class=\"fa fa-info-circle fa-fw\"/> About this forum"
-msgstr "<i class=\"fa fa-info-circle fa-fw\"/> O tym forum"
+msgid "<i class=\"oi oi-fw\" data-icon=\"info\"/> About this forum"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"info\"/> O tym forum"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your "
-"answer</span>"
+"<i class=\"oi oi-filled\" data-icon=\"edit\"/>\n"
+"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
 msgstr ""
-"<i class=\"fa fa-pencil\"/>\n"
+"<i class=\"oi-filled oi\" data-icon=\"edit\"/>\n"
 "Edytuj <span class=\"d-none d-lg-inline\">swoją odpowiedź</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"oi me-1 d-lg-none\" data-icon=\"reply\"/>\n"
 "                0"
 msgstr ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"me-1 d-lg-none oi\" data-icon=\"reply\"/>\n"
 "                0"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr "<i class=\"fa fa-reply me-1\"/>Odpowiedz"
+msgid "<i class=\"oi me-1\" data-icon=\"reply\"/>Reply"
+msgstr "<i class=\"me-1 oi\" data-icon=\"reply\"/>Odpowiedz"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Share\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Share\"/>"
 msgstr ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Udostępnij\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Udostępnij\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-shield fa-fw opacity-50\"/> Badges"
-msgstr "<i class=\"fa fa-shield fa-fw opacity-50\"/> Odznaki"
+msgid "<i class=\"oi oi-fw opacity-50\" data-icon=\"security\"/> Badges"
+msgstr "<i class=\"opacity-50 oi-fw oi\" data-icon=\"security\"/> Odznaki"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"oi oi-filled text-danger ms-3\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"text-danger ms-3 oi-filled oi\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"oi oi-filled text-success\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"text-success oi-filled oi\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "<i class=\"fa fa-times fa-fw me-1\"/>Reject"
-msgstr "<i class=\"fa fa-times fa-fw me-1\"/>Odrzuć"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"close\"/>Reject"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"close\"/>Odrzuć"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-times\"/> Good morning to all! Please, can someone help "
-"solve my tax computation problem in Canada? Thanks!"
+"<i class=\"oi\" data-icon=\"close\"/> Good morning to all! Please, can "
+"someone help solve my tax computation problem in Canada? Thanks!"
 msgstr ""
-"<i class=\"fa fa-times\"/>Dzień dobry wszystkim! Proszę, czy ktoś może pomóc "
-"rozwiązać mój problem z obliczeniem podatku w Kanadzie? Dzięki!"
+"<i class=\"oi\" data-icon=\"close\"/>Dzień dobry wszystkim! Proszę, czy ktoś"
+" może pomóc rozwiązać mój problem z obliczeniem podatku w Kanadzie? Dzięki!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-times\"/> Reject"
-msgstr "<i class=\"fa fa-times\"/> Odrzuć"
+msgid "<i class=\"oi\" data-icon=\"close\"/> Reject"
+msgstr "<i class=\"oi\" data-icon=\"close\"/> Odrzuć"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Offensive</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">Obraźliwe</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Offensive</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Obraźliwe</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Reject</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">Odrzuć</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Reject</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Odrzuć</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-user\"/> User"
-msgstr "<i class=\"fa fa-user\"/>Użytkownik"
+msgid "<i class=\"oi oi-filled\" data-icon=\"person\"/> User"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"person\"/>Użytkownik"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-users fa-fw opacity-50\"/> People"
-msgstr "<i class=\"fa fa-users fa-fw opacity-50\"/> Osoby"
+msgid "<i class=\"oi oi-filled oi-fw opacity-50\" data-icon=\"group\"/> People"
+msgstr "<i class=\"opacity-50 oi-fw oi-filled oi\" data-icon=\"group\"/> Osoby"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "<i class=\"oi oi-arrow-right d-inline-block\"/> Go to Forums"
-msgstr "<i class=\"oi oi-arrow-right d-inline-block\"/> Idź do forów"
+msgid "<i class=\"oi d-inline-block\" data-icon=\"east\"/> Go to Forums"
+msgstr "<i class=\"d-inline-block oi\" data-icon=\"east\"/> Idź do forów"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.404
 msgid ""
-"<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
-"list"
+"<i class=\"oi display-inline-block\" data-icon=\"east\"/> Return to "
+"questions list"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 msgid ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"More\"/>"
 msgstr ""
 
@@ -734,8 +727,7 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid ""
-"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr "<span class=\"flex-grow-1\">Jakie pytania mogę tutaj zadawać?</span>"
 
 #. module: website_forum
@@ -743,25 +735,26 @@ msgstr "<span class=\"flex-grow-1\">Jakie pytania mogę tutaj zadawać?</span>"
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my answers?</span>"
 msgstr ""
-"<span class=\"flex-grow-1\">Czego powinienem unikać w moich odpowiedziach?</"
-"span>"
+"<span class=\"flex-grow-1\">Czego powinienem unikać w moich "
+"odpowiedziach?</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "<span class=\"flex-grow-1\">What should I avoid in my questions?</span>"
 msgstr ""
-"<span class=\"flex-grow-1\">Czego powinienem unikać w moich pytaniach?</span>"
+"<span class=\"flex-grow-1\">Czego powinienem unikać w moich "
+"pytaniach?</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
-"span>"
+"<span class=\"flex-grow-1\">Why can other people edit my "
+"questions/answers?</span>"
 msgstr ""
-"<span class=\"flex-grow-1\">Dlaczego inne osoby mogą edytować moje pytania/"
-"odpowiedzi?</span>"
+"<span class=\"flex-grow-1\">Dlaczego inne osoby mogą edytować moje "
+"pytania/odpowiedzi?</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
@@ -770,15 +763,15 @@ msgid ""
 "<span class=\"form-text small text-muted d-block\">consider adding an "
 "example.</span>"
 msgstr ""
-"<span class=\"form-text small text-muted d-block\">rozważ dodanie przykładu."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">rozważ dodanie "
+"przykładu.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format it."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format "
+"it.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">wybierz tekst do "
 "sformatowania.</span>"
@@ -787,8 +780,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert "
+"images.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">użyj '/' aby wklejać "
 "obrazy.</span>"
@@ -797,11 +790,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Tip:</span>"
 msgstr ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Rada:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Rada:</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -828,8 +821,8 @@ msgstr "<span class=\"text-muted\">Jeszcze nie ma aktywności.</span>"
 #: model_terms:web_tour.tour,rainbow_man_message:website_forum.question
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr ""
-"<span><b>Dobra robota!</b> Przeszedłeś przez wszystkie kroki tego samouczka."
-"</span>"
+"<span><b>Dobra robota!</b> Przeszedłeś przez wszystkie kroki tego "
+"samouczka.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -1831,10 +1824,10 @@ msgstr "Oświecony"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
 "Example\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 msgstr ""
 "Przykład\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 
 #. module: website_forum
 #. odoo-javascript
@@ -2263,8 +2256,7 @@ msgid ""
 "            users having a high karma can see closed posts to moderate\n"
 "            them."
 msgstr ""
-"Jeśli zamkniesz ten post, zostanie on ukryty przed większością użytkowników. "
-"Tylko\n"
+"Jeśli zamkniesz ten post, zostanie on ukryty przed większością użytkowników. Tylko\n"
 "użytkownicy o wysokiej karmie widzą zamknięte posty, aby móc je\n"
 "moderować."
 
@@ -2273,8 +2265,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then "
-"you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then"
+" you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2291,8 +2283,7 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"Jeśli zamkniesz ten post, zostanie ono ukryte przed większością "
-"użytkowników. Tylko\n"
+"Jeśli zamkniesz ten post, zostanie ono ukryte przed większością użytkowników. Tylko\n"
 "            użytkownicy o wysokiej karmie widzą zamknięte posty, aby móc je\n"
 "            moderować."
 
@@ -2789,7 +2780,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before continuing."
+"Please wait for a moderator to validate your previous post before "
+"continuing."
 msgstr ""
 "Przed kontynuowaniem poczekaj, aż moderator zweryfikuje Twój poprzedni post."
 
@@ -2925,13 +2917,11 @@ msgstr "Publiczne"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected "
-"group"
+"Some users: Forum and their content are hidden for non members of selected group"
 msgstr ""
 "Publiczne: Forum jest publiczne\n"
 "Zalogowany: Forum jest widoczne dla zalogowanych użytkowników\n"
-"Niektórzy użytkownicy: Forum i jego zawartość są ukryte dla użytkowników "
-"spoza wybranej grupy."
+"Niektórzy użytkownicy: Forum i jego zawartość są ukryte dla użytkowników spoza wybranej grupy."
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_25
@@ -3282,8 +3272,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page "
-"and attract more visitors."
+"Share this content to increase your chances to be featured on the front page"
+" and attract more visitors."
 msgstr ""
 "Udostępnij tę zawartość, aby zwiększyć swoje szanse na pojawienie się na "
 "pierwszej stronie i przyciągnięcie więcej odwiedzających."
@@ -3340,7 +3330,8 @@ msgstr "Przepraszamy, nie mogliśmy znaleźć żadnego <b>rozwiązanego</b> wąt
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid "Sorry, we could not find any <b>unanswered</b> results"
-msgstr "Przepraszamy, nie mogliśmy znaleźć żadnego wątku <b>bez odpowiedzi</b>"
+msgstr ""
+"Przepraszamy, nie mogliśmy znaleźć żadnego wątku <b>bez odpowiedzi</b>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
@@ -3441,8 +3432,8 @@ msgid ""
 "Tap into the collective knowledge of our community by asking your questions "
 "in our forums,<br/> where helpful members are ready to assist you."
 msgstr ""
-"Skorzystaj ze zbiorowej wiedzy naszej społeczności, zadając pytania na forum,"
-"<br/> gdzie członkowie chętnie udzielą Ci odpowiedzi."
+"Skorzystaj ze zbiorowej wiedzy naszej społeczności, zadając pytania na "
+"forum,<br/> gdzie członkowie chętnie udzielą Ci odpowiedzi."
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_32
@@ -3525,9 +3516,9 @@ msgstr "Nie ma tagów pasujących do wybranego wyszukiwania"
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced "
-"users of this site in order to improve the overall quality of the knowledge "
-"base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "Dlatego pytania i odpowiedzi mogą być edytowane jak strony wiki przez "
@@ -3595,12 +3586,10 @@ msgstr "Ten post oczekuje na zaakceptowanie"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or "
-"<b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
 msgstr ""
 "Ten post oczekuje na moderację i nie został jeszcze opublikowany. <br/>\n"
-"                    jako moderator możesz <b>Zaakceptować</b> lub "
-"<b>Odrzucić</b> ten post."
+"                    jako moderator możesz <b>Zaakceptować</b> lub <b>Odrzucić</b> ten post."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3828,8 +3817,8 @@ msgstr "Widok"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "View my answer <i class=\"oi oi-arrow-right ms-1\"/>"
-msgstr "Zobacz swoją odpowiedź <i class=\"oi oi-arrow-right ms-1\"/>"
+msgid "View my answer <i class=\"oi ms-1\" data-icon=\"east\"/>"
+msgstr "Zobacz swoją odpowiedź <i class=\"ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__views
@@ -3941,9 +3930,10 @@ msgid ""
 "are gradually assigned to the users based on those points."
 msgstr ""
 "Gdy pytanie lub odpowiedź są lajkowane, użytkownik, który je opublikował, "
-"otrzymuje punkty, które nazywane są \"punktami karmy\". Punkty te służą jako "
-"przybliżona miara zaufania społeczności do niego/niej. Różne zadania "
-"moderacyjne są stopniowo przydzielane użytkownikom na podstawie tych punktów."
+"otrzymuje punkty, które nazywane są \"punktami karmy\". Punkty te służą jako"
+" przybliżona miara zaufania społeczności do niego/niej. Różne zadania "
+"moderacyjne są stopniowo przydzielane użytkownikom na podstawie tych "
+"punktów."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -4027,9 +4017,9 @@ msgstr "Musisz mieć wystarczającą karmę, aby edytować tagi"
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems "
-"that you face. Chatty, open-ended questions diminish the usefulness of this "
-"site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems"
+" that you face. Chatty, open-ended questions diminish the usefulness of this"
+" site and push other questions off the front page."
 msgstr ""
 "Powinieneś zadawać tylko praktyczne pytania, na które można odpowiedzieć, "
 "oparte na rzeczywistych problemach, z którymi się borykasz. Czcze, otwarte "
@@ -4228,8 +4218,7 @@ msgstr "zamiast tego."
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid "it is a rant disguised as a question: “______ sucks, am I right?”"
-msgstr ""
-"jest to tyrada pod postacią pytania: \"______ jest do kitu, mam rację?\""
+msgstr "jest to tyrada pod postacią pytania: \"______ jest do kitu, mam rację?\""
 
 #. module: website_forum
 #. odoo-javascript

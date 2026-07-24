@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 20:35+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
-"hr_attendance/ko/>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/hr_attendance/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,25 +64,22 @@ msgstr "'문서 읽기'"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">When enabled, "
-"only the first check-in within the scheduled working hours (including "
-"tolerance) is recorded. Further check-ins are allowed only after an "
-"automatic check-out.</span>"
+"                                    <span class=\"text-muted\">When enabled, only the first check-in within the scheduled working hours (including tolerance) is recorded. Further check-ins are allowed only after an automatic check-out.</span>"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
 msgid ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 msgstr ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"기간\" role=\"img\" title=\"기"
-"간\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"calendar_today\" aria-"
+"label=\"기간\" role=\"img\" title=\"기간\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Installation Manual"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>설치 가이드"
+msgid "<i class=\"oi oi-fw\" data-icon=\"arrow_forward\"/>Installation Manual"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"arrow_forward\"/>설치 가이드"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
@@ -91,18 +87,16 @@ msgid ""
 "<span class=\"fa fa-circle text-success me-1\" role=\"img\" aria-"
 "label=\"Available\" title=\"Available\"/>"
 msgstr ""
-"<span class=\"fa fa-circle text-success me-1\" role=\"img\" aria-label=\"근"
-"무 가능\" title=\"근무 가능\"/>"
+"<span class=\"fa fa-circle text-success me-1\" role=\"img\" aria-label=\"근무 "
+"가능\" title=\"근무 가능\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 msgid ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"근"
-"무 불가\" title=\"근무 불가\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"근무 불가\" title=\"근무 불가\">\n"
 "                                    </span>"
 
 #. module: hr_attendance
@@ -179,8 +173,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
 "<span class=\"o_stat_value\">Add</span>\n"
-"                                    <span class=\"o_stat_text\">Employees</"
-"span>"
+"                                    <span class=\"o_stat_text\">Employees</span>"
 msgstr ""
 
 #. module: hr_attendance
@@ -249,8 +242,7 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid ""
-"Add a few employees to be able to select an employee here and perform his "
-"check in / check out.\n"
+"Add a few employees to be able to select an employee here and perform his check in / check out.\n"
 "                To create employees go to the Employees menu."
 msgstr ""
 "여기에서 직원을 선택하여 출근/퇴근할 수 있는 직원을 몇 명 더 추가하세요.\n"
@@ -283,24 +275,20 @@ msgstr "사용자가 Odoo에서 체크인/체크아웃하도록 허용합니다.
 msgid ""
 "Allow a period of time (around working hours) where extra time will not be "
 "counted, in benefit of the company"
-msgstr ""
-"회사의 이익을 위해 추가 근무가 계산되지 않는 기간(근무 시간 전후)을 허용합니"
-"다."
+msgstr "회사의 이익을 위해 추가 근무가 계산되지 않는 기간(근무 시간 전후)을 허용합니다."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "Allow a period of time (around working hours) where extra time will not be "
 "deducted, in benefit of the employee"
-msgstr ""
-"직원의 이익을 위해 추가 근무가 공제되지 않는 기간(근무 시간 전후)을 허용합니"
-"다."
+msgstr "직원의 이익을 위해 추가 근무가 공제되지 않는 기간(근무 시간 전후)을 허용합니다."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"Allow the collection of GPS location, IP address, and browser/device details "
-"used to track employee access and attendance"
+"Allow the collection of GPS location, IP address, and browser/device details"
+" used to track employee access and attendance"
 msgstr ""
 
 #. module: hr_attendance
@@ -599,8 +587,7 @@ msgstr "바코드 인식"
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance_overtime_rule__base_off
 msgid ""
 "Base for overtime calculation.\n"
-"Use 'Quantity' when overtime hours are those in excess of a certain amount "
-"per day/week.\n"
+"Use 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\n"
 "Use 'Timing' when overtime hours happen on specific days or at specific times"
 msgstr ""
 
@@ -644,8 +631,7 @@ msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee hasn't "
 "checked out since %(datetime)s"
 msgstr ""
-"%(empl_name)s에 대한 새 근태 기록을 작성할 수 없습니다. %(datetime)s 이후 직"
-"원이 퇴근하지 않았습니다."
+"%(empl_name)s에 대한 새 근태 기록을 작성할 수 없습니다. %(datetime)s 이후 직원이 퇴근하지 않았습니다."
 
 #. module: hr_attendance
 #. odoo-python
@@ -653,9 +639,7 @@ msgstr ""
 msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee was "
 "already checked in on %(datetime)s"
-msgstr ""
-"%(empl_name)s에 대한 새 근태 기록을 작성할 수 없습니다. 직원이 이미 %"
-"(datetime)s에 출근하였습니다."
+msgstr "%(empl_name)s에 대한 새 근태 기록을 작성할 수 없습니다. 직원이 이미 %(datetime)s에 출근하였습니다."
 
 #. module: hr_attendance
 #. odoo-python
@@ -665,8 +649,8 @@ msgid ""
 "check in. Your attendances have probably been modified manually by human "
 "resources."
 msgstr ""
-"%(empl_name)s의 퇴근을 수행할 수 없습니다. 해당 직원의 출근을 찾을 수 없습니"
-"다. 참석자는 인사부서에서 수동으로 수정했을 수 있습니다."
+"%(empl_name)s의 퇴근을 수행할 수 없습니다. 해당 직원의 출근을 찾을 수 없습니다. 참석자는 인사부서에서 수동으로 수정했을 수"
+" 있습니다."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -816,8 +800,7 @@ msgid ""
 "Controls how the rates from the different rules that apply are combined.\n"
 "  Max: use the highest rate. (e.g.: combined for 150% and 120 = 150%)\n"
 "  Sum: sum the *extra* pay (i.e. above 100%).\n"
-"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
 msgstr ""
 
 #. module: hr_attendance
@@ -1306,11 +1289,9 @@ msgstr "수동으로 확인"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"If checked, days not covered by an attendance will be visible in the Report. "
-"Does not apply to employees with a flexible working schedule."
-msgstr ""
-"이 옵션을 선택하면 출근으로 처리되지 않은 날짜가 보고서에 나타납니다. 유연 근"
-"무제 중인 직원에게는 적용되지 않습니다."
+"If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
+msgstr "이 옵션을 선택하면 출근으로 처리되지 않은 날짜가 보고서에 나타납니다. 유연 근무제 중인 직원에게는 적용되지 않습니다."
 
 #. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance__message_needaction
@@ -1744,8 +1725,8 @@ msgstr "온보딩"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/hr_version_list_view.js:0
 msgid ""
-"One or more selected records already have a ruleset assigned (highlighted in "
-"yellow). Do you want to overwrite them?"
+"One or more selected records already have a ruleset assigned (highlighted in"
+" yellow). Do you want to overwrite them?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2090,8 +2071,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 msgid ""
-"Rule '%(name)s' is based off quantity, but the usual amount of work hours is "
-"not specified"
+"Rule '%(name)s' is based off quantity, but the usual amount of work hours is"
+" not specified"
 msgstr ""
 
 #. module: hr_attendance
@@ -2210,8 +2191,7 @@ msgstr "순서"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Set PIN codes in the employee detail form (in HR Settings tab)."
-msgstr ""
-"직원 서식에서 사원 번호를 설정합니다. (인사 관리 설정 탭에서 확인 가능)"
+msgstr "직원 서식에서 사원 번호를 설정합니다. (인사 관리 설정 탭에서 확인 가능)"
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_settings
@@ -2239,7 +2219,8 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.constraint,message:hr_attendance.constraint_res_company_check_auto_check_out_specific_time_range
-msgid "Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
+msgid ""
+"Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
 msgstr ""
 
 #. module: hr_attendance
@@ -2313,9 +2294,7 @@ msgstr "규칙 기준:"
 msgid ""
 "The user set in Attendance will access the attendance of the employee "
 "through the dedicated app and will be able to edit them."
-msgstr ""
-"출근 앱에 설정된 사용자는 전용 앱을 통해 직원의 출결 사항에 액세스하고 이를 "
-"편집할 수 있습니다."
+msgstr "출근 앱에 설정된 사용자는 전용 앱을 통해 직원의 출결 사항에 액세스하고 이를 편집할 수 있습니다."
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance_user
@@ -2329,17 +2308,14 @@ msgstr ""
 msgid ""
 "The user will have access to his own attendances on his user / employee "
 "profile"
-msgstr ""
-"사용자는 사용자/직원 프로필에서 자신의 출결 사항에 액세스할 수 있습니다."
+msgstr "사용자는 사용자/직원 프로필에서 자신의 출결 사항에 액세스할 수 있습니다."
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance_officer
 msgid ""
 "The user will have access to the attendance records and reporting of "
 "employees where he's set as an attendance manager"
-msgstr ""
-"사용자는 자신이 출석 관리자로 설정된 직원의 출석 기록 및 보고에 액세스할 수 "
-"있습니다."
+msgstr "사용자는 자신이 출석 관리자로 설정된 직원의 출석 기록 및 보고에 액세스할 수 있습니다."
 
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_version_list_view
@@ -2355,8 +2331,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically checked out based on company specific time "
-"configuration."
+"This attendance was automatically checked out based on company specific time"
+" configuration."
 msgstr ""
 
 #. module: hr_attendance
@@ -2365,24 +2341,21 @@ msgstr ""
 msgid ""
 "This attendance was automatically checked out because the employee exceeded "
 "the allowed time for their scheduled work hours."
-msgstr ""
-"직원이 허용된 근무 시간을 초과했기 때문에 이 출석이 자동으로 체크 아웃되었습"
-"니다."
+msgstr "직원이 허용된 근무 시간을 초과했기 때문에 이 출석이 자동으로 체크 아웃되었습니다."
 
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically created to cover an unjustified absence on "
-"that day."
-msgstr ""
-"이 근태는 해당 날짜의 부당한 결근을 처리하기 위해 자동으로 생성되었습니다."
+"This attendance was automatically created to cover an unjustified absence on"
+" that day."
+msgstr "이 근태는 해당 날짜의 부당한 결근을 처리하기 위해 자동으로 생성되었습니다."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
-"This will reset all manual edit on overtime period linked to those rules. Do "
-"you confirm ?"
+"This will reset all manual edit on overtime period linked to those rules. Do"
+" you confirm ?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2503,8 +2476,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid ""
-"Unable to get a valid location. Do you want to proceed with your check-in/"
-"out anyway?"
+"Unable to get a valid location. Do you want to proceed with your check-"
+"in/out anyway?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2814,8 +2787,7 @@ msgstr "선택 사항으로 PIN 코드 포함"
 #~ "additional tolerance. Does not apply to employees with a flexible working "
 #~ "schedule."
 #~ msgstr ""
-#~ "근무 일정에 따라 추가 허용 오차를 적용하여 직원을 자동으로 체크아웃 처리합"
-#~ "니다. 유연 근무 중인 직원에게는 적용되지 않습니다."
+#~ "근무 일정에 따라 추가 허용 오차를 적용하여 직원을 자동으로 체크아웃 처리합니다. 유연 근무 중인 직원에게는 적용되지 않습니다."
 
 #~ msgid "Check IN"
 #~ msgstr "출근"

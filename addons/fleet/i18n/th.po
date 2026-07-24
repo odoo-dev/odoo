@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-19 16:50+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/fleet/"
-"th/>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/fleet/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,8 +25,8 @@ msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"ตำแหน่ง\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"ตำแหน่ง\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -64,7 +63,8 @@ msgid ""
 "A trailer hitch is a device attached to a vehicle's chassis for towing "
 "purposes,             such as pulling trailers, boats, or other vehicles."
 msgstr ""
-"ขอเกี่ยวรถพ่วงคืออุปกรณ์ที่ติดอยู่กับตัวถังรถเพื่อการลากจูง เช่น ลากรถพ่วง เรือ หรือยานพาหนะอื่นๆ"
+"ขอเกี่ยวรถพ่วงคืออุปกรณ์ที่ติดอยู่กับตัวถังรถเพื่อการลากจูง เช่น ลากรถพ่วง "
+"เรือ หรือยานพาหนะอื่นๆ"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -475,11 +475,10 @@ msgstr "หมวดหมู่"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
-"หมวดหมู่จะช่วยให้คุณจัดการกลุ่มยานพาหนะได้อย่างมีประสิทธิภาพมากขึ้นและจัดเตรียมความพร้อมยานพาหน"
-"ะของคุณ"
+"หมวดหมู่จะช่วยให้คุณจัดการกลุ่มยานพาหนะได้อย่างมีประสิทธิภาพมากขึ้นและจัดเตรียมความพร้อมยานพาหนะของคุณ"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
@@ -524,7 +523,8 @@ msgstr "เลือกว่าสัญญาถูกต้องอยู่
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr "เลือกว่าบริการจะอ้างอิงถึงสัญญา บริการรถ หรือทั้งสองอย่าง"
 
 #. module: fleet
@@ -844,10 +844,11 @@ msgstr "วันที่เริ่มต้นความคุ้มคร
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
-"วันที่ความคุ้มครองของสัญญาสิ้นสุดลง (โดยเริ่มต้น หนึ่งปีหลังจากวันที่เริ่มต้น)"
+"วันที่ความคุ้มครองของสัญญาสิ้นสุดลง (โดยเริ่มต้น "
+"หนึ่งปีหลังจากวันที่เริ่มต้น)"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__write_off_date
@@ -1585,7 +1586,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:fleet.fleet_costs_reporting_action
 msgid "Manage efficiently your different effective vehicles Costs with Odoo."
 msgstr ""
-"จัดการต้นทุนยานพาหนะที่มีประสิทธิภาพและแตกต่างกันของคุณอย่างมีประสิทธิภาพด้วย Odoo"
+"จัดการต้นทุนยานพาหนะที่มีประสิทธิภาพและแตกต่างกันของคุณอย่างมีประสิทธิภาพด้วย"
+" Odoo"
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
@@ -2356,8 +2358,8 @@ msgstr "การเปลี่ยนหัวเทียน"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 
 #. module: fleet
@@ -2558,12 +2560,10 @@ msgstr "การช่วยเหลือการเดินทาง"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "ติดตามบริการทั้งหมดที่ทำบนยานพาหนะของคุณ\n"
-"           บริการสามารถมีได้หลายประเภท: การซ่อมแซมเป็นครั้งคราว การบำรุงรักษาแบบคงที่ แล"
-"ะอื่น ๆ"
+"           บริการสามารถมีได้หลายประเภท: การซ่อมแซมเป็นครั้งคราว การบำรุงรักษาแบบคงที่ และอื่น ๆ"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__trailer_hook
@@ -2939,4 +2939,5 @@ msgstr ""
 #~ "A trailer hitch is a device attached to a vehicle's chassis for towing "
 #~ "purposes,            such as pulling trailers, boats, or other vehicles."
 #~ msgstr ""
-#~ "ขอเกี่ยวรถพ่วงคืออุปกรณ์ที่ติดอยู่กับตัวถังรถเพื่อการลากจูง เช่น ลากรถพ่วง เรือ หรือยานพาหนะอื่นๆ"
+#~ "ขอเกี่ยวรถพ่วงคืออุปกรณ์ที่ติดอยู่กับตัวถังรถเพื่อการลากจูง เช่น ลากรถพ่วง "
+#~ "เรือ หรือยานพาหนะอื่นๆ"

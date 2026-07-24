@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 23:32+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"resource/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/resource/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -64,7 +63,7 @@ msgstr "週40時間"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_multi_create_form
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
 msgstr ""
 
 #. module: resource
@@ -251,17 +250,14 @@ msgstr "稼働時間のデフォルト値"
 msgid ""
 "Define the working schedule of the resource. If not set, the resource will "
 "have fully flexible working hours."
-msgstr ""
-"リソースの稼働スケジュールを定義します。未設定の場合、このリソースは完全に柔"
-"軟な稼働時間となります。"
+msgstr "リソースの稼働スケジュールを定義します。未設定の場合、このリソースは完全に柔軟な稼働時間となります。"
 
 #. module: resource
 #: model_terms:ir.actions.act_window,help:resource.action_resource_calendar_form
 msgid ""
 "Define working hours and time table that could be scheduled to your project "
 "members"
-msgstr ""
-"プロジェクトメンバーにスケジュールすることができる勤務時間と時間表を定義"
+msgstr "プロジェクトメンバーにスケジュールすることができる勤務時間と時間表を定義"
 
 #. module: resource
 #. odoo-javascript
@@ -400,27 +396,21 @@ msgstr "ID"
 msgid ""
 "If empty, this is a generic time off for the company. If a resource is set, "
 "the time off is only for this resource"
-msgstr ""
-"空欄の場合は、会社全体に適用される汎用的な休止時間となります。リソースが設定"
-"されている場合は、そのリソースのみに適用されます。"
+msgstr "空欄の場合は、会社全体に適用される汎用的な休止時間となります。リソースが設定されている場合は、そのリソースのみに適用されます。"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource__active
 msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
-msgstr ""
-"有効項目をFalse にセットすると、リソースレコードは削除することなく非表示にで"
-"きます。"
+msgstr "有効項目をFalse にセットすると、リソースレコードは削除することなく非表示にできます。"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__active
 msgid ""
 "If the active field is set to false, it will allow you to hide the Working "
 "Time without removing it."
-msgstr ""
-"有効フィールドをFALSEに設定すると、作業時間を削除せずに非表示にすることができ"
-"ます。"
+msgstr "有効フィールドをFALSEに設定すると、作業時間を削除せずに非表示にすることができます。"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__recurrency_interval
@@ -501,9 +491,9 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as fulltime."
-msgstr ""
-"フルタイムとみなされるために、会社のスケジュールで勤務する必要のある時間数。"
+"Number of hours to work on the company schedule to be considered as "
+"fulltime."
+msgstr "フルタイムとみなされるために、会社のスケジュールで勤務する必要のある時間数。"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__recurrency_end_type__times
@@ -644,8 +634,7 @@ msgid ""
 "in a specific project phase. You can also set their efficiency level and "
 "workload based on their weekly working hours."
 msgstr ""
-"リソースは特定のプロジェクトフェーズに関与すべきリソースの作成と管理ができま"
-"す。それらの効率レベルと週間作業時間を基本とする作業負荷を設定できます。"
+"リソースは特定のプロジェクトフェーズに関与すべきリソースの作成と管理ができます。それらの効率レベルと週間作業時間を基本とする作業負荷を設定できます。"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
@@ -743,7 +732,8 @@ msgstr "1日あたりの平均時間が、週あたりの時間数と比べて�
 #. odoo-python
 #: code:addons/resource/models/resource_resource.py:0
 msgid ""
-"The average hours per day is too low compared to the number of hours per week"
+"The average hours per day is too low compared to the number of hours per "
+"week"
 msgstr "1日あたりの平均時間が、週あたりの時間数と比べて小さすぎます"
 
 #. module: resource
@@ -772,8 +762,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid ""
-"This date is excluded of the recurrency, to start a new one on this date you "
-"should create it from scratch"
+"This date is excluded of the recurrency, to start a new one on this date you"
+" should create it from scratch"
 msgstr ""
 
 #. module: resource
@@ -787,9 +777,7 @@ msgstr ""
 msgid ""
 "This field is used in order to define in which timezone the resources will "
 "work."
-msgstr ""
-"このフィールドは、そのリソースが稼働するタイムゾーンを定義するために、用いら"
-"れます。"
+msgstr "このフィールドは、そのリソースが稼働するタイムゾーンを定義するために、用いられます。"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource__time_efficiency
@@ -800,10 +788,7 @@ msgid ""
 "the efficiency factor is 200%, however the expected duration will be 30 "
 "minutes."
 msgstr ""
-"このフィールドは、この作業区における作業オーダの予想時間を計算するために使用"
-"されます。例えば、作業オーダに1時間かかり、効率ファクタが100％である場合の予"
-"想所要時間は1時間ですが、効率ファクタが200％の場合、予想所要時間は30分となり"
-"ます。"
+"このフィールドは、この作業区における作業オーダの予想時間を計算するために使用されます。例えば、作業オーダに1時間かかり、効率ファクタが100％である場合の予想所要時間は1時間ですが、効率ファクタが200％の場合、予想所要時間は30分となります。"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__3
@@ -896,10 +881,9 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__count_as
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: formation)"
-msgstr ""
-"これは「休止時間」として計算すべきか、それとも「勤務時間」として計算すべきか"
-"(例：研修など)を指定します。"
+"Whether this should be computed as a time off or as work time (eg: "
+"formation)"
+msgstr "これは「休止時間」として計算すべきか、それとも「勤務時間」として計算すべきか(例：研修など)を指定します。"
 
 #. module: resource
 #: model:ir.model,name:resource.model_resource_calendar_attendance
@@ -931,9 +915,7 @@ msgstr "作業開始時間"
 msgid ""
 "Work time rate versus full time working schedule, should be between 0 and "
 "100 %."
-msgstr ""
-"フルタイム勤務スケジュールに対する労働時間比率は、0～100％の間でなければなり"
-"ません。"
+msgstr "フルタイム勤務スケジュールに対する労働時間比率は、0～100％の間でなければなりません。"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__hour_to
@@ -999,13 +981,13 @@ msgstr "リソースにカレンダーがない場合、間隔を計算するこ
 #~ msgstr "<span> 時間/週</span>"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 1-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 1-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr "本当に1週間カレンダに変更しますか？勤務記録はすべて失われます。"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 2-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 2-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr "本当に2週間カレンダに変更しますか？勤務記録はすべて失われます。"
 
 #~ msgid "Attendances can't overlap."
@@ -1045,11 +1027,9 @@ msgstr "リソースにカレンダーがない場合、間隔を計算するこ
 #~ msgstr "2週間カレンダーに変更"
 
 #~ msgid ""
-#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to %"
-#~ "(number)s week."
-#~ msgstr ""
-#~ "現在の週(%(first_day)s から %(last_day)s まで)は、第 %(number)s 週にあたり"
-#~ "ます。"
+#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to "
+#~ "%(number)s week."
+#~ msgstr "現在の週(%(first_day)s から %(last_day)s まで)は、第 %(number)s 週にあたります。"
 
 #~ msgid "Total"
 #~ msgstr "合計"
@@ -1071,9 +1051,7 @@ msgstr "リソースにカレンダーがない場合、間隔を計算するこ
 
 #~ msgid ""
 #~ "You cannot define hours and duration based attendances for the same day."
-#~ msgstr ""
-#~ "同じ日に、時間ベースの出勤と所要時間ベースの出勤を同時に設定することはでき"
-#~ "ません。"
+#~ msgstr "同じ日に、時間ベースの出勤と所要時間ベースの出勤を同時に設定することはできません。"
 
 #~ msgid "even"
 #~ msgstr "偶数"

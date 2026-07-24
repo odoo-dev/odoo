@@ -13,8 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:47+0000\n"
 "PO-Revision-Date: 2026-06-20 07:40+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/sale_stock/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/sale_stock/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,28 +38,28 @@ msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Awaiting arrival"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> En espera de llegada"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Awaiting arrival"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/> En espera de llegada"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/>Preparation"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/>Preparación"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/>Preparation"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/>Preparación"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/> Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/> Cancelado"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/> Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/> Cancelado"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/>Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/>Cancelado"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/>Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/>Cancelado"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-truck\"/> Received"
-msgstr "<i class=\"fa fa-fw fa-truck\"/> Recibido"
+msgid "<i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Received"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Recibido"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.stock_production_lot_view_form
@@ -70,16 +69,12 @@ msgstr "<span class=\"o_stat_text\">Ventas</span>"
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Shipped\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Shipped\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Enviada\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Enviada\n"
 "                                    </span>"
 
 #. module: sale_stock
@@ -95,23 +90,17 @@ msgstr "<strong>Incoterm</strong>"
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
 msgid ""
-"According to product configuration, the delivered quantity can be "
-"automatically computed by mechanism:\n"
+"According to product configuration, the delivered quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
-"  - Analytic From expenses: the quantity is the quantity sum from posted "
-"expenses\n"
-"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to "
-"this line\n"
+"  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
+"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
-"Según la configuración del producto, la cantidad entregada se puede calcular "
-"de forma automática mediante uno de estos mecanismos:\n"
+"Según la configuración del producto, la cantidad entregada se puede calcular de forma automática mediante uno de estos mecanismos:\n"
 "  - Manual: La cantidad se establece de forma manual en la línea\n"
 "  - Analítica de Gastos: La cantidad es la suma de los gastos registrados\n"
-"  - Registro de horas: La cantidad es la suma de horas registradas en las "
-"tareas vinculadas a esta línea\n"
-"  - Movimientos de inventario: La cantidad proviene de las recolecciones "
-"confirmadas\n"
+"  - Registro de horas: La cantidad es la suma de horas registradas en las tareas vinculadas a esta línea\n"
+"  - Movimientos de inventario: La cantidad proviene de las recolecciones confirmadas\n"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_account_accrued_orders_wizard
@@ -211,9 +200,9 @@ msgid ""
 "either use the minimum or maximum lead time of the order lines."
 msgstr ""
 "Fecha de entrega que puede prometer al cliente, en el caso de los productos "
-"de servicio, se calcula a partir del plazo mínimo de las líneas de orden. En "
-"el caso de los envíos, se tendrá en cuenta la política de envíos de la orden "
-"para utilizar el plazo mínimo o máximo de las líneas de orden."
+"de servicio, se calcula a partir del plazo mínimo de las líneas de orden. En"
+" el caso de los envíos, se tendrá en cuenta la política de envíos de la "
+"orden para utilizar el plazo mínimo o máximo de las líneas de orden."
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_account_accrued_orders_wizard__display_name
@@ -249,7 +238,8 @@ msgstr "Mostrar widget de cantidad"
 #: code:addons/sale_stock/models/sale_order.py:0
 msgid ""
 "Do not forget to change the partner on the following delivery orders: %s"
-msgstr "No olvide cambiar el contacto en las siguientes órdenes de entrega: %s"
+msgstr ""
+"No olvide cambiar el contacto en las siguientes órdenes de entrega: %s"
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order__effective_date
@@ -417,8 +407,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
 msgid ""
 "Margin of error for dates promised to customers. Products will be scheduled "
-"for procurement and delivery that many days earlier than the actual promised "
-"date, to cope with unexpected delays in the supply chain."
+"for procurement and delivery that many days earlier than the actual promised"
+" date, to cope with unexpected delays in the supply chain."
 msgstr ""
 "Margen de error en las fechas prometidas a los clientes. Se programará el "
 "aprovisionamiento y la entrega de los productos unos días antes de la fecha "
@@ -510,13 +500,10 @@ msgstr "DEVOLUCIÓN"
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_help_message_template
 msgid ""
 "Reduce back orders with reservations, locations management, smart\n"
-"                replenishment propositions, shipping connectors, barcode "
-"scanner, etc."
+"                replenishment propositions, shipping connectors, barcode scanner, etc."
 msgstr ""
-"Reduzca las órdenes parciales con reservaciones, gestión de ubicaciones, "
-"propuestas\n"
-"                de reabastecimiento inteligente, conectores de envío, "
-"lectores de códigos de barra, etc."
+"Reduzca las órdenes parciales con reservaciones, gestión de ubicaciones, propuestas\n"
+"                de reabastecimiento inteligente, conectores de envío, lectores de códigos de barra, etc."
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_reference
@@ -686,8 +673,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/product_catalog/sale_order_line/sale_order_line.js:0
 msgid ""
-"The ordered quantity cannot be decreased below the amount already delivered. "
-"Instead, create a return in your inventory."
+"The ordered quantity cannot be decreased below the amount already delivered."
+" Instead, create a return in your inventory."
 msgstr ""
 "La cantidad ordenada no puede ser menor que la cantidad entregada. En su "
 "lugar, cree una devolución en su inventario."

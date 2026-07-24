@@ -16,20 +16,18 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-19 00:55+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
-"master/fleet/pt_BR/>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-master/fleet/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -199,8 +197,7 @@ msgid ""
 "All services and contracts linked to this vehicle will also be archived.\n"
 "Are you sure you want to proceed?"
 msgstr ""
-"Todos os serviços e contratos relacionados a este veículo também serão "
-"arquivados.\n"
+"Todos os serviços e contratos relacionados a este veículo também serão arquivados.\n"
 "Tem certeza de que quer continuar?"
 
 #. module: fleet
@@ -481,11 +478,11 @@ msgstr "Categorias"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
-"As categorias ajudam a gerenciar sua frota com mais eficiência e a organizar "
-"seus veículos."
+"As categorias ajudam a gerenciar sua frota com mais eficiência e a organizar"
+" seus veículos."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
@@ -530,7 +527,8 @@ msgstr "Escolha se o contrato ainda é válido ou não"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr ""
 "Escolha se o serviço se refere a contratos, serviços de veículos ou ambos"
 
@@ -851,8 +849,8 @@ msgstr "Data de início da cobertura do contrato"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
 "Data em que a cobertura do contrato expira (por padrão, um ano após a data "
 "de início)"
@@ -1590,16 +1588,15 @@ msgid ""
 "            you when some contracts have to be renewed."
 msgstr ""
 "Gerencie todos os seus contratos (locação, seguros etc.) com\n"
-"            seus serviços e custos relacionados. O Odoo avisará "
-"automaticamente\n"
+"            seus serviços e custos relacionados. O Odoo avisará automaticamente\n"
 "            quando os contratos precisarem ser renovados."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_costs_reporting_action
 msgid "Manage efficiently your different effective vehicles Costs with Odoo."
 msgstr ""
-"Gerencie com eficiência os custos de seus diferentes veículos efetivos com o "
-"Odoo."
+"Gerencie com eficiência os custos de seus diferentes veículos efetivos com o"
+" Odoo."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
@@ -1969,10 +1966,10 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"Idioma de tradução opcional (código ISO) a ser selecionado ao enviar um e-"
-"mail. Se não for definido, será utilizado o idioma do parceiro principal. "
-"Normalmente, deve ser uma expressão de espaço reservado que forneça o idioma "
-"apropriado, por exemplo, {{ object.partner_id.lang }}."
+"Idioma de tradução opcional (código ISO) a ser selecionado ao enviar um "
+"e-mail. Se não for definido, será utilizado o idioma do parceiro principal. "
+"Normalmente, deve ser uma expressão de espaço reservado que forneça o idioma"
+" apropriado, por exemplo, {{ object.partner_id.lang }}."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_15
@@ -2230,7 +2227,8 @@ msgstr "Revisar alteração do motorista"
 #. odoo-python
 #: code:addons/fleet/models/fleet_vehicle.py:0
 msgid "Review driver change of %s and specify End date"
-msgstr "Revisar a alteração do motorista de %s e especificar a data de término"
+msgstr ""
+"Revisar a alteração do motorista de %s e especificar a data de término"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_39
@@ -2377,8 +2375,8 @@ msgstr "Substituição de vela de ignição"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 "Especifica o número total de portas, incluindo as portas do caminhão e da "
 "escotilha, se aplicável."
@@ -2583,12 +2581,10 @@ msgstr "Assistência em tour"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Acompanhe todos os serviços feitos em seu veículo.\n"
-"            Os serviços podem ser de vários tipos: reparos ocasionais, "
-"manutenção regular etc."
+"            Os serviços podem ser de vários tipos: reparos ocasionais, manutenção regular etc."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__trailer_hook
@@ -2968,5 +2964,5 @@ msgstr "user_id"
 #~ "A trailer hitch is a device attached to a vehicle's chassis for towing "
 #~ "purposes,            such as pulling trailers, boats, or other vehicles."
 #~ msgstr ""
-#~ "Um engate de reboque é um dispositivo acoplado ao chassi de um veículo "
-#~ "para fins de reboque, como puxar reboques, barcos ou outros veículos."
+#~ "Um engate de reboque é um dispositivo acoplado ao chassi de um veículo para "
+#~ "fins de reboque, como puxar reboques, barcos ou outros veículos."

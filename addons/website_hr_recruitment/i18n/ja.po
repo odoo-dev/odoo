@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 06:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -70,33 +69,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>全ての採用情報"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>全ての採用情報"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> 職務内容"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> 職務内容"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">それまで</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">当社のウェブサイトをご覧下さい:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">当社のウェブサイトをご覧下さい:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -111,8 +108,7 @@ msgstr "<span class=\"s_website_form_label_content\">職務</span>"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "<span class=\"s_website_form_label_content\">LinkedIn Profile</span>"
-msgstr ""
-"<span class=\"s_website_form_label_content\">LinkedIn プロファイル</span>"
+msgstr "<span class=\"s_website_form_label_content\">LinkedIn プロファイル</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -128,34 +124,28 @@ msgstr "<span class=\"s_website_form_label_content\">自己紹介（簡易）</s
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">メールアドレス</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">氏名</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">電話番号</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -182,9 +172,7 @@ msgstr "<span class=\"text-muted small\">勤務地</span>"
 msgid ""
 "<span class=\"text-muted small\">Provide either a resume file or a linkedin "
 "profile</span>"
-msgstr ""
-"<span class=\"text-muted small\">履歴書ファイルまたLinkedinプロフィールを提出"
-"</span>"
+msgstr "<span class=\"text-muted small\">履歴書ファイルまたLinkedinプロフィールを提出</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_rating
@@ -343,9 +331,9 @@ msgstr "日常的にユーザーに役立つ項目を新規に作成する"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
-msgstr ""
-"新しい採用ページを 右上ボタン<strong>+ <i>新規</i></strong>から作成します。"
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
+msgstr "新しい採用ページを 右上ボタン<strong>+ <i>新規</i></strong>から作成します。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -390,16 +378,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
-"全ての従業員に自分の仕事が与えるインパクトを目の当たりにするチャンスがありま"
-"す。\n"
+"全ての従業員に自分の仕事が与えるインパクトを目の当たりにするチャンスがあります。\n"
 "                    会社の成功に本当の意味で貢献できるのです。\n"
 "                    <br/>\n"
 "                    年間を通じて様々な行事があり、週1のスポーツセッション、\n"
@@ -466,24 +450,18 @@ msgstr "ホーム"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "通常、<strong>ご応募に対して、3日以内に返信します</strong>。\n"
 "                                                <br/><br/>\n"
-"                                                次の段階は、電話またはオフィ"
-"スでの面接です。\n"
+"                                                次の段階は、電話またはオフィスでの面接です。\n"
 "                                                <br/><br/>\n"
-"                                                <strong>もしお急ぎで回答が必"
-"要な\n"
-"                                               場合</strong>または返信が遅い"
-"場合には\n"
+"                                                <strong>もしお急ぎで回答が必要な\n"
+"                                               場合</strong>または返信が遅い場合には\n"
 "                                                ご連絡下さい。"
 
 #. module: website_hr_recruitment
@@ -835,14 +813,12 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_absolute_url
 msgid "The full absolute URL to access the document through the website."
-msgstr ""
-"ウェブサイト経由でこのドキュメントにアクセスするための完全な絶対URLです。"
+msgstr "ウェブサイト経由でこのドキュメントにアクセスするための完全な絶対URLです。"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,help:website_hr_recruitment.field_hr_job__website_url
 msgid "The full relative URL to access the document through the website."
-msgstr ""
-"ウェブサイト経由でこのドキュメントにアクセスするための完全な相対URLです。"
+msgstr "ウェブサイト経由でこのドキュメントにアクセスするための完全な相対URLです。"
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -866,12 +842,10 @@ msgstr "入力されたプロフィールはLinkedinプロフィールではな�
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "現在募集中の職位はありませんが<br class=\"mb-2\"/>\n"
-"　　　　　　　　　　ご自分で応募されたい場合は<span class=\"fw-bold\">ご連絡"
-"</span>下さい。"
+"　　　　　　　　　　ご自分で応募されたい場合は<span class=\"fw-bold\">ご連絡</span>下さい。"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -912,15 +886,11 @@ msgstr "現在のサイトに表示"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"当社は、革新的な製品を通じて皆様の生活を向上させることを目標に情熱を燃やす社"
-"員からなるチームです。\n"
-"　　　　　　　私たちは、お客様のビジネス上の問題を解決するために、優れた製品"
-"を開発しています。"
+"当社は、革新的な製品を通じて皆様の生活を向上させることを目標に情熱を燃やす社員からなるチームです。\n"
+"　　　　　　　私たちは、お客様のビジネス上の問題を解決するために、優れた製品を開発しています。"
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -1024,9 +994,7 @@ msgstr "パンくず"
 msgid ""
 "e.g. Summarize the position in one or two lines that will be displayed on "
 "the job page and the jobs list page..."
-msgstr ""
-"例：求人ページおよび求人一覧ページに表示される内容を、1～2行で要約してくださ"
-"い..."
+msgstr "例：求人ページおよび求人一覧ページに表示される内容を、1～2行で要約してください..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -1068,12 +1036,9 @@ msgstr "スケジュール済"
 #~ "The following ongoing applications share an email address, phone number "
 #~ "and/or linkedin profile with this application:"
 #~ msgstr ""
-#~ "以下の進行中のアプリケーションは、このアプリケーションとメールアドレス、電"
-#~ "話番号、および/またはLinkedInプロフィールを共有しています："
+#~ "以下の進行中のアプリケーションは、このアプリケーションとメールアドレス、電話番号、および/またはLinkedInプロフィールを共有しています："
 
 #~ msgid ""
 #~ "The following recently refused applications share an email address, phone "
 #~ "number and/or linkedin profile with this application:"
-#~ msgstr ""
-#~ "以下の最近却下された申請は、本申請とメールアドレス、電話番号、および/また"
-#~ "はLinkedInプロフィールを共有しています："
+#~ msgstr "以下の最近却下された申請は、本申請とメールアドレス、電話番号、および/またはLinkedInプロフィールを共有しています："

@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 03:19+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/im_livechat/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,14 +29,12 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
 "\n"
-"        Penilaian Live Chat terdiri dari 1 (Tidak Puas), 3 (Netral), 5 (Puas)"
-"\n"
+"        Penilaian Live Chat terdiri dari 1 (Tidak Puas), 3 (Netral), 5 (Puas)\n"
 "        atau kosong dan hanya dapat diatur di saluran Live Chat.\n"
 "        "
 
@@ -122,8 +119,10 @@ msgstr "%s (salin)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
-msgstr "'%(input_email)s' tidak tampak seperti email valid. Silakan coba lagi."
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
+msgstr ""
+"'%(input_email)s' tidak tampak seperti email valid. Silakan coba lagi."
 
 #. module: im_livechat
 #. odoo-python
@@ -143,17 +142,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Tunjukkan' menampilkan tombol chat pada halaman.\n"
-"* 'Tunjukkan dengan notifikasi' adalah 'Tunjukkan' ditambah teks mengambang "
-"persis di sebelah tombol.\n"
-"* 'Buka otomatis' menampilkan tombol dan secara otomatis membuka jendela "
-"percakapan.\n"
+"* 'Tunjukkan dengan notifikasi' adalah 'Tunjukkan' ditambah teks mengambang persis di sebelah tombol.\n"
+"* 'Buka otomatis' menampilkan tombol dan secara otomatis membuka jendela percakapan.\n"
 "* 'Sembunyikan' menyembunyikkan tombol chat pada halaman.\n"
 
 #. module: im_livechat
@@ -164,30 +159,30 @@ msgstr "< 1m"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Kembali ke mode edit"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Kembali ke mode edit"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Hapus operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Hapus operator\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -215,8 +210,8 @@ msgstr "<span>Sesi-Sesi Berlanjut:</span>"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Pengingat: Langkah ini hanya akan dijalankan bila tidak ada operator "
 "yang tersedia.</span>"
@@ -224,35 +219,28 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>Tip: Setidaknya satu interaksi (Pertanyaan, Email, ...) dibutuhkan "
-"sebelum Bot dapat melakukan action yang lebih kompleks (Forward ke Operator, "
-"...). </span>\n"
-"                    <span>Gunakan Peraturan Channel bila Anda ingin Bot "
-"untuk berinteraksi dengan pengunjung hanya saat tidak ada operator yang "
-"tersedia.</span>"
+"<span>Tip: Setidaknya satu interaksi (Pertanyaan, Email, ...) dibutuhkan sebelum Bot dapat melakukan action yang lebih kompleks (Forward ke Operator, ...). </span>\n"
+"                    <span>Gunakan Peraturan Channel bila Anda ingin Bot untuk berinteraksi dengan pengunjung hanya saat tidak ada operator yang tersedia.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Tip: Setidaknya satu interaksi (Pertanyaan, Email, ...) dibutuhkan "
-"sebelum Bot dapat melakukan action yang lebih kompleks (Forward ke Operator, "
-"...).</span>"
+"sebelum Bot dapat melakukan action yang lebih kompleks (Forward ke Operator,"
+" ...).</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Tip: Rencanakan langkah-langkah lebih lanjut untuk Bot pada kasus "
 "dimana tidak ada operator.</span>"
@@ -475,8 +463,8 @@ msgstr "Tanggapan Otomatis"
 msgid ""
 "Cannot create history as it is only available for live chats: %(histories)s."
 msgstr ""
-"Tidak dapat membuat sejarah karena hanya tersedia untuk live chat: %"
-"(histories)s."
+"Tidak dapat membuat sejarah karena hanya tersedia untuk live chat: "
+"%(histories)s."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__livechat_channel_id
@@ -516,8 +504,8 @@ msgstr "Saluran"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "Chat bersifat privat dan unik di antara 2 orang. Kelompok privat diantara "
 "mereka yang diundang. Channel bebas untuk semua orang (tergantung pada "
@@ -875,8 +863,8 @@ msgid ""
 "not be taken into account."
 msgstr ""
 "Jeda (dalam detik) untuk secara otomatis membuka jendela percakapan. Ingat: "
-"action yang dipilih harus 'Buka otomatis' jika tidak paramter ini tidak akan "
-"diperhitungkan."
+"action yang dipilih harus 'Buka otomatis' jika tidak paramter ini tidak akan"
+" diperhitungkan."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1117,8 +1105,8 @@ msgid ""
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
 "Dalam kasus perintah untuk mencari peraturan yang cocok. Bila 2 peraturan "
-"cocok untuk url/negara yang diberikan, peraturan dengan urutan terendah akan "
-"dipindah."
+"cocok untuk url/negara yang diberikan, peraturan dengan urutan terendah akan"
+" dipindah."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1128,8 +1116,8 @@ msgid ""
 "<strong>Marketing.</strong>"
 msgstr ""
 "Kunjungi <strong>Website</strong> &gt; <strong>Konfigurasi</strong> &gt; "
-"<strong>Pengaturan</strong> &gt; <strong>Email</strong> &amp; <strong>"
-"Marketing.</strong>"
+"<strong>Pengaturan</strong> &gt; <strong>Email</strong> &amp; "
+"<strong>Marketing.</strong>"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1401,8 +1389,8 @@ msgstr "Informasi"
 msgid ""
 "Invalid URL '%s'. The Review Link must start with 'http://' or 'https://'."
 msgstr ""
-"URL '%s' Tidak Valid. Link Review harus dimulai dengan 'http://' or 'https://"
-"'."
+"URL '%s' Tidak Valid. Link Review harus dimulai dengan 'http://' or "
+"'https://'."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_script_step__is_forward_operator_child
@@ -2421,7 +2409,8 @@ msgstr "Tanggal akhir sesi"
 msgid ""
 "Session is closed when either the visitor or the last agent leaves the "
 "conversation."
-msgstr "Sesi ditutup saat pengunjung atau agen terakhir keluar dari percakapan."
+msgstr ""
+"Sesi ditutup saat pengunjung atau agen terakhir keluar dari percakapan."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_channel_member_history__call_percentage
@@ -2456,8 +2445,7 @@ msgstr "Sesi per Operator"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2598,12 +2586,12 @@ msgstr "Percakapan dikirim."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "Peraturan ini hanya akan diaplikasikan untuk negara-negara yang dipilih. "
-"Contoh: jika Anda memilih 'Belgia' dan 'Amerika Serikat' dan Anda menentukan "
-"tindakan untuk 'Sembunyikan', tombol chat akan disembunyikan pada URL "
+"Contoh: jika Anda memilih 'Belgia' dan 'Amerika Serikat' dan Anda menentukan"
+" tindakan untuk 'Sembunyikan', tombol chat akan disembunyikan pada URL "
 "pengunjung yang berlokasi di 2 negara tersebut. Fitur ini membutuhkan "
 "penginstalan GeoIP pada server Anda."
 
@@ -2702,20 +2690,11 @@ msgstr "Warna Judul"
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 #, fuzzy
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
-"Untuk menerapkan peraturan hanya ke halaman-halaman tertentu di website "
-"Anda, masukkan URL regex seperti /shop. Ini akan mencocokkan halaman apa pun "
-"yang mulai dengan /shop, seperti /shop/product. Biarkan field kosong untuk "
-"menerapkan peraturan ke semua halaman.<br/>\n"
-"                                    Untuk database on-premise, GeoIP harus "
-"diinstal di server Anda untuk geolokasi pengunjung. Tanpanya, peraturan yang "
-"termasuk batasan negara akan diabaikan."
+"Untuk menerapkan peraturan hanya ke halaman-halaman tertentu di website Anda, masukkan URL regex seperti /shop. Ini akan mencocokkan halaman apa pun yang mulai dengan /shop, seperti /shop/product. Biarkan field kosong untuk menerapkan peraturan ke semua halaman.<br/>\n"
+"                                    Untuk database on-premise, GeoIP harus diinstal di server Anda untuk geolokasi pengunjung. Tanpanya, peraturan yang termasuk batasan negara akan diabaikan."
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_agent_history_action
@@ -2755,8 +2734,8 @@ msgid ""
 "URL to a static page where you client can discuss with the operator of the "
 "channel."
 msgstr ""
-"URL ke halaman statik di mana klien Anda dapat mendiskusikan dengan operator "
-"channel."
+"URL ke halaman statik di mana klien Anda dapat mendiskusikan dengan operator"
+" channel."
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_utm_mixin
@@ -2928,7 +2907,8 @@ msgstr "Selamat datang NamaPerusahaan! 👋"
 #. module: im_livechat
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_initial_step_demo
 msgid "Welcome to the Support! How can I assist you today?"
-msgstr "Selamat datang ke Bantuan! Bagaimana saya dapat membantu Anda hari ini?"
+msgstr ""
+"Selamat datang ke Bantuan! Bagaimana saya dapat membantu Anda hari ini?"
 
 #. module: im_livechat
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_dispatch

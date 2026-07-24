@@ -19,14 +19,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 23:57+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"mass_mailing/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/mass_mailing/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: mass_mailing
@@ -34,8 +32,7 @@ msgstr ""
 #: code:addons/mass_mailing/models/mailing_filter.py:0
 msgid ""
 "\n"
-"                <p class=\"o_view_nocontent_smiling_face\">No record "
-"currently matches your rules!</p>\n"
+"                <p class=\"o_view_nocontent_smiling_face\">No record currently matches your rules!</p>\n"
 "            "
 msgstr ""
 
@@ -54,23 +51,23 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "\"Engaging with this team was effortless from start to end. Their "
-"proficiency and meticulous approach greatly enhanced our project. I couldn't "
-"be happier with the final product!\""
+"proficiency and meticulous approach greatly enhanced our project. I couldn't"
+" be happier with the final product!\""
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
-"\"Exceptional service and great communication throughout the entire process. "
-"They went above and beyond to ensure our project was a complete success.\""
+"\"Exceptional service and great communication throughout the entire process."
+" They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "\"From the first meeting, it was clear we were in good hands. They took our "
-"vision and turned it into something even better than we had imagined. Highly "
-"recommend!\""
+"vision and turned it into something even better than we had imagined. Highly"
+" recommend!\""
 msgstr ""
 
 #. module: mass_mailing
@@ -163,8 +160,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/wizard/mailing_contact_import.py:0
 msgid ""
-"%(imported_count)s contacts have been imported. %(duplicate_count)s contacts "
-"are duplicates and have been ignored."
+"%(imported_count)s contacts have been imported. %(duplicate_count)s contacts"
+" are duplicates and have been ignored."
 msgstr ""
 
 #. module: mass_mailing
@@ -303,26 +300,22 @@ msgstr ""
 msgid ""
 "<br/>\n"
 "                                    <span class=\"text-muted\">\n"
-"                                        <i class=\"fa fa-envelope-o\"/> "
-"Contacts\n"
+"                                        <i class=\"oi\" data-icon=\"mail\"/> Contacts\n"
 "                                    </span>"
 msgstr ""
 "<br/>\n"
 "                                    <span class=\"text-muted\">\n"
-"                                        <i class=\"fa fa-envelope-o\"/> "
-"Contacte\n"
+"                                        <i class=\"oi\" data-icon=\"mail\"/> Contacte\n"
 "                                    </span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Blacklist</"
-"span>"
+"                                    <span class=\"text-muted\">Blacklist</span>"
 msgstr ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Listă neagră</"
-"span>"
+"                                    <span class=\"text-muted\">Listă neagră</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
@@ -331,19 +324,16 @@ msgid ""
 "                                    <span class=\"text-muted\">Bounce</span>"
 msgstr ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Răspunsuri</"
-"span>"
+"                                    <span class=\"text-muted\">Răspunsuri</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Mailings</"
-"span>"
+"                                    <span class=\"text-muted\">Mailings</span>"
 msgstr ""
 "<br/>\n"
-"                                    <span class=\"text-"
-"muted\">Corespondențe</span>"
+"                                    <span class=\"text-muted\">Corespondențe</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
@@ -352,22 +342,16 @@ msgid ""
 "                                    <span class=\"text-muted\">Opt-Out</span>"
 msgstr ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Renunțare</"
-"span>"
+"                                    <span class=\"text-muted\">Renunțare</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.theme_default_template
 msgid ""
-"<br/>We want to take this opportunity to welcome you to our ever-growing "
-"community!\n"
-"                <br/>Your platform is ready for work, it will help you "
-"reduce the costs of digital signatures, attract new customers and increase "
-"sales."
+"<br/>We want to take this opportunity to welcome you to our ever-growing community!\n"
+"                <br/>Your platform is ready for work, it will help you reduce the costs of digital signatures, attract new customers and increase sales."
 msgstr ""
 "<br/>Vrem să vă mulțumim pentru că ați ales platforma noastră!\n"
-"                <br/>Platforma este gata pentru a fi folosită, va ajuta la "
-"reducerea costurilor de semnături digitale, atragerea de noi clienți și "
-"creșterea vânzărilor."
+"                <br/>Platforma este gata pentru a fi folosită, va ajuta la reducerea costurilor de semnături digitale, atragerea de noi clienți și creșterea vânzărilor."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_signature
@@ -396,8 +380,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_highlight
-msgid ""
-"<font class=\"text-white\">Put the focus on what you have to say!</font>"
+msgid "<font class=\"text-white\">Put the focus on what you have to say!</font>"
 msgstr ""
 
 #. module: mass_mailing
@@ -463,8 +446,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_call_to_action
 msgid ""
-"<font style=\"color: white;\"><strong>50,000+ companies</strong> run Odoo.</"
-"font>"
+"<font style=\"color: white;\"><strong>50,000+ companies</strong> run "
+"Odoo.</font>"
 msgstr ""
 
 #. module: mass_mailing
@@ -475,22 +458,20 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_call_to_action
 msgid ""
-"<font style=\"color: white;\">Join us and make your company a better place.</"
-"font>"
+"<font style=\"color: white;\">Join us and make your company a better "
+"place.</font>"
+msgstr ""
+
+#. module: mass_mailing
+#: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
+msgid "<font style=\"color:white;\"><span class=\"h3-fs\">A color block</span></font>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
 msgid ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">A color block</span></"
-"font>"
-msgstr ""
-
-#. module: mass_mailing
-#: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
-msgid ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">Another color block</"
-"span></font>"
+"<font style=\"color:white;\"><span class=\"h3-fs\">Another color "
+"block</span></font>"
 msgstr ""
 
 #. module: mass_mailing
@@ -509,80 +490,75 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_picture
-msgid ""
-"<font style=\"font-size: 12px;\">Where innovation meets performance</font>"
+msgid "<font style=\"font-size: 12px;\">Where innovation meets performance</font>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
-msgid "<i class=\"fa fa-bar-chart\"/> Compare Version"
-msgstr "<i class=\"fa fa-bar-chart\"/> Comparați Versiunea"
+msgid "<i class=\"oi\" data-icon=\"bar_chart\"/> Compare Version"
+msgstr "<i class=\"oi\" data-icon=\"bar_chart\"/> Comparați Versiunea"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_filter_view_kanban
 msgid ""
-"<i class=\"fa fa-bullseye me-1\" title=\"Recipient Model\" aria-"
-"hidden=\"true\"/>"
+"<i class=\"oi me-1\" data-icon=\"crisis_alert\" title=\"Recipient Model\" "
+"aria-hidden=\"true\"/>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
 msgid ""
-"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Lead/"
-"Opportunity\"/>"
+"<i class=\"oi me-2\" data-icon=\"crisis_alert\" role=\"img\" aria-"
+"label=\"Lead/Opportunity\"/>"
 msgstr ""
-"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Lead/"
-"Oportunitate\"/>"
+"<i class=\"me-2 oi\" data-icon=\"crisis_alert\" role=\"img\" aria-"
+"label=\"Lead/Oportunitate\"/>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
-msgid "<i class=\"fa fa-copy\"/> Create an Alternative"
-msgstr "<i class=\"fa fa-copy\"/> Creați o Alternativă"
+msgid "<i class=\"oi\" data-icon=\"content_copy\"/> Create an Alternative"
+msgstr "<i class=\"oi\" data-icon=\"content_copy\"/> Creați o Alternativă"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_kanban
-msgid "<i class=\"fa fa-envelope text-primary me-2\" title=\"Email\"/>"
+msgid "<i class=\"oi oi-filled text-primary me-2\" data-icon=\"mail\" title=\"Email\"/>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
-msgid "<i class=\"fa fa-envelope\"/> Send this as winner"
-msgstr "<i class=\"fa fa-envelope\"/> Trimiteți acesta ca câștigător"
+msgid "<i class=\"oi oi-filled\" data-icon=\"mail\"/> Send this as winner"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"mail\"/> Trimiteți acesta ca câștigător"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid ""
-"<i class=\"fa fa-envelope\"/><span name=\"ab_test_auto\">\n"
+"<i class=\"oi oi-filled\" data-icon=\"mail\"/><span name=\"ab_test_auto\">\n"
 "                                                    Send Winner Now\n"
 "                                                </span>"
 msgstr ""
-"<i class=\"fa fa-envelope\"/><span name=\"ab_test_auto\">\n"
-"                                                    Trimite câștigătorul "
-"acum\n"
+"<i class=\"oi-filled oi\" data-icon=\"mail\"/><span name=\"ab_test_auto\">\n"
+"                                                    Trimite câștigătorul acum\n"
 "                                                </span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 msgid ""
-"<i class=\"fa fa-exclamation-triangle text-danger\" aria-hidden=\"true\"/>\n"
-"                        The sum of all percentages for this A/B campaign "
-"totals"
+"<i class=\"oi text-danger\" data-icon=\"warning\" aria-hidden=\"true\"/>\n"
+"                        The sum of all percentages for this A/B campaign totals"
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle text-danger\" aria-hidden=\"true\"/>\n"
-"                        Suma tuturor procentelor pentru această campanie A/B "
-"totalizează"
+"<i class=\"text-danger oi\" data-icon=\"warning\" aria-hidden=\"true\"/>\n"
+"                        Suma tuturor procentelor pentru această campanie A/B totalizează"
 
 #. module: mass_mailing
 #: model_terms:ir.actions.act_window,help:mass_mailing.mailing_subscription_action_report_optout
-msgid "<i class=\"oi oi-arrow-right\"></i> Configure Opt-out Reasons"
-msgstr "<i class=\"oi oi-arrow-right\"></i> Configurează motivele de renunțare"
+msgid "<i class=\"oi\" data-icon=\"east\"></i> Configure Opt-out Reasons"
+msgstr "<i class=\"oi\" data-icon=\"east\"></i> Configurează motivele de renunțare"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_filter_view_kanban
 msgid ""
-"<i class=\"text-muted fa fa-paper-plane-o me-1\" aria-hidden=\"true\"/>\n"
-"                                    <span class=\"text-muted "
-"fs-5\">Mailings</span>"
+"<i class=\"oi text-muted me-1\" data-icon=\"send\" aria-hidden=\"true\"/>\n"
+"                                    <span class=\"text-muted fs-5\">Mailings</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -593,18 +569,12 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid ""
-"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" "
-"invisible=\"reply_to_mode == 'update' or mailing_model_name in "
-"['mailing.contact', 'res.partner', 'mailing.list']\">\n"
-"                                                    To track replies, this "
-"address must belong to this database.\n"
+"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" invisible=\"reply_to_mode == 'update' or mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']\">\n"
+"                                                    To track replies, this address must belong to this database.\n"
 "                                                </small>"
 msgstr ""
-"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" "
-"invisible=\"reply_to_mode == 'update' or mailing_model_name in "
-"['mailing.contact', 'res.partner', 'mailing.list']\">\n"
-"                                                    Pentru a urmări "
-"răspunsurile, această adresă trebuie să aparțină acestei baze de date.\n"
+"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" invisible=\"reply_to_mode == 'update' or mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']\">\n"
+"                                                    Pentru a urmări răspunsurile, această adresă trebuie să aparțină acestei baze de date.\n"
 "                                                </small>"
 
 #. module: mass_mailing
@@ -630,92 +600,96 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
 msgid ""
-"<span class=\"fa fa-asterisk me-2\" contenteditable=\"false\"/>What We Offer"
+"<span class=\"oi me-2\" data-icon=\"emergency\" "
+"contenteditable=\"false\"/>What We Offer"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Curated Industry "
-"Insights"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" "
+"role=\"img\"/>  Curated Industry Insights"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Expert Tips &amp; "
-"How-Tos"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Expert"
+" Tips &amp; How-Tos"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"Resources"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Guides"
+" &amp; Resources"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
+"<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Access "
+"all modules"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
+"<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Account "
+"management"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Complete CRM for "
-"any team"
+"<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Complete"
+" CRM for any team"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
-msgid "<span class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
+msgid "<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Email support"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Limited "
+"<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Limited "
 "customization"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Sales &amp; "
-"marketing for 2"
+"<span class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Sales "
+"&amp; marketing for 2"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_badge
-msgid "<span class=\"fa fa-fw fa-folder\"/>Category"
+msgid "<span class=\"oi oi-fw oi-filled\" data-icon=\"folder\"/>Category"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_cta_badge
 msgid ""
-"<span class=\"fa fa-fw fa-info-circle\" role=\"img\"/>  What do you want to "
-"promote&amp;nbsp;?"
+"<span class=\"oi oi-fw\" data-icon=\"info\" role=\"img\"/>  What do you want"
+" to promote&amp;nbsp;?"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_centered_cta_badge
 msgid ""
-"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  Huge "
-"holiday sale savings. Don't miss out."
+"<span class=\"oi oi-fw\" data-icon=\"shopping_cart\" "
+"contenteditable=\"false\"/>  Huge holiday sale savings. Don't miss out."
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_special_offer_cta
 msgid ""
-"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>Special "
-"Offers</strong>. Complimentary care packs included with every sofa."
+"<span class=\"oi oi-fw\" data-icon=\"label\" "
+"contenteditable=\"false\"/>  <strong>Special Offers</strong>. Complimentary "
+"care packs included with every sofa."
 msgstr ""
 
 #. module: mass_mailing
@@ -730,12 +704,10 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
 msgid ""
-"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Scheduled "
-"date\"/>\n"
+"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Scheduled date\"/>\n"
 "                                        <span>Next Batch</span>"
 msgstr ""
-"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Data "
-"programată\"/>\n"
+"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Data programată\"/>\n"
 "                                        <span>Următorul lot</span>"
 
 #. module: mass_mailing
@@ -750,12 +722,13 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 msgid ""
-"<span class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
+"<span class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No "
+"customization"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
-msgid "<span class=\"fa fa-times text-danger\" role=\"img\"/>  No support"
+msgid "<span class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No support"
 msgstr ""
 
 #. module: mass_mailing
@@ -832,17 +805,14 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
-msgid ""
-"<span class=\"o_small-fs\">Instant setup, satisfied or reimbursed.</span>"
+msgid "<span class=\"o_small-fs\">Instant setup, satisfied or reimbursed.</span>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length != "
-"1\">Mailing Contact</span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"mailing_contact_ids.length == 1\">Mailing Contacts</span>"
+"<span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length != 1\">Mailing Contact</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length == 1\">Mailing Contacts</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -852,8 +822,7 @@ msgstr "<span class=\"o_stat_text\">Deschide destinatar</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_form_split_name
-msgid ""
-"<span class=\"opacity-50\" invisible=\"name\">e.g. \"John Smith\"</span>"
+msgid "<span class=\"opacity-50\" invisible=\"name\">e.g. \"John Smith\"</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -888,8 +857,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
-msgid ""
-"<span name=\"next_departure_text\">This mailing is scheduled for </span>"
+msgid "<span name=\"next_departure_text\">This mailing is scheduled for </span>"
 msgstr ""
 "<span name=\"next_departure_text\">Această corespondență este programată "
 "pentru </span>"
@@ -902,8 +870,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid ""
-"<span name=\"refresh_text\">This mailing will be sent as soon as possible.</"
-"span>"
+"<span name=\"refresh_text\">This mailing will be sent as soon as "
+"possible.</span>"
 msgstr ""
 "<span name=\"refresh_text\">Această corespondență va fi trimisă cât mai "
 "curând posibil.</span>"
@@ -911,16 +879,16 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid ""
-"<span name=\"scheduled_text\">emails are in queue and will be sent soon</"
-"span>"
+"<span name=\"scheduled_text\">emails are in queue and will be sent "
+"soon</span>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.digest_mail_main
 msgid "<span style=\"color: #878d97;\">Turn off Mailing Reports</span>"
 msgstr ""
-"<span style=\"color: #878d97;\">Dezactivează rapoartele de corespondență</"
-"span>"
+"<span style=\"color: #878d97;\">Dezactivează rapoartele de "
+"corespondență</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_cover
@@ -948,8 +916,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 msgid "<span>There wasn't enough recipients left for this mailing</span>"
 msgstr ""
-"<span>Nu au mai rămas suficienți destinatari pentru această corespondență</"
-"span>"
+"<span>Nu au mai rămas suficienți destinatari pentru această "
+"corespondență</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
@@ -983,8 +951,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_numbers
-msgid ""
-"<strong><font style=\"font-size: 48px; color: white;\">45</font></strong>"
+msgid "<strong><font style=\"font-size: 48px; color: white;\">45</font></strong>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1016,8 +983,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "<strong>Emil Foster</strong><br/>\n"
-"                                    <span class=\"text-muted\">Creative "
-"Director</span>"
+"                                    <span class=\"text-muted\">Creative Director</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1029,8 +995,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "<strong>James Carter</strong><br/>\n"
-"                                    <span class=\"text-muted\">Chief "
-"Technical Officer</span>"
+"                                    <span class=\"text-muted\">Chief Technical Officer</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1042,8 +1007,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "<strong>Jody Roberts</strong><br/>\n"
-"                                    <span class=\"text-muted\">Chief "
-"Financial Officer</span>"
+"                                    <span class=\"text-muted\">Chief Financial Officer</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1102,8 +1066,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 msgid ""
 "<strong>Sullivan Mitchell</strong><br/>\n"
-"                                    <span class=\"text-muted\">Marketing "
-"Director</span>"
+"                                    <span class=\"text-muted\">Marketing Director</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1158,8 +1121,8 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
-msgid "<u>Refresh <i class=\"fa fa-refresh ms-1\"/></u>"
-msgstr "<u>Reîmprospătează <i class=\"fa fa-refresh ms-1\"/></u>"
+msgid "<u>Refresh <i class=\"oi ms-1\" data-icon=\"refresh\"/></u>"
+msgstr "<u>Reîmprospătează <i class=\"ms-1 oi\" data-icon=\"refresh\"/></u>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_contact
@@ -1380,7 +1343,8 @@ msgstr "Pictograma tipului de activitate"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_three_columns
 msgid ""
 "Adapt these three columns to fit your design need. To duplicate, delete or "
-"move columns, select the column and use the top icons to perform your action."
+"move columns, select the column and use the top icons to perform your "
+"action."
 msgstr ""
 "Adaptați aceste trei coloane pentru a se potrivi nevoilor dvs. de design. "
 "Pentru a duplica, șterge sau muta coloane, selectați coloana și utilizați "
@@ -1475,7 +1439,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_features_grid
 msgid "All these icons are completely free for commercial use."
-msgstr "Toate aceste icoane sunt complet gratuite pentru utilizare comercială."
+msgstr ""
+"Toate aceste icoane sunt complet gratuite pentru utilizare comercială."
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__ab_testing_enabled
@@ -1498,8 +1463,8 @@ msgid ""
 "Allow the recipient to manage themselves their state in the blacklist via "
 "the unsubscription page."
 msgstr ""
-"Permiteți destinatarului să gestioneze starea sa în lista neagră prin pagina "
-"de dezabonare."
+"Permiteți destinatarului să gestioneze starea sa în lista neagră prin pagina"
+" de dezabonare."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.res_config_settings_view_form
@@ -1510,8 +1475,8 @@ msgid ""
 "visible in any case to allow leads and partners to re-subscribe."
 msgstr ""
 "Permite destinatarului să își gestioneze singur starea pe lista neagră prin "
-"pagina de dezabonare. Dacă opțiunea este activă, butonul 'Adaugă-mă pe lista "
-"neagră' este ascuns pe pagina de dezabonare. Butonul 'Revino' va fi mereu "
+"pagina de dezabonare. Dacă opțiunea este activă, butonul 'Adaugă-mă pe lista"
+" neagră' este ascuns pe pagina de dezabonare. Butonul 'Revino' va fi mereu "
 "vizibil pentru a permite lead-urilor și partenerilor să se reaboneze."
 
 #. module: mass_mailing
@@ -1706,8 +1671,8 @@ msgstr "Începător"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
 msgid ""
-"Benefit from tax-free shopping, simplifying your purchase and enhancing your "
-"savings without any extra costs."
+"Benefit from tax-free shopping, simplifying your purchase and enhancing your"
+" savings without any extra costs."
 msgstr ""
 
 #. module: mass_mailing
@@ -1778,11 +1743,11 @@ msgstr "Cerere de eliminare din lista de blocare din portal"
 #. odoo-python
 #: code:addons/mass_mailing/controllers/main.py:0
 msgid ""
-"Blocklist removal request from portal of mailing %(mailing_link)s (document %"
-"(record_link)s)"
+"Blocklist removal request from portal of mailing %(mailing_link)s (document "
+"%(record_link)s)"
 msgstr ""
-"Cerere de eliminare din lista de blocare din portal pentru corespondența %"
-"(mailing_link)s (document %(record_link)s)"
+"Cerere de eliminare din lista de blocare din portal pentru corespondența "
+"%(mailing_link)s (document %(record_link)s)"
 
 #. module: mass_mailing
 #. odoo-python
@@ -1794,11 +1759,11 @@ msgstr "Cerere de blocare din portal"
 #. odoo-python
 #: code:addons/mass_mailing/controllers/main.py:0
 msgid ""
-"Blocklist request from portal of mailing %(mailing_link)s (document %"
-"(record_link)s)"
-msgstr ""
-"Cerere de blocare din portal pentru corespondența %(mailing_link)s (document "
+"Blocklist request from portal of mailing %(mailing_link)s (document "
 "%(record_link)s)"
+msgstr ""
+"Cerere de blocare din portal pentru corespondența %(mailing_link)s (document"
+" %(record_link)s)"
 
 #. module: mass_mailing
 #. odoo-python
@@ -1807,8 +1772,8 @@ msgid ""
 "Blocklist request from unsubscribe link of mailing %(mailing_link)s (direct "
 "link usage)"
 msgstr ""
-"Cerere de blocare din linkul de dezabonare al corespondenței %"
-"(mailing_link)s (utilizare directă a linkului)"
+"Cerere de blocare din linkul de dezabonare al corespondenței "
+"%(mailing_link)s (utilizare directă a linkului)"
 
 #. module: mass_mailing
 #. odoo-python
@@ -1817,8 +1782,8 @@ msgid ""
 "Blocklist request from unsubscribe link of mailing %(mailing_link)s "
 "(document %(record_link)s)"
 msgstr ""
-"Cerere de blocare din linkul de dezabonare al corespondenței %"
-"(mailing_link)s (document %(record_link)s)"
+"Cerere de blocare din linkul de dezabonare al corespondenței "
+"%(mailing_link)s (document %(record_link)s)"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.email_designer_snippets
@@ -2049,8 +2014,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/ir_mail_server.py:0
 msgid ""
-"Cannot set an owner on '%(server)s': it is configured as the dedicated Email "
-"Marketing server."
+"Cannot set an owner on '%(server)s': it is configured as the dedicated Email"
+" Marketing server."
 msgstr ""
 
 #. module: mass_mailing
@@ -2160,8 +2125,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_pricelist_boxed
 msgid ""
-"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
-"drizzled with extra virgin olive oil."
+"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves,"
+" drizzled with extra virgin olive oil."
 msgstr ""
 "Pizza clasică cu mozzarella proaspătă, roșii San Marzano și frunze de "
 "busuioc, stropită cu ulei de măsline extravirgin."
@@ -2424,8 +2389,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
-msgid ""
-"Continue reading <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Continue reading <span class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: mass_mailing
@@ -2754,8 +2718,7 @@ msgstr "Descoperă toate caracteristicile"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
-msgid ""
-"Discover more <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Discover more <span class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: mass_mailing
@@ -2920,8 +2883,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:mass_mailing.mailing_filter_action
 msgid ""
 "Dynamic lists are smart lists that update themselves.\n"
-"                Define your rules to automatically target recipients who "
-"match specific conditions."
+"                Define your rules to automatically target recipients who match specific conditions."
 msgstr ""
 
 #. module: mass_mailing
@@ -3109,8 +3071,8 @@ msgstr "Estimat"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_3
 msgid ""
 "Experience the perfect harmony of form and function. Each piece is "
-"meticulously designed with <strong>premium materials</strong>, ensuring that "
-"your interior reflects a sophisticated yet inviting atmosphere."
+"meticulously designed with <strong>premium materials</strong>, ensuring that"
+" your interior reflects a sophisticated yet inviting atmosphere."
 msgstr ""
 
 #. module: mass_mailing
@@ -3264,19 +3226,13 @@ msgstr "Subsoluri"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_company_team
 msgid ""
-"Founder and chief visionary, Tony is the driving force behind the company. "
-"He loves\n"
-"                                to keep his hands full by participating in "
-"the development of the software,\n"
-"                                marketing, and customer experience "
-"strategies."
+"Founder and chief visionary, Tony is the driving force behind the company. He loves\n"
+"                                to keep his hands full by participating in the development of the software,\n"
+"                                marketing, and customer experience strategies."
 msgstr ""
-"Fundator și principal vizionar, Tony este forța motrice din spatele "
-"companiei. El îi place\n"
-"                                să țină mâinile pline participând la "
-"dezvoltarea software-ului,\n"
-"                                strategiile de marketing și experiența "
-"clienților."
+"Fundator și principal vizionar, Tony este forța motrice din spatele companiei. El îi place\n"
+"                                să țină mâinile pline participând la dezvoltarea software-ului,\n"
+"                                strategiile de marketing și experiența clienților."
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing_test__email_from
@@ -3314,8 +3270,8 @@ msgstr "Valoare mare"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_product_showcase
 msgid ""
 "Great design is about more than just filling a room; it is about creating a "
-"lifestyle that feels both luxurious and meaningful. Our pieces are carefully "
-"made to bring soul to your space, blending modern ideas with the warmth of "
+"lifestyle that feels both luxurious and meaningful. Our pieces are carefully"
+" made to bring soul to your space, blending modern ideas with the warmth of "
 "traditional craftsmanship. Every detail is a deliberate choice, intended to "
 "turn your house into a personal gallery where you can truly relax in style."
 msgstr ""
@@ -3336,8 +3292,8 @@ msgid ""
 "Great stories have a <strong>personality</strong>. Consider telling a great "
 "story that provides personality. Writing a story with personality for "
 "potential clients will assist with making a relationship connection. This "
-"shows up in small quirks like word choices or phrases. Write from your point "
-"of view, not from someone else's experience."
+"shows up in small quirks like word choices or phrases. Write from your point"
+" of view, not from someone else's experience."
 msgstr ""
 
 #. module: mass_mailing
@@ -3458,12 +3414,12 @@ msgstr "ID"
 #: model:ir.model.fields,help:mass_mailing.field_mailing_trace__mail_mail_id_int
 msgid ""
 "ID of the related mail_mail. This field is an integer field because the "
-"related mail_mail can be deleted separately from its statistics. However the "
-"ID is needed for several action and controllers."
+"related mail_mail can be deleted separately from its statistics. However the"
+" ID is needed for several action and controllers."
 msgstr ""
 "ID-ul mail_mail aferent. Acest câmp este un câmp întreg, deoarece mail_mail-"
-"ul aferent poate fi șters separat de statisticile sale. Cu toate acestea, ID-"
-"ul este necesar pentru mai multe de acțiuni și controale."
+"ul aferent poate fi șters separat de statisticile sale. Cu toate acestea, "
+"ID-ul este necesar pentru mai multe de acțiuni și controale."
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_mailing__activity_exception_icon
@@ -3494,8 +3450,8 @@ msgstr "Dacă este selectat, mesajele noi necesită atenția dumneavoastră."
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_mailing__ab_testing_enabled
 msgid ""
-"If checked, recipients will be mailed only once for the whole campaign. This "
-"lets you send different mailings to randomly selected recipients and test "
+"If checked, recipients will be mailed only once for the whole campaign. This"
+" lets you send different mailings to randomly selected recipients and test "
 "the effectiveness of the mailings, without causing duplicate messages."
 msgstr ""
 "Dacă sunt bifate, destinatarii vor fi expediați prin poștă o singură dată "
@@ -3527,8 +3483,8 @@ msgid ""
 "If the email address is on the blacklist, the contact won't receive mass "
 "mailing anymore, from any list"
 msgstr ""
-"Dacă adresa de e-mail este pe lista neagră, contactul nu va mai primi mesaje "
-"de corespondență în masă, din nicio listă"
+"Dacă adresa de e-mail este pe lista neagră, contactul nu va mai primi mesaje"
+" de corespondență în masă, din nicio listă"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.email_designer_snippets
@@ -3597,8 +3553,8 @@ msgstr "În coadă"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_product_showcase
 msgid ""
 "In a fast-paced world, your home should be your ultimate escape—a private "
-"place that brings you a sense of calm and clarity. Our collection focuses on "
-"clean lines and comfortable shapes, providing a sophisticated backdrop for "
+"place that brings you a sense of calm and clarity. Our collection focuses on"
+" clean lines and comfortable shapes, providing a sophisticated backdrop for "
 "your most important moments. We believe your surroundings should be a "
 "testament to your taste, offering the perfect l ease you need to unwind."
 msgstr ""
@@ -4159,11 +4115,9 @@ msgstr "Rapoarte de corespondență dezactivate"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_report_deactivated
 msgid ""
 "Mailing Reports have been turned off for all users. <br/>\n"
-"                                If needed, they can be turned back on from "
-"the"
+"                                If needed, they can be turned back on from the"
 msgstr ""
-"Rapoartele de corespondență au fost dezactivate pentru toți utilizatorii. "
-"<br/>\n"
+"Rapoartele de corespondență au fost dezactivate pentru toți utilizatorii. <br/>\n"
 "                                Dacă este necesar, pot fi activate din"
 
 #. module: mass_mailing
@@ -4406,23 +4360,21 @@ msgstr "Mesaje"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_company_team
 msgid ""
 "Mich loves taking on challenges. With his multi-year experience as "
-"Commercial Director in the software industry, Mich has helped the company to "
-"get where it is today. Mich is among the best minds."
+"Commercial Director in the software industry, Mich has helped the company to"
+" get where it is today. Mich is among the best minds."
 msgstr ""
 "Lui Mich îi place să facă față provocărilor. Cu experiența sa de mai mulți "
-"ani ca Director Comercial în industria software-ului, Mich a ajutat compania "
-"să ajungă acolo unde este astăzi. Mich este printre cele mai bune minți."
+"ani ca Director Comercial în industria software-ului, Mich a ajutat compania"
+" să ajungă acolo unde este astăzi. Mich este printre cele mai bune minți."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.theme_default_template
 msgid ""
 "Michael Fletcher<br/>\n"
-"                   <span style=\"font-size: 12px; font-weight: bolder;"
-"\">Customer Service</span>"
+"                   <span style=\"font-size: 12px; font-weight: bolder;\">Customer Service</span>"
 msgstr ""
 "Michael Fletcher<br/>\n"
-"                   <span style=\"font-size: 12px; font-weight: bolder;"
-"\">Serviciul clienților</span>"
+"                   <span style=\"font-size: 12px; font-weight: bolder;\">Serviciul clienților</span>"
 
 #. module: mass_mailing
 #: model:ir.model.fields.selection,name:mass_mailing.selection__mailing_trace__failure_type__mail_email_missing
@@ -4830,11 +4782,12 @@ msgstr "Nu participați"
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__opt_out
 msgid ""
-"Opt out flag for a specific mailing list. This field should not be used in a "
-"view without a unique and active mailing list context."
+"Opt out flag for a specific mailing list. This field should not be used in a"
+" view without a unique and active mailing list context."
 msgstr ""
-"Opțiune de a nu participa la o listă de distribuție specifică. Acest câmp nu "
-"trebuie folosit într-o vedere fără un context unic și activ pentru o listă de"
+"Opțiune de a nu participa la o listă de distribuție specifică. Acest câmp nu"
+" trebuie folosit într-o vedere fără un context unic și activ pentru o listă "
+"de"
 
 #. module: mass_mailing
 #: model:ir.actions.act_window,name:mass_mailing.mailing_subscription_action_report_optout
@@ -4870,8 +4823,8 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"Limba de traducere opțională (cod ISO) de selectat la trimiterea unui email. "
-"Dacă nu este setată, se va folosi limba principală a partenerului. De "
+"Limba de traducere opțională (cod ISO) de selectat la trimiterea unui email."
+" Dacă nu este setată, se va folosi limba principală a partenerului. De "
 "obicei, aceasta ar trebui să fie o expresie substituent care furnizează "
 "limba potrivită, de exemplu {{ object.partner_id.lang }}."
 
@@ -4888,8 +4841,8 @@ msgid ""
 "Organizing and presenting key information effectively increases the "
 "likelihood of turning your visitors into customers."
 msgstr ""
-"Organizarea și prezentarea eficientă a informațiilor cheie crește șansele de "
-"a transforma vizitatorii în clienți."
+"Organizarea și prezentarea eficientă a informațiilor cheie crește șansele de"
+" a transforma vizitatorii în clienți."
 
 #. module: mass_mailing
 #: model:mailing.subscription.optout,name:mass_mailing.mailing_subscription_optout_data_4
@@ -5054,7 +5007,8 @@ msgstr "Text simplu"
 #: code:addons/mass_mailing/static/src/interactions/subscribe.js:0
 #: model_terms:ir.ui.view,arch_db:mass_mailing.unsubscribe_form
 msgid "Please let us know why you updated your subscription."
-msgstr "Vă rugăm să ne spuneți motivul pentru care ați actualizat abonamentul."
+msgstr ""
+"Vă rugăm să ne spuneți motivul pentru care ați actualizat abonamentul."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -5313,10 +5267,10 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_4
 msgid ""
-"Redefine your daily rituals with interiors that inspire. From the moment you "
-"walk through the door, our pieces evoke a sense of <strong>pure delight</"
-"strong>, turning every corner of your home into a sanctuary of happiness and "
-"ease."
+"Redefine your daily rituals with interiors that inspire. From the moment you"
+" walk through the door, our pieces evoke a sense of <strong>pure "
+"delight</strong>, turning every corner of your home into a sanctuary of "
+"happiness and ease."
 msgstr ""
 
 #. module: mass_mailing
@@ -5504,8 +5458,8 @@ msgid ""
 "Savor our fresh, local cuisine with a modern twist.<br/>Deliciously crafted "
 "for every taste!"
 msgstr ""
-"Savurați bucătăria noastră proaspătă, locală, cu o notă modernă.<br/"
-">Delicioasă pentru orice gust!"
+"Savurați bucătăria noastră proaspătă, locală, cu o notă "
+"modernă.<br/>Delicioasă pentru orice gust!"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_features_column
@@ -5581,7 +5535,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_cta_badge
-msgid "See more <span class=\"fa fa-long-arrow-right\" role=\"img\"/>"
+msgid "See more <span class=\"oi\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: mass_mailing
@@ -5942,11 +5896,11 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_pricelist_boxed
 msgid ""
-"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce "
-"for a flavorful kick."
+"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce"
+" for a flavorful kick."
 msgstr ""
-"Pepperoni picant combinat cu fulgi de ardei iute, mozzarella și sos de roșii "
-"pentru un gust intens."
+"Pepperoni picant combinat cu fulgi de ardei iute, mozzarella și sos de roșii"
+" pentru un gust intens."
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_res_config_settings__mass_mailing_split_contact_name
@@ -6298,8 +6252,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/mailing.py:0
 msgid ""
-"The saved filters target different recipients and are incompatible with this "
-"mailing."
+"The saved filters target different recipients and are incompatible with this"
+" mailing."
 msgstr ""
 
 #. module: mass_mailing
@@ -6308,9 +6262,9 @@ msgid ""
 "The winner has already been sent. Use <b>Compare Version</b> to get an "
 "overview of this A/B testing campaign."
 msgstr ""
-"Versiunea câștigătoare a fost deja trimisă. Folosiți <b>Comparați versiunea</"
-"b> pentru a obține o privire de ansamblu asupra acestei campanii de testare "
-"A/B."
+"Versiunea câștigătoare a fost deja trimisă. Folosiți <b>Comparați "
+"versiunea</b> pentru a obține o privire de ansamblu asupra acestei campanii "
+"de testare A/B."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
@@ -6383,8 +6337,8 @@ msgstr ""
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__email_normalized
 msgid ""
-"This field is used to search on email address as the primary email field can "
-"contain more than strictly an email address."
+"This field is used to search on email address as the primary email field can"
+" contain more than strictly an email address."
 msgstr ""
 "Acest câmp este folosit pentru a căuta pe adresa de e-mail deoarece câmpul "
 "de e-mail principal poate conține mai mult decât strict o adresă de e-mail."
@@ -6394,8 +6348,8 @@ msgstr ""
 msgid ""
 "This is useful if your marketing campaigns are composed of several emails"
 msgstr ""
-"Acest lucru este util dacă campaniile dvs. de marketing sunt compuse din mai "
-"multe e-mailuri"
+"Acest lucru este util dacă campaniile dvs. de marketing sunt compuse din mai"
+" multe e-mailuri"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -6446,17 +6400,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_three_columns
 msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
-"right icon of each block. Then, duplicate one of the columns to create a new "
-"one as a copy."
+"right icon of each block. Then, duplicate one of the columns to create a new"
+" one as a copy."
 msgstr ""
-"Pentru a adăuga o a patra coloană, reduceți dimensiunea acestor trei coloane "
-"folosind pictograma din dreapta a fiecărui bloc. Apoi, dublați una dintre "
+"Pentru a adăuga o a patra coloană, reduceți dimensiunea acestor trei coloane"
+" folosind pictograma din dreapta a fiecărui bloc. Apoi, dublați una dintre "
 "coloane pentru a crea una nouă ca copie."
 
 #. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/models/mailing.py:0
-msgid "To send the winner mailing the campaign should not have been completed."
+msgid ""
+"To send the winner mailing the campaign should not have been completed."
 msgstr ""
 "Pentru a trimite campania câștigătoare, campania nu ar trebui să fi fost"
 
@@ -6679,26 +6634,22 @@ msgid ""
 "Use this component for creating a list of featured elements to which you "
 "want to bring attention."
 msgstr ""
-"Utilizați această componentă pentru a crea o listă de elemente prezentate la "
-"care doriți să atrageți atenția."
+"Utilizați această componentă pentru a crea o listă de elemente prezentate la"
+" care doriți să atrageți atenția."
 
 #. module: mass_mailing
 #: model_terms:ir.actions.act_window,help:mass_mailing.mailing_trace_report_action_mail
 msgid ""
 "Use this menu to keep track of the results of your mailings.<br>\n"
-"                    From here, you'll be able to overview the rate of "
-"replies, clicks, bounces..."
+"                    From here, you'll be able to overview the rate of replies, clicks, bounces..."
 msgstr ""
 "Folosiți acest meniu pentru a urmări rezultatele corespondențelor dvs.<br>\n"
-"                    De aici, puteți vedea rata de răspunsuri, clicuri, "
-"respingeri..."
+"                    De aici, puteți vedea rata de răspunsuri, clicuri, respingeri..."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
 msgid ""
-"Use this snippet to build various types of components that feature a left- "
-"or right-aligned image alongside textual content. Duplicate the element to "
-"create a list that fits your needs.\n"
+"Use this snippet to build various types of components that feature a left- or right-aligned image alongside textual content. Duplicate the element to create a list that fits your needs.\n"
 "                            <br/>"
 msgstr ""
 
@@ -6770,7 +6721,8 @@ msgstr "Mesaj de Avertizare"
 #. module: mass_mailing
 #: model:ir.model.fields,help:mass_mailing.field_mailing_mailing__warning_message
 msgid "Warning message displayed in the mailing form view"
-msgstr "Mesajul de avertizare afișat în formularul de vizualizare a e-mailului"
+msgstr ""
+"Mesajul de avertizare afișat în formularul de vizualizare a e-mailului"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_references
@@ -6780,8 +6732,8 @@ msgstr "Suntem în companie bună."
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_need_help
 msgid ""
-"We deliver personalized solutions, ensuring that every customer receives top-"
-"tier service tailored to their needs."
+"We deliver personalized solutions, ensuring that every customer receives "
+"top-tier service tailored to their needs."
 msgstr ""
 
 #. module: mass_mailing
@@ -6839,8 +6791,8 @@ msgid ""
 "Whether this model supports marketing mailing capabilities (notably email "
 "and SMS)."
 msgstr ""
-"Dacă acest model suportă capacitățile de marketing prin e-mail (în special e-"
-"mail și SMS)."
+"Dacă acest model suportă capacitățile de marketing prin e-mail (în special "
+"e-mail și SMS)."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_link_list
@@ -6868,8 +6820,8 @@ msgid ""
 "successful your content needs to be useful to your readers."
 msgstr ""
 "Scrieți unul sau două paragrafe care să descrie produsul, serviciile sau o "
-"anumită caracteristică. Pentru a avea succes, conținutul dvs. trebuie să fie "
-"util cititorilor dvs."
+"anumită caracteristică. Pentru a avea succes, conținutul dvs. trebuie să fie"
+" util cititorilor dvs."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_1
@@ -6886,8 +6838,7 @@ msgid ""
 "                    Each line will be imported as a mailing list contact."
 msgstr ""
 "Scrieți sau lipiți adresele de e-mail în câmpul de mai jos.\n"
-"                    Fiecare linie va fi importată ca un contact din lista de "
-"distribuție."
+"                    Fiecare linie va fi importată ca un contact din lista de distribuție."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -6916,7 +6867,8 @@ msgstr "Nu mai faceți parte din lista/le noastre de corespondență."
 #. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/controllers/main.py:0
-msgid "You are no longer part of our services and will not be contacted again."
+msgid ""
+"You are no longer part of our services and will not be contacted again."
 msgstr ""
 "Nu mai faceți parte din serviciile noastre și nu veți mai fi contactat."
 
@@ -6954,24 +6906,20 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/utm_medium.py:0
 msgid ""
-"You cannot delete these UTM Mediums as they are linked to the following "
-"mailings in Mass Mailing:\n"
+"You cannot delete these UTM Mediums as they are linked to the following mailings in Mass Mailing:\n"
 "%(mailing_names)s"
 msgstr ""
-"Nu puteți șterge aceste medii UTM deoarece sunt legate de următoarele e-"
-"mailuri în Mass Mailing:\n"
+"Nu puteți șterge aceste medii UTM deoarece sunt legate de următoarele e-mailuri în Mass Mailing:\n"
 "%(mailing_names)s"
 
 #. module: mass_mailing
 #. odoo-python
 #: code:addons/mass_mailing/models/utm_source.py:0
 msgid ""
-"You cannot delete these UTM Sources as they are linked to the following "
-"mailings in Mass Mailing:\n"
+"You cannot delete these UTM Sources as they are linked to the following mailings in Mass Mailing:\n"
 "%(mailing_names)s"
 msgstr ""
-"Nu puteți șterge aceste surse UTM deoarece sunt legate de următoarele e-"
-"mailuri în Mass Mailing:\n"
+"Nu puteți șterge aceste surse UTM deoarece sunt legate de următoarele e-mailuri în Mass Mailing:\n"
 "%(mailing_names)s"
 
 #. module: mass_mailing
@@ -7036,7 +6984,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_footer_social_and_logo
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_footer_social_left
 msgid ""
-"You're seeing this because you've shopped with us or joined our mailing list."
+"You're seeing this because you've shopped with us or joined our mailing "
+"list."
 msgstr ""
 
 #. module: mass_mailing
@@ -7187,8 +7136,8 @@ msgstr "pe lista noastră de blocare"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 msgid ""
-"is the winner of the A/B testing campaign and has been sent to all remaining "
-"recipients."
+"is the winner of the A/B testing campaign and has been sent to all remaining"
+" recipients."
 msgstr ""
 "este câștigătorul campaniei de testare A/B și a fost trimis tuturor "
 "destinatarilor rămași."
@@ -7197,14 +7146,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 msgid ""
 "of all potential recipients.<br/>\n"
-"                        <b class=\"text-danger\">Some of the mailings will "
-"not be sent</b>, as only 1 email will be sent for each unique recipient in "
-"this campaign."
+"                        <b class=\"text-danger\">Some of the mailings will not be sent</b>, as only 1 email will be sent for each unique recipient in this campaign."
 msgstr ""
 "din toți destinatarii potențiali.<br/>\n"
-"                        <b class=\"text-danger\">Unele corespondențe nu vor "
-"fi trimise</b>, deoarece doar un e-mail va fi trimis fiecărui destinatar "
-"unic în această campanie."
+"                        <b class=\"text-danger\">Unele corespondențe nu vor fi trimise</b>, deoarece doar un e-mail va fi trimis fiecărui destinatar unic în această campanie."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -7266,32 +7211,25 @@ msgstr "✽  Pizza"
 #~ msgstr "# Filtre Favorite"
 
 #~ msgid "<span name=\"process_text\">emails are being processed.</span>"
-#~ msgstr ""
-#~ "<span name=\"process_text\">e-mailurile sunt în curs de procesare.</span>"
+#~ msgstr "<span name=\"process_text\">e-mailurile sunt în curs de procesare.</span>"
 
 #~ msgid ""
-#~ "<span name=\"scheduled_text\">emails are in queue and will be sent soon.</"
-#~ "span>"
+#~ "<span name=\"scheduled_text\">emails are in queue and will be sent "
+#~ "soon.</span>"
 #~ msgstr ""
-#~ "<span name=\"scheduled_text\">e-mailurile sunt în coadă și vor fi trimise "
-#~ "în curând.</span>"
+#~ "<span name=\"scheduled_text\">e-mailurile sunt în coadă și vor fi trimise în"
+#~ " curând.</span>"
 
 #~ msgid "<span name=\"sent\">emails have been sent.</span>"
 #~ msgstr "<span name=\"sent\">e-mailurile au fost trimise .</span>"
 
 #~ msgid ""
-#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not "
-#~ "ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or "
-#~ "canceled != 0\">\n"
-#~ "                                <span name=\"ab_test_text\">There wasn't "
-#~ "enough recipients given to this mailing. </span>\n"
+#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or canceled != 0\">\n"
+#~ "                                <span name=\"ab_test_text\">There wasn't enough recipients given to this mailing. </span>\n"
 #~ "                            </strong>"
 #~ msgstr ""
-#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not "
-#~ "ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or "
-#~ "canceled != 0\">\n"
-#~ "                                <span name=\"ab_test_text\">Nu au fost "
-#~ "suficienți destinatari pentru această corespondență. </span>\n"
+#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or canceled != 0\">\n"
+#~ "                                <span name=\"ab_test_text\">Nu au fost suficienți destinatari pentru această corespondență. </span>\n"
 #~ "                            </strong>"
 
 #~ msgid "Domain field"
@@ -7343,26 +7281,20 @@ msgstr "✽  Pizza"
 #~ msgstr "Salvați ca filtru favorit"
 
 #~ msgid ""
-#~ "The saved filter targets different recipients and is incompatible with "
-#~ "this mailing."
+#~ "The saved filter targets different recipients and is incompatible with this "
+#~ "mailing."
 #~ msgstr ""
-#~ "Filtrul salvat țintează destinatari diferiți și este incompatibil cu "
-#~ "această campanie de e-mailing."
+#~ "Filtrul salvat țintează destinatari diferiți și este incompatibil cu această"
+#~ " campanie de e-mailing."
 
 #~ msgid ""
-#~ "While designing the mailing, you can define the rules to filter "
-#~ "recipients.\n"
-#~ "                To save the same criteria for future use, you can add it "
-#~ "to the favorite list\n"
-#~ "                by clicking on <i class=\"fa fa-floppy-o text-warning\"></"
-#~ "i> icon next to \"Recipients\"."
+#~ "While designing the mailing, you can define the rules to filter recipients.\n"
+#~ "                To save the same criteria for future use, you can add it to the favorite list\n"
+#~ "                by clicking on <i class=\"fa fa-floppy-o text-warning\"></i> icon next to \"Recipients\"."
 #~ msgstr ""
-#~ "În timp ce creați corespondența, puteți defini regulile pentru filtrarea "
-#~ "destinatarilor.\n"
-#~ "                Pentru a salva aceleași criterii pentru utilizări "
-#~ "viitoare, le puteți adăuga la lista de favorite\n"
-#~ "                făcând clic pe pictograma <i class=\"fa fa-floppy-o text-"
-#~ "warning\"></i> de lângă \"Destinatari\"."
+#~ "În timp ce creați corespondența, puteți defini regulile pentru filtrarea destinatarilor.\n"
+#~ "                Pentru a salva aceleași criterii pentru utilizări viitoare, le puteți adăuga la lista de favorite\n"
+#~ "                făcând clic pe pictograma <i class=\"fa fa-floppy-o text-warning\"></i> de lângă \"Destinatari\"."
 
 #~ msgid "e.g. \"VIP Customers\""
 #~ msgstr "de exemplu \"Clienți VIP\""

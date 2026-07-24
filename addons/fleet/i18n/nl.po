@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-20 10:47+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/fleet/"
-"nl/>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/fleet/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,8 +25,8 @@ msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Locatie\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Locatie\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -198,8 +197,7 @@ msgid ""
 "All services and contracts linked to this vehicle will also be archived.\n"
 "Are you sure you want to proceed?"
 msgstr ""
-"Alle diensten en contracten die aan dit voertuig zijn gekoppeld, worden ook "
-"gearchiveerd.\n"
+"Alle diensten en contracten die aan dit voertuig zijn gekoppeld, worden ook gearchiveerd.\n"
 "Weet je zeker dat je wilt doorgaan?"
 
 #. module: fleet
@@ -480,8 +478,8 @@ msgstr "Categorieën"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
 "Categorieën helpen je om je wagenpark efficiënter te beheren en je "
 "voertuigen te rangschikken."
@@ -529,7 +527,8 @@ msgstr "Kies of het contract nog geldig is of niet"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr ""
 "Kies of de dienst betrekking heeft op contracten, voertuigonderhoud of beide"
 
@@ -850,8 +849,8 @@ msgstr "Datum waarop de dekking van de overeenkomst begint"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
 "Datum waarop de dekking van het contract vervalt (standaard, een jaar na "
 "startdatum)"
@@ -2375,8 +2374,8 @@ msgstr "Bougie vervangen"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 "Geeft het totale aantal deuren aan, inclusief laadruimte- en "
 "achterklepdeuren, indien van toepassing."
@@ -2581,8 +2580,7 @@ msgstr "Touring assistentie"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Traceer alle diensten die gedaan zijn aan je voertuig.\n"
 "Diensten kunnen vele soorten zijn: sporadische reparaties, onderhoud, enz."
@@ -2865,7 +2863,8 @@ msgstr "Jaarlijks"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_action
 msgid "You can add various odometer entries for all vehicles."
-msgstr "Je kunt verschillende kilometerstanden toevoegen voor alle voertuigen."
+msgstr ""
+"Je kunt verschillende kilometerstanden toevoegen voor alle voertuigen."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_state_action

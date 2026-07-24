@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 04:43+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/"
-"website_slides_forum/nl/>\n"
+"Language-Team: Dutch <https://translate.odoo.com/projects/odoo-master/website_slides_forum/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,11 +34,11 @@ msgstr "(De sectie hierboven was gewijzigd van de Stackoverflow's FAQ.)"
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,welcome_message:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Sign up</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Sign up</a>"
 msgstr ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Aanmelden</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Aanmelden</a>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -48,8 +47,8 @@ msgid ""
 "<b>Answers should not add or expand questions</b>. Instead either edit the "
 "question or add a question comment."
 msgstr ""
-"<b>Antwoorden moeten geen vragen toevoegen of uitbreiden</b>. In plaats hier "
-"van wijzig je de vraag of voeg je een reactie toe."
+"<b>Antwoorden moeten geen vragen toevoegen of uitbreiden</b>. In plaats hier"
+" van wijzig je de vraag of voeg je een reactie toe."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -77,13 +76,11 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please "
-"use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please"
+" use commenting facility."
 msgstr ""
 "<b>Antwoorden moeten geen debat starten</b>\n"
-"Deze community Q&amp;A is geen discussiegroep. Vermijd aub debatten in je "
-"antwoord omdat ze vaak de essentie van de vraag en antwoorden vertroebelen. "
-"Voor korte discussies plaats je best een reactie."
+"Deze community Q&amp;A is geen discussiegroep. Vermijd aub debatten in je antwoord omdat ze vaak de essentie van de vraag en antwoorden vertroebelen. Voor korte discussies plaats je best een reactie."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -91,34 +88,34 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional "
-"information."
+"to include links to other questions or answers providing relevant additional"
+" information."
 msgstr ""
 "<b>Antwoorden moeten niet gewoon verwijzen naar andere vragen</b>. Voeg in "
 "plaats daarvan een vraag reactie indicatie toe \"Mogelijk duplicaat "
-"van...\". Hoewel het wel ok is om links naar andere vragen of antwoorden bij "
-"te voegen die extra relevante informatie toevoegen."
+"van...\". Hoewel het wel ok is om links naar andere vragen of antwoorden bij"
+" te voegen die extra relevante informatie toevoegen."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
-"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
+" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
 "<b>Antwoorden moeten niet gewoon verwijzen naar andere vragen</b>. Voeg in "
 "plaats daarvan de reactie <i>\"Mogelijk duplicaat van...\"</i> toe. Het is "
-"bijgevolg wel ok om links naar andere vragen of antwoorden bij te voegen die "
-"extra relevante informatie toevoegen."
+"bijgevolg wel ok om links naar andere vragen of antwoorden bij te voegen die"
+" extra relevante informatie toevoegen."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
-"solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
+" solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
@@ -133,19 +130,19 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your "
-"own question."
+"You can search questions by their title or tags. It’s also OK to answer your"
+" own question."
 msgstr ""
 "<b>Controleer of er al een gelijkaardige vraag bestaat - voordat je ze "
-"stelt.</b> Je kunt vragen zoeken op hun titel of labels. Het is tevens OK om "
-"je eigen vraag te beantwoorden."
+"stelt.</b> Je kunt vragen zoeken op hun titel of labels. Het is tevens OK om"
+" je eigen vraag te beantwoorden."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<b>Please avoid asking questions that are too subjective and argumentative</"
-"b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and "
+"argumentative</b> or not relevant to this community."
 msgstr ""
 "<b>Vermijd vragen die te subjectief en argumentatief zijn</b> of niet "
 "relevant zijn voor deze community."
@@ -153,17 +150,16 @@ msgstr ""
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-"
-"block\">Forum</span>"
+"<i class=\"oi oi-filled\" data-icon=\"forum\"/><span class=\"ms-1 d-none "
+"d-md-inline-block\">Forum</span>"
 msgstr ""
-"<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-block\">"
-"Forum</span>"
+"<i class=\"oi-filled oi\" data-icon=\"forum\"/><span class=\"ms-1 d-none "
+"d-md-inline-block\">Forum</span>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
-msgid ""
-"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr "<span class=\"flex-grow-1\">Wat voor vragen kan ik hier stellen?</span>"
 
 #. module: website_slides_forum
@@ -177,18 +173,17 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid "<span class=\"flex-grow-1\">What should I avoid in my questions?</span>"
-msgstr ""
-"<span class=\"flex-grow-1\">Wat moet ik vermijden in mijn vragen?</span>"
+msgstr "<span class=\"flex-grow-1\">Wat moet ik vermijden in mijn vragen?</span>"
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
-"span>"
+"<span class=\"flex-grow-1\">Why can other people edit my "
+"questions/answers?</span>"
 msgstr ""
-"<span class=\"flex-grow-1\">Waarom kunnen andere mensen mijn vragen/"
-"antwoorden bewerken?</span>"
+"<span class=\"flex-grow-1\">Waarom kunnen andere mensen mijn "
+"vragen/antwoorden bewerken?</span>"
 
 #. module: website_slides_forum
 #: model:forum.forum,name:website_slides_forum.forum_forum_demo_channel_0
@@ -197,8 +192,8 @@ msgstr "Basis van tuinieren"
 
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.forum_all_all_entries
-msgid "Check out our courses <i class=\"fa fa-long-arrow-right\"/>"
-msgstr "Bekijk onze cursussen <i class=\"fa fa-long-arrow-right\"/>"
+msgid "Check out our courses <i class=\"oi\" data-icon=\"east\"/>"
+msgstr "Bekijk onze cursussen <i class=\"oi\" data-icon=\"east\"/>"
 
 #. module: website_slides_forum
 #: model_terms:ir.actions.act_window,help:website_slides_forum.forum_post_action_channel
@@ -250,7 +245,8 @@ msgstr "Weergavenaam"
 #. module: website_slides_forum
 #: model:ir.model.fields,help:website_slides_forum.field_forum_forum__slide_channel_ids
 msgid "Edit the course linked to this forum on the course form."
-msgstr "Bewerk de cursus die aan dit forum is gekoppeld op het cursusformulier."
+msgstr ""
+"Bewerk de cursus die aan dit forum is gekoppeld op het cursusformulier."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -328,14 +324,14 @@ msgstr "Als deze aanpak niets voor jou is, respecteer dan de community."
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then "
-"you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then"
+" you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
 "Als je in een van deze voorbeelden past of als je motivatie om de vraag te "
-"stellen is: “IIk wil graag deelnemen aan een discussie over ______”, dan zou "
-"je dit niet hier moeten stellen, maar op onze mailinglijsten. Als je "
+"stellen is: “IIk wil graag deelnemen aan een discussie over ______”, dan zou"
+" je dit niet hier moeten stellen, maar op onze mailinglijsten. Als je "
 "motivatie echter is: \"Ik zou graag willen dat anderen mij ______ "
 "uitleggen\", dan ben je waarschijnlijk op de goede plek."
 
@@ -416,16 +412,16 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced "
-"users of this site in order to improve the overall quality of the knowledge "
-"base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
-"Daarom kunnen vragen en antwoorden gewijzigd worden zoals wiki pagina's door "
-"ervaren gebruikers van deze website om zo de algemene kwaliteit te "
+"Daarom kunnen vragen en antwoorden gewijzigd worden zoals wiki pagina's door"
+" ervaren gebruikers van deze website om zo de algemene kwaliteit te "
 "verbeteren van de kennis en inhoud. Zulke privileges worden toegewezen "
-"gebaseerd op het karma niveau: je zal hetzelfde kunnen doen wanneer je karma "
-"hoog genoeg is."
+"gebaseerd op het karma niveau: je zal hetzelfde kunnen doen wanneer je karma"
+" hoog genoeg is."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
@@ -468,18 +464,18 @@ msgid ""
 "are gradually assigned to the users based on those points."
 msgstr ""
 "Wanneer een vraag of antwoord omhoog wordt gestemd, krijgt de gebruiker die "
-"deze heeft gemaakt wat punten, zogenaamde \"Karmapunten\". Deze punten geven "
-"een globale indicatie van betrouwbaarheid binnen de community. Op basis van "
-"die punten worden geleidelijk verschillende moderatietaken aan gebruikers "
+"deze heeft gemaakt wat punten, zogenaamde \"Karmapunten\". Deze punten geven"
+" een globale indicatie van betrouwbaarheid binnen de community. Op basis van"
+" die punten worden geleidelijk verschillende moderatietaken aan gebruikers "
 "toegekend."
 
 #. module: website_slides_forum
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_0
 #: model_terms:forum.forum,faq:website_slides_forum.forum_forum_demo_channel_2
 msgid ""
-"You should only ask practical, answerable questions based on actual problems "
-"that you face. Chatty, open-ended questions diminish the usefulness of this "
-"site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems"
+" that you face. Chatty, open-ended questions diminish the usefulness of this"
+" site and push other questions off the front page."
 msgstr ""
 "Het is aan te raden enkel praktische, beantwoordbare vragen te stellen die "
 "gebaseerd zijn op problemen die je ondervind. Chatterige, open vragen "

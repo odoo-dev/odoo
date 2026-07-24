@@ -19,8 +19,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 05:40+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"product/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/product/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,10 +43,8 @@ msgstr "製品数"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
 "%(base)s 割引 %(discount)s %% %(discount_type)s と %(surcharge)s 追加料金\n"
 "例: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
@@ -56,11 +53,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
-msgstr ""
-"%(item_name)s: 終了日 (%(end_date)s) は開始日 (%(start_date)s)の後にして下さ"
-"い"
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
+msgstr "%(item_name)s: 終了日 (%(end_date)s) は開始日 (%(start_date)s)の後にして下さい"
 
 #. module: product
 #. odoo-python
@@ -141,28 +136,21 @@ msgstr "- %(amount)s 割引"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
-msgstr ""
-"- バーコード \"%(barcode)s\" は既にプロダクト: %(product_list)sに割当済です"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgstr "- バーコード \"%(barcode)s\" は既にプロダクト: %(product_list)sに割当済です"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
-"- 即時： プロダクトに属性とその値が追加されると同時に、すべての可能なバリアン"
-"トが作成されます。\n"
-"- 同時： 対応する属性と値が販売オーダに追加されたときのみ、各バリアントが作成"
-"されます。\n"
+"- 即時： プロダクトに属性とその値が追加されると同時に、すべての可能なバリアントが作成されます。\n"
+"- 同時： 対応する属性と値が販売オーダに追加されたときのみ、各バリアントが作成されます。\n"
 "- 作成されない： 属性のバリアントは決して作成されません。\n"
-"　　注意: これは、属性が少なくとも一つのプロダクトで使用されると変更できませ"
-"ん。"
+"　　注意: これは、属性が少なくとも一つのプロダクトで使用されると変更できません。"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -242,8 +230,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
 "o_translate_inline\">Contact Us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">お問"
-"い合わせ</a>"
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">お問い合わせ</a>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -253,19 +241,18 @@ msgstr "<b>ヒント: 9.99で切り上げますか?</b>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"矢印\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
-msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"通貨\" title=\"通貨\"/>"
+msgstr "<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"通貨\" title=\"通貨\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
@@ -286,11 +273,11 @@ msgstr "<span class=\"o_stat_text\">プロダクト</span>"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 #, fuzzy
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">バリア"
-"ントに基づく</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= "
+"1\">バリアントに基づく</span>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_kanban_view
@@ -334,9 +321,7 @@ msgstr "コンボの選択肢には、重複するプロダクトを含めるこ
 #. odoo-python
 #: code:addons/product/models/product_combo_item.py:0
 msgid "A combo choice can't contain products of type \"combo\"."
-msgstr ""
-"コンボの選択肢には、プロダクトタイプ\"コンボ\"のプロダクトを含めることはでき"
-"ません。"
+msgstr "コンボの選択肢には、プロダクトタイプ\"コンボ\"のプロダクトを含めることはできません。"
 
 #. module: product
 #. odoo-python
@@ -348,19 +333,16 @@ msgstr "コンボの選択肢には、少なくとも1つのプロダクトを�
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "A combo product must contain at least 1 combo choice."
-msgstr ""
-"コンボプロダクトには、少なくとも1つのコンボ選択肢を含める必要があります。"
+msgstr "コンボプロダクトには、少なくとも1つのコンボ選択肢を含める必要があります。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
-msgstr ""
-"顧客に見せたい製品の説明。この説明は販売注文、配送注文、顧客請求書/クレジット"
-"ノートにコピーされます。"
+msgstr "顧客に見せたい製品の説明。この説明は販売注文、配送注文、顧客請求書/クレジットノートにコピーされます。"
 
 #. module: product
 #. odoo-python
@@ -371,16 +353,11 @@ msgstr "パッケージングはすでにバーコードを使用しています
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"価格は、プロダクト、プロダクトカテゴリ、日付、オーダ数量に基づいて販売オーダ"
-"明細の価格を計算するための一連の販売価格またはルールです。\n"
-"　　これは、いくつかの価格設定、シーズン値引などを処理するために最適なツール"
-"です。"
+"価格は、プロダクト、プロダクトカテゴリ、日付、オーダ数量に基づいて販売オーダ明細の価格を計算するための一連の販売価格またはルールです。\n"
+"　　これは、いくつかの価格設定、シーズン値引などを処理するために最適なツールです。"
 
 #. module: product
 #. odoo-python
@@ -388,9 +365,7 @@ msgstr ""
 msgid ""
 "A pricelist item with \"Other Pricelist\" as base must have a "
 "base_pricelist_id."
-msgstr ""
-"「その他の価格表」 をベースとする価格表項目には base_pricelist_id が必要で"
-"す。"
+msgstr "「その他の価格表」 をベースとする価格表項目には base_pricelist_id が必要です。"
 
 #. module: product
 #. odoo-python
@@ -402,9 +377,7 @@ msgstr "プロダクトはすでにバーコードを使用しています。"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "A sellable combo product can only contain sellable products."
-msgstr ""
-"販売可能なコンボプロダクトには、販売可能なプロダクトのみ含めることができま"
-"す。"
+msgstr "販売可能なコンボプロダクトには、販売可能なプロダクトのみ含めることができます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__is_storable
@@ -708,9 +681,7 @@ msgstr "プロダクト仕入先のリストに優先順位を割り当てます
 msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
-msgstr ""
-"同時に表示できる数量は最大%sまでです。選択した数量を削除して他の数量を追加し"
-"て下さい。"
+msgstr "同時に表示できる数量は最大%sまでです。選択した数量を削除して他の数量を追加して下さい。"
 
 #. module: product
 #: model:ir.model,name:product.model_ir_attachment
@@ -787,22 +758,15 @@ msgstr "属性とバリアント"
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 #, fuzzy
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "利用可能数量(手持数量 - 引当数量 - 除去予定数量)\n"
-"単一のストックロケーションを持つコンテキストでは、このロケーションに格納され"
-"ている製品、またはその子製品が含まれます。\n"
-"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーションに保管されている製品"
-"またはその子製品が含まれます。\n"
-"それ以外の場合は、「内部」タイプの在庫ロケーションに保管されている製品が含ま"
-"れます。"
+"単一のストックロケーションを持つコンテキストでは、このロケーションに格納されている製品、またはその子製品が含まれます。\n"
+"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーションに保管されている製品またはその子製品が含まれます。\n"
+"それ以外の場合は、「内部」タイプの在庫ロケーションに保管されている製品が含まれます。"
 
 #. module: product
 #. odoo-javascript
@@ -998,15 +962,11 @@ msgstr "椅子セット"
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"プロダクトの測定単位を変更すると、1%(old_uom_name)s= 1%(new_uom_name)s の変換"
-"が適用されます。\n"
-"このプロダクトを使用しているすべての既存のレコード(販売オーダ、購買オーダな"
-"ど)は、単位名が置き換えられて更新されます。"
+"プロダクトの測定単位を変更すると、1%(old_uom_name)s= 1%(new_uom_name)s の変換が適用されます。\n"
+"このプロダクトを使用しているすべての既存のレコード(販売オーダ、購買オーダなど)は、単位名が置き換えられて更新されます。"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1101,8 +1061,7 @@ msgstr "コンボプロダクトには属性を指定できません。"
 msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
-msgstr ""
-"コンボは、カテゴリごとの選択肢の中から1つのプロダクトを選ぶことができます。"
+msgstr "コンボは、カテゴリごとの選択肢の中から1つのプロダクトを選ぶことができます。"
 
 #. module: product
 #: model:product.template,description_sale:product.product_delivery_01_product_template
@@ -1325,24 +1284,16 @@ msgstr "通貨"
 #: model:ir.model.fields,help:product.field_product_product__qty_available
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "現在のプロダクトの数量。\n"
-"単一の在庫ロケーションとの関連では、これには、このロケーションに保管されてい"
-"る製品またはその子が含まれます。\n"
-"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーションに保管されている製品"
-"またはその子品が含まれます。\n"
-"このショップの倉庫の保管ロケーションに保管されているか、またはその子のいずれ"
-"かに保管されています。\n"
-"それ以外の場合は、「内部」タイプの在庫ロケーションに保管されているロケーショ"
-"ンが含まれます。"
+"単一の在庫ロケーションとの関連では、これには、このロケーションに保管されている製品またはその子が含まれます。\n"
+"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーションに保管されている製品またはその子品が含まれます。\n"
+"このショップの倉庫の保管ロケーションに保管されているか、またはその子のいずれかに保管されています。\n"
+"それ以外の場合は、「内部」タイプの在庫ロケーションに保管されているロケーションが含まれます。"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1427,7 +1378,8 @@ msgstr "すべての在庫操作に使用されるデフォルトの測定単位
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
 #, fuzzy
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr "単位フィールド毎に、価格に表示するカスタム単位を定義します。"
 
 #. module: product
@@ -1584,20 +1536,16 @@ msgstr "表示タイプ"
 #: model:ir.model.fields,help:product.field_product_template__base_unit_count
 #, fuzzy
 msgid "Display base unit price. Set to 0 to hide it for this product."
-msgstr ""
-"基本価格を表示します。このプロダクトで非表示にする場合は、0に設定してくださ"
-"い。"
+msgstr "基本価格を表示します。このプロダクトで非表示にする場合は、0に設定してください。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__base_unit_name
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 #, fuzzy
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
-msgstr ""
-"定義された場合は、プロダクトのカスタム単位を表示します。そうでない場合は、選"
-"択された単位を表示します。"
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
+msgstr "定義された場合は、プロダクトのカスタム単位を表示します。そうでない場合は、選択された単位を表示します。"
 
 #. module: product
 #. odoo-python
@@ -1691,8 +1639,8 @@ msgstr "終了日"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1718,8 +1666,7 @@ msgstr "エルゴノミック"
 #. odoo-javascript
 #: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.js:0
 msgid "Error exporting file. Please try again."
-msgstr ""
-"ファイルのエクスポートにエラーが発生しました。もう一度やり直して下さい。"
+msgstr "ファイルのエクスポートにエラーが発生しました。もう一度やり直して下さい。"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_template_attribute_value__excluded_value_ids
@@ -1762,11 +1709,9 @@ msgstr "追加価格"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
-msgstr ""
-"この属性値を持つバリアントのセール価格への追加価格。例： 200 追加価格、 1000 "
-"+ 200 = 1200"
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
+msgstr "この属性値を持つバリアントのセール価格への追加価格。例： 200 追加価格、 1000 + 200 = 1200"
 
 #. module: product
 #: model:product.attribute,name:product.pa_fabric
@@ -1848,33 +1793,24 @@ msgstr "Font awesomeのアイコン 例. fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"ルールを適用するには、購入/販売数量は、このフィールドで指定された最小量以上で"
-"なければなりません。\n"
+"ルールを適用するには、購入/販売数量は、このフィールドで指定された最小量以上でなければなりません。\n"
 "これは製品のデフォルトの単位です。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "予測数量(在庫数量 − 出庫予定数 ＋ 入庫予定数 − 除去予定数量として算出)\n"
-"単一の在庫ロケーションの文脈では、そのロケーションおよびその下位ロケーション"
-"に保管されている商品が含まれます。\n"
-"単一の倉庫の文脈では、その倉庫の在庫ロケーションおよびその下位ロケーションに"
-"保管されている商品が含まれます。\n"
-"それ以外の場合は、「内部」タイプのすべての在庫ロケーションに保管されている商"
-"品が含まれます。"
+"単一の在庫ロケーションの文脈では、そのロケーションおよびその下位ロケーションに保管されている商品が含まれます。\n"
+"単一の倉庫の文脈では、その倉庫の在庫ロケーションおよびその下位ロケーションに保管されている商品が含まれます。\n"
+"それ以外の場合は、「内部」タイプのすべての在庫ロケーションに保管されている商品が含まれます。"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
@@ -2035,9 +1971,7 @@ msgstr "高さ"
 msgid ""
 "Here you can set a specific HTML color index (e.g. #ff0000) to display the "
 "color if the attribute type is 'Color'."
-msgstr ""
-"ここでは、属性タイプが「色」である場合に表示される特定のHTMLカラーインデック"
-"ス（例えば#ff0000）を設定することができます。"
+msgstr "ここでは、属性タイプが「色」である場合に表示される特定のHTMLカラーインデックス（例えば#ff0000）を設定することができます。"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_12_product_template
@@ -2128,9 +2062,7 @@ msgstr "有効にすると、一部のメッセージに配信エラーが発生
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_id
 msgid ""
 "If not set, the vendor price will apply to all variants of this product."
-msgstr ""
-"設定されていない場合、仕入先価格はこのプロダクトのすべてのバリエーションに適"
-"用されます。"
+msgstr "設定されていない場合、仕入先価格はこのプロダクトのすべてのバリエーションに適用されます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__active
@@ -2433,9 +2365,7 @@ msgid ""
 "Lead time in days between the confirmation of the purchase order and the "
 "receipt of the products in your warehouse. Used by the scheduler for "
 "automatic computation of the purchase order planning."
-msgstr ""
-"発注書の確認と、倉庫内の製品の受領日の間のリードタイム。購買発注計画の自動計"
-"算のためのスケジューラによって使用されます。"
+msgstr "発注書の確認と、倉庫内の製品の受領日の間のリードタイム。購買発注計画の自動計算のためのスケジューラによって使用されます。"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_fabric_leather
@@ -2644,8 +2574,7 @@ msgstr "複数チェックボックス"
 #: model:ir.model.constraint,message:product.constraint_product_attribute_check_multi_checkbox_no_variant
 msgid ""
 "Multi-checkbox display type is not compatible with the creation of variants"
-msgstr ""
-"マルチチェックボックス表示タイプはバリアントの作成と互換性がありません。"
+msgstr "マルチチェックボックス表示タイプはバリアントの作成と互換性がありません。"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -2748,9 +2677,7 @@ msgstr "Nivea"
 msgid ""
 "No product to print, if the product is archived please unarchive it before "
 "printing its label."
-msgstr ""
-"プリントするプロダクトがありません。プロダクトがアーカイブされている場合は、"
-"ラベルを印刷する前にアーカイブキャンセルして下さい。"
+msgstr "プリントするプロダクトがありません。プロダクトがアーカイブされている場合は、ラベルを印刷する前にアーカイブキャンセルして下さい。"
 
 #. module: product
 #. odoo-javascript
@@ -2901,29 +2828,24 @@ msgstr "手持在庫"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
-msgstr ""
-"プロダクト%(product)sでは、値%(value)sと属性%(attribute)sが一致しないため、関"
-"連付けることができません。"
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
+msgstr "プロダクト%(product)sでは、値%(value)sと属性%(attribute)sが一致しないため、関連付けることができません。"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
-"プロダクト %(product)sでは、属性 %(attribute_src)sを属性%(attribute_dest)sに"
-"変更することはできません。"
+"プロダクト %(product)sでは、属性 %(attribute_src)sを属性%(attribute_dest)sに変更することはできません。"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.js:0
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
-msgstr ""
-"'%(fileName)s' のフォーマットが許可されていないためアップロードできませんでし"
-"た。"
+msgstr "'%(fileName)s' のフォーマットが許可されていないためアップロードできませんでした。"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
@@ -3632,39 +3554,27 @@ msgstr "既に存在する数量（%s）です。"
 #: model:ir.model.fields,help:product.field_product_product__incoming_qty
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "予定されている入庫プロダクトの数量。\n"
-"単一の在庫ロケーションのコンテキストでは、このロケーション、またはその子ロ"
-"ケーションに入庫予定の商品が含まれます。\n"
-"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーション、またはその子ロケー"
-"ションに入庫予定の商品が含まれます。\n"
-"それ以外の場合、タイプが '内部'のすべての在庫ロケーションに入庫予定の商品が含"
-"まれます。"
+"単一の在庫ロケーションのコンテキストでは、このロケーション、またはその子ロケーションに入庫予定の商品が含まれます。\n"
+"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーション、またはその子ロケーションに入庫予定の商品が含まれます。\n"
+"それ以外の場合、タイプが '内部'のすべての在庫ロケーションに入庫予定の商品が含まれます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__outgoing_qty
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "Quantity of planned outgoing products.\n"
-"単一の在庫ロケーションのコンテキストでは、このロケーション、またはその子ロ"
-"ケーションから出庫予定の商品が含まれます。\n"
-"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーション、またはその子ロケー"
-"ションから出庫予定の商品が含まれます。\n"
-"それ以外の場合は、タイプが '内部' のすべての在庫ロケーションから出庫予定の商"
-"品が含まれます。"
+"単一の在庫ロケーションのコンテキストでは、このロケーション、またはその子ロケーションから出庫予定の商品が含まれます。\n"
+"単一の倉庫のコンテキストでは、この倉庫の在庫ロケーション、またはその子ロケーションから出庫予定の商品が含まれます。\n"
+"それ以外の場合は、タイプが '内部' のすべての在庫ロケーションから出庫予定の商品が含まれます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -3713,11 +3623,9 @@ msgstr "参照単位"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
-msgstr ""
-"各プロダクトについて、数量と期間に基づいて仕入先から要求された価格を登録しま"
-"す。"
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
+msgstr "各プロダクトについて、数量と期間に基づいて仕入先から要求された価格を登録します。"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__product_tmpl_ids
@@ -3991,36 +3899,29 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"このカテゴリがこのカテゴリまたはその子カテゴリに属するプロダクトにのみ適用さ"
-"れる場合は、プロダクトカテゴリを指定します。 それ以外の場合は空白にしておきま"
-"す。"
+"このカテゴリがこのカテゴリまたはその子カテゴリに属するプロダクトにのみ適用される場合は、プロダクトカテゴリを指定します。 "
+"それ以外の場合は空白にしておきます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
 msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
-msgstr ""
-"このルールが1つのプロダクトにのみ適用される場合、プロダクトを指定します。 そ"
-"れ以外の場合は空白にしておきます。"
+msgstr "このルールが1つのプロダクトにのみ適用される場合、プロダクトを指定します。 それ以外の場合は空白にしておきます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
 msgid ""
 "Specify a template if this rule only applies to one product template. Keep "
 "empty otherwise."
-msgstr ""
-"このルールが1つのプロダクトテンプレートにのみ適用される場合は、テンプレートを"
-"指定します。 それ以外の場合は空白にしておきます。"
+msgstr "このルールが1つのプロダクトテンプレートにのみ適用される場合は、テンプレートを指定します。 それ以外の場合は空白にしておきます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
 msgid ""
 "Specify the fixed amount to add or subtract (if negative) to the amount "
 "calculated with the discount."
-msgstr ""
-"割引で計算された金額に加算または（マイナスの場合）減算する固定金額を指定しま"
-"す。"
+msgstr "割引で計算された金額に加算または（マイナスの場合）減算する固定金額を指定します。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -4168,11 +4069,9 @@ msgstr "参照 '%s' は既に存在します。"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
-msgstr ""
-"この属性%(attribute)sは、プロダクト%(product)sに対して少なくとも1つの値を持っ"
-"ている必要があります。"
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
+msgstr "この属性%(attribute)sは、プロダクト%(product)sに対して少なくとも1つの値を持っている必要があります。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -4195,9 +4094,7 @@ msgid ""
 "since the 5 boxes are loose, you can move and place them in the way that "
 "suits you and your things best."
 msgstr ""
-"このデスクオーガナイザーは、様々な小物を収納することができます。5つのボックス"
-"がバラバラになっているので、自分やモノに合った方法で移動・配置することができ"
-"ます。"
+"このデスクオーガナイザーは、様々な小物を収納することができます。5つのボックスがバラバラになっているので、自分やモノに合った方法で移動・配置することができます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -4211,12 +4108,11 @@ msgstr "プロダクトコンフィギュレータで使用されている表示
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
-"既存の製品に設定されている属性値が異なります。\"%(imported_values)s\" は\"%"
-"(existing_values)s\" と一致しません。(\"%(external_id)s\", \"%(id)s\" に対し"
-"て)"
+"既存の製品に設定されている属性値が異なります。\"%(imported_values)s\" は\"%(existing_values)s\" "
+"と一致しません。(\"%(external_id)s\", \"%(id)s\" に対して)"
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -4236,13 +4132,10 @@ msgstr "最小マージンは最大マージンより低い必要があります
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
-"このコンボ内のプロダクトの最低価格。この値は、コンボ商品内の他のコンボとの関"
-"係で、このコンボの価格を按分するために使用されます。このヒューリスティックに"
-"より、コンボ内でユーザがどのプロダクトを選択しても、常に同じ価格となることが"
-"保証されます。"
+"このコンボ内のプロダクトの最低価格。この値は、コンボ商品内の他のコンボとの関係で、このコンボの価格を按分するために使用されます。このヒューリスティックにより、コンボ内でユーザがどのプロダクトを選択しても、常に同じ価格となることが保証されます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__product_count
@@ -4255,15 +4148,12 @@ msgstr "このカテゴリ下のプロダクト数(子カテゴリを考慮し�
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
-"生成するバリアントの数が限度を超えています。組み合わせごとにバリアントを生成"
-"するのをやめるか、販売オーダからオンデマンドでバリアントを生成する必要があり"
-"ます。そのためには、属性のフォームビューを開き、*バリアントを作成*のモードを"
-"変更します。"
+"生成するバリアントの数が限度を超えています。組み合わせごとにバリアントを生成するのをやめるか、販売オーダからオンデマンドでバリアントを生成する必要があります。そのためには、属性のフォームビューを開き、*バリアントを作成*のモードを変更します。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -4274,20 +4164,17 @@ msgstr "プロダクト購買用価格"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "The product template is archived so no combination is possible."
-msgstr ""
-"プロダクトテンプレートはアーカイブされているため、組み合わせることはできませ"
-"ん。"
+msgstr "プロダクトテンプレートはアーカイブされているため、組み合わせることはできません。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
-"この仕入先から購買する際に、単価の割引を受けるために必要な数量。 仕入先単位が"
-"設定されている場合、数量はこの単位で指定する必要があります。そうでない場合"
-"は、プロダクトのデフォルト単位で指定する必要があります。"
+"この仕入先から購買する際に、単価の割引を受けるために必要な数量。 "
+"仕入先単位が設定されている場合、数量はこの単位で指定する必要があります。そうでない場合は、プロダクトのデフォルト単位で指定する必要があります。"
 
 #. module: product
 #. odoo-python
@@ -4302,8 +4189,7 @@ msgid ""
 "The sale price can be set manually or computed from the product template. "
 "Click on the 'Configure Variants' button to set the extra attribute prices."
 msgstr ""
-"販売価格は手動で設定するか、プロダクトテンプレートから計算できます。「バリア"
-"ントを設定」ボタンをクリックして追加属性の価格を設定してください。"
+"販売価格は手動で設定するか、プロダクトテンプレートから計算できます。「バリアントを設定」ボタンをクリックして追加属性の価格を設定してください。"
 
 #. module: product
 #. odoo-python
@@ -4311,20 +4197,16 @@ msgstr ""
 msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
-msgstr ""
-"値 %(value)s は属性%(attribute)s （プロダクト %(product)s）用に定義されていま"
-"せん。"
+msgstr "値 %(value)s は属性%(attribute)s （プロダクト %(product)s）用に定義されていません。"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
-msgstr ""
-"基本単位数の数値は0以上でなければなりません。製品の単価を非表示したい場合は0"
-"を設定してください。"
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
+msgstr "基本単位数の数値は0以上でなければなりません。製品の単価を非表示したい場合は0を設定してください。"
 
 #. module: product
 #. odoo-python
@@ -4360,9 +4242,7 @@ msgid ""
 "to no possible variant. Please archive or delete your product directly if "
 "intended."
 msgstr ""
-"プロダクトの属性、値、除外のこのコンフィギュレータは、可能なバリアントを導き"
-"ません。それが意図的な場合は、プロダクトを直接アーカイブするか削除して下さ"
-"い。"
+"プロダクトの属性、値、除外のこのコンフィギュレータは、可能なバリアントを導きません。それが意図的な場合は、プロダクトを直接アーカイブするか削除して下さい。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__price_extra
@@ -4384,27 +4264,21 @@ msgstr "このメモは内部参照用です。"
 #: code:addons/product/models/product_template.py:0
 msgid ""
 "This product is part of a combo, so its type can't be changed to \"combo\"."
-msgstr ""
-"このプロダクトはコンボの一部ですあるため、タイプを \"コンボ\" に変更すること"
-"はできません。"
+msgstr "このプロダクトはコンボの一部ですあるため、タイプを \"コンボ\" に変更することはできません。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_code
 msgid ""
 "This vendor's product code will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
-msgstr ""
-"見積依頼を印刷する場合、この仕入先の製品コードが使用されます。内部のものを使"
-"用する場合は空白のままにします。"
+msgstr "見積依頼を印刷する場合、この仕入先の製品コードが使用されます。内部のものを使用する場合は空白のままにします。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_name
 msgid ""
 "This vendor's product name will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
-msgstr ""
-"見積依頼を印刷する場合、この仕入先の製品名が使用されます。内部のものをを使用"
-"する場合は空白のままにします。"
+msgstr "見積依頼を印刷する場合、この仕入先の製品名が使用されます。内部のものをを使用する場合は空白のままにします。"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__thumbnail
@@ -4493,9 +4367,7 @@ msgstr "%sフォーマット用のレポートテンプレートが見つかり�
 msgid ""
 "Unable to import products with attribute value without attribute name "
 "(defined as: attribute:value): %s"
-msgstr ""
-"属性名のない属性値(定義例: 属性:値)を持つプロダクトのインポートができません:"
-"%s"
+msgstr "属性名のない属性値(定義例: 属性:値)を持つプロダクトのインポートができません:%s"
 
 #. module: product
 #. odoo-python
@@ -4503,9 +4375,7 @@ msgstr ""
 msgid ""
 "Unable to import products with attribute values but without name of product "
 "set"
-msgstr ""
-"プロダクト名が設定されていない状態では、属性値付きのプロダクトをインポートで"
-"きません"
+msgstr "プロダクト名が設定されていない状態では、属性値付きのプロダクトをインポートできません"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_brand_underarmour
@@ -4694,13 +4564,11 @@ msgstr "値カウント"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "プロダクトの価値（AVCO で自動的に計算される）。\n"
-"　仕入原価が不明な場合（在庫調整など）に、プロダクトの価値を算出するために使"
-"用されます。\n"
+"　仕入原価が不明な場合（在庫調整など）に、プロダクトの価値を算出するために使用されます。\n"
 "　販売オーダのマージンを計算するために使用されます。"
 
 #. module: product
@@ -4894,8 +4762,8 @@ msgstr "警告"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr "当社は細部までこだわることで、優れた品質のデスクを提供しています。"
 
 #. module: product
@@ -4976,9 +4844,7 @@ msgstr "黄"
 msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
-msgstr ""
-"値 \"%(attribute_value)s\" を %(product_count)s プロダクトに追加しようとして"
-"います。"
+msgstr "値 \"%(attribute_value)s\" を %(product_count)s プロダクトに追加しようとしています。"
 
 #. module: product
 #. odoo-python
@@ -4998,8 +4864,7 @@ msgstr "価格表機能を停止しています。すべての有効な価格表
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_discount
 msgid "You can apply a mark-up by setting a negative discount."
-msgstr ""
-"マイナスの割引(負の値)を設定することで、上乗せ(マークアップ)を適用できます。"
+msgstr "マイナスの割引(負の値)を設定することで、上乗せ(マークアップ)を適用できます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_markup
@@ -5011,18 +4876,14 @@ msgstr "原価にマークアップを適用できます"
 msgid ""
 "You can assign pricelists to your customers or select one when creating a "
 "new sales quotation."
-msgstr ""
-"価格表を顧客に割当てたり、新規の販売見積書を作成する際に価格表を選択すること"
-"ができます。"
+msgstr "価格表を顧客に割当てたり、新規の販売見積書を作成する際に価格表を選択することができます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_document__type
 msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
-msgstr ""
-"利用中のコンピュータから、もしくはインターネットのリンクをコピーペーストで"
-"ファイルをアップロードすることができます。"
+msgstr "利用中のコンピュータから、もしくはインターネットのリンクをコピーペーストでファイルをアップロードすることができます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__image
@@ -5059,37 +4920,30 @@ msgstr ""
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
 "You cannot archive this attribute as there are still products linked to it"
-msgstr ""
-"リンクされているプロダクトがあるため、この属性をアーカイブすることはできませ"
-"ん。"
+msgstr "リンクされているプロダクトがあるため、この属性をアーカイブすることはできません。"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
-msgstr ""
-"属性%(attribute)sのバリアント作成モードは以下のプロダクトで使用されているた"
-"め、変更できません：%(products)s"
+msgstr "属性%(attribute)sのバリアント作成モードは以下のプロダクトで使用されているため、変更できません：%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
-msgstr ""
-"値%(value)sの属性は以下のプロダクトで使用されているため、変更できません：%"
-"(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
+msgstr "値%(value)sの属性は以下のプロダクトで使用されているため、変更できません：%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5104,19 +4958,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr "値%(value)s（プロダクト%(product)sに設定されている）は変更できません。"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
-msgstr ""
-"値%(value)s（プロダクト%(product)sに設定されている）の値は変更することはでき"
-"ません。"
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
+msgstr "値%(value)s（プロダクト%(product)sに設定されている）の値は変更することはできません。"
 
 #. module: product
 #. odoo-python
@@ -5136,8 +4988,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
 "属性%(attribute)sは以下のプロダクトで使用されているため削除できません：\n"
@@ -5147,8 +4998,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
 "値%(value)sは以下のプロダクトで使用されているため削除できません：\n"
@@ -5158,11 +5008,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
-"属性 %(attribute)s をプロダクト%(product_src)sからプロダクト%(product_dest)s"
-"に移動することはできません。"
+"属性 %(attribute)s をプロダクト%(product_src)sからプロダクト%(product_dest)sに移動することはできません。"
 
 #. module: product
 #. odoo-python
@@ -5170,9 +5019,7 @@ msgstr ""
 msgid ""
 "You cannot update related variants from the values. Please update related "
 "values from the variants."
-msgstr ""
-"値から関連するバリアントを更新することはできません。バリアントから関連する値"
-"を更新して下さい。"
+msgstr "値から関連するバリアントを更新することはできません。バリアントから関連する値を更新して下さい。"
 
 #. module: product
 #. odoo-javascript
@@ -5180,8 +5027,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "販売または購買するもの、在庫品、消耗品、サービス品は、\n"
 "　　　　　　　プロダクトとして登録する必要があります。"
@@ -5200,14 +5046,10 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
-"販売または購買するもの(在庫可能品、消耗品、サービス品等)は、プロダクトとして"
-"登録する必要があります。プロダクトフォームは販売プロセスを容易にするための情"
-"報(価格、見積書の備考、会計データ、調達方法等)を含みます。"
+"販売または購買するもの(在庫可能品、消耗品、サービス品等)は、プロダクトとして登録する必要があります。プロダクトフォームは販売プロセスを容易にするための情報(価格、見積書の備考、会計データ、調達方法等)を含みます。"
 
 #. module: product
 #. odoo-javascript

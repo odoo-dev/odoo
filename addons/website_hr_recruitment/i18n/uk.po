@@ -13,16 +13,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 01:20+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/uk/>\n"
+"Language-Team: Ukrainian <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/uk/>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
-"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
-"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
-"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_hr_recruitment
@@ -59,33 +55,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Усі вакансії"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Усі вакансії"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> Опис вакансії"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> Опис вакансії"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">Тим часом,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">перегляньте наш веб-сайт:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">перегляньте наш веб-сайт:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -116,34 +110,28 @@ msgstr "<span class=\"s_website_form_label_content\">Короткий вступ
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Ваш Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Ваше ім'я</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Ваш номер телефону</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -331,7 +319,8 @@ msgstr "Створіть контент, який допоможе нашим к
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
 "Створіть нові сторінки вакансій через праву верхню кнопку <strong>+ "
 "<i>Новий</i></strong>."
@@ -379,13 +368,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 
 #. module: website_hr_recruitment
@@ -449,24 +435,18 @@ msgstr "Головна"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "Зазвичай ми <strong>відповідаємо на заявку протягом 3 днів</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                Наступним кроком буде "
-"дзвінок або зустріч в офісі.\n"
+"                                                Наступним кроком буде дзвінок або зустріч в офісі.\n"
 "                                                <br/><br/>\n"
-"                                                Не соромтеся "
-"<strong>звʼязуватися зі мною, якщо ви хочете швидше отримати\n"
-"                                                відгук</strong> або якщо ви "
-"не отримали від нас новин\n"
+"                                                Не соромтеся <strong>звʼязуватися зі мною, якщо ви хочете швидше отримати\n"
+"                                                відгук</strong> або якщо ви не отримали від нас новин\n"
 "                                                достатньо швидко."
 
 #. module: website_hr_recruitment
@@ -852,12 +832,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "Наразі немає відкритих вакансій,<br class=\"mb-2\"/>\n"
-"                                            але не соромтеся <span "
-"class=\"fw-bold\">звʼязуватися з нами</span> для спонтанних заявок."
+"                                            але не соромтеся <span class=\"fw-bold\">звʼязуватися з нами</span> для спонтанних заявок."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -898,15 +876,11 @@ msgstr "Видимий на поточному веб-сайті"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"Ми - команда пристрасних людей, мета яких - покращити життя кожної людини за "
-"допомогою руйнівних товарів.\n"
-"                                Ми створюємо чудові рішення для ваших бізнес-"
-"потреб."
+"Ми - команда пристрасних людей, мета яких - покращити життя кожної людини за допомогою руйнівних товарів.\n"
+"                                Ми створюємо чудові рішення для ваших бізнес-потреб."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -998,8 +972,7 @@ msgid ""
 "                                    We usually respond within 3 days..."
 msgstr ""
 "Вашу вакансію успішно опубліковано,<br class=\"mb-2\"/>\n"
-"                                    Зазвичай ми відповідаємо протягом 3 "
-"днів..."
+"                                    Зазвичай ми відповідаємо протягом 3 днів..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply

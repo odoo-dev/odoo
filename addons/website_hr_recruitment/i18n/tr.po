@@ -27,8 +27,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 11:31+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/tr/>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -56,8 +55,7 @@ msgstr ""
 "            <span class=\"text-muted small\">Süreç</span>\n"
 "            <h6>1 Telefon</h6>\n"
 "            <h6>1 Yerinde Mülakat</h6>\n"
-"            <span class=\"text-muted small\">Teklif almak için beklenecek "
-"Gün sayısı</span>\n"
+"            <span class=\"text-muted small\">Teklif almak için beklenecek Gün sayısı</span>\n"
 "            <h6>Mülakattan sonra 4 Gün</h6>\n"
 "        "
 
@@ -82,33 +80,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Tüm İşler"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Tüm İşler"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"İstihdam türü\" role=\"img\" aria-"
-"label=\"Employment type\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"İstihdam türü\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> İş Tanımı"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> İş Tanımı"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">Bu sırada</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Web sitemize göz atabilirsiniz:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Web sitemize göz atabilirsiniz:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -139,34 +135,28 @@ msgstr "<span class=\"s_website_form_label_content\">Kısa Tanıtım</span>"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">E-postanız</span>\n"
-"                                                            <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                            <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Adınız</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Telefon Numaranız</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -194,8 +184,8 @@ msgid ""
 "<span class=\"text-muted small\">Provide either a resume file or a linkedin "
 "profile</span>"
 msgstr ""
-"<span class=\"text-muted small\">Bir özgeçmiş dosyası ya da LinkedIn profili "
-"paylaşın</span>"
+"<span class=\"text-muted small\">Bir özgeçmiş dosyası ya da LinkedIn profili"
+" paylaşın</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_rating
@@ -354,7 +344,8 @@ msgstr "Kullanıcılarımıza günlük bazda yardımcı olacak içerikler oluşt
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
 "Sağ üstteki <strong>+ <i>Yeni</i></strong> düğmesini kullanarak yeni iş "
 "ilanı sayfaları oluşturun."
@@ -402,22 +393,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 "Her bir çalışan, çalışmasının sonuçlarını ve yarattığı etkiyi görebilir.\n"
-"                    Şirketin başarısına somut bir biçimde katkı "
-"sunabilirsiniz.\n"
+"                    Şirketin başarısına somut bir biçimde katkı sunabilirsiniz.\n"
 "                    <br/>\n"
-"                    Yıl boyunca haftalık spor seansları, ekibin bağlarını "
-"kuvvetlendirme\n"
-"                    etkinlikleri, aylık içki partileri gibi çeşitli "
-"etkinlikler düzenlenmektedir"
+"                    Yıl boyunca haftalık spor seansları, ekibin bağlarını kuvvetlendirme\n"
+"                    etkinlikleri, aylık içki partileri gibi çeşitli etkinlikler düzenlenmektedir"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -482,26 +467,19 @@ msgstr "Ana Sayfa"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "Genellikle <strong>başvurulara üç gün içinde yanıt veririm</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                Sonraki adım ya bir telefon "
-"görüşmesi ya da ofisimizde yüz yüze bir görüşme olacaktır.\n"
+"                                                Sonraki adım ya bir telefon görüşmesi ya da ofisimizde yüz yüze bir görüşme olacaktır.\n"
 "                                                <br/><br/>\n"
-"                                                <strong>Daha hızlı geri "
-"bildirim\n"
-"                                                isterseniz</strong>veya "
-"benden yeterince hızlı dönüş almazsanız\n"
-"                                                dilediğiniz zaman benimle "
-"iletişime geçebilirsiniz."
+"                                                <strong>Daha hızlı geri bildirim\n"
+"                                                isterseniz</strong>veya benden yeterince hızlı dönüş almazsanız\n"
+"                                                dilediğiniz zaman benimle iletişime geçebilirsiniz."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -629,7 +607,8 @@ msgstr "Olması Güzel"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "No dumb managers, no stupid tools to use, no rigid working hours"
-msgstr "Kötü yöneticiler, kullanılacak kötü araçlar, katı çalışma saatleri yok"
+msgstr ""
+"Kötü yöneticiler, kullanılacak kötü araçlar, katı çalışma saatleri yok"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -666,7 +645,8 @@ msgstr "Ofis Filtresi"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid "Optional introduction, or any question you might have about the job…"
 msgstr ""
-"İsteğe bağlı giriş veya işle ilgili aklınıza takılabilecek herhangi bir soru…"
+"İsteğe bağlı giriş veya işle ilgili aklınıza takılabilecek herhangi bir "
+"soru…"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_departments
@@ -884,13 +864,10 @@ msgstr "Paylaştığınız profil bir LinkedIn profiline benzemiyor"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "Şu anda açık iş pozisyonumuz yok,<br class=\"mb-2\"/>\n"
-"                                            ancak bize doğrudan başvurmak "
-"isterseniz<span class=\"fw-bold\">bizimle iletişime geçmekten</span> "
-"çekinmeyin."
+"                                            ancak bize doğrudan başvurmak isterseniz<span class=\"fw-bold\">bizimle iletişime geçmekten</span> çekinmeyin."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -931,15 +908,11 @@ msgstr "Mevcut web sitesinde görülebilir"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"Biz, yenilikçi ürünler aracılığıyla herkesin hayatını iyileştirmeyi "
-"hedefleyen tutkulu insanlardan oluşan bir ekibiz.\n"
-"                                İş sorunlarınızı çözmek için harika ürünler "
-"geliştiriyoruz."
+"Biz, yenilikçi ürünler aracılığıyla herkesin hayatını iyileştirmeyi hedefleyen tutkulu insanlardan oluşan bir ekibiz.\n"
+"                                İş sorunlarınızı çözmek için harika ürünler geliştiriyoruz."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -1031,8 +1004,7 @@ msgid ""
 "                                    We usually respond within 3 days..."
 msgstr ""
 "Başvurunuz başarıyla gönderildi,<br class=\"mb-2\"/>\n"
-"                                    Genellikle 3 gün içinde yanıt "
-"veriyoruz..."
+"                                    Genellikle 3 gün içinde yanıt veriyoruz..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply

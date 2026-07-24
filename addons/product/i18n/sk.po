@@ -21,14 +21,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 17:47+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-master/"
-"product/sk/>\n"
+"Language-Team: Slovak <https://translate.odoo.com/projects/odoo-master/product/sk/>\n"
 "Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n "
-">= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n == 1 ? 0 : n % 1 == 0 && n >= 2 && n <= 4 ? 1 : n % 1 != 0 ? 2: 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: product
@@ -48,25 +46,22 @@ msgstr "# Produkty"
 #: code:addons/product/models/product_pricelist_item.py:0
 #, fuzzy
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
 "%(base)s s %(discount)s %% %(discount_type)s a %(surcharge)s prirážkou\n"
-"Napríklad: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"Napríklad: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #, fuzzy
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
-msgstr ""
-"%(item_name)s: koncový dátum (%(end_date)s) by mal byť po počiatočnom dátume "
+"%(item_name)s: end date (%(end_date)s) should be after start date "
 "(%(start_date)s)"
+msgstr ""
+"%(item_name)s: koncový dátum (%(end_date)s) by mal byť po počiatočnom dátume"
+" (%(start_date)s)"
 
 #. module: product
 #. odoo-python
@@ -155,29 +150,24 @@ msgstr "- %(amount)s zľava"
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
-"- Čiarový kód „%(barcode)s“ je už priradený k produktu(-om): %(product_list)s"
+"- Čiarový kód „%(barcode)s“ je už priradený k produktu(-om): "
+"%(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 #, fuzzy
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
-"- Okamžite: Všetky možné varianty sa vytvoria hneď po pridaní atribútu a "
-"jeho hodnôt k produktu.\n"
-"        - Dynamicky: Každá varianta sa vytvorí až po pridaní príslušných "
-"atribútov a hodnôt na predajnej objednávke.\n"
+"- Okamžite: Všetky možné varianty sa vytvoria hneď po pridaní atribútu a jeho hodnôt k produktu.\n"
+"        - Dynamicky: Každá varianta sa vytvorí až po pridaní príslušných atribútov a hodnôt na predajnej objednávke.\n"
 "        - Nikdy: Pre atribút sa nikdy nevytvoria žiadne varianty.\n"
-"        Poznámka: túto voľbu nie je možné zmeniť, ak sa atribút už na "
-"produkte používa."
+"        Poznámka: túto voľbu nie je možné zmeniť, ak sa atribút už na produkte používa."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -280,20 +270,20 @@ msgstr "<b>Tip: chcete zaokrúhliť na 9,99?</b>"
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Ikona "
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"Ikona "
 "šípky\" title=\"Šípka\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" title=\"Mena\"/"
-">"
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
+"title=\"Mena\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_category_form_view
@@ -315,8 +305,8 @@ msgstr "<span class=\"o_stat_text\">Produkty</span>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
 
 #. module: product
@@ -390,13 +380,12 @@ msgstr "Kombinovaný produkt musí obsahovať najmenej jednu voľbu."
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
 "Popis produktu ktorý chcete odkomunikovať vašim zákazníkom. Tento\n"
-"popis bude skopírovaný na každú predajnú objednávku, dodaciu objednávku a "
-"zákaznícku faktúru/Dobropis"
+"popis bude skopírovaný na každú predajnú objednávku, dodaciu objednávku a zákaznícku faktúru/Dobropis"
 
 #. module: product
 #. odoo-python
@@ -409,17 +398,11 @@ msgstr "Balenie už používa čiarový kód"
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 #, fuzzy
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"Cena je súbor predajných cien alebo pravidiel na výpočet ceny riadkov "
-"predajnej objednávky na základe produktov, kategórií produktov, dátumov a "
-"objednaných množstiev.\n"
-"            Je to ideálny nástroj na spracovanie viacerých cien, sezónnych "
-"zliav atď."
+"Cena je súbor predajných cien alebo pravidiel na výpočet ceny riadkov predajnej objednávky na základe produktov, kategórií produktov, dátumov a objednaných množstiev.\n"
+"            Je to ideálny nástroj na spracovanie viacerých cien, sezónnych zliav atď."
 
 #. module: product
 #. odoo-python
@@ -577,8 +560,7 @@ msgid ""
 "Add products using the \"Add Products\" button at the top right to\n"
 "                                include them in the report."
 msgstr ""
-"Pridajte produkty pomocou tlačidla „Pridať produkty“ v pravom hornom rohu, "
-"aby\n"
+"Pridajte produkty pomocou tlačidla „Pridať produkty“ v pravom hornom rohu, aby\n"
 "                                boli zahrnuté do prehľadu."
 
 #. module: product
@@ -857,23 +839,15 @@ msgstr "Atribúty a varianty"
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 #, fuzzy
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Dostupné množstvo (vypočítané ako množstvo na sklade - rezervované množstvo "
-"- množstvo na odstránenie)\n"
-"V kontexte s jedným skladovým miestom to zahŕňa tovar uskladnený na tomto "
-"mieste alebo na ktoromkoľvek z jeho podriadených miest.\n"
-"V kontexte s jedným skladom to zahŕňa tovar uskladnený na skladovom mieste "
-"tohto skladu alebo na ktoromkoľvek z jeho podriadených miest.\n"
-"V ostatných prípadoch to zahŕňa tovar uskladnený na akomkoľvek skladovom "
-"mieste typu „interné“."
+"Dostupné množstvo (vypočítané ako množstvo na sklade - rezervované množstvo - množstvo na odstránenie)\n"
+"V kontexte s jedným skladovým miestom to zahŕňa tovar uskladnený na tomto mieste alebo na ktoromkoľvek z jeho podriadených miest.\n"
+"V kontexte s jedným skladom to zahŕňa tovar uskladnený na skladovom mieste tohto skladu alebo na ktoromkoľvek z jeho podriadených miest.\n"
+"V ostatných prípadoch to zahŕňa tovar uskladnený na akomkoľvek skladovom mieste typu „interné“."
 
 #. module: product
 #. odoo-javascript
@@ -1086,15 +1060,11 @@ msgstr ""
 #: code:addons/product/models/product_template.py:0
 #, fuzzy
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"Zmena mernej jednotky vášho produktu použije konverziu 1 %(old_uom_name)s = "
-"1 %(new_uom_name)s.\n"
-"Všetky existujúce záznamy (predajné objednávky, nákupné objednávky atď.) "
-"používajúce tento produkt budú aktualizované nahradením názvu jednotky."
+"Zmena mernej jednotky vášho produktu použije konverziu 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"Všetky existujúce záznamy (predajné objednávky, nákupné objednávky atď.) používajúce tento produkt budú aktualizované nahradením názvu jednotky."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1202,7 +1172,8 @@ msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
 msgstr ""
-"Kombinácie umožňujú vybrať jeden produkt z výberu možností v danej kategórii."
+"Kombinácie umožňujú vybrať jeden produkt z výberu možností v danej "
+"kategórii."
 
 #. module: product
 #: model:product.template,description_sale:product.product_delivery_01_product_template
@@ -1438,28 +1409,20 @@ msgstr "Mena"
 #, fuzzy
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "Aktuálne množstvo produktov.\n"
 "\n"
-"V kontexte s jedným Umiestneniením zásob, toto zahŕňa aj tovar uložené na "
-"tomto mieste, alebo hociktorom z jeho potomkov.\n"
+"V kontexte s jedným Umiestneniením zásob, toto zahŕňa aj tovar uložené na tomto mieste, alebo hociktorom z jeho potomkov.\n"
 "\n"
-"V kontexte s jedným Skladom, toto zahŕňa aj tovar uložený v sortimente tohto "
-"skladu, alebo niektorom z jeho potomkov.\n"
+"V kontexte s jedným Skladom, toto zahŕňa aj tovar uložený v sortimente tohto skladu, alebo niektorom z jeho potomkov.\n"
 "\n"
-"uložené v Umiestnení zásob  Skladu tohoto Obchodu, alebo niektorom z jeho "
-"potomkov.\n"
+"uložené v Umiestnení zásob  Skladu tohoto Obchodu, alebo niektorom z jeho potomkov.\n"
 "\n"
-"V opačnom prípade, toto zahŕňa tovar uložený v ktoromkoľvek Umiestení zásob "
-"typu \"interné\""
+"V opačnom prípade, toto zahŕňa tovar uložený v ktoromkoľvek Umiestení zásob typu \"interné\""
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1551,7 +1514,8 @@ msgstr "Predvolená merná jednotka používaná pre všetky skladové operácie
 #: model:ir.model.fields,help:product.field_product_base_unit__name
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr ""
 
 #. module: product
@@ -1725,8 +1689,8 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_product__base_unit_name
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
 msgstr ""
 
 #. module: product
@@ -1831,8 +1795,8 @@ msgstr "Dátum ukončenia"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1848,8 +1812,7 @@ msgid ""
 "The displayed value depends on the timezone set in your preferences."
 msgstr ""
 "Koniec platnosti položky cenníka\n"
-"Zobrazená hodnota závisí od časového pásma nastaveného vo vašich "
-"preferenciách."
+"Zobrazená hodnota závisí od časového pásma nastaveného vo vašich preferenciách."
 
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
@@ -1909,8 +1872,8 @@ msgstr "Prirážka"
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 #, fuzzy
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
 msgstr ""
 "Prirážka k predajnej cene za variantu s touto hodnotou atribútu. Napr. "
 "prirážka 200, 1000 + 200 = 1200."
@@ -1999,35 +1962,25 @@ msgstr "Úžasná ikona fronty napr. fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"Pre pravidlo na uplatnenie, kúpené / predané množstvo musí byť väčšie ako "
-"alebo rovné minimálnemu množstvu špecifikovanom v tomto poli.\n"
+"Pre pravidlo na uplatnenie, kúpené / predané množstvo musí byť väčšie ako alebo rovné minimálnemu množstvu špecifikovanom v tomto poli.\n"
 "Vyjadrené v predvolených merných jednotkách produktu."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 #, fuzzy
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Očakávané množstvo (vypočítané ako množstvo na sklade - odoslané + prijaté - "
-"množstvo na odstránenie)\n"
-"V kontexte s jedným skladovým miestom to zahŕňa tovar uskladnený na tomto "
-"mieste alebo na ktoromkoľvek z jeho podriadených miest.\n"
-"V kontexte s jedným skladom to zahŕňa tovar uskladnený na skladovom mieste "
-"tohto skladu alebo na ktoromkoľvek z jeho podriadených miest.\n"
-"V ostatných prípadoch to zahŕňa tovar uskladnený na akomkoľvek skladovom "
-"mieste typu „interný“."
+"Očakávané množstvo (vypočítané ako množstvo na sklade - odoslané + prijaté - množstvo na odstránenie)\n"
+"V kontexte s jedným skladovým miestom to zahŕňa tovar uskladnený na tomto mieste alebo na ktoromkoľvek z jeho podriadených miest.\n"
+"V kontexte s jedným skladom to zahŕňa tovar uskladnený na skladovom mieste tohto skladu alebo na ktoromkoľvek z jeho podriadených miest.\n"
+"V ostatných prípadoch to zahŕňa tovar uskladnený na akomkoľvek skladovom mieste typu „interný“."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
@@ -3132,19 +3085,19 @@ msgstr "Na sklade"
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
-"V produkte %(product)s nemôžete priradiť hodnotu %(value)s k atribútu %"
-"(attribute)s, pretože sa nezhodujú."
+"V produkte %(product)s nemôžete priradiť hodnotu %(value)s k atribútu "
+"%(attribute)s, pretože sa nezhodujú."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
 "V produkte %(product)s nemôžete transformovať atribút %(attribute_src)s na "
 "atribút %(attribute_dest)s."
@@ -3924,40 +3877,28 @@ msgstr "Množstvo (%s) už je v prehľade zadané."
 #, fuzzy
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "Množstvo produktov s naplánovaným príchodom.\n"
-"V kontexte s jednou Lokáciou skladu, toto zahŕňa tovar prichádzajúci do "
-"tejto Lokácie, alebo ktorýchkoľvek z jeho podriadených.\n"
-"V kontexte s jedným Skladiskom, toto zahŕňa tovar prichádzajúci do tejto "
-"Lokácie skladu tohto Skladiska, alebo ktorýchkoľvek z jeho podriadených.\n"
-"V opačnom prípade, toto zahŕňa tovar prichádzajúci do akejkoľvek lokácie "
-"skladu s typom \"interná\"."
+"V kontexte s jednou Lokáciou skladu, toto zahŕňa tovar prichádzajúci do tejto Lokácie, alebo ktorýchkoľvek z jeho podriadených.\n"
+"V kontexte s jedným Skladiskom, toto zahŕňa tovar prichádzajúci do tejto Lokácie skladu tohto Skladiska, alebo ktorýchkoľvek z jeho podriadených.\n"
+"V opačnom prípade, toto zahŕňa tovar prichádzajúci do akejkoľvek lokácie skladu s typom \"interná\"."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__outgoing_qty
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "Množstvo produktov s naplánovaným odchodom.\n"
-"V kontexte s jednou Lokáciou skladu, toto zahŕňa tovar odchádzajúci do tejto "
-"Lokácie, alebo ktorýchkoľvek z jeho podriadených.\n"
-"V kontexte s jedným Skladiskom, toto zahŕňa tovar odchádzajúci do tejto "
-"Lokácie skladu tohto Skladiska, alebo ktorýchkoľvek z jeho podriadených.\n"
-"V opačnom prípade, toto zahŕňa tovar odchádzajúci z akejkoľvek lokácie "
-"skladu s typom \"interná\"."
+"V kontexte s jednou Lokáciou skladu, toto zahŕňa tovar odchádzajúci do tejto Lokácie, alebo ktorýchkoľvek z jeho podriadených.\n"
+"V kontexte s jedným Skladiskom, toto zahŕňa tovar odchádzajúci do tejto Lokácie skladu tohto Skladiska, alebo ktorýchkoľvek z jeho podriadených.\n"
+"V opačnom prípade, toto zahŕňa tovar odchádzajúci z akejkoľvek lokácie skladu s typom \"interná\"."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -4010,8 +3951,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 #, fuzzy
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
 msgstr ""
 "Zaevidujte ceny požadované vašimi dodávateľmi pre každý produkt, množstvo a "
 "obdobie."
@@ -4376,8 +4317,7 @@ msgid ""
 "The displayed value depends on the timezone set in your preferences."
 msgstr ""
 "Počiatočný dátum a čas pre overenie položky cenníka\n"
-"Zobrazená hodnota závisí od časového pásma nastaveného vo vašich "
-"preferenciách."
+"Zobrazená hodnota závisí od časového pásma nastaveného vo vašich preferenciách."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__activity_state
@@ -4497,8 +4437,8 @@ msgstr "Referencia „%s“ už existuje."
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
 msgstr ""
 "Atribút %(attribute)s produktu %(product)s musí mať aspoň jednu hodnotu."
 
@@ -4544,8 +4484,8 @@ msgstr "Typ zobrazenia, ktorý sa použil v konfigurátore produktu."
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4569,12 +4509,12 @@ msgstr "Minimálna marža by mala byť nižšia ako maximálna marža."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
 "Minimálna cena medzi produktmi v tejto kombinácii. Táto hodnota sa použije "
-"na pomerné rozdelenie ceny tejto kombinácie vo vzťahu k ostatným kombináciám "
-"v kombinovanom produkte. Táto heuristika zabezpečuje, že bez ohľadu na to, "
+"na pomerné rozdelenie ceny tejto kombinácie vo vzťahu k ostatným kombináciám"
+" v kombinovanom produkte. Táto heuristika zabezpečuje, že bez ohľadu na to, "
 "ktorý produkt si používateľ v kombinácii vyberie, cena bude vždy rovnaká."
 
 #. module: product
@@ -4589,13 +4529,13 @@ msgstr "Počet produktov v tejto kategórii (nezohľadňuje dcérske kategórie)
 #: code:addons/product/models/product_template.py:0
 #, fuzzy
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
-"Počet variantov, ktoré sa majú vygenerovať, presahuje povolený limit. Nemali "
-"by ste generovať varianty pre každú kombináciu, alebo ich generujte ak je "
+"Počet variantov, ktoré sa majú vygenerovať, presahuje povolený limit. Nemali"
+" by ste generovať varianty pre každú kombináciu, alebo ich generujte ak je "
 "treba v predajnej objednávke. Pre zmenu otvorte zobrazenie formulára "
 "atribútov a zmeňte režim *Vytvoriť varianty*."
 
@@ -4614,13 +4554,13 @@ msgstr "Šablóna produktu je archivovaná, kombinácie nie sú možné."
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 #, fuzzy
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
 "Množstvo, ktoré je potrebné zakúpiť od tohto dodávateľa, aby ste mohli "
-"dosiahli na danú jednotkovú cenu. Ak je nastavená merná jednotka dodávateľa, "
-"množstvo by malo byť uvedené v tejto jednotke, inak by malo byť uvedené v "
+"dosiahli na danú jednotkovú cenu. Ak je nastavená merná jednotka dodávateľa,"
+" množstvo by malo byť uvedené v tejto jednotke, inak by malo byť uvedené v "
 "základnej mernej jednotke produktu."
 
 #. module: product
@@ -4653,8 +4593,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
 msgstr ""
 
 #. module: product
@@ -5057,13 +4997,11 @@ msgstr "Počet hodnôt"
 #, fuzzy
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "Hodnota produktu (automaticky vypočítaná v priemernej cene).\n"
-"        Používa sa na ocenenie produktu, ak nie je známa nákupná cena (napr. "
-"úprava zásob).\n"
+"        Používa sa na ocenenie produktu, ak nie je známa nákupná cena (napr. úprava zásob).\n"
 "        Používa sa na výpočet marží pri predajných objednávkach."
 
 #. module: product
@@ -5268,8 +5206,8 @@ msgstr "Varovania"
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 #, fuzzy
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr ""
 "Venujeme osobitnú pozornosť detailom, preto sú naše stoly najvyššej kvality."
 
@@ -5378,7 +5316,8 @@ msgstr "Chystáte sa aktualizovať doplatok %s produktov."
 msgid ""
 "You are deactivating the pricelist feature. Every active pricelist will be "
 "archived."
-msgstr "Deaktivujete funkciu cenníka. Všetky aktívne cenníky budú archivované."
+msgstr ""
+"Deaktivujete funkciu cenníka. Všetky aktívne cenníky budú archivované."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
@@ -5457,12 +5396,10 @@ msgstr ""
 #: code:addons/product/models/product_attribute.py:0
 #, fuzzy
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Režim vytvárania variantov atribútu %(attribute)s nie je možné zmeniť, "
-"pretože sa používa v nasledujúcich produktoch:\n"
+"Režim vytvárania variantov atribútu %(attribute)s nie je možné zmeniť, pretože sa používa v nasledujúcich produktoch:\n"
 "%(products)s"
 
 #. module: product
@@ -5470,8 +5407,8 @@ msgstr ""
 #: code:addons/product/models/product_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
 msgstr ""
 "Atribút hodnoty %(value)s nie je možné zmeniť, pretože sa používa v "
 "nasledujúcich produktoch: %(products)s"
@@ -5480,8 +5417,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5497,18 +5434,19 @@ msgstr ""
 #: code:addons/product/models/product_template_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
-"Nemôžete zmeniť produkt hodnoty %(value)s nastavenej na produkte %(product)s."
+"Nemôžete zmeniť produkt hodnoty %(value)s nastavenej na produkte "
+"%(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
 "Hodnotu %(value)s nastavenú pre produkt %(product)s nie je možné zmeniť."
 
@@ -5532,12 +5470,10 @@ msgstr ""
 #: code:addons/product/models/product_attribute.py:0
 #, fuzzy
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Atribút %(attribute)s nie je možné odstrániť, pretože sa používa v "
-"nasledujúcich produktoch:\n"
+"Atribút %(attribute)s nie je možné odstrániť, pretože sa používa v nasledujúcich produktoch:\n"
 "%(products)s"
 
 #. module: product
@@ -5545,12 +5481,10 @@ msgstr ""
 #: code:addons/product/models/product_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
-"Hodnotu %(value)s nie je možné odstrániť, pretože sa používa v nasledujúcich "
-"produktoch:\n"
+"Hodnotu %(value)s nie je možné odstrániť, pretože sa používa v nasledujúcich produktoch:\n"
 "%(products)s\n"
 
 #. module: product
@@ -5558,8 +5492,8 @@ msgstr ""
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
 "Atribút %(attribute)s nie je možné presunúť z produktu %(product_src)s do "
 "produktu %(product_dest)s."
@@ -5572,8 +5506,8 @@ msgid ""
 "You cannot update related variants from the values. Please update related "
 "values from the variants."
 msgstr ""
-"Súvisiace varianty nemožno aktualizovať z ich hodnôt. Aktualizujte súvisiace "
-"hodnoty z variantov."
+"Súvisiace varianty nemožno aktualizovať z ich hodnôt. Aktualizujte súvisiace"
+" hodnoty z variantov."
 
 #. module: product
 #. odoo-javascript
@@ -5581,12 +5515,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "Produkty musíte definovať pre všetko čo predávate alebo kupujete,\n"
-"                            či už ide o skladovaný produkt, spotrebný tovar "
-"alebo službu."
+"                            či už ide o skladovaný produkt, spotrebný tovar alebo službu."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_template_action
@@ -5604,18 +5536,13 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
 "Produkt musíte definovať pre všetko, čo predávate alebo nakupujete,\n"
-"                či už ide o skladovateľný produkt, spotrebný tovar alebo "
-"službu.\n"
-"                Formulár produktu obsahuje informácie, ktoré zjednodušujú "
-"proces predaja:\n"
-"                cenu, poznámky v ponuke, účtovné údaje, metódy obstarávania "
-"atď."
+"                či už ide o skladovateľný produkt, spotrebný tovar alebo službu.\n"
+"                Formulár produktu obsahuje informácie, ktoré zjednodušujú proces predaja:\n"
+"                cenu, poznámky v ponuke, účtovné údaje, metódy obstarávania atď."
 
 #. module: product
 #. odoo-javascript

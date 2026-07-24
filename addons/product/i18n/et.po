@@ -32,8 +32,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 00:59+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/"
-"product/et/>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/product/et/>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,25 +56,21 @@ msgstr "Tooted"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
-"%(base)s millega %(discount)s %% %(discount_type)s ja %(surcharge)s "
-"lisatasu\n"
-"Näide: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s millega %(discount)s %% %(discount_type)s ja %(surcharge)s lisatasu\n"
+"Näide: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
 msgstr ""
-"%(item_name)s: lõppkuupäev (%(end_date)s) peaks olema pärast alguskuupäeva (%"
-"(start_date)s)"
+"%(item_name)s: lõppkuupäev (%(end_date)s) peaks olema pärast alguskuupäeva "
+"(%(start_date)s)"
 
 #. module: product
 #. odoo-python
@@ -156,27 +151,22 @@ msgstr "- %(amount)s allahindlus"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
 "- Triipkood \"%(barcode)s\" on juba määratud too(de)tele: %(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
 "- Kohe: kõik variatsiooni luuakse niipea kui need on tootele lisatud.\n"
-"        - Dünaamiliselt: iga variatsioon luuakse pärast vastava atribuudid "
-"ja väärtused on lisatud müügitellimusele.\n"
+"        - Dünaamiliselt: iga variatsioon luuakse pärast vastava atribuudid ja väärtused on lisatud müügitellimusele.\n"
 "        - Kunagi: Variatsioone ei looda atribuudile kunagi.\n"
-"        Märkus: niipea kui atribuuti on tootel kasutatud, ei saa antud "
-"seadistust enam muuta."
+"        Märkus: niipea kui atribuuti on tootel kasutatud, ei saa antud seadistust enam muuta."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -265,19 +255,19 @@ msgstr "<b>Nõuanne: kas soovid ümardada kuni 9.99?</b>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 
 #. module: product
@@ -299,8 +289,8 @@ msgstr "<span class=\"o_stat_text\">Tooted</span>"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 #, fuzzy
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
 "<span class=\"text-muted\" invisible=\"product_variant_count &lt;= "
 "1\">Põhineb variatsioonidel</span>"
@@ -366,13 +356,13 @@ msgstr "Kombinatsioontoode peab sisaldama vähemalt 1 kominatsiooni valikut."
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
 "Toote kirjeldus, mida soovite oma klientidele edastada. See kirjeldus "
-"kopeeritakse igale müügitellimusele, saatelehele ja kliendiarvele/"
-"krediidiarvele"
+"kopeeritakse igale müügitellimusele, saatelehele ja "
+"kliendiarvele/krediidiarvele"
 
 #. module: product
 #. odoo-python
@@ -383,17 +373,11 @@ msgstr "Pakendil on juba vöötkood"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"Hind on müügihindade või reeglite kogum müügitellimuste ridade hinna "
-"arvutamiseks toodete, tootekategooriate, kuupäevade ja tellitud koguste "
-"põhjal.\n"
-"             See on hea tööriist erinevate hindade, hooajaliste "
-"allahindluste jms käsitlemiseks."
+"Hind on müügihindade või reeglite kogum müügitellimuste ridade hinna arvutamiseks toodete, tootekategooriate, kuupäevade ja tellitud koguste põhjal.\n"
+"             See on hea tööriist erinevate hindade, hooajaliste allahindluste jms käsitlemiseks."
 
 #. module: product
 #. odoo-python
@@ -721,8 +705,8 @@ msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
 msgstr ""
-"Korraga saab kuvada kõige rohkem %s kogust. Eemalda valitud kogus, et lisada "
-"teisi."
+"Korraga saab kuvada kõige rohkem %s kogust. Eemalda valitud kogus, et lisada"
+" teisi."
 
 #. module: product
 #: model:ir.model,name:product.model_ir_attachment
@@ -799,23 +783,15 @@ msgstr "Atribuudid ja variandid"
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 #, fuzzy
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Vaba laokogus (arvutatud nii: Kogus laos - reserveeritud kogus - kogus "
-"eemaldamiseks)\n"
-"Kui laos on ainult üks laokoht, hõlmab see selles laokohas või selle "
-"alamkohtades hoiustatud kaupa.\n"
-"Kui teil on ainult üks ladu, hõlmab see selle lao laokohas või selle "
-"allüksustes hoiustatud kaupa.\n"
-"Muudel juhtudel hõlmab see kõiki „sisemise“ tüübiga laokohtades hoiustatud "
-"kaupu."
+"Vaba laokogus (arvutatud nii: Kogus laos - reserveeritud kogus - kogus eemaldamiseks)\n"
+"Kui laos on ainult üks laokoht, hõlmab see selles laokohas või selle alamkohtades hoiustatud kaupa.\n"
+"Kui teil on ainult üks ladu, hõlmab see selle lao laokohas või selle allüksustes hoiustatud kaupa.\n"
+"Muudel juhtudel hõlmab see kõiki „sisemise“ tüübiga laokohtades hoiustatud kaupu."
 
 #. module: product
 #. odoo-javascript
@@ -1012,15 +988,11 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"Muutes toote mõõtühikut, konverteeritakse kõik ühikud järgnevalt: 1 %"
-"(old_uom_name)s = 1%(new_uom_name)s.\n"
-"Kõik seda toodet sisaldavad olemasolevad kanded (Müügitellimused, "
-"ostutellimused jne) uuendatakse, asendades mõõtühiku nime."
+"Muutes toote mõõtühikut, konverteeritakse kõik ühikud järgnevalt: 1 %(old_uom_name)s = 1%(new_uom_name)s.\n"
+"Kõik seda toodet sisaldavad olemasolevad kanded (Müügitellimused, ostutellimused jne) uuendatakse, asendades mõõtühiku nime."
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1343,23 +1315,16 @@ msgstr "Valuuta"
 #, fuzzy
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "Praegune toodete kogus.\n"
-"Ühe lao asukoha konteksis hõlmab see siin asukohas või selle alamasukohtades "
-"hoitavaid tooteid.\n"
-"Ühe lao kontekstis hõlmab see siin laos või selle alamladudes hoitavaid "
-"tooteid.\n"
+"Ühe lao asukoha konteksis hõlmab see siin asukohas või selle alamasukohtades hoitavaid tooteid.\n"
+"Ühe lao kontekstis hõlmab see siin laos või selle alamladudes hoitavaid tooteid.\n"
 "tooted, mida hoitakse selle poe laoasukohas või selle alamladudes.\n"
-"Muul juhul hõlmab see kaupu, mis on ladustatud mis tahes laokohas, mille "
-"tüüp on \"sisemine\"."
+"Muul juhul hõlmab see kaupu, mis on ladustatud mis tahes laokohas, mille tüüp on \"sisemine\"."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1445,7 +1410,8 @@ msgstr "Vaikimisi mõõtühikut kasutatakse kõigis laooperatsioonides."
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
 #, fuzzy
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr "Määrake kohandatud ühik, mida kuvada mõõtühiku hinna väljal."
 
 #. module: product
@@ -1608,11 +1574,11 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 #, fuzzy
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
 msgstr ""
-"Kui see on määratud, kuvab toodete kohandatud ühikut või muul viisil valitud "
-"mõõtühikut."
+"Kui see on määratud, kuvab toodete kohandatud ühikut või muul viisil valitud"
+" mõõtühikut."
 
 #. module: product
 #. odoo-python
@@ -1706,8 +1672,8 @@ msgstr "Lõppkuupäev"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1776,8 +1742,8 @@ msgstr "Lisahind"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
 msgstr ""
 "Selle atribuudi väärtusega variandi lisahind müügihinnal. nt. 200 lisatasu, "
 "1000 + 200 = 1200."
@@ -1862,35 +1828,25 @@ msgstr "Font awesome icon nt. fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"Reegli rakendumiseks peab ostetud/müüdud kogus olema sellel väljal määratud "
-"miinimumkogusest suurem või sellega võrdne.\n"
+"Reegli rakendumiseks peab ostetud/müüdud kogus olema sellel väljal määratud miinimumkogusest suurem või sellega võrdne.\n"
 "Väljendatakse toote vaikimisi mõõtühikus."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 #, fuzzy
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
-"Prognoositud kogus (arvutatud nii: Kogus laos - väljaminev kogus + "
-"sissetulev kogus - kogus eemaldamiseks)\n"
-"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis on "
-"ladustatud sellesse asukohta või selle alamasukohta.\n"
-"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis on ladustatud Lao "
-"asukohta või alamasukohta selles Laos.\n"
-"Teistel juhtudel hõlmab see tooteid, mis on ladustatud ükskõik millisesse "
-"Lao \"sisemisse\" asukohta."
+"Prognoositud kogus (arvutatud nii: Kogus laos - väljaminev kogus + sissetulev kogus - kogus eemaldamiseks)\n"
+"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis on ladustatud sellesse asukohta või selle alamasukohta.\n"
+"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis on ladustatud Lao asukohta või alamasukohta selles Laos.\n"
+"Teistel juhtudel hõlmab see tooteid, mis on ladustatud ükskõik millisesse Lao \"sisemisse\" asukohta."
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_product_tree_view
@@ -2001,8 +1957,7 @@ msgid ""
 "Goods are tangible materials and merchandise you provide.\n"
 "A service is a non-material product you provide."
 msgstr ""
-"Kaupade all mõistetakse käegakatsutavaid materjale ja kaupu, mida te "
-"pakute. \n"
+"Kaupade all mõistetakse käegakatsutavaid materjale ja kaupu, mida te pakute. \n"
 "Teenus on mittefüüsiline toode, mida te pakute."
 
 #. module: product
@@ -2924,21 +2879,21 @@ msgstr "Laos"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
-"Toote %(product)s väärtust %(value)s ei saa siduda atribuudiga %"
-"(attribute)s, sest need ei kattu."
+"Toote %(product)s väärtust %(value)s ei saa siduda atribuudiga "
+"%(attribute)s, sest need ei kattu."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
-"Toote %(product)s atribuuti %(attribute_src)s ei saa muuta atrbuudiks %"
-"(attribute_dest)s."
+"Toote %(product)s atribuuti %(attribute_src)s ei saa muuta atrbuudiks "
+"%(attribute_dest)s."
 
 #. module: product
 #. odoo-javascript
@@ -3658,40 +3613,28 @@ msgstr "Kogus juba olemas (%s)."
 #, fuzzy
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "Planeeritud saabuvate toodete kogused.\n"
-"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis saabuvad "
-"sellesse asukohta või selle alamasukohta.\n"
-"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis saabuvad Lao asukohta "
-"või alamasukohta selles Laos.\n"
-"Teistel juhtudel hõlmab see tooteid, mis saabuvad ükskõik millisesse Lao "
-"\"sisemisse\" asukohta."
+"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis saabuvad sellesse asukohta või selle alamasukohta.\n"
+"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis saabuvad Lao asukohta või alamasukohta selles Laos.\n"
+"Teistel juhtudel hõlmab see tooteid, mis saabuvad ükskõik millisesse Lao \"sisemisse\" asukohta."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__outgoing_qty
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "Planeeritud väljuvate toodete kogused.\n"
-"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis väljuvad "
-"sellest asukohast või selle alamasukohast.\n"
-"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis väljuvad Lao "
-"asukohast või alamasukohast selles Laos.\n"
-"Teistel juhtudel hõlmab see tooteid, mis väljuvad ükskõik millisest Lao "
-"\"sisemisest\" asukohast."
+"Kui kasutatakse ühte Lao asukohta, siis hõlmab see tooteid, mis väljuvad sellest asukohast või selle alamasukohast.\n"
+"Kui kasutatakse ühte ladu, siis see hõlmab tooteid mis väljuvad Lao asukohast või alamasukohast selles Laos.\n"
+"Teistel juhtudel hõlmab see tooteid, mis väljuvad ükskõik millisest Lao \"sisemisest\" asukohast."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -3740,8 +3683,8 @@ msgstr "Võrdlusühik"
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
 msgstr ""
 "Registreerige oma tarnijatelt taotletud hinnad koguse ja perioodi alusel."
 
@@ -4017,8 +3960,8 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"Määrake tootekategooria, kui see reegel kehtib ainult sellesse kategooriasse "
-"või selle alamkategooriatesse kuuluvatele toodetele. Vastasel juhul jätke "
+"Määrake tootekategooria, kui see reegel kehtib ainult sellesse kategooriasse"
+" või selle alamkategooriatesse kuuluvatele toodetele. Vastasel juhul jätke "
 "väli tühjaks."
 
 #. module: product
@@ -4193,8 +4136,8 @@ msgstr "Viide '%s' on juba olemas."
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
 msgstr ""
 "Toote %(product)s atribuudil %(attribute)s peab olema vähemalt üks väärtus."
 
@@ -4221,8 +4164,8 @@ msgid ""
 "suits you and your things best."
 msgstr ""
 "Lauakorraldaja on ideaalne kõigi väikeste asjade hoidmiseks ja kuna need 5 "
-"kasti on lahtised, saate neid paigutada ja liigutada viisil, mis sobib teile "
-"ja teie asjadele kõige paremini."
+"kasti on lahtised, saate neid paigutada ja liigutada viisil, mis sobib teile"
+" ja teie asjadele kõige paremini."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -4236,8 +4179,8 @@ msgstr "Tootekonfiguraatoris kasutatav kuvatüüp."
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4259,8 +4202,8 @@ msgstr "Minimaalne marginaal peaks olema väiksem kui maksimaalne marginaal."
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
 "Antud kombinatsiooni toodete minimaalne hind. Seda väärtust kasutatakse "
 "selle kombinatsiooni hinna proportsionaalseks jaotamiseks kombineeritud "
@@ -4278,15 +4221,15 @@ msgstr "Toodete arv antud kategoorias (Ei arvesta alamkategooriaid)"
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
 "Variatsioonide arv on üle lubatud piiri. Kas ära loo iga kombinatsiooni "
 "kohta variatsiooni või loo need vastavalt müügitellimuselt tulevale "
-"nõudlusele. Selleks ava atribuudi vormivaade ja muuda variatsioonide loomise "
-"viisi."
+"nõudlusele. Selleks ava atribuudi vormivaade ja muuda variatsioonide loomise"
+" viisi."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -4302,12 +4245,12 @@ msgstr "Tootemall on arhiveeritud, nii et kombinatsioon pole võimalik."
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
-"Sellelt tarnijalt ostetav kogus. Kogus on väljatoodud tarnija mõõtühikus või "
-"selle puudumisel toote enda mõõtühikus."
+"Sellelt tarnijalt ostetav kogus. Kogus on väljatoodud tarnija mõõtühikus või"
+" selle puudumisel toote enda mõõtühikus."
 
 #. module: product
 #. odoo-python
@@ -4330,15 +4273,15 @@ msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
 msgstr ""
-"Väärtus %(value)s ei ole defineeritud toote %(product)s atribuudile %"
-"(attribute)s."
+"Väärtus %(value)s ei ole defineeritud toote %(product)s atribuudile "
+"%(attribute)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
 msgstr ""
 
 #. module: product
@@ -4711,13 +4654,11 @@ msgstr "Väärtuste arv"
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "Toote väärtus (AVCO puhul arvutatakse automaatselt).\n"
-"                   Kasutatakse toote väärtuse määramiseks, kui ostuhind ei "
-"ole teada (nt. laoseisu korrigeerimisel).\n"
+"                   Kasutatakse toote väärtuse määramiseks, kui ostuhind ei ole teada (nt. laoseisu korrigeerimisel).\n"
 "                   Kasutatakse müügitellimuse marginaali arvutamisel."
 
 #. module: product
@@ -4911,8 +4852,8 @@ msgstr "Hoiatused"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr ""
 "Pöörame erilist tähelepanu detailidele, mistõttu on meie lauad kõrge "
 "kvaliteediga."
@@ -5049,7 +4990,8 @@ msgstr ""
 msgid ""
 "You can upload an image that will be used as the color of the attribute "
 "value."
-msgstr "Saate üles laadida pildi, mida kasutatakse atribuudi väärtuse värvina."
+msgstr ""
+"Saate üles laadida pildi, mida kasutatakse atribuudi väärtuse värvina."
 
 #. module: product
 #. odoo-javascript
@@ -5085,30 +5027,28 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Atribuudil %(attribute)s ei saa variatsiooni loomise viisi muuta, sest see "
-"on kasutusel järgneva(te)l too(de)tel:\n"
+"Atribuudil %(attribute)s ei saa variatsiooni loomise viisi muuta, sest see on kasutusel järgneva(te)l too(de)tel:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
 msgstr ""
-"Väärtuse %(value)s atribuuti ei saa muuta, sest seda kasutatakse järgnevatel "
-"toodetel: %(products)s"
+"Väärtuse %(value)s atribuuti ei saa muuta, sest seda kasutatakse järgnevatel"
+" toodetel: %(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5123,16 +5063,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr "Väärtuse %(value)s toodet ei saa muuta tootel %(product)s."
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
 msgstr "Toote %(product)s väärtust%(value)s ei saa muuta."
 
 #. module: product
@@ -5153,20 +5093,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"Atribuuti ei saa kustutada %(attribute)s , sest see on kasutusel järgmistel "
-"toodetel:\n"
+"Atribuuti ei saa kustutada %(attribute)s , sest see on kasutusel järgmistel toodetel:\n"
 "%(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
 "Väärtust%(value)s ei saa kustutada, sest see on kasutuses too(de)tel:\n"
@@ -5176,11 +5113,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
-"Atribuuti%(attribute)s ei saa liigutada tootelt%(product_src)s tootele%"
-"(product_dest)s."
+"Atribuuti%(attribute)s ei saa liigutada tootelt%(product_src)s "
+"tootele%(product_dest)s."
 
 #. module: product
 #. odoo-python
@@ -5198,12 +5135,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "Peate määrama toote kõigele, mida te müüte või ostate,\n"
-"                            olgu see siis ladustatav toode, tarbitav toode "
-"või teenus."
+"                            olgu see siis ladustatav toode, tarbitav toode või teenus."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_template_action
@@ -5219,16 +5154,13 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
 "Peate määratlema toote kõige jaoks, mida müüte või ostate,\n"
 "                 olgu see ladustatav toode, tarbekaup või teenus.\n"
 "                 Tootekaart sisaldab teavet müügiprotsessi lihtsustamiseks:\n"
-"                 hind, hinnapakkumise märkused, raamatupidamisandmed, "
-"tanreviisid jne."
+"                 hind, hinnapakkumise märkused, raamatupidamisandmed, tanreviisid jne."
 
 #. module: product
 #. odoo-javascript

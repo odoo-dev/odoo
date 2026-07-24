@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 09:22+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/"
-"stock_picking_batch/da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,7 +33,9 @@ msgstr "%s blev fjernet fra partiet, ingen mængde behandlet"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -115,24 +116,20 @@ msgstr "<strong>→</strong>"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"En overførsel tilføjer ikke automatisk partier, hvis det vil medføre, at "
-"dette antal linjer overskrides.\n"
+"En overførsel tilføjer ikke automatisk partier, hvis det vil medføre, at dette antal linjer overskrides.\n"
 "Angiv '0', hvis der ikke skal være en linjebegrænsning."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"En overførsel føjes ikke automatisk til den bunke, hvis det vil medføre, at "
-"dette antal overførsler overskrides.\n"
+"En overførsel føjes ikke automatisk til den bunke, hvis det vil medføre, at dette antal overførsler overskrides.\n"
 "Sæt værdien til '0', hvis der ikke skal være nogen overførselsgrænse."
 
 #. module: stock_picking_batch
@@ -349,14 +346,16 @@ msgstr "Batchoverførsler"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, fuzzy
 msgid "Batch transfers cannot be merged with wave transfers and vice versa."
-msgstr "Batchoverførsler kan ikke slås sammen med bølgeoverførsler og omvendt."
+msgstr ""
+"Batchoverførsler kan ikke slås sammen med bølgeoverførsler og omvendt."
 
 #. module: stock_picking_batch
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, fuzzy
 msgid "Batch/Wave transfers have been merged into the following transfer"
-msgstr "Batch-/bølgeoverførsler er blevet slået sammen til følgende overførsel"
+msgstr ""
+"Batch-/bølgeoverførsler er blevet slået sammen til følgende overførsel"
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -364,7 +363,8 @@ msgstr "Batch-/bølgeoverførsler er blevet slået sammen til følgende overfør
 #, fuzzy
 msgid "Batch/Wave transfers with different operation types cannot be merged."
 msgstr ""
-"Batch-/bølgeoverførsler med forskellige operationstyper kan ikke slås sammen."
+"Batch-/bølgeoverførsler med forskellige operationstyper kan ikke slås "
+"sammen."
 
 #. module: stock_picking_batch
 #. odoo-python
@@ -965,7 +965,8 @@ msgstr "Bedømmelser"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 #, fuzzy
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr "Gruppér flere ordrer i én plukning, og saml dem i pakkezonen."
 
 #. module: stock_picking_batch
@@ -1007,20 +1008,14 @@ msgstr "Planlagt dato"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "Planlagt dato for overførsler til behandling.\n"
-"            - Hvis manuelt angivet vil den planlagte dato for alle "
-"overførsler i partier blive opdateret automatisk til denne dato.\n"
-"            - Hvis ikke manuelt ændret og overførsler er tilføjet/fjernet/"
-"opdateret så vil dette være deres tidligst planlagte dato\n"
-"              men denne planlagte dato vil ikke bilve angivet for alle "
-"overførsler i partiet."
+"            - Hvis manuelt angivet vil den planlagte dato for alle overførsler i partier blive opdateret automatisk til denne dato.\n"
+"            - Hvis ikke manuelt ændret og overførsler er tilføjet/fjernet/opdateret så vil dette være deres tidligst planlagte dato\n"
+"              men denne planlagte dato vil ikke bilve angivet for alle overførsler i partiet."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1084,8 +1079,8 @@ msgstr ""
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 #, fuzzy
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr ""
 "Opdel overførsler efter produktkategori, og gruppér derefter overførsler, "
 "der har samme produktkategori."
@@ -1179,13 +1174,11 @@ msgstr "Følgende batchoverførsel er blevet opdateret"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, fuzzy
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
-"Følgende overførsler kan ikke føjes til batchoverførsel %(batch)s. "
-"Kontrollér venligst deres status og operationstyper.\n"
+"Følgende overførsler kan ikke føjes til batchoverførsel %(batch)s. Kontrollér venligst deres status og operationstyper.\n"
 "\n"
 "Uforeneligheder: %(incompatible_transfers)s"
 
@@ -1378,8 +1371,8 @@ msgstr "Det er ikke muligt at slette afsluttede batchoverførsler."
 #, fuzzy
 msgid "You cannot merge done or cancelled batch/wave transfers."
 msgstr ""
-"Det er ikke muligt at slå afsluttede eller annullerede batch-/"
-"bølgeoverførsler sammen."
+"Det er ikke muligt at slå afsluttede eller annullerede "
+"batch-/bølgeoverførsler sammen."
 
 #. module: stock_picking_batch
 #. odoo-python

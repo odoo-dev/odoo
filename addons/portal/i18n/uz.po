@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 19:05+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/portal/"
-"uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/portal/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,95 +64,96 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
-"Account"
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-icon=\"badge\"/>"
+" My Account"
 msgstr ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> Mening "
-"hisobim"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-icon=\"badge\"/>"
+" Mening hisobim"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Logout"
+msgid ""
+"<i class=\"oi oi-fw small text-primary-emphasis\" data-icon=\"logout\"/> "
+"Logout"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
+msgid ""
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-"
+"icon=\"grid_view\"/> Apps"
 msgstr ""
-"<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Ilovalar"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-"
+"icon=\"grid_view\"/> Ilovalar"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-pencil\" title=\"Edit\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\" title=\"Edit\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
 #, fuzzy
-msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr "<i class=\"fa fa-pencil\"/> Ma'lumotlarni tahrirlash"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit information"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/> Ma'lumotlarni tahrirlash"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-trash-o\" title=\"Clear\"/>"
+msgid "<i class=\"oi\" data-icon=\"delete\" title=\"Clear\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
 #, fuzzy
-msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
-msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>Bekor qilish"
+msgid "<i class=\"fw-light oi me-2\" data-icon=\"keyboard_arrow_left\"/>Discard"
+msgstr "<i class=\"fw-light me-2 oi\" data-icon=\"keyboard_arrow_left\"/>Bekor qilish"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
 #, fuzzy
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Tahrirlash rejimiga qaytish"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Tahrirlash rejimiga qaytish"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Oldingi\" "
-"title=\"Oldingi\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Oldingi\" title=\"Oldingi\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Keyingi\" "
-"title=\"Keyingi\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Keyingi\" title=\"Keyingi\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
 #, fuzzy
-msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
-msgstr "<i class=\"oi oi-plus me-2\"/>Manzil qo‘shish"
+msgid "<i class=\"oi me-2\" data-icon=\"add\"/>Add Address"
+msgstr "<i class=\"me-2 oi\" data-icon=\"add\"/>Manzil qo‘shish"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 #, fuzzy
-msgid ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"Hujjatlar\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid "<i title=\"Documentation\" class=\"oi oi-fw o_button_icon\" data-icon=\"info\"/>"
+msgstr "<i title=\"Hujjatlar\" class=\"o_button_icon oi-fw oi\" data-icon=\"info\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 #, fuzzy
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            Changing VAT number is not allowed once "
-"document(s) have\n"
-"                            been issued for your account. Please contact us "
-"directly for this\n"
+"                            Changing VAT number is not allowed once document(s) have\n"
+"                            been issued for your account. Please contact us directly for this\n"
 "                            operation.\n"
 "                        </small>"
 msgstr ""
@@ -166,8 +166,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            The VAT number can only be updated on the "
-"company account.\n"
+"                            The VAT number can only be updated on the company account.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">QQS raqamini faqat kompaniya hisobida "
@@ -179,8 +178,7 @@ msgstr ""
 msgid ""
 "<small class=\"form-text text-muted\">\n"
 "                    Changing country is not allowed once document(s) have\n"
-"                    been issued for your account. Please contact us directly "
-"for this\n"
+"                    been issued for your account. Please contact us directly for this\n"
 "                    operation.\n"
 "                </small>"
 msgstr ""
@@ -201,9 +199,7 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
 #, fuzzy
-msgid ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
 "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Keyingi\" "
 "title=\"Keyingi\"/>"
@@ -403,9 +399,9 @@ msgid ""
 "Changing your country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"Hisobingizga hujjat(lar) chiqarilgandan so‘ng mamlakatingizni o‘zgartirishga "
-"ruxsat berilmaydi. Iltimos, bu amal uchun bizga to‘g‘ridan-to‘g‘ri murojaat "
-"qiling."
+"Hisobingizga hujjat(lar) chiqarilgandan so‘ng mamlakatingizni o‘zgartirishga"
+" ruxsat berilmaydi. Iltimos, bu amal uchun bizga to‘g‘ridan-to‘g‘ri murojaat"
+" qiling."
 
 #. module: portal
 #. odoo-javascript
@@ -638,13 +634,12 @@ msgstr "Dasturchi API kalitlari"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"oi text-danger\" data-icon=\"warning\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "Hisobingizni o‘chirib, keyingi kirishlarni oldini oling.<br/> <b> <i "
-"class=\"fa fa-exclamation-triangle text-danger\"/> Bu amalni qaytarib "
+"class=\"text-danger oi\" data-icon=\"warning\"/> Bu amalni qaytarib "
 "bo‘lmaydi. </b>"
 
 #. module: portal
@@ -963,11 +958,11 @@ msgstr "Xabar"
 #: code:addons/portal/models/mail_thread.py:0
 #, fuzzy
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have %"
-"(field_name)s field."
+"Model %(model_name)s does not support token signature, as it does not have "
+"%(field_name)s field."
 msgstr ""
-"%(model_name)s modeli token imzosini qo‘llab-quvvatlamaydi, chunki unda %"
-"(field_name)s maydoni mavjud emas."
+"%(model_name)s modeli token imzosini qo‘llab-quvvatlamaydi, chunki unda "
+"%(field_name)s maydoni mavjud emas."
 
 #. module: portal
 #. odoo-python
@@ -1139,7 +1134,8 @@ msgstr "Oldingi"
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 #, fuzzy
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted again"
+"Put my email and phone in a block list to make sure I'm never contacted "
+"again"
 msgstr ""
 "Meni qayta hech qachon bog‘lanmaslik uchun elektron pochtam va telefonimni "
 "bloklash ro‘yxatiga kiriting"
@@ -1246,15 +1242,13 @@ msgstr "Xavfsizlik belgisi"
 #, fuzzy
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be "
-"valid and unique.\n"
-"                        If necessary, you can fix any contact's email "
-"address directly in the list."
+"                        The email address of each selected contact must be valid and unique.\n"
+"                        If necessary, you can fix any contact's email address directly in the list."
 msgstr ""
 "Quyidagi ro‘yxatda qaysi kontaktlar portalga tegishli bo‘lishini tanlang. "
 "Har bir tanlangan kontaktning elektron pochta manzili to‘g‘ri va noyob "
-"bo‘lishi shart. Zarur bo‘lsa, istalgan kontaktning elektron pochta manzilini "
-"ro‘yxatda to‘g‘ridan-to‘g‘ri tuzatishingiz mumkin."
+"bo‘lishi shart. Zarur bo‘lsa, istalgan kontaktning elektron pochta manzilini"
+" ro‘yxatda to‘g‘ridan-to‘g‘ri tuzatishingiz mumkin."
 
 #. module: portal
 #. odoo-javascript
@@ -1411,8 +1405,8 @@ msgstr "\"%s\" kontaktning elektron pochta manzili yaroqsiz."
 #, fuzzy
 msgid "The contact \"%s\" has the same email as an existing user"
 msgstr ""
-"\"%s\" kontakti mavjud foydalanuvchi bilan bir xil elektron pochta manziliga "
-"ega"
+"\"%s\" kontakti mavjud foydalanuvchi bilan bir xil elektron pochta manziliga"
+" ega"
 
 #. module: portal
 #. odoo-javascript
@@ -1453,8 +1447,7 @@ msgstr "\"%s\" hamkori allaqachon portalga kirish huquqiga ega."
 #: code:addons/portal/wizard/portal_wizard.py:0
 #, fuzzy
 msgid "The partner \"%s\" has no portal access or is internal."
-msgstr ""
-"\"%s\" hamkorida portalga kirish huquqi yo‘q yoki u ichki foydalanuvchi."
+msgstr "\"%s\" hamkorida portalga kirish huquqi yo‘q yoki u ichki foydalanuvchi."
 
 #. module: portal
 #. odoo-python
@@ -1493,7 +1486,8 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 #, fuzzy
-msgid "This text is included at the end of the email sent to new portal users."
+msgid ""
+"This text is included at the end of the email sent to new portal users."
 msgstr ""
 "Ushbu matn portalning yangi foydalanuvchilariga yuborilgan xat oxirida "
 "keltiriladi."

@@ -17,14 +17,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-18 16:52+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-master/"
-"website_event/fr/>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-master/website_event/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event
@@ -88,88 +86,92 @@ msgid ""
 "<em>Write here a quote from one of your attendees. It gives confidence in "
 "your events.</em>"
 msgstr ""
-"<em>Écrivez ici la citation d'un de vos participants. Cela donne du crédit à "
-"vos événements.</em>"
+"<em>Écrivez ici la citation d'un de vos participants. Cela donne du crédit à"
+" vos événements.</em>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-msgid "<i class=\"fa fa-ban me-2\"/>Sold Out"
-msgstr "<i class=\"fa fa-ban me-2\"/>Complet"
+msgid "<i class=\"oi me-2\" data-icon=\"block\"/>Sold Out"
+msgstr "<i class=\"me-2 oi\" data-icon=\"block\"/>Complet"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid "<i class=\"fa fa-calendar me-2\" role=\"presentation\"/>August 23, 2025"
-msgstr "<i class=\"fa fa-calendar me-2\" role=\"presentation\"/>23 août 2025"
+msgid ""
+"<i class=\"oi oi-filled me-2\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>August 23, 2025"
+msgstr ""
+"<i class=\"me-2 oi-filled oi\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>23 août 2025"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<i class=\"fa fa-caret-left me-2\"/><small>Previous</small>"
-msgstr "<i class=\"fa fa-caret-left me-2\"/><small>Précédent</small>"
+msgid "<i class=\"oi me-2\" data-icon=\"arrow_left\"/><small>Previous</small>"
+msgstr "<i class=\"me-2 oi\" data-icon=\"arrow_left\"/><small>Précédent</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\" role=\"img\"/>Inscrit·e"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\" role=\"img\"/>Inscrit·e"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-check me-2\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\"/>Inscrit·e"
+msgid "<i class=\"oi me-2\" data-icon=\"check\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\"/>Inscrit·e"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid "<i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>8:15 PM"
-msgstr "<i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>20 h 15"
+msgid "<i class=\"oi me-2\" data-icon=\"schedule\" role=\"presentation\"/>8:15 PM"
+msgstr "<i class=\"me-2 oi\" data-icon=\"schedule\" role=\"presentation\"/>20 h 15"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_configure_tickets_button
 msgid ""
-"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
-"title=\"Configure event tickets\"/><em>Configure Tickets</em>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"settings\" role=\"img\" aria-"
+"label=\"Configure\" title=\"Configure event tickets\"/><em>Configure "
+"Tickets</em>"
 msgstr ""
-"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configurer\" "
-"title=\"Configurer les tickets de l'événement\"/><em>Configurer les tickets</"
-"em>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"settings\" role=\"img\" aria-"
+"label=\"Configurer\" title=\"Configurer les tickets de "
+"l'événement\"/><em>Configurer les tickets</em>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Site Web\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Site Web\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-map-marker me-2 text-muted\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker me-2 text-muted\" title=\"Lieu\"/>"
+msgid "<i class=\"oi me-2 text-muted\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"me-2 text-muted oi\" data-icon=\"location_on\" title=\"Lieu\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
 msgid ""
-"<i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>\n"
-"                                    <span> Los Angeles, CA, United States</"
-"span>"
+"<i class=\"oi me-2\" data-icon=\"location_on\" role=\"presentation\"/>\n"
+"                                    <span> Los Angeles, CA, United States</span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
 msgid ""
-"<i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Los Angeles, "
-"CA, United States"
+"<i class=\"oi me-2\" data-icon=\"location_on\" role=\"presentation\"/>Los "
+"Los Angeles, CA, United States"
 msgstr ""
-"<i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Angeles, "
-"Californie, États-Unis"
+"<i class=\"me-2 oi\" data-icon=\"location_on\" role=\"presentation\"/>Los "
+"Angeles, Californie, États-Unis"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/> Online event"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Lieu\"/> Événement en ligne"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/> Online event"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Lieu\"/> Événement en ligne"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.navbar
 msgid ""
-"<i class=\"oi oi-chevron-left\"/>\n"
+"<i class=\"oi\" data-icon=\"chevron_backward\"/>\n"
 "                <span>All Events</span>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\"/>\n"
+"<i class=\"oi\" data-icon=\"chevron_backward\"/>\n"
 "                <span>Tous les événements</span>"
 
 #. module: website_event
@@ -189,8 +191,8 @@ msgstr "<small class=\"text-muted\">Ajouter au calendrier :</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<small>Next</small><i class=\"fa fa-caret-right ms-2\"/>"
-msgstr "<small>Suivant</small><i class=\"fa fa-caret-right ms-2\"/>"
+msgid "<small>Next</small><i class=\"oi ms-2\" data-icon=\"arrow_right\"/>"
+msgstr "<small>Suivant</small><i class=\"ms-2 oi\" data-icon=\"arrow_right\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
@@ -200,10 +202,10 @@ msgstr "<span class=\"fa fa-plus me-1\"/> Créer un événement"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_entry_preview_data
 msgid ""
-"<span class=\"fs-5\"><i class=\"fa fa-map-marker me-2\" "
+"<span class=\"fs-5\"><i class=\"oi me-2\" data-icon=\"location_on\" "
 "role=\"presentation\"/>Los Angeles, CA, United States</span>"
 msgstr ""
-"<span class=\"fs-5\"><i class=\"fa fa-map-marker me-2\" "
+"<span class=\"fs-5\"><i class=\"me-2 oi\" data-icon=\"location_on\" "
 "role=\"presentation\"/>Los Angeles, Californie, États-Unis</span>"
 
 #. module: website_event
@@ -218,14 +220,11 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_badge_preview_data
 msgid ""
-"<span class=\"o_cc o_cc1 d-inline-flex justify-content-center flex-wrap "
-"gap-3 my-3 border py-2 px-3 rounded-pill\">\n"
+"<span class=\"o_cc o_cc1 d-inline-flex justify-content-center flex-wrap gap-3 my-3 border py-2 px-3 rounded-pill\">\n"
 "                    <i class=\"fa fa-calendar\" role=\"presentation\"/>\n"
 "                    <strong>Harmony Under the Stars</strong>\n"
-"                    <span class=\"text-muted\">August 23, 2025 - 8:15 PM</"
-"span>\n"
-"                    <span class=\"text-primary\">Register <i class=\"fa fa-"
-"long-arrow-right\" role=\"presentation\"/></span>\n"
+"                    <span class=\"text-muted\">August 23, 2025 - 8:15 PM</span>\n"
+"                    <span class=\"text-primary\">Register <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/></span>\n"
 "                </span>"
 msgstr ""
 
@@ -269,44 +268,45 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
 msgid ""
 "<span class=\"text-danger\">\n"
-"                                        <i class=\"fa fa-ban me-2\"/>Sold "
-"Out\n"
+"                                        <i class=\"oi me-2\" data-icon=\"block\"/>Sold Out\n"
 "                                    </span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_badge
 msgid ""
-"<span class=\"text-primary text-nowrap\">Register Now <i class=\"fa fa-long-"
-"arrow-right\"/></span>"
+"<span class=\"text-primary text-nowrap\">Register Now <i class=\"oi\" data-"
+"icon=\"east\"/></span>"
 msgstr ""
-"<span class=\"text-primary text-nowrap\">S'inscrire<i class=\"fa fa-long-"
-"arrow-right\"/></span>"
+"<span class=\"text-primary text-nowrap\">S'inscrire<i class=\"oi\" data-"
+"icon=\"east\"/></span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
 msgid ""
-"<span><i class=\"fa fa-calendar me-2\" role=\"presentation\"/>August 23, "
-"2025 at 8:15 PM</span>"
+"<span><i class=\"oi oi-filled me-2\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>August 23, 2025 at 8:15 PM</span>"
 msgstr ""
-"<span><i class=\"fa fa-calendar me-2\" role=\"presentation\"/>23 août 2025 à "
-"20 h 15</span>"
+"<span><i class=\"me-2 oi-filled oi\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>23 août 2025 à 20 h 15</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_offset_preview_data
 msgid ""
-"<span><i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>8:15 PM</span>"
+"<span><i class=\"oi me-2\" data-icon=\"schedule\" "
+"role=\"presentation\"/>8:15 PM</span>"
 msgstr ""
-"<span><i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>20 h 15</span>"
+"<span><i class=\"me-2 oi\" data-icon=\"schedule\" role=\"presentation\"/>20 "
+"h 15</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_offset_preview_data
 msgid ""
-"<span><i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Angeles, "
-"CA, United States</span>"
+"<span><i class=\"oi me-2\" data-icon=\"location_on\" "
+"role=\"presentation\"/>Los Angeles, CA, United States</span>"
 msgstr ""
-"<span><i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Angeles, "
-"Californie, États-Unis</span>"
+"<span><i class=\"me-2 oi\" data-icon=\"location_on\" "
+"role=\"presentation\"/>Los Angeles, Californie, États-Unis</span>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_location
@@ -324,7 +324,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "<strong> You ordered more tickets than available seats</strong>"
 msgstr ""
-"<strong>Vous avez commandé plus de tickets que de places disponibles</strong>"
+"<strong>Vous avez commandé plus de tickets que de places "
+"disponibles</strong>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_event_upcoming_snippet_card_preview_data
@@ -702,11 +703,9 @@ msgstr "Dates"
 msgid ""
 "Defines the Visibility of the Event on the Website and searches.\n"
 "\n"
-"            Note that the EventEvent is however always available via its "
-"link."
+"            Note that the EventEvent is however always available via its link."
 msgstr ""
-"Définit la visibilité de l'événement sur le site web et dans les "
-"recherches.\n"
+"Définit la visibilité de l'événement sur le site web et dans les recherches.\n"
 "\n"
 "            Notez que l'événement est toujours disponible via son lien."
 
@@ -802,8 +801,8 @@ msgstr "Informations sur l'événement"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Event Info <i class=\"fa fa-chevron-right\"/>"
-msgstr "Infos sur l’événement <i class=\"fa fa-chevron-right\"/>"
+msgid "Event Info <i class=\"oi\" data-icon=\"chevron_right\"/>"
+msgstr "Infos sur l’événement <i class=\"oi\" data-icon=\"chevron_right\"/>"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__menu_id
@@ -958,7 +957,8 @@ msgstr "Filtres"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.opt_event_share_block
 msgid ""
-"Find out what people see and say about this event, and join the conversation."
+"Find out what people see and say about this event, and join the "
+"conversation."
 msgstr ""
 "Découvrez ce que les gens voient et disent à propos de cet événement et "
 "rejoignez la conversation."
@@ -983,8 +983,8 @@ msgstr "Footer visible"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Get Tickets <i class=\"fa fa-chevron-right\"/>"
-msgstr "Obtenir des tickets <i class=\"fa fa-chevron-right\"/>"
+msgid "Get Tickets <i class=\"oi\" data-icon=\"chevron_right\"/>"
+msgstr "Obtenir des tickets <i class=\"oi\" data-icon=\"chevron_right\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -1150,8 +1150,8 @@ msgstr "Rejoindre en ligne"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_ticket_access
-msgid "Join online <i class=\"ms-1 fa fa-globe\"/>"
-msgstr "Rejoindre en ligne <i class=\"ms-1 fa fa-globe\"/>"
+msgid "Join online <i class=\"oi ms-1\" data-icon=\"public\"/>"
+msgstr "Rejoindre en ligne <i class=\"ms-1 oi\" data-icon=\"public\"/>"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__write_uid
@@ -1441,25 +1441,22 @@ msgstr "S'inscrire"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_aside
-msgid ""
-"Register Now <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
-msgstr "S'inscrire <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
+msgid "Register Now <i class=\"oi\" data-icon=\"east\" role=\"presentation\"/>"
+msgstr "S'inscrire <i class=\"oi\" data-icon=\"east\" role=\"presentation\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_card
-msgid "Register<i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
-msgstr "S’inscrire<i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
+msgid "Register<i class=\"oi ms-2\" data-icon=\"east\" role=\"img\"/>"
+msgstr "S’inscrire<i class=\"ms-2 oi\" data-icon=\"east\" role=\"img\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid ""
-"Register<i class=\"fa fa-long-arrow-right ms-2\" role=\"presentation\"/>"
-msgstr ""
-"S’inscrire<i class=\"fa fa-long-arrow-right ms-2\" role=\"presentation\"/>"
+msgid "Register<i class=\"oi ms-2\" data-icon=\"east\" role=\"presentation\"/>"
+msgstr "S’inscrire<i class=\"ms-2 oi\" data-icon=\"east\" role=\"presentation\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
-msgid "Register<i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
+msgid "Register<i class=\"oi\" data-icon=\"east\" role=\"presentation\"/>"
 msgstr ""
 
 #. module: website_event
@@ -2015,8 +2012,8 @@ msgid ""
 "With the Edit button, you can <b>customize</b> the web page visitors will "
 "see when registering."
 msgstr ""
-"Avec le bouton Modifier, vous pouvez <b>personnaliser</b>la page web que les "
-"visiteurs verront lors de leur inscription."
+"Avec le bouton Modifier, vous pouvez <b>personnaliser</b>la page web que les"
+" visiteurs verront lors de leur inscription."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_aside
@@ -2061,14 +2058,10 @@ msgid "w-100 py-sm-3 mt-sm-2"
 msgstr "w-100 py-sm-3 mt-sm-2"
 
 #~ msgid ""
-#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" "
-#~ "class=\"text-danger\">\n"
-#~ "                                        <i class=\"fa fa-ban me-2\"/>Sold "
-#~ "Out\n"
+#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
+#~ "                                        <i class=\"fa fa-ban me-2\"/>Sold Out\n"
 #~ "                                    </span>"
 #~ msgstr ""
-#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" "
-#~ "class=\"text-danger\">\n"
-#~ "                                        <i class=\"fa fa-ban me-2\"/"
-#~ ">Épuisé\n"
+#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
+#~ "                                        <i class=\"fa fa-ban me-2\"/>Épuisé\n"
 #~ "                                    </span>"

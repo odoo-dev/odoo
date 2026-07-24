@@ -13,8 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 00:16+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/hr_expense/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/hr_expense/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,16 +24,12 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
-" - Cuando ya exista una factura de proveedor, el pago usará la cuenta por "
-"pagar del proveedor para conciliarla con la factura.\n"
-"           - Cuando no exista una factura de proveedor, el pago se "
-"registrará directo en la cuenta de gastos, como siempre.\n"
+" - Cuando ya exista una factura de proveedor, el pago usará la cuenta por pagar del proveedor para conciliarla con la factura.\n"
+"           - Cuando no exista una factura de proveedor, el pago se registrará directo en la cuenta de gastos, como siempre.\n"
 "      "
 
 #. module: hr_expense
@@ -74,7 +69,8 @@ msgstr ""
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr ""
 "%(user)s confirma que este gasto no es un duplicado de un gasto similar."
 
@@ -84,7 +80,8 @@ msgid ""
 "'Expense - %s - %s' % (object.employee_id.name, (object.name).replace('/', "
 "''))"
 msgstr ""
-"'Gasto - %s - %s' % (object.employee_id.name, (object.name).replace('/', ''))"
+"'Gasto - %s - %s' % (object.employee_id.name, (object.name).replace('/', "
+"''))"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_submitted_expenses
@@ -102,12 +99,13 @@ msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 msgid "<b>Wasting time recording your receipts?</b> Let’s try a better way."
 msgstr ""
-"<b>¿Pierde mucho tiempo registrando sus recibos?</b> Hagámoslo de otra forma."
+"<b>¿Pierde mucho tiempo registrando sus recibos?</b> Hagámoslo de otra "
+"forma."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
-msgstr "<i class=\"oi oi-arrow-right\"/> Configura el dominio de tu alias"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Configura el dominio de tu alias"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -281,15 +279,11 @@ msgstr "Ocurrió un error durante la carga"
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
-"Necesitas una cuenta de gastos para los gastos pagados por empleados y para "
-"los gastos pagados por la empresa sin una factura asociada.\n"
-"Para los gastos pagados por la empresa con una factura asociada, la cuenta "
-"debe ser la cuenta por pagar de la factura."
+"Necesitas una cuenta de gastos para los gastos pagados por empleados y para los gastos pagados por la empresa sin una factura asociada.\n"
+"Para los gastos pagados por la empresa con una factura asociada, la cuenta debe ser la cuenta por pagar de la factura."
 
 #. module: hr_expense
 #. odoo-javascript
@@ -636,8 +630,8 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
-"Deje de guardar los recibos de sus gastos, solo tome una foto de su recibo y "
-"Odoo lo digitalizará. El OCR y la inteligencia artificial completarán los "
+"Deje de guardar los recibos de sus gastos, solo tome una foto de su recibo y"
+" Odoo lo digitalizará. El OCR y la inteligencia artificial completarán los "
 "datos de forma automática."
 
 #. module: hr_expense
@@ -1525,13 +1519,11 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
-"Odoo buscó en el gasto, el producto, la empresa y el diario, pero no "
-"encontró información.\n"
+"Odoo buscó en el gasto, el producto, la empresa y el diario, pero no encontró información.\n"
 "Encontraremos la cuenta luego de que configure una cuenta de gastos.\n"
 "%(expense)s %(expense_name)s.\n"
 
@@ -1940,13 +1932,10 @@ msgstr "Selecciona un producto para continuar."
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
-"Seleccione al usuario responsable de aprobar los \"gastos\" de este "
-"empleado.\n"
-"Si se encuentra vacío, la aprobación la realiza el administrador o el "
-"aprobador (se determina en los ajustes/usuarios)."
+"Seleccione al usuario responsable de aprobar los \"gastos\" de este empleado.\n"
+"Si se encuentra vacío, la aprobación la realiza el administrador o el aprobador (se determina en los ajustes/usuarios)."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2135,14 +2124,15 @@ msgstr "Gracias,"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "The account %(name)s (%(code)s) is archived. Activate it to continue"
-msgstr "La cuenta %(name)s (%(code)s) está archivada, actívala para continuar."
+msgstr ""
+"La cuenta %(name)s (%(code)s) está archivada, actívala para continuar."
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 "No fue posible agregar el archivo adjunto (%(attachment_name)s) al reporte "
 "debido al error: \"%(error)s\""
@@ -2150,7 +2140,8 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr ""
 "El diario predeterminado de la empresa que se utiliza cuando se crea un "
 "gasto de empleado."
@@ -2184,20 +2175,18 @@ msgid ""
 "than some expenses of this report. Please verify this report does not "
 "contain duplicates."
 msgstr ""
-"Los siguientes gastos aprobados tienen un empleado, un importe y un producto "
-"similares a los de algunos gastos de este reporte. Verifica que este reporte "
-"no contenga duplicados."
+"Los siguientes gastos aprobados tienen un empleado, un importe y un producto"
+" similares a los de algunos gastos de este reporte. Verifica que este "
+"reporte no contenga duplicados."
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
-"El siguiente método de pago de gastos lleva a varias cuentas por pagar y eso "
-"es incompatible:\n"
+"El siguiente método de pago de gastos lleva a varias cuentas por pagar y eso es incompatible:\n"
 "%(expenses)s"
 
 #. module: hr_expense
@@ -2225,12 +2214,10 @@ msgstr "La suma posterior a la división debe ser la misma."
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
-"El proveedor es obligatorio para los gastos que usan la transferencia de "
-"crédito SEPA como método de pago.\n"
+"El proveedor es obligatorio para los gastos que usan la transferencia de crédito SEPA como método de pago.\n"
 "Configura un proveedor en los siguientes gastos: %s"
 
 #. module: hr_expense
@@ -2351,8 +2338,7 @@ msgstr "Tipo de la actividad de excepción registrada."
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 "No puedes editar este gasto.\n"
 "\n"
@@ -2432,22 +2418,22 @@ msgstr "En espera de reembolso"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
-"Cuando el costo de un producto de gasto no es 0, el "
-"usuario                                             que lo utiliza no podrá "
-"cambiar el importe del gasto,                                             "
-"solo la cantidad. Utiliza un costo distinto a 0 para los productos de gastos "
+"Cuando el costo de un producto de gasto no es 0, el usuario"
+"                                             que lo utiliza no podrá cambiar"
+" el importe del gasto,                                             solo la "
+"cantidad. Utiliza un costo distinto a 0 para los productos de gastos "
 "financiadas por                                             la empresa a "
-"costo fijo, como los subsidios por kilometraje, "
-"alojamiento                                             o comida."
+"costo fijo, como los subsidios por kilometraje, alojamiento"
+"                                             o comida."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_has_tax
@@ -2673,7 +2659,8 @@ msgstr "por"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "use OCR to fill data from a picture of the bill"
-msgstr "use el OCR para completar los datos a partir de una foto de la factura"
+msgstr ""
+"use el OCR para completar los datos a partir de una foto de la factura"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form

@@ -16,20 +16,18 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-21 17:54+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/fleet/"
-"ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/fleet/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"الموقع \"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"الموقع \"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -66,8 +64,8 @@ msgid ""
 "A trailer hitch is a device attached to a vehicle's chassis for towing "
 "purposes,             such as pulling trailers, boats, or other vehicles."
 msgstr ""
-"وصلة المقطورة عبارة عن جهاز متصل بهيكل السيارة يُستخدم في القَطر،             "
-"مثل سحب المقطورات أو القوارب أو المركبات الأخرى."
+"وصلة المقطورة عبارة عن جهاز متصل بهيكل السيارة يُستخدم في القَطر،"
+"             مثل سحب المقطورات أو القوارب أو المركبات الأخرى."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -478,8 +476,8 @@ msgstr "الفئات"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr "ستساعدك الفئات على إدارة أسطولك بكفاءة أعلى وتنظيم مركباتك."
 
 #. module: fleet
@@ -525,7 +523,8 @@ msgstr "تحديد ما إذا كان العقد لا يزال صالحًا أم
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr "تحديد ما إذا كانت الخدمة تشير لعقود أم لخدمات المركبة أم لكليهما"
 
 #. module: fleet
@@ -845,8 +844,8 @@ msgstr "تاريخ بداية صلاحية العقد"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
 "تاريخ انتهاء صلاحية العقد (افتراضيًا، يكون بعد عام واحد من تاريخ بدايته)"
 
@@ -999,8 +998,8 @@ msgid ""
 "Emission Standard specifies the regulatory test procedure             or "
 "guideline under which a vehicle's emissions are measured."
 msgstr ""
-"يحدد معيار الانبعاثات إجراء الاختبار التنظيمي             أو المبدأ التوجيهي "
-"الذي يتم بموجبه قياس انبعاثات السيارة."
+"يحدد معيار الانبعاثات إجراء الاختبار التنظيمي             أو المبدأ التوجيهي"
+" الذي يتم بموجبه قياس انبعاثات السيارة."
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__co2_standard
@@ -1008,8 +1007,8 @@ msgid ""
 "Emission Standard specifies the regulatory test procedure or             "
 "guideline under which a vehicle's emissions are measured."
 msgstr ""
-"يحدد معيار الانبعاثات إجراء الاختبار التنظيمي أو             المبدأ التوجيهي "
-"الذي يتم بموجبه قياس انبعاثات السيارة."
+"يحدد معيار الانبعاثات إجراء الاختبار التنظيمي أو             المبدأ التوجيهي"
+" الذي يتم بموجبه قياس انبعاثات السيارة."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_16
@@ -2364,10 +2363,11 @@ msgstr "استبدال شمعة الاحتراق"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
-"يحدد العدد الإجمالي للأبواب، بما في ذلك أبواب الشاحنة وأبواب الفتحات إن وجدت."
+"يحدد العدد الإجمالي للأبواب، بما في ذلك أبواب الشاحنة وأبواب الفتحات إن "
+"وجدت."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__state
@@ -2567,8 +2567,7 @@ msgstr "المساعدة في جولة"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "تتبع كافة الخدمات التي تتم على مركبتك.\n"
 "            هناك أنواع كثيرة للخدمات: إصلاح عرضي، صيانة دورية، إلخ."
@@ -2947,5 +2946,5 @@ msgstr ""
 #~ "A trailer hitch is a device attached to a vehicle's chassis for towing "
 #~ "purposes,            such as pulling trailers, boats, or other vehicles."
 #~ msgstr ""
-#~ "وصلة المقطورة عبارة عن جهاز متصل بهيكل السيارة يُستخدم في "
-#~ "القَطر،            مثل سحب المقطورات أو القوارب أو المركبات الأخرى."
+#~ "وصلة المقطورة عبارة عن جهاز متصل بهيكل السيارة يُستخدم في القَطر،"
+#~ "            مثل سحب المقطورات أو القوارب أو المركبات الأخرى."

@@ -20,8 +20,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 01:02+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/web/"
-"ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/web/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -200,23 +199,22 @@ msgstr ": not"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login_oauth
 msgid "<em class=\"d-block my-3 small text-center text-muted\">- or -</em>"
-msgstr ""
-"<em class=\"d-block my-3 small text-center text-muted\">- または -</em>"
+msgstr "<em class=\"d-block my-3 small text-center text-muted\">- または -</em>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (html)"
-msgstr "<i class=\"fa fa-download\"/> (html)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (html)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (html)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (json)"
-msgstr "<i class=\"fa fa-download\"/> (json)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (json)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (json)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
-msgid "<i class=\"fa fa-repeat\"/> Reset"
-msgstr "<i class=\"fa fa-repeat\"/> 再設定"
+msgid "<i class=\"oi\" data-icon=\"redo\"/> Reset"
+msgstr "<i class=\"oi\" data-icon=\"redo\"/> 再設定"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -226,38 +224,38 @@ msgstr "<span class=\"text-nowrap\">3,613.50ドル</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">1,400.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">1,400.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">1,400.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">1,400.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">240.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">240.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -287,15 +285,11 @@ msgstr "<span class=\"text-nowrap\">税 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
-"Barbara\n"
-"                                Rd<br/>Pleasant Hill CA 94523<br/>United "
-"States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
+"                                Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
-"Barbara\n"
-"                                Rd<br/>Pleasant Hill CA 94523<br/>United "
-"States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
+"                                Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -306,14 +300,13 @@ msgstr "<span id=\"line_tax_ids\">15%</span>"
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all samples."
-"<br/>It can lead to partially invalid result in case of concurrent profiles."
-"<br/>Use with caution </span>"
+"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all "
+"samples.<br/>It can lead to partially invalid result in case of concurrent "
+"profiles.<br/>Use with caution </span>"
 msgstr ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>警告:</b> テンポラルモードでは、すべてのサンプルが"
-"統合されます。<br/>同時実行プロファイルの場合、結果が一部無効になる可能性があ"
-"ります。<br/>注意して使用してください。</span>"
+"style=\"display:none\"><b>警告:</b> "
+"テンポラルモードでは、すべてのサンプルが統合されます。<br/>同時実行プロファイルの場合、結果が一部無効になる可能性があります。<br/>注意して使用してください。</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -325,14 +318,12 @@ msgstr "<span itemprop=\"name\">アクメ株式会社</span>"
 msgid ""
 "<span>\n"
 "                                        Chair floor protection<br/>\n"
-"                                        Office chairs can harm your floor: "
-"protect it\n"
+"                                        Office chairs can harm your floor: protect it\n"
 "                                    </span>"
 msgstr ""
 "<span>\n"
 "                                        チェア用フロア保護マット<br/>\n"
-"                                        オフィスチェアは床を傷める可能性があ"
-"ります：床を保護しましょう\n"
+"                                        オフィスチェアは床を傷める可能性があります：床を保護しましょう\n"
 "                                    </span>"
 
 #. module: web
@@ -340,8 +331,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_7777] Office Chair<br/>\n"
-"                                        Comfortable yellow chair for daily "
-"work\n"
+"                                        Comfortable yellow chair for daily work\n"
 "                                    </span>"
 msgstr ""
 "<span>\n"
@@ -354,14 +344,11 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_8999] Three-Seat Sofa<br/>\n"
-"                                        Three Seater Sofa with Lounger in "
-"Steel Grey Colour\n"
+"                                        Three Seater Sofa with Lounger in Steel Grey Colour\n"
 "                                    </span>"
 msgstr ""
 "<span>\n"
-"                                        [FURN_8999] 3人掛けソファ<br/"
-">                                        スチールグレーカラーのラウンジ付き3"
-"人掛けソファ\n"
+"                                        [FURN_8999] 3人掛けソファ<br/>                                        スチールグレーカラーのラウンジ付き3人掛けソファ\n"
 "                                   </span>"
 
 #. module: web
@@ -422,24 +409,20 @@ msgstr "<span>単価</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                    Four person modern office workstation</"
-"span>"
+"                                    Four person modern office workstation</span>"
 msgstr ""
 "<span>[FURN_8220] 4人用デスク<br/>\n"
-"                                    4人用のモダンなオフィスワークステーション"
-"</span>"
+"                                    4人用のモダンなオフィスワークステーション</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">\n"
-"                                                    $ <span "
-"class=\"oe_currency_value\">27,703.50</span>\n"
+"                                                    $ <span class=\"oe_currency_value\">27,703.50</span>\n"
 "                                                </strong>"
 msgstr ""
 "<strong class=\"text-nowrap\">\n"
-"                                                    $ <span "
-"class=\"oe_currency_value\">27,703.50</span>\n"
+"                                                    $ <span class=\"oe_currency_value\">27,703.50</span>\n"
 "                                                </strong>"
 
 #. module: web
@@ -535,9 +518,7 @@ msgid ""
 "settings to allow popup windows for this page. You can also copy the link "
 "and paste it in a new tab."
 msgstr ""
-"ポップアップウィンドウがブロックされました。このページでポップアップを許可す"
-"るよう、ブラウザの設定を変更する必要があるかもしれません。リンクをコピーして"
-"新しいタブに貼り付けることもできます。"
+"ポップアップウィンドウがブロックされました。このページでポップアップを許可するよう、ブラウザの設定を変更する必要があるかもしれません。リンクをコピーして新しいタブに貼り付けることもできます。"
 
 #. module: web
 #. odoo-javascript
@@ -902,8 +883,7 @@ msgstr "アメリカ"
 msgid ""
 "Among the %(total)s selected records, %(valid_count)s are valid for this "
 "update."
-msgstr ""
-"選択された%(total)sレコードのうち、%(valid_count)s 件がこの更新に有効です。"
+msgstr "選択された%(total)sレコードのうち、%(valid_count)s 件がこの更新に有効です。"
 
 #. module: web
 #. odoo-javascript
@@ -1226,11 +1206,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is base64-"
-"encoded. That does not seem to be the case for %s."
-msgstr ""
-"バイナリ項目はbase64でエンコードされていない限りExcelにエクスポートできませ"
-"ん。%sはbase64ではないようです。"
+"Binary fields can not be exported to Excel unless their content is "
+"base64-encoded. That does not seem to be the case for %s."
+msgstr "バイナリ項目はbase64でエンコードされていない限りExcelにエクスポートできません。%sはbase64ではないようです。"
 
 #. module: web
 #. odoo-javascript
@@ -1263,9 +1241,7 @@ msgstr "ブーリアンアイコン"
 msgid ""
 "Boolean field from the model used in the relation, which indicates whether "
 "the state is folded or not."
-msgstr ""
-"リレーションで使用されるモデルのブーリアンフィールドで、ステータスが折りたた"
-"まれているかどうかを示します。"
+msgstr "リレーションで使用されるモデルのブーリアンフィールドで、ステータスが折りたたまれているかどうかを示します。"
 
 #. module: web
 #. odoo-javascript
@@ -1295,14 +1271,12 @@ msgstr "ボタンタイプ:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
-"a valid electronic representation of my hand-written signature/initials for "
-"all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
+" a valid electronic representation of my hand-written signature/initials for"
+" all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
-"承認＆署名をクリックすることにより、私は、選択した署名/イニシャルが、法的拘束"
-"力のある契約を含む文書に使用される場合、すべての目的において、私の手書きの署"
-"名/イニシャルの有効な電子署名となることに同意します。"
+"承認＆署名をクリックすることにより、私は、選択した署名/イニシャルが、法的拘束力のある契約を含む文書に使用される場合、すべての目的において、私の手書きの署名/イニシャルの有効な電子署名となることに同意します。"
 
 #. module: web
 #. odoo-javascript
@@ -1460,9 +1434,7 @@ msgstr "ブラウザの権限を確認して下さい。"
 msgid ""
 "Check your network connection and come back here. Odoo will load as soon as "
 "you're back online."
-msgstr ""
-"ネットワーク接続を確認し、ここに戻ってきて下さい。オンラインに戻るとすぐに"
-"Odooがロードされます。"
+msgstr "ネットワーク接続を確認し、ここに戻ってきて下さい。オンラインに戻るとすぐにOdooがロードされます。"
 
 #. module: web
 #. odoo-javascript
@@ -1501,8 +1473,7 @@ msgstr "ユーザを選択"
 msgid ""
 "Choose which maximal precision (days, months, ...) you want in the datetime "
 "picker."
-msgstr ""
-"日付時刻選択ツールで、どの最大精度(日、月、...)を使用するかを選択します。"
+msgstr "日付時刻選択ツールで、どの最大精度(日、月、...)を使用するかを選択します。"
 
 #. module: web
 #. odoo-javascript
@@ -1510,8 +1481,7 @@ msgstr ""
 msgid ""
 "Choose which minimal precision (days, months, ...) you want in the datetime "
 "picker."
-msgstr ""
-"日付時刻選択ツールで、どの最小精度(日、月、...)を使用するかを選択します。"
+msgstr "日付時刻選択ツールで、どの最小精度(日、月、...)を使用するかを選択します。"
 
 #. module: web
 #. odoo-javascript
@@ -1732,9 +1702,7 @@ msgstr "会社キャッチフレーズ"
 msgid ""
 "Company tagline, which is included in a printed document's header or footer "
 "(depending on the selected layout)."
-msgstr ""
-"会社のキャッチフレーズ。印刷文書のヘッダまたはフッタに含まれます。（選択した"
-"レイアウトによって異なります）"
+msgstr "会社のキャッチフレーズ。印刷文書のヘッダまたはフッタに含まれます。（選択したレイアウトによって異なります）"
 
 #. module: web
 #. odoo-javascript
@@ -1831,9 +1799,7 @@ msgstr "コントロールパネルボタン"
 msgid ""
 "Control the number of minutes in the time selection. E.g. set it to 15 to "
 "work in quarters."
-msgstr ""
-"時間選択で分数をコントロールします。例えば、4分の1単位で作業する場合は15に設"
-"定します。"
+msgstr "時間選択で分数をコントロールします。例えば、4分の1単位で作業する場合は15に設定します。"
 
 #. module: web
 #. odoo-javascript
@@ -1908,9 +1874,7 @@ msgstr "選択されたスプレッドシートを表示できませんでした
 msgid ""
 "Could not set the cover image: incorrect field (\"%s\") is provided in the "
 "view."
-msgstr ""
-"カバー画像は設定できません: 表示に提供されるフィールド (\"%s\")は間違っていま"
-"す。"
+msgstr "カバー画像は設定できません: 表示に提供されるフィールド (\"%s\")は間違っています。"
 
 #. module: web
 #. odoo-javascript
@@ -2265,9 +2229,7 @@ msgstr "デフォルト値："
 msgid ""
 "Defines the behavior when a tag is clicked. 'Edit color' requires a color "
 "field"
-msgstr ""
-"タグがクリックされたときの動作を定義します。「色を編集」にはカラーフィールド"
-"が必要です"
+msgstr "タグがクリックされたときの動作を定義します。「色を編集」にはカラーフィールドが必要です"
 
 #. module: web
 #. odoo-javascript
@@ -2276,9 +2238,7 @@ msgstr ""
 msgid ""
 "Defines the minimum number of characters to perform the search. If not set, "
 "the search is performed on focus."
-msgstr ""
-"検索を実行する最小文字数を定義します。設定しない場合、フォーカスが当たった時"
-"点で検索が実行されます。"
+msgstr "検索を実行する最小文字数を定義します。設定しない場合、フォーカスが当たった時点で検索が実行されます。"
 
 #. module: web
 #. odoo-javascript
@@ -2529,9 +2489,7 @@ msgstr "未来の日付が入力された場合は警告アイコンを表示し
 msgid ""
 "Displays or hides the seconds in the datetime value. Affect only the "
 "readable datetime format."
-msgstr ""
-"日時値における秒の表示/非表示を切り替えます。これは、可読形式での日時表示にの"
-"み影響します。"
+msgstr "日時値における秒の表示/非表示を切り替えます。これは、可読形式での日時表示にのみ影響します。"
 
 #. module: web
 #. odoo-javascript
@@ -2552,8 +2510,7 @@ msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
-"選択されたフィールドの値をテキストのヒントとして表示します。選択されたフィー"
-"ルドが空の場合、代わりに静的なプレースホルダ属性が表示されます。"
+"選択されたフィールドの値をテキストのヒントとして表示します。選択されたフィールドが空の場合、代わりに静的なプレースホルダ属性が表示されます。"
 
 #. module: web
 #. odoo-javascript
@@ -3051,9 +3008,7 @@ msgstr "フィールドプロパティがサポートされていません"
 msgid ""
 "Field that holds the maximum value of the progress bar. If set, will be "
 "displayed next to the progress bar (e.g. 10 / 200)."
-msgstr ""
-"進捗バーの最大値を保持するフィールド。設定されている場合、進捗バーの横に表示"
-"されます(例：10 / 200)"
+msgstr "進捗バーの最大値を保持するフィールド。設定されている場合、進捗バーの横に表示されます(例：10 / 200)"
 
 #. module: web
 #. odoo-javascript
@@ -3155,16 +3110,13 @@ msgstr "各種レポートの底に表示されるフッタテキスト"
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than "
-"16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
-"Excel との互換性について、カラム数が 16384 を超える場合はデータをエクスポート"
-"できません。\n"
+"Excel との互換性について、カラム数が 16384 を超える場合はデータをエクスポートできません。\n"
 "\n"
-"ヒント: 軸を反転させる、さらにフィルタリングする、または集計項目数を減らして"
-"みて下さい。"
+"ヒント: 軸を反転させる、さらにフィルタリングする、または集計項目数を減らしてみて下さい。"
 
 #. module: web
 #. odoo-javascript
@@ -3180,8 +3132,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid ""
-"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
-"to \"3\"."
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated"
+" to \"3\"."
 msgstr "たとえば、値が「1」のときに「+=2」と入力すると、「3」に更新されます。"
 
 #. module: web
@@ -3203,8 +3155,7 @@ msgstr "フォーマット番号"
 msgid ""
 "Format the value according to your language setup - e.g. thousand "
 "separators, rounding, etc."
-msgstr ""
-"言語設定に従って値をフォーマットして下さい。例えば、千区切り、丸めなど。"
+msgstr "言語設定に従って値をフォーマットして下さい。例えば、千区切り、丸めなど。"
 
 #. module: web
 #. odoo-javascript
@@ -3478,8 +3429,7 @@ msgid ""
 "numbers, underscores, hyphens, or dots in the database name, and you'll be "
 "golden."
 msgstr ""
-"データベースの名前に問題があります！データベース名にはアルファベット、数字、"
-"アンダースコア、ハイフン、ドットのみを使用するようにして下さい。"
+"データベースの名前に問題があります！データベース名にはアルファベット、数字、アンダースコア、ハイフン、ドットのみを使用するようにして下さい。"
 
 #. module: web
 #. odoo-javascript
@@ -3547,7 +3497,8 @@ msgstr "アイコン"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid "If True, the url will be used as it is, without any prefix added to it."
+msgid ""
+"If True, the url will be used as it is, without any prefix added to it."
 msgstr "TRUEの場合、URLはそのまま使用され、プレフィクスは追加されません。"
 
 #. module: web
@@ -3556,9 +3507,7 @@ msgstr "TRUEの場合、URLはそのまま使用され、プレフィクスは�
 msgid ""
 "If checked, the checkboxes will be displayed in a column. Otherwise, they "
 "will be inlined."
-msgstr ""
-"チェックを入れると、チェックボックスは縦に並びます。オフの場合は横に並びま"
-"す。"
+msgstr "チェックを入れると、チェックボックスは縦に並びます。オフの場合は横に並びます。"
 
 #. module: web
 #. odoo-javascript
@@ -3568,8 +3517,7 @@ msgid ""
 "If checked, users will not be able to create records based on the text "
 "input; they will still be able to create records via a popup form."
 msgstr ""
-"チェックした場合、ユーザはテキスト入力に基づいてレコードを作成することはでき"
-"ません。ポップアップフォーム経由でレコードを作成することはできます。"
+"チェックした場合、ユーザはテキスト入力に基づいてレコードを作成することはできません。ポップアップフォーム経由でレコードを作成することはできます。"
 
 #. module: web
 #. odoo-javascript
@@ -3579,9 +3527,7 @@ msgid ""
 "If checked, users will not be able to create records based through a popup "
 "form; they will still be able to create records based on the text input."
 msgstr ""
-"チェックした場合、ユーザはポップアップ・フォームに基づいてレコードを作成する"
-"ことができなくなります。テキスト入力に基づいてレコードを作成することはできま"
-"す。"
+"チェックした場合、ユーザはポップアップ・フォームに基づいてレコードを作成することができなくなります。テキスト入力に基づいてレコードを作成することはできます。"
 
 #. module: web
 #. odoo-javascript
@@ -3590,9 +3536,7 @@ msgstr ""
 msgid ""
 "If checked, users won't be able to create records through the autocomplete "
 "dropdown at all."
-msgstr ""
-"チェックした場合、ユーザは自動入力のドロップダウンからレコードを作成すること"
-"ができなくなります。"
+msgstr "チェックした場合、ユーザは自動入力のドロップダウンからレコードを作成することができなくなります。"
 
 #. module: web
 #. odoo-javascript
@@ -3678,9 +3622,7 @@ msgstr "アプリをインストール"
 msgid ""
 "Install the app on your device to access it easily. Here are the steps to "
 "follow:"
-msgstr ""
-"デバイスにアプリをインストールすると、簡単にアクセスできます。以下はその手順"
-"です:"
+msgstr "デバイスにアプリをインストールすると、簡単にアクセスできます。以下はその手順です:"
 
 #. module: web
 #. odoo-javascript
@@ -3826,16 +3768,11 @@ msgstr "イスラム教"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall "
-"time of the\n"
-"            template. Because the global time (in the drop down) does not "
-"take into account the\n"
-"            duration which is not in the rendering (look for the template, "
-"read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes "
-"part of the time to make\n"
-"            the profile as well as some part not logged in the function "
-"generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
+"            template. Because the global time (in the drop down) does not take into account the\n"
+"            duration which is not in the rendering (look for the template, read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes part of the time to make\n"
+"            the profile as well as some part not logged in the function generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3850,11 +3787,9 @@ msgstr "ID%sを持つレコードが見つからないようです。削除さ�
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid ""
-"It will be removed for everyone using the \"%(parentName)s\" %"
-"(parentFieldLabel)s."
-msgstr ""
-"「%(parentName)s」%(parentFieldLabel)s を使用しているすべてのユーザに対して削"
-"除されます。"
+"It will be removed for everyone using the \"%(parentName)s\" "
+"%(parentFieldLabel)s."
+msgstr "「%(parentName)s」%(parentFieldLabel)s を使用しているすべてのユーザに対して削除されます。"
 
 #. module: web
 #. odoo-javascript
@@ -4449,9 +4384,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/ui/block_ui.js:0
 msgid "Maybe you should consider reloading the application by pressing F5..."
-msgstr ""
-"F5キーを押してアプリケーションを再ロードすることを検討した方が良いかもしれま"
-"せん。。"
+msgstr "F5キーを押してアプリケーションを再ロードすることを検討した方が良いかもしれません。。"
 
 #. module: web
 #. odoo-javascript
@@ -5074,9 +5007,7 @@ msgstr "無効な %s"
 msgid ""
 "Not possible to create monetary field because there is no currency on "
 "current model."
-msgstr ""
-"現在のモデルに通貨フィールドが存在しないため、金額フィールドを作成できませ"
-"ん。"
+msgstr "現在のモデルに通貨フィールドが存在しないため、金額フィールドを作成できません。"
 
 #. module: web
 #. odoo-javascript
@@ -5239,8 +5170,7 @@ msgid ""
 "Of the %(selectedRecord)s selected records, only the first %(firstRecords)s "
 "have been archived/unarchived."
 msgstr ""
-"選択された %(selectedRecord)sレコードのうち、 はじめの%(firstRecords)sだけが"
-"アーカイブ/アーカイブ解除されました。"
+"選択された %(selectedRecord)sレコードのうち、 はじめの%(firstRecords)sだけがアーカイブ/アーカイブ解除されました。"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.webclient_offline
@@ -5279,8 +5209,7 @@ msgstr "タグをクリックすると"
 #: code:addons/web/controllers/home.py:0
 msgid ""
 "Only employees can access this database. Please contact the administrator."
-msgstr ""
-"従業員のみがこのデータベースにアクセスできます。管理者に連絡して下さい。"
+msgstr "従業員のみがこのデータベースにアクセスできます。管理者に連絡して下さい。"
 
 #. module: web
 #. odoo-javascript
@@ -5288,28 +5217,25 @@ msgstr ""
 msgid ""
 "Only the first %(count)s records have been deleted (out of %(total)s "
 "selected)"
-msgstr ""
-"最初のレコード%(count)sだけが削除されました（選択された%(total)sのうち）"
+msgstr "最初のレコード%(count)sだけが削除されました（選択された%(total)sのうち）"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type "
+"%(field_type)s)"
 msgstr ""
-"カテゴリについては、タイプ%(supported_types)sのみがサポートされています。（発"
-"見されたタイプ%(field_type)s）"
+"カテゴリについては、タイプ%(supported_types)sのみがサポートされています。（発見されたタイプ%(field_type)s）"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type "
+"%(field_type)s)"
 msgstr ""
-"フィルタについてはタイプ%(supported_types)sのみがサポートされています。（発見"
-"されたタイプ %(field_type)s）"
+"フィルタについてはタイプ%(supported_types)sのみがサポートされています。（発見されたタイプ %(field_type)s）"
 
 #. module: web
 #. odoo-javascript
@@ -5327,23 +5253,19 @@ msgstr "おっと!"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/file_handler.js:0
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
-msgstr ""
-"'%(fileName)s' のフォーマットが許可されていないためアップロードできませんでし"
-"た。"
+msgstr "'%(fileName)s' のフォーマットが許可されていないためアップロードできませんでした。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Oops! A %(parentFieldLabel)s is needed to add property fields."
-msgstr ""
-"おっと!プロパティフィールドを追加するには %(parentFieldLabel)s が必要です。"
+msgstr "おっと!プロパティフィールドを追加するには %(parentFieldLabel)s が必要です。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid "Oops! You cannot edit the %(parentFieldLabel)s \"%(parentName)s\"."
-msgstr ""
-"おっと! %(parentFieldLabel)s \"%(parentName)s\" を編集することはできません。"
+msgstr "おっと! %(parentFieldLabel)s \"%(parentName)s\" を編集することはできません。"
 
 #. module: web
 #. odoo-javascript
@@ -5603,20 +5525,14 @@ msgstr "保管する項目リスト名を入れてください"
 #: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
 msgid ""
 "Please note that your view includes invalid locators.<br/>\n"
-"                    These nodes could not be anchored to the parent view and "
-"have no effect.<br/>\n"
-"                    This issue may have arisen as a result of manual "
-"modifications or during the upgrade process.<br/>\n"
-"                    For your reference, invalid xpath nodes are highlighted "
-"in red."
+"                    These nodes could not be anchored to the parent view and have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted in red."
 msgstr ""
 "ご注意ください:このビューには無効なロケーターが含まれています。<br/>\n"
-"                    これらのノードは親ビューにアンカー(接続)できず、効果があ"
-"りません。<br/>\n"
-"                    この問題は、手動での変更やアップグレードプロセス中に発生"
-"した可能性があります。<br/>\n"
-"                    ご参考までに、無効な XPath ノードは赤色で強調表示されてい"
-"ます。"
+"                    これらのノードは親ビューにアンカー(接続)できず、効果がありません。<br/>\n"
+"                    この問題は、手動での変更やアップグレードプロセス中に発生した可能性があります。<br/>\n"
+"                    ご参考までに、無効な XPath ノードは赤色で強調表示されています。"
 
 #. module: web
 #. odoo-javascript
@@ -5829,8 +5745,8 @@ msgstr "紫"
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/notification_alert/notification_alert.xml:0
 msgid ""
-"Push notifications are blocked. Enable them in your browser settings to stay "
-"updated when you're away."
+"Push notifications are blocked. Enable them in your browser settings to stay"
+" updated when you're away."
 msgstr ""
 
 #. module: web
@@ -5919,8 +5835,7 @@ msgstr "読取専用"
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid ""
-"Ready to make your record disappear into thin air? Are you sure? It will be "
-"gone forever!\n"
+"Ready to make your record disappear into thin air? Are you sure? It will be gone forever!\n"
 "    \n"
 "Think twice before you click that 'Delete' button!"
 msgstr ""
@@ -6474,10 +6389,10 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid ""
-"Select <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
+"Select <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
 msgstr ""
-"<i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
+"<i class=\"oi\" data-icon=\"database\" role=\"img\" aria-label=\"Database\" "
 "title=\"Database\"/>を選択"
 
 #. module: web
@@ -6655,7 +6570,8 @@ msgstr "優先順位を設定"
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if empty."
+"Set to true the full range input has to be display by default, even if "
+"empty."
 msgstr "trueに設定すると、デフォルトで全範囲の入力が表示されます。"
 
 #. module: web
@@ -7150,17 +7066,13 @@ msgstr "アプリはデバイスにインストールされているようです
 msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
-msgstr ""
-"このセルの内容はXLSXファイルには長すぎます。（%s文字以上）CSV形式でエクスポー"
-"トして下さい。"
+msgstr "このセルの内容はXLSXファイルには長すぎます。（%s文字以上）CSV形式でエクスポートして下さい。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/domain/domain_field.js:0
 msgid "The domain involves non-literals. Their evaluation might fail."
-msgstr ""
-"このドメインには非リテラルが含まれています。それらの評価は失敗する可能性があ"
-"ります。"
+msgstr "このドメインには非リテラルが含まれています。それらの評価は失敗する可能性があります。"
 
 #. module: web
 #. odoo-javascript
@@ -7184,19 +7096,17 @@ msgstr "%(field_name)s 内の ID は重複してはいけません: “%(action_
 #. odoo-python
 #: code:addons/web/models/res_users_settings_embedded_action.py:0
 msgid ""
-"The ids in %(field_name)s must only be integers or \"false\": “%"
-"(action_ids)s”"
-msgstr ""
-"%(field_name)s フィールドには、整数または \"false\" の値のみを含めることがで"
-"きます: “%(action_ids)s”"
+"The ids in %(field_name)s must only be integers or \"false\": "
+"“%(action_ids)s”"
+msgstr "%(field_name)s フィールドには、整数または \"false\" の値のみを含めることができます: “%(action_ids)s”"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation "
-"is taking too much time."
+"The operation was interrupted. This usually means that the current operation"
+" is taking too much time."
 msgstr "処理が中断されました。処理に時間がかかりすぎている可能性があります。"
 
 #. module: web
@@ -7221,11 +7131,9 @@ msgstr "選択されたフィールドは署名を事前入力するのに使用
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
-"(maxSize)sB)."
-msgstr ""
-"選択されたファイル (%(size)sB)は許可されている最大ファイルサイズ(%"
-"(maxSize)sB)を超えています。"
+"The selected file (%(size)sB) is larger than the maximum allowed file size "
+"(%(maxSize)sB)."
+msgstr "選択されたファイル (%(size)sB)は許可されている最大ファイルサイズ(%(maxSize)sB)を超えています。"
 
 #. module: web
 #. odoo-javascript
@@ -7235,18 +7143,14 @@ msgid ""
 "that must be fixed for the entire database before continuing working. See "
 "browser console or server logs for details."
 msgstr ""
-"スタイルのコンパイルに失敗しました。これは管理者または開発者のエラーで、作業"
-"を続行する前にデータベース全体を修正する必要があります。詳細については、ブラ"
-"ウザコンソールまたはサーバログを参照して下さい。"
+"スタイルのコンパイルに失敗しました。これは管理者または開発者のエラーで、作業を続行する前にデータベース全体を修正する必要があります。詳細については、ブラウザコンソールまたはサーバログを参照して下さい。"
 
 #. module: web
 #: model:ir.model.constraint,message:web.constraint_res_users_settings_embedded_action_res_user_settings_e_91890fa3
 msgid ""
 "The user should have one unique embedded action setting per user setting, "
 "action and record id."
-msgstr ""
-"ユーザごとの設定・アクション・レコード ID の組み合わせにつき、埋め込みアク"
-"ション設定は一意でなければなりません。"
+msgstr "ユーザごとの設定・アクション・レコード ID の組み合わせにつき、埋め込みアクション設定は一意でなければなりません。"
 
 #. module: web
 #. odoo-python
@@ -7255,8 +7159,8 @@ msgid ""
 "There are too many rows (%(count)s rows, limit: %(limit)s) to export as "
 "Excel 2007-2013 (.xlsx) format. Consider splitting the export."
 msgstr ""
-"行数が多すぎる（%(count)s行、上限:%(limit)s）ため、Excel 2007-2013 (.xlsx) 形"
-"式でエクスポートできません。エクスポートの分割を検討して下さい。"
+"行数が多すぎる（%(count)s行、上限:%(limit)s）ため、Excel 2007-2013 (.xlsx) "
+"形式でエクスポートできません。エクスポートの分割を検討して下さい。"
 
 #. module: web
 #. odoo-javascript
@@ -7279,8 +7183,7 @@ msgstr "ファイルのアップロード中に問題が発生しました。"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.address_layout
 msgid "This block is not always present depending on the printed document."
-msgstr ""
-"このブロックは、印刷される文書によっては必ずしも存在しない場合があります。"
+msgstr "このブロックは、印刷される文書によっては必ずしも存在しない場合があります。"
 
 #. module: web
 #. odoo-javascript
@@ -7328,9 +7231,7 @@ msgstr "これは社内レポートのサンプルです。"
 msgid ""
 "This record belongs to a different parent so you can not change this "
 "property."
-msgstr ""
-"このレコードは違う親に属しているためこのプロパティを変更することはできませ"
-"ん。"
+msgstr "このレコードは違う親に属しているためこのプロパティを変更することはできません。"
 
 #. module: web
 #. odoo-javascript
@@ -7373,13 +7274,10 @@ msgstr "時間間隔"
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies "
-"in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
 msgstr ""
-"タイムゾーンの不一致: このタイムゾーンはお使いのブラウザのタイムゾーンと一致"
-"していません。\n"
-"システム上での時間の不一致を回避するため、ブラウザに同じタイムゾーンを設定し"
-"てください。"
+"タイムゾーンの不一致: このタイムゾーンはお使いのブラウザのタイムゾーンと一致していません。\n"
+"システム上での時間の不一致を回避するため、ブラウザに同じタイムゾーンを設定してください。"
 
 #. module: web
 #. odoo-javascript
@@ -7527,9 +7425,7 @@ msgstr ""
 msgid ""
 "Try to add some records, or make sure that there is no\n"
 "                    active filter in the search bar."
-msgstr ""
-"レコードを追加するか、または、検索バーのフィルタが有効になっていないことを確"
-"認してください。"
+msgstr "レコードを追加するか、または、検索バーのフィルタが有効になっていないことを確認してください。"
 
 #. module: web
 #. odoo-javascript
@@ -7814,33 +7710,25 @@ msgstr "実行コンテキストを使用"
 #: code:addons/web/static/src/views/fields/integer/integer_field.js:0
 msgid ""
 "Use it with the 'User-friendly format' option to customize the formatting."
-msgstr ""
-"書式をカスタマイズするには、'ユーザフレンドリー書式'オプションを使用します。"
+msgstr "書式をカスタマイズするには、'ユーザフレンドリー書式'オプションを使用します。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
 msgid ""
-"Use the operators \"+=\", \"-=\" to update the current date by days (%"
-"(days)s), \n"
-"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours "
-"(%(hours)s), \n"
+"Use the operators \"+=\", \"-=\" to update the current date by days (%(days)s), \n"
+"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours (%(hours)s), \n"
 "            minutes (%(minutes)s) and seconds (%(seconds)s)."
 msgstr ""
 "演算子\"+=\"、\"-=\" を使用して、現在の日付を日単位(%(days)s )、\n"
-"週単位(%(weeks)s )、月単位(%(months)s )、年単位(%(years)s )、時間単位(%"
-"(hours)s )、\n"
+"週単位(%(weeks)s )、月単位(%(months)s )、年単位(%(years)s )、時間単位(%(hours)s )、\n"
 "分単位(%(minutes)s )、秒単位(%(seconds)s )で更新します。"
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid ""
-"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
-"value."
-msgstr ""
-"現在の値を更新するには \"+=\", \"-=\", \"*=\", \"/=\" の演算子を使用してくだ"
-"さい。"
+msgid "Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current value."
+msgstr "現在の値を更新するには \"+=\", \"-=\", \"*=\", \"/=\" の演算子を使用してください。"
 
 #. module: web
 #. odoo-javascript
@@ -8140,9 +8028,7 @@ msgstr "フィールドが空の場合に記入すること"
 msgid ""
 "Whether or not this Property Field is displayed in the Calendar, Cards & "
 "Kanban views"
-msgstr ""
-"このプロパティフィールドをカレンダー、カード、かんばんビューに表示するかどう"
-"か"
+msgstr "このプロパティフィールドをカレンダー、カード、かんばんビューに表示するかどうか"
 
 #. module: web
 #. odoo-javascript
@@ -8239,8 +8125,8 @@ msgstr ""
 msgid ""
 "You are currently using a non-secure context. As a result, some Odoo "
 "features may be unavailable or function improperly. For more information, "
-"please visit: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/"
-"Secure_Contexts"
+"please visit: https://developer.mozilla.org/en-"
+"US/docs/Web/Security/Defenses/Secure_Contexts"
 msgstr ""
 
 #. module: web
@@ -8314,9 +8200,7 @@ msgstr "/jsonルートを使用するには許可をエクスポートする必�
 #: code:addons/web/static/src/views/fields/dynamic_placeholder_hook.js:0
 msgid ""
 "You need to select a model before opening the dynamic placeholder selector."
-msgstr ""
-"ダイナミック・プレースホルダー・セレクタを開く前に、モデルを選択する必要があ"
-"ります。"
+msgstr "ダイナミック・プレースホルダー・セレクタを開く前に、モデルを選択する必要があります。"
 
 #. module: web
 #. odoo-javascript
@@ -8324,8 +8208,7 @@ msgstr ""
 msgid ""
 "You need to start Odoo with at least two workers to print a pdf version of "
 "the reports."
-msgstr ""
-"PDFレポートを印刷するには、ワーカー数を2以上にしてOdooを起動してください。"
+msgstr "PDFレポートを印刷するには、ワーカー数を2以上にしてOdooを起動してください。"
 
 #. module: web
 #. odoo-javascript
@@ -8340,9 +8223,7 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid "Your Odoo session expired. The current page is about to be refreshed."
-msgstr ""
-"Odooセッションの有効期限が切れました。現在のページがリフレッシュされようとし"
-"ています。"
+msgstr "Odooセッションの有効期限が切れました。現在のページがリフレッシュされようとしています。"
 
 #. module: web
 #. odoo-javascript
@@ -27411,11 +27292,11 @@ msgstr ""
 
 #~ msgid ""
 #~ "The Tax Identification Number. Values here will be validated based on the "
-#~ "country format. You can use '/' to indicate that the partner is not "
-#~ "subject to tax."
+#~ "country format. You can use '/' to indicate that the partner is not subject "
+#~ "to tax."
 #~ msgstr ""
-#~ "登録番号(Tax Identification Number)。ここでの値は、国の形式に基づいて検証"
-#~ "されます。取引先に税金がかからないことを示すには、'/' を使用して下さい。"
+#~ "登録番号(Tax Identification "
+#~ "Number)。ここでの値は、国の形式に基づいて検証されます。取引先に税金がかからないことを示すには、'/' を使用して下さい。"
 
 #~ msgid "Custom"
 #~ msgstr "カスタム"
@@ -27448,12 +27329,11 @@ msgstr ""
 #~ msgstr "実線"
 
 #~ msgid ""
-#~ "Use up and down arrow keys to adapt the brightness. Use left and right "
-#~ "arrow keys to adapt the saturation. Press the Control or Command key at "
-#~ "the same time to have finer control."
+#~ "Use up and down arrow keys to adapt the brightness. Use left and right arrow"
+#~ " keys to adapt the saturation. Press the Control or Command key at the same "
+#~ "time to have finer control."
 #~ msgstr ""
-#~ "上下の矢印キーで明度を調整し、左右の矢印キーで彩度を調整できます。Control"
-#~ "キー（またはCommandキー）を同時に押すと、より細かい調整が可能です。"
+#~ "上下の矢印キーで明度を調整し、左右の矢印キーで彩度を調整できます。Controlキー（またはCommandキー）を同時に押すと、より細かい調整が可能です。"
 
 #~ msgid "hex"
 #~ msgstr "hex"
@@ -27462,10 +27342,8 @@ msgstr ""
 #~ msgstr "自動保存"
 
 #~ msgid ""
-#~ "If checked, the record will be saved immediately when the field is "
-#~ "modified."
-#~ msgstr ""
-#~ "チェックした場合、フィールドが変更されるとレコードは直ちに保存されます。"
+#~ "If checked, the record will be saved immediately when the field is modified."
+#~ msgstr "チェックした場合、フィールドが変更されるとレコードは直ちに保存されます。"
 
 #~ msgid "Invalid data"
 #~ msgstr "無効なデータ"
@@ -27476,9 +27354,7 @@ msgstr ""
 #~ msgid ""
 #~ "Pie chart cannot mix positive and negative numbers. Try to change your "
 #~ "domain to only display positive results"
-#~ msgstr ""
-#~ "円グラフは正と負の数値を混在させることはできません。 肯定的な結果のみを表"
-#~ "示するようにドメインを変更してみてください"
+#~ msgstr "円グラフは正と負の数値を混在させることはできません。 肯定的な結果のみを表示するようにドメインを変更してみてください"
 
 #~ msgid "Try searching for another keyword"
 #~ msgstr "別のキーワードで検索してみてください"

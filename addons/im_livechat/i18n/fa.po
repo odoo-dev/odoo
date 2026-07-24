@@ -21,8 +21,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 06:27+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/im_livechat/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,8 +33,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -121,10 +119,11 @@ msgstr "%s (کپی)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
-"\"'%(input_email)s' به نظر نمی‌رسد که یک ایمیل معتبر باشد. لطفاً دوباره تلاش "
-"کنید؟\""
+"\"'%(input_email)s' به نظر نمی‌رسد که یک ایمیل معتبر باشد. لطفاً دوباره تلاش"
+" کنید؟\""
 
 #. module: im_livechat
 #. odoo-python
@@ -144,16 +143,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'نمایش' دکمه چت را در صفحات نمایش می‌دهد.\n"
 "* 'نمایش با اعلان' همان 'نمایش' است به‌علاوه یک متن شناور درست در کنار دکمه.\n"
-"* 'باز شدن خودکار' دکمه را نمایش می‌دهد و به‌طور خودکار صفحه گفتگو را باز "
-"می‌کند.\n"
+"* 'باز شدن خودکار' دکمه را نمایش می‌دهد و به‌طور خودکار صفحه گفتگو را باز می‌کند.\n"
 "* 'پنهان کردن' دکمه چت را در صفحات پنهان می‌کند.\n"
 
 #. module: im_livechat
@@ -164,30 +160,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>بازگشت به حالت ویرایش"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>بازگشت به حالت ویرایش"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"حذف اپراتور\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"حذف اپراتور\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -212,8 +208,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>یادآوری: این مرحله فقط در صورتی اجرا می‌شود که هیچ اپراتوری در دسترس "
 "نباشد.</span>"
@@ -221,33 +217,27 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>نکته: حداقل یک تعامل (سؤال، ایمیل و ...) قبل از اینکه ربات بتواند "
-"اقدامات پیچیده‌تری انجام دهد (مانند هدایت به یک اپراتور و ...)، لازم است. </"
-"span>\n"
-"<span>اگر می‌خواهید ربات فقط زمانی که هیچ اپراتوری در دسترس نیست با "
-"بازدیدکنندگان تعامل داشته باشد، از قوانین کانال استفاده کنید.</span>"
+"<span>نکته: حداقل یک تعامل (سؤال، ایمیل و ...) قبل از اینکه ربات بتواند اقدامات پیچیده‌تری انجام دهد (مانند هدایت به یک اپراتور و ...)، لازم است. </span>\n"
+"<span>اگر می‌خواهید ربات فقط زمانی که هیچ اپراتوری در دسترس نیست با بازدیدکنندگان تعامل داشته باشد، از قوانین کانال استفاده کنید.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
-"<span>نکته: حداقل یک تعامل (سوال، ایمیل، ...) لازم است تا بات بتواند اقدامات "
-"پیچیده‌تری (ارسال به یک اپراتور، ...) انجام دهد.</span>"
+"<span>نکته: حداقل یک تعامل (سوال، ایمیل، ...) لازم است تا بات بتواند اقدامات"
+" پیچیده‌تری (ارسال به یک اپراتور، ...) انجام دهد.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>نکته: در صورتی که هیچ یک از اپراتورها در دسترس نباشند، مراحل بعدی را "
 "برای ربات برنامه‌ریزی کنید.</span>"
@@ -505,8 +495,8 @@ msgstr "کانال‌ها"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "گفتگو خصوصی و منحصر به 2 نفر است. گروه مختص چند عضو دعوت شده است. می‌توان "
 "آزادانه به کانال ملحق شد (بسته به پیکربندی آن)."
@@ -611,7 +601,8 @@ msgstr "چت‌بات‌ها"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid "Choose the live chat channel you want to display on your website."
-msgstr "کانال چت زنده ای را که می خواهید در وب سایت خود نمایش دهید انتخاب کنید."
+msgstr ""
+"کانال چت زنده ای را که می خواهید در وب سایت خود نمایش دهید انتخاب کنید."
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_troubleshooting_answer_chrome_demo
@@ -2416,8 +2407,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2557,8 +2547,8 @@ msgstr "گفتگو ارسال شد."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "قانون فقط برای این کشورها اعمال خواهد شد. مثال: اگر شما 'بلژیک' و 'ایالات "
 "متحده' را انتخاب کنید و عمل را به 'پنهان کردن' تنظیم کنید، دکمه چت برای "
@@ -2660,12 +2650,8 @@ msgstr "رنگ عنوان"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat

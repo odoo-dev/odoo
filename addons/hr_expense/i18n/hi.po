@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 23:59+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/"
-"hr_expense/hi/>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/hr_expense/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,10 +22,8 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
 
@@ -60,13 +57,17 @@ msgstr "%(expense_name)s: आप न तो मैनेजर हैं और 
 msgid ""
 "%(expense_name)s: Your are neither a Manager nor a HR Officer of this "
 "expense's company"
-msgstr "%(expense_name)s: आप इस खर्च की कंपनी के न तो मैनेजर हैं और न ही एचआर अधिकारी"
+msgstr ""
+"%(expense_name)s: आप इस खर्च की कंपनी के न तो मैनेजर हैं और न ही एचआर "
+"अधिकारी"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
-msgstr "%(user)s पुष्टि करता है कि यह खर्च किसी समान खर्च के साथ डुप्लिकेट नहीं है।"
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
+msgstr ""
+"%(user)s पुष्टि करता है कि यह खर्च किसी समान खर्च के साथ डुप्लिकेट नहीं है।"
 
 #. module: hr_expense
 #: model:ir.actions.report,print_report_name:hr_expense.action_report_hr_expense
@@ -92,12 +93,13 @@ msgstr ""
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 msgid "<b>Wasting time recording your receipts?</b> Let’s try a better way."
 msgstr ""
-"<b>रसीदों का रिकॉर्ड रखने में समय बर्बाद हो रहा है?</b> आइए एक बेहतर तरीका आज़माएं।"
+"<b>रसीदों का रिकॉर्ड रखने में समय बर्बाद हो रहा है?</b> आइए एक बेहतर तरीका "
+"आज़माएं।"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
-msgstr "<i class=\"oi oi-arrow-right\"/> अपना एलियास डोमेन सेटअप करें"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> अपना एलियास डोमेन सेटअप करें"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -271,10 +273,8 @@ msgstr "अपलोड के दौरान कोई गड़बड़ी �
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
 
 #. module: hr_expense
@@ -404,8 +404,8 @@ msgid ""
 "Both price-included and price-excluded taxes will behave as price-included "
 "taxes for expenses."
 msgstr ""
-"खर्चों के मामले में, वे सभी टैक्स जो कीमत में जुड़े हैं या कीमत के बाहर हैं, उन्हें कीमत में शामिल "
-"टैक्स ही माना जाएगा।"
+"खर्चों के मामले में, वे सभी टैक्स जो कीमत में जुड़े हैं या कीमत के बाहर हैं,"
+" उन्हें कीमत में शामिल टैक्स ही माना जाएगा।"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.report_expense
@@ -559,7 +559,8 @@ msgstr "डिफ़ॉल्ट एक्सपेंस जर्नल"
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "Default accounting journal for expenses paid by employees."
 msgstr ""
-"वह जर्नल जिसमें कर्मचारियों द्वारा किए गए खर्चों को डिफ़ॉल्ट रूप से दर्ज किया जाता है।"
+"वह जर्नल जिसमें कर्मचारियों द्वारा किए गए खर्चों को डिफ़ॉल्ट रूप से दर्ज "
+"किया जाता है।"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_department
@@ -619,8 +620,8 @@ msgid ""
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
-"अब कागज़ी रसीदें न रखें. बस अपनी रसीद की फोटो खींचें, Odoo इसे डिजिटाइज़ कर देगा. ओसीआर "
-"और एआई की मदद से डेटा अपने-आप भर जाएगा।"
+"अब कागज़ी रसीदें न रखें. बस अपनी रसीद की फोटो खींचें, Odoo इसे डिजिटाइज़ कर "
+"देगा. ओसीआर और एआई की मदद से डेटा अपने-आप भर जाएगा।"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -653,7 +654,8 @@ msgid ""
 "Each expense paid by the company must have a distinct and dedicated journal "
 "entry."
 msgstr ""
-"कंपनी द्वारा दिए गए हर खर्च के लिए एक खास और अलग जर्नल एंट्री दर्ज करना ज़रूरी है।"
+"कंपनी द्वारा दिए गए हर खर्च के लिए एक खास और अलग जर्नल एंट्री दर्ज करना "
+"ज़रूरी है।"
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_employee
@@ -930,8 +932,8 @@ msgid ""
 "Failed to send mails for submitted expenses. No valid email was found for "
 "the company"
 msgstr ""
-"सबमिट किए गए खर्चों के लिए ईमेल नहीं भेजा जा सका, क्योंकि कंपनी का कोई सही ईमेल पता "
-"नहीं मिल पाया"
+"सबमिट किए गए खर्चों के लिए ईमेल नहीं भेजा जा सका, क्योंकि कंपनी का कोई सही "
+"ईमेल पता नहीं मिल पाया"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee__filter_for_expense
@@ -1251,13 +1253,16 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_res_config_settings__hr_expense_use_mailgateway
 msgid "Let your employees record expenses by email"
-msgstr "कर्मचारियों को यह सुविधा दें कि वे ईमेल के माध्यम से अपने खर्चों को रिकॉर्ड कर सकें"
+msgstr ""
+"कर्मचारियों को यह सुविधा दें कि वे ईमेल के माध्यम से अपने खर्चों को रिकॉर्ड "
+"कर सकें"
 
 #. module: hr_expense
 #. odoo-javascript
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 msgid "Let's check out where you can manage all your employees expenses"
-msgstr "आइए देखें कि आप अपने सभी कर्मचारियों के खर्चों का मैनेज कहां कर सकते हैं"
+msgstr ""
+"आइए देखें कि आप अपने सभी कर्मचारियों के खर्चों का मैनेज कहां कर सकते हैं"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1280,7 +1285,9 @@ msgstr ""
 msgid ""
 "Link your stripe issuing account to manage company credit cards for your "
 "employees through Odoo"
-msgstr "कर्मचारियों के क्रेडिट कार्ड मैनेज करने के लिए स्ट्राइप अकाउंट को Odoo से जोड़ें"
+msgstr ""
+"कर्मचारियों के क्रेडिट कार्ड मैनेज करने के लिए स्ट्राइप अकाउंट को Odoo से "
+"जोड़ें"
 
 #. module: hr_expense
 #. odoo-python
@@ -1306,8 +1313,8 @@ msgid ""
 "Managers can approve the expense here, then an accountant can post the "
 "accounting entries."
 msgstr ""
-"मैनेजर इस जगह से खर्च को मंज़ूरी दे सकते हैं, और फिर अकाउंटेंट इससे जुड़ी अकाउंटिंग एंट्रीज़ दर्ज "
-"कर सकता है।"
+"मैनेजर इस जगह से खर्च को मंज़ूरी दे सकते हैं, और फिर अकाउंटेंट इससे जुड़ी "
+"अकाउंटिंग एंट्रीज़ दर्ज कर सकता है।"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1431,7 +1438,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "No work contact found for the employee %(name)s, please configure one."
-msgstr "कर्मचारी %(name)s के लिए कोई काम का संपर्क नहीं मिला, कृपया एक कॉन्फ़िगर करें।"
+msgstr ""
+"कर्मचारी %(name)s के लिए कोई काम का संपर्क नहीं मिला, कृपया एक कॉन्फ़िगर "
+"करें।"
 
 #. module: hr_expense
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__payment_mode__company_account
@@ -1500,13 +1509,11 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
-"Odoo ने आपके खर्च, उसके प्रॉडक्ट, आपकी कंपनी और जर्नल की जांच की, लेकिन खाता नहीं "
-"मिला. \n"
+"Odoo ने आपके खर्च, उसके प्रॉडक्ट, आपकी कंपनी और जर्नल की जांच की, लेकिन खाता नहीं मिला. \n"
 "खर्च खाता सेट करके Odoo की मदद करें. \n"
 "%(expense)s %(expense_name)s.\n"
 
@@ -1523,27 +1530,34 @@ msgstr "खर्च बनाने के बाद, इसे मंज़ू
 msgid ""
 "Once your <b>Expense</b> is ready, you can submit it to your manager and "
 "wait for approval."
-msgstr "जब आपका <b>खर्च</b> पूरी तरह दर्ज हो जाए, तो इसे मंज़ूरी के लिए मैनेजर को भेज दें।"
+msgstr ""
+"जब आपका <b>खर्च</b> पूरी तरह दर्ज हो जाए, तो इसे मंज़ूरी के लिए मैनेजर को "
+"भेज दें।"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
 "Only HR Officers, accountants, or the concerned employee can reset to draft."
-msgstr "सिर्फ़ एचआर अधिकारी, अकाउंटेंट या संबंधित कर्मचारी ही ड्राफ़्ट पर रीसेट कर सकते हैं।"
+msgstr ""
+"सिर्फ़ एचआर अधिकारी, अकाउंटेंट या संबंधित कर्मचारी ही ड्राफ़्ट पर रीसेट कर "
+"सकते हैं।"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "Only draft expenses can have a total of 0."
-msgstr "सिर्फ़ वही खर्च जिनका स्टेटस अभी ड्राफ़्ट है, उनकी कुल राशि शून्य हो सकती है।"
+msgstr ""
+"सिर्फ़ वही खर्च जिनका स्टेटस अभी ड्राफ़्ट है, उनकी कुल राशि शून्य हो सकती "
+"है।"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "Only expense paid by the employee can be posted with the wizard"
 msgstr ""
-"सिर्फ़ कर्मचारी द्वारा भुगतान किया गया खर्च ही विज़ार्ड के साथ पोस्ट किया जा सकता है"
+"सिर्फ़ कर्मचारी द्वारा भुगतान किया गया खर्च ही विज़ार्ड के साथ पोस्ट किया जा "
+"सकता है"
 
 #. module: hr_expense
 #. odoo-python
@@ -1762,8 +1776,9 @@ msgid ""
 "don't <em>need to save</em> - Odoo will save eveyrthing for you when you "
 "navigate."
 msgstr ""
-"तैयार हैं? आप इसे मैन्युअल रूप से सेव करें या यहां से बदलावों को खारिज करें. आपको <em>सेव करने "
-"की ज़रूरत</em> नहीं है - जब आप आगे जाएंगे, तो Odoo आपके लिए सब कुछ सेव कर देगा।"
+"तैयार हैं? आप इसे मैन्युअल रूप से सेव करें या यहां से बदलावों को खारिज करें."
+" आपको <em>सेव करने की ज़रूरत</em> नहीं है - जब आप आगे जाएंगे, तो Odoo आपके "
+"लिए सब कुछ सेव कर देगा।"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1883,7 +1898,9 @@ msgstr "एक ही रसीद से संबंधित खर्च"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "Save this page and come back here to set up the feature."
-msgstr "इस पेज को सेव करें और फिर इस सुविधा को सेट करने के लिए बाद में यहीं लौटकर आएं।"
+msgstr ""
+"इस पेज को सेव करें और फिर इस सुविधा को सेट करने के लिए बाद में यहीं लौटकर "
+"आएं।"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -1907,12 +1924,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
 "इस कर्मचारी के खर्चों को मंज़ूरी देने वाले उपयोगकर्ता को चुनें. \n"
-"अगर खाली है, तो मंज़ूरी किसी एडमिनिस्ट्रेटर या अप्रूवर द्वारा दी जाएगी (जो सेटिंग/"
-"उपयोगकर्ता में तय किया जाता है)।"
+"अगर खाली है, तो मंज़ूरी किसी एडमिनिस्ट्रेटर या अप्रूवर द्वारा दी जाएगी (जो सेटिंग/उपयोगकर्ता में तय किया जाता है)।"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2107,17 +2122,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr ""
-"वह कंपनी डिफ़ॉल्ट जर्नल जिसका इस्तेमाल तब किया जाता है जब कोई कर्मचारी खर्च बनाया "
-"जाता है।"
+"वह कंपनी डिफ़ॉल्ट जर्नल जिसका इस्तेमाल तब किया जाता है जब कोई कर्मचारी खर्च "
+"बनाया जाता है।"
 
 #. module: hr_expense
 #. odoo-python
@@ -2150,8 +2166,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
 
@@ -2159,15 +2174,15 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_post_wizard__employee_journal_id
 msgid "The journal used when the expense is paid by employee."
 msgstr ""
-"वह जर्नल जिसका इस्तेमाल तब किया जाता है जब खर्च का भुगतान कर्मचारी द्वारा किया जाता "
-"है।"
+"वह जर्नल जिसका इस्तेमाल तब किया जाता है जब खर्च का भुगतान कर्मचारी द्वारा "
+"किया जाता है।"
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__payment_method_line_id
 msgid "The payment method used when the expense is paid by the company."
 msgstr ""
-"वह भुगतान विधि जिसका उपयोग तब किया जाता है जब खर्च का भुगतान कंपनी द्वारा किया "
-"जाता है।"
+"वह भुगतान विधि जिसका उपयोग तब किया जाता है जब खर्च का भुगतान कंपनी द्वारा "
+"किया जाता है।"
 
 #. module: hr_expense
 #. odoo-javascript
@@ -2184,8 +2199,7 @@ msgstr "बांटने के बाद, सभी हिस्सों क
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
 
@@ -2281,7 +2295,9 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense_split_wizard__total_amount_currency_original
 msgid "Total amount of the original Expense that we are splitting"
-msgstr "उस मूल खर्च (ओरिजिनल एक्सपेंस) की कुल राशि जिसे अलग-अलग हिस्सों में बांटा जा रहा है"
+msgstr ""
+"उस मूल खर्च (ओरिजिनल एक्सपेंस) की कुल राशि जिसे अलग-अलग हिस्सों में बांटा जा"
+" रहा है"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_split_wizard__total_amount_currency_original
@@ -2304,8 +2320,7 @@ msgstr "रिकॉर्ड में जो अलग तरह की गत
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 
 #. module: hr_expense
@@ -2382,14 +2397,14 @@ msgstr "रिफ़ंड का इंतज़ार"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
 
 #. module: hr_expense
@@ -2439,8 +2454,8 @@ msgid ""
 "You can't post simultaneously employee-paid expenses belonging to different "
 "companies"
 msgstr ""
-"आप एक साथ उन खर्चों को पोस्ट नहीं कर सकते जिनका भुगतान कर्मचारी ने किया है, लेकिन वे "
-"अलग-अलग कंपनियों से जुड़े हैं"
+"आप एक साथ उन खर्चों को पोस्ट नहीं कर सकते जिनका भुगतान कर्मचारी ने किया है, "
+"लेकिन वे अलग-अलग कंपनियों से जुड़े हैं"
 
 #. module: hr_expense
 #. odoo-python
@@ -2469,7 +2484,8 @@ msgstr "आप पोस्ट किए गए या मंज़ूर कि
 #: code:addons/hr_expense/models/analytic.py:0
 msgid "You cannot delete an analytic account that is used in an expense."
 msgstr ""
-"आप उस एनालिटिक खाते को डिलीट नहीं कर सकते जिसका उपयोग किसी खर्च में किया गया है।"
+"आप उस एनालिटिक खाते को डिलीट नहीं कर सकते जिसका उपयोग किसी खर्च में किया गया"
+" है।"
 
 #. module: hr_expense
 #. odoo-python
@@ -2498,7 +2514,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "You cannot reset to draft an expense linked to a posted journal entry."
-msgstr "आप पोस्ट की गई जर्नल एंट्री से जुड़े खर्च को ड्राफ़्ट में रीसेट नहीं कर सकते।"
+msgstr ""
+"आप पोस्ट की गई जर्नल एंट्री से जुड़े खर्च को ड्राफ़्ट में रीसेट नहीं कर "
+"सकते।"
 
 #. module: hr_expense
 #. odoo-python

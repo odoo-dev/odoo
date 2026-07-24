@@ -11,14 +11,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 18:12+0000\n"
 "PO-Revision-Date: 2026-01-17 12:51+0000\n"
 "Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-1-l10n/"
-"l10n_sa_edi/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-s19-1-l10n/l10n_sa_edi/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 5.14.3\n"
 
 #. module: l10n_sa_edi
@@ -26,10 +24,8 @@ msgstr ""
 #: code:addons/l10n_sa_edi/models/account_move.py:0
 msgid ""
 "\n"
-"                    Please set the Identification Scheme as National ID and "
-"Identification Number as the respective\n"
-"                    number on the Customer, as the Tax Exemption Reason is "
-"set either as VATEX-SA-HEA or VATEX-SA-EDU\n"
+"                    Please set the Identification Scheme as National ID and Identification Number as the respective\n"
+"                    number on the Customer, as the Tax Exemption Reason is set either as VATEX-SA-HEA or VATEX-SA-EDU\n"
 "                "
 msgstr ""
 
@@ -38,8 +34,7 @@ msgstr ""
 #: code:addons/l10n_sa_edi/models/res_config_settings.py:0
 msgid ""
 "\n"
-"Building Number: %(building_number)s, Plot Identification: %"
-"(plot_identification)s\n"
+"Building Number: %(building_number)s, Plot Identification: %(plot_identification)s\n"
 "Neighborhood: %(neighborhood)s"
 msgstr ""
 "\n"
@@ -61,8 +56,8 @@ msgstr "1. هناك ثلاثة أوضاع متاحة:"
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
 msgid ""
 "2. After selecting the mode, please go to <span "
-"class=\"o_form_label\">Journals &gt; Sales Type &gt; ZATCA Tab &gt; Onboard."
-"</span>"
+"class=\"o_form_label\">Journals &gt; Sales Type &gt; ZATCA Tab &gt; "
+"Onboard.</span>"
 msgstr ""
 "2. بعد تحديد الأوضاع، اذهب إلى <span class=\"o_form_label\">دفاتر اليومية "
 "&gt; نوع المبيعات &gt; علامة تبويب زاتكا &gt; تهيئة.</span>"
@@ -84,8 +79,8 @@ msgstr ""
 
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
-msgid "<i class=\"fa fa-warning me-2\"/> Warning"
-msgstr "تحذير <i class=\"fa fa-warning me-2\"/> "
+msgid "<i class=\"oi me-2\" data-icon=\"warning\"/> Warning"
+msgstr "تحذير <i class=\"me-2 oi\" data-icon=\"warning\"/> "
 
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_move_form
@@ -98,8 +93,7 @@ msgstr ""
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Production</span> - Live environment"
-msgstr ""
-"<span class=\"o_form_label\">قاعدة بيانات الإنتاج</span> - البيئة الفعلية"
+msgstr "<span class=\"o_form_label\">قاعدة بيانات الإنتاج</span> - البيئة الفعلية"
 
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
@@ -468,8 +462,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_sa_edi/models/account_move_send.py:0
 msgid ""
-"Export Transaction Type with the Simplified Invoice Type is not permitted as "
-"per ZATCA rules."
+"Export Transaction Type with the Simplified Invoice Type is not permitted as"
+" per ZATCA rules."
 msgstr ""
 
 #. module: l10n_sa_edi
@@ -480,8 +474,8 @@ msgstr ""
 #. module: l10n_sa_edi
 #: model:ir.model.fields,help:l10n_sa_edi.field_account_journal__l10n_sa_latest_submission_hash
 msgid ""
-"Hash of the latest submitted invoice to be used as the Previous Invoice Hash "
-"(KSA-13)"
+"Hash of the latest submitted invoice to be used as the Previous Invoice Hash"
+" (KSA-13)"
 msgstr "تشفير آخر فاتورة مرسلة ليتم إرساله كتشفير الفاتورة السابقة (KSA-13)"
 
 #. module: l10n_sa_edi
@@ -560,8 +554,8 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_sa_edi.field_l10n_sa_edi_document__l10n_sa_chain_index
 #: model:ir.model.fields,help:l10n_sa_edi.field_zatca_mixin__l10n_sa_chain_index
 msgid ""
-"Invoice index in chain, set if and only if an in-chain XML was submitted and "
-"did not error"
+"Invoice index in chain, set if and only if an in-chain XML was submitted and"
+" did not error"
 msgstr ""
 "مؤشر الفاتورة في السلسلة. يتم إعداده فقط إذا تم إرسال ملف XML في سلسلة ولم "
 "يحدث أي خطأ"
@@ -743,8 +737,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_sa_edi/models/account_move.py:0
 msgid ""
-"No Private Key was generated for these companies. A Private Key is mandatory "
-"in order to generate Certificate Signing Requests (CSR)."
+"No Private Key was generated for these companies. A Private Key is mandatory"
+" in order to generate Certificate Signing Requests (CSR)."
 msgstr ""
 
 #. module: l10n_sa_edi
@@ -761,10 +755,11 @@ msgstr "كلمة المرور لمرة واحدة"
 #. module: l10n_sa_edi
 #: model:ir.model.fields,help:l10n_sa_edi.field_l10n_sa_edi_otp_wizard__l10n_sa_otp
 msgid ""
-"OTP required to get a CCSID. Can only be acquired through the Fatoora portal."
+"OTP required to get a CCSID. Can only be acquired through the Fatoora "
+"portal."
 msgstr ""
-"يتطلب كلمة المرور لمرة واحدة للحصول على CCSID. يمكن الحصول عليها فقط من خلال "
-"بوابة فاتورة."
+"يتطلب كلمة المرور لمرة واحدة للحصول على CCSID. يمكن الحصول عليها فقط من خلال"
+" بوابة فاتورة."
 
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.view_account_journal_form
@@ -784,19 +779,13 @@ msgstr "أخطاء التهيئة"
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
 msgid ""
-"Once the mode is set to <strong>Production</strong> and an Invoice has been "
-"submitted to ZATCA,\n"
-"                            then the API mode cannot be changed. Any invoice "
-"submitted in the Production mode will be officially\n"
-"                            recorded with ZATCA and considered in the "
-"calculation of the VAT Liability."
+"Once the mode is set to <strong>Production</strong> and an Invoice has been submitted to ZATCA,\n"
+"                            then the API mode cannot be changed. Any invoice submitted in the Production mode will be officially\n"
+"                            recorded with ZATCA and considered in the calculation of the VAT Liability."
 msgstr ""
-"بمجر أن يتم تعيين الوضع كـ <strong>قاعدة بيانات الإنتاج</strong> ويتم إرسال "
-"الفاتورة إلى هيئة الزكاة والضريبة والجمارك (زاتكا)،\n"
-"                            لن يكون بالإمكان تغيير وضع الواجهة البرمجية بعد "
-"الآن. سيتم تسجيل أي فاتورة مقدمة في وضع الإنتاج رسميًا\n"
-"                            لدى زاتكا وستؤخذ في الاعتبار عند حساب ضريبة "
-"القيمة المضافة المستحقة."
+"بمجر أن يتم تعيين الوضع كـ <strong>قاعدة بيانات الإنتاج</strong> ويتم إرسال الفاتورة إلى هيئة الزكاة والضريبة والجمارك (زاتكا)،\n"
+"                            لن يكون بالإمكان تغيير وضع الواجهة البرمجية بعد الآن. سيتم تسجيل أي فاتورة مقدمة في وضع الإنتاج رسميًا\n"
+"                            لدى زاتكا وستؤخذ في الاعتبار عند حساب ضريبة القيمة المضافة المستحقة."
 
 #. module: l10n_sa_edi
 #: model:ir.model.constraint,message:l10n_sa_edi.constraint_l10n_sa_edi_document_unique_record
@@ -931,15 +920,16 @@ msgstr "يرجى تقديم كلمة المرور لمرة واحدة (OTP) لإ
 #: code:addons/l10n_sa_edi/models/account_move.py:0
 msgid ""
 "Please set the Invoice Date to be either less than or equal to today as per "
-"the Asia/Riyadh time zone, since ZATCA does not allow future-dated invoicing."
+"the Asia/Riyadh time zone, since ZATCA does not allow future-dated "
+"invoicing."
 msgstr ""
 
 #. module: l10n_sa_edi
 #. odoo-python
 #: code:addons/l10n_sa_edi/models/account_move.py:0
 msgid ""
-"Please set the VAT Number as the Identification Scheme is Tax Identification "
-"Number"
+"Please set the VAT Number as the Identification Scheme is Tax Identification"
+" Number"
 msgstr ""
 "يرجى تعيين رقم ضريبة القيمة المضافة بحيث يكون نظام التعريف هو رقم التعريف "
 "الضريبي"
@@ -1031,7 +1021,8 @@ msgstr ""
 #. module: l10n_sa_edi
 #: model_terms:ir.ui.view,arch_db:l10n_sa_edi.res_config_settings_view_form
 msgid "Set whether the system should use the Production API"
-msgstr "قم بإعداد ما إذا كان على النظام استخدام الواجهة البرمجية للإنتاج أم لا"
+msgstr ""
+"قم بإعداد ما إذا كان على النظام استخدام الواجهة البرمجية للإنتاج أم لا"
 
 #. module: l10n_sa_edi
 #: model:ir.model,name:l10n_sa_edi.model_account_move_send
@@ -1145,18 +1136,19 @@ msgstr "حقل تقني لمعرفة ما إذا كانت السلسلة قد ت
 
 #. module: l10n_sa_edi
 #: model:ir.model.fields,help:l10n_sa_edi.field_account_journal__l10n_sa_csr
-msgid "The Certificate Signing Request that is submitted to the Compliance API"
+msgid ""
+"The Certificate Signing Request that is submitted to the Compliance API"
 msgstr "طلب توقيع الشهادة المرسل إلى الواجهة البرمجية للامتثال"
 
 #. module: l10n_sa_edi
 #. odoo-python
 #: code:addons/l10n_sa_edi/models/account_move.py:0
 msgid ""
-"The Invoice(s) are linked to a validated EDI document and cannot be modified "
-"according to ZATCA rules"
+"The Invoice(s) are linked to a validated EDI document and cannot be modified"
+" according to ZATCA rules"
 msgstr ""
-"الفاتورة (الفواتير) مرتبطة بمستند EDI تم تصديقه ولا يمكن تعديلها وفقًا لقواعد "
-"زاتكا."
+"الفاتورة (الفواتير) مرتبطة بمستند EDI تم تصديقه ولا يمكن تعديلها وفقًا "
+"لقواعد زاتكا."
 
 #. module: l10n_sa_edi
 #. odoo-python
@@ -1356,8 +1348,8 @@ msgstr "VATEX-SA-34-4 التزويد بوسائل نقل مؤهلة."
 #. module: l10n_sa_edi
 #: model:ir.model.fields.selection,name:l10n_sa_edi.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-sa-34-5
 msgid ""
-"VATEX-SA-34-5 Any services relating to Goods or passenger transportation, as "
-"defined in article twenty five of these Regulations."
+"VATEX-SA-34-5 Any services relating to Goods or passenger transportation, as"
+" defined in article twenty five of these Regulations."
 msgstr ""
 "VATEX-SA-34-5 أي خدمة متعلقة بنقل الركاب أو البضائع، كما هو محدد في القانون "
 "خمسة وعشرين في تلك اللوائح."

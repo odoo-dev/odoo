@@ -24,8 +24,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 00:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
-"hr_attendance/ca/>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/hr_attendance/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,25 +72,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">When enabled, "
-"only the first check-in within the scheduled working hours (including "
-"tolerance) is recorded. Further check-ins are allowed only after an "
-"automatic check-out.</span>"
+"                                    <span class=\"text-muted\">When enabled, only the first check-in within the scheduled working hours (including tolerance) is recorded. Further check-ins are allowed only after an automatic check-out.</span>"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
 msgid ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 msgstr ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Installation Manual"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Manual d'instal·lació"
+msgid "<i class=\"oi oi-fw\" data-icon=\"arrow_forward\"/>Installation Manual"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"arrow_forward\"/>Manual d'instal·lació"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
@@ -105,12 +101,10 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 msgid ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 
 #. module: hr_attendance
@@ -181,8 +175,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
 "<span class=\"o_stat_value\">Add</span>\n"
-"                                    <span class=\"o_stat_text\">Employees</"
-"span>"
+"                                    <span class=\"o_stat_text\">Employees</span>"
 msgstr ""
 
 #. module: hr_attendance
@@ -251,12 +244,10 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid ""
-"Add a few employees to be able to select an employee here and perform his "
-"check in / check out.\n"
+"Add a few employees to be able to select an employee here and perform his check in / check out.\n"
 "                To create employees go to the Employees menu."
 msgstr ""
-"Afegiu uns quants empleats per poder seleccionar un empleat aquí i realitzar "
-"la seva entrada/sortida.\n"
+"Afegiu uns quants empleats per poder seleccionar un empleat aquí i realitzar la seva entrada/sortida.\n"
 "                Per crear empleats, aneu al menú Empleats."
 
 #. module: hr_attendance
@@ -287,8 +278,8 @@ msgid ""
 "Allow a period of time (around working hours) where extra time will not be "
 "counted, in benefit of the company"
 msgstr ""
-"Concedir un període de temps (al voltant de les hores laborals) en què no es "
-"comptabilitzaran les hores extres, en benefici de l'empresa"
+"Concedir un període de temps (al voltant de les hores laborals) en què no es"
+" comptabilitzaran les hores extres, en benefici de l'empresa"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -302,8 +293,8 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"Allow the collection of GPS location, IP address, and browser/device details "
-"used to track employee access and attendance"
+"Allow the collection of GPS location, IP address, and browser/device details"
+" used to track employee access and attendance"
 msgstr ""
 
 #. module: hr_attendance
@@ -602,8 +593,7 @@ msgstr "Font del codi de barres"
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance_overtime_rule__base_off
 msgid ""
 "Base for overtime calculation.\n"
-"Use 'Quantity' when overtime hours are those in excess of a certain amount "
-"per day/week.\n"
+"Use 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\n"
 "Use 'Timing' when overtime hours happen on specific days or at specific times"
 msgstr ""
 
@@ -820,8 +810,7 @@ msgid ""
 "Controls how the rates from the different rules that apply are combined.\n"
 "  Max: use the highest rate. (e.g.: combined for 150% and 120 = 150%)\n"
 "  Sum: sum the *extra* pay (i.e. above 100%).\n"
-"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
 msgstr ""
 
 #. module: hr_attendance
@@ -885,7 +874,8 @@ msgstr "Dia"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Define the camera used for the barcode scan."
-msgstr "Defineix la càmera que es farà servir pel escaneig del codi de barres."
+msgstr ""
+"Defineix la càmera que es farà servir pel escaneig del codi de barres."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -1310,8 +1300,8 @@ msgstr "Identificar manualment"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"If checked, days not covered by an attendance will be visible in the Report. "
-"Does not apply to employees with a flexible working schedule."
+"If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
 
 #. module: hr_attendance
@@ -1748,8 +1738,8 @@ msgstr "Onboarding"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/hr_version_list_view.js:0
 msgid ""
-"One or more selected records already have a ruleset assigned (highlighted in "
-"yellow). Do you want to overwrite them?"
+"One or more selected records already have a ruleset assigned (highlighted in"
+" yellow). Do you want to overwrite them?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2094,8 +2084,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 msgid ""
-"Rule '%(name)s' is based off quantity, but the usual amount of work hours is "
-"not specified"
+"Rule '%(name)s' is based off quantity, but the usual amount of work hours is"
+" not specified"
 msgstr ""
 
 #. module: hr_attendance
@@ -2244,7 +2234,8 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.constraint,message:hr_attendance.constraint_res_company_check_auto_check_out_specific_time_range
-msgid "Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
+msgid ""
+"Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
 msgstr ""
 
 #. module: hr_attendance
@@ -2355,8 +2346,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically checked out based on company specific time "
-"configuration."
+"This attendance was automatically checked out based on company specific time"
+" configuration."
 msgstr ""
 
 #. module: hr_attendance
@@ -2371,15 +2362,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically created to cover an unjustified absence on "
-"that day."
+"This attendance was automatically created to cover an unjustified absence on"
+" that day."
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
-"This will reset all manual edit on overtime period linked to those rules. Do "
-"you confirm ?"
+"This will reset all manual edit on overtime period linked to those rules. Do"
+" you confirm ?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2500,8 +2491,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid ""
-"Unable to get a valid location. Do you want to proceed with your check-in/"
-"out anyway?"
+"Unable to get a valid location. Do you want to proceed with your check-"
+"in/out anyway?"
 msgstr ""
 
 #. module: hr_attendance

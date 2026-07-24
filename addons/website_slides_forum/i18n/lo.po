@@ -9,8 +9,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-07 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 14:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/"
-"website_slides_forum/lo/>\n"
+"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/website_slides_forum/lo/>\n"
 "Language: lo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -116,8 +115,8 @@ msgstr ""
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.slide_fullscreen
 msgid ""
-"<i class=\"fa fa-comments\"/><span class=\"ms-1 d-none d-md-inline-"
-"block\">Forum</span>"
+"<i class=\"oi oi-filled\" data-icon=\"forum\"/><span class=\"ms-1 d-none "
+"d-md-inline-block\">Forum</span>"
 msgstr ""
 
 #. module: website_slides_forum
@@ -153,7 +152,7 @@ msgstr ""
 
 #. module: website_slides_forum
 #: model_terms:ir.ui.view,arch_db:website_slides_forum.forum_all_all_entries
-msgid "Check out our courses <i class=\"fa fa-long-arrow-right\"/>"
+msgid "Check out our courses <i class=\"oi\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: website_slides_forum

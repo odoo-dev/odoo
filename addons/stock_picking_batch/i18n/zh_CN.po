@@ -18,8 +18,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-19 03:42+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-master/stock_picking_batch/zh_Hans/>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,8 +34,12 @@ msgstr "%s 已从批次中移除，没有处理任何数量"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
-msgstr "<i class=\"fa fa-calendar text-primary me-2\" title=\"日历\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
+msgstr ""
+"<i class=\"text-primary me-2 oi-filled oi\" data-icon=\"calendar_today\" "
+"title=\"日历\"/>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -57,9 +60,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
-msgstr ""
-"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">批次组</"
-"span>"
+msgstr "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">批次组</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -109,8 +110,7 @@ msgstr "<strong>→</strong>"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
 "如果将调拨添加到超过此行数的批中，则不会自动向其添加调拨。\n"
@@ -119,8 +119,7 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
 "调拨将不会自动添加到超过此调拨数量的批中。\n"
@@ -903,7 +902,8 @@ msgstr "点评"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr "将多个订单合并为一次拣选，并在包装区集中处理。"
 
 #. module: stock_picking_batch
@@ -944,17 +944,13 @@ msgstr "安排的日期"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "操作调拨的计划日期。\n"
 "- 如果手动设置此批量调拨中的计划日期，将自动更新到这个日期。\n"
-"- 如果没有手动更改，并且添加/删除过调拨，那么将会是最早的计划日期，但此计划日"
-"期不会设置到该批量操作中的所有调拨上。"
+"- 如果没有手动更改，并且添加/删除过调拨，那么将会是最早的计划日期，但此计划日期不会设置到该批量操作中的所有调拨上。"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1011,8 +1007,8 @@ msgstr "按定义的位置拆分传输，然后将同一位置的传输分组。
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr "按产品类别拆分传输，然后将具有相同产品类别的传输分组。"
 
 #. module: stock_picking_batch
@@ -1100,8 +1096,7 @@ msgstr "以下批量调拨单已更新"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""

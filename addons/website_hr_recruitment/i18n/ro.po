@@ -18,14 +18,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 04:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_hr_recruitment
@@ -71,33 +69,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Toate posturile"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Toate posturile"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> Descrierea postului"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> Descrierea postului"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">Între timp,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Aruncați o privire pe site-ul nostru:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Aruncați o privire pe site-ul nostru:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -128,19 +124,16 @@ msgstr "<span class=\"s_website_form_label_content\">Introducere scurtă</span>"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Email-ul tău</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Numele dumneavoastră</span>\n"
 "<span class=\"s_website_form_mark\"> *</span>"
@@ -149,12 +142,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Numărul tău de telefon</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -343,10 +334,11 @@ msgstr "Creați conținut care va ajuta utilizatorii noștri zilnic"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
-"Creați pagini noi de locuri de muncă cu butonul <strong>+ <i>Nou</i></"
-"strong> din dreapta-sus."
+"Creați pagini noi de locuri de muncă cu butonul <strong>+ "
+"<i>Nou</i></strong> din dreapta-sus."
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -391,21 +383,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 "Fiecare angajat are șansa să vadă impactul muncii sale.\n"
 "                    Poți aduce o contribuție reală la succesul companiei.\n"
 "                    <br/>\n"
-"                    De-a lungul anului sunt organizate frecvent diverse "
-"activități, precum sesiuni săptămânale\n"
-"                    de sport, evenimente de team building, întâlniri lunare "
-"și multe altele"
+"                    De-a lungul anului sunt organizate frecvent diverse activități, precum sesiuni săptămânale\n"
+"                    de sport, evenimente de team building, întâlniri lunare și multe altele"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -469,24 +456,18 @@ msgstr "Acasă"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "De obicei <strong>răspund aplicărilor în termen de 3 zile</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                Următorul pas este fie un "
-"apel telefonic, fie o întâlnire în birourile noastre.\n"
+"                                                Următorul pas este fie un apel telefonic, fie o întâlnire în birourile noastre.\n"
 "                                                <br/><br/>\n"
-"                                                Nu ezitați să <strong>mă "
-"contactați dacă doriți un feedback\n"
-"                                                mai repede</strong> sau dacă "
-"nu primiți vești de la mine\n"
+"                                                Nu ezitați să <strong>mă contactați dacă doriți un feedback\n"
+"                                                mai repede</strong> sau dacă nu primiți vești de la mine\n"
 "                                                suficient de repede."
 
 #. module: website_hr_recruitment
@@ -616,8 +597,8 @@ msgstr "Dorit"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "No dumb managers, no stupid tools to use, no rigid working hours"
 msgstr ""
-"Fără manageri proști, fără instrumente stupide de folosit, fără ore de lucru "
-"rigide"
+"Fără manageri proști, fără instrumente stupide de folosit, fără ore de lucru"
+" rigide"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
@@ -741,7 +722,8 @@ msgstr "Calificați nevoile clientului"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid "Real responsibilities and challenges in a fast evolving company"
-msgstr "Responsabilități și provocări reale într-o companie cu evoluție rapidă"
+msgstr ""
+"Responsabilități și provocări reale într-o companie cu evoluție rapidă"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -873,12 +855,10 @@ msgstr "Profilul pe care ni l-ați furnizat nu pare a fi un profil LinkedIn"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "În prezent nu există oportunități de angajare deschise,<br class=\"mb-2\"/>\n"
-"                                            dar nu ezitați să <span "
-"class=\"fw-bold\">ne contactați</span> pentru o aplicare spontană."
+"                                            dar nu ezitați să <span class=\"fw-bold\">ne contactați</span> pentru o aplicare spontană."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -919,15 +899,11 @@ msgstr "Vizibil pe site-ul curent"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"Suntem o echipă de oameni pasionați al căror scop este de a îmbunătăți viața "
-"tuturor prin intermediul unor produse revoluționare.\n"
-"                                Construim produse extraordinare pentru a vă "
-"rezolva problemele de afaceri."
+"Suntem o echipă de oameni pasionați al căror scop este de a îmbunătăți viața tuturor prin intermediul unor produse revoluționare.\n"
+"                                Construim produse extraordinare pentru a vă rezolva problemele de afaceri."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -1019,8 +995,7 @@ msgid ""
 "                                    We usually respond within 3 days..."
 msgstr ""
 "Aplicația dvs. a fost postată cu succes,<br class=\"mb-2\"/>\n"
-"                                    De obicei, răspundem în termen de 3 "
-"zile..."
+"                                    De obicei, răspundem în termen de 3 zile..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply

@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 06:00+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/ko/>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/pos_online_payment/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,7 +44,8 @@ msgstr "결제 옵션을 지정해야 합니다"
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr "결제 유효성 검사는 POS 온라인 결제에 사용할 수 없습니다."
 
 #. module: pos_online_payment
@@ -60,9 +60,7 @@ msgid ""
 "All payment providers configured for an online payment method must use the "
 "same currency as the Sales Journal, or the company currency if that is not "
 "set, of the POS config."
-msgstr ""
-"온라인 결제 수단에 대해 설정된 모든 결제대행업체는 POS 설정의 판매 전표와 "
-"동일하거나 회사 통화로 설정해야 합니다."
+msgstr "온라인 결제 수단에 대해 설정된 모든 결제대행업체는 POS 설정의 판매 전표와 동일하거나 회사 통화로 설정해야 합니다."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -96,9 +94,7 @@ msgstr "POS 온라인 결제는 계정 결제 없이는 생성할 수 없습니�
 msgid ""
 "Cannot create a POS payment with a not online payment method and an online "
 "accounting payment."
-msgstr ""
-"POS 온라인 결제는 온라인 결제 방법 및 온라인 계정 결제 없이는 생성할 수 "
-"없습니다."
+msgstr "POS 온라인 결제는 온라인 결제 방법 및 온라인 계정 결제 없이는 생성할 수 없습니다."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -298,7 +294,7 @@ msgstr "서버 오류"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -319,9 +315,7 @@ msgstr "POS 온라인 결제 (tx.id=%d)를 올바르게 저장하지 못했습�
 msgid ""
 "The POS online payment (tx.id=%d) could not be saved correctly because the "
 "online payment method could not be found"
-msgstr ""
-"온라인 결제 수단을 찾을 수 없어 POS 온라인 결제 (tx.id=%d)를 올바르게 "
-"저장하지 못했습니다"
+msgstr "온라인 결제 수단을 찾을 수 없어 POS 온라인 결제 (tx.id=%d)를 올바르게 저장하지 못했습니다"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -453,8 +447,7 @@ msgid ""
 "There is a problem with the server. The order online payment status cannot "
 "be retrieved. Are you sure there is no online payment for this order ?"
 msgstr ""
-"서버에 문제가 있습니다. 온라인 결제 상태를 확인할 수 없습니다. 이 주문에 "
-"대한 온라인 결제가 없는지 다시 확인해 주십시오."
+"서버에 문제가 있습니다. 온라인 결제 상태를 확인할 수 없습니다. 이 주문에 대한 온라인 결제가 없는지 다시 확인해 주십시오."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -485,9 +478,7 @@ msgstr "결제 대기 중"
 msgid ""
 "To use an online payment method in a POS config, it must have at least one "
 "published payment provider supporting the currency of that POS config."
-msgstr ""
-"POS 설정에서 온라인 결제 수단을 사용하려면 해당 POS의 설정 통화를 지원하는 "
-"결제대행업체가 하나 이상 있어야 합니다."
+msgstr "POS 설정에서 온라인 결제 수단을 사용하려면 해당 POS의 설정 통화를 지원하는 결제대행업체가 하나 이상 있어야 합니다."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -542,10 +533,8 @@ msgstr "활성화하지 않은"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

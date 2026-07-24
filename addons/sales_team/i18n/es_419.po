@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 01:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/sales_team/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/sales_team/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,40 +34,53 @@ msgstr "%(user_names)s ya están en otros equipos (%(team_names)s)."
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-building\" title=\"Company\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-building\" title=\"Empresa\"/>"
-
-#. module: sales_team
-#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Email\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
 msgstr ""
-"<i class=\"d-none d-md-block fa fa-envelope\" title=\"Correo electrónico\"/>"
+"<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"business\" "
+"title=\"Empresa\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Phone\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-phone\" title=\"Teléfono\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"mail\" title=\"Email\"/>"
+msgstr ""
+"<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"mail\" "
+"title=\"Correo electrónico\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-users\" title=\"Sales Team\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-users\" title=\"Equipo de ventas\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"phone\" title=\"Phone\"/>"
+msgstr ""
+"<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"phone\" "
+"title=\"Teléfono\"/>"
+
+#. module: sales_team
+#: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
+msgstr ""
+"<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"group\" "
+"title=\"Equipo de ventas\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Correo "
-"electrónico\" title=\"Correo electrónico\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Correo electrónico\" title=\"Correo electrónico\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
-msgid "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-primary\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
-" <i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Equipo de "
-"ventas\"/>"
+" <i class=\"me-1 text-primary oi-fw oi oi-filled\" data-icon=\"group\" "
+"title=\"Equipo de ventas\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -115,7 +127,8 @@ msgstr "Agregar un miembro al equipo"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid "Add members to automatically assign their documents to this sales team."
+msgid ""
+"Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Agregue miembros para asignar sus documentos a este equipo de ventas en "
 "automático."
@@ -267,7 +280,8 @@ msgstr "Miembros favoritos"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid "Favorite teams to display them in the dashboard and access them easily."
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
 msgstr ""
 "Equipos favoritos que aparecerán en el tablero, podrá acceder a ellos con "
 "facilidad."
@@ -595,7 +609,8 @@ msgstr "Miembros del equipo"
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_member_action
 msgid "Team Members are salespersons assigned to specific teams."
-msgstr "Los miembros del equipo son vendedores asignados a equipos específicos."
+msgstr ""
+"Los miembros del equipo son vendedores asignados a equipos específicos."
 
 #. module: sales_team
 #: model:ir.actions.act_window,name:sales_team.crm_team_action_pipeline
@@ -619,8 +634,8 @@ msgid ""
 "The following team members are not allowed in company '%(company)s' of the "
 "Sales Team '%(team)s': %(users)s"
 msgstr ""
-"Los siguientes miembros del equipo no tienen permisos en la empresa \"%"
-"(company)s\" del equipo de ventas \"%(team)s\": %(users)s"
+"Los siguientes miembros del equipo no tienen permisos en la empresa "
+"\"%(company)s\" del equipo de ventas \"%(team)s\": %(users)s"
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.mail_activity_type_action_config_sales
@@ -649,12 +664,13 @@ msgstr ""
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__user_company_ids
 msgid "UX: Limit to team company or all if no company"
 msgstr ""
-"Experiencia del usuario: limitar a la empresa del equipo o a todas si no hay "
-"empresa"
+"Experiencia del usuario: limitar a la empresa del equipo o a todas si no hay"
+" empresa"
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid "Use Sales Teams to organize your sales departments and draw up reports."
+msgid ""
+"Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
 "Utilice los equipos de ventas para organizar sus departamentos de ventas y "
 "elaborar reportes."
@@ -690,8 +706,8 @@ msgid ""
 "User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
 "Team '%(team)s'."
 msgstr ""
-"El usuario \"%(user)s\" no tiene permisos de acceso en la empresa \"%"
-"(company)s\" del equipo de ventas \"%(team)s\"."
+"El usuario \"%(user)s\" no tiene permisos de acceso en la empresa "
+"\"%(company)s\" del equipo de ventas \"%(team)s\"."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -743,9 +759,10 @@ msgstr "¿Trabaja en varios equipos?"
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that %"
-"(duplicates)s already exist(s)."
-msgstr "Está intentando crear membresías duplicadas, ya existen %(duplicates)s."
+"You are trying to create duplicate membership(s). We found that "
+"%(duplicates)s already exist(s)."
+msgstr ""
+"Está intentando crear membresías duplicadas, ya existen %(duplicates)s."
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
@@ -767,7 +784,8 @@ msgstr "Por ejemplo, servicios"
 msgid ""
 "the user will have access to all records of everyone in the sales "
 "application."
-msgstr "el usuario tendrá acceso a todos los registros en la aplicación Ventas."
+msgstr ""
+"el usuario tendrá acceso a todos los registros en la aplicación Ventas."
 
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_salesman
@@ -777,8 +795,8 @@ msgstr "el usuario tendrá acceso a sus propios datos en la aplicación Ventas."
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
 msgstr ""
 "el usuario tendrá acceso a la configuración de ventas así como a los "
 "reportes estadísticos."

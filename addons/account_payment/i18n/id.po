@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-18 19:09+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"account_payment/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/account_payment/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -49,49 +48,51 @@ msgstr "<b>Komunikasi: </b>"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
+"<i class=\"oi oi-filled\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Pay Now</span>"
 msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Bayar Sekarang</span>"
+"<i class=\"oi-filled oi\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Bayar Sekarang</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Pay Now"
-msgstr "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Bayar Sekarang"
+msgid "<i class=\"oi oi-fw oi-filled\" data-icon=\"arrow_circle_right\"/> Pay Now"
+msgstr ""
+"<i class=\"oi-fw oi oi-filled\" data-icon=\"arrow_circle_right\"/> Bayar "
+"Sekarang"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Paid</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Dibayar</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Dibayar"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Paid"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Dibayar"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Pending"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Pending"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Processing Payment"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Memproses Pembayaran"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Processing Payment"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Memproses Pembayaran"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -116,28 +117,25 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund "
-"is still pending in a\n"
-"                        few minutes, please check your payment provider "
-"configuration."
+"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
+"                        few minutes, please check your payment provider configuration."
 msgstr ""
 "<strong>Warning!</strong> Ada refund yang pending untuk pembayaran ini.\n"
-"                        Tunggu sebentar sampai refund diproses. Bila refund "
-"masih pending setelah\n"
-"                        beberapa menit, silakan periksa kembali konfigurasi "
-"penyedia pembayaran Anda."
+"                        Tunggu sebentar sampai refund diproses. Bila refund masih pending setelah\n"
+"                        beberapa menit, silakan periksa kembali konfigurasi penyedia pembayaran Anda."
 
 #. module: account_payment
 #. odoo-python
 #: code:addons/account_payment/wizards/payment_link_wizard.py:0
 msgid "A discount will be applied if the customer pays before %s included."
-msgstr "Diskon akan diterapkan bila pelanggan membayar sebelum dan termasuk %s."
+msgstr ""
+"Diskon akan diterapkan bila pelanggan membayar sebelum dan termasuk %s."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay "
-"twice."
+"A payment has already been made on this invoice, please make sure to not pay"
+" twice."
 msgstr ""
 "Pembayaran sudah dilakukan pada faktur ini, pastikan pembayaran tidak "
 "dilakukan dua kali."
@@ -340,8 +338,7 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"Pada mode testing, pembayaran palsu akan diproses melalui antarmuka "
-"pembayaran testing.\n"
+"Pada mode testing, pembayaran palsu akan diproses melalui antarmuka pembayaran testing.\n"
 "Mode ini disarankan saat sedang set up provider."
 
 #. module: account_payment
@@ -433,8 +430,8 @@ msgstr "Opsi pembayaran online tidak diaktifkan di Konfigurasi."
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__available_pricelist_ids
 msgid ""
-"Only allow this payment provider when the partner's pricelist matches one of "
-"these."
+"Only allow this payment provider when the partner's pricelist matches one of"
+" these."
 msgstr ""
 
 #. module: account_payment
@@ -652,7 +649,8 @@ msgstr "Token akses tidak valid."
 #: code:addons/account_payment/wizards/payment_refund_wizard.py:0
 msgid ""
 "The amount to be refunded must be positive and cannot be superior to %s."
-msgstr "Jumlah yang akan di-refund harus positif dan tidak boleh lebih dari %s."
+msgstr ""
+"Jumlah yang akan di-refund harus positif dan tidak boleh lebih dari %s."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__journal_id
@@ -699,8 +697,8 @@ msgid ""
 "There was an error processing your payment: issue with credit card ID "
 "validation."
 msgstr ""
-"Terjadi kesalahan ketika memproses tagihan Anda: ada masalah pada pengesahan "
-"ID kartu kredit."
+"Terjadi kesalahan ketika memproses tagihan Anda: ada masalah pada pengesahan"
+" ID kartu kredit."
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -711,7 +709,8 @@ msgstr "Terjadi kesalahan ketika memproses tagihan Anda: transaksi gagal."
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was en error processing your payment: invalid credit card ID."
 msgstr ""
-"Terjadi kesalahan ketika memproses tagihan Anda: ID kartu kredit tidak valid."
+"Terjadi kesalahan ketika memproses tagihan Anda: ID kartu kredit tidak "
+"valid."
 
 #. module: account_payment
 #. odoo-python
@@ -769,12 +768,10 @@ msgstr "Batalkan Transaksi"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the "
-"enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Anda tidak dapat menghapus metode pembayaran yang terkait provider dalam "
-"status enabled atau testing.\n"
+"Anda tidak dapat menghapus metode pembayaran yang terkait provider dalam status enabled atau testing.\n"
 "Provider yang terhubung: %s"
 
 #. module: account_payment
@@ -784,8 +781,8 @@ msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
 msgstr ""
-"Anda tidak dapat menguninstal modul ini karena pembayaran menggunakan metode "
-"pembayaran ini sudah tersedia."
+"Anda tidak dapat menguninstal modul ini karena pembayaran menggunakan metode"
+" pembayaran ini sudah tersedia."
 
 #. module: account_payment
 #. odoo-python
@@ -794,8 +791,7 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Anda harus pertama-tama menonaktifkan penyedia pembayaran sebelum "
-"menghapusnya dari jurnal.\n"
+"Anda harus pertama-tama menonaktifkan penyedia pembayaran sebelum menghapusnya dari jurnal.\n"
 "Provider yang terhubung: %s"
 
 #. module: account_payment

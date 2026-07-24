@@ -10,14 +10,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:02+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Serbian (Latin script) <https://translate.odoo.com/projects/"
-"odoo-master/website_slides_survey/sr_Latn/>\n"
+"Language-Team: Serbian (Latin script) <https://translate.odoo.com/projects/odoo-master/website_slides_survey/sr_Latn/>\n"
 "Language: sr@latin\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_slides_survey
@@ -45,19 +43,11 @@ msgstr ""
 msgid ""
 "<div style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Dear <t t-out=\"object.partner_id.name or 'participant' or "
-"''\">participant</t><br/><br/>\n"
-"        Unfortunately, you have failed the certification and are no longer a "
-"member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or "
-"''\">Basics of Gardening</t>.<br/><br/>\n"
+"        Dear <t t-out=\"object.partner_id.name or 'participant' or ''\">participant</t><br/><br/>\n"
+"        Unfortunately, you have failed the certification and are no longer a member of the course: <t t-out=\"object.slide_partner_id.channel_id.name or ''\">Basics of Gardening</t>.<br/><br/>\n"
 "        Don't hesitate to enroll again!\n"
 "        </p><div style=\"margin: 16px 0px 16px 0px;\">\n"
-"            <a t-att-"
-"href=\"(object.slide_partner_id.channel_id.website_absolute_url)\" t-attf-"
-"style=\"background-color: {{user.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\">\n"
+"            <a t-att-href=\"(object.slide_partner_id.channel_id.website_absolute_url)\" t-attf-style=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\">\n"
 "                Enroll now\n"
 "            </a>\n"
 "        </div>\n"
@@ -69,59 +59,61 @@ msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"fa fa-arrow-right\"/> Get Certified"
-msgstr "<i class=\"fa fa-arrow-right\"/> Sertifikuj se"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Get Certified"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Sertifikuj se"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
 msgid ""
-"<i class=\"fa fa-download\" aria-label=\"Download certification\" "
-"title=\"Download Certification\"/>"
+"<i class=\"oi\" data-icon=\"download\" aria-label=\"Download certification\""
+" title=\"Download Certification\"/>"
 msgstr ""
-"<i class=\"fa fa-download\" aria-label=\"Preuzmi sertifikat\" "
+"<i class=\"oi\" data-icon=\"download\" aria-label=\"Preuzmi sertifikat\" "
 "title=\"Preuzmi sertifikat\"/>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
 msgid ""
-"<i class=\"fa fa-fw fa-trophy\" role=\"img\" aria-label=\"Download "
-"certification\" title=\"Download certification\"/> Download certification"
+"<i class=\"oi oi-fw oi-filled\" data-icon=\"trophy\" role=\"img\" aria-"
+"label=\"Download certification\" title=\"Download certification\"/> Download"
+" certification"
 msgstr ""
-"<i class=\"fa fa-fw fa-trophy\" role=\"img\" aria-label=\"Preuzmi "
-"sertifikat\" title=\"Preuzmi sertifikat\"/> Preuzmi sertifikat"
+"<i class=\"oi-fw oi oi-filled\" data-icon=\"trophy\" role=\"img\" aria-"
+"label=\"Preuzmi sertifikat\" title=\"Preuzmi sertifikat\"/> Preuzmi "
+"sertifikat"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_fill_form_done_inherit_website_slides
 msgid ""
-"<i class=\"fa fa-share-alt d-none d-md-inline\" aria-label=\"Share "
-"certification\" title=\"Share certification\"/>\n"
+"<i class=\"oi oi-filled d-none d-md-inline\" data-icon=\"share\" aria-label=\"Share certification\" title=\"Share certification\"/>\n"
 "                        <span class=\"d-md-none\">Share certification</span>"
 msgstr ""
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"fa fa-share-alt\" aria-label=\"Share\" title=\"Share\"/>"
-msgstr "<i class=\"fa fa-share-alt\" aria-label=\"Podeli\" title=\"Podeli\"/>"
+msgid "<i class=\"oi\" data-icon=\"family_history\" aria-label=\"Share\" title=\"Share\"/>"
+msgstr "<i class=\"oi\" data-icon=\"family_history\" aria-label=\"Podeli\" title=\"Podeli\"/>"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.slide_content_detailed
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Add Questions to this Survey"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Dodaj pitanja ovoj anketi"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Add Questions to this Survey"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Dodaj pitanja ovoj anketi"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.display_certificate
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Certifications"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Sve sertifikacije"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Certifications"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Sve sertifikacije"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.user_profile_content
-msgid "<i class=\"oi oi-arrow-right\"/> See Certifications"
-msgstr "<i class=\"oi oi-arrow-right\"/> Pogledaj sertifikacije"
+msgid "<i class=\"oi\" data-icon=\"east\"/> See Certifications"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Pogledaj sertifikacije"
 
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.survey_fill_form_done_inherit_website_slides
 msgid ""
-"<i class=\"oi oi-chevron-left me-2\" aria-hidden=\"true\"/>Go back to course"
+"<i class=\"oi me-2\" data-icon=\"chevron_backward\" aria-hidden=\"true\"/>Go"
+" back to course"
 msgstr ""
 
 #. module: website_slides_survey
@@ -152,9 +144,11 @@ msgstr "<span class=\"text-muted\">Sertifikacije</span>"
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.course_main
 msgid ""
-"<span>Start Now</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+"<span>Start Now</span><i class=\"oi ms-2 align-middle\" data-"
+"icon=\"chevron_forward\"/>"
 msgstr ""
-"<span>Počni odmah</span><i class=\"oi oi-chevron-right ms-2 align-middle\"/>"
+"<span>Počni odmah</span><i class=\"ms-2 align-middle oi\" data-"
+"icon=\"chevron_forward\"/>"
 
 #. module: website_slides_survey
 #: model:ir.model.constraint,message:website_slides_survey.constraint_slide_slide_check_survey_id
@@ -559,8 +553,8 @@ msgstr "Informacije o pretplatniku"
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_slide_slide__slide_type
 msgid ""
-"Subtype of the slide category, allows more precision on the actual file "
-"type / source type."
+"Subtype of the slide category, allows more precision on the actual file type"
+" / source type."
 msgstr ""
 "Podvrsta kategorije slajdova, omogućava veću preciznost o stvarnoj vrsti "
 "datoteke / vrsti izvora."
@@ -619,7 +613,8 @@ msgstr ""
 
 #. module: website_slides_survey
 #: model:ir.model.fields,help:website_slides_survey.field_survey_survey__slide_channel_ids
-msgid "The courses this survey is linked to through the e-learning application"
+msgid ""
+"The courses this survey is linked to through the e-learning application"
 msgstr "Kursevi sa kojima je povezana ova anketa kroz e-learning aplikaciju"
 
 #. module: website_slides_survey
@@ -641,8 +636,7 @@ msgstr "Naslov"
 #. odoo-python
 #: code:addons/website_slides_survey/models/survey_survey.py:0
 msgid ""
-"Uh-oh! You can’t delete surveys used as a Course Certification! Otherwise, "
-"students might think diplomas just grow on trees.\n"
+"Uh-oh! You can’t delete surveys used as a Course Certification! Otherwise, students might think diplomas just grow on trees.\n"
 "The courses that need them are:\n"
 "%s"
 msgstr ""
@@ -672,15 +666,11 @@ msgstr "Vama nije dozvoljeno da povežete sertifikaciju."
 #. module: website_slides_survey
 #: model_terms:ir.ui.view,arch_db:website_slides_survey.badge_content
 msgid ""
-"You can gain badges by passing certifications. Here is a list of all "
-"available certification badges.\n"
-"                            <br/>Follow the links to reach new heights and "
-"skill up!"
+"You can gain badges by passing certifications. Here is a list of all available certification badges.\n"
+"                            <br/>Follow the links to reach new heights and skill up!"
 msgstr ""
-"Prolaskom kroz sertifikaciju možete osvojiti bedževe. Evo liste svih "
-"dostupnih sertifikacionih bedževa.\n"
-"                            <br/>Pratite linkove da biste dostigli nove "
-"visine i unapredili svoje veštine!"
+"Prolaskom kroz sertifikaciju možete osvojiti bedževe. Evo liste svih dostupnih sertifikacionih bedževa.\n"
+"                            <br/>Pratite linkove da biste dostigli nove visine i unapredili svoje veštine!"
 
 #. module: website_slides_survey
 #: model:mail.template,subject:website_slides_survey.mail_template_user_input_certification_failed

@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 11:50+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/pos_online_payment/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/pos_online_payment/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -48,7 +47,8 @@ msgstr "Se debe especificar una opción de pago."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr ""
 "No se puede usar un pago de validación para el pago en línea del Punto de "
 "venta."
@@ -67,8 +67,8 @@ msgid ""
 "set, of the POS config."
 msgstr ""
 "Todos los proveedores de pago que configure para un método de pago en línea "
-"deben tener la misma divisa que el diario de ventas, la divisa de la empresa "
-"o, si eso no está configurado, la de la configuración del PdV."
+"deben tener la misma divisa que el diario de ventas, la divisa de la empresa"
+" o, si eso no está configurado, la de la configuración del PdV."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -307,8 +307,8 @@ msgstr "Error de servidor"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
-msgstr "Omitir <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
+msgstr "Omitir <i class=\"ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -343,7 +343,8 @@ msgstr "La sesión del PdV no está abierta."
 #. module: pos_online_payment
 #: model:ir.model.fields,help:pos_online_payment.field_payment_transaction__pos_order_id
 msgid "The Point of Sale order linked to the payment transaction"
-msgstr "La orden del punto de venta que está vinculada a la transacción de pago"
+msgstr ""
+"La orden del punto de venta que está vinculada a la transacción de pago"
 
 #. module: pos_online_payment
 #: model:ir.model.fields,help:pos_online_payment.field_account_payment__pos_order_id
@@ -391,7 +392,8 @@ msgstr "La orden no se guardó de manera correcta en el servidor."
 #: code:addons/pos_online_payment/models/pos_session.py:0
 msgid "The partner of the POS online payment (id=%d) could not be found"
 msgstr ""
-"El contacto del pago en línea del punto de venta (id=%d) no se pudo encontrar"
+"El contacto del pago en línea del punto de venta (id=%d) no se pudo "
+"encontrar"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -562,13 +564,10 @@ msgstr "No ha activado ningún"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
-"Deberías recibir un correo electrónico que confirme tu pago en unos "
-"minutos.<br/>\n"
+"Deberías recibir un correo electrónico que confirme tu pago en unos minutos.<br/>\n"
 "                        No dudes en contactarnos si no lo recibes."
 
 #. module: pos_online_payment

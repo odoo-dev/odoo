@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-22 00:06+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/website_hr_recruitment/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,8 +40,7 @@ msgstr ""
 "            <span class=\"text-muted small\">Proceso</span>\n"
 "            <h6>1 llamada telefónica</h6>\n"
 "            <h6>1 entrevista presencial</h6>\n"
-"            <span class=\"text-muted small\">Días para recibir una oferta</"
-"span>\n"
+"            <span class=\"text-muted small\">Días para recibir una oferta</span>\n"
 "            <h6>4 días después de la entrevista</h6>\n"
 "        "
 
@@ -67,34 +65,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr ""
-"<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Todos los trabajos"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Todos los trabajos"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Tipo de empleo\" role=\"img\" aria-"
-"label=\"Tipo de empleo\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Tipo de empleo\" "
+"role=\"img\" aria-label=\"Tipo de empleo\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> Descirpción del trabajo"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> Descirpción del trabajo"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">Mientras tanto,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Échele un vistazo a nuestro sitio web:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Échele un vistazo a nuestro sitio web:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -125,34 +120,28 @@ msgstr "<span class=\"s_website_form_label_content\">Breve introducción</span>"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Su correo electrónico</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Su nombre</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Su número de teléfono</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -341,7 +330,8 @@ msgstr "Crear contenido que ayude a nuestros usuarios a diario"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
 "Cree nuevas páginas de empleo con el botón <strong>+ <i>Nuevo</i></strong> "
 "en la parte superior derecha."
@@ -389,21 +379,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 "Todos los empleados pueden ver lo importante que es su trabajo.\n"
 "                     Contribuye al éxito de la empresa.\n"
 "                    <br/>\n"
-"                    Organizamos varias actividades a lo largo del año, como "
-"actividades deportivas\n"
-"                     semanales, eventos de integración de equipos, "
-"convivencias mensuales y más."
+"                    Organizamos varias actividades a lo largo del año, como actividades deportivas\n"
+"                     semanales, eventos de integración de equipos, convivencias mensuales y más."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -468,24 +453,18 @@ msgstr "Inicio"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "Normalmente <strong>contesto postulaciones en 3 días</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                Después tendremos una "
-"llamada o nos reuniremos en nuestras oficinas.\n"
+"                                                Después tendremos una llamada o nos reuniremos en nuestras oficinas.\n"
 "                                                <br/><br/>\n"
-"                                                Siéntase libre de "
-"<strong>ponerse en contacto conmigo si lo que quiere es\n"
-"                                                obtener retroalimentación "
-"antes,</strong> o si no tiene noticias de nosotros\n"
+"                                                Siéntase libre de <strong>ponerse en contacto conmigo si lo que quiere es\n"
+"                                                obtener retroalimentación antes,</strong> o si no tiene noticias de nosotros\n"
 "                                                pronto."
 
 #. module: website_hr_recruitment
@@ -875,12 +854,10 @@ msgstr "Parece que el perfil que nos proporcionó no es de LinkedIn"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "No hay oportunidades laborales en este momento,<br class=\"mb-2\"/>\n"
-"                                            pero no dude en <span class=\"fw-"
-"bold\">contactarnos</span> para una postulación espontánea."
+"                                            pero no dude en <span class=\"fw-bold\">contactarnos</span> para una postulación espontánea."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -921,15 +898,11 @@ msgstr "Visible desde este sitio web"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"Somos un equipo de personas apasionadas que tienen el objetivo de mejorar la "
-"vida de todo el mundo con productos innovadores.\n"
-"                                Creamos productos increíbles para resolver "
-"sus problemas empresariales."
+"Somos un equipo de personas apasionadas que tienen el objetivo de mejorar la vida de todo el mundo con productos innovadores.\n"
+"                                Creamos productos increíbles para resolver sus problemas empresariales."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website
@@ -1021,8 +994,7 @@ msgid ""
 "                                    We usually respond within 3 days..."
 msgstr ""
 "Su postulación se publicó con éxito,<br class=\"mb-2\"/>\n"
-"                                    Normalmente tardamos en responder 3 "
-"días..."
+"                                    Normalmente tardamos en responder 3 días..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -1078,8 +1050,8 @@ msgstr "programado"
 #~ "The following ongoing applications share an email address, phone number "
 #~ "and/or linkedin profile with this application:"
 #~ msgstr ""
-#~ "Las postulaciones a continuación tienen la misma dirección de correo, "
-#~ "número de teléfono o perfil de LinkedIn que esta postulación:"
+#~ "Las postulaciones a continuación tienen la misma dirección de correo, número"
+#~ " de teléfono o perfil de LinkedIn que esta postulación:"
 
 #~ msgid ""
 #~ "The following recently refused applications share an email address, phone "

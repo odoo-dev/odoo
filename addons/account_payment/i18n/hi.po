@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-20 04:36+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/"
-"account_payment/hi/>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/account_payment/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,8 +25,8 @@ msgid ""
 "#%(number)s - Installment of <strong>%(amount)s</strong> due on <strong "
 "class=\"text-primary\">%(date)s</strong>"
 msgstr ""
-"#%(number)s - <strong>%(amount)s</strong> की इंस्टॉलमेंट <strong class=\"text-"
-"primary\">%(date)s</strong> तक भरें"
+"#%(number)s - <strong>%(amount)s</strong> की इंस्टॉलमेंट <strong "
+"class=\"text-primary\">%(date)s</strong> तक भरें"
 
 #. module: account_payment
 #. odoo-javascript
@@ -43,49 +42,51 @@ msgstr "<b>कम्यूनिकेशन: </b>"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
+"<i class=\"oi oi-filled\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Pay Now</span>"
 msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"अभी चुकाएं</span>"
+"<i class=\"oi-filled oi\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> अभी चुकाएं</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Pay Now"
-msgstr "<i class=\"fa fa-fw fa-arrow-circle-right\"/> अभी चुकाएं"
+msgid "<i class=\"oi oi-fw oi-filled\" data-icon=\"arrow_circle_right\"/> Pay Now"
+msgstr "<i class=\"oi-fw oi oi-filled\" data-icon=\"arrow_circle_right\"/> अभी चुकाएं"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> अधिकृत</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Paid</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> चुका दिया गया</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> चुका दिया गया"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Paid"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> चुका दिया गया"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> बाकी है"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Pending"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> बाकी है"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Processing Payment"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> पेमेंट प्रोसेस की जा रही है"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Processing Payment"
+msgstr ""
+"<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> पेमेंट प्रोसेस की जा रही "
+"है"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -110,14 +111,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund "
-"is still pending in a\n"
-"                        few minutes, please check your payment provider "
-"configuration."
+"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
+"                        few minutes, please check your payment provider configuration."
 msgstr ""
 "<strong>चेतावनी!</strong> इस भुगतान के लिए एक रिफंड बकाया है.\n"
-"                        इसके प्रोसेस होने के लिए कुछ देर इंतज़ार करें. अगर कुछ मिनटों में "
-"भी रिफंड बकाया रहता है,\n"
+"                        इसके प्रोसेस होने के लिए कुछ देर इंतज़ार करें. अगर कुछ मिनटों में भी रिफंड बकाया रहता है,\n"
 "                        तो कृपया अपने भुगतान प्रोवाइडर का कॉन्फ़िगरेशन जांचें।"
 
 #. module: account_payment
@@ -129,8 +127,8 @@ msgstr "ग्राहक के %s तक भुगतान करने प�
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay "
-"twice."
+"A payment has already been made on this invoice, please make sure to not pay"
+" twice."
 msgstr ""
 "इस इनवॉइस पर पहले ही पेमेंट किया जा चुका है, कृपया दोबारा पेमेंट न करें।"
 
@@ -184,8 +182,8 @@ msgid ""
 "Are you sure you want to void the authorized transaction? This action can't "
 "be undone."
 msgstr ""
-"क्या आप वाकई मंज़ूर किए गए लेन-देन को रद्द करना चाहते हैं? इस कार्रवाई को वापस नहीं लिया "
-"जा सकता।"
+"क्या आप वाकई मंज़ूर किए गए लेन-देन को रद्द करना चाहते हैं? इस कार्रवाई को "
+"वापस नहीं लिया जा सकता।"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__authorized_transaction_ids
@@ -262,8 +260,8 @@ msgid ""
 "Done, your online payment has been successfully processed. Thank you for "
 "your order."
 msgstr ""
-"हो गया, आपका ऑनलाइन भुगतान सफलतापूर्वक प्रोसेस कर दिया गया है. आपके ऑर्डर के लिए "
-"धन्यवाद।"
+"हो गया, आपका ऑनलाइन भुगतान सफलतापूर्वक प्रोसेस कर दिया गया है. आपके ऑर्डर के"
+" लिए धन्यवाद।"
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_payment_link_wizard__epd_info
@@ -402,7 +400,8 @@ msgid ""
 "Note that only tokens from providers allowing to capture the amount are "
 "available."
 msgstr ""
-"ध्यान दें कि सिर्फ़ उन्हीं प्रोवाइडर के टोकन उपलब्ध हैं जो राशि कैप्चर करने की अनुमति देते हैं।"
+"ध्यान दें कि सिर्फ़ उन्हीं प्रोवाइडर के टोकन उपलब्ध हैं जो राशि कैप्चर करने "
+"की अनुमति देते हैं।"
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_register__payment_token_id
@@ -410,8 +409,8 @@ msgid ""
 "Note that tokens from providers set to only authorize transactions (instead "
 "of capturing the amount) are not available."
 msgstr ""
-"ध्यान दें कि सिर्फ़ उन्हीं प्रोवाइडर के टोकन उपलब्ध हैं जो लेन-देन को सिर्फ़ मंज़ूरी देने के बजाय "
-"राशि को कैप्चर करने की भी अनुमति देते हैं।"
+"ध्यान दें कि सिर्फ़ उन्हीं प्रोवाइडर के टोकन उपलब्ध हैं जो लेन-देन को सिर्फ़ "
+"मंज़ूरी देने के बजाय राशि को कैप्चर करने की भी अनुमति देते हैं।"
 
 #. module: account_payment
 #. odoo-python
@@ -422,8 +421,8 @@ msgstr "ऑनलाइन भुगतान विकल्प कॉन्फ
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__available_pricelist_ids
 msgid ""
-"Only allow this payment provider when the partner's pricelist matches one of "
-"these."
+"Only allow this payment provider when the partner's pricelist matches one of"
+" these."
 msgstr ""
 
 #. module: account_payment
@@ -688,13 +687,15 @@ msgid ""
 "There was an error processing your payment: issue with credit card ID "
 "validation."
 msgstr ""
-"आपके भुगतान को प्रोसेस करते समय एक गड़बड़ी हुई: क्रेडिट कार्ड आईडी की जांच में समस्या।"
+"आपके भुगतान को प्रोसेस करते समय एक गड़बड़ी हुई: क्रेडिट कार्ड आईडी की जांच "
+"में समस्या।"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
 msgid "There was an error processing your payment: transaction failed.<br/>"
 msgstr ""
-"आपके पेमेंट को प्रोसेस करते समय एक गड़बड़ी हुई: ट्रांज़ैक्शन फ़ेल हो गया.<br/>"
+"आपके पेमेंट को प्रोसेस करते समय एक गड़बड़ी हुई: ट्रांज़ैक्शन फ़ेल हो "
+"गया.<br/>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_error
@@ -758,12 +759,10 @@ msgstr "ट्रांज़ैक्शन रद्द करें"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the "
-"enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"आप किसी ऐसी भुगतान विधि को नहीं हटा सकते जो 'चालू' या 'टेस्ट' स्थिति में प्रोवाइडर से "
-"जुड़ी हुई है. \n"
+"आप किसी ऐसी भुगतान विधि को नहीं हटा सकते जो 'चालू' या 'टेस्ट' स्थिति में प्रोवाइडर से जुड़ी हुई है. \n"
 "जुड़े हुए प्रोवाइडर: %s"
 
 #. module: account_payment
@@ -773,8 +772,8 @@ msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
 msgstr ""
-"आप इस मॉड्यूल को अनइंस्टॉल नहीं कर सकते, क्योंकि इस भुगतान विधि का इस्तेमाल करके पहले ही "
-"भुगतान मौजूद हैं।"
+"आप इस मॉड्यूल को अनइंस्टॉल नहीं कर सकते, क्योंकि इस भुगतान विधि का इस्तेमाल "
+"करके पहले ही भुगतान मौजूद हैं।"
 
 #. module: account_payment
 #. odoo-python

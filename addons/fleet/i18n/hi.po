@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-20 01:11+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/fleet/"
-"hi/>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/fleet/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,7 +20,7 @@ msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
 msgstr ""
 
 #. module: fleet
@@ -59,8 +58,9 @@ msgid ""
 "A trailer hitch is a device attached to a vehicle's chassis for towing "
 "purposes,             such as pulling trailers, boats, or other vehicles."
 msgstr ""
-"ट्रेलर हिच एक उपकरण होता है जिसे गाड़ी के नीचे लगे ढांचे (चेसिस) से जोड़ा जाता है. इसका "
-"उपयोग ट्रेलर, नाव या किसी अन्य गाड़ी को खींचने के लिए किया जाता है।"
+"ट्रेलर हिच एक उपकरण होता है जिसे गाड़ी के नीचे लगे ढांचे (चेसिस) से जोड़ा "
+"जाता है. इसका उपयोग ट्रेलर, नाव या किसी अन्य गाड़ी को खींचने के लिए किया "
+"जाता है।"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -471,11 +471,11 @@ msgstr "कैटगरी"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
-"कैटेगरी बनाने से आप अपनी सभी गाड़ियों को बेहतर तरीके से संभाल सकते हैं और उन्हें व्यवस्थित ढंग "
-"से रख सकते हैं।"
+"कैटेगरी बनाने से आप अपनी सभी गाड़ियों को बेहतर तरीके से संभाल सकते हैं और "
+"उन्हें व्यवस्थित ढंग से रख सकते हैं।"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
@@ -520,10 +520,11 @@ msgstr "चुनें कि क्या कॉन्ट्रैक्ट �
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr ""
-"यह चुनें कि जिस सेवा की बात हो रही है, वह गाड़ियों के कॉन्ट्रैक्ट से जुड़ी है, उनकी सर्विस से "
-"या दोनों से"
+"यह चुनें कि जिस सेवा की बात हो रही है, वह गाड़ियों के कॉन्ट्रैक्ट से जुड़ी "
+"है, उनकी सर्विस से या दोनों से"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
@@ -842,11 +843,11 @@ msgstr "वह तारीख जब कॉन्ट्रैक्ट का �
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
-"वह तारीख जब कॉन्ट्रैक्ट का कवरेज खत्म होता है (डिफ़ॉल्ट रूप से, शुरू होने की तारीख से एक "
-"साल बाद)"
+"वह तारीख जब कॉन्ट्रैक्ट का कवरेज खत्म होता है (डिफ़ॉल्ट रूप से, शुरू होने की"
+" तारीख से एक साल बाद)"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__write_off_date
@@ -997,8 +998,8 @@ msgid ""
 "Emission Standard specifies the regulatory test procedure             or "
 "guideline under which a vehicle's emissions are measured."
 msgstr ""
-"उत्सर्जन मानक (एमिशन स्टैंडर्ड) वह सरकारी नियम या तरीका है, जिससे यह तय किया जाता है "
-"कि किसी गाड़ी से निकलने वाले धुएं या गैसों को कैसे मापा जाएगा।"
+"उत्सर्जन मानक (एमिशन स्टैंडर्ड) वह सरकारी नियम या तरीका है, जिससे यह तय किया"
+" जाता है कि किसी गाड़ी से निकलने वाले धुएं या गैसों को कैसे मापा जाएगा।"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__co2_standard
@@ -1006,8 +1007,8 @@ msgid ""
 "Emission Standard specifies the regulatory test procedure or             "
 "guideline under which a vehicle's emissions are measured."
 msgstr ""
-"उत्सर्जन मानक (एमिशन स्टैंडर्ड) वह सरकारी नियम या तरीका है, जिससे यह तय किया जाता है "
-"कि किसी गाड़ी से निकलने वाले धुएं या गैसों को कैसे मापा जाएगा।"
+"उत्सर्जन मानक (एमिशन स्टैंडर्ड) वह सरकारी नियम या तरीका है, जिससे यह तय किया"
+" जाता है कि किसी गाड़ी से निकलने वाले धुएं या गैसों को कैसे मापा जाएगा।"
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_16
@@ -1581,8 +1582,7 @@ msgid ""
 "            their related services, costs. Odoo will automatically warn\n"
 "            you when some contracts have to be renewed."
 msgstr ""
-"अपने सभी कॉन्ट्रैक्ट (लीजिंग, बीमा, वगैरह) को उनकी संबंधित सेवाओं और लागतों के साथ मैनेज "
-"करें.\n"
+"अपने सभी कॉन्ट्रैक्ट (लीजिंग, बीमा, वगैरह) को उनकी संबंधित सेवाओं और लागतों के साथ मैनेज करें.\n"
 "             जब कुछ कॉन्ट्रैक्ट को रिन्यू करना होगा,\n"
 "             तो Odoo आपको अपने-आप चेतावनी देगा।"
 
@@ -2360,10 +2360,11 @@ msgstr "स्पार्क प्लग बदलना"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
-"दरवाज़ों की कुल संख्या बताता है, जिसमें ज़रूरत पड़ने पर ट्रक और हैच के दरवाज़े भी शामिल हैं।"
+"दरवाज़ों की कुल संख्या बताता है, जिसमें ज़रूरत पड़ने पर ट्रक और हैच के "
+"दरवाज़े भी शामिल हैं।"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__state
@@ -2563,12 +2564,10 @@ msgstr "टूरिंग सहायता"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "अपने वाहन पर की गई सभी सेवाओं को ट्रैक करें.\n"
-"            सेवाएं कई प्रकार की हो सकती हैं: कभी-कभार होने वाली मरम्मत, तय रखरखाव, "
-"वगैरह।"
+"            सेवाएं कई प्रकार की हो सकती हैं: कभी-कभार होने वाली मरम्मत, तय रखरखाव, वगैरह।"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__trailer_hook
@@ -2824,7 +2823,8 @@ msgstr "इस कॉन्ट्रैक्ट से जुड़ी बा�
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_form
 msgid "Write here any other information related to the service completed."
 msgstr ""
-"जो सेवा पूरी हो चुकी है, उससे संबंधित कोई भी अन्य ज़रूरी जानकारी या विवरण यहां लिखें।"
+"जो सेवा पूरी हो चुकी है, उससे संबंधित कोई भी अन्य ज़रूरी जानकारी या विवरण "
+"यहां लिखें।"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_form

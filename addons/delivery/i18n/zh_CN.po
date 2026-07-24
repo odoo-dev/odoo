@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 17:35+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-master/delivery/zh_Hans/>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/projects/odoo-master/delivery/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,8 +29,7 @@ msgstr ""
 #: model:ir.actions.report,print_report_name:delivery.action_report_delivery_note
 msgid ""
 "\n"
-"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", "
-"object.name)\n"
+"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", object.name)\n"
 "        "
 msgstr ""
 
@@ -62,15 +60,13 @@ msgstr "%s（副本）"
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,"
-"<br/><br/>\n"
+"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,<br/><br/>\n"
 "        We are glad to inform you that your order has been shipped.\n"
 "        <t t-if=\"object.tracking_ref\">\n"
 "            Your tracking reference is\n"
 "            <strong>\n"
 "                <t t-if=\"object.tracking_url\">\n"
-"                    <a t-attf-href=\"{{ object.tracking_url }}\" "
-"target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
+"                    <a t-attf-href=\"{{ object.tracking_url }}\" target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
 "                </t>\n"
 "                <t t-else=\"\">\n"
 "                    <t t-out=\"object.tracking_ref\"/>.\n"
@@ -78,13 +74,11 @@ msgid ""
 "            </strong>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        Please find your delivery order attached for more details.<br/><br/"
-">\n"
+"        Please find your delivery order attached for more details.<br/><br/>\n"
 "        Thank you,\n"
 "        <t t-if=\"user.signature\">\n"
 "            <br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
-"out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "        </t>\n"
 "    </p>\n"
 "</div>\n"
@@ -93,8 +87,8 @@ msgstr ""
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Get rate"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>获取费率"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Get rate"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>获取费率"
 
 #. module: delivery
 #. odoo-python
@@ -112,8 +106,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">测试</span>\n"
 "                                <span class=\"o_stat_text\">环境</span>"
@@ -132,8 +125,7 @@ msgstr "<span class=\"text-success\">调试请求</span>"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"text-success\">生产</span>\n"
 "                                <span class=\"o_stat_text\">环境</span>"
@@ -187,8 +179,8 @@ msgstr ""
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__carrier_description
 msgid ""
 "A description of the delivery method that you want to communicate to your "
-"customers on the Sales Order and sales confirmation email. E.g. instructions "
-"for customers to follow."
+"customers on the Sales Order and sales confirmation email. E.g. instructions"
+" for customers to follow."
 msgstr ""
 
 #. module: delivery
@@ -249,8 +241,8 @@ msgstr "已归档"
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
 msgid ""
-"Are you sure you want the delivery to be free for this order? You might have "
-"forgotten to compute the rates."
+"Are you sure you want the delivery to be free for this order? You might have"
+" forgotten to compute the rates."
 msgstr "您确定该订单要免费送货吗？您可能忘记计算运费。"
 
 #. module: delivery
@@ -499,8 +491,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid ""
-"Delivery method %(name)s cannot have the same tag in both Must Have Tags and "
-"Excluded Tags."
+"Delivery method %(name)s cannot have the same tag in both Must Have Tags and"
+" Excluded Tags."
 msgstr ""
 
 #. module: delivery
@@ -558,9 +550,7 @@ msgid ""
 "Each carrier (e.g. UPS) can have several delivery methods (e.g.\n"
 "            UPS Express, UPS Standard) with a set of pricing rules attached\n"
 "            to each method."
-msgstr ""
-"每家承运商（如 UPS）可以有多种运输方式（如 UPS 快递、UPS 标准），并有一套相应"
-"的定价规则。"
+msgstr "每家承运商（如 UPS）可以有多种运输方式（如 UPS 快递、UPS 标准），并有一套相应的定价规则。"
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__prod_environment
@@ -582,10 +572,8 @@ msgstr "错误：此交付方式不适用。"
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the "
-"shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the "
-"cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
 "预估成本：客户将收到预估运费的发票。\n"
 "实际费用：客户将收到实际运费的发票，运费将在发货后更新到 SO 上。"
@@ -608,8 +596,8 @@ msgstr "如果计划根据发货的实际数量开具发票，请填写此字段
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"Filling this form allows you to make the delivery method available according "
-"to the content of the order or its destination."
+"Filling this form allows you to make the delivery method available according"
+" to the content of the order or its destination."
 msgstr ""
 
 #. module: delivery
@@ -881,8 +869,8 @@ msgstr "前缀已存在！"
 msgid ""
 "Prefixes of zip codes that this delivery method applies to. Note that "
 "regular expressions can be used to support countries with varying zip code "
-"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g. "
-"'100$' will only match '100' and not '1000')"
+"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g."
+" '100$' will only match '100' and not '1000')"
 msgstr ""
 
 #. module: delivery
@@ -1074,8 +1062,8 @@ msgstr "如果订单中至少有一个产品带有这些标记，则无法使用
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__must_have_tag_ids
 msgid ""
-"The method is available only if at least one product of the order has one of "
-"these tags."
+"The method is available only if at least one product of the order has one of"
+" these tags."
 msgstr "只有当订单中至少有一个产品带有这些标签时，才可使用该方法。"
 
 #. module: delivery
@@ -1106,9 +1094,7 @@ msgid ""
 "These methods allow to automatically compute the delivery price\n"
 "            according to your settings; on the sales order (based on the\n"
 "            quotation) or the invoice (based on the delivery orders)."
-msgstr ""
-"这些方法可以根据您的设置，在销售订单（基于报价单）或发票（基于交货单）上自动"
-"计算运费。"
+msgstr "这些方法可以根据您的设置，在销售订单（基于报价单）或发票（基于交货单）上自动计算运费。"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__fixed_margin
@@ -1120,9 +1106,7 @@ msgstr "该固定金额将被添加到运费。"
 msgid ""
 "This option adds a link for the customer in the portal to track their "
 "package easily. Use <shipmenttrackingnumber> as a placeholder in your URL."
-msgstr ""
-"此选项可在门户网站中为客户添加一个链接，方便客户追踪包裹。在 URL 中使用"
-"<shipmenttrackingnumber>作为占位符。"
+msgstr "此选项可在门户网站中为客户添加一个链接，方便客户追踪包裹。在 URL 中使用<shipmenttrackingnumber>作为占位符。"
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__margin
@@ -1229,11 +1213,9 @@ msgstr "重量单位标签"
 #. odoo-python
 #: code:addons/delivery/models/sale_order.py:0
 msgid ""
-"You can not update the shipping costs on an order where it was already "
-"invoiced!\n"
+"You can not update the shipping costs on an order where it was already invoiced!\n"
 "\n"
-"The following delivery lines (product, invoiced quantity and price) have "
-"already been processed:\n"
+"The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
 "\n"
 "%s"
 msgstr ""
@@ -1242,8 +1224,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/product_category.py:0
 msgid ""
-"You cannot delete this product category as it is used on the products linked "
-"to delivery methods."
+"You cannot delete this product category as it is used on the products linked"
+" to delivery methods."
 msgstr ""
 
 #. module: delivery
@@ -1284,8 +1266,8 @@ msgstr "即：https://ekartlogistics.com/shipmenttrack/<shipmenttrackingnumber>"
 #. module: delivery
 #: model:mail.template,subject:delivery.mail_template_data_delivery_note
 msgid ""
-"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref "
-"{{ object.so_id.name or 'n/a' }})"
+"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref {{ "
+"object.so_id.name or 'n/a' }})"
 msgstr ""
 
 #~ msgid "Payment Transaction"

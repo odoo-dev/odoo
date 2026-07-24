@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 14:52+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/pos_online_payment/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,8 +46,10 @@ msgstr "Opsi pembayaran harus ditentukan."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
-msgstr "Pembayaran validasi tidak dapat digunakan untuk pembayaran online POS."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
+msgstr ""
+"Pembayaran validasi tidak dapat digunakan untuk pembayaran online POS."
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment
@@ -302,7 +303,7 @@ msgstr "Error server"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -496,8 +497,8 @@ msgid ""
 "published payment provider supporting the currency of that POS config."
 msgstr ""
 "Untuk menggunakan metode pembayaran online di konfigurasi POS, harus "
-"terdapat setidaknya satu penyedia pembayaran yang diterbitkan yang mendukung "
-"mata uang konfigurasi POS tersebut."
+"terdapat setidaknya satu penyedia pembayaran yang diterbitkan yang mendukung"
+" mata uang konfigurasi POS tersebut."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -554,10 +555,8 @@ msgstr "Anda belum mengaktifkan"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

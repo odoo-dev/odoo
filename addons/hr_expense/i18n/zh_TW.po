@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 07:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
-"projects/odoo-master/hr_expense/zh_Hant/>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/projects/odoo-master/hr_expense/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,10 +27,8 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
 
@@ -70,7 +67,8 @@ msgstr "%(expense_name)s：你不是此項開支的公司的經理或人力資�
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr "%(user)s 確認此費用與類似費用不重複。"
 
 #. module: hr_expense
@@ -100,8 +98,8 @@ msgstr "<b>記錄收據浪費大量時間？</b>讓我們試試更好的方法�
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
-msgstr "<i class=\"oi oi-arrow-right\"/> 設立你的別名網域"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> 設立你的別名網域"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -275,10 +273,8 @@ msgstr "附件上傳過程中發生問題"
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
 
 #. module: hr_expense
@@ -493,9 +489,7 @@ msgstr "建立新費用以獲取統計資料。"
 msgid ""
 "Create prepaid virtual and physical cards for both one-time and recurring "
 "expenses, integrated into Odoo through Stripe Issuing."
-msgstr ""
-"利用整合至 Odoo 的 Stripe Issuing 功能，可為單次及經常性支出，建立預付儲值的"
-"虛擬或實體開支卡。"
+msgstr "利用整合至 Odoo 的 Stripe Issuing 功能，可為單次及經常性支出，建立預付儲值的虛擬或實體開支卡。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__create_uid
@@ -621,9 +615,7 @@ msgid ""
 "Do not keep your expense tickets in your pockets any longer. Just snap a "
 "picture of your receipt and let Odoo digitalizes it for you. The OCR and "
 "Artificial Intelligence will fill the data automatically."
-msgstr ""
-"不要再把你的費用收據放在口袋裡了。只需拍下收據的照片，讓 Odoo 為您將其數位"
-"化。 OCR 和人工智能將自動辨識資訊。"
+msgstr "不要再把你的費用收據放在口袋裡了。只需拍下收據的照片，讓 Odoo 為您將其數位化。 OCR 和人工智能將自動辨識資訊。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -1498,8 +1490,7 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
@@ -1757,9 +1748,7 @@ msgid ""
 "Ready? You can save it manually or discard modifications from here. You "
 "don't <em>need to save</em> - Odoo will save eveyrthing for you when you "
 "navigate."
-msgstr ""
-"準備好了嗎？你可在此處手動儲存或捨棄變更。你是<u>無需儲存</u>的：Odoo 會在你"
-"導覽時，為你儲存所有內容。"
+msgstr "準備好了嗎？你可在此處手動儲存或捨棄變更。你是<u>無需儲存</u>的：Odoo 會在你導覽時，為你儲存所有內容。"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1903,8 +1892,7 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
 "選擇負責審批該員工“費用”的用戶。\n"
 "如果為空，則審批由管理員或審批人完成（在設置/用戶中確定）。"
@@ -2102,14 +2090,15 @@ msgstr "賬戶 %(name)s（%(code)s）已封存。要繼續操作，請啟動它�
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr "創建員工支出時使用的公司默認日記帳。"
 
 #. module: hr_expense
@@ -2143,8 +2132,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
 
@@ -2173,8 +2161,7 @@ msgstr "分拆關閉後的總和保持不變"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
 
@@ -2293,8 +2280,7 @@ msgstr "記錄的異常活動的類型。"
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 "哎唷！你不可編輯此開支。\n"
 "\n"
@@ -2374,14 +2360,14 @@ msgstr "等待發還款項"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
 
 #. module: hr_expense

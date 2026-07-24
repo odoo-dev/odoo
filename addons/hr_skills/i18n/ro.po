@@ -18,14 +18,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 10:20+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"hr_skills/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/hr_skills/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_skills
@@ -41,12 +39,8 @@ msgstr "'CV - %s' % (object.name)"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 
 #. module: hr_skills
 #. odoo-python
@@ -59,10 +53,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_employee_skill.py:0
 msgid ""
-"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. "
-"Navigate to Skill types!</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. Navigate to Skill types!</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Show Skill Types\n"
 "                </a>"
 msgstr ""
@@ -1080,39 +1072,27 @@ msgstr "Funcție"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied "
-"production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative "
-"to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using "
-"MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 "Poziție: Lider echipă de dezvoltare\n"
-"- A susținut operațiunile tehnice prin investigarea și corectarea diverselor "
-"probleme de suport producție (Java, Perl, Shell scripts, SQL).\n"
-"- A condus planificarea asigurării calității pentru mai multe proiecte "
-"simultane, în raport cu arhitectura generală a sistemului sau modificări/"
-"dezvoltări noi ale sistemului de tranzacționare.\n"
-"- A configurat și lansat modele alfa și de risc critice pentru afacere "
-"folosind MATLAB și SQL cu inputuri de la managerii de portofoliu."
+"- A susținut operațiunile tehnice prin investigarea și corectarea diverselor probleme de suport producție (Java, Perl, Shell scripts, SQL).\n"
+"- A condus planificarea asigurării calității pentru mai multe proiecte simultane, în raport cu arhitectura generală a sistemului sau modificări/dezvoltări noi ale sistemului de tranzacționare.\n"
+"- A configurat și lansat modele alfa și de risc critice pentru afacere folosind MATLAB și SQL cu inputuri de la managerii de portofoliu."
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system "
-"environments from development to production.\n"
+"- Coordinated and managed software deployment across five system environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial "
-"installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
 msgstr ""
 "Poziție: Manager de produs\n"
-"- A coordonat și gestionat implementarea software-ului în cinci medii de "
-"sistem, de la dezvoltare la producție.\n"
-"- A dezvoltat proceduri stocate pentru a sprijini eforturile de programare "
-"la nivel Java.\n"
-"- A dezvoltat mai multe arhitecturi de centrale de energie regenerabilă, "
-"atât pentru instalații comerciale, cât și pentru cele din domeniul apărării."
+"- A coordonat și gestionat implementarea software-ului în cinci medii de sistem, de la dezvoltare la producție.\n"
+"- A dezvoltat proceduri stocate pentru a sprijini eforturile de programare la nivel Java.\n"
+"- A dezvoltat mai multe arhitecturi de centrale de energie regenerabilă, atât pentru instalații comerciale, cât și pentru cele din domeniul apărării."
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
@@ -1313,12 +1293,10 @@ msgstr "Martin, Stanley și Duncan"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through "
-"machine learning"
+"            Master thesis: Better grid management and control through machine learning"
 msgstr ""
 "Master în inginerie electrică\n"
-"            Teză de masterat: Îmbunătățirea gestionării și controlului "
-"rețelei prin învățarea automată"
+"            Teză de masterat: Îmbunătățirea gestionării și controlului rețelei prin învățarea automată"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_matlab
@@ -2098,8 +2076,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid ""
-"The following skills can't be created as they overlap or exactly match "
-"existing skills:\n"
+"The following skills can't be created as they overlap or exactly match existing skills:\n"
 "%(collisions)s"
 msgstr ""
 
@@ -2129,8 +2106,8 @@ msgstr ""
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
 msgstr ""
-"Nivelul competenței %(level)s nu este valabil pentru tipul de competență: %"
-"(type)s"
+"Nivelul competenței %(level)s nu este valabil pentru tipul de competență: "
+"%(type)s"
 
 #. module: hr_skills
 #: model:ir.model.constraint,message:hr_skills.constraint_hr_resume_line_date_check
@@ -2160,8 +2137,7 @@ msgid ""
 "This report will give you an overview of the skills per Employee.\n"
 "                Create them in configuration and add them on the Employee."
 msgstr ""
-"Acest raport vă oferă o imagine de ansamblu asupra aptitudinilor fiecărui "
-"angajat.\n"
+"Acest raport vă oferă o imagine de ansamblu asupra aptitudinilor fiecărui angajat.\n"
 "                Creați-le în configurare și adăugați-le la angajat."
 
 #. module: hr_skills

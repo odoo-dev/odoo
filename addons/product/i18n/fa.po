@@ -28,8 +28,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 23:09+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/"
-"product/fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/product/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -53,18 +52,16 @@ msgstr "تعداد محصولات"
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
 msgstr ""
 
 #. module: product
@@ -145,17 +142,14 @@ msgstr "- %(amount)s تخفیف"
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
@@ -245,19 +239,19 @@ msgstr ""
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"mx-2 oe_edit_only oi\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 
 #. module: product
@@ -279,8 +273,8 @@ msgstr "<span class=\"o_stat_text\">محصولات</span>"
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 #, fuzzy
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
 "<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">بر "
 "اساس واریانت‌ها</span>"
@@ -346,8 +340,8 @@ msgstr "یک محصول ترکیبی باید حداقل 1 انتخاب داشت
 #: model:ir.model.fields,help:product.field_product_product__description_sale
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
 "شرح محصولی که می خواهید به مشتریان خود اطلاع دهید. این توضیحات در هر سفارش "
@@ -362,11 +356,8 @@ msgstr ""
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
 
 #. module: product
@@ -514,8 +505,7 @@ msgid ""
 "Add products using the \"Add Products\" button at the top right to\n"
 "                                include them in the report."
 msgstr ""
-"محصولات را با استفاده از دکمه \"افزودن محصولات\" در بالا سمت راست به افزودن "
-"محصولات با استفاده از دکمه \"افزودن محصولات\" در بالا سمت راست اضافه کنید\n"
+"محصولات را با استفاده از دکمه \"افزودن محصولات\" در بالا سمت راست به افزودن محصولات با استفاده از دکمه \"افزودن محصولات\" در بالا سمت راست اضافه کنید\n"
 "                                تا آنها را در گزارش لحاظ کنید."
 
 #. module: product
@@ -766,14 +756,10 @@ msgstr "مشخصه ها و گونه ها"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 
 #. module: product
@@ -963,10 +949,8 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
 
 #. module: product
@@ -1063,8 +1047,8 @@ msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
 msgstr ""
-"ترکیب‌های ترکیبی به شما امکان می‌دهند از میان مجموعه‌ای از انتخاب‌ها در هر دسته، "
-"یک محصول را انتخاب کنید."
+"ترکیب‌های ترکیبی به شما امکان می‌دهند از میان مجموعه‌ای از انتخاب‌ها در هر "
+"دسته، یک محصول را انتخاب کنید."
 
 #. module: product
 #: model:product.template,description_sale:product.product_delivery_01_product_template
@@ -1289,23 +1273,16 @@ msgstr "ارز"
 #, fuzzy
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "مقدار فعلی محصولات\n"
-"در زمینه ای با یک مکان انبار واحد، این شامل کالاهای ذخیره شده در این مکان یا "
-"هر یک از فرزندان آن می شود.\n"
-"در زمینه ای با یک انبار واحد، این شامل کالاهای ذخیره شده در محل انبار این "
-"انبار یا هر یک از فرزندان آن می شود.\n"
+"در زمینه ای با یک مکان انبار واحد، این شامل کالاهای ذخیره شده در این مکان یا هر یک از فرزندان آن می شود.\n"
+"در زمینه ای با یک انبار واحد، این شامل کالاهای ذخیره شده در محل انبار این انبار یا هر یک از فرزندان آن می شود.\n"
 "در محل انبار این فروشگاه یا هر یک از فرزندان آن ذخیره می شود.\n"
-"در غیر این صورت، این شامل کالاهای ذخیره شده در هر مکان انبار با نوع "
-"\"داخلی\" می شود."
+"در غیر این صورت، این شامل کالاهای ذخیره شده در هر مکان انبار با نوع \"داخلی\" می شود."
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1391,7 +1368,8 @@ msgstr "واحد اندازه گیری پیش فرض برای همه عملیا�
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
 #, fuzzy
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr ""
 "واحد سفارشی را برای نمایش در فیلد قیمت به ازای واحد اندازه‌گیری تعریف کنید."
 
@@ -1555,8 +1533,8 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 #, fuzzy
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
 msgstr ""
 "محصولات را با واحد سفارشی نمایش می‌دهد اگر تعریف شده باشد، وگرنه واحد "
 "اندازه‌گیری انتخاب شده را نمایش می‌دهد."
@@ -1653,8 +1631,8 @@ msgstr "تاریخ پایان"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1721,8 +1699,8 @@ msgstr "قیمت مازاد"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
 msgstr ""
 
 #. module: product
@@ -1805,22 +1783,17 @@ msgstr "آیکون فونت عالی به عبارتی fa-tasks"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 
 #. module: product
@@ -2838,16 +2811,16 @@ msgstr "موجود"
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
 
 #. module: product
@@ -3561,40 +3534,28 @@ msgstr "تعداد مجودی کنونی (%s)."
 #, fuzzy
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 "مقدار محصولات ورودی برنامه ریزی شده\n"
-"در زمینه‌ای با یک مکان انبار واحد، این شامل کالاهایی است که به این مکان یا هر "
-"یک از فرزندان آن می‌رسند.\n"
-"در زمینه ای با یک انبار واحد، این شامل کالاهایی است که به محل این انبار یا "
-"هر یک از فرزندان آن می رسند.\n"
-"در غیر این صورت، این شامل کالاهایی می شود که به هر مکان انبار با نوع "
-"\"داخلی\" می رسند."
+"در زمینه‌ای با یک مکان انبار واحد، این شامل کالاهایی است که به این مکان یا هر یک از فرزندان آن می‌رسند.\n"
+"در زمینه ای با یک انبار واحد، این شامل کالاهایی است که به محل این انبار یا هر یک از فرزندان آن می رسند.\n"
+"در غیر این صورت، این شامل کالاهایی می شود که به هر مکان انبار با نوع \"داخلی\" می رسند."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__outgoing_qty
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "مقدار محصولات خروجی برنامه ریزی شده\n"
-"در زمینه ای با یک مکان انبار واحد، این شامل کالاهایی است که از این مکان یا "
-"هر یک از فرزندان آن خارج می شوند.\n"
-"در زمینه ای با یک انبار واحد، این شامل کالاهایی است که از محل این انبار یا "
-"هر یک از فرزندان آن خارج می شوند.\n"
-"در غیر این صورت، این شامل کالاهایی می شود که از هر مکان انبار با نوع "
-"\"داخلی\" خارج می شوند."
+"در زمینه ای با یک مکان انبار واحد، این شامل کالاهایی است که از این مکان یا هر یک از فرزندان آن خارج می شوند.\n"
+"در زمینه ای با یک انبار واحد، این شامل کالاهایی است که از محل این انبار یا هر یک از فرزندان آن خارج می شوند.\n"
+"در غیر این صورت، این شامل کالاهایی می شود که از هر مکان انبار با نوع \"داخلی\" خارج می شوند."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_template__free_qty
@@ -3642,8 +3603,8 @@ msgstr ""
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
 msgstr ""
 "قیمت های درخواستی فروشندگان خود را برای هر محصول بر اساس مقدار و دوره ثبت "
 "کنید."
@@ -4085,8 +4046,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
 msgstr ""
 
 #. module: product
@@ -4110,8 +4071,8 @@ msgid ""
 "since the 5 boxes are loose, you can move and place them in the way that "
 "suits you and your things best."
 msgstr ""
-"مجموعه سازمان‌دهنده میز برای نگهداری انواع اشیاء کوچک عالی است و از آنجایی که "
-"۵ جعبه آزاد هستند، می‌توانید آنها را به شکلی جابه‌جا کرده و قرار دهید که "
+"مجموعه سازمان‌دهنده میز برای نگهداری انواع اشیاء کوچک عالی است و از آنجایی "
+"که ۵ جعبه آزاد هستند، می‌توانید آنها را به شکلی جابه‌جا کرده و قرار دهید که "
 "بهترین تناسب را با شما و وسایلتان داشته باشد."
 
 #. module: product
@@ -4126,8 +4087,8 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4148,8 +4109,8 @@ msgstr ""
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
 
 #. module: product
@@ -4163,8 +4124,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
@@ -4183,8 +4144,8 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
 
@@ -4215,8 +4176,8 @@ msgstr ""
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
 msgstr ""
 "مقدار شمارش واحد پایه باید بزرگتر از 0 باشد. از 0 برای مخفی کردن قیمت هر "
 "واحد در این محصول استفاده کنید."
@@ -4580,8 +4541,7 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_template__standard_price
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 
@@ -4777,8 +4737,8 @@ msgstr "هشدارها"
 #. module: product
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr ""
 
 #. module: product
@@ -4899,8 +4859,8 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"می توانید یک فایل را از رایانه خود آپلود کنید یا یک لینک اینترنتی را در فایل "
-"خود کپی/پیست کنید."
+"می توانید یک فایل را از رایانه خود آپلود کنید یا یک لینک اینترنتی را در فایل"
+" خود کپی/پیست کنید."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__image
@@ -4942,8 +4902,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
 
@@ -4951,16 +4910,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
 msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -4975,16 +4934,16 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
 
 #. module: product
@@ -5001,8 +4960,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
 
@@ -5010,8 +4968,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_attribute_value.py:0
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
 
@@ -5019,8 +4976,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
 
 #. module: product
@@ -5036,8 +4993,7 @@ msgstr ""
 #: code:addons/product/static/src/product_catalog/kanban_renderer.xml:0
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 
 #. module: product
@@ -5047,25 +5003,20 @@ msgid ""
 "                whether it's a storable product, a consumable or a service."
 msgstr ""
 "شما باید برای هر چیزی که می فروشید یا می خرید یک محصول تعریف کنید،\n"
-"                 خواه یک محصول قابل ذخیره سازی، یک کالای مصرفی یا یک سرویس "
-"باشد."
+"                 خواه یک محصول قابل ذخیره سازی، یک کالای مصرفی یا یک سرویس باشد."
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_variant_action
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
 "شما باید برای هر چیزی که می فروشید یا می خرید یک محصول تعریف کنید،\n"
-"                 خواه یک محصول قابل ذخیره سازی، یک کالای مصرفی یا یک سرویس "
-"باشد.\n"
+"                 خواه یک محصول قابل ذخیره سازی، یک کالای مصرفی یا یک سرویس باشد.\n"
 "                 فرم محصول حاوی اطلاعاتی برای ساده کردن فرآیند فروش است:\n"
-"                 قیمت، یادداشت های موجود در پیش فاکتور، داده های حسابداری، "
-"روش های تدارکات و غیره."
+"                 قیمت، یادداشت های موجود در پیش فاکتور، داده های حسابداری، روش های تدارکات و غیره."
 
 #. module: product
 #. odoo-javascript

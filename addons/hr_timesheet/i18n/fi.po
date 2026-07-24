@@ -29,8 +29,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 08:16+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/"
-"hr_timesheet/fi/>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/hr_timesheet/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -114,8 +113,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
 msgstr ""
 "'%(missing_plan_names)s' analyyttiset suunnitelmat, jotka vaaditaan "
 "työaikakirjauksiin liitetyssä projektissa '%(project_name)s'."
@@ -139,27 +138,20 @@ msgstr "2 tuntia"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> Näytä yksityiskohdat"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> Näytä yksityiskohdat"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -284,14 +276,11 @@ msgstr "Analyysisuunnitelman sovellettavuus"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
 msgstr ""
-"Analysoi projekteja ja tehtäviä, joihin työntekijäsi käyttävät aikaansa."
-"<br>\n"
-"                Arvioi, mikä osa on laskutettavaa ja mitä kustannuksia se "
-"aiheuttaa."
+"Analysoi projekteja ja tehtäviä, joihin työntekijäsi käyttävät aikaansa.<br>\n"
+"                Arvioi, mikä osa on laskutettavaa ja mitä kustannuksia se aiheuttaa."
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_res_config_settings__reminder_allow
@@ -517,7 +506,8 @@ msgstr "Lisäaika"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr ""
 "Luo työaikakirjaukset, joiden perusteena on hyväksytyt lomapyynnöt ja "
 "yleiset vapaapäivät"
@@ -963,11 +953,11 @@ msgstr "Yrityksen sisäisen hankkeen tulisi olla kyseisessä yrityksessä."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr ""
-"Työaikataulun projektin, tehtävän ja kustannuspaikkojen on kuuluttava samaan "
-"yritykseen."
+"Työaikataulun projektin, tehtävän ja kustannuspaikkojen on kuuluttava samaan"
+" yritykseen."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_timesheets
@@ -978,8 +968,8 @@ msgstr "Työaikakirjauksia ei ole."
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
 msgstr ""
 "Näillä projekteilla on työaikakirjauksia, jotka viittaavat näihin. Ennen "
 "kuin poistat nämä projektit, poista työaikakirjaukset."
@@ -1013,11 +1003,11 @@ msgstr "Tämä vuosi"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
 msgstr ""
-"Tällä projekteilla on työaikakirjauksia, jotka viittaavat siihen. Ennen kuin "
-"poistat tämän projektin, poista työaikakirjaukset."
+"Tällä projekteilla on työaikakirjauksia, jotka viittaavat siihen. Ennen kuin"
+" poistat tämän projektin, poista työaikakirjaukset."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1032,12 +1022,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
 msgstr ""
-"Tätä tehtävää ei voi poistaa, koska se on linkitetty työaikakirjauksiin. Ota "
-"yhteyttä käyttäjään, jolla on korkeammat oikeudet, poista kirjaukset ensin "
+"Tätä tehtävää ei voi poistaa, koska se on linkitetty työaikakirjauksiin. Ota"
+" yhteyttä käyttäjään, jolla on korkeammat oikeudet, poista kirjaukset ensin "
 "ja poista tehtävä sen jälkeen."
 
 #. module: hr_timesheet
@@ -1045,12 +1035,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_timesheet.field_res_config_settings__project_time_mode_id
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "Tämä asettaa projekteissa ja tehtävissä käytetyn ajan yksikön.\n"
-"Jos käytät projektiin liittyivä työaikakirjauksia, älä unohda asettaa myös "
-"työntekijöille oikeaa ajan yksikköä."
+"Jos käytät projektiin liittyivä työaikakirjauksia, älä unohda asettaa myös työntekijöille oikeaa ajan yksikköä."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1285,7 +1273,8 @@ msgstr "Työaikakirjauksia ei voi luoda yksityiselle tehtävälle."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr ""
 "Työaikakirjaukset on luotava siten, että valituissa yrityksissä on "
 "aktiivinen työntekijä."
@@ -1315,8 +1304,8 @@ msgid ""
 "timesheets feature."
 msgstr ""
 "Jotta voit käyttää työaikakirjaustoimintoa, tarvitset kustannuspaikan "
-"projektillesi. Ota sellainen käyttöön suunnitelmassa '%(plan_name)s' tai ota "
-"työaikakirjaukset pois käytöstä."
+"projektillesi. Ota sellainen käyttöön suunnitelmassa '%(plan_name)s' tai ota"
+" työaikakirjaukset pois käytöstä."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1369,8 +1358,8 @@ msgstr "Summa:"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_line_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr ""
 "Seuraa tehtyjä tuntejasi projekteittain ja laskuta käytetty aika "
 "asiakkailtasi."
@@ -1393,8 +1382,7 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 "Käytä näitä avansanoja otsikossa määrittääksesi uusia tehtäviä:\n"
 "\n"
@@ -1405,8 +1393,7 @@ msgstr ""
 "                     !! Aseta tehtävälle korkea prioriteetti\n"
 "                     !!! Aseta tehtävä kiireelliseksi\n"
 "\n"
-"                    Varmista, että käytät oikeaa muotoa ja järjestystä, "
-"esim. Paranna ruudun konfiguraatiota 5h #ominaisuus #v16 @Mitchell !"
+"                    Varmista, että käytät oikeaa muotoa ja järjestystä, esim. Paranna ruudun konfiguraatiota 5h #ominaisuus #v16 @Mitchell !"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__user_id
@@ -1433,13 +1420,11 @@ msgstr "Katso tiedot"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_from_employee
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
 "Voit kirjata ja seurata työtuntejasi projektikohtaisesti joka\n"
-"                    päivä. Kaikesta projektiin käytetystä ajasta tulee "
-"kustannus ja se voidaan laskuttaa uudelleen\n"
+"                    päivä. Kaikesta projektiin käytetystä ajasta tulee kustannus ja se voidaan laskuttaa uudelleen\n"
 "                    asiakkaalta tarvittaessa."
 
 #. module: hr_timesheet
@@ -1451,22 +1436,18 @@ msgstr "Et voi tarkastella työaikakirjauksia jotka eivät ole omiasi."
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
-"Et voi syöttää työaikakirjauksia tähän projektiin, koska se on liitetty "
-"passiiviseen kustannuspaikkaan.<br/>\n"
-"                            Vaihda toiseen tiliin tai aktivoi nykyinen "
-"tilisi uudelleen, jotta voit tehdä työaikakirjanpitoa projektissa."
+"Et voi syöttää työaikakirjauksia tähän projektiin, koska se on liitetty passiiviseen kustannuspaikkaan.<br/>\n"
+"                            Vaihda toiseen tiliin tai aktivoi nykyinen tilisi uudelleen, jotta voit tehdä työaikakirjanpitoa projektissa."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
 msgstr ""
 "Et voi kirjata työaikakirjauksia tähän projektiin, koska se on liitetty "
 "passiiviseen kustannuspaikkaan.<br/> Vaihda tämä tili tai aktivoi nykyinen "
@@ -1477,7 +1458,8 @@ msgstr ""
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid "You cannot set an archived employee on existing timesheets."
 msgstr ""
-"Arkistoitua työntekijää ei voi asettaa olemassa oleville työaikakirjauksille."
+"Arkistoitua työntekijää ei voi asettaa olemassa oleville "
+"työaikakirjauksille."
 
 #. module: hr_timesheet
 #. odoo-python

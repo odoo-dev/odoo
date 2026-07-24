@@ -23,8 +23,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-19 15:52+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-master/"
-"fleet/bg/>\n"
+"Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-master/fleet/bg/>\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,8 +33,8 @@ msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -44,8 +43,7 @@ msgid ""
 "                                <span class=\"o_stat_text\">Vehicle</span>"
 msgstr ""
 "<span class=\"o_stat_value\">Ново</span>\n"
-"                                <span class=\"o_stat_text\">Превозно "
-"средство</span>"
+"                                <span class=\"o_stat_text\">Превозно средство</span>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_services_view_kanban
@@ -483,8 +481,8 @@ msgstr "Категории"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
 "Категориите ще ви помогнат да управлявате автопарка си по-ефективно и да "
 "организирате превозните си средства."
@@ -532,10 +530,11 @@ msgstr "Изберете дали договорът е все още валид
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr ""
-"Изберете дали услугата да се отнася за договори, услуги за превозни средства "
-"или и двете"
+"Изберете дали услугата да се отнася за договори, услуги за превозни средства"
+" или и двете"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_form
@@ -854,8 +853,8 @@ msgstr "Дата, на която започва обхвата на догов�
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
 "Дата, на която изтича обхвата на договора (стандартно една година след "
 "началната дата)"
@@ -864,8 +863,8 @@ msgstr ""
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__write_off_date
 msgid "Date when the vehicle's license plate has been cancelled/removed."
 msgstr ""
-"Дата, на която регистрационният номер на превозното средство е бил анулиран/"
-"премахнат."
+"Дата, на която регистрационният номер на превозното средство е бил "
+"анулиран/премахнат."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_res_config_settings__delay_alert_contract
@@ -1034,7 +1033,8 @@ msgstr "Автомобил на служител"
 #: code:addons/fleet/models/fleet_vehicle_log_services.py:0
 msgid "Emptying the odometer value of a vehicle is not allowed."
 msgstr ""
-"Изпразването стойността на километража на превозното средство не е позволено."
+"Изпразването стойността на километража на превозното средство не е "
+"позволено."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_assignation_log__date_end
@@ -1596,16 +1596,15 @@ msgid ""
 "            you when some contracts have to be renewed."
 msgstr ""
 "Управлявайте всичките си договори (лизинг, застраховки и т.н.)\n"
-"със свързаните с тях услуги и разходи. Odoo автоматично ще ви "
-"предупреждава,\n"
+"със свързаните с тях услуги и разходи. Odoo автоматично ще ви предупреждава,\n"
 "когато някои договори трябва да бъдат подновени."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_costs_reporting_action
 msgid "Manage efficiently your different effective vehicles Costs with Odoo."
 msgstr ""
-"Управлявайте ефективно различните реални разходи на вашите превозни средства "
-"с Odoo."
+"Управлявайте ефективно различните реални разходи на вашите превозни средства"
+" с Odoo."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_odometer_reporting_action
@@ -2377,8 +2376,8 @@ msgstr "Подмяна на запалителни свещи"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 
 #. module: fleet
@@ -2579,8 +2578,7 @@ msgstr "Пътна помощ"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Проследявайте всички услуги, извършени върху вашето превозно средство. "
 "Услугите могат да бъдат от много видове: случайни ремонти, фиксирана "
@@ -2634,8 +2632,8 @@ msgstr "Вид на изключение на дейност в базата."
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__vin_sn
 msgid "Unique number written on the vehicle motor (VIN/SN number)"
 msgstr ""
-"Уникален номер, изписан върху двигателя на автомобил (Идентификационен/"
-"сериен номер на превозно средство)"
+"Уникален номер, изписан върху двигателя на автомобил "
+"(Идентификационен/сериен номер на превозно средство)"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__odometer_unit
@@ -2877,8 +2875,7 @@ msgid ""
 "You can customize available status to track the evolution of\n"
 "            each vehicle. Example: active, being repaired, sold."
 msgstr ""
-"Можете да персонализирате наличните статуси, за да проследявате развитието "
-"на\n"
+"Можете да персонализирате наличните статуси, за да проследявате развитието на\n"
 "всяко превозно средство. Пример: активно, в ремонт, продадено."
 
 #. module: fleet

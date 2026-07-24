@@ -20,14 +20,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 20:06+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-master/"
-"account_payment/sl/>\n"
+"Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-master/account_payment/sl/>\n"
 "Language: sl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
-"n%100==4 ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
@@ -54,49 +52,51 @@ msgstr "<b>Komuniciranje: </b>"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
+"<i class=\"oi oi-filled\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Pay Now</span>"
 msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Plačaj zdaj</span>"
+"<i class=\"oi-filled oi\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Plačaj zdaj</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Pay Now"
-msgstr "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Plačaj zdaj"
+msgid "<i class=\"oi oi-fw oi-filled\" data-icon=\"arrow_circle_right\"/> Pay Now"
+msgstr ""
+"<i class=\"oi-fw oi oi-filled\" data-icon=\"arrow_circle_right\"/> Plačaj "
+"zdaj"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Pooblaščeno</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Paid</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Plačano</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Plačano"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Paid"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Plačano"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> V čakanju"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Pending"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> V čakanju"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Processing Payment"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Obdelava plačila"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Processing Payment"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Obdelava plačila"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -122,15 +122,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund "
-"is still pending in a\n"
-"                        few minutes, please check your payment provider "
-"configuration."
+"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
+"                        few minutes, please check your payment provider configuration."
 msgstr ""
 "<strong>Opozorilo!</strong> Za to plačilo je čakajoče vračilo.\n"
 "Počakajte trenutek, da se obdela. Če vračilo še vedno čaka \n"
-"                        čez nekaj minut preverite konfiguracijo svojega "
-"ponudnika plačilnih storitev."
+"                        čez nekaj minut preverite konfiguracijo svojega ponudnika plačilnih storitev."
 
 #. module: account_payment
 #. odoo-python
@@ -141,8 +138,8 @@ msgstr "Popust se obračuna, če stranka plača pred %s vključen."
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay "
-"twice."
+"A payment has already been made on this invoice, please make sure to not pay"
+" twice."
 msgstr ""
 "Plačilo za ta račun je že bilo izvedeno, prosimo, poskrbite, da ne plačate "
 "dvakrat."
@@ -435,8 +432,8 @@ msgstr "Možnost spletnega plačila ni omogočena v konfiguraciji."
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__available_pricelist_ids
 msgid ""
-"Only allow this payment provider when the partner's pricelist matches one of "
-"these."
+"Only allow this payment provider when the partner's pricelist matches one of"
+" these."
 msgstr ""
 
 #. module: account_payment
@@ -772,12 +769,10 @@ msgstr "Neveljavna transakcija"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the "
-"enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Plačilne metode, ki je povezana s ponudnikom v omogočenem ali testnem "
-"stanju, ni mogoče izbrisati.\n"
+"Plačilne metode, ki je povezana s ponudnikom v omogočenem ali testnem stanju, ni mogoče izbrisati.\n"
 "Povezani ponudnik(i): %s"
 
 #. module: account_payment
@@ -797,8 +792,7 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Preden izbrišete dnevnik ponudnika plačilnih storitev, ga morate najprej "
-"deaktivirati.\n"
+"Preden izbrišete dnevnik ponudnika plačilnih storitev, ga morate najprej deaktivirati.\n"
 "Povezani ponudniki: %s"
 
 #. module: account_payment

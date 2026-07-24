@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 07:42+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/pos_online_payment/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,7 +44,8 @@ msgstr "決済オプションを指定して下さい。"
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr "認証決済は、POSオンライン支払いに使用することはできません。"
 
 #. module: pos_online_payment
@@ -61,8 +61,7 @@ msgid ""
 "same currency as the Sales Journal, or the company currency if that is not "
 "set, of the POS config."
 msgstr ""
-"オンライン決済方法用に設定されたすべての決済プロバイダーは、販売仕訳帳と同じ"
-"通貨であるか、設定されていない場合はPOSの会社の通貨を使用する必要があります。"
+"オンライン決済方法用に設定されたすべての決済プロバイダーは、販売仕訳帳と同じ通貨であるか、設定されていない場合はPOSの会社の通貨を使用する必要があります。"
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -256,9 +255,7 @@ msgstr "決済プロバイダーの要件"
 #. odoo-javascript
 #: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Please ensure you have a customer with an email address on this order."
-msgstr ""
-"このオーダには、メールアドレスを持つ顧客が登録されていることを確認してくださ"
-"い。"
+msgstr "このオーダには、メールアドレスを持つ顧客が登録されていることを確認してください。"
 
 #. module: pos_online_payment
 #: model:ir.model,name:pos_online_payment.model_pos_config
@@ -298,7 +295,7 @@ msgstr "サーバーエラー"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -319,9 +316,7 @@ msgstr "POSオンライン支払 (tx.id=%d)が正常に保存できませんで�
 msgid ""
 "The POS online payment (tx.id=%d) could not be saved correctly because the "
 "online payment method could not be found"
-msgstr ""
-"オンライン決済方法が見つからなかったため、POSオンライン決済 (tx.id=%d) が正常"
-"に保存できませんでした。"
+msgstr "オンライン決済方法が見つからなかったため、POSオンライン決済 (tx.id=%d) が正常に保存できませんでした。"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -452,9 +447,7 @@ msgstr "サーバに問題が発生しました。オーダオンライン決済
 msgid ""
 "There is a problem with the server. The order online payment status cannot "
 "be retrieved. Are you sure there is no online payment for this order ?"
-msgstr ""
-"サーバに問題が発生しました。オーダのオンライン決済ステータスが取得できません"
-"。このオーダにオンライン決済がないのは確かですか？"
+msgstr "サーバに問題が発生しました。オーダのオンライン決済ステータスが取得できません。このオーダにオンライン決済がないのは確かですか？"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -486,8 +479,7 @@ msgid ""
 "To use an online payment method in a POS config, it must have at least one "
 "published payment provider supporting the currency of that POS config."
 msgstr ""
-"POS コンフィグでオンライン決済方法を使用するには、その POSコンフィグの通貨を"
-"サポートする公開決済プロバイダが少なくとも 1 つ必要です。"
+"POS コンフィグでオンライン決済方法を使用するには、その POSコンフィグの通貨をサポートする公開決済プロバイダが少なくとも 1 つ必要です。"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -521,9 +513,7 @@ msgstr "更新されたオンライン決済"
 msgid ""
 "Use this payment method for online payments (payments made on a web page "
 "with online payment providers)"
-msgstr ""
-"オンライン決済用 (オンライン決済プロバイダを利用したウェブページ上での支払い)"
-"にはこの決済方法を使用して下さい。"
+msgstr "オンライン決済用 (オンライン決済プロバイダを利用したウェブページ上での支払い)にはこの決済方法を使用して下さい。"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
@@ -544,10 +534,8 @@ msgstr "以下が有効化されていません:"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

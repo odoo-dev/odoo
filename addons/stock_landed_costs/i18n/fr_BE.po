@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-02-20 09:01+0000\n"
 "PO-Revision-Date: 2015-11-18 13:41+0000\n"
 "Last-Translator: Martin Trigaux\n"
-"Language-Team: French (Belgium) (http://www.transifex.com/odoo/odoo-9/"
-"language/fr_BE/)\n"
+"Language-Team: French (Belgium) (http://www.transifex.com/odoo/odoo-9/language/fr_BE/)\n"
 "Language: fr_BE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,8 +31,7 @@ msgstr ""
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
-msgid ""
-"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgid "<i class=\"oi\" data-icon=\"schedule\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 msgstr ""
 
 #. module: stock_landed_costs
@@ -739,6 +737,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 msgid ""
-"You cannot change the product type or disable landed cost option because the "
-"product is used in a journal item."
+"You cannot change the product type or disable landed cost option because the"
+" product is used in a journal item."
 msgstr ""

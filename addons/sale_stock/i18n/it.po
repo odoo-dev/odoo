@@ -15,14 +15,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:47+0000\n"
 "PO-Revision-Date: 2026-06-22 00:27+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/"
-"sale_stock/it/>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/sale_stock/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
-"0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_stock
@@ -42,28 +40,28 @@ msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Awaiting arrival"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> In attesa dell'arrivo"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Awaiting arrival"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/> In attesa dell'arrivo"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/>Preparation"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/>Preparazione"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/>Preparation"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/>Preparazione"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/> Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/> Annullato"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/> Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/> Annullato"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/>Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/>Annullato"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/>Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/>Annullato"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-truck\"/> Received"
-msgstr "<i class=\"fa fa-fw fa-truck\"/> Ricevuto"
+msgid "<i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Received"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Ricevuto"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.stock_production_lot_view_form
@@ -73,16 +71,12 @@ msgstr "<span class=\"o_stat_text\">Vendite</span>"
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Shipped\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Shipped\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Spedito\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Spedito\n"
 "                                    </span>"
 
 #. module: sale_stock
@@ -98,13 +92,10 @@ msgstr "<strong>Termini di resa</strong>"
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
 msgid ""
-"According to product configuration, the delivered quantity can be "
-"automatically computed by mechanism:\n"
+"According to product configuration, the delivered quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
-"  - Analytic From expenses: the quantity is the quantity sum from posted "
-"expenses\n"
-"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to "
-"this line\n"
+"  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
+"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
 
@@ -205,9 +196,9 @@ msgid ""
 "shipping, the shipping policy of the order will be taken into account to "
 "either use the minimum or maximum lead time of the order lines."
 msgstr ""
-"Data di consegna che può essere promessa al cliente. Per i prodotti servizio "
-"viene calcolata dal tempo di risposta minimo delle righe ordine. in caso di "
-"spedizione, per la politica dell'ordine viene preso in considerazione il "
+"Data di consegna che può essere promessa al cliente. Per i prodotti servizio"
+" viene calcolata dal tempo di risposta minimo delle righe ordine. in caso di"
+" spedizione, per la politica dell'ordine viene preso in considerazione il "
 "tempo di risposta minimo o massimo delle righe ordine."
 
 #. module: sale_stock
@@ -413,13 +404,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
 msgid ""
 "Margin of error for dates promised to customers. Products will be scheduled "
-"for procurement and delivery that many days earlier than the actual promised "
-"date, to cope with unexpected delays in the supply chain."
+"for procurement and delivery that many days earlier than the actual promised"
+" date, to cope with unexpected delays in the supply chain."
 msgstr ""
 "Margine di errore per date promesse ai clienti. Per superare ritardi "
-"imprevisti nella catena di fornitura, l'approvvigionamento e la consegna dei "
-"prodotti vengono programmate con alcuni giorni di anticipo sull'attuale data "
-"promessa."
+"imprevisti nella catena di fornitura, l'approvvigionamento e la consegna dei"
+" prodotti vengono programmate con alcuni giorni di anticipo sull'attuale "
+"data promessa."
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__qty_delivered_method
@@ -506,13 +497,10 @@ msgstr "CREA RESO"
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_help_message_template
 msgid ""
 "Reduce back orders with reservations, locations management, smart\n"
-"                replenishment propositions, shipping connectors, barcode "
-"scanner, etc."
+"                replenishment propositions, shipping connectors, barcode scanner, etc."
 msgstr ""
-"Riduci gli ordini residui grazie a prenotazioni, gestione delle ubicazioni, "
-"proposte\n"
-"                di rifornimento intelligenti, connettori di spedizione, "
-"scanner di codici a barre, ecc."
+"Riduci gli ordini residui grazie a prenotazioni, gestione delle ubicazioni, proposte\n"
+"                di rifornimento intelligenti, connettori di spedizione, scanner di codici a barre, ecc."
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_reference
@@ -682,8 +670,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/product_catalog/sale_order_line/sale_order_line.js:0
 msgid ""
-"The ordered quantity cannot be decreased below the amount already delivered. "
-"Instead, create a return in your inventory."
+"The ordered quantity cannot be decreased below the amount already delivered."
+" Instead, create a return in your inventory."
 msgstr ""
 "La quantità ordinata non può essere ridotta al di sotto della quantità già "
 "consegnata. In alternativa, puoi creare un reso nel magazzino."

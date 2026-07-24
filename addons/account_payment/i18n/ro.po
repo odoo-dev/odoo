@@ -17,14 +17,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 19:35+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"account_payment/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/account_payment/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_payment
@@ -51,49 +49,49 @@ msgstr "<b>Comunicare:</b>"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
+"<i class=\"oi oi-filled\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Pay Now</span>"
 msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\">"
-"Achită acum</span>"
+"<i class=\"oi-filled oi\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\">Achită acum</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Pay Now"
-msgstr "<i class=\"fa fa-fw fa-arrow-circle-right\"/>Achită acum"
+msgid "<i class=\"oi oi-fw oi-filled\" data-icon=\"arrow_circle_right\"/> Pay Now"
+msgstr "<i class=\"oi-fw oi oi-filled\" data-icon=\"arrow_circle_right\"/>Achită acum"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Autorizat</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Paid</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Plătit</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Plătit"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Paid"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Plătit"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/>În așteptare"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Pending"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/>În așteptare"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Processing Payment"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> Procesare plată"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Processing Payment"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> Procesare plată"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -116,17 +114,12 @@ msgstr "<strong>Rată</strong><br/>"
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund "
-"is still pending in a\n"
-"                        few minutes, please check your payment provider "
-"configuration."
+"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
+"                        few minutes, please check your payment provider configuration."
 msgstr ""
-"<strong>Atenție!</strong> Există o rambursare în așteptare pentru această "
-"plată.\n"
-"                        Așteptați un moment pentru a fi procesată. Dacă "
-"rambursarea este încă în așteptare în\n"
-"                        câteva minute, vă rugăm să verificați configurația "
-"furnizorului de plată."
+"<strong>Atenție!</strong> Există o rambursare în așteptare pentru această plată.\n"
+"                        Așteptați un moment pentru a fi procesată. Dacă rambursarea este încă în așteptare în\n"
+"                        câteva minute, vă rugăm să verificați configurația furnizorului de plată."
 
 #. module: account_payment
 #. odoo-python
@@ -139,11 +132,11 @@ msgstr ""
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay "
-"twice."
+"A payment has already been made on this invoice, please make sure to not pay"
+" twice."
 msgstr ""
-"O plată a fost deja efectuată pentru această factură, vă rugăm să nu plătiți "
-"de două ori."
+"O plată a fost deja efectuată pentru această factură, vă rugăm să nu plătiți"
+" de două ori."
 
 #. module: account_payment
 #. odoo-python
@@ -195,8 +188,8 @@ msgid ""
 "Are you sure you want to void the authorized transaction? This action can't "
 "be undone."
 msgstr ""
-"Sunteți sigur că doriți să anulați tranzacția autorizată? Această acțiune nu "
-"poate fi anulată."
+"Sunteți sigur că doriți să anulați tranzacția autorizată? Această acțiune nu"
+" poate fi anulată."
 
 #. module: account_payment
 #: model:ir.model.fields,field_description:account_payment.field_account_bank_statement_line__authorized_transaction_ids
@@ -334,7 +327,8 @@ msgid ""
 "Impossible to pay all the overdue invoices if they don't share the same "
 "currency."
 msgstr ""
-"Este imposibil să plătiți toate facturile restante dacă nu au aceeași monedă."
+"Este imposibil să plătiți toate facturile restante dacă nu au aceeași "
+"monedă."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_method_line__payment_provider_state
@@ -413,8 +407,8 @@ msgid ""
 "Note that only tokens from providers allowing to capture the amount are "
 "available."
 msgstr ""
-"Rețineți că doar token-urile de la furnizori care permit captarea sumei sunt "
-"disponibile."
+"Rețineți că doar token-urile de la furnizori care permit captarea sumei sunt"
+" disponibile."
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_register__payment_token_id
@@ -434,8 +428,8 @@ msgstr "Opțiunea de plată online nu este activată în Configurare."
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__available_pricelist_ids
 msgid ""
-"Only allow this payment provider when the partner's pricelist matches one of "
-"these."
+"Only allow this payment provider when the partner's pricelist matches one of"
+" these."
 msgstr ""
 
 #. module: account_payment
@@ -770,12 +764,10 @@ msgstr "Tranzacție nulă"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the "
-"enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"Nu puteți șterge o metodă de plată care este legată de un furnizor aflat în "
-"stare activă sau de testare.\n"
+"Nu puteți șterge o metodă de plată care este legată de un furnizor aflat în stare activă sau de testare.\n"
 "Furnizor(i) legați: %s"
 
 #. module: account_payment
@@ -795,8 +787,7 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
-"Trebuie să dezactivați mai întâi furnizorul de plată înainte de a șterge "
-"jurnalul său.\n"
+"Trebuie să dezactivați mai întâi furnizorul de plată înainte de a șterge jurnalul său.\n"
 "Furnizori legați: %s"
 
 #. module: account_payment

@@ -21,12 +21,12 @@ msgstr ""
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
-msgid "<small>Follow</small><i class=\"fa fa-fw ms-1\"/>"
+msgid "<small>Follow</small><i class=\"oi oi-fw ms-1\"/>"
 msgstr ""
 
 #. module: website_mail
 #: model_terms:ir.ui.view,arch_db:website_mail.follow
-msgid "<small>Unfollow</small><i class=\"fa fa-fw ms-1\"/>"
+msgid "<small>Unfollow</small><i class=\"oi oi-fw ms-1\"/>"
 msgstr ""
 
 #. module: website_mail

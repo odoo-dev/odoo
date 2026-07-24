@@ -20,22 +20,19 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 12:11+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/es/>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-master/im_livechat/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
-"0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: im_livechat
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -121,10 +118,11 @@ msgstr "%s (copia)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
-"'%(input_email)s' no parece ser un correo electrónico válido. ¿Podría volver "
-"a intentarlo?"
+"'%(input_email)s' no parece ser un correo electrónico válido. ¿Podría volver"
+" a intentarlo?"
 
 #. module: im_livechat
 #. odoo-python
@@ -144,17 +142,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* \"Mostrar\" muestra el botón de chat en todas las páginas.\n"
-"* \"Mostrar con notificación\" es similar a \"Mostrar\" pero cuenta con un "
-"texto flotante junto al botón.\n"
-"* \"Abrir automáticamente\" muestra el botón y abre automáticamente la "
-"ventana de conversación.\n"
+"* \"Mostrar con notificación\" es similar a \"Mostrar\" pero cuenta con un texto flotante junto al botón.\n"
+"* \"Abrir automáticamente\" muestra el botón y abre automáticamente la ventana de conversación.\n"
 "* \"Ocultar\" oculta el botón de chat en las páginas.\n"
 
 #. module: im_livechat
@@ -165,30 +159,30 @@ msgstr "< 1m"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Volver al modo de edición"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Volver al modo de edición"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Remove operator\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -213,8 +207,8 @@ msgstr "<span>Sesiones en curso:</span>"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Recordatorio: este paso solo sucederá si no hay operadores "
 "disponibles.</span>"
@@ -222,25 +216,18 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>Consejo: para que el bot pueda realizar acciones complejas (enviar a "
-"un operador, etc.) es necesario que ocurra al menos una interacción "
-"(pregunta, correo electrónico, etc.). </span>\n"
-"                    <span>Utilice las reglas de canal si desea que el bot "
-"interactúe con los visitantes solo cuando no hay operadores disponibles.</"
-"span>"
+"<span>Consejo: para que el bot pueda realizar acciones complejas (enviar a un operador, etc.) es necesario que ocurra al menos una interacción (pregunta, correo electrónico, etc.). </span>\n"
+"                    <span>Utilice las reglas de canal si desea que el bot interactúe con los visitantes solo cuando no hay operadores disponibles.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Consejo: para que el bot pueda realizar acciones complejas (enviar a "
 "un operador, etc.) es necesario que ocurra al menos una interacción "
@@ -249,8 +236,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Consejo: agregue los pasos adicionales que el bot debe seguir en caso "
 "de que no haya ningún operador disponible.</span>"
@@ -285,7 +272,8 @@ msgstr "Añadir experiencia"
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid "Add the following code to the &lt;head&gt; section of your website:"
 msgstr ""
-"Añada el siguiente código a la sección &lt;de encabezado&gt; de su sitio web:"
+"Añada el siguiente código a la sección &lt;de encabezado&gt; de su sitio "
+"web:"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -513,8 +501,8 @@ msgstr "Canales"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "El chat es privado y único entre 2 personas. El grupo es privado entre las "
 "personas invitadas. El acceso al canal es libre (dependiendo de su "
@@ -870,8 +858,8 @@ msgid ""
 "selected action must be 'Open automatically' otherwise this parameter will "
 "not be taken into account."
 msgstr ""
-"Retraso (en segundos) para abrir automáticamente la ventana de conversación. "
-"Nota: la acción seleccionada debe ser \"Abrir automáticamente\", de lo "
+"Retraso (en segundos) para abrir automáticamente la ventana de conversación."
+" Nota: la acción seleccionada debe ser \"Abrir automáticamente\", de lo "
 "contrario este parámetro no se tendrá en cuenta."
 
 #. module: im_livechat
@@ -1397,8 +1385,8 @@ msgstr "Información"
 msgid ""
 "Invalid URL '%s'. The Review Link must start with 'http://' or 'https://'."
 msgstr ""
-"URL no válida “%s”. El enlace de reseña debe empezar con “http://” o “"
-"https://”."
+"URL no válida “%s”. El enlace de reseña debe empezar con “http://” o "
+"“https://”."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_script_step__is_forward_operator_child
@@ -2062,8 +2050,8 @@ msgstr "Solo si"
 #: code:addons/im_livechat/models/im_livechat_channel.py:0
 msgid "Only Live Chat operators can join Live Chat channels"
 msgstr ""
-"Solo los operadores del chat en directo pueden unirse a los canales del chat "
-"en directo"
+"Solo los operadores del chat en directo pueden unirse a los canales del chat"
+" en directo"
 
 #. module: im_livechat
 #. odoo-python
@@ -2204,8 +2192,8 @@ msgstr "Enlace de redirección"
 msgid ""
 "Regular expression specifying the web pages this rule will be applied on."
 msgstr ""
-"Expresión regular que especifica las páginas web en las que se aplicará esta "
-"regla."
+"Expresión regular que especifica las páginas web en las que se aplicará esta"
+" regla."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__mail_message_id
@@ -2448,8 +2436,7 @@ msgstr "Sesiones por operador"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2588,12 +2575,12 @@ msgstr "Se envió la conversación."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "Esta regla solo se aplicará a estos países. Por ejemplo, si seleccionó "
-"\"Bélgica\" y \"Estados Unidos\" y estableció la acción como \"Ocultar\", el "
-"botón de chat se ocultará en la URL específica de los visitantes que se "
+"\"Bélgica\" y \"Estados Unidos\" y estableció la acción como \"Ocultar\", el"
+" botón de chat se ocultará en la URL específica de los visitantes que se "
 "ubican en estos 2 países. Esta función requiere que instale GeoIP en su "
 "servidor."
 
@@ -2632,8 +2619,8 @@ msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
 msgstr ""
-"Este es un mensaje de bienvenida automático que su visitante verá al iniciar "
-"una nueva conversación."
+"Este es un mensaje de bienvenida automático que su visitante verá al iniciar"
+" una nueva conversación."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2694,21 +2681,11 @@ msgstr "Color del título"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
-"Para aplicar la regla solo a determinadas páginas de tu sitio web, introduce "
-"una expresión regular de URL como /shop. Esto coincidirá con cualquier "
-"página que empiece por /shop/product. Deja el campo vacío para aplicar la "
-"regla a todas las páginas.<br/>\n"
-"                                    En las bases de datos on-premise, es "
-"necesario tener GeoIP instalado en el servidor para geolocalizar a los "
-"visitantes. Si no está instalado, las reglas que incluyan restricciones por "
-"país se ignorarán."
+"Para aplicar la regla solo a determinadas páginas de tu sitio web, introduce una expresión regular de URL como /shop. Esto coincidirá con cualquier página que empiece por /shop/product. Deja el campo vacío para aplicar la regla a todas las páginas.<br/>\n"
+"                                    En las bases de datos on-premise, es necesario tener GeoIP instalado en el servidor para geolocalizar a los visitantes. Si no está instalado, las reglas que incluyan restricciones por país se ignorarán."
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_agent_history_action
@@ -2718,8 +2695,8 @@ msgid ""
 "Track and improve live chat performance with insights on session activity, "
 "response times, customer ratings, and call interactions."
 msgstr ""
-"Haga seguimiento y mejore el rendimiento del chat en directo con información "
-"sobre la actividad de las sesiones, tiempo de respuesta, calificaciones de "
+"Haga seguimiento y mejore el rendimiento del chat en directo con información"
+" sobre la actividad de las sesiones, tiempo de respuesta, calificaciones de "
 "los clientes e interacciones de llamada."
 
 #. module: im_livechat
@@ -2889,8 +2866,8 @@ msgid ""
 "Visitors who leave a positive review will be redirected to this optional "
 "link."
 msgstr ""
-"Los visitantes que dejen una reseña positiva serán redirigidos a este enlace "
-"opcional."
+"Los visitantes que dejen una reseña positiva serán redirigidos a este enlace"
+" opcional."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_channel__web_page
@@ -2968,7 +2945,8 @@ msgstr ""
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__block_assignment_during_call
 msgid "While on a call, agents will not receive new conversations."
-msgstr "Los agentes no recibirán conversaciones mientras estén en una llamada."
+msgstr ""
+"Los agentes no recibirán conversaciones mientras estén en una llamada."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -2993,7 +2971,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/im_livechat/controllers/channel.py:0
 msgid "Write expertises: Only LINK and UNLINK commands are allowed."
-msgstr "Habilidades de escritura: solo se permiten los comandos LINK y UNLINK."
+msgstr ""
+"Habilidades de escritura: solo se permiten los comandos LINK y UNLINK."
 
 #. module: im_livechat
 #. odoo-javascript

@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 21:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/"
-"website_mass_mailing/lo/>\n"
+"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/website_mass_mailing/lo/>\n"
 "Language: lo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,57 +22,52 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Curated Industry "
-"Insights"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Curated "
+"Industry Insights"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/"
-">  ຂໍ້ມູນເຈາະຈຶກໃນຂະແໜງການທີ່ຄັດສັນມາແລ້ວ"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" "
+"role=\"img\"/>  ຂໍ້ມູນເຈາະຈຶກໃນຂະແໜງການທີ່ຄັດສັນມາແລ້ວ"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Expert Tips &amp; "
-"How-Tos"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Expert "
+"Tips &amp; How-Tos"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  ເຄັດລັບຈາກຜູ້ຊ່ຽວຊານ "
-"&amp; ວິທີການຕ່າງໆ"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" "
+"role=\"img\"/>  ເຄັດລັບຈາກຜູ້ຊ່ຽວຊານ &amp; ວິທີການຕ່າງໆ"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"Resources"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Guides "
+"&amp; Resources"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  ຄູ່ມື &amp; ແຫຼ່ງຂໍ້ມູນ"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/>  ຄູ່ມື "
+"&amp; ແຫຼ່ງຂໍ້ມູນ"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_grid
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_form
 #, fuzzy
-msgid ""
-"<i class=\"fa fa-check-circle-o\" role=\"img\"/> Thanks for registering!"
-msgstr "<i class=\"fa fa-check-circle-o\" role=\"img\"/> ຂອບໃຈສຳລັບການລົງທະບຽນ!"
+msgid "<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> Thanks for registering!"
+msgstr "<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> ຂອບໃຈສຳລັບການລົງທະບຽນ!"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                        We send one weekly newsletter per "
-"list and always try to keep it interesting. You can unsubscribe at any "
-"time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                        We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                    </span>"
 msgstr ""
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                    We send one weekly newsletter per list "
-"and always try to keep it interesting. You can unsubscribe at any time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                    We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                </span>"
 msgstr ""
 
@@ -81,8 +75,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website_mass_mailing
@@ -99,8 +92,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 #, fuzzy
 msgid ""
-"<span class=\"s_website_form_label_content\">I agree to receive updates</"
-"span>\n"
+"<span class=\"s_website_form_label_content\">I agree to receive updates</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">ຂ້ອຍຕົກລົງທີ່ຈະຮັບຂໍ້ມູນອັບເດດ</span>\n"
@@ -110,8 +102,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Name</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website_mass_mailing
@@ -128,8 +119,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Our mailing lists</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website_mass_mailing
@@ -164,7 +154,8 @@ msgstr "ເປັນຄົນທຳອິດທີ່ຮັບຮູ້ຂ່າ
 #, fuzzy
 msgid ""
 "Be the first to find out all the latest news,<br/> products, and trends."
-msgstr "ເປັນຄົນທຳອິດທີ່ຮັບຮູ້ຂ່າວສານໃໝ່ລ້າສຸດ,<br/> ຜະລິດຕະພັນ, ແລະ ແນວໂນ້ມຕ່າງໆ."
+msgstr ""
+"ເປັນຄົນທຳອິດທີ່ຮັບຮູ້ຂ່າວສານໃໝ່ລ້າສຸດ,<br/> ຜະລິດຕະພັນ, ແລະ ແນວໂນ້ມຕ່າງໆ."
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_waiting_list
@@ -238,8 +229,8 @@ msgid ""
 "Get all the latest news, blog posts and product updates from our company, "
 "delivered directly to your inbox."
 msgstr ""
-"ຮັບຂ່າວສານໃໝ່ລ້າສຸດ, ບົດຄວາມບລັອກ ແລະ ການອັບເດດຜະລິດຕະພັນຈາກບໍລິສັດຂອງພວກເຮົາ "
-"ສົ່ງກົງເຖິງກ່ອງຈົດໝາຍຂອງທ່ານ."
+"ຮັບຂ່າວສານໃໝ່ລ້າສຸດ, ບົດຄວາມບລັອກ ແລະ "
+"ການອັບເດດຜະລິດຕະພັນຈາກບໍລິສັດຂອງພວກເຮົາ ສົ່ງກົງເຖິງກ່ອງຈົດໝາຍຂອງທ່ານ."
 
 #. module: website_mass_mailing
 #. odoo-python
@@ -261,8 +252,8 @@ msgid ""
 "Join our mailing list to receive carefully curated resources, tips, and "
 "updates straight to your inbox."
 msgstr ""
-"ເຂົ້າຮ່ວມລາຍຊື່ຜູ້ຮັບຈົດໝາຍຂອງພວກເຮົາ ເພື່ອຮັບແຫຼ່ງຂໍ້ມູນ, ເຄັດລັບ ແລະ ການອັບເດດທີ່ຄັດສັນມາຢ່າງດີ "
-"ສົ່ງກົງເຖິງກ່ອງຈົດໝາຍຂອງທ່ານ."
+"ເຂົ້າຮ່ວມລາຍຊື່ຜູ້ຮັບຈົດໝາຍຂອງພວກເຮົາ ເພື່ອຮັບແຫຼ່ງຂໍ້ມູນ, ເຄັດລັບ ແລະ "
+"ການອັບເດດທີ່ຄັດສັນມາຢ່າງດີ ສົ່ງກົງເຖິງກ່ອງຈົດໝາຍຂອງທ່ານ."
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_waiting_list
@@ -352,8 +343,8 @@ msgid ""
 "No mailing list found, do you want to create a new one? This will save all "
 "your changes, are you sure you want to proceed?"
 msgstr ""
-"ບໍ່ພົບລາຍຊື່ຜູ້ຮັບຈົດໝາຍ, ທ່ານຕ້ອງການສ້າງໃໝ່ບໍ່? ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, "
-"ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການສືບຕໍ່?"
+"ບໍ່ພົບລາຍຊື່ຜູ້ຮັບຈົດໝາຍ, ທ່ານຕ້ອງການສ້າງໃໝ່ບໍ່? "
+"ນີ້ຈະບັນທຶກການປ່ຽນແປງທັງໝົດຂອງທ່ານ, ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການສືບຕໍ່?"
 
 #. module: website_mass_mailing
 #. odoo-javascript

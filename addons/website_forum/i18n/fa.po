@@ -21,8 +21,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:50+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/"
-"website_forum/fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/website_forum/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -262,31 +261,27 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 msgid ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Sign up</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Sign up</a>"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or "
-"reject this answer."
+"                            As a moderator, you can either validate or reject this answer."
 msgstr ""
 "<b class=\"d-block \">این پاسخ علامت گذاری شده است</b>\n"
-"                            به عنوان یک مدیر، شما می‌توانید این پاسخ را تأیید "
-"یا رد کنید."
+"                            به عنوان یک مدیر، شما می‌توانید این پاسخ را تأیید یا رد کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your "
-"previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">شما یک پست معلق دارید</b>\n"
-"                        لطفاً منتظر بمانید تا مدیر پست قبلی شما را تأیید کند "
-"تا به سؤالات پاسخ دهد."
+"                        لطفاً منتظر بمانید تا مدیر پست قبلی شما را تأیید کند تا به سؤالات پاسخ دهد."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -305,8 +300,8 @@ msgid ""
 "<b>Answers should not add or expand questions</b>. Instead, either edit the "
 "question or add a comment."
 msgstr ""
-"<b>پاسخ‌ها نباید اضافه شوند و سوالات نیز نباید گسترده‌تر شوند<b>. در عوض، یا "
-"سوالات را ویرایش کنید و یا توضیحاتی را اضافه کنید."
+"<b>پاسخ‌ها نباید اضافه شوند و سوالات نیز نباید گسترده‌تر شوند<b>. در عوض، یا"
+" سوالات را ویرایش کنید و یا توضیحاتی را اضافه کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -315,8 +310,8 @@ msgid ""
 "<b>Answers should not comment other answers</b>. Instead add a comment on "
 "the other answers."
 msgstr ""
-"<b>پاسخ ها نباید در رابطه با پاسخ‌های دیگر اظهار نظر کنند</b>. در عوض یک نظر "
-"در مورد پاسخ های دیگر اضافه کنید."
+"<b>پاسخ ها نباید در رابطه با پاسخ‌های دیگر اظهار نظر کنند</b>. در عوض یک نظر"
+" در مورد پاسخ های دیگر اضافه کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -324,13 +319,13 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please "
-"use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please"
+" use commenting facility."
 msgstr ""
 "<b>پاسخ ها نباید شروع کننده بحث یا گفتویی باشند</b> این  انجمن پرسش و پاسخ، "
 "یک گروه بحث نیست. لطفاً از برگزاری مناظره در پاسخ‌های خود اجتناب کنید، زیرا "
-"آنها ماهیت سؤال و پاسخ‌ها را کمرنگ می‌کنند. برای بحث های مختصر لطفا از اظهار "
-"نظر استفاده کنید."
+"آنها ماهیت سؤال و پاسخ‌ها را کمرنگ می‌کنند. برای بحث های مختصر لطفا از اظهار"
+" نظر استفاده کنید."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -338,20 +333,20 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional "
-"information."
+"to include links to other questions or answers providing relevant additional"
+" information."
 msgstr ""
-"<b>یک پاسخ نمی‌تواند صرفا یک اشاره به پرسش‌های دیگر باشد</b>. به‌جای آن یک نظر "
-"به سؤال با علامت «تکراری احتمالی...» اضافه کنید. با این وجود، اضافه کردن "
-"پیوندهایی به سؤالات یا پاسخ های دیگر که اطلاعات اضافی مربوطه را ارائه می‌دهد، "
-"مشکلی ندارد."
+"<b>یک پاسخ نمی‌تواند صرفا یک اشاره به پرسش‌های دیگر باشد</b>. به‌جای آن یک "
+"نظر به سؤال با علامت «تکراری احتمالی...» اضافه کنید. با این وجود، اضافه کردن"
+" پیوندهایی به سؤالات یا پاسخ های دیگر که اطلاعات اضافی مربوطه را ارائه "
+"می‌دهد، مشکلی ندارد."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
-"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
+" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -364,14 +359,14 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
-"solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
+" solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
 "<b>پاسخ ها نباید فقط یک لینک به یک راه حل ارائه دهند</b>. در عوض، متن "
-"توضیحات راه حل را در پاسخ خود اضافه کنید، حتی اگر فقط یک کپی/پیست ساده باشد. "
-"از پیوندها استقبال می‌شود، اما باید مکمل پاسخ، ارجاع منابع یا خواندنی‌های "
+"توضیحات راه حل را در پاسخ خود اضافه کنید، حتی اگر فقط یک کپی/پیست ساده باشد."
+" از پیوندها استقبال می‌شود، اما باید مکمل پاسخ، ارجاع منابع یا خواندنی‌های "
 "اضافی باشند."
 
 #. module: website_forum
@@ -379,8 +374,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your "
-"own question."
+"You can search questions by their title or tags. It’s also OK to answer your"
+" own question."
 msgstr ""
 "<b>قبل از اینکه بپرسید - لطفاً یک سؤال مشابه را جستجو کنید.</b> می‌توانید "
 "سوالات را بر اساس عنوان یا برچسب آنها جستجو کنید. پاسخ دادن به سوالی که "
@@ -390,8 +385,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<b>Please avoid asking questions that are too subjective and argumentative</"
-"b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and "
+"argumentative</b> or not relevant to this community."
 msgstr ""
 "<b>لطفا از پرسیدن سوالاتی که بیش از حد ذهنی هستند خودداری کنید</b> یا "
 "سوالاتی که مربوط به این انجمن نیست."
@@ -399,20 +394,14 @@ msgstr ""
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
-"the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can "
-"always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please "
-"<b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
-"<b>لطفا سعی کنید یک پاسخ اساسی بدهید.</b> اگر می خواهید در مورد سؤال یا پاسخ "
-"نظر دهید، فقط\n"
-"            <b>از ابزار نظر دادن استفاده کنید</b> لطفا به یاد داشته باشید که "
-"همیشه می توانید <b>پاسخ های خود را اصلاح کنید</b>\n"
-"            - نیازی نیست به یک سوال دو بار پاسخ دهید. همچنین، لطفا <b>رای "
-"دادن را فراموش نکنید</b>\n"
+"<b>لطفا سعی کنید یک پاسخ اساسی بدهید.</b> اگر می خواهید در مورد سؤال یا پاسخ نظر دهید، فقط\n"
+"            <b>از ابزار نظر دادن استفاده کنید</b> لطفا به یاد داشته باشید که همیشه می توانید <b>پاسخ های خود را اصلاح کنید</b>\n"
+"            - نیازی نیست به یک سوال دو بار پاسخ دهید. همچنین، لطفا <b>رای دادن را فراموش نکنید</b>\n"
 "            - این واقعا کمک می کند تا بهترین پرسش و پاسخ را انتخاب کنید!"
 
 #. module: website_forum
@@ -429,12 +418,10 @@ msgstr "<b>شما قبلاً یک پست معلق دارید.</b><br/>"
 #: model_terms:ir.ui.view,arch_db:website_forum.contact
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"نشان طلایی\" title=\"نشان طلایی\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"نشان طلایی\" title=\"نشان طلایی\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -443,236 +430,240 @@ msgstr "<br/>توسط"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
-msgid "<i class=\"fa fa-angle-left me-2\"/>Back to All Posts"
-msgstr "<i class=\"fa fa-angle-left me-2\"/>بازگشت به همه پست‌ها"
+msgid "<i class=\"oi me-2\" data-icon=\"keyboard_arrow_left\"/>Back to All Posts"
+msgstr "<i class=\"me-2 oi\" data-icon=\"keyboard_arrow_left\"/>بازگشت به همه پست‌ها"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
-msgid "<i class=\"fa fa-arrow-right\"/> Go To Forums"
-msgstr "<i class=\"fa fa-arrow-right\"/> برو به انجمن‌ها"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Go To Forums"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> برو به انجمن‌ها"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
-msgid "<i class=\"fa fa-bug me-1\"/>Filter Tool"
-msgstr "<i class=\"fa fa-bug me-1\"/>ابزار فیلتر"
+msgid "<i class=\"oi me-1\" data-icon=\"bug_report\"/>Filter Tool"
+msgstr "<i class=\"me-1 oi\" data-icon=\"bug_report\"/>ابزار فیلتر"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Downvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Downvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"رأی منفی\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"رأی منفی\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 msgid ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Upvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Upvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"رای مثبت\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"رای مثبت\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Accept"
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>قبول"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Accept"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>قبول"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Be less specific in your wording for a "
-"wider search result."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Be less specific in your "
+"wording for a wider search result."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>کلمات کمتری را به کار ببرید تا نتیجه "
-"جستجوی گسترده‌تری داشته باشید."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Check your spelling and try again."
-msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>املای خود را بررسی کنید و دوباره امتحان "
-"کنید."
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>کلمات کمتری را به کار ببرید "
+"تا نتیجه جستجوی گسترده‌تری داشته باشید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Check your spelling and try "
+"again."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>سعی کنید یک یا دو کلمه را جستجو کنید."
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>املای خود را بررسی کنید و "
+"دوباره امتحان کنید."
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
+msgid ""
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Try searching for one or two"
+" words."
+msgstr ""
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>سعی کنید یک یا دو کلمه را "
+"جستجو کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
-msgid "<i class=\"fa fa-check me-1\"/>Solved"
-msgstr "<i class=\"fa fa-check me-1\"/>حل شد"
+msgid "<i class=\"oi me-1\" data-icon=\"check\"/>Solved"
+msgstr "<i class=\"me-1 oi\" data-icon=\"check\"/>حل شد"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-check\"/> Accept"
-msgstr "<i class=\"fa fa-check\"/> قبول"
+msgid "<i class=\"oi\" data-icon=\"check\"/> Accept"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> قبول"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+"<i class=\"oi\" data-icon=\"check\"/> How to configure TPS and TVQ's "
+"canadian taxes?"
 msgstr ""
-"<i class=\"fa fa-check\"/> چگونه مالیات کانادایی TPS و TVQ را پیکربندی کنیم؟"
+"<i class=\"oi\" data-icon=\"check\"/> چگونه مالیات کانادایی TPS و TVQ را "
+"پیکربندی کنیم؟"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-check\"/><span class=\"ms-2\">Accept</span>"
-msgstr "<i class=\"fa fa-check\"/><span class=\"ms-2\">قبول</span>"
+msgid "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Accept</span>"
+msgstr "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">قبول</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr "<i class=\"fa fa-comments-o me-1\" title=\"انجمن\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"forum\" title=\"Forum\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"forum\" title=\"انجمن\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-1\" title=\"نمایش‌ها\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"visibility\" title=\"Views\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"visibility\" title=\"نمایش‌ها\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-flag\"/> Country"
-msgstr "<i class=\"fa fa-flag\"/> کشور"
+msgid "<i class=\"oi oi-filled\" data-icon=\"flag\"/> Country"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"flag\"/> کشور"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-font\"/> Text"
-msgstr "<i class=\"fa fa-font\"/> متن"
+msgid "<i class=\"oi\" data-icon=\"text_fields\"/> Text"
+msgstr "<i class=\"oi\" data-icon=\"text_fields\"/> متن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
-msgid "<i class=\"fa fa-fw fa-check me-1\"/>Following"
-msgstr "<i class=\"fa fa-fw fa-check me-1\"/>دنبال کردن"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Following"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>دنبال کردن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Website\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_mobile
-msgid "<i class=\"fa fa-info-circle fa-fw\"/> About this forum"
-msgstr "<i class=\"fa fa-info-circle fa-fw\"/> درباره این انجمن"
+msgid "<i class=\"oi oi-fw\" data-icon=\"info\"/> About this forum"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"info\"/> درباره این انجمن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your "
-"answer</span>"
+"<i class=\"oi oi-filled\" data-icon=\"edit\"/>\n"
+"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
 msgstr ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                <span class=\"d-none d-lg-inline\"> پاسخ "
-"خودت را</span> ویرایش کن"
+"<i class=\"oi-filled oi\" data-icon=\"edit\"/>\n"
+"                                <span class=\"d-none d-lg-inline\"> پاسخ خودت را</span> ویرایش کن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 msgid ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"oi me-1 d-lg-none\" data-icon=\"reply\"/>\n"
 "                0"
-msgstr "<i class=\"fa fa-reply me-1 d-lg-none\"/> ۰"
+msgstr "<i class=\"me-1 d-lg-none oi\" data-icon=\"reply\"/> ۰"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr "<i class=\"fa fa-reply me-1\"/>پاسخ"
+msgid "<i class=\"oi me-1\" data-icon=\"reply\"/>Reply"
+msgstr "<i class=\"me-1 oi\" data-icon=\"reply\"/>پاسخ"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 msgid ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Share\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Share\"/>"
 msgstr ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"اشتراک گذاری\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"اشتراک گذاری\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-shield fa-fw opacity-50\"/> Badges"
-msgstr "<i class=\"fa fa-shield fa-fw opacity-50\"/> نشان‌ها"
+msgid "<i class=\"oi oi-fw opacity-50\" data-icon=\"security\"/> Badges"
+msgstr "<i class=\"opacity-50 oi-fw oi\" data-icon=\"security\"/> نشان‌ها"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"oi oi-filled text-danger ms-3\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"آراء منفی\" title=\"آراء منفی\"/>"
+"<i class=\"text-danger ms-3 oi-filled oi\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"آراء منفی\" title=\"آراء منفی\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"oi oi-filled text-success\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"text-success oi-filled oi\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
-msgid "<i class=\"fa fa-times fa-fw me-1\"/>Reject"
-msgstr "<i class=\"fa fa-times fa-fw me-1\"/>رد کردن"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"close\"/>Reject"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"close\"/>رد کردن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<i class=\"fa fa-times\"/> Good morning to all! Please, can someone help "
-"solve my tax computation problem in Canada? Thanks!"
+"<i class=\"oi\" data-icon=\"close\"/> Good morning to all! Please, can "
+"someone help solve my tax computation problem in Canada? Thanks!"
 msgstr ""
-"<i class=\"fa fa-times\"/> صبح به خیر به همه! لطفاً کسی می تواند در حل مشکل "
-"محاسبه مالیات من در کانادا کمک کند؟ با تشکر!"
+"<i class=\"oi\" data-icon=\"close\"/> صبح به خیر به همه! لطفاً کسی می تواند "
+"در حل مشکل محاسبه مالیات من در کانادا کمک کند؟ با تشکر!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
-msgid "<i class=\"fa fa-times\"/> Reject"
-msgstr "<i class=\"fa fa-times\"/> رد کردن"
+msgid "<i class=\"oi\" data-icon=\"close\"/> Reject"
+msgstr "<i class=\"oi\" data-icon=\"close\"/> رد کردن"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Offensive</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">توهین‌آمیز</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Offensive</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">توهین‌آمیز</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Reject</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">رد کردن</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Reject</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">رد کردن</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
-msgid "<i class=\"fa fa-user\"/> User"
-msgstr "<i class=\"fa fa-user\"/> کاربر"
+msgid "<i class=\"oi oi-filled\" data-icon=\"person\"/> User"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"person\"/> کاربر"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
-msgid "<i class=\"fa fa-users fa-fw opacity-50\"/> People"
-msgstr "<i class=\"fa fa-users fa-fw opacity-50\"/> افراد"
+msgid "<i class=\"oi oi-filled oi-fw opacity-50\" data-icon=\"group\"/> People"
+msgstr "<i class=\"opacity-50 oi-fw oi-filled oi\" data-icon=\"group\"/> افراد"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
-msgid "<i class=\"oi oi-arrow-right d-inline-block\"/> Go to Forums"
-msgstr "<i class=\"oi oi-arrow-right d-inline-block\"/> برو به انجمن‌ها"
+msgid "<i class=\"oi d-inline-block\" data-icon=\"east\"/> Go to Forums"
+msgstr "<i class=\"d-inline-block oi\" data-icon=\"east\"/> برو به انجمن‌ها"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.404
 msgid ""
-"<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
-"list"
+"<i class=\"oi display-inline-block\" data-icon=\"east\"/> Return to "
+"questions list"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 msgid ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"More\"/>"
 msgstr ""
 
@@ -712,10 +703,8 @@ msgstr ""
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
-msgid ""
-"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
-msgstr ""
-"<span class=\"flex-grow-1\">چه نوع سؤالاتی می توانم اینجا بپرسم؟</span>"
+msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgstr "<span class=\"flex-grow-1\">چه نوع سؤالاتی می توانم اینجا بپرسم؟</span>"
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -735,8 +724,8 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
-"span>"
+"<span class=\"flex-grow-1\">Why can other people edit my "
+"questions/answers?</span>"
 msgstr ""
 "<span class=\"flex-grow-1\">چرا افراد دیگر می توانند سوالات/پاسخ های من را "
 "ویرایش کنند؟</span>"
@@ -755,8 +744,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format it."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format "
+"it.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">متن را برای قالب بندی "
 "انتخاب کنید.</span>"
@@ -765,8 +754,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert "
+"images.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">از '/' برای وارد کردن "
 "تصویر استفاده کنید.</span>"
@@ -775,11 +764,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Tip:</span>"
 msgstr ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> نکته:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> نکته:</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -805,7 +794,8 @@ msgstr "<span class=\"text-muted\">هنوز فعالیتی وجود ندارد.<
 #. module: website_forum
 #: model_terms:web_tour.tour,rainbow_man_message:website_forum.question
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
-msgstr "<span><b>کارت عالی بود!</b> شما تمام مراحل این تور را طی کردید.</span>"
+msgstr ""
+"<span><b>کارت عالی بود!</b> شما تمام مراحل این تور را طی کردید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -830,7 +820,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_header
 msgid "<span>You need to be registered to interact with the community.</span>"
 msgstr ""
-"<span>شما نیاز به ثبت‌نام دارید تا بتوانید با جامعه تعامل داشته باشید.</span>"
+"<span>شما نیاز به ثبت‌نام دارید تا بتوانید با جامعه تعامل داشته "
+"باشید.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -1805,10 +1796,10 @@ msgstr "روشن فکر"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
 "Example\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 msgstr ""
 "مثال\n"
-"                            <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
 
 #. module: website_forum
 #. odoo-javascript
@@ -1961,10 +1952,10 @@ msgid ""
 "explains reputation point requirements for each type of moderation task."
 msgstr ""
 "به طورمثال، اگر سوال جالبی بپرسید و یا پاسخ مفیدی دهید، اطلاعات ورودی شما "
-"رای بالایی می‌آورند. از طرف دیگر اگر پاسخ گمراه‌کننده باشد، رای نمی‌آورد. هر "
-"رای موافق 10 امتیاز برای شما ایجاد کرده و هر رای مخالف 2 امتیاز از شما کم "
-"می‌کند. محدودیت امتیازی که در یک روز برای یک پرسش یا پاسخ قابل جمع‌آوری است، "
-"200 امتیاز است."
+"رای بالایی می‌آورند. از طرف دیگر اگر پاسخ گمراه‌کننده باشد، رای نمی‌آورد. هر"
+" رای موافق 10 امتیاز برای شما ایجاد کرده و هر رای مخالف 2 امتیاز از شما کم "
+"می‌کند. محدودیت امتیازی که در یک روز برای یک پرسش یا پاسخ قابل جمع‌آوری است،"
+" 200 امتیاز است."
 
 #. module: website_forum
 #. odoo-python
@@ -2235,16 +2226,15 @@ msgid ""
 "            them."
 msgstr ""
 "اگر این پست را ببندید برای اکثر کاربران مخفی می شود. تنها\n"
-"            کاربرانی که کارما بالایی دارند می‌توانند پست‌های بسته را تا تعدیل "
-"کنند."
+"            کاربرانی که کارما بالایی دارند می‌توانند پست‌های بسته را تا تعدیل کنند."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then "
-"you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then"
+" you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -2261,10 +2251,8 @@ msgid ""
 "            users having a high karma can see offensive posts to moderate\n"
 "            them."
 msgstr ""
-"اگر این پست را به عنوان توهین آمیز علامت گذاری کنید، برای اکثر کاربران پنهان "
-"می شود. تنها\n"
-"            کاربران با کارمای بالا می‌توانند پست‌های توهین آمیز را برای نظم "
-"بخشیدن\n"
+"اگر این پست را به عنوان توهین آمیز علامت گذاری کنید، برای اکثر کاربران پنهان می شود. تنها\n"
+"            کاربران با کارمای بالا می‌توانند پست‌های توهین آمیز را برای نظم بخشیدن\n"
 "            مشاهده کنند."
 
 #. module: website_forum
@@ -2760,7 +2748,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 msgid ""
-"Please wait for a moderator to validate your previous post before continuing."
+"Please wait for a moderator to validate your previous post before "
+"continuing."
 msgstr "لطفاً قبل از ادامه، منتظر بمانید تا ناظم پست قبلی شما را تأیید کند."
 
 #. module: website_forum
@@ -2894,8 +2883,7 @@ msgstr "همگانی"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected "
-"group"
+"Some users: Forum and their content are hidden for non members of selected group"
 msgstr ""
 "عمومی: انجمن عمومی است\n"
 "ورود به سیستم: انجمن برای کاربرانی که وارد سیستم شده اند قابل مشاهده است\n"
@@ -3250,8 +3238,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 msgid ""
-"Share this content to increase your chances to be featured on the front page "
-"and attract more visitors."
+"Share this content to increase your chances to be featured on the front page"
+" and attract more visitors."
 msgstr ""
 "این محتوا را به اشتراک بگذارید تا شانس خود را برای برجسته شدن در صفحه اول "
 "افزایش دهید و بازدیدکنندگان بیشتری را جذب کنید."
@@ -3459,8 +3447,8 @@ msgid ""
 "The goal of this site is create a relevant knowledge base that would answer "
 "questions related to Odoo."
 msgstr ""
-"هدف این سایت ایجاد یک پایگاه دانش مرتبط است که به سوالات مربوط به اودوو پاسخ "
-"دهد."
+"هدف این سایت ایجاد یک پایگاه دانش مرتبط است که به سوالات مربوط به اودوو پاسخ"
+" دهد."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3492,13 +3480,13 @@ msgstr "هیچ برچسبی با جستجوی انتخاب‌شده مطابقت
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced "
-"users of this site in order to improve the overall quality of the knowledge "
-"base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
-"بنابراین، پرسش‌ها و پاسخ‌ها را می‌توان مانند صفحات ویکی توسط کاربران با تجربه "
-"این سایت ویرایش کرد تا کیفیت کلی محتوای پایگاه دانش بهبود یابد. چنین "
+"بنابراین، پرسش‌ها و پاسخ‌ها را می‌توان مانند صفحات ویکی توسط کاربران با "
+"تجربه این سایت ویرایش کرد تا کیفیت کلی محتوای پایگاه دانش بهبود یابد. چنین "
 "امتیازاتی بر اساس سطح کارمای کاربر اعطا می شود: زمانی که کارمای شما به "
 "اندازه کافی بالا رفت، می توانید همین کار را انجام دهید."
 
@@ -3560,12 +3548,10 @@ msgstr "این پست منتظر اعتبارسنجی است"
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or "
-"<b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
 msgstr ""
 "این پست در حال حاضر در انتظار بررسی است و هنوز منتشر نشده است.<br/>\n"
-"                    به‌عنوان یک مدیر می‌توانید این پست را <b>پذیرفتن</b> یا "
-"<b>رد کردن</b> کنید."
+"                    به‌عنوان یک مدیر می‌توانید این پست را <b>پذیرفتن</b> یا <b>رد کردن</b> کنید."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -3624,8 +3610,8 @@ msgid ""
 "To prevent your question from being flagged and possibly removed, avoid "
 "asking subjective questions where …"
 msgstr ""
-"برای جلوگیری از پرچم گذاری و احتمالاً حذف شدن سؤال خود، از پرسیدن سؤالات ذهنی "
-"در جایی که …"
+"برای جلوگیری از پرچم گذاری و احتمالاً حذف شدن سؤال خود، از پرسیدن سؤالات "
+"ذهنی در جایی که …"
 
 #. module: website_forum
 #: model:forum.post.reason,name:website_forum.reason_9
@@ -3793,8 +3779,8 @@ msgstr "نما"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
-msgid "View my answer <i class=\"oi oi-arrow-right ms-1\"/>"
-msgstr "مشاهده پاسخ من <i class=\"oi oi-arrow-right ms-1\"/>"
+msgid "View my answer <i class=\"oi ms-1\" data-icon=\"east\"/>"
+msgstr "مشاهده پاسخ من <i class=\"ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__views
@@ -3905,9 +3891,9 @@ msgid ""
 "rough measure of the community trust to him/her. Various moderation tasks "
 "are gradually assigned to the users based on those points."
 msgstr ""
-"هنگامی که یک سوال یا پاسخ رای مثبت داده می شود، کاربری که آنها را ارسال کرده "
-"است امتیازاتی را کسب می کند که به آنها \"نقاط کارما\" می گویند. این نکات به "
-"عنوان معیار تقریبی از اعتماد جامعه به او عمل می کند. وظایف تعدیل مختلفی بر "
+"هنگامی که یک سوال یا پاسخ رای مثبت داده می شود، کاربری که آنها را ارسال کرده"
+" است امتیازاتی را کسب می کند که به آنها \"نقاط کارما\" می گویند. این نکات به"
+" عنوان معیار تقریبی از اعتماد جامعه به او عمل می کند. وظایف تعدیل مختلفی بر "
 "اساس آن نکات به تدریج به کاربران محول می شود."
 
 #. module: website_forum
@@ -3992,9 +3978,9 @@ msgstr "برای ویرایش برچسب ها باید کارما کافی دا�
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
-"You should only ask practical, answerable questions based on actual problems "
-"that you face. Chatty, open-ended questions diminish the usefulness of this "
-"site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems"
+" that you face. Chatty, open-ended questions diminish the usefulness of this"
+" site and push other questions off the front page."
 msgstr ""
 "شما فقط باید بر اساس مشکلات واقعی که با آن مواجه هستید، سوالات عملی و قابل "
 "پاسخ بپرسید. سوالات پرحرف و باز از مفید بودن این سایت می کاهد و سوالات دیگر "
@@ -4300,8 +4286,8 @@ msgid ""
 "we are being asked an open-ended, hypothetical question: “What if ______ "
 "happened?”"
 msgstr ""
-"از ما یک سوال فرضی و باز پرسیده می شود: \"اگر ______ اتفاق می افتاد چه می شد؟"
-"\""
+"از ما یک سوال فرضی و باز پرسیده می شود: \"اگر ______ اتفاق می افتاد چه می "
+"شد؟\""
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help

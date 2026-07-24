@@ -15,14 +15,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 10:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-"
-"master/resource/pt_BR/>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/odoo-master/resource/pt_BR/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: resource
@@ -65,7 +63,7 @@ msgstr "40 horas/semana"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_multi_create_form
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
 msgstr ""
 
 #. module: resource
@@ -254,8 +252,8 @@ msgid ""
 "Define the working schedule of the resource. If not set, the resource will "
 "have fully flexible working hours."
 msgstr ""
-"Define o horário de trabalho do recurso. Se não for definido, o recurso terá "
-"um horário de trabalho totalmente flexível."
+"Define o horário de trabalho do recurso. Se não for definido, o recurso terá"
+" um horário de trabalho totalmente flexível."
 
 #. module: resource
 #: model_terms:ir.actions.act_window,help:resource.action_resource_calendar_form
@@ -263,8 +261,8 @@ msgid ""
 "Define working hours and time table that could be scheduled to your project "
 "members"
 msgstr ""
-"Defina horas de trabalho e cronograma que poderiam ser programados para seus "
-"membros do projeto"
+"Defina horas de trabalho e cronograma que poderiam ser programados para seus"
+" membros do projeto"
 
 #. module: resource
 #. odoo-javascript
@@ -406,8 +404,8 @@ msgid ""
 "If empty, this is a generic time off for the company. If a resource is set, "
 "the time off is only for this resource"
 msgstr ""
-"Se estiver vazio, é uma folga genérica para a empresa. Se um recurso estiver "
-"definido, o tempo livre é apenas para este recurso"
+"Se estiver vazio, é uma folga genérica para a empresa. Se um recurso estiver"
+" definido, o tempo livre é apenas para este recurso"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource__active
@@ -506,7 +504,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as fulltime."
+"Number of hours to work on the company schedule to be considered as "
+"fulltime."
 msgstr ""
 "Número de horas a serem trabalhadas no cronograma da empresa para ser "
 "considerado como tempo integral."
@@ -651,8 +650,8 @@ msgid ""
 "workload based on their weekly working hours."
 msgstr ""
 "Recursos te permitem criar e controlar recursos que estão envolvidos em uma "
-"fase específica do projeto. Você pode também definir seu nível de eficiência "
-"e carga de trabalho baseado nas horas de trabalho da semana."
+"fase específica do projeto. Você pode também definir seu nível de eficiência"
+" e carga de trabalho baseado nas horas de trabalho da semana."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
@@ -752,7 +751,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_resource.py:0
 msgid ""
-"The average hours per day is too low compared to the number of hours per week"
+"The average hours per day is too low compared to the number of hours per "
+"week"
 msgstr ""
 "A média de horas por dia é muito baixa em comparação com o número de horas "
 "por semana"
@@ -783,8 +783,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid ""
-"This date is excluded of the recurrency, to start a new one on this date you "
-"should create it from scratch"
+"This date is excluded of the recurrency, to start a new one on this date you"
+" should create it from scratch"
 msgstr ""
 
 #. module: resource
@@ -811,10 +811,10 @@ msgid ""
 "the efficiency factor is 200%, however the expected duration will be 30 "
 "minutes."
 msgstr ""
-"Este campo é usado para calcular a duração esperada de uma ordem de trabalho "
-"neste centro de trabalho. Por exemplo, se uma ordem de trabalho leva uma "
-"hora e o fator de eficiência é 100%, a duração esperada será de uma hora. Se "
-"o fator de eficiência for 200%, entretanto, a duração esperada será de 30 "
+"Este campo é usado para calcular a duração esperada de uma ordem de trabalho"
+" neste centro de trabalho. Por exemplo, se uma ordem de trabalho leva uma "
+"hora e o fator de eficiência é 100%, a duração esperada será de uma hora. Se"
+" o fator de eficiência for 200%, entretanto, a duração esperada será de 30 "
 "minutos."
 
 #. module: resource
@@ -908,7 +908,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__count_as
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: formation)"
+"Whether this should be computed as a time off or as work time (eg: "
+"formation)"
 msgstr ""
 "Se isso deve ser calculado como uma folga ou como tempo de trabalho (por "
 "exemplo: formação)"
@@ -1012,18 +1013,18 @@ msgstr ""
 #~ msgstr "<span>horas/semana</span>"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 1-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 1-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
 #~ "Tem certeza de que quer trocar para um calendário de uma semana? Todas as "
 #~ "entradas de trabalho serão perdidas."
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 2-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 2-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
-#~ "Tem certeza de que quer trocar para um calendário de duas semanas? Todas "
-#~ "as entradas de trabalho serão perdidas."
+#~ "Tem certeza de que quer trocar para um calendário de duas semanas? Todas as "
+#~ "entradas de trabalho serão perdidas."
 
 #~ msgid "Attendances can't overlap."
 #~ msgstr "As presenças não podem se sobrepor."
@@ -1062,11 +1063,11 @@ msgstr ""
 #~ msgstr "Mudar para o calendário de 2 semanas"
 
 #~ msgid ""
-#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to %"
-#~ "(number)s week."
+#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to "
+#~ "%(number)s week."
 #~ msgstr ""
-#~ "A semana atual (de %(first_day)s até %(last_day)s) corresponde ao número "
-#~ "da semana %(number)s."
+#~ "A semana atual (de %(first_day)s até %(last_day)s) corresponde ao número da "
+#~ "semana %(number)s."
 
 #~ msgid "Total"
 #~ msgstr "Total"

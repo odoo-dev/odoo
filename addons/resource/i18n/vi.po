@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 23:35+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
-"resource/vi/>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/resource/vi/>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,7 +64,7 @@ msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_multi_create_form
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
 msgstr ""
 
 #. module: resource
@@ -424,8 +423,8 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the Working "
 "Time without removing it."
 msgstr ""
-"Nếu trường không được chuyển false, nó sẽ cho phép bạn ẩn Thời gian làm việc "
-"mà không cần xóa nó."
+"Nếu trường không được chuyển false, nó sẽ cho phép bạn ẩn Thời gian làm việc"
+" mà không cần xóa nó."
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__recurrency_interval
@@ -506,7 +505,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as fulltime."
+"Number of hours to work on the company schedule to be considered as "
+"fulltime."
 msgstr ""
 "Số giờ làm việc theo lịch làm việc của công ty được coi là toàn thời gian."
 
@@ -650,8 +650,8 @@ msgid ""
 "workload based on their weekly working hours."
 msgstr ""
 "Nhân lực cho phép bạn tạo và quản lý nhân lực sẽ tham gia trong các giai "
-"đoạn của dự án. Bạn cũng có thể thiết lập mức hiệu suất và khả năng làm việc "
-"dựa trên thời gian làm việc của họ trong tuần."
+"đoạn của dự án. Bạn cũng có thể thiết lập mức hiệu suất và khả năng làm việc"
+" dựa trên thời gian làm việc của họ trong tuần."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
@@ -747,7 +747,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_resource.py:0
 msgid ""
-"The average hours per day is too low compared to the number of hours per week"
+"The average hours per day is too low compared to the number of hours per "
+"week"
 msgstr ""
 
 #. module: resource
@@ -776,8 +777,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid ""
-"This date is excluded of the recurrency, to start a new one on this date you "
-"should create it from scratch"
+"This date is excluded of the recurrency, to start a new one on this date you"
+" should create it from scratch"
 msgstr ""
 
 #. module: resource
@@ -802,10 +803,10 @@ msgid ""
 "the efficiency factor is 200%, however the expected duration will be 30 "
 "minutes."
 msgstr ""
-"Trường này được sử dụng để tính toán thời gian dự kiến của một Công đoạn tại "
-"khu vực sản xuất này. Ví dụ, nếu một Công đoạn mất một giờ và hệ số hiệu quả "
-"là 100%, thì thời lượng dự kiến sẽ là một giờ. Tuy nhiên, nếu hệ số hiệu quả "
-"là 200% thì thời lượng dự kiến sẽ là 30 phút."
+"Trường này được sử dụng để tính toán thời gian dự kiến của một Công đoạn tại"
+" khu vực sản xuất này. Ví dụ, nếu một Công đoạn mất một giờ và hệ số hiệu "
+"quả là 100%, thì thời lượng dự kiến sẽ là một giờ. Tuy nhiên, nếu hệ số hiệu"
+" quả là 200% thì thời lượng dự kiến sẽ là 30 phút."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__3
@@ -898,10 +899,11 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__count_as
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: formation)"
+"Whether this should be computed as a time off or as work time (eg: "
+"formation)"
 msgstr ""
-"Liệu điều này nên được tính là thời gian nghỉ hay thời gian làm việc (ví dụ: "
-"đào tạo)"
+"Liệu điều này nên được tính là thời gian nghỉ hay thời gian làm việc (ví dụ:"
+" đào tạo)"
 
 #. module: resource
 #: model:ir.model,name:resource.model_resource_calendar_attendance
@@ -995,18 +997,16 @@ msgstr ""
 #~ msgstr "<span>giờ/tuần</span>"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 1-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 1-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
-#~ "Bạn có chắc chắn muốn chuyển sang lịch 1 tuần không? Tất cả công sẽ bị "
-#~ "mất."
+#~ "Bạn có chắc chắn muốn chuyển sang lịch 1 tuần không? Tất cả công sẽ bị mất."
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 2-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 2-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
-#~ "Bạn có chắc chắn muốn chuyển sang lịch 2 tuần không? Tất cả công sẽ bị "
-#~ "mất."
+#~ "Bạn có chắc chắn muốn chuyển sang lịch 2 tuần không? Tất cả công sẽ bị mất."
 
 #~ msgid "Attendances can't overlap."
 #~ msgstr "Chấm công không được trùng lặp."

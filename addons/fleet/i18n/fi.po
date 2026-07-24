@@ -35,8 +35,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-20 06:18+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/"
-"fleet/fi/>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/fleet/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,8 +45,8 @@ msgstr ""
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Sijainti\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Sijainti\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -84,9 +83,9 @@ msgid ""
 "A trailer hitch is a device attached to a vehicle's chassis for towing "
 "purposes,             such as pulling trailers, boats, or other vehicles."
 msgstr ""
-"Peräkoukku on ajoneuvon runkoon kiinnitettävä laite "
-"vetotarkoituksiin,                      kuten perävaunujen, veneiden tai "
-"muiden ajoneuvojen vetämiseen."
+"Peräkoukku on ajoneuvon runkoon kiinnitettävä laite vetotarkoituksiin,"
+"                      kuten perävaunujen, veneiden tai muiden ajoneuvojen "
+"vetämiseen."
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_1
@@ -497,11 +496,11 @@ msgstr "Tuoteryhmä(t)"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
-"Kategoriat auttavat hallinnoimaan ajokalustoasi tehokkaammin ja järjestämään "
-"ajoneuvosi."
+"Kategoriat auttavat hallinnoimaan ajokalustoasi tehokkaammin ja järjestämään"
+" ajoneuvosi."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_service_type__category
@@ -546,7 +545,8 @@ msgstr "Valitse, onko sopimus edelleen voimassa vai ei"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr "Valitse, koskeeko palvelu sopimuksia, ajoneuvopalveluja vai molempia"
 
 #. module: fleet
@@ -866,8 +866,8 @@ msgstr "Päivämäärä jolloin sopimuksen voimassaolo alkaa"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
 "Päivä jolloin sopimuksen voimassaolo päättyy (oletuksena vuosi alkupäivästä)"
 
@@ -1604,8 +1604,7 @@ msgid ""
 "            you when some contracts have to be renewed."
 msgstr ""
 "Hallitse kaikkia sopimuksiasi (leasing, vakuutukset jne.) osoitteessa\n"
-"            niihin liittyvät palvelut ja kustannukset. Odoo varoittaa "
-"automaattisesti\n"
+"            niihin liittyvät palvelut ja kustannukset. Odoo varoittaa automaattisesti\n"
 "            kun jotkin sopimukset on uusittava."
 
 #. module: fleet
@@ -2386,8 +2385,8 @@ msgstr "Sytytystulpan vaihto"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 "Määrittää ovien kokonaismäärän, mukaan lukien tavaratilan ja takaluukun "
 "ovet, jos sellaisia on."
@@ -2590,12 +2589,10 @@ msgstr "Kiertoapu"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Seuraa kaikkia ajoneuvollesi tehtyjä huoltoja.\n"
-"            Huoltoja voi olla monenlaisia: satunnaisia korjauksia, kiinteitä "
-"huoltoja jne."
+"            Huoltoja voi olla monenlaisia: satunnaisia korjauksia, kiinteitä huoltoja jne."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__trailer_hook
@@ -2884,13 +2881,13 @@ msgid ""
 "            each vehicle. Example: active, being repaired, sold."
 msgstr ""
 "Voit mukauttaa käytettävissä olevaa tilaa seurataksesi kehitystä\n"
-"            kunkin ajoneuvon tilannetta. Esimerkki: aktiivinen, "
-"korjattavana, myyty."
+"            kunkin ajoneuvon tilannetta. Esimerkki: aktiivinen, korjattavana, myyty."
 
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_action
 msgid "You can define several models (e.g. A3, A4) for each make (Audi)."
-msgstr "Voit määrittää useita malleja (esim. A3, A4) kullekin merkille (Audi)."
+msgstr ""
+"Voit määrittää useita malleja (esim. A3, A4) kullekin merkille (Audi)."
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -2972,6 +2969,6 @@ msgstr ""
 #~ "A trailer hitch is a device attached to a vehicle's chassis for towing "
 #~ "purposes,            such as pulling trailers, boats, or other vehicles."
 #~ msgstr ""
-#~ "Peräkoukku on ajoneuvon runkoon kiinnitettävä laite "
-#~ "vetotarkoituksiin,              kuten perävaunujen, veneiden tai muiden "
-#~ "ajoneuvojen vetämiseen."
+#~ "Peräkoukku on ajoneuvon runkoon kiinnitettävä laite vetotarkoituksiin,"
+#~ "              kuten perävaunujen, veneiden tai muiden ajoneuvojen "
+#~ "vetämiseen."

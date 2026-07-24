@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:03+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"hr_holidays/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/hr_holidays/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,14 +35,12 @@ msgid ""
 "                    No Balance yet!\n"
 "                </p>\n"
 "                <p>\n"
-"                    Why don't you start by <a type=\"action\" class=\"text-"
-"link\" name=\"%d\">Allocating Time off</a> ?\n"
+"                    Why don't you start by <a type=\"action\" class=\"text-link\" name=\"%d\">Allocating Time off</a> ?\n"
 "                </p>\n"
 "            "
 msgstr ""
 "<p class=\"o_view_nocontent_empty_folder\">Hali balans mavjud emas!</p>\n"
-"<p>Nima uchun <a type=\"action\" class=\"text-link\" name=\"%d\">Dam olish "
-"vaqtini taqsimlash</a> bilan boshlamaslik?</p>"
+"<p>Nima uchun <a type=\"action\" class=\"text-link\" name=\"%d\">Dam olish vaqtini taqsimlash</a> bilan boshlamaslik?</p>"
 
 #. module: hr_holidays
 #. odoo-python
@@ -277,9 +274,11 @@ msgstr "&lt;/th&gt;"
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
 #, fuzzy
 msgid ""
-"&lt;td class=\"text-center oe_leftfit oe_rightfit\" style=\"background-color:"
+"&lt;td class=\"text-center oe_leftfit oe_rightfit\" style=\"background-"
+"color:"
 msgstr ""
-"&lt;td class=\"text-center oe_leftfit oe_rightfit\" style=\"background-color:"
+"&lt;td class=\"text-center oe_leftfit oe_rightfit\" style=\"background-"
+"color:"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.report_holidayssummary
@@ -351,19 +350,13 @@ msgstr ": ning"
 #: model:mail.template,body_html:hr_holidays.new_timeoff_request_template
 msgid ""
 "<div>\n"
-"                    Dear <b><t t-out=\"object.env.context.get('manager')\"/"
-"></b>,\n"
+"                    Dear <b><t t-out=\"object.env.context.get('manager')\"/></b>,\n"
 "                    <br/><br/>\n"
-"                    <p>I'm requesting a Time Off. I would appreciate if you "
-"could approve it whenever possible!</p>\n"
+"                    <p>I'm requesting a Time Off. I would appreciate if you could approve it whenever possible!</p>\n"
 "                    <ul>\n"
-"                        <li>Time Type: <t t-"
-"out=\"object.work_entry_type_id.name\"/></li>\n"
-"                        <li><t t-out=\"object.request_date_from\"/> → <t t-"
-"out=\"object.request_date_to\"/> (<t t-out=\"object.duration_display\"/>)</"
-"li>\n"
-"                        <li t-if=\"object.name\">Reason: <t t-"
-"out=\"object.name\"/></li>\n"
+"                        <li>Time Type: <t t-out=\"object.work_entry_type_id.name\"/></li>\n"
+"                        <li><t t-out=\"object.request_date_from\"/> → <t t-out=\"object.request_date_to\"/> (<t t-out=\"object.duration_display\"/>)</li>\n"
+"                        <li t-if=\"object.name\">Reason: <t t-out=\"object.name\"/></li>\n"
 "                    </ul>\n"
 "                </div>\n"
 "            "
@@ -372,7 +365,7 @@ msgstr ""
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\" invisible=\"accrual_plan_id or state != 'confirm'\"/>"
 msgstr ""
 
@@ -380,35 +373,33 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_generate_multi_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form_manager
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"<i class=\"oi oi-fw mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\" invisible=\"accrual_plan_id\"/>"
 msgstr ""
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_activity
 #, fuzzy
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
-msgstr "<i class=\"fa fa-long-arrow-right\" title=\"ga\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
+msgstr "<i class=\"oi\" data-icon=\"east\" title=\"ga\"/>"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_kanban
-msgid "<i class=\"fa fa-paperclip\" title=\"Attachments\"/>"
+msgid "<i class=\"oi\" data-icon=\"attach_file\" title=\"Attachments\"/>"
 msgstr ""
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_view_form
 msgid ""
 "<span class=\"ml8\" invisible=\"type_request_unit == 'hour'\">Days</span>\n"
-"                                <span id=\"hour_display_field\" "
-"class=\"ml8\" invisible=\"type_request_unit != 'hour'\">Hours</span>"
+"                                <span id=\"hour_display_field\" class=\"ml8\" invisible=\"type_request_unit != 'hour'\">Hours</span>"
 msgstr ""
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_allocation_generate_multi_wizard_view_form
 msgid ""
 "<span class=\"ml8\" invisible=\"unit_of_measure == 'hour'\">Days</span>\n"
-"                            <span class=\"ml8\" invisible=\"unit_of_measure !"
-"= 'hour'\">Hours</span>"
+"                            <span class=\"ml8\" invisible=\"unit_of_measure != 'hour'\">Hours</span>"
 msgstr ""
 
 #. module: hr_holidays
@@ -492,8 +483,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_work_entry_type_view_form
 msgid ""
 "<span invisible=\"unit_of_measure == 'hour'\">days</span>\n"
-"                                            <span "
-"invisible=\"unit_of_measure != 'hour'\">hours</span>"
+"                                            <span invisible=\"unit_of_measure != 'hour'\">hours</span>"
 msgstr ""
 
 #. module: hr_holidays
@@ -524,8 +514,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_leave_view_form
 #, fuzzy
 msgid ""
-"<span>The employee has a different timezone than yours! Here dates and times "
-"are displayed in the employee's work timezone</span>\n"
+"<span>The employee has a different timezone than yours! Here dates and times are displayed in the employee's work timezone</span>\n"
 "                                ("
 msgstr ""
 "<span>Xodimning vaqt mintaqasi siznikidan farq qiladi! Bu yerda sanalar va "
@@ -558,7 +547,8 @@ msgstr "Bekor qilingan ta'tilni o‘zgartirib bo‘lmaydi."
 #. module: hr_holidays
 #: model_terms:ir.actions.act_window,help:hr_holidays.hr_leave_action_holiday_allocation_id
 msgid ""
-"A great way to keep track on employee’s PTOs, sick days, and approval status."
+"A great way to keep track on employee’s PTOs, sick days, and approval "
+"status."
 msgstr ""
 
 #. module: hr_holidays
@@ -573,8 +563,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_holidays.hr_leave_action_new_request
 #, fuzzy
 msgid ""
-"A great way to keep track on your time off requests, sick days, and approval "
-"status."
+"A great way to keep track on your time off requests, sick days, and approval"
+" status."
 msgstr ""
 "Dam olish so‘rovlari, kasallik kunlari va tasdiqlash holatini kuzatib "
 "borishning ajoyib usuli."
@@ -583,8 +573,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid ""
-"A leave cannot be set across multiple versions with different working "
-"schedules.\n"
+"A leave cannot be set across multiple versions with different working schedules.\n"
 "\n"
 "    Please create one time off for each version period.\n"
 "\n"
@@ -634,8 +623,8 @@ msgid ""
 "Absent Employee(s), Whose time off requests are either confirmed or "
 "validated on today"
 msgstr ""
-"Bugun ta'til so‘rovlari tasdiqlangan yoki tekshirilgan holda ishda bo‘lmagan "
-"xodim(lar)"
+"Bugun ta'til so‘rovlari tasdiqlangan yoki tekshirilgan holda ishda bo‘lmagan"
+" xodim(lar)"
 
 #. module: hr_holidays
 #: model:ir.actions.act_window,name:hr_holidays.hr_employee_action_from_department
@@ -655,9 +644,9 @@ msgstr "Bugun ishda yo‘q"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave.py:0
 msgid ""
-"According to your working schedule you are expected to work %(days)s days in "
-"this period, but %(nb_days)s days will be used because this leave %"
-"(work_entry_type_name)s can only be taken by days."
+"According to your working schedule you are expected to work %(days)s days in"
+" this period, but %(nb_days)s days will be used because this leave "
+"%(work_entry_type_name)s can only be taken by days."
 msgstr ""
 
 #. module: hr_holidays
@@ -1401,12 +1390,11 @@ msgstr "Tekshirishi mumkin"
 msgid ""
 "Can manage and configure all holidays and leave requests.\n"
 "\n"
-"A user without any rights on Time Off will be able to see the application, "
-"create his own holidays and manage the requests of the users he's manager of."
+"A user without any rights on Time Off will be able to see the application, create his own holidays and manage the requests of the users he's manager of."
 msgstr ""
 "Barcha bayramlar va ta'til so‘rovlarini boshqarishi va sozlashi mumkin.  "
-"Ta'til tizimida huquqlarga ega bo‘lmagan foydalanuvchi ilovani ko‘rishi, o‘z "
-"ta'tillarini yaratishi va o‘zi boshqaradigan foydalanuvchilarning "
+"Ta'til tizimida huquqlarga ega bo‘lmagan foydalanuvchi ilovani ko‘rishi, o‘z"
+" ta'tillarini yaratishi va o‘zi boshqaradigan foydalanuvchilarning "
 "so‘rovlarini boshqarishi mumkin."
 
 #. module: hr_holidays
@@ -1483,11 +1471,7 @@ msgstr "O‘tkazish parametrlari"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_version.py:0
 msgid ""
-"Changing the contract on this employee changes their working schedule in a "
-"period they already took leaves. Changing this working schedule changes the "
-"duration of these leaves in such a way the employee no longer has the "
-"required allocation for them. Please review these leaves and/or allocations "
-"before changing the contract.\n"
+"Changing the contract on this employee changes their working schedule in a period they already took leaves. Changing this working schedule changes the duration of these leaves in such a way the employee no longer has the required allocation for them. Please review these leaves and/or allocations before changing the contract.\n"
 "\n"
 "This error has been triggered by:\n"
 msgstr ""
@@ -2009,16 +1993,16 @@ msgid ""
 "Do you want to save the changes made to the accrual plan before creating a "
 "new milestone?"
 msgstr ""
-"Yangi bosqich yaratishdan oldin hisoblash rejasiga kiritilgan o‘zgarishlarni "
-"saqlaysizmi?"
+"Yangi bosqich yaratishdan oldin hisoblash rejasiga kiritilgan o‘zgarishlarni"
+" saqlaysizmi?"
 
 #. module: hr_holidays
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/components/accrual_level/accrual_levels.js:0
 #, fuzzy
 msgid ""
-"Do you want to save the changes made to the accrual plan before editing this "
-"milestone?"
+"Do you want to save the changes made to the accrual plan before editing this"
+" milestone?"
 msgstr ""
 "Ushbu bosqichni tahrirlashdan oldin hisoblash rejasiga kiritilgan "
 "o‘zgarishlarni saqlaysizmi?"
@@ -2199,8 +2183,8 @@ msgstr "Tugash sanasi"
 #: code:addons/hr_holidays/models/hr_employee_departure.py:0
 #, fuzzy
 msgid ""
-"End date has been updated because the employee will leave the company on %"
-"(departure_date)s."
+"End date has been updated because the employee will leave the company on "
+"%(departure_date)s."
 msgstr ""
 "Xodim kompaniyani %(departure_date)s sanasida tark etishi sababli tugash "
 "sanasi yangilandi."
@@ -2218,8 +2202,8 @@ msgid ""
 "\n"
 "        Not Allowed: User cannot request an allocation."
 msgstr ""
-"Qo‘shimcha kunlar so‘roviga ruxsat: Foydalanuvchi o‘zi uchun vaqt ajratishni "
-"so‘rashi mumkin. Ruxsat yo‘q: Foydalanuvchi vaqt ajratishni so‘ray olmaydi."
+"Qo‘shimcha kunlar so‘roviga ruxsat: Foydalanuvchi o‘zi uchun vaqt ajratishni"
+" so‘rashi mumkin. Ruxsat yo‘q: Foydalanuvchi vaqt ajratishni so‘ray olmaydi."
 
 #. module: hr_holidays
 #: model:ir.model.fields.selection,name:hr_holidays.selection__hr_leave_accrual_level__first_month__2
@@ -2236,8 +2220,8 @@ msgid ""
 "Field allowing to see the allocation duration in days or hours depending on "
 "the type_request_unit"
 msgstr ""
-"So‘rov birligi turiga qarab ajratilgan vaqt davomiyligini kun yoki soatlarda "
-"ko‘rish imkonini beruvchi maydon"
+"So‘rov birligi turiga qarab ajratilgan vaqt davomiyligini kun yoki soatlarda"
+" ko‘rish imkonini beruvchi maydon"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__first_approver_id
@@ -2276,8 +2260,8 @@ msgstr "Font Awesome belgisi, masalan, fa-tasks"
 #, fuzzy
 msgid ""
 "For an Accrual Allocation, this field contains the theorical amount of time "
-"given to the employee, due to a previous start date, on the first run of the "
-"plan. This can be manually edited."
+"given to the employee, due to a previous start date, on the first run of the"
+" plan. This can be manually edited."
 msgstr ""
 "Hisoblangan ajratma uchun bu maydon rejaning birinchi ishga tushirilishida "
 "xodimga oldingi boshlanish sanasi tufayli berilgan nazariy vaqt miqdorini "
@@ -2505,9 +2489,9 @@ msgstr "Kadrlar belgisi ko‘rinishi"
 #. module: hr_holidays
 #: model:mail.template,subject:hr_holidays.new_timeoff_request_template
 msgid ""
-"I'm requesting {{ object.duration_display }} of "
-"{{ object.work_entry_type_id.name }} from {{ object.request_date_from }} to "
-"{{ object.request_date_to }}"
+"I'm requesting {{ object.duration_display }} of {{ "
+"object.work_entry_type_id.name }} from {{ object.request_date_from }} to {{ "
+"object.request_date_to }}"
 msgstr ""
 
 #. module: hr_holidays
@@ -2600,8 +2584,8 @@ msgid ""
 "If checked, users request can exceed the allocated days and balance can go "
 "in negative."
 msgstr ""
-"Agar belgilansa, foydalanuvchilar so‘rovi ajratilgan kunlardan oshib ketishi "
-"va balans manfiy bo‘lishi mumkin."
+"Agar belgilansa, foydalanuvchilar so‘rovi ajratilgan kunlardan oshib ketishi"
+" va balans manfiy bo‘lishi mumkin."
 
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__active_employee
@@ -2618,8 +2602,8 @@ msgstr ""
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__count_days_as
 msgid ""
 "If you take a leave on the whole week, worked days will result in a various "
-"number based on the working hours of the employee, calendar days will result "
-"in 7 in every case."
+"number based on the working hours of the employee, calendar days will result"
+" in 7 in every case."
 msgstr ""
 
 #. module: hr_holidays
@@ -2821,7 +2805,8 @@ msgstr ""
 #: code:addons/hr_holidays/static/src/tours/hr_holidays_tour.js:0
 #, fuzzy
 msgid "Let's try to create a Sick Time Off, select it in the list"
-msgstr "Kasallik ta'tilini yaratishga urinib ko‘raylik, uni ro‘yxatdan tanlang"
+msgstr ""
+"Kasallik ta'tilini yaratishga urinib ko‘raylik, uni ro‘yxatdan tanlang"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave_accrual_plan__level_count
@@ -2924,7 +2909,8 @@ msgstr "Maksimal ortiqcha miqdor"
 #: model:ir.model.fields,help:hr_holidays.field_hr_work_entry_type__virtual_remaining_leaves
 #, fuzzy
 msgid ""
-"Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting Approval"
+"Maximum Time Off Allowed - Time Off Already Taken - Time Off Waiting "
+"Approval"
 msgstr ""
 "Ruxsat etilgan maksimal ta'til vaqti - Allaqachon olingan ta'til vaqti - "
 "Tasdiqlanishi kutilayotgan ta'til vaqti"
@@ -3649,7 +3635,8 @@ msgid ""
 "Public holidays should be counted in the leave duration when applying for "
 "leaves"
 msgstr ""
-"Ta'til uchun ariza berishda bayram kunlari ta'til muddatiga qo‘shilishi kerak"
+"Ta'til uchun ariza berishda bayram kunlari ta'til muddatiga qo‘shilishi "
+"kerak"
 
 #. module: hr_holidays
 #: model:ir.model.fields,field_description:hr_holidays.field_hr_leave__rating_ids
@@ -3924,17 +3911,15 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Select the level of approval needed in case of request by employee\n"
-"            #     - No validation needed: The employee's request is "
-"automatically approved.\n"
-"            #     - Approved by Time Off Officer: The employee's request "
-"need to be manually approved\n"
+"            #     - No validation needed: The employee's request is automatically approved.\n"
+"            #     - Approved by Time Off Officer: The employee's request need to be manually approved\n"
 "            #       by the Time Off Officer, Employee's Approver or both."
 msgstr ""
 "Xodim tomonidan so‘rov berilganda kerakli tasdiqlash darajasini tanlang # - "
 "Tasdiqlash shart emas: Xodimning so‘rovi avtomatik ravishda tasdiqlanadi. # "
 "- Dam olish vaqti bo‘yicha mas'ul xodim tomonidan tasdiqlanadi: Xodimning "
-"so‘rovi dam olish vaqti bo‘yicha mas'ul xodim, xodimning tasdiqlovchisi yoki "
-"ikkalasi tomonidan qo‘lda tasdiqlanishi kerak."
+"so‘rovi dam olish vaqti bo‘yicha mas'ul xodim, xodimning tasdiqlovchisi yoki"
+" ikkalasi tomonidan qo‘lda tasdiqlanishi kerak."
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -3950,8 +3935,7 @@ msgstr "Hozirgina yaratgan so‘rovingizni tanlang"
 #, fuzzy
 msgid ""
 "Select the user responsible for approving \"Time Off\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
 "Ushbu xodimning \"Dam olish vaqti\"ni tasdiqlash uchun mas'ul "
 "foydalanuvchini tanlang. Agar bo‘sh bo‘lsa, tasdiqlash Administrator yoki "
@@ -4009,9 +3993,7 @@ msgstr "Kasallik sababli dam olish"
 #. odoo-python
 #: code:addons/hr_holidays/wizard/hr_leave_generate_multi_wizard.py:0
 msgid ""
-"Some employees already have time off requests in hours that overlap with the "
-"selected period, Odoo cannot automatically adjust or split hourly leaves "
-"during batch generation. Conflicting time off:\n"
+"Some employees already have time off requests in hours that overlap with the selected period, Odoo cannot automatically adjust or split hourly leaves during batch generation. Conflicting time off:\n"
 "%s"
 msgstr ""
 
@@ -4171,7 +4153,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, fuzzy
-msgid "The Start Date of the Validity Period must be anterior to the End Date."
+msgid ""
+"The Start Date of the Validity Period must be anterior to the End Date."
 msgstr ""
 "Amal qilish muddatining boshlanish sanasi tugash sanasidan oldin bo‘lishi "
 "kerak."
@@ -4185,7 +4168,8 @@ msgid ""
 "is used."
 msgstr ""
 "Hisoblash ajratma boshlangan sanadan ma'lum muddat o‘tgach boshlanadi. Bu "
-"maydon hisoblash qo‘llaniladigan kunlar, oylar yoki yillar sonini belgilaydi."
+"maydon hisoblash qo‘llaniladigan kunlar, oylar yoki yillar sonini "
+"belgilaydi."
 
 #. module: hr_holidays
 #. odoo-python
@@ -4244,8 +4228,7 @@ msgstr "Quyidagi xodimlar bu davrda ishlamasligi kerak: %s"
 #. odoo-javascript
 #: code:addons/hr_holidays/static/src/dashboard/time_off_card.xml:0
 msgid ""
-"The leaves planned in the future are exceeding the maximum value of the "
-"allocation.\n"
+"The leaves planned in the future are exceeding the maximum value of the allocation.\n"
 "                It will not be possible to take all of them."
 msgstr ""
 
@@ -4278,7 +4261,8 @@ msgstr "Balans yetsa, reja to‘xtatib qo‘yiladi"
 #. module: hr_holidays
 #: model:ir.model.constraint,message:hr_holidays.constraint_hr_leave_date_check3
 #, fuzzy
-msgid "The request start date must be before or equal to the request end date."
+msgid ""
+"The request start date must be before or equal to the request end date."
 msgstr ""
 "So‘rovning boshlanish sanasi so‘rovning tugash sanasidan oldin yoki unga "
 "teng bo‘lishi kerak."
@@ -4328,8 +4312,8 @@ msgstr "Ta'til so‘rovi quyidagi sababga ko‘ra bekor qilindi: %(reason)s"
 #. odoo-python
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 msgid ""
-"The total negative allocation within this validity period cannot exceed %"
-"(max)s %(unit)s."
+"The total negative allocation within this validity period cannot exceed "
+"%(max)s %(unit)s."
 msgstr ""
 
 #. module: hr_holidays
@@ -4390,7 +4374,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__first_approver_id
 #, fuzzy
-msgid "This area is automatically filled by the user who validate the time off"
+msgid ""
+"This area is automatically filled by the user who validate the time off"
 msgstr ""
 "Bu maydon ta'til vaqtini tasdiqlagan foydalanuvchi tomonidan avtomatik "
 "ravishda to‘ldiriladi"
@@ -4398,8 +4383,8 @@ msgstr ""
 #. module: hr_holidays
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave__second_approver_id
 msgid ""
-"This area is automatically filled by the user who validate the time off with "
-"second level (If time type need second validation)"
+"This area is automatically filled by the user who validate the time off with"
+" second level (If time type need second validation)"
 msgstr ""
 
 #. module: hr_holidays
@@ -5197,8 +5182,8 @@ msgid ""
 "When the field is checked the total amount accrued each year will be capped "
 "at the specified amount"
 msgstr ""
-"Maydon belgilanganda, har yili to‘planadigan umumiy summa belgilangan miqdor "
-"bilan cheklanadi"
+"Maydon belgilanganda, har yili to‘planadigan umumiy summa belgilangan miqdor"
+" bilan cheklanadi"
 
 #. module: hr_holidays
 #: model_terms:ir.ui.view,arch_db:hr_holidays.hr_accrual_plan_view_form
@@ -5326,8 +5311,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_holidays.hr_leave_allocation_action_my
 #, fuzzy
 msgid ""
-"You can create a new allocation or follow the approval status of the current "
-"ones."
+"You can create a new allocation or follow the approval status of the current"
+" ones."
 msgstr ""
 "Yangi taqsimot yaratishingiz yoki mavjudlarining tasdiqlash holatini "
 "kuzatishingiz mumkin"
@@ -5336,7 +5321,8 @@ msgstr ""
 #: model:ir.model.fields,help:hr_holidays.field_hr_leave_accrual_level__accrual_validity_count
 #, fuzzy
 msgid ""
-"You can define a period of time where the days carried over will be available"
+"You can define a period of time where the days carried over will be "
+"available"
 msgstr ""
 "O‘tkazilgan kunlar mavjud bo‘ladigan vaqt oralig‘ini belgilashingiz mumkin"
 
@@ -5376,8 +5362,8 @@ msgstr ""
 msgid ""
 "You can only validate an allocation with validation by Time Off Manager."
 msgstr ""
-"Taqsimotni faqat Dam olish vaqti boshqaruvchisi tomonidan tekshirilgan holda "
-"tasdiqlashingiz mumkin"
+"Taqsimotni faqat Dam olish vaqti boshqaruvchisi tomonidan tekshirilgan holda"
+" tasdiqlashingiz mumkin"
 
 #. module: hr_holidays
 #. odoo-javascript
@@ -5476,8 +5462,7 @@ msgstr "Bu ta'tilni tasdiqlay olmaysiz."
 #: code:addons/hr_holidays/models/hr_work_entry_type.py:0
 #, fuzzy
 msgid "You cannot allow requests on top of leaves of type 'Absence'."
-msgstr ""
-"\"Yo‘qlik\" turidagi ta'tillar ustiga so‘rovlarga ruxsat bera olmaysiz."
+msgstr "\"Yo‘qlik\" turidagi ta'tillar ustiga so‘rovlarga ruxsat bera olmaysiz."
 
 #. module: hr_holidays
 #. odoo-python
@@ -5515,8 +5500,8 @@ msgstr "%s holatidagi taqsimot so‘rovini o‘chira olmaysiz."
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, fuzzy
 msgid ""
-"You cannot first approve a time off for %s, because you are not his time off "
-"manager"
+"You cannot first approve a time off for %s, because you are not his time off"
+" manager"
 msgstr ""
 "Siz %s uchun ta'tilni birinchi bo‘lib tasdiqlay olmaysiz, chunki siz uning "
 "ta'til menejeri emassiz"
@@ -5574,8 +5559,8 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave_allocation.py:0
 #, fuzzy
 msgid ""
-"You cannot reduce the duration below the duration of leaves already taken by "
-"the employee."
+"You cannot reduce the duration below the duration of leaves already taken by"
+" the employee."
 msgstr ""
 "Ta'til muddatini xodim allaqachon olgan ta'tillar muddatidan qisqartira "
 "olmaysiz."
@@ -5614,7 +5599,8 @@ msgstr ""
 #: code:addons/hr_holidays/models/hr_leave.py:0
 #, fuzzy
 msgid ""
-"You must have manager rights to modify/validate a time off that already begun"
+"You must have manager rights to modify/validate a time off that already "
+"begun"
 msgstr ""
 "Allaqachon boshlangan ta'tilni tahrirlash yoki tasdiqlash uchun menejer "
 "huquqlariga ega bo‘lishingiz kerak"

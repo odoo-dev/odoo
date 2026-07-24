@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 20:49+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"website_forum/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/website_forum/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,8 +72,8 @@ msgstr "# ko‘rishlar"
 msgid ""
 "%(link_start)sRead the guidelines to know how to gain karma.%(link_end)s"
 msgstr ""
-"%(link_start)sKarma qanday to‘planishini bilish uchun ko‘rsatmalarni o‘qing.%"
-"(link_end)s"
+"%(link_start)sKarma qanday to‘planishini bilish uchun ko‘rsatmalarni "
+"o‘qing.%(link_end)s"
 
 #. module: website_forum
 #. odoo-javascript
@@ -292,19 +291,18 @@ msgstr "Javob olish ehtimoli 65% yuqori"
 #: model_terms:forum.forum,welcome_message:website_forum.forum_help
 #, fuzzy
 msgid ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Sign up</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Sign up</a>"
 msgstr ""
-"<a class=\"btn btn-primary forum_register_url o_translate_inline\" href=\"/"
-"web/login\">Ro‘yxatdan o‘tish</a>"
+"<a class=\"btn btn-primary forum_register_url o_translate_inline\" "
+"href=\"/web/login\">Ro‘yxatdan o‘tish</a>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 #, fuzzy
 msgid ""
 "<b class=\"d-block \">This answer has been flagged</b>\n"
-"                            As a moderator, you can either validate or "
-"reject this answer."
+"                            As a moderator, you can either validate or reject this answer."
 msgstr ""
 "<b class=\"d-block \">Bu javob belgilangan</b> Moderator sifatida siz bu "
 "javobni tasdiqlashingiz yoki rad etishingiz mumkin."
@@ -314,8 +312,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<b class=\"d-block\">You have a pending post</b>\n"
-"                        Please wait for a moderator to validate your "
-"previous post to be allowed replying questions."
+"                        Please wait for a moderator to validate your previous post to be allowed replying questions."
 msgstr ""
 "<b class=\"d-block\">Sizda kutilayotgan post mavjud</b> Savollarga javob "
 "berishga ruxsat olish uchun moderator avvalgi postingizni tasdiqlashini "
@@ -361,8 +358,8 @@ msgstr ""
 msgid ""
 "<b>Answers should not start debates</b> This community Q&amp;A is not a "
 "discussion group. Please avoid holding debates in your answers as they tend "
-"to dilute the essence of questions and answers. For brief discussions please "
-"use commenting facility."
+"to dilute the essence of questions and answers. For brief discussions please"
+" use commenting facility."
 msgstr ""
 "<b>Javoblar munozara boshlamasligi kerak</b>. Bu hamjamiyat Savol-javob "
 "platformasi bo‘lib, muhokama guruhi emas. Iltimos, javoblaringizda bahs-"
@@ -377,8 +374,8 @@ msgstr ""
 msgid ""
 "<b>Answers shouldn't just point to other Questions</b>. Instead add a "
 "question comment indication \"Possible duplicate of...\". However, it's ok "
-"to include links to other questions or answers providing relevant additional "
-"information."
+"to include links to other questions or answers providing relevant additional"
+" information."
 msgstr ""
 "<b>Javoblar faqat boshqa savollarga yo‘naltirmasligi kerak</b>. Buning "
 "o‘rniga \"Ehtimol takroriy savol...\" degan izoh qoldiring. Biroq, boshqa "
@@ -390,8 +387,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
 msgid ""
-"<b>Answers shouldn't just point to other questions</b>.Instead add a comment "
-"indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
+"<b>Answers shouldn't just point to other questions</b>.Instead add a comment"
+" indicating <i>\"Possible duplicate of...\"</i>. However, it's fine to "
 "include links to other questions or answers providing relevant additional "
 "information."
 msgstr ""
@@ -405,8 +402,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
 msgid ""
-"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the "
-"solution description text in your answer, even if it's just a copy/paste. "
+"<b>Answers shouldn't just provide a link a solution</b>. Instead provide the"
+" solution description text in your answer, even if it's just a copy/paste. "
 "Links are welcome, but should be complementary to answer, referring sources "
 "or additional reading."
 msgstr ""
@@ -421,8 +418,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 msgid ""
 "<b>Before you ask - please make sure to search for a similar question.</b> "
-"You can search questions by their title or tags. It’s also OK to answer your "
-"own question."
+"You can search questions by their title or tags. It’s also OK to answer your"
+" own question."
 msgstr ""
 
 #. module: website_forum
@@ -430,8 +427,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
 msgid ""
-"<b>Please avoid asking questions that are too subjective and argumentative</"
-"b> or not relevant to this community."
+"<b>Please avoid asking questions that are too subjective and "
+"argumentative</b> or not relevant to this community."
 msgstr ""
 "<b>Juda subyektiv va bahsli</b> yoki ushbu hamjamiyatga aloqador bo‘lmagan "
 "savollarni berishdan saqlaning."
@@ -440,12 +437,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.post_answer
 #, fuzzy
 msgid ""
-"<b>Please try to give a substantial answer.</b> If you wanted to comment on "
-"the question or answer, just\n"
-"            <b>use the commenting tool.</b> Please remember that you can "
-"always <b>revise your answers</b>\n"
-"            - no need to answer the same question twice. Also, please "
-"<b>don't forget to vote</b>\n"
+"<b>Please try to give a substantial answer.</b> If you wanted to comment on the question or answer, just\n"
+"            <b>use the commenting tool.</b> Please remember that you can always <b>revise your answers</b>\n"
+"            - no need to answer the same question twice. Also, please <b>don't forget to vote</b>\n"
 "            - it really helps to select the best questions and answers!"
 msgstr ""
 "<b>Iltimos, asosli javob berishga harakat qiling.</b> Agar savol yoki "
@@ -474,8 +468,7 @@ msgstr "<b>Sizda allaqachon kutilayotgan post mavjud.</b><br/>"
 #, fuzzy
 msgid ""
 "<b>|</b>\n"
-"                    <span class=\"fa fa-trophy o-text-gold ms-2\" "
-"role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
+"                    <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-label=\"Gold badge\" title=\"Gold badge\"/>"
 msgstr ""
 "<b>|</b> <span class=\"fa fa-trophy o-text-gold ms-2\" role=\"img\" aria-"
 "label=\"Oltin nishon\" title=\"Oltin nishon\"/>"
@@ -489,275 +482,281 @@ msgstr "<br/>tomonidan"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
-msgid "<i class=\"fa fa-angle-left me-2\"/>Back to All Posts"
-msgstr "<i class=\"fa fa-angle-left me-2\"/>Barcha xabarlarga qaytish"
+msgid "<i class=\"oi me-2\" data-icon=\"keyboard_arrow_left\"/>Back to All Posts"
+msgstr ""
+"<i class=\"me-2 oi\" data-icon=\"keyboard_arrow_left\"/>Barcha xabarlarga "
+"qaytish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_votes
 #, fuzzy
-msgid "<i class=\"fa fa-arrow-right\"/> Go To Forums"
-msgstr "<i class=\"fa fa-arrow-right\"/> Forumlarga o‘tish"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Go To Forums"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Forumlarga o‘tish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_model_nav
 #, fuzzy
-msgid "<i class=\"fa fa-bug me-1\"/>Filter Tool"
-msgstr "<i class=\"fa fa-bug me-1\"/>Saralash vositasi"
+msgid "<i class=\"oi me-1\" data-icon=\"bug_report\"/>Filter Tool"
+msgstr "<i class=\"me-1 oi\" data-icon=\"bug_report\"/>Saralash vositasi"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Downvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Downvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-down\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Pastga ovoz berish\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_down\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Pastga ovoz berish\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.vote
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Upvote\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Upvote\"/>"
 msgstr ""
-"<i class=\"fa fa-caret-up\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Yuqoriga ovoz berish\"/>"
+"<i class=\"oi\" data-icon=\"arrow_drop_up\" data-bs-toggle=\"tooltip\" data-"
+"bs-placement=\"top\" title=\"Yuqoriga ovoz berish\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #, fuzzy
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Accept"
-msgstr "<i class=\"fa fa-check fa-fw me-1\"/>Qabul qilish"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Accept"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Qabul qilish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Be less specific in your wording for a "
-"wider search result."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Be less specific in your "
+"wording for a wider search result."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Keng qamrovli qidiruv natijasi uchun "
-"so‘zlaringizni umumiyroq qiling."
-
-#. module: website_forum
-#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
-#, fuzzy
-msgid "<i class=\"fa fa-check fa-fw me-1\"/>Check your spelling and try again."
-msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Imloingizni tekshirib, qaytadan urinib "
-"ko‘ring."
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Keng qamrovli qidiruv "
+"natijasi uchun so‘zlaringizni umumiyroq qiling."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Try searching for one or two words."
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Check your spelling and try "
+"again."
 msgstr ""
-"<i class=\"fa fa-check fa-fw me-1\"/>Bir yoki ikki so‘zni qidirib ko‘ring."
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Imloingizni tekshirib, "
+"qaytadan urinib ko‘ring."
+
+#. module: website_forum
+#: model_terms:ir.ui.view,arch_db:website_forum.no_results_message
+#, fuzzy
+msgid ""
+"<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Try searching for one or two"
+" words."
+msgstr ""
+"<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Bir yoki ikki so‘zni qidirib"
+" ko‘ring."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post_question_block
 #, fuzzy
-msgid "<i class=\"fa fa-check me-1\"/>Solved"
-msgstr "<i class=\"fa fa-check me-1\"/>Yechildi"
+msgid "<i class=\"oi me-1\" data-icon=\"check\"/>Solved"
+msgstr "<i class=\"me-1 oi\" data-icon=\"check\"/>Yechildi"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
 #, fuzzy
-msgid "<i class=\"fa fa-check\"/> Accept"
-msgstr "<i class=\"fa fa-check\"/> Qabul qilish"
+msgid "<i class=\"oi\" data-icon=\"check\"/> Accept"
+msgstr "<i class=\"oi\" data-icon=\"check\"/> Qabul qilish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check\"/> How to configure TPS and TVQ's canadian taxes?"
+"<i class=\"oi\" data-icon=\"check\"/> How to configure TPS and TVQ's "
+"canadian taxes?"
 msgstr ""
-"<i class=\"fa fa-check\"/> TPS va TVQ Kanada soliqlarini qanday sozlash "
-"mumkin?"
+"<i class=\"oi\" data-icon=\"check\"/> TPS va TVQ Kanada soliqlarini qanday "
+"sozlash mumkin?"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-check\"/><span class=\"ms-2\">Accept</span>"
-msgstr "<i class=\"fa fa-check\"/><span class=\"ms-2\">Qabul qilish</span>"
+msgid "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Accept</span>"
+msgstr "<i class=\"oi\" data-icon=\"check\"/><span class=\"ms-2\">Qabul qilish</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
-msgstr "<i class=\"fa fa-comments-o me-1\" title=\"Forum\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"forum\" title=\"Forum\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"forum\" title=\"Forum\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-eye me-1\" title=\"Views\"/>"
-msgstr "<i class=\"fa fa-eye me-1\" title=\"Ko‘rishlar\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"visibility\" title=\"Views\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"visibility\" title=\"Ko‘rishlar\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-flag\"/> Country"
-msgstr "<i class=\"fa fa-flag\"/> Davlat"
+msgid "<i class=\"oi oi-filled\" data-icon=\"flag\"/> Country"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"flag\"/> Davlat"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-font\"/> Text"
-msgstr "<i class=\"fa fa-font\"/> Matn"
+msgid "<i class=\"oi\" data-icon=\"text_fields\"/> Text"
+msgstr "<i class=\"oi\" data-icon=\"text_fields\"/> Matn"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.follow_button
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-check me-1\"/>Following"
-msgstr "<i class=\"fa fa-fw fa-check me-1\"/>Kuzatilmoqda"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"check\"/>Following"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"check\"/>Kuzatilmoqda"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Veb-sayt\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Veb-sayt\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_mobile
 #, fuzzy
-msgid "<i class=\"fa fa-info-circle fa-fw\"/> About this forum"
-msgstr "<i class=\"fa fa-info-circle fa-fw\"/> Ushbu forum haqida"
+msgid "<i class=\"oi oi-fw\" data-icon=\"info\"/> About this forum"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"info\"/> Ushbu forum haqida"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-pencil\"/>\n"
-"                                Edit<span class=\"d-none d-lg-inline\"> your "
-"answer</span>"
+"<i class=\"oi oi-filled\" data-icon=\"edit\"/>\n"
+"                                Edit<span class=\"d-none d-lg-inline\"> your answer</span>"
 msgstr ""
-"<i class=\"fa fa-pencil\"/> Tahrirlash<span class=\"d-none d-lg-inline\"> "
-"javobingizni</span>"
+"<i class=\"oi-filled oi\" data-icon=\"edit\"/> Tahrirlash<span "
+"class=\"d-none d-lg-inline\"> javobingizni</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.display_post
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-reply me-1 d-lg-none\"/>\n"
+"<i class=\"oi me-1 d-lg-none\" data-icon=\"reply\"/>\n"
 "                0"
-msgstr "<i class=\"fa fa-reply me-1 d-lg-none\"/> 0"
+msgstr "<i class=\"me-1 d-lg-none oi\" data-icon=\"reply\"/> 0"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 #, fuzzy
-msgid "<i class=\"fa fa-reply me-1\"/>Reply"
-msgstr "<i class=\"fa fa-reply me-1\"/>Javob berish"
+msgid "<i class=\"oi me-1\" data-icon=\"reply\"/>Reply"
+msgstr "<i class=\"me-1 oi\" data-icon=\"reply\"/>Javob berish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Share\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Share\"/>"
 msgstr ""
-"<i class=\"fa fa-share-alt\" data-bs-toggle=\"tooltip\" data-bs-"
-"placement=\"top\" title=\"Ulashish\"/>"
+"<i class=\"oi\" data-icon=\"family_history\" data-bs-toggle=\"tooltip\" "
+"data-bs-placement=\"top\" title=\"Ulashish\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 #, fuzzy
-msgid "<i class=\"fa fa-shield fa-fw opacity-50\"/> Badges"
-msgstr "<i class=\"fa fa-shield fa-fw opacity-50\"/> Nishonlar"
+msgid "<i class=\"oi oi-fw opacity-50\" data-icon=\"security\"/> Badges"
+msgstr "<i class=\"opacity-50 oi-fw oi\" data-icon=\"security\"/> Nishonlar"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Negative votes\" title=\"Negative votes\"/>"
+"<i class=\"oi oi-filled text-danger ms-3\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Negative votes\" title=\"Negative votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-down text-danger ms-3\" role=\"img\" aria-"
-"label=\"Salbiy ovozlar\" title=\"Salbiy ovozlar\"/>"
+"<i class=\"text-danger ms-3 oi-filled oi\" data-icon=\"thumb_down\" "
+"role=\"img\" aria-label=\"Salbiy ovozlar\" title=\"Salbiy ovozlar\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Positive "
-"votes\" title=\"Positive votes\"/>"
+"<i class=\"oi oi-filled text-success\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Positive votes\" title=\"Positive votes\"/>"
 msgstr ""
-"<i class=\"fa fa-thumbs-up text-success\" role=\"img\" aria-label=\"Ijobiy "
-"ovozlar\" title=\"Ijobiy ovozlar\"/>"
+"<i class=\"text-success oi-filled oi\" data-icon=\"thumb_up\" role=\"img\" "
+"aria-label=\"Ijobiy ovozlar\" title=\"Ijobiy ovozlar\"/>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
 #, fuzzy
-msgid "<i class=\"fa fa-times fa-fw me-1\"/>Reject"
-msgstr "<i class=\"fa fa-times fa-fw me-1\"/>Rad etish"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"close\"/>Reject"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"close\"/>Rad etish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.edit_post
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-times\"/> Good morning to all! Please, can someone help "
-"solve my tax computation problem in Canada? Thanks!"
+"<i class=\"oi\" data-icon=\"close\"/> Good morning to all! Please, can "
+"someone help solve my tax computation problem in Canada? Thanks!"
 msgstr ""
-"<i class=\"fa fa-times\"/> Hammaga xayrli tong! Iltimos, menga Kanadada "
-"soliq hisob-kitobini hal qilishda yordam bera oladigan biror kishi bormi? "
-"Rahmat!"
+"<i class=\"oi\" data-icon=\"close\"/> Hammaga xayrli tong! Iltimos, menga "
+"Kanadada soliq hisob-kitobini hal qilishda yordam bera oladigan biror kishi "
+"bormi? Rahmat!"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.show_flag_validator
 #, fuzzy
-msgid "<i class=\"fa fa-times\"/> Reject"
-msgstr "<i class=\"fa fa-times\"/> Rad etish"
+msgid "<i class=\"oi\" data-icon=\"close\"/> Reject"
+msgstr "<i class=\"oi\" data-icon=\"close\"/> Rad etish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Offensive</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">Haqoratli</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Offensive</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Haqoratli</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-times\"/><span class=\"ms-2\">Reject</span>"
-msgstr "<i class=\"fa fa-times\"/><span class=\"ms-2\">Rad etish</span>"
+msgid "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Reject</span>"
+msgstr "<i class=\"oi\" data-icon=\"close\"/><span class=\"ms-2\">Rad etish</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.moderation_queue
 #, fuzzy
-msgid "<i class=\"fa fa-user\"/> User"
-msgstr "<i class=\"fa fa-user\"/> Foydalanuvchi"
+msgid "<i class=\"oi oi-filled\" data-icon=\"person\"/> User"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"person\"/> Foydalanuvchi"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_sidebar_body
 #, fuzzy
-msgid "<i class=\"fa fa-users fa-fw opacity-50\"/> People"
-msgstr "<i class=\"fa fa-users fa-fw opacity-50\"/> Odamlar"
+msgid "<i class=\"oi oi-filled oi-fw opacity-50\" data-icon=\"group\"/> People"
+msgstr "<i class=\"opacity-50 oi-fw oi-filled oi\" data-icon=\"group\"/> Odamlar"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.user_profile_content
 #, fuzzy
-msgid "<i class=\"oi oi-arrow-right d-inline-block\"/> Go to Forums"
-msgstr "<i class=\"oi oi-arrow-right d-inline-block\"/> Forumlarga o‘tish"
+msgid "<i class=\"oi d-inline-block\" data-icon=\"east\"/> Go to Forums"
+msgstr "<i class=\"d-inline-block oi\" data-icon=\"east\"/> Forumlarga o‘tish"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.404
 msgid ""
-"<i class=\"oi oi-arrow-right display-inline-block\"/> Return to questions "
-"list"
+"<i class=\"oi display-inline-block\" data-icon=\"east\"/> Return to "
+"questions list"
 msgstr ""
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_dropdown
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"More\"/>"
 msgstr ""
-"<i class=\"oi oi-ellipsis-h\" data-bs-toggle=\"tooltip\" data-bs-"
+"<i class=\"oi\" data-icon=\"more_horiz\" data-bs-toggle=\"tooltip\" data-bs-"
 "placement=\"top\" title=\"Ko‘proq\"/>"
 
 #. module: website_forum
@@ -802,8 +801,7 @@ msgstr ""
 #: model_terms:forum.forum,faq:website_forum.forum_help
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
-msgid ""
-"<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
+msgid "<span class=\"flex-grow-1\">What kind of questions can I ask here?</span>"
 msgstr ""
 "<span class=\"flex-grow-1\">Bu yerda qanday savollar berishim mumkin?</span>"
 
@@ -828,8 +826,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
 msgid ""
-"<span class=\"flex-grow-1\">Why can other people edit my questions/answers?</"
-"span>"
+"<span class=\"flex-grow-1\">Why can other people edit my "
+"questions/answers?</span>"
 msgstr ""
 "<span class=\"flex-grow-1\">Nima uchun boshqalar mening savol/javoblarimni "
 "tahrirlashi mumkin?</span>"
@@ -850,8 +848,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"<span class=\"form-text small text-muted d-block\">select text to format it."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">select text to format "
+"it.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">matnni formatlash uchun "
 "uni tanlang.</span>"
@@ -861,8 +859,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"<span class=\"form-text small text-muted d-block\">use '/' to insert images."
-"</span>"
+"<span class=\"form-text small text-muted d-block\">use '/' to insert "
+"images.</span>"
 msgstr ""
 "<span class=\"form-text small text-muted d-block\">rasm joylash uchun '/' "
 "belgisidan foydalaning.</span>"
@@ -872,11 +870,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Tip:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Tip:</span>"
 msgstr ""
-"<span class=\"form-text small text-muted me-1\"><i class=\"fa fa-lightbulb-"
-"o\"/> Maslahat:</span>"
+"<span class=\"form-text small text-muted me-1\"><i class=\"oi\" data-"
+"icon=\"lightbulb\"/> Maslahat:</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_forum_view_form
@@ -938,7 +936,8 @@ msgstr ""
 #, fuzzy
 msgid "<span>You need to be registered to interact with the community.</span>"
 msgstr ""
-"<span>Jamiyat bilan muloqot qilish uchun ro‘yxatdan o‘tishingiz kerak.</span>"
+"<span>Jamiyat bilan muloqot qilish uchun ro‘yxatdan o‘tishingiz "
+"kerak.</span>"
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.forum_post_template_new_answer
@@ -1224,7 +1223,8 @@ msgstr "Haqiqatan ham bu izohni o‘chirib tashlamoqchimisiz?"
 #, fuzzy
 msgid "As a moderator, you can either validate or reject this answer."
 msgstr ""
-"Moderator sifatida siz bu javobni tasdiqlashingiz yoki rad etishingiz mumkin."
+"Moderator sifatida siz bu javobni tasdiqlashingiz yoki rad etishingiz "
+"mumkin."
 
 #. module: website_forum
 #. odoo-python
@@ -2079,8 +2079,8 @@ msgstr "Ma'rifatli"
 #, fuzzy
 msgid ""
 "Example\n"
-"                            <i class=\"fa fa-question-circle\"/>"
-msgstr "Misol <i class=\"fa fa-question-circle\"/>"
+"                            <i class=\"oi\" data-icon=\"help\"/>"
+msgstr "Misol <i class=\"oi\" data-icon=\"help\"/>"
 
 #. module: website_forum
 #. odoo-javascript
@@ -2573,8 +2573,8 @@ msgid ""
 "            users having a high karma can see closed posts to moderate\n"
 "            them."
 msgstr ""
-"Agar bu postni yopsangiz, u ko‘pchilik foydalanuvchilarga ko‘rinmaydi. Faqat "
-"yuqori karmali foydalanuvchilar yopiq postlarni ko‘rib, moderatsiya qila "
+"Agar bu postni yopsangiz, u ko‘pchilik foydalanuvchilarga ko‘rinmaydi. Faqat"
+" yuqori karmali foydalanuvchilar yopiq postlarni ko‘rib, moderatsiya qila "
 "oladi"
 
 #. module: website_forum
@@ -2583,8 +2583,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "If you fit in one of these example or if your motivation for asking the "
-"question is “I would like to participate in a discussion about ______”, then "
-"you should not be asking here but on our mailing lists. However, if your "
+"question is “I would like to participate in a discussion about ______”, then"
+" you should not be asking here but on our mailing lists. However, if your "
 "motivation is “I would like others to explain ______ to me”, then you are "
 "probably OK."
 msgstr ""
@@ -3185,7 +3185,8 @@ msgstr "Iltimos, 2 yoki undan ortiq belgi kiriting"
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
 #, fuzzy
 msgid ""
-"Please wait for a moderator to validate your previous post before continuing."
+"Please wait for a moderator to validate your previous post before "
+"continuing."
 msgstr ""
 "Davom etishdan oldin moderator oldingi xabaringizni tasdiqlashini kuting."
 
@@ -3343,12 +3344,11 @@ msgstr "Ommaviy"
 msgid ""
 "Public: Forum is public\n"
 "Signed In: Forum is visible for signed in users\n"
-"Some users: Forum and their content are hidden for non members of selected "
-"group"
+"Some users: Forum and their content are hidden for non members of selected group"
 msgstr ""
 "Ommaviy: Forum hammaga ochiq. Tizimga kirgan: Forum faqat tizimga kirgan "
-"foydalanuvchilarga ko‘rinadi. Ba'zi foydalanuvchilar: Forum va uning mazmuni "
-"tanlangan guruh a'zosi bo‘lmaganlar uchun yashirin"
+"foydalanuvchilarga ko‘rinadi. Ba'zi foydalanuvchilar: Forum va uning mazmuni"
+" tanlangan guruh a'zosi bo‘lmaganlar uchun yashirin"
 
 #. module: website_forum
 #: model:gamification.badge,name:website_forum.badge_25
@@ -3760,8 +3760,8 @@ msgstr ""
 #: code:addons/website_forum/static/src/xml/public_templates.xml:0
 #, fuzzy
 msgid ""
-"Share this content to increase your chances to be featured on the front page "
-"and attract more visitors."
+"Share this content to increase your chances to be featured on the front page"
+" and attract more visitors."
 msgstr ""
 "Bosh sahifada ko‘rinish imkoniyatingizni oshirish va ko‘proq tashrif "
 "buyuruvchilarni jalb qilish uchun bu kontentni ulashing."
@@ -4038,15 +4038,15 @@ msgstr "Tanlangan qidiruvga mos keladigan teglar yo‘q."
 #: model_terms:ir.ui.view,arch_db:website_forum.faq_karma
 #, fuzzy
 msgid ""
-"Therefore questions and answers can be edited like wiki pages by experienced "
-"users of this site in order to improve the overall quality of the knowledge "
-"base content. Such privileges are granted based on user karma level: you "
+"Therefore questions and answers can be edited like wiki pages by experienced"
+" users of this site in order to improve the overall quality of the knowledge"
+" base content. Such privileges are granted based on user karma level: you "
 "will be able to do the same once your karma gets high enough."
 msgstr ""
 "Shu sababli, sayt kontenti sifatini oshirish maqsadida, savol va javoblar "
 "tajribali foydalanuvchilar tomonidan viki sahifalari kabi tahrirlanishi "
-"mumkin. Bunday imtiyozlar foydalanuvchining karma darajasiga qarab beriladi: "
-"karmangiz yetarli darajada yuqori bo‘lgach, siz ham shunday qila olasiz."
+"mumkin. Bunday imtiyozlar foydalanuvchining karma darajasiga qarab beriladi:"
+" karmangiz yetarli darajada yuqori bo‘lgach, siz ham shunday qila olasiz."
 
 #. module: website_forum
 #: model_terms:forum.forum,faq:website_forum.forum_help
@@ -4056,8 +4056,8 @@ msgid ""
 "This community is for professional and enthusiast users, partners and "
 "programmers. You can ask questions about:"
 msgstr ""
-"Ushbu hamjamiyat professional va ishtiyoqmand foydalanuvchilar, hamkorlar va "
-"dasturchilar uchun mo‘ljallangan. Quyidagilar haqida savol berishingiz "
+"Ushbu hamjamiyat professional va ishtiyoqmand foydalanuvchilar, hamkorlar va"
+" dasturchilar uchun mo‘ljallangan. Quyidagilar haqida savol berishingiz "
 "mumkin:"
 
 #. module: website_forum
@@ -4116,12 +4116,11 @@ msgstr "Bu post tasdiqlashni kutmoqda"
 #, fuzzy
 msgid ""
 "This post is currently awaiting moderation and is not published yet.<br/>\n"
-"                    As a moderator you can either <b>Accept</b> or "
-"<b>Reject</b> this post."
+"                    As a moderator you can either <b>Accept</b> or <b>Reject</b> this post."
 msgstr ""
 "Bu post hozirda moderatsiyadan o‘tmoqda va hali e'lon qilinmagan.<br/> "
-"Moderator sifatida siz bu postni <b>Qabul qilish</b> yoki <b>Rad etish</"
-"b>ingiz mumkin."
+"Moderator sifatida siz bu postni <b>Qabul qilish</b> yoki <b>Rad "
+"etish</b>ingiz mumkin."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_description_full
@@ -4391,8 +4390,8 @@ msgstr "Ko‘rish"
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.post_display
 #, fuzzy
-msgid "View my answer <i class=\"oi oi-arrow-right ms-1\"/>"
-msgstr "Javobimni ko‘rish <i class=\"oi oi-arrow-right ms-1\"/>"
+msgid "View my answer <i class=\"oi ms-1\" data-icon=\"east\"/>"
+msgstr "Javobimni ko‘rish <i class=\"ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website_forum
 #: model:ir.model.fields,field_description:website_forum.field_forum_post__views
@@ -4522,8 +4521,8 @@ msgstr ""
 "Savol yoki javobga ovoz berilganda, uni joylashtirgan foydalanuvchi \"karma "
 "ballari\" deb ataladigan ma'lum miqdordagi ballarga ega bo‘ladi. Bu ballar "
 "jamiyatning unga bo‘lgan ishonchini taxminiy o‘lchovi sifatida xizmat "
-"qiladi. Ushbu ballar asosida foydalanuvchilarga turli moderatsiya vazifalari "
-"bosqichma-bosqich topshiriladi."
+"qiladi. Ushbu ballar asosida foydalanuvchilarga turli moderatsiya vazifalari"
+" bosqichma-bosqich topshiriladi."
 
 #. module: website_forum
 #: model_terms:ir.ui.view,arch_db:website_forum.new_question
@@ -4623,9 +4622,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_forum.default_faq
 #, fuzzy
 msgid ""
-"You should only ask practical, answerable questions based on actual problems "
-"that you face. Chatty, open-ended questions diminish the usefulness of this "
-"site and push other questions off the front page."
+"You should only ask practical, answerable questions based on actual problems"
+" that you face. Chatty, open-ended questions diminish the usefulness of this"
+" site and push other questions off the front page."
 msgstr ""
 "Faqat o‘zingiz duch kelgan haqiqiy muammolar asosida amaliy va javob "
 "berilishi mumkin bo‘lgan savollarni berishingiz lozim. Suhbatga chorlovchi, "

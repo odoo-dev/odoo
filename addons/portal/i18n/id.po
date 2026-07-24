@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-20 05:22+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"portal/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/portal/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,95 +57,93 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
-"Account"
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-icon=\"badge\"/>"
+" My Account"
 msgstr ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> Akun "
-"Saya"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-icon=\"badge\"/>"
+" Akun Saya"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Logout"
+msgid ""
+"<i class=\"oi oi-fw small text-primary-emphasis\" data-icon=\"logout\"/> "
+"Logout"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
+msgid ""
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-"
+"icon=\"grid_view\"/> Apps"
 msgstr ""
-"<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Aplikasi-"
-"Aplikasi"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-"
+"icon=\"grid_view\"/> Aplikasi-Aplikasi"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-pencil\" title=\"Edit\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\" title=\"Edit\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
-msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr "<i class=\"fa fa-pencil\"/> Edit informasi"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit information"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/> Edit informasi"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-trash-o\" title=\"Clear\"/>"
+msgid "<i class=\"oi\" data-icon=\"delete\" title=\"Clear\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
-msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
-msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>Buang"
+msgid "<i class=\"fw-light oi me-2\" data-icon=\"keyboard_arrow_left\"/>Discard"
+msgstr "<i class=\"fw-light me-2 oi\" data-icon=\"keyboard_arrow_left\"/>Buang"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Kembali ke mode edit"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Kembali ke mode edit"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Sebelumnya\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Sebelumnya\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Berikutnya\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Berikutnya\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
-msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
+msgid "<i class=\"oi me-2\" data-icon=\"add\"/>Add Address"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"Dokumentasi\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid "<i title=\"Documentation\" class=\"oi oi-fw o_button_icon\" data-icon=\"info\"/>"
+msgstr "<i title=\"Dokumentasi\" class=\"o_button_icon oi-fw oi\" data-icon=\"info\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            Changing VAT number is not allowed once "
-"document(s) have\n"
-"                            been issued for your account. Please contact us "
-"directly for this\n"
+"                            Changing VAT number is not allowed once document(s) have\n"
+"                            been issued for your account. Please contact us directly for this\n"
 "                            operation.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            Mengubah nomor PPN tidak diizinkan setelah "
-"dokumen telah\n"
-"                            diterbitkan untuk akun Anda. Silakan hubungi "
-"kami langsung untuk operasi\n"
+"                            Mengubah nomor PPN tidak diizinkan setelah dokumen telah\n"
+"                            diterbitkan untuk akun Anda. Silakan hubungi kami langsung untuk operasi\n"
 "                            ini.\n"
 "                        </small>"
 
@@ -154,13 +151,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            The VAT number can only be updated on the "
-"company account.\n"
+"                            The VAT number can only be updated on the company account.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            Angka PPN hanya dapat diupdate di akun "
-"perusahaan.\n"
+"                            Angka PPN hanya dapat diupdate di akun perusahaan.\n"
 "                        </small>"
 
 #. module: portal
@@ -168,15 +163,13 @@ msgstr ""
 msgid ""
 "<small class=\"form-text text-muted\">\n"
 "                    Changing country is not allowed once document(s) have\n"
-"                    been issued for your account. Please contact us directly "
-"for this\n"
+"                    been issued for your account. Please contact us directly for this\n"
 "                    operation.\n"
 "                </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
 "                    Mengubah negara tidak diizinkan setelah dokumen telah\n"
-"                    diterbitkan untuk akun Anda. Silakan hubungi kami "
-"langsung untuk operasi\n"
+"                    diterbitkan untuk akun Anda. Silakan hubungi kami langsung untuk operasi\n"
 "                    ini.\n"
 "                </small>"
 
@@ -191,9 +184,7 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
 "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
 "title=\"Berikutnya\"/>"
@@ -364,8 +355,8 @@ msgid ""
 "Changing your country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"Mengubah negara Anda tidak diizinkan setelah dokumen telah diterbitkan untuk "
-"akun Anda. Silakan hubungi kami langsung untuk operasi ini."
+"Mengubah negara Anda tidak diizinkan setelah dokumen telah diterbitkan untuk"
+" akun Anda. Silakan hubungi kami langsung untuk operasi ini."
 
 #. module: portal
 #. odoo-javascript
@@ -568,17 +559,14 @@ msgstr "API Key Developer"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"oi text-danger\" data-icon=\"warning\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "Nonaktifkan akun Anda, mencegah login lebih lanjut.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
-"                                            Tindakan ini tidak dapat "
-"dibatalkan.\n"
+"                                            <i class=\"text-danger oi\" data-icon=\"warning\"/>\n"
+"                                            Tindakan ini tidak dapat dibatalkan.\n"
 "                                        </b>"
 
 #. module: portal
@@ -855,8 +843,8 @@ msgstr "Pesan"
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have %"
-"(field_name)s field."
+"Model %(model_name)s does not support token signature, as it does not have "
+"%(field_name)s field."
 msgstr ""
 "Model %(model_name)s tidak mendukung tanda tangan token support, karena "
 "tidak memiliki field %(field_name)s."
@@ -957,7 +945,8 @@ msgstr "Jumlah Placeholder"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Please enter your password to confirm you own this account"
-msgstr "Mohon masukkan password Anda untuk mengonfirmasi Anda pemilik akun ini"
+msgstr ""
+"Mohon masukkan password Anda untuk mengonfirmasi Anda pemilik akun ini"
 
 #. module: portal
 #. odoo-python
@@ -1005,10 +994,11 @@ msgstr "Sebelum"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted again"
+"Put my email and phone in a block list to make sure I'm never contacted "
+"again"
 msgstr ""
-"Masukkan email dan telepon saya di daftar blokir untuk memastikan saya tidak "
-"pernah dihubungi lagi"
+"Masukkan email dan telepon saya di daftar blokir untuk memastikan saya tidak"
+" pernah dihubungi lagi"
 
 #. module: portal
 #: model:ir.model,name:portal.model_ir_qweb
@@ -1095,16 +1085,12 @@ msgstr "Token Keamanan"
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be "
-"valid and unique.\n"
-"                        If necessary, you can fix any contact's email "
-"address directly in the list."
+"                        The email address of each selected contact must be valid and unique.\n"
+"                        If necessary, you can fix any contact's email address directly in the list."
 msgstr ""
 "Pilih kontak yang harus milik portal dalam daftar di bawah ini.\n"
-"                        Alamat email dari setiap kontak yang dipilih harus "
-"valid dan unik.\n"
-"                        Jika perlu, Anda dapat memperbaiki alamat email "
-"kontak apapun secara langsung dalam daftar."
+"                        Alamat email dari setiap kontak yang dipilih harus valid dan unik.\n"
+"                        Jika perlu, Anda dapat memperbaiki alamat email kontak apapun secara langsung dalam daftar."
 
 #. module: portal
 #. odoo-javascript
@@ -1288,8 +1274,8 @@ msgid ""
 "The template \"Portal: new user\" not found for sending email to the portal "
 "user."
 msgstr ""
-"Templat \"Portal: new user\" tidak ditemukan untuk mengirimkan email ke user "
-"portal."
+"Templat \"Portal: new user\" tidak ditemukan untuk mengirimkan email ke user"
+" portal."
 
 #. module: portal
 #. odoo-python
@@ -1312,7 +1298,8 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid "This text is included at the end of the email sent to new portal users."
+msgid ""
+"This text is included at the end of the email sent to new portal users."
 msgstr "Teks ini dimasukkan diakhir email yang dikirim ke user portal baru."
 
 #. module: portal

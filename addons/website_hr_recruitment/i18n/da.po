@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 18:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,8 +43,7 @@ msgstr ""
 "            <span class=\"text-muted small\">Proces</span>\n"
 "            <h6>1 telefonopkald</h6>\n"
 "            <h6>1 samtale på stedet</h6>\n"
-"            <span class=\"text-muted small\">Dage til at få et tilbud</"
-"span>\n"
+"            <span class=\"text-muted small\">Dage til at få et tilbud</span>\n"
 "            <h6>4 dage efter samtalen</h6>\n"
 "        "
 
@@ -70,33 +68,31 @@ msgstr ""
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Alle job"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Alle job"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Ansættelsestype\" role=\"img\" "
-"aria-label=\"Ansættelsestype\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Ansættelsestype\" "
+"role=\"img\" aria-label=\"Ansættelsestype\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> Jobbeskrivelse"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> Jobbeskrivelse"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
 "<span class=\"h5 fw-light\">I mellemtiden</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">kan du tage et kig på vores hjemmeside:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">kan du tage et kig på vores hjemmeside:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -127,34 +123,28 @@ msgstr "<span class=\"s_website_form_label_content\">Kort introduktion</span>"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Din e-mail</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Dit navn</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Dit telefonnummer</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -342,7 +332,8 @@ msgstr "Opret indhold, som vil hjælpe vores brugere på daglig basis"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
 "Opret nye job sider fra den <strong>+<i>Nye</i></strong> knap øverst til "
 "højre."
@@ -390,21 +381,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 "Hver medarbejder kan se effekten af sit arbejde.\n"
 "                    Du kan yde et reelt bidrag til virksomhedens succes.\n"
 "                    <br/>\n"
-"                    Flere aktiviteter arrangeres i løbet af året som "
-"eksempelvis\n"
-"                    sportssessioner, teambuildingarrangementer, drinks en "
-"gang om måneden og meget mere"
+"                    Flere aktiviteter arrangeres i løbet af året som eksempelvis\n"
+"                    sportssessioner, teambuildingarrangementer, drinks en gang om måneden og meget mere"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.default_website_description
@@ -467,24 +453,18 @@ msgstr "Startside"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "Jeg besvarer<strong>normalt ansøgninger inden for 3 dage</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                Næste skridt vil typisk være "
-"enten et opkald eller et møde på vores kontor.\n"
+"                                                Næste skridt vil typisk være enten et opkald eller et møde på vores kontor.\n"
 "                                                <br/><br/>\n"
-"                                                Du er velkommen til "
-"<strong>at kontakte mig, hvis du ønsker hurtigere\n"
-"                                                feedback</strong> eller ikke "
-"hører fra mig inden for\n"
+"                                                Du er velkommen til <strong>at kontakte mig, hvis du ønsker hurtigere\n"
+"                                                feedback</strong> eller ikke hører fra mig inden for\n"
 "                                                rimelig tid."
 
 #. module: website_hr_recruitment
@@ -868,12 +848,10 @@ msgstr "Den profil, du har angivet, ligner ikke en LinkedIn-profil."
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
 "Der er i øjeblikket ingen ledige stillinger,<br class=\"mb-2\"/>\n"
-"                                            men du er velkommen til at <span "
-"class=\"fw-bold\">sende os</span>en uopfordret ansøgning."
+"                                            men du er velkommen til at <span class=\"fw-bold\">sende os</span>en uopfordret ansøgning."
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -914,15 +892,11 @@ msgstr "Synlig på denne hjemmeside"
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
-"Vi er et team af passionerede mennesker med det mål at forbedre alles liv "
-"gennem innovative produkter.\n"
-"                               Vi skaber fantastiske løsninger, der hjælper "
-"med at løse dine forretningsmæssige udfordringer."
+"Vi er et team af passionerede mennesker med det mål at forbedre alles liv gennem innovative produkter.\n"
+"                               Vi skaber fantastiske løsninger, der hjælper med at løse dine forretningsmæssige udfordringer."
 
 #. module: website_hr_recruitment
 #: model:ir.model,name:website_hr_recruitment.model_website

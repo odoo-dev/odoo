@@ -12,14 +12,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 02:01+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/"
-"marketing_card/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/marketing_card/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: marketing_card
@@ -31,28 +29,27 @@ msgstr "%(card_campaign_name)s مراسلات"
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_linkedin_share_composer
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/>\n"
-"                    <span>We were not able to get an authorization to post "
-"in your stead.</span>"
+"<i class=\"oi\" data-icon=\"warning\"/>\n"
+"                    <span>We were not able to get an authorization to post in your stead.</span>"
 msgstr ""
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
 msgid ""
-"<i class=\"fa fa-fw fa-mouse-pointer\" aria-label=\"Clicks\" role=\"img\" "
-"title=\"Clicks\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"mouse\" aria-label=\"Clicks\" role=\"img\""
+" title=\"Clicks\"/>"
 msgstr ""
-"<i class=\"fa fa-fw fa-mouse-pointer\" aria-label=\"Clicks\" role=\"img\" "
-"title=\"النقرات \"/>"
+"<i class=\"oi-fw oi\" data-icon=\"mouse\" aria-label=\"Clicks\" role=\"img\""
+" title=\"النقرات \"/>"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
 msgid ""
-"<i class=\"fa fa-fw fa-share\" aria-label=\"Shares\" role=\"img\" "
-"title=\"Shares\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"share\" aria-label=\"Shares\" role=\"img\""
+" title=\"Shares\"/>"
 msgstr ""
-"<i class=\"fa fa-fw fa-share\" aria-label=\"Shares\" role=\"img\" "
-"title=\"المشاركات \"/>"
+"<i class=\"oi-fw oi\" data-icon=\"share\" aria-label=\"Shares\" role=\"img\""
+" title=\"المشاركات \"/>"
 
 #. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_preview
@@ -896,8 +893,8 @@ msgstr "معرف السجل"
 #. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_campaign__target_url
 msgid ""
-"Redirection link for clicks on the cards, defaults to the relevant record or "
-"the home page."
+"Redirection link for clicks on the cards, defaults to the relevant record or"
+" the home page."
 msgstr ""
 
 #. module: marketing_card
@@ -1179,16 +1176,16 @@ msgstr "جمع العمليات من شحنات مختلفة"
 #. odoo-python
 #: code:addons/marketing_card/models/card_campaign.py:0
 msgid ""
-"We'd love your help in getting the word out. Feel free to post these on your "
-"social channels!"
+"We'd love your help in getting the word out. Feel free to post these on your"
+" social channels!"
 msgstr ""
 
 #. module: marketing_card
 #. odoo-python
 #: code:addons/marketing_card/models/card_campaign.py:0
 msgid ""
-"We've created these personalized cards to make it easy for you to share your "
-"involvement with your network."
+"We've created these personalized cards to make it easy for you to share your"
+" involvement with your network."
 msgstr ""
 
 #. module: marketing_card

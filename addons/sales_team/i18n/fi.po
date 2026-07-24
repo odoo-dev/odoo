@@ -30,8 +30,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 00:44+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/"
-"sales_team/fi/>\n"
+"Language-Team: Finnish <https://translate.odoo.com/projects/odoo-master/sales_team/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -53,38 +52,45 @@ msgstr "%(user_names)s on jo muissa tiimeissä (%(team_names)s)."
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-building\" title=\"Company\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Email\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"mail\" title=\"Email\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Phone\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"phone\" title=\"Phone\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-users\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
-msgid "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-primary\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
-"<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Myyntitiimi\"/>"
+"<i class=\"me-1 text-primary oi-fw oi oi-filled\" data-icon=\"group\" "
+"title=\"Myyntitiimi\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -131,7 +137,8 @@ msgstr "Lisää tiimin jäsen"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid "Add members to automatically assign their documents to this sales team."
+msgid ""
+"Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Lisää jäseniä, jotta heidän asiakirjansa voidaan kohdistaa automaattisesti "
 "tähän myyntitiimiin."
@@ -283,7 +290,8 @@ msgstr "Suosikki jäsenet"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid "Favorite teams to display them in the dashboard and access them easily."
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
 msgstr "Näytä Suosikkitiimit työpöydällä ja pääset käsiksi niihin helposti."
 
 #. module: sales_team
@@ -663,9 +671,11 @@ msgstr "UX: Rajoita tiimiyritykseen tai kaikkiin, jos ei yritystä"
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid "Use Sales Teams to organize your sales departments and draw up reports."
+msgid ""
+"Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
-"Käytä myyntitiimejä myyntiosastojen organisointiin ja raporttien laatimiseen."
+"Käytä myyntitiimejä myyntiosastojen organisointiin ja raporttien "
+"laatimiseen."
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_pipeline
@@ -749,8 +759,8 @@ msgstr "Työskenteletkö useissa tiimeissä?"
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that %"
-"(duplicates)s already exist(s)."
+"You are trying to create duplicate membership(s). We found that "
+"%(duplicates)s already exist(s)."
 msgstr ""
 "Yrität luoda päällekkäisiä jäsenyyksiä. Havaitsimme, että %(duplicates)s on "
 "jo olemassa."
@@ -787,7 +797,7 @@ msgstr "käyttäjällä on pääsy hänen omiin tietoihinsa myyntijärjestelmäs
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
 msgstr ""
 "käyttäjällä on käyttöoikeus myynnin konfigurointiin ja tilastoraportteihin."

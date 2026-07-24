@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 06:04+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/rating/"
-"th/>\n"
+"Language-Team: Thai <https://translate.odoo.com/projects/odoo-master/rating/th/>\n"
 "Language: th\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -37,18 +36,18 @@ msgstr "# การให้คะแนน"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_external_page_view
-msgid "<i class=\"fa fa-arrow-left me-1\"/> Back to the Homepage"
-msgstr "<i class=\"fa fa-arrow-left me-1\"/> กลับไปที่หน้าแรก"
+msgid "<i class=\"oi me-1\" data-icon=\"arrow_back\"/> Back to the Homepage"
+msgstr "<i class=\"me-1 oi\" data-icon=\"arrow_back\"/> กลับไปที่หน้าแรก"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_rating_view_kanban_stars
-msgid "<i class=\"fa fa-clock-o me-2\" aria-label=\"Create date\"/>"
-msgstr "<i class=\"fa fa-clock-o me-2\" aria-label=\"วันที่สร้าง\"/>"
+msgid "<i class=\"oi me-2\" data-icon=\"schedule\" aria-label=\"Create date\"/>"
+msgstr "<i class=\"me-2 oi\" data-icon=\"schedule\" aria-label=\"วันที่สร้าง\"/>"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_rating_view_kanban_stars
-msgid "<i class=\"fa fa-folder me-2\" aria-label=\"Open folder\"/>"
-msgstr "<i class=\"fa fa-folder me-2\" aria-label=\"เปิดโฟลเดอร์\"/>"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"folder\" aria-label=\"Open folder\"/>"
+msgstr "<i class=\"me-2 oi-filled oi\" data-icon=\"folder\" aria-label=\"เปิดโฟลเดอร์\"/>"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_rating_view_kanban_stars
@@ -163,7 +162,8 @@ msgstr "มีข้อความ"
 #: model:ir.model.fields,help:rating.field_rating_rating__is_internal
 msgid ""
 "Hide to public / portal users, independently from subtype configuration."
-msgstr "ซ่อนสำหรับผู้ใช้สาธารณะ/พอร์ทัล โดยไม่ขึ้นอยู่กับการกำหนดค่าประเภทย่อย"
+msgstr ""
+"ซ่อนสำหรับผู้ใช้สาธารณะ/พอร์ทัล โดยไม่ขึ้นอยู่กับการกำหนดค่าประเภทย่อย"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_external_page_invalid_partner
@@ -203,8 +203,8 @@ msgstr "URL รูปภาพ"
 #. odoo-python
 #: code:addons/rating/controllers/main.py:0
 msgid ""
-"Incorrect rating: should be %(rating_unhappy)d, %(rating_neutral)d or %"
-"(rating_happy)d (received %(rate)d)"
+"Incorrect rating: should be %(rating_unhappy)d, %(rating_neutral)d or "
+"%(rating_happy)d (received %(rate)d)"
 msgstr ""
 
 #. module: rating
@@ -571,7 +571,8 @@ msgstr "มองเห็นได้ภายในเท่านั้น"
 #. odoo-python
 #: code:addons/rating/models/mail_thread.py:0
 msgid "Wrong rating value. A rate should be between 0 and 5 (received %d)."
-msgstr "ค่าการให้คะแนนไม่ถูกต้อง การให้คะแนนควรอยู่ระหว่าง 0 ถึง 5 (ได้รับ %d)"
+msgstr ""
+"ค่าการให้คะแนนไม่ถูกต้อง การให้คะแนนควรอยู่ระหว่าง 0 ถึง 5 (ได้รับ %d)"
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_external_page_invalid_partner

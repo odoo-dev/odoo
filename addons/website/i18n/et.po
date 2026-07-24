@@ -33,8 +33,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-22 00:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/"
-"website/et/>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/website/et/>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -119,23 +118,23 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "\"Engaging with this team was effortless from start to end. Their "
-"proficiency and meticulous approach greatly enhanced our project. I couldn’t "
-"be happier with the final product!\""
+"proficiency and meticulous approach greatly enhanced our project. I couldn’t"
+" be happier with the final product!\""
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
-"\"Exceptional service and great communication throughout the entire process. "
-"They went above and beyond to ensure our project was a complete success.\""
+"\"Exceptional service and great communication throughout the entire process."
+" They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "\"From the first meeting, it was clear we were in good hands. They took our "
-"vision and turned it into something even better than we had imagined. Highly "
-"recommend!\""
+"vision and turned it into something even better than we had imagined. Highly"
+" recommend!\""
 msgstr ""
 
 #. module: website
@@ -149,9 +148,9 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
-"\"This team truly understands the meaning of partnership. They brought fresh "
-"ideas to the table and delivered a final product that exceeded expectations."
-"\""
+"\"This team truly understands the meaning of partnership. They brought fresh"
+" ideas to the table and delivered a final product that exceeded "
+"expectations.\""
 msgstr ""
 
 #. module: website
@@ -165,8 +164,8 @@ msgstr ""
 #: code:addons/website/models/website_rewrite.py:0
 msgid ""
 "\"URL to\" cannot be set to \"/\". To change the homepage content, use the "
-"\"Homepage URL\" field in the website settings or the page properties on any "
-"custom page."
+"\"Homepage URL\" field in the website settings or the page properties on any"
+" custom page."
 msgstr ""
 
 #. module: website
@@ -178,8 +177,7 @@ msgstr ""
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
-msgid ""
-"\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
+msgid "\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
 msgstr ""
 "\"URL to\" ei saa sisaldada parameetrit %s mida ei kasutata parameetris "
 "\"URL from\"."
@@ -717,15 +715,15 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 msgid ""
-"<a class=\"o_translate_inline\" href=\"#\">Read More <i class=\"fa fa-angle-"
-"right\" role=\"img\"/></a>"
+"<a class=\"o_translate_inline\" href=\"#\">Read More <i class=\"oi\" data-"
+"icon=\"keyboard_arrow_right\" role=\"img\"/></a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references
 msgid ""
 "<a class=\"o_translate_inline\" href=\"#\">See our case studies <i "
-"class=\"fa fa-long-arrow-right ms-2\"/></a>"
+"class=\"oi ms-2\" data-icon=\"east\"/></a>"
 msgstr ""
 
 #. module: website
@@ -760,10 +758,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 msgid ""
-"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Get started</"
-"a>\n"
-"                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
-"o_translate_inline\">Learn more</a>"
+"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Get started</a>\n"
+"                        <a href=\"#\" class=\"btn btn-secondary mb-2 o_translate_inline\">Learn more</a>"
 msgstr ""
 
 #. module: website
@@ -777,29 +773,24 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_box
 #: model_terms:ir.ui.view,arch_db:website.s_mockup_image
 #: model_terms:ir.ui.view,arch_db:website.s_shape_image
-msgid ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Learn more</a>"
+msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Learn more</a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
-msgid ""
-"<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Documentation</"
-"a>"
+msgid "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Documentation</a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_overlap
 #: model_terms:ir.ui.view,arch_db:website.s_text_image
-msgid ""
-"<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Learn more</a>"
+msgid "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Learn more</a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
-msgid ""
-"<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Get in touch</a>"
+msgid "<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Get in touch</a>"
 msgstr ""
 
 #. module: website
@@ -831,11 +822,9 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_cookie_policy_link
 msgid ""
-"<a href=\"/website/cookie-policy\" class=\"oe_unremovable small "
-"o_translate_inline\">Cookie Policy</a>\n"
+"<a href=\"/website/cookie-policy\" class=\"oe_unremovable small o_translate_inline\">Cookie Policy</a>\n"
 "                <span class=\"text-muted  mx-2\">•</span>\n"
-"                <a href=\"#\" class=\"o_cookies_bar_toggle oe_unremovable "
-"small o_translate_inline\">Update Cookie Preferences</a>"
+"                <a href=\"#\" class=\"o_cookies_bar_toggle oe_unremovable small o_translate_inline\">Update Cookie Preferences</a>"
 msgstr ""
 
 #. module: website
@@ -892,8 +881,8 @@ msgstr "<br/>Firenze"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_list
 msgid ""
-"<br/>From revenue growth to customer retention and market expansion, our key "
-"metrics of company achievements underscore our strategic prowess and "
+"<br/>From revenue growth to customer retention and market expansion, our key"
+" metrics of company achievements underscore our strategic prowess and "
 "dedication to driving sustainable business success."
 msgstr ""
 
@@ -928,8 +917,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_text_cover
 msgid ""
 "<br/>Sell online easily with a user-friendly platform that streamlines all "
-"the steps, including setup, inventory management, and payment processing.<br/"
-">"
+"the steps, including setup, inventory management, and payment "
+"processing.<br/>"
 msgstr ""
 
 #. module: website
@@ -954,8 +943,8 @@ msgstr ""
 msgid ""
 "<br/>Users can participate in beta testing programs, providing feedback on "
 "upcoming releases and influencing the future direction of the platform. By "
-"staying current with updates, you can take advantage of the latest tools and "
-"features, ensuring your business remains competitive and efficient."
+"staying current with updates, you can take advantage of the latest tools and"
+" features, ensuring your business remains competitive and efficient."
 msgstr ""
 
 #. module: website
@@ -968,15 +957,15 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
 msgid ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
 msgid ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
 msgstr ""
 
 #. module: website
@@ -988,98 +977,103 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 msgid ""
-"<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>\n"
-"                        <span class=\"o_force_ltr\"><small>+1 555-555-5556</"
-"small></span>"
+"<i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"phone\"/>\n"
+"                        <span class=\"o_force_ltr\"><small>+1 555-555-5556</small></span>"
 msgstr ""
-"<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>\n"
+"<i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"phone\"/>\n"
 "<span class=\"o_force_ltr\"><small>+1 555-555-5556</small></span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
-msgid "<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>͏"
-msgstr "<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>͏"
+msgid "<i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"phone\"/>͏"
+msgstr "<i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"phone\"/>͏"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_controller_pages_kanban_view
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"URL\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"URL\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"URL\"/>"
+msgstr "<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" title=\"URL\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  24/7 toll-free support"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  24/7 toll-"
+"free support"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Access all "
+"modules"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Account "
+"management"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  All modules &amp; "
-"features"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  All modules"
+" &amp; features"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Complete CRM for any "
-"team"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Complete "
+"CRM for any team"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
-msgid "<i class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
-msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/>Email tugi"
+msgid "<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Email support"
+msgstr "<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/>Email tugi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Limited customization"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_comparisons
-msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Sales &amp; marketing "
-"for 2"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Limited "
+"customization"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Unlimited CRM support"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Sales &amp;"
+" marketing for 2"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Unlimited customization"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Unlimited "
+"CRM support"
+msgstr ""
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_comparisons
+msgid ""
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Unlimited "
+"customization"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_inline_default_template
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_inline_text_template
-msgid "<i class=\"fa fa-clock-o\"/> Sale ends in"
+msgid "<i class=\"oi\" data-icon=\"schedule\"/> Sale ends in"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 msgid ""
-"<i class=\"fa fa-fw fa-building-o\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"business\" role=\"presentation\"/>\n"
 "                        Office"
 msgstr ""
-"<i class=\"fa fa-fw fa-building-o\" role=\"presentation\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"business\" role=\"presentation\"/>\n"
 "                        Kontor"
 
 #. module: website
@@ -1089,13 +1083,11 @@ msgid ""
 "                      yourcompany@example.com\n"
 "                    <br/>\n"
 "                    <br/>\n"
-"                    <i class=\"fa fa-fw fa-phone o_not-animable\" "
-"role=\"img\"/>\n"
+"                    <i class=\"fa fa-fw fa-phone o_not-animable\" role=\"img\"/>\n"
 "                       +32(0)499 123 456\n"
 "                    <br/>\n"
 "                    <br/>\n"
-"                    <i class=\"fa fa-fw fa-map-marker o_not-animable\" "
-"role=\"img\"/>\n"
+"                    <i class=\"fa fa-fw fa-map-marker o_not-animable\" role=\"img\"/>\n"
 "                      Brussels, Belgium"
 msgstr ""
 
@@ -1115,10 +1107,10 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 msgid ""
-"<i class=\"fa fa-fw fa-envelope-o\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"mail\" role=\"presentation\"/>\n"
 "                        Email"
 msgstr ""
-"<i class=\"fa fa-fw fa-envelope-o\" role=\"presentation\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"mail\" role=\"presentation\"/>\n"
 "                        Email"
 
 #. module: website
@@ -1126,187 +1118,191 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 msgid ""
-"<i class=\"fa fa-fw fa-info-circle o_not-animable\" role=\"img\"/> What's "
-"new ?"
+"<i class=\"oi oi-fw o_not-animable\" data-icon=\"info\" role=\"img\"/> "
+"What's new ?"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 msgid ""
-"<i class=\"fa fa-fw fa-phone\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw oi-filled\" data-icon=\"phone\" role=\"presentation\"/>\n"
 "                        Phone"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-danger\" title=\"Offline\"/>"
+"<i class=\"oi oi-filled oi-fw o_button_icon text-danger\" data-"
+"icon=\"circle\" title=\"Offline\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-danger\" title=\"Offline\"/>"
+"<i class=\"o_button_icon text-danger oi-fw oi-filled oi\" data-"
+"icon=\"circle\" title=\"Offline\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
-"title=\"Connected\"/>"
+"<i class=\"oi oi-filled oi-fw o_button_icon text-success\" data-"
+"icon=\"circle\" title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
-"title=\"Connected\"/>"
+"<i class=\"o_button_icon text-success oi-fw oi-filled oi\" data-"
+"icon=\"circle\" title=\"Connected\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Website\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"<i class=\"fa fa-info-circle me-1\"/>\n"
-"                                Supported formats for social share images "
-"are PNG, JPG, WEBP, or GIF."
+"<i class=\"oi oi-filled me-1\" data-icon=\"info\"/>\n"
+"                                Supported formats for social share images are PNG, JPG, WEBP, or GIF."
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.protected_403
 msgid ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
-"                            <span class=\"mt-1\">A password is required to "
-"access this page.</span>"
+"<i class=\"oi oi-2x\" data-icon=\"lock\"/><br/>\n"
+"                            <span class=\"mt-1\">A password is required to access this page.</span>"
 msgstr ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
-"                            <span class=\"mt-1\">Sellele lehele ligipääsuks "
-"on vajalik parool.</span>"
+"<i class=\"oi-2x oi\" data-icon=\"lock\"/><br/>\n"
+"                            <span class=\"mt-1\">Sellele lehele ligipääsuks on vajalik parool.</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.protected_403
 msgid ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
+"<i class=\"oi oi-2x\" data-icon=\"lock\"/><br/>\n"
 "                            <span class=\"mt-1\">Wrong password</span>"
 msgstr ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
+"<i class=\"oi-2x oi\" data-icon=\"lock\"/><br/>\n"
 "                            <span class=\"mt-1\">Vale parool</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
-msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
+msgid "<i class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No customization"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
-msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No support"
+msgid "<i class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No support"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw oi-filled me-2\" data-icon=\"calendar_today\"/>\n"
 "                            <b>Events</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi oi-filled\" data-icon=\"calendar_today\"/>\n"
 "                            <b>Üritused</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"visibility\"/>\n"
 "                            <b>About us</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"visibility\"/>\n"
 "                            <b>Meist</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw oi-filled me-2\" data-icon=\"group\"/>\n"
 "                            <b>Partners</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi oi-filled\" data-icon=\"group\"/>\n"
 "                            <b>Partnerid</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-handshake-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"handshake\"/>\n"
 "                            <b>Services</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-handshake-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"handshake\"/>\n"
 "                            <b>Teenused</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-headphones fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"headphones\"/>\n"
 "                            <b>Help center</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-headphones fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"headphones\"/>\n"
 "                            <b>Abikeskus</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-map-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"map\"/>\n"
 "                            <b>Guides</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-map-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"map\"/>\n"
 "                            <b>Juhendid</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"newspaper\"/>\n"
 "                            <b>Our blog</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"newspaper\"/>\n"
 "                            <b>Blogi</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"star\"/>\n"
 "                            <b>Customers</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"star\"/>\n"
 "                            <b>Kliendid</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"sell\"/>\n"
 "                            <b>Products</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"sell\"/>\n"
 "                            <b>Tooted</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> Contact us"
+"<i class=\"s_mega_menu_thumbnails_icon oi oi-filled me-2\" data-"
+"icon=\"forum\"/> Contact us"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> Võtke meiega "
-"ühendust"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
-msgid "<i class=\"s_mega_menu_thumbnails_icon fa fa-cube me-2\"/> Free returns"
-msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-cube me-2\"/> Tasuta tagastus"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi-filled oi\" data-"
+"icon=\"forum\"/> Võtke meiega ühendust"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> Pickup "
-"in store"
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"deployed_code\"/> Free returns"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> "
-"Kättesaamine väljastuspunktist"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"deployed_code\"/> Tasuta tagastus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-truck me-2\"/> Express delivery"
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"shopping_basket\"/> Pickup in store"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-truck me-2\"/> Kiire "
-"kohaletoimetamine"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"shopping_basket\"/> Kättesaamine väljastuspunktist"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
+msgid ""
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"local_shipping\"/> Express delivery"
+msgstr ""
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"local_shipping\"/> Kiire kohaletoimetamine"
 
 #. module: website
 #. odoo-python
@@ -1322,13 +1318,11 @@ msgid ""
 "                        Low Price Guarantee\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-"
-"stack me-1\"/>\n"
+"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-stack me-1\"/>\n"
 "                        30 Days Online Returns\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
-">\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>\n"
 "                        Standard Shipping\n"
 "                    </small>"
 msgstr ""
@@ -1337,13 +1331,11 @@ msgstr ""
 "                        Madalaima hinna garantii \n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-"
-"stack me-1\"/>\n"
+"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-stack me-1\"/>\n"
 "                        30 päeva tagastusõigus\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
-">\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>\n"
 "                        Standard kohaletoimetamine\n"
 "                    </small>"
 
@@ -1375,8 +1367,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_vertical
 msgid ""
 "<small class=\"text-muted\" style=\"text-align: center;\">\n"
-"                            Your information is protected with encrypted<br/"
-">\n"
+"                            Your information is protected with encrypted<br/>\n"
 "                            checkout and trusted payment methods.\n"
 "                        </small>"
 msgstr ""
@@ -1385,9 +1376,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
 "<small class=\"text-muted\">\n"
-"                                        Block 3rd-party services that track "
-"users (e.g. YouTube, Google Maps, Facebook...) when the user has not given "
-"their consent.\n"
+"                                        Block 3rd-party services that track users (e.g. YouTube, Google Maps, Facebook...) when the user has not given their consent.\n"
 "                                    </small>"
 msgstr ""
 
@@ -1482,11 +1471,11 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
 msgid ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help text</"
-"small>"
+"<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help "
+"text</small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">Vormi välja abitekst</"
-"small>"
+"<small id=\"emailHelp\" class=\"form-text text-muted\">Vormi välja "
+"abitekst</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -1501,12 +1490,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 msgid ""
 "<small>\n"
-"                            <i class=\"fa fa-1x fa-fw fa-envelope me-1\"/>\n"
+"                            <i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"mail\"/>\n"
 "                            info@yourcompany.example.com\n"
 "                        </small>"
 msgstr ""
 "<small>\n"
-"                            <i class=\"fa fa-1x fa-fw fa-envelope me-1\"/>\n"
+"                            <i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"mail\"/>\n"
 "                            info@yourcompany.example.com\n"
 "                        </small>"
 
@@ -1518,10 +1507,10 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 msgid ""
-"<small><i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
+"<small><i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"mail\"/> "
 "info@yourcompany.example.com</small>"
 msgstr ""
-"<small><i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
+"<small><i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"mail\"/> "
 "info@yourcompany.example.com</small>"
 
 #. module: website
@@ -1596,8 +1585,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel_compact
 msgid ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                            <span class=\"visually-hidden\">Previous slide</"
-"span>"
+"                            <span class=\"visually-hidden\">Previous slide</span>"
 msgstr ""
 
 #. module: website
@@ -1657,47 +1645,47 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  24/7 Support"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  24/7 Support"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Access all modules"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Access all modules"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  All modules &amp; features"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  All modules &amp; features"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Complete CRM for any team"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Complete CRM for any team"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Email support"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Email support"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Limited Customization"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Limited Customization"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  PaaS Access"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  PaaS Access"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Unlimited CRM support"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Unlimited CRM support"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
-msgid "<span class=\"fa fa-check-circle-o\"/>  Unlimited customization"
+msgid "<span class=\"oi\" data-icon=\"check_circle\"/>  Unlimited customization"
 msgstr ""
 
 #. module: website
@@ -1718,8 +1706,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
 msgid "<span class=\"flex-grow-1\">How can I contact customer support ?</span>"
-msgstr ""
-"<span class=\"flex-grow-1\">Kuidas ma saan ühendust klienditoega?</span>"
+msgstr "<span class=\"flex-grow-1\">Kuidas ma saan ühendust klienditoega?</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
@@ -1728,8 +1715,7 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
-msgid ""
-"<span class=\"flex-grow-1\">What services does your company offer ?</span>"
+msgid "<span class=\"flex-grow-1\">What services does your company offer ?</span>"
 msgstr ""
 
 #. module: website
@@ -1778,9 +1764,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
 msgid ""
 "<span class=\"h3-fs\">\n"
-"                                \"This collection masterfully combines "
-"premium craftsmanship with timeless design, creating pieces that elevate any "
-"interior space.\"\n"
+"                                \"This collection masterfully combines premium craftsmanship with timeless design, creating pieces that elevate any interior space.\"\n"
 "                            </span>"
 msgstr ""
 
@@ -1797,28 +1781,23 @@ msgstr "<span class=\"me-1\">On:</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Apr 03, 2024</small>\n"
-"                        <strong>New Dashboard Features for Custom Reports</"
-"strong>"
+"                        <strong>New Dashboard Features for Custom Reports</strong>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Aug 27, 2024</small>\n"
-"                        <strong>Improved Security Protocols Implemented</"
-"strong>"
+"                        <strong>Improved Security Protocols Implemented</strong>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Dec 22, 2024</small>\n"
 "                        <strong>Advanced Analytics Tools Introduced</strong>"
 msgstr ""
@@ -1826,28 +1805,23 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Feb 11, 2024</small>\n"
-"                        <strong>Enhanced User Interface for Better "
-"Navigation</strong>"
+"                        <strong>Enhanced User Interface for Better Navigation</strong>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Jun 15, 2024</small>\n"
-"                        <strong>Integrated Multi-Language Support Added</"
-"strong>"
+"                        <strong>Integrated Multi-Language Support Added</strong>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Oct 09, 2024</small>\n"
 "                        <strong>Mobile App Compatibility Expanded</strong>"
 msgstr ""
@@ -1872,30 +1846,29 @@ msgstr "<span class=\"o_force_ltr\">+1 555-555-5556</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_hero_about
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, 400px);"
-"\">Our company was founded ten years ago around a common dream made by our "
-"founders.</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, "
+"400px);\">Our company was founded ten years ago around a common dream made "
+"by our founders.</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_portfolio_s_title
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, 400px);"
-"\">PORTFOLIO</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, "
+"400px);\">PORTFOLIO</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_bold
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, 400px);"
-"\">Contact us.</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, "
+"400px);\">Contact us.</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_search_box
 msgid ""
-"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm "
-"text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
+"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
 "                <span class=\"visually-hidden\">Loading...</span>\n"
 "            </span>"
 msgstr ""
@@ -1905,8 +1878,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Iris DOE</strong><br/>\n"
-"                                            <span class=\"text-"
-"muted\">Manager of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">Manager of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -1915,8 +1887,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Jane DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CEO "
-"of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CEO of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -1925,8 +1896,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>John DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CCO "
-"of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CCO of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -1935,8 +1905,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                        Furniture Design Specialist\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/"
-"><br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\n"
 "                                    </span>"
 msgstr ""
 
@@ -1946,8 +1915,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Iris DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">Manager of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">Manager of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -1957,8 +1925,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Jane DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">CEO of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">CEO of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -1968,8 +1935,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>John DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">CCO of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">CCO of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -1978,8 +1944,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Paul Dawson</strong><br/>\n"
-"                                    <span class=\"text-muted\">Furniture "
-"Design Specialist</span>\n"
+"                                    <span class=\"text-muted\">Furniture Design Specialist</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -2014,19 +1979,15 @@ msgstr "<span class=\"o_stat_text\">Väljas</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid ""
-"<span class=\"pe-1\">We use cookies to provide you a better user experience "
-"on this website.</span>\n"
-"                                            <a href=\"/website/cookie-"
-"policy\" class=\"o_cookies_bar_text_policy small o_translate_inline\">Cookie "
-"Policy</a>"
+"<span class=\"pe-1\">We use cookies to provide you a better user experience on this website.</span>\n"
+"                                            <a href=\"/website/cookie-policy\" class=\"o_cookies_bar_text_policy small o_translate_inline\">Cookie Policy</a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_badge
 msgid ""
-"<span class=\"s_badge badge text-bg-secondary o_animable\" data-"
-"name=\"Badge\" data-vxml=\"001\">\n"
-"        <i class=\"fa fa-fw fa-folder o_not-animable\"/>Category\n"
+"<span class=\"s_badge badge text-bg-secondary o_animable\" data-name=\"Badge\" data-vxml=\"001\">\n"
+"        <i class=\"oi oi-fw oi-filled o_not-animable\" data-icon=\"folder\"/>Category\n"
 "    </span>"
 msgstr ""
 
@@ -2087,24 +2048,21 @@ msgstr "<span class=\"s_website_form_label_content\">Saada meilile</span>"
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid ""
 "<span class=\"s_website_form_label_content\">Message</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid ""
 "<span class=\"s_website_form_label_content\">Name</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website
@@ -2117,8 +2075,7 @@ msgstr "<span class=\"s_website_form_label_content\">Telefoninumber</span>"
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid ""
 "<span class=\"s_website_form_label_content\">Subject</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website
@@ -2185,28 +2142,22 @@ msgstr "<span invisible=\"name_slugified\" class=\"bg-300\">...</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_view_form
 msgid ""
-"<span invisible=\"website_indexed\">Won't appear in search engine results</"
-"span>"
+"<span invisible=\"website_indexed\">Won't appear in search engine "
+"results</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"<span invisible=\"website_language_count &lt; 2\">Website visitors see the "
-"version matching their browser language, or the default if unavailable.</"
-"span>\n"
-"                                <span invisible=\"website_language_count "
-"&gt;= 2\">Install multiple languages to enable translation across your "
-"website.</span>"
+"<span invisible=\"website_language_count &lt; 2\">Website visitors see the version matching their browser language, or the default if unavailable.</span>\n"
+"                                <span invisible=\"website_language_count &gt;= 2\">Install multiple languages to enable translation across your website.</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_big_number
 msgid ""
 "<span style=\"font-size: 10.75rem;\">\n"
-"                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
-"\">\n"
+"                        <font class=\"text-gradient\" style=\"background-image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
@@ -2220,10 +2171,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_punchy
 msgid ""
-"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" "
-"class=\"o_rfs\">\n"
-"                            <font class=\"bg-o-color-1\">A PUNCHY</font> "
-"HEADLINE\n"
+"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" class=\"o_rfs\">\n"
+"                            <font class=\"bg-o-color-1\">A PUNCHY</font> HEADLINE\n"
 "                        </span>"
 msgstr ""
 
@@ -2241,8 +2190,7 @@ msgstr "<span>/model/</span>"
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
 msgid ""
 "<strong class=\"h2-fs\">$ 125.00</strong>\n"
-"                                        <small class=\"text-muted\">/ month</"
-"small>"
+"                                        <small class=\"text-muted\">/ month</small>"
 msgstr ""
 
 #. module: website
@@ -2276,8 +2224,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
 msgid ""
 "<strong class=\"h2-fs\">$ 65.00</strong>\n"
-"                                        <small class=\"text-muted\">/ month</"
-"small>"
+"                                        <small class=\"text-muted\">/ month</small>"
 msgstr ""
 
 #. module: website
@@ -2328,16 +2275,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>Daniella Clarke</strong><br/>\n"
-"                                <span class=\"text-muted\">Senior Manager</"
-"span>"
+"                                <span class=\"text-muted\">Senior Manager</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>Emil Foster</strong><br/>\n"
-"                                <span class=\"text-muted\">Creative "
-"Director</span>"
+"                                <span class=\"text-muted\">Creative Director</span>"
 msgstr ""
 
 #. module: website
@@ -2373,24 +2318,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>James Carter</strong><br/>\n"
-"                                <span class=\"text-muted\">Chief Technical "
-"Officer</span>"
+"                                <span class=\"text-muted\">Chief Technical Officer</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>Jody Roberts</strong><br/>\n"
-"                                <span class=\"text-muted\">Chief Financial "
-"Officer</span>"
+"                                <span class=\"text-muted\">Chief Financial Officer</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>Laura Evans</strong><br/>\n"
-"                                <span class=\"text-muted\">Head of "
-"Operations</span>"
+"                                <span class=\"text-muted\">Head of Operations</span>"
 msgstr ""
 
 #. module: website
@@ -2413,7 +2355,8 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
-msgid "<strong>Social platforms:</strong> Facebook, Instagram, Twitter, TikTok"
+msgid ""
+"<strong>Social platforms:</strong> Facebook, Instagram, Twitter, TikTok"
 msgstr ""
 
 #. module: website
@@ -2425,8 +2368,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "<strong>Sullivan Mitchell</strong><br/>\n"
-"                                <span class=\"text-muted\">Marketing "
-"Director</span>"
+"                                <span class=\"text-muted\">Marketing Director</span>"
 msgstr ""
 
 #. module: website
@@ -2514,11 +2456,11 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"A CDN helps you serve your website’s content with high availability and high "
-"performance to any visitor wherever they are located."
+"A CDN helps you serve your website’s content with high availability and high"
+" performance to any visitor wherever they are located."
 msgstr ""
-"CDN võimaldab teil esitada oma lehe sisu kõrge saadavuse ja jõudlusega igale "
-"külastajale, ükskõik, kus nad ka ei asu."
+"CDN võimaldab teil esitada oma lehe sisu kõrge saadavuse ja jõudlusega igale"
+" külastajale, ükskõik, kus nad ka ei asu."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart
@@ -2568,7 +2510,8 @@ msgid ""
 "colors, and powerful display options."
 msgstr ""
 "Kaart on paindlik ja laiendatav sisukonteiner. See sisaldab valikuid päise "
-"ja jaluse jaoks, suurel hulgal sisu, taustavärve ja võimsaid kuvamisvalikuid."
+"ja jaluse jaoks, suurel hulgal sisu, taustavärve ja võimsaid "
+"kuvamisvalikuid."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -2587,8 +2530,8 @@ msgid ""
 "action cannot be run through the website."
 msgstr ""
 "Koodiserveri toimingut saab teostada internetilehel, kasutades spetsiaalset "
-"kontrollerit. Internetilehe aadress on <base>/website/action/<website_path>. "
-"Aktiveerige see väli, et kasutaja saaks teha seda toimingut. Kui väli on "
+"kontrollerit. Internetilehe aadress on <base>/website/action/<website_path>."
+" Aktiveerige see väli, et kasutaja saaks teha seda toimingut. Kui väli on "
 "mitteaktiivne, siis toimingut ei saa internetilehe kaudu käivitada."
 
 #. module: website
@@ -2604,8 +2547,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid ""
-"A creamy, smooth cheesecake with a graham cracker crust, topped with a layer "
-"of fresh fruit or chocolate ganache."
+"A creamy, smooth cheesecake with a graham cracker crust, topped with a layer"
+" of fresh fruit or chocolate ganache."
 msgstr ""
 
 #. module: website
@@ -2669,13 +2612,14 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid ""
-"A moist, red-hued cake with layers of cream cheese frosting, perfect for any "
-"special occasion."
+"A moist, red-hued cake with layers of cream cheese frosting, perfect for any"
+" special occasion."
 msgstr ""
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__visit_count
-msgid "A new visit is considered if last connection was more than 8 hours ago."
+msgid ""
+"A new visit is considered if last connection was more than 8 hours ago."
 msgstr ""
 "Külastus võetakse uuena arvesse, kui viimane ühendus oli rohkem kui 8 tundi "
 "tagasi."
@@ -2883,7 +2827,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_three_columns
 msgid ""
 "Adapt these three columns to fit your design need. To duplicate, delete or "
-"move columns, select the column and use the top icons to perform your action."
+"move columns, select the column and use the top icons to perform your "
+"action."
 msgstr ""
 "Kohanda need veergu enda disaini vajadustele vastavalt. Duplikeerimiseks, "
 "kustutamiseks või veergude liigutamiseks valige need veerud ja kasutage "
@@ -2908,8 +2853,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
 msgid ""
-"Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
-"em>, one per line."
+"Add 3rd-party service domains <em>(\"www.example.com\" or "
+"\"example.com\")</em>, one per line."
 msgstr ""
 
 #. module: website
@@ -3615,8 +3560,9 @@ msgstr "Analüütika<br/>(valikulinel)"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
 msgid ""
-"Analyzing the numbers behind our success: <br class=\"d-none d-xxl-inline\"/"
-">an in-depth look at the key metrics driving our company's achievements"
+"Analyzing the numbers behind our success: <br class=\"d-none d-xxl-"
+"inline\"/>an in-depth look at the key metrics driving our company's "
+"achievements"
 msgstr ""
 
 #. module: website
@@ -3807,8 +3753,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/website_builder.js:0
 msgid ""
-"Are you sure you want to discard all your changes? Once you do, they're gone "
-"for good."
+"Are you sure you want to discard all your changes? Once you do, they're gone"
+" for good."
 msgstr ""
 
 #. module: website
@@ -3827,8 +3773,8 @@ msgstr "Nooled"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 msgid ""
-"Artisanal espresso with a focus on direct trade and exceptional quality in a "
-"chic, comfortable setting."
+"Artisanal espresso with a focus on direct trade and exceptional quality in a"
+" chic, comfortable setting."
 msgstr ""
 
 #. module: website
@@ -3882,13 +3828,10 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"Authenticate users, protect user data and allow the website to deliver the "
-"services users expects,\n"
-"                                                such as maintaining the "
-"content of their cart, or allowing file uploads."
+"Authenticate users, protect user data and allow the website to deliver the services users expects,\n"
+"                                                such as maintaining the content of their cart, or allowing file uploads."
 msgstr ""
-"Autendi kasutajaid, kaitse kasutajaandmeid ning võimalda veebilehel pakkuda "
-"teenuseid, mida kasutajad ootavad,\n"
+"Autendi kasutajaid, kaitse kasutajaandmeid ning võimalda veebilehel pakkuda teenuseid, mida kasutajad ootavad,\n"
 "näiteks nende poekorvi sisu haldamine või faili üleslaadimiste lubamine."
 
 #. module: website
@@ -4167,8 +4110,8 @@ msgstr "Algaja"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 msgid ""
-"Benefit from tax-free shopping, simplifying your purchase and enhancing your "
-"savings without any extra costs."
+"Benefit from tax-free shopping, simplifying your purchase and enhancing your"
+" savings without any extra costs."
 msgstr ""
 
 #. module: website
@@ -4993,8 +4936,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/theme/theme_tab_plugin.js:0
 msgid ""
-"Changing the color palette will reset all your color customizations, are you "
-"sure you want to proceed?"
+"Changing the color palette will reset all your color customizations, are you"
+" sure you want to proceed?"
 msgstr ""
 "Värvipaleti muutmine lähtestab kõik teie värvikohandused, kas olete kindel, "
 "et soovite jätkata?"
@@ -5244,8 +5187,8 @@ msgstr "Klassikaline juustukook"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
 msgid ""
-"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
-"drizzled with extra virgin olive oil."
+"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves,"
+" drizzled with extra virgin olive oil."
 msgstr ""
 
 #. module: website
@@ -5431,8 +5374,8 @@ msgstr "Värvi eelseadistused"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_color_blocks_2
 msgid ""
-"Color blocks are a simple and effective way to <b>present and highlight your "
-"content</b>. Choose an image or a color for the background. You can even "
+"Color blocks are a simple and effective way to <b>present and highlight your"
+" content</b>. Choose an image or a color for the background. You can even "
 "resize and duplicate the blocks to create your own layout. Add images or "
 "icons to customize the blocks."
 msgstr ""
@@ -5768,9 +5711,8 @@ msgstr "Jätka"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
-msgid ""
-"Continue reading <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr "Jätka lugemist <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Continue reading <i class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
+msgstr "Jätka lugemist <i class=\"align-middle ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website
 #. odoo-javascript
@@ -5830,42 +5772,24 @@ msgstr "Küpsiseriba"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"Cookies are small bits of text sent by our servers to your computer or "
-"device when you access our services.\n"
-"                            They are stored in your browser and later sent "
-"back to our servers so that we can provide contextual content.\n"
-"                            Without cookies, using the web would be a much "
-"more frustrating experience.\n"
-"                            We use them to support your activities on our "
-"website. For example, your session (so you don't have to login again) or "
-"your shopping cart.\n"
+"Cookies are small bits of text sent by our servers to your computer or device when you access our services.\n"
+"                            They are stored in your browser and later sent back to our servers so that we can provide contextual content.\n"
+"                            Without cookies, using the web would be a much more frustrating experience.\n"
+"                            We use them to support your activities on our website. For example, your session (so you don't have to login again) or your shopping cart.\n"
 "                            <br/>\n"
-"                            Cookies are also used to help us understand your "
-"preferences based on previous or current activity on our website (the pages "
-"you have\n"
-"                            visited), your language and country, which "
-"enables us to provide you with improved services.\n"
-"                            We also use cookies to help us compile aggregate "
-"data about site traffic and site interaction so that we can offer\n"
+"                            Cookies are also used to help us understand your preferences based on previous or current activity on our website (the pages you have\n"
+"                            visited), your language and country, which enables us to provide you with improved services.\n"
+"                            We also use cookies to help us compile aggregate data about site traffic and site interaction so that we can offer\n"
 "                            better site experiences and tools in the future."
 msgstr ""
-"Cookies are small bits of text sent by our servers to your computer or "
-"device when you access our services.\n"
-"                            They are stored in your browser and later sent "
-"back to our servers so that we can provide contextual content.\n"
-"                            Without cookies, using the web would be a much "
-"more frustrating experience.\n"
-"                            We use them to support your activities on our "
-"website. For example, your session (so you don't have to login again) or "
-"your shopping cart.\n"
+"Cookies are small bits of text sent by our servers to your computer or device when you access our services.\n"
+"                            They are stored in your browser and later sent back to our servers so that we can provide contextual content.\n"
+"                            Without cookies, using the web would be a much more frustrating experience.\n"
+"                            We use them to support your activities on our website. For example, your session (so you don't have to login again) or your shopping cart.\n"
 "                            <br/>\n"
-"                            Cookies are also used to help us understand your "
-"preferences based on previous or current activity on our website (the pages "
-"you have\n"
-"                            visited), your language and country, which "
-"enables us to provide you with improved services.\n"
-"                            We also use cookies to help us compile aggregate "
-"data about site traffic and site interaction so that we can offer\n"
+"                            Cookies are also used to help us understand your preferences based on previous or current activity on our website (the pages you have\n"
+"                            visited), your language and country, which enables us to provide you with improved services.\n"
+"                            We also use cookies to help us compile aggregate data about site traffic and site interaction so that we can offer\n"
 "                            better site experiences and tools in the future."
 
 #. module: website
@@ -6028,9 +5952,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
 msgid ""
 "Create pages from scratch by dragging and dropping customizable building "
-"blocks. This system simplifies web design, making it accessible to all skill "
-"levels. Combine headers, images, and text sections to build cohesive layouts "
-"quickly and efficiently."
+"blocks. This system simplifies web design, making it accessible to all skill"
+" levels. Combine headers, images, and text sections to build cohesive "
+"layouts quickly and efficiently."
 msgstr ""
 
 #. module: website
@@ -6490,8 +6414,8 @@ msgstr "Tarned"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 msgid ""
-"Delivering tailored, innovative tools to help you overcome challenges and<br/"
-"> achieve your goals, ensuring your journey is fully supported."
+"Delivering tailored, innovative tools to help you overcome challenges "
+"and<br/> achieve your goals, ensuring your journey is fully supported."
 msgstr ""
 
 #. module: website
@@ -6772,8 +6696,8 @@ msgstr "Avasta rohkem"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
-msgid "Discover more <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr "Avasta rohkem <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Discover more <i class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
+msgstr "Avasta rohkem <i class=\"align-middle ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
@@ -7053,8 +6977,8 @@ msgid ""
 "Do not copy/paste code you do not understand, this could put your data at "
 "risk."
 msgstr ""
-"Ärge kopeerige/kleepige koodi, millest te aru ei saa, see võib ohustada teie "
-"andmete turvalisust."
+"Ärge kopeerige/kleepige koodi, millest te aru ei saa, see võib ohustada teie"
+" andmete turvalisust."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
@@ -7276,9 +7200,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_categories
 msgid ""
-"Each item in our collection is grouped by category to make your browsing "
-"experience effortless. Take a look and dive into the different worlds we’ve "
-"curated for you.\n"
+"Each item in our collection is grouped by category to make your browsing experience effortless. Take a look and dive into the different worlds we’ve curated for you.\n"
 "                        <br/>\n"
 "                        <br/>"
 msgstr ""
@@ -7286,8 +7208,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 msgid ""
-"Each update is thoroughly tested to guarantee compatibility and reliability, "
-"and we provide detailed release notes to keep you informed of new features "
+"Each update is thoroughly tested to guarantee compatibility and reliability,"
+" and we provide detailed release notes to keep you informed of new features "
 "and improvements."
 msgstr ""
 
@@ -7483,18 +7405,15 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
 msgid ""
-"Elevate your living space with furniture that blends modern aesthetics and "
-"classic charm, crafted to bring both comfort and style to your home.\n"
+"Elevate your living space with furniture that blends modern aesthetics and classic charm, crafted to bring both comfort and style to your home.\n"
 "                        <br/><br/><br/><br/><br/><br/>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
 msgid ""
-"Elevate your living space with furniture that blends modern aesthetics and "
-"classic charm, crafted to bring both comfort and style to your home.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
-"><br/><br/><br/><br/><br/>"
+"Elevate your living space with furniture that blends modern aesthetics and classic charm, crafted to bring both comfort and style to your home.\n"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
 msgstr ""
 
 #. module: website
@@ -7701,14 +7620,16 @@ msgstr ""
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
-msgid "Entered date or time is not correct! It must be %(start)s (%(format)s)."
+msgid ""
+"Entered date or time is not correct! It must be %(start)s (%(format)s)."
 msgstr ""
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"Entered date or time is not correct! It must be after %(start)s (%(format)s)."
+"Entered date or time is not correct! It must be after %(start)s "
+"(%(format)s)."
 msgstr ""
 
 #. module: website
@@ -7723,15 +7644,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"Entered date or time is not correct! It must be before %(start)s (%"
-"(format)s)."
-msgstr ""
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/snippets/s_website_form/form.js:0
-msgid ""
-"Entered date or time is not correct! It must be before or equal to %(start)s "
+"Entered date or time is not correct! It must be before %(start)s "
 "(%(format)s)."
 msgstr ""
 
@@ -7739,8 +7652,16 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"Entered date or time is not correct! It must be within %(start)s and %(end)s "
-"(%(format)s)."
+"Entered date or time is not correct! It must be before or equal to %(start)s"
+" (%(format)s)."
+msgstr ""
+
+#. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/snippets/s_website_form/form.js:0
+msgid ""
+"Entered date or time is not correct! It must be within %(start)s and %(end)s"
+" (%(format)s)."
 msgstr ""
 
 #. module: website
@@ -7754,8 +7675,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"Entered date or time is not correct! It must not be within %(start)s and %"
-"(end)s (%(format)s)."
+"Entered date or time is not correct! It must not be within %(start)s and "
+"%(end)s (%(format)s)."
 msgstr ""
 
 #. module: website
@@ -7926,8 +7847,8 @@ msgid ""
 "Explain the benefits you offer. <br/>Don't write about products or services "
 "here, write about solutions."
 msgstr ""
-"Selgitage, milliseid eeliseid te pakute. <br/> Ärge kirjutage siia toodetest "
-"ega teenustest, kirjutage lahendustest."
+"Selgitage, milliseid eeliseid te pakute. <br/> Ärge kirjutage siia toodetest"
+" ega teenustest, kirjutage lahendustest."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
@@ -7948,8 +7869,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_quadrant
 msgid ""
 "Explore how our cutting-edge solutions redefine industry standards. To "
-"achieve excellence, we focus on what truly matters to our customers. <br/"
-"><br/> Begin by identifying their needs and exceed their expectations."
+"achieve excellence, we focus on what truly matters to our customers. "
+"<br/><br/> Begin by identifying their needs and exceed their expectations."
 msgstr ""
 
 #. module: website
@@ -7961,7 +7882,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 msgid ""
-"Explore our curated selection of coffee, tea, and more. Delight in every sip!"
+"Explore our curated selection of coffee, tea, and more. Delight in every "
+"sip!"
 msgstr ""
 
 #. module: website
@@ -7979,7 +7901,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_cta_badge
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
-msgid "Explore <i class=\"fa fa-long-arrow-right\" role=\"img\"/>"
+msgid "Explore <i class=\"oi\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -8199,9 +8121,7 @@ msgstr "Väli kohandatud vormiandmete jaoks"
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
 msgid ""
 "Fifth Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Add a unique perspective or detail</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Add a unique perspective or detail</small>"
 msgstr ""
 
 #. module: website
@@ -8227,12 +8147,10 @@ msgstr "Faili üleslaadimine"
 #: model:ir.model.fields,help:website.field_website_page__arch_fs
 msgid ""
 "File from where the view originates.\n"
-"                                                          Useful to (hard) "
-"reset broken views or to read arch from file in dev-xml mode."
+"                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
 "File from where the view originates.\n"
-"                                                          Useful to (hard) "
-"reset broken views or to read arch from file in dev-xml mode."
+"                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 
 #. module: website
 #: model:ir.model,name:website.model_ir_binary
@@ -8300,14 +8218,14 @@ msgid ""
 "Find all information about our deliveries, express deliveries and all you "
 "need to know to return a product."
 msgstr ""
-"Leia kogu teave meie kohaletoimetamiste, express-kohaletoimetamiste ja toote "
-"tagastamise kohta."
+"Leia kogu teave meie kohaletoimetamiste, express-kohaletoimetamiste ja toote"
+" tagastamise kohta."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
-"Find out how we were able helping them and set in place solutions adapted to "
-"their needs."
+"Find out how we were able helping them and set in place solutions adapted to"
+" their needs."
 msgstr ""
 "Uuri, kuidas me suutsime neid aidata ja rakendasime lahendusi, mis olid "
 "kohandatud nende vajadustele."
@@ -8343,8 +8261,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
 msgid ""
 "First Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">A slide description</small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">A slide description</small>"
 msgstr ""
 
 #. module: website
@@ -8604,27 +8521,19 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
 msgid ""
-"Founder and chief visionary, Tony is the driving force behind the company. "
-"He loves\n"
-"                                to keep his hands full by participating in "
-"the development of the software,\n"
-"                                marketing, and customer experience "
-"strategies."
+"Founder and chief visionary, Tony is the driving force behind the company. He loves\n"
+"                                to keep his hands full by participating in the development of the software,\n"
+"                                marketing, and customer experience strategies."
 msgstr ""
-"Founder and chief visionary, Tony is the driving force behind the company. "
-"He loves\n"
-"                                to keep his hands full by participating in "
-"the development of the software,\n"
-"                                marketing, and customer experience "
-"strategies."
+"Founder and chief visionary, Tony is the driving force behind the company. He loves\n"
+"                                to keep his hands full by participating in the development of the software,\n"
+"                                marketing, and customer experience strategies."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
 msgid ""
 "Fourth Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Describe the scene as you envision it</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Describe the scene as you envision it</small>"
 msgstr ""
 
 #. module: website
@@ -8935,7 +8844,8 @@ msgid ""
 "language."
 msgstr ""
 "Hea tekst algab mõistmisest, kuidas teie toode või teenus aitab teie "
-"kliente. Lihtsad sõnad ütlevad rohkemat kui suured sõnad ning pompoosne keel."
+"kliente. Lihtsad sõnad ütlevad rohkemat kui suured sõnad ning pompoosne "
+"keel."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -9439,7 +9349,8 @@ msgstr ""
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/edit_menu.xml:0
-msgid "Hint: Type '/' to search an existing page and '#' to link to an anchor."
+msgid ""
+"Hint: Type '/' to search an existing page and '#' to link to an anchor."
 msgstr ""
 "Nipp: Trüki '/', et otsida olemasolevat lehte ja '#', et siduda see ankruga."
 
@@ -9777,14 +9688,12 @@ msgstr ""
 msgid ""
 "If this view is inherited,\n"
 "* if True, the view always extends its parent\n"
-"* if False, the view currently does not extend its parent but can be "
-"enabled\n"
+"* if False, the view currently does not extend its parent but can be enabled\n"
 "         "
 msgstr ""
 "Kui see vaade on päritud,\n"
 "* kui Tõsi, laieneb vaade alati ülemvaatele\n"
-"* kui Väär, ei laiene vaade praegu selle ülemvaatele, aga seda saab "
-"aktiveerida"
+"* kui Väär, ei laiene vaade praegu selle ülemvaatele, aga seda saab aktiveerida"
 
 #. module: website
 #. odoo-javascript
@@ -10030,11 +9939,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/translation_components/translatorInfoDialog.xml:0
 msgid ""
-"In this mode, you can only translate texts or replace some elements (images, "
-"documents) with a translated equivalent. To change the structure of the "
-"page, you must edit the master page.\n"
-"            Each modification on the master page is automatically applied to "
-"all translated versions."
+"In this mode, you can only translate texts or replace some elements (images, documents) with a translated equivalent. To change the structure of the page, you must edit the master page.\n"
+"            Each modification on the master page is automatically applied to all translated versions."
 msgstr ""
 
 #. module: website
@@ -10282,8 +10188,8 @@ msgstr "Sisesta hoiatuse lõik"
 msgid ""
 "Insert text styles like headers, bold, italic, lists, and fonts with a "
 "simple WYSIWYG editor. Flexible and easy to use, it lets you design and "
-"format documents in real time. No coding knowledge is needed, making content "
-"creation straightforward and enjoyable for everyone."
+"format documents in real time. No coding knowledge is needed, making content"
+" creation straightforward and enjoyable for everyone."
 msgstr ""
 
 #. module: website
@@ -10495,8 +10401,8 @@ msgid ""
 "numbers and improves them. She is determined to drive success and delivers "
 "her professional acumen to bring the company to the next level."
 msgstr ""
-"Iris, kellel on rahvusvaheline kogemus, aitab meil hõlpsasti mõista numbreid "
-"ning neid paremaks muuta. Tema eesmärgiks on saavutada edu ning kasutada "
+"Iris, kellel on rahvusvaheline kogemus, aitab meil hõlpsasti mõista numbreid"
+" ning neid paremaks muuta. Tema eesmärgiks on saavutada edu ning kasutada "
 "professionaalset taipu, et viia ettevõte järgmise tasemeni."
 
 #. module: website
@@ -11531,8 +11437,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_floating_blocks
 msgid ""
 "Looking for a quick and easy way to organize repeat orders?<br/>\n"
-"                                        It's just one of the ways we support "
-"our members."
+"                                        It's just one of the ways we support our members."
 msgstr ""
 
 #. module: website
@@ -11975,12 +11880,12 @@ msgstr "Mich Stark, COO"
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
 msgid ""
 "Mich loves taking on challenges. With his multi-year experience as "
-"Commercial Director in the software industry, Mich has helped the company to "
-"get where it is today. Mich is among the best minds."
+"Commercial Director in the software industry, Mich has helped the company to"
+" get where it is today. Mich is among the best minds."
 msgstr ""
 "Mich loves taking on challenges. With his multi-year experience as "
-"Commercial Director in the software industry, Mich has helped the company to "
-"get where it is today. Mich is among the best minds."
+"Commercial Director in the software industry, Mich has helped the company to"
+" get where it is today. Mich is among the best minds."
 
 #. module: website
 #. odoo-javascript
@@ -12160,10 +12065,10 @@ msgid ""
 "push notification. If they have completed one of your forms, you can send "
 "them an SMS, or call them right away while they are browsing your website."
 msgstr ""
-"Monitoori oma külastajaid, kui nad käivad teie veebilehel Odoo Social äpiga. "
-"Suhtle nendega kõigest kliki abil, kasutades live-vestluse taotlust või "
-"kiirteadet. Kui nad on ühe teie vormi täitnud, saate te saata neile SMSi või "
-"helistada neile kohe, kui nad külastavad teie veebilehte."
+"Monitoori oma külastajaid, kui nad käivad teie veebilehel Odoo Social äpiga."
+" Suhtle nendega kõigest kliki abil, kasutades live-vestluse taotlust või "
+"kiirteadet. Kui nad on ühe teie vormi täitnud, saate te saata neile SMSi või"
+" helistada neile kohe, kui nad külastavad teie veebilehte."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_odoo_menu
@@ -12387,7 +12292,8 @@ msgstr "Vajate abi?"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 msgid ""
-"Need to pick up your order at one of our stores? Discover the nearest to you."
+"Need to pick up your order at one of our stores? Discover the nearest to "
+"you."
 msgstr ""
 "Soovite oma tellimusele järele tulla ühte meie kauplusesse? Leidke lähim "
 "teile."
@@ -12960,7 +12866,8 @@ msgstr ""
 msgid ""
 "One and only one of the two fields 'page_view_id' and 'module_id' should be "
 "set"
-msgstr "Kahest väljast 'page_view_id' ja 'module_id' tuleb määrata ainult üks!"
+msgstr ""
+"Kahest väljast 'page_view_id' ja 'module_id' tuleb määrata ainult üks!"
 
 #. module: website
 #. odoo-javascript
@@ -13011,11 +12918,9 @@ msgstr "Lubage ainult olulisi küpsiseid"
 #: model:ir.model.fields,help:website.field_website_controller_page__mode
 #: model:ir.model.fields,help:website.field_website_page__mode
 msgid ""
-"Only applies if this view inherits from an other one (inherit_id is not "
-"False/Null).\n"
+"Only applies if this view inherits from an other one (inherit_id is not False/Null).\n"
 "\n"
-"* if extension (default), if this view is requested the closest primary "
-"view\n"
+"* if extension (default), if this view is requested the closest primary view\n"
 "is looked up (via inherit_id), then all views inheriting from it with this\n"
 "view's model are applied\n"
 "* if primary, the closest primary view is fully resolved (even if it uses a\n"
@@ -13023,11 +12928,9 @@ msgid ""
 "(<xpath/>) are applied, and the result is used as if it were this view's\n"
 "actual arch.\n"
 msgstr ""
-"Only applies if this view inherits from an other one (inherit_id is not "
-"False/Null).\n"
+"Only applies if this view inherits from an other one (inherit_id is not False/Null).\n"
 "\n"
-"* if extension (default), if this view is requested the closest primary "
-"view\n"
+"* if extension (default), if this view is requested the closest primary view\n"
 "is looked up (via inherit_id), then all views inheriting from it with this\n"
 "view's model are applied\n"
 "* if primary, the closest primary view is fully resolved (even if it uses a\n"
@@ -13257,8 +13160,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
 msgid ""
 "Our company specializes in consulting, product development, and customer "
-"support. We tailor our services to fit the unique needs of businesses across "
-"various sectors, helping them grow and succeed in a competitive market."
+"support. We tailor our services to fit the unique needs of businesses across"
+" various sectors, helping them grow and succeed in a competitive market."
 msgstr ""
 
 #. module: website
@@ -13289,8 +13192,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 msgid ""
-"Our development team works tirelessly to enhance the platform's performance, "
-"security, and functionality, ensuring it remains at the cutting edge of "
+"Our development team works tirelessly to enhance the platform's performance,"
+" security, and functionality, ensuring it remains at the cutting edge of "
 "innovation."
 msgstr ""
 
@@ -13680,8 +13583,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid ""
-"Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
-"span> and <em>italic</em> texts"
+"Paragraph with <strong>bold</strong>, <span class=\"text-"
+"muted\">muted</span> and <em>italic</em> texts"
 msgstr ""
 "Paragrahv <strong>paksu</strong>, <span class=\"text-muted\">tuhmi</span> "
 "ja<em>kursiivis</em> tekstidega"
@@ -14674,8 +14577,8 @@ msgstr "Normaalne"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid ""
-"Regular feedback loops and steady refinements turn early ideas into stronger "
-"outcomes, improving quality without slowing momentum."
+"Regular feedback loops and steady refinements turn early ideas into stronger"
+" outcomes, improving quality without slowing momentum."
 msgstr ""
 
 #. module: website
@@ -14957,8 +14860,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid ""
-"Responsive support and thoughtful guidance remove blockers when they appear, "
-"so people stay focused and confident as they move forward."
+"Responsive support and thoughtful guidance remove blockers when they appear,"
+" so people stay focused and confident as they move forward."
 msgstr ""
 
 #. module: website
@@ -15457,9 +15360,9 @@ msgid ""
 "picture, in just a few clicks."
 msgstr ""
 "Otsige meediadialoogist, kui teil on tarvis veebilehe illustreerimiseks "
-"fotosid. Odoo integratsioon Unsplashiga, mis sisaldab miljoneid autoritasuta "
-"kõrge kvaliteediga fotosid, teeb võimalikuks ideaalse pildi leidmise kõigeks "
-"paari klikiga."
+"fotosid. Odoo integratsioon Unsplashiga, mis sisaldab miljoneid autoritasuta"
+" kõrge kvaliteediga fotosid, teeb võimalikuks ideaalse pildi leidmise "
+"kõigeks paari klikiga."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_searchbar
@@ -15497,8 +15400,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
 msgid ""
 "Second Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">What is this slide about</small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">What is this slide about</small>"
 msgstr ""
 
 #. module: website
@@ -15586,7 +15488,7 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
-msgid "See All <i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
+msgid "See All <i class=\"oi ms-2\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -16091,7 +15993,8 @@ msgstr "Logi sisse"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
-msgid "Sign up to receive the best promotions, our events and personal advice."
+msgid ""
+"Sign up to receive the best promotions, our events and personal advice."
 msgstr ""
 
 #. module: website
@@ -16422,8 +16325,8 @@ msgstr "Midagi muud siia"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_launch_countdown
 msgid ""
-"Something exciting is on the horizon, and we can't wait to share it with you."
-"<br/>Sign up now to be the first to know when we launch."
+"Something exciting is on the horizon, and we can't wait to share it with "
+"you.<br/>Sign up now to be the first to know when we launch."
 msgstr ""
 
 #. module: website
@@ -16495,7 +16398,8 @@ msgstr "Määrake otsingu tingimused."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_model__website_form_default_field_id
-msgid "Specify the field which will contain meta and custom form fields datas."
+msgid ""
+"Specify the field which will contain meta and custom form fields datas."
 msgstr ""
 "Palun määrake väli, mis peaks sisaldama meta- ja kohandatud vormiväljade "
 "andmeid."
@@ -16512,8 +16416,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
 msgid ""
-"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce "
-"for a flavorful kick."
+"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce"
+" for a flavorful kick."
 msgstr ""
 
 #. module: website
@@ -16592,12 +16496,12 @@ msgstr "Alusta nüüd"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
-msgid "Start Now <span class=\"fa fa-angle-right ms-2\"/>"
+msgid "Start Now <span class=\"oi ms-2\" data-icon=\"keyboard_arrow_right\"/>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
-msgid "Start saving  <span class=\"fa fa-long-arrow-right\" role=\"img\"/>"
+msgid "Start saving  <span class=\"oi\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -17172,8 +17076,8 @@ msgstr "Instagrami konto nimi ei ole õige"
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid ""
-"The URL “%(url)s“ is contained in the “%(field)s” of the following “%"
-"(model)s”"
+"The URL “%(url)s“ is contained in the “%(field)s” of the following "
+"“%(model)s”"
 msgstr ""
 
 #. module: website
@@ -17199,8 +17103,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website/models/res_company.py:0
 msgid ""
-"The company “%(company_name)s” cannot be archived because it has a linked "
-"website “%(website_name)s”.\n"
+"The company “%(company_name)s” cannot be archived because it has a linked website “%(website_name)s”.\n"
 "Change that website's company first."
 msgstr ""
 
@@ -17229,16 +17132,14 @@ msgstr ""
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
-msgid ""
-"The field \"%(fieldName)s\" is mandatory for the action \"%(actionName)s\"."
+msgid "The field \"%(fieldName)s\" is mandatory for the action \"%(actionName)s\"."
 msgstr ""
 
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website_form.py:0
 msgid ""
-"The field '%(field)s' cannot be deleted because it is referenced in a "
-"website view.\n"
+"The field '%(field)s' cannot be deleted because it is referenced in a website view.\n"
 "Model: %(model)s\n"
 "View: %(view)s"
 msgstr ""
@@ -17259,8 +17160,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"The following file(s) have invalid type: %(fileNames)s. Allowed type(s): %"
-"(allowedMimeTypesLabels)s."
+"The following file(s) have invalid type: %(fileNames)s. Allowed type(s): "
+"%(allowedMimeTypesLabels)s."
 msgstr ""
 
 #. module: website
@@ -17387,8 +17288,8 @@ msgstr ""
 #: code:addons/website/models/website.py:0
 msgid ""
 "The new default website is %(default_website_name)s. The following default "
-"settings were copied from the old default website to the new one: %"
-"(transferred_settings)s. Note that these settings are still present on the "
+"settings were copied from the old default website to the new one: "
+"%(transferred_settings)s. Note that these settings are still present on the "
 "old default website."
 msgstr ""
 
@@ -17441,7 +17342,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "The website will still work if you reject or discard those cookies."
-msgstr "See veebileht töötab isegi kui te loobute või eemaldate need küpsised."
+msgstr ""
+"See veebileht töötab isegi kui te loobute või eemaldate need küpsised."
 
 #. module: website
 #. odoo-javascript
@@ -17568,9 +17470,7 @@ msgstr "Kolmas menüü"
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_images
 msgid ""
 "Third Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Add your touch to complete the image</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Add your touch to complete the image</small>"
 msgstr ""
 
 #. module: website
@@ -17578,7 +17478,8 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website__favicon
 msgid "This field holds the image used to display a favicon on the website."
 msgstr ""
-"See väli sisaldab pilti, mida kasutatakse lemmikikooni kuvamiseks veebilehel."
+"See väli sisaldab pilti, mida kasutatakse lemmikikooni kuvamiseks "
+"veebilehel."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__arch_base
@@ -17625,15 +17526,11 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website_controller_page__arch
 #: model:ir.model.fields,help:website.field_website_page__arch
 msgid ""
-"This field should be used when accessing view arch. It will use "
-"translation.\n"
-"                               Note that it will read `arch_db` or `arch_fs` "
-"if in dev-xml mode."
+"This field should be used when accessing view arch. It will use translation.\n"
+"                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 msgstr ""
-"This field should be used when accessing view arch. It will use "
-"translation.\n"
-"                               Note that it will read `arch_db` or `arch_fs` "
-"if in dev-xml mode."
+"This field should be used when accessing view arch. It will use translation.\n"
+"                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__arch_db
@@ -17646,19 +17543,17 @@ msgstr "This field stores the view arch."
 #: model:ir.model.fields,help:website.field_website_page__arch_prev
 msgid ""
 "This field will save the current `arch_db` before writing on it.\n"
-"                                                                         Useful "
-"to (soft) reset a broken view."
+"                                                                         Useful to (soft) reset a broken view."
 msgstr ""
 "This field will save the current `arch_db` before writing on it.\n"
-"                                                                         Useful "
-"to (soft) reset a broken view."
+"                                                                         Useful to (soft) reset a broken view."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/font/add_font_dialog.js:0
 msgid ""
-"This font already exists, you can only add it as a local font to replace the "
-"server version."
+"This font already exists, you can only add it as a local font to replace the"
+" server version."
 msgstr ""
 
 #. module: website
@@ -17677,8 +17572,8 @@ msgstr "See on \""
 msgid ""
 "This is a paragraph. Ambitioni dedisse scripsisse iudicaretur. Nihilne te "
 "nocturnum praesidium Palati, nihil urbis vigiliae. Unam incolunt Belgae, "
-"aliam Aquitani, tertiam. Integer legentibus erat a ante historiarum dapibus. "
-"Phasellus laoreet lorem vel dolor tempus vehicula."
+"aliam Aquitani, tertiam. Integer legentibus erat a ante historiarum dapibus."
+" Phasellus laoreet lorem vel dolor tempus vehicula."
 msgstr ""
 
 #. module: website
@@ -17976,11 +17871,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_three_columns
 msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
-"right icon of each block. Then, duplicate one of the columns to create a new "
-"one as a copy."
+"right icon of each block. Then, duplicate one of the columns to create a new"
+" one as a copy."
 msgstr ""
-"Neljanda veeru lisamiseks vähendage nende kolme veeru suurust, kasutades iga "
-"bloki paremat ikooni. Seejärel duplikeerige ühte veergu, et luua uus koopia."
+"Neljanda veeru lisamiseks vähendage nende kolme veeru suurust, kasutades iga"
+" bloki paremat ikooni. Seejärel duplikeerige ühte veergu, et luua uus "
+"koopia."
 
 #. module: website
 #. odoo-javascript
@@ -18291,8 +18187,8 @@ msgstr "Tõene, kui konfiguraator on lõpetatud või ignoreeritud"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_tiles
 msgid ""
-"Trusted by<br/><font style=\"color: rgb(125, 125, 125);\">World leaders</"
-"font>"
+"Trusted by<br/><font style=\"color: rgb(125, 125, 125);\">World "
+"leaders</font>"
 msgstr ""
 
 #. module: website
@@ -18341,25 +18237,17 @@ msgid ""
 "Type of redirect/Rewrite:\n"
 "\n"
 "        301 Moved permanently: The browser will keep in cache the new url.\n"
-"        302 Moved temporarily: The browser will not keep in cache the new "
-"url and ask again the next time the new url.\n"
-"        404 Not Found: If you want remove a specific page/controller (e.g. "
-"Ecommerce is installed, but you don't want /shop on a specific website)\n"
-"        308 Redirect / Rewrite: If you want rename a controller with a new "
-"url. (Eg: /shop -> /garden - Both url will be accessible but /shop will "
-"automatically be redirected to /garden)\n"
+"        302 Moved temporarily: The browser will not keep in cache the new url and ask again the next time the new url.\n"
+"        404 Not Found: If you want remove a specific page/controller (e.g. Ecommerce is installed, but you don't want /shop on a specific website)\n"
+"        308 Redirect / Rewrite: If you want rename a controller with a new url. (Eg: /shop -> /garden - Both url will be accessible but /shop will automatically be redirected to /garden)\n"
 "    "
 msgstr ""
 "Type of redirect/Rewrite:\n"
 "\n"
 "        301 Moved permanently: The browser will keep in cache the new url.\n"
-"        302 Moved temporarily: The browser will not keep in cache the new "
-"url and ask again the next time the new url.\n"
-"        404 Not Found: If you want remove a specific page/controller (e.g. "
-"Ecommerce is installed, but you don't want /shop on a specific website)\n"
-"        308 Redirect / Rewrite: If you want rename a controller with a new "
-"url. (Eg: /shop -> /garden - Both url will be accessible but /shop will "
-"automatically be redirected to /garden)\n"
+"        302 Moved temporarily: The browser will not keep in cache the new url and ask again the next time the new url.\n"
+"        404 Not Found: If you want remove a specific page/controller (e.g. Ecommerce is installed, but you don't want /shop on a specific website)\n"
+"        308 Redirect / Rewrite: If you want rename a controller with a new url. (Eg: /shop -> /garden - Both url will be accessible but /shop will automatically be redirected to /garden)\n"
 "    "
 
 #. module: website
@@ -18432,9 +18320,7 @@ msgstr "Jooni peale liikumise puhul alla"
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "Understand how visitors engage with our website, via Google Analytics.\n"
-"                                                Learn more about <a "
-"class=\"o_translate_inline\" href=\"https://support.google.com/analytics/"
-"answer/11397207?hl=en\">Analytics cookies and privacy information.</a>"
+"                                                Learn more about <a class=\"o_translate_inline\" href=\"https://support.google.com/analytics/answer/11397207?hl=en\">Analytics cookies and privacy information.</a>"
 msgstr ""
 
 #. module: website
@@ -18693,29 +18579,20 @@ msgstr "Kasutatakse lehe pealkirjas"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"Used to collect information about your interactions with the website, the "
-"pages you've seen,\n"
-"                                                and any specific marketing "
-"campaign that brought you to the website."
+"Used to collect information about your interactions with the website, the pages you've seen,\n"
+"                                                and any specific marketing campaign that brought you to the website."
 msgstr ""
-"Kasutatakse info kogumiseks, kuidas te kasutatate veebilehte, milliseid "
-"lehti olete külastanud\n"
+"Kasutatakse info kogumiseks, kuidas te kasutatate veebilehte, milliseid lehti olete külastanud\n"
 "ja millised turunduskampaanian tõid teid veebileheni."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"Used to make advertising more engaging to users and more valuable to "
-"publishers and advertisers,\n"
-"                                                such as providing more "
-"relevant ads when you visit other websites that display ads or to improve "
-"reporting on ad campaign performance."
+"Used to make advertising more engaging to users and more valuable to publishers and advertisers,\n"
+"                                                such as providing more relevant ads when you visit other websites that display ads or to improve reporting on ad campaign performance."
 msgstr ""
-"Kasutatakse, et muuta reklaamid kasutajatele haaravamaks ja avaldajatele ja "
-"reklaamijatele väärtuslikumaks,\n"
-"näiteks kasutatakse asjakohasemaid reklaame, kui te külastate teisi "
-"veebilehti, mis reklaame kuvavad või parandatakse reklaamkampaania toimimise "
-"aruandlust."
+"Kasutatakse, et muuta reklaamid kasutajatele haaravamaks ja avaldajatele ja reklaamijatele väärtuslikumaks,\n"
+"näiteks kasutatakse asjakohasemaid reklaame, kui te külastate teisi veebilehti, mis reklaame kuvavad või parandatakse reklaamkampaania toimimise aruandlust."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -19082,7 +18959,8 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.actions.act_window,help:website.website_visitor_view_action
-msgid "Wait for visitors to come to your website to see the pages they viewed."
+msgid ""
+"Wait for visitors to come to your website to see the pages they viewed."
 msgstr ""
 "Oodake, et külastajad tuleksid teie veebilehele, selleks et näha, milliseid "
 "lehti nad vaatasid"
@@ -19163,17 +19041,11 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products. We build great products to solve your business "
-"problems.\n"
-"                            <br/><br/>Our products are designed for small to "
-"medium size companies willing to optimize their performance."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.\n"
+"                            <br/><br/>Our products are designed for small to medium size companies willing to optimize their performance."
 msgstr ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products. We build great products to solve your business "
-"problems.\n"
-"                            <br/><br/>Our products are designed for small to "
-"medium size companies willing to optimize their performance."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.\n"
+"                            <br/><br/>Our products are designed for small to medium size companies willing to optimize their performance."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_descriptive
@@ -19191,8 +19063,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life. "
-"Our services are designed for small to medium size companies."
+"We are a team of passionate people whose goal is to improve everyone's life."
+" Our services are designed for small to medium size companies."
 msgstr ""
 
 #. module: website
@@ -19242,8 +19114,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 msgid ""
-"We collaborate with trusted, high-quality partners to bring you reliable and "
-"top-notch products and services."
+"We collaborate with trusted, high-quality partners to bring you reliable and"
+" top-notch products and services."
 msgstr ""
 
 #. module: website
@@ -19264,8 +19136,8 @@ msgstr "Me ei leidnud seda Facebook lehekülge"
 #: model_terms:ir.ui.view,arch_db:website.contactus
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 msgid ""
-"We deliver personalized solutions, ensuring that every customer receives top-"
-"tier service tailored to their needs."
+"We deliver personalized solutions, ensuring that every customer receives "
+"top-tier service tailored to their needs."
 msgstr ""
 
 #. module: website
@@ -19406,8 +19278,9 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_about_bold
 msgid ""
-"We support clients across planning, implementation, and ongoing operations—"
-"delivering reliable service, accountable teams, and outcomes they can track."
+"We support clients across planning, implementation, and ongoing "
+"operations—delivering reliable service, accountable teams, and outcomes they"
+" can track."
 msgstr ""
 
 #. module: website
@@ -19422,8 +19295,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_banner_contained
 msgid ""
 "We unite diverse perspectives, shared passion, and relentless drive. By "
-"fostering a collaborative environment, we empower our team to turn ambitious "
-"ideas into extraordinary realities."
+"fostering a collaborative environment, we empower our team to turn ambitious"
+" ideas into extraordinary realities."
 msgstr ""
 
 #. module: website
@@ -19438,14 +19311,15 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 msgid ""
-"We use cookies to provide improved experience on this website. You can learn "
-"more about our cookies and how we use them in our"
+"We use cookies to provide improved experience on this website. You can learn"
+" more about our cookies and how we use them in our"
 msgstr ""
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
-msgid "We use cookies to provide you a better user experience on this website."
+msgid ""
+"We use cookies to provide you a better user experience on this website."
 msgstr "Me kasutame küpsiseid, et pakkuda paremat kogemust sellel veebilehel."
 
 #. module: website
@@ -20033,8 +19907,8 @@ msgid ""
 "readers."
 msgstr ""
 "Kirjutage üks või kaks paragrahvi oma toodete, teenuste või konkreetse "
-"funktsiooni kirjeldamiseks.<br/>Et saavutada edu, peab olema sisu lugejatele "
-"kasulik."
+"funktsiooni kirjeldamiseks.<br/>Et saavutada edu, peab olema sisu lugejatele"
+" kasulik."
 
 #. module: website
 #. odoo-javascript
@@ -20104,15 +19978,11 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"You can choose to have your computer warn you each time a cookie is being "
-"sent, or you can choose to turn off all cookies.\n"
-"                            Each browser is a little different, so look at "
-"your browser's Help menu to learn the correct way to modify your cookies."
+"You can choose to have your computer warn you each time a cookie is being sent, or you can choose to turn off all cookies.\n"
+"                            Each browser is a little different, so look at your browser's Help menu to learn the correct way to modify your cookies."
 msgstr ""
-"Te saate valida, et arvuti hoiataks teid iga kord, kui küpsist hakatakse "
-"saatma, või te saate lülitada kõik küpsised välja.\n"
-"Iga brauser on natuke erinev, seega vaadake oma brauseri Abi menüüd, et "
-"õppida õiget meetodit oma küpsiste modifitseerimiseks."
+"Te saate valida, et arvuti hoiataks teid iga kord, kui küpsist hakatakse saatma, või te saate lülitada kõik küpsised välja.\n"
+"Iga brauser on natuke erinev, seega vaadake oma brauseri Abi menüüd, et õppida õiget meetodit oma küpsiste modifitseerimiseks."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -20139,8 +20009,8 @@ msgstr ""
 msgid ""
 "You can reach our customer support team by emailing "
 "info@yourcompany.example.com, calling +1 555-555-5556, or using the live "
-"chat on our website. Our dedicated team is available 24/7 to assist with any "
-"inquiries or issues."
+"chat on our website. Our dedicated team is available 24/7 to assist with any"
+" inquiries or issues."
 msgstr ""
 
 #. module: website
@@ -20208,8 +20078,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 msgid ""
-"You have hidden this page from search results. It won't be indexed by search "
-"engines."
+"You have hidden this page from search results. It won't be indexed by search"
+" engines."
 msgstr ""
 "Te olete peitnud selle lehe otsingutulemustest. Seda ei indekseerita "
 "otsingumootori poolt."
@@ -20223,11 +20093,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
-"You may opt-out of a third-party's use of cookies by visiting the <a "
-"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?"
-"c=1\" rel=\"nofollow\">Network Advertising Initiative opt-out page</a>.\n"
-"                                                The website will still work "
-"if you reject or discard those cookies."
+"You may opt-out of a third-party's use of cookies by visiting the <a class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?c=1\" rel=\"nofollow\">Network Advertising Initiative opt-out page</a>.\n"
+"                                                The website will still work if you reject or discard those cookies."
 msgstr ""
 
 #. module: website
@@ -20354,8 +20221,8 @@ msgid ""
 "Your experience may be degraded if you discard those cookies, but the "
 "website will still work."
 msgstr ""
-"Teie kogemuse kvaliteet võib väheneda, kui te loobute nendest küpsistest aga "
-"veebileht töötab endiselt."
+"Teie kogemuse kvaliteet võib väheneda, kui te loobute nendest küpsistest aga"
+" veebileht töötab endiselt."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cover
@@ -20388,8 +20255,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_about_bold
 msgid ""
 "Your trusted partner in navigating today's challenges. <font style=\"color: "
-"rgb(125, 125, 125);\">We provide reliable service and proven expertise.</"
-"font>"
+"rgb(125, 125, 125);\">We provide reliable service and proven "
+"expertise.</font>"
 msgstr ""
 
 #. module: website
@@ -20582,8 +20449,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"cards, shop, grid, column, cart, product, ecommerce, categories, highlights, "
-"pictures, photos, illustration, media, visuals, intro, home, coupon, code, "
+"cards, shop, grid, column, cart, product, ecommerce, categories, highlights,"
+" pictures, photos, illustration, media, visuals, intro, home, coupon, code, "
 "description, rounded, card, call to action, cta, marketing, showcase, "
 "mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
@@ -20618,15 +20485,15 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"cite, testimonials, endorsements, reviews, feedback, statements, references, "
-"sayings, comments, appreciations, citations"
+"cite, testimonials, endorsements, reviews, feedback, statements, references,"
+" sayings, comments, appreciations, citations"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"cite, testimonials, endorsements, reviews, feedback, statements, references, "
-"sayings, comments, appreciations, citations, carousel"
+"cite, testimonials, endorsements, reviews, feedback, statements, references,"
+" sayings, comments, appreciations, citations, carousel"
 msgstr ""
 
 #. module: website
@@ -20663,8 +20530,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"coming soon, countdown, launch, waitlist, timer, days hours minutes seconds, "
-"social media, teaser, pre-launch, fullscreen, dark"
+"coming soon, countdown, launch, waitlist, timer, days hours minutes seconds,"
+" social media, teaser, pre-launch, fullscreen, dark"
 msgstr ""
 
 #. module: website
@@ -20802,8 +20669,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
-"combination, trendy, pattern, design, shape, geometric, patterned, contrast, "
-"collage, arrangement, gallery, creative, mosaic"
+"combination, trendy, pattern, design, shape, geometric, patterned, contrast,"
+" collage, arrangement, gallery, creative, mosaic"
 msgstr ""
 
 #. module: website
@@ -20856,16 +20723,16 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"description, containers, layouts, structures, multi-columns, modules, boxes, "
-"content, picture, photo, illustration, media, visual, article, story, "
+"description, containers, layouts, structures, multi-columns, modules, boxes,"
+" content, picture, photo, illustration, media, visual, article, story, "
 "combination, showcase, announcement, reveal"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"description, containers, layouts, structures, multi-columns, modules, boxes, "
-"content, picture, photo, illustration, media, visual, article, story, "
+"description, containers, layouts, structures, multi-columns, modules, boxes,"
+" content, picture, photo, illustration, media, visual, article, story, "
 "combination, showcase, announcement, reveal, trendy, design, shape, "
 "geometric, engage, call to action, cta, button"
 msgstr ""
@@ -20940,8 +20807,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"features, icons, benefits, product features, split layout, image, icon list, "
-"advantages, highlights, product showcase, 4 features"
+"features, icons, benefits, product features, split layout, image, icon list,"
+" advantages, highlights, product showcase, 4 features"
 msgstr ""
 
 #. module: website
@@ -20999,8 +20866,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "gallery, carousel, slider, slideshow, picture, photo, image-slider, "
-"rotating, swipe, transition, media-carousel, movement, cta, engagement, call "
-"to action"
+"rotating, swipe, transition, media-carousel, movement, cta, engagement, call"
+" to action"
 msgstr ""
 
 #. module: website
@@ -21011,8 +20878,8 @@ msgstr "google1234567890123456.html"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, "
-"statistics, stats, analytics, infographic, skills, report"
+"graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization,"
+" statistics, stats, analytics, infographic, skills, report"
 msgstr ""
 
 #. module: website
@@ -21089,8 +20956,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"hero, categories, ecommerce, shop, illustration, buy, photos, shop, product, "
-"grid, pictures"
+"hero, categories, ecommerce, shop, illustration, buy, photos, shop, product,"
+" grid, pictures"
 msgstr ""
 
 #. module: website
@@ -21104,8 +20971,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "hero, headline, header, intro, home, landing page, animated, movement, "
-"marquee, scrolling text, avatars, social proof, background image, immersive, "
-"cover"
+"marquee, scrolling text, avatars, social proof, background image, immersive,"
+" cover"
 msgstr ""
 
 #. module: website
@@ -21140,8 +21007,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "hero, jumbotron, headline, header, introduction, banner, call to action, "
-"cta, button, highlight, showcase, spotlight, sober, trendy, design, picture, "
-"photo, illustration, visual, description, containers, layouts, product, buy"
+"cta, button, highlight, showcase, spotlight, sober, trendy, design, picture,"
+" photo, illustration, visual, description, containers, layouts, product, buy"
 msgstr ""
 
 #. module: website
@@ -21173,8 +21040,8 @@ msgstr ""
 msgid ""
 "hero, jumbotron, headline, header, introduction, home, content, "
 "introduction, overview, spotlight, presentation, welcome, context, "
-"description, primary, highlight, lead, journey, skills, expertises, experts, "
-"accomplishments, knowledge"
+"description, primary, highlight, lead, journey, skills, expertises, experts,"
+" accomplishments, knowledge"
 msgstr ""
 
 #. module: website
@@ -21321,8 +21188,8 @@ msgstr "ir.ui.view"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"journey, exploration, travel, outdoor, excitement, quest, start, onboarding, "
-"discovery, thrill"
+"journey, exploration, travel, outdoor, excitement, quest, start, onboarding,"
+" discovery, thrill"
 msgstr ""
 
 #. module: website
@@ -21628,7 +21495,8 @@ msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
-msgid "scrolling, depth, effect, background, layer, visual, movement, parallax"
+msgid ""
+"scrolling, depth, effect, background, layer, visual, movement, parallax"
 msgstr ""
 
 #. module: website
@@ -21741,8 +21609,8 @@ msgstr ""
 msgid ""
 "statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, "
 "skills, achievements, benchmarks, milestones, indicators, data, "
-"measurements, reports, trends, results, analytics, summaries, summary, large-"
-"figures, prominent, standout"
+"measurements, reports, trends, results, analytics, summaries, summary, "
+"large-figures, prominent, standout"
 msgstr ""
 
 #. module: website
@@ -21946,23 +21814,21 @@ msgstr ""
 #~ msgstr "<b>Vajutage</b> sellele valikule, et muuta bloki %s ära. "
 
 #~ msgid ""
-#~ "<b>Customize</b> any block through this menu. Try to change the "
-#~ "background color of this block."
+#~ "<b>Customize</b> any block through this menu. Try to change the background "
+#~ "color of this block."
 #~ msgstr ""
-#~ "<b>Kohandage</b> siit menüüst ükskõik, millist blokki. Üritage muuta "
-#~ "selle bloki taustavärvi."
+#~ "<b>Kohandage</b> siit menüüst ükskõik, millist blokki. Üritage muuta selle "
+#~ "bloki taustavärvi."
 
 #~ msgid ""
-#~ "<b>Customize</b> any block through this menu. Try to change the "
-#~ "background image of this block."
+#~ "<b>Customize</b> any block through this menu. Try to change the background "
+#~ "image of this block."
 #~ msgstr ""
-#~ "<b>Kohandage</b> siit menüüst ükskõik, millist blokki. Üritage muuta "
-#~ "selle bloki taustapilti."
+#~ "<b>Kohandage</b> siit menüüst ükskõik, millist blokki. Üritage muuta selle "
+#~ "bloki taustapilti."
 
-#~ msgid ""
-#~ "<b>Double click on an image</b> to change it with one of your choice."
-#~ msgstr ""
-#~ "<b>Tehke pildil topeltklikk</b> et muuta see enda valikuga vastavaks."
+#~ msgid "<b>Double click on an image</b> to change it with one of your choice."
+#~ msgstr "<b>Tehke pildil topeltklikk</b> et muuta see enda valikuga vastavaks."
 
 #~ msgid "<b>Select</b> a %s."
 #~ msgstr "<b>Valige</b> %s."
@@ -21981,8 +21847,7 @@ msgstr ""
 #~ "                            <span class=\"visually-hidden\">Next</span>"
 #~ msgstr ""
 #~ "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
-#~ "                            <span class=\"visually-hidden\">Järgmine</"
-#~ "span>"
+#~ "                            <span class=\"visually-hidden\">Järgmine</span>"
 
 #~ msgid ""
 #~ "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
@@ -22000,8 +21865,7 @@ msgstr ""
 
 #~ msgid ""
 #~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-#~ "                            <span class=\"visually-hidden\">Previous</"
-#~ "span>"
+#~ "                            <span class=\"visually-hidden\">Previous</span>"
 #~ msgstr ""
 #~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
 #~ "                            <span class=\"visually-hidden\">Eelmine</span>"
@@ -22040,9 +21904,8 @@ msgstr ""
 #~ msgstr "Aktiveeri oma %s."
 
 #~ msgid ""
-#~ "Adjust volume, skip tracks, answer calls, and activate voice assistants "
-#~ "with a simple tap, keeping your hands free and your focus on what matters "
-#~ "most."
+#~ "Adjust volume, skip tracks, answer calls, and activate voice assistants with"
+#~ " a simple tap, keeping your hands free and your focus on what matters most."
 #~ msgstr ""
 #~ "Reguleeri helitugevust, jäta lugusid vahele, vasta kõnedele ja aktiveeri "
 #~ "häälassistendid lihtsa puudutusega, hoides käed vabad ja keskendudes "
@@ -22073,8 +21936,8 @@ msgstr ""
 #~ "By Crafting unique and compelling brand identities that leave a lasting "
 #~ "impact."
 #~ msgstr ""
-#~ "Läbi ainulaadsete ja veenvate brändiidentiteetide loomise, mis jätab "
-#~ "püsiva mõju."
+#~ "Läbi ainulaadsete ja veenvate brändiidentiteetide loomise, mis jätab püsiva "
+#~ "mõju."
 
 #~ msgid "Choose"
 #~ msgstr "Vali"
@@ -22119,8 +21982,8 @@ msgstr ""
 #~ "EchoTunes comes with customizable ear tip sizes that provide a secure and "
 #~ "comfortable fit."
 #~ msgstr ""
-#~ "EchoTunes tuleb koos kohandatavate kõrvaklapi otsa suurustega, mis "
-#~ "tagavad turvalise ja mugava sobivuse."
+#~ "EchoTunes tuleb koos kohandatavate kõrvaklapi otsa suurustega, mis tagavad "
+#~ "turvalise ja mugava sobivuse."
 
 #~ msgid "Elevate Your Audio Journey Today"
 #~ msgstr "Tõsta täna oma heliteekond uuele tasandile."
@@ -22140,8 +22003,7 @@ msgstr ""
 #~ msgid ""
 #~ "Empowering your business through strategic digital insights and expertise."
 #~ msgstr ""
-#~ "Teie äri tugevdamine strateegiliste digitaalsete teadmiste ja "
-#~ "ekspertiisiga."
+#~ "Teie äri tugevdamine strateegiliste digitaalsete teadmiste ja ekspertiisiga."
 
 #~ msgid "Enabling your %s."
 #~ msgstr "Aktiveerige oma %s."
@@ -22160,8 +22022,8 @@ msgstr ""
 #~ "Experience the power of our software without breaking the bank – choose a "
 #~ "plan that suits you best and start unlocking its full potential today."
 #~ msgstr ""
-#~ "Koge meie tarkvara võimsust, ilma pangakontot koormamata - vali endale "
-#~ "sobiv plaan ja alusta täna selle täieliku potentsiaali avamist."
+#~ "Koge meie tarkvara võimsust, ilma pangakontot koormamata - vali endale sobiv"
+#~ " plaan ja alusta täna selle täieliku potentsiaali avamist."
 
 #~ msgid "Experienced fullstack developer."
 #~ msgstr "Kogenud fullstack arendaja."
@@ -22176,54 +22038,52 @@ msgstr ""
 #~ "lähenemisega."
 
 #~ msgid ""
-#~ "Explore our captivating gallery, a visual journey showcasing our finest "
-#~ "work and creative projects. Immerse yourself in a collection of images "
-#~ "that capture the essence of our craftsmanship, innovation, and dedication "
-#~ "to excellence."
+#~ "Explore our captivating gallery, a visual journey showcasing our finest work"
+#~ " and creative projects. Immerse yourself in a collection of images that "
+#~ "capture the essence of our craftsmanship, innovation, and dedication to "
+#~ "excellence."
 #~ msgstr ""
 #~ "Uuri meie haaravat galeriid, visuaalset teekonda, kus tutvustame meie "
-#~ "parimaid töid ja loovprojekte. Sukeldu kogusse piltidest, mis tabavad "
-#~ "meie meisterlikkuse, innovatsiooni ja pühendumuse essentsi."
+#~ "parimaid töid ja loovprojekte. Sukeldu kogusse piltidest, mis tabavad meie "
+#~ "meisterlikkuse, innovatsiooni ja pühendumuse essentsi."
 
 #~ msgid ""
-#~ "Founder and chief visionary, Tony is the driving force behind the "
-#~ "company. He loves to keep his hands full by participating in the "
-#~ "development of the software, marketing, and customer experience "
-#~ "strategies."
+#~ "Founder and chief visionary, Tony is the driving force behind the company. "
+#~ "He loves to keep his hands full by participating in the development of the "
+#~ "software, marketing, and customer experience strategies."
 #~ msgstr ""
 #~ "Asutaja ja peamine visionäär Tony on ettevõtte peamine jõud. Ta armastab "
 #~ "hoida oma käed täis, osaledes tarkvara arendamises, turunduses ja "
 #~ "kliendikogemuse strateegiates."
 
 #~ msgid ""
-#~ "Founder, Tony is the driving force behind the company. He loves to keep "
-#~ "his hands full by participating in the development of the software, "
-#~ "marketing, and UX strategies."
+#~ "Founder, Tony is the driving force behind the company. He loves to keep his "
+#~ "hands full by participating in the development of the software, marketing, "
+#~ "and UX strategies."
 #~ msgstr ""
 #~ "Asutaja Tony on ettevõtte peamine jõud. Ta armastab hoida oma käed täis, "
-#~ "osaledes tarkvara arendamises, turunduses ja kasutajakogemuse "
-#~ "strateegiates."
+#~ "osaledes tarkvara arendamises, turunduses ja kasutajakogemuse strateegiates."
 
 #~ msgid ""
-#~ "Founder, Tony is the driving force behind the company. He loves to keep "
-#~ "his hands full by participating in the development of the software, "
-#~ "marketing, and customer experience."
+#~ "Founder, Tony is the driving force behind the company. He loves to keep his "
+#~ "hands full by participating in the development of the software, marketing, "
+#~ "and customer experience."
 #~ msgstr ""
 #~ "Asutaja Tony on ettevõtte peamine jõud. Ta armastab hoida oma käed täis, "
 #~ "osaledes tarkvara arendamises, turunduses ja kliendikogemuse valdkonnas."
 
 #~ msgid ""
-#~ "From SEO to social media, we create campaigns that not only get you "
-#~ "noticed but also drive engagement and conversions."
+#~ "From SEO to social media, we create campaigns that not only get you noticed "
+#~ "but also drive engagement and conversions."
 #~ msgstr ""
-#~ "Alates SEO-st kuni sotsiaalmeediani loome kampaaniaid, mis mitte ainult "
-#~ "ei tõmba teie tähelepanu, vaid suurendavad ka kasutajate kaasatust ja "
+#~ "Alates SEO-st kuni sotsiaalmeediani loome kampaaniaid, mis mitte ainult ei "
+#~ "tõmba teie tähelepanu, vaid suurendavad ka kasutajate kaasatust ja "
 #~ "konversioone."
 
 #~ msgid ""
-#~ "From revitalizing your visual identity to realigning your messaging for "
-#~ "the digital landscape, we'll guide you through a strategic process that "
-#~ "ensures your brand remains relevant and resonates with your audience."
+#~ "From revitalizing your visual identity to realigning your messaging for the "
+#~ "digital landscape, we'll guide you through a strategic process that ensures "
+#~ "your brand remains relevant and resonates with your audience."
 #~ msgstr ""
 #~ "Alates visuaalse identiteedi värskendamisest kuni sõnumite kohandamiseni "
 #~ "digitaalses keskkonnas juhendame teid läbi strateegilise protsessi, mis "
@@ -22239,30 +22099,29 @@ msgstr ""
 #~ msgstr "Hea töö! On aeg <b>Salvestada</b> oma töö."
 
 #~ msgid ""
-#~ "Great stories are <b>for everyone</b> even when only written <b>for just "
-#~ "one person</b>. If you try to write with a wide, general audience in "
-#~ "mind, your story will sound fake and lack emotion. No one will be "
-#~ "interested. Write for one person. If it’s genuine for the one, it’s "
-#~ "genuine for the rest."
+#~ "Great stories are <b>for everyone</b> even when only written <b>for just one"
+#~ " person</b>. If you try to write with a wide, general audience in mind, your"
+#~ " story will sound fake and lack emotion. No one will be interested. Write "
+#~ "for one person. If it’s genuine for the one, it’s genuine for the rest."
 #~ msgstr ""
 #~ "Suurepärased jutud on mõeldud <b>kõigile</b>, isegi kui nad on kirjutatud "
 #~ "kõigest <b>ühele inimesele</b>. Kui te proovite kirjutada laiemale, "
 #~ "üldisemale publikule, kõlab teie jutt võltsilt ning emotsioonitult. Keegi "
-#~ "pole huvitatud. Kirjutage ühele inimesele. Kui see on siiras ühele, on "
-#~ "see siiras ka teistele."
+#~ "pole huvitatud. Kirjutage ühele inimesele. Kui see on siiras ühele, on see "
+#~ "siiras ka teistele."
 
 #~ msgid ""
-#~ "Great stories have a <b>personality</b>. Consider telling a great story "
-#~ "that provides personality. Writing a story with personality for potential "
-#~ "clients will assist with making a relationship connection. This shows up "
-#~ "in small quirks like word choices or phrases. Write from your point of "
-#~ "view, not from someone else's experience."
+#~ "Great stories have a <b>personality</b>. Consider telling a great story that"
+#~ " provides personality. Writing a story with personality for potential "
+#~ "clients will assist with making a relationship connection. This shows up in "
+#~ "small quirks like word choices or phrases. Write from your point of view, "
+#~ "not from someone else's experience."
 #~ msgstr ""
-#~ "Suurepärastel juttudel on <b>isikupära</b>. Üritage rääkida lugu, millel "
-#~ "on isikupära. Originaalse loo kirjutamine potentsiaalsetele klientidele "
-#~ "aitab nendega paremat kontakti saada. Seda saab saavutada, kasutades "
-#~ "väljendusrikkaid sõnu või fraase. Kirjutage enda vaatepunktist mitte "
-#~ "kellegi teise kogemusest lähtudes."
+#~ "Suurepärastel juttudel on <b>isikupära</b>. Üritage rääkida lugu, millel on "
+#~ "isikupära. Originaalse loo kirjutamine potentsiaalsetele klientidele aitab "
+#~ "nendega paremat kontakti saada. Seda saab saavutada, kasutades "
+#~ "väljendusrikkaid sõnu või fraase. Kirjutage enda vaatepunktist mitte kellegi"
+#~ " teise kogemusest lähtudes."
 
 #~ msgid "Happy Hour"
 #~ msgstr "Happy Hour"
@@ -22275,9 +22134,9 @@ msgstr ""
 #~ "skills, coupled with effective communication, enable me to lead cross-"
 #~ "functional teams to success."
 #~ msgstr ""
-#~ "Ma olen fullstack arendaja, kellel on taust juhtimises. Minu "
-#~ "analüütilised oskused koos efektiivse suhtlemisega võimaldavad mul "
-#~ "juhtida ristfunktsionaalseid meeskondi edule."
+#~ "Ma olen fullstack arendaja, kellel on taust juhtimises. Minu analüütilised "
+#~ "oskused koos efektiivse suhtlemisega võimaldavad mul juhtida "
+#~ "ristfunktsionaalseid meeskondi edule."
 
 #~ msgid "Installing your %s."
 #~ msgstr "Paigaldame %s."
@@ -22286,13 +22145,12 @@ msgstr ""
 #~ msgstr "Integreerime %s."
 
 #~ msgid ""
-#~ "It's time to elevate your fitness journey with coaching that's as unique "
-#~ "as you are. Choose your path, embrace the guidance, and transform your "
-#~ "life."
+#~ "It's time to elevate your fitness journey with coaching that's as unique as "
+#~ "you are. Choose your path, embrace the guidance, and transform your life."
 #~ msgstr ""
 #~ "On aeg tõsta oma fitnessiteekond uuele tasandile koos treeneriga, mis on "
-#~ "sama unikaalne kui sina ise. Vali oma tee, võta omaks juhendamine ja "
-#~ "muuda oma elu."
+#~ "sama unikaalne kui sina ise. Vali oma tee, võta omaks juhendamine ja muuda "
+#~ "oma elu."
 
 #~ msgid ""
 #~ "Join us for a remarkable dining experience that blends exquisite flavors "
@@ -22306,22 +22164,21 @@ msgstr ""
 
 #~ msgid ""
 #~ "Let's collaborate to create innovative solutions that stand out in the "
-#~ "digital landscape. Reach out today and let's build something "
-#~ "extraordinary together."
+#~ "digital landscape. Reach out today and let's build something extraordinary "
+#~ "together."
 #~ msgstr ""
-#~ "Tulge koostööd tegema, et luua innovaatilisi lahendusi, mis paistavad "
-#~ "silma digitaalses maastikul. Võtke täna ühendust ja loome koos midagi "
-#~ "erakordset."
+#~ "Tulge koostööd tegema, et luua innovaatilisi lahendusi, mis paistavad silma "
+#~ "digitaalses maastikul. Võtke täna ühendust ja loome koos midagi erakordset."
 
 #~ msgid "Let's do it"
 #~ msgstr "Teeme Ära"
 
 #~ msgid ""
-#~ "Let's turn your vision into reality. Contact us today to set your brand "
-#~ "on the path to digital excellence with us."
+#~ "Let's turn your vision into reality. Contact us today to set your brand on "
+#~ "the path to digital excellence with us."
 #~ msgstr ""
-#~ "Pöörame teie nägemuse reaalsuseks. Võtke täna meiega ühendust, et seada "
-#~ "oma bränd digitaalse tipptaseme teele koos meiega."
+#~ "Pöörame teie nägemuse reaalsuseks. Võtke täna meiega ühendust, et seada oma "
+#~ "bränd digitaalse tipptaseme teele koos meiega."
 
 #~ msgid "Management"
 #~ msgstr "Projektide haldus"
@@ -22330,15 +22187,14 @@ msgstr ""
 #~ msgstr "Turundus"
 
 #~ msgid ""
-#~ "Mastering frontend craftsmanship with expertise in HTML, CSS, and "
-#~ "JavaScript to craft captivating and responsive user experiences."
+#~ "Mastering frontend craftsmanship with expertise in HTML, CSS, and JavaScript"
+#~ " to craft captivating and responsive user experiences."
 #~ msgstr ""
-#~ "Valdades frontend töömeisterlikkust, millel on ekspertiis HTML-is, CSS-is "
-#~ "ja JavaScriptis, et luua haaravaid ja reageerivaid kasutajakogemusi."
+#~ "Valdades frontend töömeisterlikkust, millel on ekspertiis HTML-is, CSS-is ja"
+#~ " JavaScriptis, et luua haaravaid ja reageerivaid kasutajakogemusi."
 
 #~ msgid "Mediterranean buffet of starters, main dishes and desserts"
-#~ msgstr ""
-#~ "Vahemere stiilis buffee eelroogadest, pearoogadest ja magustoitudest"
+#~ msgstr "Vahemere stiilis buffee eelroogadest, pearoogadest ja magustoitudest"
 
 #~ msgid "Meet The Team"
 #~ msgstr "Tutvu meeskonnaga"
@@ -22351,12 +22207,12 @@ msgstr ""
 
 #~ msgid ""
 #~ "Mich loves taking on challenges. With his multi-year experience as "
-#~ "Commercial Director in the software industry, Mich has helped the company "
-#~ "to get where it is today."
+#~ "Commercial Director in the software industry, Mich has helped the company to"
+#~ " get where it is today."
 #~ msgstr ""
-#~ "Mich armastab väljakutseid vastu võtta. Oma mitmeaastase kogemusega "
-#~ "tarkvara tööstuse kommertsdirektorina on Mich aidanud ettevõttel jõuda "
-#~ "sinna, kus see täna on."
+#~ "Mich armastab väljakutseid vastu võtta. Oma mitmeaastase kogemusega tarkvara"
+#~ " tööstuse kommertsdirektorina on Mich aidanud ettevõttel jõuda sinna, kus "
+#~ "see täna on."
 
 #~ msgid "Multi Website Published Mixin"
 #~ msgstr "Multi Website Published Mixin"
@@ -22377,9 +22233,8 @@ msgstr ""
 #~ msgstr "Meie lähenemine"
 
 #~ msgid ""
-#~ "Our Coaching combines personalized fitness plans with mindfulness "
-#~ "practices, ensuring you achieve harmony in your body and peace in your "
-#~ "mind."
+#~ "Our Coaching combines personalized fitness plans with mindfulness practices,"
+#~ " ensuring you achieve harmony in your body and peace in your mind."
 #~ msgstr ""
 #~ "Meie treeningkava ühendab personaalsed fitnessiplaanid teadlikkuse "
 #~ "praktikatega, tagades tasakaalu saavutamise oma kehas ja rahu oma meeles."
@@ -22406,16 +22261,16 @@ msgstr ""
 #~ msgstr "Meie väärtused"
 
 #~ msgid ""
-#~ "Our experienced fitness coaches design workouts that align with your "
-#~ "goals, fitness level, and preferences."
+#~ "Our experienced fitness coaches design workouts that align with your goals, "
+#~ "fitness level, and preferences."
 #~ msgstr ""
 #~ "Meie kogenud fitness treenerid loovad treeningkavad, mis vastavad teie "
 #~ "sihtidele, treenitusele ja soovidele."
 
 #~ msgid ""
 #~ "Our mission is to create transformative experiences and foster growth, "
-#~ "driven by a relentless pursuit of innovation and a commitment to "
-#~ "exceeding expectations."
+#~ "driven by a relentless pursuit of innovation and a commitment to exceeding "
+#~ "expectations."
 #~ msgstr ""
 #~ "Meie missioon on luua muutusi põhjustavaid kogemusi ja soodustada kasvu, "
 #~ "toetudes pidevale innovatsioonile ja pühendumusele ootuste ületamisele."
@@ -22431,24 +22286,23 @@ msgstr ""
 
 #~ msgid ""
 #~ "Our software plans are designed to cater to a variety of needs, ensuring "
-#~ "that you find the perfect fit for your requirements. From individual "
-#~ "users to businesses of all sizes, we offer pricing options that provide "
+#~ "that you find the perfect fit for your requirements. From individual users "
+#~ "to businesses of all sizes, we offer pricing options that provide "
 #~ "exceptional value without compromising on features or performance."
 #~ msgstr ""
-#~ "Meie tarkvaraplaanid on loodud erinevate vajaduste rahuldamiseks, "
-#~ "tagades, et leiad täpselt sobiva lahenduse oma nõudmistele. Alates "
-#~ "individuaalsetest kasutajatest kuni kõigi suurustega ettevõteteni pakume "
-#~ "hinnavõimalusi, mis tagavad erakordse väärtuse ilma omaduste või jõudluse "
-#~ "kaotamiseta."
+#~ "Meie tarkvaraplaanid on loodud erinevate vajaduste rahuldamiseks, tagades, "
+#~ "et leiad täpselt sobiva lahenduse oma nõudmistele. Alates individuaalsetest "
+#~ "kasutajatest kuni kõigi suurustega ettevõteteni pakume hinnavõimalusi, mis "
+#~ "tagavad erakordse väärtuse ilma omaduste või jõudluse kaotamiseta."
 
 #~ msgid ""
 #~ "Our values shape our culture, influence our decisions, and guide us in "
 #~ "providing exceptional service. They reflect our dedication to integrity, "
 #~ "collaboration, and client satisfaction."
 #~ msgstr ""
-#~ "Meie väärtused kujundavad meie kultuuri, mõjutavad meie otsuseid ja "
-#~ "juhivad meid erakordse teenuse pakkumisel. Need peegeldavad meie "
-#~ "pühendumust aususele, koostööle ja klientide rahulolule."
+#~ "Meie väärtused kujundavad meie kultuuri, mõjutavad meie otsuseid ja juhivad "
+#~ "meid erakordse teenuse pakkumisel. Need peegeldavad meie pühendumust "
+#~ "aususele, koostööle ja klientide rahulolule."
 
 #~ msgid "Personalized Fitness"
 #~ msgstr "Personaalne fitness"
@@ -22488,8 +22342,8 @@ msgstr ""
 #~ "Ready to embark on your auditory adventure? Order your EchoTunes Wireless "
 #~ "Earbuds today and let the symphony begin."
 #~ msgstr ""
-#~ "Kas olete valmis alustama oma muusika seiklust? Tellige täna oma "
-#~ "EchoTunes juhtmevabad kõrvaklapid ja laske sümfoonial algus saada."
+#~ "Kas olete valmis alustama oma muusika seiklust? Tellige täna oma EchoTunes "
+#~ "juhtmevabad kõrvaklapid ja laske sümfoonial algus saada."
 
 #~ msgid "Rebranding"
 #~ msgstr "Brändingu uuendamine"
@@ -22535,24 +22389,23 @@ msgstr ""
 #~ "understanding your fitness aspirations, your current lifestyle, and any "
 #~ "challenges you face."
 #~ msgstr ""
-#~ "Me usume, et iga fitnessiteekond on ainulaadne. Meie lähenemine algab "
-#~ "teie fitnessi eesmärkide, praeguse elustiili ja võimalike väljakutsete "
+#~ "Me usume, et iga fitnessiteekond on ainulaadne. Meie lähenemine algab teie "
+#~ "fitnessi eesmärkide, praeguse elustiili ja võimalike väljakutsete "
 #~ "mõistmisega."
 
 #~ msgid ""
 #~ "We monitor your progress meticulously, adjusting your plan as needed to "
 #~ "ensure continuous improvement and results."
 #~ msgstr ""
-#~ "Me jälgime teie progressi põhjalikult, kohandades teie plaani vajadusel, "
-#~ "et tagada pidev edasiminek ja tulemused."
+#~ "Me jälgime teie progressi põhjalikult, kohandades teie plaani vajadusel, et "
+#~ "tagada pidev edasiminek ja tulemused."
 
 #~ msgid ""
-#~ "We're driven by the aspiration to redefine industry standards, to exceed "
-#~ "the expectations of our clients, and to foster a culture of continuous "
-#~ "growth."
+#~ "We're driven by the aspiration to redefine industry standards, to exceed the"
+#~ " expectations of our clients, and to foster a culture of continuous growth."
 #~ msgstr ""
-#~ "Meie eesmärk on ületada tööstuse standardeid, ületada meie klientide "
-#~ "ootusi ja edendada pideva kasvu kultuuri."
+#~ "Meie eesmärk on ületada tööstuse standardeid, ületada meie klientide ootusi "
+#~ "ja edendada pideva kasvu kultuuri."
 
 #~ msgid "Website Domain should be unique."
 #~ msgstr "Veebilehe domeen peab olema unikaalne."
@@ -22563,13 +22416,13 @@ msgstr ""
 #~ msgid ""
 #~ "Welcome to our comprehensive range of Tailored Fitness Coaching Services, "
 #~ "with personalized workouts, customized nutrition plans, and unwavering "
-#~ "support, we're committed to helping you achieve lasting results that "
-#~ "align with your aspirations."
+#~ "support, we're committed to helping you achieve lasting results that align "
+#~ "with your aspirations."
 #~ msgstr ""
 #~ "Tere tulemast meie kohandatud fitnessi treeninguteenuste ulatuslikku "
-#~ "valikusse! Pakume personaalseid treeninguid, kohandatud toitumiskavasid "
-#~ "ja pidevat tuge, et aidata teil saavutada püsivaid tulemusi, mis vastavad "
-#~ "teie eesmärkidele."
+#~ "valikusse! Pakume personaalseid treeninguid, kohandatud toitumiskavasid ja "
+#~ "pidevat tuge, et aidata teil saavutada püsivaid tulemusi, mis vastavad teie "
+#~ "eesmärkidele."
 
 #~ msgid "Wellness Coaching"
 #~ msgstr "Psühholoogilise heaolu nõustamine"
@@ -22581,13 +22434,13 @@ msgstr ""
 #~ msgstr "Juhtmevaba vabadus"
 
 #~ msgid ""
-#~ "With personalized fitness plans, tailored nutrition guidance, and "
-#~ "consistent support, you'll shed unwanted pounds while building healthy "
-#~ "habits that last."
+#~ "With personalized fitness plans, tailored nutrition guidance, and consistent"
+#~ " support, you'll shed unwanted pounds while building healthy habits that "
+#~ "last."
 #~ msgstr ""
 #~ "Personaalsete treeningukavade, kohandatud toitumisnõuannete ja pideva "
-#~ "toetuse abil kaotate soovimatud kilod, samal ajal luues kestvaid "
-#~ "tervislikke harjumusi."
+#~ "toetuse abil kaotate soovimatud kilod, samal ajal luues kestvaid tervislikke"
+#~ " harjumusi."
 
 #~ msgid ""
 #~ "Your brand is your story. We help you tell it through cohesive visual "

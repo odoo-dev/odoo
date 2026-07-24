@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 18:09+0000\n"
 "PO-Revision-Date: 2025-11-18 14:55+0000\n"
 "Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
-"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-19-l10n/"
-"l10n_es_edi_verifactu/es/>\n"
+"Language-Team: Spanish <https://translate.odoo.com/projects/odoo-19-l10n/l10n_es_edi_verifactu/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,40 +26,32 @@ msgid ""
 "%(existing_warning)sA Veri*Factu document is waiting to be sent as soon as "
 "possible."
 msgstr ""
-"%(existing_warning)sUn documento Veri*Factu está pendiente de ser enviado lo "
-"antes posible."
+"%(existing_warning)sUn documento Veri*Factu está pendiente de ser enviado lo"
+" antes posible."
 
 #. module: l10n_es_edi_verifactu
 #: model:ir.model.fields,help:l10n_es_edi_verifactu.field_account_bank_statement_line__l10n_es_edi_verifactu_state
 #: model:ir.model.fields,help:l10n_es_edi_verifactu.field_account_move__l10n_es_edi_verifactu_state
 msgid ""
-"- Rejected: Successfully sent to the AEAT, but it was rejected during "
-"validation\n"
-"                - Registered with Errors: Registered at the AEAT, but the "
-"AEAT has some issues with the sent document\n"
+"- Rejected: Successfully sent to the AEAT, but it was rejected during validation\n"
+"                - Registered with Errors: Registered at the AEAT, but the AEAT has some issues with the sent document\n"
 "                - Accepted: Registered by the AEAT without errors\n"
 "                - Cancelled: Registered by the AEAT as cancelled"
 msgstr ""
-"- Rechazado: enviado correctamente a la AEAT, pero fue rechazado durante la "
-"validación\n"
-"                - Registrado con errores: registrado en la AEAT, pero la "
-"AEAT ha detectado algunos problemas con el documento enviado\n"
+"- Rechazado: enviado correctamente a la AEAT, pero fue rechazado durante la validación\n"
+"                - Registrado con errores: registrado en la AEAT, pero la AEAT ha detectado algunos problemas con el documento enviado\n"
 "                - Aceptado: registrado por la AEAT sin errores\n"
 "                - Cancelado: registrado por la AEAT como cancelado"
 
 #. module: l10n_es_edi_verifactu
 #: model:ir.model.fields,help:l10n_es_edi_verifactu.field_l10n_es_edi_verifactu_document__state
 msgid ""
-"- Rejected: Successfully sent to the AEAT, but it was rejected during "
-"validation\n"
-"                - Registered with Errors: Registered at the AEAT, but the "
-"AEAT has some issues with the sent record\n"
+"- Rejected: Successfully sent to the AEAT, but it was rejected during validation\n"
+"                - Registered with Errors: Registered at the AEAT, but the AEAT has some issues with the sent record\n"
 "                - Accepted: Registered by the AEAT without errors"
 msgstr ""
-"- Rechazado: enviado correctamente a la AEAT, pero fue rechazado durante la "
-"validación\n"
-"                - Registrado con errores: registrado en la AEAT, pero la "
-"AEAT ha detectado algunos problemas con el registro enviado\n"
+"- Rechazado: enviado correctamente a la AEAT, pero fue rechazado durante la validación\n"
+"                - Registrado con errores: registrado en la AEAT, pero la AEAT ha detectado algunos problemas con el registro enviado\n"
 "                - Aceptado: Registrado por la AEAT sin errores"
 
 #. module: l10n_es_edi_verifactu
@@ -96,7 +87,7 @@ msgstr ""
 #. module: l10n_es_edi_verifactu
 #: model_terms:ir.ui.view,arch_db:l10n_es_edi_verifactu.res_config_settings_view_form
 msgid ""
-"<i class=\"o_button_icon oi oi-fw oi oi-arrow-right\"/>\n"
+"<i class=\"o_button_icon oi oi-fw oi\" data-icon=\"east\"/>\n"
 "                                        Access Declaración Responsable"
 msgstr ""
 
@@ -147,10 +138,8 @@ msgstr "Plantilla de plan contable"
 #. module: l10n_es_edi_verifactu
 #: model_terms:ir.ui.view,arch_db:l10n_es_edi_verifactu.view_account_resequence_inherit_l10n_es_edi_verifactu
 msgid ""
-"Al usar Veri*factu, el número de factura no puede modificarse sin alterar la "
-"integridad e\n"
-"                        inalterabilidad exigidas por los artículos 8 y 13 "
-"del RD 007/2023. Existe un alto riesgo de que\n"
+"Al usar Veri*factu, el número de factura no puede modificarse sin alterar la integridad e\n"
+"                        inalterabilidad exigidas por los artículos 8 y 13 del RD 007/2023. Existe un alto riesgo de que\n"
 "                        la factura quede invalidada a efectos fiscales."
 msgstr ""
 
@@ -190,8 +179,8 @@ msgstr "Cancelado"
 #. odoo-python
 #: code:addons/l10n_es_edi_verifactu/models/verifactu_issuer.py:0
 msgid ""
-"Cannot delete the Veri*Factu SIF for '%(partner)s': it has chained documents "
-"that must be preserved for audit purposes."
+"Cannot delete the Veri*Factu SIF for '%(partner)s': it has chained documents"
+" that must be preserved for audit purposes."
 msgstr ""
 
 #. module: l10n_es_edi_verifactu
@@ -376,8 +365,8 @@ msgstr "IPSI"
 #. module: l10n_es_edi_verifactu
 #: model:ir.model.fields,help:l10n_es_edi_verifactu.field_l10n_es_edi_verifactu_document__chain_index
 msgid ""
-"Index in the chain of Veri*Factu Documents. It is only set if the generation "
-"was succesful."
+"Index in the chain of Veri*Factu Documents. It is only set if the generation"
+" was succesful."
 msgstr ""
 "Índice en la cadena de documentos Veri*Factu. Solo se establece si la "
 "generaciónfue exitosa."
@@ -500,8 +489,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_es_edi_verifactu/models/verifactu_document.py:0
 msgid "Only a single recargo tax may be used per \"main\" tax."
-msgstr ""
-"Solo se puede aplicar un único recargo por cada impuesto \"principal\"."
+msgstr "Solo se puede aplicar un único recargo por cada impuesto \"principal\"."
 
 #. module: l10n_es_edi_verifactu
 #. odoo-python
@@ -738,7 +726,8 @@ msgstr ""
 #: code:addons/l10n_es_edi_verifactu/tests/common.py:0
 msgid ""
 "The Veri*Factu document contains the following errors according to the AEAT"
-msgstr "El documento Veri*Factu contiene los siguientes errores según la AEAT."
+msgstr ""
+"El documento Veri*Factu contiene los siguientes errores según la AEAT."
 
 #. module: l10n_es_edi_verifactu
 #. odoo-python
@@ -841,8 +830,8 @@ msgstr "No se ha especificado el motivo del reembolso."
 #. odoo-python
 #: code:addons/l10n_es_edi_verifactu/models/verifactu_document.py:0
 msgid ""
-"The response of the server had the wrong format (HTML instead of XML). It is "
-"most likely a problem with the certificate."
+"The response of the server had the wrong format (HTML instead of XML). It is"
+" most likely a problem with the certificate."
 msgstr ""
 "La respuesta del servidor no tenía el formato correcto (HTML en lugar de "
 "XML). Es muy probable que sea un problema con el certificado."
@@ -1077,8 +1066,8 @@ msgstr "Solo se permite un único impuesto \"principal\" por línea."
 #. odoo-python
 #: code:addons/l10n_es_edi_verifactu/models/verifactu_document.py:0
 msgid ""
-"We only allow a single Veri*Factu Tax Applicability (Impuesto) per document: "
-"%(applicabilities)s."
+"We only allow a single Veri*Factu Tax Applicability (Impuesto) per document:"
+" %(applicabilities)s."
 msgstr ""
 "Solo se permite una única aplicabilidad fiscal de Veri*Factu (Impuesto) por "
 "documento: %(applicabilities)s."
@@ -1107,11 +1096,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_es_edi_verifactu/models/account_move.py:0
 msgid ""
-"You are modifying a journal entry for which a Veri*Factu document is waiting "
-"to be sent."
+"You are modifying a journal entry for which a Veri*Factu document is waiting"
+" to be sent."
 msgstr ""
-"Está modificando un asiento contable para el que hay un documento Veri*Factu "
-"pendiente de envío."
+"Está modificando un asiento contable para el que hay un documento Veri*Factu"
+" pendiente de envío."
 
 #. module: l10n_es_edi_verifactu
 #. odoo-python
@@ -1128,15 +1117,14 @@ msgstr ""
 
 #~ msgid "The Datetime at which the next submission to the AEAT can be made."
 #~ msgstr ""
-#~ "La fecha y hora en la que se puede realizar la siguiente presentación a "
-#~ "la AEAT."
+#~ "La fecha y hora en la que se puede realizar la siguiente presentación a la "
+#~ "AEAT."
 
 #~ msgid "Veri*Factu Document Chain Sequence"
 #~ msgstr "Secuencia de cadena del documento Veri*Factu"
 
 #~ msgid "Veri*Factu Document Sequence for company %(name)s (%(id)s)"
-#~ msgstr ""
-#~ "Secuencia del documento Veri*Factu para la compañía %(name)s (%(id)s)"
+#~ msgstr "Secuencia del documento Veri*Factu para la compañía %(name)s (%(id)s)"
 
 #~ msgid "Veri*Factu Next Batch Time"
 #~ msgstr "Hora del siguiente lote de Veri*Factu"

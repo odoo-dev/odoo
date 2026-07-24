@@ -14,14 +14,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 23:12+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/"
-"base_automation/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/base_automation/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: base_automation
@@ -71,11 +69,11 @@ msgstr "<code>البيئة</code>: البيئة التي تم تشغيل الإ�
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is "
-"a void recordset"
+"<code>model</code>: model of the record on which the action is triggered; is"
+" a void recordset"
 msgstr ""
-"<code>النموذج</code>: النموذج في السجل الذي يتم تشغيل الإجراء فيه؛ هو مجموعة "
-"سجلات باطلة"
+"<code>النموذج</code>: النموذج في السجل الذي يتم تشغيل الإجراء فيه؛ هو مجموعة"
+" سجلات باطلة"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -97,29 +95,30 @@ msgstr ""
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"Actions\"/>"
 msgstr ""
-"<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"الإجراءات \"/>"
+"<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" "
+"title=\"الإجراءات \"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
+"<i class=\"oi\" data-icon=\"info\"/> The default target record getter will "
+"work out-of-the-box for any webhook coming from another Odoo instance."
 msgstr ""
-"<i class=\"fa fa-info-circle\"/> ستعمل أداة إحضار السجل المستهدف الافتراضي "
-"مباشرة مع أي ويبهوك قادم من مثيل أودو آخر."
+"<i class=\"oi\" data-icon=\"info\"/> ستعمل أداة إحضار السجل المستهدف "
+"الافتراضي مباشرة مع أي ويبهوك قادم من مثيل أودو آخر."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automation rules triggered by UI "
+"changes will be executed <em>every time</em> the watched fields change, "
+"<em>whether you save or not</em>."
 msgstr ""
-"<i class=\"fa fa-warning\"/> سيتم تنفيذ قواعد الأتمتة الناتجة عن تغييرات "
-"واجهة المستخدم <em>في كل مرة</em> تتغير فيها الحقول المراقَبة <em>سواءً قمت "
-"بالحفظ أم لا</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> سيتم تنفيذ قواعد الأتمتة الناتجة عن "
+"تغييرات واجهة المستخدم <em>في كل مرة</em> تتغير فيها الحقول المراقَبة "
+"<em>سواءً قمت بالحفظ أم لا</em>."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_server_action_form
@@ -298,7 +297,8 @@ msgstr "وضع التأخير"
 msgid ""
 "Delay must be positive. Set 'Delay mode' to 'Before' to negate the delay."
 msgstr ""
-"يجب أن يكون التأخير موجباً. قم بضبط 'وضع التأخير' ليكون ”قبل' لإبطال التأخير."
+"يجب أن يكون التأخير موجباً. قم بضبط 'وضع التأخير' ليكون ”قبل' لإبطال "
+"التأخير."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trg_date_range_type
@@ -429,8 +429,8 @@ msgstr "إذا كان محددًا، فقد حدث خطأ في تسليم بعض
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
 msgid ""
-"If present, this condition must be satisfied before executing the automation "
-"rule."
+"If present, this condition must be satisfied before executing the automation"
+" rule."
 msgstr "إذا كان موجودًا، يتوجب استيفاء هذا الشرط قبل تنفيذ قاعدة الأتمتة."
 
 #. module: base_automation
@@ -530,8 +530,8 @@ msgstr "اسم النموذج"
 #. odoo-python
 #: code:addons/base_automation/models/ir_actions_server.py:0
 msgid ""
-"Model of action %(action_name)s should match the one from automated rule %"
-"(rule_name)s."
+"Model of action %(action_name)s should match the one from automated rule "
+"%(rule_name)s."
 msgstr ""
 "يجب أن يطابق نموذج الإجراء %(action_name)sنموذج الإجراء الموجود في القاعدة "
 "المؤتمتة %(rule_name)s."
@@ -723,8 +723,7 @@ msgstr "قم بتحديد الحقول..."
 #: model_terms:ir.actions.act_window,help:base_automation.base_automation_act
 msgid ""
 "Send an email when an object changes state, archive records\n"
-"                after a month of inactivity or remind yourself to follow-up "
-"on\n"
+"                after a month of inactivity or remind yourself to follow-up on\n"
 "                tasks when a specific tag is added."
 msgstr ""
 "قم بإرسال بريد إلكتروني عندما تتغير حالة كائن ما، وقم بأرشفة السجلات\n"
@@ -734,12 +733,12 @@ msgstr ""
 #. module: base_automation
 #: model_terms:digest.tip,tip_description:base_automation.digest_tip_base_automation_0
 msgid ""
-"Send an email when an object changes state, archive records after a month of "
-"inactivity or remind yourself to follow-up on tasks when a specific tag is "
+"Send an email when an object changes state, archive records after a month of"
+" inactivity or remind yourself to follow-up on tasks when a specific tag is "
 "added.<br>With Automation Rules, you can automate any workflow."
 msgstr ""
-"قم بإرسال بريد إلكتروني عندما تتغير حالة كائن ما، وقم بأرشفة السجلات بعد شهر "
-"من عدم النشاط، أو ذكّر نفسك بالمتابعة بشأن المهام عند إضافة علامة تصنيف "
+"قم بإرسال بريد إلكتروني عندما تتغير حالة كائن ما، وقم بأرشفة السجلات بعد شهر"
+" من عدم النشاط، أو ذكّر نفسك بالمتابعة بشأن المهام عند إضافة علامة تصنيف "
 "محددة. <br>باستخدام قواعد الأتمتة، يمكنك تشغيل أي عملية تلقائياً."
 
 #. module: base_automation
@@ -762,8 +761,8 @@ msgstr "تحتاج بعض المشغلات إلى مرجع لحقل اختيار
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
 msgid ""
-"Some triggers need a reference to another field. This field is used to store "
-"it."
+"Some triggers need a reference to another field. This field is used to store"
+" it."
 msgstr "تحتاج بعض المشغلات إلى مرجع لحقل آخر. يُستخدَم هذا الحقل لتخزينه."
 
 #. module: base_automation
@@ -808,15 +807,16 @@ msgstr "السجل المستهدف"
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
-msgid "Target model of actions %(action_names)s are different from rule model."
+msgid ""
+"Target model of actions %(action_names)s are different from rule model."
 msgstr "النموذج المستهدف للإجراءات %(action_names)s مختلف عن نموذج القاعدة."
 
 #. module: base_automation
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%"
-"(state_value)s\" action type"
+"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
+"\"%(state_value)s\" action type"
 msgstr ""
 "لا يمكن استخدام \"%(trigger_value)s\" %(trigger_label)s إلا مع نوع الإجراء "
 "\"%(state_value)s\""
@@ -971,12 +971,10 @@ msgstr ""
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id
 msgid ""
 "When should the condition be triggered.\n"
-"                If present, will be checked by the scheduler. If empty, will "
-"be checked at creation and update."
+"                If present, will be checked by the scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "متى يتم تفعيل الشرط.\n"
-"                إذا كان موجوداً، سيتم التحقق منه من قِبَل المجدوِل. إذا كان "
-"فارغاً، سيتم التحقق منه عند الإنشاء والتحديث."
+"                إذا كان موجوداً، سيتم التحقق منه من قِبَل المجدوِل. إذا كان فارغاً، سيتم التحقق منه عند الإنشاء والتحديث."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active

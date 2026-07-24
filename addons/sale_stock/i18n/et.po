@@ -25,8 +25,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:47+0000\n"
 "PO-Revision-Date: 2026-06-21 00:15+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/"
-"sale_stock/et/>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/sale_stock/et/>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,28 +50,28 @@ msgstr ""
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Awaiting arrival"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> Ootab saabumist"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Awaiting arrival"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/> Ootab saabumist"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-clock-o\"/>Preparation"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/>Ettevalmistus"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/>Preparation"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/>Ettevalmistus"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/> Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/> Tühistatud"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/> Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/> Tühistatud"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-times\"/>Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/>Tühistatud"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/>Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/>Tühistatud"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
-msgid "<i class=\"fa fa-fw fa-truck\"/> Received"
-msgstr "<i class=\"fa fa-fw fa-truck\"/> Vastu võetud"
+msgid "<i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Received"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Vastu võetud"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.stock_production_lot_view_form
@@ -82,16 +81,12 @@ msgstr "<span class=\"o_stat_text\">Müügid</span>"
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 msgid ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Shipped\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Shipped\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/>"
-"Tarnitud\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi-fw oi\" data-icon=\"local_shipping\"/>Tarnitud\n"
 "                                    </span>"
 
 #. module: sale_stock
@@ -107,13 +102,10 @@ msgstr "<strong>Tarnetingimus</strong><br/>"
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
 msgid ""
-"According to product configuration, the delivered quantity can be "
-"automatically computed by mechanism:\n"
+"According to product configuration, the delivered quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
-"  - Analytic From expenses: the quantity is the quantity sum from posted "
-"expenses\n"
-"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to "
-"this line\n"
+"  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
+"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
 
@@ -423,8 +415,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_stock.res_config_settings_view_form_stock
 msgid ""
 "Margin of error for dates promised to customers. Products will be scheduled "
-"for procurement and delivery that many days earlier than the actual promised "
-"date, to cope with unexpected delays in the supply chain."
+"for procurement and delivery that many days earlier than the actual promised"
+" date, to cope with unexpected delays in the supply chain."
 msgstr ""
 "Kliendile lubatud kuupäevade ja kauba oodatava kuupäevade vahe. Tooted "
 "planeeritakse hankimiseks nende päevade arvu võrra varem kui kliendile "
@@ -515,12 +507,10 @@ msgstr "TAGASTA"
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_stock_help_message_template
 msgid ""
 "Reduce back orders with reservations, locations management, smart\n"
-"                replenishment propositions, shipping connectors, barcode "
-"scanner, etc."
+"                replenishment propositions, shipping connectors, barcode scanner, etc."
 msgstr ""
 "Vähendaga järeltellimusi reserveeringute, asukohtade haldamise, tarkade\n"
-"                kauba tellimimise soovitustega, tarnijate liidestustega, "
-"triipkoodi skänneriga, jne."
+"                kauba tellimimise soovitustega, tarnijate liidestustega, triipkoodi skänneriga, jne."
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_reference
@@ -690,8 +680,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sale_stock/static/src/product_catalog/sale_order_line/sale_order_line.js:0
 msgid ""
-"The ordered quantity cannot be decreased below the amount already delivered. "
-"Instead, create a return in your inventory."
+"The ordered quantity cannot be decreased below the amount already delivered."
+" Instead, create a return in your inventory."
 msgstr ""
 "Tellitud kogust ei saa muuta alla juba tarnitud koguste. Selle asemel looge "
 "laos tagastus."

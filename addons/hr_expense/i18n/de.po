@@ -18,8 +18,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 06:10+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-master/"
-"hr_expense/de/>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-master/hr_expense/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,16 +29,12 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
-" - Wenn bereits eine Rechnung vorliegt, wird für die Zahlung das "
-"Kreditorenkonto verwendet, damit sie der Rechnung zugeordnet werden kann.\n"
-"                 - Wenn keine Rechnung vorliegt, wird die Zahlung wie üblich "
-"direkt auf dem Aufwandskonto verbucht.\n"
+" - Wenn bereits eine Rechnung vorliegt, wird für die Zahlung das Kreditorenkonto verwendet, damit sie der Rechnung zugeordnet werden kann.\n"
+"                 - Wenn keine Rechnung vorliegt, wird die Zahlung wie üblich direkt auf dem Aufwandskonto verbucht.\n"
 "            "
 
 #. module: hr_expense
@@ -64,7 +59,8 @@ msgstr "%(expense_name)s: ist Ihre eigene Ausgabe"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "%(expense_name)s: You are neither a Manager nor a HR Officer"
-msgstr "%(expense_name)s: Sie sind weder Manager noch Personalverantwortlicher"
+msgstr ""
+"%(expense_name)s: Sie sind weder Manager noch Personalverantwortlicher"
 
 #. module: hr_expense
 #. odoo-python
@@ -79,7 +75,8 @@ msgstr ""
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr ""
 "%(user)s bestätigt, dass es sich bei dieser Ausgabe nicht um ein Duplikat "
 "einer ähnlichen Ausgabe handelt."
@@ -114,8 +111,8 @@ msgstr ""
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
-msgstr "<i class=\"oi oi-arrow-right\"/> Ihre Alias-Domain einrichten"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Ihre Alias-Domain einrichten"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -289,15 +286,11 @@ msgstr "Beim Hochladen ist ein Fehler aufgetreten"
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
-"Für von Mitarbeitern bezahlte Ausgaben und vom Unternehmen bezahlte Ausgaben "
-"ohne entsprechende Rechnung wird ein Aufwandskonto erwartet.\n"
-"Bei vom Unternehmen bezahlten Ausgaben mit entsprechender Rechnung muss das "
-"Konto das Kreditorenkonto der Rechnung sein."
+"Für von Mitarbeitern bezahlte Ausgaben und vom Unternehmen bezahlte Ausgaben ohne entsprechende Rechnung wird ein Aufwandskonto erwartet.\n"
+"Bei vom Unternehmen bezahlten Ausgaben mit entsprechender Rechnung muss das Konto das Kreditorenkonto der Rechnung sein."
 
 #. module: hr_expense
 #. odoo-javascript
@@ -723,8 +716,8 @@ msgstr "Geben Sie eine Beschreibung ein, um fortzufahren."
 msgid ""
 "Enter a name then choose a product and configure the amount of your expense."
 msgstr ""
-"Geben Sie einen Namen ein, wählen Sie dann ein Produkt aus und legen Sie den "
-"Betrag Ihrer Ausgabe fest."
+"Geben Sie einen Namen ein, wählen Sie dann ein Produkt aus und legen Sie den"
+" Betrag Ihrer Ausgabe fest."
 
 #. module: hr_expense
 #. odoo-python
@@ -962,8 +955,8 @@ msgid ""
 "Failed to send mails for submitted expenses. No valid email was found for "
 "the company"
 msgstr ""
-"E-Mails für eingereichte Spesen konnte nicht gesendet werden. Es wurde keine "
-"gültige E-Mail-Adresse für das Unternehmen gefunden"
+"E-Mails für eingereichte Spesen konnte nicht gesendet werden. Es wurde keine"
+" gültige E-Mail-Adresse für das Unternehmen gefunden"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee__filter_for_expense
@@ -1104,7 +1097,8 @@ msgstr "Falls markiert, erfordern neue Nachrichten Ihre Aufmerksamkeit."
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_has_error
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
+msgstr ""
+"Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
 
 #. module: hr_expense
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__state__in_payment
@@ -1536,15 +1530,12 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
-"Odoo hat Ihre Ausgabe, Ihr Produkt, Ihr Unternehmen und das Journal geprüft, "
-"jedoch keine passenden Ergebnisse gefunden.\n"
-"Helfen Sie Odoo bei der Suche nach einem Konto, indem Sie ein Spesenkonto "
-"einrichten.\n"
+"Odoo hat Ihre Ausgabe, Ihr Produkt, Ihr Unternehmen und das Journal geprüft, jedoch keine passenden Ergebnisse gefunden.\n"
+"Helfen Sie Odoo bei der Suche nach einem Konto, indem Sie ein Spesenkonto einrichten.\n"
 "%(expense)s%(expense_name)s.\n"
 
 #. module: hr_expense
@@ -1695,8 +1686,8 @@ msgid ""
 "Please specify if the expenses were paid by the company, reimbursed to the "
 "employee directly, or in a payslip."
 msgstr ""
-"Bitte geben Sie an, ob die Ausgaben vom Unternehmen bezahlt, dem Mitarbeiter "
-"direkt erstattet oder über die Gehaltsabrechnung abgerechnet wurden."
+"Bitte geben Sie an, ob die Ausgaben vom Unternehmen bezahlt, dem Mitarbeiter"
+" direkt erstattet oder über die Gehaltsabrechnung abgerechnet wurden."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_view_form
@@ -1811,8 +1802,8 @@ msgid ""
 "navigate."
 msgstr ""
 "Bereit? Sie können sie manuell speichern oder Änderungen von hier aus "
-"verwerfen. Sie <em>müssen sie nicht speichern</em> – Odoo wird alles für Sie "
-"speichern, wenn Sie fortfahren."
+"verwerfen. Sie <em>müssen sie nicht speichern</em> – Odoo wird alles für Sie"
+" speichern, wenn Sie fortfahren."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense_refuse_wizard__reason
@@ -1958,13 +1949,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
-"Wählen Sie den Benutzer, der für die Genehmigung der „Spesen“ dieses "
-"Mitarbeiters zuständig ist.\n"
-"Wenn keiner ausgewählt wird, wird die Genehmigung von einem Administrator "
-"oder Genehmiger durchgeführt (festgelegt in Einstellungen/Benutzer)."
+"Wählen Sie den Benutzer, der für die Genehmigung der „Spesen“ dieses Mitarbeiters zuständig ist.\n"
+"Wenn keiner ausgewählt wird, wird die Genehmigung von einem Administrator oder Genehmiger durchgeführt (festgelegt in Einstellungen/Benutzer)."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2165,8 +2153,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 "Der Anhang (%(attachment_name)s) wurde aufgrund des folgenden Fehlers nicht "
 "zum Bericht hinzugefügt: „%(error)s“"
@@ -2174,7 +2162,8 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr ""
 "Das Standardjournal des Unternehmens, das verwendet wird, wenn eine "
 "Mitarbeiterausgabe erstellt wird."
@@ -2212,12 +2201,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
-"Die folgende Zahlungsmethode für Ausgaben führt zu mehreren "
-"Verbindlichkeiten und wird nicht unterstützt:\n"
+"Die folgende Zahlungsmethode für Ausgaben führt zu mehreren Verbindlichkeiten und wird nicht unterstützt:\n"
 "%(expenses)s"
 
 #. module: hr_expense
@@ -2249,12 +2236,10 @@ msgstr "Die Summe nach der Aufteilung bleibt gleich"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
-"Für Ausgaben mit der Zahlungsmethode „SEPA-Überweisung“ ist ein Lieferant "
-"erforderlich.\n"
+"Für Ausgaben mit der Zahlungsmethode „SEPA-Überweisung“ ist ein Lieferant erforderlich.\n"
 "Legen Sie für die folgenden Ausgaben einen Lieferanten fest: %s"
 
 #. module: hr_expense
@@ -2372,13 +2357,11 @@ msgstr "Typ der Ausnahmeaktivität im Datensatz."
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 "Oh oh! Sie können diese Ausgabe nicht bearbeiten.\n"
 "\n"
-"Wenden Sie sich an die Administratoren, zeigen Sie Ihr schönestes Lächeln "
-"und prüfen Sie, ob sie Ihnen den gewünschten Zugang gewähren."
+"Wenden Sie sich an die Administratoren, zeigen Sie Ihr schönestes Lächeln und prüfen Sie, ob sie Ihnen den gewünschten Zugang gewähren."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_uom_id
@@ -2456,14 +2439,14 @@ msgstr "Rückerstattung ausstehend"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
 
 #. module: hr_expense
@@ -2485,7 +2468,8 @@ msgstr ""
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_template_register
 msgid "You can now submit it to the manager from the following link."
-msgstr "Sie können es nun mit dem folgenden Link bei Ihrem Manager einreichen."
+msgstr ""
+"Sie können es nun mit dem folgenden Link bei Ihrem Manager einreichen."
 
 #. module: hr_expense
 #. odoo-python
@@ -2556,8 +2540,8 @@ msgstr ""
 msgid ""
 "You cannot do this modification since the payment is linked to an expense."
 msgstr ""
-"Diese Änderung ist nicht möglich, da die Zahlung mit einer Ausgabe verknüpft "
-"ist."
+"Diese Änderung ist nicht möglich, da die Zahlung mit einer Ausgabe verknüpft"
+" ist."
 
 #. module: hr_expense
 #. odoo-python

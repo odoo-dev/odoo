@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:02+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"website_customer/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/website_customer/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,27 +27,25 @@ msgstr ""
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the "
-"selected country. Displaying results across all countries instead."
+"<i class=\"oi me-2\" data-icon=\"info\"/>\n"
+"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
 msgstr ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        Tidak ada pelanggan yang cocok yang ditemukan untuk "
-"negara terpilih. Sekarang menampilkan hasil di semua negara."
+"<i class=\"me-2 oi\" data-icon=\"info\"/>\n"
+"                        Tidak ada pelanggan yang cocok yang ditemukan untuk negara terpilih. Sekarang menampilkan hasil di semua negara."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
 msgid ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 msgstr ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Buka peta\" "
-"title=\"Buka peta\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Buka "
+"peta\" title=\"Buka peta\"/>"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"oi oi-chevron-left me-2\"/>Kembali ke referensi"
+msgid "<i class=\"oi me-2\" data-icon=\"chevron_backward\"/>Back to references"
+msgstr "<i class=\"me-2 oi\" data-icon=\"chevron_backward\"/>Kembali ke referensi"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
@@ -91,7 +88,8 @@ msgstr "Publikasi otomatis pada"
 #. module: website_customer
 #: model:ir.model.fields,help:website_customer.field_res_partner_tag__publish_on
 msgid "Automatically publish the page on the chosen date and time."
-msgstr "Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
+msgstr ""
+"Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details

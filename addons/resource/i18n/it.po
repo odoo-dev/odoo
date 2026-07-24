@@ -14,14 +14,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 00:37+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/"
-"resource/it/>\n"
+"Language-Team: Italian <https://translate.odoo.com/projects/odoo-master/resource/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
-"0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: resource
@@ -64,7 +62,7 @@ msgstr ""
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_multi_create_form
-msgid "<i class=\"fa fa-long-arrow-right\" title=\"to\"/>"
+msgid "<i class=\"oi\" data-icon=\"east\" title=\"to\"/>"
 msgstr ""
 
 #. module: resource
@@ -508,7 +506,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar__full_time_required_hours
 msgid ""
-"Number of hours to work on the company schedule to be considered as fulltime."
+"Number of hours to work on the company schedule to be considered as "
+"fulltime."
 msgstr ""
 "Numero di ore di lavoro secondo l'orario dell'azienda da considerare come "
 "tempo pieno"
@@ -653,8 +652,8 @@ msgid ""
 "workload based on their weekly working hours."
 msgstr ""
 "Risorse consente di creare e gestire le risorse che devono essere coinvolte "
-"in una specifica fase di progetto. È anche possibile impostare il livello di "
-"efficienza e il carico di lavoro in base alle ore di lavoro settimanali."
+"in una specifica fase di progetto. È anche possibile impostare il livello di"
+" efficienza e il carico di lavoro in base alle ore di lavoro settimanali."
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__5
@@ -747,13 +746,15 @@ msgid ""
 "The average hours per day is too high compared to the number of hours per "
 "week"
 msgstr ""
-"La media di ore al giorno è troppo alta rispetto al numero di ore settimanali"
+"La media di ore al giorno è troppo alta rispetto al numero di ore "
+"settimanali"
 
 #. module: resource
 #. odoo-python
 #: code:addons/resource/models/resource_resource.py:0
 msgid ""
-"The average hours per day is too low compared to the number of hours per week"
+"The average hours per day is too low compared to the number of hours per "
+"week"
 msgstr ""
 "La media di ore al giorno è troppo bassa rispetto al numero di ore "
 "settimanali"
@@ -784,8 +785,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/resource/models/resource_calendar_attendance.py:0
 msgid ""
-"This date is excluded of the recurrency, to start a new one on this date you "
-"should create it from scratch"
+"This date is excluded of the recurrency, to start a new one on this date you"
+" should create it from scratch"
 msgstr ""
 
 #. module: resource
@@ -908,7 +909,8 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves__count_as
 msgid ""
-"Whether this should be computed as a time off or as work time (eg: formation)"
+"Whether this should be computed as a time off or as work time (eg: "
+"formation)"
 msgstr ""
 "Indica se deve essere calcolato come ferie o come orario di lavoro (es. "
 "formazione)"
@@ -1013,15 +1015,15 @@ msgstr ""
 #~ msgstr "<span>ore/settimana</span>"
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 1-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 1-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
 #~ "Sei sicuro di passare al calendario di una settimana? Tutte le voci "
 #~ "lavorative verranno perse."
 
 #~ msgid ""
-#~ "Are you sure you want to switch to a 2-week calendar? All work entries "
-#~ "will be lost."
+#~ "Are you sure you want to switch to a 2-week calendar? All work entries will "
+#~ "be lost."
 #~ msgstr ""
 #~ "Sei sicuro di passare al calendario di due settimane? Tutte le voci "
 #~ "lavorative verranno perse."
@@ -1063,11 +1065,11 @@ msgstr ""
 #~ msgstr "Passa al calendario di 2 settimane"
 
 #~ msgid ""
-#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to %"
-#~ "(number)s week."
+#~ "The current week (from %(first_day)s to %(last_day)s) corresponds to "
+#~ "%(number)s week."
 #~ msgstr ""
-#~ "La settimana corrente (da %(first_day)s a %(last_day)s) corrisponde a %"
-#~ "(number)s settimana/e."
+#~ "La settimana corrente (da %(first_day)s a %(last_day)s) corrisponde a "
+#~ "%(number)s settimana/e."
 
 #~ msgid "Total"
 #~ msgstr "Totale"

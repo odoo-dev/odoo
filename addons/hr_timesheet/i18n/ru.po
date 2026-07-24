@@ -13,15 +13,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 04:03+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/"
-"hr_timesheet/ru/>\n"
+"Language-Team: Russian <https://translate.odoo.com/projects/odoo-master/hr_timesheet/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_timesheet
@@ -100,8 +97,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
 msgstr ""
 "Для проекта «%(project_name)s», к которому привязан табель, требуется "
 "добавить аналитический план(ы): «%(missing_plan_names)s»."
@@ -125,27 +122,20 @@ msgstr "2 часа"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> Посмотреть детали"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> Посмотреть детали"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -270,12 +260,10 @@ msgstr "Применимость аналитического плана"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
 msgstr ""
-"Проанализируйте проекты и задачи, на которые сотрудники тратят рабочее время."
-"<br>\n"
+"Проанализируйте проекты и задачи, на которые сотрудники тратят рабочее время.<br>\n"
 "                Определите долю времени, подлежащую оплате клиентом."
 
 #. module: hr_timesheet
@@ -411,8 +399,8 @@ msgid ""
 "Deliver your services automatically when a milestone is reached by linking "
 "it to a sales order item."
 msgstr ""
-"Предоставляйте услуги автоматически по достижении вехи, связав ее с позицией "
-"заказа на продажу."
+"Предоставляйте услуги автоматически по достижении вехи, связав ее с позицией"
+" заказа на продажу."
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__department_id
@@ -502,7 +490,8 @@ msgstr "Дополнительное время"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr ""
 "Формирование табелей учета рабочего времени для подтвержденных заявок на "
 "отгулы и праздничные дни"
@@ -868,8 +857,8 @@ msgid ""
 "Send a periodical email reminder to timesheets users that still have "
 "timesheets to encode"
 msgstr ""
-"Регулярно отправлять напоминания пользователям, у которых есть незаполненные "
-"табели."
+"Регулярно отправлять напоминания пользователям, у которых есть незаполненные"
+" табели."
 
 #. module: hr_timesheet
 #: model:ir.actions.act_window,name:hr_timesheet.hr_timesheet_config_settings_action
@@ -946,8 +935,8 @@ msgstr "Внутренний проект компании должен нахо
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr ""
 "Проект, задача и аналитические счета в табеле должны принадлежать одной и "
 "той же компании."
@@ -961,8 +950,8 @@ msgstr "Нет никаких табелей учета рабочего вре�
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
 msgstr ""
 "На эти проекты ссылаются некоторые записи в табеле учета рабочего времени. "
 "Перед удалением проектов необходимо удалить эти записи."
@@ -996,8 +985,8 @@ msgstr "В этом году"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
 msgstr ""
 "На этот проект ссылаются некоторые записи в табеле учета рабочего времени. "
 "Перед удалением проекта необходимо удалить эти записи."
@@ -1015,8 +1004,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
 msgstr ""
 
@@ -1025,12 +1014,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_timesheet.field_res_config_settings__project_time_mode_id
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "Это значение задает единицу измерения, используемую в проектах и задачах.\n"
-"Если вы используете табели, связанные с проектами, не забудьте настроить "
-"соответствующую единицу измерения в карточке сотрудника."
+"Если вы используете табели, связанные с проектами, не забудьте настроить соответствующую единицу измерения в карточке сотрудника."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1267,7 +1254,8 @@ msgstr "Временные таблицы не могут быть создан�
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr ""
 "Временные таблицы должны быть созданы с активным сотрудником в выбранных "
 "компаниях."
@@ -1279,8 +1267,8 @@ msgid ""
 "Timesheets must be created with at least an active analytic account defined "
 "in the plan '%(plan_name)s'."
 msgstr ""
-"Табели должны содержать хотя бы один активный аналитический счет из плана «%"
-"(plan_name)s»."
+"Табели должны содержать хотя бы один активный аналитический счет из плана "
+"«%(plan_name)s»."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1351,8 +1339,8 @@ msgstr "Итого:"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_line_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr ""
 "Фиксируйте рабочее время по проектам ежедневно и выставляйте счета за это "
 "время своим клиентам."
@@ -1375,8 +1363,7 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 "Используйте эти ключевые слова в заголовке для создания новых задач:\n"
 "\n"
@@ -1387,8 +1374,7 @@ msgstr ""
 "        !! – Установить высокий приоритет\n"
 "        !!! – Установить срочный приоритет\n"
 "\n"
-"        Обязательно используйте правильный формат и порядок, например: "
-"Улучшить экран настройки 5ч #функция #v16 @Митчеллl !"
+"        Обязательно используйте правильный формат и порядок, например: Улучшить экран настройки 5ч #функция #v16 @Митчеллl !"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__user_id
@@ -1415,13 +1401,11 @@ msgstr "Подробнее"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_from_employee
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
 "Вы можете фиксировать и отслеживать рабочее время по проектам\n"
-"                    ежедневно. Все время, затраченное на проект, будет "
-"учтено при выставлении счета\n"
+"                    ежедневно. Все время, затраченное на проект, будет учтено при выставлении счета\n"
 "                    клиенту."
 
 #. module: hr_timesheet
@@ -1433,31 +1417,30 @@ msgstr "Вы не можете получить доступ к чужим та�
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
-"Вы не можете вести учет времени по этому проекту, так как он привязан к "
-"неактивному аналитическому счету.<br/>\n"
+"Вы не можете вести учет времени по этому проекту, так как он привязан к неактивному аналитическому счету.<br/>\n"
 "                            Выберите другой счет или активируйте текущий."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
 msgstr ""
 "Вы не можете вести учет времени по этому проекту, так как он привязан к "
-"неактивному аналитическому счету.<br/> Измените счет или активируйте текущий."
+"неактивному аналитическому счету.<br/> Измените счет или активируйте "
+"текущий."
 
 #. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid "You cannot set an archived employee on existing timesheets."
 msgstr ""
-"Вы не можете использовать архивированного сотрудника для действующих табелей."
+"Вы не можете использовать архивированного сотрудника для действующих "
+"табелей."
 
 #. module: hr_timesheet
 #. odoo-python

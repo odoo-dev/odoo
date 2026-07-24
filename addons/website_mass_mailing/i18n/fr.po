@@ -16,97 +16,81 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 19:48+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-master/"
-"website_mass_mailing/fr/>\n"
+"Language-Team: French <https://translate.odoo.com/projects/odoo-master/website_mass_mailing/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
-"1000000 == 0) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % 1000000 == 0) ? 1 : 2);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Curated Industry "
-"Insights"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Curated "
+"Industry Insights"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/> Informations "
-"sectorielles sélectionnées"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" "
+"role=\"img\"/> Informations sectorielles sélectionnées"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Expert Tips &amp; "
-"How-Tos"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Expert "
+"Tips &amp; How-Tos"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Conseils "
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/>  Conseils "
 "d’experts&amp; tutoriels"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"Resources"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Guides "
+"&amp; Resources"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"ressources"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/>  Guides "
+"&amp; ressources"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_grid
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_form
-msgid ""
-"<i class=\"fa fa-check-circle-o\" role=\"img\"/> Thanks for registering!"
+msgid "<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> Thanks for registering!"
 msgstr ""
-"<i class=\"fa fa-check-circle-o\" role=\"img\"/> Merci pour votre "
+"<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> Merci pour votre "
 "inscription !"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 #, fuzzy
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                        We send one weekly newsletter per "
-"list and always try to keep it interesting. You can unsubscribe at any "
-"time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                        We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                        Nous envoyons une newsletter "
-"hebdomadaire pour chaque liste et nous nous efforçons toujours de proposer "
-"un contenu intéressant. Vous pouvez vous désabonner à tout moment.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                        Nous envoyons une newsletter hebdomadaire pour chaque liste et nous nous efforçons toujours de proposer un contenu intéressant. Vous pouvez vous désabonner à tout moment.\n"
 "                                    </span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 #, fuzzy
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                    We send one weekly newsletter per list "
-"and always try to keep it interesting. You can unsubscribe at any time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                    We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                </span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                    Nous envoyons une newsletter "
-"hebdomadaire par liste et nous nous efforçons toujours de la rendre "
-"intéressante. Vous pouvez vous désabonner à tout moment.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                    Nous envoyons une newsletter hebdomadaire par liste et nous nous efforçons toujours de la rendre intéressante. Vous pouvez vous désabonner à tout moment.\n"
 "                               </span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">E-mail</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -120,24 +104,20 @@ msgstr ""
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 msgid ""
-"<span class=\"s_website_form_label_content\">I agree to receive updates</"
-"span>\n"
+"<span class=\"s_website_form_label_content\">I agree to receive updates</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"<span class=\"s_website_form_label_content\">J'accepte de recevoir des mises "
-"à jour</span>\n"
+"<span class=\"s_website_form_label_content\">J'accepte de recevoir des mises à jour</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Name</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Nom</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -152,12 +132,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Our mailing lists</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Nos listes de diffusion</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -182,7 +160,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_grid
 msgid "Be the first to find out all the latest new, products and trends."
 msgstr ""
-"Soyez le premier à découvrir les dernières nouveautés, produits et tendances."
+"Soyez le premier à découvrir les dernières nouveautés, produits et "
+"tendances."
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_popup
@@ -277,8 +256,8 @@ msgid ""
 "updates straight to your inbox."
 msgstr ""
 "Rejoignez notre liste de diffusion pour recevoir des ressources, des "
-"conseils et des actualités soigneusement sélectionnés directement dans votre "
-"boîte mail."
+"conseils et des actualités soigneusement sélectionnés directement dans votre"
+" boîte mail."
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_waiting_list
@@ -515,8 +494,8 @@ msgid ""
 "promotional, email, prompt, subscription, subscribe, mailing-list, news"
 msgstr ""
 "mises à jour, récapitulatif, bulletin, annonces, notifications, "
-"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de "
-"diffusion, actualités"
+"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de"
+" diffusion, actualités"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -527,8 +506,8 @@ msgid ""
 "box, image, picture"
 msgstr ""
 "mises à jour, récapitulatif, bulletin, annonces, notifications, "
-"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de "
-"diffusion, actualités, boîte, image, photo"
+"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de"
+" diffusion, actualités, boîte, image, photo"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -539,8 +518,8 @@ msgid ""
 "grid, image, picture"
 msgstr ""
 "mises à jour, récapitulatif, bulletin, annonces, notifications, "
-"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de "
-"diffusion, actualités, grille, image, photo"
+"communication, promotionnel, e-mail, prompt, abonnement, s'abonner, liste de"
+" diffusion, actualités, grille, image, photo"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets

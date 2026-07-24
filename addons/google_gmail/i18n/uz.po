@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 05:21+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"google_gmail/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/google_gmail/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,36 +29,36 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 #, fuzzy
-msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
-msgstr "<i class=\"fa fa-cog\" title=\"Sozlamalarni tahrirlash\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"settings\" title=\"Edit Settings\"/>"
+msgstr ""
+"<i class=\"oi-filled oi\" data-icon=\"settings\" title=\"Sozlamalarni "
+"tahrirlash\"/>"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                        Connect your Gmail account"
-msgstr "<i class=\"oi oi-arrow-right\"/> Gmail hisobingizni ulang"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Gmail hisobingizni ulang"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #, fuzzy
 msgid ""
-"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" "
-"class=\"badge text-bg-success\">\n"
+"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" "
-"class=\"badge text-bg-success\"> Gmail tokeni yaroqli </span>"
+"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\""
+" class=\"badge text-bg-success\"> Gmail tokeni yaroqli </span>"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 #, fuzzy
 msgid ""
-"<span invisible=\"smtp_authentication != 'gmail' or not "
-"google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span invisible=\"smtp_authentication != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
@@ -123,8 +122,7 @@ msgstr "Sozlamalarni moslash"
 #, fuzzy
 msgid ""
 "Connect your Gmail account with the OAuth Authentication process. \n"
-"You will be redirected to the Gmail login page where you will need to accept "
-"the permission."
+"You will be redirected to the Gmail login page where you will need to accept the permission."
 msgstr ""
 "Gmail hisobingizni OAuth autentifikatsiya jarayoni orqali ulang.  Siz Gmail "
 "tizimiga kirish sahifasiga yo‘naltirilasiz, u yerda ruxsatni qabul "
@@ -136,9 +134,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Connect your Gmail account with the OAuth Authentication process.  \n"
-"By default, only a user with a matching email address will be able to use "
-"this server. To extend its use, you should set a \"mail.default.from\" "
-"system parameter."
+"By default, only a user with a matching email address will be able to use this server. To extend its use, you should set a \"mail.default.from\" system parameter."
 msgstr ""
 "Gmail hisobingizni OAuth autentifikatsiya jarayoni orqali ulang.   Odatiy "
 "holatda, faqat mos elektron pochta manziliga ega foydalanuvchi ushbu "
@@ -253,8 +249,8 @@ msgstr ""
 #: code:addons/google_gmail/controllers/main.py:0
 #, fuzzy
 msgid ""
-"Oops, you're creating an authorization to send from %(email_login)s but your "
-"address is %(email_server)s. Make sure your addresses match!"
+"Oops, you're creating an authorization to send from %(email_login)s but your"
+" address is %(email_server)s. Make sure your addresses match!"
 msgstr ""
 "Kechirasiz, siz %(email_login)s dan yuborish uchun ruxsat yaratmoqdasiz, "
 "lekin manzilingiz %(email_server)s. Manzillaringiz mos kelishini tekshiring!"
@@ -289,8 +285,8 @@ msgid ""
 "OAuthentication Token."
 msgstr ""
 "\"Foydalanuvchi nomi\" maydonini Gmail foydalanuvchi nomingiz (elektron "
-"pochta manzilingiz) bilan to‘ldiring. Bu Gmail OAuth autentifikatsiya tokeni "
-"uchun ishlatiladigan hisob bilan bir xil bo‘lishi kerak."
+"pochta manzilingiz) bilan to‘ldiring. Bu Gmail OAuth autentifikatsiya tokeni"
+" uchun ishlatiladigan hisob bilan bir xil bo‘lishi kerak."
 
 #. module: google_gmail
 #. odoo-python

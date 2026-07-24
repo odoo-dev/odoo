@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 13:33+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
-"delivery/ko/>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/delivery/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,8 +27,7 @@ msgstr ""
 #: model:ir.actions.report,print_report_name:delivery.action_report_delivery_note
 msgid ""
 "\n"
-"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", "
-"object.name)\n"
+"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", object.name)\n"
 "        "
 msgstr ""
 
@@ -60,15 +58,13 @@ msgstr "%s (사본)"
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,"
-"<br/><br/>\n"
+"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,<br/><br/>\n"
 "        We are glad to inform you that your order has been shipped.\n"
 "        <t t-if=\"object.tracking_ref\">\n"
 "            Your tracking reference is\n"
 "            <strong>\n"
 "                <t t-if=\"object.tracking_url\">\n"
-"                    <a t-attf-href=\"{{ object.tracking_url }}\" "
-"target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
+"                    <a t-attf-href=\"{{ object.tracking_url }}\" target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
 "                </t>\n"
 "                <t t-else=\"\">\n"
 "                    <t t-out=\"object.tracking_ref\"/>.\n"
@@ -76,13 +72,11 @@ msgid ""
 "            </strong>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        Please find your delivery order attached for more details.<br/><br/"
-">\n"
+"        Please find your delivery order attached for more details.<br/><br/>\n"
 "        Thank you,\n"
 "        <t t-if=\"user.signature\">\n"
 "            <br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
-"out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "        </t>\n"
 "    </p>\n"
 "</div>\n"
@@ -91,8 +85,8 @@ msgstr ""
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Get rate"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>효율 확인"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Get rate"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>효율 확인"
 
 #. module: delivery
 #. odoo-python
@@ -103,16 +97,14 @@ msgid ""
 "                </p>"
 msgstr ""
 "<p class=\"o_view_nocontent\">\n"
-"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 확보하세"
-"요.\n"
+"                    지금 Odoo 유료버전을 구입하여 더 많은 공급자를 확보하세요.\n"
 "                </p>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">테스트</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -131,8 +123,7 @@ msgstr "<span class=\"text-success\">디버그 요청</span>"
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"text-success\">생산</span>\n"
 "                                <span class=\"o_stat_text\">환경</span>"
@@ -186,8 +177,8 @@ msgstr ""
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__carrier_description
 msgid ""
 "A description of the delivery method that you want to communicate to your "
-"customers on the Sales Order and sales confirmation email. E.g. instructions "
-"for customers to follow."
+"customers on the Sales Order and sales confirmation email. E.g. instructions"
+" for customers to follow."
 msgstr ""
 
 #. module: delivery
@@ -248,11 +239,9 @@ msgstr "보관됨"
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
 msgid ""
-"Are you sure you want the delivery to be free for this order? You might have "
-"forgotten to compute the rates."
-msgstr ""
-"이 주문에 대해 배송료를 무료로 적용하시겠습니까? 배송료 계산을 잊으셨을 수 있"
-"습니다."
+"Are you sure you want the delivery to be free for this order? You might have"
+" forgotten to compute the rates."
+msgstr "이 주문에 대해 배송료를 무료로 적용하시겠습니까? 배송료 계산을 잊으셨을 수 있습니다."
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -500,8 +489,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid ""
-"Delivery method %(name)s cannot have the same tag in both Must Have Tags and "
-"Excluded Tags."
+"Delivery method %(name)s cannot have the same tag in both Must Have Tags and"
+" Excluded Tags."
 msgstr ""
 
 #. module: delivery
@@ -584,14 +573,11 @@ msgstr "오류: 이 배송 방법은 사용할 수 없습니다."
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the "
-"shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the "
-"cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
 "예상 비용: 고객에게 예상 배송 비용을 청구합니다.\n"
-"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 판매주문서"
-"에 업데이트됩니다."
+"실제 비용: 고객에게 실제 배송 비용을 청구하며, 배송 비용은 배송 후 판매주문서에 업데이트됩니다."
 
 #. module: delivery
 #: model:ir.model.fields.selection,name:delivery.selection__delivery_carrier__invoice_policy__estimated
@@ -611,8 +597,8 @@ msgstr "선적된 실제 수량을 기준으로 송장을 작성하려면 이 �
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"Filling this form allows you to make the delivery method available according "
-"to the content of the order or its destination."
+"Filling this form allows you to make the delivery method available according"
+" to the content of the order or its destination."
 msgstr ""
 
 #. module: delivery
@@ -687,8 +673,7 @@ msgstr ""
 msgid ""
 "If the total volume of the order is over this volume, the method won't be "
 "available."
-msgstr ""
-"주문의 총 거래량이 이 거래량을 초과하는 경우 이 방법을 사용할 수 없습니다."
+msgstr "주문의 총 거래량이 이 거래량을 초과하는 경우 이 방법을 사용할 수 없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__max_weight
@@ -885,8 +870,8 @@ msgstr "앞자리 번호가 이미 존재합니다!"
 msgid ""
 "Prefixes of zip codes that this delivery method applies to. Note that "
 "regular expressions can be used to support countries with varying zip code "
-"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g. "
-"'100$' will only match '100' and not '1000')"
+"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g."
+" '100$' will only match '100' and not '1000')"
 msgstr ""
 
 #. module: delivery
@@ -1024,9 +1009,7 @@ msgstr "선적 중량"
 msgid ""
 "Shipping insurance is a service which may reimburse senders whose parcels "
 "are lost, stolen, and/or damaged in transit."
-msgstr ""
-"운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 "
-"보상받으실 수 있는 서비스입니다."
+msgstr "운송 보험은 운송 중에 물품이 분실, 도난 및/또는 파손될 경우 발송하신 분께서 보상받으실 수 있는 서비스입니다."
 
 #. module: delivery
 #: model:mail.template,name:delivery.mail_template_data_delivery_note
@@ -1075,18 +1058,14 @@ msgstr "배송 직원이 배송 시 결제 금액을 수령합니다."
 msgid ""
 "The method is NOT available if at least one product of the order has one of "
 "these tags."
-msgstr ""
-"주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 없습니"
-"다."
+msgstr "주문의 모든 제품에 이러한 태그 중 하나가 있는 경우 이 방법을 사용할 수 없습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__must_have_tag_ids
 msgid ""
-"The method is available only if at least one product of the order has one of "
-"these tags."
-msgstr ""
-"이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 사용"
-"할 수 있습니다."
+"The method is available only if at least one product of the order has one of"
+" these tags."
+msgstr "이 방법은 주문의 제품 중 하나 이상에 이러한 태그 중 하나가 있는 경우에만 사용할 수 있습니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__get_return_label_from_portal
@@ -1132,8 +1111,8 @@ msgid ""
 "This option adds a link for the customer in the portal to track their "
 "package easily. Use <shipmenttrackingnumber> as a placeholder in your URL."
 msgstr ""
-"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. URL"
-"의 자리 표시자로 <shipmenttrackingnumber>을 사용합니다."
+"이 옵션은 고객이 포털에서 패키지를 쉽게 추적할 수 있는 링크를 제공합니다. URL의 자리 표시자로 "
+"<shipmenttrackingnumber>을 사용합니다."
 
 #. module: delivery
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__margin
@@ -1240,11 +1219,9 @@ msgstr "무게 단위 꼬리표"
 #. odoo-python
 #: code:addons/delivery/models/sale_order.py:0
 msgid ""
-"You can not update the shipping costs on an order where it was already "
-"invoiced!\n"
+"You can not update the shipping costs on an order where it was already invoiced!\n"
 "\n"
-"The following delivery lines (product, invoiced quantity and price) have "
-"already been processed:\n"
+"The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
 "\n"
 "%s"
 msgstr ""
@@ -1253,8 +1230,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/product_category.py:0
 msgid ""
-"You cannot delete this product category as it is used on the products linked "
-"to delivery methods."
+"You cannot delete this product category as it is used on the products linked"
+" to delivery methods."
 msgstr ""
 
 #. module: delivery
@@ -1295,8 +1272,8 @@ msgstr "예: https://ekartlogistics.com/shipmenttrack/<shipmenttrackingnumber>"
 #. module: delivery
 #: model:mail.template,subject:delivery.mail_template_data_delivery_note
 msgid ""
-"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref "
-"{{ object.so_id.name or 'n/a' }})"
+"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref {{ "
+"object.so_id.name or 'n/a' }})"
 msgstr ""
 
 #~ msgid "Payment Transaction"

@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 13:33+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"website_event_exhibitor/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/website_event_exhibitor/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,19 +42,13 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
-msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgstr "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Panah\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Panah\"/>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
@@ -169,7 +162,8 @@ msgstr "Publikasi otomatis pada"
 #. module: website_event_exhibitor
 #: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__publish_on
 msgid "Automatically publish the page on the chosen date and time."
-msgstr "Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
+msgstr ""
+"Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_main
@@ -499,8 +493,8 @@ msgid ""
 "Indicates the timezone in which the event dates/times will be displayed on "
 "the website."
 msgstr ""
-"Mengindikasikan zona waktu di mana tanggal/waktu acara akan ditampilkan pada "
-"website."
+"Mengindikasikan zona waktu di mana tanggal/waktu acara akan ditampilkan pada"
+" website."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_is_follower
@@ -685,8 +679,8 @@ msgid ""
 "Rank your sponsors based on your own grading system (e.g. \"Gold, Silver, "
 "Bronze\")."
 msgstr ""
-"Urutkan sponsor berdasarkan sistem penilaian Anda sendiri (contohnya \"Emas, "
-"Perak, Perunggu\")."
+"Urutkan sponsor berdasarkan sistem penilaian Anda sendiri (contohnya \"Emas,"
+" Perak, Perunggu\")."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__rating_ids
@@ -803,12 +797,10 @@ msgstr "Sponsor-Sponsor"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid ""
 "Sponsors are advertised on your event pages.<br>\n"
-"    Exhibitors have a dedicated page a with chat room for people to connect "
-"with them."
+"    Exhibitors have a dedicated page a with chat room for people to connect with them."
 msgstr ""
 "Sponsor diiklankan pada halaman acara Anda.<br>\n"
-"    Exhibitor memiliki halaman khusus dengan chat room agar orang dapat "
-"connect dengan mereka."
+"    Exhibitor memiliki halaman khusus dengan chat room agar orang dapat connect dengan mereka."
 
 #. module: website_event_exhibitor
 #. odoo-javascript
@@ -879,7 +871,8 @@ msgstr "Kita tidak dapat menemukan exhibitor apapun pada saat ini."
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
 msgid "We could not find any exhibitor matching your search for:"
 msgstr ""
-"Kita tidak dapat menemukan exhibitor apapun yang cocok dengan yang Anda carI:"
+"Kita tidak dapat menemukan exhibitor apapun yang cocok dengan yang Anda "
+"carI:"
 
 #. module: website_event_exhibitor
 #: model:ir.model,name:website_event_exhibitor.model_website

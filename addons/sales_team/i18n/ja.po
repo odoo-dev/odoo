@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 22:44+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"sales_team/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/sales_team/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,37 +38,45 @@ msgstr "%(user_names)s はすでに他のチーム (%(team_names)s) にいます
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-building\" title=\"Company\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-building\" title=\"会社\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
+msgstr "<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"business\" title=\"会社\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Email\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-envelope\" title=\"メール\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"mail\" title=\"Email\"/>"
+msgstr "<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"mail\" title=\"メール\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Phone\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-phone\" title=\"電話\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"phone\" title=\"Phone\"/>"
+msgstr "<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"phone\" title=\"電話\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-users\" title=\"Sales Team\"/>"
-msgstr "<i class=\"d-none d-md-block fa fa-users\" title=\"販売チーム\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
+msgstr "<i class=\"d-none d-md-block oi-filled oi\" data-icon=\"group\" title=\"販売チーム\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
-msgid "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Sales Team\"/>"
-msgstr "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"販売チーム\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-primary\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
+msgstr ""
+"<i class=\"me-1 text-primary oi-fw oi oi-filled\" data-icon=\"group\" "
+"title=\"販売チーム\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -116,7 +123,8 @@ msgstr "チームメンバーを追加"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid "Add members to automatically assign their documents to this sales team."
+msgid ""
+"Add members to automatically assign their documents to this sales team."
 msgstr "メンバーを追加して、そのドキュメントをこの販売チームに自動的に割り当てます。"
 
 #. module: sales_team
@@ -266,7 +274,8 @@ msgstr "お気に入りメンバー"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid "Favorite teams to display them in the dashboard and access them easily."
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
 msgstr "お気に入りのチームをダッシュボードに表示して簡単にアクセスする"
 
 #. module: sales_team
@@ -301,9 +310,7 @@ msgstr "ID"
 msgid ""
 "If True, users may belong to several sales teams. Otherwise membership is "
 "limited to a single sales team."
-msgstr ""
-"True の場合、ユーザは複数の販売チームに所属できます。そうでない場合は、"
-"メンバーシップは1つの販売チームに限定されます。"
+msgstr "True の場合、ユーザは複数の販売チームに所属できます。そうでない場合は、メンバーシップは1つの販売チームに限定されます。"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction
@@ -322,9 +329,7 @@ msgstr "有効にすると、一部のメッセージに配信エラーが発生
 msgid ""
 "If the active field is set to false, it will allow you to hide the Sales "
 "Team without removing it."
-msgstr ""
-"有効フィールドをfalseに設定すると、販売チームを削除せずに非表示にすることがで"
-"きます。"
+msgstr "有効フィールドをfalseに設定すると、販売チームを削除せずに非表示にすることができます。"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__image_1920
@@ -366,9 +371,7 @@ msgstr "最終更新日"
 msgid ""
 "Main user sales team. Used notably for pipeline, or to set sales team in "
 "invoicing or subscription."
-msgstr ""
-"販売チームのメインユーザー。特にパイプラインや、請求書発行や"
-"サブスクリプションで販売チームを設定するために使用します。"
+msgstr "販売チームのメインユーザー。特にパイプラインや、請求書発行やサブスクリプションで販売チームを設定するために使用します。"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team__member_company_ids
@@ -614,18 +617,14 @@ msgstr "このユーザのデフォルト会社。"
 msgid ""
 "The following team members are not allowed in company '%(company)s' of the "
 "Sales Team '%(team)s': %(users)s"
-msgstr ""
-"以下のチームメンバーは、会社「%(company)s」(販売チーム「%(team)s」)には所属で"
-"きません：%(users)s"
+msgstr "以下のチームメンバーは、会社「%(company)s」(販売チーム「%(team)s」)には所属できません：%(users)s"
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.mail_activity_type_action_config_sales
 msgid ""
 "Those represent the different categories of things you have to do (e.g. "
 "\"Call\" or \"Prepare meeting\")."
-msgstr ""
-"これらは、やるべきことの様々なカテゴリを表します（例「電話」や「会議の準備」"
-"）"
+msgstr "これらは、やるべきことの様々なカテゴリを表します（例「電話」や「会議の準備」）"
 
 #. module: sales_team
 #: model:crm.tag,name:sales_team.categ_oppor6
@@ -636,9 +635,7 @@ msgstr "トレーニング"
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__user_in_teams_ids
 msgid ""
 "UX: Give users not to add in the currently chosen team to avoid duplicates"
-msgstr ""
-"UX：重複を避けるため、現在選択されているチームに追加しないようユーザーに指示"
-"します。"
+msgstr "UX：重複を避けるため、現在選択されているチームに追加しないようユーザーに指示します。"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__member_company_ids
@@ -648,7 +645,8 @@ msgstr "UX：チーム会社に限定するか、会社がない場合はすべ�
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid "Use Sales Teams to organize your sales departments and draw up reports."
+msgid ""
+"Use Sales Teams to organize your sales departments and draw up reports."
 msgstr "販売チームを使って販売部門を組織し、レポートを作成しましょう。"
 
 #. module: sales_team
@@ -679,9 +677,7 @@ msgstr "ユーザ"
 msgid ""
 "User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
 "Team '%(team)s'."
-msgstr ""
-"ユーザ '%(user)s'は、会社'%(company)s' (販売チーム '%(team)s' )には所属できま"
-"せん。"
+msgstr "ユーザ '%(user)s'は、会社'%(company)s' (販売チーム '%(team)s' )には所属できません。"
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -733,11 +729,9 @@ msgstr "マルチチームで勤務？"
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that %"
-"(duplicates)s already exist(s)."
-msgstr ""
-"重複したメンバーシップを作成しようとしています。%(duplicates)sはすでに存在し"
-"ています。"
+"You are trying to create duplicate membership(s). We found that "
+"%(duplicates)s already exist(s)."
+msgstr "重複したメンバーシップを作成しようとしています。%(duplicates)sはすでに存在しています。"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
@@ -769,6 +763,6 @@ msgstr "ユーザは販売アプリケーションで自分のデータにアク
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
 msgstr "ユーザは販売構成および統計レポートにアクセスできます。"

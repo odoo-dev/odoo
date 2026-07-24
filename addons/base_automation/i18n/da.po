@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-18 23:25+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/"
-"base_automation/da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/base_automation/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -77,8 +76,8 @@ msgstr "<code>env</code>: Miljø, hvor handlingen udløses"
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<code>model</code>: model of the record on which the action is triggered; is "
-"a void recordset"
+"<code>model</code>: model of the record on which the action is triggered; is"
+" a void recordset"
 msgstr ""
 "<code>model</code>: Modellen for den post, som handlingen udløses på, er et "
 "ugyldigt postsæt"
@@ -104,30 +103,33 @@ msgstr ""
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_kanban
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"Actions\"/>"
+msgstr ""
+"<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" "
+"title=\"Actions\"/>"
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-info-circle\"/> The default target record getter will work "
-"out-of-the-box for any webhook coming from another Odoo instance."
+"<i class=\"oi\" data-icon=\"info\"/> The default target record getter will "
+"work out-of-the-box for any webhook coming from another Odoo instance."
 msgstr ""
-"<i class=\"fa fa-info-circle\"/> Standardforespørgselsmetoden for målposten "
-"virker straks for alle webhooks, der kommer fra en anden Odoo-instans."
+"<i class=\"oi\" data-icon=\"info\"/> Standardforespørgselsmetoden for "
+"målposten virker straks for alle webhooks, der kommer fra en anden Odoo-"
+"instans."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will "
-"be executed <em>every time</em> the watched fields change, <em>whether you "
-"save or not</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automation rules triggered by UI "
+"changes will be executed <em>every time</em> the watched fields change, "
+"<em>whether you save or not</em>."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Automatiseringsregler, der udløses af ændringer "
-"i brugergrænsefladen, køres <em>hver gang</em> de overvågede felter ændres, "
-"<em>uanset om du gemmer eller ej</em>."
+"<i class=\"oi\" data-icon=\"warning\"/> Automatiseringsregler, der udløses "
+"af ændringer i brugergrænsefladen, køres <em>hver gang</em> de overvågede "
+"felter ændres, <em>uanset om du gemmer eller ej</em>."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_server_action_form
@@ -317,8 +319,8 @@ msgstr "Forsinkelsestilstand"
 msgid ""
 "Delay must be positive. Set 'Delay mode' to 'Before' to negate the delay."
 msgstr ""
-"Forsinkelsen skal være positiv. Indstil 'Forsinkelsestilstand' til 'Før' for "
-"at fjerne forsinkelsen."
+"Forsinkelsen skal være positiv. Indstil 'Forsinkelsestilstand' til 'Før' for"
+" at fjerne forsinkelsen."
 
 #. module: base_automation
 #: model:ir.model.fields,field_description:base_automation.field_base_automation__trg_date_range_type
@@ -372,8 +374,8 @@ msgid ""
 "Email, follower or activity action types cannot be used when deleting "
 "records, as there are no more records to apply these changes to!"
 msgstr ""
-"Handlingstyperne 'e-mail', 'følgere' eller 'aktivitet' kan ikke anvendes ved "
-"sletning af poster, da der ikke længere er nogen poster, som disse "
+"Handlingstyperne 'e-mail', 'følgere' eller 'aktivitet' kan ikke anvendes ved"
+" sletning af poster, da der ikke længere er nogen poster, som disse "
 "handlinger kan udføres på!"
 
 #. module: base_automation
@@ -458,8 +460,8 @@ msgstr ""
 #: model:ir.model.fields,help:base_automation.field_base_automation__filter_domain
 #, fuzzy
 msgid ""
-"If present, this condition must be satisfied before executing the automation "
-"rule."
+"If present, this condition must be satisfied before executing the automation"
+" rule."
 msgstr ""
 "Hvis denne betingelse er angivet, skal den være opfyldt, før "
 "automatiseringsreglen udføres."
@@ -567,11 +569,11 @@ msgstr "Modelnavn"
 #: code:addons/base_automation/models/ir_actions_server.py:0
 #, fuzzy
 msgid ""
-"Model of action %(action_name)s should match the one from automated rule %"
-"(rule_name)s."
+"Model of action %(action_name)s should match the one from automated rule "
+"%(rule_name)s."
 msgstr ""
-"Modellen for handling %(action_name)s skal matche den automatiserede regel %"
-"(rule_name)s."
+"Modellen for handling %(action_name)s skal matche den automatiserede regel "
+"%(rule_name)s."
 
 #. module: base_automation
 #: model:ir.model.fields.selection,name:base_automation.selection__base_automation__trg_date_range_type__month
@@ -608,7 +610,8 @@ msgstr "Næste aktivitetstype"
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
 msgid "No record to run the automation on was found."
-msgstr "Der blev ikke fundet nogen data, som automatiseringen kan anvendes på."
+msgstr ""
+"Der blev ikke fundet nogen data, som automatiseringen kan anvendes på."
 
 #. module: base_automation
 #: model_terms:ir.ui.view,arch_db:base_automation.view_base_automation_form
@@ -779,25 +782,23 @@ msgstr "Vælg felter ..."
 #: model_terms:ir.actions.act_window,help:base_automation.base_automation_act
 msgid ""
 "Send an email when an object changes state, archive records\n"
-"                after a month of inactivity or remind yourself to follow-up "
-"on\n"
+"                after a month of inactivity or remind yourself to follow-up on\n"
 "                tasks when a specific tag is added."
 msgstr ""
 "Send en e-mail, når et objekt ændrer status, arkivér datasæt\n"
-"                efter en måneds inaktivitet, eller mind dig selv om at følge "
-"op på\n"
+"                efter en måneds inaktivitet, eller mind dig selv om at følge op på\n"
 "                opgaver, når et bestemt tag tilføjes."
 
 #. module: base_automation
 #: model_terms:digest.tip,tip_description:base_automation.digest_tip_base_automation_0
 #, fuzzy
 msgid ""
-"Send an email when an object changes state, archive records after a month of "
-"inactivity or remind yourself to follow-up on tasks when a specific tag is "
+"Send an email when an object changes state, archive records after a month of"
+" inactivity or remind yourself to follow-up on tasks when a specific tag is "
 "added.<br>With Automation Rules, you can automate any workflow."
 msgstr ""
-"Send en e-mail, når status for et objekt ændres, arkivér data efter en måned "
-"uden aktivitet, eller få en påmindelse om at følge op på opgaver, når et "
+"Send en e-mail, når status for et objekt ændres, arkivér data efter en måned"
+" uden aktivitet, eller få en påmindelse om at følge op på opgaver, når et "
 "bestemt nøgleord tilføjes. Med automatiseringsregler kan du nemt "
 "automatisere alle workflows."
 
@@ -819,15 +820,15 @@ msgid ""
 "Some triggers need a reference to a selection field. This field is used to "
 "store it."
 msgstr ""
-"Nogle udløsere kræver en reference til et valgfelt. Dette felt bruges til at "
-"gemme værdien."
+"Nogle udløsere kræver en reference til et valgfelt. Dette felt bruges til at"
+" gemme værdien."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_field_ref
 #, fuzzy
 msgid ""
-"Some triggers need a reference to another field. This field is used to store "
-"it."
+"Some triggers need a reference to another field. This field is used to store"
+" it."
 msgstr ""
 "Nogle udløsere kræver en reference til et andet felt. Dette felt bruges til "
 "at gemme værdien."
@@ -880,7 +881,8 @@ msgstr "Målpost"
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 #, fuzzy
-msgid "Target model of actions %(action_names)s are different from rule model."
+msgid ""
+"Target model of actions %(action_names)s are different from rule model."
 msgstr ""
 "Målmodellen for handling %(action_names)s adskiller sig fra regelmodellen."
 
@@ -888,11 +890,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_automation/models/base_automation.py:0
 msgid ""
-"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the \"%"
-"(state_value)s\" action type"
+"The \"%(trigger_value)s\" %(trigger_label)s can only be used with the "
+"\"%(state_value)s\" action type"
 msgstr ""
-"\"%(trigger_value)s\" %(trigger_label)s Kan kun bruges sammen med \"%"
-"(state_value)s\" handlingstypen"
+"\"%(trigger_value)s\" %(trigger_label)s Kan kun bruges sammen med "
+"\"%(state_value)s\" handlingstypen"
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trigger_field_ids
@@ -1052,20 +1054,18 @@ msgid ""
 "When calculating a day-based timed condition, it is possible to use a "
 "calendar to compute the date based on working days."
 msgstr ""
-"Ved udregning af en dags-baseret timet betingelse, er det muligt at bruge en "
-"kalender til at udregne datoen, baseret på arbejdsdage."
+"Ved udregning af en dags-baseret timet betingelse, er det muligt at bruge en"
+" kalender til at udregne datoen, baseret på arbejdsdage."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__trg_date_id
 #, fuzzy
 msgid ""
 "When should the condition be triggered.\n"
-"                If present, will be checked by the scheduler. If empty, will "
-"be checked at creation and update."
+"                If present, will be checked by the scheduler. If empty, will be checked at creation and update."
 msgstr ""
 "Angiver, hvornår betingelsen skal udløses.\n"
-"                Hvis den er angivet, udfører planlæggeren kontrollen. Hvis "
-"den er tom, udføres kontrollen ved oprettelse og opdatering."
+"                Hvis den er angivet, udfører planlæggeren kontrollen. Hvis den er tom, udføres kontrollen ved oprettelse og opdatering."
 
 #. module: base_automation
 #: model:ir.model.fields,help:base_automation.field_base_automation__active

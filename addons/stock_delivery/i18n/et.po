@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 21:16+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/"
-"stock_delivery/et/>\n"
+"Language-Team: Estonian <https://translate.odoo.com/projects/odoo-master/stock_delivery/et/>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -55,12 +54,12 @@ msgstr ""
 
 #. module: stock_delivery
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_type_form_delivery
-msgid "<i class=\"fa pe-1 fa-arrow-right\"/>Configure Carrier Labels"
+msgid "<i class=\"oi pe-1\" data-icon=\"arrow_forward\"/>Configure Carrier Labels"
 msgstr ""
 
 #. module: stock_delivery
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_type_form_delivery
-msgid "<i class=\"fa pe-1 fa-arrow-right\"/>Configure Export Documents"
+msgid "<i class=\"oi pe-1\" data-icon=\"arrow_forward\"/>Configure Export Documents"
 msgstr ""
 
 #. module: stock_delivery
@@ -174,10 +173,11 @@ msgstr "Tühista"
 #. module: stock_delivery
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_withcarrier_out_form
 msgid ""
-"Cancelling a delivery may not be undoable. Are you sure you want to continue?"
+"Cancelling a delivery may not be undoable. Are you sure you want to "
+"continue?"
 msgstr ""
-"Tarne tühistamist ei ole võimalik tagasi võtta. Kas olete kindel, et soovite "
-"jätkata?"
+"Tarne tühistamist ei ole võimalik tagasi võtta. Kas olete kindel, et soovite"
+" jätkata?"
 
 #. module: stock_delivery
 #: model:ir.model.fields,field_description:stock_delivery.field_stock_move_line__carrier_id
@@ -299,15 +299,11 @@ msgstr ""
 #. module: stock_delivery
 #: model:ir.model.fields,help:stock_delivery.field_delivery_carrier__invoice_policy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the "
-"shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the "
-"cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
-"Hinnanguline kulu: kliendile esitatakse arve hinnangulise saatmiskulu "
-"põhjal.\n"
-"Tegeliku kulu: kliendile esitatakse arve tegeliku saatmiskulu põhjal; "
-"saatmiskulu uuendatakse tellimuses pärast kohaletoimetamist."
+"Hinnanguline kulu: kliendile esitatakse arve hinnangulise saatmiskulu põhjal.\n"
+"Tegeliku kulu: kliendile esitatakse arve tegeliku saatmiskulu põhjal; saatmiskulu uuendatakse tellimuses pärast kohaletoimetamist."
 
 #. module: stock_delivery
 #. odoo-python
@@ -492,15 +488,11 @@ msgstr "Marsruudid"
 #: model:ir.model.fields,help:stock_delivery.field_product_product__country_of_origin
 #: model:ir.model.fields,help:stock_delivery.field_product_template__country_of_origin
 msgid ""
-"Rules of origin determine where goods originate, i.e. not where they have "
-"been shipped from, but where they have been produced or manufactured.\n"
-"As such, the ‘origin’ is the 'economic nationality' of goods traded in "
-"commerce."
+"Rules of origin determine where goods originate, i.e. not where they have been shipped from, but where they have been produced or manufactured.\n"
+"As such, the ‘origin’ is the 'economic nationality' of goods traded in commerce."
 msgstr ""
-"Päritolureeglid määravad kindlaks kaupade päritolu — mitte seda, kust kaupu "
-"on saadetud, vaid kus need on toodetud või valmistatud.\n"
-"Seega tähistab ‘päritolu’ kaupade \"majanduslikku päritoluriiki\" "
-"rahvusvahelises kaubanduses."
+"Päritolureeglid määravad kindlaks kaupade päritolu — mitte seda, kust kaupu on saadetud, vaid kus need on toodetud või valmistatud.\n"
+"Seega tähistab ‘päritolu’ kaupade \"majanduslikku päritoluriiki\" rahvusvahelises kaubanduses."
 
 #. module: stock_delivery
 #: model:ir.model.fields,field_description:stock_delivery.field_stock_move_line__sale_price
@@ -526,8 +518,8 @@ msgstr "Saada saatjale"
 #. odoo-python
 #: code:addons/stock_delivery/models/stock_picking.py:0
 msgid ""
-"Shipment sent to carrier %(carrier_name)s for shipping with tracking number %"
-"(ref)s"
+"Shipment sent to carrier %(carrier_name)s for shipping with tracking number "
+"%(ref)s"
 msgstr ""
 "Saadetis üle antud transpordifirmale %(carrier_name)s, saadetise "
 "jälgimisnumber %(ref)s"
@@ -740,8 +732,8 @@ msgstr "Kaal:"
 #: code:addons/stock_delivery/models/stock_move.py:0
 msgid ""
 "You cannot pack products into the same package when they have different "
-"carriers (i.e. check that all of their transfers have a carrier assigned and "
-"are using the same carrier)."
+"carriers (i.e. check that all of their transfers have a carrier assigned and"
+" are using the same carrier)."
 msgstr ""
 "Tooteid ei saa pakendada samasse pakki, kui neil on erinevad vedajad "
 "(kontrollige, et kõikidel ülekannetel oleks määratud vedaja ja et see oleks "
@@ -808,7 +800,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_type_form_delivery
 msgid ""
 "are uploaded to the chatter when the picking is validated. If you want to\n"
-"                    print them automatically on validation, you need to "
-"configure a printer on the\n"
+"                    print them automatically on validation, you need to configure a printer on the\n"
 "                    report form.<br/>"
 msgstr ""

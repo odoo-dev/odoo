@@ -26,8 +26,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 02:15+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-master/"
-"payment/sv/>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-master/payment/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,38 +43,30 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_method_form
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/> These properties are set to\n"
-"                                match the behavior of providers and that of "
-"their integration with\n"
-"                                Odoo regarding this payment method. Any "
-"change may result in errors\n"
-"                                and should be tested on a test database "
-"first."
+"<i class=\"oi\" data-icon=\"warning\"/> These properties are set to\n"
+"                                match the behavior of providers and that of their integration with\n"
+"                                Odoo regarding this payment method. Any change may result in errors\n"
+"                                and should be tested on a test database first."
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\"/> Dessa egenskaper är inställda för "
-"att\n"
-"                                matcha beteendet hos leverantörer och deras "
-"integration med Odoo\n"
-"                                Odoo när det gäller denna betalningsmetod. "
-"Alla ändringar kan resultera i fel\n"
+"<i class=\"oi\" data-icon=\"warning\"/> Dessa egenskaper är inställda för att\n"
+"                                matcha beteendet hos leverantörer och deras integration med Odoo\n"
+"                                Odoo när det gäller denna betalningsmetod. Alla ändringar kan resultera i fel\n"
 "                                och bör testas på en testdatabas först."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.portal_breadcrumb
-msgid ""
-"<i class=\"fa fa-home\" role=\"img\" title=\"Home\" aria-label=\"Home\"/>"
-msgstr ""
-"<i class=\"fa fa-home\" role=\"img\" title=\"Home\" aria-label=\"Hem\"/>"
+msgid "<i class=\"oi\" data-icon=\"home\" role=\"img\" title=\"Home\" aria-label=\"Home\"/>"
+msgstr "<i class=\"oi\" data-icon=\"home\" role=\"img\" title=\"Home\" aria-label=\"Hem\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
 msgid ""
-"<i class=\"fa fa-info-circle oe_inline\" "
+"<i class=\"oi oe_inline\" data-icon=\"info\" "
 "invisible=\"support_partial_capture != 'full_only'\" title=\"Some of the "
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" "
+"<i class=\"oe_inline oi\" data-icon=\"info\" "
 "invisible=\"support_partial_capture != 'full_only'\" title=\"Vissa av de "
 "transaktioner som du avser att fånga kan bara fångas i sin helhet. Hantera "
 "transaktionerna individuellt för att fånga en del av beloppet.\"/>"
@@ -83,17 +74,20 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
 msgid ""
-"<i class=\"fa fa-trash\" title=\"Delete payment method\" data-bs-"
-"toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-delay=\"0\"/>"
+"<i class=\"oi oi-filled\" data-icon=\"delete\" title=\"Delete payment "
+"method\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-"
+"delay=\"0\"/>"
 msgstr ""
-"<i class=\"fa fa-trash\" title=\"Ta bort betalningsmetod\" data-bs-"
-"toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-delay=\"0\"/>"
+"<i class=\"oi-filled oi\" data-icon=\"delete\" title=\"Ta bort "
+"betalningsmetod\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-"
+"bs-delay=\"0\"/>"
 
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_method
-msgid "<i class=\"oi oi-arrow-right me-1\"></i> Configure a payment provider"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"></i> Configure a payment provider"
 msgstr ""
-"<i class=\"oi oi-arrow-right me-1\"></i> Konfigurera en betalningsleverantör"
+"<i class=\"me-1 oi\" data-icon=\"east\"></i> Konfigurera en "
+"betalningsleverantör"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.method_form
@@ -140,15 +134,17 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.method_form
 #: model_terms:ir.ui.view,arch_db:payment.token_form
-msgid "<span><i class=\"fa fa-lock\"/> Secured by</span>"
-msgstr "<span><i class=\"fa fa-lock\"/> Säkerställd av</span>"
+msgid "<span><i class=\"oi\" data-icon=\"lock\"/> Secured by</span>"
+msgstr "<span><i class=\"oi\" data-icon=\"lock\"/> Säkerställd av</span>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.no_pms_available_warning
 msgid ""
-"<strong><i class=\"fa fa-file-text\"/> Show availability report</strong>"
+"<strong><i class=\"oi oi-filled\" data-icon=\"article\"/> Show availability "
+"report</strong>"
 msgstr ""
-"<strong><i class=\"fa fa-file-text\"/> Visa tillgänglighetsrapport</strong>"
+"<strong><i class=\"oi-filled oi\" data-icon=\"article\"/> Visa "
+"tillgänglighetsrapport</strong>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.no_pms_available_warning
@@ -164,16 +160,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a partial capture pending. Please wait a\n"
-"                    moment for it to be processed. Check your payment "
-"provider configuration if\n"
+"                    moment for it to be processed. Check your payment provider configuration if\n"
 "                    the capture is still pending after a few minutes."
 msgstr ""
-"<strong>Varning!</strong> Det pågår en partiell infångning. Vänligen vänta "
-"ett\n"
-"                    ögonblick för att den ska behandlas. Kontrollera din "
-"betalningsleverantörs konfiguration om\n"
-"                    om registreringen fortfarande är väntande efter några "
-"minuter."
+"<strong>Varning!</strong> Det pågår en partiell infångning. Vänligen vänta ett\n"
+"                    ögonblick för att den ska behandlas. Kontrollera din betalningsleverantörs konfiguration om\n"
+"                    om registreringen fortfarande är väntande efter några minuter."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
@@ -188,20 +180,17 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment.payment_provider_form
 msgid ""
 "<strong>Warning:</strong> Creating a payment provider from scratch is not\n"
-"                        supported; please use the <em>Duplicate</em> action "
-"instead."
+"                        supported; please use the <em>Duplicate</em> action instead."
 msgstr ""
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
 msgid ""
 "<strong>Warning</strong> Make sure you are logged in as the\n"
-"                                    correct partner before making this "
-"payment."
+"                                    correct partner before making this payment."
 msgstr ""
 "<strong>Varning</strong> Se till att du är inloggad som rätt\n"
-"                                    rätt partner innan du gör denna "
-"betalning."
+"                                    rätt partner innan du gör denna betalning."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
@@ -435,8 +424,8 @@ msgstr "Transaktioner med underordnad"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.form
-msgid "Choose another method <i class=\"oi oi-arrow-down\"/>"
-msgstr "Välj en annan metod <i class=\"oi oi-arrow-down\"/>"
+msgid "Choose another method <i class=\"oi\" data-icon=\"south\"/>"
+msgstr "Välj en annan metod <i class=\"oi\" data-icon=\"south\"/>"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_city
@@ -749,8 +738,8 @@ msgstr "Generera och kopiera betalningslänk"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.confirm
-msgid "Go to my Account <i class=\"oi oi-arrow-right ms-2\"/>"
-msgstr "Gå till mitt konto <i class=\"oi oi-arrow-right ms-2\"/>"
+msgid "Go to my Account <i class=\"oi ms-2\" data-icon=\"east\"/>"
+msgstr "Gå till mitt konto <i class=\"ms-2 oi\" data-icon=\"east\"/>"
 
 #. module: payment
 #: model:ir.model,name:payment.model_ir_http
@@ -798,8 +787,8 @@ msgstr "ID"
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__is_live
 msgid ""
-"If live mode is disabled, a fake payment is processed through a test payment "
-"interface. This mode is advised when setting up the provider."
+"If live mode is disabled, a fake payment is processed through a test payment"
+" interface. This mode is advised when setting up the provider."
 msgstr ""
 
 #. module: payment
@@ -1344,8 +1333,8 @@ msgstr "Betalningsleverantörer"
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
-"Payment transactions should not be updated directly. Either use _record() to "
-"queue payment data for processing, or pass payment_safe_write=True to the "
+"Payment transactions should not be updated directly. Either use _record() to"
+" queue payment data for processing, or pass payment_safe_write=True to the "
 "context after ensuring that the update can tolerate a rollback."
 msgstr ""
 
@@ -1606,11 +1595,12 @@ msgstr "Sekvens"
 #. odoo-python
 #: code:addons/payment/wizards/payment_capture_wizard.py:0
 msgid ""
-"Some of the transactions you intend to capture can only be captured in full. "
-"Handle the transactions individually to capture a partial amount."
+"Some of the transactions you intend to capture can only be captured in full."
+" Handle the transactions individually to capture a partial amount."
 msgstr ""
-"Vissa av de transaktioner som du avser att registrera kan bara registreras i "
-"sin helhet. Hantera transaktionerna individuellt för att fånga ett delbelopp."
+"Vissa av de transaktioner som du avser att registrera kan bara registreras i"
+" sin helhet. Hantera transaktionerna individuellt för att fånga ett "
+"delbelopp."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__source_transaction_id
@@ -1726,7 +1716,8 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__brand_ids
 msgid ""
-"The brands of the payment methods that will be displayed on the payment form."
+"The brands of the payment methods that will be displayed on the payment "
+"form."
 msgstr ""
 "Varumärkena för de betalningsmetoder som ska visas på betalningsformuläret."
 
@@ -1826,15 +1817,15 @@ msgid ""
 "available to customers."
 msgstr ""
 "Listan över länder där den här betalningsmetoden kan användas (om "
-"leverantören tillåter det). I andra länder är den här betalningsmetoden inte "
-"tillgänglig för kunder."
+"leverantören tillåter det). I andra länder är den här betalningsmetoden inte"
+" tillgänglig för kunder."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__supported_currency_ids
 msgid ""
-"The list of currencies for that are supported by this payment method (if the "
-"provider allows it). When paying with another currency, this payment method "
-"is not available to customers."
+"The list of currencies for that are supported by this payment method (if the"
+" provider allows it). When paying with another currency, this payment method"
+" is not available to customers."
 msgstr ""
 "Listan över valutor som stöds av den här betalningsmetoden (om leverantören "
 "tillåter det). När du betalar med en annan valuta är den här "
@@ -1911,15 +1902,11 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__primary_payment_method_id
 msgid ""
-"The primary payment method of the current payment method, if the latter is a "
-"brand.\n"
-"For example, \"Card\" is the primary payment method of the card brand "
-"\"VISA\"."
+"The primary payment method of the current payment method, if the latter is a brand.\n"
+"For example, \"Card\" is the primary payment method of the card brand \"VISA\"."
 msgstr ""
-"Den primära betalningsmetoden för den aktuella betalningsmetoden, om den "
-"senare är ett varumärke.\n"
-"Till exempel är \"Card\" den primära betalningsmetoden för kortmärket "
-"\"VISA\"."
+"Den primära betalningsmetoden för den aktuella betalningsmetoden, om den senare är ett varumärke.\n"
+"Till exempel är \"Card\" den primära betalningsmetoden för kortmärket \"VISA\"."
 
 #. module: payment
 #: model:ir.model.constraint,message:payment.constraint_payment_method_provider_id_code_uniq
@@ -2053,8 +2040,8 @@ msgid ""
 "This action will also archive %s tokens that are registered with this "
 "payment method."
 msgstr ""
-"Denna åtgärd kommer också att arkiveras %s polletter som är registrerade med "
-"denna betalningsmetod."
+"Denna åtgärd kommer också att arkiveras %s polletter som är registrerade med"
+" denna betalningsmetod."
 
 #. module: payment
 #. odoo-python
@@ -2087,14 +2074,11 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_link_wizard_view_form
 msgid ""
-"This partner has no email, which may cause issues with some payment "
-"providers.\n"
+"This partner has no email, which may cause issues with some payment providers.\n"
 "                     Setting an email for this partner is advised."
 msgstr ""
-"Den här partnern har ingen e-postadress, vilket kan orsaka problem med vissa "
-"betalningsleverantörer.\n"
-"                     Vi rekommenderar att du anger en e-postadress för den "
-"här partnern."
+"Den här partnern har ingen e-postadress, vilket kan orsaka problem med vissa betalningsleverantörer.\n"
+"                     Vi rekommenderar att du anger en e-postadress för den här partnern."
 
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_provider
@@ -2128,8 +2112,8 @@ msgid ""
 "Tokenization is the process of saving the payment details as a token that "
 "can later be reused without having to enter the payment details again."
 msgstr ""
-"Pollettisering är processen att spara betalningsinformationen som en pollett "
-"som senare kan återanvändas utan att behöva ange betalningsinformationen "
+"Pollettisering är processen att spara betalningsinformationen som en pollett"
+" som senare kan återanvändas utan att behöva ange betalningsinformationen "
 "igen."
 
 #. module: payment
@@ -2494,8 +2478,8 @@ msgstr "Dina betalningsmetoder"
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
-"Your payment operation could not be completed for following transactions: %"
-"(tx_refs)s"
+"Your payment operation could not be completed for following transactions: "
+"%(tx_refs)s"
 msgstr ""
 
 #. module: payment
@@ -2564,12 +2548,10 @@ msgstr ""
 #~ "                                            Aktivera betalningsmetoder"
 
 #~ msgid ""
-#~ "<strong>Warning</strong> Creating a payment provider from the <em>CREATE</"
-#~ "em> button is not supported.\n"
+#~ "<strong>Warning</strong> Creating a payment provider from the <em>CREATE</em> button is not supported.\n"
 #~ "                        Please use the <em>Duplicate</em> action instead."
 #~ msgstr ""
-#~ "<strong>Varning</strong> Det finns inget stöd för att skapa en "
-#~ "betalningsleverantör från knappen <em>CREATE</em>.\n"
+#~ "<strong>Varning</strong> Det finns inget stöd för att skapa en betalningsleverantör från knappen <em>CREATE</em>.\n"
 #~ "                        Använd åtgärden <em>Duplicera</em> istället."
 
 #~ msgid "ACH Direct Debit"
@@ -2810,12 +2792,10 @@ msgstr ""
 #~ msgstr "Humm"
 
 #~ msgid ""
-#~ "In test mode, a fake payment is processed through a test payment "
-#~ "interface.\n"
+#~ "In test mode, a fake payment is processed through a test payment interface.\n"
 #~ "This mode is advised when setting up the provider."
 #~ msgstr ""
-#~ "I testläget behandlas en falsk betalning via ett "
-#~ "testbetalningsgränssnitt.\n"
+#~ "I testläget behandlas en falsk betalning via ett testbetalningsgränssnitt.\n"
 #~ "Detta läge rekommenderas när du konfigurerar leverantören."
 
 #~ msgid "JCB"
@@ -3014,8 +2994,7 @@ msgstr ""
 #~ msgid "Pix"
 #~ msgstr "Pix"
 
-#~ msgid ""
-#~ "Please make sure that %(payment_method)s is supported by %(provider)s."
+#~ msgid "Please make sure that %(payment_method)s is supported by %(provider)s."
 #~ msgstr "Se till att %(payment_method)s stöds av %(provider)s."
 
 #~ msgid "PostFinance Pay"
@@ -3180,8 +3159,8 @@ msgstr ""
 #~ "You cannot delete the payment provider %s; disable it or uninstall it "
 #~ "instead."
 #~ msgstr ""
-#~ "Du kan inte ta bort betalningsleverantören %s; inaktivera eller "
-#~ "avinstallera den i stället."
+#~ "Du kan inte ta bort betalningsleverantören %s; inaktivera eller avinstallera"
+#~ " den i stället."
 
 #~ msgid "You cannot publish a disabled provider."
 #~ msgstr "Du kan inte publicera en funktionshindrad leverantör."

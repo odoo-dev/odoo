@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 23:33+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"stock_picking_batch/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,8 +33,12 @@ msgstr "%s dihapus dari batch, tidak ada kuantitas yang diproses"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
-msgstr "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
+msgstr ""
+"<i class=\"text-primary me-2 oi-filled oi\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -108,23 +111,19 @@ msgstr "<strong>→</strong>"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"Transfer akan secara otomatis ditambahkan ke batch yang memenuhi jumlah "
-"baris ini bila transfer ditambahkan ke batch tersebut.\n"
+"Transfer akan secara otomatis ditambahkan ke batch yang memenuhi jumlah baris ini bila transfer ditambahkan ke batch tersebut.\n"
 "Berikan nilai '0' ke value ini bila tidak ada batasan baris."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"Transfer akan secara otomatis ditambahkan ke batch yang akan memenuhi jumlah "
-"transfer ini.\n"
+"Transfer akan secara otomatis ditambahkan ke batch yang akan memenuhi jumlah transfer ini.\n"
 "Berikan nilai ini '0' bila tidak ada batasan transfer."
 
 #. module: stock_picking_batch
@@ -915,7 +914,8 @@ msgstr "Rating"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr ""
 "Kelompokkan ulang lebih dari satu pesanan menjadi satu picking dan "
 "konsolidasikan pada zona packing."
@@ -958,20 +958,14 @@ msgstr "Tanggal Terjadwal"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "Jadwalkan tanggal untuk transfer untuk diproses\n"
-"              - Bila secara manual ditetapkan maka tanggal yang dijadwalkan "
-"untuk semua transfer di batch akan secara otomatis diupdate ke tanggal ini.\n"
-"              - Bila tidak dirubah secara manual dan transfer ditambahkan/"
-"dihapus/diupdate maka ini akan menjadi tanggal terjadwal yang paling awal\n"
-"                namun tanggal terjadwal ini tidak akan ditetapkan untuk "
-"semua transfer di batch."
+"              - Bila secara manual ditetapkan maka tanggal yang dijadwalkan untuk semua transfer di batch akan secara otomatis diupdate ke tanggal ini.\n"
+"              - Bila tidak dirubah secara manual dan transfer ditambahkan/dihapus/diupdate maka ini akan menjadi tanggal terjadwal yang paling awal\n"
+"                namun tanggal terjadwal ini tidak akan ditetapkan untuk semua transfer di batch."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1025,14 +1019,14 @@ msgid ""
 "Split transfers by defined locations, then group transfers with the same "
 "location."
 msgstr ""
-"Pisah transfer berdasarkan lokasi yang didefinisikan, lalu transfer kelompok "
-"dengan lokasi yang sama."
+"Pisah transfer berdasarkan lokasi yang didefinisikan, lalu transfer kelompok"
+" dengan lokasi yang sama."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr ""
 "Pisah transfer berdasarkan kategori produk, lalu kelompokkan transfer yang "
 "memiliki kategori produk yang sama."
@@ -1042,8 +1036,8 @@ msgstr ""
 msgid ""
 "Split transfers by product then group transfers that have the same product."
 msgstr ""
-"Pisah transfer berdasarkan produk lalu transfer kelompok yang masih memiliki "
-"produk yang sama."
+"Pisah transfer berdasarkan produk lalu transfer kelompok yang masih memiliki"
+" produk yang sama."
 
 #. module: stock_picking_batch
 #: model:mail.message.subtype,description:stock_picking_batch.mt_batch_state
@@ -1122,13 +1116,11 @@ msgstr "Batch transfer berikut telah diupdate"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
-"Transfer berikut tidak dapat ditambahkan ke batch transfer %(batch)s. "
-"Silakan periksa tipe status dan operasi mereka.\n"
+"Transfer berikut tidak dapat ditambahkan ke batch transfer %(batch)s. Silakan periksa tipe status dan operasi mereka.\n"
 "\n"
 "Tidak kompatibel: %(incompatible_transfers)s"
 

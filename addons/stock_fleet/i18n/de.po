@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 00:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-master/"
-"stock_fleet/de/>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-master/stock_fleet/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,48 +57,45 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_fleet.report_cmr_document
 msgid ""
 "<br/>\n"
-"                                                            <span class=\"fw-"
-"bold invisible\">Address: </span>"
+"                                                            <span class=\"fw-bold invisible\">Address: </span>"
 msgstr ""
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.report_cmr_document
 msgid ""
 "<br/>\n"
-"                                            <span class=\"fw-bold "
-"invisible\">Address: </span>"
+"                                            <span class=\"fw-bold invisible\">Address: </span>"
 msgstr ""
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.report_cmr_document
 msgid ""
 "<br/>\n"
-"                                        <span class=\"fw-bold "
-"invisible\">Address: </span><br/>"
+"                                        <span class=\"fw-bold invisible\">Address: </span><br/>"
 msgstr ""
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.stock_picking_batch_card
-msgid "<i class=\"fa fa-cubes text-primary me-2\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-cubes text-primary me-2\" title=\"Standort\"/>"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"inventory_2\" title=\"Location\"/>"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"inventory_2\" title=\"Standort\"/>"
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.stock_picking_batch_card
-msgid "<i class=\"fa fa-long-arrow-right mx-2\" title=\"Arrow\"/>"
-msgstr "<i class=\"fa fa-long-arrow-right mx-2\" title=\"Pfeil\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" title=\"Pfeil\"/>"
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.stock_picking_batch_card
-msgid "<i class=\"fa fa-truck text-primary me-2\" title=\"Vehicle\"/>"
-msgstr "<i class=\"fa fa-truck text-primary me-2\" title=\"Fahrzeug\"/>"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"local_shipping\" title=\"Vehicle\"/>"
+msgstr ""
+"<i class=\"text-primary me-2 oi\" data-icon=\"local_shipping\" "
+"title=\"Fahrzeug\"/>"
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.report_cmr_document
 msgid ""
 "<span class=\"d-block\">CMR INTERNATIONAL CONSIGNMENT NOTE</span>\n"
-"                                    <span class=\"d-block\">This carriage is "
-"subject notwithstanding any clause to the contrary, to the convention on the "
-"contact for the international carriage of goods by road (CMR)</span>\n"
+"                                    <span class=\"d-block\">This carriage is subject notwithstanding any clause to the contrary, to the convention on the contact for the international carriage of goods by road (CMR)</span>\n"
 "                                    <br/>"
 msgstr ""
 
@@ -117,12 +113,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:stock_fleet.view_picking_type_form
 msgid ""
 "<span class=\"fw-bold\" invisible=\"code !='outgoing'\">From</span>\n"
-"                        <span class=\"fw-bold\" invisible=\"code "
-"=='outgoing'\">To</span>"
+"                        <span class=\"fw-bold\" invisible=\"code =='outgoing'\">To</span>"
 msgstr ""
 "<span class=\"fw-bold\" invisible=\"code !='outgoing'\">Von</span>\n"
-"                        <span class=\"fw-bold\" invisible=\"code "
-"=='outgoing'\">Nach</span>"
+"                        <span class=\"fw-bold\" invisible=\"code =='outgoing'\">Nach</span>"
 
 #. module: stock_fleet
 #: model_terms:ir.ui.view,arch_db:stock_fleet.report_picking_batch_inherit
@@ -320,8 +314,9 @@ msgid ""
 "Enable this option to display dispatch management related details in the "
 "batch/wave form view and operations kanban overview."
 msgstr ""
-"Aktivieren Sie diese Option, um Details zur Versandverwaltung in der Stapel-/"
-"Wellenformansicht und in der Kanban-Übersicht der Vorgänge anzuzeigen."
+"Aktivieren Sie diese Option, um Details zur Versandverwaltung in der "
+"Stapel-/Wellenformansicht und in der Kanban-Übersicht der Vorgänge "
+"anzuzeigen."
 
 #. module: stock_fleet
 #: model:ir.model.fields,field_description:stock_fleet.field_stock_picking_batch__end_date

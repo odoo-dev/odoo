@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 12:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/lunch/"
-"uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/lunch/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -60,80 +59,76 @@ msgstr "6 ta losos maki - 6 ta tunets maki - 6 ta krevetka/avokado maki"
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check\" role=\"img\" aria-label=\"Receive button\" "
-"title=\"Receive button\"/>"
+"<i class=\"oi\" data-icon=\"check\" role=\"img\" aria-label=\"Receive "
+"button\" title=\"Receive button\"/>"
 msgstr ""
-"<i class=\"fa fa-check\" role=\"img\" aria-label=\"Qabul qilish tugmasi\" "
-"title=\"Qabul qilish tugmasi\"/>"
+"<i class=\"oi\" data-icon=\"check\" role=\"img\" aria-label=\"Qabul qilish "
+"tugmasi\" title=\"Qabul qilish tugmasi\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #: model_terms:ir.ui.view,arch_db:lunch.view_lunch_cashmove_kanban
 #: model_terms:ir.ui.view,arch_db:lunch.view_lunch_cashmove_report_kanban
 #, fuzzy
-msgid ""
-"<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
-msgstr ""
-"<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Sana\" title=\"Sana\"/>"
+msgid "<i class=\"oi\" data-icon=\"schedule\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>"
+msgstr "<i class=\"oi\" data-icon=\"schedule\" role=\"img\" aria-label=\"Sana\" title=\"Sana\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Send notification\" "
-"title=\"Send notification\"/>"
+"<i class=\"oi oi-filled\" data-icon=\"mail\" role=\"img\" aria-label=\"Send "
+"notification\" title=\"Send notification\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Bildirishnoma "
-"yuborish\" title=\"Bildirishnoma yuborish\"/>"
+"<i class=\"oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Bildirishnoma yuborish\" title=\"Bildirishnoma yuborish\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.view_lunch_cashmove_kanban
 #: model_terms:ir.ui.view,arch_db:lunch.view_lunch_cashmove_report_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Amount\" title=\"Amount\"/"
-">"
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Amount\" "
+"title=\"Amount\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Miqdor\" title=\"Miqdor\"/"
-">"
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Miqdor\" "
+"title=\"Miqdor\"/>"
+
+#. module: lunch
+#: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
+#, fuzzy
+msgid "<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Money\" title=\"Money\"/>"
+msgstr "<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Pul\" title=\"Pul\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Money\" title=\"Money\"/>"
+"<i class=\"oi oi-filled\" data-icon=\"send\" role=\"img\" aria-label=\"Send "
+"button\" title=\"Send button\"/>"
 msgstr ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Pul\" title=\"Pul\"/>"
+"<i class=\"oi-filled oi\" data-icon=\"send\" role=\"img\" aria-"
+"label=\"Yuborish tugmasi\" title=\"Yuborish tugmasi\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-paper-plane\" role=\"img\" aria-label=\"Send button\" "
-"title=\"Send button\"/>"
+"<i class=\"oi oi-filled\" data-icon=\"phone\" role=\"img\" aria-"
+"label=\"Order button\" title=\"Order button\"/>"
 msgstr ""
-"<i class=\"fa fa-paper-plane\" role=\"img\" aria-label=\"Yuborish tugmasi\" "
-"title=\"Yuborish tugmasi\"/>"
+"<i class=\"oi-filled oi\" data-icon=\"phone\" role=\"img\" aria-"
+"label=\"Buyurtma berish tugmasi\" title=\"Buyurtma berish tugmasi\"/>"
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Order button\" "
-"title=\"Order button\"/>"
+"<i class=\"oi\" data-icon=\"close\" role=\"img\" aria-label=\"Cancel "
+"button\" title=\"Cancel button\"/>"
 msgstr ""
-"<i class=\"fa fa-phone\" role=\"img\" aria-label=\"Buyurtma berish tugmasi\" "
-"title=\"Buyurtma berish tugmasi\"/>"
-
-#. module: lunch
-#: model_terms:ir.ui.view,arch_db:lunch.lunch_order_view_kanban
-#, fuzzy
-msgid ""
-"<i class=\"fa fa-times\" role=\"img\" aria-label=\"Cancel button\" "
-"title=\"Cancel button\"/>"
-msgstr ""
-"<i class=\"fa fa-times\" role=\"img\" aria-label=\"Bekor qilish tugmasi\" "
-"title=\"Bekor qilish tugmasi\"/>"
+"<i class=\"oi\" data-icon=\"close\" role=\"img\" aria-label=\"Bekor qilish "
+"tugmasi\" title=\"Bekor qilish tugmasi\"/>"
 
 #. module: lunch
 #: model:mail.template,body_html:lunch.lunch_order_mail_supplier
@@ -141,21 +136,18 @@ msgid ""
 "<t>\n"
 "<t t-set=\"lines\" t-value=\"ctx.get('lines', [])\"/>\n"
 "<t t-set=\"order\" t-value=\"ctx.get('order', {})\"/>\n"
-"<t t-set=\"currency\" t-"
-"value=\"user.env['res.currency'].browse(order.get('currency_id'))\"/>\n"
+"<t t-set=\"currency\" t-value=\"user.env['res.currency'].browse(order.get('currency_id'))\"/>\n"
 "<p>\n"
 "Dear <t t-out=\"order.get('supplier_name', '')\">Laurie Poiret</t>,\n"
 "</p><p>\n"
-"Here is, today orders for <t t-out=\"order.get('company_name', '')"
-"\">LunchCompany</t>:\n"
+"Here is, today orders for <t t-out=\"order.get('company_name', '')\">LunchCompany</t>:\n"
 "</p>\n"
 "\n"
 "<t t-if=\"sites\">\n"
 "    <br/>\n"
 "    <p>Location</p>\n"
 "    <p t-foreach=\"site\" t-as=\"site\">\n"
-"        <t t-out=\"site['name'] or ''\"/> : <t t-out=\"site['address'] or "
-"''\"/>\n"
+"        <t t-out=\"site['name'] or ''\"/> : <t t-out=\"site['address'] or ''\"/>\n"
 "    </p>\n"
 "    <br/>\n"
 "</t>\n"
@@ -163,54 +155,37 @@ msgid ""
 "<table>\n"
 "    <thead>\n"
 "        <tr style=\"background-color:rgb(233,232,233);\">\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;"
-"\"><strong>Product</strong></th>\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;"
-"\"><strong>Comments</strong></th>\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;"
-"\"><strong>Person</strong></th>\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;"
-"\"><strong>Site</strong></th>\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\" "
-"align=\"center\"><strong>Qty</strong></th>\n"
-"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\" "
-"align=\"center\"><strong>Price</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\"><strong>Product</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\"><strong>Comments</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\"><strong>Person</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\"><strong>Site</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\" align=\"center\"><strong>Qty</strong></th>\n"
+"            <th style=\"width: 100%; min-width: 96px; font-size: 13px;\" align=\"center\"><strong>Price</strong></th>\n"
 "        </tr>\n"
 "    </thead>\n"
 "    <tbody>\n"
 "        <tr t-foreach=\"lines\" t-as=\"line\">\n"
-"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-"
-"out=\"line['product'] or ''\">Sushi salmon</td>\n"
+"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-out=\"line['product'] or ''\">Sushi salmon</td>\n"
 "            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\">\n"
 "            <t t-if=\"line['toppings']\">\n"
 "                <t t-out=\"line['toppings'] or ''\">Soy sauce</t>\n"
 "            </t>\n"
 "            <t t-if=\"line['note']\">\n"
-"                <div style=\"color: rgb(173,181,189);\" t-out=\"line['note'] "
-"or ''\">With wasabi.</div>\n"
+"                <div style=\"color: rgb(173,181,189);\" t-out=\"line['note'] or ''\">With wasabi.</div>\n"
 "            </t>\n"
 "            </td>\n"
-"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-"
-"out=\"line['username'] or ''\">lap</td>\n"
-"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-"
-"out=\"line['site'] or ''\">Office 1</td>\n"
-"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" "
-"align=\"right\" t-out=\"line['quantity'] or ''\">10</td>\n"
-"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" "
-"align=\"right\" t-out=\"format_amount(line['price'], currency) or ''\">$ "
-"1.00</td>\n"
+"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-out=\"line['username'] or ''\">lap</td>\n"
+"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" t-out=\"line['site'] or ''\">Office 1</td>\n"
+"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" align=\"right\" t-out=\"line['quantity'] or ''\">10</td>\n"
+"            <td style=\"width: 100%; font-size: 13px;\" valign=\"top\" align=\"right\" t-out=\"format_amount(line['price'], currency) or ''\">$ 1.00</td>\n"
 "        </tr>\n"
 "        <tr>\n"
 "            <td/>\n"
 "            <td/>\n"
 "            <td/>\n"
 "            <td/>\n"
-"            <td style=\"width: 100%; font-size: 13px; border-top: 1px solid "
-"black;\"><strong>Total</strong></td>\n"
-"            <td style=\"width: 100%; font-size: 13px; border-top: 1px solid "
-"black;\" align=\"right\"><strong t-out=\"order.get('amount_total') and "
-"format_amount(order['amount_total'], currency) or ''\">$ 10.00</strong></"
-"td>\n"
+"            <td style=\"width: 100%; font-size: 13px; border-top: 1px solid black;\"><strong>Total</strong></td>\n"
+"            <td style=\"width: 100%; font-size: 13px; border-top: 1px solid black;\" align=\"right\"><strong t-out=\"order.get('amount_total') and format_amount(order['amount_total'], currency) or ''\">$ 10.00</strong></td>\n"
 "        </tr>\n"
 "    </tbody>\n"
 "</table>\n"
@@ -575,15 +550,9 @@ msgstr ""
 #. module: lunch
 #: model_terms:ir.actions.act_window,help:lunch.lunch_order_action_control_suppliers
 msgid ""
-"Click on the <span class=\"fa fa-phone text-success\" role=\"img\" aria-"
-"label=\"Order button\" title=\"Order button\"></span> to announce that the "
-"order is ordered.<br>\n"
-"            Click on the <span class=\"fa fa-check text-success\" "
-"role=\"img\" aria-label=\"Receive button\" title=\"Receive button\"></span> "
-"to announce that the order is received.<br>\n"
-"            Click on the <span class=\"fa fa-times-circle text-danger\" "
-"role=\"img\" aria-label=\"Cancel button\" title=\"Cancel button\"></span> "
-"red X to announce that the order isn't available."
+"Click on the <span class=\"fa fa-phone text-success\" role=\"img\" aria-label=\"Order button\" title=\"Order button\"></span> to announce that the order is ordered.<br>\n"
+"            Click on the <span class=\"fa fa-check text-success\" role=\"img\" aria-label=\"Receive button\" title=\"Receive button\"></span> to announce that the order is received.<br>\n"
+"            Click on the <span class=\"fa fa-times-circle text-danger\" role=\"img\" aria-label=\"Cancel button\" title=\"Cancel button\"></span> red X to announce that the order isn't available."
 msgstr ""
 
 #. module: lunch
@@ -1013,10 +982,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:lunch.lunch_cashmove_report_action_account
 #, fuzzy
 msgid ""
-"Here you can see your cash moves.<br>A cash move can either be an expense or "
-"a payment.\n"
-"            An expense is automatically created when an order is received "
-"while a payment is a reimbursement to the company encoded by the manager."
+"Here you can see your cash moves.<br>A cash move can either be an expense or a payment.\n"
+"            An expense is automatically created when an order is received while a payment is a reimbursement to the company encoded by the manager."
 msgstr ""
 "Bu yerda naqd pul harakatlarini ko‘rishingiz mumkin.<br>Naqd pul harakati "
 "xarajat yoki to‘lov bo‘lishi mumkin. Buyurtma qabul qilinganda xarajat "
@@ -2202,8 +2169,7 @@ msgstr "Mamlakat"
 #: code:addons/lunch/models/lunch_product.py:0
 #, fuzzy
 msgid ""
-"The following product categories are archived. You should either unarchive "
-"the categories or change the category of the product.\n"
+"The following product categories are archived. You should either unarchive the categories or change the category of the product.\n"
 "%s"
 msgstr ""
 "Quyidagi mahsulot toifalari arxivlangan. Siz toifalarni arxivdan "
@@ -2214,8 +2180,7 @@ msgstr ""
 #: code:addons/lunch/models/lunch_product.py:0
 #, fuzzy
 msgid ""
-"The following suppliers are archived. You should either unarchive the "
-"suppliers or change the supplier of the product.\n"
+"The following suppliers are archived. You should either unarchive the suppliers or change the supplier of the product.\n"
 "%s"
 msgstr ""
 "Quyidagi yetkazib beruvchilar arxivlangan. Siz ularni arxivdan "
@@ -2252,8 +2217,8 @@ msgstr "Buyurtmalar yuborildi!"
 #: model:ir.model.fields,help:lunch.field_lunch_supplier__responsible_id
 #, fuzzy
 msgid ""
-"The responsible is the person that will order lunch for everyone. It will be "
-"used as the 'from' when sending the automatic email."
+"The responsible is the person that will order lunch for everyone. It will be"
+" used as the 'from' when sending the automatic email."
 msgstr ""
 "Mas'ul shaxs - hamma uchun tushlikka buyurtma beradigan kishi. U avtomatik "
 "xat yuborishda \"kimdan\" sifatida ko‘rsatiladi."
@@ -2262,7 +2227,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/lunch/models/lunch_order.py:0
 #, fuzzy
-msgid "The vendor related to this order is not available at the selected date."
+msgid ""
+"The vendor related to this order is not available at the selected date."
 msgstr "Bu buyurtmaga aloqador sotuvchi tanlangan sanada mavjud emas."
 
 #. module: lunch
@@ -2276,8 +2242,8 @@ msgstr "Bu buyurtmaga aloqador sotuvchi bugun ishlamaydi."
 #: model_terms:ir.actions.act_window,help:lunch.lunch_order_action
 #, fuzzy
 msgid ""
-"There is no previous order recorded. Click on \"My Lunch\" and then create a "
-"new lunch order."
+"There is no previous order recorded. Click on \"My Lunch\" and then create a"
+" new lunch order."
 msgstr ""
 "Oldingi buyurtma qayd etilmagan. \"Mening tushligim\" tugmasini bosing va "
 "yangi tushlik buyurtmasini yarating."
@@ -2351,8 +2317,8 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:lunch.lunch_product_action_order
 #, fuzzy
 msgid ""
-"To see some products, check if your vendors are available today and that you "
-"have configured some products"
+"To see some products, check if your vendors are available today and that you"
+" have configured some products"
 msgstr ""
 "Ba'zi mahsulotlarni ko‘rish uchun sotuvchilaringiz bugun mavjudligini va "
 "ayrim mahsulotlarni sozlaganingizni tekshiring"
@@ -2595,8 +2561,8 @@ msgid ""
 "Your wallet does not contain enough money to order that. To add some money "
 "to your wallet, please contact your lunch manager."
 msgstr ""
-"Buni buyurtma qilish uchun hamyoningizda yetarli mablag‘ yo‘q. Hamyoningizga "
-"pul qo‘shish uchun tushlik menejeringizga murojaat qiling."
+"Buni buyurtma qilish uchun hamyoningizda yetarli mablag‘ yo‘q. Hamyoningizga"
+" pul qo‘shish uchun tushlik menejeringizga murojaat qiling."
 
 #. module: lunch
 #: model_terms:ir.ui.view,arch_db:lunch.lunch_supplier_view_form

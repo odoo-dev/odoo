@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 06:00+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"website_mass_mailing/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/website_mass_mailing/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,80 +27,64 @@ msgstr ""
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Curated Industry "
-"Insights"
-msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  厳選された業界インサ"
-"イト"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Curated "
+"Industry Insights"
+msgstr "<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/>  厳選された業界インサイト"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Expert Tips &amp; "
-"How-Tos"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Expert "
+"Tips &amp; How-Tos"
 msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/> エキスパートのヒント "
-"&amp; ハウツー"
+"<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/> エキスパートのヒント"
+" &amp; ハウツー"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_benefits_popup
 msgid ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"Resources"
-msgstr ""
-"<i class=\"fa fa-check text-o-color-1\" role=\"img\"/> ガイドとリソース"
+"<i class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Guides "
+"&amp; Resources"
+msgstr "<i class=\"text-o-color-1 oi\" data-icon=\"check\" role=\"img\"/> ガイドとリソース"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_grid
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_subscribe_form
-msgid ""
-"<i class=\"fa fa-check-circle-o\" role=\"img\"/> Thanks for registering!"
-msgstr ""
-"<i class=\"fa fa-check-circle-o\" role=\"img\"/> ご登録ありがとうございます!"
+msgid "<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> Thanks for registering!"
+msgstr "<i class=\"oi\" data-icon=\"check_circle\" role=\"img\"/> ご登録ありがとうございます!"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 #, fuzzy
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                        We send one weekly newsletter per "
-"list and always try to keep it interesting. You can unsubscribe at any "
-"time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                        We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                        リストごとに週1回、皆様に楽しんでいた"
-"だけるようなニュースレターをお届けします。配信停止はいつでも可能です。\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                        リストごとに週1回、皆様に楽しんでいただけるようなニュースレターをお届けします。配信停止はいつでも可能です。\n"
 "                                    </span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 #, fuzzy
 msgid ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                    We send one weekly newsletter per list "
-"and always try to keep it interesting. You can unsubscribe at any time.\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                    We send one weekly newsletter per list and always try to keep it interesting. You can unsubscribe at any time.\n"
 "                                </span>"
 msgstr ""
-"<span class=\"s_website_form_field_description small form-text text-"
-"muted\">\n"
-"                                    リストごとに週1回、皆様に楽しんでいただけ"
-"るようなニュースレターをお届けします。配信停止はいつでも可能です。\n"
+"<span class=\"s_website_form_field_description small form-text text-muted\">\n"
+"                                    リストごとに週1回、皆様に楽しんでいただけるようなニュースレターをお届けします。配信停止はいつでも可能です。\n"
 "                                </span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Eメール</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -115,24 +98,20 @@ msgstr ""
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
 msgid ""
-"<span class=\"s_website_form_label_content\">I agree to receive updates</"
-"span>\n"
+"<span class=\"s_website_form_label_content\">I agree to receive updates</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"<span class=\"s_website_form_label_content\">最新情報を受け取ることに同意しま"
-"す</span>\n"
+"<span class=\"s_website_form_label_content\">最新情報を受け取ることに同意します</span>\n"
 "                                <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Name</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">名前</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -147,12 +126,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid ""
 "<span class=\"s_website_form_label_content\">Our mailing lists</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">当社のメーリングリスト</span>\n"
-"                                        <span class=\"s_website_form_mark\"> "
-"*</span>"
+"                                        <span class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_block_form_template
@@ -246,9 +223,7 @@ msgstr "フォームサブスクリプション"
 msgid ""
 "Get all the latest news, blog posts and product updates from our company, "
 "delivered directly to your inbox."
-msgstr ""
-"最新のニュース、ブログ記事、製品アップデートを、あなたの受信箱に直接お届けし"
-"ます。"
+msgstr "最新のニュース、ブログ記事、製品アップデートを、あなたの受信箱に直接お届けします。"
 
 #. module: website_mass_mailing
 #. odoo-python
@@ -267,9 +242,7 @@ msgstr "ジョン・スミス"
 msgid ""
 "Join our mailing list to receive carefully curated resources, tips, and "
 "updates straight to your inbox."
-msgstr ""
-"メーリングリストにご登録ください。厳選した情報・ヒント・最新ニュースをメール"
-"でお届けします。"
+msgstr "メーリングリストにご登録ください。厳選した情報・ヒント・最新ニュースをメールでお届けします。"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_waiting_list
@@ -348,9 +321,7 @@ msgstr "ニュースレターポップアップ"
 msgid ""
 "No mailing list found, do you want to create a new one? This will save all "
 "your changes, are you sure you want to proceed?"
-msgstr ""
-"メーリングリストが見つかりません。新しく作成しますか？これですべての変更が保"
-"存されます。本当に続けますか？"
+msgstr "メーリングリストが見つかりません。新しく作成しますか？これですべての変更が保存されます。本当に続けますか？"
 
 #. module: website_mass_mailing
 #. odoo-javascript
@@ -391,8 +362,7 @@ msgstr "購読"
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
 msgid "Subscribe for updates, offers <br/>and insights!"
-msgstr ""
-"最新情報やお得な情報、インサイトをお届けします <br/> 今すぐご登録ください!"
+msgstr "最新情報やお得な情報、インサイトをお届けします <br/> 今すぐご登録ください!"
 
 #. module: website_mass_mailing
 #. odoo-javascript
@@ -472,9 +442,7 @@ msgstr "お名前"
 msgid ""
 "form, updates, digest, bulletin, announcements, notifications, "
 "communication, email, prompt, subscription"
-msgstr ""
-"フォーム, 更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, メール, プロンプ"
-"ト, サブスクリプション"
+msgstr "フォーム, 更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, メール, プロンプト, サブスクリプション"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.s_newsletter_aside
@@ -501,9 +469,7 @@ msgstr ""
 msgid ""
 "updates, digest, bulletin, announcements, notifications, communication, "
 "promotional, email, prompt, subscription, subscribe, mailing-list, news"
-msgstr ""
-"更新,ダイジェスト,速報,お知らせ,通知,連絡,プロモーション,メール,案内,サブスク"
-"リプション,登録,メーリングリスト,ニュース"
+msgstr "更新,ダイジェスト,速報,お知らせ,通知,連絡,プロモーション,メール,案内,サブスクリプション,登録,メーリングリスト,ニュース"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -513,9 +479,8 @@ msgid ""
 "promotional, email, prompt, subscription, subscribe, mailing-list, news, "
 "box, image, picture"
 msgstr ""
-"更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, プロモーション, メール, プロ"
-"ンプト, サブスクリプション, 登録, メーリングリスト, ニュース, ボックス, 画"
-"像, 写真"
+"更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, プロモーション, メール, プロンプト, サブスクリプション, 登録, メーリングリスト, "
+"ニュース, ボックス, 画像, 写真"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -525,9 +490,8 @@ msgid ""
 "promotional, email, prompt, subscription, subscribe, mailing-list, news, "
 "grid, image, picture"
 msgstr ""
-"更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, プロモーション, メール, プロ"
-"ンプト, サブスクリプション, 登録, メーリングリスト, ニュース, グリッド, 画"
-"像, 写真"
+"更新, ダイジェスト, 速報, お知らせ, 通知, 連絡, プロモーション, メール, プロンプト, サブスクリプション, 登録, メーリングリスト, "
+"ニュース, グリッド, 画像, 写真"
 
 #. module: website_mass_mailing
 #: model_terms:ir.ui.view,arch_db:website_mass_mailing.snippets
@@ -536,6 +500,5 @@ msgid ""
 "promotional, email, subscription, subscribe, mailing-list, news, grid, "
 "image, picture"
 msgstr ""
-"更新情報, ダイジェスト, お知らせ, 告知, 通知, 連絡, プロモーション, メール配"
-"信, サブスクリプション, 登録, メーリングリスト, ニュース, グリッド, 画像, 写"
-"真"
+"更新情報, ダイジェスト, お知らせ, 告知, 通知, 連絡, プロモーション, メール配信, サブスクリプション, 登録, メーリングリスト, "
+"ニュース, グリッド, 画像, 写真"

@@ -18,8 +18,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 20:57+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
-"projects/odoo-master/hr_timesheet/zh_Hans/>\n"
+"Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/projects/odoo-master/hr_timesheet/zh_Hans/>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -103,11 +102,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
-msgstr ""
-"缺漏 “%(missing_plan_names)s”。已连接至工时表的项目 “%(project_name)s”，需要"
-"此分析计划。"
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
+msgstr "缺漏 “%(missing_plan_names)s”。已连接至工时表的项目 “%(project_name)s”，需要此分析计划。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -128,27 +125,20 @@ msgstr "2 小时"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> 查看详情"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> 查看详情"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -273,12 +263,9 @@ msgstr "分析方案的适用性"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
-msgstr ""
-"分析员工花费时间的项目和任务。<br>评估哪个部分是可计费的，以及它所代表的成"
-"本。"
+msgstr "分析员工花费时间的项目和任务。<br>评估哪个部分是可计费的，以及它所代表的成本。"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_res_config_settings__reminder_allow
@@ -500,7 +487,8 @@ msgstr "额外工时"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr "为有效的请假申请和公共假期生成时间表"
 
 #. module: hr_timesheet
@@ -936,8 +924,8 @@ msgstr "一个公司的内部项目应该在该公司。"
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr "工时单的项目、任务和分析账户必须属于同一公司。"
 
 #. module: hr_timesheet
@@ -949,11 +937,9 @@ msgstr "没有工时表。"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
-msgstr ""
-"这些项目有一些工时表条目引用它们。在删除这些项目之前，必须删除这些工时表条"
-"目。"
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
+msgstr "这些项目有一些工时表条目引用它们。在删除这些项目之前，必须删除这些工时表条目。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -984,10 +970,9 @@ msgstr "本年"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
-msgstr ""
-"此项目有一些工时表条目引用它。在删除此项目之前，必须删除这些工时表条目。"
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
+msgstr "此项目有一些工时表条目引用它。在删除此项目之前，必须删除这些工时表条目。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1000,20 +985,17 @@ msgstr "该任务不能设为私密，因为有一些时间表与之相关联。
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
-msgstr ""
-"这项任务无法删除，因为它与工时单有关联。请联系权限较高的人员，先删除工时单，"
-"然后就可以删除任务。"
+msgstr "这项任务无法删除，因为它与工时单有关联。请联系权限较高的人员，先删除工时单，然后就可以删除任务。"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,help:hr_timesheet.field_res_company__project_time_mode_id
 #: model:ir.model.fields,help:hr_timesheet.field_res_config_settings__project_time_mode_id
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "这将设置项目和任务所使用的度量单位。\n"
 " 如果您使用链接到项目的工时表，请不要忘记在员工中设置正确的度量单位。"
@@ -1249,7 +1231,8 @@ msgstr "不能在私人任务上创建工时单。"
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr "必须使用所选公司的在职员工创建工时表。"
 
 #. module: hr_timesheet
@@ -1258,8 +1241,7 @@ msgstr "必须使用所选公司的在职员工创建工时表。"
 msgid ""
 "Timesheets must be created with at least an active analytic account defined "
 "in the plan '%(plan_name)s'."
-msgstr ""
-"在创建工时单时时，必须至少在计划“%(plan_name)s”中定义一个活动分析账户。"
+msgstr "在创建工时单时时，必须至少在计划“%(plan_name)s”中定义一个活动分析账户。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1274,9 +1256,7 @@ msgid ""
 "To use the timesheets feature, you need an analytic account for your "
 "project. Please set one up in the plan '%(plan_name)s' or turn off the "
 "timesheets feature."
-msgstr ""
-"要使用工时单功能，您需要一个项目分析账户。请在计划%(plan_name)s中设置一个，或"
-"关闭时间表功能。"
+msgstr "要使用工时单功能，您需要一个项目分析账户。请在计划%(plan_name)s中设置一个，或关闭时间表功能。"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -1329,8 +1309,8 @@ msgstr "总计："
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_line_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr "每天按项目跟踪您的工作时间，这次会向您的客户开具结算单。"
 
 #. module: hr_timesheet
@@ -1351,8 +1331,7 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 
 #. module: hr_timesheet
@@ -1380,8 +1359,7 @@ msgstr "查看详情"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_from_employee
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
 "你可按不同项目，登记并追踪每天的工作时间。\n"
@@ -1397,24 +1375,19 @@ msgstr "您不能访问不属于您的工时表。"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
 "你不可为此项目记录工时表，因为它连结至非运作的分析账户。<br/>\n"
-"                            请切换至另一账户，或重新启动此账户，以在项目中记"
-"录工时表。"
+"                            请切换至另一账户，或重新启动此账户，以在项目中记录工时表。"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
-msgstr ""
-"您不可为此专桉记录工时表，因为它连结至非运作的分析账户。<br/>请更改此账户设"
-"定，或重新启动此账户，以在项目中记录工时表。"
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
+msgstr "您不可为此专桉记录工时表，因为它连结至非运作的分析账户。<br/>请更改此账户设定，或重新启动此账户，以在项目中记录工时表。"
 
 #. module: hr_timesheet
 #. odoo-python

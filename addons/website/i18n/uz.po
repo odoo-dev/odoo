@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-18 23:32+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"website/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/website/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -68,7 +67,8 @@ msgid ""
 "build confidence in your products or services. \""
 msgstr ""
 "\"Bu yerga mijozlaringizdan birining fikrlarini yozing. Mijozlar fikrlari "
-"mahsulot yoki xizmatingizga bo‘lgan ishonchni oshirishning ajoyib usulidir.\""
+"mahsulot yoki xizmatingizga bo‘lgan ishonchni oshirishning ajoyib "
+"usulidir.\""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -122,16 +122,16 @@ msgstr "\"%(keyword)s\" sahifa sarlavhasida ishlatilgan"
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 msgid ""
 "\"Engaging with this team was effortless from start to end. Their "
-"proficiency and meticulous approach greatly enhanced our project. I couldn’t "
-"be happier with the final product!\""
+"proficiency and meticulous approach greatly enhanced our project. I couldn’t"
+" be happier with the final product!\""
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 #, fuzzy
 msgid ""
-"\"Exceptional service and great communication throughout the entire process. "
-"They went above and beyond to ensure our project was a complete success.\""
+"\"Exceptional service and great communication throughout the entire process."
+" They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
 "\"Butun jarayon davomida a'lo darajadagi xizmat va ajoyib muloqot. Ular "
 "loyihamiz to‘liq muvaffaqiyatli bo‘lishi uchun barcha kuchlarini safarbar "
@@ -142,8 +142,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\"From the first meeting, it was clear we were in good hands. They took our "
-"vision and turned it into something even better than we had imagined. Highly "
-"recommend!\""
+"vision and turned it into something even better than we had imagined. Highly"
+" recommend!\""
 msgstr ""
 "\"Birinchi uchrashuvdanoq ishonchli qo‘llarda ekanligimiz ayon bo‘ldi. Ular "
 "g‘oyamizni biz tasavvur qilgandan ham yaxshiroq narsaga aylantirdilar. Juda "
@@ -165,12 +165,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 #, fuzzy
 msgid ""
-"\"This team truly understands the meaning of partnership. They brought fresh "
-"ideas to the table and delivered a final product that exceeded expectations."
-"\""
+"\"This team truly understands the meaning of partnership. They brought fresh"
+" ideas to the table and delivered a final product that exceeded "
+"expectations.\""
 msgstr ""
-"\"Bu jamoa chinakam hamkorlikning ma'nosini tushunadi. Ular yangi g‘oyalarni "
-"taklif qilishdi va kutilganidan ham a'lo darajadagi yakuniy mahsulotni "
+"\"Bu jamoa chinakam hamkorlikning ma'nosini tushunadi. Ular yangi g‘oyalarni"
+" taklif qilishdi va kutilganidan ham a'lo darajadagi yakuniy mahsulotni "
 "taqdim etishdi.\""
 
 #. module: website
@@ -185,11 +185,11 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\"URL to\" cannot be set to \"/\". To change the homepage content, use the "
-"\"Homepage URL\" field in the website settings or the page properties on any "
-"custom page."
+"\"Homepage URL\" field in the website settings or the page properties on any"
+" custom page."
 msgstr ""
-"\"URL manzili (ga)\"ni \"/\" qilib o‘rnatib bo‘lmaydi. Bosh sahifa mazmunini "
-"o‘zgartirish uchun veb-sayt sozlamalaridagi \"Bosh sahifa URL\" maydonidan "
+"\"URL manzili (ga)\"ni \"/\" qilib o‘rnatib bo‘lmaydi. Bosh sahifa mazmunini"
+" o‘zgartirish uchun veb-sayt sozlamalaridagi \"Bosh sahifa URL\" maydonidan "
 "yoki istalgan maxsus sahifadagi sahifa xususiyatlaridan foydalaning."
 
 #. module: website
@@ -203,8 +203,7 @@ msgstr "\"URL manzili (ga)\"ni mavjud sahifaga o‘rnatib bo‘lmaydi."
 #. odoo-python
 #: code:addons/website/models/website_rewrite.py:0
 #, fuzzy
-msgid ""
-"\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
+msgid "\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
 msgstr ""
 "\"URL manzili (ga)\" \"URL manzili (dan)\"da ishlatilmagan %s parametrini "
 "o‘z ichiga olmasligi kerak."
@@ -458,8 +457,8 @@ msgstr ""
 "delay: 0.75s; } @keyframes headShake { 0% { transform: translateX(0) } 6.5% "
 "{ transform: translateX(-6px) rotateY(-9deg) } 18.5% { transform: "
 "translateX(5px) rotateY(7deg) } 31.5% { transform: translateX(-3px) "
-"rotateY(-5deg) } 43.5% { transform: translateX(2px) rotateY(3deg) } 50% "
-"{ transform: translateX(0) } }"
+"rotateY(-5deg) } 43.5% { transform: translateX(2px) rotateY(3deg) } 50% { "
+"transform: translateX(0) } }"
 
 #. module: website
 #: model:website,contact_us_link_url:website.website2
@@ -801,8 +800,8 @@ msgstr "8 km"
 #, fuzzy
 msgid "8000 Marina Blvd, Suite 300 <br/> Brisbane CA 94005 <br/>United States"
 msgstr ""
-"8000 Marina xiyoboni, 300-xona <br/> Brisben, Kaliforniya 94005 <br/>Amerika "
-"Qo‘shma Shtatlari"
+"8000 Marina xiyoboni, 300-xona <br/> Brisben, Kaliforniya 94005 <br/>Amerika"
+" Qo‘shma Shtatlari"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
@@ -835,21 +834,21 @@ msgstr "<a class=\"o_translate_inline\" href=\"#\">Havola</a>"
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 #, fuzzy
 msgid ""
-"<a class=\"o_translate_inline\" href=\"#\">Read More <i class=\"fa fa-angle-"
-"right\" role=\"img\"/></a>"
+"<a class=\"o_translate_inline\" href=\"#\">Read More <i class=\"oi\" data-"
+"icon=\"keyboard_arrow_right\" role=\"img\"/></a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"#\">Batafsil <i class=\"fa fa-angle-"
-"right\" role=\"img\"/></a>"
+"<a class=\"o_translate_inline\" href=\"#\">Batafsil <i class=\"oi\" data-"
+"icon=\"keyboard_arrow_right\" role=\"img\"/></a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references
 #, fuzzy
 msgid ""
 "<a class=\"o_translate_inline\" href=\"#\">See our case studies <i "
-"class=\"fa fa-long-arrow-right ms-2\"/></a>"
+"class=\"oi ms-2\" data-icon=\"east\"/></a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"#\">Amaliy ishlarimiz bilan tanishing "
-"<i class=\"fa fa-long-arrow-right ms-2\"/></a>"
+"<a class=\"o_translate_inline\" href=\"#\">Amaliy ishlarimiz bilan tanishing"
+" <i class=\"ms-2 oi\" data-icon=\"east\"/></a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
@@ -880,8 +879,8 @@ msgid ""
 "<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" title=\"Call "
 "Customer Service\">+1555-555-5556</a>"
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" title=\"Mijozlar "
-"xizmatiga qo‘ng‘iroq qiling\">+1555-555-5556</a>"
+"<a class=\"o_translate_inline\" href=\"tel:+1555-555-5556\" title=\"Mijozlar"
+" xizmatiga qo‘ng‘iroq qiling\">+1555-555-5556</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -897,13 +896,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 #, fuzzy
 msgid ""
-"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Get started</"
-"a>\n"
-"                        <a href=\"#\" class=\"btn btn-secondary mb-2 "
-"o_translate_inline\">Learn more</a>"
+"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Get started</a>\n"
+"                        <a href=\"#\" class=\"btn btn-secondary mb-2 o_translate_inline\">Learn more</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Boshlash</a> "
-"<a href=\"#\" class=\"btn btn-secondary mb-2 o_translate_inline\">Ko‘proq "
+"<a href=\"#\" class=\"btn btn-primary mb-2 o_translate_inline\">Boshlash</a>"
+" <a href=\"#\" class=\"btn btn-secondary mb-2 o_translate_inline\">Ko‘proq "
 "ma'lumot</a>"
 
 #. module: website
@@ -921,28 +918,23 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mockup_image
 #: model_terms:ir.ui.view,arch_db:website.s_shape_image
 #, fuzzy
-msgid ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Learn more</a>"
+msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Learn more</a>"
 msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Ko‘proq ma'lumot</"
-"a>"
+"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Ko‘proq "
+"ma'lumot</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 #, fuzzy
-msgid ""
-"<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Documentation</"
-"a>"
-msgstr ""
-"<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Hujjatlar</a>"
+msgid "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Documentation</a>"
+msgstr "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Hujjatlar</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_overlap
 #: model_terms:ir.ui.view,arch_db:website.s_text_image
 #, fuzzy
-msgid ""
-"<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Learn more</a>"
+msgid "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Learn more</a>"
 msgstr ""
 "<a href=\"#\" class=\"btn btn-secondary o_translate_inline\">Ko‘proq "
 "ma'lumot</a>"
@@ -950,10 +942,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
 #, fuzzy
-msgid ""
-"<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Get in touch</a>"
-msgstr ""
-"<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Bog‘lanish</a>"
+msgid "<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Get in touch</a>"
+msgstr "<a href=\"#\" class=\"o_translate_inline btn btn-primary\">Bog‘lanish</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_categories
@@ -996,11 +986,9 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_cookie_policy_link
 msgid ""
-"<a href=\"/website/cookie-policy\" class=\"oe_unremovable small "
-"o_translate_inline\">Cookie Policy</a>\n"
+"<a href=\"/website/cookie-policy\" class=\"oe_unremovable small o_translate_inline\">Cookie Policy</a>\n"
 "                <span class=\"text-muted  mx-2\">•</span>\n"
-"                <a href=\"#\" class=\"o_cookies_bar_toggle oe_unremovable "
-"small o_translate_inline\">Update Cookie Preferences</a>"
+"                <a href=\"#\" class=\"o_cookies_bar_toggle oe_unremovable small o_translate_inline\">Update Cookie Preferences</a>"
 msgstr ""
 
 #. module: website
@@ -1066,13 +1054,13 @@ msgstr "<br/>Firenze"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_list
 #, fuzzy
 msgid ""
-"<br/>From revenue growth to customer retention and market expansion, our key "
-"metrics of company achievements underscore our strategic prowess and "
+"<br/>From revenue growth to customer retention and market expansion, our key"
+" metrics of company achievements underscore our strategic prowess and "
 "dedication to driving sustainable business success."
 msgstr ""
 "<br/>Daromadning o‘sishidan tortib mijozlarni saqlab qolish va bozorni "
-"kengaytirishgacha, kompaniyamiz yutuqlarining asosiy ko‘rsatkichlari bizning "
-"strategik mahoratimiz va barqaror biznes muvaffaqiyatini ta'minlashdagi "
+"kengaytirishgacha, kompaniyamiz yutuqlarining asosiy ko‘rsatkichlari bizning"
+" strategik mahoratimiz va barqaror biznes muvaffaqiyatini ta'minlashdagi "
 "fidoyiligimizni aks ettiradi."
 
 #. module: website
@@ -1115,8 +1103,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<br/>Sell online easily with a user-friendly platform that streamlines all "
-"the steps, including setup, inventory management, and payment processing.<br/"
-">"
+"the steps, including setup, inventory management, and payment "
+"processing.<br/>"
 msgstr ""
 "<br/>Barcha bosqichlarni, jumladan, sozlash, inventarni boshqarish va "
 "to‘lovlarni qayta ishlashni soddalashtiruvchi qulay platforma yordamida "
@@ -1146,8 +1134,8 @@ msgstr ""
 msgid ""
 "<br/>Users can participate in beta testing programs, providing feedback on "
 "upcoming releases and influencing the future direction of the platform. By "
-"staying current with updates, you can take advantage of the latest tools and "
-"features, ensuring your business remains competitive and efficient."
+"staying current with updates, you can take advantage of the latest tools and"
+" features, ensuring your business remains competitive and efficient."
 msgstr ""
 "<br/>Foydalanuvchilar beta-sinov dasturlarida ishtirok etib, kelgusi "
 "versiyalar haqida o‘z fikrlarini bildirishi va platformaning kelajak "
@@ -1170,21 +1158,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
 #, fuzzy
 msgid ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
 msgstr ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">45%</font>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
 #, fuzzy
 msgid ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
 msgstr ""
-"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%, "
-"var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
+"<font style=\"background-image: linear-gradient(45deg, var(--o-color-4) 15%,"
+" var(--o-color-5) 100%);\" class=\"text-gradient\">8+</font>"
 
 #. module: website
 #. odoo-javascript
@@ -1197,126 +1185,133 @@ msgstr "<head> va </body>"
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>\n"
-"                        <span class=\"o_force_ltr\"><small>+1 555-555-5556</"
-"small></span>"
+"<i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"phone\"/>\n"
+"                        <span class=\"o_force_ltr\"><small>+1 555-555-5556</small></span>"
 msgstr ""
-"<i class=\"fa fa-1x fa-fw fa-phone me-1\"/> <span "
+"<i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"phone\"/> <span "
 "class=\"o_force_ltr\"><small>+1 555-555-5556</small></span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 #, fuzzy
-msgid "<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>͏"
-msgstr "<i class=\"fa fa-1x fa-fw fa-phone me-1\"/>"
+msgid "<i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"phone\"/>͏"
+msgstr "<i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"phone\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_controller_pages_kanban_view
 #, fuzzy
-msgid "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"URL\"/>"
-msgstr "<i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"URL\"/>"
+msgid "<i class=\"oi oi-2x text-primary\" data-icon=\"arrow_forward\" title=\"URL\"/>"
+msgstr "<i class=\"text-primary oi-2x oi\" data-icon=\"arrow_forward\" title=\"URL\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  24/7 toll-free support"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  24/7 toll-"
+"free support"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> 24/7 bepul texnik yordam"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> 24/7 bepul "
+"texnik yordam"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Access all "
+"modules"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Barcha modullarga kirish"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Barcha "
+"modullarga kirish"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
-msgstr "<i class=\"fa fa-check text-success\" role=\"img\"/> Hisob boshqaruvi"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Account "
+"management"
+msgstr "<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Hisob boshqaruvi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  All modules &amp; "
-"features"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  All modules"
+" &amp; features"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Barcha modullar va "
-"funksiyalar"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Barcha "
+"modullar va funksiyalar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Complete CRM for any "
-"team"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Complete "
+"CRM for any team"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Har qanday jamoa uchun "
-"to‘liq CRM"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Har qanday "
+"jamoa uchun to‘liq CRM"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
-msgid "<i class=\"fa fa-check text-success\" role=\"img\"/>  Email support"
+msgid "<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Email support"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Elektron pochta orqali "
-"qo‘llab-quvvatlash"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Elektron "
+"pochta orqali qo‘llab-quvvatlash"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Limited customization"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Limited "
+"customization"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Cheklangan "
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Cheklangan "
 "moslashuvchanlik"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Sales &amp; marketing "
-"for 2"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Sales &amp;"
+" marketing for 2"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> 2 kishi uchun savdo va "
-"marketing"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> 2 kishi "
+"uchun savdo va marketing"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Unlimited CRM support"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Unlimited "
+"CRM support"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Cheksiz CRM qo‘llab-"
-"quvvatlash"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Cheksiz CRM "
+"qo‘llab-quvvatlash"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/>  Unlimited customization"
+"<i class=\"oi text-success\" data-icon=\"check\" role=\"img\"/>  Unlimited "
+"customization"
 msgstr ""
-"<i class=\"fa fa-check text-success\" role=\"img\"/> Cheksiz moslashtiruv "
-"imkoniyati"
+"<i class=\"text-success oi\" data-icon=\"check\" role=\"img\"/> Cheksiz "
+"moslashtiruv imkoniyati"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_inline_default_template
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_inline_text_template
-msgid "<i class=\"fa fa-clock-o\"/> Sale ends in"
+msgid "<i class=\"oi\" data-icon=\"schedule\"/> Sale ends in"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw fa-building-o\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"business\" role=\"presentation\"/>\n"
 "                        Office"
-msgstr "<i class=\"fa fa-fw fa-building-o\" role=\"presentation\"/> Ofis"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"business\" role=\"presentation\"/> Ofis"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_info
@@ -1326,13 +1321,11 @@ msgid ""
 "                      yourcompany@example.com\n"
 "                    <br/>\n"
 "                    <br/>\n"
-"                    <i class=\"fa fa-fw fa-phone o_not-animable\" "
-"role=\"img\"/>\n"
+"                    <i class=\"fa fa-fw fa-phone o_not-animable\" role=\"img\"/>\n"
 "                       +32(0)499 123 456\n"
 "                    <br/>\n"
 "                    <br/>\n"
-"                    <i class=\"fa fa-fw fa-map-marker o_not-animable\" "
-"role=\"img\"/>\n"
+"                    <i class=\"fa fa-fw fa-map-marker o_not-animable\" role=\"img\"/>\n"
 "                      Brussels, Belgium"
 msgstr ""
 "<i class=\"fa fa-fw fa-envelope o_not-animable\" role=\"img\"/> "
@@ -1357,218 +1350,225 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw fa-envelope-o\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"mail\" role=\"presentation\"/>\n"
 "                        Email"
-msgstr ""
-"<i class=\"fa fa-fw fa-envelope-o\" role=\"presentation\"/> Elektron pochta"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"mail\" role=\"presentation\"/> Elektron pochta"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cta_badge
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 msgid ""
-"<i class=\"fa fa-fw fa-info-circle o_not-animable\" role=\"img\"/> What's "
-"new ?"
+"<i class=\"oi oi-fw o_not-animable\" data-icon=\"info\" role=\"img\"/> "
+"What's new ?"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_contact_info
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw fa-phone\" role=\"presentation\"/>\n"
+"<i class=\"oi oi-fw oi-filled\" data-icon=\"phone\" role=\"presentation\"/>\n"
 "                        Phone"
-msgstr "<i class=\"fa fa-fw fa-phone\" role=\"presentation\"/> Telefon"
+msgstr ""
+"<i class=\"oi-fw oi oi-filled\" data-icon=\"phone\" role=\"presentation\"/> "
+"Telefon"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-danger\" title=\"Offline\"/>"
+"<i class=\"oi oi-filled oi-fw o_button_icon text-danger\" data-"
+"icon=\"circle\" title=\"Offline\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-danger\" title=\"Oflayn\"/>"
+"<i class=\"o_button_icon text-danger oi-fw oi-filled oi\" data-"
+"icon=\"circle\" title=\"Oflayn\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_view_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" "
-"title=\"Connected\"/>"
+"<i class=\"oi oi-filled oi-fw o_button_icon text-success\" data-"
+"icon=\"circle\" title=\"Connected\"/>"
 msgstr ""
-"<i class=\"fa fa-fw o_button_icon fa-circle text-success\" title=\"Ulangan\"/"
-">"
+"<i class=\"o_button_icon text-success oi-fw oi-filled oi\" data-"
+"icon=\"circle\" title=\"Ulangan\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_kanban_view
 #, fuzzy
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Veb-sayt\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Veb-sayt\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"<i class=\"fa fa-info-circle me-1\"/>\n"
-"                                Supported formats for social share images "
-"are PNG, JPG, WEBP, or GIF."
+"<i class=\"oi oi-filled me-1\" data-icon=\"info\"/>\n"
+"                                Supported formats for social share images are PNG, JPG, WEBP, or GIF."
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.protected_403
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
-"                            <span class=\"mt-1\">A password is required to "
-"access this page.</span>"
+"<i class=\"oi oi-2x\" data-icon=\"lock\"/><br/>\n"
+"                            <span class=\"mt-1\">A password is required to access this page.</span>"
 msgstr ""
-"<i class=\"fa fa-lock fa-2x\"/><br/> <span class=\"mt-1\">Bu sahifaga kirish "
-"uchun parol kiritish zarur.</span>"
+"<i class=\"oi-2x oi\" data-icon=\"lock\"/><br/> <span class=\"mt-1\">Bu "
+"sahifaga kirish uchun parol kiritish zarur.</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.protected_403
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-lock fa-2x\"/><br/>\n"
+"<i class=\"oi oi-2x\" data-icon=\"lock\"/><br/>\n"
 "                            <span class=\"mt-1\">Wrong password</span>"
 msgstr ""
-"<i class=\"fa fa-lock fa-2x\"/><br/> <span class=\"mt-1\">Noto‘g‘ri parol</"
-"span>"
+"<i class=\"oi-2x oi\" data-icon=\"lock\"/><br/> <span "
+"class=\"mt-1\">Noto‘g‘ri parol</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
-msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
-msgstr "<i class=\"fa fa-times text-danger\" role=\"img\"/> Moslashtiruv yo‘q"
+msgid "<i class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No customization"
+msgstr "<i class=\"text-danger oi\" data-icon=\"close\" role=\"img\"/> Moslashtiruv yo‘q"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
 #, fuzzy
-msgid "<i class=\"fa fa-times text-danger\" role=\"img\"/>  No support"
+msgid "<i class=\"oi text-danger\" data-icon=\"close\" role=\"img\"/>  No support"
 msgstr ""
-"<i class=\"fa fa-times text-danger\" role=\"img\"/> Qo‘llab-quvvatlash yo‘q"
+"<i class=\"text-danger oi\" data-icon=\"close\" role=\"img\"/> Qo‘llab-"
+"quvvatlash yo‘q"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw oi-filled me-2\" data-icon=\"calendar_today\"/>\n"
 "                            <b>Events</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-calendar fa-fw me-2\"/> "
-"<b>Tadbirlar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi oi-filled\" data-"
+"icon=\"calendar_today\"/> <b>Tadbirlar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"visibility\"/>\n"
 "                            <b>About us</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-eye fa-fw me-2\"/> <b>Biz "
-"haqimizda</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"visibility\"/> <b>Biz haqimizda</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw oi-filled me-2\" data-icon=\"group\"/>\n"
 "                            <b>Partners</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-group fa-fw me-2\"/> "
-"<b>Hamkorlar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi oi-filled\" data-"
+"icon=\"group\"/> <b>Hamkorlar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-handshake-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"handshake\"/>\n"
 "                            <b>Services</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-handshake-o fa-fw me-2\"/> "
-"<b>Xizmatlar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"handshake\"/> <b>Xizmatlar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-headphones fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"headphones\"/>\n"
 "                            <b>Help center</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-headphones fa-fw me-2\"/> "
-"<b>Yordam markazi</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"headphones\"/> <b>Yordam markazi</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-map-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"map\"/>\n"
 "                            <b>Guides</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-map-o fa-fw me-2\"/> "
-"<b>Yo‘riqnomalar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-icon=\"map\"/>"
+" <b>Yo‘riqnomalar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"newspaper\"/>\n"
 "                            <b>Our blog</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-newspaper-o fa-fw me-2\"/> "
-"<b>Bizning blog</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"newspaper\"/> <b>Bizning blog</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"star\"/>\n"
 "                            <b>Customers</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-star-o fa-fw me-2\"/> "
-"<b>Mijozlar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"star\"/> <b>Mijozlar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_little_icons
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw me-2\"/>\n"
+"<i class=\"s_mega_menu_little_icons_icon oi oi-fw me-2\" data-icon=\"sell\"/>\n"
 "                            <b>Products</b>"
 msgstr ""
-"<i class=\"s_mega_menu_little_icons_icon fa fa-tags fa-fw me-2\"/> "
-"<b>Mahsulotlar</b>"
+"<i class=\"s_mega_menu_little_icons_icon me-2 oi-fw oi\" data-"
+"icon=\"sell\"/> <b>Mahsulotlar</b>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> Contact us"
+"<i class=\"s_mega_menu_thumbnails_icon oi oi-filled me-2\" data-"
+"icon=\"forum\"/> Contact us"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-comments me-2\"/> Biz bilan "
-"bog‘laning"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
-#, fuzzy
-msgid "<i class=\"s_mega_menu_thumbnails_icon fa fa-cube me-2\"/> Free returns"
-msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-cube me-2\"/> Bepul qaytarish"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi-filled oi\" data-"
+"icon=\"forum\"/> Biz bilan bog‘laning"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> Pickup "
-"in store"
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"deployed_code\"/> Free returns"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-shopping-basket me-2\"/> "
-"Do‘kondan olib ketish"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"deployed_code\"/> Bepul qaytarish"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
 #, fuzzy
 msgid ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-truck me-2\"/> Express delivery"
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"shopping_basket\"/> Pickup in store"
 msgstr ""
-"<i class=\"s_mega_menu_thumbnails_icon fa fa-truck me-2\"/> Tezkor yetkazib "
-"berish"
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"shopping_basket\"/> Do‘kondan olib ketish"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
+#, fuzzy
+msgid ""
+"<i class=\"s_mega_menu_thumbnails_icon oi me-2\" data-"
+"icon=\"local_shipping\"/> Express delivery"
+msgstr ""
+"<i class=\"s_mega_menu_thumbnails_icon me-2 oi\" data-"
+"icon=\"local_shipping\"/> Tezkor yetkazib berish"
 
 #. module: website
 #. odoo-python
@@ -1586,22 +1586,20 @@ msgid ""
 "                        Low Price Guarantee\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-"
-"stack me-1\"/>\n"
+"                        <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-stack me-1\"/>\n"
 "                        30 Days Online Returns\n"
 "                    </small>\n"
 "                    <small class=\"d-flex align-items-center\">\n"
-"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/"
-">\n"
+"                        <i class=\"fa fa-1x fa-fw fa-truck fa-stack me-1\"/>\n"
 "                        Standard Shipping\n"
 "                    </small>"
 msgstr ""
-"<small class=\"d-flex align-items-center\"> <i class=\"fa fa-1x fa-fw fa-usd "
-"fa-stack me-1\"/> Eng past narx kafolati </small> <small class=\"d-flex "
+"<small class=\"d-flex align-items-center\"> <i class=\"fa fa-1x fa-fw fa-usd"
+" fa-stack me-1\"/> Eng past narx kafolati </small> <small class=\"d-flex "
 "align-items-center\"> <i class=\"fa fa-1x fa-fw fa-shopping-basket fa-stack "
-"me-1\"/> 30 kun ichida onlayn qaytarish imkoniyati </small> <small class=\"d-"
-"flex align-items-center\"> <i class=\"fa fa-1x fa-fw fa-truck fa-stack "
-"me-1\"/> Standart yetkazib berish xizmati </small>"
+"me-1\"/> 30 kun ichida onlayn qaytarish imkoniyati </small> <small "
+"class=\"d-flex align-items-center\"> <i class=\"fa fa-1x fa-fw fa-truck fa-"
+"stack me-1\"/> Standart yetkazib berish xizmati </small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -1622,8 +1620,8 @@ msgid ""
 "                        </small>"
 msgstr ""
 "<small class=\"text-muted\" style=\"text-align: center;\"> Har bir mahsulot "
-"yuqori chidamlilik va samaradorlik standartlariga mos kelishi uchun<br/"
-">sinchkovlik bilan sinovdan o‘tkaziladi. </small>"
+"yuqori chidamlilik va samaradorlik standartlariga mos kelishi "
+"uchun<br/>sinchkovlik bilan sinovdan o‘tkaziladi. </small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_vertical
@@ -1643,8 +1641,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<small class=\"text-muted\" style=\"text-align: center;\">\n"
-"                            Your information is protected with encrypted<br/"
-">\n"
+"                            Your information is protected with encrypted<br/>\n"
 "                            checkout and trusted payment methods.\n"
 "                        </small>"
 msgstr ""
@@ -1657,9 +1654,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<small class=\"text-muted\">\n"
-"                                        Block 3rd-party services that track "
-"users (e.g. YouTube, Google Maps, Facebook...) when the user has not given "
-"their consent.\n"
+"                                        Block 3rd-party services that track users (e.g. YouTube, Google Maps, Facebook...) when the user has not given their consent.\n"
 "                                    </small>"
 msgstr ""
 "<small class=\"text-muted\"> Foydalanuvchi ruxsat bermagan holda, uchinchi "
@@ -1740,8 +1735,8 @@ msgid ""
 "minimum, no hidden fees.</small>"
 msgstr ""
 "<small class=\"text-muted\">Barcha buyurtmalar uchun minimal xarajat va "
-"yashirin to‘lovlarsiz tez, bepul yetkazib berish xizmatidan foydalaning.</"
-"small>"
+"yashirin to‘lovlarsiz tez, bepul yetkazib berish xizmatidan "
+"foydalaning.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_horizontal
@@ -1751,8 +1746,8 @@ msgid ""
 "standards of durability and performance.</small>"
 msgstr ""
 "<small class=\"text-muted\">Har bir mahsulot yuqori chidamlilik va "
-"samaradorlik me'yorlariga javob berishi uchun puxta sinovdan o‘tkaziladi.</"
-"small>"
+"samaradorlik me'yorlariga javob berishi uchun puxta sinovdan "
+"o‘tkaziladi.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_attributes_horizontal
@@ -1784,8 +1779,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.color_combinations_debug_view
 #, fuzzy
 msgid ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help text</"
-"small>"
+"<small id=\"emailHelp\" class=\"form-text text-muted\">Form field help "
+"text</small>"
 msgstr ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">Shakl maydoni uchun "
 "yordam matni</small>"
@@ -1797,19 +1792,19 @@ msgid ""
 "<small id=\"emailHelp\" class=\"form-text text-muted\">We'll never share "
 "your email with anyone else.</small>"
 msgstr ""
-"<small id=\"emailHelp\" class=\"form-text text-muted\">Elektron pochtangizni "
-"hech kim bilan baham ko‘rmaymiz.</small>"
+"<small id=\"emailHelp\" class=\"form-text text-muted\">Elektron pochtangizni"
+" hech kim bilan baham ko‘rmaymiz.</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 #, fuzzy
 msgid ""
 "<small>\n"
-"                            <i class=\"fa fa-1x fa-fw fa-envelope me-1\"/>\n"
+"                            <i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"mail\"/>\n"
 "                            info@yourcompany.example.com\n"
 "                        </small>"
 msgstr ""
-"<small> <i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
+"<small> <i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"mail\"/> "
 "info@yourcompany.example.com </small>"
 
 #. module: website
@@ -1821,10 +1816,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
 #, fuzzy
 msgid ""
-"<small><i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
+"<small><i class=\"oi oi-1x oi-fw oi-filled me-1\" data-icon=\"mail\"/> "
 "info@yourcompany.example.com</small>"
 msgstr ""
-"<small><i class=\"fa fa-1x fa-fw fa-envelope me-1\"/> "
+"<small><i class=\"me-1 oi-1x oi-fw oi oi-filled\" data-icon=\"mail\"/> "
 "info@yourcompany.example.com</small>"
 
 #. module: website
@@ -1903,8 +1898,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel_compact
 msgid ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                            <span class=\"visually-hidden\">Previous slide</"
-"span>"
+"                            <span class=\"visually-hidden\">Previous slide</span>"
 msgstr ""
 
 #. module: website
@@ -1937,8 +1931,8 @@ msgid ""
 "                            <b>Discover our new products</b>\n"
 "                        </span>"
 msgstr ""
-"<span class=\"d-block p-2 small\"> <b>Yangi mahsulotlarimiz bilan tanishing</"
-"b> </span>"
+"<span class=\"d-block p-2 small\"> <b>Yangi mahsulotlarimiz bilan "
+"tanishing</b> </span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
@@ -1988,8 +1982,7 @@ msgstr "<span class=\"fa fa-check-circle-o\"/> Barcha modullar va funksiyalar"
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
 #, fuzzy
 msgid "<span class=\"fa fa-check-circle-o\"/>  Complete CRM for any team"
-msgstr ""
-"<span class=\"fa fa-check-circle-o\"/> Har qanday jamoa uchun to‘liq CRM"
+msgstr "<span class=\"fa fa-check-circle-o\"/> Har qanday jamoa uchun to‘liq CRM"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons_horizontal
@@ -2054,11 +2047,10 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
 #, fuzzy
-msgid ""
-"<span class=\"flex-grow-1\">What services does your company offer ?</span>"
+msgid "<span class=\"flex-grow-1\">What services does your company offer ?</span>"
 msgstr ""
-"<span class=\"flex-grow-1\">Kompaniyangiz qanday xizmatlarni taklif etadi?</"
-"span>"
+"<span class=\"flex-grow-1\">Kompaniyangiz qanday xizmatlarni taklif "
+"etadi?</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_list
@@ -2074,8 +2066,7 @@ msgstr "<span class=\"h2-fs\">$50M</span><br/> Kutilayotgan daromad"
 msgid ""
 "<span class=\"h2-fs\">100,000</span><br/>\n"
 "                        Website visitors"
-msgstr ""
-"<span class=\"h2-fs\">100 000</span><br/> Veb-sayt tashrif buyuruvchilari"
+msgstr "<span class=\"h2-fs\">100 000</span><br/> Veb-sayt tashrif buyuruvchilari"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_list
@@ -2114,14 +2105,12 @@ msgstr "<span class=\"h2-fs\">85%</span><br/> Foydalanuvchilarni saqlab qolish"
 #, fuzzy
 msgid ""
 "<span class=\"h3-fs\">\n"
-"                                \"This collection masterfully combines "
-"premium craftsmanship with timeless design, creating pieces that elevate any "
-"interior space.\"\n"
+"                                \"This collection masterfully combines premium craftsmanship with timeless design, creating pieces that elevate any interior space.\"\n"
 "                            </span>"
 msgstr ""
 "<span class=\"h3-fs\">\"Bu to‘plam yuqori sifatli hunarmandchilikni abadiy "
-"dizayn bilan mahorat bilan uyg‘unlashtiradi, har qanday ichki makonni yanada "
-"go‘zal qiladigan narsalarni yaratadi.\"</span>"
+"dizayn bilan mahorat bilan uyg‘unlashtiradi, har qanday ichki makonni yanada"
+" go‘zal qiladigan narsalarni yaratadi.\"</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.language_selector_inline
@@ -2139,11 +2128,9 @@ msgstr "<span class=\"me-1\">Sanasi:</span>"
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Apr 03, 2024</small>\n"
-"                        <strong>New Dashboard Features for Custom Reports</"
-"strong>"
+"                        <strong>New Dashboard Features for Custom Reports</strong>"
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/><small class=\"text-"
@@ -2154,11 +2141,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Aug 27, 2024</small>\n"
-"                        <strong>Improved Security Protocols Implemented</"
-"strong>"
+"                        <strong>Improved Security Protocols Implemented</strong>"
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/><small class=\"text-"
@@ -2169,8 +2154,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Dec 22, 2024</small>\n"
 "                        <strong>Advanced Analytics Tools Introduced</strong>"
 msgstr ""
@@ -2183,11 +2167,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Feb 11, 2024</small>\n"
-"                        <strong>Enhanced User Interface for Better "
-"Navigation</strong>"
+"                        <strong>Enhanced User Interface for Better Navigation</strong>"
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/><small class=\"text-"
@@ -2198,11 +2180,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Jun 15, 2024</small>\n"
-"                        <strong>Integrated Multi-Language Support Added</"
-"strong>"
+"                        <strong>Integrated Multi-Language Support Added</strong>"
 msgstr ""
 "<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
 "rounded-circle pe-none\" contenteditable=\"false\"/><small class=\"text-"
@@ -2213,8 +2193,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline_list
 #, fuzzy
 msgid ""
-"<span class=\"o_dot o_not_editable position-absolute translate-middle-x "
-"rounded-circle pe-none\" contenteditable=\"false\"/>\n"
+"<span class=\"o_dot o_not_editable position-absolute translate-middle-x rounded-circle pe-none\" contenteditable=\"false\"/>\n"
 "                        <small class=\"text-muted\">Oct 09, 2024</small>\n"
 "                        <strong>Mobile App Compatibility Expanded</strong>"
 msgstr ""
@@ -2245,30 +2224,29 @@ msgstr "<span class=\"o_force_ltr\">+1 555-555-5556</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_hero_about
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, 400px);"
-"\">Our company was founded ten years ago around a common dream made by our "
-"founders.</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 0.4505vw, "
+"400px);\">Our company was founded ten years ago around a common dream made "
+"by our founders.</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.new_page_template_portfolio_s_title
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, 400px);"
-"\">PORTFOLIO</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 4.2272vw, "
+"400px);\">PORTFOLIO</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_bold
 msgid ""
-"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, 400px);"
-"\">Contact us.</span>"
+"<span class=\"o_rfs\" style=\"font-size: clamp(8px, 1em + 8.2563vw, "
+"400px);\">Contact us.</span>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_search_box
 msgid ""
-"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm "
-"text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
+"<span class=\"o_search_spinner d-none spinner-border spinner-border-sm text-500\" style=\"--spinner-border-width: 0.1em;\" role=\"status\">\n"
 "                <span class=\"visually-hidden\">Loading...</span>\n"
 "            </span>"
 msgstr ""
@@ -2278,8 +2256,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Iris DOE</strong><br/>\n"
-"                                            <span class=\"text-"
-"muted\">Manager of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">Manager of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -2288,8 +2265,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>Jane DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CEO "
-"of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CEO of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -2298,8 +2274,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                            <strong>John DOE</strong><br/>\n"
-"                                            <span class=\"text-muted\">CCO "
-"of MyCompany</span>\n"
+"                                            <span class=\"text-muted\">CCO of MyCompany</span>\n"
 "                                        </span>"
 msgstr ""
 
@@ -2309,12 +2284,11 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                        Furniture Design Specialist\n"
-"                                        <br/><br/><br/><br/><br/><br/><br/"
-"><br/><br/><br/><br/>\n"
+"                                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"o_small-fs\">Mebel dizayni bo‘yicha mutaxassis<br/><br/><br/"
-"><br/><br/><br/><br/><br/><br/><br/><br/></span>"
+"<span class=\"o_small-fs\">Mebel dizayni bo‘yicha "
+"mutaxassis<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel
@@ -2322,8 +2296,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Iris DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">Manager of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">Manager of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -2333,8 +2306,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Jane DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">CEO of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">CEO of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -2344,8 +2316,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>John DOE</strong><br/>\n"
-"                                    <span class=\"text-muted\">CCO of "
-"MyCompany</span>\n"
+"                                    <span class=\"text-muted\">CCO of MyCompany</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -2354,8 +2325,7 @@ msgstr ""
 msgid ""
 "<span class=\"o_small-fs\">\n"
 "                                    <strong>Paul Dawson</strong><br/>\n"
-"                                    <span class=\"text-muted\">Furniture "
-"Design Specialist</span>\n"
+"                                    <span class=\"text-muted\">Furniture Design Specialist</span>\n"
 "                                </span>"
 msgstr ""
 
@@ -2392,25 +2362,21 @@ msgstr "<span class=\"o_stat_text\">Oflayn</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookies_bar
 msgid ""
-"<span class=\"pe-1\">We use cookies to provide you a better user experience "
-"on this website.</span>\n"
-"                                            <a href=\"/website/cookie-"
-"policy\" class=\"o_cookies_bar_text_policy small o_translate_inline\">Cookie "
-"Policy</a>"
+"<span class=\"pe-1\">We use cookies to provide you a better user experience on this website.</span>\n"
+"                                            <a href=\"/website/cookie-policy\" class=\"o_cookies_bar_text_policy small o_translate_inline\">Cookie Policy</a>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_badge
 #, fuzzy
 msgid ""
-"<span class=\"s_badge badge text-bg-secondary o_animable\" data-"
-"name=\"Badge\" data-vxml=\"001\">\n"
-"        <i class=\"fa fa-fw fa-folder o_not-animable\"/>Category\n"
+"<span class=\"s_badge badge text-bg-secondary o_animable\" data-name=\"Badge\" data-vxml=\"001\">\n"
+"        <i class=\"oi oi-fw oi-filled o_not-animable\" data-icon=\"folder\"/>Category\n"
 "    </span>"
 msgstr ""
 "<span class=\"s_badge badge text-bg-secondary o_animable\" data-"
-"name=\"Badge\" data-vxml=\"001\"> <i class=\"fa fa-fw fa-folder o_not-"
-"animable\"/>Toifa</span>"
+"name=\"Badge\" data-vxml=\"001\"> <i class=\"o_not-animable oi-fw oi oi-"
+"filled\" data-icon=\"folder\"/>Toifa</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
@@ -2419,8 +2385,8 @@ msgid ""
 "<span class=\"s_number display-1-fs\">12k</span><br/>\n"
 "                        <span class=\"h5-fs\">Useful options</span>"
 msgstr ""
-"<span class=\"s_number display-1-fs\">12k</span><br/> <span class=\"h5-"
-"fs\">Foydali imkoniyatlar</span>"
+"<span class=\"s_number display-1-fs\">12k</span><br/> <span "
+"class=\"h5-fs\">Foydali imkoniyatlar</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
@@ -2429,8 +2395,8 @@ msgid ""
 "<span class=\"s_number display-1-fs\">45%</span><br/>\n"
 "                        <span class=\"h5-fs\">More leads</span>"
 msgstr ""
-"<span class=\"s_number display-1-fs\">45%</span><br/> <span class=\"h5-"
-"fs\">Ko‘proq potensial mijozlar</span>"
+"<span class=\"s_number display-1-fs\">45%</span><br/> <span "
+"class=\"h5-fs\">Ko‘proq potensial mijozlar</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
@@ -2439,8 +2405,8 @@ msgid ""
 "<span class=\"s_number display-1-fs\">8+</span><br/>\n"
 "                        <span class=\"h5-fs\">Amazing pages</span>"
 msgstr ""
-"<span class=\"s_number display-1-fs\">8+</span><br/> <span class=\"h5-"
-"fs\">Ajoyib sahifalar</span>"
+"<span class=\"s_number display-1-fs\">8+</span><br/> <span "
+"class=\"h5-fs\">Ajoyib sahifalar</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
@@ -2484,8 +2450,7 @@ msgstr "<span class=\"s_website_form_label_content\">Kimga (Email)</span>"
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Email</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Email</span> <span "
 "class=\"s_website_form_mark\"> *</span>"
@@ -2494,8 +2459,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.contactus
 msgid ""
 "<span class=\"s_website_form_label_content\">Message</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 
 #. module: website
@@ -2503,8 +2467,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Name</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Ism</span> <span "
 "class=\"s_website_form_mark\"> *</span>"
@@ -2521,8 +2484,7 @@ msgstr "<span class=\"s_website_form_label_content\">Telefon raqami</span>"
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Subject</span>\n"
-"                                                        <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                        <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Mavzu</span> <span "
 "class=\"s_website_form_mark\"> *</span>"
@@ -2598,21 +2560,17 @@ msgstr "<span invisible=\"name_slugified\" class=\"bg-300\">...</span>"
 #: model_terms:ir.ui.view,arch_db:website.website_page_properties_view_form
 #, fuzzy
 msgid ""
-"<span invisible=\"website_indexed\">Won't appear in search engine results</"
-"span>"
+"<span invisible=\"website_indexed\">Won't appear in search engine "
+"results</span>"
 msgstr ""
-"<span invisible=\"website_indexed\">Qidiruv tizimi natijalarida ko‘rinmaydi</"
-"span>"
+"<span invisible=\"website_indexed\">Qidiruv tizimi natijalarida "
+"ko‘rinmaydi</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"<span invisible=\"website_language_count &lt; 2\">Website visitors see the "
-"version matching their browser language, or the default if unavailable.</"
-"span>\n"
-"                                <span invisible=\"website_language_count "
-"&gt;= 2\">Install multiple languages to enable translation across your "
-"website.</span>"
+"<span invisible=\"website_language_count &lt; 2\">Website visitors see the version matching their browser language, or the default if unavailable.</span>\n"
+"                                <span invisible=\"website_language_count &gt;= 2\">Install multiple languages to enable translation across your website.</span>"
 msgstr ""
 
 #. module: website
@@ -2620,16 +2578,14 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<span style=\"font-size: 10.75rem;\">\n"
-"                        <font class=\"text-gradient\" style=\"background-"
-"image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);"
-"\">\n"
+"                        <font class=\"text-gradient\" style=\"background-image: linear-gradient(0deg, var(--o-color-4) 25%, var(--o-color-5) 90%);\">\n"
 "                            87%\n"
 "                        </font>\n"
 "                    </span>"
 msgstr ""
 "<span style=\"font-size: 10.75rem;\"> <font class=\"text-gradient\" "
-"style=\"background-image: linear-gradient(0deg, var(--o-color-4) 25%, var(--"
-"o-color-5) 90%);\"> 87% </font> </span>"
+"style=\"background-image: linear-gradient(0deg, var(--o-color-4) 25%, "
+"var(--o-color-5) 90%);\"> 87% </font> </span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_big_number
@@ -2640,10 +2596,8 @@ msgstr "<span style=\"font-size: 2.25rem;\"> mijozlar mamnuniyati</span>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_punchy
 msgid ""
-"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" "
-"class=\"o_rfs\">\n"
-"                            <font class=\"bg-o-color-1\">A PUNCHY</font> "
-"HEADLINE\n"
+"<span style=\"font-size: clamp(8px, 1em + 1.657vw, 400px);\" class=\"o_rfs\">\n"
+"                            <font class=\"bg-o-color-1\">A PUNCHY</font> HEADLINE\n"
 "                        </span>"
 msgstr ""
 
@@ -2663,8 +2617,7 @@ msgstr "<span>/model/</span>"
 #, fuzzy
 msgid ""
 "<strong class=\"h2-fs\">$ 125.00</strong>\n"
-"                                        <small class=\"text-muted\">/ month</"
-"small>"
+"                                        <small class=\"text-muted\">/ month</small>"
 msgstr ""
 "<strong class=\"h2-fs\">125,00 $</strong> <small class=\"text-muted\">/ "
 "oyiga</small>"
@@ -2704,8 +2657,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong class=\"h2-fs\">$ 65.00</strong>\n"
-"                                        <small class=\"text-muted\">/ month</"
-"small>"
+"                                        <small class=\"text-muted\">/ month</small>"
 msgstr ""
 "<strong class=\"h2-fs\">65,00 $</strong> <small class=\"text-muted\">/ "
 "oyiga</small>"
@@ -2763,8 +2715,7 @@ msgstr "<strong>Hamkorlarimizga ishonsa bo‘ladimi?</strong>"
 #, fuzzy
 msgid ""
 "<strong>Daniella Clarke</strong><br/>\n"
-"                                <span class=\"text-muted\">Senior Manager</"
-"span>"
+"                                <span class=\"text-muted\">Senior Manager</span>"
 msgstr ""
 "<strong>Daniella Clarke</strong><br/> <span class=\"text-muted\">Katta "
 "menejer</span>"
@@ -2774,8 +2725,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Emil Foster</strong><br/>\n"
-"                                <span class=\"text-muted\">Creative "
-"Director</span>"
+"                                <span class=\"text-muted\">Creative Director</span>"
 msgstr ""
 "<strong>Emil Foster</strong><br/> <span class=\"text-muted\">Ijodiy "
 "direktor</span>"
@@ -2820,8 +2770,7 @@ msgstr "<strong>Veb-sayt foydalanuvchilar uchun qulaymi?</strong>"
 #, fuzzy
 msgid ""
 "<strong>James Carter</strong><br/>\n"
-"                                <span class=\"text-muted\">Chief Technical "
-"Officer</span>"
+"                                <span class=\"text-muted\">Chief Technical Officer</span>"
 msgstr ""
 "<strong>James Carter</strong><br/> <span class=\"text-muted\">Bosh texnik "
 "direktor</span>"
@@ -2831,19 +2780,17 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Jody Roberts</strong><br/>\n"
-"                                <span class=\"text-muted\">Chief Financial "
-"Officer</span>"
+"                                <span class=\"text-muted\">Chief Financial Officer</span>"
 msgstr ""
-"<strong>Jody Roberts</strong><br/> <span class=\"text-muted\">Bosh moliyaviy "
-"direktor</span>"
+"<strong>Jody Roberts</strong><br/> <span class=\"text-muted\">Bosh moliyaviy"
+" direktor</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_reviews_wall
 #, fuzzy
 msgid ""
 "<strong>Laura Evans</strong><br/>\n"
-"                                <span class=\"text-muted\">Head of "
-"Operations</span>"
+"                                <span class=\"text-muted\">Head of Operations</span>"
 msgstr ""
 "<strong>Laura Evans</strong><br/> <span class=\"text-muted\">Operatsiyalar "
 "bo‘yicha rahbar</span>"
@@ -2870,7 +2817,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
 #, fuzzy
-msgid "<strong>Social platforms:</strong> Facebook, Instagram, Twitter, TikTok"
+msgid ""
+"<strong>Social platforms:</strong> Facebook, Instagram, Twitter, TikTok"
 msgstr ""
 "<strong>Ijtimoiy platformalar:</strong> Facebook, Instagram, Twitter, TikTok"
 
@@ -2884,11 +2832,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Sullivan Mitchell</strong><br/>\n"
-"                                <span class=\"text-muted\">Marketing "
-"Director</span>"
+"                                <span class=\"text-muted\">Marketing Director</span>"
 msgstr ""
-"<strong>Sullivan Mitchell</strong><br/> <span class=\"text-muted\">Marketing "
-"direktori</span>"
+"<strong>Sullivan Mitchell</strong><br/> <span class=\"text-muted\">Marketing"
+" direktori</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_boxed
@@ -2985,8 +2932,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid ""
-"A CDN helps you serve your website’s content with high availability and high "
-"performance to any visitor wherever they are located."
+"A CDN helps you serve your website’s content with high availability and high"
+" performance to any visitor wherever they are located."
 msgstr ""
 
 #. module: website
@@ -3027,8 +2974,8 @@ msgid ""
 "A buttery, flaky pastry with a golden-brown crust, perfect for breakfast or "
 "a light snack."
 msgstr ""
-"Nonushta yoki yengil gazak uchun juda mos keladigan sariq-jigarrang po‘stli, "
-"yog‘li, qatlamli pishiriq."
+"Nonushta yoki yengil gazak uchun juda mos keladigan sariq-jigarrang po‘stli,"
+" yog‘li, qatlamli pishiriq."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_cards
@@ -3037,8 +2984,8 @@ msgid ""
 "A card is a flexible and extensible content container. It includes colors "
 "and powerful display options."
 msgstr ""
-"Karta - moslashuvchan va kengaytiriladigan kontent joylashtirgich. U ranglar "
-"va kuchli ko‘rsatish imkoniyatlarini o‘z ichiga oladi."
+"Karta - moslashuvchan va kengaytiriladigan kontent joylashtirgich. U ranglar"
+" va kuchli ko‘rsatish imkoniyatlarini o‘z ichiga oladi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_card
@@ -3049,8 +2996,8 @@ msgid ""
 "colors, and powerful display options."
 msgstr ""
 "Karta - moslashuvchan va kengaytiriladigan kontent joylashtirgich. U "
-"sarlavhalar va pastki qismlar, keng turdagi kontent, kontekstli fon ranglari "
-"va kuchli ko‘rsatish variantlarini o‘z ichiga oladi."
+"sarlavhalar va pastki qismlar, keng turdagi kontent, kontekstli fon ranglari"
+" va kuchli ko‘rsatish variantlarini o‘z ichiga oladi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
@@ -3094,8 +3041,8 @@ msgstr "Ehtiyojlaringizga moslashtirilgan ajoyib yechimlar to‘plami"
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 #, fuzzy
 msgid ""
-"A creamy, smooth cheesecake with a graham cracker crust, topped with a layer "
-"of fresh fruit or chocolate ganache."
+"A creamy, smooth cheesecake with a graham cracker crust, topped with a layer"
+" of fresh fruit or chocolate ganache."
 msgstr ""
 "Yangi mevalar yoki shokolad ganashi qatlami bilan qoplangan graham kraker "
 "asosli kremsimon, mayin chizkeyk."
@@ -3107,8 +3054,8 @@ msgid ""
 "A crusty loaf with a chewy interior, made with a naturally fermented "
 "sourdough starter for a tangy flavor."
 msgstr ""
-"Tabiiy fermentlangan xamirturush asosida tayyorlangan, nordon ta'mli, qattiq "
-"po‘stli va yumshoq ichli non."
+"Tabiiy fermentlangan xamirturush asosida tayyorlangan, nordon ta'mli, qattiq"
+" po‘stli va yumshoq ichli non."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_freegrid
@@ -3178,8 +3125,8 @@ msgstr "Mega menyu asosiy yoki tobe menyu bo‘la olmaydi."
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 #, fuzzy
 msgid ""
-"A moist, red-hued cake with layers of cream cheese frosting, perfect for any "
-"special occasion."
+"A moist, red-hued cake with layers of cream cheese frosting, perfect for any"
+" special occasion."
 msgstr ""
 "Qatlam-qatlam qaymoqli pishloq kremli, nam, qizil rangli tort, har qanday "
 "maxsus tadbir uchun juda mos keladi."
@@ -3187,7 +3134,8 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__visit_count
 #, fuzzy
-msgid "A new visit is considered if last connection was more than 8 hours ago."
+msgid ""
+"A new visit is considered if last connection was more than 8 hours ago."
 msgstr ""
 "Agar oxirgi ulanish 8 soatdan oldin bo‘lgan bo‘lsa, yangi tashrif "
 "hisoblanadi."
@@ -3211,8 +3159,8 @@ msgid ""
 "A spiced cake loaded with grated carrots, nuts, and a hint of cinnamon, "
 "topped with a tangy cream cheese frosting."
 msgstr ""
-"Qirg‘ichdan o‘tkazilgan sabzi, yong‘oq va dolchin bilan boyitilgan ziravorli "
-"tort, ustiga nordon qaymoqli pishloq kremi surtilgan."
+"Qirg‘ichdan o‘tkazilgan sabzi, yong‘oq va dolchin bilan boyitilgan ziravorli"
+" tort, ustiga nordon qaymoqli pishloq kremi surtilgan."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -3248,8 +3196,8 @@ msgid ""
 "A vibrant spot known for its expertly crafted coffee, sourced directly from "
 "farmers and roasted to perfection."
 msgstr ""
-"Fermerlardan to‘g‘ridan-to‘g‘ri olinib, mukammal darajada qovurilgan qahvasi "
-"bilan mashhur bo‘lgan yorqin joy."
+"Fermerlardan to‘g‘ridan-to‘g‘ri olinib, mukammal darajada qovurilgan qahvasi"
+" bilan mashhur bo‘lgan yorqin joy."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__is_connected
@@ -3426,10 +3374,11 @@ msgstr "Faqat faollar"
 #, fuzzy
 msgid ""
 "Adapt these three columns to fit your design need. To duplicate, delete or "
-"move columns, select the column and use the top icons to perform your action."
+"move columns, select the column and use the top icons to perform your "
+"action."
 msgstr ""
-"Ushbu uch ustunni dizayn ehtiyojingizga moslashtiring. Ustunlarni nusxalash, "
-"o‘chirish yoki ko‘chirish uchun ustunni tanlang va amalni bajarish uchun "
+"Ushbu uch ustunni dizayn ehtiyojingizga moslashtiring. Ustunlarni nusxalash,"
+" o‘chirish yoki ko‘chirish uchun ustunni tanlang va amalni bajarish uchun "
 "yuqoridagi belgilardan foydalaning."
 
 #. module: website
@@ -3454,8 +3403,8 @@ msgstr "\"%(suggestion)s\" ni qo‘shish"
 #: model_terms:ir.ui.view,arch_db:website.view_edit_third_party_domains
 #, fuzzy
 msgid ""
-"Add 3rd-party service domains <em>(\"www.example.com\" or \"example.com\")</"
-"em>, one per line."
+"Add 3rd-party service domains <em>(\"www.example.com\" or "
+"\"example.com\")</em>, one per line."
 msgstr ""
 "Uchinchi tomon xizmat domenlarini <em>(\"www.example.com\" yoki "
 "\"example.com\")</em> har bir qatorga bittadan qo‘shing."
@@ -3765,8 +3714,8 @@ msgid ""
 "Add this page to the \"+New\" page templates. It will be added to the "
 "\"Custom\" category."
 msgstr ""
-"Bu sahifani \"+Yangi\" sahifa shablonlariga qo‘shing. U \"Maxsus\" toifasiga "
-"qo‘shiladi."
+"Bu sahifani \"+Yangi\" sahifa shablonlariga qo‘shing. U \"Maxsus\" toifasiga"
+" qo‘shiladi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.external_snippets
@@ -3804,8 +3753,8 @@ msgid ""
 "title should contain max 65 characters."
 msgstr ""
 "O‘z sarlavhangizni kiriting yoki \"%(defaultTitle)s\" ni ishlatish uchun "
-"bo‘sh qoldiring. Sahifa sarlavhangiz maksimal 65 ta belgidan iborat bo‘lishi "
-"kerak."
+"bo‘sh qoldiring. Sahifa sarlavhangiz maksimal 65 ta belgidan iborat bo‘lishi"
+" kerak."
 
 #. module: website
 #. odoo-javascript
@@ -3827,8 +3776,8 @@ msgid ""
 "with other users and share insights."
 msgstr ""
 "Bundan tashqari, biz batafsil hujjatlar, video qo‘llanmalar va boshqa "
-"foydalanuvchilar bilan bog‘lanib, fikr almashishingiz mumkin bo‘lgan jamiyat "
-"forumlarini o‘z ichiga olgan keng qamrovli bilimlar bazasini taklif etamiz."
+"foydalanuvchilar bilan bog‘lanib, fikr almashishingiz mumkin bo‘lgan jamiyat"
+" forumlarini o‘z ichiga olgan keng qamrovli bilimlar bazasini taklif etamiz."
 
 #. module: website
 #. odoo-javascript
@@ -4258,12 +4207,13 @@ msgstr "Tahlil<br/>(ixtiyoriy)"
 #: model_terms:ir.ui.view,arch_db:website.s_numbers
 #, fuzzy
 msgid ""
-"Analyzing the numbers behind our success: <br class=\"d-none d-xxl-inline\"/"
-">an in-depth look at the key metrics driving our company's achievements"
+"Analyzing the numbers behind our success: <br class=\"d-none d-xxl-"
+"inline\"/>an in-depth look at the key metrics driving our company's "
+"achievements"
 msgstr ""
-"Muvaffaqiyatimiz ortidagi raqamlarni tahlil qilish: <br class=\"d-none d-xxl-"
-"inline\"/>kompaniyamiz yutuqlarini ta'minlovchi asosiy ko‘rsatkichlarga "
-"chuqur nazar"
+"Muvaffaqiyatimiz ortidagi raqamlarni tahlil qilish: <br class=\"d-none "
+"d-xxl-inline\"/>kompaniyamiz yutuqlarini ta'minlovchi asosiy "
+"ko‘rsatkichlarga chuqur nazar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_numbers_showcase
@@ -4272,8 +4222,8 @@ msgid ""
 "Analyzing the numbers behind our success: an in-depth look at the key "
 "metrics driving our company's achievements."
 msgstr ""
-"Muvaffaqiyatimiz ortidagi raqamlarni tahlil qilish: kompaniyamiz yutuqlarini "
-"belgilovchi asosiy ko‘rsatkichlarga chuqur nazar."
+"Muvaffaqiyatimiz ortidagi raqamlarni tahlil qilish: kompaniyamiz yutuqlarini"
+" belgilovchi asosiy ko‘rsatkichlarga chuqur nazar."
 
 #. module: website
 #. odoo-javascript
@@ -4479,8 +4429,8 @@ msgstr ""
 #: code:addons/website/static/src/builder/website_builder.js:0
 #, fuzzy
 msgid ""
-"Are you sure you want to discard all your changes? Once you do, they're gone "
-"for good."
+"Are you sure you want to discard all your changes? Once you do, they're gone"
+" for good."
 msgstr ""
 "Barcha o‘zgarishlaringizni bekor qilishni xohlaysizmi? Buni qilsangiz, ular "
 "butunlay yo‘qoladi."
@@ -4503,8 +4453,8 @@ msgstr "Strelkalar"
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 #, fuzzy
 msgid ""
-"Artisanal espresso with a focus on direct trade and exceptional quality in a "
-"chic, comfortable setting."
+"Artisanal espresso with a focus on direct trade and exceptional quality in a"
+" chic, comfortable setting."
 msgstr ""
 "Shinam va zamonaviy muhitda to‘g‘ridan-to‘g‘ri savdo va ajoyib sifatga "
 "e'tibor qaratilgan hunarmandchilik espressosi."
@@ -4569,10 +4519,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"Authenticate users, protect user data and allow the website to deliver the "
-"services users expects,\n"
-"                                                such as maintaining the "
-"content of their cart, or allowing file uploads."
+"Authenticate users, protect user data and allow the website to deliver the services users expects,\n"
+"                                                such as maintaining the content of their cart, or allowing file uploads."
 msgstr ""
 "Foydalanuvchilarni autentifikatsiya qilish, ularning ma'lumotlarini "
 "himoyalash va veb-saytga foydalanuvchilar kutayotgan xizmatlarni "
@@ -4888,8 +4836,8 @@ msgstr "Boshlang‘ich"
 #: model_terms:ir.ui.view,arch_db:website.s_key_benefits
 #, fuzzy
 msgid ""
-"Benefit from tax-free shopping, simplifying your purchase and enhancing your "
-"savings without any extra costs."
+"Benefit from tax-free shopping, simplifying your purchase and enhancing your"
+" savings without any extra costs."
 msgstr ""
 "Soliqsiz xariddan foydalaning, xaridingizni soddalashtirib, qo‘shimcha "
 "xarajatlarsiz tejamkorligingizni oshiring."
@@ -5833,8 +5781,8 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/theme/theme_tab_plugin.js:0
 #, fuzzy
 msgid ""
-"Changing the color palette will reset all your color customizations, are you "
-"sure you want to proceed?"
+"Changing the color palette will reset all your color customizations, are you"
+" sure you want to proceed?"
 msgstr ""
 "Ranglar palitrasi o‘zgartirilsa, barcha rang sozlamalaringiz asl holatiga "
 "qaytariladi. Davom etishni xohlaysizmi?"
@@ -6118,8 +6066,8 @@ msgstr "Klassik pishloqli tort"
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
 #, fuzzy
 msgid ""
-"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
-"drizzled with extra virgin olive oil."
+"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves,"
+" drizzled with extra virgin olive oil."
 msgstr ""
 "Yangi motsarella, San-Marzano pomidorlari va rayhon barglari bilan "
 "tayyorlangan klassik pitsa, ustidan toza zaytun moyi sepilgan."
@@ -6159,8 +6107,8 @@ msgid ""
 "control over your content."
 msgstr ""
 "Murakkab orqa tomon jarayonlaridan qochib, mazmunni to‘g‘ridan-to‘g‘ri old "
-"tomondan bosib o‘zgartiring. Bu vosita matn, rasm va elementlarni sahifaning "
-"o‘zida tezda yangilash imkonini beradi, bu esa ish jarayoningizni "
+"tomondan bosib o‘zgartiring. Bu vosita matn, rasm va elementlarni sahifaning"
+" o‘zida tezda yangilash imkonini beradi, bu esa ish jarayoningizni "
 "osonlashtiradi va mazmunni nazorat qilishni ta'minlaydi."
 
 #. module: website
@@ -6175,8 +6123,8 @@ msgstr ""
 #, fuzzy
 msgid "Click on \"Edit/Translate\" to apply changes made on default language."
 msgstr ""
-"Standart tilda kiritilgan o‘zgarishlarni qo‘llash uchun \"Tahrirlash/Tarjima "
-"qilish\" tugmasini bosing."
+"Standart tilda kiritilgan o‘zgarishlarni qo‘llash uchun \"Tahrirlash/Tarjima"
+" qilish\" tugmasini bosing."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_embed_code
@@ -6185,8 +6133,8 @@ msgid ""
 "Click on <b>\"Edit\"</b> in the right panel to replace this with your own "
 "HTML code"
 msgstr ""
-"O‘ng paneldagi <b>\"Tahrirlash\"</b> tugmasini bosib, buni o‘zingizning HTML "
-"kodingiz bilan almashtiring"
+"O‘ng paneldagi <b>\"Tahrirlash\"</b> tugmasini bosib, buni o‘zingizning HTML"
+" kodingiz bilan almashtiring"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
@@ -6336,8 +6284,8 @@ msgstr "Rang shablonlari"
 #: model_terms:ir.ui.view,arch_db:website.s_color_blocks_2
 #, fuzzy
 msgid ""
-"Color blocks are a simple and effective way to <b>present and highlight your "
-"content</b>. Choose an image or a color for the background. You can even "
+"Color blocks are a simple and effective way to <b>present and highlight your"
+" content</b>. Choose an image or a color for the background. You can even "
 "resize and duplicate the blocks to create your own layout. Add images or "
 "icons to customize the blocks."
 msgstr ""
@@ -6725,11 +6673,10 @@ msgstr "Davom etish"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
 #, fuzzy
-msgid ""
-"Continue reading <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Continue reading <i class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
 msgstr ""
-"O‘qishni davom ettirish <i class=\"fa fa-long-arrow-right align-middle "
-"ms-1\"/>"
+"O‘qishni davom ettirish <i class=\"align-middle ms-1 oi\" data-"
+"icon=\"east\"/>"
 
 #. module: website
 #. odoo-javascript
@@ -6794,23 +6741,14 @@ msgstr "Cookie-fayllar paneli"
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"Cookies are small bits of text sent by our servers to your computer or "
-"device when you access our services.\n"
-"                            They are stored in your browser and later sent "
-"back to our servers so that we can provide contextual content.\n"
-"                            Without cookies, using the web would be a much "
-"more frustrating experience.\n"
-"                            We use them to support your activities on our "
-"website. For example, your session (so you don't have to login again) or "
-"your shopping cart.\n"
+"Cookies are small bits of text sent by our servers to your computer or device when you access our services.\n"
+"                            They are stored in your browser and later sent back to our servers so that we can provide contextual content.\n"
+"                            Without cookies, using the web would be a much more frustrating experience.\n"
+"                            We use them to support your activities on our website. For example, your session (so you don't have to login again) or your shopping cart.\n"
 "                            <br/>\n"
-"                            Cookies are also used to help us understand your "
-"preferences based on previous or current activity on our website (the pages "
-"you have\n"
-"                            visited), your language and country, which "
-"enables us to provide you with improved services.\n"
-"                            We also use cookies to help us compile aggregate "
-"data about site traffic and site interaction so that we can offer\n"
+"                            Cookies are also used to help us understand your preferences based on previous or current activity on our website (the pages you have\n"
+"                            visited), your language and country, which enables us to provide you with improved services.\n"
+"                            We also use cookies to help us compile aggregate data about site traffic and site interaction so that we can offer\n"
 "                            better site experiences and tools in the future."
 msgstr ""
 "Cookie-fayllar xizmatlarimizdan foydalanganingizda serverlarimiz tomonidan "
@@ -6819,8 +6757,8 @@ msgstr ""
 "etishimiz uchun serverlarimizga qaytariladi. Cookie-fayllarsiz internetdan "
 "foydalanish ancha noqulay bo‘lardi. Biz ulardan veb-saytimizdagi "
 "faoliyatingizni qo‘llab-quvvatlash uchun foydalanamiz. Masalan, sessiyangiz "
-"(qayta kirishingiz shart bo‘lmasligi uchun) yoki xarid savatingiz uchun. <br/"
-"> Cookie-fayllar, shuningdek, veb-saytimizdagi oldingi yoki joriy "
+"(qayta kirishingiz shart bo‘lmasligi uchun) yoki xarid savatingiz uchun. "
+"<br/> Cookie-fayllar, shuningdek, veb-saytimizdagi oldingi yoki joriy "
 "faoliyatingiz (tashrif buyurgan sahifalaringiz), tilingiz va mamlakatingiz "
 "asosida afzalliklaringizni tushunishimizga yordam beradi, bu esa sizga "
 "takomillashtirilgan xizmatlarni taqdim etish imkonini beradi. Biz, "
@@ -7011,14 +6949,15 @@ msgstr "Yangi sahifa yaratish"
 #, fuzzy
 msgid ""
 "Create pages from scratch by dragging and dropping customizable building "
-"blocks. This system simplifies web design, making it accessible to all skill "
-"levels. Combine headers, images, and text sections to build cohesive layouts "
-"quickly and efficiently."
+"blocks. This system simplifies web design, making it accessible to all skill"
+" levels. Combine headers, images, and text sections to build cohesive "
+"layouts quickly and efficiently."
 msgstr ""
 "Moslanuvchan qurilish bloklarini tortib tashlash orqali sahifalarni noldan "
 "yarating. Bu tizim veb-dizaynni soddalashtiradi va uni barcha malaka "
 "darajasidagilar uchun qulay qiladi. Sarlavhalar, rasmlar va matn "
-"bo‘limlarini birlashtirish orqali yaxlit maketlarni tez va samarali yarating."
+"bo‘limlarini birlashtirish orqali yaxlit maketlarni tez va samarali "
+"yarating."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_asset__create_uid
@@ -7523,8 +7462,8 @@ msgid ""
 "Delete the above image or replace it with a picture that illustrates your "
 "message. Click on the picture to change its <em>rounded corner</em> style."
 msgstr ""
-"Yuqoridagi rasmni o‘chiring yoki uni xabaringizni aks ettiruvchi boshqa rasm "
-"bilan almashtiring. Rasmning <em>yumaloq burchaklar</em> uslubini "
+"Yuqoridagi rasmni o‘chiring yoki uni xabaringizni aks ettiruvchi boshqa rasm"
+" bilan almashtiring. Rasmning <em>yumaloq burchaklar</em> uslubini "
 "o‘zgartirish uchun uning ustiga bosing."
 
 #. module: website
@@ -7546,8 +7485,8 @@ msgstr "Yetkazib berish"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
 msgid ""
-"Delivering tailored, innovative tools to help you overcome challenges and<br/"
-"> achieve your goals, ensuring your journey is fully supported."
+"Delivering tailored, innovative tools to help you overcome challenges "
+"and<br/> achieve your goals, ensuring your journey is fully supported."
 msgstr ""
 
 #. module: website
@@ -7872,10 +7811,8 @@ msgstr "Ko‘proq ma'lumot oling"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
 #, fuzzy
-msgid "Discover more <i class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
-msgstr ""
-"Ko‘proq ma'lumot oling <i class=\"fa fa-long-arrow-right align-middle ms-1\"/"
-">"
+msgid "Discover more <i class=\"oi align-middle ms-1\" data-icon=\"east\"/>"
+msgstr "Ko‘proq ma'lumot oling <i class=\"align-middle ms-1 oi\" data-icon=\"east\"/>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text
@@ -8446,9 +8383,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_categories
 msgid ""
-"Each item in our collection is grouped by category to make your browsing "
-"experience effortless. Take a look and dive into the different worlds we’ve "
-"curated for you.\n"
+"Each item in our collection is grouped by category to make your browsing experience effortless. Take a look and dive into the different worlds we’ve curated for you.\n"
 "                        <br/>\n"
 "                        <br/>"
 msgstr ""
@@ -8457,8 +8392,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 #, fuzzy
 msgid ""
-"Each update is thoroughly tested to guarantee compatibility and reliability, "
-"and we provide detailed release notes to keep you informed of new features "
+"Each update is thoroughly tested to guarantee compatibility and reliability,"
+" and we provide detailed release notes to keep you informed of new features "
 "and improvements."
 msgstr ""
 "Har bir yangilanish moslik va ishonchlilikni kafolatlash uchun puxta "
@@ -8684,8 +8619,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
 #, fuzzy
 msgid ""
-"Elevate your living space with furniture that blends modern aesthetics and "
-"classic charm, crafted to bring both comfort and style to your home.\n"
+"Elevate your living space with furniture that blends modern aesthetics and classic charm, crafted to bring both comfort and style to your home.\n"
 "                        <br/><br/><br/><br/><br/><br/>"
 msgstr ""
 "Zamonaviy estetika va an'anaviy jozibani uyg‘unlashtirgan, uyingizga ham "
@@ -8696,15 +8630,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid
 #, fuzzy
 msgid ""
-"Elevate your living space with furniture that blends modern aesthetics and "
-"classic charm, crafted to bring both comfort and style to your home.\n"
-"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
-"><br/><br/><br/><br/><br/>"
+"Elevate your living space with furniture that blends modern aesthetics and classic charm, crafted to bring both comfort and style to your home.\n"
+"                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
 msgstr ""
 "Zamonaviy estetika va an'anaviy jozibani uyg‘unlashtirgan, uyingizga ham "
 "qulaylik, ham uslub baxsh etadigan mebellar bilan yashash makoningizni "
-"yuksaltiring. <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/"
-"><br/><br/><br/>"
+"yuksaltiring. "
+"<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
 
 #. module: website
 #. odoo-javascript
@@ -8939,16 +8871,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
-msgid "Entered date or time is not correct! It must be %(start)s (%(format)s)."
+msgid ""
+"Entered date or time is not correct! It must be %(start)s (%(format)s)."
 msgstr ""
-"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) bo‘lishi kerak."
+"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) bo‘lishi "
+"kerak."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
 msgid ""
-"Entered date or time is not correct! It must be after %(start)s (%(format)s)."
+"Entered date or time is not correct! It must be after %(start)s "
+"(%(format)s)."
 msgstr ""
 "Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan keyin "
 "bo‘lishi kerak."
@@ -8961,16 +8896,16 @@ msgid ""
 "Entered date or time is not correct! It must be after or equal to %(start)s "
 "(%(format)s)."
 msgstr ""
-"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan keyin yoki "
-"unga teng bo‘lishi kerak."
+"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan keyin yoki"
+" unga teng bo‘lishi kerak."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
 msgid ""
-"Entered date or time is not correct! It must be before %(start)s (%"
-"(format)s)."
+"Entered date or time is not correct! It must be before %(start)s "
+"(%(format)s)."
 msgstr ""
 "Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan oldin "
 "bo‘lishi kerak."
@@ -8980,19 +8915,19 @@ msgstr ""
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
 msgid ""
-"Entered date or time is not correct! It must be before or equal to %(start)s "
-"(%(format)s)."
+"Entered date or time is not correct! It must be before or equal to %(start)s"
+" (%(format)s)."
 msgstr ""
-"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan oldin yoki "
-"unga teng bo‘lishi kerak."
+"Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s (%(format)s) dan oldin yoki"
+" unga teng bo‘lishi kerak."
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
 msgid ""
-"Entered date or time is not correct! It must be within %(start)s and %(end)s "
-"(%(format)s)."
+"Entered date or time is not correct! It must be within %(start)s and %(end)s"
+" (%(format)s)."
 msgstr ""
 "Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s va %(end)s (%(format)s) "
 "oralig‘ida bo‘lishi kerak."
@@ -9012,8 +8947,8 @@ msgstr ""
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 #, fuzzy
 msgid ""
-"Entered date or time is not correct! It must not be within %(start)s and %"
-"(end)s (%(format)s)."
+"Entered date or time is not correct! It must not be within %(start)s and "
+"%(end)s (%(format)s)."
 msgstr ""
 "Kiritilgan sana yoki vaqt noto‘g‘ri! U %(start)s va %(end)s (%(format)s) "
 "oralig‘ida bo‘lmasligi kerak."
@@ -9170,8 +9105,8 @@ msgid ""
 "enhancing<br/>technology with this latest innovation, crafted to elevate "
 "every athlete's journey."
 msgstr ""
-"Har bir sportchining faoliyatini yuksaltirish uchun yaratilgan ushbu so‘nggi "
-"innovatsiya bilan tengsiz qulaylik, zamonaviy dizayn va samaradorlikni "
+"Har bir sportchining faoliyatini yuksaltirish uchun yaratilgan ushbu so‘nggi"
+" innovatsiya bilan tengsiz qulaylik, zamonaviy dizayn va samaradorlikni "
 "oshiruvchi texnologiyadan bahramand bo‘ling."
 
 #. module: website
@@ -9241,11 +9176,11 @@ msgstr "Keng qamrovli amaliy va foydali tanlovlarni o‘rganing."
 #, fuzzy
 msgid ""
 "Explore how our cutting-edge solutions redefine industry standards. To "
-"achieve excellence, we focus on what truly matters to our customers. <br/"
-"><br/> Begin by identifying their needs and exceed their expectations."
+"achieve excellence, we focus on what truly matters to our customers. "
+"<br/><br/> Begin by identifying their needs and exceed their expectations."
 msgstr ""
-"Ilg‘or yechimlarimiz soha standartlarini qanday qayta belgilayotganini kashf "
-"eting. Mukammallikka erishish uchun mijozlarimiz uchun haqiqatan ham muhim "
+"Ilg‘or yechimlarimiz soha standartlarini qanday qayta belgilayotganini kashf"
+" eting. Mukammallikka erishish uchun mijozlarimiz uchun haqiqatan ham muhim "
 "bo‘lgan jihatlaraga e'tibor qaratamiz. <br/><br/> Avvalo ularning "
 "ehtiyojlarini aniqlab, kutganlaridan ham yuqori natijalar beramiz."
 
@@ -9259,7 +9194,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe
 #, fuzzy
 msgid ""
-"Explore our curated selection of coffee, tea, and more. Delight in every sip!"
+"Explore our curated selection of coffee, tea, and more. Delight in every "
+"sip!"
 msgstr ""
 "Maxsus tanlangan qahva, choy va boshqa ichimliklarimizni kashf eting. Har "
 "bir qultumdan rohatlaning!"
@@ -9281,7 +9217,7 @@ msgstr "Asosiy<br/>ko‘rsatkichlarimizni<br/>o‘rganing"
 #: model_terms:ir.ui.view,arch_db:website.s_cta_badge
 #: model_terms:ir.ui.view,arch_db:website.s_discovery
 #: model_terms:ir.ui.view,arch_db:website.s_empowerment
-msgid "Explore <i class=\"fa fa-long-arrow-right\" role=\"img\"/>"
+msgid "Explore <i class=\"oi\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -9530,9 +9466,7 @@ msgstr "Maxsus shakl ma'lumotlari uchun maydon"
 #, fuzzy
 msgid ""
 "Fifth Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Add a unique perspective or detail</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Add a unique perspective or detail</small>"
 msgstr ""
 "Beshinchi slayd <small class=\"oe_unbreakable o_nav_tabs_description "
 "opacity-75\">Noyob nuqtai nazar yoki tafsilotni qo‘shing</small>"
@@ -9564,8 +9498,7 @@ msgstr "Fayl yuklash"
 #, fuzzy
 msgid ""
 "File from where the view originates.\n"
-"                                                          Useful to (hard) "
-"reset broken views or to read arch from file in dev-xml mode."
+"                                                          Useful to (hard) reset broken views or to read arch from file in dev-xml mode."
 msgstr ""
 "Ko‘rinish kelib chiqqan fayl. Buzilgan ko‘rinishlarni tiklash yoki dev-xml "
 "rejimida fayldan arxitekturani o‘qish uchun foydali."
@@ -9653,8 +9586,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 #, fuzzy
 msgid ""
-"Find out how we were able helping them and set in place solutions adapted to "
-"their needs."
+"Find out how we were able helping them and set in place solutions adapted to"
+" their needs."
 msgstr ""
 "Ularga qanday yordam berganimiz va ehtiyojlariga mos yechimlarni qanday "
 "o‘rnatganimizni bilib oling."
@@ -9696,8 +9629,7 @@ msgstr "Birinchi bosqich"
 #, fuzzy
 msgid ""
 "First Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">A slide description</small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">A slide description</small>"
 msgstr ""
 "Birinchi slayd <small class=\"oe_unbreakable o_nav_tabs_description "
 "opacity-75\">Slayd tavsifi</small>"
@@ -9991,15 +9923,12 @@ msgstr "Asos paketi"
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
 #, fuzzy
 msgid ""
-"Founder and chief visionary, Tony is the driving force behind the company. "
-"He loves\n"
-"                                to keep his hands full by participating in "
-"the development of the software,\n"
-"                                marketing, and customer experience "
-"strategies."
+"Founder and chief visionary, Tony is the driving force behind the company. He loves\n"
+"                                to keep his hands full by participating in the development of the software,\n"
+"                                marketing, and customer experience strategies."
 msgstr ""
-"Asoschisi va bosh g‘oyachi Toni kompaniyaning harakatlantiruvchi kuchidir. U "
-"dasturiy ta'minot ishlab chiqish, marketing va mijozlar tajribasini "
+"Asoschisi va bosh g‘oyachi Toni kompaniyaning harakatlantiruvchi kuchidir. U"
+" dasturiy ta'minot ishlab chiqish, marketing va mijozlar tajribasini "
 "yaxshilash strategiyalarida ishtirok etishni yoqtiradi."
 
 #. module: website
@@ -10007,9 +9936,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Fourth Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Describe the scene as you envision it</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Describe the scene as you envision it</small>"
 msgstr ""
 "To‘rtinchi slayd <small class=\"oe_unbreakable o_nav_tabs_description "
 "opacity-75\">Sahnani tasavvuringizdagi kabi tasvirlang</small>"
@@ -10952,7 +10879,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/edit_menu.xml:0
 #, fuzzy
-msgid "Hint: Type '/' to search an existing page and '#' to link to an anchor."
+msgid ""
+"Hint: Type '/' to search an existing page and '#' to link to an anchor."
 msgstr ""
 "Maslahat: Mavjud sahifani qidirish uchun '/' va langarni bog‘lash uchun '#' "
 "belgisini kiriting."
@@ -11331,8 +11259,7 @@ msgstr ""
 msgid ""
 "If this view is inherited,\n"
 "* if True, the view always extends its parent\n"
-"* if False, the view currently does not extend its parent but can be "
-"enabled\n"
+"* if False, the view currently does not extend its parent but can be enabled\n"
 "         "
 msgstr ""
 "Agar bu ko‘rinish meros qilib olingan bo‘lsa, * agar Rost bo‘lsa, ko‘rinish "
@@ -11617,11 +11544,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/builder/translation_components/translatorInfoDialog.xml:0
 msgid ""
-"In this mode, you can only translate texts or replace some elements (images, "
-"documents) with a translated equivalent. To change the structure of the "
-"page, you must edit the master page.\n"
-"            Each modification on the master page is automatically applied to "
-"all translated versions."
+"In this mode, you can only translate texts or replace some elements (images, documents) with a translated equivalent. To change the structure of the page, you must edit the master page.\n"
+"            Each modification on the master page is automatically applied to all translated versions."
 msgstr ""
 
 #. module: website
@@ -11908,8 +11832,8 @@ msgstr "Ogohlantirish qismini kiritish"
 msgid ""
 "Insert text styles like headers, bold, italic, lists, and fonts with a "
 "simple WYSIWYG editor. Flexible and easy to use, it lets you design and "
-"format documents in real time. No coding knowledge is needed, making content "
-"creation straightforward and enjoyable for everyone."
+"format documents in real time. No coding knowledge is needed, making content"
+" creation straightforward and enjoyable for everyone."
 msgstr ""
 "Oddiy WYSIWYG muharriri yordamida sarlavhalar, qalin, qiya, ro‘yxatlar va "
 "shriftlar kabi matn uslublarini kiriting. Moslashuvchan va foydalanishga "
@@ -12981,7 +12905,8 @@ msgstr "Takliflarimiz haqida batafsil ma'lumot oling"
 #: model_terms:ir.ui.view,arch_db:website.s_striped
 #, fuzzy
 msgid "Learn about the key decisions that have shaped our identity."
-msgstr "Bizning o‘zligimizni shakllantirgan muhim qarorlar haqida bilib oling."
+msgstr ""
+"Bizning o‘zligimizni shakllantirgan muhim qarorlar haqida bilib oling."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -13059,7 +12984,8 @@ msgstr "Izoh"
 #, fuzzy
 msgid "Let your customers log in to see their documents"
 msgstr ""
-"Mijozlaringizga o‘z hujjatlarini ko‘rish uchun tizimga kirishga ruxsat bering"
+"Mijozlaringizga o‘z hujjatlarini ko‘rish uchun tizimga kirishga ruxsat "
+"bering"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
@@ -13342,11 +13268,11 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Looking for a quick and easy way to organize repeat orders?<br/>\n"
-"                                        It's just one of the ways we support "
-"our members."
+"                                        It's just one of the ways we support our members."
 msgstr ""
-"Takroriy buyurtmalarni tashkil etishning tez va oson usulini izlayapsizmi?"
-"<br/> Bu a'zolarimizni qo‘llab-quvvatlashning ko‘plab usullaridan biridir."
+"Takroriy buyurtmalarni tashkil etishning tez va oson usulini "
+"izlayapsizmi?<br/> Bu a'zolarimizni qo‘llab-quvvatlashning ko‘plab "
+"usullaridan biridir."
 
 #. module: website
 #. odoo-javascript
@@ -13846,8 +13772,8 @@ msgstr "Mich Stark, Bosh operatsion direktor"
 #, fuzzy
 msgid ""
 "Mich loves taking on challenges. With his multi-year experience as "
-"Commercial Director in the software industry, Mich has helped the company to "
-"get where it is today. Mich is among the best minds."
+"Commercial Director in the software industry, Mich has helped the company to"
+" get where it is today. Mich is among the best minds."
 msgstr ""
 "Mich qiyinchiliklarni yengishni yaxshi ko‘radi. Dasturiy ta'minot sohasida "
 "Tijorat direktori sifatidagi ko‘p yillik tajribasi bilan Mich kompaniyaning "
@@ -14098,8 +14024,8 @@ msgstr "Ko‘proq potensial mijozlar"
 msgid ""
 "More than 90 shapes exist and their colors are picked to match your Theme."
 msgstr ""
-"90 dan ortiq shakl mavjud bo‘lib, ularning ranglari mavzungizga mos ravishda "
-"tanlangan."
+"90 dan ortiq shakl mavjud bo‘lib, ularning ranglari mavzungizga mos ravishda"
+" tanlangan."
 
 #. module: website
 #. odoo-javascript
@@ -14320,7 +14246,8 @@ msgstr "Yordam kerakmi?"
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_cards
 #, fuzzy
 msgid ""
-"Need to pick up your order at one of our stores? Discover the nearest to you."
+"Need to pick up your order at one of our stores? Discover the nearest to "
+"you."
 msgstr ""
 "Buyurtmangizni do‘konlarimizdan birida olishingiz kerakmi? O‘zingizga eng "
 "yaqinini toping."
@@ -14498,8 +14425,8 @@ msgid ""
 "notifications."
 msgstr ""
 "Keyin siz platformaning asosiy sozlamalarini amalga oshirishda yordam "
-"beradigan <b>o‘rnatish yordamchisi</b> bilan tanishasiz. Yordamchi til, vaqt "
-"mintaqasi va xabarnomalar kabi muhim parametrlarni sozlashda ko‘maklashadi."
+"beradigan <b>o‘rnatish yordamchisi</b> bilan tanishasiz. Yordamchi til, vaqt"
+" mintaqasi va xabarnomalar kabi muhim parametrlarni sozlashda ko‘maklashadi."
 
 #. module: website
 #. odoo-javascript
@@ -14589,7 +14516,8 @@ msgstr ""
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 #, fuzzy
 msgid "No related keywords found. Try a broader term."
-msgstr "Tegishli kalit so‘zlar topilmadi. Kengroq atama bilan qidirib ko‘ring."
+msgstr ""
+"Tegishli kalit so‘zlar topilmadi. Kengroq atama bilan qidirib ko‘ring."
 
 #. module: website
 #. odoo-javascript
@@ -15037,11 +14965,9 @@ msgstr "Faqat zarur cookie-fayllariga ruxsat berish"
 #: model:ir.model.fields,help:website.field_website_page__mode
 #, fuzzy
 msgid ""
-"Only applies if this view inherits from an other one (inherit_id is not "
-"False/Null).\n"
+"Only applies if this view inherits from an other one (inherit_id is not False/Null).\n"
 "\n"
-"* if extension (default), if this view is requested the closest primary "
-"view\n"
+"* if extension (default), if this view is requested the closest primary view\n"
 "is looked up (via inherit_id), then all views inheriting from it with this\n"
 "view's model are applied\n"
 "* if primary, the closest primary view is fully resolved (even if it uses a\n"
@@ -15050,8 +14976,8 @@ msgid ""
 "actual arch.\n"
 msgstr ""
 "Faqat ushbu ko‘rinish boshqasidan meros bo‘lsa (inherit_id False/Null emas) "
-"qo‘llaniladi.  * agar kengaytma (standart) bo‘lsa, bu ko‘rinish so‘ralganda, "
-"eng yaqin asosiy ko‘rinish topiladi (inherit_id orqali), so‘ng undan ushbu "
+"qo‘llaniladi.  * agar kengaytma (standart) bo‘lsa, bu ko‘rinish so‘ralganda,"
+" eng yaqin asosiy ko‘rinish topiladi (inherit_id orqali), so‘ng undan ushbu "
 "ko‘rinish modeli bilan meros oluvchi barcha ko‘rinishlar qo‘llaniladi. * "
 "agar asosiy bo‘lsa, eng yaqin asosiy ko‘rinish to‘liq aniqlanadi (hatto u "
 "boshqa modeldan foydalansa ham), keyin bu ko‘rinishning merosxo‘rlik "
@@ -15309,8 +15235,8 @@ msgstr "Kompaniyamiz"
 #, fuzzy
 msgid ""
 "Our company specializes in consulting, product development, and customer "
-"support. We tailor our services to fit the unique needs of businesses across "
-"various sectors, helping them grow and succeed in a competitive market."
+"support. We tailor our services to fit the unique needs of businesses across"
+" various sectors, helping them grow and succeed in a competitive market."
 msgstr ""
 "Kompaniyamiz maslahat berish, mahsulot ishlab chiqarish va mijozlarni "
 "qo‘llab-quvvatlashga ixtisoslashgan. Biz xizmatlarimizni turli sohalardagi "
@@ -15358,8 +15284,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
 #, fuzzy
 msgid ""
-"Our development team works tirelessly to enhance the platform's performance, "
-"security, and functionality, ensuring it remains at the cutting edge of "
+"Our development team works tirelessly to enhance the platform's performance,"
+" security, and functionality, ensuring it remains at the cutting edge of "
 "innovation."
 msgstr ""
 "Dasturchilar jamoamiz platformaning samaradorligi, xavfsizligi va "
@@ -15423,8 +15349,8 @@ msgid ""
 "Our products are designed for small to medium size companies willing to "
 "optimize their performance."
 msgstr ""
-"Mahsulotlarimiz o‘z faoliyatini takomillashtirmoqchi bo‘lgan kichik va o‘rta "
-"korxonalar uchun mo‘ljallangan."
+"Mahsulotlarimiz o‘z faoliyatini takomillashtirmoqchi bo‘lgan kichik va o‘rta"
+" korxonalar uchun mo‘ljallangan."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_big_icons_subtitles
@@ -15489,9 +15415,9 @@ msgid ""
 "Our support team is available 24/7 to assist with any inquiries or issues, "
 "ensuring you get help whenever you need it."
 msgstr ""
-"Qo‘llab-quvvatlash jamoamiz har qanday so‘rov yoki muammolar bo‘yicha yordam "
-"berish uchun kuniga 24 soat, haftasiga 7 kun ishlaydi, bu sizga kerak paytda "
-"yordam olishingizni kafolatlaydi."
+"Qo‘llab-quvvatlash jamoamiz har qanday so‘rov yoki muammolar bo‘yicha yordam"
+" berish uchun kuniga 24 soat, haftasiga 7 kun ishlaydi, bu sizga kerak "
+"paytda yordam olishingizni kafolatlaydi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_faq_horizontal
@@ -15825,8 +15751,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 #, fuzzy
 msgid ""
-"Paragraph with <strong>bold</strong>, <span class=\"text-muted\">muted</"
-"span> and <em>italic</em> texts"
+"Paragraph with <strong>bold</strong>, <span class=\"text-"
+"muted\">muted</span> and <em>italic</em> texts"
 msgstr ""
 "<strong>Qalin</strong>, <span class=\"text-muted\">xira</span> va "
 "<em>kursiv</em> matnli paragraf"
@@ -15953,8 +15879,8 @@ msgid ""
 "Penne pasta tossed in a spicy tomato and garlic sauce with a hint of chili "
 "peppers, finished with fresh parsley."
 msgstr ""
-"Penne makaron achchiq pomidor va sarimsoqli qaylaga ozgina qalampir qo‘shib, "
-"yangi petrushka bilan bezatilgan."
+"Penne makaron achchiq pomidor va sarimsoqli qaylaga ozgina qalampir qo‘shib,"
+" yangi petrushka bilan bezatilgan."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -16953,8 +16879,8 @@ msgstr "Oddiy"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid ""
-"Regular feedback loops and steady refinements turn early ideas into stronger "
-"outcomes, improving quality without slowing momentum."
+"Regular feedback loops and steady refinements turn early ideas into stronger"
+" outcomes, improving quality without slowing momentum."
 msgstr ""
 
 #. module: website
@@ -17268,8 +17194,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_manifesto
 msgid ""
-"Responsive support and thoughtful guidance remove blockers when they appear, "
-"so people stay focused and confident as they move forward."
+"Responsive support and thoughtful guidance remove blockers when they appear,"
+" so people stay focused and confident as they move forward."
 msgstr ""
 
 #. module: website
@@ -17672,8 +17598,8 @@ msgid ""
 "Savor our fresh, local cuisine with a modern twist.<br/>Deliciously crafted "
 "for every taste!"
 msgstr ""
-"Yangi, mahalliy taomlarimizni zamonaviy usulda tayyorlanganidan lazzatlaning."
-"<br/>Har qanday didga mos tarzda mohirona tayyorlangan!"
+"Yangi, mahalliy taomlarimizni zamonaviy usulda tayyorlanganidan "
+"lazzatlaning.<br/>Har qanday didga mos tarzda mohirona tayyorlangan!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
@@ -17881,8 +17807,7 @@ msgstr "Ikkinchi bosqich"
 #, fuzzy
 msgid ""
 "Second Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">What is this slide about</small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">What is this slide about</small>"
 msgstr ""
 "Ikkinchi slayd <small class=\"oe_unbreakable o_nav_tabs_description "
 "opacity-75\">Bu slayd nima haqida</small>"
@@ -17981,7 +17906,7 @@ msgstr "Xavfsizlik siyosati"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_template
-msgid "See All <i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
+msgid "See All <i class=\"oi ms-2\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -18036,7 +17961,8 @@ msgstr "Funksiyalarni olib tashlash uchun bloklarni tanlang va o‘chiring."
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
 #, fuzzy
 msgid "Select and delete blocks to remove some steps."
-msgstr "Ba'zi bosqichlarni olib tashlash uchun bloklarni tanlang va o‘chiring."
+msgstr ""
+"Ba'zi bosqichlarni olib tashlash uchun bloklarni tanlang va o‘chiring."
 
 #. module: website
 #. odoo-javascript
@@ -18552,7 +18478,8 @@ msgstr "Kirish"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_mega_columns
 #, fuzzy
-msgid "Sign up to receive the best promotions, our events and personal advice."
+msgid ""
+"Sign up to receive the best promotions, our events and personal advice."
 msgstr ""
 "Eng yaxshi aksiyalar, tadbirlarimiz va shaxsiy maslahatlarni olish uchun "
 "ro‘yxatdan o‘ting."
@@ -18582,8 +18509,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Crafted to bring calm and "
 "clarity to your space."
 msgstr ""
-"Sodda shakllar. Tabiiy to‘qimalar. Abadiy dizayn. Xonangizga osoyishtalik va "
-"oydinlik baxsh etish uchun yaratilgan."
+"Sodda shakllar. Tabiiy to‘qimalar. Abadiy dizayn. Xonangizga osoyishtalik va"
+" oydinlik baxsh etish uchun yaratilgan."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner_product
@@ -18593,8 +18520,8 @@ msgid ""
 "Simple forms. Natural textures. Timeless design. Explore our new furniture "
 "collection—crafted to bring calm and clarity to your space."
 msgstr ""
-"Sodda shakllar. Tabiiy to‘qimalar. Abadiy dizayn. Xonangizga osoyishtalik va "
-"oydinlik baxsh etish uchun yaratilgan yangi mebel kolleksiyamiz bilan "
+"Sodda shakllar. Tabiiy to‘qimalar. Abadiy dizayn. Xonangizga osoyishtalik va"
+" oydinlik baxsh etish uchun yaratilgan yangi mebel kolleksiyamiz bilan "
 "tanishing."
 
 #. module: website
@@ -18839,8 +18766,8 @@ msgid ""
 "Small text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
 "<i>Integer posuere erat a ante</i>."
 msgstr ""
-"Kichik matn. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. "
-"<i>Integer posuere erat a ante</i>."
+"Kichik matn. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit."
+" <i>Integer posuere erat a ante</i>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_services_grid
@@ -18934,8 +18861,8 @@ msgstr "Bu yerda boshqa narsa"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_launch_countdown
 msgid ""
-"Something exciting is on the horizon, and we can't wait to share it with you."
-"<br/>Sign up now to be the first to know when we launch."
+"Something exciting is on the horizon, and we can't wait to share it with "
+"you.<br/>Sign up now to be the first to know when we launch."
 msgstr ""
 
 #. module: website
@@ -19019,7 +18946,8 @@ msgstr "Qidiruv so‘zini ko‘rsating."
 #. module: website
 #: model:ir.model.fields,help:website.field_ir_model__website_form_default_field_id
 #, fuzzy
-msgid "Specify the field which will contain meta and custom form fields datas."
+msgid ""
+"Specify the field which will contain meta and custom form fields datas."
 msgstr ""
 "Meta va maxsus shakl maydonlari ma'lumotlarini o‘z ichiga olgan maydonni "
 "belgilang."
@@ -19040,8 +18968,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_boxed
 #, fuzzy
 msgid ""
-"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce "
-"for a flavorful kick."
+"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce"
+" for a flavorful kick."
 msgstr ""
 "Achchiq pepperoni, o‘tkir chili bo‘laklari, motsarella va pomidor sousi "
 "bilan tayyorlangan mazali pitsa."
@@ -19130,12 +19058,12 @@ msgstr "Hozir boshlash"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_banner
-msgid "Start Now <span class=\"fa fa-angle-right ms-2\"/>"
+msgid "Start Now <span class=\"oi ms-2\" data-icon=\"keyboard_arrow_right\"/>"
 msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_bento_grid_avatars
-msgid "Start saving  <span class=\"fa fa-long-arrow-right\" role=\"img\"/>"
+msgid "Start saving  <span class=\"oi\" data-icon=\"east\" role=\"img\"/>"
 msgstr ""
 
 #. module: website
@@ -19488,8 +19416,8 @@ msgid ""
 "Tailor the platform to your needs, offering flexibility and control over "
 "your user experience."
 msgstr ""
-"Platformani o‘z ehtiyojlaringizga moslashtiring, foydalanuvchi tajribangizni "
-"moslashuvchan va nazorat qilinadigan qiling."
+"Platformani o‘z ehtiyojlaringizga moslashtiring, foydalanuvchi tajribangizni"
+" moslashuvchan va nazorat qilinadigan qiling."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_cards_grid
@@ -19795,8 +19723,8 @@ msgstr "Instagram sahifasi nomi noto‘g‘ri"
 #. odoo-javascript
 #: code:addons/website/static/src/components/dialog/page_properties.xml:0
 msgid ""
-"The URL “%(url)s“ is contained in the “%(field)s” of the following “%"
-"(model)s”"
+"The URL “%(url)s“ is contained in the “%(field)s” of the following "
+"“%(model)s”"
 msgstr ""
 
 #. module: website
@@ -19829,12 +19757,11 @@ msgstr "Ushbu veb-sayt bog‘langan kompaniya"
 #: code:addons/website/models/res_company.py:0
 #, fuzzy
 msgid ""
-"The company “%(company_name)s” cannot be archived because it has a linked "
-"website “%(website_name)s”.\n"
+"The company “%(company_name)s” cannot be archived because it has a linked website “%(website_name)s”.\n"
 "Change that website's company first."
 msgstr ""
-"\"%(company_name)s\" kompaniyasini arxivlash imkonsiz, chunki uning \"%"
-"(website_name)s\" bog‘langan veb-sayti mavjud. Avval bu veb-saytning "
+"\"%(company_name)s\" kompaniyasini arxivlash imkonsiz, chunki uning "
+"\"%(website_name)s\" bog‘langan veb-sayti mavjud. Avval bu veb-saytning "
 "kompaniyasini o‘zgartiring."
 
 #. module: website
@@ -19864,16 +19791,14 @@ msgstr "Kompaniyamiz taraqqiyoti"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/builder/plugins/form/form_option_plugin.js:0
-msgid ""
-"The field \"%(fieldName)s\" is mandatory for the action \"%(actionName)s\"."
+msgid "The field \"%(fieldName)s\" is mandatory for the action \"%(actionName)s\"."
 msgstr ""
 
 #. module: website
 #. odoo-python
 #: code:addons/website/models/website_form.py:0
 msgid ""
-"The field '%(field)s' cannot be deleted because it is referenced in a "
-"website view.\n"
+"The field '%(field)s' cannot be deleted because it is referenced in a website view.\n"
 "Model: %(model)s\n"
 "View: %(view)s"
 msgstr ""
@@ -19895,8 +19820,8 @@ msgstr "Quyidagi domen noto‘g‘ri:"
 #. odoo-javascript
 #: code:addons/website/static/src/snippets/s_website_form/form.js:0
 msgid ""
-"The following file(s) have invalid type: %(fileNames)s. Allowed type(s): %"
-"(allowedMimeTypesLabels)s."
+"The following file(s) have invalid type: %(fileNames)s. Allowed type(s): "
+"%(allowedMimeTypesLabels)s."
 msgstr ""
 
 #. module: website
@@ -20043,8 +19968,8 @@ msgstr ""
 #: code:addons/website/models/website.py:0
 msgid ""
 "The new default website is %(default_website_name)s. The following default "
-"settings were copied from the old default website to the new one: %"
-"(transferred_settings)s. Note that these settings are still present on the "
+"settings were copied from the old default website to the new one: "
+"%(transferred_settings)s. Note that these settings are still present on the "
 "old default website."
 msgstr ""
 
@@ -20251,9 +20176,7 @@ msgstr "Uchinchi menyu"
 #, fuzzy
 msgid ""
 "Third Slide\n"
-"                                <small class=\"oe_unbreakable "
-"o_nav_tabs_description opacity-75\">Add your touch to complete the image</"
-"small>"
+"                                <small class=\"oe_unbreakable o_nav_tabs_description opacity-75\">Add your touch to complete the image</small>"
 msgstr ""
 "Uchinchi slayd <small class=\"oe_unbreakable o_nav_tabs_description "
 "opacity-75\">Rasmni to‘ldirish uchun o‘z hissangizni qo‘shing</small>"
@@ -20263,7 +20186,8 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website__favicon
 #, fuzzy
 msgid "This field holds the image used to display a favicon on the website."
-msgstr "Bu maydon veb-saytda favikon sifatida ko‘rsatiladigan rasmni saqlaydi."
+msgstr ""
+"Bu maydon veb-saytda favikon sifatida ko‘rsatiladigan rasmni saqlaydi."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__arch_base
@@ -20316,10 +20240,8 @@ msgstr ""
 #: model:ir.model.fields,help:website.field_website_page__arch
 #, fuzzy
 msgid ""
-"This field should be used when accessing view arch. It will use "
-"translation.\n"
-"                               Note that it will read `arch_db` or `arch_fs` "
-"if in dev-xml mode."
+"This field should be used when accessing view arch. It will use translation.\n"
+"                               Note that it will read `arch_db` or `arch_fs` if in dev-xml mode."
 msgstr ""
 "Bu maydon ko‘rish arxitekturasiga kirishda ishlatilishi kerak. U tarjimadan "
 "foydalanadi. E'tibor bering, agar dev-xml rejimida bo‘lsa, u 'arch_db' yoki "
@@ -20338,8 +20260,7 @@ msgstr "Bu maydon ko‘rish arxitekturasini saqlaydi."
 #, fuzzy
 msgid ""
 "This field will save the current `arch_db` before writing on it.\n"
-"                                                                         Useful "
-"to (soft) reset a broken view."
+"                                                                         Useful to (soft) reset a broken view."
 msgstr ""
 "Bu maydon joriy 'arch_db' ni unga yozishdan oldin saqlaydi. Buzilgan "
 "ko‘rinishni (yumshoq) tiklash uchun foydali."
@@ -20349,11 +20270,11 @@ msgstr ""
 #: code:addons/website/static/src/builder/plugins/font/add_font_dialog.js:0
 #, fuzzy
 msgid ""
-"This font already exists, you can only add it as a local font to replace the "
-"server version."
+"This font already exists, you can only add it as a local font to replace the"
+" server version."
 msgstr ""
-"Bu shrift allaqachon mavjud, uni faqat server versiyasini almashtirish uchun "
-"mahalliy shrift sifatida qo‘shishingiz mumkin."
+"Bu shrift allaqachon mavjud, uni faqat server versiyasini almashtirish uchun"
+" mahalliy shrift sifatida qo‘shishingiz mumkin."
 
 #. module: website
 #. odoo-javascript
@@ -20373,8 +20294,8 @@ msgstr "Bu"
 msgid ""
 "This is a paragraph. Ambitioni dedisse scripsisse iudicaretur. Nihilne te "
 "nocturnum praesidium Palati, nihil urbis vigiliae. Unam incolunt Belgae, "
-"aliam Aquitani, tertiam. Integer legentibus erat a ante historiarum dapibus. "
-"Phasellus laoreet lorem vel dolor tempus vehicula."
+"aliam Aquitani, tertiam. Integer legentibus erat a ante historiarum dapibus."
+" Phasellus laoreet lorem vel dolor tempus vehicula."
 msgstr ""
 "Bu paragraf. Ambitioni dedisse scripsisse iudicaretur. Nihilne te nocturnum "
 "praesidium Palati, nihil urbis vigiliae. Unam incolunt Belgae, aliam "
@@ -20390,7 +20311,8 @@ msgid ""
 "extra attention to featured content or information."
 msgstr ""
 "Bu oddiy qahramon qismi bo‘lib, tanlangan mazmun yoki ma'lumotga alohida "
-"e'tibor qaratish uchun mo‘ljallangan oddiy jumbotron uslubidagi komponentdir."
+"e'tibor qaratish uchun mo‘ljallangan oddiy jumbotron uslubidagi "
+"komponentdir."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_key_images
@@ -20725,8 +20647,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
-"right icon of each block. Then, duplicate one of the columns to create a new "
-"one as a copy."
+"right icon of each block. Then, duplicate one of the columns to create a new"
+" one as a copy."
 msgstr ""
 "To‘rtinchi ustunni qo‘shish uchun har bir blokning o‘ng belgisidan "
 "foydalanib, ushbu uchta ustun hajmini kichraytiring. So‘ngra yangi ustun "
@@ -20764,9 +20686,9 @@ msgid ""
 "description accordingly to boost your traffic."
 msgstr ""
 "Ko‘proq tashrif buyuruvchilarni jalb qilish uchun Google'da tez-tez "
-"qidiriladigan kalit so‘zlarni maqsad qilib olishingiz kerak. O‘rnatilgan SEO "
-"vositasi yordamida bir nechta kalit so‘zlarni aniqlaganingizdan so‘ng, Odoo "
-"sizga eng yaxshi kalit so‘zlarni tavsiya qiladi. Keyin trafikni oshirish "
+"qidiriladigan kalit so‘zlarni maqsad qilib olishingiz kerak. O‘rnatilgan SEO"
+" vositasi yordamida bir nechta kalit so‘zlarni aniqlaganingizdan so‘ng, Odoo"
+" sizga eng yaxshi kalit so‘zlarni tavsiya qiladi. Keyin trafikni oshirish "
 "uchun sarlavha va tavsifingizni moslashtiring."
 
 #. module: website
@@ -20975,9 +20897,9 @@ msgid ""
 "meets functionality. Elevate your space with pieces that blend style and "
 "comfort seamlessly."
 msgstr ""
-"Nafislik va funksionallik uyg‘unlashgan yangi dizayn to‘plamimiz bilan atrof-"
-"muhitingizni o‘zgartiring. Uslub va qulaylikni mukammal uyg‘unlashtirgan "
-"buyumlar bilan makoningizni yuksaltiring."
+"Nafislik va funksionallik uyg‘unlashgan yangi dizayn to‘plamimiz bilan "
+"atrof-muhitingizni o‘zgartiring. Uslub va qulaylikni mukammal "
+"uyg‘unlashtirgan buyumlar bilan makoningizni yuksaltiring."
 
 #. module: website
 #. odoo-javascript
@@ -21085,8 +21007,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_references_tiles
 msgid ""
-"Trusted by<br/><font style=\"color: rgb(125, 125, 125);\">World leaders</"
-"font>"
+"Trusted by<br/><font style=\"color: rgb(125, 125, 125);\">World "
+"leaders</font>"
 msgstr ""
 
 #. module: website
@@ -21131,8 +21053,8 @@ msgid ""
 "Type '<i class=\"confirm_word\">yes</i>' in the box below if you want to "
 "confirm."
 msgstr ""
-"Tasdiqlashni istasangiz, quyidagi katakchaga '<i class=\"confirm_word\">ha</"
-"i>' deb yozing."
+"Tasdiqlashni istasangiz, quyidagi katakchaga '<i "
+"class=\"confirm_word\">ha</i>' deb yozing."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_rewrite__redirect_type
@@ -21141,21 +21063,17 @@ msgid ""
 "Type of redirect/Rewrite:\n"
 "\n"
 "        301 Moved permanently: The browser will keep in cache the new url.\n"
-"        302 Moved temporarily: The browser will not keep in cache the new "
-"url and ask again the next time the new url.\n"
-"        404 Not Found: If you want remove a specific page/controller (e.g. "
-"Ecommerce is installed, but you don't want /shop on a specific website)\n"
-"        308 Redirect / Rewrite: If you want rename a controller with a new "
-"url. (Eg: /shop -> /garden - Both url will be accessible but /shop will "
-"automatically be redirected to /garden)\n"
+"        302 Moved temporarily: The browser will not keep in cache the new url and ask again the next time the new url.\n"
+"        404 Not Found: If you want remove a specific page/controller (e.g. Ecommerce is installed, but you don't want /shop on a specific website)\n"
+"        308 Redirect / Rewrite: If you want rename a controller with a new url. (Eg: /shop -> /garden - Both url will be accessible but /shop will automatically be redirected to /garden)\n"
 "    "
 msgstr ""
 "Qayta yo‘naltirish/qayta yozish turi: 301 Doimiy ko‘chirildi: Brauzer yangi "
 "URL manzilni keshda saqlaydi.         302 Vaqtincha ko‘chirildi: Brauzer "
-"yangi URL manzilini keshda saqlamaydi va keyingi safar yana "
-"so‘raydi.         404 Topilmadi: Agar ma'lum bir sahifa/nazoratchilarni olib "
-"tashlamoqchi bo‘lsangiz (masalan, elektron tijorat o‘rnatilgan, lekin ma'lum "
-"bir veb-saytda /do‘konni xohlamaysiz). 308 Qayta yo‘naltirish / Qayta "
+"yangi URL manzilini keshda saqlamaydi va keyingi safar yana so‘raydi."
+"         404 Topilmadi: Agar ma'lum bir sahifa/nazoratchilarni olib "
+"tashlamoqchi bo‘lsangiz (masalan, elektron tijorat o‘rnatilgan, lekin ma'lum"
+" bir veb-saytda /do‘konni xohlamaysiz). 308 Qayta yo‘naltirish / Qayta "
 "yozish: Agar nazoratchilarni yangi URL bilan qayta nomlamoqchi bo‘lsangiz. "
 "(Masalan: /shop -> /garden - Ikkala URL ham ochiladi, lekin /shop avtomatik "
 "ravishda /garden manziliga yo‘naltiriladi)"
@@ -21240,14 +21158,12 @@ msgstr "Sichqoncha ustiga kelganda tagiga chizish"
 #, fuzzy
 msgid ""
 "Understand how visitors engage with our website, via Google Analytics.\n"
-"                                                Learn more about <a "
-"class=\"o_translate_inline\" href=\"https://support.google.com/analytics/"
-"answer/11397207?hl=en\">Analytics cookies and privacy information.</a>"
+"                                                Learn more about <a class=\"o_translate_inline\" href=\"https://support.google.com/analytics/answer/11397207?hl=en\">Analytics cookies and privacy information.</a>"
 msgstr ""
 "Google Analytics orqali tashrif buyuruvchilarning veb-saytimiz bilan qanday "
 "o‘zaro aloqada bo‘lishini tushunish. <a class=\"o_translate_inline\" "
-"href=\"https://support.google.com/analytics/answer/11397207?hl=en\">Analitik "
-"cookie fayllar va maxfiylik ma'lumotlari haqida batafsil.</a>"
+"href=\"https://support.google.com/analytics/answer/11397207?hl=en\">Analitik"
+" cookie fayllar va maxfiylik ma'lumotlari haqida batafsil.</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quadrant
@@ -21390,8 +21306,8 @@ msgstr "URL manzillar va sahifalar"
 #, fuzzy
 msgid "Use Google Map on your website (Contact Us page, snippets, etc)."
 msgstr ""
-"Veb-saytingizda Google Xaritadan foydalaning (Biz bilan bog‘lanish sahifasi, "
-"snippetlar va boshqalar)."
+"Veb-saytingizda Google Xaritadan foydalaning (Biz bilan bog‘lanish sahifasi,"
+" snippetlar va boshqalar)."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -21444,7 +21360,8 @@ msgstr "Veb-saytda foydalanish"
 #: code:addons/website/static/src/builder/plugins/options/popup_option.xml:0
 #, fuzzy
 msgid "Use the generated link to open the pop-up."
-msgstr "Qalqib chiquvchi oynani ochish uchun yaratilgan havoladan foydalaning."
+msgstr ""
+"Qalqib chiquvchi oynani ochish uchun yaratilgan havoladan foydalaning."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list
@@ -21545,10 +21462,8 @@ msgstr "Sahifa sarlavhasida ishlatiladi"
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"Used to collect information about your interactions with the website, the "
-"pages you've seen,\n"
-"                                                and any specific marketing "
-"campaign that brought you to the website."
+"Used to collect information about your interactions with the website, the pages you've seen,\n"
+"                                                and any specific marketing campaign that brought you to the website."
 msgstr ""
 "Veb-sayt bilan o‘zaro aloqalaringiz, ko‘rgan sahifalaringiz va sizni saytga "
 "olib kelgan har qanday muayyan marketing kampaniyasi haqida ma'lumot "
@@ -21558,17 +21473,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"Used to make advertising more engaging to users and more valuable to "
-"publishers and advertisers,\n"
-"                                                such as providing more "
-"relevant ads when you visit other websites that display ads or to improve "
-"reporting on ad campaign performance."
+"Used to make advertising more engaging to users and more valuable to publishers and advertisers,\n"
+"                                                such as providing more relevant ads when you visit other websites that display ads or to improve reporting on ad campaign performance."
 msgstr ""
 "Reklamani foydalanuvchilar uchun yanada qiziqarli, noshirlar va reklama "
 "beruvchilar uchun esa qimmatli qilish maqsadida ishlatiladi. Masalan, "
-"reklama chiqaradigan boshqa veb-saytlarga tashrif buyurganingizda yanada mos "
-"reklamalarni taqdim etish yoki reklama kampaniyasi samaradorligi hisobotini "
-"yaxshilash uchun xizmat qiladi."
+"reklama chiqaradigan boshqa veb-saytlarga tashrif buyurganingizda yanada mos"
+" reklamalarni taqdim etish yoki reklama kampaniyasi samaradorligi hisobotini"
+" yaxshilash uchun xizmat qiladi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -21607,8 +21519,8 @@ msgstr "Bloklangan tashqi domenlar foydalanuvchilari ro‘yxati"
 #, fuzzy
 msgid "User needs to be at least in one of these groups to see the menu"
 msgstr ""
-"Foydalanuvchi menyuni ko‘rishi uchun ushbu guruhlardan kamida bittasiga a'zo "
-"bo‘lishi kerak"
+"Foydalanuvchi menyuni ko‘rishi uchun ushbu guruhlardan kamida bittasiga a'zo"
+" bo‘lishi kerak"
 
 #. module: website
 #. odoo-javascript
@@ -21983,7 +21895,8 @@ msgstr "Vizual materiallar"
 #. module: website
 #: model_terms:ir.actions.act_window,help:website.website_visitor_view_action
 #, fuzzy
-msgid "Wait for visitors to come to your website to see the pages they viewed."
+msgid ""
+"Wait for visitors to come to your website to see the pages they viewed."
 msgstr ""
 "Tashrif buyuruvchilar veb-saytingizga kelishi va ular ko‘rgan sahifalarni "
 "ko‘rishingiz uchun kuting."
@@ -22052,8 +21965,8 @@ msgid ""
 "ensuring that our platform continues to evolve to meet your needs."
 msgstr ""
 "Shuningdek, biz foydalanuvchilarning fikr-mulohazalari asosida muntazam "
-"yangilanishlar va yangi funksiyalarni taqdim etamiz, bu esa platformamizning "
-"sizning ehtiyojlaringizni qondirish uchun rivojlanishda davom etishini "
+"yangilanishlar va yangi funksiyalarni taqdim etamiz, bu esa platformamizning"
+" sizning ehtiyojlaringizni qondirish uchun rivojlanishda davom etishini "
 "ta'minlaydi."
 
 #. module: website
@@ -22082,11 +21995,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
 #, fuzzy
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products. We build great products to solve your business "
-"problems.\n"
-"                            <br/><br/>Our products are designed for small to "
-"medium size companies willing to optimize their performance."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products. We build great products to solve your business problems.\n"
+"                            <br/><br/>Our products are designed for small to medium size companies willing to optimize their performance."
 msgstr ""
 "Biz innovatsion mahsulotlar orqali har bir insonning hayotini yaxshilashni "
 "maqsad qilgan fidoyi insonlar jamoasimiz. Biznesingiz muammolarini hal "
@@ -22113,8 +22023,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_footer_headline
 #, fuzzy
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life. "
-"Our services are designed for small to medium size companies."
+"We are a team of passionate people whose goal is to improve everyone's life."
+" Our services are designed for small to medium size companies."
 msgstr ""
 "Biz har bir insonning hayotini yaxshilashni maqsad qilgan fidoyi insonlar "
 "jamoasimiz. Xizmatlarimiz kichik va o‘rta hajmli kompaniyalar uchun "
@@ -22177,8 +22087,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 #, fuzzy
 msgid ""
-"We collaborate with trusted, high-quality partners to bring you reliable and "
-"top-notch products and services."
+"We collaborate with trusted, high-quality partners to bring you reliable and"
+" top-notch products and services."
 msgstr ""
 "Biz ishonchli va yuqori sifatli mahsulot hamda xizmatlarni taqdim etish "
 "uchun nufuzli hamkorlar bilan hamkorlik qilamiz."
@@ -22207,8 +22117,8 @@ msgstr "Facebook sahifasi topilmadi"
 #: model_terms:ir.ui.view,arch_db:website.s_faq_list
 #, fuzzy
 msgid ""
-"We deliver personalized solutions, ensuring that every customer receives top-"
-"tier service tailored to their needs."
+"We deliver personalized solutions, ensuring that every customer receives "
+"top-tier service tailored to their needs."
 msgstr ""
 "Har bir mijozga o‘z ehtiyojlariga mos yuqori darajadagi xizmat "
 "ko‘rsatilishini ta'minlab, individual yechimlarni taqdim etamiz."
@@ -22280,8 +22190,8 @@ msgid ""
 "We may not be able to provide the best service to you if you reject those "
 "cookies, but the website will work."
 msgstr ""
-"Agar ushbu cookie-fayllarni rad etsangiz, sizga eng yaxshi xizmatni ko‘rsata "
-"olmasligimiz mumkin, ammo veb-sayt ishlayveradi."
+"Agar ushbu cookie-fayllarni rad etsangiz, sizga eng yaxshi xizmatni ko‘rsata"
+" olmasligimiz mumkin, ammo veb-sayt ishlayveradi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_accordion
@@ -22312,8 +22222,8 @@ msgid ""
 "We offer cutting-edge products and services to tackle modern challenges. "
 "Leveraging the latest technology, we help you achieve your goals."
 msgstr ""
-"Zamonaviy muammolarni hal qilish uchun ilg‘or mahsulot va xizmatlarni taklif "
-"etamiz. Eng so‘nggi texnologiyalardan foydalanib, maqsadlaringizga "
+"Zamonaviy muammolarni hal qilish uchun ilg‘or mahsulot va xizmatlarni taklif"
+" etamiz. Eng so‘nggi texnologiyalardan foydalanib, maqsadlaringizga "
 "erishishda yordam beramiz."
 
 #. module: website
@@ -22381,8 +22291,9 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_about_bold
 msgid ""
-"We support clients across planning, implementation, and ongoing operations—"
-"delivering reliable service, accountable teams, and outcomes they can track."
+"We support clients across planning, implementation, and ongoing "
+"operations—delivering reliable service, accountable teams, and outcomes they"
+" can track."
 msgstr ""
 
 #. module: website
@@ -22402,8 +22313,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_banner_contained
 msgid ""
 "We unite diverse perspectives, shared passion, and relentless drive. By "
-"fostering a collaborative environment, we empower our team to turn ambitious "
-"ideas into extraordinary realities."
+"fostering a collaborative environment, we empower our team to turn ambitious"
+" ideas into extraordinary realities."
 msgstr ""
 
 #. module: website
@@ -22418,15 +22329,16 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 msgid ""
-"We use cookies to provide improved experience on this website. You can learn "
-"more about our cookies and how we use them in our"
+"We use cookies to provide improved experience on this website. You can learn"
+" more about our cookies and how we use them in our"
 msgstr ""
 
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/xml/website.cookies_bar.xml:0
 #, fuzzy
-msgid "We use cookies to provide you a better user experience on this website."
+msgid ""
+"We use cookies to provide you a better user experience on this website."
 msgstr ""
 "Biz ushbu veb-saytda sizga yaxshiroq foydalanuvchi tajribasini taqdim etish "
 "uchun cookie-fayllardan foydalanamiz."
@@ -22456,8 +22368,8 @@ msgid ""
 msgstr ""
 "Sizdan xabar olishni istardik! Savollaringiz, fikr-mulohazalaringiz bo‘lsa "
 "yoki yordamga muhtoj bo‘lsangiz, jamoamiz yordam berishga tayyor. Quyidagi "
-"shaklni to‘ldiring va biz barcha murojaatlarga 24 soat ichida javob berishga "
-"harakat qilamiz. Aloqaga chiqqaningiz uchun tashakkur!"
+"shaklni to‘ldiring va biz barcha murojaatlarga 24 soat ichida javob berishga"
+" harakat qilamiz. Aloqaga chiqqaningiz uchun tashakkur!"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_launch_countdown
@@ -22852,8 +22764,7 @@ msgstr "Veb-sayt qayta yozuvlari"
 msgid ""
 "Website visitors<br/>\n"
 "                        <span class=\"h1-fs\">100,000</span>"
-msgstr ""
-"Veb-sayt tashrif buyuruvchilari<br/> <span class=\"h1-fs\">100 000</span>"
+msgstr "Veb-sayt tashrif buyuruvchilari<br/> <span class=\"h1-fs\">100 000</span>"
 
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_analytics
@@ -23189,13 +23100,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"You can choose to have your computer warn you each time a cookie is being "
-"sent, or you can choose to turn off all cookies.\n"
-"                            Each browser is a little different, so look at "
-"your browser's Help menu to learn the correct way to modify your cookies."
+"You can choose to have your computer warn you each time a cookie is being sent, or you can choose to turn off all cookies.\n"
+"                            Each browser is a little different, so look at your browser's Help menu to learn the correct way to modify your cookies."
 msgstr ""
-"Siz har safar cookie fayli yuborilganda kompyuteringiz ogohlantirishini yoki "
-"barcha cookie fayllarni o‘chirishni tanlashingiz mumkin. Har bir brauzer "
+"Siz har safar cookie fayli yuborilganda kompyuteringiz ogohlantirishini yoki"
+" barcha cookie fayllarni o‘chirishni tanlashingiz mumkin. Har bir brauzer "
 "biroz farqli, shuning uchun cookie fayllaringizni to‘g‘ri o‘zgartirish "
 "usulini o‘rganish uchun brauzeringizning Yordam menyusiga qarang."
 
@@ -23230,8 +23139,8 @@ msgstr ""
 msgid ""
 "You can reach our customer support team by emailing "
 "info@yourcompany.example.com, calling +1 555-555-5556, or using the live "
-"chat on our website. Our dedicated team is available 24/7 to assist with any "
-"inquiries or issues."
+"chat on our website. Our dedicated team is available 24/7 to assist with any"
+" inquiries or issues."
 msgstr ""
 "Mijozlarga yordam xizmatimizga info@yourcompany.example.com manziliga xat "
 "yuborish, +1 555-555-5556 raqamiga qo‘ng‘iroq qilish yoki veb-saytimizdagi "
@@ -23246,8 +23155,8 @@ msgstr ""
 msgid ""
 "You cannot delete default website %s. Try to change its settings instead"
 msgstr ""
-"%s standart veb-saytini o‘chira olmaysiz. Buning o‘rniga uning sozlamalarini "
-"o‘zgartiring"
+"%s standart veb-saytini o‘chira olmaysiz. Buning o‘rniga uning sozlamalarini"
+" o‘zgartiring"
 
 #. module: website
 #. odoo-python
@@ -23312,8 +23221,8 @@ msgstr ""
 #: code:addons/website/static/src/components/dialog/seo.xml:0
 #, fuzzy
 msgid ""
-"You have hidden this page from search results. It won't be indexed by search "
-"engines."
+"You have hidden this page from search results. It won't be indexed by search"
+" engines."
 msgstr ""
 "Siz bu sahifani qidiruv natijalaridan yashirdingiz. U qidiruv tizimlari "
 "tomonidan indekslanmaydi."
@@ -23329,17 +23238,15 @@ msgstr "Siz juda ko‘p fayl yuklagansiz (maksimal %s ta fayl)."
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 #, fuzzy
 msgid ""
-"You may opt-out of a third-party's use of cookies by visiting the <a "
-"class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?"
-"c=1\" rel=\"nofollow\">Network Advertising Initiative opt-out page</a>.\n"
-"                                                The website will still work "
-"if you reject or discard those cookies."
+"You may opt-out of a third-party's use of cookies by visiting the <a class=\"o_translate_inline\" href=\"https://optout.networkadvertising.org/?c=1\" rel=\"nofollow\">Network Advertising Initiative opt-out page</a>.\n"
+"                                                The website will still work if you reject or discard those cookies."
 msgstr ""
-"<a class=\"o_translate_inline\" href=\"https://"
-"optout.networkadvertising.org/?c=1\" rel=\"nofollow\">Tarmoq reklama "
-"tashabbusidan voz kechish sahifasi</a>ga tashrif buyurib, uchinchi tomon "
-"cookie fayllaridan foydalanishni bekor qilishingiz mumkin. Agar ushbu cookie "
-"fayllarni rad etsangiz yoki o‘chirsangiz ham, veb-sayt ishlashda davom etadi."
+"<a class=\"o_translate_inline\" "
+"href=\"https://optout.networkadvertising.org/?c=1\" rel=\"nofollow\">Tarmoq "
+"reklama tashabbusidan voz kechish sahifasi</a>ga tashrif buyurib, uchinchi "
+"tomon cookie fayllaridan foydalanishni bekor qilishingiz mumkin. Agar ushbu "
+"cookie fayllarni rad etsangiz yoki o‘chirsangiz ham, veb-sayt ishlashda "
+"davom etadi."
 
 #. module: website
 #. odoo-javascript
@@ -23480,8 +23387,8 @@ msgid ""
 "Your data is protected by advanced encryption and security protocols, "
 "keeping your personal information safe."
 msgstr ""
-"Ma'lumotlaringiz shaxsiy axborotingizni xavfsiz saqlash uchun kengaytirilgan "
-"shifrlash va xavfsizlik protokollari bilan himoyalangan"
+"Ma'lumotlaringiz shaxsiy axborotingizni xavfsiz saqlash uchun kengaytirilgan"
+" shifrlash va xavfsizlik protokollari bilan himoyalangan"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -23528,8 +23435,8 @@ msgstr "Bo‘limingiz sarlavhasi"
 #: model_terms:ir.ui.view,arch_db:website.s_about_bold
 msgid ""
 "Your trusted partner in navigating today's challenges. <font style=\"color: "
-"rgb(125, 125, 125);\">We provide reliable service and proven expertise.</"
-"font>"
+"rgb(125, 125, 125);\">We provide reliable service and proven "
+"expertise.</font>"
 msgstr ""
 
 #. module: website
@@ -23678,7 +23585,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid "block, blog, post, catalog, feed, items, entries, entry, collection"
-msgstr "blok, blog, post, katalog, lenta, elementlar, yozuvlar, yozuv, to‘plam"
+msgstr ""
+"blok, blog, post, katalog, lenta, elementlar, yozuvlar, yozuv, to‘plam"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -23737,8 +23645,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"cards, shop, grid, column, cart, product, ecommerce, categories, highlights, "
-"pictures, photos, illustration, media, visuals, intro, home, coupon, code, "
+"cards, shop, grid, column, cart, product, ecommerce, categories, highlights,"
+" pictures, photos, illustration, media, visuals, intro, home, coupon, code, "
 "description, rounded, card, call to action, cta, marketing, showcase, "
 "mosaic, collage, arrangement, collection, visual-grid"
 msgstr ""
@@ -23778,8 +23686,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"cite, testimonials, endorsements, reviews, feedback, statements, references, "
-"sayings, comments, appreciations, citations"
+"cite, testimonials, endorsements, reviews, feedback, statements, references,"
+" sayings, comments, appreciations, citations"
 msgstr ""
 "iqtibos, tavsiyalar, ma'qullashlar, sharhlar, fikr-mulohazalar, bayonotlar, "
 "havolalar, iboralar, izohlar, e'tiroflar, iqtiboslar"
@@ -23788,8 +23696,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"cite, testimonials, endorsements, reviews, feedback, statements, references, "
-"sayings, comments, appreciations, citations, carousel"
+"cite, testimonials, endorsements, reviews, feedback, statements, references,"
+" sayings, comments, appreciations, citations, carousel"
 msgstr ""
 "iqtibos, tavsiyalar, ma'qullashlar, sharhlar, fikr-mulohazalar, bayonotlar, "
 "havolalar, hikmatli so‘zlar, izohlar, e'tiroflar, iqtiboslar, aylanma"
@@ -23835,8 +23743,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"coming soon, countdown, launch, waitlist, timer, days hours minutes seconds, "
-"social media, teaser, pre-launch, fullscreen, dark"
+"coming soon, countdown, launch, waitlist, timer, days hours minutes seconds,"
+" social media, teaser, pre-launch, fullscreen, dark"
 msgstr ""
 
 #. module: website
@@ -23903,8 +23811,9 @@ msgid ""
 "company, organization, address, phone, email, location, get-in-touch"
 msgstr ""
 "aloqa, to‘plash, yuborish, kiritish, maydonlar, so‘rovnoma, anketa, "
-"ro‘yxatdan o‘tish, so‘rov, rasm, surat, foto, illyustratsiya, media, vizual, "
-"kompaniya, tashkilot, manzil, telefon, elektron pochta, joylashuv, bog‘lanish"
+"ro‘yxatdan o‘tish, so‘rov, rasm, surat, foto, illyustratsiya, media, vizual,"
+" kompaniya, tashkilot, manzil, telefon, elektron pochta, joylashuv, "
+"bog‘lanish"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -23915,8 +23824,8 @@ msgid ""
 "get-in-touch"
 msgstr ""
 "aloqa, to‘plash, yuborish, kiritish, maydonlar, so‘rovnoma, anketa, "
-"ro‘yxatdan o‘tish, so‘rov, rasm, surat, foto, illyustratsiya, media, vizual, "
-"bog‘lanish"
+"ro‘yxatdan o‘tish, so‘rov, rasm, surat, foto, illyustratsiya, media, vizual,"
+" bog‘lanish"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -24025,8 +23934,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "content, picture, photo, illustration, media, visual, article, story, "
-"combination, trendy, pattern, design, shape, geometric, patterned, contrast, "
-"collage, arrangement, gallery, creative, mosaic"
+"combination, trendy, pattern, design, shape, geometric, patterned, contrast,"
+" collage, arrangement, gallery, creative, mosaic"
 msgstr ""
 "mazmun, rasm, surat, chizma, media, vizual, maqola, hikoya, uyg‘unlik, "
 "zamonaviy, naqsh, dizayn, shakl, geometrik, naqshli, qarama-qarshilik, "
@@ -24039,8 +23948,8 @@ msgid ""
 "content, picture, photo, illustration, media, visual, focus, in-depth, "
 "analysis, more, contact, detailed, mockup, explore, insight"
 msgstr ""
-"mazmun, rasm, surat, chizma, media, vizual, e'tibor, chuqur tahlil, ko‘proq, "
-"aloqa, batafsil, maket, o‘rganish, tushuncha"
+"mazmun, rasm, surat, chizma, media, vizual, e'tibor, chuqur tahlil, ko‘proq,"
+" aloqa, batafsil, maket, o‘rganish, tushuncha"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -24090,14 +23999,15 @@ msgstr "kunlar"
 msgid ""
 "description, containers, layouts, structures, multi-columns, modules, boxes"
 msgstr ""
-"tavsif, konteynerlar, tartiblar, tuzilmalar, ko‘p ustunlar, modullar, qutilar"
+"tavsif, konteynerlar, tartiblar, tuzilmalar, ko‘p ustunlar, modullar, "
+"qutilar"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"description, containers, layouts, structures, multi-columns, modules, boxes, "
-"content, picture, photo, illustration, media, visual, article, story, "
+"description, containers, layouts, structures, multi-columns, modules, boxes,"
+" content, picture, photo, illustration, media, visual, article, story, "
 "combination, showcase, announcement, reveal"
 msgstr ""
 "tavsif, konteynerlar, tartiblar, tuzilmalar, ko‘p ustunlar, modullar, "
@@ -24108,14 +24018,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"description, containers, layouts, structures, multi-columns, modules, boxes, "
-"content, picture, photo, illustration, media, visual, article, story, "
+"description, containers, layouts, structures, multi-columns, modules, boxes,"
+" content, picture, photo, illustration, media, visual, article, story, "
 "combination, showcase, announcement, reveal, trendy, design, shape, "
 "geometric, engage, call to action, cta, button"
 msgstr ""
 "tavsif, konteynerlar, tartiblar, tuzilmalar, ko‘p ustunli, modullar, "
-"qutilar, mazmun, rasm, surat, illyustratsiya, media, vizual, maqola, hikoya, "
-"birikma, namoyish, e'lon, ochilish, zamonaviy, dizayn, shakl, geometrik, "
+"qutilar, mazmun, rasm, surat, illyustratsiya, media, vizual, maqola, hikoya,"
+" birikma, namoyish, e'lon, ochilish, zamonaviy, dizayn, shakl, geometrik, "
 "jalb qilish, harakatga undash, cta, tugma"
 
 #. module: website
@@ -24193,8 +24103,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
-"features, icons, benefits, product features, split layout, image, icon list, "
-"advantages, highlights, product showcase, 4 features"
+"features, icons, benefits, product features, split layout, image, icon list,"
+" advantages, highlights, product showcase, 4 features"
 msgstr ""
 
 #. module: website
@@ -24226,8 +24136,8 @@ msgid ""
 "thumbnails, engage, call to action, cta, showcase"
 msgstr ""
 "to‘rt bo‘lim, ustun, to‘r, bo‘linish, qismlar, segmentlar, rasmlar, "
-"illyustratsiya, media, suratlar, plitkalar, joylashuv, galereya, rasm-to‘ri, "
-"aralash, to‘plam, taxlash, vizual-to‘r, namoyish, vizuallar, portfolio, "
+"illyustratsiya, media, suratlar, plitkalar, joylashuv, galereya, rasm-to‘ri,"
+" aralash, to‘plam, taxlash, vizual-to‘r, namoyish, vizuallar, portfolio, "
 "kichik rasmlar, jalb qilish, harakatga undash, cta, vitrina"
 
 #. module: website
@@ -24249,8 +24159,8 @@ msgid ""
 "gallery, carousel, pictures, photos, album, showcase, visuals, portfolio, "
 "thumbnails, slideshow"
 msgstr ""
-"galereya, karusel, rasmlar, suratlar, albom, namoyish, vizuallar, portfolio, "
-"kichik rasmlar, slayd-shou"
+"galereya, karusel, rasmlar, suratlar, albom, namoyish, vizuallar, portfolio,"
+" kichik rasmlar, slayd-shou"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -24267,8 +24177,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "gallery, carousel, slider, slideshow, picture, photo, image-slider, "
-"rotating, swipe, transition, media-carousel, movement, cta, engagement, call "
-"to action"
+"rotating, swipe, transition, media-carousel, movement, cta, engagement, call"
+" to action"
 msgstr ""
 "galereya, karusel, slayder, slayd-shou, rasm, surat, rasm-slayderi, "
 "aylanish, svayp, o‘tish, media-karusel, harakat, cta, faollashtirish, "
@@ -24284,8 +24194,8 @@ msgstr "google1234567890123456.html"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, "
-"statistics, stats, analytics, infographic, skills, report"
+"graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization,"
+" statistics, stats, analytics, infographic, skills, report"
 msgstr ""
 "grafik, jadval, diagramma, doira, chizma, ustun, ko‘rsatkichlar, raqamlar, "
 "ma'lumotlarni vizuallashtirish, statistika, tahlil, infografika, "
@@ -24360,7 +24270,8 @@ msgid ""
 "headline, header, content, picture, photo, illustration, media, visual, "
 "combination"
 msgstr ""
-"sarlavha, titul, mazmun, rasm, surat, tasviriy, media, ko‘rgazmali, uyg‘unlik"
+"sarlavha, titul, mazmun, rasm, surat, tasviriy, media, ko‘rgazmali, "
+"uyg‘unlik"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_footer_contact
@@ -24390,8 +24301,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"hero, categories, ecommerce, shop, illustration, buy, photos, shop, product, "
-"grid, pictures"
+"hero, categories, ecommerce, shop, illustration, buy, photos, shop, product,"
+" grid, pictures"
 msgstr ""
 "asosiy qism, toifalar, elektron tijorat, do‘kon, tasviriy, xarid qilish, "
 "suratlar, do‘kon, mahsulot, to‘r, rasmlar"
@@ -24407,8 +24318,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid ""
 "hero, headline, header, intro, home, landing page, animated, movement, "
-"marquee, scrolling text, avatars, social proof, background image, immersive, "
-"cover"
+"marquee, scrolling text, avatars, social proof, background image, immersive,"
+" cover"
 msgstr ""
 
 #. module: website
@@ -24455,11 +24366,11 @@ msgstr ""
 #, fuzzy
 msgid ""
 "hero, jumbotron, headline, header, introduction, banner, call to action, "
-"cta, button, highlight, showcase, spotlight, sober, trendy, design, picture, "
-"photo, illustration, visual, description, containers, layouts, product, buy"
+"cta, button, highlight, showcase, spotlight, sober, trendy, design, picture,"
+" photo, illustration, visual, description, containers, layouts, product, buy"
 msgstr ""
-"asosiy qism, jumbotron, sarlavha, titul, kirish, banner, harakatga chaqiriq, "
-"CTA, tugma, ta'kidlash, namoyish, diqqat markazi, oqilona, zamonaviy, "
+"asosiy qism, jumbotron, sarlavha, titul, kirish, banner, harakatga chaqiriq,"
+" CTA, tugma, ta'kidlash, namoyish, diqqat markazi, oqilona, zamonaviy, "
 "dizayn, rasm, surat, tasviriy, ko‘rgazmali, tavsif, konteynerlar, maketlar, "
 "mahsulot, xarid qilish"
 
@@ -24505,8 +24416,8 @@ msgstr ""
 msgid ""
 "hero, jumbotron, headline, header, introduction, home, content, "
 "introduction, overview, spotlight, presentation, welcome, context, "
-"description, primary, highlight, lead, journey, skills, expertises, experts, "
-"accomplishments, knowledge"
+"description, primary, highlight, lead, journey, skills, expertises, experts,"
+" accomplishments, knowledge"
 msgstr ""
 "asosiy qism, jumbotron, sarlavha, titul, kirish, bosh sahifa, mazmun, "
 "kirish, umumiy ma'lumot, diqqat markazi, taqdimot, xush kelibsiz, kontekst, "
@@ -24702,8 +24613,8 @@ msgstr "ir.ui.view"
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
 msgid ""
-"journey, exploration, travel, outdoor, excitement, quest, start, onboarding, "
-"discovery, thrill"
+"journey, exploration, travel, outdoor, excitement, quest, start, onboarding,"
+" discovery, thrill"
 msgstr ""
 "sayohat, kashfiyot, safar, tashqi faoliyat, hayajon, izlanish, boshlash, "
 "yo‘lga tushish, yangiliklar ochish, zavq"
@@ -24824,8 +24735,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned"
 msgstr ""
-"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar, "
-"vazifalar, xodimlar, jamoa, naqshli"
+"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar,"
+" vazifalar, xodimlar, jamoa, naqshli"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -24834,8 +24745,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned, trendy"
 msgstr ""
-"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar, "
-"vazifalar, xodimlar, jamoa, naqshli, zamonaviy"
+"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar,"
+" vazifalar, xodimlar, jamoa, naqshli, zamonaviy"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -24844,8 +24755,8 @@ msgid ""
 "organization, company, people, members, staffs, profiles, bios, roles, "
 "personnel, crew, patterned, trendy, social"
 msgstr ""
-"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar, "
-"vazifalar, xodimlar, jamoa, naqshli, zamonaviy, ijtimoiy"
+"tashkilot, kompaniya, shaxslar, a'zolar, xodimlar, profillar, biografiyalar,"
+" vazifalar, xodimlar, jamoa, naqshli, zamonaviy, ijtimoiy"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -25086,7 +24997,8 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 #, fuzzy
-msgid "scrolling, depth, effect, background, layer, visual, movement, parallax"
+msgid ""
+"scrolling, depth, effect, background, layer, visual, movement, parallax"
 msgstr ""
 "aylantirish, chuqurlik, effekt, fon, qatlam, vizual, harakat, parallaks"
 
@@ -25103,8 +25015,8 @@ msgid ""
 "functionalities, exhibit, details, capabilities, attributes, promotion, "
 "overview, specifications"
 msgstr ""
-"xizmatlar, belgilar, xususiyatlar, tavsif, texnik xususiyatlar, afzalliklar, "
-"funksiyalar, ko‘rgazma, tafsilotlar, imkoniyatlar, atributlar, reklama, "
+"xizmatlar, belgilar, xususiyatlar, tavsif, texnik xususiyatlar, afzalliklar,"
+" funksiyalar, ko‘rgazma, tafsilotlar, imkoniyatlar, atributlar, reklama, "
 "umumiy ma'lumot, spetsifikatsiyalar"
 
 #. module: website
@@ -25189,8 +25101,8 @@ msgid ""
 msgstr ""
 "statistika, ko‘rsatkichlar, KPI, mezonlar, boshqaruv paneli, tahlil, asosiy "
 "jihatlari, raqamlar, samaradorlik, yutuqlar, mezonlar, bosqichlar, "
-"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar, "
-"tahlillar, xulosalar, xulosa"
+"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar,"
+" tahlillar, xulosalar, xulosa"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -25215,8 +25127,8 @@ msgid ""
 msgstr ""
 "statistika, ko‘rsatkichlar, KPI, mezonlar, boshqaruv paneli, tahlil, asosiy "
 "jihatlari, raqamlar, ko‘nikmalar, yutuqlar, mezonlar, bosqichlar, "
-"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar, "
-"tahlillar, harakatga chaqirish, tugma"
+"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar,"
+" tahlillar, harakatga chaqirish, tugma"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -25228,8 +25140,8 @@ msgid ""
 msgstr ""
 "statistika, ko‘rsatkichlar, KPI, mezonlar, boshqaruv paneli, tahlil, asosiy "
 "jihatlari, raqamlar, ko‘nikmalar, yutuqlar, mezonlar, bosqichlar, "
-"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar, "
-"tahlillar, xulosalar, xulosa"
+"indikatorlar, ma'lumotlar, o‘lchovlar, hisobotlar, tendensiyalar, natijalar,"
+" tahlillar, xulosalar, xulosa"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -25237,8 +25149,8 @@ msgstr ""
 msgid ""
 "statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, "
 "skills, achievements, benchmarks, milestones, indicators, data, "
-"measurements, reports, trends, results, analytics, summaries, summary, large-"
-"figures, prominent, standout"
+"measurements, reports, trends, results, analytics, summaries, summary, "
+"large-figures, prominent, standout"
 msgstr ""
 "statistika, ko‘rsatkichlar, KPI, mezonlar, boshqaruv paneli, tahlillar, "
 "asosiy natijalar, raqamlar, ko‘nikmalar, yutuqlar, etalon ko‘rsatkichlar, "
@@ -25487,26 +25399,25 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "<b>Customize</b> any block through this menu. Try to change the "
-#~ "background color of this block."
+#~ "<b>Customize</b> any block through this menu. Try to change the background "
+#~ "color of this block."
 #~ msgstr ""
 #~ "Bu menyu orqali istalgan blokni <b>moslashtiring</b>. Ushbu blokning fon "
 #~ "rangini o‘zgartirishga urinib ko‘ring."
 
 #, fuzzy
 #~ msgid ""
-#~ "<b>Customize</b> any block through this menu. Try to change the "
-#~ "background image of this block."
+#~ "<b>Customize</b> any block through this menu. Try to change the background "
+#~ "image of this block."
 #~ msgstr ""
 #~ "Bu menyu orqali istalgan blokni <b>moslashtiring</b>. Ushbu blokning fon "
 #~ "rasmini o‘zgartirishga urinib ko‘ring."
 
 #, fuzzy
-#~ msgid ""
-#~ "<b>Double click on an image</b> to change it with one of your choice."
+#~ msgid "<b>Double click on an image</b> to change it with one of your choice."
 #~ msgstr ""
-#~ "<b>Rasmni o‘zingiz tanlagan boshqa rasm bilan almashtirish uchun unga "
-#~ "ikki marta bosing</b>."
+#~ "<b>Rasmni o‘zingiz tanlagan boshqa rasm bilan almashtirish uchun unga ikki "
+#~ "marta bosing</b>."
 
 #, fuzzy
 #~ msgid "<b>Select</b> a %s."
@@ -25551,8 +25462,7 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #, fuzzy
 #~ msgid ""
 #~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-#~ "                            <span class=\"visually-hidden\">Previous</"
-#~ "span>"
+#~ "                            <span class=\"visually-hidden\">Previous</span>"
 #~ msgstr ""
 #~ "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/> <span "
 #~ "class=\"visually-hidden\">Oldingisi</span>"
@@ -25615,14 +25525,13 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Adjust volume, skip tracks, answer calls, and activate voice assistants "
-#~ "with a simple tap, keeping your hands free and your focus on what matters "
-#~ "most."
+#~ "Adjust volume, skip tracks, answer calls, and activate voice assistants with"
+#~ " a simple tap, keeping your hands free and your focus on what matters most."
 #~ msgstr ""
-#~ "Tovush balandligini sozlang, qo‘shiqlarni o‘tkazib yuboring, "
-#~ "qo‘ng‘iroqlarga javob bering va ovozli yordamchilarni oddiy teginish "
-#~ "bilan faollashtiring. Shunda qo‘llaringiz bo‘sh qoladi va eng muhim "
-#~ "narsalarga e'tibor qarata olasiz."
+#~ "Tovush balandligini sozlang, qo‘shiqlarni o‘tkazib yuboring, qo‘ng‘iroqlarga"
+#~ " javob bering va ovozli yordamchilarni oddiy teginish bilan faollashtiring. "
+#~ "Shunda qo‘llaringiz bo‘sh qoladi va eng muhim narsalarga e'tibor qarata "
+#~ "olasiz."
 
 #, fuzzy
 #~ msgid "All You Can Eat"
@@ -25657,14 +25566,14 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "But before deleting, make sure you update all links referring to it. That "
 #~ "way, your customers won't bump into the not-so-famous 404 error page."
 #~ msgstr ""
-#~ "Ammo o‘chirishdan oldin unga bog‘langan barcha havolalarni yangilang. "
-#~ "Shunda mijozlaringiz unchalik mashhur bo‘lmagan 404 xato sahifasiga duch "
+#~ "Ammo o‘chirishdan oldin unga bog‘langan barcha havolalarni yangilang. Shunda"
+#~ " mijozlaringiz unchalik mashhur bo‘lmagan 404 xato sahifasiga duch "
 #~ "kelmaydilar."
 
 #, fuzzy
 #~ msgid ""
-#~ "But before deleting, make sure you update all links referring to them. "
-#~ "That way, your customers won't bump into the not-so-famous 404 error page."
+#~ "But before deleting, make sure you update all links referring to them. That "
+#~ "way, your customers won't bump into the not-so-famous 404 error page."
 #~ msgstr ""
 #~ "Ammo o‘chirishdan oldin ularga bog‘langan barcha havolalarni yangilang. "
 #~ "Shunda mijozlaringiz unchalik mashhur bo‘lmagan 404 xato sahifasiga duch "
@@ -25775,8 +25684,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "EchoTunes comes with customizable ear tip sizes that provide a secure and "
 #~ "comfortable fit."
 #~ msgstr ""
-#~ "EchoTunes xavfsiz va qulay o‘tirishni ta'minlovchi moslashuvchan quloq "
-#~ "uchi o‘lchamlari bilan birga keladi."
+#~ "EchoTunes xavfsiz va qulay o‘tirishni ta'minlovchi moslashuvchan quloq uchi "
+#~ "o‘lchamlari bilan birga keladi."
 
 #, fuzzy
 #~ msgid "Elevate Your Audio Journey Today"
@@ -25828,8 +25737,7 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "plan that suits you best and start unlocking its full potential today."
 #~ msgstr ""
 #~ "Byudjetingizga mos keladigan rejani tanlab, dasturiy ta'minotimiz kuchini "
-#~ "bugun sinab ko‘ring va uning barcha imkoniyatlaridan foydalanishni "
-#~ "boshlang."
+#~ "bugun sinab ko‘ring va uning barcha imkoniyatlaridan foydalanishni boshlang."
 
 #, fuzzy
 #~ msgid "Experienced fullstack developer."
@@ -25847,10 +25755,10 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Explore our captivating gallery, a visual journey showcasing our finest "
-#~ "work and creative projects. Immerse yourself in a collection of images "
-#~ "that capture the essence of our craftsmanship, innovation, and dedication "
-#~ "to excellence."
+#~ "Explore our captivating gallery, a visual journey showcasing our finest work"
+#~ " and creative projects. Immerse yourself in a collection of images that "
+#~ "capture the essence of our craftsmanship, innovation, and dedication to "
+#~ "excellence."
 #~ msgstr ""
 #~ "Eng sara ishlarimiz va ijodiy loyihalarimizni aks ettiruvchi maftunkor "
 #~ "galereyamizni kashf eting. Hunarmandchiligimiz, innovatsiyalarimiz va "
@@ -25859,20 +25767,19 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Founder and chief visionary, Tony is the driving force behind the "
-#~ "company. He loves to keep his hands full by participating in the "
-#~ "development of the software, marketing, and customer experience "
-#~ "strategies."
+#~ "Founder and chief visionary, Tony is the driving force behind the company. "
+#~ "He loves to keep his hands full by participating in the development of the "
+#~ "software, marketing, and customer experience strategies."
 #~ msgstr ""
-#~ "Asoschisi va bosh g‘oyachi Toni kompaniyaning harakatlantiruvchi "
-#~ "kuchidir. U dasturiy ta'minot ishlab chiqish, marketing va mijozlar "
-#~ "tajribasini yaxshilash strategiyalarida ishtirok etishni yoqtiradi."
+#~ "Asoschisi va bosh g‘oyachi Toni kompaniyaning harakatlantiruvchi kuchidir. U"
+#~ " dasturiy ta'minot ishlab chiqish, marketing va mijozlar tajribasini "
+#~ "yaxshilash strategiyalarida ishtirok etishni yoqtiradi."
 
 #, fuzzy
 #~ msgid ""
-#~ "Founder, Tony is the driving force behind the company. He loves to keep "
-#~ "his hands full by participating in the development of the software, "
-#~ "marketing, and UX strategies."
+#~ "Founder, Tony is the driving force behind the company. He loves to keep his "
+#~ "hands full by participating in the development of the software, marketing, "
+#~ "and UX strategies."
 #~ msgstr ""
 #~ "Asoschisi Toni kompaniyaning harakatlantiruvchi kuchidir. U dasturiy "
 #~ "ta'minot ishlab chiqish, marketing va foydalanuvchi tajribasi "
@@ -25880,9 +25787,9 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Founder, Tony is the driving force behind the company. He loves to keep "
-#~ "his hands full by participating in the development of the software, "
-#~ "marketing, and customer experience."
+#~ "Founder, Tony is the driving force behind the company. He loves to keep his "
+#~ "hands full by participating in the development of the software, marketing, "
+#~ "and customer experience."
 #~ msgstr ""
 #~ "Asoschisi Toni kompaniyaning harakatlantiruvchi kuchidir. U dasturiy "
 #~ "ta'minot ishlab chiqish, marketing va mijozlar tajribasini yaxshilashda "
@@ -25890,23 +25797,22 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "From SEO to social media, we create campaigns that not only get you "
-#~ "noticed but also drive engagement and conversions."
+#~ "From SEO to social media, we create campaigns that not only get you noticed "
+#~ "but also drive engagement and conversions."
 #~ msgstr ""
-#~ "SEOdan tortib ijtimoiy tarmoqlargacha, biz sizni nafaqat e'tiborga "
-#~ "oladigan, balki mijozlarni jalb qiladigan va konversiyalarni oshiradigan "
-#~ "kampaniyalar yaratamiz."
+#~ "SEOdan tortib ijtimoiy tarmoqlargacha, biz sizni nafaqat e'tiborga oladigan,"
+#~ " balki mijozlarni jalb qiladigan va konversiyalarni oshiradigan kampaniyalar"
+#~ " yaratamiz."
 
 #, fuzzy
 #~ msgid ""
-#~ "From revitalizing your visual identity to realigning your messaging for "
-#~ "the digital landscape, we'll guide you through a strategic process that "
-#~ "ensures your brand remains relevant and resonates with your audience."
+#~ "From revitalizing your visual identity to realigning your messaging for the "
+#~ "digital landscape, we'll guide you through a strategic process that ensures "
+#~ "your brand remains relevant and resonates with your audience."
 #~ msgstr ""
 #~ "Vizual identifikatsiyangizni yangilashdan tortib xabarlaringizni raqamli "
 #~ "muhitga moslashtirguncha, biz sizni brendingizning dolzarbligi va "
-#~ "auditoriyangizga ta'sirini ta'minlaydigan strategik jarayonga "
-#~ "yo‘naltiramiz."
+#~ "auditoriyangizga ta'sirini ta'minlaydigan strategik jarayonga yo‘naltiramiz."
 
 #, fuzzy
 #~ msgid "Frontend"
@@ -25922,17 +25828,17 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Great stories have a <b>personality</b>. Consider telling a great story "
-#~ "that provides personality. Writing a story with personality for potential "
-#~ "clients will assist with making a relationship connection. This shows up "
-#~ "in small quirks like word choices or phrases. Write from your point of "
-#~ "view, not from someone else's experience."
+#~ "Great stories have a <b>personality</b>. Consider telling a great story that"
+#~ " provides personality. Writing a story with personality for potential "
+#~ "clients will assist with making a relationship connection. This shows up in "
+#~ "small quirks like word choices or phrases. Write from your point of view, "
+#~ "not from someone else's experience."
 #~ msgstr ""
 #~ "Ajoyib hikoyalarda <b>o‘ziga xoslik bor</b>. Shaxsiyatni namoyon etadigan "
-#~ "ajoyib hikoya aytib berishni o‘ylab ko‘ring. Potensial mijozlar uchun "
-#~ "o‘ziga xos uslubda hikoya yozish munosabatlarni bog‘lashga yordam beradi. "
-#~ "Bu so‘z tanlash yoki iboralar kabi kichik xususiyatlarda namoyon bo‘ladi. "
-#~ "Boshqaning tajribasidan emas, o‘z nuqtai nazaringizdan yozing."
+#~ "ajoyib hikoya aytib berishni o‘ylab ko‘ring. Potensial mijozlar uchun o‘ziga"
+#~ " xos uslubda hikoya yozish munosabatlarni bog‘lashga yordam beradi. Bu so‘z "
+#~ "tanlash yoki iboralar kabi kichik xususiyatlarda namoyon bo‘ladi. Boshqaning"
+#~ " tajribasidan emas, o‘z nuqtai nazaringizdan yozing."
 
 #, fuzzy
 #~ msgid "Growth Rate"
@@ -25970,13 +25876,12 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "It's time to elevate your fitness journey with coaching that's as unique "
-#~ "as you are. Choose your path, embrace the guidance, and transform your "
-#~ "life."
+#~ "It's time to elevate your fitness journey with coaching that's as unique as "
+#~ "you are. Choose your path, embrace the guidance, and transform your life."
 #~ msgstr ""
-#~ "O‘zingiz kabi noyob bo‘lgan murabbiylik bilan jismoniy "
-#~ "tayyorgarligingizni yangi bosqichga ko‘tarish vaqti keldi. Yo‘lingizni "
-#~ "tanlang, yo‘l-yo‘riqlarni qabul qiling va hayotingizni o‘zgartiring."
+#~ "O‘zingiz kabi noyob bo‘lgan murabbiylik bilan jismoniy tayyorgarligingizni "
+#~ "yangi bosqichga ko‘tarish vaqti keldi. Yo‘lingizni tanlang, yo‘l-yo‘riqlarni"
+#~ " qabul qiling va hayotingizni o‘zgartiring."
 
 #, fuzzy
 #~ msgid ""
@@ -25993,8 +25898,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #, fuzzy
 #~ msgid ""
 #~ "Let's collaborate to create innovative solutions that stand out in the "
-#~ "digital landscape. Reach out today and let's build something "
-#~ "extraordinary together."
+#~ "digital landscape. Reach out today and let's build something extraordinary "
+#~ "together."
 #~ msgstr ""
 #~ "Keling, raqamli olamda ajralib turadigan innovatsion yechimlarni yaratish "
 #~ "uchun hamkorlik qilaylik. Bugun biz bilan bog‘laning va birgalikda "
@@ -26006,11 +25911,11 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Let's turn your vision into reality. Contact us today to set your brand "
-#~ "on the path to digital excellence with us."
+#~ "Let's turn your vision into reality. Contact us today to set your brand on "
+#~ "the path to digital excellence with us."
 #~ msgstr ""
-#~ "Keling, g‘oyangizni haqiqatga aylantiraylik. Brendingizni biz bilan "
-#~ "raqamli mukammallikka yo‘naltirish uchun bugunoq biz bilan bog‘laning."
+#~ "Keling, g‘oyangizni haqiqatga aylantiraylik. Brendingizni biz bilan raqamli "
+#~ "mukammallikka yo‘naltirish uchun bugunoq biz bilan bog‘laning."
 
 #, fuzzy
 #~ msgid "Management"
@@ -26022,8 +25927,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Mastering frontend craftsmanship with expertise in HTML, CSS, and "
-#~ "JavaScript to craft captivating and responsive user experiences."
+#~ "Mastering frontend craftsmanship with expertise in HTML, CSS, and JavaScript"
+#~ " to craft captivating and responsive user experiences."
 #~ msgstr ""
 #~ "HTML, CSS va JavaScript bo‘yicha mutaxassislik bilan frontend mahoratini "
 #~ "egallab, jozibador va moslashuvchan foydalanuvchi tajribasini yaratish."
@@ -26031,8 +25936,7 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #, fuzzy
 #~ msgid "Mediterranean buffet of starters, main dishes and desserts"
 #~ msgstr ""
-#~ "O‘rta yer dengizi bufeti: boshlang‘ich taomlar, asosiy taomlar va "
-#~ "desertlar"
+#~ "O‘rta yer dengizi bufeti: boshlang‘ich taomlar, asosiy taomlar va desertlar"
 
 #, fuzzy
 #~ msgid "Meet The Team"
@@ -26049,12 +25953,12 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #, fuzzy
 #~ msgid ""
 #~ "Mich loves taking on challenges. With his multi-year experience as "
-#~ "Commercial Director in the software industry, Mich has helped the company "
-#~ "to get where it is today."
+#~ "Commercial Director in the software industry, Mich has helped the company to"
+#~ " get where it is today."
 #~ msgstr ""
-#~ "Mich qiyinchiliklarni yengishni yaxshi ko‘radi. Dasturiy ta'minot "
-#~ "sohasida Tijorat direktori sifatidagi ko‘p yillik tajribasi bilan Mich "
-#~ "kompaniyaning bugungi mavqega erishishiga hissa qo‘shdi."
+#~ "Mich qiyinchiliklarni yengishni yaxshi ko‘radi. Dasturiy ta'minot sohasida "
+#~ "Tijorat direktori sifatidagi ko‘p yillik tajribasi bilan Mich kompaniyaning "
+#~ "bugungi mavqega erishishiga hissa qo‘shdi."
 
 #, fuzzy
 #~ msgid "Multi Website Published Mixin"
@@ -26082,13 +25986,12 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Our Coaching combines personalized fitness plans with mindfulness "
-#~ "practices, ensuring you achieve harmony in your body and peace in your "
-#~ "mind."
+#~ "Our Coaching combines personalized fitness plans with mindfulness practices,"
+#~ " ensuring you achieve harmony in your body and peace in your mind."
 #~ msgstr ""
-#~ "Bizning mashg‘ulotlarimiz shaxsiy fitnes rejalarini ongli amaliyotlar "
-#~ "bilan uyg‘unlashtiradi, bu esa tanangizda muvozanat va ongingizda "
-#~ "xotirjamlikka erishishingizni kafolatlaydi."
+#~ "Bizning mashg‘ulotlarimiz shaxsiy fitnes rejalarini ongli amaliyotlar bilan "
+#~ "uyg‘unlashtiradi, bu esa tanangizda muvozanat va ongingizda xotirjamlikka "
+#~ "erishishingizni kafolatlaydi."
 
 #, fuzzy
 #~ msgid "Our Goals"
@@ -26120,18 +26023,18 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Our experienced fitness coaches design workouts that align with your "
-#~ "goals, fitness level, and preferences."
+#~ "Our experienced fitness coaches design workouts that align with your goals, "
+#~ "fitness level, and preferences."
 #~ msgstr ""
 #~ "Tajribali fitnes murabbiylarimiz sizning maqsadlaringiz, jismoniy "
-#~ "tayyorgarlik darajangiz va afzalliklaringizga mos keladigan "
-#~ "mashg‘ulotlarni ishlab chiqadi."
+#~ "tayyorgarlik darajangiz va afzalliklaringizga mos keladigan mashg‘ulotlarni "
+#~ "ishlab chiqadi."
 
 #, fuzzy
 #~ msgid ""
 #~ "Our mission is to create transformative experiences and foster growth, "
-#~ "driven by a relentless pursuit of innovation and a commitment to "
-#~ "exceeding expectations."
+#~ "driven by a relentless pursuit of innovation and a commitment to exceeding "
+#~ "expectations."
 #~ msgstr ""
 #~ "Bizning maqsadimiz innovatsiyalarga tinimsiz intilish va kutilganidan ham "
 #~ "yuqori natijalarga erishish orqali o‘zgaruvchan tajribalar yaratish va "
@@ -26145,21 +26048,21 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ msgstr ""
 #~ "Tajribali maslahatchilarimiz sohaga oid chuqur bilimlaridan foydalanib, "
 #~ "joriy strategiyalaringizni tahlil qiladi, imkoniyatlarni aniqlaydi va "
-#~ "ma'lumotlarga asoslangan tavsiyalarni ishlab chiqib, sizga "
-#~ "moslashtirilgan yo‘l-yo‘riqlar beradi."
+#~ "ma'lumotlarga asoslangan tavsiyalarni ishlab chiqib, sizga moslashtirilgan "
+#~ "yo‘l-yo‘riqlar beradi."
 
 #, fuzzy
 #~ msgid ""
 #~ "Our software plans are designed to cater to a variety of needs, ensuring "
-#~ "that you find the perfect fit for your requirements. From individual "
-#~ "users to businesses of all sizes, we offer pricing options that provide "
+#~ "that you find the perfect fit for your requirements. From individual users "
+#~ "to businesses of all sizes, we offer pricing options that provide "
 #~ "exceptional value without compromising on features or performance."
 #~ msgstr ""
 #~ "Dasturiy ta'minotimiz rejalari turli ehtiyojlarni qondirish uchun ishlab "
 #~ "chiqilgan bo‘lib, talablaringizga to‘liq mos kelishini ta'minlaydi. Yakka "
-#~ "foydalanuvchilardan tortib barcha hajmdagi korxonalargacha, biz "
-#~ "funksiyalar yoki samaradorlikka putur yetkazmagan holda ajoyib qiymatni "
-#~ "ta'minlovchi narxlash variantlarini taklif qilamiz."
+#~ "foydalanuvchilardan tortib barcha hajmdagi korxonalargacha, biz funksiyalar "
+#~ "yoki samaradorlikka putur yetkazmagan holda ajoyib qiymatni ta'minlovchi "
+#~ "narxlash variantlarini taklif qilamiz."
 
 #, fuzzy
 #~ msgid ""
@@ -26226,8 +26129,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "Ready to embark on your auditory adventure? Order your EchoTunes Wireless "
 #~ "Earbuds today and let the symphony begin."
 #~ msgstr ""
-#~ "Ovozli sarguzashtni boshlashga tayyormisiz? EchoTunes simsiz "
-#~ "quloqchinlarini bugunoq buyurtma qiling va simfoniya boshlansin."
+#~ "Ovozli sarguzashtni boshlashga tayyormisiz? EchoTunes simsiz quloqchinlarini"
+#~ " bugunoq buyurtma qiling va simfoniya boshlansin."
 
 #, fuzzy
 #~ msgid "Ready to make these web pages disappear into thin air? Are you sure?"
@@ -26236,8 +26139,7 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid "Ready to make this web page disappear into thin air? Are you sure?"
-#~ msgstr ""
-#~ "Bu veb-sahifani havoga uchirishga tayyormisiz? Ishonchingiz komilmi?"
+#~ msgstr "Bu veb-sahifani havoga uchirishga tayyormisiz? Ishonchingiz komilmi?"
 
 #, fuzzy
 #~ msgid "Rebranding"
@@ -26257,13 +26159,13 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "Step into our past and witness the transformation of a simple idea into "
-#~ "an innovative force. Our journey, born in a garage, reflects the power of "
+#~ "Step into our past and witness the transformation of a simple idea into an "
+#~ "innovative force. Our journey, born in a garage, reflects the power of "
 #~ "passion and hard work."
 #~ msgstr ""
-#~ "O‘tmishimizga nazar soling va oddiy g‘oyaning innovatsion kuchga "
-#~ "aylanishiga guvoh bo‘ling. Garajda boshlangan sayohatimiz ishtiyoq va "
-#~ "mehnatning qudratini aks ettiradi."
+#~ "O‘tmishimizga nazar soling va oddiy g‘oyaning innovatsion kuchga aylanishiga"
+#~ " guvoh bo‘ling. Garajda boshlangan sayohatimiz ishtiyoq va mehnatning "
+#~ "qudratini aks ettiradi."
 
 #, fuzzy
 #~ msgid "Strategic Marketing Solutions"
@@ -26280,12 +26182,12 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #, fuzzy
 #~ msgid ""
 #~ "The compact charging case offers convenient on-the-go charging with a "
-#~ "battery life that lasts up to 17h, you can enjoy your favorite tunes "
-#~ "without interruption."
+#~ "battery life that lasts up to 17h, you can enjoy your favorite tunes without"
+#~ " interruption."
 #~ msgstr ""
-#~ "Ixcham zaryadlash qutisi 17 soatgacha davom etadigan batareya quvvati "
-#~ "bilan qulay mobil zaryadlashni ta'minlaydi, sevimli kuylaringizdan "
-#~ "uzluksiz bahramand bo‘lishingiz mumkin."
+#~ "Ixcham zaryadlash qutisi 17 soatgacha davom etadigan batareya quvvati bilan "
+#~ "qulay mobil zaryadlashni ta'minlaydi, sevimli kuylaringizdan uzluksiz "
+#~ "bahramand bo‘lishingiz mumkin."
 
 #, fuzzy
 #~ msgid ""
@@ -26295,8 +26197,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ msgstr ""
 #~ "Ushbu murabbiylik dasturi kuchga yo‘naltirilgan maxsus mashg‘ulotlar, "
 #~ "ovqatlanish bo‘yicha ko‘rsatmalar va ekspert murabbiylikni taklif etadi. "
-#~ "Jismoniy tayyorgarlik darajangizni oshiring va ilgari imkonsiz deb "
-#~ "o‘ylagan yutuqlarga erishing."
+#~ "Jismoniy tayyorgarlik darajangizni oshiring va ilgari imkonsiz deb o‘ylagan "
+#~ "yutuqlarga erishing."
 
 #, fuzzy
 #~ msgid "To what purpose?"
@@ -26328,10 +26230,9 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "understanding your fitness aspirations, your current lifestyle, and any "
 #~ "challenges you face."
 #~ msgstr ""
-#~ "Biz har bir salomatlik yo‘lining o‘ziga xosligiga ishonamiz. "
-#~ "Yondashuvimiz sizning sog‘lom turmush tarziga intilishingizni, hozirgi "
-#~ "hayot tarzingizni va duch kelayotgan qiyinchiliklaringizni tushunishdan "
-#~ "boshlanadi."
+#~ "Biz har bir salomatlik yo‘lining o‘ziga xosligiga ishonamiz. Yondashuvimiz "
+#~ "sizning sog‘lom turmush tarziga intilishingizni, hozirgi hayot tarzingizni "
+#~ "va duch kelayotgan qiyinchiliklaringizni tushunishdan boshlanadi."
 
 #, fuzzy
 #~ msgid "We found these links:"
@@ -26347,13 +26248,12 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "We're driven by the aspiration to redefine industry standards, to exceed "
-#~ "the expectations of our clients, and to foster a culture of continuous "
-#~ "growth."
+#~ "We're driven by the aspiration to redefine industry standards, to exceed the"
+#~ " expectations of our clients, and to foster a culture of continuous growth."
 #~ msgstr ""
-#~ "Biz sohada yangi standartlarni o‘rnatish, mijozlarimiz kutganidan ham "
-#~ "yuqori natijalarga erishish va uzluksiz rivojlanish madaniyatini "
-#~ "shakllantirish istagi bilan harakatlanamiz."
+#~ "Biz sohada yangi standartlarni o‘rnatish, mijozlarimiz kutganidan ham yuqori"
+#~ " natijalarga erishish va uzluksiz rivojlanish madaniyatini shakllantirish "
+#~ "istagi bilan harakatlanamiz."
 
 #, fuzzy
 #~ msgid "Website Domain should be unique."
@@ -26367,14 +26267,14 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ msgid ""
 #~ "Welcome to our comprehensive range of Tailored Fitness Coaching Services, "
 #~ "with personalized workouts, customized nutrition plans, and unwavering "
-#~ "support, we're committed to helping you achieve lasting results that "
-#~ "align with your aspirations."
+#~ "support, we're committed to helping you achieve lasting results that align "
+#~ "with your aspirations."
 #~ msgstr ""
 #~ "Moslashtirilgan fitnes murabbiylik xizmatlarimizning keng qamrovli "
-#~ "to‘plamiga xush kelibsiz. Shaxsiy mashg‘ulotlar, moslashtirilgan "
-#~ "ovqatlanish rejalari va doimiy qo‘llab-quvvatlash bilan biz sizning "
-#~ "maqsadlaringizga mos keladigan uzoq muddatli natijalarga erishishingizga "
-#~ "yordam berishga intilamiz."
+#~ "to‘plamiga xush kelibsiz. Shaxsiy mashg‘ulotlar, moslashtirilgan ovqatlanish"
+#~ " rejalari va doimiy qo‘llab-quvvatlash bilan biz sizning maqsadlaringizga "
+#~ "mos keladigan uzoq muddatli natijalarga erishishingizga yordam berishga "
+#~ "intilamiz."
 
 #, fuzzy
 #~ msgid "Wellness Coaching"
@@ -26390,13 +26290,13 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "With personalized fitness plans, tailored nutrition guidance, and "
-#~ "consistent support, you'll shed unwanted pounds while building healthy "
-#~ "habits that last."
+#~ "With personalized fitness plans, tailored nutrition guidance, and consistent"
+#~ " support, you'll shed unwanted pounds while building healthy habits that "
+#~ "last."
 #~ msgstr ""
-#~ "Shaxsiy fitnes rejalari, moslashtirilgan ovqatlanish bo‘yicha yo‘l-"
-#~ "yo‘riqlar va doimiy qo‘llab-quvvatlash bilan ortiqcha kilogrammlardan "
-#~ "xalos bo‘lasiz va uzoq muddatli sog‘lom odatlarni shakllantirasiz."
+#~ "Shaxsiy fitnes rejalari, moslashtirilgan ovqatlanish bo‘yicha yo‘l-yo‘riqlar"
+#~ " va doimiy qo‘llab-quvvatlash bilan ortiqcha kilogrammlardan xalos bo‘lasiz "
+#~ "va uzoq muddatli sog‘lom odatlarni shakllantirasiz."
 
 #, fuzzy
 #~ msgid ""
@@ -26404,8 +26304,8 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 #~ "identity and messaging that resonates with your audience."
 #~ msgstr ""
 #~ "Brendingiz - bu sizning hikoyangiz. Biz sizga auditoriyangizga ta'sir "
-#~ "qiladigan yaxlit vizual identifikatsiya va xabarlar orqali uni "
-#~ "yetkazishga yordam beramiz."
+#~ "qiladigan yaxlit vizual identifikatsiya va xabarlar orqali uni yetkazishga "
+#~ "yordam beramiz."
 
 #, fuzzy
 #~ msgid "a new image"
@@ -26469,16 +26369,13 @@ msgstr "✽ Biz nimalarni taklif etamiz"
 
 #, fuzzy
 #~ msgid ""
-#~ "<span class=\"pe-1\">We use cookies to provide you a better user "
-#~ "experience on this website.</span>\n"
-#~ "                                            <a href=\"/cookie-policy\" "
-#~ "class=\"o_cookies_bar_text_policy btn btn-link btn-sm px-0 "
-#~ "o_translate_inline\">Cookie Policy</a>"
+#~ "<span class=\"pe-1\">We use cookies to provide you a better user experience on this website.</span>\n"
+#~ "                                            <a href=\"/cookie-policy\" class=\"o_cookies_bar_text_policy btn btn-link btn-sm px-0 o_translate_inline\">Cookie Policy</a>"
 #~ msgstr ""
 #~ "<span class=\"pe-1\">Ushbu veb-saytda sizga yaxshiroq foydalanuvchi "
 #~ "tajribasini taqdim etish uchun kuki-fayllardan foydalanamiz.</span> <a "
-#~ "href=\"/cookie-policy\" class=\"o_cookies_bar_text_policy btn btn-link "
-#~ "btn-sm px-0 o_translate_inline\">Kuki-fayllar siyosati</a>"
+#~ "href=\"/cookie-policy\" class=\"o_cookies_bar_text_policy btn btn-link btn-"
+#~ "sm px-0 o_translate_inline\">Kuki-fayllar siyosati</a>"
 
 #, fuzzy
 #~ msgid "The language of the keyword and related keywords."

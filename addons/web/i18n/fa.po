@@ -28,8 +28,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 11:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/web/"
-"fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/web/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -212,18 +211,18 @@ msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (html)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (html)"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (json)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (json)"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
-msgid "<i class=\"fa fa-repeat\"/> Reset"
-msgstr "<i class=\"fa fa-repeat\"/> تنظیم مجدد"
+msgid "<i class=\"oi\" data-icon=\"redo\"/> Reset"
+msgstr "<i class=\"oi\" data-icon=\"redo\"/> تنظیم مجدد"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -233,34 +232,34 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">1,400.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">1,400.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$<span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$<span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">240.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\">$<span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$<span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -290,10 +289,8 @@ msgstr "<span class=\"text-nowrap\">مالیات 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
-"Barbara\n"
-"                                Rd<br/>Pleasant Hill CA 94523<br/>United "
-"States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
+"                                Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 
 #. module: web
@@ -305,9 +302,9 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all samples."
-"<br/>It can lead to partially invalid result in case of concurrent profiles."
-"<br/>Use with caution </span>"
+"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all "
+"samples.<br/>It can lead to partially invalid result in case of concurrent "
+"profiles.<br/>Use with caution </span>"
 msgstr ""
 
 #. module: web
@@ -320,8 +317,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        Chair floor protection<br/>\n"
-"                                        Office chairs can harm your floor: "
-"protect it\n"
+"                                        Office chairs can harm your floor: protect it\n"
 "                                    </span>"
 msgstr ""
 
@@ -330,8 +326,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_7777] Office Chair<br/>\n"
-"                                        Comfortable yellow chair for daily "
-"work\n"
+"                                        Comfortable yellow chair for daily work\n"
 "                                    </span>"
 msgstr ""
 
@@ -340,8 +335,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_8999] Three-Seat Sofa<br/>\n"
-"                                        Three Seater Sofa with Lounger in "
-"Steel Grey Colour\n"
+"                                        Three Seater Sofa with Lounger in Steel Grey Colour\n"
 "                                    </span>"
 msgstr ""
 
@@ -401,16 +395,14 @@ msgstr "<span>قیمت واحد</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                    Four person modern office workstation</"
-"span>"
+"                                    Four person modern office workstation</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">\n"
-"                                                    $ <span "
-"class=\"oe_currency_value\">27,703.50</span>\n"
+"                                                    $ <span class=\"oe_currency_value\">27,703.50</span>\n"
 "                                                </strong>"
 msgstr ""
 
@@ -513,8 +505,8 @@ msgstr ""
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "AB"
 msgstr ""
-"متن اصلی به درستی برای ترجمه ارائه نشده است. لطفاً متن کامل خود را برای ترجمه "
-"ارسال کنید."
+"متن اصلی به درستی برای ترجمه ارائه نشده است. لطفاً متن کامل خود را برای "
+"ترجمه ارسال کنید."
 
 #. module: web
 #. odoo-javascript
@@ -944,7 +936,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/model/relational_model/dynamic_list.js:0
 msgid "Are you sure that you want to archive all the selected records?"
-msgstr "آیا مطمئن هستید که می‌خواهید تمام رکوردهای انتخاب‌شده را بایگانی کنید؟"
+msgstr ""
+"آیا مطمئن هستید که می‌خواهید تمام رکوردهای انتخاب‌شده را بایگانی کنید؟"
 
 #. module: web
 #. odoo-javascript
@@ -1196,8 +1189,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is base64-"
-"encoded. That does not seem to be the case for %s."
+"Binary fields can not be exported to Excel unless their content is "
+"base64-encoded. That does not seem to be the case for %s."
 msgstr ""
 "فیلدهای دودویی نمی‌توانند به اکسل صادر شوند مگر اینکه محتوای آنها به صورت "
 "base64 رمزگذاری شده باشد. به نظر نمی‌رسد که این مورد در مورد %s صدق کند."
@@ -1234,8 +1227,8 @@ msgid ""
 "Boolean field from the model used in the relation, which indicates whether "
 "the state is folded or not."
 msgstr ""
-"فیلد بولین از الگوی استفاده شده در رابطه که نشان می‌دهد آیا حالت جمع‌شده است "
-"یا خیر."
+"فیلد بولین از الگوی استفاده شده در رابطه که نشان می‌دهد آیا حالت جمع‌شده است"
+" یا خیر."
 
 #. module: web
 #. odoo-javascript
@@ -1265,13 +1258,13 @@ msgstr "نوع دکمه:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
-"a valid electronic representation of my hand-written signature/initials for "
-"all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
+" a valid electronic representation of my hand-written signature/initials for"
+" all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
-"با کلیک کردن بر روی پذیرش و امضا، موافقت خود را اعلام می‌کنم که امضا/ابتدایی "
-"انتخاب‌شده، نماینده الکترونیکی معتبر از امضای دست‌نویس من برای تمامی اهداف "
+"با کلیک کردن بر روی پذیرش و امضا، موافقت خود را اعلام می‌کنم که امضا/ابتدایی"
+" انتخاب‌شده، نماینده الکترونیکی معتبر از امضای دست‌نویس من برای تمامی اهداف "
 "خواهد بود، هنگامی که بر روی اسناد استفاده می‌شود، شامل قراردادهای قانونی "
 "الزام‌آور."
 
@@ -1305,8 +1298,8 @@ msgstr "CD"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "CL"
 msgstr ""
-"متن ارائه‌شده برای ترجمه وجود ندارد. لطفاً متن کامل را ارائه دهید تا بتوانم به "
-"شما کمک کنم."
+"متن ارائه‌شده برای ترجمه وجود ندارد. لطفاً متن کامل را ارائه دهید تا بتوانم "
+"به شما کمک کنم."
 
 #. module: web
 #. odoo-javascript
@@ -1704,8 +1697,8 @@ msgid ""
 "Company tagline, which is included in a printed document's header or footer "
 "(depending on the selected layout)."
 msgstr ""
-"برچسب شرکت، که در سربرگ یا پانوشت یک سند چاپ شده درج می‌شود (بسته به طرح‌بندی "
-"انتخابی)."
+"برچسب شرکت، که در سربرگ یا پانوشت یک سند چاپ شده درج می‌شود (بسته به "
+"طرح‌بندی انتخابی)."
 
 #. module: web
 #. odoo-javascript
@@ -3014,8 +3007,8 @@ msgid ""
 "Field that holds the maximum value of the progress bar. If set, will be "
 "displayed next to the progress bar (e.g. 10 / 200)."
 msgstr ""
-"فیلدی که حداکثر مقدار نوار پیشرفت را نگه می‌دارد. اگر تنظیم شود، در کنار نوار "
-"پیشرفت نمایش داده می‌شود (مثال: ۱۰ / ۲۰۰)."
+"فیلدی که حداکثر مقدار نوار پیشرفت را نگه می‌دارد. اگر تنظیم شود، در کنار "
+"نوار پیشرفت نمایش داده می‌شود (مثال: ۱۰ / ۲۰۰)."
 
 #. module: web
 #. odoo-javascript
@@ -3117,16 +3110,13 @@ msgstr "متن پاورقی نمایش داده شده در همه گزارشه�
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than "
-"16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
-"برای سازگاری با Excel، داده‌ها نمی‌توانند صادر شوند اگر بیش از ۱۶۳۸۴ ستون وجود "
-"داشته باشد.\n"
+"برای سازگاری با Excel، داده‌ها نمی‌توانند صادر شوند اگر بیش از ۱۶۳۸۴ ستون وجود داشته باشد.\n"
 "\n"
-"نکته: سعی کنید محور را برعکس کنید، بیشتر فیلتر کنید و یا تعداد معیارها را "
-"کاهش دهید."
+"نکته: سعی کنید محور را برعکس کنید، بیشتر فیلتر کنید و یا تعداد معیارها را کاهش دهید."
 
 #. module: web
 #. odoo-javascript
@@ -3140,8 +3130,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid ""
-"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
-"to \"3\"."
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated"
+" to \"3\"."
 msgstr ""
 
 #. module: web
@@ -3511,10 +3501,11 @@ msgstr "شمایل"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid "If True, the url will be used as it is, without any prefix added to it."
+msgid ""
+"If True, the url will be used as it is, without any prefix added to it."
 msgstr ""
-"اگر صحیح باشد، آدرس اینترنتی همانطور که هست استفاده خواهد شد، بدون اینکه هیچ "
-"پیشوندی به آن اضافه شود."
+"اگر صحیح باشد، آدرس اینترنتی همانطور که هست استفاده خواهد شد، بدون اینکه هیچ"
+" پیشوندی به آن اضافه شود."
 
 #. module: web
 #. odoo-javascript
@@ -3532,8 +3523,8 @@ msgid ""
 "If checked, users will not be able to create records based on the text "
 "input; they will still be able to create records via a popup form."
 msgstr ""
-"اگر علامت‌گذاری شود، کاربران نمی‌توانند رکوردهای جدیدی براساس متن ورودی ایجاد "
-"کنند؛ اما هنوز می‌توانند از طریق فرم پاپ‌آپ رکورد ایجاد کنند."
+"اگر علامت‌گذاری شود، کاربران نمی‌توانند رکوردهای جدیدی براساس متن ورودی "
+"ایجاد کنند؛ اما هنوز می‌توانند از طریق فرم پاپ‌آپ رکورد ایجاد کنند."
 
 #. module: web
 #. odoo-javascript
@@ -3543,8 +3534,8 @@ msgid ""
 "If checked, users will not be able to create records based through a popup "
 "form; they will still be able to create records based on the text input."
 msgstr ""
-"اگر علامت زده شود، کاربران نمی توانند از طریق یک فرم بازشو رکورد ایجاد کنند. "
-"آنها همچنان قادر به ایجاد رکورد بر اساس ورودی متن خواهند بود."
+"اگر علامت زده شود، کاربران نمی توانند از طریق یک فرم بازشو رکورد ایجاد کنند."
+" آنها همچنان قادر به ایجاد رکورد بر اساس ورودی متن خواهند بود."
 
 #. module: web
 #. odoo-javascript
@@ -3787,16 +3778,11 @@ msgstr "اسلام"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall "
-"time of the\n"
-"            template. Because the global time (in the drop down) does not "
-"take into account the\n"
-"            duration which is not in the rendering (look for the template, "
-"read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes "
-"part of the time to make\n"
-"            the profile as well as some part not logged in the function "
-"generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
+"            template. Because the global time (in the drop down) does not take into account the\n"
+"            duration which is not in the rendering (look for the template, read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes part of the time to make\n"
+"            the profile as well as some part not logged in the function generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3811,8 +3797,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid ""
-"It will be removed for everyone using the \"%(parentName)s\" %"
-"(parentFieldLabel)s."
+"It will be removed for everyone using the \"%(parentName)s\" "
+"%(parentFieldLabel)s."
 msgstr ""
 
 #. module: web
@@ -5248,21 +5234,21 @@ msgstr "فقط اولین %(count)s رکورد حذف شد (از %(total)s رک�
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type "
+"%(field_type)s)"
 msgstr ""
-"فقط انواع %(supported_types)s برای دسته‌بندی پشتیبانی شده اند (یافت شد نوع %"
-"(field_type)s)"
+"فقط انواع %(supported_types)s برای دسته‌بندی پشتیبانی شده اند (یافت شد نوع "
+"%(field_type)s)"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type "
+"%(field_type)s)"
 msgstr ""
-"فقط انواع %(supported_types)s برای فیلتر پشتیبانی می شوند (یافت شد نوع %"
-"(field_type)s)"
+"فقط انواع %(supported_types)s برای فیلتر پشتیبانی می شوند (یافت شد نوع "
+"%(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -5552,12 +5538,9 @@ msgstr "لطفا نام لیست فیلد ذخیره را وارد کنید"
 #: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
 msgid ""
 "Please note that your view includes invalid locators.<br/>\n"
-"                    These nodes could not be anchored to the parent view and "
-"have no effect.<br/>\n"
-"                    This issue may have arisen as a result of manual "
-"modifications or during the upgrade process.<br/>\n"
-"                    For your reference, invalid xpath nodes are highlighted "
-"in red."
+"                    These nodes could not be anchored to the parent view and have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted in red."
 msgstr ""
 
 #. module: web
@@ -5771,8 +5754,8 @@ msgstr "بنفش"
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/notification_alert/notification_alert.xml:0
 msgid ""
-"Push notifications are blocked. Enable them in your browser settings to stay "
-"updated when you're away."
+"Push notifications are blocked. Enable them in your browser settings to stay"
+" updated when you're away."
 msgstr ""
 
 #. module: web
@@ -5861,8 +5844,7 @@ msgstr "فقط-خواندنی:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid ""
-"Ready to make your record disappear into thin air? Are you sure? It will be "
-"gone forever!\n"
+"Ready to make your record disappear into thin air? Are you sure? It will be gone forever!\n"
 "    \n"
 "Think twice before you click that 'Delete' button!"
 msgstr ""
@@ -6413,11 +6395,11 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid ""
-"Select <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
+"Select <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
 msgstr ""
-"انتخاب <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
+"انتخاب <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
 
 #. module: web
 #. odoo-javascript
@@ -6594,7 +6576,8 @@ msgstr "تنظیم اولویت..."
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if empty."
+"Set to true the full range input has to be display by default, even if "
+"empty."
 msgstr ""
 "نمایش کامل محدوده ورودی را به طور پیش‌فرض روی true تنظیم کنید، حتی اگر خالی "
 "باشد."
@@ -6946,8 +6929,8 @@ msgstr "نکته"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "TM"
 msgstr ""
-"متاسفم، اما شما هیچ متنی برای ترجمه ارائه نکرده‌اید. لطفاً متن مورد نظر خود را "
-"جهت ترجمه ارسال کنید."
+"متاسفم، اما شما هیچ متنی برای ترجمه ارائه نکرده‌اید. لطفاً متن مورد نظر خود "
+"را جهت ترجمه ارسال کنید."
 
 #. module: web
 #. odoo-javascript
@@ -7130,8 +7113,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/res_users_settings_embedded_action.py:0
 msgid ""
-"The ids in %(field_name)s must only be integers or \"false\": “%"
-"(action_ids)s”"
+"The ids in %(field_name)s must only be integers or \"false\": "
+"“%(action_ids)s”"
 msgstr ""
 
 #. module: web
@@ -7139,10 +7122,11 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation "
-"is taking too much time."
+"The operation was interrupted. This usually means that the current operation"
+" is taking too much time."
 msgstr ""
-"عملیات متوقف شد. این معمولا به این معنی است که عملیات فعلی زمان زیادی می‌گیرد."
+"عملیات متوقف شد. این معمولا به این معنی است که عملیات فعلی زمان زیادی "
+"می‌گیرد."
 
 #. module: web
 #. odoo-javascript
@@ -7166,8 +7150,8 @@ msgstr "فیلد انتخاب شده برای تکمیل پیش‌فرض امض�
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
-"(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size "
+"(%(maxSize)sB)."
 msgstr ""
 
 #. module: web
@@ -7314,12 +7298,10 @@ msgstr "بازه زمانی"
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies "
-"in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
 msgstr ""
 "Timezone Mismatch : این منطقه زمانی با منطقه زمانی مرورگر شما متفاوت است.\n"
-"لطفاً برای جلوگیری از تفاوت‌های زمانی در سیستم شما، همان منطقه زمانی مرورگر "
-"خود را تنظیم کنید."
+"لطفاً برای جلوگیری از تفاوت‌های زمانی در سیستم شما، همان منطقه زمانی مرورگر خود را تنظیم کنید."
 
 #. module: web
 #. odoo-javascript
@@ -7755,25 +7737,22 @@ msgstr ""
 msgid ""
 "Use it with the 'User-friendly format' option to customize the formatting."
 msgstr ""
-"از آن با گزینه 'قالب‌بندی کاربرپسند' برای سفارشی‌سازی قالب‌بندی استفاده کنید."
+"از آن با گزینه 'قالب‌بندی کاربرپسند' برای سفارشی‌سازی قالب‌بندی استفاده "
+"کنید."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
 msgid ""
-"Use the operators \"+=\", \"-=\" to update the current date by days (%"
-"(days)s), \n"
-"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours "
-"(%(hours)s), \n"
+"Use the operators \"+=\", \"-=\" to update the current date by days (%(days)s), \n"
+"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours (%(hours)s), \n"
 "            minutes (%(minutes)s) and seconds (%(seconds)s)."
 msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid ""
-"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
-"value."
+msgid "Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current value."
 msgstr ""
 
 #. module: web
@@ -8075,7 +8054,8 @@ msgid ""
 "Whether or not this Property Field is displayed in the Calendar, Cards & "
 "Kanban views"
 msgstr ""
-"آیا این فیلد ویژگی در نماهای تقویم، کارت‌ها و کانبان نمایش داده می‌شود یا خیر؟"
+"آیا این فیلد ویژگی در نماهای تقویم، کارت‌ها و کانبان نمایش داده می‌شود یا "
+"خیر؟"
 
 #. module: web
 #. odoo-javascript
@@ -8172,8 +8152,8 @@ msgstr ""
 msgid ""
 "You are currently using a non-secure context. As a result, some Odoo "
 "features may be unavailable or function improperly. For more information, "
-"please visit: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/"
-"Secure_Contexts"
+"please visit: https://developer.mozilla.org/en-"
+"US/docs/Web/Security/Defenses/Secure_Contexts"
 msgstr ""
 
 #. module: web
@@ -13290,8 +13270,8 @@ msgstr "عینک‌ها"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "eyeroll"
 msgstr ""
-"<! - واژه \"eyeroll\" در اینجا عنصر خاصی مانند یک تکه کد یا نام متغیر بوده و "
-"نیازی به ترجمه ندارد - !>"
+"<! - واژه \"eyeroll\" در اینجا عنصر خاصی مانند یک تکه کد یا نام متغیر بوده و"
+" نیازی به ترجمه ندارد - !>"
 
 #. module: web
 #. odoo-javascript
@@ -25668,8 +25648,8 @@ msgstr "چراغ‌های راهنمایی عمودی"
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "vest"
 msgstr ""
-"<div> <p>ماژول</p> <p>مسیر: /home/esmaeil/m_t/web</p> <p>ودریافت فصل</p> </"
-"div>"
+"<div> <p>ماژول</p> <p>مسیر: /home/esmaeil/m_t/web</p> <p>ودریافت فصل</p> "
+"</div>"
 
 #. module: web
 #. odoo-javascript
@@ -27398,12 +27378,11 @@ msgstr ""
 
 #~ msgid ""
 #~ "The Tax Identification Number. Values here will be validated based on the "
-#~ "country format. You can use '/' to indicate that the partner is not "
-#~ "subject to tax."
+#~ "country format. You can use '/' to indicate that the partner is not subject "
+#~ "to tax."
 #~ msgstr ""
-#~ "شماره شناسایی مالیاتی. مقادیر اینجا بر اساس قالب کشور اعتبارسنجی خواهند "
-#~ "شد. می‌توانید از '/' برای نشان دادن اینکه شریک مشمول مالیات نیست استفاده "
-#~ "کنید."
+#~ "شماره شناسایی مالیاتی. مقادیر اینجا بر اساس قالب کشور اعتبارسنجی خواهند شد. "
+#~ "می‌توانید از '/' برای نشان دادن اینکه شریک مشمول مالیات نیست استفاده کنید."
 
 #~ msgid "Custom"
 #~ msgstr "سفارشی"
@@ -27430,8 +27409,7 @@ msgstr ""
 #~ msgstr "ذخیره‌سازی خودکار"
 
 #~ msgid ""
-#~ "If checked, the record will be saved immediately when the field is "
-#~ "modified."
+#~ "If checked, the record will be saved immediately when the field is modified."
 #~ msgstr "اگر علامت‌زده شود، رکورد بلافاصله پس از تغییر فیلد ذخیره خواهد شد."
 
 #~ msgid "Invalid data"

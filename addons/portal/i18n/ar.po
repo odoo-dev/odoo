@@ -18,14 +18,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 17:07+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/"
-"portal/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/portal/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: portal
@@ -61,91 +59,92 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
-"Account"
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-icon=\"badge\"/>"
+" My Account"
 msgstr ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> حسابي"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-icon=\"badge\"/>"
+" حسابي"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Logout"
+msgid ""
+"<i class=\"oi oi-fw small text-primary-emphasis\" data-icon=\"logout\"/> "
+"Logout"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
+msgid ""
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-"
+"icon=\"grid_view\"/> Apps"
 msgstr ""
-"<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> التطبيقات"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-"
+"icon=\"grid_view\"/> التطبيقات"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-pencil\" title=\"Edit\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\" title=\"Edit\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
-msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr "<i class=\"fa fa-pencil\"/> تحرير المعلومات"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit information"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/> تحرير المعلومات"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-trash-o\" title=\"Clear\"/>"
+msgid "<i class=\"oi\" data-icon=\"delete\" title=\"Clear\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
-msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
-msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>إهمال"
+msgid "<i class=\"fw-light oi me-2\" data-icon=\"keyboard_arrow_left\"/>Discard"
+msgstr "<i class=\"fw-light me-2 oi\" data-icon=\"keyboard_arrow_left\"/>إهمال"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>العودة إلى وضع التحرير"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>العودة إلى وضع التحرير"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"السابق \"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"السابق \"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"التالي \"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"التالي \"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
-msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
+msgid "<i class=\"oi me-2\" data-icon=\"add\"/>Add Address"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"التوثيق \" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid "<i title=\"Documentation\" class=\"oi oi-fw o_button_icon\" data-icon=\"info\"/>"
+msgstr "<i title=\"التوثيق \" class=\"o_button_icon oi-fw oi\" data-icon=\"info\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            Changing VAT number is not allowed once "
-"document(s) have\n"
-"                            been issued for your account. Please contact us "
-"directly for this\n"
+"                            Changing VAT number is not allowed once document(s) have\n"
+"                            been issued for your account. Please contact us directly for this\n"
 "                            operation.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            لا يُسمح بتغيير رقم ضريبة القيمة المضافة بعد "
-"إصدار المستندات\n"
+"                            لا يُسمح بتغيير رقم ضريبة القيمة المضافة بعد إصدار المستندات\n"
 "                            لحسابك. يرجى الاتصال بنا مباشرةً لإجراء هذه\n"
 "                            العملية.\n"
 "                        </small>"
@@ -154,13 +153,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            The VAT number can only be updated on the "
-"company account.\n"
+"                            The VAT number can only be updated on the company account.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            لا يمكن تحديث رقم ضريبة القيمة المضافة إلا على "
-"حساب الشركة.\n"
+"                            لا يمكن تحديث رقم ضريبة القيمة المضافة إلا على حساب الشركة.\n"
 "                        </small>"
 
 #. module: portal
@@ -168,8 +165,7 @@ msgstr ""
 msgid ""
 "<small class=\"form-text text-muted\">\n"
 "                    Changing country is not allowed once document(s) have\n"
-"                    been issued for your account. Please contact us directly "
-"for this\n"
+"                    been issued for your account. Please contact us directly for this\n"
 "                    operation.\n"
 "                </small>"
 msgstr ""
@@ -190,9 +186,7 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
 "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
 "title=\"التالي \"/>"
@@ -567,15 +561,13 @@ msgstr "مفاتيح API للمطور"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"oi text-danger\" data-icon=\"warning\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "تعطيل الحساب، مما يمنع عمليات تسجيل الدخول فيما بعد.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"text-danger oi\" data-icon=\"warning\"/>\n"
 "                                            لا يمكن التراجع عن هذا الإجراء.\n"
 "                                        </b>"
 
@@ -726,8 +718,8 @@ msgid ""
 "backend. If you wish to change your name or email address, please do so in "
 "the account settings or contact your administrator."
 msgstr ""
-"إذا كنت تقوم بالطلب لشخص خارجي، يرجى الطلب من خلال الواجهة الخلفية. إذا أردت "
-"تغيير اسمك أو عنوان بريدك الإلكتروني، يرجى القيام بذلك من خلال إعدادات "
+"إذا كنت تقوم بالطلب لشخص خارجي، يرجى الطلب من خلال الواجهة الخلفية. إذا أردت"
+" تغيير اسمك أو عنوان بريدك الإلكتروني، يرجى القيام بذلك من خلال إعدادات "
 "الحساب أو التواصل مع المدير."
 
 #. module: portal
@@ -853,11 +845,11 @@ msgstr "الرسالة"
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have %"
-"(field_name)s field."
+"Model %(model_name)s does not support token signature, as it does not have "
+"%(field_name)s field."
 msgstr ""
-"لا يدعم النموذج %(model_name)s توقيع الرمز، حيث أنه لا يحتوي على حقل %"
-"(field_name)s."
+"لا يدعم النموذج %(model_name)s توقيع الرمز، حيث أنه لا يحتوي على حقل "
+"%(field_name)s."
 
 #. module: portal
 #. odoo-python
@@ -1003,7 +995,8 @@ msgstr "السابق"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted again"
+"Put my email and phone in a block list to make sure I'm never contacted "
+"again"
 msgstr ""
 "ضع عنوان بريدي الإلكتروني ورقم هاتفي في القائمة المحظورة حتى لا يتم التواصل "
 "معي أبداً مجدداً"
@@ -1093,16 +1086,12 @@ msgstr "رمز الحماية"
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be "
-"valid and unique.\n"
-"                        If necessary, you can fix any contact's email "
-"address directly in the list."
+"                        The email address of each selected contact must be valid and unique.\n"
+"                        If necessary, you can fix any contact's email address directly in the list."
 msgstr ""
 "اختر أي جهات الاتصال يجب أن تنتمي إلى بوابة العملاء في القائمة أدناه.\n"
-"                        يجب أن يكون عنوان البريد الإلكتروني الخاص بكل جهة "
-"اتصال صالحاً وفريداً.\n"
-"                        إذا لزم الأمر، يمكنك تعديل أي عنوان بريد إلكتروني "
-"مباشرة في القائمة."
+"                        يجب أن يكون عنوان البريد الإلكتروني الخاص بكل جهة اتصال صالحاً وفريداً.\n"
+"                        إذا لزم الأمر، يمكنك تعديل أي عنوان بريد إلكتروني مباشرة في القائمة."
 
 #. module: portal
 #. odoo-javascript
@@ -1305,7 +1294,8 @@ msgstr "الشريك مرتبط بمستخدم داخلي ولديه صلاحي�
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid "This text is included at the end of the email sent to new portal users."
+msgid ""
+"This text is included at the end of the email sent to new portal users."
 msgstr ""
 "هذا النص متضمن في نهاية البريد الإلكتروني الذي يتم إرساله إلى مستخدمي "
 "البوابة الجدد."

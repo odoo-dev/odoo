@@ -33,15 +33,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 20:33+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"portal/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/portal/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: portal
@@ -78,108 +75,106 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
-"Account"
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-icon=\"badge\"/>"
+" My Account"
 msgstr ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> Moje "
-"konto"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-icon=\"badge\"/>"
+" Moje konto"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Logout"
+msgid ""
+"<i class=\"oi oi-fw small text-primary-emphasis\" data-icon=\"logout\"/> "
+"Logout"
 msgstr ""
-"<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Wyloguj się"
+"<i class=\"small text-primary-emphasis oi-fw oi\" data-icon=\"logout\"/> "
+"Wyloguj się"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
+msgid ""
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-"
+"icon=\"grid_view\"/> Apps"
 msgstr ""
-"<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Aplikacje"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-"
+"icon=\"grid_view\"/> Aplikacje"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-pencil\" title=\"Edit\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\" title=\"Edit\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
-msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr "<i class=\"fa fa-pencil\"/> Edytuj informacje"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit information"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/> Edytuj informacje"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-trash-o\" title=\"Clear\"/>"
+msgid "<i class=\"oi\" data-icon=\"delete\" title=\"Clear\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
-msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
-msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>Odrzuć"
+msgid "<i class=\"fw-light oi me-2\" data-icon=\"keyboard_arrow_left\"/>Discard"
+msgstr "<i class=\"fw-light me-2 oi\" data-icon=\"keyboard_arrow_left\"/>Odrzuć"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Powrót do trybu edycji"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Powrót do trybu edycji"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Wstecz\" "
-"title=\"Wstecz\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Wstecz\" title=\"Wstecz\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Dalej\" "
-"title=\"Dalej\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Dalej\" title=\"Dalej\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
-msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
-msgstr "<i class=\"oi oi-plus me-2\"/>Dodaj adres"
+msgid "<i class=\"oi me-2\" data-icon=\"add\"/>Add Address"
+msgstr "<i class=\"me-2 oi\" data-icon=\"add\"/>Dodaj adres"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"Dokumentacja\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid "<i title=\"Documentation\" class=\"oi oi-fw o_button_icon\" data-icon=\"info\"/>"
+msgstr "<i title=\"Dokumentacja\" class=\"o_button_icon oi-fw oi\" data-icon=\"info\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            Changing VAT number is not allowed once "
-"document(s) have\n"
-"                            been issued for your account. Please contact us "
-"directly for this\n"
+"                            Changing VAT number is not allowed once document(s) have\n"
+"                            been issued for your account. Please contact us directly for this\n"
 "                            operation.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            Zmiana numeru VAT nie jest dozwolona po "
-"wystawieniu dokumentów\n"
-"                            dla Twojego konta. W tej sprawie prosimy o "
-"bezpośredni kontakt z nami.\n"
+"                            Zmiana numeru VAT nie jest dozwolona po wystawieniu dokumentów\n"
+"                            dla Twojego konta. W tej sprawie prosimy o bezpośredni kontakt z nami.\n"
 "                       </small>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            The VAT number can only be updated on the "
-"company account.\n"
+"                            The VAT number can only be updated on the company account.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            Numer VAT można aktualizować wyłącznie na koncie "
-"firmowym.\n"
+"                            Numer VAT można aktualizować wyłącznie na koncie firmowym.\n"
 "                       </small>"
 
 #. module: portal
@@ -187,16 +182,13 @@ msgstr ""
 msgid ""
 "<small class=\"form-text text-muted\">\n"
 "                    Changing country is not allowed once document(s) have\n"
-"                    been issued for your account. Please contact us directly "
-"for this\n"
+"                    been issued for your account. Please contact us directly for this\n"
 "                    operation.\n"
 "                </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                    Zmiana kraju nie jest dozwolona po wystawieniu "
-"dokumentów\n"
-"                    dla Twojego konta. W sprawie przeprowadzenia tej "
-"operacji prosimy o bezpośredni kontakt z nami.\n"
+"                    Zmiana kraju nie jest dozwolona po wystawieniu dokumentów\n"
+"                    dla Twojego konta. W sprawie przeprowadzenia tej operacji prosimy o bezpośredni kontakt z nami.\n"
 "               </small>"
 
 #. module: portal
@@ -210,9 +202,7 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 msgstr ""
 "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Dalej\" "
 "title=\"Dalej\"/>"
@@ -383,8 +373,8 @@ msgid ""
 "Changing your country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"Zmiana kraju nie jest możliwa po wystawieniu dokumentów dla Twojego konta. W "
-"tej sprawie skontaktuj się z nami bezpośrednio."
+"Zmiana kraju nie jest możliwa po wystawieniu dokumentów dla Twojego konta. W"
+" tej sprawie skontaktuj się z nami bezpośrednio."
 
 #. module: portal
 #. odoo-javascript
@@ -587,14 +577,13 @@ msgstr "Klucze API programisty"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"oi text-danger\" data-icon=\"warning\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "Wyłączenie konta, uniemożliwiające dalsze logowanie.<br/>\n"
 "<b>\n"
-"<i class=\"fa fa-exclamation-triangle text-danger\"/>\n"
+"<i class=\"text-danger oi\" data-icon=\"warning\"/>\n"
 "Tego działania nie można cofnąć.\n"
 "</b>"
 
@@ -873,11 +862,11 @@ msgstr "Wiadomość"
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have %"
-"(field_name)s field."
+"Model %(model_name)s does not support token signature, as it does not have "
+"%(field_name)s field."
 msgstr ""
-"Model %(model_name)s nie obsługuje tokena, ponieważ nie ma pola %"
-"(field_name)s."
+"Model %(model_name)s nie obsługuje tokena, ponieważ nie ma pola "
+"%(field_name)s."
 
 #. module: portal
 #. odoo-python
@@ -1024,7 +1013,8 @@ msgstr "Wstecz"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted again"
+"Put my email and phone in a block list to make sure I'm never contacted "
+"again"
 msgstr ""
 "Umieść mój e-mail i telefon na czarnej liście, aby upewnić się, że nigdy "
 "więcej nikt się ze mną nie skontaktuje."
@@ -1114,16 +1104,12 @@ msgstr "Token bezpieczeństwa"
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be "
-"valid and unique.\n"
-"                        If necessary, you can fix any contact's email "
-"address directly in the list."
+"                        The email address of each selected contact must be valid and unique.\n"
+"                        If necessary, you can fix any contact's email address directly in the list."
 msgstr ""
 "Wybierz z poniższej listy kontakty dla portalu.\n"
-"                        Adres mailowy każdego wybranego kontaktu musi być "
-"poprawny i unikalny.\n"
-"                        Jeśli trzeba, popraw adresy mailowe bezpośrednio w "
-"tej liście."
+"                        Adres mailowy każdego wybranego kontaktu musi być poprawny i unikalny.\n"
+"                        Jeśli trzeba, popraw adresy mailowe bezpośrednio w tej liście."
 
 #. module: portal
 #. odoo-javascript
@@ -1227,7 +1213,8 @@ msgstr "Pole %(field_name)s jest zarządzane na głównym adresie Twojego konta.
 #: code:addons/portal/controllers/portal.py:0
 msgid "The attachment %s cannot be removed because it is linked to a message."
 msgstr ""
-"Załącznik %s nie może zostać usunięty, ponieważ jest powiązany z wiadomością."
+"Załącznik %s nie może zostać usunięty, ponieważ jest powiązany z "
+"wiadomością."
 
 #. module: portal
 #. odoo-python
@@ -1308,8 +1295,8 @@ msgid ""
 "The template \"Portal: new user\" not found for sending email to the portal "
 "user."
 msgstr ""
-"Nie znaleziono szablonu „Portal: nowy użytkownik” do wysyłania wiadomości e-"
-"mail do użytkownika portalu."
+"Nie znaleziono szablonu „Portal: nowy użytkownik” do wysyłania wiadomości "
+"e-mail do użytkownika portalu."
 
 #. module: portal
 #. odoo-python
@@ -1333,7 +1320,8 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid "This text is included at the end of the email sent to new portal users."
+msgid ""
+"This text is included at the end of the email sent to new portal users."
 msgstr ""
 "Ten tekst znajduje się na końcu wiadomości e-mail wysyłanej do nowych "
 "użytkowników portalu."
@@ -1463,8 +1451,7 @@ msgstr "Należy wpisać \""
 #. odoo-python
 #: code:addons/portal/wizard/portal_wizard.py:0
 msgid "You should first grant the portal access to the partner \"%s\"."
-msgstr ""
-"Powinieneś najpierw przyznać dostęp do portalu swojemu partnerowi \"%s\"."
+msgstr "Powinieneś najpierw przyznać dostęp do portalu swojemu partnerowi \"%s\"."
 
 #. module: portal
 #. odoo-python

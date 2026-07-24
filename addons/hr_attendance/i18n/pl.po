@@ -26,15 +26,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 04:50+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"hr_attendance/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/hr_attendance/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_attendance
@@ -77,25 +74,22 @@ msgstr "'Przeczytaj dokumentację'"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">When enabled, "
-"only the first check-in within the scheduled working hours (including "
-"tolerance) is recorded. Further check-ins are allowed only after an "
-"automatic check-out.</span>"
+"                                    <span class=\"text-muted\">When enabled, only the first check-in within the scheduled working hours (including tolerance) is recorded. Further check-ins are allowed only after an automatic check-out.</span>"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
 msgid ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 msgstr ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Okres\" role=\"img\" "
-"title=\"Okres\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"calendar_today\" aria-"
+"label=\"Okres\" role=\"img\" title=\"Okres\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Installation Manual"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Instrukcja instalacji"
+msgid "<i class=\"oi oi-fw\" data-icon=\"arrow_forward\"/>Installation Manual"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"arrow_forward\"/>Instrukcja instalacji"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
@@ -109,12 +103,10 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 msgid ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-"
-"label=\"Niedostępny\" title=\"Niedostępny\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Niedostępny\" title=\"Niedostępny\">\n"
 "                                    </span>"
 
 #. module: hr_attendance
@@ -193,12 +185,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
 "<span class=\"o_stat_value\">Add</span>\n"
-"                                    <span class=\"o_stat_text\">Employees</"
-"span>"
+"                                    <span class=\"o_stat_text\">Employees</span>"
 msgstr ""
 "<span class=\"o_stat_value\">Dodaj</span>\n"
-"                                    <span class=\"o_stat_text\">pracowników</"
-"span>"
+"                                    <span class=\"o_stat_text\">pracowników</span>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_rule_view_form
@@ -268,12 +258,10 @@ msgstr "Dodaj pracowników"
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid ""
-"Add a few employees to be able to select an employee here and perform his "
-"check in / check out.\n"
+"Add a few employees to be able to select an employee here and perform his check in / check out.\n"
 "                To create employees go to the Employees menu."
 msgstr ""
-"Dodaj kilku pracowników, aby móc wybrać pracownika i dokonać jego wejścia / "
-"wyjścia.\n"
+"Dodaj kilku pracowników, aby móc wybrać pracownika i dokonać jego wejścia / wyjścia.\n"
 "Aby utworzyć pracowników, przejdź do menu Pracownicy."
 
 #. module: hr_attendance
@@ -320,11 +308,11 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"Allow the collection of GPS location, IP address, and browser/device details "
-"used to track employee access and attendance"
+"Allow the collection of GPS location, IP address, and browser/device details"
+" used to track employee access and attendance"
 msgstr ""
-"Zezwól na zbieranie lokalizacji GPS, adresu IP i szczegółów o przeglądarce/"
-"urządzeniu, aby śledzić dostęp pracowników i obecność."
+"Zezwól na zbieranie lokalizacji GPS, adresu IP i szczegółów o "
+"przeglądarce/urządzeniu, aby śledzić dostęp pracowników i obecność."
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_line__rule_ids
@@ -623,15 +611,12 @@ msgstr "Źródło kodów kreskowych"
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance_overtime_rule__base_off
 msgid ""
 "Base for overtime calculation.\n"
-"Use 'Quantity' when overtime hours are those in excess of a certain amount "
-"per day/week.\n"
+"Use 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\n"
 "Use 'Timing' when overtime hours happen on specific days or at specific times"
 msgstr ""
 "Podstawa do obliczania nadgodzin.\n"
-"Użyj opcji \"Ilość\", gdy nadgodziny przekraczają określoną liczbę godzin "
-"dziennie/tygodniowo.\n"
-"Użyj opcji \"Ograniczenie czasowe\", gdy nadgodziny występują w określonych "
-"dniach lub godzinach."
+"Użyj opcji \"Ilość\", gdy nadgodziny przekraczają określoną liczbę godzin dziennie/tygodniowo.\n"
+"Użyj opcji \"Ograniczenie czasowe\", gdy nadgodziny występują w określonych dniach lub godzinach."
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_rule__base_off
@@ -673,8 +658,8 @@ msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee hasn't "
 "checked out since %(datetime)s"
 msgstr ""
-"Nie można utworzyć nowego rekordu obecności dla %(empl_name)s, pracownik nie "
-"zarejestrował wyjścia od czasu %(datetime)s"
+"Nie można utworzyć nowego rekordu obecności dla %(empl_name)s, pracownik nie"
+" zarejestrował wyjścia od czasu %(datetime)s"
 
 #. module: hr_attendance
 #. odoo-python
@@ -846,14 +831,12 @@ msgid ""
 "Controls how the rates from the different rules that apply are combined.\n"
 "  Max: use the highest rate. (e.g.: combined for 150% and 120 = 150%)\n"
 "  Sum: sum the *extra* pay (i.e. above 100%).\n"
-"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
 msgstr ""
 "Kontroluje sposób łączenia stawek z różnych obowiązujących reguł.\n"
 "  Maks: używa najwyższej stawki. (np.: łącznie 150% i 120 = 150%)\n"
 "  Suma: suma *Dodatkowego* wynagrodzenia (np. powyżej 100%).\n"
-"    np.: łączna stawka dla 150% & 120% = 100% (podstawa) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    np.: łączna stawka dla 150% & 120% = 100% (podstawa) + (150-100)% + (120-100)% = 170%\n"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_ruleset__country_id
@@ -1007,8 +990,8 @@ msgid ""
 "Do not have access, user cannot edit the attendances that are not their own "
 "or if they are not the attendance manager of the employee."
 msgstr ""
-"Użytkownik nie ma dostępu i nie może edytować list obecności, jeśli nie jest "
-"ich właścicielem lub nie jest menedżerem ds. obecności pracownika."
+"Użytkownik nie ma dostępu i nie może edytować list obecności, jeśli nie jest"
+" ich właścicielem lub nie jest menedżerem ds. obecności pracownika."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_rule_view_form
@@ -1346,8 +1329,8 @@ msgstr "Ręczna identyfikacja"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"If checked, days not covered by an attendance will be visible in the Report. "
-"Does not apply to employees with a flexible working schedule."
+"If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
 "Jeśli opcja jest zaznaczona, dni nieobjęte obecnością będą widoczne w "
 "raporcie. Nie dotyczy pracowników z elastycznym grafikiem pracy."
@@ -1787,8 +1770,8 @@ msgstr "Wdrażanie"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/hr_version_list_view.js:0
 msgid ""
-"One or more selected records already have a ruleset assigned (highlighted in "
-"yellow). Do you want to overwrite them?"
+"One or more selected records already have a ruleset assigned (highlighted in"
+" yellow). Do you want to overwrite them?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2127,15 +2110,14 @@ msgstr "Reguła"
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 msgid "Rule '%(name)s' is based off quantity, but the period is not specified"
-msgstr ""
-"Reguła \"%(name)s\" jest w oparciu o ilość, ale okres nie jest określony"
+msgstr "Reguła \"%(name)s\" jest w oparciu o ilość, ale okres nie jest określony"
 
 #. module: hr_attendance
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 msgid ""
-"Rule '%(name)s' is based off quantity, but the usual amount of work hours is "
-"not specified"
+"Rule '%(name)s' is based off quantity, but the usual amount of work hours is"
+" not specified"
 msgstr ""
 "Reguła \"%(name)s\" jest oparta o ilość, ale zwykła ilość godzin pracy nie "
 "jest określona"
@@ -2287,7 +2269,8 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.constraint,message:hr_attendance.constraint_res_company_check_auto_check_out_specific_time_range
-msgid "Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
+msgid ""
+"Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
 msgstr ""
 
 #. module: hr_attendance
@@ -2410,8 +2393,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically checked out based on company specific time "
-"configuration."
+"This attendance was automatically checked out based on company specific time"
+" configuration."
 msgstr ""
 
 #. module: hr_attendance
@@ -2428,8 +2411,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically created to cover an unjustified absence on "
-"that day."
+"This attendance was automatically created to cover an unjustified absence on"
+" that day."
 msgstr ""
 "Ta obecność była utworzona automatycznie aby pokryć nieusprawiedliwioną "
 "nieobecność tego dnia."
@@ -2437,8 +2420,8 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
-"This will reset all manual edit on overtime period linked to those rules. Do "
-"you confirm ?"
+"This will reset all manual edit on overtime period linked to those rules. Do"
+" you confirm ?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2559,8 +2542,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid ""
-"Unable to get a valid location. Do you want to proceed with your check-in/"
-"out anyway?"
+"Unable to get a valid location. Do you want to proceed with your check-"
+"in/out anyway?"
 msgstr ""
 "Nie można uzyskać prawidłowej lokalizacji. Czy mimo to chcesz kontynuować "
 "operację wejścia/wyjścia?"

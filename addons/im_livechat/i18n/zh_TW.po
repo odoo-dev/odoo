@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 21:19+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
-"projects/odoo-master/im_livechat/zh_Hant/>\n"
+"Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/projects/odoo-master/im_livechat/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,8 +28,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -117,7 +115,8 @@ msgstr "%s (副本)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr "%(input_email)s 看起來不像是有效的電子郵件。你能再試一次嗎？"
 
 #. module: im_livechat
@@ -138,10 +137,8 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 「顯示」，在頁面上顯示聊天按鈕。\n"
@@ -157,30 +154,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/> 返回編輯模式"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/> 返回編輯模式"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"移除操作員\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"移除操作員\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -205,39 +202,32 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr "<span>提醒：此步驟只會在沒有操作員可用時，才會播放。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>提示：至少需要一次互動（問題、電子郵件等），機器人才能執行更複雜的操作"
-"（轉發給操作員等）。 </span>\n"
-"                    <span>如果您希望機器人僅在沒有操作員可用時與訪客互動，請"
-"使用通道規則。</span>"
+"<span>提示：至少需要一次互動（問題、電子郵件等），機器人才能執行更複雜的操作（轉發給操作員等）。 </span>\n"
+"                    <span>如果您希望機器人僅在沒有操作員可用時與訪客互動，請使用通道規則。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
-msgstr ""
-"<span>提示：至少需要一次互動（問題、電子郵件等），機器人才能執行更複雜的操作"
-"（轉發給操作員等）。</span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
+msgstr "<span>提示：至少需要一次互動（問題、電子郵件等），機器人才能執行更複雜的操作（轉發給操作員等）。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr "<span>提示：在沒有操作員可用的情況下，為機器人計劃進一步的步驟。</span>"
 
 #. module: im_livechat
@@ -491,11 +481,9 @@ msgstr "頻道"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
-msgstr ""
-"2 人之間的聊天是私密且獨特的。群組在受邀者之間是私人的。頻道可以自由加入（取"
-"決於其配置）。"
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
+msgstr "2 人之間的聊天是私密且獨特的。群組在受邀者之間是私人的。頻道可以自由加入（取決於其配置）。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -845,9 +833,7 @@ msgid ""
 "Delay (in seconds) to automatically open the conversation window. Note: the "
 "selected action must be 'Open automatically' otherwise this parameter will "
 "not be taken into account."
-msgstr ""
-"自動打開對話窗口的延遲，以秒計。請注意：所選操作須為「自動打開」，否則將不會"
-"考慮此參數。"
+msgstr "自動打開對話窗口的延遲，以秒計。請注意：所選操作須為「自動打開」，否則將不會考慮此參數。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1087,9 +1073,7 @@ msgstr "提供意見"
 msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
-msgstr ""
-"幫助訂單找到匹配規則。如果2條規則同時匹配給定的網址l/國家，會選擇低序列的一個"
-"。"
+msgstr "幫助訂單找到匹配規則。如果2條規則同時匹配給定的網址l/國家，會選擇低序列的一個。"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1098,8 +1082,8 @@ msgid ""
 "<strong>Settings</strong> &gt; <strong>Email</strong> &amp; "
 "<strong>Marketing.</strong>"
 msgstr ""
-"前往<strong>網站製作</strong> &gt; <strong>配置</strong> &gt; <strong>設定</"
-"strong> &gt; <strong>電郵</strong> &amp; <strong>市場推廣</strong>。"
+"前往<strong>網站製作</strong> &gt; <strong>配置</strong> &gt; <strong>設定</strong> "
+"&gt; <strong>電郵</strong> &amp; <strong>市場推廣</strong>。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2402,8 +2386,7 @@ msgstr "每名操作員的對話時段數目"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2543,12 +2526,10 @@ msgstr "對話已發送。"
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
-"本規則僅適用於這些國家。示例：如果您選擇「比利時」和「美國」，並將操作設置為"
-"「隱藏」，則聊天按鈕將對這兩個國家的訪問者、在指定網址上隱藏。本功能要求在服"
-"務器上安裝GeoIP。"
+"本規則僅適用於這些國家。示例：如果您選擇「比利時」和「美國」，並將操作設置為「隱藏」，則聊天按鈕將對這兩個國家的訪問者、在指定網址上隱藏。本功能要求在服務器上安裝GeoIP。"
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -2565,9 +2546,7 @@ msgstr "使用者能夠加入支援的頻道。"
 msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
-msgstr ""
-"按下該選項後，訪問者將被重新導向至此連結（請注意，如果連結位於實時聊天網站外"
-"部，腳本將結束）。"
+msgstr "按下該選項後，訪問者將被重新導向至此連結（請注意，如果連結位於實時聊天網站外部，腳本將結束）。"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_lang_ids
@@ -2640,12 +2619,8 @@ msgstr "標題顏色"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat
@@ -2655,9 +2630,7 @@ msgstr ""
 msgid ""
 "Track and improve live chat performance with insights on session activity, "
 "response times, customer ratings, and call interactions."
-msgstr ""
-"透過了解對話時段的進行情況、回應時間、客戶評分及通話互動等，追蹤及改善線上客"
-"服的表現。"
+msgstr "透過了解對話時段的進行情況、回應時間、客戶評分及通話互動等，追蹤及改善線上客服的表現。"
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_answer_troubleshooting_demo
@@ -2880,9 +2853,7 @@ msgstr "你對哪些模組感興趣？"
 msgid ""
 "When forwarding live chat conversations, the chatbot will prioritize users "
 "with matching expertise."
-msgstr ""
-"即時聊天對話轉交他人跟進時，聊天機器人會優先考慮專業知識能匹配查詢內容的使用"
-"者。"
+msgstr "即時聊天對話轉交他人跟進時，聊天機器人會優先考慮專業知識能匹配查詢內容的使用者。"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__has_call

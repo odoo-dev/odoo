@@ -14,8 +14,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 08:59+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"website_event_sale/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/website_event_sale/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,8 +34,8 @@ msgstr "<b>開始</b>"
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.event_confirmation
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\" role=\"img\"/>登録済"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\" role=\"img\"/>登録済"
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.registration_attendee_details
@@ -53,9 +52,7 @@ msgstr ""
 msgid ""
 "A pricelist item with a positive min. quantity cannot be applied to this "
 "event tickets product."
-msgstr ""
-"このイベントチケットプロダクトには、最小数量がプラスの価格表項目は適用できま"
-"せん。"
+msgstr "このイベントチケットプロダクトには、最小数量がプラスの価格表項目は適用できません。"
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.registration_attendee_details
@@ -166,19 +163,17 @@ msgstr "販売オーダ明細"
 #. odoo-python
 #: code:addons/website_event_sale/models/sale_order.py:0
 msgid "Sorry, The %(ticket)s tickets for the %(event)s event are sold out."
-msgstr ""
-"申し訳ありません。チケット %(ticket)s （イベント %(event)s用）は売り切れまし"
-"た。"
+msgstr "申し訳ありません。チケット %(ticket)s （イベント %(event)s用）は売り切れました。"
 
 #. module: website_event_sale
 #. odoo-python
 #: code:addons/website_event_sale/models/sale_order.py:0
 msgid ""
-"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s "
-"ticket for the %(event)s event%(slot)s."
+"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s"
+" ticket for the %(event)s event%(slot)s."
 msgstr ""
-"申し訳ありません。ご利用可能な残席は%(remaining_seats)d のみです（チケット %"
-"(ticket)s、イベント %(event)s 、スロット%(slot)s）。"
+"申し訳ありません。ご利用可能な残席は%(remaining_seats)d のみです（チケット %(ticket)s、イベント %(event)s "
+"、スロット%(slot)s）。"
 
 #. module: website_event_sale
 #. odoo-python

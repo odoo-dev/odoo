@@ -10,14 +10,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 05:30+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/pos_online_payment/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_online_payment
@@ -34,7 +32,8 @@ msgstr "<strong>Error:</strong> Moneda lipsește sau nu este valabilă."
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_config.py:0
 msgid "A POS config cannot have more than one online payment method."
-msgstr "O configurație POS nu poate avea mai mult de o metodă de plată online."
+msgstr ""
+"O configurație POS nu poate avea mai mult de o metodă de plată online."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -45,7 +44,8 @@ msgstr "Trebuie specificată o opțiune de plată."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr ""
 "O plată de validare nu poate fi utilizată pentru o plată online la un punct "
 "de vânzare."
@@ -64,8 +64,8 @@ msgid ""
 "set, of the POS config."
 msgstr ""
 "Toți furnizorii de servicii de plată configurați pentru o metodă de plată "
-"online trebuie să utilizeze aceeași monedă ca Jurnalul de vânzări sau moneda "
-"companiei, dacă aceasta nu este setată, din configurația POS."
+"online trebuie să utilizeze aceeași monedă ca Jurnalul de vânzări sau moneda"
+" companiei, dacă aceasta nu este setată, din configurația POS."
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_pos_payment_method__online_payment_provider_ids
@@ -301,7 +301,7 @@ msgstr "Eroare server"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -471,8 +471,8 @@ msgstr ""
 msgid ""
 "There is no online payment method configured for this Point of Sale order."
 msgstr ""
-"Nu există nicio metodă de plată online configurată pentru această comandă la "
-"punctul de vânzare."
+"Nu există nicio metodă de plată online configurată pentru această comandă la"
+" punctul de vânzare."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -556,10 +556,8 @@ msgstr "Nu ați activat niciun"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

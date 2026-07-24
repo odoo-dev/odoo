@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 17:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/"
-"product/hi/>\n"
+"Language-Team: Hindi <https://translate.odoo.com/projects/odoo-master/product/hi/>\n"
 "Language: hi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,25 +38,22 @@ msgstr "# प्रॉडक्ट"
 #: code:addons/product/models/product_pricelist_item.py:0
 #, fuzzy
 msgid ""
-"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra "
-"fee\n"
-"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"%(base)s with a %(discount)s %% %(discount_type)s and %(surcharge)s extra fee\n"
+"Example: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 msgstr ""
 "%(base)s पर %(discount)s %% %(discount_type)s और %(surcharge)s अतिरिक्त शुल्क\n"
-"उदाहरण: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %"
-"(total_amount)s"
+"उदाहरण: %(amount)s * %(discount_charge)s + %(price_surcharge)s → %(total_amount)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
 #, fuzzy
 msgid ""
-"%(item_name)s: end date (%(end_date)s) should be after start date (%"
-"(start_date)s)"
+"%(item_name)s: end date (%(end_date)s) should be after start date "
+"(%(start_date)s)"
 msgstr ""
-"%(item_name)s: खत्म होने की तारीख (%(end_date)s) शुरू होने की तारीख (%"
-"(start_date)s) के बाद होनी चाहिए"
+"%(item_name)s: खत्म होने की तारीख (%(end_date)s) शुरू होने की तारीख "
+"(%(start_date)s) के बाद होनी चाहिए"
 
 #. module: product
 #. odoo-python
@@ -146,30 +142,24 @@ msgstr "- %(amount)s छूट"
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 #, fuzzy
-msgid ""
-"- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
+msgid "- Barcode \"%(barcode)s\" already assigned to product(s): %(product_list)s"
 msgstr ""
-"- बारकोड \"%(barcode)s\" पहले से ही इन प्रॉडक्ट को असाइन किया गया है: %"
-"(product_list)s"
+"- बारकोड \"%(barcode)s\" पहले से ही इन प्रॉडक्ट को असाइन किया गया है: "
+"%(product_list)s"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__create_variant
 #, fuzzy
 msgid ""
-"- Instantly: All possible variants are created as soon as the attribute and "
-"its values are added to a product.\n"
-"        - Dynamically: Each variant is created only when its corresponding "
-"attributes and values are added to a sales order.\n"
+"- Instantly: All possible variants are created as soon as the attribute and its values are added to a product.\n"
+"        - Dynamically: Each variant is created only when its corresponding attributes and values are added to a sales order.\n"
 "        - Never: Variants are never created for the attribute.\n"
 "        Note: this cannot be changed once the attribute is used on a product."
 msgstr ""
-"- तुरंत: जैसे ही आप किसी प्रॉडक्ट में कोई विशेषता और उसकी वैल्यू जोड़ते हैं, उसके सभी संभावित "
-"वेरिएंट तुरंत बन जाते हैं.\n"
-"        - डाइनैमिक तौर पर: हर वेरिएंट तभी बनाया जाता है जब उसके संबंधित विशेषता और "
-"वैल्यू किसी सेल्स ऑर्डर में जोड़ी जाती हैं.\n"
+"- तुरंत: जैसे ही आप किसी प्रॉडक्ट में कोई विशेषता और उसकी वैल्यू जोड़ते हैं, उसके सभी संभावित वेरिएंट तुरंत बन जाते हैं.\n"
+"        - डाइनैमिक तौर पर: हर वेरिएंट तभी बनाया जाता है जब उसके संबंधित विशेषता और वैल्यू किसी सेल्स ऑर्डर में जोड़ी जाती हैं.\n"
 "        - कभी नहीं: उस विशेषता के लिए कभी भी कोई वेरिएंट नहीं बनाया जाता है।.\n"
-"        ध्यान दें: एक बार जब किसी प्रॉडक्ट पर उस विशेषता का उपयोग कर लिया जाता है, "
-"तो इस सेटिंग को बदला नहीं जा सकता।"
+"        ध्यान दें: एक बार जब किसी प्रॉडक्ट पर उस विशेषता का उपयोग कर लिया जाता है, तो इस सेटिंग को बदला नहीं जा सकता।"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_duration_month_1
@@ -251,8 +241,8 @@ msgid ""
 "<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
 "o_translate_inline\">Contact Us</a>"
 msgstr ""
-"<a href=\"/contactus\" class=\"mb-2 btn btn-primary o_translate_inline\">हमसे "
-"संपर्क करें</a>"
+"<a href=\"/contactus\" class=\"mb-2 btn btn-primary "
+"o_translate_inline\">हमसे संपर्क करें</a>"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
@@ -263,14 +253,14 @@ msgstr "<b>सलाह: क्या आप कीमत को 9.99 पर र
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_form_view
 msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"<i class=\"oi mx-2 oe_edit_only\" data-icon=\"east\" aria-label=\"Arrow "
 "icon\" title=\"Arrow\"/>"
 msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_view_kanban
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
 
@@ -295,8 +285,8 @@ msgstr "<span class=\"o_stat_text\">प्रॉडक्ट</span>"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid ""
-"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based "
-"on variants</span>"
+"<span class=\"text-muted\" invisible=\"product_variant_count &lt;= 1\">Based"
+" on variants</span>"
 msgstr ""
 
 #. module: product
@@ -365,12 +355,12 @@ msgstr "एक कॉम्बो प्रॉडक्ट में कम स�
 #: model:ir.model.fields,help:product.field_product_template__description_sale
 #, fuzzy
 msgid ""
-"A description of the Product that you want to communicate to your customers. "
-"This description will be copied to every Sales Order, Delivery Order and "
+"A description of the Product that you want to communicate to your customers."
+" This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
 msgstr ""
-"प्रॉडक्ट का वह विवरण जिसे आप अपने ग्राहकों को बताना चाहते हैं. यह विवरण हर सेल्स ऑर्डर, "
-"डिलीवरी ऑर्डर और कस्टमर इनवॉइस/क्रेडिट नोट पर कॉपी किया जाएगा"
+"प्रॉडक्ट का वह विवरण जिसे आप अपने ग्राहकों को बताना चाहते हैं. यह विवरण हर "
+"सेल्स ऑर्डर, डिलीवरी ऑर्डर और कस्टमर इनवॉइस/क्रेडिट नोट पर कॉपी किया जाएगा"
 
 #. module: product
 #. odoo-python
@@ -383,14 +373,10 @@ msgstr "यह बारकोड पहले से ही किसी दू
 #: model_terms:ir.actions.act_window,help:product.product_pricelist_action2
 #, fuzzy
 msgid ""
-"A price is a set of sales prices or rules to compute the price of sales "
-"order lines based on products, product categories, dates and ordered "
-"quantities.\n"
-"            This is the perfect tool to handle several pricings, seasonal "
-"discounts, etc."
+"A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n"
+"            This is the perfect tool to handle several pricings, seasonal discounts, etc."
 msgstr ""
-"प्राइस लिस्ट, सेल्स ऑर्डर लाइनों के लिए प्रॉडक्ट, प्रॉडक्ट कैटेगरी, तारीखों और ऑर्डर की "
-"मात्रा के आधार पर बिक्री की कीमतें या नियम तय करती है.\n"
+"प्राइस लिस्ट, सेल्स ऑर्डर लाइनों के लिए प्रॉडक्ट, प्रॉडक्ट कैटेगरी, तारीखों और ऑर्डर की मात्रा के आधार पर बिक्री की कीमतें या नियम तय करती है.\n"
 "            यह अलग-अलग कीमतों और मौसमी छूट को संभालने के लिए सबसे सही टूल है।"
 
 #. module: product
@@ -401,21 +387,25 @@ msgid ""
 "A pricelist item with \"Other Pricelist\" as base must have a "
 "base_pricelist_id."
 msgstr ""
-"\"अन्य मूल्य सूची\" पर आधारित मूल्य सूची आइटम में एक base_pricelist_id होना चाहिए।"
+"\"अन्य मूल्य सूची\" पर आधारित मूल्य सूची आइटम में एक base_pricelist_id होना "
+"चाहिए।"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_uom.py:0
 #, fuzzy
 msgid "A product already uses the barcode"
-msgstr "यह बारकोड पहले से ही किसी अन्य प्रॉडक्ट के लिए इस्तेमाल किया जा रहा है"
+msgstr ""
+"यह बारकोड पहले से ही किसी अन्य प्रॉडक्ट के लिए इस्तेमाल किया जा रहा है"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 #, fuzzy
 msgid "A sellable combo product can only contain sellable products."
-msgstr "एक बेचने योग्य कॉम्बो प्रॉडक्ट में सिर्फ़ बेचने योग्य प्रॉडक्ट ही हो सकते हैं।"
+msgstr ""
+"एक बेचने योग्य कॉम्बो प्रॉडक्ट में सिर्फ़ बेचने योग्य प्रॉडक्ट ही हो सकते "
+"हैं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__is_storable
@@ -575,7 +565,9 @@ msgstr "प्रॉडक्ट में जोड़ें"
 #: model:ir.model.fields,help:product.field_product_template__uom_ids
 #, fuzzy
 msgid "Additional packagings for this product which can be used for sales"
-msgstr "इस प्रॉडक्ट के लिए अतिरिक्त पैकेजिंग जिसका उपयोग बिक्री के लिए किया जा सकता है"
+msgstr ""
+"इस प्रॉडक्ट के लिए अतिरिक्त पैकेजिंग जिसका उपयोग बिक्री के लिए किया जा सकता "
+"है"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_brand_adidas
@@ -746,8 +738,8 @@ msgid ""
 "At most %s quantities can be displayed simultaneously. Remove a selected "
 "quantity to add others."
 msgstr ""
-"एक बार में सिर्फ %s मात्राएं ही दिखाई जा सकती हैं. नई मात्रा जोड़ने के लिए पहले वाली को "
-"हटाएं।"
+"एक बार में सिर्फ %s मात्राएं ही दिखाई जा सकती हैं. नई मात्रा जोड़ने के लिए "
+"पहले वाली को हटाएं।"
 
 #. module: product
 #: model:ir.model,name:product.model_ir_attachment
@@ -831,14 +823,10 @@ msgstr "एट्रिब्यूट और वैरिएंट"
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__free_qty
 msgid ""
-"Available quantity (computed as Quantity On Hand - reserved quantity - "
-"quantity to remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Available quantity (computed as Quantity On Hand - reserved quantity - quantity to remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 
 #. module: product
@@ -1043,15 +1031,11 @@ msgstr ""
 #: code:addons/product/models/product_template.py:0
 #, fuzzy
 msgid ""
-"Changing the unit of measure for your product will apply a conversion 1 %"
-"(old_uom_name)s = 1 %(new_uom_name)s.\n"
-"All existing records (Sales orders, Purchase orders, etc.) using this "
-"product will be updated by replacing the unit name."
+"Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n"
+"All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name."
 msgstr ""
-"अपने प्रॉडक्ट की माप की इकाई (UoM) बदलने पर 1 %(old_uom_name)s = 1 %"
-"(new_uom_name)s का कन्वर्शन लागू होगा.\n"
-"इस प्रॉडक्ट का उपयोग करने वाले सभी मौजूदा रिकॉर्ड (सेल्स ऑर्डर, परचेज़ ऑर्डर, वगैरह) यूनिट "
-"का नाम बदलकर अपडेट कर दिए जाएंगे।"
+"अपने प्रॉडक्ट की माप की इकाई (UoM) बदलने पर 1 %(old_uom_name)s = 1 %(new_uom_name)s का कन्वर्शन लागू होगा.\n"
+"इस प्रॉडक्ट का उपयोग करने वाले सभी मौजूदा रिकॉर्ड (सेल्स ऑर्डर, परचेज़ ऑर्डर, वगैरह) यूनिट का नाम बदलकर अपडेट कर दिए जाएंगे।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__checksum
@@ -1157,7 +1141,8 @@ msgstr "कॉम्बो प्रॉडक्ट में एट्रिब
 msgid ""
 "Combos allow to choose one product amongst a selection of choices per "
 "category."
-msgstr "कॉम्बो हर कैटगरी के विकल्पों में से एक प्रॉडक्ट चुनने की अनुमति देते हैं।"
+msgstr ""
+"कॉम्बो हर कैटगरी के विकल्पों में से एक प्रॉडक्ट चुनने की अनुमति देते हैं।"
 
 #. module: product
 #: model:product.template,description_sale:product.product_delivery_01_product_template
@@ -1395,24 +1380,16 @@ msgstr "करेंसी"
 #, fuzzy
 msgid ""
 "Current quantity of products.\n"
-"In a context with a single Stock Location, this includes goods stored at "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"stored in the Stock Location of the Warehouse of this Shop, or any of its "
-"children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods stored at this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"stored in the Stock Location of the Warehouse of this Shop, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 "प्रॉडक्ट की मौजूदा क्वांटिटी.\n"
-"अगर आप सिर्फ एक स्टॉक लोकेशन को देखते हैं, तो इसमें उस लोकेशन या उससे जुड़ी किसी भी छोटी "
-"जगह में रखा सामान शामिल करें.\n"
-"अगर आप सिर्फ एक वेयरहाउस को देखते हैं, तो इसमें उस वेयरहाउस के स्टॉक लोकेशन या उससे जुड़ी "
-"किसी भी छोटी जगह में रखा सामान शामिल करें.\n"
-"इस दुकान के वेयरहाउस के स्टॉक लोकेशन या उससे जुड़ी किसी भी छोटी जगह में रखा सामान शामिल "
-"करें.\n"
-"बाकी सभी स्थितियों में, इसमें 'आंतरिक' प्रकार वाले किसी भी स्टॉक लोकेशन में रखा सामान "
-"शामिल करें।"
+"अगर आप सिर्फ एक स्टॉक लोकेशन को देखते हैं, तो इसमें उस लोकेशन या उससे जुड़ी किसी भी छोटी जगह में रखा सामान शामिल करें.\n"
+"अगर आप सिर्फ एक वेयरहाउस को देखते हैं, तो इसमें उस वेयरहाउस के स्टॉक लोकेशन या उससे जुड़ी किसी भी छोटी जगह में रखा सामान शामिल करें.\n"
+"इस दुकान के वेयरहाउस के स्टॉक लोकेशन या उससे जुड़ी किसी भी छोटी जगह में रखा सामान शामिल करें.\n"
+"बाकी सभी स्थितियों में, इसमें 'आंतरिक' प्रकार वाले किसी भी स्टॉक लोकेशन में रखा सामान शामिल करें।"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_custom
@@ -1503,7 +1480,8 @@ msgstr "स्टॉक से जुड़े सभी कामों के 
 #: model:ir.model.fields,help:product.field_product_base_unit__name
 #: model:ir.model.fields,help:product.field_product_product__base_unit_id
 #: model:ir.model.fields,help:product.field_product_template__base_unit_id
-msgid "Define a custom unit to display in the price per unit of measure field."
+msgid ""
+"Define a custom unit to display in the price per unit of measure field."
 msgstr ""
 
 #. module: product
@@ -1674,8 +1652,8 @@ msgstr ""
 #: model:ir.model.fields,help:product.field_product_product__base_unit_name
 #: model:ir.model.fields,help:product.field_product_template__base_unit_name
 msgid ""
-"Displays the custom unit for the products if defined or the selected unit of "
-"measure otherwise."
+"Displays the custom unit for the products if defined or the selected unit of"
+" measure otherwise."
 msgstr ""
 
 #. module: product
@@ -1758,7 +1736,8 @@ msgstr ""
 #, fuzzy
 msgid "Each value should be defined only once per attribute per product."
 msgstr ""
-"प्रत्येक वैल्यू को प्रति एट्रिब्यूट प्रति प्रॉडक्ट केवल एक बार परिभाषित किया जाना चाहिए।"
+"प्रत्येक वैल्यू को प्रति एट्रिब्यूट प्रति प्रॉडक्ट केवल एक बार परिभाषित किया"
+" जाना चाहिए।"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_document_kanban
@@ -1776,8 +1755,8 @@ msgstr "समाप्ति तिथि"
 #. odoo-python
 #: code:addons/product/models/product_supplierinfo.py:0
 msgid ""
-"End date can't be earlier than the start date. Please check dates for vendor "
-"pricelist: %s"
+"End date can't be earlier than the start date. Please check dates for vendor"
+" pricelist: %s"
 msgstr ""
 
 #. module: product
@@ -1855,11 +1834,11 @@ msgstr "अतिरिक्त कीमत"
 #: model:ir.model.fields,help:product.field_product_template_attribute_value__price_extra
 #, fuzzy
 msgid ""
-"Extra price for the variant with this attribute value on sale price. eg. 200 "
-"price extra, 1000 + 200 = 1200."
+"Extra price for the variant with this attribute value on sale price. eg. 200"
+" price extra, 1000 + 200 = 1200."
 msgstr ""
-"इस एट्रिब्यूट वैल्यू वाले वैरिएंट के लिए सेल प्राइस पर अतिरिक्त कीमत. जैसे 200 अतिरिक्त "
-"कीमत, 1000 + 200 = 1200।"
+"इस एट्रिब्यूट वैल्यू वाले वैरिएंट के लिए सेल प्राइस पर अतिरिक्त कीमत. जैसे "
+"200 अतिरिक्त कीमत, 1000 + 200 = 1200।"
 
 #. module: product
 #: model:product.attribute,name:product.pa_fabric
@@ -1944,25 +1923,19 @@ msgstr "फॉन्ट के बेहतरीन आइकॉन जैस�
 #: model:ir.model.fields,help:product.field_product_pricelist_item__min_quantity
 #, fuzzy
 msgid ""
-"For the rule to apply, bought/sold quantity must be greater than or equal to "
-"the minimum quantity specified in this field.\n"
+"For the rule to apply, bought/sold quantity must be greater than or equal to the minimum quantity specified in this field.\n"
 "Expressed in the default unit of measure of the product."
 msgstr ""
-"नियम लागू होने के लिए, खरीदी/बेची गई मात्रा इस फ़ील्ड में दी गई न्यूनतम मात्रा के बराबर "
-"या उससे अधिक होनी चाहिए.\n"
+"नियम लागू होने के लिए, खरीदी/बेची गई मात्रा इस फ़ील्ड में दी गई न्यूनतम मात्रा के बराबर या उससे अधिक होनी चाहिए.\n"
 "यह प्रॉडक्ट की डिफ़ॉल्ट माप की इकाई (UoM) में दिखाई गई है।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__virtual_available
 msgid ""
-"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - "
-"Quantity to Remove)\n"
-"In a context with a single Stock Location, this includes goods stored in "
-"this location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods stored in the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods stored in any Stock Location with 'internal' "
-"type."
+"Forecast quantity (computed as Quantity On Hand - Outgoing + Incoming - Quantity to Remove)\n"
+"In a context with a single Stock Location, this includes goods stored in this location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods stored in the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods stored in any Stock Location with 'internal' type."
 msgstr ""
 
 #. module: product
@@ -2138,8 +2111,8 @@ msgid ""
 "Here you can set a specific HTML color index (e.g. #ff0000) to display the "
 "color if the attribute type is 'Color'."
 msgstr ""
-"यहां आप एक खास एचटीएमएल कलर इंडेक्स (जैसे #ff0000) सेट कर सकते हैं, ताकि एट्रिब्यूट टाइप "
-"'कलर' होने पर वह रंग दिखाई दे।"
+"यहां आप एक खास एचटीएमएल कलर इंडेक्स (जैसे #ff0000) सेट कर सकते हैं, ताकि "
+"एट्रिब्यूट टाइप 'कलर' होने पर वह रंग दिखाई दे।"
 
 #. module: product
 #: model:product.template,description_sale:product.product_product_12_product_template
@@ -2233,14 +2206,18 @@ msgstr "अगर बॉक्स पर टिक है, तो कुछ म�
 #, fuzzy
 msgid ""
 "If not set, the vendor price will apply to all variants of this product."
-msgstr "अगर सेट नहीं किया गया है, तो वेंडर प्राइस इस प्रॉडक्ट के सभी वैरिएंट पर लागू होगा।"
+msgstr ""
+"अगर सेट नहीं किया गया है, तो वेंडर प्राइस इस प्रॉडक्ट के सभी वैरिएंट पर लागू"
+" होगा।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__active
 #, fuzzy
 msgid ""
 "If unchecked, it will allow you to hide the attribute without removing it."
-msgstr "अगर अनचेक किया गया, तो यह आपको एट्रिब्यूट को हटाए बिना छिपाने की अनुमति देगा।"
+msgstr ""
+"अगर अनचेक किया गया, तो यह आपको एट्रिब्यूट को हटाए बिना छिपाने की अनुमति "
+"देगा।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist__active
@@ -2248,7 +2225,8 @@ msgstr "अगर अनचेक किया गया, तो यह आप�
 msgid ""
 "If unchecked, it will allow you to hide the pricelist without removing it."
 msgstr ""
-"अगर अनचेक किया गया, तो यह आपको प्राइसलिस्ट को हटाए बिना छिपाने की अनुमति देगा।"
+"अगर अनचेक किया गया, तो यह आपको प्राइसलिस्ट को हटाए बिना छिपाने की अनुमति "
+"देगा।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__active
@@ -2256,7 +2234,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "If unchecked, it will allow you to hide the product without removing it."
-msgstr "अगर अनचेक किया गया, तो यह आपको प्रॉडक्ट को हटाए बिना छिपाने की अनुमति देगा।"
+msgstr ""
+"अगर अनचेक किया गया, तो यह आपको प्रॉडक्ट को हटाए बिना छिपाने की अनुमति देगा।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute_value__image
@@ -2558,8 +2537,8 @@ msgid ""
 "receipt of the products in your warehouse. Used by the scheduler for "
 "automatic computation of the purchase order planning."
 msgstr ""
-"ऑर्डर कन्फर्म होने से लेकर सामान हाथ में आने तक लगने वाले कुल दिन. सिस्टम इसी नंबर का "
-"उपयोग करके अपने आप तय करता है कि अगला ऑर्डर कब देना चाहिए।"
+"ऑर्डर कन्फर्म होने से लेकर सामान हाथ में आने तक लगने वाले कुल दिन. सिस्टम "
+"इसी नंबर का उपयोग करके अपने आप तय करता है कि अगला ऑर्डर कब देना चाहिए।"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_fabric_leather
@@ -2637,7 +2616,8 @@ msgid ""
 "Looking for a custom bamboo stain to match existing furniture? Contact us "
 "for a quote."
 msgstr ""
-"मौजूदा फर्नीचर से मेल खाने वाले कस्टम बांस के स्टेन की तलाश है? कोटेशन के लिए हमसे संपर्क करें।"
+"मौजूदा फर्नीचर से मेल खाने वाले कस्टम बांस के स्टेन की तलाश है? कोटेशन के "
+"लिए हमसे संपर्क करें।"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_size_m
@@ -2785,8 +2765,8 @@ msgstr "मल्टी-चेकबॉक्स"
 msgid ""
 "Multi-checkbox display type is not compatible with the creation of variants"
 msgstr ""
-"अगर आप 'मल्टी-चेकबॉक्स' वाला डिजाइन चुनते हैं, तो आप उस प्रॉडक्ट के अलग-अलग वेरिएंट्स नहीं "
-"बना पाएंगे"
+"अगर आप 'मल्टी-चेकबॉक्स' वाला डिजाइन चुनते हैं, तो आप उस प्रॉडक्ट के अलग-अलग "
+"वेरिएंट्स नहीं बना पाएंगे"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
@@ -2892,8 +2872,8 @@ msgid ""
 "No product to print, if the product is archived please unarchive it before "
 "printing its label."
 msgstr ""
-"प्रिंट करने के लिए कोई प्रॉडक्ट नहीं है. यदि प्रॉडक्ट आर्काइव है, तो लेबल प्रिंट करने से पहले "
-"इसे अनआर्काइव करें।"
+"प्रिंट करने के लिए कोई प्रॉडक्ट नहीं है. यदि प्रॉडक्ट आर्काइव है, तो लेबल "
+"प्रिंट करने से पहले इसे अनआर्काइव करें।"
 
 #. module: product
 #. odoo-javascript
@@ -3052,29 +3032,30 @@ msgstr "ऑन हैंड"
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"On the product %(product)s you cannot associate the value %(value)s with the "
-"attribute %(attribute)s because they do not match."
+"On the product %(product)s you cannot associate the value %(value)s with the"
+" attribute %(attribute)s because they do not match."
 msgstr ""
-"प्रॉडक्ट %(product)s पर आप वैल्यू %(value)s को एट्रिब्यूट %(attribute)s के साथ नहीं "
-"जोड़ सकते, क्योंकि वे मेल नहीं खाते।"
+"प्रॉडक्ट %(product)s पर आप वैल्यू %(value)s को एट्रिब्यूट %(attribute)s के "
+"साथ नहीं जोड़ सकते, क्योंकि वे मेल नहीं खाते।"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"On the product %(product)s you cannot transform the attribute %"
-"(attribute_src)s into the attribute %(attribute_dest)s."
+"On the product %(product)s you cannot transform the attribute "
+"%(attribute_src)s into the attribute %(attribute_dest)s."
 msgstr ""
-"प्रॉडक्ट %(product)s पर आप एट्रिब्यूट %(attribute_src)s को एट्रिब्यूट %"
-"(attribute_dest)s में नहीं बदल सकते।"
+"प्रॉडक्ट %(product)s पर आप एट्रिब्यूट %(attribute_src)s को एट्रिब्यूट "
+"%(attribute_dest)s में नहीं बदल सकते।"
 
 #. module: product
 #. odoo-javascript
 #: code:addons/product/static/src/js/product_document_kanban/upload_button/upload_button.js:0
 #, fuzzy
 msgid "Oops! '%(fileName)s' didn’t upload since its format isn’t allowed."
-msgstr "माफ करें! '%(fileName)s' अपलोड नहीं हुआ, क्योंकि इसका फ़ॉर्मेट सही नहीं है।"
+msgstr ""
+"माफ करें! '%(fileName)s' अपलोड नहीं हुआ, क्योंकि इसका फ़ॉर्मेट सही नहीं है।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo_item__product_id
@@ -3276,7 +3257,8 @@ msgstr "कृपया वह प्रॉडक्ट चुनें या �
 #, fuzzy
 msgid ""
 "Please specify the product variant for which this rule should be applied"
-msgstr "कृपया वह प्रॉडक्ट वैरिएंट चुनें या बताएं जिस पर आप यह नियम लगाना चाहते हैं"
+msgstr ""
+"कृपया वह प्रॉडक्ट वैरिएंट चुनें या बताएं जिस पर आप यह नियम लगाना चाहते हैं"
 
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_weight_in_lbs__1
@@ -3291,8 +3273,8 @@ msgid ""
 "Press a button and watch your desk glide effortlessly from sitting to "
 "standing height in seconds."
 msgstr ""
-"एक बटन दबाएं और अपनी डेस्क को कुछ ही सेकंड में आसानी से बैठने की ऊंचाई से खड़े होने की ऊंचाई "
-"तक सरकते हुए देखें।"
+"एक बटन दबाएं और अपनी डेस्क को कुछ ही सेकंड में आसानी से बैठने की ऊंचाई से "
+"खड़े होने की ऊंचाई तक सरकते हुए देखें।"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_pricelist_item_tree_view_from_product
@@ -3851,12 +3833,9 @@ msgstr "मात्रा पहले से मौजूद है (%s)।"
 #: model:ir.model.fields,help:product.field_product_product__incoming_qty
 msgid ""
 "Quantity of planned incoming products.\n"
-"In a context with a single Stock Location, this includes goods arriving to "
-"this Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods arriving to the "
-"Stock Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods arriving to any Stock Location with "
-"'internal' type."
+"In a context with a single Stock Location, this includes goods arriving to this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods arriving to the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods arriving to any Stock Location with 'internal' type."
 msgstr ""
 
 #. module: product
@@ -3864,18 +3843,13 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Quantity of planned outgoing products.\n"
-"In a context with a single Stock Location, this includes goods leaving this "
-"Location, or any of its children.\n"
-"In a context with a single Warehouse, this includes goods leaving the Stock "
-"Location of this Warehouse, or any of its children.\n"
-"Otherwise, this includes goods leaving any Stock Location with 'internal' "
-"type."
+"In a context with a single Stock Location, this includes goods leaving this Location, or any of its children.\n"
+"In a context with a single Warehouse, this includes goods leaving the Stock Location of this Warehouse, or any of its children.\n"
+"Otherwise, this includes goods leaving any Stock Location with 'internal' type."
 msgstr ""
 "पहले से तय किए गए बाहर जाने वाले प्रॉडक्ट माल की कुल संख्या.\n"
-"एक स्टॉक लोकेशन के मामले में, इसमें इस लोकेशन या इसके चिल्ड्रन लोकेशन से बाहर जाने वाला माल "
-"शामिल है.\n"
-"एक वेयरहाउस के मामले में, इसमें इस वेयरहाउस के स्टॉक लोकेशन या इसके चिल्ड्रन लोकेशन से बाहर "
-"जाने वाला सामान शामिल है.\n"
+"एक स्टॉक लोकेशन के मामले में, इसमें इस लोकेशन या इसके चिल्ड्रन लोकेशन से बाहर जाने वाला माल शामिल है.\n"
+"एक वेयरहाउस के मामले में, इसमें इस वेयरहाउस के स्टॉक लोकेशन या इसके चिल्ड्रन लोकेशन से बाहर जाने वाला सामान शामिल है.\n"
 "नहीं, तो इसमें 'इंटरनल' प्रकार के किसी भी स्टॉक लोकेशन से बाहर जाने वाला सामान शामिल है।"
 
 #. module: product
@@ -3925,11 +3899,11 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:product.product_supplierinfo_type_action
 #, fuzzy
 msgid ""
-"Register the prices requested by your vendors for each product, based on the "
-"quantity and the period."
+"Register the prices requested by your vendors for each product, based on the"
+" quantity and the period."
 msgstr ""
-"मात्रा और समय अवधि के आधार पर, हर प्रॉडक्ट के लिए अपने वेंडर द्वारा मांगी गई कीमतें दर्ज "
-"करें।"
+"मात्रा और समय अवधि के आधार पर, हर प्रॉडक्ट के लिए अपने वेंडर द्वारा मांगी गई"
+" कीमतें दर्ज करें।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_attribute__product_tmpl_ids
@@ -4213,8 +4187,8 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"अगर यह नियम सिर्फ़ इस कैटेगरी या इसकी सब-कैटेगरी के प्रॉडक्ट पर लागू होता है, तो एक "
-"प्रॉडक्ट कैटेगरी तय करें. अन्यथा इसे खाली छोड़ दें।"
+"अगर यह नियम सिर्फ़ इस कैटेगरी या इसकी सब-कैटेगरी के प्रॉडक्ट पर लागू होता "
+"है, तो एक प्रॉडक्ट कैटेगरी तय करें. अन्यथा इसे खाली छोड़ दें।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id
@@ -4223,8 +4197,8 @@ msgid ""
 "Specify a product if this rule only applies to one product. Keep empty "
 "otherwise."
 msgstr ""
-"अगर यह नियम सिर्फ़ एक प्रॉडक्ट पर लागू होता है, तो एक प्रॉडक्ट तय करें. अन्यथा इसे खाली "
-"छोड़ दें।"
+"अगर यह नियम सिर्फ़ एक प्रॉडक्ट पर लागू होता है, तो एक प्रॉडक्ट तय करें. "
+"अन्यथा इसे खाली छोड़ दें।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_tmpl_id
@@ -4233,8 +4207,8 @@ msgid ""
 "Specify a template if this rule only applies to one product template. Keep "
 "empty otherwise."
 msgstr ""
-"अगर यह नियम सिर्फ़ एक प्रॉडक्ट टेम्प्लेट पर लागू होता है, तो एक टेम्प्लेट तय करें. अन्यथा इसे "
-"खाली छोड़ दें।"
+"अगर यह नियम सिर्फ़ एक प्रॉडक्ट टेम्प्लेट पर लागू होता है, तो एक टेम्प्लेट तय"
+" करें. अन्यथा इसे खाली छोड़ दें।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_surcharge
@@ -4243,8 +4217,8 @@ msgid ""
 "Specify the fixed amount to add or subtract (if negative) to the amount "
 "calculated with the discount."
 msgstr ""
-"डिस्काउंट के साथ गणना की गई राशि में जोड़ने या घटाने (अगर नकारात्मक हो) के लिए एक "
-"निश्चित राशि तय करें।"
+"डिस्काउंट के साथ गणना की गई राशि में जोड़ने या घटाने (अगर नकारात्मक हो) के "
+"लिए एक निश्चित राशि तय करें।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__price_max_margin
@@ -4348,7 +4322,9 @@ msgstr "टैग"
 #: model_terms:ir.actions.act_window,help:product.product_tag_action
 #, fuzzy
 msgid "Tags are used to search product for a given theme."
-msgstr "टैग्स का उपयोग किसी खास थीम के आधार पर प्रॉडक्ट को खोजने के लिए किया जाता है।"
+msgstr ""
+"टैग्स का उपयोग किसी खास थीम के आधार पर प्रॉडक्ट को खोजने के लिए किया जाता "
+"है।"
 
 #. module: product
 #: model:product.attribute.value,name:product.pav_color_tan
@@ -4403,10 +4379,11 @@ msgstr "रेफ़रेंस '%s' पहले से ही मौजूद
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"The attribute %(attribute)s must have at least one value for the product %"
-"(product)s."
+"The attribute %(attribute)s must have at least one value for the product "
+"%(product)s."
 msgstr ""
-"प्रॉडक्ट %(product)s के लिए एट्रिब्यूट %(attribute)s की कम से कम एक वैल्यू होनी चाहिए।"
+"प्रॉडक्ट %(product)s के लिए एट्रिब्यूट %(attribute)s की कम से कम एक वैल्यू "
+"होनी चाहिए।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__attribute_id
@@ -4414,7 +4391,9 @@ msgstr ""
 msgid ""
 "The attribute cannot be changed once the value is used on at least one "
 "product."
-msgstr "एट्रिब्यूट को एक बार किसी प्रॉडक्ट पर इस्तेमाल करने के बाद बदला नहीं जा सकता।"
+msgstr ""
+"एट्रिब्यूट को एक बार किसी प्रॉडक्ट पर इस्तेमाल करने के बाद बदला नहीं जा "
+"सकता।"
 
 #. module: product
 #. odoo-python
@@ -4432,8 +4411,8 @@ msgid ""
 "since the 5 boxes are loose, you can move and place them in the way that "
 "suits you and your things best."
 msgstr ""
-"डेस्क ऑर्गनाइज़र छोटी चीज़ों को रखने के लिए बेहतरीन है. इसके 5 बॉक्स अलग-अलग हैं, इसलिए आप "
-"उन्हें अपनी ज़रूरत और सुविधा के अनुसार कहीं भी रख सकते हैं।"
+"डेस्क ऑर्गनाइज़र छोटी चीज़ों को रखने के लिए बेहतरीन है. इसके 5 बॉक्स अलग-अलग"
+" हैं, इसलिए आप उन्हें अपनी ज़रूरत और सुविधा के अनुसार कहीं भी रख सकते हैं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute__display_type
@@ -4448,8 +4427,8 @@ msgstr "प्रॉडक्ट कॉन्फ़िगरेटर में 
 #: code:addons/product/models/product_product.py:0
 msgid ""
 "The exitings product has different attribute value. \"%(imported_values)s\" "
-"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", \"%"
-"(id)s\""
+"is not equivalent to \"%(existing_values)s\" for \"%(external_id)s\", "
+"\"%(id)s\""
 msgstr ""
 
 #. module: product
@@ -4458,7 +4437,9 @@ msgstr ""
 msgid ""
 "The minimum height is 65 cm, and for standing work the maximum height "
 "position is 125 cm."
-msgstr "न्यूनतम ऊंचाई 65 सेमी है, और खड़े होकर काम करने के लिए अधिकतम ऊंचाई 125 सेमी है।"
+msgstr ""
+"न्यूनतम ऊंचाई 65 सेमी है, और खड़े होकर काम करने के लिए अधिकतम ऊंचाई 125 सेमी"
+" है।"
 
 #. module: product
 #. odoo-python
@@ -4473,12 +4454,13 @@ msgstr "न्यूनतम मार्जिन, अधिकतम मा�
 msgid ""
 "The minimum price among the products in this combo. This value will be used "
 "to prorate the price of this combo with respect to the other combos in a "
-"combo product. This heuristic ensures that whatever product the user chooses "
-"in a combo, it will always be the same price."
+"combo product. This heuristic ensures that whatever product the user chooses"
+" in a combo, it will always be the same price."
 msgstr ""
-"इस कॉम्बो में प्रॉडक्ट का न्यूनतम मूल्य. इस मान का इस्तेमाल कॉम्बो प्रॉडक्ट के अन्य कॉम्बो के "
-"संबंध में इस कॉम्बो के मूल्य को प्रोरैट करने के लिए किया जाएगा. यह नियम सुनिश्चित करता है "
-"कि उपयोगकर्ता कॉम्बो में जो भी प्रॉडक्ट चुने, उसका मूल्य हमेशा बराबर रहेगा।"
+"इस कॉम्बो में प्रॉडक्ट का न्यूनतम मूल्य. इस मान का इस्तेमाल कॉम्बो प्रॉडक्ट "
+"के अन्य कॉम्बो के संबंध में इस कॉम्बो के मूल्य को प्रोरैट करने के लिए किया "
+"जाएगा. यह नियम सुनिश्चित करता है कि उपयोगकर्ता कॉम्बो में जो भी प्रॉडक्ट "
+"चुने, उसका मूल्य हमेशा बराबर रहेगा।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_category__product_count
@@ -4486,22 +4468,24 @@ msgstr ""
 msgid ""
 "The number of products under this category (Does not consider the children "
 "categories)"
-msgstr "इस कैटेगरी के तहत प्रॉडक्ट की संख्या (इसमें चाइल्ड कैटेगरी शामिल नहीं हैं)"
+msgstr ""
+"इस कैटेगरी के तहत प्रॉडक्ट की संख्या (इसमें चाइल्ड कैटेगरी शामिल नहीं हैं)"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 #, fuzzy
 msgid ""
-"The number of variants to generate is above allowed limit. You should either "
-"not generate variants for each combination or generate them on demand from "
+"The number of variants to generate is above allowed limit. You should either"
+" not generate variants for each combination or generate them on demand from "
 "the sales order. To do so, open the form view of attributes and change the "
 "mode of *Create Variants*."
 msgstr ""
-"सिस्टम में वेरिएंट्स बनाने की एक तय सीमा है और आपका डेटा उस लिमिट को पार कर रहा है. इसे "
-"ठीक करने के लिए आपको हर संभावित कॉम्बिनेशन को ऑटोमैटिक बनाने के बजाय 'ऑन डिमांड' (जब "
-"ज़रूरत हो तब) का विकल्प चुनना होगा. यह बदलाव आप एट्रिब्यूट सेटिंग्स में जाकर \"वैरिएंट "
-"बनाएं\" विकल्प को अपडेट करके कर सकते हैं।"
+"सिस्टम में वेरिएंट्स बनाने की एक तय सीमा है और आपका डेटा उस लिमिट को पार कर "
+"रहा है. इसे ठीक करने के लिए आपको हर संभावित कॉम्बिनेशन को ऑटोमैटिक बनाने के "
+"बजाय 'ऑन डिमांड' (जब ज़रूरत हो तब) का विकल्प चुनना होगा. यह बदलाव आप "
+"एट्रिब्यूट सेटिंग्स में जाकर \"वैरिएंट बनाएं\" विकल्प को अपडेट करके कर सकते "
+"हैं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__price
@@ -4515,19 +4499,20 @@ msgstr "प्रॉडक्ट खरीदने की कीमत"
 #, fuzzy
 msgid "The product template is archived so no combination is possible."
 msgstr ""
-"प्रॉडक्ट टेम्प्लेट आर्काइव कर दिया गया है, इसलिए अब कोई भी कॉम्बिनेशन बनाना संभव नहीं है।"
+"प्रॉडक्ट टेम्प्लेट आर्काइव कर दिया गया है, इसलिए अब कोई भी कॉम्बिनेशन बनाना "
+"संभव नहीं है।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__min_qty
 #, fuzzy
 msgid ""
-"The quantity to purchase from this vendor to benefit from the unit price. If "
-"a vendor unit is set, quantity should be specified in this unit, otherwise "
+"The quantity to purchase from this vendor to benefit from the unit price. If"
+" a vendor unit is set, quantity should be specified in this unit, otherwise "
 "it should be specified in the default unit of the product."
 msgstr ""
-"यूनिट प्राइस का लाभ पाने के लिए इस वेंडर से खरीदे जाने वाले सामान की संख्या. यदि वेंडर "
-"यूनिट सेट है, तो संख्या उस यूनिट में होनी चाहिए, अन्यथा यह प्रॉडक्ट की डिफॉल्ट यूनिट में "
-"होनी चाहिए।"
+"यूनिट प्राइस का लाभ पाने के लिए इस वेंडर से खरीदे जाने वाले सामान की संख्या."
+" यदि वेंडर यूनिट सेट है, तो संख्या उस यूनिट में होनी चाहिए, अन्यथा यह "
+"प्रॉडक्ट की डिफॉल्ट यूनिट में होनी चाहिए।"
 
 #. module: product
 #. odoo-python
@@ -4552,15 +4537,15 @@ msgid ""
 "The value %(value)s is not defined for the attribute %(attribute)s on the "
 "product %(product)s."
 msgstr ""
-"प्रॉडक्ट %(product)s के एट्रिब्यूट %(attribute)s के लिए वैल्यू %(value)s परिभाषित नहीं "
-"है।"
+"प्रॉडक्ट %(product)s के एट्रिब्यूट %(attribute)s के लिए वैल्यू %(value)s "
+"परिभाषित नहीं है।"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_product.py:0
 msgid ""
-"The value of Base Unit Count must be greater than 0. Use 0 to hide the price "
-"per unit on this product."
+"The value of Base Unit Count must be greater than 0. Use 0 to hide the price"
+" per unit on this product."
 msgstr ""
 
 #. module: product
@@ -4601,8 +4586,9 @@ msgid ""
 "to no possible variant. Please archive or delete your product directly if "
 "intended."
 msgstr ""
-"प्रॉडक्ट एट्रिब्यूट्स, वैल्यू और एक्सक्लूजन के इस कॉन्फ़िगरेशन से कोई भी वेरिएंट नहीं बन सकता. "
-"अगर आप ऐसा ही चाहते हैं, तो कृपया अपने प्रॉडक्ट को सीधे आर्काइव या मिटाएं।"
+"प्रॉडक्ट एट्रिब्यूट्स, वैल्यू और एक्सक्लूजन के इस कॉन्फ़िगरेशन से कोई भी "
+"वेरिएंट नहीं बन सकता. अगर आप ऐसा ही चाहते हैं, तो कृपया अपने प्रॉडक्ट को "
+"सीधे आर्काइव या मिटाएं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__price_extra
@@ -4629,8 +4615,8 @@ msgstr "यह नोट सिर्फ़ इंटरनल इस्ते�
 msgid ""
 "This product is part of a combo, so its type can't be changed to \"combo\"."
 msgstr ""
-"यह प्रॉडक्ट कॉम्बो का हिस्सा है, इसलिए इसका प्रकार बदलकर \"कॉम्बो\" नहीं किया जा "
-"सकता।"
+"यह प्रॉडक्ट कॉम्बो का हिस्सा है, इसलिए इसका प्रकार बदलकर \"कॉम्बो\" नहीं "
+"किया जा सकता।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_code
@@ -4639,8 +4625,8 @@ msgid ""
 "This vendor's product code will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
 msgstr ""
-"रिक्वेस्ट फॉर कोटेशन प्रिंट करते समय इस वेंडर का प्रॉडक्ट कोड इस्तेमाल किया जाएगा. इंटरनल "
-"कोड के लिए इसे खाली छोड़ दें।"
+"रिक्वेस्ट फॉर कोटेशन प्रिंट करते समय इस वेंडर का प्रॉडक्ट कोड इस्तेमाल किया "
+"जाएगा. इंटरनल कोड के लिए इसे खाली छोड़ दें।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_supplierinfo__product_name
@@ -4649,8 +4635,8 @@ msgid ""
 "This vendor's product name will be used when printing a request for "
 "quotation. Keep empty to use the internal one."
 msgstr ""
-"रिक्वेस्ट फॉर कोटेशन प्रिंट करते समय इस वेंडर का प्रॉडक्ट नाम इस्तेमाल किया जाएगा. इंटरनल "
-"नाम के लिए इसे खाली छोड़ दें।"
+"रिक्वेस्ट फॉर कोटेशन प्रिंट करते समय इस वेंडर का प्रॉडक्ट नाम इस्तेमाल किया "
+"जाएगा. इंटरनल नाम के लिए इसे खाली छोड़ दें।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_document__thumbnail
@@ -4888,8 +4874,8 @@ msgid ""
 "Use the discount rules and activate the discount settings in order to show "
 "discount to customer."
 msgstr ""
-"कस्टमर को डिस्काउंट दिखाने के लिए डिस्काउंट रूल्स का इस्तेमाल करें और डिस्काउंट सेटिंग्स को "
-"एक्टिवेट करें।"
+"कस्टमर को डिस्काउंट दिखाने के लिए डिस्काउंट रूल्स का इस्तेमाल करें और "
+"डिस्काउंट सेटिंग्स को एक्टिवेट करें।"
 
 #. module: product
 #. odoo-python
@@ -4899,7 +4885,8 @@ msgid ""
 "Use this feature to store any files you would like to share with your "
 "customers"
 msgstr ""
-"अपने ग्राहकों के साथ शेयर की जाने वाली फ़ाइलें स्टोर करने के लिए इस फ़ीचर का इस्तेमाल करें"
+"अपने ग्राहकों के साथ शेयर की जाने वाली फ़ाइलें स्टोर करने के लिए इस फ़ीचर का"
+" इस्तेमाल करें"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_res_partner__property_product_pricelist
@@ -4959,13 +4946,11 @@ msgstr "वैल्यू की संख्या"
 #, fuzzy
 msgid ""
 "Value of the product (automatically computed in AVCO).\n"
-"        Used to value the product when the purchase cost is not known (e.g. "
-"inventory adjustment).\n"
+"        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n"
 "        Used to compute margins on sale orders."
 msgstr ""
 "प्रॉडक्ट की वैल्यू (AVCO में अपने आप कैलकुलेट होती है).\n"
-"        इसका इस्तेमाल तब किया जाता है जब खरीद की लागत पता न हो (जैसे इन्वेंटरी "
-"एडजस्टमेंट).\n"
+"        इसका इस्तेमाल तब किया जाता है जब खरीद की लागत पता न हो (जैसे इन्वेंटरी एडजस्टमेंट).\n"
 "        इसका इस्तेमाल सेल्स ऑर्डर पर मार्जिन निकालने के लिए किया जाता है।"
 
 #. module: product
@@ -5182,10 +5167,11 @@ msgstr "चेतावनी"
 #: model_terms:product.template,website_description:product.product_product_4_product_template
 #, fuzzy
 msgid ""
-"We pay special attention to detail, which is why our desks are of a superior "
-"quality."
+"We pay special attention to detail, which is why our desks are of a superior"
+" quality."
 msgstr ""
-"हम बारीकियों पर विशेष ध्यान देते हैं, यही कारण है कि हमारे डेस्क बेहतरीन गुणवत्ता के होते हैं।"
+"हम बारीकियों पर विशेष ध्यान देते हैं, यही कारण है कि हमारे डेस्क बेहतरीन "
+"गुणवत्ता के होते हैं।"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__weight
@@ -5271,7 +5257,9 @@ msgstr "पीला"
 msgid ""
 "You are about to add the value \"%(attribute_value)s\" to %(product_count)s "
 "products."
-msgstr "आप %(product_count)s प्रॉडक्ट में \"%(attribute_value)s\" वैल्यू जोड़ने वाले हैं।"
+msgstr ""
+"आप %(product_count)s प्रॉडक्ट में \"%(attribute_value)s\" वैल्यू जोड़ने वाले"
+" हैं।"
 
 #. module: product
 #. odoo-python
@@ -5288,7 +5276,8 @@ msgid ""
 "You are deactivating the pricelist feature. Every active pricelist will be "
 "archived."
 msgstr ""
-"आप प्राइसलिस्ट फ़ीचर को बंद कर रहे हैं. सभी एक्टिव प्राइसलिस्ट आर्काइव कर दी जाएंगी।"
+"आप प्राइसलिस्ट फ़ीचर को बंद कर रहे हैं. सभी एक्टिव प्राइसलिस्ट आर्काइव कर दी"
+" जाएंगी।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__percent_price
@@ -5310,8 +5299,8 @@ msgid ""
 "You can assign pricelists to your customers or select one when creating a "
 "new sales quotation."
 msgstr ""
-"आप अपने ग्राहकों को प्राइसलिस्ट असाइन कर सकते हैं या नया सेल्स कोटेशन बनाते समय किसी एक "
-"को चुन सकते हैं।"
+"आप अपने ग्राहकों को प्राइसलिस्ट असाइन कर सकते हैं या नया सेल्स कोटेशन बनाते "
+"समय किसी एक को चुन सकते हैं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_document__type
@@ -5319,8 +5308,8 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr ""
-"आप या तो अपने कंप्यूटर से कोई फ़ाइल अपलोड कर सकते हैं या अपनी फ़ाइल का इंटरनेट लिंक कॉपी "
-"करके पेस्ट कर सकते हैं।"
+"आप या तो अपने कंप्यूटर से कोई फ़ाइल अपलोड कर सकते हैं या अपनी फ़ाइल का "
+"इंटरनेट लिंक कॉपी करके पेस्ट कर सकते हैं।"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_attribute_value__image
@@ -5330,7 +5319,8 @@ msgid ""
 "You can upload an image that will be used as the color of the attribute "
 "value."
 msgstr ""
-"आप एक इमेज अपलोड कर सकते हैं जिसका इस्तेमाल एट्रिब्यूट वैल्यू के रंग के तौर पर किया जाएगा।"
+"आप एक इमेज अपलोड कर सकते हैं जिसका इस्तेमाल एट्रिब्यूट वैल्यू के रंग के तौर "
+"पर किया जाएगा।"
 
 #. module: product
 #. odoo-javascript
@@ -5360,19 +5350,19 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You cannot archive this attribute as there are still products linked to it"
-msgstr "आप इस एट्रिब्यूट को आर्काइव नहीं कर सकते, क्योंकि अभी भी कुछ प्रॉडक्ट इससे जुड़े हुए हैं"
+msgstr ""
+"आप इस एट्रिब्यूट को आर्काइव नहीं कर सकते, क्योंकि अभी भी कुछ प्रॉडक्ट इससे "
+"जुड़े हुए हैं"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_attribute.py:0
 #, fuzzy
 msgid ""
-"You cannot change the Variants Creation Mode of the attribute %(attribute)s "
-"because it is used on the following products:\n"
+"You cannot change the Variants Creation Mode of the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"आप एट्रिब्यूट %(attribute)s के वेरिएंट क्रिएशन मोड को नहीं बदल सकते, क्योंकि इसका "
-"इस्तेमाल इन प्रॉडक्ट्स पर किया जा रहा है:\n"
+"आप एट्रिब्यूट %(attribute)s के वेरिएंट क्रिएशन मोड को नहीं बदल सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट्स पर किया जा रहा है:\n"
 "%(products)s"
 
 #. module: product
@@ -5380,18 +5370,18 @@ msgstr ""
 #: code:addons/product/models/product_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the attribute of the value %(value)s because it is used on "
-"the following products: %(products)s"
+"You cannot change the attribute of the value %(value)s because it is used on"
+" the following products: %(products)s"
 msgstr ""
-"आप वैल्यू %(value)s के एट्रिब्यूट को नहीं बदल सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट पर "
-"किया जा रहा है: %(products)s"
+"आप वैल्यू %(value)s के एट्रिब्यूट को नहीं बदल सकते, क्योंकि इसका इस्तेमाल इन"
+" प्रॉडक्ट पर किया जा रहा है: %(products)s"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_category.py:0
 msgid ""
-"You cannot change the company of %(categories)s as they hold products shared "
-"between companies or belonging to other companies."
+"You cannot change the company of %(categories)s as they hold products shared"
+" between companies or belonging to other companies."
 msgstr ""
 
 #. module: product
@@ -5407,19 +5397,21 @@ msgstr ""
 #: code:addons/product/models/product_template_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the product of the value %(value)s set on product %"
-"(product)s."
+"You cannot change the product of the value %(value)s set on product "
+"%(product)s."
 msgstr ""
-"आप वैल्यू %(value)s के प्रॉडक्ट को नहीं बदल सकते जो प्रॉडक्ट %(product)s पर सेट है।"
+"आप वैल्यू %(value)s के प्रॉडक्ट को नहीं बदल सकते जो प्रॉडक्ट %(product)s पर "
+"सेट है।"
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot change the value of the value %(value)s set on product %"
-"(product)s."
-msgstr "आप प्रॉडक्ट %(product)s पर सेट की गई वैल्यू %(value)s को नहीं बदल सकते।"
+"You cannot change the value of the value %(value)s set on product "
+"%(product)s."
+msgstr ""
+"आप प्रॉडक्ट %(product)s पर सेट की गई वैल्यू %(value)s को नहीं बदल सकते।"
 
 #. module: product
 #. odoo-python
@@ -5441,12 +5433,10 @@ msgstr ""
 #: code:addons/product/models/product_attribute.py:0
 #, fuzzy
 msgid ""
-"You cannot delete the attribute %(attribute)s because it is used on the "
-"following products:\n"
+"You cannot delete the attribute %(attribute)s because it is used on the following products:\n"
 "%(products)s"
 msgstr ""
-"आप एट्रिब्यूट %(attribute)s को मिटा नहीं सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट पर "
-"किया जा रहा है:\n"
+"आप एट्रिब्यूट %(attribute)s को मिटा नहीं सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट पर किया जा रहा है:\n"
 "%(products)s"
 
 #. module: product
@@ -5454,12 +5444,10 @@ msgstr ""
 #: code:addons/product/models/product_attribute_value.py:0
 #, fuzzy
 msgid ""
-"You cannot delete the value %(value)s because it is used on the following "
-"products:\n"
+"You cannot delete the value %(value)s because it is used on the following products:\n"
 "%(products)s\n"
 msgstr ""
-"आप वैल्यू %(value)s को मिटा नहीं सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट पर किया जा रहा "
-"है:\n"
+"आप वैल्यू %(value)s को मिटा नहीं सकते, क्योंकि इसका इस्तेमाल इन प्रॉडक्ट पर किया जा रहा है:\n"
 "%(products)s\n"
 
 #. module: product
@@ -5467,11 +5455,11 @@ msgstr ""
 #: code:addons/product/models/product_template_attribute_line.py:0
 #, fuzzy
 msgid ""
-"You cannot move the attribute %(attribute)s from the product %(product_src)s "
-"to the product %(product_dest)s."
+"You cannot move the attribute %(attribute)s from the product %(product_src)s"
+" to the product %(product_dest)s."
 msgstr ""
-"आप एट्रिब्यूट %(attribute)s को प्रॉडक्ट %(product_src)s से हटाकर प्रॉडक्ट %"
-"(product_dest)s में नहीं भेज सकते।"
+"आप एट्रिब्यूट %(attribute)s को प्रॉडक्ट %(product_src)s से हटाकर प्रॉडक्ट "
+"%(product_dest)s में नहीं भेज सकते।"
 
 #. module: product
 #. odoo-python
@@ -5481,7 +5469,8 @@ msgid ""
 "You cannot update related variants from the values. Please update related "
 "values from the variants."
 msgstr ""
-"आप वैल्यू से संबंधित वेरिएंट्स को अपडेट नहीं कर सकते. कृपया वेरिएंट से संबंधित वैल्यू को अपडेट करें।"
+"आप वैल्यू से संबंधित वेरिएंट्स को अपडेट नहीं कर सकते. कृपया वेरिएंट से "
+"संबंधित वैल्यू को अपडेट करें।"
 
 #. module: product
 #. odoo-javascript
@@ -5489,12 +5478,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
-"                            whether it's a storable product, a consumable or "
-"a service."
+"                            whether it's a storable product, a consumable or a service."
 msgstr ""
 "आपको अपनी हर खरीद-बिक्री के लिए एक प्रॉडक्ट बनाना होगा,\n"
-"                            चाहे वह स्टोर करने लायक सामान, उपभोग्य सामग्री या कोई "
-"सेवा हो।"
+"                            चाहे वह स्टोर करने लायक सामान, उपभोग्य सामग्री या कोई सेवा हो।"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_template_action
@@ -5504,8 +5491,7 @@ msgid ""
 "                whether it's a storable product, a consumable or a service."
 msgstr ""
 "बेचने या खरीदने वाली हर चीज़ के लिए एक प्रॉडक्ट बनाना ज़रूरी है,\n"
-"                चाहे वह स्टॉक में रखने वाला सामान हो, इस्तेमाल होने वाली सामग्री या "
-"कोई सेवा।"
+"                चाहे वह स्टॉक में रखने वाला सामान हो, इस्तेमाल होने वाली सामग्री या कोई सेवा।"
 
 #. module: product
 #: model_terms:ir.actions.act_window,help:product.product_variant_action
@@ -5513,16 +5499,12 @@ msgstr ""
 msgid ""
 "You must define a product for everything you sell or purchase,\n"
 "                whether it's a storable product, a consumable or a service.\n"
-"                The product form contains information to simplify the sale "
-"process:\n"
-"                price, notes in the quotation, accounting data, procurement "
-"methods, etc."
+"                The product form contains information to simplify the sale process:\n"
+"                price, notes in the quotation, accounting data, procurement methods, etc."
 msgstr ""
 "बेचने या खरीदने वाली हर चीज़ के लिए एक प्रॉडक्ट बनाना ज़रूरी है,\n"
-"                चाहे वह स्टॉक में रखने वाला सामान हो, इस्तेमाल होने वाली सामग्री या "
-"कोई सेवा.\n"
-"                प्रॉडक्ट फॉर्म में बिक्री की प्रक्रिया को आसान बनाने के लिए जानकारी "
-"होती है:\n"
+"                चाहे वह स्टॉक में रखने वाला सामान हो, इस्तेमाल होने वाली सामग्री या कोई सेवा.\n"
+"                प्रॉडक्ट फॉर्म में बिक्री की प्रक्रिया को आसान बनाने के लिए जानकारी होती है:\n"
 "                जैसे: कीमत, कोटेशन के लिए नोट्स, अकाउंटिंग डेटा, खरीदारी के तरीके वगैरह।"
 
 #. module: product

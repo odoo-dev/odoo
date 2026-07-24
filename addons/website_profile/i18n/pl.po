@@ -24,15 +24,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 20:43+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"website_profile/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/website_profile/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_profile
@@ -71,33 +68,33 @@ msgstr "Spróbuj innego wyszukiwania."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
-msgstr "<i class=\"fa fa-arrow-right\"/> Zdobądź odznaki"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Get Badges"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Zdobądź odznaki"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
-msgstr "<i class=\"fa fa-pencil me-1\"/>EDYTUJ"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>EDIT"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>EDYTUJ"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/>Edytuj"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>Edit"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>Edytuj"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
-msgstr "<i class=\"fa fa-pencil me-2\"/>EDYTUJ PROFIL"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"edit\"/>EDIT PROFILE"
+msgstr "<i class=\"me-2 oi-filled oi\" data-icon=\"edit\"/>EDYTUJ PROFIL"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Wszystkie odznaki"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Badges"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Wszystkie odznaki"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
-msgstr "<i class=\"oi oi-arrow-right\"/> Wszystkie odznaki"
+msgid "<i class=\"oi\" data-icon=\"east\"/> All Badges"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Wszystkie odznaki"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -155,19 +152,11 @@ msgstr "<strong class=\"mb-3 text-white me-2\">Ranking według:</strong>"
 #: model:mail.template,body_html:website_profile.validation_email
 msgid ""
 "<t>\n"
-"                            Hello <t t-out=\"object.name or ''\">Marc Demo</"
-"t>,<br/><br/>\n"
-"                            You have been invited to validate your email in "
-"order to get access to \"<t t-out=\"object.company_id.name or "
-"''\">YourCompany</t>\" website.\n"
-"                            To validate your email, please click on the "
-"button below:\n"
+"                            Hello <t t-out=\"object.name or ''\">Marc Demo</t>,<br/><br/>\n"
+"                            You have been invited to validate your email in order to get access to \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\" website.\n"
+"                            To validate your email, please click on the button below:\n"
 "                            <div style=\"margin: 32px 0px 32px 0px;\">\n"
-"                                <a t-att-href=\"ctx.get('token_url')\" t-"
-"attf-style=\"background-color: {{object.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\">\n"
+"                                <a t-att-href=\"ctx.get('token_url')\" t-attf-style=\"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\">\n"
 "                                    Validate my account\n"
 "                                </a>\n"
 "                            </div>\n"
@@ -175,19 +164,11 @@ msgid ""
 "            </t>"
 msgstr ""
 "<t>\n"
-"                            Dzień dobry <t t-out=\"object.name or ''\">Marc "
-"Demo</t>,<br/><br/>\n"
-"                            Zostałeś poproszony do zweryfikowania swojego "
-"adresu e-mail, aby uzyskać dostęp do strony internetowej <t t-"
-"out=\"object.company_id.name or ''\">YourCompany</t>.\n"
-"                            Aby zweryfikować swój adres e-mail, kliknij "
-"poniższy przycisk:\n"
+"                            Dzień dobry <t t-out=\"object.name or ''\">Marc Demo</t>,<br/><br/>\n"
+"                            Zostałeś poproszony do zweryfikowania swojego adresu e-mail, aby uzyskać dostęp do strony internetowej <t t-out=\"object.company_id.name or ''\">YourCompany</t>.\n"
+"                            Aby zweryfikować swój adres e-mail, kliknij poniższy przycisk:\n"
 "                           <div style=\"margin: 32px 0px 32px 0px;\">\n"
-"                                <a t-att-href=\"ctx.get('token_url')\" t-"
-"attf-style=\"background-color: {{object.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\"> \n"
+"                                <a t-att-href=\"ctx.get('token_url')\" t-attf-style=\"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\"> \n"
 "                                    Zweryfikuj moje konto\n"
 "                               </a>\n"
 "                            </div> \n"
@@ -257,13 +238,11 @@ msgstr "Odznaki to twoja kolekcja osiągnięć. Noś je z dumą! <br/>"
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
-"                        you receive badges for being especially helpful.<br "
-"class=\"d-none d-lg-inline-block\"/>Badges\n"
+"                        you receive badges for being especially helpful.<br class=\"d-none d-lg-inline-block\"/>Badges\n"
 "                        appear on your profile page, and your posts."
 msgstr ""
 "Oprócz zdobywania reputacji dzięki pytaniom i odpowiedziom,\n"
-"otrzymujesz odznaki za bycie szczególnie pomocnym. <br class=\"d-none d-lg-"
-"inline-block\"/>Odznaki\n"
+"otrzymujesz odznaki za bycie szczególnie pomocnym. <br class=\"d-none d-lg-inline-block\"/>Odznaki\n"
 "pojawiają się na stronie profilu i w postach."
 
 #. module: website_profile
@@ -287,8 +266,8 @@ msgid ""
 "Changing the country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"Zmiana kraju nie jest dozwolona po opublikowaniu dokumentów na Twoim koncie. "
-"W tej sprawie skontaktuj się z nami bezpośrednio."
+"Zmiana kraju nie jest dozwolona po opublikowaniu dokumentów na Twoim koncie."
+" W tej sprawie skontaktuj się z nami bezpośrednio."
 
 #. module: website_profile
 #. odoo-javascript
@@ -720,6 +699,6 @@ msgstr "└ Użytkownicy"
 #~ "content. Points can also be earned on the forum. Follow this link to the "
 #~ "guidelines of the forum."
 #~ msgstr ""
-#~ "Możesz zdobyć więcej punktów, odpowiadając na quizy na końcu każdej "
-#~ "treści kursu. Punkty można również zdobywać na forum. Pod tym linkiem "
-#~ "znajdują się wytyczne dotyczące forum."
+#~ "Możesz zdobyć więcej punktów, odpowiadając na quizy na końcu każdej treści "
+#~ "kursu. Punkty można również zdobywać na forum. Pod tym linkiem znajdują się "
+#~ "wytyczne dotyczące forum."

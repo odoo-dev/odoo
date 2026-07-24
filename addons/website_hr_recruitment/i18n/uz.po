@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 06:29+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"website_hr_recruitment/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/website_hr_recruitment/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -71,35 +70,34 @@ msgstr ""
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.detail
 #, fuzzy
-msgid "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>All Jobs"
-msgstr "<i class=\"fa fa-long-arrow-left text-primary me-2\"/>Barcha ishlar"
+msgid "<i class=\"oi text-primary me-2\" data-icon=\"west\"/>All Jobs"
+msgstr "<i class=\"text-primary me-2 oi\" data-icon=\"west\"/>Barcha ishlar"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_card
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Employment type\" role=\"img\" "
-"aria-label=\"Employment type\"/>"
+"<i class=\"oi oi-fw\" data-icon=\"luggage\" title=\"Employment type\" "
+"role=\"img\" aria-label=\"Employment type\"/>"
 msgstr ""
-"<i class=\"fa fa-suitcase fa-fw\" title=\"Ish turi\" role=\"img\" aria-"
-"label=\"Ish turi\"/>"
+"<i class=\"oi-fw oi\" data-icon=\"luggage\" title=\"Ish turi\" role=\"img\" "
+"aria-label=\"Ish turi\"/>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 #, fuzzy
-msgid "<i class=\"oi oi-arrow-left\"/> Job Description"
-msgstr "<i class=\"oi oi-arrow-left\"/> Lavozim tavsifi"
+msgid "<i class=\"oi\" data-icon=\"west\"/> Job Description"
+msgstr "<i class=\"oi\" data-icon=\"west\"/> Lavozim tavsifi"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.thankyou_ir_ui_view
 #, fuzzy
 msgid ""
 "<span class=\"h5 fw-light\">In the meantime,</span><br/>\n"
-"                                            <span class=\"h3 mt8 mb32 fw-"
-"bold\">Take a look around our website:</span>"
+"                                            <span class=\"h3 mt8 mb32 fw-bold\">Take a look around our website:</span>"
 msgstr ""
-"<span class=\"h5 fw-light\">Shu orada,</span><br/> <span class=\"h3 mt8 mb32 "
-"fw-bold\">Veb-saytimizni ko‘zdan kechiring:</span>"
+"<span class=\"h5 fw-light\">Shu orada,</span><br/> <span class=\"h3 mt8 mb32"
+" fw-bold\">Veb-saytimizni ko‘zdan kechiring:</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -136,8 +134,7 @@ msgstr "<span class=\"s_website_form_label_content\">Qisqacha ma'lumot</span>"
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Email</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Elektron pochtangiz</span> "
 "<span class=\"s_website_form_mark\"> *</span>"
@@ -147,8 +144,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Name</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
 "<span class=\"s_website_form_label_content\">Ismingiz</span> <span "
 "class=\"s_website_form_mark\"> *</span>"
@@ -158,11 +154,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<span class=\"s_website_form_label_content\">Your Phone Number</span>\n"
-"                                                <span "
-"class=\"s_website_form_mark\"> *</span>"
+"                                                <span class=\"s_website_form_mark\"> *</span>"
 msgstr ""
-"<span class=\"s_website_form_label_content\">Telefon raqamingiz</span> <span "
-"class=\"s_website_form_mark\"> *</span>"
+"<span class=\"s_website_form_label_content\">Telefon raqamingiz</span> <span"
+" class=\"s_website_form_mark\"> *</span>"
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -385,10 +380,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.index
 #, fuzzy
 msgid ""
-"Create new job pages from the <strong>+ <i>New</i></strong> top-right button."
+"Create new job pages from the <strong>+ <i>New</i></strong> top-right "
+"button."
 msgstr ""
-"Yuqori o‘ng burchakdagi <strong>+ <i>Yangi</i></strong> tugmasi orqali yangi "
-"ish sahifalarini yarating."
+"Yuqori o‘ng burchakdagi <strong>+ <i>Yangi</i></strong> tugmasi orqali yangi"
+" ish sahifalarini yarating."
 
 #. module: website_hr_recruitment
 #. odoo-javascript
@@ -439,13 +435,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Each employee has a chance to see the impact of his work.\n"
-"                    You can make a real contribution to the success of the "
-"company.\n"
+"                    You can make a real contribution to the success of the company.\n"
 "                    <br/>\n"
-"                    Several activities are often organized all over the "
-"year, such as weekly\n"
-"                    sports sessions, team building events, monthly drink, "
-"and much more"
+"                    Several activities are often organized all over the year, such as weekly\n"
+"                    sports sessions, team building events, monthly drink, and much more"
 msgstr ""
 "Har bir xodim o‘z ishining natijasini ko‘rish imkoniyatiga ega. Siz "
 "kompaniya muvaffaqiyatiga haqiqiy hissa qo‘shishingiz mumkin. <br/> Yil "
@@ -525,19 +518,16 @@ msgstr "Bosh sahifa"
 msgid ""
 "I usually <strong>answer applications within 3 days</strong>.\n"
 "                                                <br/><br/>\n"
-"                                                The next step is either a "
-"call or a meeting in our offices.\n"
+"                                                The next step is either a call or a meeting in our offices.\n"
 "                                                <br/><br/>\n"
-"                                                Feel free to <strong>contact "
-"me if you want a faster\n"
-"                                                feedback</strong> or if you "
-"don't get news from me\n"
+"                                                Feel free to <strong>contact me if you want a faster\n"
+"                                                feedback</strong> or if you don't get news from me\n"
 "                                                quickly enough."
 msgstr ""
 "Odatda <strong>arizalarga 3 kun ichida javob beraman</strong>. <br/><br/> "
-"Keyingi bosqich telefon orqali suhbat yoki ofisimizda uchrashuv bo‘ladi. <br/"
-"><br/> Agar tezroq javob olishni istasangiz</strong> yoki mendan o‘z vaqtida "
-"xabar ololmasangiz, <strong>menga murojaat qilishingiz mumkin."
+"Keyingi bosqich telefon orqali suhbat yoki ofisimizda uchrashuv bo‘ladi. "
+"<br/><br/> Agar tezroq javob olishni istasangiz</strong> yoki mendan o‘z "
+"vaqtida xabar ololmasangiz, <strong>menga murojaat qilishingiz mumkin."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
@@ -729,7 +719,8 @@ msgstr "Ofis filtri"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.apply
 #, fuzzy
 msgid "Optional introduction, or any question you might have about the job…"
-msgstr "Ixtiyoriy kirish so‘zi yoki ish haqida har qanday savolingiz bo‘lsa..."
+msgstr ""
+"Ixtiyoriy kirish so‘zi yoki ish haqida har qanday savolingiz bo‘lsa..."
 
 #. module: website_hr_recruitment
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_filter_by_departments
@@ -982,11 +973,10 @@ msgstr "Siz taqdim etgan profil LinkedIn profiliga o‘xshamaydi"
 #, fuzzy
 msgid ""
 "There are currently no open job opportunities,<br class=\"mb-2\"/>\n"
-"                                            but feel free to <span "
-"class=\"fw-bold\">contact us</span> for a spontaneous application."
+"                                            but feel free to <span class=\"fw-bold\">contact us</span> for a spontaneous application."
 msgstr ""
-"Hozirda ochiq ish o‘rinlari mavjud emas,<br class=\"mb-2\"/> lekin tasodifiy "
-"ariza topshirish uchun <span class=\"fw-bold\">biz bilan bog‘laning</span>"
+"Hozirda ochiq ish o‘rinlari mavjud emas,<br class=\"mb-2\"/> lekin tasodifiy"
+" ariza topshirish uchun <span class=\"fw-bold\">biz bilan bog‘laning</span>"
 
 #. module: website_hr_recruitment
 #: model:ir.model.fields,field_description:website_hr_recruitment.field_hr_recruitment_source__url
@@ -1034,10 +1024,8 @@ msgstr "Joriy veb-saytda ko‘rinadi"
 #: model_terms:ir.ui.view,arch_db:website_hr_recruitment.job_right_side_bar
 #, fuzzy
 msgid ""
-"We are a team of passionate people whose goal is to improve everyone's life "
-"through disruptive products.\n"
-"                                We build great products to solve your "
-"business problems."
+"We are a team of passionate people whose goal is to improve everyone's life through disruptive products.\n"
+"                                We build great products to solve your business problems."
 msgstr ""
 "Biz innovatsion mahsulotlar orqali har bir inson hayotini yaxshilashni "
 "maqsad qilgan ishtiyoqli odamlar jamoasimiz. Biznesingiz muammolarini hal "

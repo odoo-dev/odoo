@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 01:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-master/"
-"hr_skills/mn/>\n"
+"Language-Team: Mongolian <https://translate.odoo.com/projects/odoo-master/hr_skills/mn/>\n"
 "Language: mn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,9 +37,7 @@ msgstr "'CV - %s' % (object.name)"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 msgstr ""
 
 #. module: hr_skills
@@ -54,10 +51,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_employee_skill.py:0
 msgid ""
-"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. "
-"Navigate to Skill types!</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. Navigate to Skill types!</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Show Skill Types\n"
 "                </a>"
 msgstr ""
@@ -1068,23 +1063,18 @@ msgstr "Албан тушаал"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied "
-"production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative "
-"to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using "
-"MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system "
-"environments from development to production.\n"
+"- Coordinated and managed software deployment across five system environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial "
-"installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
 msgstr ""
 
 #. module: hr_skills
@@ -1286,8 +1276,7 @@ msgstr ""
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through "
-"machine learning"
+"            Master thesis: Better grid management and control through machine learning"
 msgstr ""
 
 #. module: hr_skills
@@ -2068,8 +2057,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid ""
-"The following skills can't be created as they overlap or exactly match "
-"existing skills:\n"
+"The following skills can't be created as they overlap or exactly match existing skills:\n"
 "%(collisions)s"
 msgstr ""
 
@@ -2099,8 +2087,8 @@ msgstr ""
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
 msgstr ""
-"Ур чадварын түвшин %(level)s нь дараах ур чадварын төрөлд тохирохгүй байна: %"
-"(type)s"
+"Ур чадварын түвшин %(level)s нь дараах ур чадварын төрөлд тохирохгүй байна: "
+"%(type)s"
 
 #. module: hr_skills
 #: model:ir.model.constraint,message:hr_skills.constraint_hr_resume_line_date_check
@@ -2131,8 +2119,7 @@ msgid ""
 "                Create them in configuration and add them on the Employee."
 msgstr ""
 "Энэхүү тайлан нь танд ажилтан бүрээр ур чадварын тойм харуулах болно.\n"
-"                Ур чадварын үзүүлэлтүүдийг тохируулж оруулаад ажилтан дээр "
-"сонгож ашиглаарай."
+"                Ур чадварын үзүүлэлтүүдийг тохируулж оруулаад ажилтан дээр сонгож ашиглаарай."
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_vad_thomas_chirnside_primary_school

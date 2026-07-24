@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 01:15+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/sms/uz/"
-">\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/sms/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -67,45 +66,44 @@ msgstr "%s ta noto‘g‘ri qabul qiluvchi"
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-warning\"/> An error occurred with your account. Please "
-"contact the support for more information..."
+"<i class=\"oi\" data-icon=\"warning\"/> An error occurred with your account."
+" Please contact the support for more information..."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Hisobingizda xatolik yuz berdi. Batafsil "
-"ma'lumot uchun qo‘llab-quvvatlash xizmatiga murojaat qiling..."
+"<i class=\"oi\" data-icon=\"warning\"/> Hisobingizda xatolik yuz berdi. "
+"Batafsil ma'lumot uchun qo‘llab-quvvatlash xizmatiga murojaat qiling..."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-warning\"/> You cannot send SMS while your account is not "
-"registered."
+"<i class=\"oi\" data-icon=\"warning\"/> You cannot send SMS while your "
+"account is not registered."
 msgstr ""
-"<i class=\"fa fa-warning\"/> Hisobingiz ro‘yxatdan o‘tkazilmaguncha SMS "
-"yubora olmaysiz."
+"<i class=\"oi\" data-icon=\"warning\"/> Hisobingiz ro‘yxatdan "
+"o‘tkazilmaguncha SMS yubora olmaysiz."
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Register"
-msgstr "<i class=\"oi oi-arrow-right\"/> Ro‘yxatdan o‘tish"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Ro‘yxatdan o‘tish"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 #, fuzzy
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Set Sender Name"
-msgstr "<i class=\"oi oi-arrow-right\"/> Yuboruvchi nomini o‘rnatish"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Yuboruvchi nomini o‘rnatish"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 #, fuzzy
 msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\">Qo‘shish</span> <span "
 "class=\"o_stat_text\">Kontekst harakatni</span>"
@@ -121,8 +119,7 @@ msgstr "<span class=\"o_stat_text\">Ko‘rib chiqish</span>"
 #, fuzzy
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\">O‘chirish</span> <span "
 "class=\"o_stat_text\">Kontekst harakatni</span>"
@@ -130,8 +127,7 @@ msgstr ""
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
 #, fuzzy
-msgid ""
-"<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
+msgid "<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
 msgstr ""
 "<span class=\"text-warning\" invisible=\"not no_record\">Yozuvlar mavjud "
 "emas</span>"
@@ -141,22 +137,16 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<span invisible=\"sms_method != 'sms'\">\n"
-"                                    The message will be sent as an SMS to "
-"the recipients of the template\n"
-"                                    and will not appear in the messaging "
-"history.\n"
+"                                    The message will be sent as an SMS to the recipients of the template\n"
+"                                    and will not appear in the messaging history.\n"
 "                                </span>\n"
 "                                <span invisible=\"sms_method != 'note'\">\n"
-"                                    The SMS will not be sent, it will only "
-"be posted as an\n"
+"                                    The SMS will not be sent, it will only be posted as an\n"
 "                                    internal note in the messaging history.\n"
 "                                </span>\n"
-"                                <span invisible=\"sms_method != "
-"'comment'\">\n"
-"                                    The SMS will be sent as an SMS to the "
-"recipients of the\n"
-"                                    template and it will also be posted as "
-"an internal note\n"
+"                                <span invisible=\"sms_method != 'comment'\">\n"
+"                                    The SMS will be sent as an SMS to the recipients of the\n"
+"                                    template and it will also be posted as an internal note\n"
 "                                    in the messaging history.\n"
 "                                </span>"
 msgstr ""
@@ -181,8 +171,8 @@ msgid ""
 "<strong>Invalid number:</strong>\n"
 "                        <span> make sure to set a country on the </span>"
 msgstr ""
-"<strong>Noto‘g‘ri raqam:</strong> <span> da mamlakat sozlanganligiga ishonch "
-"hosil qiling</span>"
+"<strong>Noto‘g‘ri raqam:</strong> <span> da mamlakat sozlanganligiga ishonch"
+" hosil qiling</span>"
 
 #. module: sms
 #: model:ir.model.constraint,message:sms.constraint_sms_tracker_sms_uuid_unique
@@ -438,7 +428,8 @@ msgstr ""
 #: model:sms.template,body:sms.sms_template_demo_0
 #, fuzzy
 msgid "Dear {{ object.display_name }} this is an automated SMS."
-msgstr "Hurmatli {{ object.display_name }}, bu avtomatlashtirilgan SMS xabari."
+msgstr ""
+"Hurmatli {{ object.display_name }}, bu avtomatlashtirilgan SMS xabari."
 
 #. module: sms
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__state__sent
@@ -551,7 +542,8 @@ msgstr "Xatolik turi"
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__template_fs
 #, fuzzy
-msgid "File from where the template originates. Used to reset broken template."
+msgid ""
+"File from where the template originates. Used to reset broken template."
 msgstr ""
 "Andoza kelib chiqqan fayl. Buzilgan andozani tiklash uchun ishlatiladi."
 
@@ -875,8 +867,8 @@ msgstr "Raqam maydoni"
 #: model:ir.model.fields,help:sms.field_sms_composer__res_ids_count
 #, fuzzy
 msgid ""
-"Number of recipients that will receive the SMS if sent in mass mode, without "
-"applying the Active Domain value"
+"Number of recipients that will receive the SMS if sent in mass mode, without"
+" applying the Active Domain value"
 msgstr ""
 "Faol domen qiymatini qo‘llamasdan ommaviy rejimda yuborilganda SMSni qabul "
 "qiladigan oluvchilar soni"
@@ -898,8 +890,8 @@ msgid ""
 msgstr ""
 "Elektron pochta yuborishda tanlanadigan ixtiyoriy tarjima tili (ISO kodi). "
 "Agar belgilanmasa, asosiy hamkorning tili ishlatiladi. Bu odatda tegishli "
-"tilni ta'minlaydigan to‘ldiruvchi ifoda bo‘lishi kerak, masalan: "
-"{{ object.partner_id.lang }}."
+"tilni ta'minlaydigan to‘ldiruvchi ifoda bo‘lishi kerak, masalan: {{ "
+"object.partner_id.lang }}."
 
 #. module: sms
 #: model:ir.model,name:sms.model_sms_sms
@@ -1588,7 +1580,8 @@ msgstr "Raqam allaqachon ishlatilganligi sababli bu SMS o‘chirildi."
 msgid ""
 "This account already has an existing sender name and it cannot be changed."
 msgstr ""
-"Ushbu hisobda allaqachon yuboruvchi nomi mavjud va uni o‘zgartirib bo‘lmaydi."
+"Ushbu hisobda allaqachon yuboruvchi nomi mavjud va uni o‘zgartirib "
+"bo‘lmaydi."
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_iap_account__sender_name
@@ -1636,14 +1629,11 @@ msgid ""
 "- 'Update a Record': update the values of a record\n"
 "- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': "
-"add or remove followers to a record (Discuss)\n"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
 "- 'Create Record': create a new record with new values\n"
 "- 'Execute Code': a block of Python code that will be executed\n"
-"- 'Send Webhook Notification': send a POST request to an external system, "
-"also known as a Webhook\n"
-"- 'Multi Actions': define an action that triggers several other server "
-"actions\n"
+"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+"- 'Multi Actions': define an action that triggers several other server actions\n"
 msgstr ""
 "Server harakati turi. Quyidagi qiymatlar mavjud: - 'Yozuvni yangilash': "
 "yozuv qiymatlarini yangilash - 'Faoliyat yaratish': faoliyat yaratish "
@@ -1653,8 +1643,8 @@ msgstr ""
 "yozuvga kuzatuvchilarni qo‘shish yoki olib tashlash (Muhokama) - 'Yozuv "
 "yaratish': yangi qiymatlar bilan yangi yozuv yaratish - 'Kodni bajarish': "
 "bajariladigan Python kodi bloki - 'Veb-ilgak bildirishnomasi yuborish': "
-"tashqi tizimga POST so‘rovini yuborish, shuningdek Veb-ilgak deb ham ataladi "
-"- 'Ko‘p harakatlar': serverning boshqa bir nechta harakatlarini keltirib "
+"tashqi tizimga POST so‘rovini yuborish, shuningdek Veb-ilgak deb ham ataladi"
+" - 'Ko‘p harakatlar': serverning boshqa bir nechta harakatlarini keltirib "
 "chiqaradigan harakatni aniqlash"
 
 #. module: sms
@@ -1706,8 +1696,7 @@ msgid ""
 "'comment': generated by user input e.g. through discuss or composer\n"
 "'email_outgoing': generated by a mailing\n"
 "'notification': generated by system e.g. tracking messages\n"
-"'auto_comment': generated by automated notification mechanism e.g. "
-"acknowledgment\n"
+"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
 "'user_notification': generated for a specific recipient"
 msgstr ""
 "Xabarlar generatori turlari: 'email': kiruvchi xat orqali yaratiladi, "
@@ -1815,7 +1804,8 @@ msgstr ""
 msgid ""
 "Your SMS Text Message must include at least one non-whitespace character"
 msgstr ""
-"SMS matnli xabaringizda kamida bitta bo‘sh joy bo‘lmagan belgi bo‘lishi kerak"
+"SMS matnli xabaringizda kamida bitta bo‘sh joy bo‘lmagan belgi bo‘lishi "
+"kerak"
 
 #. module: sms
 #. odoo-python
@@ -1852,10 +1842,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_sender_view_form
 #, fuzzy
 msgid ""
-"Your sender name must be between 3 and 11 characters long and only contain "
-"alphanumeric characters.\n"
-"                        It must fit your company name, and you aren't "
-"allowed to modify it once you registered one, choose it carefully."
+"Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters.\n"
+"                        It must fit your company name, and you aren't allowed to modify it once you registered one, choose it carefully."
 msgstr ""
 "Yuboruvchi nomingiz 3-11 ta belgidan iborat bo‘lishi va faqat harf-raqamli "
 "belgilardan tashkil topishi kerak. U kompaniyangiz nomiga mos kelishi lozim "

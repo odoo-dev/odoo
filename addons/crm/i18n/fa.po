@@ -26,8 +26,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 10:41+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/crm/"
-"fa/>\n"
+"Language-Team: Persian <https://translate.odoo.com/projects/odoo-master/crm/fa/>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -121,9 +120,10 @@ msgstr "<b>اولین فرصت خودت را ایجاد کن.</b>"
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 msgid ""
-"<b>Drag &amp; drop opportunities</b> between columns as you progress in your "
-"sales cycle."
-msgstr "<b>فرصت‌ها را بکشید و رها کنید</b> بین ستون‌ها با پیشروی در چرخه فروش."
+"<b>Drag &amp; drop opportunities</b> between columns as you progress in your"
+" sales cycle."
+msgstr ""
+"<b>فرصت‌ها را بکشید و رها کنید</b> بین ستون‌ها با پیشروی در چرخه فروش."
 
 #. module: crm
 #. odoo-javascript
@@ -133,59 +133,59 @@ msgstr "<b> چند حرف بنویسید </b> برای جستجوی یک شرک�
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-briefcase\" title=\"Opportunity Name\"/>"
+msgid "<i class=\"oi\" data-icon=\"work\" title=\"Opportunity Name\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-envelope\" title=\"Contact Email\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"mail\" title=\"Contact Email\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-mobile fa-lg\" title=\"Contact Phone\"/>"
+msgid "<i class=\"oi oi-lg\" data-icon=\"smartphone\" title=\"Contact Phone\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-money\" title=\"Expected Revenue\"/>"
+msgid "<i class=\"oi\" data-icon=\"payments\" title=\"Expected Revenue\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-refresh\" title=\"Recurring Revenue\"/>"
+msgid "<i class=\"oi\" data-icon=\"refresh\" title=\"Recurring Revenue\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.quick_create_opportunity_form
-msgid "<i class=\"fa fa-user\" title=\"Contact\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"person\" title=\"Contact\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.sales_team_form_view_in_crm
 msgid ""
-"<i class=\"fa fa-warning\" title=\"Exceeded\" invisible=\"not "
+"<i class=\"oi\" data-icon=\"warning\" title=\"Exceeded\" invisible=\"not "
 "lead_all_assigned_month_exceeded\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                                Install Extension"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
-"<i title=\"Update now\" role=\"img\" aria-label=\"Update now\" class=\"fa fa-"
-"fw fa-refresh\"/>"
+"<i title=\"Update now\" role=\"img\" aria-label=\"Update now\" class=\"oi "
+"oi-fw\" data-icon=\"refresh\"/>"
 msgstr ""
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
-"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"<span class=\"oi text-warning oe_edit_only\" data-icon=\"warning\" "
 "title=\"By saving this change, the customer email will also be updated.\" "
 "invisible=\"not partner_email_update\"/>"
 msgstr ""
@@ -193,7 +193,7 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
-"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"<span class=\"oi text-warning oe_edit_only\" data-icon=\"warning\" "
 "title=\"By saving this change, the customer phone number will also be "
 "updated.\" invisible=\"not partner_phone_update\"/>"
 msgstr ""
@@ -211,26 +211,20 @@ msgstr ""
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; "
-"2\">Similar Leads</span>\n"
-"                                    <span class=\"o_stat_text\" "
-"invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
+"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">Similar Leads</span>\n"
+"                                    <span class=\"o_stat_text\" invisible=\"duplicate_lead_count &gt; 1\">Similar Lead</span>"
 msgstr ""
-"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">سرنخ "
-"های مشابه</span>\n"
-"                                    <span class=\"o_stat_text\" "
-"invisible=\"duplicate_lead_count &gt; 1\">سرنخ مشابه</span>"
+"<span class=\"o_stat_text\" invisible=\"duplicate_lead_count &lt; 2\">سرنخ های مشابه</span>\n"
+"                                    <span class=\"o_stat_text\" invisible=\"duplicate_lead_count &gt; 1\">سرنخ مشابه</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.utm_campaign_view_form
 msgid ""
 "<span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"use_leads\">Opportunities</span>"
+"                        <span class=\"o_stat_text\" invisible=\"use_leads\">Opportunities</span>"
 msgstr ""
 "<span class=\"o_stat_text\" invisible=\"not use_leads\">سرنخ ها</span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"use_leads\">فرصت ها</span>"
+"                        <span class=\"o_stat_text\" invisible=\"use_leads\">فرصت ها</span>"
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lost_reason_view_form
@@ -246,12 +240,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_lead2opportunity_partner_mass
 msgid ""
 "<span invisible=\"name != 'convert'\">\n"
-"                        Potential duplicates found. Use \"Convert &amp; "
-"Merge with duplicates\" to clean your data before converting.\n"
+"                        Potential duplicates found. Use \"Convert &amp; Merge with duplicates\" to clean your data before converting.\n"
 "                    </span>\n"
 "                    <span invisible=\"name != 'convert_and_merge'\">\n"
-"                        Convert the selected Leads to Opportunities and "
-"merge all duplicates listed below.\n"
+"                        Convert the selected Leads to Opportunities and merge all duplicates listed below.\n"
 "                    </span>"
 msgstr ""
 
@@ -288,12 +280,9 @@ msgstr "<span>سرنخ/فرصت ادغام شده</span>"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
-"<span>Periodically assign leads based on priorities and filters.</span><br/"
-">\n"
-"                                <span invisible=\"not "
-"crm_use_auto_assignment\">\n"
-"                                    All sales teams will use this setting by "
-"default.\n"
+"<span>Periodically assign leads based on priorities and filters.</span><br/>\n"
+"                                <span invisible=\"not crm_use_auto_assignment\">\n"
+"                                    All sales teams will use this setting by default.\n"
 "                                </span>"
 msgstr ""
 
@@ -316,26 +305,18 @@ msgstr ""
 #: model:mail.template,body_html:crm.mail_template_demo_crm_lead
 msgid ""
 "<t>\n"
-"Hi <t t-out=\"object.partner_id and object.partner_id.name or ''\">Acme "
-"Corporation</t>,<br/><br/>\n"
-"Welcome to <t t-out=\"object.company_id.name or ''\">My Company (San "
-"Francisco)</t>.\n"
-"It's great to meet you! Now that you're on board, you'll discover what <t t-"
-"out=\"object.company_id.name or ''\">My Company (San Francisco)</t> has to "
-"offer. My name is <t t-out=\"object.user_id.name or ''\">Marc Demo</t> and "
-"I'll help you get the most out of Odoo. Could we plan a quick demo soon?<br/"
-">\n"
+"Hi <t t-out=\"object.partner_id and object.partner_id.name or ''\">Acme Corporation</t>,<br/><br/>\n"
+"Welcome to <t t-out=\"object.company_id.name or ''\">My Company (San Francisco)</t>.\n"
+"It's great to meet you! Now that you're on board, you'll discover what <t t-out=\"object.company_id.name or ''\">My Company (San Francisco)</t> has to offer. My name is <t t-out=\"object.user_id.name or ''\">Marc Demo</t> and I'll help you get the most out of Odoo. Could we plan a quick demo soon?<br/>\n"
 "Feel free to reach out at any time!<br/><br/>\n"
 "Best,<br/>\n"
 "<t t-if=\"object.user_id\">\n"
 "    <b><t t-out=\"object.user_id.name or ''\">Marc Demo</t></b>\n"
-"    <br/>Email: <t t-out=\"object.user_id.email or "
-"''\">mark.brown23@example.com</t>\n"
+"    <br/>Email: <t t-out=\"object.user_id.email or ''\">mark.brown23@example.com</t>\n"
 "    <br/>Phone: <t t-out=\"object.user_id.phone or ''\">+1 650-123-4567</t>\n"
 "</t>\n"
 "<t t-else=\"\">\n"
-"    <t t-out=\"object.company_id.name or ''\">My Company (San Francisco)</"
-"t>\n"
+"    <t t-out=\"object.company_id.name or ''\">My Company (San Francisco)</t>\n"
 "</t>\n"
 "        </t>"
 msgstr ""
@@ -346,22 +327,23 @@ msgid ""
 "A Python dictionary that will be evaluated to provide default values when "
 "creating new records for this alias."
 msgstr ""
-"یک دیکشنری پایتون که برای فراهم کردن مقادیر پیش‌فرض هنگام ایجاد رکوردهای جدید "
-"برای این نام مستعار مورد  ارزیابی قرار می‌گیرد."
+"یک دیکشنری پایتون که برای فراهم کردن مقادیر پیش‌فرض هنگام ایجاد رکوردهای "
+"جدید برای این نام مستعار مورد  ارزیابی قرار می‌گیرد."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_3
 msgid ""
 "A great tip to boost sales efficiency is to always define a next step on "
 "each opportunity. To manage ongoing activities, click on any status of the "
-"progress bar to filter opportunities based on their next activities' status. "
-"Click on the grey area of the progress bar to see all opportunities that "
+"progress bar to filter opportunities based on their next activities' status."
+" Click on the grey area of the progress bar to see all opportunities that "
 "have no next activity."
 msgstr ""
 "یک نکته بزرگ برای افزایش بهره‌وری فروش این است که همیشه یک گام بعدی در هر "
-"فرصت را تعریف کنیم. برای مدیریت فعالیت‌های جاری، بر روی هر وضعیت نوار پیشرفت "
-"کلیک کنید تا فرصت‌هایی را براساس وضعیت بعدی آن‌ها فیلتر کنید. روی قسمت خاکستری "
-"نوار پیشرفت کلیک کنید تا تمام فرصت‌هایی که فعالیت بعدی ندارند را ببینید."
+"فرصت را تعریف کنیم. برای مدیریت فعالیت‌های جاری، بر روی هر وضعیت نوار پیشرفت"
+" کلیک کنید تا فرصت‌هایی را براساس وضعیت بعدی آن‌ها فیلتر کنید. روی قسمت "
+"خاکستری نوار پیشرفت کلیک کنید تا تمام فرصت‌هایی که فعالیت بعدی ندارند را "
+"ببینید."
 
 #. module: crm
 #. odoo-python
@@ -442,8 +424,8 @@ msgid ""
 "Activities marked as Done on Leads will appear here, providing an overview "
 "of lead interactions."
 msgstr ""
-"فعالیت‌هایی که به‌عنوان «انجام شد» در سرنخ‌ها علامت‌گذاری شده‌اند، در اینجا ظاهر "
-"می‌شوند و نمای کلی از تعاملات سرنخ ارائه می‌دهند."
+"فعالیت‌هایی که به‌عنوان «انجام شد» در سرنخ‌ها علامت‌گذاری شده‌اند، در اینجا "
+"ظاهر می‌شوند و نمای کلی از تعاملات سرنخ ارائه می‌دهند."
 
 #. module: crm
 #: model:ir.model,name:crm.model_mail_activity
@@ -497,8 +479,7 @@ msgstr "فعالیت توسط"
 #: model_terms:ir.actions.act_window,help:crm.mail_activity_plan_action_lead
 msgid ""
 "Activity plans are used to assign a list of activities in just a few clicks\n"
-"                    (e.g. \"Demo Preparation Process\", "
-"\"Qualification\", ...)"
+"                    (e.g. \"Demo Preparation Process\", \"Qualification\", ...)"
 msgstr ""
 
 #. module: crm
@@ -805,7 +786,8 @@ msgstr ""
 #: model:ir.model.fields,help:crm.field_crm_team__use_opportunities
 msgid "Check this box to manage a presales process with opportunities."
 msgstr ""
-"این گزینه را انتخاب کنید تا یک فرایند پیش‌ از فروش را با فرصت‌ها مدیریت کنید."
+"این گزینه را انتخاب کنید تا یک فرایند پیش‌ از فروش را با فرصت‌ها مدیریت "
+"کنید."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__city
@@ -820,7 +802,8 @@ msgstr "شهر"
 #: model:ir.model.fields,help:crm.field_crm_activity_report__tag_ids
 #: model:ir.model.fields,help:crm.field_crm_lead__tag_ids
 msgid ""
-"Classify and analyze your lead/opportunity categories like: Training, Service"
+"Classify and analyze your lead/opportunity categories like: Training, "
+"Service"
 msgstr ""
 "طبقه بندی و تجزیه و تحلیل دسته بندی‌های سرنخ/ فرصت خود. مانند: آموزش، خدمات"
 
@@ -1241,8 +1224,8 @@ msgid ""
 "Did you know emails sent to a Sales Team alias generate opportunities in "
 "your pipeline?"
 msgstr ""
-"آیا میدانستید ایمیل‌های ارسالی به ایمیل مستعار تیم فروش، فرصت در فرصت‌های فروش "
-"شما ایجاد می‌کند؟"
+"آیا میدانستید ایمیل‌های ارسالی به ایمیل مستعار تیم فروش، فرصت در فرصت‌های "
+"فروش شما ایجاد می‌کند؟"
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_4
@@ -1251,20 +1234,20 @@ msgid ""
 "fill in all its data? Odoo autocompletes everything for you: logo, address, "
 "company size, business information, social media accounts, etc."
 msgstr ""
-"آیا می‌دانستید که می‌توانید یک شرکت را با نام یا شماره مالیات بر ارزش افزوده "
-"پیدا کنید تا فورا تمام داده‌های آن را پر کنید؟ Odoo همه چیز را برای شما خوکار "
-"تکمیل می‌کند: لوگو، آدرس، اندازه شرکت، اطلاعات کسب‌وکار، اکانت های شبکه های "
-"اجتماعی و غیره."
+"آیا می‌دانستید که می‌توانید یک شرکت را با نام یا شماره مالیات بر ارزش افزوده"
+" پیدا کنید تا فورا تمام داده‌های آن را پر کنید؟ Odoo همه چیز را برای شما "
+"خوکار تکمیل می‌کند: لوگو، آدرس، اندازه شرکت، اطلاعات کسب‌وکار، اکانت های "
+"شبکه های اجتماعی و غیره."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_5
 msgid ""
-"Did you know you can turn a list of opportunities into a map view, using the "
-"top-right map icon? A lot of screens in Odoo can be turned into a map: "
+"Did you know you can turn a list of opportunities into a map view, using the"
+" top-right map icon? A lot of screens in Odoo can be turned into a map: "
 "tasks, contacts, delivery orders, etc."
 msgstr ""
-"آیا می دانستید که می‌توانید با استفاده از نماد نقشه سمت راست بالا، فهرستی از "
-"فرصت‌ها را به یک نمایش نقشه تبدیل کنید؟ بسیاری از صفحه نمایش در Odoo را "
+"آیا می دانستید که می‌توانید با استفاده از نماد نقشه سمت راست بالا، فهرستی از"
+" فرصت‌ها را به یک نمایش نقشه تبدیل کنید؟ بسیاری از صفحه نمایش در Odoo را "
 "می‌توان به یک نقشه تبدیل کرد: وظایف, مخاطبین, سفارشات تحویل, و غیره."
 
 #. module: crm
@@ -1440,8 +1423,8 @@ msgid ""
 "Enter here the internal requirements for this stage (ex: Offer sent to "
 "customer). It will appear as a tooltip over the stage's name."
 msgstr ""
-"در اینجا الزامات داخلی برای این مرحله را وارد کنید (مانند: پیشنهاد ارسال شده "
-"به مشتری). آن به عنوان یک راهنما بیش از نام مرحله ظاهر می شود."
+"در اینجا الزامات داخلی برای این مرحله را وارد کنید (مانند: پیشنهاد ارسال شده"
+" به مشتری). آن به عنوان یک راهنما بیش از نام مرحله ظاهر می شود."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__date_deadline
@@ -1659,9 +1642,9 @@ msgstr "بالا"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_stage__rotting_threshold_days
 msgid ""
-"Highlight opportunities that haven't been updated for this many "
-"days.         Set to 0 to disable. Changing this parameter will not affect "
-"the rotting status/date of resources last updated before this change."
+"Highlight opportunities that haven't been updated for this many days."
+"         Set to 0 to disable. Changing this parameter will not affect the "
+"rotting status/date of resources last updated before this change."
 msgstr ""
 
 #. module: crm
@@ -1703,8 +1686,8 @@ msgstr "شناسه"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_parent_thread_id
 msgid ""
-"ID of the parent record holding the alias (example: project holding the task "
-"creation alias)"
+"ID of the parent record holding the alias (example: project holding the task"
+" creation alias)"
 msgstr ""
 "شناسه رکورد والد حاوی نام مستعار (مثال: پروژه دارای نام مستعار ایجاد وظیفه)"
 
@@ -1746,17 +1729,17 @@ msgid ""
 "If the email address is on the blacklist, the contact won't receive mass "
 "mailing anymore, from any list"
 msgstr ""
-"اگر آدرس ایمیل در لیست سیاه باشد، مخاطب‌ دیگر ایمیل پستی انبوه، از هیچ فهرستی "
-"دریافت نخواهد کرد"
+"اگر آدرس ایمیل در لیست سیاه باشد، مخاطب‌ دیگر ایمیل پستی انبوه، از هیچ "
+"فهرستی دریافت نخواهد کرد"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive "
-"mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive"
+" mass mailing sms anymore, from any list"
 msgstr ""
-"اگر شماره تلفن مدنظر در لیست سیاه باشد، مخاطب‌ دیگر پیامک‌های پستی انبوه را از "
-"هیچ لیستی، دریافت نخواهد کرد"
+"اگر شماره تلفن مدنظر در لیست سیاه باشد، مخاطب‌ دیگر پیامک‌های پستی انبوه را "
+"از هیچ لیستی، دریافت نخواهد کرد"
 
 #. module: crm
 #: model:ir.ui.menu,name:crm.menu_import_crm
@@ -1804,8 +1787,8 @@ msgid ""
 "distinguish which number is blacklisted             when there is both a "
 "mobile and phone field in a model."
 msgstr ""
-"نشان می دهد که آیا شماره تلفن ثبت شده در لیست سیاه، یک شماره تلفن همراه است. "
-"هنگامی که در یک مدل هم فیلد تلفن همراه و هم تلفن وجود دارد، می توان تشخیص "
+"نشان می دهد که آیا شماره تلفن ثبت شده در لیست سیاه، یک شماره تلفن همراه است."
+" هنگامی که در یک مدل هم فیلد تلفن همراه و هم تلفن وجود دارد، می توان تشخیص "
 "داد که کدام شماره در لیست سیاه قرار می گیرد."
 
 #. module: crm
@@ -2163,7 +2146,8 @@ msgstr "تولید سرنخ"
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_all_leads
-msgid "Leads are the qualification step before the creation of an opportunity."
+msgid ""
+"Leads are the qualification step before the creation of an opportunity."
 msgstr "سرنخ ها مرحله صلاحیت قبل از ایجاد فرصت هستند."
 
 #. module: crm
@@ -2241,11 +2225,11 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__partner_id
 msgid ""
-"Linked partner (optional). Usually created when converting the lead. You can "
-"find a partner by its Name, TIN, Email or Internal Reference."
+"Linked partner (optional). Usually created when converting the lead. You can"
+" find a partner by its Name, TIN, Email or Internal Reference."
 msgstr ""
-"شریک مرتبط (اختیاری). معمولاً هنگام تبدیل سرنخ ایجاد می شود. می توانید شریکی "
-"را با نام ، TIN ، ایمیل یا مرجع داخلی پیدا کنید."
+"شریک مرتبط (اختیاری). معمولاً هنگام تبدیل سرنخ ایجاد می شود. می توانید شریکی"
+" را با نام ، TIN ، ایمیل یا مرجع داخلی پیدا کنید."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_team__alias_incoming_local
@@ -2272,8 +2256,8 @@ msgstr "به نظر می رسد هیچ چیز برنامه ریزی نشده ا�
 #. odoo-javascript
 #: code:addons/crm/static/src/js/tours/crm.js:0
 msgid ""
-"Looks like nothing is planned. :(<br><br><i>Tip: Schedule activities to keep "
-"track of everything you have to do!</i>"
+"Looks like nothing is planned. :(<br><br><i>Tip: Schedule activities to keep"
+" track of everything you have to do!</i>"
 msgstr ""
 "به نظر می رسد هیچ چیز برنامه ریزی نشده است. :(<br><br><i>نکته: برای پیگیری "
 "کارهایی که باید انجام دهید، فعالیت ها را برنامه ریزی کنید!</i>"
@@ -2349,8 +2333,8 @@ msgid ""
 "Make and receive calls from Odoo with Ringover's dialer. Track calls, SMS "
 "messages, and get AI-powered transcripts of your conversations."
 msgstr ""
-"با شماره گیر Ringover از Odoo تماس بگیرید و دریافت کنید. تماس‌ها، پیام‌های SMS "
-"را دنبال کنید و رونوشت‌های مکالمات خود را با هوش مصنوعی دریافت کنید."
+"با شماره گیر Ringover از Odoo تماس بگیرید و دریافت کنید. تماس‌ها، پیام‌های "
+"SMS را دنبال کنید و رونوشت‌های مکالمات خود را با هوش مصنوعی دریافت کنید."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -2686,16 +2670,17 @@ msgid ""
 "No new lead allocated to %(team_name)s team because no unassigned lead "
 "matches its domain."
 msgstr ""
-"هیچ سرنخ جدیدی به تیم %(team_name) اختصاص داده نشده است زیرا هیچ سرنخ اختصاص "
-"نیافته با دامنه آن مطابقت ندارد."
+"هیچ سرنخ جدیدی به تیم %(team_name) اختصاص داده نشده است زیرا هیچ سرنخ اختصاص"
+" نیافته با دامنه آن مطابقت ندارد."
 
 #. module: crm
 #. odoo-python
 #: code:addons/crm/models/crm_team.py:0
-msgid "No new lead allocated to the teams because no lead match their domains."
+msgid ""
+"No new lead allocated to the teams because no lead match their domains."
 msgstr ""
-"هیچ سرنخ جدیدی به تیم ها اختصاص داده نشده است زیرا هیچ سرنشینی با دامنه آنها "
-"مطابقت ندارد."
+"هیچ سرنخ جدیدی به تیم ها اختصاص داده نشده است زیرا هیچ سرنشینی با دامنه آنها"
+" مطابقت ندارد."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_forecast
@@ -2792,12 +2777,10 @@ msgstr "تعداد پیامهای با خطای تحویل"
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_opportunity
 msgid ""
 "Odoo helps you keep track of your sales pipeline to follow\n"
-"                    up potential sales and better forecast your future "
-"revenues."
+"                    up potential sales and better forecast your future revenues."
 msgstr ""
 "Odoo به شما کمک می کند فرصت‌های فروش خود را دنبال کنید\n"
-"                     فروش بالقوه را افزایش داده و درآمد آینده خود را بهتر "
-"پیش بینی کنید."
+"                     فروش بالقوه را افزایش داده و درآمد آینده خود را بهتر پیش بینی کنید."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_2
@@ -2807,10 +2790,10 @@ msgid ""
 "manually, but if you let Odoo do the job the score is updated while the "
 "opportunity moves forward in your sales cycle."
 msgstr ""
-"موتور هوش مصنوعی Odoo نرخ موفقیت هر فرصت را براساس سابقه شما پیش‌بینی می‌کند. "
-"همیشه می‌توانید نرخ موفقیت را به صورت دستی به روز کنید، اما اگر اجازه دهید "
-"Odoo کار را انجام دهید در حالی که این فرصت در چرخه فروش شما به جلو حرکت "
-"می‌کند، امتیاز به روز می‌شود."
+"موتور هوش مصنوعی Odoo نرخ موفقیت هر فرصت را براساس سابقه شما پیش‌بینی "
+"می‌کند. همیشه می‌توانید نرخ موفقیت را به صورت دستی به روز کنید، اما اگر "
+"اجازه دهید Odoo کار را انجام دهید در حالی که این فرصت در چرخه فروش شما به "
+"جلو حرکت می‌کند، امتیاز به روز می‌شود."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_opportunities_filter
@@ -2861,13 +2844,13 @@ msgid ""
 "Opportunities Analysis gives you an instant access to your opportunities "
 "with information such as the expected revenue, planned cost, missed "
 "deadlines or the number of interactions per opportunity. This report is "
-"mainly used by the sales manager in order to do the periodic review with the "
-"channels of the sales pipeline."
+"mainly used by the sales manager in order to do the periodic review with the"
+" channels of the sales pipeline."
 msgstr ""
-"تجزیه و تحلیل فرصت ها به شما دسترسی فوری به فرصت‌هایی با اطلاعاتی مانند درآمد "
-"مورد انتظار، هزینه برنامه ریزی شده، مهلت های از دست رفته یا تعداد تعاملات در "
-"هر فرصت می دهد. این گزارش عمدتا توسط مدیر فروش به منظور بررسی دوره ای "
-"فرصت‌های فروش مورد استفاده قرار می گیرد."
+"تجزیه و تحلیل فرصت ها به شما دسترسی فوری به فرصت‌هایی با اطلاعاتی مانند "
+"درآمد مورد انتظار، هزینه برنامه ریزی شده، مهلت های از دست رفته یا تعداد "
+"تعاملات در هر فرصت می دهد. این گزارش عمدتا توسط مدیر فروش به منظور بررسی "
+"دوره ای فرصت‌های فروش مورد استفاده قرار می گیرد."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_graph_forecast
@@ -3003,13 +2986,13 @@ msgstr "شناسه موضوع رکورد والد"
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_parent_model_id
 msgid ""
-"Parent model holding the alias. The model holding the alias reference is not "
-"necessarily the model given by alias_model_id (example: project "
+"Parent model holding the alias. The model holding the alias reference is not"
+" necessarily the model given by alias_model_id (example: project "
 "(parent_model) and task (model))"
 msgstr ""
-"مدل والد دارای نام مستعار. مدلی که مرجع نام مستعار را نگه می دارد لزوماً مدلی "
-"نیست که توسط alias_model_id (مثال: پروژه (parent_model) و task (model)) "
-"ارائه شده است."
+"مدل والد دارای نام مستعار. مدلی که مرجع نام مستعار را نگه می دارد لزوماً "
+"مدلی نیست که توسط alias_model_id (مثال: پروژه (parent_model) و task (model))"
+" ارائه شده است."
 
 #. module: crm
 #: model:ir.model.fields,field_description:crm.field_crm_lead__partner_email_update
@@ -3118,8 +3101,7 @@ msgid ""
 "Policy to post a message on the document using the mailgateway.\n"
 "- everyone: everyone can post\n"
 "- partners: only authenticated partners\n"
-"- followers: only followers of the related document or members of following "
-"channels\n"
+"- followers: only followers of the related document or members of following channels\n"
 msgstr ""
 "خط مشی ارسال پیام در سند با استفاده از mailgateway.\n"
 "- همه: همه می توانند پست کنند\n"
@@ -3418,7 +3400,8 @@ msgstr "شماره معتبر شده"
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_lead_action_my_activities
 msgid "Schedule activities to keep track of everything you have to do."
-msgstr "برای پیگیری کارهایی که باید انجام دهید، فعالیت ها را برنامه ریزی کنید."
+msgstr ""
+"برای پیگیری کارهایی که باید انجام دهید، فعالیت ها را برنامه ریزی کنید."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.view_crm_case_leads_filter
@@ -3736,8 +3719,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_merge_summary
 msgid ""
 "The contacts below have been added as followers of this lead\n"
-"                        because they have been contacted less than 30 days "
-"ago on"
+"                        because they have been contacted less than 30 days ago on"
 msgstr ""
 "مخاطبین زیر به عنوان دنبال کنندگان این سرنخ اضافه شده اند\n"
 "                         زیرا کمتر از 30 روز پیش با آنها تماس گرفته شده است"
@@ -3748,8 +3730,8 @@ msgid ""
 "The email address associated with this channel. New emails received will "
 "automatically create new leads assigned to the channel."
 msgstr ""
-"آدرس ایمیل مربوط به این کانال. ایمیل های دریافتی جدید به طور خودکار سرنخ های "
-"جدیدی را به کانال اختصاص می دهد."
+"آدرس ایمیل مربوط به این کانال. ایمیل های دریافتی جدید به طور خودکار سرنخ های"
+" جدیدی را به کانال اختصاص می دهد."
 
 #. module: crm
 #. odoo-python
@@ -3760,9 +3742,9 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_team__alias_model_id
 msgid ""
-"The model (Odoo Document Kind) to which this alias corresponds. Any incoming "
-"email that does not reply to an existing record will cause the creation of a "
-"new record of this model (e.g. a Project Task)"
+"The model (Odoo Document Kind) to which this alias corresponds. Any incoming"
+" email that does not reply to an existing record will cause the creation of "
+"a new record of this model (e.g. a Project Task)"
 msgstr ""
 "مدلی (Odoo Document Kind) که این نام مستعار با آن مطابقت دارد. هر ایمیل "
 "دریافتی که به سابقه موجود پاسخ نمی‌دهد باعث ایجاد یک رکورد جدید از این مدل "
@@ -3780,8 +3762,8 @@ msgstr ""
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__partner_name
 msgid ""
-"The name of the future partner company that will be created while converting "
-"the lead into opportunity"
+"The name of the future partner company that will be created while converting"
+" the lead into opportunity"
 msgstr "نام شرکت شریک آینده که در هنگام تبدیل سرنخ به فرصت ایجاد می شود"
 
 #. module: crm
@@ -3802,11 +3784,11 @@ msgstr "محاسبه میزان موفقیت بر اساس"
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_pls_update_view_form
 msgid ""
-"The success rate is computed based on the stage, but you can add more fields "
-"in the statistical analysis."
+"The success rate is computed based on the stage, but you can add more fields"
+" in the statistical analysis."
 msgstr ""
-"میزان موفقیت بر اساس مرحله محاسبه می شود، اما می توانید فیلدهای بیشتری را در "
-"تجزیه و تحلیل آماری اضافه کنید."
+"میزان موفقیت بر اساس مرحله محاسبه می شود، اما می توانید فیلدهای بیشتری را در"
+" تجزیه و تحلیل آماری اضافه کنید."
 
 #. module: crm
 #: model_terms:ir.actions.act_window,help:crm.crm_opportunity_report_action_lead
@@ -3819,8 +3801,8 @@ msgstr ""
 msgid ""
 "This bar allows to filter the opportunities based on scheduled activities."
 msgstr ""
-"این نوار اجازه می دهد تا فرصت ها را بر اساس فعالیت های برنامه ریزی شده فیلتر "
-"کنید."
+"این نوار اجازه می دهد تا فرصت ها را بر اساس فعالیت های برنامه ریزی شده فیلتر"
+" کنید."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
@@ -3840,14 +3822,14 @@ msgstr "این می تواند برای محاسبه احتمال آماری ب�
 #: model_terms:ir.ui.view,arch_db:crm.crm_lead_view_form
 msgid "This email is blacklisted for mass mailings. Click to unblacklist."
 msgstr ""
-"این ایمیل برای ارسال‌های دسته جمعی در لیست سیاه قرار گرفته است. برای لغو لیست "
-"سیاه کلیک کنید."
+"این ایمیل برای ارسال‌های دسته جمعی در لیست سیاه قرار گرفته است. برای لغو "
+"لیست سیاه کلیک کنید."
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__email_normalized
 msgid ""
-"This field is used to search on email address as the primary email field can "
-"contain more than strictly an email address."
+"This field is used to search on email address as the primary email field can"
+" contain more than strictly an email address."
 msgstr ""
 "این فیلد برای جستجوی آدرس ایمیل استفاده می شود، زیرا فیلد اصلی ایمیل می "
 "تواند بیش از یک آدرس ایمیل باشد."
@@ -3860,11 +3842,11 @@ msgstr "این فیلد برای تنظیم/دریافت زبان‌های کا�
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__campaign_id
 msgid ""
-"This is a name that helps you keep track of your different campaign efforts, "
-"e.g. Fall_Drive, Christmas_Special"
+"This is a name that helps you keep track of your different campaign efforts,"
+" e.g. Fall_Drive, Christmas_Special"
 msgstr ""
-"این یک نام است که کمک می کند تا مسیر شما را از تلاش کمپین‌های مختلف، به عنوان "
-"مثال: Fall_Drive، Christmas_Special"
+"این یک نام است که کمک می کند تا مسیر شما را از تلاش کمپین‌های مختلف، به "
+"عنوان مثال: Fall_Drive، Christmas_Special"
 
 #. module: crm
 #: model:ir.model.fields,help:crm.field_crm_lead__medium_id
@@ -4128,33 +4110,29 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_lead
 msgid ""
 "Use leads if you need a qualification step before creating an\n"
-"                    opportunity or a customer. It can be a business card you "
-"received,\n"
-"                    a contact form filled in your website, or a file of "
-"unqualified\n"
+"                    opportunity or a customer. It can be a business card you received,\n"
+"                    a contact form filled in your website, or a file of unqualified\n"
 "                    prospects you import, etc."
 msgstr ""
 "اگر قبل از ایجاد به مرحله احراز صلاحیت احتیاج دارید، از سرنخ استفاده کنید\n"
-"                     فرصت یا یک مشتری. این می تواند یک کارت ویزیت باشد که "
-"دریافت کرده اید ،\n"
-"                     یک فرم تماس که در وب سایت شما پر شده است ، یا یک فایل "
-"فاقد صلاحیت\n"
+"                     فرصت یا یک مشتری. این می تواند یک کارت ویزیت باشد که دریافت کرده اید ،\n"
+"                     یک فرم تماس که در وب سایت شما پر شده است ، یا یک فایل فاقد صلاحیت\n"
 "                     دورنمایی که شما وارد می کنید و غیره."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.res_config_settings_view_form
 msgid ""
-"Use leads if you need a qualification step before creating an opportunity or "
-"a customer. It can be a business card you received, a contact form filled in "
-"your website, or a file of unqualified prospects you import, etc. Once "
+"Use leads if you need a qualification step before creating an opportunity or"
+" a customer. It can be a business card you received, a contact form filled "
+"in your website, or a file of unqualified prospects you import, etc. Once "
 "qualified, the lead can be converted into a business opportunity and/or a "
 "new customer in your address book."
 msgstr ""
 "در صورتی که قبل از ایجاد یک فرصت یا مشتری به مرحله احراز صلاحیت نیاز دارید، "
 "از سرنخ ها استفاده کنید. این می تواند یک کارت ویزیت دریافتی باشد، یک فرم "
-"تماس پر شده در وب‌سایت شما، یا یک فایل از چشم انداز تایید صلاحیت نشده که وارد "
-"می کنید، و غیره. پس از واجد شرایط شدن، می تواند در دفترچه آدرس خود به فرصت "
-"تجاری و/یا مشتری جدید تبدیل شود."
+"تماس پر شده در وب‌سایت شما، یا یک فایل از چشم انداز تایید صلاحیت نشده که "
+"وارد می کنید، و غیره. پس از واجد شرایط شدن، می تواند در دفترچه آدرس خود به "
+"فرصت تجاری و/یا مشتری جدید تبدیل شود."
 
 #. module: crm
 #: model_terms:ir.ui.view,arch_db:crm.crm_action_helper
@@ -4168,14 +4146,14 @@ msgid ""
 "Use the <i>New</i> button, or send an email to %(email_link)s to test the "
 "email gateway."
 msgstr ""
-"از دکمه <i>جدید</i> استفاده کنید یا برای آزمایش مدخل ایمیل به %(email_link)s "
-"ایمیل بفرستید."
+"از دکمه <i>جدید</i> استفاده کنید یا برای آزمایش مدخل ایمیل به %(email_link)s"
+" ایمیل بفرستید."
 
 #. module: crm
 #: model_terms:digest.tip,tip_description:crm.digest_tip_crm_7
 msgid ""
-"Use the CRM Forecast Kanban to easily define when Opportunities are expected "
-"to be won."
+"Use the CRM Forecast Kanban to easily define when Opportunities are expected"
+" to be won."
 msgstr ""
 "از کانبان پیش‌بینی CRM استفاده کنید تا به راحتی مشخص کنید چه زمانی انتظار "
 "می‌رود فرصت‌ها برنده شوند."
@@ -4368,13 +4346,11 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:crm.crm_case_form_view_salesteams_opportunity
 msgid ""
 "You will be able to plan meetings and phone calls from\n"
-"                    opportunities, convert them into quotations, attach "
-"related\n"
+"                    opportunities, convert them into quotations, attach related\n"
 "                    documents, track all discussions, and much more."
 msgstr ""
 "شما می توانید جلسات و تماس های تلفنی را برنامه ریزی کنید از \n"
-"                     فرصت ها، تبدیل آنها به پیش‌فاکتور، پیوست کردن اسناد "
-"مربوطه\n"
+"                     فرصت ها، تبدیل آنها به پیش‌فاکتور، پیوست کردن اسناد مربوطه\n"
 "                     پیگیری همه گفتگوها و موارد دیگر."
 
 #. module: crm

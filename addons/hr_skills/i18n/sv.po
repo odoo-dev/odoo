@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-20 07:57+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-master/"
-"hr_skills/sv/>\n"
+"Language-Team: Swedish <https://translate.odoo.com/projects/odoo-master/hr_skills/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,12 +33,8 @@ msgstr "'CV - %s' % (object.name)"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Pilikon\" "
-"title=\"Pil\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Pilikon\" title=\"Pil\"/>"
 
 #. module: hr_skills
 #. odoo-python
@@ -52,10 +47,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_employee_skill.py:0
 msgid ""
-"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. "
-"Navigate to Skill types!</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. Navigate to Skill types!</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Show Skill Types\n"
 "                </a>"
 msgstr ""
@@ -715,8 +708,8 @@ msgid ""
 "itself."
 msgstr ""
 "Ange dina ekonomiska data och appen försöker förutse vad som kommer att bli "
-"dina framtida inkomster/utgifter. Applikationen använder maskininlärning för "
-"att träna sig själv."
+"dina framtida inkomster/utgifter. Applikationen använder maskininlärning för"
+" att träna sig själv."
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_qdp_evans_cooper_and_white
@@ -1004,8 +997,8 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
 msgstr ""
-"Om det aktiva fältet är inställt på False kan du dölja resursposten utan att "
-"ta bort den."
+"Om det aktiva fältet är inställt på False kan du dölja resursposten utan att"
+" ta bort den."
 
 #. module: hr_skills
 #. odoo-javascript
@@ -1073,39 +1066,27 @@ msgstr "Tjänst"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied "
-"production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative "
-"to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using "
-"MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 "Arbetsuppgifter: Teamledare för utveckling\n"
-"- Stödde den tekniska verksamheten med att undersöka och åtgärda olika "
-"problem med produktionsstöd (Java, Perl, Shell-skript, SQL).\n"
-"- Ledde kvalitetssäkringsplanering för flera samtidiga projekt i förhållande "
-"till övergripande systemarkitektur eller förändringar/nyutveckling av "
-"handelssystem.\n"
-"- Konfigurerade och lanserade affärskritiska alfa- och riskmodeller med "
-"hjälp av MATLAB och SQL med input från portföljförvaltare."
+"- Stödde den tekniska verksamheten med att undersöka och åtgärda olika problem med produktionsstöd (Java, Perl, Shell-skript, SQL).\n"
+"- Ledde kvalitetssäkringsplanering för flera samtidiga projekt i förhållande till övergripande systemarkitektur eller förändringar/nyutveckling av handelssystem.\n"
+"- Konfigurerade och lanserade affärskritiska alfa- och riskmodeller med hjälp av MATLAB och SQL med input från portföljförvaltare."
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system "
-"environments from development to production.\n"
+"- Coordinated and managed software deployment across five system environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial "
-"installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
 msgstr ""
 "Arbetsuppgifter: Produktchef\n"
-"- Samordnade och hanterade programvaruutrullning i fem systemmiljöer från "
-"utveckling till produktion.\n"
-"- Utvecklade lagrade procedurer för att underlätta programmering på Java-"
-"nivå.\n"
-"- Utvecklade flera anläggningsarkitekturer för förnybar energi, både "
-"kommersiella installationer och försvarsrelaterade."
+"- Samordnade och hanterade programvaruutrullning i fem systemmiljöer från utveckling till produktion.\n"
+"- Utvecklade lagrade procedurer för att underlätta programmering på Java-nivå.\n"
+"- Utvecklade flera anläggningsarkitekturer för förnybar energi, både kommersiella installationer och försvarsrelaterade."
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
@@ -1306,12 +1287,10 @@ msgstr "Martin, Stanley och Duncan"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through "
-"machine learning"
+"            Master thesis: Better grid management and control through machine learning"
 msgstr ""
 "Master i elektroteknik\n"
-"            Examensarbete: Bättre styrning och kontroll av elnätet genom "
-"maskininlärning"
+"            Examensarbete: Bättre styrning och kontroll av elnätet genom maskininlärning"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_matlab
@@ -2092,8 +2071,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid ""
-"The following skills can't be created as they overlap or exactly match "
-"existing skills:\n"
+"The following skills can't be created as they overlap or exactly match existing skills:\n"
 "%(collisions)s"
 msgstr ""
 
@@ -2153,8 +2131,7 @@ msgid ""
 "                Create them in configuration and add them on the Employee."
 msgstr ""
 "Den här rapporten ger dig en översikt över kompetenserna per anställd.\n"
-"                Skapa dem i konfigurationen och lägg till dem på den "
-"anställde."
+"                Skapa dem i konfigurationen och lägg till dem på den anställde."
 
 #. module: hr_skills
 #: model:hr.resume.line,name:hr_skills.employee_resume_vad_thomas_chirnside_primary_school

@@ -32,7 +32,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sale.s_product_aside
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sale.s_product_card
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sale.s_product_columns
-msgid "<i class=\"fa fa-cart\"/> Buy Now"
+msgid "<i class=\"oi\" data-icon=\"shopping_cart\"/> Buy Now"
 msgstr ""
 
 #. module: mass_mailing_sale
@@ -41,8 +41,7 @@ msgid ""
 "<strong>$20</strong>\n"
 "                                        <span class=\"h4-fs\">\n"
 "                                            <s>\n"
-"                                                <font style=\"color: "
-"rgb(108, 117, 125)\">$25</font>\n"
+"                                                <font style=\"color: rgb(108, 117, 125)\">$25</font>\n"
 "                                            </s>\n"
 "                                        </span>"
 msgstr ""
@@ -54,8 +53,7 @@ msgid ""
 "<strong>$20</strong>\n"
 "                            <span class=\"h4-fs\">\n"
 "                                <s>\n"
-"                                    <font style=\"color: rgb(108, 117, "
-"125)\">$25</font>\n"
+"                                    <font style=\"color: rgb(108, 117, 125)\">$25</font>\n"
 "                                </s>\n"
 "                            </span>"
 msgstr ""

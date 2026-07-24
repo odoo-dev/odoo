@@ -11,14 +11,12 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 04:48+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"website_event_exhibitor/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/website_event_exhibitor/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: website_event_exhibitor
@@ -43,23 +41,17 @@ msgstr ""
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
-msgstr ""
-"<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Odkryj więcej</a>"
+msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
+msgstr "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Odkryj więcej</a>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
+msgstr "<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
-msgid "<span class=\"fa fa-plus me-1\"/> Add Exhibitors"
+msgid "<span class=\"oi me-1\" data-icon=\"add\"/> Add Exhibitors"
 msgstr ""
 
 #. module: website_event_exhibitor
@@ -149,7 +141,8 @@ msgstr "Zarchiwizowane"
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
 #: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
 msgid "As a team, we are happy to contribute to this event."
-msgstr "Jako zespół cieszymy się, że możemy przyczynić się do tego wydarzenia."
+msgstr ""
+"Jako zespół cieszymy się, że możemy przyczynić się do tego wydarzenia."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_attachment_count
@@ -500,8 +493,8 @@ msgid ""
 "Indicates the timezone in which the event dates/times will be displayed on "
 "the website."
 msgstr ""
-"Wskazuje strefę czasową, w której data/czas wydarzenia będzie wyświetlana na "
-"stronie internetowej."
+"Wskazuje strefę czasową, w której data/czas wydarzenia będzie wyświetlana na"
+" stronie internetowej."
 
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_is_follower
@@ -804,12 +797,10 @@ msgstr "Sponsorzy"
 #: model_terms:ir.actions.act_window,help:website_event_exhibitor.event_sponsor_action_from_event
 msgid ""
 "Sponsors are advertised on your event pages.<br>\n"
-"    Exhibitors have a dedicated page a with chat room for people to connect "
-"with them."
+"    Exhibitors have a dedicated page a with chat room for people to connect with them."
 msgstr ""
 "Sponsorzy są reklamowani na stronach wydarzenia.<br>\n"
-"Wystawcy mają dedykowaną stronę z czatem, aby ludzie mogli się z nimi "
-"połączyć."
+"Wystawcy mają dedykowaną stronę z czatem, aby ludzie mogli się z nimi połączyć."
 
 #. module: website_event_exhibitor
 #. odoo-javascript

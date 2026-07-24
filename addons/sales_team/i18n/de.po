@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-22 00:18+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-master/"
-"sales_team/de/>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-master/sales_team/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,38 +38,45 @@ msgstr "%(user_names)s ist bereits Teil anderer Teams (%(team_names)s)."
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-building\" title=\"Company\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-envelope\" title=\"Email\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"mail\" title=\"Email\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-phone\" title=\"Phone\"/>"
+msgid "<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"phone\" title=\"Phone\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_form
-msgid "<i class=\"d-none d-md-block fa fa-users\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"d-none d-md-block oi oi-filled\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_form
 msgid ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" "
-"title=\"Email\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"mail\" role=\"img\" aria-"
+"label=\"Email\" title=\"Email\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_member_view_kanban
-msgid "<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Sales Team\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-primary\" data-icon=\"group\" "
+"title=\"Sales Team\"/>"
 msgstr ""
-"<i class=\"fa fa-fw me-1 fa-users text-primary\" title=\"Verkaufsteam\"/>"
+"<i class=\"me-1 text-primary oi-fw oi oi-filled\" data-icon=\"group\" "
+"title=\"Verkaufsteam\"/>"
 
 #. module: sales_team
 #: model_terms:ir.ui.view,arch_db:sales_team.crm_team_view_kanban_dashboard
@@ -117,7 +123,8 @@ msgstr "Ein Teammitglied hinzufügen"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__crm_team_member_ids
-msgid "Add members to automatically assign their documents to this sales team."
+msgid ""
+"Add members to automatically assign their documents to this sales team."
 msgstr ""
 "Fügen Sie Mitglieder hinzu, um ihre Dokumente automatisch diesem "
 "Verkaufsteam zuzuordnen."
@@ -270,7 +277,8 @@ msgstr "Lieblingsmitglieder"
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__is_favorite
-msgid "Favorite teams to display them in the dashboard and access them easily."
+msgid ""
+"Favorite teams to display them in the dashboard and access them easily."
 msgstr ""
 "Machen Sie Teams zu Favoriten, um sie im Dashboard anzeigen zu lassen und "
 "einfach auf sie zugreifen zu können."
@@ -308,8 +316,8 @@ msgid ""
 "If True, users may belong to several sales teams. Otherwise membership is "
 "limited to a single sales team."
 msgstr ""
-"Wenn Wahr, können Benutzer mehreren Verkaufsteams angehören. Andernfalls ist "
-"die Mitgliedschaft auf ein einziges Verkaufsteam beschränkt."
+"Wenn Wahr, können Benutzer mehreren Verkaufsteams angehören. Andernfalls ist"
+" die Mitgliedschaft auf ein einziges Verkaufsteam beschränkt."
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_needaction
@@ -321,7 +329,8 @@ msgstr "Falls markiert, erfordern neue Nachrichten Ihre Aufmerksamkeit."
 #: model:ir.model.fields,help:sales_team.field_crm_team__message_has_error
 #: model:ir.model.fields,help:sales_team.field_crm_team_member__message_has_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
+msgstr ""
+"Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
 
 #. module: sales_team
 #: model:ir.model.fields,help:sales_team.field_crm_team__active
@@ -632,8 +641,8 @@ msgid ""
 "Those represent the different categories of things you have to do (e.g. "
 "\"Call\" or \"Prepare meeting\")."
 msgstr ""
-"Diese stehen für die verschiedenen Kategorien von zu erledigenden Dingen (z. "
-"B. „Anruf“ oder „Meeting vorbereiten“)."
+"Diese stehen für die verschiedenen Kategorien von zu erledigenden Dingen (z."
+" B. „Anruf“ oder „Meeting vorbereiten“)."
 
 #. module: sales_team
 #: model:crm.tag,name:sales_team.categ_oppor6
@@ -658,10 +667,11 @@ msgstr ""
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_config
-msgid "Use Sales Teams to organize your sales departments and draw up reports."
+msgid ""
+"Use Sales Teams to organize your sales departments and draw up reports."
 msgstr ""
-"Verwenden Sie Verkaufsteams, um Ihre Verkaufsabteilungen zu organisieren und "
-"Berichte zu erstellen."
+"Verwenden Sie Verkaufsteams, um Ihre Verkaufsabteilungen zu organisieren und"
+" Berichte zu erstellen."
 
 #. module: sales_team
 #: model_terms:ir.actions.act_window,help:sales_team.crm_team_action_pipeline
@@ -694,8 +704,8 @@ msgid ""
 "User '%(user)s' is not allowed in the company '%(company)s' of the Sales "
 "Team '%(team)s'."
 msgstr ""
-"Der Benutzer „%(user)s“ ist im Unternehmen „%(company)s“ des Verkaufsteams '%"
-"(team)s' nicht zugelassen."
+"Der Benutzer „%(user)s“ ist im Unternehmen „%(company)s“ des Verkaufsteams "
+"'%(team)s' nicht zugelassen."
 
 #. module: sales_team
 #: model:ir.model.fields,field_description:sales_team.field_crm_team_member__user_company_ids
@@ -747,8 +757,8 @@ msgstr "Sie arbeiten in mehreren Teams?"
 #. odoo-python
 #: code:addons/sales_team/models/crm_team_member.py:0
 msgid ""
-"You are trying to create duplicate membership(s). We found that %"
-"(duplicates)s already exist(s)."
+"You are trying to create duplicate membership(s). We found that "
+"%(duplicates)s already exist(s)."
 msgstr ""
 "Sie versuchen, doppelte Mitgliedschaft(en) zu erstellen. Wir haben "
 "festgestellt, dass %(duplicates)s bereits existieren."
@@ -786,8 +796,8 @@ msgstr ""
 #. module: sales_team
 #: model:res.groups,comment:sales_team.group_sale_manager
 msgid ""
-"the user will have an access to the sales configuration as well as statistic "
-"reports."
+"the user will have an access to the sales configuration as well as statistic"
+" reports."
 msgstr ""
 "der Benutzer erhält den Zugriff auf die Konfiguration des Verkaufs wie auch "
 "auf die zugehörigen Berichte."

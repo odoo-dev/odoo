@@ -20,8 +20,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-20 02:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"account_payment/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/account_payment/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -36,8 +35,8 @@ msgid ""
 "#%(number)s - Installment of <strong>%(amount)s</strong> due on <strong "
 "class=\"text-primary\">%(date)s</strong>"
 msgstr ""
-"#%(number)s - <strong>%(amount)s</strong>の分割払、期日: <strong "
-"class=\"text-primary\">%(date)s</strong>"
+"#%(number)s - <strong>%(amount)s</strong>の分割払、期日: <strong class=\"text-"
+"primary\">%(date)s</strong>"
 
 #. module: account_payment
 #. odoo-javascript
@@ -53,49 +52,49 @@ msgstr "<b>コミュニケーション: </b>"
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> "
-"Pay Now</span>"
+"<i class=\"oi oi-filled\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> Pay Now</span>"
 msgstr ""
-"<i class=\"fa fa-arrow-circle-right\"/><span class=\"d-none d-md-inline\"> 今"
-"すぐ支払う</span>"
+"<i class=\"oi-filled oi\" data-icon=\"arrow_circle_right\"/><span "
+"class=\"d-none d-md-inline\"> 今すぐ支払う</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-arrow-circle-right\"/> Pay Now"
-msgstr "<i class=\"fa fa-fw fa-arrow-circle-right\"/> 今すぐ支払う"
+msgid "<i class=\"oi oi-fw oi-filled\" data-icon=\"arrow_circle_right\"/> Pay Now"
+msgstr "<i class=\"oi-fw oi oi-filled\" data-icon=\"arrow_circle_right\"/> 今すぐ支払う"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Authorized</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> 承認済</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
 msgid ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi oi-fw\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> Paid</span>"
 msgstr ""
-"<i class=\"fa fa-fw fa-check\"/>\n"
+"<i class=\"oi-fw oi\" data-icon=\"check\"/>\n"
 "                <span class=\"d-none d-md-inline\"> 支払済</span>"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Paid"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> 支払済"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Paid"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> 支払済"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Pending"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> 保留"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Pending"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> 保留"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_page_inherit_payment
-msgid "<i class=\"fa fa-fw fa-check-circle\"/> Processing Payment"
-msgstr "<i class=\"fa fa-fw fa-check-circle\"/> 支払処理中"
+msgid "<i class=\"oi oi-fw\" data-icon=\"check_circle\"/> Processing Payment"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"check_circle\"/> 支払処理中"
 
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_my_invoices_payment
@@ -120,14 +119,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_payment.payment_refund_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a refund pending for this payment.\n"
-"                        Wait a moment for it to be processed. If the refund "
-"is still pending in a\n"
-"                        few minutes, please check your payment provider "
-"configuration."
+"                        Wait a moment for it to be processed. If the refund is still pending in a\n"
+"                        few minutes, please check your payment provider configuration."
 msgstr ""
 "<strong>警告！</strong>この支払には保留中の返金があります。 \n"
-"                        処理されるまでしばらくお待ち下さい。数分経っても返金"
-"が保留中の場合は\n"
+"                        処理されるまでしばらくお待ち下さい。数分経っても返金が保留中の場合は\n"
 "                        支払いプロバイダーの設定を確認して下さい。"
 
 #. module: account_payment
@@ -139,8 +135,8 @@ msgstr "顧客が %s以前に支払う場合、値引きが適用されます。
 #. module: account_payment
 #: model_terms:ir.ui.view,arch_db:account_payment.portal_invoice_payment
 msgid ""
-"A payment has already been made on this invoice, please make sure to not pay "
-"twice."
+"A payment has already been made on this invoice, please make sure to not pay"
+" twice."
 msgstr "この請求書はすでに支払されています。二重払いとならないようご注意下さい。"
 
 #. module: account_payment
@@ -335,8 +331,7 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
-"テストモードでは、偽の支払いがテスト支払インターフェイスを通じて処理されま"
-"す。\n"
+"テストモードでは、偽の支払いがテスト支払インターフェイスを通じて処理されます。\n"
 "このモードは、プロバイダを設定する際に推奨されます。"
 
 #. module: account_payment
@@ -406,18 +401,14 @@ msgstr "次の分割払"
 msgid ""
 "Note that only tokens from providers allowing to capture the amount are "
 "available."
-msgstr ""
-"利用できるのは、金額を把握できるプロバイダーのトークンのみであるることに注意"
-"して下さい。"
+msgstr "利用できるのは、金額を把握できるプロバイダーのトークンのみであるることに注意して下さい。"
 
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_account_payment_register__payment_token_id
 msgid ""
 "Note that tokens from providers set to only authorize transactions (instead "
 "of capturing the amount) are not available."
-msgstr ""
-"（金額を確定する代わりに）取引の承認のみに設定されたプロバイダーのトークンは"
-"利用できないことに注意して下さい。"
+msgstr "（金額を確定する代わりに）取引の承認のみに設定されたプロバイダーのトークンは利用できないことに注意して下さい。"
 
 #. module: account_payment
 #. odoo-python
@@ -428,11 +419,9 @@ msgstr "オンライン支払オプションが設定で無効になっていま
 #. module: account_payment
 #: model:ir.model.fields,help:account_payment.field_payment_provider__available_pricelist_ids
 msgid ""
-"Only allow this payment provider when the partner's pricelist matches one of "
-"these."
-msgstr ""
-"取引先の価格表が以下のいずれかに一致する場合にのみ、この決済プロバイダーを許"
-"可します。"
+"Only allow this payment provider when the partner's pricelist matches one of"
+" these."
+msgstr "取引先の価格表が以下のいずれかに一致する場合にのみ、この決済プロバイダーを許可します。"
 
 #. module: account_payment
 #. odoo-python
@@ -763,12 +752,10 @@ msgstr "無効な取引"
 #. odoo-python
 #: code:addons/account_payment/models/account_payment_method_line.py:0
 msgid ""
-"You can't delete a payment method that is linked to a provider in the "
-"enabled or test state.\n"
+"You can't delete a payment method that is linked to a provider in the enabled or test state.\n"
 "Linked providers(s): %s"
 msgstr ""
-"有効ステータスまたはテストステータスのプロバイダーにリンクされている支払方法"
-"を削除することはできません。\n"
+"有効ステータスまたはテストステータスのプロバイダーにリンクされている支払方法を削除することはできません。\n"
 "リンクされているプロバイダー:%s"
 
 #. module: account_payment
@@ -777,9 +764,7 @@ msgstr ""
 msgid ""
 "You cannot uninstall this module as payments using this payment method "
 "already exist."
-msgstr ""
-"この支払い方法を使用した支払が既に存在するため、このモジュールを"
-"アンインストールすることはできません。"
+msgstr "この支払い方法を使用した支払が既に存在するため、このモジュールをアンインストールすることはできません。"
 
 #. module: account_payment
 #. odoo-python

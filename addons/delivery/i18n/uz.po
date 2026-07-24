@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 08:40+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"delivery/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/delivery/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,8 +29,7 @@ msgstr ""
 #: model:ir.actions.report,print_report_name:delivery.action_report_delivery_note
 msgid ""
 "\n"
-"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", "
-"object.name)\n"
+"            \"Delivery Note - %s - %s\" % (object.partner_id.name or \"\", object.name)\n"
 "        "
 msgstr ""
 
@@ -63,15 +61,13 @@ msgstr "%s (nusxa)"
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,"
-"<br/><br/>\n"
+"        Hello <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,<br/><br/>\n"
 "        We are glad to inform you that your order has been shipped.\n"
 "        <t t-if=\"object.tracking_ref\">\n"
 "            Your tracking reference is\n"
 "            <strong>\n"
 "                <t t-if=\"object.tracking_url\">\n"
-"                    <a t-attf-href=\"{{ object.tracking_url }}\" "
-"target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
+"                    <a t-attf-href=\"{{ object.tracking_url }}\" target=\"_blank\" t-out=\"object.tracking_ref\"/>.\n"
 "                </t>\n"
 "                <t t-else=\"\">\n"
 "                    <t t-out=\"object.tracking_ref\"/>.\n"
@@ -79,13 +75,11 @@ msgid ""
 "            </strong>\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        Please find your delivery order attached for more details.<br/><br/"
-">\n"
+"        Please find your delivery order attached for more details.<br/><br/>\n"
 "        Thank you,\n"
 "        <t t-if=\"user.signature\">\n"
 "            <br/>\n"
-"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
-"out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-out=\"user.signature or ''\">Mitchell Admin</t></div>\n"
 "        </t>\n"
 "    </p>\n"
 "</div>\n"
@@ -95,8 +89,8 @@ msgstr ""
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
 #, fuzzy
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Get rate"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Narxni olish"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Get rate"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Narxni olish"
 
 #. module: delivery
 #. odoo-python
@@ -107,16 +101,15 @@ msgid ""
 "                    Buy Odoo Enterprise now to get more providers.\n"
 "                </p>"
 msgstr ""
-"<p class=\"o_view_nocontent\">Ko‘proq provayderlarga ega bo‘lish uchun hozir "
-"Odoo Enterprise'ni xarid qiling.</p>"
+"<p class=\"o_view_nocontent\">Ko‘proq provayderlarga ega bo‘lish uchun hozir"
+" Odoo Enterprise'ni xarid qiling.</p>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 #, fuzzy
 msgid ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Test</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"o_stat_text o_warning_text fw-bold\">Sinov</span> <span "
 "class=\"o_stat_text\">muhiti</span>"
@@ -125,8 +118,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 #, fuzzy
 msgid "<span class=\"o_stat_text text-danger\">No debug</span>"
-msgstr ""
-"<span class=\"o_stat_text text-danger\">Nosozlikni tuzatish yo‘q</span>"
+msgstr "<span class=\"o_stat_text text-danger\">Nosozlikni tuzatish yo‘q</span>"
 
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
@@ -139,8 +131,7 @@ msgstr "<span class=\"text-success\">Nosozlikni tuzatish so‘rovlari</span>"
 #, fuzzy
 msgid ""
 "<span class=\"text-success\">Production</span>\n"
-"                                <span class=\"o_stat_text\">Environment</"
-"span>"
+"                                <span class=\"o_stat_text\">Environment</span>"
 msgstr ""
 "<span class=\"text-success\">Ishlab chiqarish</span> <span "
 "class=\"o_stat_text\">muhiti</span>"
@@ -194,8 +185,8 @@ msgstr ""
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__carrier_description
 msgid ""
 "A description of the delivery method that you want to communicate to your "
-"customers on the Sales Order and sales confirmation email. E.g. instructions "
-"for customers to follow."
+"customers on the Sales Order and sales confirmation email. E.g. instructions"
+" for customers to follow."
 msgstr ""
 
 #. module: delivery
@@ -239,8 +230,8 @@ msgstr "Qo‘shimcha ustama"
 #, fuzzy
 msgid "Allow customers to choose Cash on Delivery as their payment method."
 msgstr ""
-"Mijozlarga to‘lov usuli sifatida yetkazib berilganda naqd to‘lovni tanlashga "
-"ruxsat bering."
+"Mijozlarga to‘lov usuli sifatida yetkazib berilganda naqd to‘lovni tanlashga"
+" ruxsat bering."
 
 #. module: delivery
 #: model:ir.model.fields,field_description:delivery.field_delivery_carrier__amount
@@ -266,8 +257,8 @@ msgstr "Arxivlangan"
 #: model_terms:ir.ui.view,arch_db:delivery.choose_delivery_carrier_view_form
 #, fuzzy
 msgid ""
-"Are you sure you want the delivery to be free for this order? You might have "
-"forgotten to compute the rates."
+"Are you sure you want the delivery to be free for this order? You might have"
+" forgotten to compute the rates."
 msgstr ""
 "Bu buyurtma uchun yetkazib berish bepul bo‘lishiga ishonchingiz komilmi? "
 "Narxlarni hisoblashni unutgan bo‘lishingiz mumkin."
@@ -549,8 +540,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/delivery_carrier.py:0
 msgid ""
-"Delivery method %(name)s cannot have the same tag in both Must Have Tags and "
-"Excluded Tags."
+"Delivery method %(name)s cannot have the same tag in both Must Have Tags and"
+" Excluded Tags."
 msgstr ""
 
 #. module: delivery
@@ -642,10 +633,8 @@ msgstr "Xatolik: bu yetkazib berish usuli mavjud emas."
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__invoice_policy
 #, fuzzy
 msgid ""
-"Estimated Cost: the customer will be invoiced the estimated cost of the "
-"shipping.\n"
-"Real Cost: the customer will be invoiced the real cost of the shipping, the "
-"cost of theshipping will be updated on the SO after the delivery."
+"Estimated Cost: the customer will be invoiced the estimated cost of the shipping.\n"
+"Real Cost: the customer will be invoiced the real cost of the shipping, the cost of theshipping will be updated on the SO after the delivery."
 msgstr ""
 "Taxminiy narx: mijozga yetkazib berishning taxminiy narxi bo‘yicha hisob-"
 "faktura yuboriladi. Haqiqiy narx: mijozga yetkazib berishning haqiqiy narxi "
@@ -675,8 +664,8 @@ msgstr ""
 #. module: delivery
 #: model_terms:ir.ui.view,arch_db:delivery.view_delivery_carrier_form
 msgid ""
-"Filling this form allows you to make the delivery method available according "
-"to the content of the order or its destination."
+"Filling this form allows you to make the delivery method available according"
+" to the content of the order or its destination."
 msgstr ""
 
 #. module: delivery
@@ -991,8 +980,8 @@ msgstr "Prefiks allaqachon mavjud!"
 msgid ""
 "Prefixes of zip codes that this delivery method applies to. Note that "
 "regular expressions can be used to support countries with varying zip code "
-"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g. "
-"'100$' will only match '100' and not '1000')"
+"lengths, i.e. '$' can be added to end of prefix to match the exact zip (e.g."
+" '100$' will only match '100' and not '1000')"
 msgstr ""
 
 #. module: delivery
@@ -1216,8 +1205,8 @@ msgstr ""
 #: model:ir.model.fields,help:delivery.field_delivery_carrier__must_have_tag_ids
 #, fuzzy
 msgid ""
-"The method is available only if at least one product of the order has one of "
-"these tags."
+"The method is available only if at least one product of the order has one of"
+" these tags."
 msgstr ""
 "Usul faqat buyurtmadagi kamida bitta mahsulotda ushbu teglardan biri mavjud "
 "bo‘lsagina mavjud bo‘ladi."
@@ -1240,7 +1229,8 @@ msgstr ""
 #: model:ir.model.constraint,message:delivery.constraint_delivery_carrier_shipping_insurance_is_percentage
 #, fuzzy
 msgid "The shipping insurance must be a percentage between 0 and 100."
-msgstr "Yuk tashish sug‘urtasi 0 dan 100 gacha foiz oralig‘ida bo‘lishi shart."
+msgstr ""
+"Yuk tashish sug‘urtasi 0 dan 100 gacha foiz oralig‘ida bo‘lishi shart."
 
 #. module: delivery
 #. odoo-python
@@ -1398,11 +1388,9 @@ msgstr "Og‘irlik o‘lchov birligi yorlig‘i"
 #. odoo-python
 #: code:addons/delivery/models/sale_order.py:0
 msgid ""
-"You can not update the shipping costs on an order where it was already "
-"invoiced!\n"
+"You can not update the shipping costs on an order where it was already invoiced!\n"
 "\n"
-"The following delivery lines (product, invoiced quantity and price) have "
-"already been processed:\n"
+"The following delivery lines (product, invoiced quantity and price) have already been processed:\n"
 "\n"
 "%s"
 msgstr ""
@@ -1411,8 +1399,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/delivery/models/product_category.py:0
 msgid ""
-"You cannot delete this product category as it is used on the products linked "
-"to delivery methods."
+"You cannot delete this product category as it is used on the products linked"
+" to delivery methods."
 msgstr ""
 
 #. module: delivery
@@ -1460,8 +1448,8 @@ msgstr ""
 #. module: delivery
 #: model:mail.template,subject:delivery.mail_template_data_delivery_note
 msgid ""
-"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref "
-"{{ object.so_id.name or 'n/a' }})"
+"{{ object.so_id.company_id.name }} Shipping Confirmation (Ref {{ "
+"object.so_id.name or 'n/a' }})"
 msgstr ""
 
 #, fuzzy
@@ -1475,5 +1463,5 @@ msgstr ""
 #, fuzzy
 #~ msgid "cash on delivery not allowed by selected delivery method"
 #~ msgstr ""
-#~ "tanlangan yetkazib berish usulida yetkazib berishda naqd pul to‘lovi "
-#~ "ruxsat etilmagan"
+#~ "tanlangan yetkazib berish usulida yetkazib berishda naqd pul to‘lovi ruxsat "
+#~ "etilmagan"

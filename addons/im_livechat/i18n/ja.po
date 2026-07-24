@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 04:13+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/im_livechat/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,8 +28,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -121,7 +119,8 @@ msgstr "%s (コピー)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr "'%(input_email)s' は有効なEメールではないようです。再度試しますか？"
 
 #. module: im_livechat
@@ -142,15 +141,12 @@ msgstr "'%s' は無効な電話番号です。"
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* '表示' はページ上にチャットボタンを表示します。\n"
-"* '通知付きで表示'は'表示'に加え、ボタンのすぐ横にフローティングテキストを表"
-"示します。\n"
+"* '通知付きで表示'は'表示'に加え、ボタンのすぐ横にフローティングテキストを表示します。\n"
 "* '自動的に開く'はボタンを表示し、自動的に会話ペインを開きます。\n"
 "* '隠す'はページ上のチャットボタンを隠します。\n"
 
@@ -163,34 +159,34 @@ msgstr "< 1m"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
-msgstr "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>参加する"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
+msgstr "<i class=\"o-me-1_5 oi\" data-icon=\"login\" role=\"img\"/>参加する"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
-msgstr "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>退出"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
+msgstr "<i class=\"o-me-1_5 oi\" data-icon=\"logout\" role=\"img\"/>退出"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-"
-"label=\"スマイル\"/>"
+"<i class=\"text-success oi\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"スマイル\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>編集モードに戻る"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>編集モードに戻る"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Remove operator\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -215,44 +211,35 @@ msgstr "<span>進行中のセッション:</span>"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
+msgstr "<span>リマインダ：このステップは、オペレーターが不在の場合のみ再生されます。</span>"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
+msgid ""
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>リマインダ：このステップは、オペレーターが不在の場合のみ再生されます"
-"。</span>"
+"<span>ヒント: ボットがより複雑なアクション(オペレータに転送、...)を実行する前に、少なくとも1回の対話(質問、Eメール、...)が必要です。 </span>\n"
+"                    <span>オペレータが利用できない場合にのみボットに訪問者と対話させたい場合は、チャネルルールを使用します。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
-"<span>ヒント: ボットがより複雑なアクション(オペレータに転送、...)を実行する前"
-"に、少なくとも1回の対話(質問、Eメール、...)が必要です。 </span>\n"
-"                    <span>オペレータが利用できない場合にのみボットに訪問者と"
-"対話させたい場合は、チャネルルールを使用します。</span>"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
-msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
-msgstr ""
-"<span>ヒント: ボットがより複雑なアクション(オペレータに転送、...)を実行する前"
-"に、少なくとも1回の対話(質問、Eメール、...)が必要です。</span>"
+"<span>ヒント: "
+"ボットがより複雑なアクション(オペレータに転送、...)を実行する前に、少なくとも1回の対話(質問、Eメール、...)が必要です。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
-msgstr ""
-"<span>ヒント: オペレーターがいない場合に備えて、ボットのさらなる手順を計画し"
-"ましょう。</span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
+msgstr "<span>ヒント: オペレーターがいない場合に備えて、ボットのさらなる手順を計画しましょう。</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
@@ -506,11 +493,10 @@ msgstr "チャネル"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"チャットは2人だけのプライベートなものです。グループは招待された人だけの"
-"プライベートなものです。チャネルは (設定により)自由に参加できます。"
+"チャットは2人だけのプライベートなものです。グループは招待された人だけのプライベートなものです。チャネルは (設定により)自由に参加できます。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -527,8 +513,7 @@ msgid ""
 "                channel for each website where you want live chat enabled."
 msgstr ""
 "ライブチャットを有効にしたい各ウェブサイトごとに\n"
-"                チャネルを作成することで、ウェブサイト訪問者とリアルタイムで"
-"チャットできます。"
+"                チャネルを作成することで、ウェブサイト訪問者とリアルタイムでチャットできます。"
 
 #. module: im_livechat
 #: model:ir.actions.act_window,name:im_livechat.chatbot_script_action
@@ -650,9 +635,7 @@ msgstr "終了済みのライブチャットセッションにステータスを
 msgid ""
 "Closing this will end the live chat with %(channel_name)s. Are you sure you "
 "want to proceed?"
-msgstr ""
-"これを閉じると、%(channel_name)s とのライブチャットが終了します。本当に続行し"
-"ますか?"
+msgstr "これを閉じると、%(channel_name)s とのライブチャットが終了します。本当に続行しますか?"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_expertise__color
@@ -866,9 +849,7 @@ msgid ""
 "Delay (in seconds) to automatically open the conversation window. Note: the "
 "selected action must be 'Open automatically' otherwise this parameter will "
 "not be taken into account."
-msgstr ""
-"会話ウィンドウを自動的に開くまでの遅延時間（秒）。注：選択したアクションが「"
-"自動で開く」でなければ、このパラメータは考慮されません。"
+msgstr "会話ウィンドウを自動的に開くまでの遅延時間（秒）。注：選択したアクションが「自動で開く」でなければ、このパラメータは考慮されません。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1107,9 +1088,7 @@ msgstr "フィードバックを送る"
 msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
-msgstr ""
-"一致するルールを見つけるための順序が与えられます。与えられた URL/国に一致する"
-"ルールが2つある場合、順序が最も低いものが選択されます。"
+msgstr "一致するルールを見つけるための順序が与えられます。与えられた URL/国に一致するルールが2つある場合、順序が最も低いものが選択されます。"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -1118,9 +1097,9 @@ msgid ""
 "<strong>Settings</strong> &gt; <strong>Email</strong> &amp; "
 "<strong>Marketing.</strong>"
 msgstr ""
-"<strong>ウェブサイト</strong>へ移動 &gt; <strong>設定</strong> &gt; <strong>"
-"管理設定</strong> &gt; <strong>Eメール</strong> &amp; <strong>"
-"マーケティング</strong>"
+"<strong>ウェブサイト</strong>へ移動 &gt; <strong>設定</strong> &gt; "
+"<strong>管理設定</strong> &gt; <strong>Eメール</strong> &amp; "
+"<strong>マーケティング</strong>"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1227,9 +1206,7 @@ msgstr "履歴"
 #. module: im_livechat
 #: model:ir.model.constraint,message:im_livechat.constraint_im_livechat_channel_member_history_partner_id_or_guest_3b134909
 msgid "History should either be linked to a partner or a guest but not both"
-msgstr ""
-"履歴は取引先またはゲストのいずれかにリンクする必要があります(両方にリンクする"
-"ことはできません)"
+msgstr "履歴は取引先またはゲストのいずれかにリンクする必要があります(両方にリンクすることはできません)"
 
 #. module: im_livechat
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_pricing
@@ -1316,9 +1293,7 @@ msgstr "スクリプト回答の ID。回答が削除された場合でも統計
 msgid ""
 "If limited, operators will only handle the selected number of sessions at a "
 "time."
-msgstr ""
-"制限されている場合、オペレーターは同時に指定された数のセッションのみを処理し"
-"ます。"
+msgstr "制限されている場合、オペレーターは同時に指定された数のセッションのみを処理します。"
 
 #. module: im_livechat
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_documentation_exit
@@ -1388,9 +1363,7 @@ msgstr "情報"
 #: code:addons/im_livechat/models/im_livechat_channel.py:0
 msgid ""
 "Invalid URL '%s'. The Review Link must start with 'http://' or 'https://'."
-msgstr ""
-"無効なURL '%s'. リビューリンクは 'http://' or 'https://' で始まる必要がありま"
-"す。"
+msgstr "無効なURL '%s'. リビューリンクは 'http://' or 'https://' で始まる必要があります。"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_script_step__is_forward_operator_child
@@ -1520,9 +1493,7 @@ msgstr "最終更新日"
 msgid ""
 "Learn how to display a live chat bubble on your website and start chatting "
 "with visitors in a few easy steps."
-msgstr ""
-"ウェブサイトにライブチャットの吹き出しを表示する方法を学び、簡単なステップで"
-"訪問者とのチャットを開始しましょう。"
+msgstr "ウェブサイトにライブチャットの吹き出しを表示する方法を学び、簡単なステップで訪問者とのチャットを開始しましょう。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1543,9 +1514,7 @@ msgstr "チャネルから退席"
 msgid ""
 "Leaving will end the live chat with %(channel_name)s. Are you sure you want "
 "to continue?"
-msgstr ""
-"退出すると、%(channel_name)s とのライブチャットが終了します。続行してもよろし"
-"いですか？"
+msgstr "退出すると、%(channel_name)s とのライブチャットが終了します。続行してもよろしいですか？"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1771,8 +1740,7 @@ msgid ""
 "Looking for help date should only be set if the channel is looking for help "
 "and must be empty otherwise."
 msgstr ""
-"「ヘルプを求めている日付」は、そのチャンネルが実際にヘルプを求めている場合に"
-"のみ設定されるべきであり、そうでない場合は空でなければなりません。"
+"「ヘルプを求めている日付」は、そのチャンネルが実際にヘルプを求めている場合にのみ設定されるべきであり、そうでない場合は空でなければなりません。"
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_discuss_channel_rtc_session
@@ -1899,9 +1867,7 @@ msgstr "新規セッション"
 msgid ""
 "Nickname used in live chat conversations to protect your real name from "
 "visitors."
-msgstr ""
-"ライブチャットでの会話において、訪問者から本名を保護するために使用される"
-"ニックネーム。"
+msgstr "ライブチャットでの会話において、訪問者から本名を保護するために使用されるニックネーム。"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_channel__block_assignment_during_call
@@ -1974,9 +1940,7 @@ msgstr "未応答"
 msgid ""
 "Note about the session, visible to all internal users having access to the "
 "session."
-msgstr ""
-"セッションに関するメモ。このセッションにアクセスできる社内ユーザー全員に表示"
-"されます。"
+msgstr "セッションに関するメモ。このセッションにアクセスできる社内ユーザー全員に表示されます。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2449,12 +2413,10 @@ msgstr "オペレータごとのセッション"
 #, fuzzy
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
-"定義済みのスクリプトを使用して、ウェブサイトの訪問者とチャットするボットを設"
-"定します。\n"
+"定義済みのスクリプトを使用して、ウェブサイトの訪問者とチャットするボットを設定します。\n"
 "                会話を評価してライブチャット担当者に転送し、リード生成や\n"
 "                サポートチケットを自動的に生成します。"
 
@@ -2594,13 +2556,12 @@ msgstr "会話が送信されました。"
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
-"ルールはこれらの国にのみ適用されます。例: 'ベルギー' と '米国' を選択し、"
-"アクションを '隠す' に設定した場合、これらの 2 つの国にいる訪問者に対しては指"
-"定されたURLのチャットボタンが非表示になります。この機能を使用するには、サーバ"
-"に GeoIP がインストールされている必要があります。"
+"ルールはこれらの国にのみ適用されます。例: 'ベルギー' と '米国' を選択し、アクションを '隠す' に設定した場合、これらの 2 "
+"つの国にいる訪問者に対しては指定されたURLのチャットボタンが非表示になります。この機能を使用するには、サーバに GeoIP "
+"がインストールされている必要があります。"
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -2618,27 +2579,21 @@ msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
 msgstr ""
-"訪問者は、オプションをクリックすると、このリンクにリダイレクトされます(リンク"
-"がライブチャットウェブサイトの外部である場合、スクリプトは終了することに注意"
-"して下さい)。"
+"訪問者は、オプションをクリックすると、このリンクにリダイレクトされます(リンクがライブチャットウェブサイトの外部である場合、スクリプトは終了することに注意して下さい)。"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_lang_ids
 msgid ""
 "These languages, in addition to your main language, will be used to assign "
 "you to Live Chat sessions."
-msgstr ""
-"これらの言語は、メイン言語に加えて、ライブチャットセッションの割当に使用され"
-"ます。"
+msgstr "これらの言語は、メイン言語に加えて、ライブチャットセッションの割当に使用されます。"
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__default_message
 msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
-msgstr ""
-"これは、訪問者が新しい会話を始めたときに表示される自動の’"
-"ウェルカム'メッセージです。"
+msgstr "これは、訪問者が新しい会話を始めたときに表示される自動の’ウェルカム'メッセージです。"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2698,21 +2653,11 @@ msgstr "タイトル色"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
-"このルールをウェブサイトの特定のページにのみ適用するには、/shop のような URL "
-"正規表現を入力してください。これは /shop で始まるすべてのページ(例：/shop/"
-"product)に一致します。すべてのページにルールを適用する場合は、このフィールド"
-"を空のままにしてください。<br/>\n"
-"                                    オンプレミス版のデータベースでは、訪問者"
-"の位置情報を取得するために、サーバに GeoIP をインストールする必要があります。"
-"GeoIP がインストールされていない場合、国による制限を含むルールは無視されます"
-"。"
+"このルールをウェブサイトの特定のページにのみ適用するには、/shop のような URL 正規表現を入力してください。これは /shop で始まるすべてのページ(例：/shop/product)に一致します。すべてのページにルールを適用する場合は、このフィールドを空のままにしてください。<br/>\n"
+"                                    オンプレミス版のデータベースでは、訪問者の位置情報を取得するために、サーバに GeoIP をインストールする必要があります。GeoIP がインストールされていない場合、国による制限を含むルールは無視されます。"
 
 #. module: im_livechat
 #: model_terms:ir.actions.act_window,help:im_livechat.im_livechat_agent_history_action
@@ -2721,9 +2666,7 @@ msgstr ""
 msgid ""
 "Track and improve live chat performance with insights on session activity, "
 "response times, customer ratings, and call interactions."
-msgstr ""
-"ライブチャットのパフォーマンスを、セッションの活動状況、応答時間、顧客評価、"
-"通話のやり取りに関するインサイトで追跡・改善しましょう。"
+msgstr "ライブチャットのパフォーマンスを、セッションの活動状況、応答時間、顧客評価、通話のやり取りに関するインサイトで追跡・改善しましょう。"
 
 #. module: im_livechat
 #: model:chatbot.script.answer,name:im_livechat.chatbot_script_answer_troubleshooting_demo
@@ -2794,9 +2737,8 @@ msgid ""
 "To load a canned response, start your sentence with '::' and select the "
 "template."
 msgstr ""
-"定型応答を使用して、ライブチャットアプリでメッセージのテンプレートを定義しま"
-"す。定型応答を読み込むには、テキストを ' : ' で開始し、テンプレートを選択しま"
-"す。"
+"定型応答を使用して、ライブチャットアプリでメッセージのテンプレートを定義します。定型応答を読み込むには、テキストを ' : ' "
+"で開始し、テンプレートを選択します。"
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_res_users
@@ -2893,9 +2835,7 @@ msgstr "訪問者は会話から退出しました。"
 msgid ""
 "Visitors who leave a positive review will be redirected to this optional "
 "link."
-msgstr ""
-"ポジティブなレビューを残した訪問者は、この任意のリンクにリダイレクトされます"
-"。"
+msgstr "ポジティブなレビューを残した訪問者は、この任意のリンクにリダイレクトされます。"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_channel__web_page
@@ -2952,9 +2892,7 @@ msgstr "ご興味のあるモジュールはどれですか？"
 msgid ""
 "When forwarding live chat conversations, the chatbot will prioritize users "
 "with matching expertise."
-msgstr ""
-"ライブチャットの会話を転送する際、チャットボットは専門知識が一致するユーザを"
-"優先します。"
+msgstr "ライブチャットの会話を転送する際、チャットボットは専門知識が一致するユーザを優先します。"
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_im_livechat_report_channel__has_call
@@ -2988,9 +2926,7 @@ msgstr "ウィンドウカラー"
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_pricing_email_demo
 msgid ""
 "Would you mind leaving your email address so that we can reach you back?"
-msgstr ""
-"折り返しご連絡させていただきますので、メールアドレスを教えていただけますでし"
-"ょうか？"
+msgstr "折り返しご連絡させていただきますので、メールアドレスを教えていただけますでしょうか？"
 
 #. module: im_livechat
 #. odoo-python

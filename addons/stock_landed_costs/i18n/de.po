@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 12:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-master/"
-"stock_landed_costs/de/>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-master/stock_landed_costs/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,10 +38,8 @@ msgstr "+ %(value)s aus %(vendor_bill)s (Einstandskosten: %(landed_cost)s)"
 
 #. module: stock_landed_costs
 #: model_terms:ir.ui.view,arch_db:stock_landed_costs.stock_landed_cost_view_kanban
-msgid ""
-"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
-msgstr ""
-"<i class=\"fa fa-clock-o\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgid "<i class=\"oi\" data-icon=\"schedule\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
+msgstr "<i class=\"oi\" data-icon=\"schedule\" title=\"Date\" role=\"img\" aria-label=\"Date\"/>"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__account_id
@@ -294,8 +291,7 @@ msgid ""
 msgstr ""
 "Gleichmäßig: Die Kosten werden gleichmäßig geteilt\n"
 "Nach Menge: Die Kosten werden nach der Produktmenge geteilt\n"
-"Nach laufenden Kosten: Die Kosten werden nach den laufenden Kosten des "
-"Produkts geteilt\n"
+"Nach laufenden Kosten: Die Kosten werden nach den laufenden Kosten des Produkts geteilt\n"
 "Nach Gewicht: Die Kosten werden je nach Gewicht geteilt\n"
 "Nach Volumen: Die Kosten werden je nach Volumen geteilt."
 
@@ -366,7 +362,8 @@ msgstr "Falls markiert, erfordern neue Nachrichten Ihre Aufmerksamkeit."
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__message_has_error
 #: model:ir.model.fields,help:stock_landed_costs.field_stock_landed_cost__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
+msgstr ""
+"Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,help:stock_landed_costs.field_product_product__landed_cost_ok
@@ -758,15 +755,15 @@ msgid ""
 "You cannot apply landed costs on the chosen %s(s). Landed costs can only be "
 "applied for products with FIFO or average costing method."
 msgstr ""
-"Sie können keine Einstandskosten auf %s anwenden. Einstandskosten können nur "
-"für Produkte mit FIFO- oder Durchschnittskostenmethode angewendet werden."
+"Sie können keine Einstandskosten auf %s anwenden. Einstandskosten können nur"
+" für Produkte mit FIFO- oder Durchschnittskostenmethode angewendet werden."
 
 #. module: stock_landed_costs
 #. odoo-python
 #: code:addons/stock_landed_costs/models/product.py:0
 msgid ""
-"You cannot change the product type or disable landed cost option because the "
-"product is used in a journal item."
+"You cannot change the product type or disable landed cost option because the"
+" product is used in a journal item."
 msgstr ""
 "Sie können den Produkttyp nicht ändern oder die Option „Einstandskosten“ "
 "deaktivieren, da das Produkt in einer Buchungszeile verwendet wird."

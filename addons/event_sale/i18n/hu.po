@@ -21,8 +21,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 12:04+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/"
-"event_sale/hu/>\n"
+"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/event_sale/hu/>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,8 +40,8 @@ msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
-msgid "<i class=\"fa fa-arrow-right\"/> Configure Events &amp; Tickets"
-msgstr "<i class=\"fa fa-arrow-right\"/> Események és jegyek beállítása"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Configure Events &amp; Tickets"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Események és jegyek beállítása"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
@@ -362,8 +361,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid ticket choice \"%(ticket_name)s\" for event \"%(event_name)s\"."
-msgstr ""
-"Érvénytelen \"%(ticket_name)s\" jegyválasztás \"%(event_name)s\"eseményre."
+msgstr "Érvénytelen \"%(ticket_name)s\" jegyválasztás \"%(event_name)s\"eseményre."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
@@ -650,17 +648,14 @@ msgstr "Nincs megerősítve"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__state
 msgid ""
-"Unconfirmed: registrations in a pending state waiting for an action "
-"(specific case, notably with sale status)\n"
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
 "Registered: registrations considered taken by a client\n"
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
 msgstr ""
-"Meg nem erősített: függőben lévő, intézkedésre váró regisztrációk (speciális "
-"eset, nevezetesen értékesítés státusszal)\n"
+"Meg nem erősített: függőben lévő, intézkedésre váró regisztrációk (speciális eset, nevezetesen értékesítés státusszal)\n"
 "Regisztrált: a vevő által foglaltnak tekintett regisztrációk\n"
-"Részt vett: olyan regisztrációk, amelyek esetében a résztvevő részt vett az "
-"eseményen\n"
+"Részt vett: olyan regisztrációk, amelyek esetében a résztvevő részt vett az eseményen\n"
 "Törölt: manuálisan törölt regisztrációk."
 
 #. module: event_sale

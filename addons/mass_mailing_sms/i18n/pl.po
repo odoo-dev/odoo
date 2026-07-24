@@ -31,15 +31,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-18 21:46+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"mass_mailing_sms/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/mass_mailing_sms/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: mass_mailing_sms
@@ -77,14 +74,16 @@ msgstr "24-godzinne statystyki %(mailing_type)s \"%(mailing_name)s\""
 msgid ""
 "<br/>\n"
 "                    <span class=\"text-muted\">\n"
-"                        <i class=\"fa fa-mobile fa-lg\"/> Contacts\n"
+"                        <i class=\"oi oi-filled\" data-icon=\"phone\"/> Contacts\n"
 "                    </span>"
 msgstr ""
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_contact_view_kanban
-msgid "<i class=\"fa fa-phone text-primary me-2\" title=\"Phone\"/>"
-msgstr "<i class=\"fa fa-phone text-primary me-2\" title=\"Telefon\"/>"
+msgid "<i class=\"oi oi-filled text-primary me-2\" data-icon=\"phone\" title=\"Phone\"/>"
+msgstr ""
+"<i class=\"text-primary me-2 oi-filled oi\" data-icon=\"phone\" "
+"title=\"Telefon\"/>"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
@@ -98,8 +97,8 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
-"<span name=\"process_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text "
-"Messages are being processed.</span>"
+"<span name=\"process_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text"
+" Messages are being processed.</span>"
 msgstr ""
 "<span name=\"process_text_sms\" invisible=\"mailing_type != "
 "'sms'\">Wiadomości SMS są przetwarzane.</span>"
@@ -122,26 +121,22 @@ msgstr "<span widget=\"statinfo\">Otwarty odbiorca</span>"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
 "<strong>\n"
-"                            It appears you don't have enough IAP credits. "
-"Click here to buy credits.\n"
+"                            It appears you don't have enough IAP credits. Click here to buy credits.\n"
 "                        </strong>"
 msgstr ""
 "<strong>\n"
-"Wygląda na to, że nie masz wystarczającej liczby kredytów IAP. Kliknij "
-"tutaj, aby kupić kredyty.\n"
+"Wygląda na to, że nie masz wystarczającej liczby kredytów IAP. Kliknij tutaj, aby kupić kredyty.\n"
 "</strong>"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
 "<strong>\n"
-"                            It appears your SMS account is not registered. "
-"Click here to set up your account.\n"
+"                            It appears your SMS account is not registered. Click here to set up your account.\n"
 "                        </strong>"
 msgstr ""
 "<strong>\n"
-"Wygląda na to, że Twoje konto SMS nie jest zarejestrowane. Kliknij tutaj, "
-"aby skonfigurować konto.\n"
+"Wygląda na to, że Twoje konto SMS nie jest zarejestrowane. Kliknij tutaj, aby skonfigurować konto.\n"
 "</strong>"
 
 #. module: mass_mailing_sms
@@ -296,7 +291,8 @@ msgstr "Kod"
 msgid ""
 "Come back once some SMS Mailings are sent to check out aggregated results."
 msgstr ""
-"Wróć po wysłaniu niektórych wiadomości SMS, aby sprawdzić zagregowane wyniki."
+"Wróć po wysłaniu niektórych wiadomości SMS, aby sprawdzić zagregowane "
+"wyniki."
 
 #. module: mass_mailing_sms
 #: model:ir.ui.menu,name:mass_mailing_sms.mass_mailing_sms_menu_configuration
@@ -423,8 +419,7 @@ msgid ""
 "For an Email, Subject your Recipients will see in their inbox.\n"
 "                    For an SMS Text Message, internal Title of the Message."
 msgstr ""
-"W przypadku wiadomości e-mail, temat, który odbiorcy zobaczą w swojej "
-"skrzynce odbiorczej.\n"
+"W przypadku wiadomości e-mail, temat, który odbiorcy zobaczą w swojej skrzynce odbiorczej.\n"
 "W przypadku wiadomości tekstowej SMS, wewnętrzny tytuł wiadomości."
 
 #. module: mass_mailing_sms
@@ -433,8 +428,7 @@ msgid ""
 "For an email, the subject your recipients will see in their inbox.\n"
 "For an SMS, the internal title of the message."
 msgstr ""
-"W przypadku wiadomości e-mail jest to temat, który odbiorcy zobaczą w swojej "
-"skrzynce odbiorczej.\n"
+"W przypadku wiadomości e-mail jest to temat, który odbiorcy zobaczą w swojej skrzynce odbiorczej.\n"
 "W przypadku wiadomości SMS - wewnętrzny tytuł wiadomości."
 
 #. module: mass_mailing_sms
@@ -484,16 +478,17 @@ msgstr ""
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_contact__phone_sanitized_blacklisted
 msgid ""
-"If the sanitized phone number is on the blacklist, the contact won't receive "
-"mass mailing sms anymore, from any list"
+"If the sanitized phone number is on the blacklist, the contact won't receive"
+" mass mailing sms anymore, from any list"
 msgstr ""
-"Jeśli oczyszczony numer telefonu znajduje się na czarnej liście, kontakt nie "
-"będzie już otrzymywał masowych wiadomości sms z żadnej listy."
+"Jeśli oczyszczony numer telefonu znajduje się na czarnej liście, kontakt nie"
+" będzie już otrzymywał masowych wiadomości sms z żadnej listy."
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,help:mass_mailing_sms.field_mailing_mailing__sms_force_send
 msgid ""
-"Immediately send the SMS Mailing instead of queuing up. Use at your own risk."
+"Immediately send the SMS Mailing instead of queuing up. Use at your own "
+"risk."
 msgstr ""
 "Natychmiastowe wysyłanie wiadomości SMS zamiast oczekiwania w kolejce. "
 "Używaj na własne ryzyko."
@@ -517,8 +512,8 @@ msgid ""
 "mobile and phone field in a model."
 msgstr ""
 "Wskazuje, czy wpisany na czarną listę oczyszczony numer telefonu jest "
-"numerem telefonu. Pomaga odróżnić, który numer jest na czarnej liście, gdy w "
-"modelu jest zarówno pole telefonu jak i komórki."
+"numerem telefonu. Pomaga odróżnić, który numer jest na czarnej liście, gdy w"
+" modelu jest zarówno pole telefonu jak i komórki."
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_credit
@@ -616,8 +611,8 @@ msgid ""
 "Mailing contacts allow you to separate your marketing audience from your "
 "contact directory."
 msgstr ""
-"Kontakty mailingowe pozwalają oddzielić odbiorców marketingowych od katalogu "
-"kontaktów."
+"Kontakty mailingowe pozwalają oddzielić odbiorców marketingowych od katalogu"
+" kontaktów."
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__utm_campaign__ab_testing_sms_winner_selection__manual
@@ -684,8 +679,8 @@ msgstr "Brak danych!"
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_list_action_sms
 msgid ""
-"No need to import mailing lists, you can send SMS to contacts saved in other "
-"Odoo apps."
+"No need to import mailing lists, you can send SMS to contacts saved in other"
+" Odoo apps."
 msgstr ""
 "Nie ma potrzeby importowania list mailingowych, możesz wysyłać SMS-y do "
 "kontaktów zapisanych w innych aplikacjach Odoo."
@@ -738,8 +733,8 @@ msgstr "Numer(y)"
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
 msgid ""
-"Once you send these text messages, they'll be making a grand entrance in all "
-"pockets, creating quite the bzzzzz!"
+"Once you send these text messages, they'll be making a grand entrance in all"
+" pockets, creating quite the bzzzzz!"
 msgstr ""
 "Po wysłaniu tych wiadomości tekstowych pojawią się one we wszystkich "
 "kieszeniach, wywołując spore poruszenie!"
@@ -1021,7 +1016,8 @@ msgstr "Nie można wysłać testowego SMS na numer %(destination)s: %(state)s"
 #: code:addons/mass_mailing_sms/wizard/mailing_sms_test.py:0
 msgid "Test SMS skipped those numbers as they appear invalid: %(numbers)s"
 msgstr ""
-"Testowy SMS pominął te numery, ponieważ wydają się nieprawidłowe: %(numbers)s"
+"Testowy SMS pominął te numery, ponieważ wydają się nieprawidłowe: "
+"%(numbers)s"
 
 #. module: mass_mailing_sms
 #. odoo-python
@@ -1039,8 +1035,8 @@ msgstr "Wystąpił błąd podczas próby anulowania subskrypcji"
 msgid ""
 "This phone number is blacklisted for SMS Marketing. Click to unblacklist."
 msgstr ""
-"Ten numer telefonu jest na czarnej liście marketingu SMS-owego. Kliknij, aby "
-"odblokować listę."
+"Ten numer telefonu jest na czarnej liście marketingu SMS-owego. Kliknij, aby"
+" odblokować listę."
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields,field_description:mass_mailing_sms.field_mailing_mailing__sms_subject
@@ -1115,7 +1111,8 @@ msgstr "Wybór zwycięzcy"
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_mailing_action_sms
 msgid ""
-"Write an appealing SMS Text Message, define recipients and track its results."
+"Write an appealing SMS Text Message, define recipients and track its "
+"results."
 msgstr ""
 "Napisz atrakcyjną wiadomość tekstową SMS, zdefiniuj odbiorców i śledź jej "
 "wyniki."
@@ -1158,11 +1155,11 @@ msgstr ""
 #~ "'sms'\">Wiadomości SMS zostały anulowane i nie zostaną wysłane.</span>"
 
 #~ msgid ""
-#~ "<span name=\"failed_text_sms\" invisible=\"mailing_type != 'sms'\">SMS "
-#~ "Text Messages could not be delivered.</span>"
+#~ "<span name=\"failed_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text "
+#~ "Messages could not be delivered.</span>"
 #~ msgstr ""
-#~ "<span name=\"failed_text_sms\" invisible=\"mailing_type != 'sms'\">Nie "
-#~ "można dostarczyć wiadomości SMS.</span>"
+#~ "<span name=\"failed_text_sms\" invisible=\"mailing_type != 'sms'\">Nie można"
+#~ " dostarczyć wiadomości SMS.</span>"
 
 #~ msgid ""
 #~ "<span name=\"sent_sms\" invisible=\"mailing_type != 'sms'\">SMS Text "

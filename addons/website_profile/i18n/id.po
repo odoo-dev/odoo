@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 21:03+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/"
-"website_profile/id/>\n"
+"Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-master/website_profile/id/>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,8 +45,8 @@ msgid ""
 ". Collect points on the forum or on the eLearning platform. Those points "
 "will make you reach new ranks."
 msgstr ""
-". Kumpulkan poin pada forum atau pada platform eLearning. Poin-poin tersebut "
-"akan membuat Anda mencapai peringkat baru."
+". Kumpulkan poin pada forum atau pada platform eLearning. Poin-poin tersebut"
+" akan membuat Anda mencapai peringkat baru."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_content
@@ -56,33 +55,33 @@ msgstr ". Coba mencari lagi."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
-msgstr "<i class=\"fa fa-arrow-right\"/> Dapatkan Lencana"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Get Badges"
+msgstr "<i class=\"oi\" data-icon=\"arrow_forward\"/> Dapatkan Lencana"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
-msgstr "<i class=\"fa fa-pencil me-1\"/>EDIT"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>EDIT"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>EDIT"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/>Edit"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>Edit"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>Edit"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
-msgstr "<i class=\"fa fa-pencil me-2\"/>EDIT PROFIL"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"edit\"/>EDIT PROFILE"
+msgstr "<i class=\"me-2 oi-filled oi\" data-icon=\"edit\"/>EDIT PROFIL"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Semua Lencana"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Badges"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Semua Lencana"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
-msgstr "<i class=\"oi oi-arrow-right\"/> Semua Lencana"
+msgid "<i class=\"oi\" data-icon=\"east\"/> All Badges"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Semua Lencana"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -130,32 +129,23 @@ msgid ""
 "<span id=\"email_validated_message\">Congratulations! Your email has just "
 "been validated.</span>"
 msgstr ""
-"<span id=\"email_validated_message\">Selamat! Email Anda telah divalidasi.</"
-"span>"
+"<span id=\"email_validated_message\">Selamat! Email Anda telah "
+"divalidasi.</span>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.users_page_header
 msgid "<strong class=\"mb-3 text-white me-2\">Rank by:</strong>"
-msgstr ""
-"<strong class=\"mb-3 text-white me-2\">Peringkatkan berdasarkan:</strong>"
+msgstr "<strong class=\"mb-3 text-white me-2\">Peringkatkan berdasarkan:</strong>"
 
 #. module: website_profile
 #: model:mail.template,body_html:website_profile.validation_email
 msgid ""
 "<t>\n"
-"                            Hello <t t-out=\"object.name or ''\">Marc Demo</"
-"t>,<br/><br/>\n"
-"                            You have been invited to validate your email in "
-"order to get access to \"<t t-out=\"object.company_id.name or "
-"''\">YourCompany</t>\" website.\n"
-"                            To validate your email, please click on the "
-"button below:\n"
+"                            Hello <t t-out=\"object.name or ''\">Marc Demo</t>,<br/><br/>\n"
+"                            You have been invited to validate your email in order to get access to \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\" website.\n"
+"                            To validate your email, please click on the button below:\n"
 "                            <div style=\"margin: 32px 0px 32px 0px;\">\n"
-"                                <a t-att-href=\"ctx.get('token_url')\" t-"
-"attf-style=\"background-color: {{object.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\">\n"
+"                                <a t-att-href=\"ctx.get('token_url')\" t-attf-style=\"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\">\n"
 "                                    Validate my account\n"
 "                                </a>\n"
 "                            </div>\n"
@@ -208,7 +198,8 @@ msgstr "Publikasi otomatis pada"
 #. module: website_profile
 #: model:ir.model.fields,help:website_profile.field_gamification_badge__publish_on
 msgid "Automatically publish the page on the chosen date and time."
-msgstr "Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
+msgstr ""
+"Secara otomatis publikasi halaman pada tanggal dan waktu yang dipilih."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -220,19 +211,18 @@ msgstr "Lencana"
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
 msgid "Badges are your collection of achievements. Wear them proudly! <br/>"
-msgstr "Lencana adalah koleksi pencapaian Anda. Tampilkan dengan bangga! <br/>"
+msgstr ""
+"Lencana adalah koleksi pencapaian Anda. Tampilkan dengan bangga! <br/>"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
-"                        you receive badges for being especially helpful.<br "
-"class=\"d-none d-lg-inline-block\"/>Badges\n"
+"                        you receive badges for being especially helpful.<br class=\"d-none d-lg-inline-block\"/>Badges\n"
 "                        appear on your profile page, and your posts."
 msgstr ""
 "Selain mendapatkan reputasi dengan pertanyaan dan jawaban Anda,\n"
-"                        Anda mendapatkan lencana karena sudah sangat "
-"membantu orang lain.<br class=\"d-none d-lg-inline-block\"/>Lencana\n"
+"                        Anda mendapatkan lencana karena sudah sangat membantu orang lain.<br class=\"d-none d-lg-inline-block\"/>Lencana\n"
 "                        akan tampil di halaman profil Anda, dan di post Anda."
 
 #. module: website_profile
@@ -256,8 +246,8 @@ msgid ""
 "Changing the country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
 msgstr ""
-"Mengubah negara tidak diizinkan setelah dokumen telah diterbitkan untuk akun "
-"Anda. Silakan hubungi kami langsung untuk operasi ini."
+"Mengubah negara tidak diizinkan setelah dokumen telah diterbitkan untuk akun"
+" Anda. Silakan hubungi kami langsung untuk operasi ini."
 
 #. module: website_profile
 #. odoo-javascript
@@ -569,7 +559,8 @@ msgstr "URL Websi8te"
 #: model_terms:ir.ui.view,arch_db:website_profile.rank_badge_main
 msgid "When you finish a course or reach milestones, you're awarded badges."
 msgstr ""
-"Saat Anda menyelesaikan kursus atau meraih milestone, Anda diberikan lencana."
+"Saat Anda menyelesaikan kursus atau meraih milestone, Anda diberikan "
+"lencana."
 
 #. module: website_profile
 #. odoo-javascript

@@ -29,8 +29,8 @@ msgstr ""
 #. module: snailmail_account
 #: model_terms:ir.ui.view,arch_db:snailmail_account.res_config_settings_view_form
 msgid ""
-"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
-"specific.\"/>"
+"<span class=\"oi oi-lg\" data-icon=\"business\" title=\"Values set here are "
+"company-specific.\"/>"
 msgstr ""
 
 #. module: snailmail_account

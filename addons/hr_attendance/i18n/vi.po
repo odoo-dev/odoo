@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 21:16+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
-"hr_attendance/vi/>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/hr_attendance/vi/>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -65,25 +64,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">When enabled, "
-"only the first check-in within the scheduled working hours (including "
-"tolerance) is recorded. Further check-ins are allowed only after an "
-"automatic check-out.</span>"
+"                                    <span class=\"text-muted\">When enabled, only the first check-in within the scheduled working hours (including tolerance) is recorded. Further check-ins are allowed only after an automatic check-out.</span>"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
 msgid ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 msgstr ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Giai đoạn\" role=\"img\" "
-"title=\"Giai đoạn\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"calendar_today\" aria-"
+"label=\"Giai đoạn\" role=\"img\" title=\"Giai đoạn\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Installation Manual"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>Cài đặt thủ công"
+msgid "<i class=\"oi oi-fw\" data-icon=\"arrow_forward\"/>Installation Manual"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"arrow_forward\"/>Cài đặt thủ công"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
@@ -97,12 +93,10 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 msgid ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 msgstr ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-"
-"label=\"Không có mặt\" title=\"Không có mặt\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Không có mặt\" title=\"Không có mặt\">\n"
 "                                    </span>"
 
 #. module: hr_attendance
@@ -173,8 +167,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
 "<span class=\"o_stat_value\">Add</span>\n"
-"                                    <span class=\"o_stat_text\">Employees</"
-"span>"
+"                                    <span class=\"o_stat_text\">Employees</span>"
 msgstr ""
 
 #. module: hr_attendance
@@ -243,12 +236,10 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 msgid ""
-"Add a few employees to be able to select an employee here and perform his "
-"check in / check out.\n"
+"Add a few employees to be able to select an employee here and perform his check in / check out.\n"
 "                To create employees go to the Employees menu."
 msgstr ""
-"Thêm một vài nhân viên để có thể chọn một nhân viên ở đây và thực hiện đăng "
-"nhập / đăng xuất.\n"
+"Thêm một vài nhân viên để có thể chọn một nhân viên ở đây và thực hiện đăng nhập / đăng xuất.\n"
 "Để tạo nhân viên, hãy vào menu Nhân viên."
 
 #. module: hr_attendance
@@ -294,8 +285,8 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"Allow the collection of GPS location, IP address, and browser/device details "
-"used to track employee access and attendance"
+"Allow the collection of GPS location, IP address, and browser/device details"
+" used to track employee access and attendance"
 msgstr ""
 "Cho phép thu thập vị trí GPS, địa chỉ IP và thông tin trình duyệt/thiết bị "
 "được sử dụng để theo dõi quyền truy cập và chấm công của nhân viên"
@@ -596,15 +587,12 @@ msgstr "Nguồn mã vạch"
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance_overtime_rule__base_off
 msgid ""
 "Base for overtime calculation.\n"
-"Use 'Quantity' when overtime hours are those in excess of a certain amount "
-"per day/week.\n"
+"Use 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\n"
 "Use 'Timing' when overtime hours happen on specific days or at specific times"
 msgstr ""
 "Cơ sở để tính giờ làm thêm.\n"
-"Sử dụng 'Số lượng' khi giờ làm thêm là số giờ vượt quá một mức nhất định "
-"trong ngày/tuần.\n"
-"Sử dụng 'Thời gian' khi giờ làm thêm xảy ra vào các ngày cụ thể hoặc vào "
-"những khoảng thời gian cụ thể."
+"Sử dụng 'Số lượng' khi giờ làm thêm là số giờ vượt quá một mức nhất định trong ngày/tuần.\n"
+"Sử dụng 'Thời gian' khi giờ làm thêm xảy ra vào các ngày cụ thể hoặc vào những khoảng thời gian cụ thể."
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_rule__base_off
@@ -646,8 +634,8 @@ msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee hasn't "
 "checked out since %(datetime)s"
 msgstr ""
-"Không thể tạo ghi nhận có mặt cho nhân viên %(empl_name)s. Nhân viên này vẫn "
-"chưa checkout kể từ %(datetime)s"
+"Không thể tạo ghi nhận có mặt cho nhân viên %(empl_name)s. Nhân viên này vẫn"
+" chưa checkout kể từ %(datetime)s"
 
 #. module: hr_attendance
 #. odoo-python
@@ -667,9 +655,9 @@ msgid ""
 "check in. Your attendances have probably been modified manually by human "
 "resources."
 msgstr ""
-"Không thể thực hiện việc đăng xuất cho nhân viên %(empl_name)s, do không tìm "
-"thấy lần đăng nhập tương ứng. Dữ liệu Chấm công của bạn có thể đã được điều "
-"chỉnh bởi bộ phận nhân sự."
+"Không thể thực hiện việc đăng xuất cho nhân viên %(empl_name)s, do không tìm"
+" thấy lần đăng nhập tương ứng. Dữ liệu Chấm công của bạn có thể đã được điều"
+" chỉnh bởi bộ phận nhân sự."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -819,14 +807,12 @@ msgid ""
 "Controls how the rates from the different rules that apply are combined.\n"
 "  Max: use the highest rate. (e.g.: combined for 150% and 120 = 150%)\n"
 "  Sum: sum the *extra* pay (i.e. above 100%).\n"
-"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
 msgstr ""
 "Kiểm soát cách các tỷ lệ từ những quy tắc khác nhau được kết hợp.  \n"
 "  Tối đa: Sử dụng tỷ lệ cao nhất. (Ví dụ: kết hợp cho 150% và 120 = 150%)\n"
 "  Tổng: cộng các khoản lương *thêm* (tức là trên 100%).  \n"
-"    Ví dụ: tỷ lệ kết hợp cho 150% & 120% = 100% (cơ sở) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    Ví dụ: tỷ lệ kết hợp cho 150% & 120% = 100% (cơ sở) + (150-100)% + (120-100)% = 170%\n"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_ruleset__country_id
@@ -1316,11 +1302,11 @@ msgstr "Nhận dạng thủ công"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
-"If checked, days not covered by an attendance will be visible in the Report. "
-"Does not apply to employees with a flexible working schedule."
+"If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
-"Nếu được chọn, những ngày không có chấm công sẽ hiển thị trong Báo cáo. Điều "
-"này không áp dụng đối với nhân viên có lịch làm việc linh hoạt."
+"Nếu được chọn, những ngày không có chấm công sẽ hiển thị trong Báo cáo. Điều"
+" này không áp dụng đối với nhân viên có lịch làm việc linh hoạt."
 
 #. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance__message_needaction
@@ -1754,8 +1740,8 @@ msgstr "Onboarding"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/hr_version_list_view.js:0
 msgid ""
-"One or more selected records already have a ruleset assigned (highlighted in "
-"yellow). Do you want to overwrite them?"
+"One or more selected records already have a ruleset assigned (highlighted in"
+" yellow). Do you want to overwrite them?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2100,8 +2086,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 msgid ""
-"Rule '%(name)s' is based off quantity, but the usual amount of work hours is "
-"not specified"
+"Rule '%(name)s' is based off quantity, but the usual amount of work hours is"
+" not specified"
 msgstr ""
 "Quy tắc '%(name)s' dựa trên số lượng, nhưng số giờ làm việc thông thường "
 "không được quy định cụ thể"
@@ -2250,7 +2236,8 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.constraint,message:hr_attendance.constraint_res_company_check_auto_check_out_specific_time_range
-msgid "Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
+msgid ""
+"Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
 msgstr ""
 
 #. module: hr_attendance
@@ -2352,8 +2339,8 @@ msgid ""
 "The user will have access to the attendance records and reporting of "
 "employees where he's set as an attendance manager"
 msgstr ""
-"Nếu được chỉ định làm quản lý chấm công, người dùng sẽ có quyền truy cập vào "
-"báo cáo và dữ liệu chấm công của nhân viên."
+"Nếu được chỉ định làm quản lý chấm công, người dùng sẽ có quyền truy cập vào"
+" báo cáo và dữ liệu chấm công của nhân viên."
 
 #. module: hr_attendance
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_version_list_view
@@ -2369,8 +2356,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically checked out based on company specific time "
-"configuration."
+"This attendance was automatically checked out based on company specific time"
+" configuration."
 msgstr ""
 
 #. module: hr_attendance
@@ -2387,8 +2374,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically created to cover an unjustified absence on "
-"that day."
+"This attendance was automatically created to cover an unjustified absence on"
+" that day."
 msgstr ""
 "Lượt chấm công này được tự động ra để bù cho thời gian vắng mặt không có lý "
 "do vào ngày hôm đó."
@@ -2396,8 +2383,8 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
-"This will reset all manual edit on overtime period linked to those rules. Do "
-"you confirm ?"
+"This will reset all manual edit on overtime period linked to those rules. Do"
+" you confirm ?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2518,8 +2505,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid ""
-"Unable to get a valid location. Do you want to proceed with your check-in/"
-"out anyway?"
+"Unable to get a valid location. Do you want to proceed with your check-"
+"in/out anyway?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2824,8 +2811,8 @@ msgstr "bằng mã PIN tuỳ chọn"
 #~ "additional tolerance. Does not apply to employees with a flexible working "
 #~ "schedule."
 #~ msgstr ""
-#~ "Tự động check-out nhân viên dựa trên lịch làm việc của họ với một khoảng "
-#~ "sai số bổ sung. Không áp dụng cho nhân viên có lịch làm việc linh hoạt."
+#~ "Tự động check-out nhân viên dựa trên lịch làm việc của họ với một khoảng sai"
+#~ " số bổ sung. Không áp dụng cho nhân viên có lịch làm việc linh hoạt."
 
 #~ msgid "Check IN"
 #~ msgstr "Đăng NHẬP"

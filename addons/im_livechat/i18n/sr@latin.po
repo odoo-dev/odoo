@@ -14,22 +14,19 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 11:35+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Serbian (Latin script) <https://translate.odoo.com/projects/"
-"odoo-master/im_livechat/sr_Latn/>\n"
+"Language-Team: Serbian (Latin script) <https://translate.odoo.com/projects/odoo-master/im_livechat/sr_Latn/>\n"
 "Language: sr@latin\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: im_livechat
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -115,7 +112,8 @@ msgstr "%s (kopija)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
 "'%(input_email)s' ne izglada kao ispravan email. Molimo vas da pokušate "
 "ponovo?"
@@ -138,17 +136,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Prikaži' prikazuje chat dugme na stranicama.\n"
-"* 'Prikaži sa notifikacijom' je 'Prikaži' uz dodatak lebdećeg teksta odmah "
-"pored dugmeta.\n"
-"* 'Otvori automatski' prikazuje dugme i automatski otvara prozor za "
-"konverzaciju.\n"
+"* 'Prikaži sa notifikacijom' je 'Prikaži' uz dodatak lebdećeg teksta odmah pored dugmeta.\n"
+"* 'Otvori automatski' prikazuje dugme i automatski otvara prozor za konverzaciju.\n"
 "* 'Sakrij' krije chat dugme na stranicama.\n"
 
 #. module: im_livechat
@@ -159,30 +153,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Nazad na uređivački mod"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Nazad na uređivački mod"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Ukloni operatera\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Ukloni operatera\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -207,8 +201,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Podsetnik: Ovaj korak će biti izveden samo ako nema dostupnih "
 "operatera.</span>"
@@ -216,34 +210,28 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>Savet: Najmanje jedna interakcija (Pitanje, email, ...) je potrebna "
-"pre no što Bot može da izvede kompleksnije akcije (Prosledi operateru, ...). "
-"</span>\n"
-"                    <span>Koristite Pravila kanala ako želite da Bot ima "
-"interakciju sa posetiocima samo kada nema dostupnih operatera.</span>"
+"<span>Savet: Najmanje jedna interakcija (Pitanje, email, ...) je potrebna pre no što Bot može da izvede kompleksnije akcije (Prosledi operateru, ...). </span>\n"
+"                    <span>Koristite Pravila kanala ako želite da Bot ima interakciju sa posetiocima samo kada nema dostupnih operatera.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Savet: Najmanje jedna interakcija (Pitanje, email, ...) je potrebna "
-"pre no što Bot može da izvede kompleksnije akcije (Prosledi operateru, ...)"
-".</span>"
+"pre no što Bot može da izvede kompleksnije akcije (Prosledi operateru, "
+"...).</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Savet: Planirajte naredne korake za Bot-a u slučaju da nema dostupnih "
 "operatera.</span>"
@@ -501,12 +489,12 @@ msgstr "Kanali"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "Chat je privatan i jedinstven između 2 osobe. Grupa je privatne između "
-"pozvanih osoba. Kanalu se može slobodno pristupiti (u zavisnosti od njegovih "
-"podešavanja)."
+"pozvanih osoba. Kanalu se može slobodno pristupiti (u zavisnosti od njegovih"
+" podešavanja)."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1223,8 +1211,8 @@ msgstr ""
 msgid ""
 "Hmmm, let me check if I can find someone that could help you with that..."
 msgstr ""
-"Hmmm, samo da proverim da li mogu da nađem nekoga ko bi mogao da vam pomogne "
-"u vezi sa tim..."
+"Hmmm, samo da proverim da li mogu da nađem nekoga ko bi mogao da vam pomogne"
+" u vezi sa tim..."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_agent_history_view_search
@@ -2170,7 +2158,8 @@ msgstr "Link preusmerenja"
 msgid ""
 "Regular expression specifying the web pages this rule will be applied on."
 msgstr ""
-"Regularni izraz koji navodi web stranice na koje će se ovo pravilo primeniti."
+"Regularni izraz koji navodi web stranice na koje će se ovo pravilo "
+"primeniti."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__mail_message_id
@@ -2411,8 +2400,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2551,13 +2539,13 @@ msgstr "Konverzacija je poslata."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "Pravilo će se primenjivati samo za ove zemlje. Primer: ako izaberete "
 "'Belgija' i 'Sjedinjene Države' i ako radnju podesite na 'Sakrij', dugme za "
-"chat će biti skriveno na navedenom URL-u od posetilaca koji se nalaze u ove "
-"2 zemlje. Ova funkcija zahteva GeoIP instaliran na vašem serveru."
+"chat će biti skriveno na navedenom URL-u od posetilaca koji se nalaze u ove"
+" 2 zemlje. Ova funkcija zahteva GeoIP instaliran na vašem serveru."
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -2575,8 +2563,9 @@ msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
 msgstr ""
-"Posetilac će biti preusmeren na ovaj link nakon što klikne na opciju (imajte "
-"na umu da će se skripta završiti ako je link spoljašnji za livechat website)."
+"Posetilac će biti preusmeren na ovaj link nakon što klikne na opciju "
+"(imajte na umu da će se skripta završiti ako je link spoljašnji za livechat "
+"website)."
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_lang_ids
@@ -2584,8 +2573,8 @@ msgid ""
 "These languages, in addition to your main language, will be used to assign "
 "you to Live Chat sessions."
 msgstr ""
-"Ovi jezici, pored vašeg glavnog jezika, biće korišćeni za vaše dodeljivanje "
-"LiveChat sesijama."
+"Ovi jezici, pored vašeg glavnog jezika, biće korišćeni za vaše "
+"dodeljivanje LiveChat sesijama."
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel__default_message
@@ -2610,7 +2599,8 @@ msgstr ""
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_username
 msgid "This username will be used as your name in the livechat channels."
-msgstr "Ovo korisničko ime će biti korišćeno kao vaše ime u livechat kanalima."
+msgstr ""
+"Ovo korisničko ime će biti korišćeno kao vaše ime u livechat kanalima."
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__discuss_channel__livechat_week_day__3
@@ -2652,12 +2642,8 @@ msgstr "Boja naslova"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat

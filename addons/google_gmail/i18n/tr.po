@@ -13,8 +13,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 12:18+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
-"google_gmail/tr/>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/google_gmail/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,42 +24,38 @@ msgstr ""
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
-msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
-msgstr "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"settings\" title=\"Edit Settings\"/>"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"settings\" title=\"Edit Settings\"/>"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                        Connect your Gmail account"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                        Gmail hesabınızı bağlayın"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.fetchmail_server_view_form
 msgid ""
-"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" "
-"class=\"badge text-bg-success\">\n"
+"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" "
-"class=\"badge text-bg-success\">\n"
+"<span invisible=\"server_type != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Geçerli\n"
 "                   </span>"
 
 #. module: google_gmail
 #: model_terms:ir.ui.view,arch_db:google_gmail.ir_mail_server_view_form
 msgid ""
-"<span invisible=\"smtp_authentication != 'gmail' or not "
-"google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span invisible=\"smtp_authentication != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Valid\n"
 "                    </span>"
 msgstr ""
-"<span invisible=\"smtp_authentication != 'gmail' or not "
-"google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span invisible=\"smtp_authentication != 'gmail' or not google_gmail_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Gmail Token Geçerli\n"
 "                   </span>"
 
@@ -112,8 +107,7 @@ msgstr "Yapılandırma Ayarları"
 #: code:addons/google_gmail/models/fetchmail_server.py:0
 msgid ""
 "Connect your Gmail account with the OAuth Authentication process. \n"
-"You will be redirected to the Gmail login page where you will need to accept "
-"the permission."
+"You will be redirected to the Gmail login page where you will need to accept the permission."
 msgstr ""
 "Gmail hesabınızı OAuth Kimlik Doğrulama işlemine bağlayın. \n"
 "İzni kabul etmeniz gereken Gmail giriş sayfasına yönlendirilirsiniz."
@@ -123,14 +117,10 @@ msgstr ""
 #: code:addons/google_gmail/models/ir_mail_server.py:0
 msgid ""
 "Connect your Gmail account with the OAuth Authentication process.  \n"
-"By default, only a user with a matching email address will be able to use "
-"this server. To extend its use, you should set a \"mail.default.from\" "
-"system parameter."
+"By default, only a user with a matching email address will be able to use this server. To extend its use, you should set a \"mail.default.from\" system parameter."
 msgstr ""
 "Gmail hesabınızı OAuth Kimlik Doğrulama işlemine bağlayın.  \n"
-"Varsayılan olarak, yalnızca eşleşen bir e-posta adresine sahip bir kullanıcı "
-"bu sunucuyu kullanabilir. Kullanımını genişletmek için bir "
-"\"mail.default.from\" sistem parametresi ayarlamanız gerekir."
+"Varsayılan olarak, yalnızca eşleşen bir e-posta adresine sahip bir kullanıcı bu sunucuyu kullanabilir. Kullanımını genişletmek için bir \"mail.default.from\" sistem parametresi ayarlamanız gerekir."
 
 #. module: google_gmail
 #: model:ir.model.fields,field_description:google_gmail.field_fetchmail_server__display_name
@@ -223,8 +213,8 @@ msgstr "Oops, kimliğinizi doğrulayamadık. Lütfen daha sonra tekrar deneyin."
 #. odoo-python
 #: code:addons/google_gmail/controllers/main.py:0
 msgid ""
-"Oops, you're creating an authorization to send from %(email_login)s but your "
-"address is %(email_server)s. Make sure your addresses match!"
+"Oops, you're creating an authorization to send from %(email_login)s but your"
+" address is %(email_server)s. Make sure your addresses match!"
 msgstr ""
 "Hata! %(email_login)s adresiyle gönderim yetkisi oluşturmaya çalışıyorsunuz "
 "ancak adresiniz %(email_server)s. Adreslerin eşleştiğinden emin olun!"
@@ -255,8 +245,8 @@ msgid ""
 "OAuthentication Token."
 msgstr ""
 "Lütfen \"Kullanıcı Adı\" alanını Gmail kullanıcı adınızla (e-posta "
-"adresiniz) doldurun. Bu, Gmail OAuthentication Token için kullanılan hesapla "
-"aynı olmalıdır."
+"adresiniz) doldurun. Bu, Gmail OAuthentication Token için kullanılan hesapla"
+" aynı olmalıdır."
 
 #. module: google_gmail
 #. odoo-python

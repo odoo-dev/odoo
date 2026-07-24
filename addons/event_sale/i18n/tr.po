@@ -31,8 +31,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 01:17+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/"
-"event_sale/tr/>\n"
+"Language-Team: Turkish <https://translate.odoo.com/projects/odoo-master/event_sale/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,8 +50,10 @@ msgstr ""
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_configurator_view_form
-msgid "<i class=\"fa fa-arrow-right\"/> Configure Events &amp; Tickets"
-msgstr "<i class=\"fa fa-arrow-right\"/> Etkinlikleri Oluşturma &amp; Biletler"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Configure Events &amp; Tickets"
+msgstr ""
+"<i class=\"oi\" data-icon=\"arrow_forward\"/> Etkinlikleri Oluşturma &amp; "
+"Biletler"
 
 #. module: event_sale
 #: model_terms:ir.ui.view,arch_db:event_sale.event_registration_ticket_view_form
@@ -371,15 +372,13 @@ msgstr "ID"
 #. odoo-python
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid slot choice \"%(slot_name)s\" for event \"%(event_name)s\"."
-msgstr ""
-"\"%(event_name)s\" etlinlik için geçersiz zaman seçimi \"%(slot_name)s\"."
+msgstr "\"%(event_name)s\" etlinlik için geçersiz zaman seçimi \"%(slot_name)s\"."
 
 #. module: event_sale
 #. odoo-python
 #: code:addons/event_sale/wizard/event_configurator.py:0
 msgid "Invalid ticket choice \"%(ticket_name)s\" for event \"%(event_name)s\"."
-msgstr ""
-"\"%(ticket_name)s\" etkinliği için geçersiz bilet seçimi \"%(event_name)s\"."
+msgstr "\"%(ticket_name)s\" etkinliği için geçersiz bilet seçimi \"%(event_name)s\"."
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_sale_report__invoice_partner_id
@@ -669,14 +668,12 @@ msgstr "Onaysız"
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_event_registration__state
 msgid ""
-"Unconfirmed: registrations in a pending state waiting for an action "
-"(specific case, notably with sale status)\n"
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
 "Registered: registrations considered taken by a client\n"
 "Attended: registrations for which the attendee attended the event\n"
 "Cancelled: registrations cancelled manually"
 msgstr ""
-"Onaylanmamış: eylem bekleyen, bekleme durumundaki kayıtlar (özellikle satış "
-"gibi belirli durumlar)\n"
+"Onaylanmamış: eylem bekleyen, bekleme durumundaki kayıtlar (özellikle satış gibi belirli durumlar)\n"
 "Kayıtlı: müşteri tarafından kabul edildiği düşünülen kayıtlar\n"
 "Katılımcı: katılımcının etkinliğe katıldığı kayıtlar\n"
 "İptal edilen: manuel olarak iptal edilen kayıtlar"

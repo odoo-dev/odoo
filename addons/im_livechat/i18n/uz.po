@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-18 22:43+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/im_livechat/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,8 +29,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -128,7 +126,8 @@ msgstr "%s (nusxa)"
 #: code:addons/im_livechat/models/chatbot_script.py:0
 #, fuzzy
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
 "'%(input_email)s' to‘g‘ri elektron pochta manziliga o‘xshamaydi. Iltimos, "
 "qayta urinib ko‘ring."
@@ -152,10 +151,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Ko‘rsatish' sahifalarda chat tugmasini namoyish etadi. * 'Bildirishnoma "
@@ -171,33 +168,34 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
 #, fuzzy
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Tahrirlash rejimiga qaytish"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Tahrirlash rejimiga qaytish"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 #, fuzzy
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
 msgstr ""
-"<i title=\"Operatorni olib tashlash\" class=\"fa fa-fw fa-lg fa-close\"/>"
+"<i title=\"Operatorni olib tashlash\" class=\"oi-lg oi-fw oi\" data-"
+"icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -227,8 +225,8 @@ msgstr "<span>Davom etayotgan seanslar:</span>"
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Eslatma: Bu qadam faqat operator mavjud bo‘lmaganda bajariladi.</span>"
 
@@ -236,25 +234,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 #, fuzzy
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
 "<span>Maslahat: Bot murakkabroq amallarni (Operatorga yo‘naltirish, ...) "
 "bajarishi uchun kamida bitta o‘zaro aloqa (Savol, Elektron pochta, ...) "
 "kerak bo‘ladi. </span> <span>Agar Bot faqat operator mavjud bo‘lmaganda "
-"tashrif buyuruvchilar bilan muloqot qilishini istasangiz, Kanal qoidalaridan "
-"foydalaning.</span>"
+"tashrif buyuruvchilar bilan muloqot qilishini istasangiz, Kanal qoidalaridan"
+" foydalaning.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 #, fuzzy
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Maslahat: Bot murakkabroq amallarni (Operatorga yo‘naltirish, ...) "
 "bajarishi uchun kamida bitta o‘zaro aloqa (Savol, Elektron pochta, ...) "
@@ -264,8 +259,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Maslahat: Operator mavjud bo‘lmagan holat uchun Bot keyingi "
 "qadamlarini rejalashtiring.</span>"
@@ -521,8 +516,8 @@ msgstr "Tayyor javoblar"
 msgid ""
 "Cannot create history as it is only available for live chats: %(histories)s."
 msgstr ""
-"Tarix yaratib bo‘lmadi, chunki u faqat jonli chatlar uchun mavjud: %"
-"(histories)s."
+"Tarix yaratib bo‘lmadi, chunki u faqat jonli chatlar uchun mavjud: "
+"%(histories)s."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_discuss_channel__livechat_channel_id
@@ -568,11 +563,11 @@ msgstr "Kanallar"
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 #, fuzzy
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"Chat ikki kishi o‘rtasida maxfiy va noyobdir. Guruh taklif qilingan shaxslar "
-"o‘rtasida yopiqdir. Kanal erkin qo‘shilish imkonini beradi (uning "
+"Chat ikki kishi o‘rtasida maxfiy va noyobdir. Guruh taklif qilingan shaxslar"
+" o‘rtasida yopiqdir. Kanal erkin qo‘shilish imkonini beradi (uning "
 "sozlamalariga qarab)."
 
 #. module: im_livechat
@@ -1244,8 +1239,8 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"Mos keladigan qoidani topish uchun buyruq berilgan. Agar berilgan URL/"
-"mamlakat uchun 2 ta qoida mos kelsa, ketma-ketligi eng past bo‘lgani "
+"Mos keladigan qoidani topish uchun buyruq berilgan. Agar berilgan "
+"URL/mamlakat uchun 2 ta qoida mos kelsa, ketma-ketligi eng past bo‘lgani "
 "tanlanadi."
 
 #. module: im_livechat
@@ -1256,9 +1251,9 @@ msgid ""
 "<strong>Settings</strong> &gt; <strong>Email</strong> &amp; "
 "<strong>Marketing.</strong>"
 msgstr ""
-"<strong>Veb-sayt</strong> &gt; <strong>Konfiguratsiya</strong> &gt; <strong>"
-"Sozlamalar</strong> &gt; <strong>Elektron pochta</strong> va <strong>"
-"Marketing</strong> bo‘limiga o‘ting."
+"<strong>Veb-sayt</strong> &gt; <strong>Konfiguratsiya</strong> &gt; "
+"<strong>Sozlamalar</strong> &gt; <strong>Elektron pochta</strong> va "
+"<strong>Marketing</strong> bo‘limiga o‘ting."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1759,7 +1754,8 @@ msgstr "Chiqish jonli muloqotni yakunlaydi. Davom etishni xohlaysizmi?"
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_module_info_expert_text_step_demo
 #, fuzzy
 msgid "Let me check if I can connect you with the right expert..."
-msgstr "Sizni tegishli mutaxassis bilan bog‘lay olishimni tekshirib ko‘raman..."
+msgstr ""
+"Sizni tegishli mutaxassis bilan bog‘lay olishimni tekshirib ko‘raman..."
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__im_livechat_channel__max_sessions_mode__limited
@@ -2328,7 +2324,8 @@ msgstr "Faqat agar"
 #, fuzzy
 msgid "Only Live Chat operators can join Live Chat channels"
 msgstr ""
-"Faqat jonli muloqot operatorlari jonli muloqot kanallariga qo‘shilishi mumkin"
+"Faqat jonli muloqot operatorlari jonli muloqot kanallariga qo‘shilishi "
+"mumkin"
 
 #. module: im_livechat
 #. odoo-python
@@ -2486,7 +2483,8 @@ msgstr "Yo‘naltirish havolasi"
 #, fuzzy
 msgid ""
 "Regular expression specifying the web pages this rule will be applied on."
-msgstr "Ushbu qoida qo‘llaniladigan veb-sahifalarni belgilovchi muntazam ifoda."
+msgstr ""
+"Ushbu qoida qo‘llaniladigan veb-sahifalarni belgilovchi muntazam ifoda."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__mail_message_id
@@ -2765,8 +2763,7 @@ msgstr "Operator boshiga seanslar soni"
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2928,8 +2925,8 @@ msgstr "Suhbat jo‘natildi."
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 "Qoida faqat ushbu mamlakatlar uchun qo‘llaniladi. Misol: agar siz "
 "\"Belgiya\" va \"Qo‘shma Shtatlar\"ni tanlab, amalni \"Yashirish\" deb "
@@ -3047,16 +3044,12 @@ msgstr "Sarlavha rangi"
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 #, fuzzy
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 "Qoidani faqat veb-saytingizning ma'lum sahifalariga qo‘llash uchun /shop "
-"kabi URL regex kiriting. Bu /shop/product kabi /shop bilan boshlanadigan har "
-"qanday sahifaga mos keladi. Qoidani barcha sahifalarga qo‘llash uchun "
+"kabi URL regex kiriting. Bu /shop/product kabi /shop bilan boshlanadigan har"
+" qanday sahifaga mos keladi. Qoidani barcha sahifalarga qo‘llash uchun "
 "maydonni bo‘sh qoldiring.<br/> Mahalliy ma'lumotlar bazalari uchun tashrif "
 "buyuruvchilarni geolokatsiya qilish uchun serveringizga GeoIP o‘rnatilgan "
 "bo‘lishi kerak. Busiz mamlakat cheklovlarini o‘z ichiga olgan qoidalar "
@@ -3301,7 +3294,8 @@ msgstr "CompanyName'ga xush kelibsiz! 👋"
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_initial_step_demo
 #, fuzzy
 msgid "Welcome to the Support! How can I assist you today?"
-msgstr "Yordam xizmatiga xush kelibsiz! Bugun sizga qanday yordam bera olaman?"
+msgstr ""
+"Yordam xizmatiga xush kelibsiz! Bugun sizga qanday yordam bera olaman?"
 
 #. module: im_livechat
 #: model_terms:chatbot.script.step,message:im_livechat.chatbot_script_welcome_step_dispatch

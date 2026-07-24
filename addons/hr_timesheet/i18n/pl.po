@@ -36,15 +36,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 11:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"hr_timesheet/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/hr_timesheet/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_timesheet
@@ -123,11 +120,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
 msgstr ""
-"Plany analityczne '%(missing_plan_names)s' wymagane w projekcie '%"
-"(project_name)s' powiązane z wykazem czasu."
+"Plany analityczne '%(missing_plan_names)s' wymagane w projekcie "
+"'%(project_name)s' powiązane z wykazem czasu."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -148,27 +145,20 @@ msgstr "2 godziny"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> Pokaż szczegóły"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> Pokaż szczegóły"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -293,12 +283,10 @@ msgstr "Zastosowania planu analitycznego"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
 msgstr ""
-"Przeanalizuj projekty i zadania, na które pracownicy poświęcają swój czas."
-"<br>\n"
+"Przeanalizuj projekty i zadania, na które pracownicy poświęcają swój czas.<br>\n"
 "Oceń, która część jest rozliczana i jakie koszty reprezentuje."
 
 #. module: hr_timesheet
@@ -524,7 +512,8 @@ msgstr "Dodatkowy czas"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr ""
 "Generowanie kart pracy dla zatwierdzonych wniosków o dni wolne i święta "
 "państwowe"
@@ -837,7 +826,8 @@ msgstr "Research & Development"
 #: model:portal.entry,description:hr_timesheet.portal_timesheets
 msgid "Review all timesheets related to your projects"
 msgstr ""
-"Przejrzyj wszystkie karty ewidencji czasu pracy związane z twoimi projektami."
+"Przejrzyj wszystkie karty ewidencji czasu pracy związane z twoimi "
+"projektami."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -882,8 +872,8 @@ msgid ""
 "Send a periodical email reminder to timesheets approvers that still have "
 "timesheets to validate"
 msgstr ""
-"Wysyłaj okresowe przypomnienia e-mail do osób odpowiedzialnych za akceptację "
-"kart pracy, które mają jeszcze karty pracy do zatwierdzenia."
+"Wysyłaj okresowe przypomnienia e-mail do osób odpowiedzialnych za akceptację"
+" kart pracy, które mają jeszcze karty pracy do zatwierdzenia."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -911,8 +901,8 @@ msgid ""
 "Some timesheet entries are weighing down these tasks! Remove them first, "
 "then you’ll be able to delete the tasks!"
 msgstr ""
-"Niektóre wpisy w arkuszu czasu pracy obciążają te zadania! Najpierw je usuń, "
-"a następnie będziesz mógł usunąć zadania!"
+"Niektóre wpisy w arkuszu czasu pracy obciążają te zadania! Najpierw je usuń,"
+" a następnie będziesz mógł usunąć zadania!"
 
 #. module: hr_timesheet
 #. odoo-python
@@ -973,8 +963,8 @@ msgstr "Wewnętrzny projekt firmy powinien znajdować się w tej firmie."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr ""
 "Projekt, zadanie i konto analityczne ewidencji czasu pracy muszą należeć do "
 "tej samej firmy."
@@ -988,8 +978,8 @@ msgstr "Nie ma arkuszy czasu pracy."
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
 msgstr ""
 "Projekty te zawierają wpisy odnoszące się do arkuszy czasu pracy. Przed "
 "usunięciem tych projektów należy usunąć te arkusze czasu pracy."
@@ -1023,8 +1013,8 @@ msgstr "Bieżący rok"
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_project.py:0
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
 msgstr ""
 "Do tego projektu odnoszą się niektóre wpisy arkusza czasu pracy. Przed "
 "usunięciem tego projektu należy usunąć te arkusze czasu pracy."
@@ -1035,15 +1025,15 @@ msgstr ""
 msgid ""
 "This task cannot be private because there are some timesheets linked to it."
 msgstr ""
-"To zadanie nie może być prywatne, ponieważ są z nim powiązane niektóre karty "
-"ewidencji czasu pracy."
+"To zadanie nie może być prywatne, ponieważ są z nim powiązane niektóre karty"
+" ewidencji czasu pracy."
 
 #. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
 msgstr ""
 "Nie można usunąć tego zadania, ponieważ jest ono powiązane z kartami "
@@ -1056,12 +1046,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_timesheet.field_res_config_settings__project_time_mode_id
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "To ustawi jednostkę miary dla projektów i zadań.\n"
-"Jeśli stosujesz karty pracy do projektów, to nie zapomnij ustawić "
-"odpowiednią jednostkę w pracownikach."
+"Jeśli stosujesz karty pracy do projektów, to nie zapomnij ustawić odpowiednią jednostkę w pracownikach."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1144,7 +1132,8 @@ msgstr "Czas poświęcony na podzadania tego zadania."
 #: model:ir.model.fields,help:hr_timesheet.field_project_task__total_hours_spent
 msgid "Time spent on this task and its sub-tasks (and their own sub-tasks)."
 msgstr ""
-"Czas poświęcony na to zadanie i jego podzadania (oraz ich własne podzadania)."
+"Czas poświęcony na to zadanie i jego podzadania (oraz ich własne "
+"podzadania)."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1295,7 +1284,8 @@ msgstr "Karty pracy nie mogą być tworzone dla zadań prywatnych."
 #. odoo-python
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr ""
 "Karty pracy muszą być tworzone z aktywnym pracownikiem w wybranych firmach."
 
@@ -1378,8 +1368,8 @@ msgstr "Łącznie:"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.act_hr_timesheet_line_by_project
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr ""
 "Śledź swoje godziny pracy według projektów każdego dnia i wystawiaj faktury "
 "za ten czas swoim klientom."
@@ -1402,8 +1392,7 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 "Użyj tych słów kluczowych w tytule, aby ustawić nowe zadania:\n"
 "\n"
@@ -1414,8 +1403,7 @@ msgstr ""
 "        !! Ustaw wysoki priorytet zadania\n"
 "        !!! Ustaw pilny priorytet zadania\n"
 "\n"
-"        Pamiętaj, aby używać właściwego formatu i kolejności, np. Popraw "
-"ekran konfiguracji 5h #funkcja #v16 @Maciej !!"
+"        Pamiętaj, aby używać właściwego formatu i kolejności, np. Popraw ekran konfiguracji 5h #funkcja #v16 @Maciej !!"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__user_id
@@ -1442,13 +1430,11 @@ msgstr "Wyświetl szczegóły"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_from_employee
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
 "Możesz rejestrować i śledzić godziny pracy nad każdym projektem każdego\n"
-"                    dnia. Każdy czas poświęcony na projekt stanie się "
-"kosztem i może zostać ponownie zafakturowany\n"
+"                    dnia. Każdy czas poświęcony na projekt stanie się kosztem i może zostać ponownie zafakturowany\n"
 "                    klientom, jeśli zajdzie taka potrzeba."
 
 #. module: hr_timesheet
@@ -1460,22 +1446,18 @@ msgstr "Nie możesz uzyskać dostępu do kart pracy, które nie należą do Cieb
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
-"Nie możesz rejestrować kart pracy na tym projekcie, ponieważ jest powiązany "
-"z nieaktywnym kontem analitycznym.<br/>\n"
-"                            Przejdź do innego konta lub ponownie aktywuj "
-"bieżące konto, aby wprowadzić dane do karty pracy w projekcie."
+"Nie możesz rejestrować kart pracy na tym projekcie, ponieważ jest powiązany z nieaktywnym kontem analitycznym.<br/>\n"
+"                            Przejdź do innego konta lub ponownie aktywuj bieżące konto, aby wprowadzić dane do karty pracy w projekcie."
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.view_task_form2_inherited
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
 msgstr ""
 "Nie możesz rejestrować kart pracy w tym projekcie, ponieważ jest on "
 "powiązany z nieaktywnym kontem analitycznym.<br/> Zmień to konto lub "

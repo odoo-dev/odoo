@@ -11,14 +11,12 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 14:40+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/ar/>\n"
+"Language-Team: Arabic <https://translate.odoo.com/projects/odoo-master/pos_online_payment/ar/>\n"
 "Language: ar\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
-"&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: pos_online_payment
@@ -35,7 +33,8 @@ msgstr "<strong>خطأ:</strong> العملة غير موجودة أو غير ص
 #. odoo-python
 #: code:addons/pos_online_payment/models/pos_config.py:0
 msgid "A POS config cannot have more than one online payment method."
-msgstr "لا يمكن أن يكون لتهيئة نقطة البيع أكثر من طريقة دفع واحدة عبر الإنترنت."
+msgstr ""
+"لا يمكن أن يكون لتهيئة نقطة البيع أكثر من طريقة دفع واحدة عبر الإنترنت."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -46,8 +45,10 @@ msgstr "يجب أن يتم تحديد خيار دفع."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
-msgstr "لا يمكن استخدام عملية الدفع للتأكيد من أجل الدفع أونلاين في نقطة البيع."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
+msgstr ""
+"لا يمكن استخدام عملية الدفع للتأكيد من أجل الدفع أونلاين في نقطة البيع."
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment
@@ -99,8 +100,8 @@ msgid ""
 "Cannot create a POS payment with a not online payment method and an online "
 "accounting payment."
 msgstr ""
-"لا يمكن إنشاء دفع في نقطة البيع باستخدام دفع غير أونلاين مع طريقة دفع محاسبة "
-"أونلاين."
+"لا يمكن إنشاء دفع في نقطة البيع باستخدام دفع غير أونلاين مع طريقة دفع محاسبة"
+" أونلاين."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -115,8 +116,8 @@ msgid ""
 "Could not create an online payment method (company_id=%(company_id)d, "
 "pos_config_id=%(pos_config_id)d)"
 msgstr ""
-"تعذر إنشاء طريقة دفع عبر الإنترنت (company_id=%(company_id)d، pos_config_id=%"
-"(pos_config_id)d)"
+"تعذر إنشاء طريقة دفع عبر الإنترنت (company_id=%(company_id)d، "
+"pos_config_id=%(pos_config_id)d)"
 
 #. module: pos_online_payment
 #: model:ir.model.fields,field_description:pos_online_payment.field_account_payment__display_name
@@ -300,7 +301,7 @@ msgstr "خطأ في الخادم"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -394,7 +395,8 @@ msgstr "مزود الدفع غير صالح."
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
 msgid ""
 "The payment should either be direct, with redirection, or made by a token."
-msgstr "يجب أن يكون الدفع إما مباشراً، أو عن طريق إعادة التوجيه أو عن طريق رمز."
+msgstr ""
+"يجب أن يكون الدفع إما مباشراً، أو عن طريق إعادة التوجيه أو عن طريق رمز."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -433,8 +435,8 @@ msgid ""
 "The total amount of remaining online payments to execute (%s) doesn't "
 "correspond to the remaining unpaid amount of the order (%s)."
 msgstr ""
-"إجمالي المبلغ المتبقي لدفعه عبر الإنترنت (%s) لا يتوافق مع المبلغ المتبقي دفعه "
-"في الطلب (%s)."
+"إجمالي المبلغ المتبقي لدفعه عبر الإنترنت (%s) لا يتوافق مع المبلغ المتبقي "
+"دفعه في الطلب (%s)."
 
 #. module: pos_online_payment
 #. odoo-javascript
@@ -457,8 +459,8 @@ msgid ""
 "There is a problem with the server. The order online payment status cannot "
 "be retrieved. Are you sure there is no online payment for this order ?"
 msgstr ""
-"توجد مشكلة في الخادم. تعذر إحضار حالة الدفع عبر الإنترنت. هل أنت متأكد من أنه "
-"لا يوجد دفع عبر الإنترنت لهذا الطلب؟"
+"توجد مشكلة في الخادم. تعذر إحضار حالة الدفع عبر الإنترنت. هل أنت متأكد من "
+"أنه لا يوجد دفع عبر الإنترنت لهذا الطلب؟"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -548,10 +550,8 @@ msgstr "لم تقم بتفعيل أي"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

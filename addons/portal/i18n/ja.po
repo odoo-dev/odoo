@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:39+0000\n"
 "PO-Revision-Date: 2026-06-19 12:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"portal/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/portal/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -45,9 +44,7 @@ msgstr "'%s のアイコン'% entry.name"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid "1. Enter your password to confirm you own this account"
-msgstr ""
-"1.  このアカウントの所有者であることを確認するために、パスワードを入力して下"
-"さい。"
+msgstr "1.  このアカウントの所有者であることを確認するために、パスワードを入力して下さい。"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
@@ -61,93 +58,95 @@ msgstr ""
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_account_link
 msgid ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> My "
-"Account"
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-icon=\"badge\"/>"
+" My Account"
 msgstr ""
-"<i class=\"fa fa-fw fa-id-card-o me-1 small text-primary-emphasis\"/> マイア"
-"カウント"
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-icon=\"badge\"/>"
+" マイアカウント"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> Logout"
+msgid ""
+"<i class=\"oi oi-fw small text-primary-emphasis\" data-icon=\"logout\"/> "
+"Logout"
 msgstr ""
-"<i class=\"fa fa-fw fa-sign-out small text-primary-emphasis\"/> ログアウト"
+"<i class=\"small text-primary-emphasis oi-fw oi\" data-icon=\"logout\"/> "
+"ログアウト"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.user_dropdown
-msgid "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> Apps"
-msgstr "<i class=\"fa fa-fw fa-th me-1 small text-primary-emphasis\"/> アプリ"
+msgid ""
+"<i class=\"oi oi-fw me-1 small text-primary-emphasis\" data-"
+"icon=\"grid_view\"/> Apps"
+msgstr ""
+"<i class=\"me-1 small text-primary-emphasis oi-fw oi\" data-"
+"icon=\"grid_view\"/> アプリ"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-pencil\" title=\"Edit\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\" title=\"Edit\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.side_content
-msgid "<i class=\"fa fa-pencil\"/> Edit information"
-msgstr "<i class=\"fa fa-pencil\"/>アカウント情報を変更"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit information"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/>アカウント情報を変更"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.profile_picture_card
-msgid "<i class=\"fa fa-trash-o\" title=\"Clear\"/>"
+msgid "<i class=\"oi\" data-icon=\"delete\" title=\"Clear\"/>"
 msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
-msgid "<i class=\"fw-light fa fa-angle-left me-2\"/>Discard"
-msgstr "<i class=\"fw-light fa fa-angle-left me-2\"/>破棄"
+msgid "<i class=\"fw-light oi me-2\" data-icon=\"keyboard_arrow_left\"/>Discard"
+msgstr "<i class=\"fw-light me-2 oi\" data-icon=\"keyboard_arrow_left\"/>破棄"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_back_in_edit_mode
-msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>編集モードへ戻る"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>編集モードへ戻る"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\" role=\"img\" aria-label=\"Previous\" "
-"title=\"Previous\"/>"
+"<i class=\"oi\" data-icon=\"chevron_backward\" role=\"img\" aria-"
+"label=\"Previous\" title=\"Previous\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.record_pager
 msgid ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 msgstr ""
-"<i class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+"<i class=\"oi\" data-icon=\"chevron_forward\" role=\"img\" aria-"
+"label=\"Next\" title=\"Next\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.my_addresses
-msgid "<i class=\"oi oi-plus me-2\"/>Add Address"
-msgstr "<i class=\"oi oi-plus me-2\"/>住所を追加"
+msgid "<i class=\"oi me-2\" data-icon=\"add\"/>Add Address"
+msgstr "<i class=\"me-2 oi\" data-icon=\"add\"/>住所を追加"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
-msgid ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
-msgstr ""
-"<i title=\"Documentation\" class=\"fa fa-fw o_button_icon fa-info-circle\"/>"
+msgid "<i title=\"Documentation\" class=\"oi oi-fw o_button_icon\" data-icon=\"info\"/>"
+msgstr "<i title=\"Documentation\" class=\"o_button_icon oi-fw oi\" data-icon=\"info\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            Changing VAT number is not allowed once "
-"document(s) have\n"
-"                            been issued for your account. Please contact us "
-"directly for this\n"
+"                            Changing VAT number is not allowed once document(s) have\n"
+"                            been issued for your account. Please contact us directly for this\n"
 "                            operation.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
 "                            ドキュメントが発行されているため、\n"
-"                            登録番号(VAT番号)の変更はできません。変更をご希望"
-"の場合は、サポートまで\n"
+"                            登録番号(VAT番号)の変更はできません。変更をご希望の場合は、サポートまで\n"
 "                            ご連絡ください。\n"
 "                        </small>"
 
@@ -155,13 +154,11 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
 msgid ""
 "<small class=\"form-text text-muted\">\n"
-"                            The VAT number can only be updated on the "
-"company account.\n"
+"                            The VAT number can only be updated on the company account.\n"
 "                        </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
-"                            登録番号(VAT番号)は会社アカウントでのみ変更可能で"
-"す。\n"
+"                            登録番号(VAT番号)は会社アカウントでのみ変更可能です。\n"
 "                        </small>"
 
 #. module: portal
@@ -169,15 +166,13 @@ msgstr ""
 msgid ""
 "<small class=\"form-text text-muted\">\n"
 "                    Changing country is not allowed once document(s) have\n"
-"                    been issued for your account. Please contact us directly "
-"for this\n"
+"                    been issued for your account. Please contact us directly for this\n"
 "                    operation.\n"
 "                </small>"
 msgstr ""
 "<small class=\"form-text text-muted\">\n"
 "                            ドキュメントが発行されているため、\n"
-"                            国番号の変更はできません。変更をご希望の場合は、"
-"サポートまで\n"
+"                            国番号の変更はできません。変更をご希望の場合は、サポートまで\n"
 "                            ご連絡ください。\n"
 "                        </small>"
 
@@ -192,12 +187,8 @@ msgstr ""
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.pager
-msgid ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
-msgstr ""
-"<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" "
-"title=\"Next\"/>"
+msgid "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
+msgstr "<span class=\"oi oi-chevron-right\" role=\"img\" aria-label=\"Next\" title=\"Next\"/>"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_footer
@@ -354,9 +345,7 @@ msgstr "パスワード変更"
 msgid ""
 "Changing VAT number is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
-msgstr ""
-"アカウントにドキュメントを発行されると、VAT番号の変更はできなくなります。変更"
-"したい場合は直接当社にご連絡ください。"
+msgstr "アカウントにドキュメントを発行されると、VAT番号の変更はできなくなります。変更したい場合は直接当社にご連絡ください。"
 
 #. module: portal
 #. odoo-python
@@ -364,9 +353,7 @@ msgstr ""
 msgid ""
 "Changing your country is not allowed once document(s) have been issued for "
 "your account. Please contact us directly for this operation."
-msgstr ""
-"アカウント用にドキュメントが発行されると、国の変更はできなくなります。変更し"
-"たい場合は直接当社にご連絡下さい。"
+msgstr "アカウント用にドキュメントが発行されると、国の変更はできなくなります。変更したい場合は直接当社にご連絡下さい。"
 
 #. module: portal
 #. odoo-javascript
@@ -569,17 +556,14 @@ msgstr "開発者APIキー"
 msgid ""
 "Disable your account, preventing any further login.<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
+"                                            <i class=\"oi text-danger\" data-icon=\"warning\"/>\n"
 "                                            This action cannot be undone.\n"
 "                                        </b>"
 msgstr ""
 "アカウントを無効にし、以後のログインを防ぎます。<br/>\n"
 "                                        <b>\n"
-"                                            <i class=\"fa fa-exclamation-"
-"triangle text-danger\"/>\n"
-"                                            このアクションは取り消すことはで"
-"きません。\n"
+"                                            <i class=\"text-danger oi\" data-icon=\"warning\"/>\n"
+"                                            このアクションは取り消すことはできません。\n"
 "　　　　　　　　　　</b>"
 
 #. module: portal
@@ -729,9 +713,7 @@ msgid ""
 "backend. If you wish to change your name or email address, please do so in "
 "the account settings or contact your administrator."
 msgstr ""
-"外部の方用にオーダする場合は、バックエンドから注文して下さい。名前やメールア"
-"ドレスを変更したい場合は、アカウント設定から変更するか、管理者にご連絡下さ"
-"い。"
+"外部の方用にオーダする場合は、バックエンドから注文して下さい。名前やメールアドレスを変更したい場合は、アカウント設定から変更するか、管理者にご連絡下さい。"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
@@ -856,11 +838,9 @@ msgstr "メッセージ"
 #. odoo-python
 #: code:addons/portal/models/mail_thread.py:0
 msgid ""
-"Model %(model_name)s does not support token signature, as it does not have %"
-"(field_name)s field."
-msgstr ""
-"モデル%(model_name)s は%(field_name)sフィールドが無いためトークン署名をサポー"
-"トしていません。"
+"Model %(model_name)s does not support token signature, as it does not have "
+"%(field_name)s field."
+msgstr "モデル%(model_name)s は%(field_name)sフィールドが無いためトークン署名をサポートしていません。"
 
 #. module: portal
 #. odoo-python
@@ -958,9 +938,7 @@ msgstr "プレースホルダ数"
 #. odoo-javascript
 #: code:addons/portal/static/src/xml/portal_security.xml:0
 msgid "Please enter your password to confirm you own this account"
-msgstr ""
-"あなた自身のアカウントであることを確認するために、パスワードを入力してくださ"
-"い"
+msgstr "あなた自身のアカウントであることを確認するために、パスワードを入力してください"
 
 #. module: portal
 #. odoo-python
@@ -1008,9 +986,9 @@ msgstr "前へ"
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.portal_my_security
 msgid ""
-"Put my email and phone in a block list to make sure I'm never contacted again"
-msgstr ""
-"今後決して連絡を受けないようにブロックリストにEメールと電話番号を記載する"
+"Put my email and phone in a block list to make sure I'm never contacted "
+"again"
+msgstr "今後決して連絡を受けないようにブロックリストにEメールと電話番号を記載する"
 
 #. module: portal
 #: model:ir.model,name:portal.model_ir_qweb
@@ -1097,10 +1075,8 @@ msgstr "セキュリティトークン"
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
 msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
-"                        The email address of each selected contact must be "
-"valid and unique.\n"
-"                        If necessary, you can fix any contact's email "
-"address directly in the list."
+"                        The email address of each selected contact must be valid and unique.\n"
+"                        If necessary, you can fix any contact's email address directly in the list."
 msgstr ""
 "以下のリストでポータルに所属する連絡先を選択します。\n"
 "選択した各連絡先のEメールアドレスは、有効で一意でなければなりません。\n"
@@ -1219,8 +1195,7 @@ msgstr "添付の %s はペンディング状況に無いため削除できま�
 #: code:addons/portal/controllers/portal.py:0
 msgid ""
 "The attachment does not exist or you do not have the rights to access it."
-msgstr ""
-"添付ファイルが存在しないか、添付ファイルにアクセスする権限がありません。"
+msgstr "添付ファイルが存在しないか、添付ファイルにアクセスする権限がありません。"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.address_form_fields
@@ -1263,8 +1238,7 @@ msgstr "新しいパスワードとその確認は同一でなければなりま
 #: code:addons/portal/controllers/portal.py:0
 msgid ""
 "The old password you provided is incorrect, your password was not changed."
-msgstr ""
-"入力した古いパスワードが間違っています。パスワードは変更されていません。"
+msgstr "入力した古いパスワードが間違っています。パスワードは変更されていません。"
 
 #. module: portal
 #. odoo-python
@@ -1284,9 +1258,7 @@ msgstr "取引先 \"%s\" はポータルアクセス権がない、または内�
 msgid ""
 "The template \"Portal: new user\" not found for sending email to the portal "
 "user."
-msgstr ""
-"ポータルユーザに電子メールを送信するためのテンプレート \"ポータル: 新規ユーザ"
-"\"が見つかりません。"
+msgstr "ポータルユーザに電子メールを送信するためのテンプレート \"ポータル: 新規ユーザ\"が見つかりません。"
 
 #. module: portal
 #. odoo-python
@@ -1304,20 +1276,18 @@ msgstr "こちらは顧客ポータルのプレビューです。"
 msgid ""
 "This partner is linked to an internal User and already has access to the "
 "Portal."
-msgstr ""
-"この取引先は内部ユーザにリンクされており、既にポータルへのアクセス権を持って"
-"います。"
+msgstr "この取引先は内部ユーザにリンクされており、既にポータルへのアクセス権を持っています。"
 
 #. module: portal
 #: model_terms:ir.ui.view,arch_db:portal.wizard_view
-msgid "This text is included at the end of the email sent to new portal users."
+msgid ""
+"This text is included at the end of the email sent to new portal users."
 msgstr "この文は、新規ポータルユーザに送信されるEメールの最後に記載されます。"
 
 #. module: portal
 #: model:ir.model.fields,help:portal.field_portal_wizard__welcome_message
 msgid "This text is included in the email sent to new users of the portal."
-msgstr ""
-"このテキストは、ポータルの新しいユーザーに送信される電子メールに含まれます。"
+msgstr "このテキストは、ポータルの新しいユーザーに送信される電子メールに含まれます。"
 
 #. module: portal
 #: model:ir.model.fields,field_description:portal.field_portal_entry__name

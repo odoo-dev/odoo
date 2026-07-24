@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:36+0000\n"
 "PO-Revision-Date: 2026-06-21 23:19+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/"
-"website_event/ko/>\n"
+"Language-Team: Korean <https://translate.odoo.com/projects/odoo-master/website_event/ko/>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -85,86 +84,86 @@ msgstr "<em>등록 <b>마감</b></em>"
 msgid ""
 "<em>Write here a quote from one of your attendees. It gives confidence in "
 "your events.</em>"
-msgstr ""
-"<em>참석자 중 한 사람의 인용문을 여기에 쓰십시오. 그것은 당신의 행사에 대한 "
-"자신감을 줍니다.</em>"
+msgstr "<em>참석자 중 한 사람의 인용문을 여기에 쓰십시오. 그것은 당신의 행사에 대한 자신감을 줍니다.</em>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-msgid "<i class=\"fa fa-ban me-2\"/>Sold Out"
-msgstr "<i class=\"fa fa-ban me-2\"/>품절"
+msgid "<i class=\"oi me-2\" data-icon=\"block\"/>Sold Out"
+msgstr "<i class=\"me-2 oi\" data-icon=\"block\"/>품절"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid "<i class=\"fa fa-calendar me-2\" role=\"presentation\"/>August 23, 2025"
+msgid ""
+"<i class=\"oi oi-filled me-2\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>August 23, 2025"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<i class=\"fa fa-caret-left me-2\"/><small>Previous</small>"
-msgstr "<i class=\"fa fa-caret-left me-2\"/><small>이전</small>"
+msgid "<i class=\"oi me-2\" data-icon=\"arrow_left\"/><small>Previous</small>"
+msgstr "<i class=\"me-2 oi\" data-icon=\"arrow_left\"/><small>이전</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\" role=\"img\"/>등록됨"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\" role=\"img\"/>등록됨"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-check me-2\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\"/>등록됨"
+msgid "<i class=\"oi me-2\" data-icon=\"check\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\"/>등록됨"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid "<i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>8:15 PM"
+msgid "<i class=\"oi me-2\" data-icon=\"schedule\" role=\"presentation\"/>8:15 PM"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_configure_tickets_button
 msgid ""
-"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
-"title=\"Configure event tickets\"/><em>Configure Tickets</em>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"settings\" role=\"img\" aria-"
+"label=\"Configure\" title=\"Configure event tickets\"/><em>Configure "
+"Tickets</em>"
 msgstr ""
-"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"설정\" title=\"행사 티"
-"켓 설정\"/><em>티켓 설정</em>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"settings\" role=\"img\" aria-"
+"label=\"설정\" title=\"행사 티켓 설정\"/><em>티켓 설정</em>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr "<i class=\"me-1 oi\" data-icon=\"public\" title=\"Website\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-map-marker me-2 text-muted\" title=\"Location\"/>"
+msgid "<i class=\"oi me-2 text-muted\" data-icon=\"location_on\" title=\"Location\"/>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
 msgid ""
-"<i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>\n"
-"                                    <span> Los Angeles, CA, United States</"
-"span>"
+"<i class=\"oi me-2\" data-icon=\"location_on\" role=\"presentation\"/>\n"
+"                                    <span> Los Angeles, CA, United States</span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
 msgid ""
-"<i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Los Angeles, "
-"CA, United States"
+"<i class=\"oi me-2\" data-icon=\"location_on\" role=\"presentation\"/>Los "
+"Los Angeles, CA, United States"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/> Online event"
-msgstr "<i class=\"fa fa-map-marker\" title=\"위치\"/> 온라인 행사"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/> Online event"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"위치\"/> 온라인 행사"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.navbar
 msgid ""
-"<i class=\"oi oi-chevron-left\"/>\n"
+"<i class=\"oi\" data-icon=\"chevron_backward\"/>\n"
 "                <span>All Events</span>"
 msgstr ""
-"<i class=\"oi oi-chevron-left\"/>\n"
+"<i class=\"oi\" data-icon=\"chevron_backward\"/>\n"
 "                <span>모든 행사</span>"
 
 #. module: website_event
@@ -184,8 +183,8 @@ msgstr "<small class=\"text-muted\">캘린더에 추가:</small>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<small>Next</small><i class=\"fa fa-caret-right ms-2\"/>"
-msgstr "<small>다음</small><i class=\"fa fa-caret-right ms-2\"/>"
+msgid "<small>Next</small><i class=\"oi ms-2\" data-icon=\"arrow_right\"/>"
+msgstr "<small>다음</small><i class=\"ms-2 oi\" data-icon=\"arrow_right\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
@@ -195,7 +194,7 @@ msgstr "<span class=\"fa fa-plus me-1\"/> 행사 만들기"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_entry_preview_data
 msgid ""
-"<span class=\"fs-5\"><i class=\"fa fa-map-marker me-2\" "
+"<span class=\"fs-5\"><i class=\"oi me-2\" data-icon=\"location_on\" "
 "role=\"presentation\"/>Los Angeles, CA, United States</span>"
 msgstr ""
 
@@ -209,14 +208,11 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_badge_preview_data
 msgid ""
-"<span class=\"o_cc o_cc1 d-inline-flex justify-content-center flex-wrap "
-"gap-3 my-3 border py-2 px-3 rounded-pill\">\n"
+"<span class=\"o_cc o_cc1 d-inline-flex justify-content-center flex-wrap gap-3 my-3 border py-2 px-3 rounded-pill\">\n"
 "                    <i class=\"fa fa-calendar\" role=\"presentation\"/>\n"
 "                    <strong>Harmony Under the Stars</strong>\n"
-"                    <span class=\"text-muted\">August 23, 2025 - 8:15 PM</"
-"span>\n"
-"                    <span class=\"text-primary\">Register <i class=\"fa fa-"
-"long-arrow-right\" role=\"presentation\"/></span>\n"
+"                    <span class=\"text-muted\">August 23, 2025 - 8:15 PM</span>\n"
+"                    <span class=\"text-primary\">Register <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/></span>\n"
 "                </span>"
 msgstr ""
 
@@ -260,36 +256,36 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
 msgid ""
 "<span class=\"text-danger\">\n"
-"                                        <i class=\"fa fa-ban me-2\"/>Sold "
-"Out\n"
+"                                        <i class=\"oi me-2\" data-icon=\"block\"/>Sold Out\n"
 "                                    </span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_badge
 msgid ""
-"<span class=\"text-primary text-nowrap\">Register Now <i class=\"fa fa-long-"
-"arrow-right\"/></span>"
+"<span class=\"text-primary text-nowrap\">Register Now <i class=\"oi\" data-"
+"icon=\"east\"/></span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
 msgid ""
-"<span><i class=\"fa fa-calendar me-2\" role=\"presentation\"/>August 23, "
-"2025 at 8:15 PM</span>"
+"<span><i class=\"oi oi-filled me-2\" data-icon=\"calendar_today\" "
+"role=\"presentation\"/>August 23, 2025 at 8:15 PM</span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_offset_preview_data
 msgid ""
-"<span><i class=\"fa fa-clock-o me-2\" role=\"presentation\"/>8:15 PM</span>"
+"<span><i class=\"oi me-2\" data-icon=\"schedule\" "
+"role=\"presentation\"/>8:15 PM</span>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_offset_preview_data
 msgid ""
-"<span><i class=\"fa fa-map-marker me-2\" role=\"presentation\"/>Los Angeles, "
-"CA, United States</span>"
+"<span><i class=\"oi me-2\" data-icon=\"location_on\" "
+"role=\"presentation\"/>Los Angeles, CA, United States</span>"
 msgstr ""
 
 #. module: website_event
@@ -681,8 +677,7 @@ msgstr "날짜"
 msgid ""
 "Defines the Visibility of the Event on the Website and searches.\n"
 "\n"
-"            Note that the EventEvent is however always available via its "
-"link."
+"            Note that the EventEvent is however always available via its link."
 msgstr ""
 "웹사이트와 검색에서 행사의 가시성을 지정합니다.\n"
 "\n"
@@ -777,8 +772,8 @@ msgstr "행사 정보"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Event Info <i class=\"fa fa-chevron-right\"/>"
-msgstr "행사 정보 <i class=\"fa fa-chevron-right\"/>"
+msgid "Event Info <i class=\"oi\" data-icon=\"chevron_right\"/>"
+msgstr "행사 정보 <i class=\"oi\" data-icon=\"chevron_right\"/>"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__menu_id
@@ -933,7 +928,8 @@ msgstr "필터"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.opt_event_share_block
 msgid ""
-"Find out what people see and say about this event, and join the conversation."
+"Find out what people see and say about this event, and join the "
+"conversation."
 msgstr "이 행사에 대해 사람들이 보고 말하는 내용을 찾아 대화에 참여하십시오."
 
 #. module: website_event
@@ -956,8 +952,8 @@ msgstr "바닥글 표시"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Get Tickets <i class=\"fa fa-chevron-right\"/>"
-msgstr "티켓 예매 <i class=\"fa fa-chevron-right\"/>"
+msgid "Get Tickets <i class=\"oi\" data-icon=\"chevron_right\"/>"
+msgstr "티켓 예매 <i class=\"oi\" data-icon=\"chevron_right\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
@@ -1119,8 +1115,8 @@ msgstr "온라인 가입"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_ticket_access
-msgid "Join online <i class=\"ms-1 fa fa-globe\"/>"
-msgstr "온라인 가입 <i class=\"ms-1 fa fa-globe\"/>"
+msgid "Join online <i class=\"oi ms-1\" data-icon=\"public\"/>"
+msgstr "온라인 가입 <i class=\"ms-1 oi\" data-icon=\"public\"/>"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__write_uid
@@ -1172,9 +1168,7 @@ msgstr "로그인한 사용자"
 msgid ""
 "Looking great! Let's now <b>publish</b> this page so that it becomes "
 "<b>visible</b> on your website!"
-msgstr ""
-"멋있네요! 이제 이 페이지를<b>게시</b> 하여 웹사이트에 <b>보일 수 있도록</b> "
-"해보세요!"
+msgstr "멋있네요! 이제 이 페이지를<b>게시</b> 하여 웹사이트에 <b>보일 수 있도록</b> 해보세요!"
 
 #. module: website_event
 #: model:event.question,title:website_event.event_question_meal_type
@@ -1408,24 +1402,22 @@ msgstr "지금 등록하세요"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_aside
-msgid ""
-"Register Now <i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
+msgid "Register Now <i class=\"oi\" data-icon=\"east\" role=\"presentation\"/>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_card
-msgid "Register<i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
-msgstr "등록 <i class=\"fa fa-long-arrow-right ms-2\" role=\"img\"/>"
+msgid "Register<i class=\"oi ms-2\" data-icon=\"east\" role=\"img\"/>"
+msgstr "등록 <i class=\"ms-2 oi\" data-icon=\"east\" role=\"img\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_card_preview_data
-msgid ""
-"Register<i class=\"fa fa-long-arrow-right ms-2\" role=\"presentation\"/>"
-msgstr "등록 <i class=\"fa fa-long-arrow-right ms-2\" role=\"presentation\"/>"
+msgid "Register<i class=\"oi ms-2\" data-icon=\"east\" role=\"presentation\"/>"
+msgstr "등록 <i class=\"ms-2 oi\" data-icon=\"east\" role=\"presentation\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_aside_preview_data
-msgid "Register<i class=\"fa fa-long-arrow-right\" role=\"presentation\"/>"
+msgid "Register<i class=\"oi\" data-icon=\"east\" role=\"presentation\"/>"
 msgstr ""
 
 #. module: website_event
@@ -1451,8 +1443,7 @@ msgstr "등록 확인됨!"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_template
 msgid "Registration failed! Suspicious activity detected by Google reCaptcha."
-msgstr ""
-"등록에 실패했습니다! Google reCaptcha에서 의심스러운 활동을 감지했습니다."
+msgstr "등록에 실패했습니다! Google reCaptcha에서 의심스러운 활동을 감지했습니다."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
@@ -1972,9 +1963,7 @@ msgstr ""
 msgid ""
 "With the Edit button, you can <b>customize</b> the web page visitors will "
 "see when registering."
-msgstr ""
-"편집 버튼을 활용하면 방문자가 행사에 등록할 때 표시되는 페이지를 <b>사용자 지"
-"정</b>하여 만들 수 있습니다."
+msgstr "편집 버튼을 활용하면 방문자가 행사에 등록할 때 표시되는 페이지를 <b>사용자 지정</b>하여 만들 수 있습니다."
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.dynamic_filter_template_event_event_single_aside
@@ -2019,14 +2008,10 @@ msgid "w-100 py-sm-3 mt-sm-2"
 msgstr "w-100 py-sm-3 mt-sm-2"
 
 #~ msgid ""
-#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" "
-#~ "class=\"text-danger\">\n"
-#~ "                                        <i class=\"fa fa-ban me-2\"/>Sold "
-#~ "Out\n"
+#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
+#~ "                                        <i class=\"fa fa-ban me-2\"/>Sold Out\n"
 #~ "                                    </span>"
 #~ msgstr ""
-#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" "
-#~ "class=\"text-danger\">\n"
-#~ "                                        <i class=\"fa fa-ban me-2\"/>판매 "
-#~ "완료\n"
+#~ "<span itemprop=\"availability\" content=\"http://schema.org/SoldOut\" class=\"text-danger\">\n"
+#~ "                                        <i class=\"fa fa-ban me-2\"/>판매 완료\n"
 #~ "                                    </span>"

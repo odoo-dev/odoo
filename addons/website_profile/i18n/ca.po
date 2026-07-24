@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-21 11:57+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/"
-"website_profile/ca/>\n"
+"Language-Team: Catalan <https://translate.odoo.com/projects/odoo-master/website_profile/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,33 +56,33 @@ msgstr ". Prova una altra cerca."
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"fa fa-arrow-right\"/> Get Badges"
+msgid "<i class=\"oi\" data-icon=\"arrow_forward\"/> Get Badges"
 msgstr ""
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-1\"/>EDIT"
-msgstr "<i class=\"fa fa-pencil me-1\"/>MODIFICAR"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>EDIT"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>MODIFICAR"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_content
-msgid "<i class=\"fa fa-pencil me-1\"/>Edit"
-msgstr "<i class=\"fa fa-pencil me-1\"/>Modificar"
+msgid "<i class=\"oi oi-filled me-1\" data-icon=\"edit\"/>Edit"
+msgstr "<i class=\"me-1 oi-filled oi\" data-icon=\"edit\"/>Modificar"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_profile_header
-msgid "<i class=\"fa fa-pencil me-2\"/>EDIT PROFILE"
-msgstr "<i class=\"fa fa-pencil me-2\"/>MODIFICAR PERFIL"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"edit\"/>EDIT PROFILE"
+msgstr "<i class=\"me-2 oi-filled oi\" data-icon=\"edit\"/>MODIFICAR PERFIL"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right me-1\"/>All Badges"
-msgstr "<i class=\"oi oi-arrow-right me-1\"/>Totes les insígnies"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"/>All Badges"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"/>Totes les insígnies"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.user_badges
-msgid "<i class=\"oi oi-arrow-right\"/> All Badges"
-msgstr "<i class=\"oi oi-arrow-right\"/>Totes les insígnies"
+msgid "<i class=\"oi\" data-icon=\"east\"/> All Badges"
+msgstr "<i class=\"oi\" data-icon=\"east\"/>Totes les insígnies"
 
 #. module: website_profile
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
@@ -143,19 +142,11 @@ msgstr ""
 #: model:mail.template,body_html:website_profile.validation_email
 msgid ""
 "<t>\n"
-"                            Hello <t t-out=\"object.name or ''\">Marc Demo</"
-"t>,<br/><br/>\n"
-"                            You have been invited to validate your email in "
-"order to get access to \"<t t-out=\"object.company_id.name or "
-"''\">YourCompany</t>\" website.\n"
-"                            To validate your email, please click on the "
-"button below:\n"
+"                            Hello <t t-out=\"object.name or ''\">Marc Demo</t>,<br/><br/>\n"
+"                            You have been invited to validate your email in order to get access to \"<t t-out=\"object.company_id.name or ''\">YourCompany</t>\" website.\n"
+"                            To validate your email, please click on the button below:\n"
 "                            <div style=\"margin: 32px 0px 32px 0px;\">\n"
-"                                <a t-att-href=\"ctx.get('token_url')\" t-"
-"attf-style=\"background-color: {{object.company_id.email_secondary_color or "
-"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\">\n"
+"                                <a t-att-href=\"ctx.get('token_url')\" t-attf-style=\"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-size:13px;\">\n"
 "                                    Validate my account\n"
 "                                </a>\n"
 "                            </div>\n"
@@ -226,15 +217,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_profile.badge_content
 msgid ""
 "Besides gaining reputation with your questions and answers,\n"
-"                        you receive badges for being especially helpful.<br "
-"class=\"d-none d-lg-inline-block\"/>Badges\n"
+"                        you receive badges for being especially helpful.<br class=\"d-none d-lg-inline-block\"/>Badges\n"
 "                        appear on your profile page, and your posts."
 msgstr ""
 "A més de guanyar reputació amb les teves preguntes i respostes,\n"
-"                        Rebre insígnies per ser especialment útil.<br "
-"class=\"d-none d-lg-inline-block\"/>Insígnies\n"
-"                        apareix a la teva pàgina de perfil i les teves "
-"publicacions."
+"                        Rebre insígnies per ser especialment útil.<br class=\"d-none d-lg-inline-block\"/>Insígnies\n"
+"                        apareix a la teva pàgina de perfil i les teves publicacions."
 
 #. module: website_profile
 #. odoo-javascript
@@ -684,5 +672,5 @@ msgstr "└ Usuaris"
 #~ "guidelines of the forum."
 #~ msgstr ""
 #~ "Podeu puntuar més punts responent qüestionaris al final de cada contingut "
-#~ "del curs. També es poden obtenir punts en el fòrum. Segueix aquest enllaç "
-#~ "a les directrius del fòrum."
+#~ "del curs. També es poden obtenir punts en el fòrum. Segueix aquest enllaç a "
+#~ "les directrius del fòrum."

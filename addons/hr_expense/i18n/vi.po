@@ -18,8 +18,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 07:08+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
-"hr_expense/vi/>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/hr_expense/vi/>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,10 +29,8 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__has_existing_bill
 msgid ""
-" - When a bill already exists, the payment will use the supplier payable "
-"account so it can be matched with the bill.\n"
-"                 - When no bill exists, the payment will be recorded "
-"directly on the expense account, as usual.\n"
+" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.\n"
+"                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.\n"
 "            "
 msgstr ""
 
@@ -68,13 +65,14 @@ msgid ""
 "%(expense_name)s: Your are neither a Manager nor a HR Officer of this "
 "expense's company"
 msgstr ""
-"%(expense_name)s: Bạn không phải là Quản lý hay Chuyên viên nhân sự của công "
-"ty có chi phí này"
+"%(expense_name)s: Bạn không phải là Quản lý hay Chuyên viên nhân sự của công"
+" ty có chi phí này"
 
 #. module: hr_expense
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
-msgid "%(user)s confirms this expense is not a duplicate with similar expense."
+msgid ""
+"%(user)s confirms this expense is not a duplicate with similar expense."
 msgstr ""
 "%(user)s xác nhận chi phí này không phải bản trùng lặp của chi phí tương tự."
 
@@ -103,13 +101,13 @@ msgstr "1 %(exp_cur)s = %(rate)s %(comp_cur)s"
 #: code:addons/hr_expense/static/src/js/tours/hr_expense.js:0
 msgid "<b>Wasting time recording your receipts?</b> Let’s try a better way."
 msgstr ""
-"<b>Bạn đang lãng phí thời gian ghi nhận biên lai?</b> Hãy thử cách khác hiệu "
-"quả hơn."
+"<b>Bạn đang lãng phí thời gian ghi nhận biên lai?</b> Hãy thử cách khác hiệu"
+" quả hơn."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
-msgid "<i class=\"oi oi-arrow-right\"/> Setup your alias domain"
-msgstr "<i class=\"oi oi-arrow-right\"/> Thiết lập miền bí danh của bạn"
+msgid "<i class=\"oi\" data-icon=\"east\"/> Setup your alias domain"
+msgstr "<i class=\"oi\" data-icon=\"east\"/> Thiết lập miền bí danh của bạn"
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.hr_expense_split
@@ -283,10 +281,8 @@ msgstr "Đã xảy ra lỗi trong quá trình tải lên"
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_hr_expense__account_id
 msgid ""
-"An expense account is expected for employee paid expenses and company paid "
-"expenses without a matched bill.\n"
-"For company paid expenses with a matched bill, the account needs to be the "
-"payable account of the bill."
+"An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+"For company paid expenses with a matched bill, the account needs to be the payable account of the bill."
 msgstr ""
 
 #. module: hr_expense
@@ -634,8 +630,8 @@ msgid ""
 "Artificial Intelligence will fill the data automatically."
 msgstr ""
 "Đừng giữ vé chi phí trong túi của bạn nữa. Chỉ cần chụp ảnh biên nhận của "
-"bạn và để Odoo số hóa nó cho bạn. OCR và Trí tuệ nhân tạo sẽ tự động điền dữ "
-"liệu."
+"bạn và để Odoo số hóa nó cho bạn. OCR và Trí tuệ nhân tạo sẽ tự động điền dữ"
+" liệu."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_account_analytic_applicability__business_domain
@@ -946,8 +942,8 @@ msgid ""
 "Failed to send mails for submitted expenses. No valid email was found for "
 "the company"
 msgstr ""
-"Không gửi được email cho các chi phí đã nộp. Không tìm thấy email hợp lệ cho "
-"công ty"
+"Không gửi được email cho các chi phí đã nộp. Không tìm thấy email hợp lệ cho"
+" công ty"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_employee__filter_for_expense
@@ -1449,8 +1445,8 @@ msgstr ""
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "No work contact found for the employee %(name)s, please configure one."
 msgstr ""
-"Không tìm thấy liên hệ cơ quan nào cho nhân viên %(name)s, vui lòng cấu hình "
-"một liên hệ."
+"Không tìm thấy liên hệ cơ quan nào cho nhân viên %(name)s, vui lòng cấu hình"
+" một liên hệ."
 
 #. module: hr_expense
 #: model:ir.model.fields.selection,name:hr_expense.selection__hr_expense__payment_mode__company_account
@@ -1519,16 +1515,13 @@ msgstr "Odoo"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"Odoo had a look at your expense, its product, your company and the journal "
-"but came back with empty hands.\n"
+"Odoo had a look at your expense, its product, your company and the journal but came back with empty hands.\n"
 "Give Odoo a hand to find an account by setting up an expense account.\n"
 "%(expense)s %(expense_name)s.\n"
 msgstr ""
-"Odoo đã xem xét chi phí của bạn, sản phẩm liên quan, công ty và sổ nhật ký "
-"kế toán, nhưng vẫn không thể xác định được tài khoản phù hợp.\n"
+"Odoo đã xem xét chi phí của bạn, sản phẩm liên quan, công ty và sổ nhật ký kế toán, nhưng vẫn không thể xác định được tài khoản phù hợp.\n"
 "\n"
-"Hãy hỗ trợ Odoo tìm kiếm tài khoản bằng cách thiết lập một tài khoản chi "
-"phí.\n"
+"Hãy hỗ trợ Odoo tìm kiếm tài khoản bằng cách thiết lập một tài khoản chi phí.\n"
 "%(expense)s %(expense_name)s.\n"
 
 #. module: hr_expense
@@ -1652,8 +1645,8 @@ msgstr "Thanh toán được tạo cho: %s"
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
 msgid "Payment method allowed for expenses paid by company."
 msgstr ""
-"Phương thức thanh toán được phép dành cho các khoản chi phí mà công ty thanh "
-"toán."
+"Phương thức thanh toán được phép dành cho các khoản chi phí mà công ty thanh"
+" toán."
 
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.res_config_settings_view_form
@@ -1938,12 +1931,10 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense.field_hr_employee__expense_manager_id
 msgid ""
 "Select the user responsible for approving \"Expenses\" of this employee.\n"
-"If empty, the approval is done by an Administrator or Approver (determined "
-"in settings/users)."
+"If empty, the approval is done by an Administrator or Approver (determined in settings/users)."
 msgstr ""
 "Chọn người dùng chịu trách nhiệm phê duyệt \"Chi phí\" của nhân viên này.\n"
-"Nếu trống, phê duyệt được thực hiện bởi Quản trị viên hoặc Người phê duyệt "
-"(được xác định trong cài đặt/người dùng)."
+"Nếu trống, phê duyệt được thực hiện bởi Quản trị viên hoặc Người phê duyệt (được xác định trong cài đặt/người dùng)."
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__selectable_payment_method_line_ids
@@ -2138,14 +2129,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/ir_actions_report.py:0
 msgid ""
-"The attachment (%(attachment_name)s) has not been added to the report due to "
-"the following error: '%(error)s'"
+"The attachment (%(attachment_name)s) has not been added to the report due to"
+" the following error: '%(error)s'"
 msgstr ""
 
 #. module: hr_expense
 #: model:ir.model.fields,help:hr_expense.field_res_company__expense_journal_id
 #: model:ir.model.fields,help:hr_expense.field_res_config_settings__expense_journal_id
-msgid "The company's default journal used when an employee expense is created."
+msgid ""
+"The company's default journal used when an employee expense is created."
 msgstr ""
 "Nhật ký mặc định của công ty được sử dụng khi chi phí nhân viên được tạo."
 
@@ -2181,8 +2173,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The following expenses payment method leads to several accounts payable and "
-"this isn't supported:\n"
+"The following expenses payment method leads to several accounts payable and this isn't supported:\n"
 "%(expenses)s"
 msgstr ""
 
@@ -2213,8 +2204,7 @@ msgstr "Tổng của sau khi đóng tách vẫn giữ nguyên"
 #. odoo-python
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid ""
-"The vendor is required for expenses using SEPA Credit Transfer as the "
-"payment method.\n"
+"The vendor is required for expenses using SEPA Credit Transfer as the payment method.\n"
 "Please set a vendor on the following expenses: %s"
 msgstr ""
 
@@ -2333,13 +2323,11 @@ msgstr "Loại hoạt động ngoại lệ trong bản ghi."
 msgid ""
 "Uh-oh! You can’t edit this expense.\n"
 "\n"
-"Reach out to the administrators, flash your best smile, and see if they'll "
-"grant you the magical access you seek."
+"Reach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
 msgstr ""
 "Rất tiếc! Bạn không có quyền chỉnh sửa khoản chi này.\n"
 "\n"
-"Hãy liên hệ với quản trị viên – biết đâu bạn sẽ được cấp quyền truy cập thì "
-"sao!"
+"Hãy liên hệ với quản trị viên – biết đâu bạn sẽ được cấp quyền truy cập thì sao!"
 
 #. module: hr_expense
 #: model:ir.model.fields,field_description:hr_expense.field_hr_expense__product_uom_id
@@ -2415,14 +2403,14 @@ msgstr "Chờ hoàn trả"
 #. module: hr_expense
 #: model_terms:ir.ui.view,arch_db:hr_expense.product_product_expense_form_view
 msgid ""
-"When the cost of an expense product is different than 0, then the "
-"user                                             using this product won't be "
-"able to change the amount of the "
-"expense,                                             only the quantity. Use "
-"a cost different than 0 for expense products funded "
-"by                                             the company at fixed cost "
-"like allowances for mileage, per diem, "
-"accommodation                                             or meal."
+"When the cost of an expense product is different than 0, then the user"
+"                                             using this product won't be "
+"able to change the amount of the expense,"
+"                                             only the quantity. Use a cost "
+"different than 0 for expense products funded by"
+"                                             the company at fixed cost like "
+"allowances for mileage, per diem, accommodation"
+"                                             or meal."
 msgstr ""
 
 #. module: hr_expense
@@ -2537,7 +2525,8 @@ msgstr ""
 #: code:addons/hr_expense/models/hr_expense.py:0
 msgid "You cannot reset to draft an expense linked to a posted journal entry."
 msgstr ""
-"Bạn không thể đặt lại chi phí liên kết với bút toán đã ghi sổ thành bản nháp."
+"Bạn không thể đặt lại chi phí liên kết với bút toán đã ghi sổ thành bản "
+"nháp."
 
 #. module: hr_expense
 #. odoo-python

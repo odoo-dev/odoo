@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 03:43+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: German <https://translate.odoo.com/projects/odoo-master/"
-"pos_online_payment/de/>\n"
+"Language-Team: German <https://translate.odoo.com/projects/odoo-master/pos_online_payment/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,7 +46,8 @@ msgstr "Es muss eine Zahlungsoption festgelegt werden."
 #. module: pos_online_payment
 #. odoo-python
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
-msgid "A validation payment cannot be used for a Point of Sale online payment."
+msgid ""
+"A validation payment cannot be used for a Point of Sale online payment."
 msgstr ""
 "Eine Validierungszahlung kann nicht für Online-Zahlungen des Kassensystems "
 "verwendet werden."
@@ -113,7 +113,8 @@ msgstr ""
 #: code:addons/pos_online_payment/models/pos_payment.py:0
 msgid "Cannot edit a POS online payment essential data."
 msgstr ""
-"Kann die grundlegenden Daten einer Online-Zahlung im Kassensystem bearbeiten."
+"Kann die grundlegenden Daten einer Online-Zahlung im Kassensystem "
+"bearbeiten."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -268,8 +269,8 @@ msgstr "Anforderungen an Zahlungsanbieter"
 #: code:addons/pos_online_payment/static/src/app/utils/order_payment_validation.js:0
 msgid "Please ensure you have a customer with an email address on this order."
 msgstr ""
-"Stellen Sie sicher, dass Sie einen Kunden mit einer E-Mail-Adresse für diese "
-"Bestellung haben."
+"Stellen Sie sicher, dass Sie einen Kunden mit einer E-Mail-Adresse für diese"
+" Bestellung haben."
 
 #. module: pos_online_payment
 #: model:ir.model,name:pos_online_payment.model_pos_config
@@ -309,7 +310,7 @@ msgstr "Serverfehler"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
-msgid "Skip <i class=\"fa fa-long-arrow-right ms-1\"/>"
+msgid "Skip <i class=\"oi ms-1\" data-icon=\"east\"/>"
 msgstr ""
 
 #. module: pos_online_payment
@@ -395,8 +396,8 @@ msgstr "Der Auftrag wurde nicht korrekt auf dem Server gespeichert."
 #: code:addons/pos_online_payment/models/pos_session.py:0
 msgid "The partner of the POS online payment (id=%d) could not be found"
 msgstr ""
-"Der Partner der Online-Zahlung im Kassensystem (id=%d) konnte nicht gefunden "
-"werden"
+"Der Partner der Online-Zahlung im Kassensystem (id=%d) konnte nicht gefunden"
+" werden"
 
 #. module: pos_online_payment
 #. odoo-python
@@ -485,7 +486,8 @@ msgstr ""
 #: code:addons/pos_online_payment/controllers/payment_portal.py:0
 msgid ""
 "There is no online payment method configured for this Point of Sale order."
-msgstr "Für diesen Kassenauftrag ist keine Online-Zahlungsmethode konfiguriert."
+msgstr ""
+"Für diesen Kassenauftrag ist keine Online-Zahlungsmethode konfiguriert."
 
 #. module: pos_online_payment
 #. odoo-python
@@ -547,8 +549,8 @@ msgid ""
 "Use this payment method for online payments (payments made on a web page "
 "with online payment providers)"
 msgstr ""
-"Verwenden Sie diese Zahlungsmethode für Online-Zahlungen (Zahlungen, die auf "
-"einer Webseite mit Online-Zahlungsanbietern erfolgen)"
+"Verwenden Sie diese Zahlungsmethode für Online-Zahlungen (Zahlungen, die auf"
+" einer Webseite mit Online-Zahlungsanbietern erfolgen)"
 
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
@@ -569,10 +571,8 @@ msgstr "Sie haben noch keinen"
 #. module: pos_online_payment
 #: model_terms:ir.ui.view,arch_db:pos_online_payment.pos_payment_status
 msgid ""
-"You should receive an email confirming your payment within a few minutes.<br/"
-">\n"
-"                            Don't hesitate to contact us if you don't "
-"receive it."
+"You should receive an email confirming your payment within a few minutes.<br/>\n"
+"                            Don't hesitate to contact us if you don't receive it."
 msgstr ""
 
 #. module: pos_online_payment

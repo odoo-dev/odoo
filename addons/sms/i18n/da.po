@@ -16,8 +16,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 11:41+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/sms/"
-"da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/sms/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -58,28 +57,28 @@ msgstr "%s ugyldig modtagere"
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"fa fa-warning\"/> An error occurred with your account. Please "
-"contact the support for more information..."
+"<i class=\"oi\" data-icon=\"warning\"/> An error occurred with your account."
+" Please contact the support for more information..."
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"fa fa-warning\"/> You cannot send SMS while your account is not "
-"registered."
+"<i class=\"oi\" data-icon=\"warning\"/> You cannot send SMS while your "
+"account is not registered."
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Register"
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Set Sender Name"
 msgstr ""
 
@@ -87,12 +86,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Add</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\">Tilføj</span>\n"
-"                                <span class=\"o_stat_text\">Kontekst "
-"handling</span>"
+"                                <span class=\"o_stat_text\">Kontekst handling</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
@@ -103,39 +100,30 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_view_form
 msgid ""
 "<span class=\"o_stat_text\">Remove</span>\n"
-"                                <span class=\"o_stat_text\">Context Action</"
-"span>"
+"                                <span class=\"o_stat_text\">Context Action</span>"
 msgstr ""
 "<span class=\"o_stat_text\">Fjern</span>\n"
-"                                <span class=\"o_stat_text\">Kontekst "
-"handling</span>"
+"                                <span class=\"o_stat_text\">Kontekst handling</span>"
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_template_preview_form
-msgid ""
-"<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
+msgid "<span class=\"text-warning\" invisible=\"not no_record\">No records</span>"
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.ir_actions_server_view_form
 msgid ""
 "<span invisible=\"sms_method != 'sms'\">\n"
-"                                    The message will be sent as an SMS to "
-"the recipients of the template\n"
-"                                    and will not appear in the messaging "
-"history.\n"
+"                                    The message will be sent as an SMS to the recipients of the template\n"
+"                                    and will not appear in the messaging history.\n"
 "                                </span>\n"
 "                                <span invisible=\"sms_method != 'note'\">\n"
-"                                    The SMS will not be sent, it will only "
-"be posted as an\n"
+"                                    The SMS will not be sent, it will only be posted as an\n"
 "                                    internal note in the messaging history.\n"
 "                                </span>\n"
-"                                <span invisible=\"sms_method != "
-"'comment'\">\n"
-"                                    The SMS will be sent as an SMS to the "
-"recipients of the\n"
-"                                    template and it will also be posted as "
-"an internal note\n"
+"                                <span invisible=\"sms_method != 'comment'\">\n"
+"                                    The SMS will be sent as an SMS to the recipients of the\n"
+"                                    template and it will also be posted as an internal note\n"
 "                                    in the messaging history.\n"
 "                                </span>"
 msgstr ""
@@ -467,7 +455,8 @@ msgstr "Fejltype"
 
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_template__template_fs
-msgid "File from where the template originates. Used to reset broken template."
+msgid ""
+"File from where the template originates. Used to reset broken template."
 msgstr ""
 
 #. module: sms
@@ -751,8 +740,8 @@ msgstr "Nummer Felt"
 #. module: sms
 #: model:ir.model.fields,help:sms.field_sms_composer__res_ids_count
 msgid ""
-"Number of recipients that will receive the SMS if sent in mass mode, without "
-"applying the Active Domain value"
+"Number of recipients that will receive the SMS if sent in mass mode, without"
+" applying the Active Domain value"
 msgstr ""
 "Antal modtagere som vil modtage SMS'en hvis den sendes i masse-tilstand, "
 "uden anvendelse af Aktiv Domæne værdien"
@@ -1396,27 +1385,21 @@ msgid ""
 "- 'Update a Record': update the values of a record\n"
 "- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': "
-"add or remove followers to a record (Discuss)\n"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
 "- 'Create Record': create a new record with new values\n"
 "- 'Execute Code': a block of Python code that will be executed\n"
-"- 'Send Webhook Notification': send a POST request to an external system, "
-"also known as a Webhook\n"
-"- 'Multi Actions': define an action that triggers several other server "
-"actions\n"
+"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+"- 'Multi Actions': define an action that triggers several other server actions\n"
 msgstr ""
 "Type serverhandling. De følgende værdier er tilgængelige:\n"
 "- 'Opdatér en postering': Opdatér en posteringsværdi.\n"
 "- 'Opret aktivitet': Opret en aktivitet (Dialog).\n"
 "- 'Send e-mail': Send en besked, note eller e-mail (Dialog).\n"
-"- 'Send SMS': Send en SMS, registrér dem i dokumenter (SMS). - 'Tilføj/fjern "
-"følgere': Tilføj eller fjern følgere fra en datapost (Dialog).\n"
+"- 'Send SMS': Send en SMS, registrér dem i dokumenter (SMS). - 'Tilføj/fjern følgere': Tilføj eller fjern følgere fra en datapost (Dialog).\n"
 "- 'Opret en datapost': Opret en ny datapost med nye værdier.\n"
 "- 'Udfør kode': En sektion med Python-kode, der eksekveres.\n"
-"- 'Send Webhook-meddelelse': Send en POST-anmodning til et eksternt system "
-"(også kendt som en webhook).\n"
-"- 'Udfør flere handlinger': Fastsæt en handling, der udløser flere andre "
-"serverhandlinger.\n"
+"- 'Send Webhook-meddelelse': Send en POST-anmodning til et eksternt system (også kendt som en webhook).\n"
+"- 'Udfør flere handlinger': Fastsæt en handling, der udløser flere andre serverhandlinger.\n"
 
 #. module: sms
 #: model:ir.model.fields,field_description:sms.field_sms_sms__uuid
@@ -1460,18 +1443,15 @@ msgid ""
 "'comment': generated by user input e.g. through discuss or composer\n"
 "'email_outgoing': generated by a mailing\n"
 "'notification': generated by system e.g. tracking messages\n"
-"'auto_comment': generated by automated notification mechanism e.g. "
-"acknowledgment\n"
+"'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n"
 "'user_notification': generated for a specific recipient"
 msgstr ""
 "Bruges til at kategorisere meddelelsesgenerator\n"
 "'e-mail': genereret af en indgående e-mail, f.eks. mailgateway\n"
-"'comment': genereret af brugerinput, f.eks. gennem diskutere eller "
-"komponist\n"
+"'comment': genereret af brugerinput, f.eks. gennem diskutere eller komponist\n"
 "'email_outgoing': genereret af en mailing\n"
 "'notification': genereret af systemet f.eks. sporingsmeddelelser\n"
-"'auto_comment': genereret af automatiseret notifikationsmekanisme, f.eks. "
-"anerkendelse\n"
+"'auto_comment': genereret af automatiseret notifikationsmekanisme, f.eks. anerkendelse\n"
 "'user_notification': genereret til en bestemt modtager"
 
 #. module: sms
@@ -1585,10 +1565,8 @@ msgstr ""
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.sms_account_sender_view_form
 msgid ""
-"Your sender name must be between 3 and 11 characters long and only contain "
-"alphanumeric characters.\n"
-"                        It must fit your company name, and you aren't "
-"allowed to modify it once you registered one, choose it carefully."
+"Your sender name must be between 3 and 11 characters long and only contain alphanumeric characters.\n"
+"                        It must fit your company name, and you aren't allowed to modify it once you registered one, choose it carefully."
 msgstr ""
 
 #. module: sms

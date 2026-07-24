@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-19 19:09+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"hr_timesheet/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/hr_timesheet/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -112,11 +111,11 @@ msgstr ""
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 #, fuzzy
 msgid ""
-"'%(missing_plan_names)s' analytic plan(s) required on the project '%"
-"(project_name)s' linked to the timesheet."
+"'%(missing_plan_names)s' analytic plan(s) required on the project "
+"'%(project_name)s' linked to the timesheet."
 msgstr ""
-"Vaqt jadvaliga bog‘langan '%(project_name)s' loyihasida '%"
-"(missing_plan_names)s' tahliliy reja(lar) talab qilinadi."
+"Vaqt jadvaliga bog‘langan '%(project_name)s' loyihasida "
+"'%(missing_plan_names)s' tahliliy reja(lar) talab qilinadi."
 
 #. module: hr_timesheet
 #. odoo-python
@@ -140,28 +139,21 @@ msgstr "2 soat"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 msgid ""
-"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" "
-"invisible=\"stat_success_rate\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-success\" title=\"On Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt;= 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or "
-"stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
-"                            <i class=\"fa fa-fw o_button_icon fa-clock-o "
-"text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or "
-"stat_success_rate &lt;= 100\"/>"
+"<i class=\"fa fa-fw o_button_icon fa-clock-o\" title=\"Timesheets\" invisible=\"stat_success_rate\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-success\" title=\"On Due\" invisible=\"not stat_success_rate or stat_success_rate &gt;= 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-warning\" title=\"Warning\" invisible=\"not stat_success_rate or stat_success_rate &gt; 100 or stat_success_rate &lt; 80\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-clock-o text-danger\" title=\"Over Due\" invisible=\"not stat_success_rate or stat_success_rate &lt;= 100\"/>"
 msgstr ""
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.portal_my_task
 #, fuzzy
-msgid "<i class=\"fa fa-print\"/> View Details"
-msgstr "<i class=\"fa fa-print\"/> Tafsilotlarni ko‘rish"
+msgid "<i class=\"oi\" data-icon=\"print\"/> View Details"
+msgstr "<i class=\"oi\" data-icon=\"print\"/> Tafsilotlarni ko‘rish"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_update_view_kanban_inherit
-msgid "<span class=\"fa fa-fw fa-clock-o me-1\" title=\"Time\"/>"
+msgid "<span class=\"oi oi-fw me-1\" data-icon=\"schedule\" title=\"Time\"/>"
 msgstr ""
 
 #. module: hr_timesheet
@@ -307,8 +299,7 @@ msgstr "Analitik rejaning qo‘llanilishi"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_report_by_task
 #, fuzzy
 msgid ""
-"Analyze the projects and tasks on which your employees spend their time."
-"<br>\n"
+"Analyze the projects and tasks on which your employees spend their time.<br>\n"
 "                Evaluate which part is billable and what costs it represents."
 msgstr ""
 "Xodimlaringiz o‘z vaqtlarini sarflaydigan loyihalar va vazifalarni tahlil "
@@ -572,7 +563,8 @@ msgstr "Qo‘shimcha vaqt"
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
 #, fuzzy
-msgid "Generate timesheets for validated time off requests and public holidays"
+msgid ""
+"Generate timesheets for validated time off requests and public holidays"
 msgstr ""
 "Tasdiqlangan ta'til so‘rovlari va bayram kunlari uchun ish vaqti "
 "jadvallarini yaratish"
@@ -981,8 +973,8 @@ msgid ""
 "Send a periodical email reminder to timesheets approvers that still have "
 "timesheets to validate"
 msgstr ""
-"Hali tasdiqlashi kerak bo‘lgan tabel tasdiqlovchilarga davriy eslatma xatini "
-"yuborish"
+"Hali tasdiqlashi kerak bo‘lgan tabel tasdiqlovchilarga davriy eslatma xatini"
+" yuborish"
 
 #. module: hr_timesheet
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.res_config_settings_view_form
@@ -1078,8 +1070,8 @@ msgstr ""
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 #, fuzzy
 msgid ""
-"The project, the task and the analytic accounts of the timesheet must belong "
-"to the same company."
+"The project, the task and the analytic accounts of the timesheet must belong"
+" to the same company."
 msgstr ""
 "Loyiha, vazifa va tabelning tahliliy hisoblari bir xil kompaniyaga tegishli "
 "bo‘lishi kerak."
@@ -1095,8 +1087,8 @@ msgstr "Tabellar mavjud emas."
 #: code:addons/hr_timesheet/models/project_project.py:0
 #, fuzzy
 msgid ""
-"These projects have some timesheet entries referencing them. Before removing "
-"these projects, you have to remove these timesheet entries."
+"These projects have some timesheet entries referencing them. Before removing"
+" these projects, you have to remove these timesheet entries."
 msgstr ""
 "Bu loyihalarga bog‘liq ba'zi tabel yozuvlari mavjud. Ushbu loyihalarni "
 "o‘chirishdan oldin, bu tabel yozuvlarini o‘chirishingiz kerak."
@@ -1135,8 +1127,8 @@ msgstr "Shu yil"
 #: code:addons/hr_timesheet/models/project_project.py:0
 #, fuzzy
 msgid ""
-"This project has some timesheet entries referencing it. Before removing this "
-"project, you have to remove these timesheet entries."
+"This project has some timesheet entries referencing it. Before removing this"
+" project, you have to remove these timesheet entries."
 msgstr ""
 "Bu loyihaga bog‘liq ba'zi tabel yozuvlari mavjud. Ushbu loyihani "
 "o‘chirishdan oldin, bu tabel yozuvlarini o‘chirishingiz kerak."
@@ -1148,14 +1140,15 @@ msgstr ""
 msgid ""
 "This task cannot be private because there are some timesheets linked to it."
 msgstr ""
-"Bu vazifa maxfiy bo‘la olmaydi, chunki unga bog‘langan ba'zi tabellar mavjud."
+"Bu vazifa maxfiy bo‘la olmaydi, chunki unga bog‘langan ba'zi tabellar "
+"mavjud."
 
 #. module: hr_timesheet
 #. odoo-python
 #: code:addons/hr_timesheet/models/project_task.py:0
 msgid ""
-"This task can’t be deleted because it’s linked to timesheets. Please contact "
-"someone with higher access to remove the timesheets first, and then you’ll "
+"This task can’t be deleted because it’s linked to timesheets. Please contact"
+" someone with higher access to remove the timesheets first, and then you’ll "
 "be able to delete the task."
 msgstr ""
 
@@ -1165,8 +1158,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "This will set the unit of measure used in projects and tasks.\n"
-"If you use the timesheet linked to projects, don't forget to setup the right "
-"unit of measure in your employees."
+"If you use the timesheet linked to projects, don't forget to setup the right unit of measure in your employees."
 msgstr ""
 "Bu loyihalar va vazifalarda qo‘llaniladigan o‘lchov birligini belgilaydi. "
 "Agar siz loyihalarga bog‘langan tabellardan foydalansangiz, xodimlaringizda "
@@ -1436,7 +1428,8 @@ msgstr "Shaxsiy vazifa uchun vaqt jadvallari yaratib bo‘lmaydi."
 #: code:addons/hr_timesheet/models/account_analytic_line.py:0
 #, fuzzy
 msgid ""
-"Timesheets must be created with an active employee in the selected companies."
+"Timesheets must be created with an active employee in the selected "
+"companies."
 msgstr ""
 "Vaqt jadvallari tanlangan kompaniyalardagi faol xodim bilan yaratilishi "
 "kerak."
@@ -1530,8 +1523,8 @@ msgstr "Jami:"
 #: model_terms:ir.actions.act_window,help:hr_timesheet.timesheet_action_all
 #, fuzzy
 msgid ""
-"Track your working hours by projects every day and invoice this time to your "
-"customers."
+"Track your working hours by projects every day and invoice this time to your"
+" customers."
 msgstr ""
 "Har kuni loyihalar bo‘yicha ish soatlaringizni kuzatib boring va bu vaqtni "
 "mijozlaringizga hisob-faktura qiling."
@@ -1556,16 +1549,15 @@ msgid ""
 "        !! Set the task a high priority\n"
 "        !!! Set the task a urgent priority\n"
 "\n"
-"        Make sure to use the right format and order e.g. Improve the "
-"configuration screen 5h #feature #v16 @Mitchell !"
+"        Make sure to use the right format and order e.g. Improve the configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
 "Yangi vazifalarni belgilash uchun sarlavhada ushbu kalit so‘zlardan "
 "foydalaning: 30h Vazifaga 30 soat ajrating #teglar Vazifaga teglar qo‘ying "
 "@foydalanuvchi Vazifani foydalanuvchiga topshiring ! Vazifaga o‘rtacha "
 "ustuvorlik bering !! Vazifaga yuqori ustuvorlik bering !!! Vazifaga "
-"shoshilinch ustuvorlik bering To‘g‘ri format va tartibdan foydalanganingizga "
-"ishonch hosil qiling, masalan: Sozlamalar ekranini yaxshilash 5h #xususiyat "
-"#v16 @Mitchell !"
+"shoshilinch ustuvorlik bering To‘g‘ri format va tartibdan foydalanganingizga"
+" ishonch hosil qiling, masalan: Sozlamalar ekranini yaxshilash 5h #xususiyat"
+" #v16 @Mitchell !"
 
 #. module: hr_timesheet
 #: model:ir.model.fields,field_description:hr_timesheet.field_account_analytic_line__user_id
@@ -1597,12 +1589,11 @@ msgstr "Tafsilotlarni ko‘rish"
 #, fuzzy
 msgid ""
 "You can register and track your workings hours by project every\n"
-"                    day. Every time spent on a project will become a cost "
-"and can be re-invoiced to\n"
+"                    day. Every time spent on a project will become a cost and can be re-invoiced to\n"
 "                    customers if required."
 msgstr ""
-"Siz har kuni loyiha bo‘yicha ish soatlaringizni ro‘yxatdan o‘tkazishingiz va "
-"kuzatib borishingiz mumkin. Loyihaga sarflangan har qanday vaqt xarajatga "
+"Siz har kuni loyiha bo‘yicha ish soatlaringizni ro‘yxatdan o‘tkazishingiz va"
+" kuzatib borishingiz mumkin. Loyihaga sarflangan har qanday vaqt xarajatga "
 "aylanadi va zarur bo‘lsa, mijozlarga qayta hisob-faktura qilinishi mumkin."
 
 #. module: hr_timesheet
@@ -1616,10 +1607,8 @@ msgstr "O‘zingizniki bo‘lmagan vaqt jadvallariga kira olmaysiz."
 #: model_terms:ir.ui.view,arch_db:hr_timesheet.project_invoice_form
 #, fuzzy
 msgid ""
-"You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/>\n"
-"                            Please switch to another account, or reactivate "
-"the current one to timesheet on the project."
+"You cannot log timesheets on this project since it is linked to an inactive analytic account.<br/>\n"
+"                            Please switch to another account, or reactivate the current one to timesheet on the project."
 msgstr ""
 "Bu loyihada vaqt jadvallarini qayd qila olmaysiz, chunki u nofaol tahliliy "
 "hisobga bog‘langan.<br/>Iltimos, boshqa hisobga o‘ting yoki joriy hisobni "
@@ -1630,8 +1619,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "You cannot log timesheets on this project since it is linked to an inactive "
-"analytic account.<br/> Please change this account, or reactivate the current "
-"one to timesheet on the project."
+"analytic account.<br/> Please change this account, or reactivate the current"
+" one to timesheet on the project."
 msgstr ""
 "Bu loyihada vaqt jadvallarini kirita olmaysiz, chunki u faol bo‘lmagan "
 "tahliliy hisobga bog‘langan.<br/> Iltimos, ushbu hisobni o‘zgartiring yoki "

@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 01:24+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/"
-"microsoft_outlook/da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/microsoft_outlook/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,24 +22,23 @@ msgstr ""
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
-msgid "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
-msgstr "<i class=\"fa fa-cog\" title=\"Edit Settings\"/>"
+msgid "<i class=\"oi oi-filled\" data-icon=\"settings\" title=\"Edit Settings\"/>"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"settings\" title=\"Edit Settings\"/>"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                        Connect your Outlook account"
 msgstr ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                       Tilslut din Outlook-konto"
 
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.fetchmail_server_view_form
 msgid ""
-"<span invisible=\"server_type != 'outlook' or not "
-"microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span invisible=\"server_type != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
@@ -48,8 +46,7 @@ msgstr ""
 #. module: microsoft_outlook
 #: model_terms:ir.ui.view,arch_db:microsoft_outlook.ir_mail_server_view_form
 msgid ""
-"<span invisible=\"smtp_authentication != 'outlook' or not "
-"microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
+"<span invisible=\"smtp_authentication != 'outlook' or not microsoft_outlook_refresh_token\" class=\"badge text-bg-success\">\n"
 "                        Outlook Token Valid\n"
 "                    </span>"
 msgstr ""
@@ -89,9 +86,7 @@ msgstr "Konfigurationsindstillinger"
 #: code:addons/microsoft_outlook/models/ir_mail_server.py:0
 msgid ""
 "Connect your Outlook account with the OAuth Authentication process.  \n"
-"By default, only a user with a matching email address will be able to use "
-"this server. To extend its use, you should set a \"mail.default.from\" "
-"system parameter."
+"By default, only a user with a matching email address will be able to use this server. To extend its use, you should set a \"mail.default.from\" system parameter."
 msgstr ""
 
 #. module: microsoft_outlook
@@ -140,8 +135,8 @@ msgstr "Indgående mail server"
 #. odoo-python
 #: code:addons/microsoft_outlook/models/ir_mail_server.py:0
 msgid ""
-"Incorrect Connection Security for Outlook mail server “%s”. Please set it to "
-"\"TLS (STARTTLS)\"."
+"Incorrect Connection Security for Outlook mail server “%s”. Please set it to"
+" \"TLS (STARTTLS)\"."
 msgstr ""
 
 #. module: microsoft_outlook
@@ -170,8 +165,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/microsoft_outlook/controllers/main.py:0
 msgid ""
-"Oops, you're creating an authorization to send from %(email_login)s but your "
-"address is %(email_server)s. Make sure your addresses match!"
+"Oops, you're creating an authorization to send from %(email_login)s but your"
+" address is %(email_server)s. Make sure your addresses match!"
 msgstr ""
 
 #. module: microsoft_outlook

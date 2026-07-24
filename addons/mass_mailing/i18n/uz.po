@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 07:23+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"mass_mailing/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/mass_mailing/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,8 +30,7 @@ msgstr ""
 #: code:addons/mass_mailing/models/mailing_filter.py:0
 msgid ""
 "\n"
-"                <p class=\"o_view_nocontent_smiling_face\">No record "
-"currently matches your rules!</p>\n"
+"                <p class=\"o_view_nocontent_smiling_face\">No record currently matches your rules!</p>\n"
 "            "
 msgstr ""
 
@@ -52,8 +50,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\"Engaging with this team was effortless from start to end. Their "
-"proficiency and meticulous approach greatly enhanced our project. I couldn't "
-"be happier with the final product!\""
+"proficiency and meticulous approach greatly enhanced our project. I couldn't"
+" be happier with the final product!\""
 msgstr ""
 "\"Bu jamoa bilan hamkorlik qilish boshidan oxirigacha oson kechdi. Ularning "
 "mahorati va puxta yondashuvi loyihamizni sezilarli darajada yaxshiladi. "
@@ -63,8 +61,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
 #, fuzzy
 msgid ""
-"\"Exceptional service and great communication throughout the entire process. "
-"They went above and beyond to ensure our project was a complete success.\""
+"\"Exceptional service and great communication throughout the entire process."
+" They went above and beyond to ensure our project was a complete success.\""
 msgstr ""
 "\"Butun jarayon davomida ajoyib xizmat va a'lo muloqot. Ular loyihamiz "
 "to‘liq muvaffaqiyatga erishishi uchun qo‘llaridan kelganidan ham ko‘proq "
@@ -75,8 +73,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "\"From the first meeting, it was clear we were in good hands. They took our "
-"vision and turned it into something even better than we had imagined. Highly "
-"recommend!\""
+"vision and turned it into something even better than we had imagined. Highly"
+" recommend!\""
 msgstr ""
 "\"Birinchi uchrashuvdanoq ishonchli qo‘llarda ekanligimiz ayon bo‘ldi. Ular "
 "g‘oyamizni olib, uni biz tasavvur qilgandan ham yaxshiroq narsaga "
@@ -142,7 +140,8 @@ msgstr "%(contact_name)s quyidagi tarqatma ro‘yxat(lar)ga obuna bo‘ldi"
 #: code:addons/mass_mailing/models/mailing_list.py:0
 #, fuzzy
 msgid "%(contact_name)s unsubscribed from the following mailing list(s)"
-msgstr "%(contact_name)s quyidagi tarqatma ro‘yxat(lar)dan obunani bekor qildi"
+msgstr ""
+"%(contact_name)s quyidagi tarqatma ro‘yxat(lar)dan obunani bekor qildi"
 
 #. module: mass_mailing
 #. odoo-python
@@ -178,8 +177,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/wizard/mailing_contact_import.py:0
 msgid ""
-"%(imported_count)s contacts have been imported. %(duplicate_count)s contacts "
-"are duplicates and have been ignored."
+"%(imported_count)s contacts have been imported. %(duplicate_count)s contacts"
+" are duplicates and have been ignored."
 msgstr ""
 
 #. module: mass_mailing
@@ -337,21 +336,19 @@ msgstr ""
 msgid ""
 "<br/>\n"
 "                                    <span class=\"text-muted\">\n"
-"                                        <i class=\"fa fa-envelope-o\"/> "
-"Contacts\n"
+"                                        <i class=\"oi\" data-icon=\"mail\"/> Contacts\n"
 "                                    </span>"
 msgstr ""
-"<br/>                                     <span class=\"text-"
-"muted\">                                         <i class=\"fa fa-envelope-"
-"o\"/> Kontaktlar                                     </span>"
+"<br/>                                     <span class=\"text-muted\">"
+"                                         <i class=\"oi\" data-"
+"icon=\"mail\"/> Kontaktlar                                     </span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_list_view_kanban
 #, fuzzy
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Blacklist</"
-"span>"
+"                                    <span class=\"text-muted\">Blacklist</span>"
 msgstr ""
 "<br/>                                     <span class=\"text-muted\">Qora "
 "ro‘yxat</span>"
@@ -371,8 +368,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">Mailings</"
-"span>"
+"                                    <span class=\"text-muted\">Mailings</span>"
 msgstr "<br/> <span class=\"text-muted\">Xabarlar</span>"
 
 #. module: mass_mailing
@@ -387,11 +383,8 @@ msgstr "<br/> <span class=\"text-muted\">Obunani bekor qilish</span>"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.theme_default_template
 #, fuzzy
 msgid ""
-"<br/>We want to take this opportunity to welcome you to our ever-growing "
-"community!\n"
-"                <br/>Your platform is ready for work, it will help you "
-"reduce the costs of digital signatures, attract new customers and increase "
-"sales."
+"<br/>We want to take this opportunity to welcome you to our ever-growing community!\n"
+"                <br/>Your platform is ready for work, it will help you reduce the costs of digital signatures, attract new customers and increase sales."
 msgstr ""
 "<br/>Sizni tobora kengayib borayotgan hamjamiyatimizga xush kelibsiz deb "
 "aytishdan mamnunmiz! <br/>Platformangiz ishga tayyor, u sizga elektron "
@@ -430,11 +423,10 @@ msgstr "<font class=\"h5-fs\">Tony Fred</font>"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_highlight
 #, fuzzy
-msgid ""
-"<font class=\"text-white\">Put the focus on what you have to say!</font>"
+msgid "<font class=\"text-white\">Put the focus on what you have to say!</font>"
 msgstr ""
-"<font class=\"text-white\">Aytmoqchi bo‘lgan fikringizga e'tibor qarating!</"
-"font>"
+"<font class=\"text-white\">Aytmoqchi bo‘lgan fikringizga e'tibor "
+"qarating!</font>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_5
@@ -508,8 +500,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_call_to_action
 #, fuzzy
 msgid ""
-"<font style=\"color: white;\"><strong>50,000+ companies</strong> run Odoo.</"
-"font>"
+"<font style=\"color: white;\"><strong>50,000+ companies</strong> run "
+"Odoo.</font>"
 msgstr ""
 "<font style=\"color: white;\"><strong>50 000 dan ortiq kompaniya</strong> "
 "Odoo‘dan foydalanadi.</font>"
@@ -524,8 +516,8 @@ msgstr "<font style=\"color: white;\">Go‘zal parchalar</font>"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_call_to_action
 #, fuzzy
 msgid ""
-"<font style=\"color: white;\">Join us and make your company a better place.</"
-"font>"
+"<font style=\"color: white;\">Join us and make your company a better "
+"place.</font>"
 msgstr ""
 "<font style=\"color: white;\">Bizga qo‘shiling va kompaniyangizni yaxshiroq "
 "joyga aylantiring.</font>"
@@ -533,21 +525,18 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
 #, fuzzy
-msgid ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">A color block</span></"
-"font>"
-msgstr ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">Rangli blok</span></font>"
+msgid "<font style=\"color:white;\"><span class=\"h3-fs\">A color block</span></font>"
+msgstr "<font style=\"color:white;\"><span class=\"h3-fs\">Rangli blok</span></font>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
 #, fuzzy
 msgid ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">Another color block</"
-"span></font>"
+"<font style=\"color:white;\"><span class=\"h3-fs\">Another color "
+"block</span></font>"
 msgstr ""
-"<font style=\"color:white;\"><span class=\"h3-fs\">Boshqa rangli blok</"
-"span></font>"
+"<font style=\"color:white;\"><span class=\"h3-fs\">Boshqa rangli "
+"blok</span></font>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_color_blocks_2
@@ -573,8 +562,7 @@ msgstr "<font style=\"color:white;\">Batafsil ma'lumot</font>"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_picture
 #, fuzzy
-msgid ""
-"<font style=\"font-size: 12px;\">Where innovation meets performance</font>"
+msgid "<font style=\"font-size: 12px;\">Where innovation meets performance</font>"
 msgstr ""
 "<font style=\"font-size: 12px;\">Innovatsiya samaradorlik bilan "
 "uyg‘unlashgan joy</font>"
@@ -582,77 +570,75 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
-msgid "<i class=\"fa fa-bar-chart\"/> Compare Version"
-msgstr "<i class=\"fa fa-bar-chart\"/> Versiyalarni taqqoslash"
+msgid "<i class=\"oi\" data-icon=\"bar_chart\"/> Compare Version"
+msgstr "<i class=\"oi\" data-icon=\"bar_chart\"/> Versiyalarni taqqoslash"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_filter_view_kanban
 msgid ""
-"<i class=\"fa fa-bullseye me-1\" title=\"Recipient Model\" aria-"
-"hidden=\"true\"/>"
+"<i class=\"oi me-1\" data-icon=\"crisis_alert\" title=\"Recipient Model\" "
+"aria-hidden=\"true\"/>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Lead/"
-"Opportunity\"/>"
+"<i class=\"oi me-2\" data-icon=\"crisis_alert\" role=\"img\" aria-"
+"label=\"Lead/Opportunity\"/>"
 msgstr ""
-"<i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Yetakchi/"
-"Imkoniyat\"/>"
+"<i class=\"me-2 oi\" data-icon=\"crisis_alert\" role=\"img\" aria-"
+"label=\"Yetakchi/Imkoniyat\"/>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
-msgid "<i class=\"fa fa-copy\"/> Create an Alternative"
-msgstr "<i class=\"fa fa-copy\"/> Muqobil nusxa yaratish"
+msgid "<i class=\"oi\" data-icon=\"content_copy\"/> Create an Alternative"
+msgstr "<i class=\"oi\" data-icon=\"content_copy\"/> Muqobil nusxa yaratish"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_kanban
-msgid "<i class=\"fa fa-envelope text-primary me-2\" title=\"Email\"/>"
+msgid "<i class=\"oi oi-filled text-primary me-2\" data-icon=\"mail\" title=\"Email\"/>"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
-msgid "<i class=\"fa fa-envelope\"/> Send this as winner"
-msgstr "<i class=\"fa fa-envelope\"/> Buni g‘olib sifatida jo‘natish"
+msgid "<i class=\"oi oi-filled\" data-icon=\"mail\"/> Send this as winner"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"mail\"/> Buni g‘olib sifatida jo‘natish"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-envelope\"/><span name=\"ab_test_auto\">\n"
+"<i class=\"oi oi-filled\" data-icon=\"mail\"/><span name=\"ab_test_auto\">\n"
 "                                                    Send Winner Now\n"
 "                                                </span>"
 msgstr ""
-"<i class=\"fa fa-envelope\"/><span name=\"ab_test_auto\">G‘olibni hoziroq "
-"jo‘natish</span>"
+"<i class=\"oi-filled oi\" data-icon=\"mail\"/><span "
+"name=\"ab_test_auto\">G‘olibni hoziroq jo‘natish</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-exclamation-triangle text-danger\" aria-hidden=\"true\"/>\n"
-"                        The sum of all percentages for this A/B campaign "
-"totals"
+"<i class=\"oi text-danger\" data-icon=\"warning\" aria-hidden=\"true\"/>\n"
+"                        The sum of all percentages for this A/B campaign totals"
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle text-danger\" aria-hidden=\"true\"/> "
+"<i class=\"text-danger oi\" data-icon=\"warning\" aria-hidden=\"true\"/> "
 "Ushbu A/B kampaniyasi uchun barcha foizlar yig‘indisi"
 
 #. module: mass_mailing
 #: model_terms:ir.actions.act_window,help:mass_mailing.mailing_subscription_action_report_optout
 #, fuzzy
-msgid "<i class=\"oi oi-arrow-right\"></i> Configure Opt-out Reasons"
-msgstr "<i class=\"oi oi-arrow-right\"></i> Rad etish sabablarini sozlash"
+msgid "<i class=\"oi\" data-icon=\"east\"></i> Configure Opt-out Reasons"
+msgstr "<i class=\"oi\" data-icon=\"east\"></i> Rad etish sabablarini sozlash"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_filter_view_kanban
 msgid ""
-"<i class=\"text-muted fa fa-paper-plane-o me-1\" aria-hidden=\"true\"/>\n"
-"                                    <span class=\"text-muted "
-"fs-5\">Mailings</span>"
+"<i class=\"oi text-muted me-1\" data-icon=\"send\" aria-hidden=\"true\"/>\n"
+"                                    <span class=\"text-muted fs-5\">Mailings</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -664,17 +650,14 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
 msgid ""
-"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" "
-"invisible=\"reply_to_mode == 'update' or mailing_model_name in "
-"['mailing.contact', 'res.partner', 'mailing.list']\">\n"
-"                                                    To track replies, this "
-"address must belong to this database.\n"
+"<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" invisible=\"reply_to_mode == 'update' or mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']\">\n"
+"                                                    To track replies, this address must belong to this database.\n"
 "                                                </small>"
 msgstr ""
 "<small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" "
 "invisible=\"reply_to_mode == 'update' or mailing_model_name in "
-"['mailing.contact','res.partner','mailing.list']\">Javoblarni kuzatish uchun "
-"bu manzil ushbu ma'lumotlar bazasiga tegishli bo‘lishi shart.</small>"
+"['mailing.contact','res.partner','mailing.list']\">Javoblarni kuzatish uchun"
+" bu manzil ushbu ma'lumotlar bazasiga tegishli bo‘lishi shart.</small>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
@@ -699,35 +682,35 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
 msgid ""
-"<span class=\"fa fa-asterisk me-2\" contenteditable=\"false\"/>What We Offer"
+"<span class=\"oi me-2\" data-icon=\"emergency\" "
+"contenteditable=\"false\"/>What We Offer"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Curated Industry "
-"Insights"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" "
+"role=\"img\"/>  Curated Industry Insights"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Expert Tips &amp; "
-"How-Tos"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Expert"
+" Tips &amp; How-Tos"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mailing_list_advertisement
 msgid ""
-"<span class=\"fa fa-check text-o-color-1\" role=\"img\"/>  Guides &amp; "
-"Resources"
+"<span class=\"oi text-o-color-1\" data-icon=\"check\" role=\"img\"/>  Guides"
+" &amp; Resources"
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 #, fuzzy
-msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
+msgid "<span class=\"fa fa-check text-success\" role=\"img\"/>  Access all modules"
 msgstr ""
 "<span class=\"fa fa-check text-success\" role=\"img\"/> Barcha modullarga "
 "kirish imkoniyati"
@@ -735,10 +718,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 #, fuzzy
-msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
-msgstr ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/> Hisob boshqaruvi"
+msgid "<span class=\"fa fa-check text-success\" role=\"img\"/>  Account management"
+msgstr "<span class=\"fa fa-check text-success\" role=\"img\"/> Hisob boshqaruvi"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
@@ -761,9 +742,7 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 #, fuzzy
-msgid ""
-"<span class=\"fa fa-check text-success\" role=\"img\"/>  Limited "
-"customization"
+msgid "<span class=\"fa fa-check text-success\" role=\"img\"/>  Limited customization"
 msgstr ""
 "<span class=\"fa fa-check text-success\" role=\"img\"/> Cheklangan "
 "moslashtiruv"
@@ -797,15 +776,16 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_centered_cta_badge
 msgid ""
-"<span class=\"fa fa-fw fa-shopping-cart\" contenteditable=\"false\"/>  Huge "
-"holiday sale savings. Don't miss out."
+"<span class=\"oi oi-fw\" data-icon=\"shopping_cart\" "
+"contenteditable=\"false\"/>  Huge holiday sale savings. Don't miss out."
 msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_special_offer_cta
 msgid ""
-"<span class=\"fa fa-fw fa-tag\" contenteditable=\"false\"/>  <strong>Special "
-"Offers</strong>. Complimentary care packs included with every sofa."
+"<span class=\"oi oi-fw\" data-icon=\"label\" "
+"contenteditable=\"false\"/>  <strong>Special Offers</strong>. Complimentary "
+"care packs included with every sofa."
 msgstr ""
 
 #. module: mass_mailing
@@ -822,8 +802,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_kanban
 #, fuzzy
 msgid ""
-"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Scheduled "
-"date\"/>\n"
+"<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Scheduled date\"/>\n"
 "                                        <span>Next Batch</span>"
 msgstr ""
 "<span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-"
@@ -842,10 +821,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 #, fuzzy
-msgid ""
-"<span class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
-msgstr ""
-"<span class=\"fa fa-times text-danger\" role=\"img\"/> Moslashtirish yo‘q"
+msgid "<span class=\"fa fa-times text-danger\" role=\"img\"/>  No customization"
+msgstr "<span class=\"fa fa-times text-danger\" role=\"img\"/> Moslashtirish yo‘q"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
@@ -940,8 +917,7 @@ msgstr "<span class=\"h5-fs\">Tony Fred</span>"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_comparisons
 #, fuzzy
-msgid ""
-"<span class=\"o_small-fs\">Instant setup, satisfied or reimbursed.</span>"
+msgid "<span class=\"o_small-fs\">Instant setup, satisfied or reimbursed.</span>"
 msgstr ""
 "<span class=\"o_small-fs\">Tezkor o‘rnatish, qoniqish yoki pulni qaytarish "
 "kafolati.</span>"
@@ -949,10 +925,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.res_partner_view_form
 msgid ""
-"<span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length != "
-"1\">Mailing Contact</span>\n"
-"                        <span class=\"o_stat_text\" "
-"invisible=\"mailing_contact_ids.length == 1\">Mailing Contacts</span>"
+"<span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length != 1\">Mailing Contact</span>\n"
+"                        <span class=\"o_stat_text\" invisible=\"mailing_contact_ids.length == 1\">Mailing Contacts</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -964,10 +938,8 @@ msgstr "<span class=\"o_stat_text\">Qabul qiluvchini ochish</span>"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_contact_view_form_split_name
 #, fuzzy
-msgid ""
-"<span class=\"opacity-50\" invisible=\"name\">e.g. \"John Smith\"</span>"
-msgstr ""
-"<span class=\"opacity-50\" invisible=\"name\">masalan, \"John Smith\"</span>"
+msgid "<span class=\"opacity-50\" invisible=\"name\">e.g. \"John Smith\"</span>"
+msgstr "<span class=\"opacity-50\" invisible=\"name\">masalan, \"John Smith\"</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.mailing_filter_view_kanban
@@ -1003,11 +975,10 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
-msgid ""
-"<span name=\"next_departure_text\">This mailing is scheduled for </span>"
+msgid "<span name=\"next_departure_text\">This mailing is scheduled for </span>"
 msgstr ""
-"<span name=\"next_departure_text\">Bu xabar ushbu vaqtga rejalashtirilgan: </"
-"span>"
+"<span name=\"next_departure_text\">Bu xabar ushbu vaqtga rejalashtirilgan: "
+"</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
@@ -1018,16 +989,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
 msgid ""
-"<span name=\"refresh_text\">This mailing will be sent as soon as possible.</"
-"span>"
+"<span name=\"refresh_text\">This mailing will be sent as soon as "
+"possible.</span>"
 msgstr ""
 "<span name=\"refresh_text\">Bu xabar imkon qadar tezroq yuboriladi.</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 msgid ""
-"<span name=\"scheduled_text\">emails are in queue and will be sent soon</"
-"span>"
+"<span name=\"scheduled_text\">emails are in queue and will be sent "
+"soon</span>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1105,8 +1076,7 @@ msgstr ""
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_numbers
-msgid ""
-"<strong><font style=\"font-size: 48px; color: white;\">45</font></strong>"
+msgid "<strong><font style=\"font-size: 48px; color: white;\">45</font></strong>"
 msgstr ""
 
 #. module: mass_mailing
@@ -1139,8 +1109,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Emil Foster</strong><br/>\n"
-"                                    <span class=\"text-muted\">Creative "
-"Director</span>"
+"                                    <span class=\"text-muted\">Creative Director</span>"
 msgstr ""
 "<strong>Emil Foster</strong><br/> <span class=\"text-muted\">Ijodiy "
 "direktor</span>"
@@ -1155,8 +1124,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>James Carter</strong><br/>\n"
-"                                    <span class=\"text-muted\">Chief "
-"Technical Officer</span>"
+"                                    <span class=\"text-muted\">Chief Technical Officer</span>"
 msgstr ""
 "<strong>Jeyms Karter</strong><br/> <span class=\"text-muted\">Bosh texnik "
 "direktor</span>"
@@ -1171,11 +1139,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Jody Roberts</strong><br/>\n"
-"                                    <span class=\"text-muted\">Chief "
-"Financial Officer</span>"
+"                                    <span class=\"text-muted\">Chief Financial Officer</span>"
 msgstr ""
-"<strong>Jodi Roberts</strong><br/> <span class=\"text-muted\">Bosh moliyaviy "
-"direktor</span>"
+"<strong>Jodi Roberts</strong><br/> <span class=\"text-muted\">Bosh moliyaviy"
+" direktor</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_4
@@ -1193,7 +1160,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
 #, fuzzy
 msgid "<strong>Networking: Walking Dinner &amp; Drinks</strong>"
-msgstr "<strong>Networking: Aylanib yurib kechki ovqat va ichimliklar</strong>"
+msgstr ""
+"<strong>Networking: Aylanib yurib kechki ovqat va ichimliklar</strong>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_reviews_wall
@@ -1236,11 +1204,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "<strong>Sullivan Mitchell</strong><br/>\n"
-"                                    <span class=\"text-muted\">Marketing "
-"Director</span>"
+"                                    <span class=\"text-muted\">Marketing Director</span>"
 msgstr ""
-"<strong>Sullivan Mitchell</strong><br/> <span class=\"text-muted\">Marketing "
-"direktori</span>"
+"<strong>Sullivan Mitchell</strong><br/> <span class=\"text-muted\">Marketing"
+" direktori</span>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_schedule
@@ -1298,8 +1265,8 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.view_mail_mass_mailing_form
 #, fuzzy
-msgid "<u>Refresh <i class=\"fa fa-refresh ms-1\"/></u>"
-msgstr "<u>Yangilash <i class=\"fa fa-refresh ms-1\"/></u>"
+msgid "<u>Refresh <i class=\"oi ms-1\" data-icon=\"refresh\"/></u>"
+msgstr "<u>Yangilash <i class=\"ms-1 oi\" data-icon=\"refresh\"/></u>"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_contact
@@ -1400,7 +1367,8 @@ msgstr ""
 msgid ""
 "A mailing contact cannot subscribe to the same mailing list multiple times."
 msgstr ""
-"Aloqa kontakti bir xil pochta ro‘yxatiga bir necha marta obuna bo‘la olmaydi."
+"Aloqa kontakti bir xil pochta ro‘yxatiga bir necha marta obuna bo‘la "
+"olmaydi."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
@@ -1547,7 +1515,8 @@ msgstr "Faoliyat turi belgisi"
 #, fuzzy
 msgid ""
 "Adapt these three columns to fit your design need. To duplicate, delete or "
-"move columns, select the column and use the top icons to perform your action."
+"move columns, select the column and use the top icons to perform your "
+"action."
 msgstr ""
 "Ushbu uch ustunni o‘z dizayn ehtiyojingizga moslashtiring. Ustunlarni "
 "nusxalash, o‘chirish yoki ko‘chirish uchun ustunni tanlang va amalni "
@@ -1692,8 +1661,8 @@ msgstr ""
 "Qabul qiluvchiga obunani bekor qilish sahifasi orqali qora ro‘yxatdagi "
 "holatini o‘zi boshqarishiga ruxsat bering. Agar bu parametr faol bo‘lsa, "
 "\"Meni qora ro‘yxatga qo‘shish\" tugmasi obunani bekor qilish sahifasida "
-"ko‘rinmaydi. Lidlar va hamkorlarga qayta obuna bo‘lish imkonini berish uchun "
-"\"Qaytish\" tugmasi har qanday holatda doim ko‘rinib turadi."
+"ko‘rinmaydi. Lidlar va hamkorlarga qayta obuna bo‘lish imkonini berish uchun"
+" \"Qaytish\" tugmasi har qanday holatda doim ko‘rinib turadi."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -1912,8 +1881,8 @@ msgstr "Boshlang‘ich"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_describing_benefits
 msgid ""
-"Benefit from tax-free shopping, simplifying your purchase and enhancing your "
-"savings without any extra costs."
+"Benefit from tax-free shopping, simplifying your purchase and enhancing your"
+" savings without any extra costs."
 msgstr ""
 
 #. module: mass_mailing
@@ -1994,8 +1963,8 @@ msgstr "Portaldan bloklash ro‘yxatini olib tashlash so‘rovi"
 #: code:addons/mass_mailing/controllers/main.py:0
 #, fuzzy
 msgid ""
-"Blocklist removal request from portal of mailing %(mailing_link)s (document %"
-"(record_link)s)"
+"Blocklist removal request from portal of mailing %(mailing_link)s (document "
+"%(record_link)s)"
 msgstr ""
 "%(mailing_link)s xabarining portalidan bloklash ro‘yxatini olib tashlash "
 "so‘rovi (hujjat %(record_link)s)"
@@ -2012,11 +1981,11 @@ msgstr "Portaldan bloklash ro‘yxati so‘rovi"
 #: code:addons/mass_mailing/controllers/main.py:0
 #, fuzzy
 msgid ""
-"Blocklist request from portal of mailing %(mailing_link)s (document %"
-"(record_link)s)"
+"Blocklist request from portal of mailing %(mailing_link)s (document "
+"%(record_link)s)"
 msgstr ""
-"%(mailing_link)s xabarining portalidan bloklash ro‘yxati so‘rovi (hujjat %"
-"(record_link)s)"
+"%(mailing_link)s xabarining portalidan bloklash ro‘yxati so‘rovi (hujjat "
+"%(record_link)s)"
 
 #. module: mass_mailing
 #. odoo-python
@@ -2298,8 +2267,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/ir_mail_server.py:0
 msgid ""
-"Cannot set an owner on '%(server)s': it is configured as the dedicated Email "
-"Marketing server."
+"Cannot set an owner on '%(server)s': it is configured as the dedicated Email"
+" Marketing server."
 msgstr ""
 
 #. module: mass_mailing
@@ -2424,8 +2393,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_pricelist_boxed
 #, fuzzy
 msgid ""
-"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves, "
-"drizzled with extra virgin olive oil."
+"Classic pizza with fresh mozzarella, San Marzano tomatoes, and basil leaves,"
+" drizzled with extra virgin olive oil."
 msgstr ""
 "Yangi motsarella, San Marzano pomidorlari va rayhon barglari bilan "
 "tayyorlangan klassik pitsa, ustidan toza zaytun moyi sepilgan."
@@ -2530,8 +2499,8 @@ msgstr "Qaytish"
 #, fuzzy
 msgid "Come back later to discover why contacts unsubscribe.<br>"
 msgstr ""
-"Kontaktlar obunani bekor qilish sabablarini bilish uchun keyinroq qayting."
-"<br>"
+"Kontaktlar obunani bekor qilish sabablarini bilish uchun keyinroq "
+"qayting.<br>"
 
 #. module: mass_mailing
 #. odoo-python
@@ -2579,8 +2548,8 @@ msgid ""
 "Comprehensive tools for growing businesses. Optimize your processes and "
 "productivity across your team."
 msgstr ""
-"O‘sib borayotgan korxonalar uchun keng qamrovli vositalar. Jamoangiz bo‘ylab "
-"jarayonlar va samaradorlikni optimallashtirishingiz mumkin."
+"O‘sib borayotgan korxonalar uchun keng qamrovli vositalar. Jamoangiz bo‘ylab"
+" jarayonlar va samaradorlikni optimallashtirishingiz mumkin."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -3089,8 +3058,7 @@ msgstr "Barcha xususiyatlar bilan tanishing"
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
 #, fuzzy
-msgid ""
-"Discover more <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
+msgid "Discover more <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 msgstr ""
 "Ko‘proq ma'lumot <span class=\"fa fa-long-arrow-right align-middle ms-1\"/>"
 
@@ -3185,7 +3153,8 @@ msgstr ""
 #, fuzzy
 msgid "Don't worry, the mailing contact we created is an internal user."
 msgstr ""
-"Xavotir olmang, biz yaratgan pochta kontakti ichki foydalanuvchi hisoblanadi."
+"Xavotir olmang, biz yaratgan pochta kontakti ichki foydalanuvchi "
+"hisoblanadi."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -3270,8 +3239,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:mass_mailing.mailing_filter_action
 msgid ""
 "Dynamic lists are smart lists that update themselves.\n"
-"                Define your rules to automatically target recipients who "
-"match specific conditions."
+"                Define your rules to automatically target recipients who match specific conditions."
 msgstr ""
 
 #. module: mass_mailing
@@ -3356,8 +3324,8 @@ msgstr "Elektron pochta marketingi"
 msgid ""
 "Email Marketing uses it as its default mail server to send mass mailings"
 msgstr ""
-"Elektron pochta marketingi uni ommaviy xatlar yuborish uchun standart pochta "
-"serveri sifatida ishlatadi"
+"Elektron pochta marketingi uni ommaviy xatlar yuborish uchun standart pochta"
+" serveri sifatida ishlatadi"
 
 #. module: mass_mailing
 #: model:ir.model,name:mass_mailing.model_mail_thread
@@ -3482,8 +3450,8 @@ msgstr "Kutilgan"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_3
 msgid ""
 "Experience the perfect harmony of form and function. Each piece is "
-"meticulously designed with <strong>premium materials</strong>, ensuring that "
-"your interior reflects a sophisticated yet inviting atmosphere."
+"meticulously designed with <strong>premium materials</strong>, ensuring that"
+" your interior reflects a sophisticated yet inviting atmosphere."
 msgstr ""
 
 #. module: mass_mailing
@@ -3659,12 +3627,9 @@ msgstr "Pastki qismlar"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_company_team
 #, fuzzy
 msgid ""
-"Founder and chief visionary, Tony is the driving force behind the company. "
-"He loves\n"
-"                                to keep his hands full by participating in "
-"the development of the software,\n"
-"                                marketing, and customer experience "
-"strategies."
+"Founder and chief visionary, Tony is the driving force behind the company. He loves\n"
+"                                to keep his hands full by participating in the development of the software,\n"
+"                                marketing, and customer experience strategies."
 msgstr ""
 "Asoschisi va bosh g‘oyaviy rahbari Tony kompaniyaning harakatlantiruvchi "
 "kuchidir. U dasturiy ta'minot ishlab chiqish, marketing va mijozlar "
@@ -3710,8 +3675,8 @@ msgstr "Yuqori qiymat"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_product_showcase
 msgid ""
 "Great design is about more than just filling a room; it is about creating a "
-"lifestyle that feels both luxurious and meaningful. Our pieces are carefully "
-"made to bring soul to your space, blending modern ideas with the warmth of "
+"lifestyle that feels both luxurious and meaningful. Our pieces are carefully"
+" made to bring soul to your space, blending modern ideas with the warmth of "
 "traditional craftsmanship. Every detail is a deliberate choice, intended to "
 "turn your house into a personal gallery where you can truly relax in style."
 msgstr ""
@@ -3727,8 +3692,8 @@ msgid ""
 "it's genuine for the rest."
 msgstr ""
 "Ajoyib hikoyalar <strong>hamma uchun</strong>, hatto ular <strong>faqat bir "
-"kishi uchun</strong> yozilgan bo‘lsa ham. Agar siz keng, umumiy auditoriyani "
-"ko‘zlab yozsangiz, hikoyangiz sun'iy va his-tuyg‘usiz bo‘lib qoladi. Hech "
+"kishi uchun</strong> yozilgan bo‘lsa ham. Agar siz keng, umumiy auditoriyani"
+" ko‘zlab yozsangiz, hikoyangiz sun'iy va his-tuyg‘usiz bo‘lib qoladi. Hech "
 "kim qiziqmaydi. Bir kishi uchun yozing. Bitta odam uchun samimiy bo‘lsa, "
 "boshqalar uchun ham samimiy bo‘ladi."
 
@@ -3739,8 +3704,8 @@ msgid ""
 "Great stories have a <strong>personality</strong>. Consider telling a great "
 "story that provides personality. Writing a story with personality for "
 "potential clients will assist with making a relationship connection. This "
-"shows up in small quirks like word choices or phrases. Write from your point "
-"of view, not from someone else's experience."
+"shows up in small quirks like word choices or phrases. Write from your point"
+" of view, not from someone else's experience."
 msgstr ""
 "Ajoyib hikoyalar <strong>o‘ziga xos uslubga</strong> ega. Shaxsiy "
 "xususiyatlarni aks ettiradigan ajoyib hikoya aytib berishni o‘ylab ko‘ring. "
@@ -3883,8 +3848,8 @@ msgstr "ID"
 #, fuzzy
 msgid ""
 "ID of the related mail_mail. This field is an integer field because the "
-"related mail_mail can be deleted separately from its statistics. However the "
-"ID is needed for several action and controllers."
+"related mail_mail can be deleted separately from its statistics. However the"
+" ID is needed for several action and controllers."
 msgstr ""
 "Tegishli mail_mail ID raqami. Bu maydon butun sonli maydon, chunki tegishli "
 "mail_mail o‘z statistikasidan alohida o‘chirilishi mumkin. Biroq, ID bir "
@@ -3924,8 +3889,8 @@ msgstr "Agar belgilansa, yangi xabarlar e'tiboringizni talab qiladi."
 #: model:ir.model.fields,help:mass_mailing.field_mailing_mailing__ab_testing_enabled
 #, fuzzy
 msgid ""
-"If checked, recipients will be mailed only once for the whole campaign. This "
-"lets you send different mailings to randomly selected recipients and test "
+"If checked, recipients will be mailed only once for the whole campaign. This"
+" lets you send different mailings to randomly selected recipients and test "
 "the effectiveness of the mailings, without causing duplicate messages."
 msgstr ""
 "Agar belgilansa, qabul qiluvchilarga butun kampaniya davomida faqat bir "
@@ -3960,8 +3925,8 @@ msgid ""
 "If the email address is on the blacklist, the contact won't receive mass "
 "mailing anymore, from any list"
 msgstr ""
-"Agar elektron pochta manzili qora ro‘yxatda bo‘lsa, kontakt endi hech qanday "
-"ro‘yxatdan ommaviy xabar qabul qilmaydi"
+"Agar elektron pochta manzili qora ro‘yxatda bo‘lsa, kontakt endi hech qanday"
+" ro‘yxatdan ommaviy xabar qabul qilmaydi"
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.email_designer_snippets
@@ -4040,8 +4005,8 @@ msgstr "Navbatda"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_product_showcase
 msgid ""
 "In a fast-paced world, your home should be your ultimate escape—a private "
-"place that brings you a sense of calm and clarity. Our collection focuses on "
-"clean lines and comfortable shapes, providing a sophisticated backdrop for "
+"place that brings you a sense of calm and clarity. Our collection focuses on"
+" clean lines and comfortable shapes, providing a sophisticated backdrop for "
 "your most important moments. We believe your surroundings should be a "
 "testament to your taste, offering the perfect l ease you need to unwind."
 msgstr ""
@@ -4666,8 +4631,7 @@ msgstr "Xabar yuborish hisobotlari o‘chirildi"
 #, fuzzy
 msgid ""
 "Mailing Reports have been turned off for all users. <br/>\n"
-"                                If needed, they can be turned back on from "
-"the"
+"                                If needed, they can be turned back on from the"
 msgstr ""
 "Xabar yuborish hisobotlari barcha foydalanuvchilar uchun o‘chirildi. <br/> "
 "Zarur bo‘lsa, ularni qayta yoqish mumkin"
@@ -4948,8 +4912,8 @@ msgstr "Xabarlar"
 #, fuzzy
 msgid ""
 "Mich loves taking on challenges. With his multi-year experience as "
-"Commercial Director in the software industry, Mich has helped the company to "
-"get where it is today. Mich is among the best minds."
+"Commercial Director in the software industry, Mich has helped the company to"
+" get where it is today. Mich is among the best minds."
 msgstr ""
 "Mich qiyinchiliklarni yengishni yoqtiradi. Dasturiy ta'minot sohasida "
 "Tijorat direktori sifatidagi ko‘p yillik tajribasi bilan Mich kompaniyaning "
@@ -4961,11 +4925,10 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Michael Fletcher<br/>\n"
-"                   <span style=\"font-size: 12px; font-weight: bolder;"
-"\">Customer Service</span>"
+"                   <span style=\"font-size: 12px; font-weight: bolder;\">Customer Service</span>"
 msgstr ""
-"Michael Fletcher<br/> <span style=\"font-size: 12px; font-weight: bolder;"
-"\">Mijozlar xizmati</span>"
+"Michael Fletcher<br/> <span style=\"font-size: 12px; font-weight: "
+"bolder;\">Mijozlar xizmati</span>"
 
 #. module: mass_mailing
 #: model:ir.model.fields.selection,name:mass_mailing.selection__mailing_trace__failure_type__mail_email_missing
@@ -5365,8 +5328,8 @@ msgid ""
 "Once you send these emails, they'll be making a grand entrance in all the "
 "inboxes, creating quite the buzz!"
 msgstr ""
-"Bu xatlarni jo‘natganingizdan so‘ng, ular barcha pochta qutilarda katta shov-"
-"shuvga sabab bo‘ladi!"
+"Bu xatlarni jo‘natganingizdan so‘ng, ular barcha pochta qutilarda katta "
+"shov-shuvga sabab bo‘ladi!"
 
 #. module: mass_mailing
 #. odoo-python
@@ -5421,8 +5384,8 @@ msgstr "Rad etish"
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__opt_out
 #, fuzzy
 msgid ""
-"Opt out flag for a specific mailing list. This field should not be used in a "
-"view without a unique and active mailing list context."
+"Opt out flag for a specific mailing list. This field should not be used in a"
+" view without a unique and active mailing list context."
 msgstr ""
 "Muayyan xat ro‘yxati uchun rad etish belgisi. Bu maydon noyob va faol xat "
 "ro‘yxati kontekstisiz ko‘rinishda ishlatilmasligi kerak."
@@ -5469,8 +5432,8 @@ msgid ""
 msgstr ""
 "E-mail yuborishda tanlanadigan ixtiyoriy tarjima tili (ISO kodi). Agar "
 "belgilanmasa, asosiy hamkorning tili ishlatiladi. Bu odatda tegishli tilni "
-"ta'minlaydigan to‘ldiruvchi ifoda bo‘lishi kerak, masalan "
-"{{ object.partner_id.lang }}."
+"ta'minlaydigan to‘ldiruvchi ifoda bo‘lishi kerak, masalan {{ "
+"object.partner_id.lang }}."
 
 #. module: mass_mailing
 #: model:ir.actions.act_window,name:mass_mailing.mailing_subscription_optout_action
@@ -5646,7 +5609,8 @@ msgstr ""
 #, fuzzy
 msgid "Pick a dedicated outgoing mail server for your mass mailings"
 msgstr ""
-"Ommaviy xat jo‘natishlaringiz uchun maxsus chiquvchi pochta serverini tanlang"
+"Ommaviy xat jo‘natishlaringiz uchun maxsus chiquvchi pochta serverini "
+"tanlang"
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -5963,10 +5927,10 @@ msgstr ""
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_content_card_4
 msgid ""
-"Redefine your daily rituals with interiors that inspire. From the moment you "
-"walk through the door, our pieces evoke a sense of <strong>pure delight</"
-"strong>, turning every corner of your home into a sanctuary of happiness and "
-"ease."
+"Redefine your daily rituals with interiors that inspire. From the moment you"
+" walk through the door, our pieces evoke a sense of <strong>pure "
+"delight</strong>, turning every corner of your home into a sanctuary of "
+"happiness and ease."
 msgstr ""
 
 #. module: mass_mailing
@@ -6671,8 +6635,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_pricelist_boxed
 #, fuzzy
 msgid ""
-"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce "
-"for a flavorful kick."
+"Spicy pepperoni paired with fiery chili flakes, mozzarella, and tomato sauce"
+" for a flavorful kick."
 msgstr ""
 "Achchiq pepperoni, o‘tkir chili bo‘laklari, motsarella va pomidor sousi "
 "bilan tayyorlangan mazali pitsa."
@@ -7067,8 +7031,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/mailing.py:0
 msgid ""
-"The saved filters target different recipients and are incompatible with this "
-"mailing."
+"The saved filters target different recipients and are incompatible with this"
+" mailing."
 msgstr ""
 
 #. module: mass_mailing
@@ -7159,8 +7123,8 @@ msgstr ""
 #: model:ir.model.fields,help:mass_mailing.field_mailing_contact__email_normalized
 #, fuzzy
 msgid ""
-"This field is used to search on email address as the primary email field can "
-"contain more than strictly an email address."
+"This field is used to search on email address as the primary email field can"
+" contain more than strictly an email address."
 msgstr ""
 "Bu maydon elektron pochta manzilini qidirish uchun ishlatiladi, chunki "
 "asosiy elektron pochta maydonida faqat elektron pochta manzilidan tashqari "
@@ -7228,8 +7192,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
-"right icon of each block. Then, duplicate one of the columns to create a new "
-"one as a copy."
+"right icon of each block. Then, duplicate one of the columns to create a new"
+" one as a copy."
 msgstr ""
 "To‘rtinchi ustunni qo‘shish uchun har bir blokning o‘ng tomonidagi belgidan "
 "foydalanib, ushbu uchta ustun o‘lchamini kichraytiring. So‘ngra yangi ustun "
@@ -7239,8 +7203,10 @@ msgstr ""
 #. odoo-python
 #: code:addons/mass_mailing/models/mailing.py:0
 #, fuzzy
-msgid "To send the winner mailing the campaign should not have been completed."
-msgstr "G‘olib xabarini yuborish uchun kampaniya yakunlanmagan bo‘lishi kerak."
+msgid ""
+"To send the winner mailing the campaign should not have been completed."
+msgstr ""
+"G‘olib xabarini yuborish uchun kampaniya yakunlanmagan bo‘lishi kerak."
 
 #. module: mass_mailing
 #. odoo-python
@@ -7249,8 +7215,8 @@ msgstr "G‘olib xabarini yuborish uchun kampaniya yakunlanmagan bo‘lishi kera
 msgid ""
 "To send the winner mailing the same campaign should be used by the mailings"
 msgstr ""
-"G‘olib xabarini yuborish uchun xuddi shu kampaniya xat jo‘natmalar tomonidan "
-"ishlatilgan bo‘lishi kerak"
+"G‘olib xabarini yuborish uchun xuddi shu kampaniya xat jo‘natmalar tomonidan"
+" ishlatilgan bo‘lishi kerak"
 
 #. module: mass_mailing
 #. odoo-python
@@ -7349,7 +7315,8 @@ msgstr "Taqqoslash uchun kampaniyaning turli xil variantlarini sinab ko‘ring"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_features_grid
 #, fuzzy
 msgid "Turn every feature into a benefit for your reader."
-msgstr "Har bir xususiyatni o‘quvchingiz uchun foydali jihatlarga aylantiring."
+msgstr ""
+"Har bir xususiyatni o‘quvchingiz uchun foydali jihatlarga aylantiring."
 
 #. module: mass_mailing
 #: model:ir.model.fields,field_description:mass_mailing.field_mailing_trace__trace_type
@@ -7495,19 +7462,16 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Use this menu to keep track of the results of your mailings.<br>\n"
-"                    From here, you'll be able to overview the rate of "
-"replies, clicks, bounces..."
+"                    From here, you'll be able to overview the rate of replies, clicks, bounces..."
 msgstr ""
-"Xabarlaringiz natijalarini kuzatib borish uchun ushbu menyudan foydalaning."
-"<br> Bu yerdan javoblar, bosishlar, qaytarilishlar foizini ko‘rib "
-"chiqishingiz mumkin..."
+"Xabarlaringiz natijalarini kuzatib borish uchun ushbu menyudan "
+"foydalaning.<br> Bu yerdan javoblar, bosishlar, qaytarilishlar foizini "
+"ko‘rib chiqishingiz mumkin..."
 
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_media_list
 msgid ""
-"Use this snippet to build various types of components that feature a left- "
-"or right-aligned image alongside textual content. Duplicate the element to "
-"create a list that fits your needs.\n"
+"Use this snippet to build various types of components that feature a left- or right-aligned image alongside textual content. Duplicate the element to create a list that fits your needs.\n"
 "                            <br/>"
 msgstr ""
 
@@ -7599,8 +7563,8 @@ msgstr "Biz yaxshi hamkorlar davrasidamiz."
 #. module: mass_mailing
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_text_need_help
 msgid ""
-"We deliver personalized solutions, ensuring that every customer receives top-"
-"tier service tailored to their needs."
+"We deliver personalized solutions, ensuring that every customer receives "
+"top-tier service tailored to their needs."
 msgstr ""
 
 #. module: mass_mailing
@@ -7694,8 +7658,8 @@ msgid ""
 "Write one or two paragraphs describing your product or services. To be "
 "successful your content needs to be useful to your readers."
 msgstr ""
-"Mahsulotingiz yoki xizmatingizni tasvirlovchi bir yoki ikki xatboshi yozing. "
-"Muvaffaqiyatli bo‘lish uchun mazmun o‘quvchilaringizga foydali bo‘lishi "
+"Mahsulotingiz yoki xizmatingizni tasvirlovchi bir yoki ikki xatboshi yozing."
+" Muvaffaqiyatli bo‘lish uchun mazmun o‘quvchilaringizga foydali bo‘lishi "
 "kerak."
 
 #. module: mass_mailing
@@ -7713,8 +7677,8 @@ msgid ""
 "Write or paste email addresses in the field below.\n"
 "                    Each line will be imported as a mailing list contact."
 msgstr ""
-"Quyidagi maydonchaga elektron pochta manzillarini yozing yoki joylashtiring. "
-"Har bir qator tarqatma ro‘yxati kontakti sifatida import qilinadi."
+"Quyidagi maydonchaga elektron pochta manzillarini yozing yoki joylashtiring."
+" Har bir qator tarqatma ro‘yxati kontakti sifatida import qilinadi."
 
 #. module: mass_mailing
 #. odoo-javascript
@@ -7746,7 +7710,8 @@ msgstr "Siz endi bizning tarqatma ro‘yxatimiz(lar)dan chiqarilgansiz."
 #. odoo-python
 #: code:addons/mass_mailing/controllers/main.py:0
 #, fuzzy
-msgid "You are no longer part of our services and will not be contacted again."
+msgid ""
+"You are no longer part of our services and will not be contacted again."
 msgstr ""
 "Siz endi xizmatlarimizdan foydalanmaysiz va biz siz bilan qayta "
 "bog‘lanmaymiz."
@@ -7790,8 +7755,7 @@ msgstr ""
 #: code:addons/mass_mailing/models/utm_medium.py:0
 #, fuzzy
 msgid ""
-"You cannot delete these UTM Mediums as they are linked to the following "
-"mailings in Mass Mailing:\n"
+"You cannot delete these UTM Mediums as they are linked to the following mailings in Mass Mailing:\n"
 "%(mailing_names)s"
 msgstr ""
 "Bu UTM vositalarini o‘chira olmaysiz, chunki ular Ommaviy tarqatmadagi "
@@ -7802,8 +7766,7 @@ msgstr ""
 #: code:addons/mass_mailing/models/utm_source.py:0
 #, fuzzy
 msgid ""
-"You cannot delete these UTM Sources as they are linked to the following "
-"mailings in Mass Mailing:\n"
+"You cannot delete these UTM Sources as they are linked to the following mailings in Mass Mailing:\n"
 "%(mailing_names)s"
 msgstr ""
 "Bu UTM manbalarini o‘chira olmaysiz, chunki ular Ommaviy tarqatmadagi "
@@ -7877,7 +7840,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_footer_social_and_logo
 #: model_terms:ir.ui.view,arch_db:mass_mailing.s_mail_block_footer_social_left
 msgid ""
-"You're seeing this because you've shopped with us or joined our mailing list."
+"You're seeing this because you've shopped with us or joined our mailing "
+"list."
 msgstr ""
 
 #. module: mass_mailing
@@ -8045,8 +8009,8 @@ msgstr "bizning bloklash ro‘yxatimizda"
 #: model_terms:ir.ui.view,arch_db:mass_mailing.ab_testing_description
 #, fuzzy
 msgid ""
-"is the winner of the A/B testing campaign and has been sent to all remaining "
-"recipients."
+"is the winner of the A/B testing campaign and has been sent to all remaining"
+" recipients."
 msgstr ""
 "A/B sinov kampaniyasining g‘olibi bo‘lib, qolgan barcha qabul qiluvchilarga "
 "yuborildi."
@@ -8056,9 +8020,7 @@ msgstr ""
 #, fuzzy
 msgid ""
 "of all potential recipients.<br/>\n"
-"                        <b class=\"text-danger\">Some of the mailings will "
-"not be sent</b>, as only 1 email will be sent for each unique recipient in "
-"this campaign."
+"                        <b class=\"text-danger\">Some of the mailings will not be sent</b>, as only 1 email will be sent for each unique recipient in this campaign."
 msgstr ""
 "Barcha potensial qabul qiluvchilardan.<br/> <b class=\"text-danger\">Ba'zi "
 "xatlar yuborilmaydi</b>, chunki bu kampaniyada har bir noyob qabul "
@@ -8139,8 +8101,8 @@ msgstr "✽ Pitsalar"
 
 #, fuzzy
 #~ msgid ""
-#~ "<span name=\"scheduled_text\">emails are in queue and will be sent soon.</"
-#~ "span>"
+#~ "<span name=\"scheduled_text\">emails are in queue and will be sent "
+#~ "soon.</span>"
 #~ msgstr ""
 #~ "<span name=\"scheduled_text\">xatlar navbatda turibdi va tez orada "
 #~ "yuboriladi.</span>"
@@ -8151,11 +8113,8 @@ msgstr "✽ Pitsalar"
 
 #, fuzzy
 #~ msgid ""
-#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not "
-#~ "ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or "
-#~ "canceled != 0\">\n"
-#~ "                                <span name=\"ab_test_text\">There wasn't "
-#~ "enough recipients given to this mailing. </span>\n"
+#~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or canceled != 0\">\n"
+#~ "                                <span name=\"ab_test_text\">There wasn't enough recipients given to this mailing. </span>\n"
 #~ "                            </strong>"
 #~ msgstr ""
 #~ "<strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not "
@@ -8229,26 +8188,23 @@ msgstr "✽ Pitsalar"
 
 #, fuzzy
 #~ msgid ""
-#~ "The saved filter targets different recipients and is incompatible with "
-#~ "this mailing."
+#~ "The saved filter targets different recipients and is incompatible with this "
+#~ "mailing."
 #~ msgstr ""
-#~ "Saqlangan filtr boshqa qabul qiluvchilarga mo‘ljallangan va bu xat "
-#~ "jo‘natish bilan mos kelmaydi."
+#~ "Saqlangan filtr boshqa qabul qiluvchilarga mo‘ljallangan va bu xat jo‘natish"
+#~ " bilan mos kelmaydi."
 
 #, fuzzy
 #~ msgid ""
-#~ "While designing the mailing, you can define the rules to filter "
-#~ "recipients.\n"
-#~ "                To save the same criteria for future use, you can add it "
-#~ "to the favorite list\n"
-#~ "                by clicking on <i class=\"fa fa-floppy-o text-warning\"></"
-#~ "i> icon next to \"Recipients\"."
+#~ "While designing the mailing, you can define the rules to filter recipients.\n"
+#~ "                To save the same criteria for future use, you can add it to the favorite list\n"
+#~ "                by clicking on <i class=\"fa fa-floppy-o text-warning\"></i> icon next to \"Recipients\"."
 #~ msgstr ""
 #~ "Xabarni tuzayotganingizda, qabul qiluvchilarni saralash uchun qoidalarni "
 #~ "belgilashingiz mumkin. Kelajakda xuddi shu mezonlardan foydalanish uchun "
 #~ "ularni \"Qabul qiluvchilar\" yonidagi <i class=\"fa fa-floppy-o text-"
-#~ "warning\"></i> belgisini bosish orqali sevimlilar ro‘yxatiga "
-#~ "qo‘shishingiz mumkin."
+#~ "warning\"></i> belgisini bosish orqali sevimlilar ro‘yxatiga qo‘shishingiz "
+#~ "mumkin."
 
 #, fuzzy
 #~ msgid "e.g. \"VIP Customers\""

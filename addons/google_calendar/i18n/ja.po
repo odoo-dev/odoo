@@ -15,8 +15,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:37+0000\n"
 "PO-Revision-Date: 2026-06-20 06:55+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/"
-"google_calendar/ja/>\n"
+"Language-Team: Japanese <https://translate.odoo.com/projects/odoo-master/google_calendar/ja/>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,14 +56,11 @@ msgstr "(タイトルなし)"
 #. module: google_calendar
 #: model_terms:ir.ui.view,arch_db:google_calendar.res_config_settings_view_form
 msgid ""
-"<i class=\"fa fa-info-circle fa-sm me-1\"/>\n"
-"                                When checked, Google Calendar will not "
-"automatically add a video call link to events without a location."
+"<i class=\"oi oi-filled oi-sm me-1\" data-icon=\"info\"/>\n"
+"                                When checked, Google Calendar will not automatically add a video call link to events without a location."
 msgstr ""
-"<i class=\"fa fa-info-circle fa-sm me-1\"/>\n"
-"                                このチェックボックスをオンにすると、Googleカ"
-"レンダーは場所が指定されていないイベントにビデオ通話リンクを自動的に追加しな"
-"くなります。"
+"<i class=\"me-1 oi-sm oi-filled oi\" data-icon=\"info\"/>\n"
+"                                このチェックボックスをオンにすると、Googleカレンダーは場所が指定されていないイベントにビデオ通話リンクを自動的に追加しなくなります。"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_calendar_event__active
@@ -85,14 +81,13 @@ msgstr "管理者は、Google同期を使用する前に設定する必要があ
 #. odoo-python
 #: code:addons/google_calendar/models/res_users_settings.py:0
 msgid ""
-"An error occurred while generating the token. Your authorization code may be "
-"invalid or has already expired [%s]. You should check your Client ID and "
-"secret on the Google APIs plateform or try to stop and restart your calendar "
-"synchronization."
+"An error occurred while generating the token. Your authorization code may be"
+" invalid or has already expired [%s]. You should check your Client ID and "
+"secret on the Google APIs plateform or try to stop and restart your calendar"
+" synchronization."
 msgstr ""
-"トークンの生成中にエラーが発生しました。認証コードが無効であるか、有効期限が"
-"切れています [%s]Google APIプラットフォームでClient IDとシークレットを確認す"
-"るか、カレンダの同期を停止して再開して下さい。"
+"トークンの生成中にエラーが発生しました。認証コードが無効であるか、有効期限が切れています [%s]Google APIプラットフォームでClient "
+"IDとシークレットを確認するか、カレンダの同期を停止して再開して下さい。"
 
 #. module: google_calendar
 #: model:ir.model,name:google_calendar.model_calendar_attendee
@@ -296,9 +291,7 @@ msgstr "ID"
 msgid ""
 "If the active field is set to false, it will allow you to hide the event "
 "alarm information without removing it."
-msgstr ""
-"有効なフィールドがfalseに設定されると、それを削除せずにイベントのアラーム情報"
-"を非表示にすることができます。"
+msgstr "有効なフィールドがfalseに設定されると、それを削除せずにイベントのアラーム情報を非表示にすることができます。"
 
 #. module: google_calendar
 #: model:ir.model.fields,help:google_calendar.field_res_config_settings__cal_sync_paused
@@ -317,9 +310,7 @@ msgstr "更新されない限り同期されません。"
 msgid ""
 "Last Calendar ID who has been synchronized. If it is changed, we remove all "
 "links between GoogleID and Odoo Google Internal ID"
-msgstr ""
-"同期された最後のカレンダーID。 変更された場合、Google IDとOdoo Google内部IDの"
-"間のリンクはすべて削除されます"
+msgstr "同期された最後のカレンダーID。 変更された場合、Google IDとOdoo Google内部IDの間のリンクはすべて削除されます"
 
 #. module: google_calendar
 #: model:ir.model.fields,field_description:google_calendar.field_google_calendar_account_reset__write_uid
@@ -377,8 +368,7 @@ msgstr "Googleカレンダーとレコードを同期する"
 msgid ""
 "The Google Synchronization needs to be configured before you can use it, do "
 "you want to do it now?"
-msgstr ""
-"Google同期を使用するには、事前に設定する必要があります。今すぐしますか？"
+msgstr "Google同期を使用するには、事前に設定する必要があります。今すぐしますか？"
 
 #. module: google_calendar
 #. odoo-python
@@ -386,9 +376,7 @@ msgstr ""
 msgid ""
 "The following event can only be updated by the organizer according to the "
 "event permissions set on Google Calendar."
-msgstr ""
-"以下のイベントは、Googleカレンダに設定されたイベント権限に従って、主催者のみ"
-"が更新できます。"
+msgstr "以下のイベントは、Googleカレンダに設定されたイベント権限に従って、主催者のみが更新できます。"
 
 #. module: google_calendar
 #. odoo-python

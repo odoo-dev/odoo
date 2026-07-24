@@ -12,8 +12,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 11:27+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/hr_skills/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/hr_skills/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,11 +33,9 @@ msgstr "'Curriculum Vitae - %s' % (object.name)"
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.resume_line_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 msgstr ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Icono de flecha\" "
+"<i class=\"mx-2 oi\" data-icon=\"east\" aria-label=\"Icono de flecha\" "
 "title=\"Flecha\"/>"
 
 #. module: hr_skills
@@ -54,17 +51,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills/models/hr_employee_skill.py:0
 msgid ""
-"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. "
-"Navigate to Skill types!</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No Certifications available. Navigate to Skill types!</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Show Skill Types\n"
 "                </a>"
 msgstr ""
-"<p class=\"o_view_nocontent_smiling_face\">No hay certificaciones "
-"disponibles. Ve a los tipos de habilidades.</p>\n"
-"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" "
-"class=\"btn btn-primary\">\n"
+"<p class=\"o_view_nocontent_smiling_face\">No hay certificaciones disponibles. Ve a los tipos de habilidades.</p>\n"
+"                <a type=\"action\" name=\"hr_skills.hr_skill_type_action\" class=\"btn btn-primary\">\n"
 "                Mostrar tipos de habilidades\n"
 "               </a>"
 
@@ -1081,39 +1074,27 @@ msgstr "Puesto de trabajo"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_4
 msgid ""
 "Job position: Development team leader\n"
-"- Supported technical operations with investigating and correcting varied "
-"production support issues (Java, Perl, Shell scripts, SQL).\n"
-"- Led quality assurance planning for multiple concurrent projects relative "
-"to overall system architecture or trading system changes/new developments.\n"
-"- Configured and released business critical alpha and risk models using "
-"MATLAB and SQL with inputs from Portfolio Managers."
+"- Supported technical operations with investigating and correcting varied production support issues (Java, Perl, Shell scripts, SQL).\n"
+"- Led quality assurance planning for multiple concurrent projects relative to overall system architecture or trading system changes/new developments.\n"
+"- Configured and released business critical alpha and risk models using MATLAB and SQL with inputs from Portfolio Managers."
 msgstr ""
 "Puesto de trabajo: Líder del equipo de desarrollo\n"
-"- Apoyo en operaciones técnicas. Investigación y corrección de varios "
-"errores de producción (Java, Perl, scripts Shell, SQL).\n"
-"- Dirección de la planificación de aseguramiento de la calidad para varios "
-"proyectos simultáneos relacionados con la arquitectura general del sistema y "
-"los cambios y nuevos desarrollos del sistema.\n"
-"- Configuración y publicación de modelos alfa y de riesgo con MATLAB y SQL "
-"con ayuda de los gestores de cartera."
+"- Apoyo en operaciones técnicas. Investigación y corrección de varios errores de producción (Java, Perl, scripts Shell, SQL).\n"
+"- Dirección de la planificación de aseguramiento de la calidad para varios proyectos simultáneos relacionados con la arquitectura general del sistema y los cambios y nuevos desarrollos del sistema.\n"
+"- Configuración y publicación de modelos alfa y de riesgo con MATLAB y SQL con ayuda de los gestores de cartera."
 
 #. module: hr_skills
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_3
 msgid ""
 "Job position: Product manager\n"
-"- Coordinated and managed software deployment across five system "
-"environments from development to production.\n"
+"- Coordinated and managed software deployment across five system environments from development to production.\n"
 "- Developed stored procedures to assist Java level programming efforts.\n"
-"- Developed multiple renewable energy plant architectures, both commercial "
-"installations and defense-related."
+"- Developed multiple renewable energy plant architectures, both commercial installations and defense-related."
 msgstr ""
 "Puesto de trabajo: Gerente de producto\n"
-"- Coordinación y gestión de la implementación de software en cinco entornos "
-"de sistema, desde el desarrollo hasta la producción.\n"
-"- Desarrollo de procedimientos almacenados para asistir en la programación a "
-"nivel Java.\n"
-"- Desarrollo de arquitectura de plantas de energías renovables, tanto en "
-"instalaciones comerciales como en el sector de defensa."
+"- Coordinación y gestión de la implementación de software en cinco entornos de sistema, desde el desarrollo hasta la producción.\n"
+"- Desarrollo de procedimientos almacenados para asistir en la programación a nivel Java.\n"
+"- Desarrollo de arquitectura de plantas de energías renovables, tanto en instalaciones comerciales como en el sector de defensa."
 
 #. module: hr_skills
 #: model_terms:ir.ui.view,arch_db:hr_skills.hr_employee_skill_report_view_search
@@ -1314,12 +1295,10 @@ msgstr "Martin, Stanley and Duncan"
 #: model_terms:hr.resume.line,description:hr_skills.employee_resume_line_admin_1
 msgid ""
 "Master in Electrical engineering\n"
-"            Master thesis: Better grid management and control through "
-"machine learning"
+"            Master thesis: Better grid management and control through machine learning"
 msgstr ""
 "Máster en ingeniería eléctrica\n"
-"            Tesis de máster: Mejor gestión y control de la capacidad "
-"informática de la red mediante aprendizaje automático"
+"            Tesis de máster: Mejor gestión y control de la capacidad informática de la red mediante aprendizaje automático"
 
 #. module: hr_skills
 #: model:hr.skill,name:hr_skills.hr_skill_matlab
@@ -2101,12 +2080,10 @@ msgstr "La fecha de finalización debe ser posterior a la fecha de inicio."
 #. odoo-python
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid ""
-"The following skills can't be created as they overlap or exactly match "
-"existing skills:\n"
+"The following skills can't be created as they overlap or exactly match existing skills:\n"
 "%(collisions)s"
 msgstr ""
-"Las siguientes habilidades no se pueden crear, porque se traslapan o son "
-"exactamente iguales a habilidades existentes:\n"
+"Las siguientes habilidades no se pueden crear, porque se traslapan o son exactamente iguales a habilidades existentes:\n"
 "%(collisions)s"
 
 #. module: hr_skills
@@ -2116,8 +2093,8 @@ msgid ""
 "The following skills have their valid stop date prior to their valid start "
 "date:\n"
 msgstr ""
-"La fecha de finalización válida de las hablidades a continuación as anterior "
-"a la fecha de inicio válida:\n"
+"La fecha de finalización válida de las hablidades a continuación as anterior"
+" a la fecha de inicio válida:\n"
 
 #. module: hr_skills
 #. odoo-python
@@ -2139,8 +2116,8 @@ msgstr "La habilidad %(name)s y el tipo de habilidad %(type)s no coinciden"
 #: code:addons/hr_skills/models/hr_individual_skill_mixin.py:0
 msgid "The skill level %(level)s is not valid for skill type: %(type)s"
 msgstr ""
-"El nivel de habilidad %(level)s no es válido para el tipo de habilidad: %"
-"(type)s"
+"El nivel de habilidad %(level)s no es válido para el tipo de habilidad: "
+"%(type)s"
 
 #. module: hr_skills
 #: model:ir.model.constraint,message:hr_skills.constraint_hr_resume_line_date_check
@@ -2170,8 +2147,7 @@ msgid ""
 "This report will give you an overview of the skills per Employee.\n"
 "                Create them in configuration and add them on the Employee."
 msgstr ""
-"Este reporte le proporcionará información general relacionada con las "
-"habilidades de cada empleado.\n"
+"Este reporte le proporcionará información general relacionada con las habilidades de cada empleado.\n"
 "                Créelas en configuración y agréguelas al empleado."
 
 #. module: hr_skills

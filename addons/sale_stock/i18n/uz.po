@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:47+0000\n"
 "PO-Revision-Date: 2026-06-21 00:04+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"sale_stock/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/sale_stock/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,32 +42,32 @@ msgstr ""
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Awaiting arrival"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/> Yetib kelishi kutilmoqda"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Awaiting arrival"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/> Yetib kelishi kutilmoqda"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-clock-o\"/>Preparation"
-msgstr "<i class=\"fa fa-fw fa-clock-o\"/>Tayyorgarlik"
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/>Preparation"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"schedule\"/>Tayyorgarlik"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-times\"/> Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/> Bekor qilindi"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/> Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/> Bekor qilindi"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-times\"/>Cancelled"
-msgstr "<i class=\"fa fa-fw fa-times\"/>Bekor qilindi"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/>Cancelled"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"close\"/>Bekor qilindi"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-truck\"/> Received"
-msgstr "<i class=\"fa fa-fw fa-truck\"/> Qabul qilindi"
+msgid "<i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Received"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"local_shipping\"/> Qabul qilindi"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.stock_production_lot_view_form
@@ -80,15 +79,13 @@ msgstr "<span class=\"o_stat_text\">Savdolar</span>"
 #: model_terms:ir.ui.view,arch_db:sale_stock.sale_order_portal_content_inherit_sale_stock
 #, fuzzy
 msgid ""
-"<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\">\n"
-"                                        <i class=\"fa fa-fw fa-truck\"/> "
-"Shipped\n"
+"<span class=\"small badge rounded-pill text-bg-success orders_label_text_align\">\n"
+"                                        <i class=\"oi oi-fw\" data-icon=\"local_shipping\"/> Shipped\n"
 "                                    </span>"
 msgstr ""
 "<span class=\"small badge rounded-pill text-bg-success "
-"orders_label_text_align\"> <i class=\"fa fa-fw fa-truck\"/> Jo‘natildi </"
-"span>"
+"orders_label_text_align\"> <i class=\"oi-fw oi\" data-"
+"icon=\"local_shipping\"/> Jo‘natildi </span>"
 
 #. module: sale_stock
 #: model_terms:ir.ui.view,arch_db:sale_stock.report_delivery_document_inherit_sale_stock
@@ -105,13 +102,10 @@ msgstr "<strong>Incoterm</strong>"
 #. module: sale_stock
 #: model:ir.model.fields,help:sale_stock.field_sale_order_line__qty_delivered_method
 msgid ""
-"According to product configuration, the delivered quantity can be "
-"automatically computed by mechanism:\n"
+"According to product configuration, the delivered quantity can be automatically computed by mechanism:\n"
 "  - Manual: the quantity is set manually on the line\n"
-"  - Analytic From expenses: the quantity is the quantity sum from posted "
-"expenses\n"
-"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to "
-"this line\n"
+"  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
+"  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this line\n"
 "  - Stock Moves: the quantity comes from confirmed pickings\n"
 msgstr ""
 
@@ -162,7 +156,8 @@ msgstr ""
 #: model:ir.model.fields,help:sale_stock.field_stock_rules_report__so_route_ids
 #, fuzzy
 msgid "Choose to apply SO lines specific routes."
-msgstr "Sotish buyurtmasi qatorlariga maxsus yo‘nalishlarni qo‘llashni tanlang."
+msgstr ""
+"Sotish buyurtmasi qatorlariga maxsus yo‘nalishlarni qo‘llashni tanlang."
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_res_company
@@ -229,8 +224,8 @@ msgstr ""
 "Xizmat mahsulotlari uchun buyurtma qatorlarining minimal yetkazib berish "
 "muddatidan hisoblab chiqilgan, mijozga va'da qila oladigan yetkazib berish "
 "sanasi. Yuk tashish holatida, buyurtma qatorlarining minimal yoki maksimal "
-"yetkazib berish muddatidan foydalanish uchun buyurtmaning jo‘natish siyosati "
-"hisobga olinadi."
+"yetkazib berish muddatidan foydalanish uchun buyurtmaning jo‘natish siyosati"
+" hisobga olinadi."
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_account_accrued_orders_wizard__display_name
@@ -464,13 +459,13 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Margin of error for dates promised to customers. Products will be scheduled "
-"for procurement and delivery that many days earlier than the actual promised "
-"date, to cope with unexpected delays in the supply chain."
+"for procurement and delivery that many days earlier than the actual promised"
+" date, to cope with unexpected delays in the supply chain."
 msgstr ""
 "Mijozlarga va'da qilingan sanalar uchun xato chegarasi. Yetkazib berish "
 "zanjiridagi kutilmagan kechikishlarni qoplash uchun mahsulotlarni xarid "
-"qilish va yetkazib berish haqiqiy va'da qilingan sanadan bir necha kun oldin "
-"rejalashtiriladi."
+"qilish va yetkazib berish haqiqiy va'da qilingan sanadan bir necha kun oldin"
+" rejalashtiriladi."
 
 #. module: sale_stock
 #: model:ir.model.fields,field_description:sale_stock.field_sale_order_line__qty_delivered_method
@@ -488,7 +483,8 @@ msgstr ""
 #, fuzzy
 msgid "No delivery yet! Automate them with sales orders."
 msgstr ""
-"Hali yetkazib berish yo‘q! Ularni savdo buyurtmalari bilan avtomatlashtiring."
+"Hali yetkazib berish yo‘q! Ularni savdo buyurtmalari bilan "
+"avtomatlashtiring."
 
 #. module: sale_stock
 #. odoo-javascript
@@ -568,8 +564,7 @@ msgstr "QAYTARISH"
 #, fuzzy
 msgid ""
 "Reduce back orders with reservations, locations management, smart\n"
-"                replenishment propositions, shipping connectors, barcode "
-"scanner, etc."
+"                replenishment propositions, shipping connectors, barcode scanner, etc."
 msgstr ""
 "Rezervatsiyalar, joylarni boshqarish, aqlli to‘ldirish takliflari, yuk "
 "tashish ulagichlari, shtrix-kod skaneri va boshqalar yordamida qayta "
@@ -774,11 +769,11 @@ msgstr ""
 #: code:addons/sale_stock/static/src/product_catalog/sale_order_line/sale_order_line.js:0
 #, fuzzy
 msgid ""
-"The ordered quantity cannot be decreased below the amount already delivered. "
-"Instead, create a return in your inventory."
+"The ordered quantity cannot be decreased below the amount already delivered."
+" Instead, create a return in your inventory."
 msgstr ""
-"Buyurtma qilingan miqdorni allaqachon yetkazib berilgan miqdordan kamaytirib "
-"bo‘lmaydi. Buning o‘rniga omboringizda qaytarish yarating."
+"Buyurtma qilingan miqdorni allaqachon yetkazib berilgan miqdordan kamaytirib"
+" bo‘lmaydi. Buning o‘rniga omboringizda qaytarish yarating."
 
 #. module: sale_stock
 #. odoo-python

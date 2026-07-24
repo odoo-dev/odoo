@@ -25,14 +25,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-18 21:45+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/"
-"stock_picking_batch/hr/>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/hr/>\n"
 "Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
@@ -44,7 +42,9 @@ msgstr "%s je uklonjen iz grupe, nijedna količina nije obrađena"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
 msgstr ""
 
 #. module: stock_picking_batch
@@ -70,8 +70,8 @@ msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
 msgstr ""
-"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Grupiranje "
-"grupa</span>"
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Grupiranje"
+" grupa</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -125,24 +125,20 @@ msgstr "<strong>→</strong>"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"Prijenos neće biti automatski dodan u grupe koje će premašiti ovaj broj "
-"stavki ako se prijenos doda.\n"
+"Prijenos neće biti automatski dodan u grupe koje će premašiti ovaj broj stavki ako se prijenos doda.\n"
 "Ostavite ovu vrijednost kao '0' ako nema ograničenja stavki."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 #, fuzzy
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"Prijenos neće biti automatski dodan u grupe koje će premašiti ovaj broj "
-"prijenosa.\n"
+"Prijenos neće biti automatski dodan u grupe koje će premašiti ovaj broj prijenosa.\n"
 "Ostavite ovu vrijednost kao '0' ako nema ograničenja prijenosa."
 
 #. module: stock_picking_batch
@@ -674,8 +670,8 @@ msgid ""
 "Launch picking orders by aisle or area and regroup at packing zone. Ideal "
 "for large warehouses."
 msgstr ""
-"Pokrenite naloge prikupljanja po prolazu ili području i grupirajte ponovno u "
-"zoni pakiranja. Idealno za velika skladišta."
+"Pokrenite naloge prikupljanja po prolazu ili području i grupirajte ponovno u"
+" zoni pakiranja. Idealno za velika skladišta."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__line_ids
@@ -878,8 +874,8 @@ msgid ""
 "Pick multiple orders in one trip and prepare orders as you pick. This "
 "reduces packing time and is ideal for small products."
 msgstr ""
-"Prikupite više naloga u jednom obilasku i pripremite naloge dok prikupljate. "
-"Time se smanjuje vrijeme pakiranja i idealno je za male proizvode."
+"Prikupite više naloga u jednom obilasku i pripremite naloge dok prikupljate."
+" Time se smanjuje vrijeme pakiranja i idealno je za male proizvode."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,field_description:stock_picking_batch.field_stock_add_to_wave__picking_ids
@@ -994,7 +990,8 @@ msgstr "Ocjene"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 #, fuzzy
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr ""
 "Grupirajte više naloga u jedno prikupljanje i konsolidirajte u zoni "
 "pakiranja."
@@ -1039,20 +1036,14 @@ msgstr "Planirani datum"
 #, fuzzy
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "Zakazani datum obrade prijenosa.\n"
-"              - Ako je ručno postavljeno, zakazani datum za sve prijenose u "
-"grupi automatski će se ažurirati na ovaj datum.\n"
-"              - Ako nije ručno promijenjeno, a prijenosi se dodaju/uklanjaju/"
-"ažuriraju, to će biti njihov najraniji zakazani datum\n"
-"                no ovaj zakazani datum neće biti postavljen za sve prijenose "
-"u grupi."
+"              - Ako je ručno postavljeno, zakazani datum za sve prijenose u grupi automatski će se ažurirati na ovaj datum.\n"
+"              - Ako nije ručno promijenjeno, a prijenosi se dodaju/uklanjaju/ažuriraju, to će biti njihov najraniji zakazani datum\n"
+"                no ovaj zakazani datum neće biti postavljen za sve prijenose u grupi."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1113,15 +1104,15 @@ msgid ""
 "Split transfers by defined locations, then group transfers with the same "
 "location."
 msgstr ""
-"Podijelite prijenose po definiranim lokacijama, zatim grupirajte prijenose s "
-"istom lokacijom."
+"Podijelite prijenose po definiranim lokacijama, zatim grupirajte prijenose s"
+" istom lokacijom."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 #, fuzzy
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr ""
 "Podijelite prijenose po kategoriji proizvoda, zatim grupirajte prijenose "
 "koji imaju istu kategoriju proizvoda."
@@ -1218,13 +1209,11 @@ msgstr "Sljedeći grupni prijenos je ažuriran"
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 #, fuzzy
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
-"Sljedeći prijenosi ne mogu se dodati u grupni prijenos %(batch)s. Molimo "
-"provjerite njihove statuse i tipove operacija.\n"
+"Sljedeći prijenosi ne mogu se dodati u grupni prijenos %(batch)s. Molimo provjerite njihove statuse i tipove operacija.\n"
 "\n"
 "Nekompatibilnosti: %(incompatible_transfers)s"
 

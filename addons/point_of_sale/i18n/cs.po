@@ -24,14 +24,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:36+0000\n"
 "PO-Revision-Date: 2026-06-19 10:39+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Czech <https://translate.odoo.com/projects/odoo-master/"
-"point_of_sale/cs/>\n"
+"Language-Team: Czech <https://translate.odoo.com/projects/odoo-master/point_of_sale/cs/>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
-"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: point_of_sale
@@ -319,28 +317,17 @@ msgstr "5-kapesní džíny z bavlněného denimu."
 #: model:mail.template,body_html:point_of_sale.email_template_pos_receipt
 msgid ""
 "<div style=\"margin: 0; padding: 0; font-size: 14px;\">\n"
-"                    <t t-set=\"client_name\" t-"
-"value=\"object.partner_id.name\"/>\n"
-"                    <t t-set=\"store_name\" t-"
-"value=\"object.config_id.name\"/>\n"
-"                    <t t-set=\"tz\" t-"
-"value=\"object.company_id.partner_id.tz\"/>\n"
-"                    <t t-set=\"lg\" t-value=\"object.partner_id.lang or "
-"user.lang\"/>\n"
+"                    <t t-set=\"client_name\" t-value=\"object.partner_id.name\"/>\n"
+"                    <t t-set=\"store_name\" t-value=\"object.config_id.name\"/>\n"
+"                    <t t-set=\"tz\" t-value=\"object.company_id.partner_id.tz\"/>\n"
+"                    <t t-set=\"lg\" t-value=\"object.partner_id.lang or user.lang\"/>\n"
 "                    <div>\n"
-"                        <t t-if=\"client_name\">Hello <t t-"
-"out=\"client_name\">Client name</t>,</t>\n"
+"                        <t t-if=\"client_name\">Hello <t t-out=\"client_name\">Client name</t>,</t>\n"
 "                        <t t-else=\"\">Hello,</t>\n"
 "                    </div>\n"
 "                    <br/>\n"
-"                    <div>Thank you for purchasing from <t t-"
-"out=\"store_name\">Store name</t>!</div>\n"
-"                    <div>Attached, you will find your receipt for the "
-"purchase of <span><t t-out=\"format_datetime(dt=object.date_order, tz=tz, "
-"dt_format=&quot;EEEE d MMMM&quot;,                          lang_code=lg) or "
-"''\">date</t> <t t-out=\"format_time(time=object.date_order, tz=tz, "
-"time_format='short',                          lang_code=lg)\">time</t>.</"
-"span>\n"
+"                    <div>Thank you for purchasing from <t t-out=\"store_name\">Store name</t>!</div>\n"
+"                    <div>Attached, you will find your receipt for the purchase of <span><t t-out=\"format_datetime(dt=object.date_order, tz=tz, dt_format=&quot;EEEE d MMMM&quot;,                          lang_code=lg) or ''\">date</t> <t t-out=\"format_time(time=object.date_order, tz=tz, time_format='short',                          lang_code=lg)\">time</t>.</span>\n"
 "                    </div>\n"
 "                    <br/>\n"
 "                    <div>With kind regards,</div>\n"
@@ -352,51 +339,56 @@ msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_partner_form_pos_ui
-msgid "<i class=\"d-none d-md-inline-flex fa fa-building\" title=\"Company\"/>"
+msgid ""
+"<i class=\"d-none d-md-inline-flex oi oi-filled\" data-icon=\"business\" "
+"title=\"Company\"/>"
 msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_partner_form_pos_ui
-msgid "<i class=\"d-none d-md-inline-flex fa fa-envelope\" title=\"Email\"/>"
+msgid ""
+"<i class=\"d-none d-md-inline-flex oi oi-filled\" data-icon=\"mail\" "
+"title=\"Email\"/>"
 msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_partner_form_pos_ui
-msgid "<i class=\"d-none d-md-inline-flex fa fa-phone\" title=\"Phone\"/>"
+msgid ""
+"<i class=\"d-none d-md-inline-flex oi oi-filled\" data-icon=\"phone\" "
+"title=\"Phone\"/>"
 msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
-"<i class=\"fa fa-info-circle me-1\" title=\"This setting is common to all "
-"PoS.\" pos-data-toggle=\"tooltip\"/>"
+"<i class=\"oi me-1\" data-icon=\"info\" title=\"This setting is common to "
+"all PoS.\" pos-data-toggle=\"tooltip\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle me-1\" title=\"Toto nastavení je časté pro "
+"<i class=\"me-1 oi\" data-icon=\"info\" title=\"Toto nastavení je časté pro "
 "všechna místa prodeje.\" pos-data-toggle=\"tooltip\"/>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.product_pricelist_view_kanban_pos
 msgid ""
-"<i class=\"fa fa-money\" role=\"img\" aria-label=\"Currency\" "
+"<i class=\"oi\" data-icon=\"payments\" role=\"img\" aria-label=\"Currency\" "
 "title=\"Currency\"/>"
 msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_validation_screen
-msgid "<i class=\"fa fa-pencil\"/> Edit"
-msgstr "<i class=\"fa fa-pencil\"/> Upravit"
+msgid "<i class=\"oi oi-filled\" data-icon=\"edit\"/> Edit"
+msgstr "<i class=\"oi-filled oi\" data-icon=\"edit\"/> Upravit"
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
-"<p>Dear %(client_name)s,<br/>Here is your Receipt %"
-"(is_invoiced)sfor             %(pos_name)s amounting in %(amount)s from %"
-"(company_name)s. </p>"
+"<p>Dear %(client_name)s,<br/>Here is your Receipt %(is_invoiced)sfor"
+"             %(pos_name)s amounting in %(amount)s from %(company_name)s. "
+"</p>"
 msgstr ""
-"<p>Dobrý den %(client_name)s,<br/>Zde je váš doklad %"
-"(is_invoiced)sk             %(pos_name)s ve výši %(amount)s od %"
-"(company_name)s. </p>"
+"<p>Dobrý den %(client_name)s,<br/>Zde je váš doklad %(is_invoiced)sk"
+"             %(pos_name)s ve výši %(amount)s od %(company_name)s. </p>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_order_receipt
@@ -416,13 +408,10 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
 "<span class=\"o_form_label\">Barcodes</span>\n"
-"                                    <i class=\"fa fa-info-circle me-1\" "
-"title=\"This setting is common to all PoS.\" pos-data-toggle=\"tooltip\"/>"
+"                                    <i class=\"oi oi-filled me-1\" data-icon=\"info\" title=\"This setting is common to all PoS.\" pos-data-toggle=\"tooltip\"/>"
 msgstr ""
 "<span class=\"o_form_label\">Čárové kódy</span>\n"
-"                                    <i class=\"fa fa-info-circle me-1\" "
-"title=\"Toto nastavení je časté pro všechna místa místa prodeje.\" pos-data-"
-"toggle=\"tooltip\"/>"
+"                                    <i class=\"me-1 oi-filled oi\" data-icon=\"info\" title=\"Toto nastavení je časté pro všechna místa místa prodeje.\" pos-data-toggle=\"tooltip\"/>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_session_form
@@ -778,13 +767,14 @@ msgstr "Účetní záznam"
 #: model:ir.model.fields,help:point_of_sale.field_pos_session__bank_payment_ids
 msgid "Account payments representing aggregated and bank split payments."
 msgstr ""
-"Platby na účet představující agregované platby a platby rozdělené mezi banky."
+"Platby na účet představující agregované platby a platby rozdělené mezi "
+"banky."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_payment_method__outstanding_account_id
 msgid ""
-"Account used as outstanding account when creating accounting payment records "
-"for bank payments."
+"Account used as outstanding account when creating accounting payment records"
+" for bank payments."
 msgstr ""
 "Účet použitý jako neuhrazený účet při vytváření účetních platebních záznamů "
 "pro bankovní platby."
@@ -914,8 +904,8 @@ msgid ""
 "Add a 5-digit code on the receipt to allow the user to request the invoice "
 "for an order on the portal."
 msgstr ""
-"Přidejte na účtenku pětimístný kód, který uživateli umožní požádat o fakturu "
-"za objednávku na portálu."
+"Přidejte na účtenku pětimístný kód, který uživateli umožní požádat o fakturu"
+" za objednávku na portálu."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1055,8 +1045,8 @@ msgid ""
 "Adjust the amount authorized by payment terminals to add a tip after the "
 "customers left or at the end of the day."
 msgstr ""
-"Upravte částku autorizovanou platebními terminály a přidejte spropitné poté, "
-"co zákazníci odešli, nebo na konci dne."
+"Upravte částku autorizovanou platebními terminály a přidejte spropitné poté,"
+" co zákazníci odešli, nebo na konci dne."
 
 #. module: point_of_sale
 #: model:res.groups,name:point_of_sale.group_pos_manager
@@ -1122,8 +1112,8 @@ msgstr "Všechny poznámky"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
-"All payment methods must be in the same currency as the Sales Journal or the "
-"company currency if that is not set."
+"All payment methods must be in the same currency as the Sales Journal or the"
+" company currency if that is not set."
 msgstr ""
 "Všechny platební metody musí být ve stejné měně jako prodejní deník nebo "
 "měna společnosti, pokud není nastavena."
@@ -1251,8 +1241,8 @@ msgid ""
 "An error has occurred when trying to close the session.\n"
 "You will be redirected to the back-end to manually close the session."
 msgstr ""
-"Při pokusu o ukončení relace došlo k chybě. Budete přesměrováni na back-end, "
-"kde můžete relaci ručně ukončit."
+"Při pokusu o ukončení relace došlo k chybě. Budete přesměrováni na back-end,"
+" kde můžete relaci ručně ukončit."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1261,19 +1251,17 @@ msgid ""
 "An error occurred when loading product prices. Make sure all pricelists are "
 "available in the POS."
 msgstr ""
-"Při načítání cen produktu došlo k chybě. Ujistěte se, že všechny ceníky jsou "
-"k dispozici v Prodejním místě."
+"Při načítání cen produktu došlo k chybě. Ujistěte se, že všechny ceníky jsou"
+" k dispozici v Prodejním místě."
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/services/pos_store.js:0
 msgid ""
-"An error occurred while closing the session. But don't worry, unsynced "
-"orders will be available in the next session.\n"
+"An error occurred while closing the session. But don't worry, unsynced orders will be available in the next session.\n"
 "The page will now, be reloaded."
 msgstr ""
-"Při ukončování relace došlo k chybě. Ale nebojte se, nesynchronizované "
-"objednávky budou k dispozici v příští relaci.\n"
+"Při ukončování relace došlo k chybě. Ale nebojte se, nesynchronizované objednávky budou k dispozici v příští relaci.\n"
 "Stránka se nyní znovu načte."
 
 #. module: point_of_sale
@@ -1321,7 +1309,8 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/retry_print_popup/retry_print_popup.js:0
-msgid "An unknown error occurred. Do you want to download the receipt instead?"
+msgid ""
+"An unknown error occurred. Do you want to download the receipt instead?"
 msgstr "Došlo k neznámé chybě. Chcete místo toho stáhnout účtenku?"
 
 #. module: point_of_sale
@@ -1777,8 +1766,8 @@ msgid ""
 "products."
 msgstr ""
 "Zvyšte své prodeje pomocí několika druhů programů: kupóny, akce, dárkové "
-"karty, věrnostní programy. Mohou být nastaveny konkrétní podmínky (produkty, "
-"zákazníci, minimální částka nákupu, doba). Odměny mohou být slevy (% nebo "
+"karty, věrnostní programy. Mohou být nastaveny konkrétní podmínky (produkty,"
+" zákazníci, minimální částka nákupu, doba). Odměny mohou být slevy (% nebo "
 "částka) nebo produkty zdarma."
 
 #. module: point_of_sale
@@ -2154,7 +2143,8 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.template,description_sale:point_of_sale.t_shirt_slim_product_template
 msgid "Casual slim t-shirt 100% cotton. Various sizes available"
-msgstr "Ležérní slim tričko ze 100% bavlny. K dispozici v různých velikostech."
+msgstr ""
+"Ležérní slim tričko ze 100% bavlny. K dispozici v různých velikostech."
 
 #. module: point_of_sale
 #: model:product.template,description_sale:point_of_sale.casual_t_shirt_product_template
@@ -2855,8 +2845,8 @@ msgstr "Pokračovat s omezenými funkcemi"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/test_epos/test_epos.js:0
 msgid ""
-"Continuous printing of high-density printing caused a printing error. Please "
-"retry later"
+"Continuous printing of high-density printing caused a printing error. Please"
+" retry later"
 msgstr ""
 "Nepřetržitý tisk s vysokou hustotou způsobil chybu tisku. Zkuste to prosím "
 "znovu později."
@@ -2998,8 +2988,8 @@ msgid ""
 "Create one invoice for all orders related to same customer and same "
 "invoicing address"
 msgstr ""
-"Vytvořit jednu fakturu pro všechny objednávky týkající se stejného zákazníka "
-"a stejné fakturační adresy."
+"Vytvořit jednu fakturu pro všechny objednávky týkající se stejného zákazníka"
+" a stejné fakturační adresy."
 
 #. module: point_of_sale
 #: model_terms:ir.actions.act_window,help:point_of_sale.action_pos_note_model
@@ -3383,7 +3373,8 @@ msgstr ""
 #. module: point_of_sale
 #: model_terms:ir.actions.act_window,help:point_of_sale.product_template_action_pos_product
 msgid "Define products and categories for POS retail and restaurant"
-msgstr "Definujte produkty a kategorie pro maloobchodní prodejny a restaurace."
+msgstr ""
+"Definujte produkty a kategorie pro maloobchodní prodejny a restaurace."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -3521,7 +3512,8 @@ msgstr "Rozdíl při uzavírání relace místa prodeje"
 msgid ""
 "Difference between the theoretical closing balance and the real closing "
 "balance."
-msgstr "Rozdíl mezi teoretickým konečným zůstatkem a reálnou konečnou bilancí."
+msgstr ""
+"Rozdíl mezi teoretickým konečným zůstatkem a reálnou konečnou bilancí."
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_digest_digest
@@ -3704,8 +3696,8 @@ msgid ""
 "Display the breakdown of sales lines by product in the automatically "
 "generated closing entry."
 msgstr ""
-"Zobrazte rozpis prodejních položek podle produktu v automaticky vygenerované "
-"uzávěrkové položce."
+"Zobrazte rozpis prodejních položek podle produktu v automaticky vygenerované"
+" uzávěrkové položce."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_pricer
@@ -3896,10 +3888,10 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_product_product__to_weight
 #: model:ir.model.fields,help:point_of_sale.field_product_template__to_weight
 msgid ""
-"Enable this option if the product should be sold by weight. When enabled and "
-"scale is not avalable, the 'Price' button will update the quantity instead "
-"of the unit price. This applies to both normal POS usage and when integrated "
-"with a hardware scale."
+"Enable this option if the product should be sold by weight. When enabled and"
+" scale is not avalable, the 'Price' button will update the quantity instead "
+"of the unit price. This applies to both normal POS usage and when integrated"
+" with a hardware scale."
 msgstr ""
 
 #. module: point_of_sale
@@ -3921,8 +3913,8 @@ msgstr "Konečný zůstatek"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
-"Ensure that there is an existing bank journal. Check if chart of accounts is "
-"installed in your company."
+"Ensure that there is an existing bank journal. Check if chart of accounts is"
+" installed in your company."
 msgstr ""
 "Ujistěte se, že existuje bankovní deník. Zkontrolujte, zda je ve vaší "
 "společnosti nainstalován účetní osnova."
@@ -4097,7 +4089,8 @@ msgstr "Křehké máslové těsto, vrstvené pro lehký a zlatavý croissant."
 
 #. module: point_of_sale
 #: model:product.template,description_sale:point_of_sale.product_cheese_croissant_product_template
-msgid "Flaky croissant filled with creamy cheese, a savory twist on a classic."
+msgid ""
+"Flaky croissant filled with creamy cheese, a savory twist on a classic."
 msgstr "Křehký croissant plněný krémovým sýrem, pikantní variace na klasiku."
 
 #. module: point_of_sale
@@ -4472,7 +4465,8 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/lna_checklist/lna_checklist.xml:0
-msgid "I use an Epson printer (Check supported printers in Odoo documentation)"
+msgid ""
+"I use an Epson printer (Check supported printers in Odoo documentation)"
 msgstr ""
 
 #. module: point_of_sale
@@ -4597,8 +4591,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/lna_checklist/lna_checklist.xml:0
 msgid ""
-"If the system parameter is set, but the browser doesn't support LNA, the PoS "
-"will show this notification:"
+"If the system parameter is set, but the browser doesn't support LNA, the PoS"
+" will show this notification:"
 msgstr ""
 
 #. module: point_of_sale
@@ -4622,8 +4616,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/printer/epson_printer.js:0
 msgid ""
-"If you are on a secure server (HTTPS) please make sure you manually accepted "
-"the certificate by accessing %s. "
+"If you are on a secure server (HTTPS) please make sure you manually accepted"
+" the certificate by accessing %s. "
 msgstr ""
 "Pokud jste na zabezpečeném serveru (HTTPS), ujistěte se prosím, že jste "
 "certifikát přijali přístupem %s. "
@@ -4702,8 +4696,8 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_product_combo__is_upsell
 msgid ""
-"Indicates if the combo is an upsell to the customer. This can be compared to "
-"a minimum quantity of 0."
+"Indicates if the combo is an upsell to the customer. This can be compared to"
+" a minimum quantity of 0."
 msgstr ""
 
 #. module: point_of_sale
@@ -4946,8 +4940,7 @@ msgstr ""
 msgid ""
 "It seems that the POS order(s) %(order_ref)s do not have a customer.\n"
 "\n"
-"Would you like to set %(customer_name)s as the customer for the selected POS "
-"order(s)?"
+"Would you like to set %(customer_name)s as the customer for the selected POS order(s)?"
 msgstr ""
 "Zdá se, že objednávky POS %(order_ref)s nemají zákazníka.\n"
 "\n"
@@ -5165,12 +5158,10 @@ msgstr "Zadejte důvod"
 #: model:ir.model.fields,help:point_of_sale.field_pos_payment_method__receivable_account_id
 msgid ""
 "Leave empty to use the default account from the company setting.\n"
-"Overrides the company's receivable account (for Point of Sale) used in the "
-"journal entries."
+"Overrides the company's receivable account (for Point of Sale) used in the journal entries."
 msgstr ""
 "Ponechte prázdné pro použití výchozího účtu z firemního nastavení.\n"
-"Přepíše účet pohledávek společnosti (pro prodejní místo) použitý v účetních "
-"zápisech."
+"Přepíše účet pohledávek společnosti (pro prodejní místo) použitý v účetních zápisech."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_payment_method_view_form
@@ -5181,22 +5172,15 @@ msgstr "Ponechte prázdné pro použití účtu pohledávek zákazníka"
 #: model:ir.model.fields,help:point_of_sale.field_pos_payment_method__journal_id
 msgid ""
 "Leave empty to use the receivable account of customer.\n"
-"Defines the journal where to book the accumulated payments (or individual "
-"payment if Identify Customer is true) after closing the session.\n"
-"For cash journal, we directly write to the default account in the journal "
-"via statement lines.\n"
-"For bank journal, we write to the outstanding account specified in this "
-"payment method.\n"
+"Defines the journal where to book the accumulated payments (or individual payment if Identify Customer is true) after closing the session.\n"
+"For cash journal, we directly write to the default account in the journal via statement lines.\n"
+"For bank journal, we write to the outstanding account specified in this payment method.\n"
 "Only cash and bank journals are allowed."
 msgstr ""
 "Ponechte prázdné pro použití účtu pohledávek zákazníka.\n"
-"Definuje deník, do kterého se mají zaúčtovat akumulované platby (nebo "
-"jednotlivá platba, pokud je Identifikace zákazníka pravdivá) po uzavření "
-"relace.\n"
-"U peněžního deníku zapisujeme přímo na výchozí účet v deníku přes položky "
-"výpisu.\n"
-"U bankovního deníku zapisujeme na dlužný účet uvedený v tomto způsobu "
-"platby.\n"
+"Definuje deník, do kterého se mají zaúčtovat akumulované platby (nebo jednotlivá platba, pokud je Identifikace zákazníka pravdivá) po uzavření relace.\n"
+"U peněžního deníku zapisujeme přímo na výchozí účet v deníku přes položky výpisu.\n"
+"U bankovního deníku zapisujeme na dlužný účet uvedený v tomto způsobu platby.\n"
 "Povoleny jsou pouze peněžní a bankovní deníky."
 
 #. module: point_of_sale
@@ -5214,7 +5198,8 @@ msgstr "Světle modré džíny Slim"
 msgid ""
 "Lightweight bomber jacket in linen with a ribbed stand-up collar and zip "
 "down the front."
-msgstr "Lehká lněná bomber bunda s žebrovaným stojáčkem a zipem po celé délce."
+msgstr ""
+"Lehká lněná bomber bunda s žebrovaným stojáčkem a zipem po celé délce."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5306,8 +5291,8 @@ msgstr "Načítání..."
 #: model:ir.model.fields,help:point_of_sale.field_pos_printer__printer_ip
 msgid ""
 "Local IP address of an Epson receipt printer, or its serial number if the "
-"'Automatic Certificate Update' option is enabled in the printer settings. It "
-"can also be the IP address of a Zebra network printer."
+"'Automatic Certificate Update' option is enabled in the printer settings. It"
+" can also be the IP address of a Zebra network printer."
 msgstr ""
 
 #. module: point_of_sale
@@ -5320,10 +5305,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/lna_checklist/lna_checklist.xml:0
 msgid ""
-"Local Network Access (LNA) is a Chrome feature that allows your browser to "
-"communicate \n"
-"                directly with your local network. It means you can make your "
-"browser communicate with \n"
+"Local Network Access (LNA) is a Chrome feature that allows your browser to communicate \n"
+"                directly with your local network. It means you can make your browser communicate with \n"
 "                your devices without the need for importing certificates."
 msgstr ""
 
@@ -5432,14 +5415,14 @@ msgstr "Zaplatit"
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__available_pricelist_ids
 msgid ""
-"Make several pricelists available in the Point of Sale. You can also apply a "
-"pricelist to specific customers from their contact form (in Sales tab). To "
+"Make several pricelists available in the Point of Sale. You can also apply a"
+" pricelist to specific customers from their contact form (in Sales tab). To "
 "be valid, this pricelist must be listed here as an available pricelist. "
 "Otherwise the default pricelist will apply."
 msgstr ""
 "Uveďte v prodejním místě několik ceníků. Ceník můžete také použít pro "
-"konkrétní zákazníky prostřednictvím kontaktního formuláře (na kartě Prodej). "
-"Chcete-li aby byl platný, musí být tento ceník uveden zde jako dostupný "
+"konkrétní zákazníky prostřednictvím kontaktního formuláře (na kartě Prodej)."
+" Chcete-li aby byl platný, musí být tento ceník uveden zde jako dostupný "
 "ceník. Jinak se použije výchozí ceník."
 
 #. module: point_of_sale
@@ -5733,8 +5716,8 @@ msgstr ""
 msgid ""
 "Need profit account for the following journals to post the gained amount: %s"
 msgstr ""
-"Pro zaúčtování získané částky potřebujete účet zisků pro následující deníky: "
-"%s"
+"Pro zaúčtování získané částky potřebujete účet zisků pro následující deníky:"
+" %s"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5864,15 +5847,15 @@ msgstr "Nenalezen žádný pohyb hotovosti"
 msgid ""
 "No cash statement found for this session. Unable to record returned cash."
 msgstr ""
-"Pro tuto relaci nebyl nalezen žádný peněžní výpis. Nelze zaznamenat vrácenou "
-"hotovost."
+"Pro tuto relaci nebyl nalezen žádný peněžní výpis. Nelze zaznamenat vrácenou"
+" hotovost."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
-"No chart of account configured, go to the \"configuration / settings\" menu, "
-"and install one from the Invoicing tab."
+"No chart of account configured, go to the \"configuration / settings\" menu,"
+" and install one from the Invoicing tab."
 msgstr ""
 "Není nakonfigurován žádný účetní plán, přejděte do nabídky „konfigurace / "
 "nastavení“ a nainstalujte jej z karty Fakturace."
@@ -6142,8 +6125,7 @@ msgstr "Tenisky Odoo"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_price_inclusion_wizard_form
 msgid ""
 "Odoo stores one price per product. How tax is applied to\n"
-"                            that price is not mathematically reversible so "
-"rounding\n"
+"                            that price is not mathematically reversible so rounding\n"
 "                            creates permanent discrepancies."
 msgstr ""
 
@@ -6187,8 +6169,8 @@ msgstr "Online rezervace"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
-"Online payment, delivery payment, terminal payment, and methods that require "
-"customer identification are not supported for fast payment validation."
+"Online payment, delivery payment, terminal payment, and methods that require"
+" customer identification are not supported for fast payment validation."
 msgstr ""
 "Online platby, platby při dodání, platby prostřednictvím terminálu a metody "
 "vyžadující identifikaci zákazníka nejsou podporovány pro rychlé ověření "
@@ -7065,18 +7047,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_payment_method.py:0
 msgid ""
-"Please close and validate the following open PoS Sessions before modifying "
-"this payment method.\n"
+"Please close and validate the following open PoS Sessions before modifying this payment method.\n"
 "Open sessions: %s"
 msgstr ""
-"Před úpravou této platební metody prosím zavřete a ověřte následující "
-"otevřené relace místa prodeje.\n"
+"Před úpravou této platební metody prosím zavřete a ověřte následující otevřené relace místa prodeje.\n"
 "Otevřené relace: %s"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
-"Please create/select a Point of Sale above to show the configuration options."
+"Please create/select a Point of Sale above to show the configuration "
+"options."
 msgstr ""
 "Chcete-li zobrazit možnosti nastavení, vytvořte/vyberte místo prodeje výše."
 
@@ -7122,8 +7103,8 @@ msgid ""
 "Please go on the %s journal and define a Loss Account. This account will be "
 "used to record cash difference."
 msgstr ""
-"Prosím pokračujte %sdeníku a definujte ztrátový účet. Tento účet bude použit "
-"k zaznamenání rozdílu v hotovosti."
+"Prosím pokračujte %sdeníku a definujte ztrátový účet. Tento účet bude použit"
+" k zaznamenání rozdílu v hotovosti."
 
 #. module: point_of_sale
 #. odoo-python
@@ -7132,8 +7113,8 @@ msgid ""
 "Please go on the %s journal and define a Profit Account. This account will "
 "be used to record cash difference."
 msgstr ""
-"Prosím pokračujte %s deníku a definujte ziskový účet. Tento účet bude použit "
-"k zaznamenání rozdílu v hotovosti."
+"Prosím pokračujte %s deníku a definujte ziskový účet. Tento účet bude použit"
+" k zaznamenání rozdílu v hotovosti."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7860,8 +7841,7 @@ msgstr "Tiskárny"
 #: model_terms:ir.actions.act_window,help:point_of_sale.action_pos_printer_form
 msgid ""
 "Printers are typically used by restaurants and bars to print the\n"
-"            orders at the kitchen/bar, the bills or the receipts for the "
-"customers."
+"            orders at the kitchen/bar, the bills or the receipts for the customers."
 msgstr ""
 
 #. module: point_of_sale
@@ -8027,8 +8007,8 @@ msgstr "Produktová varianta"
 #. module: point_of_sale
 #: model_terms:ir.actions.act_window,help:point_of_sale.pos_product_attribute_action
 msgid ""
-"Product attribute allow you to manage the different variation possible for a "
-"product."
+"Product attribute allow you to manage the different variation possible for a"
+" product."
 msgstr ""
 
 #. module: point_of_sale
@@ -8540,11 +8520,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
-"Reversal of POS closing entry %(entry)s for order %(order)s from session %"
-"(session)s"
+"Reversal of POS closing entry %(entry)s for order %(order)s from session "
+"%(session)s"
 msgstr ""
-"Storno záznam uzávěrky POS %(entry)s pro objednávku %(order)s z relace %"
-"(session)s"
+"Storno záznam uzávěrky POS %(entry)s pro objednávku %(order)s z relace "
+"%(session)s"
 
 #. module: point_of_sale
 #. odoo-python
@@ -8709,7 +8689,8 @@ msgstr "Uložte tuto stránku a vraťte se pro nastavení funkcionality."
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/connect_web_serial_scale/connect_web_serial_scale.js:0
-msgid "Scale connected successfully! It will be used automatically in the POS."
+msgid ""
+"Scale connected successfully! It will be used automatically in the POS."
 msgstr ""
 
 #. module: point_of_sale
@@ -9738,7 +9719,8 @@ msgid ""
 "The ISO country code in two chars. \n"
 "You can use this field for quick search."
 msgstr ""
-"ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé vyhledávání."
+"ISO kód země ve dvou znacích. Toto pole můžete použít pro rychlé "
+"vyhledávání."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -9747,8 +9729,8 @@ msgid ""
 "The Point of Sale could not find any product, customer, employee or action "
 "associated with the scanned barcode."
 msgstr ""
-"Prodejní místo nemohlo najít žádný produkt, zákazníka, zaměstnance nebo akci "
-"spojenou s naskenovaným čárovým kódem."
+"Prodejní místo nemohlo najít žádný produkt, zákazníka, zaměstnance nebo akci"
+" spojenou s naskenovaným čárovým kódem."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_rounding_form_view_inherited
@@ -9779,10 +9761,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/order_payment_validation.js:0
 msgid ""
-"The amount of your payment lines must be rounded to validate the "
-"transaction.\n"
-"The rounding precision is %(rounding)s so you should set %(expectedAmount)s "
-"as payment amount instead of %(paidAmount)s."
+"The amount of your payment lines must be rounded to validate the transaction.\n"
+"The rounding precision is %(rounding)s so you should set %(expectedAmount)s as payment amount instead of %(paidAmount)s."
 msgstr ""
 
 #. module: point_of_sale
@@ -9830,8 +9810,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
-"The default tip product is missing. Please manually specify the tip product. "
-"(See Tips field.)"
+"The default tip product is missing. Please manually specify the tip product."
+" (See Tips field.)"
 msgstr ""
 "Chybí výchozí zpropitné produktu. Zadejte prosím zpropitné produktu ručně. "
 "(Viz pole Zpropitné.)"
@@ -9864,23 +9844,18 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/utils/printer/epson_printer.js:0
 msgid ""
 "The following error code was given by the printer: %s \n"
-"To find more details on the error reason, please search online for: Epson "
-"ePoS error %s "
+"To find more details on the error reason, please search online for: Epson ePoS error %s "
 msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/wizard/pos_make_invoice.py:0
 msgid ""
-"The following refund orders can't be part of a consolidated invoice because "
-"they refunded invoiced orders. Each refund order should be handled "
-"separately.\n"
+"The following refund orders can't be part of a consolidated invoice because they refunded invoiced orders. Each refund order should be handled separately.\n"
 "\n"
 "%s"
 msgstr ""
-"Následující vrácené objednávky nemohou být součástí konsolidované faktury, "
-"protože se jedná o vrácení fakturovaných objednávek. Každá vrácená "
-"objednávka by měla být zpracována samostatně.\n"
+"Následující vrácené objednávky nemohou být součástí konsolidované faktury, protože se jedná o vrácení fakturovaných objednávek. Každá vrácená objednávka by měla být zpracována samostatně.\n"
 "\n"
 "%s"
 
@@ -9906,8 +9881,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
 msgid ""
-"The invoice journal must be in the same currency as the Sales Journal or the "
-"company currency if that is not set."
+"The invoice journal must be in the same currency as the Sales Journal or the"
+" company currency if that is not set."
 msgstr ""
 "Deník faktur musí být ve stejné měně jako Deník prodeje nebo v měně "
 "společnosti, pokud není nastavena."
@@ -9950,8 +9925,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/closing_popup/closing_popup.js:0
 msgid ""
-"The money counted doesn't match what we expected. Want to log the difference "
-"for the books?"
+"The money counted doesn't match what we expected. Want to log the difference"
+" for the books?"
 msgstr ""
 "Počítané peníze se neshodují s tím, co jsme očekávali. Chcete rozdíl "
 "zaznamenat do účetnictví?"
@@ -9960,7 +9935,8 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_res_partner__pos_order_count
 #: model:ir.model.fields,help:point_of_sale.field_res_users__pos_order_count
 msgid "The number of point of sales orders related to this customer"
-msgstr "Počet objednávek v místě prodeje vztahujících se k tomuto zákazníkovi."
+msgstr ""
+"Počet objednávek v místě prodeje vztahujících se k tomuto zákazníkovi."
 
 #. module: point_of_sale
 #. odoo-python
@@ -9993,17 +9969,18 @@ msgstr ""
 #: code:addons/point_of_sale/models/pos_payment.py:0
 msgid ""
 "The payment method selected is not allowed in the config of the POS session."
-msgstr "Vybraný způsob platby není v konfiguraci relace Místa Prodeje povolen."
+msgstr ""
+"Vybraný způsob platby není v konfiguraci relace Místa Prodeje povolen."
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_available_categ_ids
 msgid ""
 "The point of sale will only display products which are within one of the "
-"selected category trees. If no category is specified, all available products "
-"will be shown"
+"selected category trees. If no category is specified, all available products"
+" will be shown"
 msgstr ""
-"Prodejní místo zobrazí pouze produkty, které spadají do jednoho ze zvolených "
-"stromů kategorií. Pokud není zadána žádná kategorie, zobrazí se všechny "
+"Prodejní místo zobrazí pouze produkty, které spadají do jednoho ze zvolených"
+" stromů kategorií. Pokud není zadána žádná kategorie, zobrazí se všechny "
 "dostupné produkty."
 
 #. module: point_of_sale
@@ -10032,8 +10009,8 @@ msgstr "Předdefinované poznámky tohoto prodejního místa."
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__pricelist_id
 msgid ""
-"The pricelist used if no customer is selected or if the customer has no Sale "
-"Pricelist configured if any."
+"The pricelist used if no customer is selected or if the customer has no Sale"
+" Pricelist configured if any."
 msgstr ""
 "Ceník použitý, pokud není vybrán žádný zákazník nebo pokud zákazník nemá "
 "nakonfigurován žádný prodejní ceník, pokud existuje."
@@ -10096,13 +10073,15 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/models/pos_order_line.js:0
 msgid ""
-"The requested quantity to be refunded is higher than the refundable quantity."
+"The requested quantity to be refunded is higher than the refundable "
+"quantity."
 msgstr "Požadované množství k refundaci je větší než refundované množství."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_config.py:0
-msgid "The rounding strategy of the point of sale %(pos)s must be: '%(value)s'"
+msgid ""
+"The rounding strategy of the point of sale %(pos)s must be: '%(value)s'"
 msgstr ""
 
 #. module: point_of_sale
@@ -10136,8 +10115,8 @@ msgid ""
 "anytime and posted to Accounting from Point of Sale's dashboard."
 msgstr ""
 "Relace již byla uzavřena jiným uživatelem. Všechny prodeje uskutečněné v "
-"mezidobí byly uloženy do záchranné relace, kterou lze kdykoli zkontrolovat a "
-"odeslat do účetnictví z ovládacího panelu prodejního místa."
+"mezidobí byly uloženy do záchranné relace, kterou lze kdykoli zkontrolovat a"
+" odeslat do účetnictví z ovládacího panelu prodejního místa."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_config_kanban
@@ -10150,7 +10129,8 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/services/pos_store.js:0
-msgid "The session is being closed by another user. The page will be reloaded."
+msgid ""
+"The session is being closed by another user. The page will be reloaded."
 msgstr "Relace je uzavírána jiným uživatelem. Stránka bude znovu načtena."
 
 #. module: point_of_sale
@@ -10166,8 +10146,8 @@ msgid ""
 "The tip has been added to the order. However,the selected payment line does "
 "not allow tips to be added."
 msgstr ""
-"Spropitné bylo přidáno k objednávce, ale vybraná platební metoda nepodporuje "
-"jeho zahrnutí."
+"Spropitné bylo přidáno k objednávce, ale vybraná platební metoda nepodporuje"
+" jeho zahrnutí."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -10182,8 +10162,8 @@ msgid ""
 "The transactions are processed by Adyen. Set your Adyen credentials on the "
 "related payment method."
 msgstr ""
-"Transakce zpracovává Adyen. Nastavte přihlašovací údaje Adyen na související "
-"platební metodu."
+"Transakce zpracovává Adyen. Nastavte přihlašovací údaje Adyen na související"
+" platební metodu."
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -10239,8 +10219,8 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_razorpay
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
-"The transactions are processed by Razorpay. Set your Razorpay credentials on "
-"the related payment method."
+"The transactions are processed by Razorpay. Set your Razorpay credentials on"
+" the related payment method."
 msgstr ""
 "Transakce zpracovává Razorpay. Nastavte své přihlašovací údaje Razorpay na "
 "související platební metodu."
@@ -10249,8 +10229,8 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_stripe
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
-"The transactions are processed by Stripe. Set your Stripe credentials on the "
-"related payment method."
+"The transactions are processed by Stripe. Set your Stripe credentials on the"
+" related payment method."
 msgstr ""
 "Transakce zpracovává Stripe. Nastavte své přihlašovací údaje Stripe na "
 "související platební metodu."
@@ -10258,7 +10238,8 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__module_pos_viva_com
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
-msgid "The transactions are processed by Viva.com on terminal or tap on phone."
+msgid ""
+"The transactions are processed by Viva.com on terminal or tap on phone."
 msgstr ""
 "Transakce zpracovává společnost Viva.com na terminálu nebo klepnutím na "
 "telefon."
@@ -10283,19 +10264,19 @@ msgstr "Teoretický konečný zůstatek"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/sync_popup/sync_popup.js:0
 msgid ""
-"There are %(count)s products available for this PoS (configured limit: %"
-"(limit)s). Loading all products may slow down the Point of Sale. Do you want "
-"to continue with Full Synchronization?"
+"There are %(count)s products available for this PoS (configured limit: "
+"%(limit)s). Loading all products may slow down the Point of Sale. Do you "
+"want to continue with Full Synchronization?"
 msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/components/popups/sync_popup/sync_popup.js:0
 msgid ""
-"There are %(count)s products available for this PoS (configured limit: %"
-"(limit)s). Loading this many products will severely slow down the system and "
-"may cause it to crash or become unresponsive. It is strongly recommended to "
-"use Limited Synchronization instead. Do you still want to proceed?"
+"There are %(count)s products available for this PoS (configured limit: "
+"%(limit)s). Loading this many products will severely slow down the system "
+"and may cause it to crash or become unresponsive. It is strongly recommended"
+" to use Limited Synchronization instead. Do you still want to proceed?"
 msgstr ""
 
 #. module: point_of_sale
@@ -10308,12 +10289,10 @@ msgstr "V této kategorii není žádné zboží."
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid ""
-"There are still orders in draft state in the session. Pay or cancel the "
-"following orders to validate the session:\n"
+"There are still orders in draft state in the session. Pay or cancel the following orders to validate the session:\n"
 "%s"
 msgstr ""
-"V relaci jsou stále objednávky ve stavu konceptu. Zaplaťte nebo zrušte "
-"následující objednávky pro ověření relace:\n"
+"V relaci jsou stále objednávky ve stavu konceptu. Zaplaťte nebo zrušte následující objednávky pro ověření relace:\n"
 "%s"
 
 #. module: point_of_sale
@@ -10346,11 +10325,9 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/order_payment_validation.js:0
 msgid ""
-"There is no cash payment method available in this point of sale to handle "
-"the change.\n"
+"There is no cash payment method available in this point of sale to handle the change.\n"
 "\n"
-" Please pay the exact amount or add a cash payment method in the point of "
-"sale settings."
+" Please pay the exact amount or add a cash payment method in the point of sale settings."
 msgstr ""
 
 #. module: point_of_sale
@@ -10385,8 +10362,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/services/barcode_reader_service.js:0
 msgid ""
-"This barcode is not compatible with the GS1 standard. Consider configuring a "
-"fallback barcode parser from the PoS settings."
+"This barcode is not compatible with the GS1 standard. Consider configuring a"
+" fallback barcode parser from the PoS settings."
 msgstr ""
 "Tento čárový kód není kompatibilní se standardem GS1. Zvažte konfiguraci "
 "záložního analyzátoru čárových kódů v nastavení PoS."
@@ -10411,8 +10388,8 @@ msgstr ""
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__amount_authorized_diff
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__pos_amount_authorized_diff
 msgid ""
-"This field depicts the maximum difference allowed between the ending balance "
-"and the theoretical cash when closing a session, for non-POS managers. If "
+"This field depicts the maximum difference allowed between the ending balance"
+" and the theoretical cash when closing a session, for non-POS managers. If "
 "this maximum is reached, the user will have an error message at the closing "
 "of his session saying that he needs to contact his manager."
 msgstr ""
@@ -10448,8 +10425,8 @@ msgstr "Tato faktura byla vytvořena z relace prodejního místa: %s"
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__fiscal_position_ids
 msgid ""
-"This is useful for restaurants with onsite and take-away services that imply "
-"specific tax rates."
+"This is useful for restaurants with onsite and take-away services that imply"
+" specific tax rates."
 msgstr ""
 "To je užitečné pro restaurace s místními a rozvážkovými službami , které "
 "zahrnují konkrétní daňové sazby."
@@ -10487,7 +10464,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
-"This order has already been paid. You cannot set it back to draft or edit it."
+"This order has already been paid. You cannot set it back to draft or edit "
+"it."
 msgstr ""
 "Tato objednávka již byla zaplacena. Nelze ji vrátit do stavu konceptu ani "
 "upravovat."
@@ -10569,8 +10547,8 @@ msgid ""
 "Tiger bloomer. Baked for a soft inside, with its distinctive savoury "
 "crackled crust."
 msgstr ""
-"Tiger bloomer. Pečený pro měkký vnitřek, s charakteristickou slanou křupavou "
-"kůrou."
+"Tiger bloomer. Pečený pro měkký vnitřek, s charakteristickou slanou křupavou"
+" kůrou."
 
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_tiger_white_loaf_product_template
@@ -10920,13 +10898,11 @@ msgstr ""
 #: code:addons/point_of_sale/models/pos_session.py:0
 msgid ""
 "Unable to close and validate the session.\n"
-"Please set corresponding tax account in each repartition line of the "
-"following taxes: \n"
+"Please set corresponding tax account in each repartition line of the following taxes: \n"
 "%s"
 msgstr ""
 "Nelze zavřít a ověřit relaci.\n"
-"Nastavte prosím odpovídající daňový účet v každém řádku přerozdělení "
-"následujících daní: \n"
+"Nastavte prosím odpovídající daňový účet v každém řádku přerozdělení následujících daní: \n"
 "%s"
 
 #. module: point_of_sale
@@ -11128,8 +11104,8 @@ msgstr "Potvrdit"
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_payment_method.py:0
 msgid ""
-"Validation Error: You cannot assign the same Cash payment method to multiple "
-"POS Shops. Please create a separate Cash payment method for each shop."
+"Validation Error: You cannot assign the same Cash payment method to multiple"
+" POS Shops. Please create a separate Cash payment method for each shop."
 msgstr ""
 
 #. module: point_of_sale
@@ -11253,8 +11229,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
 "Whenever you close a session, one entry is generated in the following "
-"accounting journal for all the orders not invoiced. Invoices are recorded in "
-"accounting separately."
+"accounting journal for all the orders not invoiced. Invoices are recorded in"
+" accounting separately."
 msgstr ""
 "Při každém uzavření relace se v následujícím účetním deníku vytvoří jeden "
 "záznam pro všechny nevyfakturované zakázky. Faktury jsou v účetnictví "
@@ -11334,8 +11310,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
-"You are not allowed to change the rounding configuration while a pos session "
-"using it is already opened."
+"You are not allowed to change the rounding configuration while a pos session"
+" using it is already opened."
 msgstr ""
 
 #. module: point_of_sale
@@ -11407,8 +11383,8 @@ msgstr "Můžete jej aktualizovat výběrem jedné z následujících možností
 #. odoo-python
 #: code:addons/point_of_sale/models/account_move.py:0
 msgid ""
-"You can't reset this invoice to draft because the POS session is still open. "
-"Please close the ongoing session first, then try again."
+"You can't reset this invoice to draft because the POS session is still open."
+" Please close the ongoing session first, then try again."
 msgstr ""
 
 #. module: point_of_sale
@@ -11428,8 +11404,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_category.py:0
 msgid ""
-"You cannot archive/delete PoS Product Categories that are used in an active "
-"Point of Sale session.\n"
+"You cannot archive/delete PoS Product Categories that are used in an active Point of Sale session.\n"
 "Close all related PoS sessions first and try again."
 msgstr ""
 
@@ -11437,8 +11412,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_category.py:0
 msgid ""
-"You cannot archive/delete a category which is currently in use in a point of "
-"sale."
+"You cannot archive/delete a category which is currently in use in a point of"
+" sale."
 msgstr ""
 
 #. module: point_of_sale
@@ -11453,12 +11428,9 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/product_template.py:0
 msgid ""
-"You cannot archive/delete product(s) that are available in an active Point "
-"of Sale session.\n"
+"You cannot archive/delete product(s) that are available in an active Point of Sale session.\n"
 "\n"
-"Archiving/Deleting a product available in a session would be like attempting "
-"to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as "
-"ketchup and mayo go flying everywhere!"
+"Archiving/Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!"
 msgstr ""
 
 #. module: point_of_sale
@@ -11503,8 +11475,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/res_partner.py:0
 msgid ""
-"You cannot delete a customer that has point of sales orders. You can archive "
-"it instead."
+"You cannot delete a customer that has point of sales orders. You can archive"
+" it instead."
 msgstr ""
 
 #. module: point_of_sale
@@ -11580,7 +11552,8 @@ msgid ""
 "You don't have the access rights to get the point of sale closing control "
 "data."
 msgstr ""
-"K získání kontrolních dat uzávěrky v prodejním místě nemáte přístupová práva."
+"K získání kontrolních dat uzávěrky v prodejním místě nemáte přístupová "
+"práva."
 
 #. module: point_of_sale
 #. odoo-python
@@ -11657,8 +11630,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/wizard/pos_price_inclusion_wizard.py:0
 msgid ""
-"You want to sell a product at %(price_incl)s using tax \"%(tax_name)s\" (%"
-"(amount_type_label)s)"
+"You want to sell a product at %(price_incl)s using tax \"%(tax_name)s\" "
+"(%(amount_type_label)s)"
 msgstr ""
 
 #. module: point_of_sale
@@ -11684,8 +11657,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/backend/connect_web_serial_scale/connect_web_serial_scale.js:0
 msgid ""
-"Your browser does not support connecting a scale directly. Only Chrome-based "
-"desktop browsers are supported."
+"Your browser does not support connecting a scale directly. Only Chrome-based"
+" desktop browsers are supported."
 msgstr ""
 
 #. module: point_of_sale
@@ -12073,19 +12046,17 @@ msgstr ""
 #~ msgstr "Odkaz zkopírován do schránky"
 
 #~ msgid ""
-#~ "Check the internet connection then try to sync again by clicking on the "
-#~ "red wifi button (upper right of the screen)."
+#~ "Check the internet connection then try to sync again by clicking on the red "
+#~ "wifi button (upper right of the screen)."
 #~ msgstr ""
 #~ "Zkontrolujte připojení k internetu a poté se pokuste znovu synchronizovat "
 #~ "kliknutím na červené tlačítko wifi (vpravo nahoře na obrazovce)."
 
 #~ msgid ""
-#~ "Hold up! Archiving products while POS sessions are active is like pulling "
-#~ "a plate mid-meal.\n"
+#~ "Hold up! Archiving products while POS sessions are active is like pulling a plate mid-meal.\n"
 #~ "Make sure to close all sessions first to avoid any issues."
 #~ msgstr ""
-#~ "Počkejte! Archivace produktů během aktivních POS relací je jako vytáhnout "
-#~ "talíř uprostřed jídla.\n"
+#~ "Počkejte! Archivace produktů během aktivních POS relací je jako vytáhnout talíř uprostřed jídla.\n"
 #~ "Nejprve uzavřete všechny relace, abyste předešli problémům."
 
 #~ msgid "Please print the invoice from the backend"
@@ -12110,16 +12081,11 @@ msgstr ""
 #~ msgid ""
 #~ "To delete a product, make sure all point of sale sessions are closed.\n"
 #~ "\n"
-#~ "Deleting a product available in a session would be like attempting to "
-#~ "snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as "
-#~ "ketchup and mayo go flying everywhere!"
+#~ "Deleting a product available in a session would be like attempting to snatch a hamburger from a customer’s hand mid-bite; chaos will ensue as ketchup and mayo go flying everywhere!"
 #~ msgstr ""
-#~ "Chcete-li produkt odstranit, ujistěte se, že jsou uzavřeny všechny "
-#~ "pokladní relace.\n"
+#~ "Chcete-li produkt odstranit, ujistěte se, že jsou uzavřeny všechny pokladní relace.\n"
 #~ "\n"
-#~ "Odstranění produktu dostupného v relaci by bylo jako pokusit se vytrhnout "
-#~ "hamburger z ruky zákazníka uprostřed sousta; nastal by chaos, kečup a "
-#~ "majonéza by létaly všude kolem!"
+#~ "Odstranění produktu dostupného v relaci by bylo jako pokusit se vytrhnout hamburger z ruky zákazníka uprostřed sousta; nastal by chaos, kečup a majonéza by létaly všude kolem!"
 
 #~ msgid "Unable to sync order"
 #~ msgstr "Nelze synchronizovat objednávku"
@@ -12140,9 +12106,8 @@ msgstr ""
 #~ "Local IP address of an Epson receipt printer, or its serial number if the "
 #~ "'Automatic Certificate Update' option is enabled in the printer settings."
 #~ msgstr ""
-#~ "Místní IP adresa tiskárny účtenek Epson nebo její sériové číslo, pokud je "
-#~ "v nastavení tiskárny povolena možnost „Automatická aktualizace "
-#~ "certifikátu“."
+#~ "Místní IP adresa tiskárny účtenek Epson nebo její sériové číslo, pokud je v "
+#~ "nastavení tiskárny povolena možnost „Automatická aktualizace certifikátu“."
 
 #~ msgid "Print Basic Receipt"
 #~ msgstr "Vytisknout základní účtenku"

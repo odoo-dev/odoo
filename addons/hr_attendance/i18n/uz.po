@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 18:21+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"hr_attendance/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/hr_attendance/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -71,27 +70,24 @@ msgstr "'Hujjatlarni o‘qish'"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "<br/>\n"
-"                                    <span class=\"text-muted\">When enabled, "
-"only the first check-in within the scheduled working hours (including "
-"tolerance) is recorded. Further check-ins are allowed only after an "
-"automatic check-out.</span>"
+"                                    <span class=\"text-muted\">When enabled, only the first check-in within the scheduled working hours (including tolerance) is recorded. Further check-ins are allowed only after an automatic check-out.</span>"
 msgstr ""
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_hr_attendance_kanban
 #, fuzzy
 msgid ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Period\" role=\"img\" "
-"title=\"Period\"/>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"calendar_today\" aria-"
+"label=\"Period\" role=\"img\" title=\"Period\"/>"
 msgstr ""
-"<i class=\"fa fa-calendar me-1\" aria-label=\"Davr\" role=\"img\" "
-"title=\"Davr\"/>"
+"<i class=\"me-1 oi-filled oi\" data-icon=\"calendar_today\" aria-"
+"label=\"Davr\" role=\"img\" title=\"Davr\"/>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 #, fuzzy
-msgid "<i class=\"fa fa-fw fa-arrow-right\"/>Installation Manual"
-msgstr "<i class=\"fa fa-fw fa-arrow-right\"/>O‘rnatish qo‘llanmasi"
+msgid "<i class=\"oi oi-fw\" data-icon=\"arrow_forward\"/>Installation Manual"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"arrow_forward\"/>O‘rnatish qo‘llanmasi"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
@@ -107,8 +103,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_employees_view_kanban
 #, fuzzy
 msgid ""
-"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not "
-"available\" title=\"Not available\">\n"
+"<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n"
 "                                    </span>"
 msgstr ""
 "<span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-"
@@ -186,8 +181,7 @@ msgstr "<span class=\"o_stat_text\">Oylik soatlar</span>"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
 "<span class=\"o_stat_value\">Add</span>\n"
-"                                    <span class=\"o_stat_text\">Employees</"
-"span>"
+"                                    <span class=\"o_stat_text\">Employees</span>"
 msgstr ""
 
 #. module: hr_attendance
@@ -197,8 +191,8 @@ msgid ""
 "<span colspan=\"2\" class=\"mb-3 fw-bold\">The hours will be considered "
 "extra and submitted to approval.</span>"
 msgstr ""
-"<span colspan=\"2\" class=\"mb-3 fw-bold\">Bu soatlar qo‘shimcha hisoblanib, "
-"tasdiqlash uchun yuboriladi.</span>"
+"<span colspan=\"2\" class=\"mb-3 fw-bold\">Bu soatlar qo‘shimcha hisoblanib,"
+" tasdiqlash uchun yuboriladi.</span>"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
@@ -268,8 +262,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:hr_attendance.hr_employee_attendance_action_kanban
 #, fuzzy
 msgid ""
-"Add a few employees to be able to select an employee here and perform his "
-"check in / check out.\n"
+"Add a few employees to be able to select an employee here and perform his check in / check out.\n"
 "                To create employees go to the Employees menu."
 msgstr ""
 "Bu yerda xodimni tanlash va uning kirish/chiqishini amalga oshirish uchun "
@@ -325,8 +318,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 #, fuzzy
 msgid ""
-"Allow the collection of GPS location, IP address, and browser/device details "
-"used to track employee access and attendance"
+"Allow the collection of GPS location, IP address, and browser/device details"
+" used to track employee access and attendance"
 msgstr ""
 "Xodimlarning kirishi va davomatini kuzatish uchun ishlatiladigan GPS "
 "joylashuv, IP manzil va brauzer/qurilma ma'lumotlarini yig‘ishga ruxsat "
@@ -669,13 +662,12 @@ msgstr "Shtrix-kod manbasi"
 #, fuzzy
 msgid ""
 "Base for overtime calculation.\n"
-"Use 'Quantity' when overtime hours are those in excess of a certain amount "
-"per day/week.\n"
+"Use 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\n"
 "Use 'Timing' when overtime hours happen on specific days or at specific times"
 msgstr ""
 "Qo‘shimcha ish vaqtini hisoblash asosi. Qo‘shimcha soatlar kunlik/haftalik "
-"ma'lum miqdordan oshganda \"Miqdor\"dan foydalaning. Qo‘shimcha ish soatlari "
-"muayyan kunlarda yoki vaqtlarda sodir bo‘lganda \"Vaqt\"dan foydalaning"
+"ma'lum miqdordan oshganda \"Miqdor\"dan foydalaning. Qo‘shimcha ish soatlari"
+" muayyan kunlarda yoki vaqtlarda sodir bo‘lganda \"Vaqt\"dan foydalaning"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance_overtime_rule__base_off
@@ -724,8 +716,8 @@ msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee hasn't "
 "checked out since %(datetime)s"
 msgstr ""
-"%(empl_name)s uchun yangi davomat qaydini yaratib bo‘lmadi, xodim %"
-"(datetime)s dan beri ro‘yxatdan chiqmagan"
+"%(empl_name)s uchun yangi davomat qaydini yaratib bo‘lmadi, xodim "
+"%(datetime)s dan beri ro‘yxatdan chiqmagan"
 
 #. module: hr_attendance
 #. odoo-python
@@ -735,8 +727,8 @@ msgid ""
 "Cannot create new attendance record for %(empl_name)s, the employee was "
 "already checked in on %(datetime)s"
 msgstr ""
-"%(empl_name)s uchun yangi davomat qaydini yaratib bo‘lmadi, xodim allaqachon "
-"%(datetime)s da ro‘yxatdan o‘tgan"
+"%(empl_name)s uchun yangi davomat qaydini yaratib bo‘lmadi, xodim allaqachon"
+" %(datetime)s da ro‘yxatdan o‘tgan"
 
 #. module: hr_attendance
 #. odoo-python
@@ -915,13 +907,12 @@ msgid ""
 "Controls how the rates from the different rules that apply are combined.\n"
 "  Max: use the highest rate. (e.g.: combined for 150% and 120 = 150%)\n"
 "  Sum: sum the *extra* pay (i.e. above 100%).\n"
-"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + "
-"(120-100)% = 170%\n"
+"    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
 msgstr ""
 "Turli qoidalarga oid stavkalar qanday birlashtirilib hisoblanishini "
-"boshqaradi.   Maksimal: eng yuqori stavkani qo‘llash. (masalan: 150% va 120% "
-"uchun 150%) Yig‘indi: *qo‘shimcha to‘lov* yig‘indisi (ya'ni 100% dan yuqori "
-"qismi). Masalan: 150% va 120% uchun birlashtirilgan stavka = 100% (asos) + "
+"boshqaradi.   Maksimal: eng yuqori stavkani qo‘llash. (masalan: 150% va 120%"
+" uchun 150%) Yig‘indi: *qo‘shimcha to‘lov* yig‘indisi (ya'ni 100% dan yuqori"
+" qismi). Masalan: 150% va 120% uchun birlashtirilgan stavka = 100% (asos) + "
 "(150-100)% + (120-100)% = 170%"
 
 #. module: hr_attendance
@@ -1473,8 +1464,8 @@ msgstr "Qo‘lda aniqlash"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 #, fuzzy
 msgid ""
-"If checked, days not covered by an attendance will be visible in the Report. "
-"Does not apply to employees with a flexible working schedule."
+"If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
 "Agar belgilansa, davomat qayd etilmagan kunlar hisobotda ko‘rinadi. "
 "Moslashuvchan ish jadvaliga ega xodimlarga nisbatan qo‘llanilmaydi."
@@ -1973,8 +1964,8 @@ msgstr "Ish boshiga kiritish"
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/views/hr_version_list_view.js:0
 msgid ""
-"One or more selected records already have a ruleset assigned (highlighted in "
-"yellow). Do you want to overwrite them?"
+"One or more selected records already have a ruleset assigned (highlighted in"
+" yellow). Do you want to overwrite them?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2365,8 +2356,8 @@ msgstr "'%(name)s' qoidasi miqdorga asoslangan, ammo davr ko‘rsatilmagan"
 #: code:addons/hr_attendance/models/hr_attendance_overtime_rule.py:0
 #, fuzzy
 msgid ""
-"Rule '%(name)s' is based off quantity, but the usual amount of work hours is "
-"not specified"
+"Rule '%(name)s' is based off quantity, but the usual amount of work hours is"
+" not specified"
 msgstr ""
 "'%(name)s' qoidasi miqdorga asoslangan, lekin odatdagi ish soatlari soni "
 "ko‘rsatilmagan"
@@ -2377,7 +2368,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "Rule '%(name)s' is based off timing, but the work schedule is not specified"
-msgstr "'%(name)s' qoidasi vaqtga asoslangan, lekin ish jadvali ko‘rsatilmagan"
+msgstr ""
+"'%(name)s' qoidasi vaqtga asoslangan, lekin ish jadvali ko‘rsatilmagan"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_rule_view_form
@@ -2506,7 +2498,8 @@ msgstr "Ketma-ketlik"
 #, fuzzy
 msgid "Set PIN codes in the employee detail form (in HR Settings tab)."
 msgstr ""
-"PIN kodlarni xodim tafsilotlari shaklida (HR sozlamalari bo‘limida) o‘rnating"
+"PIN kodlarni xodim tafsilotlari shaklida (HR sozlamalari bo‘limida) "
+"o‘rnating"
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_settings
@@ -2536,7 +2529,8 @@ msgstr ""
 
 #. module: hr_attendance
 #: model:ir.model.constraint,message:hr_attendance.constraint_res_company_check_auto_check_out_specific_time_range
-msgid "Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
+msgid ""
+"Specific Time must be within a 24-hour range (0h 0m 0s to 23h 59m 59s)."
 msgstr ""
 
 #. module: hr_attendance
@@ -2618,8 +2612,8 @@ msgid ""
 "The user set in Attendance will access the attendance of the employee "
 "through the dedicated app and will be able to edit them."
 msgstr ""
-"Davomatga o‘rnatilgan foydalanuvchi maxsus ilova orqali xodimning davomatini "
-"ko‘radi va uni tahrirlash imkoniyatiga ega bo‘ladi"
+"Davomatga o‘rnatilgan foydalanuvchi maxsus ilova orqali xodimning davomatini"
+" ko‘radi va uni tahrirlash imkoniyatiga ega bo‘ladi"
 
 #. module: hr_attendance
 #: model:res.groups,comment:hr_attendance.group_hr_attendance_user
@@ -2665,8 +2659,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 msgid ""
-"This attendance was automatically checked out based on company specific time "
-"configuration."
+"This attendance was automatically checked out based on company specific time"
+" configuration."
 msgstr ""
 
 #. module: hr_attendance
@@ -2685,8 +2679,8 @@ msgstr ""
 #: code:addons/hr_attendance/models/hr_attendance.py:0
 #, fuzzy
 msgid ""
-"This attendance was automatically created to cover an unjustified absence on "
-"that day."
+"This attendance was automatically created to cover an unjustified absence on"
+" that day."
 msgstr ""
 "Bu davomat o‘sha kundagi asoslanmagan yo‘qlikni qoplash uchun avtomatik "
 "tarzda yaratildi."
@@ -2694,8 +2688,8 @@ msgstr ""
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_overtime_ruleset_view_form
 msgid ""
-"This will reset all manual edit on overtime period linked to those rules. Do "
-"you confirm ?"
+"This will reset all manual edit on overtime period linked to those rules. Do"
+" you confirm ?"
 msgstr ""
 
 #. module: hr_attendance
@@ -2828,8 +2822,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_attendance/static/src/components/attendance_menu/attendance_menu.js:0
 msgid ""
-"Unable to get a valid location. Do you want to proceed with your check-in/"
-"out anyway?"
+"Unable to get a valid location. Do you want to proceed with your check-"
+"in/out anyway?"
 msgstr ""
 
 #. module: hr_attendance

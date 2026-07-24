@@ -14,8 +14,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:38+0000\n"
 "PO-Revision-Date: 2026-06-19 04:37+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/"
-"website_customer/da/>\n"
+"Language-Team: Danish <https://translate.odoo.com/projects/odoo-master/website_customer/da/>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,27 +25,25 @@ msgstr ""
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index
 msgid ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        There are no matching customers found for the "
-"selected country. Displaying results across all countries instead."
+"<i class=\"oi me-2\" data-icon=\"info\"/>\n"
+"                        There are no matching customers found for the selected country. Displaying results across all countries instead."
 msgstr ""
-"<i class=\"fa fa-info-circle me-2\"/>\n"
-"                        Der er ingen matchende kunder fundet for det valgte "
-"land. Viser resultater på tværs af alle lande i stedet."
+"<i class=\"me-2 oi\" data-icon=\"info\"/>\n"
+"                        Der er ingen matchende kunder fundet for det valgte land. Viser resultater på tværs af alle lande i stedet."
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.opt_country
 msgid ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 msgstr ""
-"<i class=\"fa fa-map-marker\" role=\"img\" aria-label=\"Open map\" "
-"title=\"Open map\"/>"
+"<i class=\"oi\" data-icon=\"location_on\" role=\"img\" aria-label=\"Open "
+"map\" title=\"Open map\"/>"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.details
-msgid "<i class=\"oi oi-chevron-left me-2\"/>Back to references"
-msgstr "<i class=\"oi oi-chevron-left me-2\"/>Tilbage til referencer"
+msgid "<i class=\"oi me-2\" data-icon=\"chevron_backward\"/>Back to references"
+msgstr "<i class=\"me-2 oi\" data-icon=\"chevron_backward\"/>Tilbage til referencer"
 
 #. module: website_customer
 #: model_terms:ir.ui.view,arch_db:website_customer.index

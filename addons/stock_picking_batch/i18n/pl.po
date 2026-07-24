@@ -34,15 +34,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-03 17:40+0000\n"
 "PO-Revision-Date: 2026-06-20 05:14+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/"
-"stock_picking_batch/pl/>\n"
+"Language-Team: Polish <https://translate.odoo.com/projects/odoo-master/stock_picking_batch/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
-"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: stock_picking_batch
@@ -53,8 +50,12 @@ msgstr "Z partii usunięto %s, żadna ilość nie została przetworzona"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_card
-msgid "<i class=\"fa fa-calendar text-primary me-2\" title=\"Calendar\"/>"
-msgstr "<i class=\"fa fa-calendar text-primary me-2\" title=\"Kalendarz\"/>"
+msgid ""
+"<i class=\"oi oi-filled text-primary me-2\" data-icon=\"calendar_today\" "
+"title=\"Calendar\"/>"
+msgstr ""
+"<i class=\"text-primary me-2 oi-filled oi\" data-icon=\"calendar_today\" "
+"title=\"Kalendarz\"/>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_type_kanban_batch
@@ -76,8 +77,8 @@ msgid ""
 "<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Batch "
 "Grouping</span>"
 msgstr ""
-"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Grupowanie "
-"wsadowe</span>"
+"<span class=\"o_form_label fw-bold\" invisible=\"not auto_batch\">Grupowanie"
+" wsadowe</span>"
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_form
@@ -127,23 +128,19 @@ msgstr "<strong>→</strong>"
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_lines
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of lines if the transfer is added to it.\n"
+"A transfer will not be automatically added to batches that will exceed this number of lines if the transfer is added to it.\n"
 "Leave this value as '0' if no line limit."
 msgstr ""
-"Transfer nie zostanie automatycznie dodany do partii, które po jego dodaniu "
-"przekroczą tę liczbę pozycji.\n"
+"Transfer nie zostanie automatycznie dodany do partii, które po jego dodaniu przekroczą tę liczbę pozycji.\n"
 "Pozostaw tę wartość jako \"0\", jeśli nie ma limitu pozycji."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__batch_max_pickings
 msgid ""
-"A transfer will not be automatically added to batches that will exceed this "
-"number of transfers.\n"
+"A transfer will not be automatically added to batches that will exceed this number of transfers.\n"
 "Leave this value as '0' if no transfer limit."
 msgstr ""
-"Transfer nie zostanie automatycznie dodany do partii, które przekroczą tę "
-"liczbę transferów.\n"
+"Transfer nie zostanie automatycznie dodany do partii, które przekroczą tę liczbę transferów.\n"
 "Pozostaw tę wartość jako \"0\", jeśli nie ma limitu transferów."
 
 #. module: stock_picking_batch
@@ -268,8 +265,8 @@ msgstr "Automatycznie grupuj partie według ich lokalizacji źródłowej."
 msgid ""
 "Automatically put pickings into batches as they are confirmed when possible."
 msgstr ""
-"Automatycznie umieść kompletacje we wsadach w miarę ich potwierdzania, jeśli "
-"to możliwe."
+"Automatycznie umieść kompletacje we wsadach w miarę ich potwierdzania, jeśli"
+" to możliwe."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.report_picking_batch
@@ -586,8 +583,8 @@ msgid ""
 "If the Automatic Batches feature is enabled, at least one 'Group by' option "
 "must be selected."
 msgstr ""
-"Jeśli funkcja automatycznych partii jest włączona, należy wybrać co najmniej "
-"jedną opcję \"Grupuj według\"."
+"Jeśli funkcja automatycznych partii jest włączona, należy wybrać co najmniej"
+" jedną opcję \"Grupuj według\"."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -931,7 +928,8 @@ msgstr "Oceny"
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.action_picking_tree_wave
 #: model_terms:ir.actions.act_window,help:stock_picking_batch.stock_picking_batch_action
 msgid ""
-"Regroup multiple orders into one picking and consolidate at the packing zone."
+"Regroup multiple orders into one picking and consolidate at the packing "
+"zone."
 msgstr ""
 "Przegrupuj wiele zamówień w ramach jednej kompletacji i skompletuj je w "
 "strefie pakowania."
@@ -974,20 +972,14 @@ msgstr "Zaplanowana data"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_batch__scheduled_date
 msgid ""
 "Scheduled date for the transfers to be processed.\n"
-"              - If manually set then scheduled date for all transfers in "
-"batch will automatically update to this date.\n"
-"              - If not manually changed and transfers are added/removed/"
-"updated then this will be their earliest scheduled date\n"
-"                but this scheduled date will not be set for all transfers in "
-"batch."
+"              - If manually set then scheduled date for all transfers in batch will automatically update to this date.\n"
+"              - If not manually changed and transfers are added/removed/updated then this will be their earliest scheduled date\n"
+"                but this scheduled date will not be set for all transfers in batch."
 msgstr ""
 "Zaplanowana data przetworzenia transferów.\n"
-"- Jeśli zostanie ustawiona ręcznie, zaplanowana data dla wszystkich "
-"przekazów w partii zostanie automatycznie zaktualizowana do tej daty.\n"
-"- Jeśli nie zostanie zmieniona ręcznie, a transfery zostaną dodane/usunięte/"
-"zaktualizowane, będzie to ich najwcześniejsza zaplanowana data,\n"
-"ale ta zaplanowana data nie zostanie ustawiona dla wszystkich transferów w "
-"partii."
+"- Jeśli zostanie ustawiona ręcznie, zaplanowana data dla wszystkich przekazów w partii zostanie automatycznie zaktualizowana do tej daty.\n"
+"- Jeśli nie zostanie zmieniona ręcznie, a transfery zostaną dodane/usunięte/zaktualizowane, będzie to ich najwcześniejsza zaplanowana data,\n"
+"ale ta zaplanowana data nie zostanie ustawiona dla wszystkich transferów w partii."
 
 #. module: stock_picking_batch
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch.stock_picking_batch_filter
@@ -1046,11 +1038,11 @@ msgstr ""
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_category
 msgid ""
-"Split transfers by product category, then group transfers that have the same "
-"product category."
+"Split transfers by product category, then group transfers that have the same"
+" product category."
 msgstr ""
-"Podziel transfery według kategorii produktów, a następnie zgrupuj transfery, "
-"z tą samą kategorią produktów."
+"Podziel transfery według kategorii produktów, a następnie zgrupuj transfery,"
+" z tą samą kategorią produktów."
 
 #. module: stock_picking_batch
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_type__wave_group_by_product
@@ -1137,13 +1129,11 @@ msgstr "Zaktualizowano następujący transfer wsadowy"
 #. odoo-python
 #: code:addons/stock_picking_batch/models/stock_picking_batch.py:0
 msgid ""
-"The following transfers cannot be added to batch transfer %(batch)s. Please "
-"check their states and operation types.\n"
+"The following transfers cannot be added to batch transfer %(batch)s. Please check their states and operation types.\n"
 "\n"
 "Incompatibilities: %(incompatible_transfers)s"
 msgstr ""
-"Następujące transfery nie mogą zostać dodane do transferu wsadowego %"
-"(batch)s. Sprawdź ich statusy i typy operacji.\n"
+"Następujące transfery nie mogą zostać dodane do transferu wsadowego %(batch)s. Sprawdź ich statusy i typy operacji.\n"
 "\n"
 "Niezgodności: %(incompatible_transfers)s"
 
@@ -1306,7 +1296,8 @@ msgstr "Transfery falowe"
 #: model:ir.model.fields,help:stock_picking_batch.field_stock_picking_to_batch__is_create_draft
 msgid "When checked, create the batch in draft status"
 msgstr ""
-"Zaznaczenie tej opcji spowoduje utworzenie partii w statusie wersji roboczej."
+"Zaznaczenie tej opcji spowoduje utworzenie partii w statusie wersji "
+"roboczej."
 
 #. module: stock_picking_batch
 #. odoo-python

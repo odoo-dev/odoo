@@ -10,8 +10,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 08:01+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/lo/>\n"
+"Language-Team: Lao <https://translate.odoo.com/projects/odoo-master/im_livechat/lo/>\n"
 "Language: lo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,8 +22,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -116,9 +114,11 @@ msgstr "%s (ສຳເນົາ)"
 #: code:addons/im_livechat/models/chatbot_script.py:0
 #, fuzzy
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
-"'%(input_email)s' ເບິ່ງຄືວ່າບໍ່ແມ່ນອີເມວທີ່ຖືກຕ້ອງ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງໄດ້ບໍ່?"
+"'%(input_email)s' ເບິ່ງຄືວ່າບໍ່ແມ່ນອີເມວທີ່ຖືກຕ້ອງ. "
+"ກະລຸນາລອງໃໝ່ອີກຄັ້ງໄດ້ບໍ່?"
 
 #. module: im_livechat
 #. odoo-python
@@ -139,10 +139,8 @@ msgstr ""
 #, fuzzy
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'ສະແດງ' ແມ່ນສະແດງປຸ່ມແຊັດໃນໜ້າເວັບ.\n"
@@ -158,30 +156,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
 #, fuzzy
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>ກັບຄືນໄປຫາໂໝດແກ້ໄຂ"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>ກັບຄືນໄປຫາໂໝດແກ້ໄຂ"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
 msgstr ""
 
 #. module: im_livechat
@@ -208,45 +206,42 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
-"<span>ແຈ້ງເຕືອນ: ຂັ້ນຕອນນີ້ຈະສະແດງກໍ່ຕໍ່ເມື່ອບໍ່ມີພະນັກງານຫວ່າງເທົ່ານັ້ນ.</span>"
+"<span>ແຈ້ງເຕືອນ: "
+"ຂັ້ນຕອນນີ້ຈະສະແດງກໍ່ຕໍ່ເມື່ອບໍ່ມີພະນັກງານຫວ່າງເທົ່ານັ້ນ.</span>"
+
+#. module: im_livechat
+#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
+#, fuzzy
+msgid ""
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
+msgstr ""
+"<span>ຄຳແນະນຳ: ຕ້ອງມີການໂຕ້ຕອບຢ່າງໜ້ອຍໜຶ່ງຢ່າງ (ຄຳຖາມ, ອີເມວ, ...) ກ່ອນທີ່ບອດຈະສາມາດເຮັດວຽກທີ່ຊັບຊ້ອນກວ່າໄດ້ (ສົ່ງຕໍ່ໃຫ້ພະນັກງານ, ...). </span>\n"
+"                    <span>ໃຊ້ກົດລະບຽບຊ່ອງທາງ ຖ້າທ່ານຕ້ອງການໃຫ້ບອດໂຕ້ຕອບກັບຜູ້ເຂົ້າຊົມສະເພາະຕອນທີ່ບໍ່ມີພະນັກງານຫວ່າງເທົ່ານັ້ນ.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 #, fuzzy
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
-"<span>ຄຳແນະນຳ: ຕ້ອງມີການໂຕ້ຕອບຢ່າງໜ້ອຍໜຶ່ງຢ່າງ (ຄຳຖາມ, ອີເມວ, ...) ກ່ອນທີ່ບອດຈະສາມາດເຮັດວຽ"
-"ກທີ່ຊັບຊ້ອນກວ່າໄດ້ (ສົ່ງຕໍ່ໃຫ້ພະນັກງານ, ...). </span>\n"
-"                    <span>ໃຊ້ກົດລະບຽບຊ່ອງທາງ ຖ້າທ່ານຕ້ອງການໃຫ້ບອດໂຕ້ຕອບກັບຜູ້ເຂົ້າຊົມສະເພາະ"
-"ຕອນທີ່ບໍ່ມີພະນັກງານຫວ່າງເທົ່ານັ້ນ.</span>"
-
-#. module: im_livechat
-#: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
-#, fuzzy
-msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
-msgstr ""
-"<span>ຄຳແນະນຳ: ຕ້ອງມີການໂຕ້ຕອບຢ່າງໜ້ອຍໜຶ່ງຢ່າງ (ຄຳຖາມ, ອີເມວ, ...) ກ່ອນທີ່ບອດຈະສາມາດເຮັດວຽ"
-"ກທີ່ຊັບຊ້ອນກວ່າໄດ້ (ສົ່ງຕໍ່ໃຫ້ພະນັກງານ, ...).</span>"
+"<span>ຄຳແນະນຳ: ຕ້ອງມີການໂຕ້ຕອບຢ່າງໜ້ອຍໜຶ່ງຢ່າງ (ຄຳຖາມ, ອີເມວ, ...) "
+"ກ່ອນທີ່ບອດຈະສາມາດເຮັດວຽກທີ່ຊັບຊ້ອນກວ່າໄດ້ (ສົ່ງຕໍ່ໃຫ້ພະນັກງານ, ...).</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 #, fuzzy
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
-"<span>ຄຳແນະນຳ: ວາງແຜນຂັ້ນຕອນຕໍ່ໄປໃຫ້ບອດ ໃນກໍລະນີທີ່ບໍ່ມີພະນັກງານຫວ່າງ.</span>"
+"<span>ຄຳແນະນຳ: ວາງແຜນຂັ້ນຕອນຕໍ່ໄປໃຫ້ບອດ "
+"ໃນກໍລະນີທີ່ບໍ່ມີພະນັກງານຫວ່າງ.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
@@ -525,11 +520,12 @@ msgstr "ຊ່ອງທາງ"
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 #, fuzzy
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
-"ການແຊັດແມ່ນເປັນສ່ວນຕົວ ແລະ ມີສະເພາະລະຫວ່າງ 2 ຄົນ. ກຸ່ມແມ່ນເປັນສ່ວນຕົວໃນບັນດາຜູ້ທີ່ຖືກເຊີນ. ຊ່ອງທາງສ"
-"າມາດເຂົ້າຮ່ວມໄດ້ຢ່າງເສລີ (ຂຶ້ນກັບການຕັ້ງຄ່າ)."
+"ການແຊັດແມ່ນເປັນສ່ວນຕົວ ແລະ ມີສະເພາະລະຫວ່າງ 2 ຄົນ. "
+"ກຸ່ມແມ່ນເປັນສ່ວນຕົວໃນບັນດາຜູ້ທີ່ຖືກເຊີນ. ຊ່ອງທາງສາມາດເຂົ້າຮ່ວມໄດ້ຢ່າງເສລີ "
+"(ຂຶ້ນກັບການຕັ້ງຄ່າ)."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -911,8 +907,9 @@ msgid ""
 "selected action must be 'Open automatically' otherwise this parameter will "
 "not be taken into account."
 msgstr ""
-"ໄລຍະເວລາ (ເປັນວິນາທີ) ກ່ອນຈະເປີດປ່ອງຢ້ຽມສົນທະນາໂດຍອັດຕະໂນມັດ. ໝາຍເຫດ: ການດຳເນີນການທີ່ເລືອກຕ້"
-"ອງເປັນ 'ເປີດອັດຕະໂນມັດ' ຖ້າບໍ່ດັ່ງນັ້ນ ຄ່ານີ້ຈະບໍ່ມີຜົນ."
+"ໄລຍະເວລາ (ເປັນວິນາທີ) ກ່ອນຈະເປີດປ່ອງຢ້ຽມສົນທະນາໂດຍອັດຕະໂນມັດ. ໝາຍເຫດ: "
+"ການດຳເນີນການທີ່ເລືອກຕ້ອງເປັນ 'ເປີດອັດຕະໂນມັດ' ຖ້າບໍ່ດັ່ງນັ້ນ "
+"ຄ່ານີ້ຈະບໍ່ມີຜົນ."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -1172,8 +1169,8 @@ msgid ""
 "Given the order to find a matching rule. If 2 rules are matching for the "
 "given url/country, the one with the lowest sequence will be chosen."
 msgstr ""
-"ລຳດັບໃນການຄົ້ນຫາກົດລະບຽບທີ່ກົງກັນ. ຖ້າມີ 2 ກົດລະບຽບທີ່ກົງກັບ URL/ປະເທດ ນັ້ນໆ, ກົດລະບຽບທີ່ມີລຳດັບຕ່ຳສຸ"
-"ດຈະຖືກເລືອກ."
+"ລຳດັບໃນການຄົ້ນຫາກົດລະບຽບທີ່ກົງກັນ. ຖ້າມີ 2 ກົດລະບຽບທີ່ກົງກັບ URL/ປະເທດ "
+"ນັ້ນໆ, ກົດລະບຽບທີ່ມີລຳດັບຕ່ຳສຸດຈະຖືກເລືອກ."
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
@@ -2588,8 +2585,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2744,12 +2740,13 @@ msgstr ""
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
-"ກົດລະບຽບນີ້ຈະຖືກນຳໃຊ້ສະເພາະກັບປະເທດເຫຼົ່ານີ້ເທົ່ານັ້ນ. ຕົວຢ່າງ: ຖ້າທ່ານເລືອກ 'Belgium' ແລະ "
-"'United States' ແລະ ຕັ້ງຄ່າການດຳເນີນການເປັນ 'ຊ່ອນ', ປຸ່ມແຊັດຈະຖືກຊ່ອນໃນ URL ທີ່ກຳນົດ ສຳລັບຜູ້ເ"
-"ຂົ້າຊົມທີ່ມາຈາກ 2 ປະເທດນີ້. ຟີເຈີນີ້ຕ້ອງການການຕິດຕັ້ງ GeoIP ໃນເຊີບເວີຂອງທ່ານ."
+"ກົດລະບຽບນີ້ຈະຖືກນຳໃຊ້ສະເພາະກັບປະເທດເຫຼົ່ານີ້ເທົ່ານັ້ນ. ຕົວຢ່າງ: ຖ້າທ່ານເລືອກ"
+" 'Belgium' ແລະ 'United States' ແລະ ຕັ້ງຄ່າການດຳເນີນການເປັນ 'ຊ່ອນ', "
+"ປຸ່ມແຊັດຈະຖືກຊ່ອນໃນ URL ທີ່ກຳນົດ ສຳລັບຜູ້ເຂົ້າຊົມທີ່ມາຈາກ 2 ປະເທດນີ້. "
+"ຟີເຈີນີ້ຕ້ອງການການຕິດຕັ້ງ GeoIP ໃນເຊີບເວີຂອງທ່ານ."
 
 #. module: im_livechat
 #: model:res.groups,comment:im_livechat.im_livechat_group_manager
@@ -2770,8 +2767,8 @@ msgid ""
 "The visitor will be redirected to this link upon clicking the option (note "
 "that the script will end if the link is external to the livechat website)."
 msgstr ""
-"ຜູ້ເຂົ້າຊົມຈະຖືກປ່ຽນເສັ້ນທາງໄປຫາລິ້ງນີ້ເມື່ອຄລິກທີ່ຕົວເລືອກ (ໝາຍເຫດ: ສະຄຣິບຈະສິ້ນສຸດລົງຖ້າລິ້ງນັ້ນເປັນເວັບໄຊທ໌"
-"ພາຍນອກ)."
+"ຜູ້ເຂົ້າຊົມຈະຖືກປ່ຽນເສັ້ນທາງໄປຫາລິ້ງນີ້ເມື່ອຄລິກທີ່ຕົວເລືອກ (ໝາຍເຫດ: "
+"ສະຄຣິບຈະສິ້ນສຸດລົງຖ້າລິ້ງນັ້ນເປັນເວັບໄຊທ໌ພາຍນອກ)."
 
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_res_users_settings__livechat_lang_ids
@@ -2787,7 +2784,8 @@ msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
 msgstr ""
-"ນີ້ຄືຂໍ້ຄວາມ 'ຕ້ອນຮັບ' ອັດຕະໂນມັດ ທີ່ຜູ້ເຂົ້າຊົມຈະເຫັນເມື່ອພວກເຂົາເລີ່ມຕົ້ນການສົນທະນາໃໝ່."
+"ນີ້ຄືຂໍ້ຄວາມ 'ຕ້ອນຮັບ' ອັດຕະໂນມັດ "
+"ທີ່ຜູ້ເຂົ້າຊົມຈະເຫັນເມື່ອພວກເຂົາເລີ່ມຕົ້ນການສົນທະນາໃໝ່."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2851,12 +2849,8 @@ msgstr "ສີຫົວຂໍ້"
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat

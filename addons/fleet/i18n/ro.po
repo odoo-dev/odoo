@@ -18,20 +18,18 @@ msgstr ""
 "POT-Creation-Date: 2026-05-22 17:45+0000\n"
 "PO-Revision-Date: 2026-06-19 16:40+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"fleet/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/fleet/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_view_kanban
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Location\"/>"
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/>"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_model_view_form
@@ -478,8 +476,8 @@ msgstr "Categorii"
 #. module: fleet
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_model_category_action
 msgid ""
-"Categories will help you manage your fleet more efficiently and arrange your "
-"vehicles."
+"Categories will help you manage your fleet more efficiently and arrange your"
+" vehicles."
 msgstr ""
 "Categoriile vă vor ajuta să gestionați flota mai eficient și să vă "
 "organizați vehiculele."
@@ -527,7 +525,8 @@ msgstr "Alegeți dacă contractul este încă valabil sau nu"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_service_type__category
-msgid "Choose whether the service refer to contracts, vehicle services or both"
+msgid ""
+"Choose whether the service refer to contracts, vehicle services or both"
 msgstr ""
 "Alegeți dacă serviciul se referă la contracte, servicii pentru vehicule sau "
 "ambele"
@@ -849,11 +848,11 @@ msgstr "Data cand incepe acoperirea contractului"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__expiration_date
 msgid ""
-"Date when the coverage of the contract expirates (by default, one year after "
-"begin date)"
+"Date when the coverage of the contract expirates (by default, one year after"
+" begin date)"
 msgstr ""
-"Data la care expira acoperirea contractului (implicit, la un an dupa data de "
-"inceput)"
+"Data la care expira acoperirea contractului (implicit, la un an dupa data de"
+" inceput)"
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__write_off_date
@@ -1965,8 +1964,8 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
-"Limba de traducere opțională (cod ISO) de selectat la trimiterea unui email. "
-"Dacă nu este setată, se va folosi limba principală a partenerului. De "
+"Limba de traducere opțională (cod ISO) de selectat la trimiterea unui email."
+" Dacă nu este setată, se va folosi limba principală a partenerului. De "
 "obicei, aceasta ar trebui să fie o expresie substituent care furnizează "
 "limba potrivită, de exemplu {{ object.partner_id.lang }}."
 
@@ -2371,8 +2370,8 @@ msgstr "Inlocuirea Bujiei"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_model__doors
 msgid ""
-"Specifies the total number of doors, including the truck and hatch doors, if "
-"applicable."
+"Specifies the total number of doors, including the truck and hatch doors, if"
+" applicable."
 msgstr ""
 
 #. module: fleet
@@ -2573,12 +2572,10 @@ msgstr "Asistenta Autoturism"
 #: model_terms:ir.actions.act_window,help:fleet.fleet_vehicle_log_services_action
 msgid ""
 "Track all the services done on your vehicle.\n"
-"            Services can be of many types: occasional repair, fixed "
-"maintenance, etc."
+"            Services can be of many types: occasional repair, fixed maintenance, etc."
 msgstr ""
 "Urmăriți toate serviciile oferite pe vehiculul dvs.\n"
-"            Serviciile pot fi de mai multe tipuri: reparații ocazionale, "
-"întreținere fixă etc."
+"            Serviciile pot fi de mai multe tipuri: reparații ocazionale, întreținere fixă etc."
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__trailer_hook

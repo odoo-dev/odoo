@@ -20,14 +20,12 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:37+0000\n"
 "PO-Revision-Date: 2026-06-21 18:13+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/"
-"payment/ro/>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-master/payment/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
-"20)) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2;\n"
 "X-Generator: Weblate 2026.6.1\n"
 
 #. module: payment
@@ -39,39 +37,30 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_method_form
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/> These properties are set to\n"
-"                                match the behavior of providers and that of "
-"their integration with\n"
-"                                Odoo regarding this payment method. Any "
-"change may result in errors\n"
-"                                and should be tested on a test database "
-"first."
+"<i class=\"oi\" data-icon=\"warning\"/> These properties are set to\n"
+"                                match the behavior of providers and that of their integration with\n"
+"                                Odoo regarding this payment method. Any change may result in errors\n"
+"                                and should be tested on a test database first."
 msgstr ""
-"<i class=\"fa fa-exclamation-triangle\"/> Aceste proprietăți sunt setate "
-"pentru a se potrivi cu\n"
-"                                comportamentul furnizorilor și al integrării "
-"acestora cu Odoo în\n"
-"                                ceea ce privește această metodă de plată. "
-"Orice modificare poate\n"
-"                                duce la erori și ar trebui testată mai întâi "
-"pe o bază de date de test."
+"<i class=\"oi\" data-icon=\"warning\"/> Aceste proprietăți sunt setate pentru a se potrivi cu\n"
+"                                comportamentul furnizorilor și al integrării acestora cu Odoo în\n"
+"                                ceea ce privește această metodă de plată. Orice modificare poate\n"
+"                                duce la erori și ar trebui testată mai întâi pe o bază de date de test."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.portal_breadcrumb
-msgid ""
-"<i class=\"fa fa-home\" role=\"img\" title=\"Home\" aria-label=\"Home\"/>"
-msgstr ""
-"<i class=\"fa fa-home\" role=\"img\" title=\"Acasă\" aria-label=\"Acasă\"/>"
+msgid "<i class=\"oi\" data-icon=\"home\" role=\"img\" title=\"Home\" aria-label=\"Home\"/>"
+msgstr "<i class=\"oi\" data-icon=\"home\" role=\"img\" title=\"Acasă\" aria-label=\"Acasă\"/>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
 msgid ""
-"<i class=\"fa fa-info-circle oe_inline\" "
+"<i class=\"oi oe_inline\" data-icon=\"info\" "
 "invisible=\"support_partial_capture != 'full_only'\" title=\"Some of the "
 "transactions you intend to capture can only be captured in full. Handle the "
 "transactions individually to capture a partial amount.\"/>"
 msgstr ""
-"<i class=\"fa fa-info-circle oe_inline\" "
+"<i class=\"oe_inline oi\" data-icon=\"info\" "
 "invisible=\"support_partial_capture != 'full_only'\" title=\"Unele dintre "
 "tranzacțiile pe care intenționați să le capturați pot fi capturate doar în "
 "totalitate. Gestionați tranzacțiile individual pentru a captura o sumă "
@@ -80,17 +69,18 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.token_form
 msgid ""
-"<i class=\"fa fa-trash\" title=\"Delete payment method\" data-bs-"
-"toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-delay=\"0\"/>"
+"<i class=\"oi oi-filled\" data-icon=\"delete\" title=\"Delete payment "
+"method\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-"
+"delay=\"0\"/>"
 msgstr ""
-"<i class=\"fa fa-trash\" title=\"Șterge metoda de plată\" data-bs-"
-"toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-delay=\"0\"/>"
+"<i class=\"oi-filled oi\" data-icon=\"delete\" title=\"Șterge metoda de "
+"plată\" data-bs-toggle=\"tooltip\" data-bs-placement=\"top\" data-bs-"
+"delay=\"0\"/>"
 
 #. module: payment
 #: model_terms:ir.actions.act_window,help:payment.action_payment_method
-msgid "<i class=\"oi oi-arrow-right me-1\"></i> Configure a payment provider"
-msgstr ""
-"<i class=\"oi oi-arrow-right me-1\"></i> Configurați un furnizor de plată"
+msgid "<i class=\"oi me-1\" data-icon=\"east\"></i> Configure a payment provider"
+msgstr "<i class=\"me-1 oi\" data-icon=\"east\"></i> Configurați un furnizor de plată"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.method_form
@@ -137,16 +127,17 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.method_form
 #: model_terms:ir.ui.view,arch_db:payment.token_form
-msgid "<span><i class=\"fa fa-lock\"/> Secured by</span>"
-msgstr "<span><i class=\"fa fa-lock\"/> Securizat de</span>"
+msgid "<span><i class=\"oi\" data-icon=\"lock\"/> Secured by</span>"
+msgstr "<span><i class=\"oi\" data-icon=\"lock\"/> Securizat de</span>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.no_pms_available_warning
 msgid ""
-"<strong><i class=\"fa fa-file-text\"/> Show availability report</strong>"
+"<strong><i class=\"oi oi-filled\" data-icon=\"article\"/> Show availability "
+"report</strong>"
 msgstr ""
-"<strong><i class=\"fa fa-file-text\"/> Arată raportul de disponibilitate</"
-"strong>"
+"<strong><i class=\"oi-filled oi\" data-icon=\"article\"/> Arată raportul de "
+"disponibilitate</strong>"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.no_pms_available_warning
@@ -162,13 +153,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
 msgid ""
 "<strong>Warning!</strong> There is a partial capture pending. Please wait a\n"
-"                    moment for it to be processed. Check your payment "
-"provider configuration if\n"
+"                    moment for it to be processed. Check your payment provider configuration if\n"
 "                    the capture is still pending after a few minutes."
 msgstr ""
 "<strong>Atenție!</strong> Există o captură parțială în așteptare. Vă rugăm "
-"să                     așteptați un moment pentru a fi procesată. Verificați "
-"configurația furnizorului de plată dacă"
+"să                     așteptați un moment pentru a fi procesată. Verificați"
+" configurația furnizorului de plată dacă"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_capture_wizard_view_form
@@ -183,20 +173,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment.payment_provider_form
 msgid ""
 "<strong>Warning:</strong> Creating a payment provider from scratch is not\n"
-"                        supported; please use the <em>Duplicate</em> action "
-"instead."
+"                        supported; please use the <em>Duplicate</em> action instead."
 msgstr ""
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
 msgid ""
 "<strong>Warning</strong> Make sure you are logged in as the\n"
-"                                    correct partner before making this "
-"payment."
+"                                    correct partner before making this payment."
 msgstr ""
-"<strong>Atenție</strong> Asigurați-vă că sunteți autentificat ca "
-"partenerul                                     corect înainte de a efectua "
-"această plată."
+"<strong>Atenție</strong> Asigurați-vă că sunteți autentificat ca partenerul"
+"                                     corect înainte de a efectua această "
+"plată."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.pay
@@ -322,8 +310,8 @@ msgid ""
 "Are you sure you want to void the authorized transaction? This action can't "
 "be undone."
 msgstr ""
-"Sunteți sigur că doriți să anulați tranzacția autorizată? Această acțiune nu "
-"poate fi anulată."
+"Sunteți sigur că doriți să anulați tranzacția autorizată? Această acțiune nu"
+" poate fi anulată."
 
 #. module: payment
 #: model:payment.provider,name:payment.payment_provider_asiapay
@@ -430,8 +418,8 @@ msgstr "Tranzacții copil"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.form
-msgid "Choose another method <i class=\"oi oi-arrow-down\"/>"
-msgstr "Alegeți o altă metodă <i class=\"oi oi-arrow-down\"/>"
+msgid "Choose another method <i class=\"oi\" data-icon=\"south\"/>"
+msgstr "Alegeți o altă metodă <i class=\"oi\" data-icon=\"south\"/>"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__partner_city
@@ -744,8 +732,8 @@ msgstr "Generează și copiază linkul de plată"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.confirm
-msgid "Go to my Account <i class=\"oi oi-arrow-right ms-2\"/>"
-msgstr "Du-te la Contul meu <i class=\"oi oi-arrow-right ms-2\"/>"
+msgid "Go to my Account <i class=\"oi ms-2\" data-icon=\"east\"/>"
+msgstr "Du-te la Contul meu <i class=\"ms-2 oi\" data-icon=\"east\"/>"
 
 #. module: payment
 #: model:ir.model,name:payment.model_ir_http
@@ -793,8 +781,8 @@ msgstr "ID"
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__is_live
 msgid ""
-"If live mode is disabled, a fake payment is processed through a test payment "
-"interface. This mode is advised when setting up the provider."
+"If live mode is disabled, a fake payment is processed through a test payment"
+" interface. This mode is advised when setting up the provider."
 msgstr ""
 
 #. module: payment
@@ -1339,8 +1327,8 @@ msgstr "Furnizori de plată"
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
-"Payment transactions should not be updated directly. Either use _record() to "
-"queue payment data for processing, or pass payment_safe_write=True to the "
+"Payment transactions should not be updated directly. Either use _record() to"
+" queue payment data for processing, or pass payment_safe_write=True to the "
 "context after ensuring that the update can tolerate a rollback."
 msgstr ""
 
@@ -1601,12 +1589,12 @@ msgstr "Secvență"
 #. odoo-python
 #: code:addons/payment/wizards/payment_capture_wizard.py:0
 msgid ""
-"Some of the transactions you intend to capture can only be captured in full. "
-"Handle the transactions individually to capture a partial amount."
+"Some of the transactions you intend to capture can only be captured in full."
+" Handle the transactions individually to capture a partial amount."
 msgstr ""
 "Unele dintre tranzacțiile pe care intenționați să le capturați pot fi "
-"capturate doar integral. Gestionați tranzacțiile individual pentru a captura "
-"o sumă parțială."
+"capturate doar integral. Gestionați tranzacțiile individual pentru a captura"
+" o sumă parțială."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__source_transaction_id
@@ -1724,7 +1712,8 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__brand_ids
 msgid ""
-"The brands of the payment methods that will be displayed on the payment form."
+"The brands of the payment methods that will be displayed on the payment "
+"form."
 msgstr ""
 "Brandurile metodelor de plată care vor fi afișate pe formularul de plată."
 
@@ -1758,8 +1747,8 @@ msgid ""
 "The currencies available with this payment provider. Leave empty not to "
 "restrict any."
 msgstr ""
-"Monedele disponibile cu acest furnizor de plată. Lăsați necompletat pentru a "
-"nu restricționa niciuna."
+"Monedele disponibile cu acest furnizor de plată. Lăsați necompletat pentru a"
+" nu restricționa niciuna."
 
 #. module: payment
 #. odoo-python
@@ -1834,13 +1823,13 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__supported_currency_ids
 msgid ""
-"The list of currencies for that are supported by this payment method (if the "
-"provider allows it). When paying with another currency, this payment method "
-"is not available to customers."
+"The list of currencies for that are supported by this payment method (if the"
+" provider allows it). When paying with another currency, this payment method"
+" is not available to customers."
 msgstr ""
 "Lista valutelor acceptate de această metodă de plată (dacă furnizorul o "
-"permite). Când se plătește cu o altă monedă, această metodă de plată nu este "
-"disponibilă pentru clienți."
+"permite). Când se plătește cu o altă monedă, această metodă de plată nu este"
+" disponibilă pentru clienți."
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__main_currency_id
@@ -1866,7 +1855,8 @@ msgstr "Mesajul afișat dacă plata este autorizată"
 #: model:ir.model.fields,help:payment.field_payment_provider__cancel_msg
 msgid ""
 "The message displayed if the order is cancelled during the payment process"
-msgstr "Mesajul afișat dacă comanda este anulată în timpul procesului de plată"
+msgstr ""
+"Mesajul afișat dacă comanda este anulată în timpul procesului de plată"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__done_msg
@@ -1911,13 +1901,10 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_method__primary_payment_method_id
 msgid ""
-"The primary payment method of the current payment method, if the latter is a "
-"brand.\n"
-"For example, \"Card\" is the primary payment method of the card brand "
-"\"VISA\"."
+"The primary payment method of the current payment method, if the latter is a brand.\n"
+"For example, \"Card\" is the primary payment method of the card brand \"VISA\"."
 msgstr ""
-"Metoda de plată primară a metodei de plată curente, dacă aceasta este un "
-"brand.\n"
+"Metoda de plată primară a metodei de plată curente, dacă aceasta este un brand.\n"
 "De exemplu, „Card” este metoda de plată primară a brandului de card „VISA”."
 
 #. module: payment
@@ -1993,8 +1980,8 @@ msgid ""
 "The template rendering a form submitted to redirect the user when making a "
 "payment"
 msgstr ""
-"Șablonul care afișează un formular trimis pentru a redirecționa utilizatorul "
-"când efectuează o plată"
+"Șablonul care afișează un formular trimis pentru a redirecționa utilizatorul"
+" când efectuează o plată"
 
 #. module: payment
 #: model:ir.model.fields,help:payment.field_payment_provider__express_checkout_form_view_id
@@ -2086,12 +2073,10 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_link_wizard_view_form
 msgid ""
-"This partner has no email, which may cause issues with some payment "
-"providers.\n"
+"This partner has no email, which may cause issues with some payment providers.\n"
 "                     Setting an email for this partner is advised."
 msgstr ""
-"Acest partener nu are e-mail, ceea ce poate cauza probleme cu unii furnizori "
-"de plată.\n"
+"Acest partener nu are e-mail, ceea ce poate cauza probleme cu unii furnizori de plată.\n"
 "                     Se recomandă setarea unui e-mail pentru acest partener."
 
 #. module: payment
@@ -2170,7 +2155,8 @@ msgid ""
 "Transaction authorization is not supported by the following payment "
 "providers: %s"
 msgstr ""
-"Autorizarea tranzacției nu este acceptată de următorii furnizori de plată: %s"
+"Autorizarea tranzacției nu este acceptată de următorii furnizori de plată: "
+"%s"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_provider_form
@@ -2493,8 +2479,8 @@ msgstr "Metodele dvs. de plată"
 #. odoo-python
 #: code:addons/payment/models/payment_transaction.py:0
 msgid ""
-"Your payment operation could not be completed for following transactions: %"
-"(tx_refs)s"
+"Your payment operation could not be completed for following transactions: "
+"%(tx_refs)s"
 msgstr ""
 "Operațiunea dvs. de plată nu a putut fi finalizată pentru următoarele "
 "tranzacții: %(tx_refs)s"
@@ -2563,14 +2549,11 @@ msgstr ""
 #~ "                                            Activați Metodele de Plată"
 
 #~ msgid ""
-#~ "<strong>Warning</strong> Creating a payment provider from the <em>CREATE</"
-#~ "em> button is not supported.\n"
+#~ "<strong>Warning</strong> Creating a payment provider from the <em>CREATE</em> button is not supported.\n"
 #~ "                        Please use the <em>Duplicate</em> action instead."
 #~ msgstr ""
-#~ "<strong>Atenție</strong> Crearea unui furnizor de plată din butonul "
-#~ "<em>CREARE</em> nu este acceptată.\n"
-#~ "                        Vă rugăm să folosiți în schimb acțiunea "
-#~ "<em>Duplicare</em>."
+#~ "<strong>Atenție</strong> Crearea unui furnizor de plată din butonul <em>CREARE</em> nu este acceptată.\n"
+#~ "                        Vă rugăm să folosiți în schimb acțiunea <em>Duplicare</em>."
 
 #~ msgid "ACH Direct Debit"
 #~ msgstr "ACH Direct Debit"
@@ -2849,12 +2832,11 @@ msgstr ""
 #~ msgstr "Humm"
 
 #~ msgid ""
-#~ "In test mode, a fake payment is processed through a test payment "
-#~ "interface.\n"
+#~ "In test mode, a fake payment is processed through a test payment interface.\n"
 #~ "This mode is advised when setting up the provider."
 #~ msgstr ""
-#~ "În modul de testare, o plată falsă este procesată prin o interfață de "
-#~ "plată de testare."
+#~ "În modul de testare, o plată falsă este procesată prin o interfață de plată "
+#~ "de testare."
 
 #~ msgid "JCB"
 #~ msgstr "JCB"
@@ -3067,11 +3049,10 @@ msgstr ""
 #~ msgid "Pix"
 #~ msgstr "Pix"
 
-#~ msgid ""
-#~ "Please make sure that %(payment_method)s is supported by %(provider)s."
+#~ msgid "Please make sure that %(payment_method)s is supported by %(provider)s."
 #~ msgstr ""
-#~ "Vă rugăm să vă asigurați că %(payment_method)s este acceptată de %"
-#~ "(provider)s."
+#~ "Vă rugăm să vă asigurați că %(payment_method)s este acceptată de "
+#~ "%(provider)s."
 
 #~ msgid "PostFinance Pay"
 #~ msgstr "PostFinance Pay"
@@ -3268,8 +3249,8 @@ msgstr ""
 #~ "You cannot delete the payment provider %s; disable it or uninstall it "
 #~ "instead."
 #~ msgstr ""
-#~ "Nu puteți șterge furnizorul de plată %s; dezactivați-l sau dezinstalați-l "
-#~ "în schimb."
+#~ "Nu puteți șterge furnizorul de plată %s; dezactivați-l sau dezinstalați-l în"
+#~ " schimb."
 
 #~ msgid "You cannot publish a disabled provider."
 #~ msgstr "Nu puteți publica un furnizor dezactivat."

@@ -20,8 +20,7 @@ msgstr ""
 "POT-Creation-Date: 2026-07-10 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 10:18+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/"
-"web/vi/>\n"
+"Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-master/web/vi/>\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -204,18 +203,18 @@ msgstr "<em class=\"d-block my-3 small text-center text-muted\">- hoặc -</em>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (html)"
-msgstr "<i class=\"fa fa-download\"/> (html)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (html)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (html)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
-msgid "<i class=\"fa fa-download\"/> (json)"
-msgstr "<i class=\"fa fa-download\"/> (json)"
+msgid "<i class=\"oi oi-fw\" data-icon=\"download\"/> (json)"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"download\"/> (json)"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.view_base_document_layout
-msgid "<i class=\"fa fa-repeat\"/> Reset"
-msgstr "<i class=\"fa fa-repeat\"/> Đặt lại"
+msgid "<i class=\"oi\" data-icon=\"redo\"/> Reset"
+msgstr "<i class=\"oi\" data-icon=\"redo\"/> Đặt lại"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -225,34 +224,34 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">1,400.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">1,400.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">11,750.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">11,750.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\"><span class=\"oe_currency_value\">11.750,00</"
-"span>$</span>"
+"<span class=\"text-nowrap\"><span "
+"class=\"oe_currency_value\">11.750,00</span>$</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">240.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">240.00</span></span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"text-nowrap\">$ <span class=\"oe_currency_value\">7,500.00</"
-"span></span>"
+"<span class=\"text-nowrap\">$ <span "
+"class=\"oe_currency_value\">7,500.00</span></span>"
 msgstr ""
-"<span class=\"text-nowrap\"><span class=\"oe_currency_value\">7.500.000</"
-"span>đ</span>"
+"<span class=\"text-nowrap\"><span "
+"class=\"oe_currency_value\">7.500.000</span>đ</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -282,10 +281,8 @@ msgstr "<span class=\"text-nowrap\">Thuế 15%</span>"
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
-"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa "
-"Barbara\n"
-"                                Rd<br/>Pleasant Hill CA 94523<br/>United "
-"States</span>"
+"<span class=\"w-100 o_force_ltr\" itemprop=\"streetAddress\">77 Santa Barbara\n"
+"                                Rd<br/>Pleasant Hill CA 94523<br/>United States</span>"
 msgstr ""
 
 #. module: web
@@ -297,14 +294,14 @@ msgstr "<span id=\"line_tax_ids\">15%</span>"
 #: model_terms:ir.ui.view,arch_db:web.config_speedscope_index
 msgid ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all samples."
-"<br/>It can lead to partially invalid result in case of concurrent profiles."
-"<br/>Use with caution </span>"
+"style=\"display:none\"><b>Warning:</b> Temporal mode will merge all "
+"samples.<br/>It can lead to partially invalid result in case of concurrent "
+"profiles.<br/>Use with caution </span>"
 msgstr ""
 "<span id=\"temporal_warning\" class=\"alert alert-warning\" "
-"style=\"display:none\"><b>Cảnh báo:</b> Chế độ tạm thời sẽ gộp tất cả mẫu."
-"<br/>Điều này có thể dẫn đến kết quả một phần không hợp lệ trong trường hợp "
-"có các hồ sơ đồng thời.<br/>Sử dụng thận trọng</span>"
+"style=\"display:none\"><b>Cảnh báo:</b> Chế độ tạm thời sẽ gộp tất cả "
+"mẫu.<br/>Điều này có thể dẫn đến kết quả một phần không hợp lệ trong trường "
+"hợp có các hồ sơ đồng thời.<br/>Sử dụng thận trọng</span>"
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
@@ -316,8 +313,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        Chair floor protection<br/>\n"
-"                                        Office chairs can harm your floor: "
-"protect it\n"
+"                                        Office chairs can harm your floor: protect it\n"
 "                                    </span>"
 msgstr ""
 
@@ -326,8 +322,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_7777] Office Chair<br/>\n"
-"                                        Comfortable yellow chair for daily "
-"work\n"
+"                                        Comfortable yellow chair for daily work\n"
 "                                    </span>"
 msgstr ""
 
@@ -336,8 +331,7 @@ msgstr ""
 msgid ""
 "<span>\n"
 "                                        [FURN_8999] Three-Seat Sofa<br/>\n"
-"                                        Three Seater Sofa with Lounger in "
-"Steel Grey Colour\n"
+"                                        Three Seater Sofa with Lounger in Steel Grey Colour\n"
 "                                    </span>"
 msgstr ""
 
@@ -397,16 +391,14 @@ msgstr "<span>Đơn giá</span>"
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<span>[FURN_8220] Four Person Desk<br/>\n"
-"                                    Four person modern office workstation</"
-"span>"
+"                                    Four person modern office workstation</span>"
 msgstr ""
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.report_invoice_wizard_preview
 msgid ""
 "<strong class=\"text-nowrap\">\n"
-"                                                    $ <span "
-"class=\"oe_currency_value\">27,703.50</span>\n"
+"                                                    $ <span class=\"oe_currency_value\">27,703.50</span>\n"
 "                                                </strong>"
 msgstr ""
 
@@ -1193,8 +1185,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/controllers/export.py:0
 msgid ""
-"Binary fields can not be exported to Excel unless their content is base64-"
-"encoded. That does not seem to be the case for %s."
+"Binary fields can not be exported to Excel unless their content is "
+"base64-encoded. That does not seem to be the case for %s."
 msgstr ""
 "Không thể xuất trường nhị phân ra Excel trừ khi nội dung của nó được mã hoá "
 "base64. %s có vẻ không rơi vào trường hợp này."
@@ -1231,8 +1223,8 @@ msgid ""
 "Boolean field from the model used in the relation, which indicates whether "
 "the state is folded or not."
 msgstr ""
-"Trường boolean từ mô hình được sử dụng trong quan hệ, cho biết trạng thái có "
-"được thu gọn hay không."
+"Trường boolean từ mô hình được sử dụng trong quan hệ, cho biết trạng thái có"
+" được thu gọn hay không."
 
 #. module: web
 #. odoo-javascript
@@ -1262,9 +1254,9 @@ msgstr "Kiểu nút:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/signature/signature_dialog.xml:0
 msgid ""
-"By clicking Adopt & Sign, I agree that the chosen signature/initials will be "
-"a valid electronic representation of my hand-written signature/initials for "
-"all purposes when it is used on documents, including legally binding "
+"By clicking Adopt & Sign, I agree that the chosen signature/initials will be"
+" a valid electronic representation of my hand-written signature/initials for"
+" all purposes when it is used on documents, including legally binding "
 "contracts."
 msgstr ""
 "Bằng cách nhấp vào Thông qua & Ký tên, tôi đồng ý rằng chữ ký/tên viết tắt "
@@ -1480,8 +1472,8 @@ msgid ""
 "Choose which minimal precision (days, months, ...) you want in the datetime "
 "picker."
 msgstr ""
-"Chọn độ chính xác tối thiểu (ngày, tháng,...) mà bạn muốn trong bộ chọn ngày "
-"giờ."
+"Chọn độ chính xác tối thiểu (ngày, tháng,...) mà bạn muốn trong bộ chọn ngày"
+" giờ."
 
 #. module: web
 #. odoo-javascript
@@ -1802,8 +1794,8 @@ msgid ""
 "Control the number of minutes in the time selection. E.g. set it to 15 to "
 "work in quarters."
 msgstr ""
-"Kiểm soát số phút trong lựa chọn thời gian. Ví dụ: đặt thành 15 để hoạt động "
-"trong 15 phút."
+"Kiểm soát số phút trong lựa chọn thời gian. Ví dụ: đặt thành 15 để hoạt động"
+" trong 15 phút."
 
 #. module: web
 #. odoo-javascript
@@ -2247,16 +2239,16 @@ msgid ""
 "Defines the minimum number of characters to perform the search. If not set, "
 "the search is performed on focus."
 msgstr ""
-"Xác định số ký tự tối thiểu để thực hiện tìm kiếm. Nếu không được thiết lập, "
-"việc tìm kiếm sẽ được thực hiện khi trường tìm kiếm được chọn."
+"Xác định số ký tự tối thiểu để thực hiện tìm kiếm. Nếu không được thiết lập,"
+" việc tìm kiếm sẽ được thực hiện khi trường tìm kiếm được chọn."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/image/image_field.js:0
 msgid "Delay the apparition of the zoomed image with a value in milliseconds"
 msgstr ""
-"Trì hoãn sự xuất hiện của hình ảnh được thu phóng với giá trị tính bằng mili "
-"giây"
+"Trì hoãn sự xuất hiện của hình ảnh được thu phóng với giá trị tính bằng mili"
+" giây"
 
 #. module: web
 #. odoo-javascript
@@ -2522,8 +2514,8 @@ msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
-"Hiển thị giá trị của trường đã chọn dưới dạng gợi ý bằng văn bản. Nếu trường "
-"đã chọn trống, thuộc tính phần giữ chỗ tĩnh sẽ được hiển thị thay thế."
+"Hiển thị giá trị của trường đã chọn dưới dạng gợi ý bằng văn bản. Nếu trường"
+" đã chọn trống, thuộc tính phần giữ chỗ tĩnh sẽ được hiển thị thay thế."
 
 #. module: web
 #. odoo-javascript
@@ -3125,8 +3117,7 @@ msgstr "Văn bản trong phần footer được hiển thị ở cuối tất c�
 #. odoo-javascript
 #: code:addons/web/static/src/views/pivot/pivot_renderer.js:0
 msgid ""
-"For Excel compatibility, data cannot be exported if there are more than "
-"16384 columns.\n"
+"For Excel compatibility, data cannot be exported if there are more than 16384 columns.\n"
 "\n"
 "Tip: try to flip axis, filter further or reduce the number of measures."
 msgstr ""
@@ -3146,11 +3137,9 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
 msgid ""
-"For example, if the value is \"1\" and you enter \"+=2\", it will be updated "
-"to \"3\"."
-msgstr ""
-"Ví dụ, nếu giá trị là \"1\" và bạn nhập \"+=2\", nó sẽ được cập nhật thành "
-"\"3\"."
+"For example, if the value is \"1\" and you enter \"+=2\", it will be updated"
+" to \"3\"."
+msgstr "Ví dụ, nếu giá trị là \"1\" và bạn nhập \"+=2\", nó sẽ được cập nhật thành \"3\"."
 
 #. module: web
 #. odoo-javascript
@@ -3519,7 +3508,8 @@ msgstr "Biểu tượng"
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/url/url_field.js:0
-msgid "If True, the url will be used as it is, without any prefix added to it."
+msgid ""
+"If True, the url will be used as it is, without any prefix added to it."
 msgstr ""
 "Nếu Đúng, url sẽ được sử dụng nguyên trạng mà không cần thêm bất kỳ tiền tố "
 "nào."
@@ -3797,16 +3787,11 @@ msgstr "Đạo Hồi"
 #. odoo-javascript
 #: code:addons/web/static/src/webclient/debug/profiling/profiling_qweb.xml:0
 msgid ""
-"It is possible that the \"t-call\" time does not correspond to the overall "
-"time of the\n"
-"            template. Because the global time (in the drop down) does not "
-"take into account the\n"
-"            duration which is not in the rendering (look for the template, "
-"read, inheritance,\n"
-"            compilation...). During rendering, the global time also takes "
-"part of the time to make\n"
-"            the profile as well as some part not logged in the function "
-"generated by the qweb."
+"It is possible that the \"t-call\" time does not correspond to the overall time of the\n"
+"            template. Because the global time (in the drop down) does not take into account the\n"
+"            duration which is not in the rendering (look for the template, read, inheritance,\n"
+"            compilation...). During rendering, the global time also takes part of the time to make\n"
+"            the profile as well as some part not logged in the function generated by the qweb."
 msgstr ""
 
 #. module: web
@@ -3815,14 +3800,15 @@ msgstr ""
 msgid ""
 "It seems the records with IDs %s cannot be found. They might have been "
 "deleted."
-msgstr "Có vẻ như không thể tìm thấy bản ghi có ID %s. Có thể chúng đã bị xóa."
+msgstr ""
+"Có vẻ như không thể tìm thấy bản ghi có ID %s. Có thể chúng đã bị xóa."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/properties/properties_field.js:0
 msgid ""
-"It will be removed for everyone using the \"%(parentName)s\" %"
-"(parentFieldLabel)s."
+"It will be removed for everyone using the \"%(parentName)s\" "
+"%(parentFieldLabel)s."
 msgstr ""
 
 #. module: web
@@ -5261,21 +5247,21 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for category (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for category (found type "
+"%(field_type)s)"
 msgstr ""
-"Chỉ có loại %(supported_types)s được dùng cho nhóm (found type %"
-"(field_type)s)"
+"Chỉ có loại %(supported_types)s được dùng cho nhóm (found type "
+"%(field_type)s)"
 
 #. module: web
 #. odoo-python
 #: code:addons/web/models/models.py:0
 msgid ""
-"Only types %(supported_types)s are supported for filter (found type %"
-"(field_type)s)"
+"Only types %(supported_types)s are supported for filter (found type "
+"%(field_type)s)"
 msgstr ""
-"Chỉ có loại %(supported_types)s được phép dùng để lọc (found type %"
-"(field_type)s)"
+"Chỉ có loại %(supported_types)s được phép dùng để lọc (found type "
+"%(field_type)s)"
 
 #. module: web
 #. odoo-javascript
@@ -5565,18 +5551,13 @@ msgstr "Vui lòng nhập danh sách tên các trường"
 #: model_terms:ir.ui.view,arch_db:web.view_view_form_inherit_view
 msgid ""
 "Please note that your view includes invalid locators.<br/>\n"
-"                    These nodes could not be anchored to the parent view and "
-"have no effect.<br/>\n"
-"                    This issue may have arisen as a result of manual "
-"modifications or during the upgrade process.<br/>\n"
-"                    For your reference, invalid xpath nodes are highlighted "
-"in red."
+"                    These nodes could not be anchored to the parent view and have no effect.<br/>\n"
+"                    This issue may have arisen as a result of manual modifications or during the upgrade process.<br/>\n"
+"                    For your reference, invalid xpath nodes are highlighted in red."
 msgstr ""
 "Xin lưu ý rằng chế độ xem của bạn bao gồm các bộ định vị không hợp lệ.<br/>\n"
-"Các nút này không thể được gắn vào chế độ xem chính và sẽ không có tác dụng."
-"<br/>\n"
-"Vấn đề này có thể phát sinh do các chỉnh sửa thủ công hoặc trong quá trình "
-"nâng cấp.<br/>\n"
+"Các nút này không thể được gắn vào chế độ xem chính và sẽ không có tác dụng.<br/>\n"
+"Vấn đề này có thể phát sinh do các chỉnh sửa thủ công hoặc trong quá trình nâng cấp.<br/>\n"
 "Để tiện tham khảo, các nút xpath không hợp lệ được tô đỏ nổi bật."
 
 #. module: web
@@ -5790,8 +5771,8 @@ msgstr "Tím"
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/notification_alert/notification_alert.xml:0
 msgid ""
-"Push notifications are blocked. Enable them in your browser settings to stay "
-"updated when you're away."
+"Push notifications are blocked. Enable them in your browser settings to stay"
+" updated when you're away."
 msgstr ""
 
 #. module: web
@@ -5880,13 +5861,11 @@ msgstr "Chỉ đọc:"
 #. odoo-javascript
 #: code:addons/web/static/src/core/confirmation_dialog/confirmation_dialog.js:0
 msgid ""
-"Ready to make your record disappear into thin air? Are you sure? It will be "
-"gone forever!\n"
+"Ready to make your record disappear into thin air? Are you sure? It will be gone forever!\n"
 "    \n"
 "Think twice before you click that 'Delete' button!"
 msgstr ""
-"Bạn đã sẵn sàng khiến bản ghi bốc hơi hoàn toàn? Bạn có chắc chắn không? Bản "
-"ghi sẽ biến mất vĩnh viễn!\n"
+"Bạn đã sẵn sàng khiến bản ghi bốc hơi hoàn toàn? Bạn có chắc chắn không? Bản ghi sẽ biến mất vĩnh viễn!\n"
 "\n"
 "Hãy suy nghĩ kỹ trước khi nhấp vào nút 'Xóa' nhé!"
 
@@ -6436,11 +6415,11 @@ msgstr ""
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.login
 msgid ""
-"Select <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
+"Select <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
 msgstr ""
-"Chọn <i class=\"fa fa-database\" role=\"img\" aria-label=\"Database\" "
-"title=\"Database\"/>"
+"Chọn <i class=\"oi\" data-icon=\"database\" role=\"img\" aria-"
+"label=\"Database\" title=\"Database\"/>"
 
 #. module: web
 #. odoo-javascript
@@ -6617,10 +6596,11 @@ msgstr "Đặt ưu tiên..."
 #. odoo-javascript
 #: code:addons/web/static/src/views/fields/datetime/datetime_field.js:0
 msgid ""
-"Set to true the full range input has to be display by default, even if empty."
+"Set to true the full range input has to be display by default, even if "
+"empty."
 msgstr ""
-"Đặt là true, đầu vào toàn vùng phải được hiển thị theo mặc định, ngay cả khi "
-"rỗng."
+"Đặt là true, đầu vào toàn vùng phải được hiển thị theo mặc định, ngay cả khi"
+" rỗng."
 
 #. module: web
 #. odoo-javascript
@@ -7115,8 +7095,8 @@ msgid ""
 "The content of this cell is too long for an XLSX file (more than %s "
 "characters). Please use the CSV format for this export."
 msgstr ""
-"Nội dung trong ô này quá dài đối với định dạng XLSX file (hơn %s ký tự). Vui "
-"lòng dùng định dạng CSV để xuất."
+"Nội dung trong ô này quá dài đối với định dạng XLSX file (hơn %s ký tự). Vui"
+" lòng dùng định dạng CSV để xuất."
 
 #. module: web
 #. odoo-javascript
@@ -7146,8 +7126,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/web/models/res_users_settings_embedded_action.py:0
 msgid ""
-"The ids in %(field_name)s must only be integers or \"false\": “%"
-"(action_ids)s”"
+"The ids in %(field_name)s must only be integers or \"false\": "
+"“%(action_ids)s”"
 msgstr ""
 
 #. module: web
@@ -7155,8 +7135,8 @@ msgstr ""
 #: code:addons/web/static/src/core/errors/error_dialogs.xml:0
 #: code:addons/web/static/src/public/error_notifications.js:0
 msgid ""
-"The operation was interrupted. This usually means that the current operation "
-"is taking too much time."
+"The operation was interrupted. This usually means that the current operation"
+" is taking too much time."
 msgstr ""
 "Thao tác bị gián đoạn. Điều này thường có nghĩa là hoạt động hiện tại cần "
 "nhiều thời gian hơn để xử lý."
@@ -7183,11 +7163,11 @@ msgstr "Trường đã chọn sẽ được dùng để điền trước chữ k
 #. odoo-javascript
 #: code:addons/web/static/src/core/utils/files.js:0
 msgid ""
-"The selected file (%(size)sB) is larger than the maximum allowed file size (%"
-"(maxSize)sB)."
+"The selected file (%(size)sB) is larger than the maximum allowed file size "
+"(%(maxSize)sB)."
 msgstr ""
-"Tệp đã chọn (%(size)sB) vượt quá kích thước tệp tối đa cho phép (%"
-"(maxSize)sB)."
+"Tệp đã chọn (%(size)sB) vượt quá kích thước tệp tối đa cho phép "
+"(%(maxSize)sB)."
 
 #. module: web
 #. odoo-javascript
@@ -7290,8 +7270,8 @@ msgid ""
 "This record belongs to a different parent so you can not change this "
 "property."
 msgstr ""
-"Bản ghi này thuộc về một bản ghi chính khác nên bạn không thể thay đổi thuộc "
-"tính này."
+"Bản ghi này thuộc về một bản ghi chính khác nên bạn không thể thay đổi thuộc"
+" tính này."
 
 #. module: web
 #. odoo-javascript
@@ -7334,12 +7314,10 @@ msgstr "Khoảng thời gian"
 #: code:addons/web/static/src/views/fields/timezone_mismatch/timezone_mismatch_field.js:0
 msgid ""
 "Timezone Mismatch : This timezone is different from that of your browser.\n"
-"Please, set the same timezone as your browser's to avoid time discrepancies "
-"in your system."
+"Please, set the same timezone as your browser's to avoid time discrepancies in your system."
 msgstr ""
 "Múi giờ bị sai : Múi giờ này khác với múi giờ trong trình duyệt của bạn.\n"
-"Vui lòng, cài lại múi giờ chung với trình duyệt của bạn để tránh việc chênh "
-"lệch thời gian trong hệ thống của bạn."
+"Vui lòng, cài lại múi giờ chung với trình duyệt của bạn để tránh việc chênh lệch thời gian trong hệ thống của bạn."
 
 #. module: web
 #. odoo-javascript
@@ -7777,31 +7755,25 @@ msgstr "Sử dụng ngữ cảnh thực thi"
 msgid ""
 "Use it with the 'User-friendly format' option to customize the formatting."
 msgstr ""
-"Sử dụng với tùy chọn 'Định dạng thân thiện với người dùng' để tùy chỉnh định "
-"dạng."
+"Sử dụng với tùy chọn 'Định dạng thân thiện với người dùng' để tùy chỉnh định"
+" dạng."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.js:0
 msgid ""
-"Use the operators \"+=\", \"-=\" to update the current date by days (%"
-"(days)s), \n"
-"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours "
-"(%(hours)s), \n"
+"Use the operators \"+=\", \"-=\" to update the current date by days (%(days)s), \n"
+"            weeks (%(weeks)s), months (%(months)s), years (%(years)s), hours (%(hours)s), \n"
 "            minutes (%(minutes)s) and seconds (%(seconds)s)."
 msgstr ""
-"Sử dụng các toán tử \"+=\", \"-=\" để cập nhật ngày hiện tại theo ngày (%"
-"(days)s), \n"
-"            tuần (%(weeks)s), tháng (%(months)s), năm (%(years)s), giờ (%"
-"(hours)s), \n"
+"Sử dụng các toán tử \"+=\", \"-=\" để cập nhật ngày hiện tại theo ngày (%(days)s), \n"
+"            tuần (%(weeks)s), tháng (%(months)s), năm (%(years)s), giờ (%(hours)s), \n"
 "            phút (%(minutes)s) và giây (%(seconds)s)."
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/views/list/list_confirmation_dialog.xml:0
-msgid ""
-"Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current "
-"value."
+msgid "Use the operators \"+=\", \"-=\", \"*=\" and \"/=\" to update the current value."
 msgstr ""
 
 #. module: web
@@ -8201,8 +8173,8 @@ msgstr ""
 msgid ""
 "You are currently using a non-secure context. As a result, some Odoo "
 "features may be unavailable or function improperly. For more information, "
-"please visit: https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/"
-"Secure_Contexts"
+"please visit: https://developer.mozilla.org/en-"
+"US/docs/Web/Security/Defenses/Secure_Contexts"
 msgstr ""
 
 #. module: web
@@ -27362,11 +27334,11 @@ msgstr ""
 
 #~ msgid ""
 #~ "The Tax Identification Number. Values here will be validated based on the "
-#~ "country format. You can use '/' to indicate that the partner is not "
-#~ "subject to tax."
+#~ "country format. You can use '/' to indicate that the partner is not subject "
+#~ "to tax."
 #~ msgstr ""
-#~ "Mã số thuế. Các giá trị ở đây sẽ được xác thực dựa trên định dạng quốc "
-#~ "gia. Bạn có thể sử dụng dấu '/' để chỉ một đối tác không phải chịu thuế."
+#~ "Mã số thuế. Các giá trị ở đây sẽ được xác thực dựa trên định dạng quốc gia. "
+#~ "Bạn có thể sử dụng dấu '/' để chỉ một đối tác không phải chịu thuế."
 
 #~ msgid "Custom"
 #~ msgstr "Tùy chỉnh"
@@ -27393,13 +27365,13 @@ msgstr ""
 #~ msgstr "Rắn"
 
 #~ msgid ""
-#~ "Use up and down arrow keys to adapt the brightness. Use left and right "
-#~ "arrow keys to adapt the saturation. Press the Control or Command key at "
-#~ "the same time to have finer control."
+#~ "Use up and down arrow keys to adapt the brightness. Use left and right arrow"
+#~ " keys to adapt the saturation. Press the Control or Command key at the same "
+#~ "time to have finer control."
 #~ msgstr ""
-#~ "Sử dụng phím mũi tên lên và xuống để điều chỉnh độ sáng. Dùng phím mũi "
-#~ "tên trái và phải để điều chỉnh độ bão hòa màu. Nhấn đồng thời phím "
-#~ "Control hoặc Command để có độ chính xác cao hơn khi điều chỉnh."
+#~ "Sử dụng phím mũi tên lên và xuống để điều chỉnh độ sáng. Dùng phím mũi tên "
+#~ "trái và phải để điều chỉnh độ bão hòa màu. Nhấn đồng thời phím Control hoặc "
+#~ "Command để có độ chính xác cao hơn khi điều chỉnh."
 
 #~ msgid "hex"
 #~ msgstr "hex"
@@ -27408,8 +27380,7 @@ msgstr ""
 #~ msgstr "Lưu tự động"
 
 #~ msgid ""
-#~ "If checked, the record will be saved immediately when the field is "
-#~ "modified."
+#~ "If checked, the record will be saved immediately when the field is modified."
 #~ msgstr "Nếu chọn, bản ghi sẽ được lưu ngay lập tức khi trường được sửa đổi."
 
 #~ msgid "Invalid data"
@@ -27419,8 +27390,8 @@ msgstr ""
 #~ "Pie chart cannot mix positive and negative numbers. Try to change your "
 #~ "domain to only display positive results"
 #~ msgstr ""
-#~ "Biểu đồ bánh không thể chứa cả số dương và số âm. Hãy thay đổi miền để "
-#~ "chỉ hiển thị kết quả dương"
+#~ "Biểu đồ bánh không thể chứa cả số dương và số âm. Hãy thay đổi miền để chỉ "
+#~ "hiển thị kết quả dương"
 
 #~ msgid "props.placeholder"
 #~ msgstr "props.placeholder"

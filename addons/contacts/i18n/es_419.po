@@ -11,8 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-03 17:36+0000\n"
 "PO-Revision-Date: 2026-06-20 06:42+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
-"odoo-master/contacts/es_419/>\n"
+"Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/odoo-master/contacts/es_419/>\n"
 "Language: es_419\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,20 +21,26 @@ msgstr ""
 
 #. module: contacts
 #: model_terms:ir.ui.view,arch_db:contacts.res_partner_view_hierarchy
-msgid "<i class=\"fa fa-fw me-1 fa-envelope text-muted\" title=\"Email\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-muted\" data-icon=\"mail\" "
+"title=\"Email\"/>"
 msgstr ""
-"<i class=\"fa fa-fw me-1 fa-envelope text-muted\" title=\"Correo "
-"electrónico\"/>"
+"<i class=\"me-1 text-muted oi-fw oi oi-filled\" data-icon=\"mail\" "
+"title=\"Correo electrónico\"/>"
 
 #. module: contacts
 #: model_terms:ir.ui.view,arch_db:contacts.res_partner_view_hierarchy
-msgid "<i class=\"fa fa-fw me-1 fa-map-marker\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-fw me-1 fa-map-marker\" title=\"Ubicación\"/>"
+msgid "<i class=\"oi oi-fw me-1\" data-icon=\"location_on\" title=\"Location\"/>"
+msgstr "<i class=\"me-1 oi-fw oi\" data-icon=\"location_on\" title=\"Ubicación\"/>"
 
 #. module: contacts
 #: model_terms:ir.ui.view,arch_db:contacts.res_partner_view_hierarchy
-msgid "<i class=\"fa fa-fw me-1 fa-phone text-muted\" title=\"Phone\"/>"
-msgstr "<i class=\"fa fa-fw me-1 fa-phone text-muted\" title=\"Teléfono\"/>"
+msgid ""
+"<i class=\"oi oi-fw oi-filled me-1 text-muted\" data-icon=\"phone\" "
+"title=\"Phone\"/>"
+msgstr ""
+"<i class=\"me-1 text-muted oi-fw oi oi-filled\" data-icon=\"phone\" "
+"title=\"Teléfono\"/>"
 
 #. module: contacts
 #: model:ir.ui.menu,name:contacts.menu_action_res_partner_bank_form
@@ -116,8 +121,8 @@ msgstr "Localización"
 #: model_terms:ir.actions.act_window,help:contacts.action_contacts
 msgid "Odoo helps you track all activities related to your contacts."
 msgstr ""
-"Odoo te ayuda a llevar seguimiento de todas las actividades relacionadas con "
-"tus contactos."
+"Odoo te ayuda a llevar seguimiento de todas las actividades relacionadas con"
+" tus contactos."
 
 #. module: contacts
 #: model:ir.model,name:contacts.model_res_users

@@ -17,8 +17,7 @@ msgstr ""
 "POT-Creation-Date: 2026-06-19 17:38+0000\n"
 "PO-Revision-Date: 2026-06-21 03:11+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
-"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/"
-"website_event_sale/uz/>\n"
+"Language-Team: Uzbek <https://translate.odoo.com/projects/odoo-master/website_event_sale/uz/>\n"
 "Language: uz\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -41,8 +40,8 @@ msgstr "<b>Boshlash</b>"
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.event_confirmation
 #, fuzzy
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
-msgstr "<i class=\"fa fa-check me-2\" role=\"img\"/>Ro‘yxatdan o‘tgan"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
+msgstr "<i class=\"me-2 oi\" data-icon=\"check\" role=\"img\"/>Ro‘yxatdan o‘tgan"
 
 #. module: website_event_sale
 #: model_terms:ir.ui.view,arch_db:website_event_sale.registration_attendee_details
@@ -197,11 +196,11 @@ msgstr ""
 #: code:addons/website_event_sale/models/sale_order.py:0
 #, fuzzy
 msgid ""
-"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s "
-"ticket for the %(event)s event%(slot)s."
+"Sorry, only %(remaining_seats)d seats are still available for the %(ticket)s"
+" ticket for the %(event)s event%(slot)s."
 msgstr ""
-"Kechirasiz, %(event)s tadbiri%(slot)s uchun %(ticket)s chiptasidan faqat %"
-"(remaining_seats)d ta joy qoldi."
+"Kechirasiz, %(event)s tadbiri%(slot)s uchun %(ticket)s chiptasidan faqat "
+"%(remaining_seats)d ta joy qoldi."
 
 #. module: website_event_sale
 #. odoo-python

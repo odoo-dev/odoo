@@ -21,8 +21,7 @@ msgstr ""
 "POT-Creation-Date: 2026-05-29 17:39+0000\n"
 "PO-Revision-Date: 2026-06-21 19:11+0000\n"
 "Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
-"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/"
-"im_livechat/hu/>\n"
+"Language-Team: Hungarian <https://translate.odoo.com/projects/odoo-master/im_livechat/hu/>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -34,8 +33,7 @@ msgstr ""
 #: model:ir.model.constraint,message:im_livechat.constraint_discuss_channel_livechat_rating_constraint
 msgid ""
 "\n"
-"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 "
-"(Happy)\n"
+"        Live chat rating should be either 1 (Unhappy), 3 (Neutral), 5 (Happy)\n"
 "        or empty and can only be set on live chat channels.\n"
 "        "
 msgstr ""
@@ -122,10 +120,11 @@ msgstr "%s (másolat)"
 #. odoo-python
 #: code:addons/im_livechat/models/chatbot_script.py:0
 msgid ""
-"'%(input_email)s' does not look like a valid email. Can you please try again?"
+"'%(input_email)s' does not look like a valid email. Can you please try "
+"again?"
 msgstr ""
-"A (z) '%(input_email)s' nem tűnik érvényes email címnek. Meg tudnád próbálni "
-"újra?"
+"A (z) '%(input_email)s' nem tűnik érvényes email címnek. Meg tudnád próbálni"
+" újra?"
 
 #. module: im_livechat
 #. odoo-python
@@ -145,17 +144,13 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__action
 msgid ""
 "* 'Show' displays the chat button on the pages.\n"
-"* 'Show with notification' is 'Show' in addition to a floating text just "
-"next to the button.\n"
-"* 'Open automatically' displays the button and automatically opens the "
-"conversation pane.\n"
+"* 'Show with notification' is 'Show' in addition to a floating text just next to the button.\n"
+"* 'Open automatically' displays the button and automatically opens the conversation pane.\n"
 "* 'Hide' hides the chat button on the pages.\n"
 msgstr ""
 "* 'Megjelenít' megjeleníti a chat gombot az oldalakon.\n"
-"* 'Megjelenítés értesítéssel' olyan mint a 'Megjenelít' egy lebegő szöveggel "
-"a gomb mellett.\n"
-"* 'Megnyitás automatikusan' megjeleníti a gombot és automatikusan megnyitja "
-"a párbeszéd ablakot.\n"
+"* 'Megjelenítés értesítéssel' olyan mint a 'Megjenelít' egy lebegő szöveggel a gomb mellett.\n"
+"* 'Megnyitás automatikusan' megjeleníti a gombot és automatikusan megnyitja a párbeszéd ablakot.\n"
 "* 'Elrejt' elrejti a gombot az oldalakon.\n"
 
 #. module: im_livechat
@@ -166,30 +161,30 @@ msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in o-me-1_5\" role=\"img\"/>Join"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"login\" role=\"img\"/>Join"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out o-me-1_5\" role=\"img\"/>Leave"
+msgid "<i class=\"oi o-me-1_5\" data-icon=\"logout\" role=\"img\"/>Leave"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_kanban
 msgid ""
-"<i class=\"fa fa-smile-o text-success\" role=\"img\" aria-label=\"Happy "
-"face\"/>"
+"<i class=\"oi text-success\" data-icon=\"sentiment_satisfied\" role=\"img\" "
+"aria-label=\"Happy face\"/>"
 msgstr ""
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_test_script_page
-msgid "<i class=\"oi oi-fw oi-arrow-right\"/>Back to edit mode"
-msgstr "<i class=\"oi oi-fw oi-arrow-right\"/>Vissza a szerkesztés módba"
+msgid "<i class=\"oi oi-fw\" data-icon=\"east\"/>Back to edit mode"
+msgstr "<i class=\"oi-fw oi\" data-icon=\"east\"/>Vissza a szerkesztés módba"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
-msgid "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
-msgstr "<i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>"
+msgid "<i title=\"Remove operator\" class=\"oi oi-fw oi-lg\" data-icon=\"close\"/>"
+msgstr "<i title=\"Remove operator\" class=\"oi-lg oi-fw oi\" data-icon=\"close\"/>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.discuss_channel_view_kanban
@@ -214,8 +209,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Reminder: This step will only be played if no operator is available.</"
-"span>"
+"<span>Reminder: This step will only be played if no operator is "
+"available.</span>"
 msgstr ""
 "<span>Emlékeztető: Ez a lépés csak akkor kerül lejátszásra, ha nincs "
 "elérhető operátor.</span>"
@@ -223,25 +218,18 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
-"<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...). </"
-"span>\n"
-"                    <span>Use Channel Rules if you want the Bot to interact "
-"with visitors only when no operator is available.</span>"
+"<span>Tip: At least one interaction (Question, Email, ...) is needed before the Bot can perform more complex actions (Forward to an Operator, ...). </span>\n"
+"                    <span>Use Channel Rules if you want the Bot to interact with visitors only when no operator is available.</span>"
 msgstr ""
-"<span>Tipp: Legalább egy interakcióra (kérdés, e-mail, ...) van szükség, "
-"mielőtt a bot összetettebb műveleteket tudna végrehajtani (továbbítás egy "
-"operátornak, stb.).</span>\n"
-"                    <span>Használj csatornaszabályokat, ha azt szeretnéd, "
-"hogy a bot csak akkor lépjen kapcsolatba a látogatókkal, ha nincs elérhető "
-"operátor.</span>"
+"<span>Tipp: Legalább egy interakcióra (kérdés, e-mail, ...) van szükség, mielőtt a bot összetettebb műveleteket tudna végrehajtani (továbbítás egy operátornak, stb.).</span>\n"
+"                    <span>Használj csatornaszabályokat, ha azt szeretnéd, hogy a bot csak akkor lépjen kapcsolatba a látogatókkal, ha nincs elérhető operátor.</span>"
 
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_view_form
 msgid ""
 "<span>Tip: At least one interaction (Question, Email, ...) is needed before "
-"the Bot can perform more complex actions (Forward to an Operator, ...).</"
-"span>"
+"the Bot can perform more complex actions (Forward to an Operator, "
+"...).</span>"
 msgstr ""
 "<span>Tipp: Legalább egy interakcióra (kérdés, e-mail, ...) van szükség, "
 "mielőtt a bot összetettebb műveleteket tudna végrehajtani (továbbítás egy "
@@ -250,8 +238,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.chatbot_script_step_view_form
 msgid ""
-"<span>Tip: Plan further steps for the Bot in case no operator is available.</"
-"span>"
+"<span>Tip: Plan further steps for the Bot in case no operator is "
+"available.</span>"
 msgstr ""
 "<span>Tipp: Tervezzen további lépéseket a Bot számára arra az esetre, ha "
 "nincs elérhető operátor.</span>"
@@ -356,8 +344,8 @@ msgstr "Minden ország"
 msgid ""
 "Alternatively, share this URL with your customers or suppliers via email:"
 msgstr ""
-"Alternatívaként ossza meg ezt az URL-t az ügyfeleivel vagy beszállítóival e-"
-"mailben:"
+"Alternatívaként ossza meg ezt az URL-t az ügyfeleivel vagy beszállítóival "
+"e-mailben:"
 
 #. module: im_livechat
 #: model:ir.model.fields.selection,name:im_livechat.selection__im_livechat_channel_rule__chatbot_enabled_condition__always
@@ -509,8 +497,8 @@ msgstr "Csatornák"
 #. module: im_livechat
 #: model:ir.model.fields,help:im_livechat.field_discuss_channel__channel_type
 msgid ""
-"Chat is private and unique between 2 persons. Group is private among invited "
-"persons. Channel can be freely joined (depending on its configuration)."
+"Chat is private and unique between 2 persons. Group is private among invited"
+" persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
 "A chat privát és egyedi 2 személy között. A csoport privát a meghívott "
 "személyek között. A csatornához szabadon lehet csatlakozni (a "
@@ -1121,8 +1109,8 @@ msgid ""
 "<strong>Marketing.</strong>"
 msgstr ""
 "Menj ide <strong>Weboldal</strong> &gt; <strong>Konfiguráció</strong> &gt; "
-"<strong>Beállítások</strong> &gt; <strong>Email</strong> &amp; <strong>"
-"Marketing.</strong>"
+"<strong>Beállítások</strong> &gt; <strong>Email</strong> &amp; "
+"<strong>Marketing.</strong>"
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2181,7 +2169,8 @@ msgstr ""
 #: model:ir.model.fields,help:im_livechat.field_im_livechat_channel_rule__regex_url
 msgid ""
 "Regular expression specifying the web pages this rule will be applied on."
-msgstr "Általános kifejezés a weboldalhoz, melyen a szabályt alkalmazni fogják."
+msgstr ""
+"Általános kifejezés a weboldalhoz, melyen a szabályt alkalmazni fogják."
 
 #. module: im_livechat
 #: model:ir.model.fields,field_description:im_livechat.field_chatbot_message__mail_message_id
@@ -2422,8 +2411,7 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:im_livechat.chatbot_script_action
 msgid ""
 "Set up a bot with a defined script to chat with your website visitors.\n"
-"                Qualify and forward conversations to your live chat agents, "
-"and generate leads or\n"
+"                Qualify and forward conversations to your live chat agents, and generate leads or\n"
 "                support tickets automatically."
 msgstr ""
 
@@ -2562,8 +2550,8 @@ msgstr ""
 msgid ""
 "The rule will only be applied for these countries. Example: if you select "
 "'Belgium' and 'United States' and that you set the action to 'Hide', the "
-"chat button will be hidden on the specified URL from the visitors located in "
-"these 2 countries. This feature requires GeoIP installed on your server."
+"chat button will be hidden on the specified URL from the visitors located in"
+" these 2 countries. This feature requires GeoIP installed on your server."
 msgstr ""
 
 #. module: im_livechat
@@ -2596,8 +2584,8 @@ msgid ""
 "This is an automated 'welcome' message that your visitor will see when they "
 "initiate a new conversation."
 msgstr ""
-"Ez egy automatikus 'üdvözöljük' üzenet, melyet a látogatója fog látni, mikor "
-"meghívják az új párbeszédre."
+"Ez egy automatikus 'üdvözöljük' üzenet, melyet a látogatója fog látni, mikor"
+" meghívják az új párbeszédre."
 
 #. module: im_livechat
 #. odoo-javascript
@@ -2655,12 +2643,8 @@ msgstr ""
 #. module: im_livechat
 #: model_terms:ir.ui.view,arch_db:im_livechat.im_livechat_channel_view_form
 msgid ""
-"To apply the rule only to certain pages of your website, enter a URL regex "
-"like /shop. This will match any page that starts with /shop, such as /shop/"
-"product. Leave the field empty to apply the rule to all pages.<br/>\n"
-"                                    For on-premise databases, GeoIP must be "
-"installed on your server to geolocate visitors. Without it, rules that "
-"include country restrictions will be ignored."
+"To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n"
+"                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored."
 msgstr ""
 
 #. module: im_livechat
@@ -2699,8 +2683,8 @@ msgid ""
 "URL to a static page where you client can discuss with the operator of the "
 "channel."
 msgstr ""
-"Egy statisztikai oldal URL elérése ahol a csatorna operátorához hozzászólhat "
-"az ügyfél."
+"Egy statisztikai oldal URL elérése ahol a csatorna operátorához hozzászólhat"
+" az ügyfél."
 
 #. module: im_livechat
 #: model:ir.model,name:im_livechat.model_utm_mixin
