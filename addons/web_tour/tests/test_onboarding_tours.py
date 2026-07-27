@@ -6,13 +6,17 @@ from odoo.tests import HttpCase, tagged
 @tagged('post_install', '-at_install')
 class TestOnboardingTours(HttpCase):
 
-    tour_names = ['hr_expense_tour', 'event_tour', 'sale_tour', 'purchase_tour', 'mass_mailing_tour']
+    tour_names = ['hr_expense_tour', 'event_tour', 'sale_tour', 'purchase_tour', 'mass_mailing_tour', 'frontdesk_tour']
     only_tour = None  # TEMP: set to a tour name (e.g. 'sale_tour') to run only that one
 
     def setUp(self):
         super().setUp()
+        company = self.env.ref('base.main_company')
         # Email company is always set on a configured instance
-        self.env.ref('base.main_company').email = 'admin@yourcompany.example.com'
+        company.email = 'admin@yourcompany.example.com'
+        # The admin's own email is always set on a configured instance too
+        # (e.g. needed as the default mailing reply-to).
+        self.env.ref('base.user_admin').email = 'admin@yourcompany.example.com'
 
     def _get_tours(self):
         tour_names = [self.only_tour] if self.only_tour else self.tour_names

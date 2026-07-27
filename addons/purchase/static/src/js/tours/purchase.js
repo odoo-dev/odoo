@@ -54,7 +54,30 @@ registry.category("web_tour.tours").add("purchase_tour", {
             run: "click",
         },
         {
+            // The vendor was created on the fly without an email address,
+            // so the composer would otherwise get stuck asking for one.
             trigger: ".o_field_res_partner_many2one[name='partner_id'] .o_external_button",
+            content: _t("Open the vendor to set its email address."),
+            tooltipPosition: "bottom",
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name='email'] input",
+            content: _t("Enter an email address for your vendor."),
+            tooltipPosition: "bottom",
+            run: "edit azure.interior@example.com",
+        },
+        {
+            trigger: ".o_form_button_save",
+            content: _t("Save the vendor."),
+            tooltipPosition: "bottom",
+            run: "click",
+        },
+        {
+            trigger: ".breadcrumb-item:not(.active):last",
+            content: _t("Go back to the request for quotation."),
+            tooltipPosition: "bottom",
+            run: "click",
         },
         {
             trigger: ".o_field_x2many_list_row_add > button",
@@ -103,6 +126,22 @@ registry.category("web_tour.tours").add("purchase_tour", {
         ),
         {
             trigger: ".modal-footer button[name='action_send_mail']",
+        },
+        {
+            // The vendor was created on the fly without an email address,
+            // so the composer asks for one before it can send.
+            isActive: ["body:has(.o-mail-RecipientsInputTagsListPopover)"],
+            trigger: ".o-mail-RecipientsInputTagsListPopover input",
+            content: _t("Enter an email address for your vendor."),
+            tooltipPosition: "bottom",
+            run: "edit azure.interior@example.com",
+        },
+        {
+            isActive: ["body:has(.o-mail-RecipientsInputTagsListPopover)"],
+            trigger: ".o-mail-RecipientsInputTagsListPopover button.btn-primary",
+            content: _t("Confirm the email address."),
+            tooltipPosition: "bottom",
+            run: "click",
         },
         {
             trigger: ".modal-footer button[name='action_send_mail']",
