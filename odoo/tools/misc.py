@@ -74,7 +74,6 @@ objectify.set_default_parser(default_parser)
 
 NON_BREAKING_SPACE = u'\N{NO-BREAK SPACE}'
 
-
 #----------------------------------------------------------
 # Subprocesses
 #----------------------------------------------------------

@@ -10,7 +10,7 @@
             </xpath>
 
             <xpath expr="//block[@id='peppol']" position="attributes">
-                <attribute name="invisible" add="(country_code == 'FR')" separator="or"/>
+                <attribute name="invisible" add="(country_code == 'FR')" separator=" or "/>
             </xpath>
 
             <xpath expr="//block[@id='peppol']" position="after">
@@ -90,6 +90,13 @@
                                 </div>
                                 <widget name="peppol_settings_buttons"
                                         invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'pending', 'active')"/>
+                                <div class="mt-3"
+                                     invisible="account_peppol_proxy_state in ('not_registered', 'active', 'sender', 'rejected', 'canceled')">
+                                    <button name="button_deregister_peppol_participant"
+                                            type="object"
+                                            string="Cancel registration"
+                                            class="btn btn-secondary"/>
+                                </div>
                             </div>
 
                             <br/>

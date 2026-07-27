@@ -27,7 +27,6 @@ def _post_init_pdp(env):
         'account_edi_ubl_cii.ubl_20_CommonLineType',
         'account_edi_ubl_cii.ubl_20_InvoiceLineType',
         'account_edi_ubl_cii.ubl_21_CreditNoteLineType',
-        'account.res_config_settings_view_form',
     ]:
         view = env.ref(view_name).sudo()
         view.reset_arch(mode="hard")
