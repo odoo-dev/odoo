@@ -38,7 +38,7 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         return constraints
 
     def _export_invoice_vals(self, invoice):
-        # EXTENDS account.edi.xml.ubl_ib2d
+        # EXTENDS account.edi.xml.ubl_bis3
         vals = super()._export_invoice_vals(invoice)
 
         # Les valeurs autorisées pour le Cadre (Mode de Facturation) sont:
