@@ -3340,6 +3340,18 @@ class AccountMove(models.Model):
         }
         yield
 
+        # TEMP TEST: moves flagged by `_sync_dynamic_lines`'s tail-check (see
+        # there) had a write happen while nested inside an already-active
+        # sync (e.g. from an on_create_or_write automation running via
+        # base_automation's `_compute_field_value` patch). The before/after
+        # diff below can't see that write — both "before" (captured above,
+        # before our own `yield`) and "after" would already reflect it, since
+        # it happened entirely within some other, already-exited sync pass.
+        # For those, skip the diff and force a recompute unconditionally;
+        # `is_write_needed` below still makes actually applying it a no-op if
+        # nothing turns out to differ.
+        force_resync_ids = self.env.cr.cache.get('moves_to_force_resync', ())
+
         to_delete = []
         to_create = []
         grouped_update = defaultdict(set)
@@ -3351,7 +3363,9 @@ class AccountMove(models.Model):
             base_lines = get_base_lines(move)
             move_tax_lines_values_before = tax_lines_values_before.get(move, {})
             move_base_lines_values_before = base_lines_values_before.get(move, {})
-            if (
+            if move.id in force_resync_ids:
+                round_from_tax_lines = False
+            elif (
                 move.is_invoice(include_receipts=True)
                 and (
                     field_has_changed(moves_values_before, move, 'currency_id')
@@ -3601,13 +3615,24 @@ class AccountMove(models.Model):
         def filter_trivial(mapping):
             return {k: v for k, v in mapping.items() if 'id' not in v}
 
+        # TEMP TEST: same rationale as `_sync_tax_lines`'s `force_resync_ids` —
+        # a write from automation code that happened entirely within an
+        # already-exited, guard-skipped sync pass is invisible to the
+        # before/after diffing below (both would already reflect it). For
+        # moves flagged there, skip the two early-exits below and always
+        # recompute; the to_delete/to_create/to_write computation further
+        # down reads current state, so nothing bad happens if it turns out
+        # there's genuinely nothing to change.
+        force_resync_ids = self.env.cr.cache.get('moves_to_force_resync', ())
+        is_forced = any(move.id in force_resync_ids for move in container['records'])
+
         inv_existing_before = existing()
         needed_before = needed()
         dirty_recs_before, dirty_fname = dirty()
         dirty_recs_before[dirty_fname] = False
         yield
         dirty_recs_after, dirty_fname = dirty()
-        if not dirty_recs_after:  # TODO improve filter
+        if not dirty_recs_after and not is_forced:  # TODO improve filter
             return
         inv_existing_after = existing()
         needed_after = needed()
@@ -3623,9 +3648,9 @@ class AccountMove(models.Model):
             if bline in inv_existing_after
         }
 
-        if needed_after == needed_before:
+        if needed_after == needed_before and not is_forced:
             return  # do not modify user input if nothing changed in the needs
-        if not needed_before and (filter_trivial(inv_existing_after) != filter_trivial(inv_existing_before)):
+        if not needed_before and (filter_trivial(inv_existing_after) != filter_trivial(inv_existing_before)) and not is_forced:
             return  # do not modify user input if already created manually
 
         existing_after = defaultdict(list)
@@ -3750,6 +3775,30 @@ class AccountMove(models.Model):
         with self._disable_recursion(container, 'skip_invoice_sync') as disabled:
             if disabled:
                 yield
+                # TEMP TEST: only flag for a forced resync when this nested,
+                # guard-skipped write actually left base lines and their
+                # journal balance out of sync — i.e. `price_subtotal`
+                # (recomputed automatically, `@api.depends` includes
+                # `quantity`/`price_unit`/`discount`) no longer matches
+                # `-balance` (only ever written by `_sync_tax_lines`'s
+                # imperative logic, whose own `@api.depends` is just
+                # `move_id` — it never reacts to a base field change on its
+                # own). This is the same check used in `_sync_tax_lines`
+                # (see `any(-line.balance != line.price_subtotal ...)`) —
+                # reusing it here means we don't need to know or care WHO
+                # caused the write (automation or anything else): a real
+                # mismatch is a real mismatch, checked after the write
+                # actually happened (post-`yield`), not inferred from
+                # context.
+                incorrect_moves = container['records'].filtered(lambda m: any(
+                    line.price_subtotal
+                    and float_compare(m.direction_sign * line.amount_currency, line.price_subtotal, precision_rounding=m.currency_id.rounding) != 0 
+                    for line in m.line_ids
+                ))
+                if incorrect_moves:
+                    moves_needing_resync = self.env.cr.cache.setdefault('moves_needing_resync', set())
+                    moves_needing_resync.update(incorrect_moves.ids)
+                    pass
                 return
 
             stack_list, update_containers = self._get_sync_stack(container)
@@ -3764,6 +3813,42 @@ class AccountMove(models.Model):
                     yield
                     line_container['records'] = self.line_ids
                 update_containers()
+
+        # TEMP TEST: redo the sync for any moves flagged above, now that
+        # we're genuinely clear of the guard. `pending` is cleared BEFORE
+        # calling the redo — the redo itself is a non-nested call to this
+        # very method, so it reaches this same tail; if `pending` still
+        # listed these ids at that point, the redo's own tail would see them
+        # and redo again, forever. `moves_to_force_resync` is a SEPARATE,
+        # short-lived flag: populated only for the duration of the redo call
+        # (so `_sync_tax_lines`/`_sync_dynamic_line` bypass their diff), then
+        # cleared right after — never seen by the redo's own tail-check.
+        if (moves_needing_resync := self.env.cr.cache.get('moves_needing_resync')):
+            ids_to_redo = moves_needing_resync.intersection(container['records']._ids)
+            if ids_to_redo:
+                moves_needing_resync.difference_update(ids_to_redo)
+                # TEMP TEST: hard circuit breaker — never redo the same move
+                # more than once per transaction, no matter what the
+                # mismatch check finds afterward. This is a backstop, not a
+                # substitute for a correct check: it guards against any
+                # future/unknown case where a legitimate (non-bug) mismatch
+                # persists (like the tax-line and non_deductible_product
+                # cases already found), which would otherwise recurse
+                # forever. `moves_resync_done` is deliberately never
+                # cleared during the transaction.
+                moves_resync_done = self.env.cr.cache.setdefault('moves_resync_done', set())
+                ids_to_redo -= moves_resync_done
+                moves_resync_done.update(ids_to_redo)
+                if ids_to_redo:
+                    redo_records = self.browse(ids_to_redo).exists()
+                    if redo_records:
+                        force = self.env.cr.cache.setdefault('moves_to_force_resync', set())
+                        force.update(redo_records._ids)
+                        try:
+                            with redo_records._sync_dynamic_lines({'records': redo_records}):
+                                pass
+                        finally:
+                            force.difference_update(redo_records._ids)
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
