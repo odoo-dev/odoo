@@ -2,15 +2,17 @@ import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 
-patch(PosOrder.prototype, {
-    get isGccCountry() {
-        return ["SA", "AE", "BH", "OM", "QA", "KW"].includes(this.company.country_id?.code);
-    },
+const EXCLUDE_IF_NOT_REGISTERED = ['AE', 'SA'];
+const GCC_COUNTRIES = ['SA', 'AE', 'BH', 'OM', 'QA', 'KW'];
 
+patch(PosOrder.prototype, {
     export_for_printing(baseUrl, headerData) {
         const results = super.export_for_printing(...arguments);
-        results.is_gcc_country = this.isGccCountry;
-        if (results.is_gcc_country) {
+        const country = this.pos.company.country?.code;
+        results.use_gcc_report =
+            GCC_COUNTRIES.includes(country) &&
+            (this.pos.company.vat || !EXCLUDE_IF_NOT_REGISTERED.includes(country));
+        if (results.use_gcc_report) {
             results.label_total = _t("TOTAL / اﻹجمالي");
             results.label_rounding = _t("Rounding / التقريب");
             results.label_change = _t("CHANGE / الباقي");
