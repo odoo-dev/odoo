@@ -10,7 +10,7 @@
                 <div data-prevent-closing-overlay="true">
                     <t t-foreach="items" t-as="item" t-key="item_index">
                         <DropdownItem class="'user-select-none'" onSelected="() => this.onSelected(item)">
-                            <t t-esc="item.name"/>
+                            <t t-out="item.name"/>
                         </DropdownItem>
                     </t>
                 </div>
