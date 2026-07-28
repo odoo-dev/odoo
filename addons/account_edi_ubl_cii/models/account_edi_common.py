@@ -456,16 +456,16 @@ class AccountEdiCommon(models.AbstractModel):
             return
         if peppol_eas and peppol_endpoint:
             invoice.partner_id.write({'peppol_eas': peppol_eas, 'peppol_endpoint': peppol_endpoint})
-        if not invoice.partner_id.ubl_cii_format:
-            # Set the `ubl_cii_format` to be the same as the imported document
-            for (ubl_cii_format, _label) in invoice.partner_id._fields['ubl_cii_format'].selection:
-                try:
-                    edi_builder = self.env['res.partner'].new({'ubl_cii_format': ubl_cii_format})._get_edi_builder()
-                except Exception:  # noqa: BLE001
-                    continue
-                if isinstance(edi_builder, models.AbstractModel) and self._name == edi_builder._name:
-                    invoice.partner_id.ubl_cii_format = ubl_cii_format
-                    break
+        # if not invoice.partner_id.ubl_cii_format:
+        #     # Set the `ubl_cii_format` to be the same as the imported document
+        #     for (ubl_cii_format, _label) in invoice.partner_id._fields['ubl_cii_format'].selection:
+        #         try:
+        #             edi_builder = self.env['res.partner'].new({'ubl_cii_format': ubl_cii_format})._get_edi_builder()
+        #         except Exception:  # noqa: BLE001
+        #             continue
+        #         if isinstance(edi_builder, models.AbstractModel) and self._name == edi_builder._name:
+        #             invoice.partner_id.ubl_cii_format = ubl_cii_format
+        #             break
 
     def _import_retrieve_and_fill_partner_bank_details(self, invoice, bank_details):
         """ Retrieve the bank account, if no matching bank account is found, create it
