@@ -309,9 +309,9 @@ class StockPicking(models.Model):
 
     def cancel_shipment(self):
         for picking in self:
-            picking.carrier_id.cancel_shipment(self)
-            msg = "Shipment %s cancelled" % picking.carrier_tracking_ref
-            picking.message_post(body=msg)
+            tracking_ref = picking.carrier_tracking_ref
+            picking.carrier_id.cancel_shipment(picking)
+            picking.message_post(body=_("Shipment %(tracking_ref)s cancelled", tracking_ref=tracking_ref))
             picking.carrier_tracking_ref = False
 
     def _get_estimated_weight(self):
