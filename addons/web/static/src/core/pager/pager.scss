@@ -16,7 +16,6 @@
         background: var(--o-Pager-backgroundColor, #{$o-view-background-color});
         border: var(--o-Pager-border, #{$border-width solid var(--border-color)});
         border-radius: calc(#{map-get($spacers, 1)} + #{$btn-border-radius});
-        gap: map-get($spacers, 1);
     }
 
     .btn {
