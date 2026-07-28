@@ -300,6 +300,9 @@ $kbd-box-shadow: 0px 1px 1px rgba($o-black, 0.2), inset 0px -1px 1px 1px rgba($o
 // Input
 $input-bg: $o-input-bg !default;
 $input-focus-border-color: $o-brand-primary !default;
+
+$form-label-font-weight: $font-weight-bold !default;
+
 $form-check-input-border: 1px solid $o-form-check-input-border-color !default;
 $form-check-input-checked-color: $o-brand-lightsecondary !default;
 $form-check-input-checked-border-color: $o-brand-primary !default;

@@ -380,7 +380,7 @@
         justify-content: space-between;
 
         .o_form_label {
-            font-weight: $font-weight-normal;
+            font-weight: $form-label-font-weight;
         }
 
         .o_field_widget {
@@ -412,9 +412,6 @@
             &.o_label_nowrap .o_form_label {
                 white-space: normal;
             }
-        }
-        .o_wrap_label .o_form_label {
-            font-weight: $font-weight-bold;
         }
     }
 
@@ -475,7 +472,6 @@
 
         > .o_form_label {
             color: $headings-color;
-            font-weight: $font-weight-bold;
         }
     }
 
@@ -584,7 +580,7 @@
     .o_form_label {
         font-size: $font-size-base; // The label muse have the same size whatever their position
         line-height: $line-height-base;
-        font-weight: $font-weight-bold;
+        font-weight: $form-label-font-weight;
 
         @include media-breakpoint-down(md) {
             font-size: $o-font-size-base-touch;
@@ -592,7 +588,6 @@
 
         &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
             color: $text-muted;
-            font-weight: $font-weight-normal;
         }
     }
 
@@ -1049,7 +1044,6 @@
 
         .o_form_label {
             font-size: $o-label-font-size-factor * $o-font-size-base-touch;
-            font-weight: $font-weight-normal;
         }
     }
 
