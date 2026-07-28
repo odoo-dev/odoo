@@ -43,6 +43,7 @@
                         </section>
                     </t>
                     <t t-else="">
+                        <span t-if="this.display.buttons" class="ps-1"/> <!-- Spacer -->
                         <Breadcrumbs breadcrumbs="this.breadcrumbs">
                             <t t-set-slot="breadcrumb-status-indicator">
                                 <t t-call-slot="control-panel-status-indicator" />
