@@ -15,75 +15,79 @@ class CalendarAlarm_Manager(models.AbstractModel):
 
     def _get_next_potential_limit_alarm(self, alarm_type, seconds=None, partners=None):
         # flush models before making queries
-        for model_name in ('calendar.alarm', 'calendar.event', 'calendar.recurrence'):
+        for model_name in ('calendar.alarm', 'calendar.event'):
             self.env[model_name].flush_model()
 
-        result = {}
-        delta_request = """
-            SELECT
-                rel.calendar_event_id,
-                max(alarm.duration_minutes) AS max_delta,
-                min(alarm.duration_minutes) AS min_delta
-            FROM
-                calendar_alarm_calendar_event_rel AS rel
-            LEFT JOIN calendar_alarm AS alarm ON alarm.id = rel.calendar_alarm_id
-            WHERE alarm.alarm_type = %s
-            GROUP BY rel.calendar_event_id
-        """
-        base_request = """
-            SELECT
-                cal.id,
-                cal.start - interval '1' minute * calcul_delta.max_delta AS first_alarm,
-                cal.stop - interval '1' minute * calcul_delta.min_delta AS last_alarm,
-                cal.start AS first_meeting,
-                cal.stop AS last_meeting,
-                calcul_delta.min_delta,
-                calcul_delta.max_delta
-            FROM
-                calendar_event AS cal
-            INNER JOIN calcul_delta ON calcul_delta.calendar_event_id = cal.id
-            WHERE cal.active = True
-        """
-        filter_user = """
-            INNER JOIN calendar_event_res_partner_rel AS part_rel
-                ON part_rel.calendar_event_id = cal.id
-                AND part_rel.res_partner_id IN %s
-            WHERE cal.active = True
-        """
-
-        # Add filter on alarm type
-        tuple_params = (alarm_type,)
-
-        # Add filter on partner_id
+        partner_join = SQL()
         if partners:
-            base_request = base_request.replace("WHERE cal.active = True", filter_user)
-            tuple_params += (tuple(partners.ids), )
+            partner_join = SQL("""
+                JOIN calendar_event_res_partner_rel AS part_rel
+                  ON part_rel.calendar_event_id = event.id
+                 AND part_rel.res_partner_id IN %s
+            """, tuple(partners.ids))
 
         # Upper bound on first_alarm of requested events
-        first_alarm_max_value = ""
+        now = self.env.cr.now()
         if seconds is None:
             # first alarm in the future + 3 minutes if there is one, now otherwise
-            first_alarm_max_value = """
-                COALESCE((SELECT MIN(cal.start - interval '1' minute  * calcul_delta.max_delta)
-                FROM calendar_event cal
-                RIGHT JOIN calcul_delta ON calcul_delta.calendar_event_id = cal.id
-                WHERE cal.start - interval '1' minute  * calcul_delta.max_delta > now() at time zone 'utc'
-            ) + interval '3' minute, now() at time zone 'utc')"""
+            first_alarm_max_value = SQL("""
+                COALESCE(
+                    (SELECT alarm_time FROM next_alarm) + INTERVAL '3 MINUTE',
+                    %s
+                )
+            """, now)
         else:
             # now + given seconds
-            first_alarm_max_value = "(now() at time zone 'utc' + interval '%s' second )"
-            tuple_params += (seconds,)
+            first_alarm_max_value = SQL("%s + INTERVAL '1 SECOND' * %s", now, seconds)
 
-        self.env.flush_all()
-        self.env.cr.execute("""
-            WITH calcul_delta AS (%s)
-            SELECT *
-                FROM ( %s ) AS ALL_EVENTS
-            WHERE ALL_EVENTS.first_alarm < %s
-                AND ALL_EVENTS.last_alarm > ('%s' at time zone 'utc')
-        """ % (delta_request, base_request, first_alarm_max_value, fields.Datetime.now()), tuple_params)
+        query = SQL("""
+            WITH event_alarmable_window AS (
+                SELECT
+                    event.id,
+                    event.start - INTERVAL '1 MINUTE' * MAX(alarm.duration_minutes) AS first_alarm,
+                    event.stop - INTERVAL '1 MINUTE' * MIN(alarm.duration_minutes) AS last_alarm,
+                    event.start AS first_meeting,
+                    event.stop AS last_meeting,
+                    MIN(alarm.duration_minutes) AS min_duration,
+                    MAX(alarm.duration_minutes) AS max_duration
+                FROM calendar_event AS event
+                JOIN calendar_alarm_calendar_event_rel AS rel
+                  ON rel.calendar_event_id = event.id
+                JOIN calendar_alarm AS alarm
+                  ON alarm.id = rel.calendar_alarm_id
+                %s
+                WHERE alarm.alarm_type = %s
+                  AND event.active = TRUE
+                GROUP BY event.id, event.start, event.stop
+            ),
+            next_alarm AS (
+                SELECT MIN(first_alarm) AS alarm_time
+                FROM event_alarmable_window
+                WHERE first_alarm > %s
+            )
+            SELECT
+                id,
+                first_alarm,
+                last_alarm,
+                first_meeting,
+                last_meeting,
+                min_duration,
+                max_duration
+            FROM event_alarmable_window
+            WHERE first_alarm < %s
+              AND last_alarm > %s
+        """, partner_join, alarm_type, now, first_alarm_max_value, now)
 
-        for event_id, first_alarm, last_alarm, first_meeting, last_meeting, min_duration, max_duration in self.env.cr.fetchall():
+        result = {}
+        for (
+            event_id,
+            first_alarm,
+            last_alarm,
+            first_meeting,
+            last_meeting,
+            min_duration,
+            max_duration,
+        ) in self.env.execute_query(query):
             result[event_id] = {
                 'event_id': event_id,
                 'first_alarm': first_alarm,

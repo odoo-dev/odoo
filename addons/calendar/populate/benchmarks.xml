@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        The final calendar.event job is the benchmark probe. Bulk events are
+        deliberately unrelated to the probe user: the optimized alarm query
+        should discard them through the attendee relation before aggregating
+        their alarms.
+    -->
+    <record id="benchmark_alarm_query" model="populate.blueprint">
+        <field name="name">Benchmark: Calendar Alarm Query</field>
+        <field name="definition_xml" type="xml">
+            <model name="res.partner" count="1000" id="alarm_query_partners"
+                   context="{'tracking_disable': True}">
+                <field name="v_sequence" virtual="True" generator="misc.counter" start="1"/>
+                <field name="name" eval="f'Alarm query partner {v_sequence}'"/>
+            </model>
+
+            <model name="calendar.alarm" count="3" id="alarm_query_alarms" scale="False">
+                <field name="v_sequence" virtual="True" generator="misc.counter" start="1"/>
+                <field name="name" eval="f'Alarm query notification {v_sequence}'"/>
+                <field name="alarm_type" eval="'notification'"/>
+                <field name="interval" eval="'minutes'"/>
+                <field name="duration" generator="misc.cycle" values="[5, 15, 60]"/>
+            </model>
+
+            <!--
+                Avoid exercising the query while building the fixture. At the
+                default scale this produces 200,000 event/alarm relation rows.
+            -->
+            <model name="calendar.event" count="100000" id="alarm_query_events"
+                   context="{
+                       'dont_notify': True,
+                       'no_mail_to_attendees': True,
+                       'skip_contact_description': True,
+                       'tracking_disable': True,
+                   }">
+                <field name="v_sequence" virtual="True" generator="misc.counter" start="1"/>
+                <field name="name" eval="f'Alarm query event {v_sequence}'"/>
+                <field name="start" start="now -2y" end="now +2y"/>
+                <field name="stop" eval="start"/>
+                <field name="partner_ids" ref="alarm_query_partners" count="1"/>
+                <field name="alarm_ids" ref="alarm_query_alarms" count="2"/>
+            </model>
+
+            <!--
+                Keep notifications enabled here. Creating this event executes
+                the alarm query once for an active internal user's partner.
+            -->
+            <model name="calendar.event" count="1" id="alarm_query_probe" scale="False"
+                   parallel="False"
+                   context="{
+                       'no_mail_to_attendees': True,
+                       'skip_contact_description': True,
+                       'tracking_disable': True,
+                   }">
+                <field name="name" eval="'Alarm query benchmark probe'"/>
+                <field name="v_probe_partner_id" virtual="True"
+                       eval="env['res.users'].search([('share', '=', False), ('active', '=', True)], limit=1).partner_id.id"/>
+                <field name="partner_ids" eval="[Command.set([v_probe_partner_id])]"/>
+                <field name="alarm_ids" ref="alarm_query_alarms" count="3"/>
+            </model>
+        </field>
+    </record>
+</odoo>
