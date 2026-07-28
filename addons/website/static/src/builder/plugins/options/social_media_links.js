@@ -19,12 +19,10 @@ export class SocialMediaLinks extends BaseOptionComponent {
             // Prefill placeholder social media links for existing static
             // content (e.g., footer snippets) that are not added via drag and
             // drop.
-            this.dependencies.operation.next(async () => {
-                const prefilled = await prefillSocialMediaLinks(this.env.getEditingElement());
-                if (prefilled) {
-                    this.dependencies.history.addStep({ extraStepInfos: { prefill: true } });
-                }
-            });
+            const prefilled = await prefillSocialMediaLinks(this.env.getEditingElement());
+            if (prefilled) {
+                this.dependencies.history.reset(this.env.getEditingElement().innerHTML);
+            }
         });
         this.rootRef = useRef("root");
         this.domState = useDomState((editingElement) => ({

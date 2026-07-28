@@ -147,11 +147,6 @@ export class SocialMediaOptionPlugin extends Plugin {
             { selector: ".s_share > a > *", target: ".s_share" },
         ],
         replace_media_dialog_params_processors: this.applyMediaDialogParams.bind(this),
-        is_step_reversible_predicates: (step) => {
-            if (step.extraStepInfos?.prefill) {
-                return false;
-            }
-        },
         immutable_link_selectors: [".s_share a"],
     };
 
