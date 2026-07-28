@@ -119,6 +119,14 @@ export class CallPreview extends Component {
                 disposeFns.forEach((f) => f());
                 closeStream(this.state.audioStream);
                 closeStream(this.state.videoStream);
+                // A <video>/<audio> element with an active srcObject is kept alive by the
+                // browser even once detached, so clear it explicitly to release the element.
+                if (this.audioRef.el) {
+                    this.audioRef.el.srcObject = null;
+                }
+                if (this.videoRef.el) {
+                    this.videoRef.el.srcObject = null;
+                }
             });
             useLayoutEffect(
                 (activateCamera) => {

@@ -120,6 +120,11 @@ export class BarcodeVideoScanner extends Component {
             this.stream.getTracks().forEach((track) => track.stop());
             this.stream = null;
         }
+        if (this.videoPreviewRef.el) {
+            // A <video> element with an active srcObject is kept alive by the browser
+            // even once detached, so clear it explicitly to release the element.
+            this.videoPreviewRef.el.srcObject = null;
+        }
     }
 
     isZXingBarcodeDetector() {

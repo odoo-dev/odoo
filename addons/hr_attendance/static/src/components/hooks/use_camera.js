@@ -66,6 +66,11 @@ export function useCamera({ width = 480, height = 480 } = {}) {
     function stop() {
         stream?.getTracks().forEach((track) => track.stop());
         stream = null;
+        if (videoEl) {
+            // A <video> element with an active srcObject is kept alive by the browser
+            // even once detached, so clear it explicitly to release the element.
+            videoEl.srcObject = null;
+        }
     }
 
     return {
