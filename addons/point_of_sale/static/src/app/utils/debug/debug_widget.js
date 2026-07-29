@@ -153,6 +153,7 @@ export class DebugWidget extends Component {
         a.href = url;
         a.download = fileName;
         a.click();
+        URL.revokeObjectURL(url);
     }
     async importData(event) {
         const file = event.target.files[0];

@@ -1,5 +1,6 @@
 import {
     activateCropper,
+    clearImageCache,
     getAspectRatio,
     getDataURLBinarySize,
     getImageSizeFromCache,
@@ -46,6 +47,11 @@ export class ImagePostProcessPlugin extends Plugin {
     static id = "imagePostProcess";
     static dependencies = ["style"];
     static shared = ["processImage", "getProcessedImageSize"];
+
+    destroy() {
+        super.destroy();
+        clearImageCache();
+    }
 
     /**
      * Applies data-attributes modifications to an img tag and returns a dataURL

@@ -6,7 +6,7 @@ import { url } from "@web/core/utils/urls";
 import { standardFieldProps } from "../standard_field_props";
 import { FileUploader } from "../file_handler";
 
-import { Component, onWillUpdateProps, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, onWillDestroy, onWillUpdateProps, proxy, signal, t, useProps } from "@odoo/owl";
 import { hidePDFJSButtons } from "@web/core/utils/pdfjs";
 
 export class PdfViewerField extends Component {
@@ -30,9 +30,11 @@ export class PdfViewerField extends Component {
         });
         onWillUpdateProps((nextProps) => {
             if (nextProps.readonly) {
+                this.revokeObjectUrl();
                 this.state.objectUrl = "";
             }
         });
+        onWillDestroy(() => this.revokeObjectUrl());
         useLayoutEffect(
             (el) => {
                 if (el) {
@@ -91,8 +93,15 @@ export class PdfViewerField extends Component {
 
     onFileUploaded({ name, data, objectUrl }) {
         this.state.isValid = true;
+        this.revokeObjectUrl();
         this.state.objectUrl = objectUrl;
         this.update({ name, data });
+    }
+
+    revokeObjectUrl() {
+        if (this.state.objectUrl) {
+            URL.revokeObjectURL(this.state.objectUrl);
+        }
     }
 
     onLoadFailed() {

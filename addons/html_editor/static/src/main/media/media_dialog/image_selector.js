@@ -1,4 +1,4 @@
-import { proxy, signal } from "@odoo/owl";
+import { onWillDestroy, proxy, signal } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { KeepLast } from "@web/core/utils/concurrency";
@@ -89,6 +89,13 @@ export class ImageSelector extends FileSelector {
         this.isImageField =
             !!this.props.media?.closest("[data-oe-type=image]") || !!this.props.addFieldImage;
         this.isProcessingClick = false;
+
+        this.dynamicSvgObjectURLs = new Set();
+        onWillDestroy(() => {
+            for (const url of this.dynamicSvgObjectURLs) {
+                URL.revokeObjectURL(url);
+            }
+        });
     }
 
     get canLoadMore() {
@@ -494,7 +501,9 @@ export class ImageSelector extends FileSelector {
                 const file = new File([svg], fileName, {
                     type: "image/svg+xml",
                 });
-                imgEl.src = URL.createObjectURL(file);
+                const objectURL = URL.createObjectURL(file);
+                this.dynamicSvgObjectURLs.add(objectURL);
+                imgEl.src = objectURL;
                 if (Object.keys(dynamicColors).length) {
                     media.isDynamicSVG = true;
                     media.dynamicColors = dynamicColors;

@@ -68,7 +68,9 @@ export function resizeBlobImg(blob, params = {}) {
     };
     return new Promise((resolve, reject) => {
         const img = new Image();
+        const objectUrl = URL.createObjectURL(blob);
         img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
             if (width < img.width || height < img.height) {
                 const canvas = document.createElement("canvas");
                 canvas.width = width;
@@ -98,8 +100,9 @@ export function resizeBlobImg(blob, params = {}) {
             }
         };
         img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
             reject(new Error(_t("The resizing of the image failed")));
         };
-        img.src = URL.createObjectURL(blob);
+        img.src = objectUrl;
     });
 }

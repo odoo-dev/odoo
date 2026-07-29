@@ -144,6 +144,20 @@ export function getImageSizeFromCache(src) {
 }
 
 /**
+ * Revokes every object URL held by the image cache and empties it. Must be
+ * called when the editor using it is destroyed, otherwise the object URLs
+ * are never released for the lifetime of the page.
+ */
+export function clearImageCache() {
+    for (const { objectURL } of imageCache.values()) {
+        if (objectURL) {
+            URL.revokeObjectURL(objectURL);
+        }
+    }
+    imageCache.clear();
+}
+
+/**
  * Activates the cropper on a given image.
  *
  * @param {HTMLElement} image the image on which to activate the cropper
