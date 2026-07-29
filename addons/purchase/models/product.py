@@ -54,6 +54,12 @@ class ProductTemplate(models.Model):
         action['display_name'] = _("Purchase History for %s", self.display_name)
         return action
 
+    def _get_product_accounts(self):
+        accounts = super()._get_product_accounts()
+        accounts['bills_to_receive'] = self._get_category_account('property_account_bills_to_receive_id', 'account_bills_to_receive_id')
+        accounts['billed_not_received'] = self._get_category_account('property_account_billed_not_received_id', 'account_billed_not_received_id')
+        return accounts
+
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
