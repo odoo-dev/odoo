@@ -18,22 +18,85 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         return self.display_type != "product" or not self.move_id.is_sale_document()
 
-    def _l10n_ph_line_qty(self):
-        self.ensure_one()
-        return self.quantity
+    def _l10n_ph_get_discount_price_details(self):
+        """Return the gross (pre-discount) price amounts and the discount
+        amounts derived from the current AML.
 
-    def _l10n_ph_regular_discount_reference_price(self):
+        At 100% discount, price_subtotal/price_total are zero, so the gross
+        values are recomputed from price_unit*qty with the tax engine to avoid
+        manual tax roundings.
+        """
         self.ensure_one()
-        return self.price_unit
+        if self.discount >= 100:
+            company = self.company_id or self.env.company
+            base_line = self.move_id._prepare_product_base_line_for_taxes_computation(
+                self,
+            )
+            base_line["discount"] = 0.0
+            self.env["account.tax"]._add_tax_details_in_base_line(base_line, company)
+            self.env["account.tax"]._round_base_lines_tax_details([base_line], company)
+            gross_price_subtotal = self.price_unit * self.quantity
+            gross_price_total = base_line["tax_details"]["total_included_currency"]
+        else:
+            gross_price_subtotal = self.price_subtotal / (
+                1.0 - (self.discount / 100.0)
+            )
+            gross_price_total = self.price_total / (1.0 - (self.discount / 100.0))
+        return (
+            gross_price_subtotal,
+            gross_price_subtotal - self.price_subtotal,
+            gross_price_total,
+            gross_price_total - self.price_total,
+        )
 
     @api.depends(
         "price_total",
+        "price_subtotal",
         "tax_ids",
         "document_tax_mode",
         "l10n_ph_discount_privilege_id",
     )
     def _compute_l10n_ph_discount_amounts(self):
         super()._compute_l10n_ph_discount_amounts()
+
+    # --- Price unit / taxes / discount helpers (called by the wizard) ---
+
+    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids):
+        """Compute the new price_unit and original_price_unit to set on the
+        line after applying (or removing) the privilege's fiscal position."""
+        self.ensure_one()
+        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
+        if fiscal_position:
+            tax_ids = self.l10n_ph_original_tax_ids or tax_ids
+            taxes_after_fp = fiscal_position.map_tax(tax_ids)
+            new_price_unit = tax_ids._adapt_price_unit_to_another_taxes(
+                price_unit=self.l10n_ph_original_price_unit or price_unit,
+                product=None,
+                original_taxes=tax_ids,
+                new_taxes=taxes_after_fp,
+                document_tax_mode=self.document_tax_mode,
+            )
+            original_price_unit = self.l10n_ph_original_price_unit or price_unit
+        elif self.l10n_ph_original_price_unit:
+            new_price_unit = self.l10n_ph_original_price_unit
+            original_price_unit = 0.0
+        else:
+            new_price_unit = price_unit
+            original_price_unit = 0.0
+        return new_price_unit, original_price_unit
+
+    def _adjust_taxes_from_privilege(self, tax_ids):
+        """Compute the new tax_ids and original tax_ids to set on the line
+        after applying (or removing) the privilege's fiscal position."""
+        self.ensure_one()
+        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
+        if fiscal_position:
+            original_taxes = self.l10n_ph_original_tax_ids or tax_ids
+            new_taxes = fiscal_position.map_tax(original_taxes)
+            return new_taxes, original_taxes
+        if self.l10n_ph_original_tax_ids:
+            return self.l10n_ph_original_tax_ids, None
+        return tax_ids, self.l10n_ph_original_tax_ids
 
     # --- Discount allocation (invoice lines only) ---
 

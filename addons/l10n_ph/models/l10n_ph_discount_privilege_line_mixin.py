@@ -59,88 +59,18 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
         """
         raise NotImplementedError
 
-    def _l10n_ph_line_qty(self):
-        """Return the line quantity used in the 100% discount back-calculation.
+    def _l10n_ph_get_discount_price_details(self):
+        """Return the gross (pre-discount) price amounts and the discount
+        amounts derived from the current line.
 
-        Must be overridden in each concrete model.
+        Concrete models must override this hook and return a 4-tuple:
+
+        * ``gross_price_subtotal``: price subtotal before any discount.
+        * ``subtotal_price_discount``: gross_price_subtotal - price_subtotal.
+        * ``gross_price_total``: price total before any discount.
+        * ``total_price_discount``: gross_price_total - price_total.
         """
         raise NotImplementedError
-
-    def _l10n_ph_regular_discount_reference_price(self):
-        """Return the reference (pre-discount) unit price used to infer the
-        regular discount amount when no explicit discount % is set.
-
-        Must be overridden in each concrete model.
-        """
-        raise NotImplementedError
-
-    # --- price_unit adjustment with privilege FP ---
-
-    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids):
-        """Compute the new price_unit and original_price_unit to set on the line
-        after applying (or removing) the privilege's fiscal position, without
-        writing to any model-specific field directly."""
-        self.ensure_one()
-        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
-        if fiscal_position:
-            tax_ids = self.l10n_ph_original_tax_ids or tax_ids
-            taxes_after_fp = fiscal_position.map_tax(tax_ids)
-            new_price_unit = tax_ids._adapt_price_unit_to_another_taxes(
-                price_unit=self.l10n_ph_original_price_unit or price_unit,
-                product=None,
-                original_taxes=tax_ids,
-                new_taxes=taxes_after_fp,
-                document_tax_mode=self.document_tax_mode,
-            )
-            original_price_unit = self.l10n_ph_original_price_unit or price_unit
-        elif self.l10n_ph_original_price_unit:
-            new_price_unit = self.l10n_ph_original_price_unit
-            original_price_unit = 0.0
-        else:
-            new_price_unit = price_unit
-            original_price_unit = 0.0
-        return new_price_unit, original_price_unit
-
-    def _update_price_unit_from_privilege(self):
-        """Save the original price_unit so it can be restored on removal, then
-        adapts price_unit through the privilege's fiscal position (FP), or
-        restores the original price_unit when the privilege is cleared."""
-        for line in self:
-            price_unit = line.price_unit
-            new_price_unit, original_price_unit = (
-                line._adjust_price_unit_from_privilege(
-                    price_unit,
-                    line.tax_ids,
-                )
-            )
-            line.price_unit = new_price_unit
-            line.l10n_ph_original_price_unit = original_price_unit
-
-    # --- Computed taxes with privilege FP ---
-
-    def _update_tax_from_privilege(self):
-        """Save the original taxes so they can be restored on removal, then
-        apply the fiscal position's tax mapping, restore original taxes for
-        non-FP privileges, or clear them entirely on privilege removal."""
-        for line in self:
-            fiscal_position = line.l10n_ph_discount_privilege_id.fiscal_position_id
-            if fiscal_position:
-                if not line.l10n_ph_original_tax_ids and line.tax_ids:
-                    line.l10n_ph_original_tax_ids = line.tax_ids
-                line.tax_ids = fiscal_position.map_tax(line.l10n_ph_original_tax_ids)
-            elif line.l10n_ph_original_tax_ids:
-                line.tax_ids = line.l10n_ph_original_tax_ids
-                line.l10n_ph_original_tax_ids = None
-
-    # --- Discount with privilege ---
-
-    def _update_discount_from_privilege(self):
-        for line in self:
-            if line.l10n_ph_discount_privilege_id:
-                line.discount = line.l10n_ph_discount_privilege_id.discount_amount
-            else:
-                line.discount = line.l10n_ph_original_discount or 0.0
-                line.l10n_ph_original_discount = 0.0
 
     # --- Discount amounts ---
 
@@ -148,10 +78,10 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
         """Compute l10n_ph_special_discount_amount and
         l10n_ph_regular_discount_amount for sale lines (SLSP/BOA reporting).
 
-        Special (privileged lines): VAT-inclusive discount = price_total *
-        discount/(100-discount); at 100% price_total is 0, so it is recomputed
-        from price_unit*qty with taxes via the tax engine. This keeps the
-        reported discount consistent with the FP tax treatment.
+        Special (privileged lines): use the gross subtotal discount amount when
+        the privilege applies a fiscal position (tax-excluded discount, e.g.
+        SC/PWD), otherwise use the gross total discount amount (tax-included
+        discount, e.g. a special discount without tax mapping).
 
         Regular (non-privileged): explicit discount % back-computed from
         price_subtotal. Never reported as a privilege discount."""
@@ -161,51 +91,31 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
                 line.l10n_ph_special_discount_amount = 0.0
                 continue
 
+            _, subtotal_price_discount, _, total_price_discount = (
+                line._l10n_ph_get_discount_price_details()
+            )
             if line.l10n_ph_discount_privilege_id:
                 line.l10n_ph_regular_discount_amount = 0.0
-                if line.discount < 100.0:
-                    line.l10n_ph_special_discount_amount = (
-                        line.price_total * line.discount / (100.0 - line.discount)
-                    )
+                if line.l10n_ph_discount_privilege_id.fiscal_position_id:
+                    line.l10n_ph_special_discount_amount = subtotal_price_discount
                 else:
-                    # 100% discount — price_total is zero, so recompute the
-                    # tax-inclusive amount (with no discount) and use it as the
-                    # discounted amount, avoiding manual tax roundings.
-                    company = line.company_id or self.env.company
-                    base_line = (
-                        line.move_id._prepare_product_base_line_for_taxes_computation(
-                            line,
-                        )
-                    )
-                    base_line["discount"] = 0.0
-                    self.env["account.tax"]._add_tax_details_in_base_line(
-                        base_line, company,
-                    )
-                    self.env["account.tax"]._round_base_lines_tax_details(
-                        [base_line], company,
-                    )
-                    line.l10n_ph_special_discount_amount = base_line["tax_details"][
-                        "total_included_currency"
-                    ]
+                    line.l10n_ph_special_discount_amount = total_price_discount
             else:
+                line.l10n_ph_regular_discount_amount = subtotal_price_discount
                 line.l10n_ph_special_discount_amount = 0.0
-                if line.discount:
-                    line.l10n_ph_regular_discount_amount = (
-                        line.price_subtotal * line.discount / (100.0 - line.discount)
-                    )
-                else:
-                    line.l10n_ph_regular_discount_amount = 0.0
 
     # --- Preview helper for wizard ---
 
     def _l10n_ph_get_preview_discount_amount(self, privilege):
+        """Return the discount amount that would apply to the line if the
+        given privilege was applied.
+
+        An empty privilege recordset is supported and yields 0.0.
+        """
         self.ensure_one()
-        if not privilege or self.discount >= 100.0:
-            return 0.0
-        if privilege == self.l10n_ph_discount_privilege_id:
-            return self.l10n_ph_special_discount_amount
+        gross_price_subtotal, _, gross_price_total, _ = (
+            self._l10n_ph_get_discount_price_details()
+        )
         if privilege.fiscal_position_id:
-            excluded = self.price_subtotal / (1.0 - self.discount / 100.0)
-            return excluded * privilege.discount_amount / 100.0
-        included = self.price_total / (1.0 - self.discount / 100.0)
-        return included * privilege.discount_amount / 100.0
+            return gross_price_subtotal * (privilege.discount_amount / 100.0)
+        return gross_price_total * (privilege.discount_amount / 100.0)

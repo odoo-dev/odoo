@@ -281,6 +281,12 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
                 },
             )
 
+    def test_privilege_copy_appends_copy_suffix(self):
+        priv_copy = self.privilege.copy()
+        self.assertEqual(priv_copy.name, "Senior Citizen (copy)")
+        self.assertEqual(priv_copy.discount_amount, self.privilege.discount_amount)
+        self.assertEqual(priv_copy.account_id, self.privilege.account_id)
+
     def test_privilege_archive_in_use(self):
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
