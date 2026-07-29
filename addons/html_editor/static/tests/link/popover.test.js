@@ -1677,6 +1677,18 @@ describe("upload file via link popover", () => {
         expect(favIcon).toHaveAttribute("data-mimetype", "text/plain");
     });
 
+    test("popover in preview mode should not crash when attachment was deleted", async () => {
+        onRpc("ir.attachment", "read", () => []);
+        await setupEditor('<p><a href="/web/content/1?download=true&unique=123">file.txt[]</a></p>', {
+            config: { allowTargetBlank: true },
+        });
+        await waitFor(".o-we-linkpopover");
+        expect(".o_we_url_link").toHaveText("file.txt");
+        await click(".o_we_edit_link");
+        await waitFor(".o_we_href_input_link");
+        expect(".direct-download-option").toHaveCount(0);
+    });
+
     test("should not insert attachment as link if popover is discarded during file upload", async () => {
         const patchUpload = (editor) => {
             const mockedUploadPromise = new Promise((resolve) => {
