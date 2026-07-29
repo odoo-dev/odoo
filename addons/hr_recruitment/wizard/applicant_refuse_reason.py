@@ -116,6 +116,13 @@ class ApplicantGetRefuseReason(models.TransientModel):
                     'body': rendered_values.get('body'),
                 })
 
+    @api.depends_context('is_single_applicant')
+    def _compute_can_edit_body(self):
+        """ Let any recruiter edit the body when refusing a single applicant. """
+        super()._compute_can_edit_body()
+        if self.env.context.get('is_single_applicant'):
+            self.can_edit_body = True
+
     def action_refuse_reason_apply(self):
         if self.send_mail:
             if not self.env.user.email:
@@ -165,9 +172,24 @@ class ApplicantGetRefuseReason(models.TransientModel):
         return related_original_applicants
 
     def _prepare_send_refusal_mails(self):
+        # When refusing multiple applicants, batch send emails respecting the template rendering.
+        if not self.env.context.get('is_single_applicant'):
+            for applicant in self.applicant_ids:
+                mail_values = self._prepare_mail_values(applicant)
+                applicant.message_post(**mail_values)
+            return
+        # Directly post the refusal mail in order to keep the possible edits from the recruiter.
+        email_from = self.template_id.email_from or self.env.user.email_formatted
         for applicant in self.applicant_ids:
-            mail_values = self._prepare_mail_values(applicant)
-            applicant.message_post(**mail_values)
+            applicant.message_post(
+                body=self.body or '',
+                subject=self.subject,
+                email_from=email_from,
+                author_id=self.env.user.partner_id.id,
+                scheduled_date=self.scheduled_date,
+                attachment_ids=[(4, att.id) for att in self.attachment_ids],
+                partner_ids=applicant.partner_id.ids,
+            )
 
     def _prepare_mail_values(self, applicant):
         """ Create mail specific for recipient """

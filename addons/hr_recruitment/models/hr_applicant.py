@@ -1067,17 +1067,21 @@ class HrApplicant(models.Model):
             raise UserError(_('You are not allowed to perform this action.'))
 
     def archive_applicant(self):
+        context = {
+            'default_applicant_ids': self.ids,
+            'active_test': False,
+            'hide_mail_template_management_options': True,
+        }
+        if len(self) == 1:
+            # For single applicants, we flag the context so that the recruiter can edit the body of the mail.
+            context['is_single_applicant'] = True
         return {
             'type': 'ir.actions.act_window',
             'name': _('Refuse Reason'),
             'res_model': 'applicant.get.refuse.reason',
             'view_mode': 'form',
             'target': 'new',
-            'context': {
-                'default_applicant_ids': self.ids,
-                'active_test': False,
-                'hide_mail_template_management_options': True,
-            },
+            'context': context,
             'views': [[False, 'form']]
         }
 
