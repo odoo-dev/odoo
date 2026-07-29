@@ -87,9 +87,6 @@ class AccountMoveLine(models.Model):
                     OR (t.tax_exigibility = 'on_payment' AND t.cash_basis_transition_account_id IS NOT NULL)
                     OR sign(aml.balance) = sign(lt.balance * t.amount * lt.factor_percent)
                 ) AND (
-                    COALESCE(rep_account_id, aml.account_id) = lt.account_id
-                    OR (t.tax_exigibility = 'on_payment' AND t.cash_basis_transition_account_id IS NOT NULL)
-                ) AND (
                     (t.analytic IS NOT TRUE AND use_in_tax_closing IS TRUE)
                     OR (aml.analytic_distribution IS NULL AND lt.analytic_distribution IS NULL)
                     OR aml.analytic_distribution = lt.analytic_distribution
@@ -351,14 +348,11 @@ class AccountMoveLine(models.Model):
         """ Create the tax details sub-query based on the orm domain passed as parameter.
 
         :param domain:      An orm domain on account.move.line.
-        :param fallback:    Fallback on an approximated mapping if the mapping failed.
+        :param fallback:    Kept for compatibility. The simplified query is always used.
         :return:            query as SQL object
         """
         query = self.env['account.move.line']._search(domain)
-        if not fallback:
-            return self._get_query_postprocessed_tax_details_simplified(query.from_clause, query.where_clause)
-
-        return self._get_query_tax_details(query.from_clause, query.where_clause, fallback=fallback)
+        return self._get_query_postprocessed_tax_details_simplified(query.from_clause, query.where_clause)
 
     @api.model
     def _get_extra_query_base_tax_line_mapping(self) -> SQL:
