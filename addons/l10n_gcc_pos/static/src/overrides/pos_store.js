@@ -1,12 +1,12 @@
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 
-const EXCLUDE_IF_NOT_REGISTERED = ['AE', 'SA'];
+const EXCLUDE_IF_NOT_REGISTERED = ['AE', 'SA', 'OM'];
 const GCC_COUNTRIES = ['SA', 'AE', 'BH', 'OM', 'QA', 'KW'];
 
 patch(PosStore.prototype, {
     getReceiptHeaderData(order) {
-        const country = this.company.country?.code;
+        const country = this.company.country_id?.code;
         const use_gcc_report =
             GCC_COUNTRIES.includes(country) &&
             (this.company.vat || !EXCLUDE_IF_NOT_REGISTERED.includes(country));
@@ -14,6 +14,7 @@ patch(PosStore.prototype, {
             ...super.getReceiptHeaderData(...arguments),
             gcc_cashier: order?.getCashierName() || this.get_cashier()?.name,
             show_title: Boolean(order),
+            is_settlement: order?.is_settlement(),
             use_gcc_report,
         };
     },

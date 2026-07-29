@@ -21,6 +21,7 @@ Activates:
     'data': [
         'data/res.country.state.csv',
         'data/tax_report.xml',
+        'views/report_invoice.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
