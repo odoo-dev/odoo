@@ -1,0 +1,33 @@
+{
+    "snippet": "s_company_team",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-5 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short supporting sentence"}
+    },
+    "repeats": {
+        "members": {
+            "path": "div[data-name=\"Team Member\"]",
+            "min": 2,
+            "max": 6,
+            "slots": {
+                "name": {"kind": "text", "path": "h3", "hint": "Person's full name, 2-3 words"},
+                "role": {"kind": "text", "path": "p.text-muted", "hint": "Job title, 2-4 words"},
+                "biography": {"kind": "text", "path": "p:last-child", "hint": "Short bio, 2-3 sentences"}
+            },
+            "images": {
+                "portrait": {"kind": "img", "path": "img.rounded-circle", "hint": "Square headshot portrait of the person"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

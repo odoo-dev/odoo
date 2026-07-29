@@ -1,0 +1,31 @@
+{
+    "snippet": "s_cards_grid",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section heading, 3-6 words"}
+    },
+    "repeats": {
+        "cards": {
+            "path": ".row > div",
+            "min": 2,
+            "max": 6,
+            "slots": {
+                "title": {"kind": "text", "path": "h3.card-title", "hint": "Card title, 2-4 words"},
+                "text": {"kind": "text", "path": "p.card-text", "hint": "One or two sentences"}
+            },
+            "images": {
+                "image": {"kind": "img", "path": "img.o_card_img", "hint": "Square photo shown on the left edge of the card"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "snippet": "s_framed_intro",
+    "content": {
+        "title": {"kind": "text", "path": "h1", "hint": "Main headline, 4-8 words, split over a few short lines"},
+        "text": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One or two supporting sentences"},
+        "button": {"kind": "button", "path": "a.btn-primary", "optional": true, "hint": "Call-to-action label, 1-3 words"}
+    },
+    "repeats": {},
+    "images": {
+        "image": {"kind": "img", "path": "img", "hint": "Portrait photo displayed inside a colored frame on the right"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

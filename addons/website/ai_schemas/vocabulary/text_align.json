@@ -1,0 +1,13 @@
+{
+    "name": "text_align",
+    "notes": "Horizontal text alignment of the section content. Only set it to override the snippet's designed alignment; 'default' keeps the snippet as designed.",
+    "apply": {
+        "mechanism": "class",
+        "remove_pattern": "^text-(center|end|start)$"
+    },
+    "entries": [
+        {"value": "default", "classes": [], "desc": "Keep the snippet's designed alignment"},
+        {"value": "text-center", "desc": "Center the text"},
+        {"value": "text-end", "desc": "Align the text to the end (right in LTR)"}
+    ]
+}

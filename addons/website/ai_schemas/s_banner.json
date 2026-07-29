@@ -1,0 +1,27 @@
+{
+    "snippet": "s_banner",
+    "content": {
+        "title": {"kind": "text", "path": "h1", "hint": "Main headline, 3-8 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One or two supporting sentences"},
+        "button": {"kind": "button", "path": "a.btn-primary", "optional": true, "hint": "Primary call-to-action label, 1-4 words"},
+        "quote": {"kind": "text", "path": "p.s_blockquote_quote", "optional": true, "hint": "Short customer testimonial, one or two sentences"},
+        "quote_author": {"kind": "text", "path": ".s_blockquote_author strong", "optional": true, "hint": "Testimonial author name"},
+        "quote_role": {"kind": "text", "path": ".s_blockquote_author span span", "optional": true, "hint": "Author role or company, 2-5 words"}
+    },
+    "repeats": {},
+    "images": {
+        "image": {"kind": "img", "path": ".g-col-lg-4 img", "hint": "Main portrait photo on the right, tall"},
+        "secondary_image": {"kind": "img", "path": ".g-col-lg-2 img", "hint": "Smaller square accent photo overlapping the main one"},
+        "avatar": {"kind": "img", "path": "img.s_blockquote_avatar", "optional": true, "hint": "Small square portrait of the testimonial author"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

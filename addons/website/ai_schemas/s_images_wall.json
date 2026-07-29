@@ -1,0 +1,23 @@
+{
+    "snippet": "s_images_wall",
+    "content": {},
+    "repeats": {},
+    "images": {
+        "image_1": {"kind": "img", "path": "[data-index=\"0\"]", "hint": "Photo, top of the first column"},
+        "image_2": {"kind": "img", "path": "[data-index=\"1\"]", "hint": "Photo, top of the second column"},
+        "image_3": {"kind": "img", "path": "[data-index=\"2\"]", "hint": "Photo, top of the third column"},
+        "image_4": {"kind": "img", "path": "[data-index=\"3\"]", "hint": "Photo, bottom of the first column"},
+        "image_5": {"kind": "img", "path": "[data-index=\"4\"]", "hint": "Photo, bottom of the second column"},
+        "image_6": {"kind": "img", "path": "[data-index=\"5\"]", "hint": "Photo, bottom of the third column"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

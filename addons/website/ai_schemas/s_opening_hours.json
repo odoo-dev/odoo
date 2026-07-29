@@ -1,0 +1,28 @@
+{
+    "snippet": "s_opening_hours",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Headline, 3-6 words, e.g. an invitation to get in touch"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "Contact email or short contact line"},
+        "monday": {"kind": "text", "path": ".row > div:nth-child(3) > p:nth-child(1)", "hint": "Day name and opening hours, e.g. 'Monday / 8.00am-6.00pm'"},
+        "tuesday": {"kind": "text", "path": ".row > div:nth-child(3) > p:nth-child(2)", "hint": "Day name and opening hours"},
+        "wednesday": {"kind": "text", "path": ".row > div:nth-child(3) > p:nth-child(3)", "hint": "Day name and opening hours"},
+        "thursday": {"kind": "text", "path": ".row > div:nth-child(3) > p:nth-child(4)", "hint": "Day name and opening hours"},
+        "friday": {"kind": "text", "path": ".row > div:nth-child(4) > p:nth-child(1)", "hint": "Day name and opening hours"},
+        "saturday": {"kind": "text", "path": ".row > div:nth-child(4) > p:nth-child(2)", "hint": "Day name and opening hours"},
+        "sunday": {"kind": "text", "path": ".row > div:nth-child(4) > p:nth-child(3)", "hint": "Day name and opening hours, or 'Closed'"}
+    },
+    "repeats": {},
+    "images": {
+        "background": {"kind": "bg", "path": "span.s_parallax_bg", "hint": "Full-width parallax background photo behind the hours card"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

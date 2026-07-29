@@ -44,18 +44,21 @@
             <!-- Intro group -->
             <t t-snippet="website.s_banner" string="Banner" group="intro">
                 <keywords>hero, jumbotron, headline, header, branding, intro, home, showcase, spotlight, lead, welcome, announcement, splash, top, main</keywords>
+                <description>Overlapping-grid hero: big headline, lead text and CTA on the left, two stacked photos on the right with a customer quote card layered over them. Rich, editorial opener.</description>
             </t>
             <t t-snippet="website.s_splash_intro" string="Splash Intro" group="intro">
                 <keywords>hero, splash, fullscreen, image, background, headline, header, branding, intro, home, showcase, spotlight, main, landing, presentation, top, cover, immersive, visual, impactful</keywords>
             </t>
             <t t-snippet="website.s_cover" string="Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, branding, intro, home, showcase, spotlight, main, landing, presentation, top, splash, parallax</keywords>
+                <description>Full-width hero with headline, subtitle and one call-to-action over a parallax background photo. Strong page opener.</description>
             </t>
             <t t-snippet="website.s_animated_cover" string="Animated Cover" group="intro">
                 <keywords>hero, headline, header, intro, home, landing page, animated, movement, marquee, scrolling text, avatars, social proof, background image, immersive, cover</keywords>
             </t>
             <t t-snippet="website.s_text_cover" string="Text Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, intro, home, content, description, primary, highlight, lead</keywords>
+                <description>Split cover: a padded text card (headline, lead, one CTA) on the left half, a full-height photo filling the entire right half. Clean fifty-fifty page opener.</description>
             </t>
             <t t-snippet="website.s_carousel" string="Carousel" group="intro" label="Carousel">
                 <keywords>gallery, carousel, slider, slideshow, picture, photo, image-slider, rotating, swipe, transition, media-carousel, movement</keywords>
@@ -71,9 +74,11 @@
             </t>
             <t t-snippet="website.s_motto" string="Motto" group="intro">
                 <keywords>cite, slogan, tagline, mantra, catchphrase, statements, sayings, comments, mission, citations, maxim, quotes, principle, ethos, values</keywords>
+                <description>Minimal statement section: one oversized display headline over a plain colored background with an animated decorative shape. No image, no button - pure typographic manifesto.</description>
             </t>
             <t t-snippet="website.s_hero_about" string="Hero About" group="intro">
                 <keywords>hero, headline, header, introduction, home, picture, photo, about page, company, story, history, brand, mission, statement</keywords>
+                <description>About-page opener: a full-width, multi-line statement headline followed by a full-width landscape photo underneath, with a decorative shape at the top. No CTA.</description>
             </t>
             <t t-snippet="website.s_banner_contained" string="Banner Contained" group="intro">
                 <keywords>hero, banner, picture, photo, cover, shape, background image, fullscreen, headline, intro, landing page, impactful</keywords>
@@ -83,12 +88,14 @@
             </t>
             <t t-snippet="website.s_kickoff" string="Kickoff" group="intro">
                 <keywords>picture, photo, illustration, media, visual, start, launch, commencement, initiation, opening, kick-off, kickoff, beginning, events, parallax</keywords>
+                <description>Full-bleed parallax cover: tall darkened background photo with a small kicker line and a huge display headline, plus a decorative shape at the bottom edge. Dramatic splash opener.</description>
             </t>
             <t t-snippet="website.s_closer_look" string="Closer Look" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, focus, in-depth, analysis, more, contact, detailed, mockup, explore, insight</keywords>
             </t>
             <t t-snippet="website.s_striped_top" string="Striped Top" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design</keywords>
+                <description>Two even columns under a striped top shape: landscape photo on the left, headline with lead sentence and one CTA on the right. Compact, balanced intro.</description>
             </t>
             <t t-snippet="website.s_sidegrid" string="Side grid" group="intro">
                 <keywords>grid, gallery, pictures, photos, media, text, content, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid, split, alignment</keywords>
@@ -101,9 +108,11 @@
             </t>
             <t t-snippet="website.s_framed_intro" string="Framed Intro" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead</keywords>
+                <description>Asymmetric intro: stacked headline then lead text and CTA on the left, and a portrait photo mounted inside a contrasting colored frame on the right. Gallery-like, polished look.</description>
             </t>
             <t t-snippet="website.s_empowerment" string="Empowerment" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead, CTA, promote, promotion</keywords>
+                <description>Left-heavy hero: a small pill "what's new" badge above the headline, lead text and two side-by-side CTAs, with a tall rounded portrait photo on the right. Product-launch feel.</description>
             </t>
             <t t-snippet="website.s_split_intro" string="Split Intro" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, network, relationships, interactions, connectivity, collaborations</keywords>
@@ -121,21 +130,25 @@
             <!-- Columns group -->
             <t t-snippet="website.s_three_columns" string="Columns" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes</keywords>
+                <description>Three equal columns of image-topped cards, each with a title and short text. The classic features/services row.</description>
             </t>
             <t t-snippet="website.s_services_grid" string="Services Grid" group="columns">
                 <keywords>services, features, grid, images, three columns, overview</keywords>
             </t>
             <t t-snippet="website.s_features_wall" string="Features Wall" group="columns">
                 <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, combination</keywords>
+                <description>Asymmetric magazine-style grid: a tall heading + lead column on the left, and two staggered columns on the right alternating square photos with short feature title/text blocks, over a subtle grid background shape.</description>
             </t>
             <t t-snippet="website.s_key_benefits" string="Key benefits" group="columns">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, features, exhibit, details, capabilities, attributes, promotion, headline, content, overview, spotlight</keywords>
+                <description>Three equal columns, each led by an oversized colored rank number over a thin separator, then a short benefit title and paragraph; a kicker line and large heading sit above, on a decorative connections background shape.</description>
             </t>
             <t t-snippet="website.s_freegrid" string="Free grid" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal, trendy, design, shape, geometric, engage, call to action, cta, button</keywords>
             </t>
             <t t-snippet="website.s_cards_grid" string="Cards Grid" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <description>A 2x2 grid of horizontal cards on a colored section background: each card pairs a square photo on its left edge with a title and short paragraph, under a single section heading.</description>
             </t>
             <t t-snippet="website.s_key_images" string="Key Images" group="columns">
                 <keywords>columns, gallery, pictures, photos, media, text, content, album, showcase, visuals, portfolio, arrangement, collection, visual-grid, split, alignment, added value</keywords>
@@ -148,20 +161,24 @@
             </t>
             <t t-snippet="website.s_cards_soft" string="Cards Soft" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <description>Centered heading and lead line above three borderless soft cards; each card stacks a title, a longer paragraph, then a rounded landscape photo at the bottom.</description>
             </t>
             <t t-snippet="website.s_achievements_list" string="Achievements List" group="columns">
                 <keywords>achievements, awards, recognitions, certifications, press, records, milestones, honors, two columns, list, stats, numbers, accomplishments, highlights</keywords>
             </t>
             <t t-snippet="website.s_about_bold" string="About Bold" group="columns">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <description>Editorial about block: one huge two-tone statement heading spans the page above a separator; below, an offset right column carries two paragraphs and a full-width photo, leaving the left half empty.</description>
             </t>
 
             <!-- Content group -->
             <t t-snippet="website.s_text_image" string="Text - Image" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination</keywords>
+                <description>Two-column section with heading, two paragraphs and a button on the left, and a rounded landscape photo on the right. Classic feature/benefit presentation.</description>
             </t>
             <t t-snippet="website.s_image_text" string="Image - Text" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination</keywords>
+                <description>Mirror of Text-Image: rounded landscape photo on the left, heading with paragraphs and a button on the right. Alternate with s_text_image for a zigzag rhythm.</description>
             </t>
             <t t-snippet="website.s_shape_image" string="Shape image" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned</keywords>
@@ -183,15 +200,19 @@
             </t>
             <t t-snippet="website.s_call_to_action" string="Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal</keywords>
+                <description>Slim full-width colored band: bold statement and lead line on the left, a single large primary button aligned right. Compact conversion strip, no imagery.</description>
             </t>
             <t t-snippet="website.s_cta_box" string="Box Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger</keywords>
+                <description>Call-to-action inside a large rounded card: text and button on the left, square photo filling the card's right side. The boxed inset look sets it apart from the full-width band.</description>
             </t>
             <t t-snippet="website.s_cta_centered" string="Centered Call to Action" group="content">
                 <keywords>CTA, button, call to action, offer, centered, minimal, conversion, signup, subscribe, join, card</keywords>
+                <description>Call-to-action as a full-width rounded card with headline, supporting line and button all center-aligned. Like the boxed CTA but symmetric and image-free.</description>
             </t>
             <t t-snippet="website.s_striped" string="Striped section" group="content">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design</keywords>
+                <description>Colored section with centered headline and lead line above one large centered landscape image, finished by a decorative wave shape at the bottom edge. Good for a showcase or story moment.</description>
             </t>
             <t t-snippet="website.s_cta_card" string="Card Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, items, checklists, entries, sequences, bullets, points, list, group, benefits, features, advantages</keywords>
@@ -215,6 +236,7 @@
             </t>
             <t t-snippet="website.s_numbers" string="Numbers" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary</keywords>
+                <description>Key-metrics strip: headline and intro paragraph on the left, three big statistic blocks (large figure over a short label) side by side on the right.</description>
             </t>
             <t t-snippet="website.s_numbers_boxed" string="Numbers boxed" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary</keywords>
@@ -233,9 +255,11 @@
             </t>
             <t t-snippet="website.s_big_number" string="Big number" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary, large-figures, prominent, standout</keywords>
+                <description>A single oversized gradient-colored statistic (e.g. "87%") centered on a decorative shaped background, with one short caption line beneath - pure visual emphasis on one number.</description>
             </t>
             <t t-snippet="website.s_features" string="Features" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion</keywords>
+                <description>A left-aligned heading and lead sentence above a 3-column grid of features, each column opening with a thin separator line and a small square icon over a short title and paragraph.</description>
             </t>
             <t t-snippet="website.s_manifesto" string="Manifesto" group="content">
                 <keywords>manifesto, mission, vision, values, principles, core values, core principles, numbered list, commitment, beliefs, statement</keywords>
@@ -266,15 +290,18 @@
             </t>
             <t t-snippet="website.s_media_list" string="Media List" group="content">
                 <keywords>block, blog, post, catalog, feed, items, entries, entry, collection</keywords>
+                <description>A stacked list of full-width horizontal cards on a contrasting section background; each card pairs a landscape image (1/3 width) with heading, paragraph and an arrow "read more" link.</description>
             </t>
             <t t-snippet="website.s_services_pack" string="Services Pack" group="content">
                 <keywords>services, offer, package, features, list, catalog, agency, deliverables, skills, expertise</keywords>
             </t>
             <t t-snippet="website.s_showcase" string="Showcase" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, presentation, demo, feature</keywords>
+                <description>A split layout: left half lists a heading, intro and three icon-led feature rows ending with a "see all" link; right half is one large square product image.</description>
             </t>
             <t t-snippet="website.s_comparisons" string="Comparisons" group="content">
                 <keywords>pricing, promotion, price, feature-comparison, side-by-side, evaluation, competitive, overview</keywords>
+                <description>A pricing table: heading and intro over three side-by-side plan cards, each with plan name, big price, pitch text, full-width CTA button, a check/cross feature list and a small footer note.</description>
             </t>
             <t t-snippet="website.s_comparisons_horizontal" string="Comparisons Horizontal" group="content">
                 <keywords>comparison, price, pricing, engage, call to action, cta, box, shop, table, cart, product, cost, charges, fees, tariffs, prices, expenses</keywords>
@@ -302,6 +329,7 @@
             </t>
             <t t-snippet="website.s_process_steps" string="Steps" t-forbid-sanitize="true" group="content">
                 <keywords>process, progression, guide, workflow, sequence, instructions, stages, procedure, roadmap</keywords>
+                <description>A centered heading over four equal columns linked by a horizontal connector line; each step shows a large number in a colored circle above a short title and one-line description.</description>
             </t>
             <t t-snippet="website.s_numbers_showcase" string="Numbers Showcase" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, cta, call to action, button</keywords>
@@ -321,6 +349,7 @@
             <!-- Images group -->
             <t t-snippet="website.s_picture" string="Title - Image" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, heading, headline</keywords>
+                <description>Minimal showcase: centered heading and intro sentence above one large rounded landscape image with a small muted caption beneath - a single-image spotlight.</description>
             </t>
             <!-- TODO share the keywords somehow (t-out does not work) -->
             <t t-snippet="website.s_masonry_block_default_template" string="Masonry" group="images">
@@ -352,6 +381,7 @@
             </t>
             <t t-snippet="website.s_images_wall" string="Images Wall" group="images" label="Gallery">
                 <keywords>grid, gallery, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <description>Text-free masonry wall of six rounded photos in three columns, two stacked per column with tight spacing; images open in a popup.</description>
             </t>
             <t t-snippet="website.s_image_punchy" string="Punchy Image" group="images">
                 <keywords>headline, header, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design, bold, impactful, vibrant, standout</keywords>
@@ -370,6 +400,7 @@
             </t>
             <t t-snippet="website.s_images_mosaic" string="Images Mosaic" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned, contrast</keywords>
+                <description>A 3-column mosaic on a dark colored background where the first cell holds a heading and lead text, followed by five edge-to-edge square photos each masked by a different geometric shape (diamond, circle, tear...).</description>
             </t>
             <t t-snippet="website.s_images_constellation" string="Images Constellation" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned, contrast, collage, arrangement, gallery, creative, mosaic</keywords>
@@ -381,9 +412,11 @@
             <!-- People group -->
             <t t-snippet="website.s_company_team" string="Team" group="people">
                 <keywords>organization, company, people, column, members, staffs, profiles, bios, roles, personnel, crew</keywords>
+                <description>Two-column grid of detailed team cards: circular portrait on the left, name, muted job title and a multi-sentence bio on the right, under a section heading and lead line.</description>
             </t>
             <t t-snippet="website.s_company_team_basic" string="Team Basic" group="people">
                 <keywords>organization, company, people, members, staffs, profiles, bios, roles, personnel, crew, patterned, trendy</keywords>
+                <description>Compact centered team grid, four across: large circular portrait stacked above name and muted job title only - no biography text, minimal and symmetric.</description>
             </t>
             <t t-snippet="website.s_company_team_shapes" string="Team Shapes" group="people">
                 <keywords>organization, structure, people, team, name, role, position, image, portrait, photo, employees, shapes</keywords>
@@ -402,6 +435,7 @@
             </t>
             <t t-snippet="website.s_references" string="References" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements</keywords>
+                <description>Centered logo strip: heading, lead line and a small arrow link above a single row of up to six evenly-sized partner/client logos - credibility band.</description>
             </t>
             <t t-snippet="website.s_references_lite" string="References Lite" group="people">
                 <keywords>logos, brands, clients, partners, sponsors, customers, trust, social proof, trusted by</keywords>
@@ -423,6 +457,7 @@
             </t>
             <t t-snippet="website.s_reviews_wall" string="Reviews Wall" group="people">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations</keywords>
+                <description>Wall of testimonial cards, three per row: each card is an accented blockquote with a star rating on top, quote text, and avatar with name and role at the bottom.</description>
             </t>
             <t t-snippet="website.s_quotes_carousel_compact" string="Quotes Compact" group="people" label="Carousel">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations, carousel</keywords>
@@ -431,9 +466,11 @@
             <!-- Text group -->
             <t t-snippet="website.s_title" string="Title" group="text">
                 <keywords>heading, h1, headline, header, main, top, caption, introductory, principal, key</keywords>
+                <description>Minimal one-element section: a single large centered display heading used as a standalone page/section title divider.</description>
             </t>
             <t t-snippet="website.s_text_block" string="Text" group="text">
                 <keywords>content, paragraph, article, body, description, information</keywords>
+                <description>Plain prose section: one or two full-width body paragraphs with no media or headings - pure long-form text.</description>
             </t>
             <t t-snippet="website.s_text_block_split" string="Text Split" group="text">
                 <keywords>paragraph, description, information, split, split text, split content, story, typography, two columns, minimal, narrative, editorial</keywords>
@@ -449,9 +486,11 @@
             </t>
             <t t-snippet="website.s_faq_collapse" string="FAQ Block" group="text">
                 <keywords>common answers, common questions</keywords>
+                <description>FAQ in two asymmetric columns: heading and lead intro on the left third, an interactive flush accordion of collapsible question/answer items on the right.</description>
             </t>
             <t t-snippet="website.s_faq_list" string="FAQ List" group="text">
                 <keywords>questions, answers, common answers, common questions, faq, help, support, information, knowledge, guide, troubleshooting, assistance, columns, QA</keywords>
+                <description>FAQ as a static three-per-row grid: bold question headings each with a short answer paragraph beneath - all answers visible at once, no accordion.</description>
             </t>
             <t t-snippet="website.s_table_of_content" string="Table of Content" group="text" label="Table of Contents">
                 <keywords>navigation, index, outline, chapters, sections, overview, menu, tab</keywords>
@@ -461,6 +500,7 @@
             </t>
             <t t-snippet="website.s_product_catalog" string="Pricelist" group="text">
                 <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses</keywords>
+                <description>Menu/pricelist over a soft-filtered full-bleed background photo: centered heading, then two category columns of items with dot-leader lines connecting names to right-aligned prices.</description>
             </t>
             <t t-snippet="website.s_pricelist_cafe" string="Pricelist Cafe" group="text">
                 <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses, columns</keywords>
@@ -473,12 +513,16 @@
             <t t-snippet="website.s_title_form" string="Title - Form" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
             </t>
-            <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
+            <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms">
+                <description>Parallax background photo with an overlapping solid card: bold "get in touch" headline and email on the left, weekly opening hours split into two slim day columns on the right.</description>
+            </t>
             <t t-snippet="website.s_opening_hours_alt" string="Opening Hours Alt" group="contact_and_forms"/>
             <t t-snippet="website.s_hours_and_place" string="Hours and Place" group="contact_and_forms" label="Map">
                 <keywords>store, locator, map, address, hours, opening hours, directions, location, visit us, find us, contact</keywords>
             </t>
-            <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
+            <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms">
+                <description>Split contact layout: big heading and welcome paragraph top-left, stacked icon-labelled email/phone/address blocks below it, and a large rounded photo filling the right half.</description>
+            </t>
             <t t-snippet="website.s_website_form_overlay" string="Form Overlay" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
             </t>
@@ -578,7 +622,9 @@
 
             <!-- Debug group -->
             <t t-if="debug" t-snippet="website.s_dynamic_snippet" string="Dynamic Snippet" group="debug"
-                t-image-preview="/website/static/src/img/snippets_previews/s_dynamic_snippet_preview.png"/>
+                t-image-preview="/website/static/src/img/snippets_previews/s_dynamic_snippet_preview.png">
+                <description>Automatic content feed: shows the latest records (blog posts, products, events...) from a chosen source, rendered in a chosen card layout, with a feed title and description above.</description>
+            </t>
             <t t-if="debug" t-snippet="website.s_dynamic_snippet_carousel" string="Dynamic Carousel" group="debug"
                 t-image-preview="/website/static/src/img/snippets_previews/s_dynamic_snippet_carousel_preview.png"/>
         </snippets>

@@ -1,0 +1,13 @@
+{
+    "name": "section_height",
+    "notes": "Minimum height of the section. 'auto' fits the content (default for most sections); half or full screen height suit heroes and covers. At most one full-screen section per page, always the first one.",
+    "apply": {
+        "mechanism": "class",
+        "remove_pattern": "^o_(half|full)_screen_height$"
+    },
+    "entries": [
+        {"value": "auto", "classes": [], "desc": "Fit the content"},
+        {"value": "o_half_screen_height", "desc": "At least half the screen height"},
+        {"value": "o_full_screen_height", "desc": "Full screen height, immersive opener"}
+    ]
+}

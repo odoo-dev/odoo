@@ -1,0 +1,16 @@
+{
+    "name": "color_combination",
+    "notes": "Theme color presets applied on sections. o_cc1 is the plain base background; o_cc2 a light tinted background; o_cc3 and o_cc4 stronger emphasis backgrounds; o_cc5 the boldest (often dark or saturated). Alternate combinations between adjacent sections to create rhythm; use o_cc3/o_cc4/o_cc5 sparingly, for sections that deserve emphasis (hero, call-to-action). All presets are contrast-safe by construction.",
+    "apply": {
+        "mechanism": "class",
+        "remove_pattern": "^o_cc[1-5]$",
+        "extra_classes": ["o_cc"]
+    },
+    "entries": [
+        {"value": "o_cc1", "desc": "Plain base background, the default reading surface"},
+        {"value": "o_cc2", "desc": "Light tinted background, subtle alternation with o_cc1"},
+        {"value": "o_cc3", "desc": "Medium emphasis background"},
+        {"value": "o_cc4", "desc": "Strong emphasis background"},
+        {"value": "o_cc5", "desc": "Boldest preset, often dark or saturated; heroes and CTAs"}
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "snippet": "s_process_steps",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 3-7 words"}
+    },
+    "repeats": {
+        "steps": {
+            "path": ".s_process_step",
+            "min": 2,
+            "max": 4,
+            "slots": {
+                "number": {"kind": "text", "path": ".s_process_step_number h3", "hint": "Step number, e.g. '1' (keep sequential across steps)"},
+                "title": {"kind": "text", "path": ".s_process_step_content h3", "hint": "Step name, 1-4 words"},
+                "text": {"kind": "text", "path": "p", "hint": "One short sentence describing the step"}
+            },
+            "images": {}
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

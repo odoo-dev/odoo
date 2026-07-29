@@ -1,0 +1,33 @@
+{
+    "snippet": "s_showcase",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-5 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One introductory sentence"},
+        "link": {"kind": "link", "path": "a", "optional": true, "hint": "See-all link label, 3-6 words"}
+    },
+    "repeats": {
+        "features": {
+            "path": "[data-name=\"Feature\"]",
+            "min": 2,
+            "max": 5,
+            "slots": {
+                "title": {"kind": "text", "path": "h3.s_showcase_title", "hint": "Feature name, 2-4 words"},
+                "text": {"kind": "text", "path": "p", "hint": "One or two sentences describing the feature"}
+            },
+            "images": {}
+        }
+    },
+    "images": {
+        "image": {"kind": "img", "path": "img.img-fluid", "hint": "Large square visual illustrating the product, shown beside the feature list"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

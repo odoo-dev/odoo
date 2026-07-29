@@ -1,0 +1,19 @@
+{
+    "snippet": "s_big_number",
+    "content": {
+        "number": {"kind": "text", "path": "font.text-gradient", "hint": "The big statistic itself, e.g. '87%' or '10k+', 1-4 characters"},
+        "caption": {"kind": "text", "path": "p span", "hint": "Short label explaining the number, 2-6 words"}
+    },
+    "repeats": {},
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

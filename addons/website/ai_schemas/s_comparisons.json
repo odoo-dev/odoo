@@ -1,0 +1,38 @@
+{
+    "snippet": "s_comparisons",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-5 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One introductory sentence"}
+    },
+    "repeats": {
+        "plans": {
+            "path": ".row > div",
+            "min": 2,
+            "max": 3,
+            "slots": {
+                "name": {"kind": "text", "path": "h3.card-title", "hint": "Plan name, 1-2 words"},
+                "price": {"kind": "text", "path": "strong.h2-fs", "hint": "Price, e.g. '$ 25.00'"},
+                "period": {"kind": "text", "path": "small.text-muted", "optional": true, "hint": "Billing period, e.g. '/ month'"},
+                "description": {"kind": "text", "path": "p.card-text", "hint": "One or two short sentences pitching the plan"},
+                "button": {"kind": "button", "path": "a.btn", "hint": "Call-to-action label, 1-3 words"},
+                "feature_1": {"kind": "text", "path": "ul > li:nth-child(1)", "hint": "Included/excluded feature line, 2-5 words"},
+                "feature_2": {"kind": "text", "path": "ul > li:nth-child(2)", "hint": "Included/excluded feature line, 2-5 words"},
+                "feature_3": {"kind": "text", "path": "ul > li:nth-child(3)", "hint": "Included/excluded feature line, 2-5 words"},
+                "feature_4": {"kind": "text", "path": "ul > li:nth-child(4)", "hint": "Included/excluded feature line, 2-5 words"},
+                "footer_note": {"kind": "text", "path": ".card-footer small", "optional": true, "hint": "Small reassurance line, one short sentence"}
+            },
+            "images": {}
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

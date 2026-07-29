@@ -1,0 +1,44 @@
+{
+    "snippet": "s_product_catalog",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Menu or catalog headline, 2-4 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short tagline sentence"},
+        "category_1": {"kind": "text", "path": ".row > div:first-child > h3", "hint": "First category name, 1-2 words"},
+        "category_2": {"kind": "text", "path": ".row > div:last-child > h3", "hint": "Second category name, 1-2 words"}
+    },
+    "repeats": {
+        "category_1_items": {
+            "path": ".row > div:first-child > ul > li",
+            "min": 1,
+            "max": 6,
+            "slots": {
+                "name": {"kind": "text", "path": ".s_product_catalog_dish_name", "hint": "Product or dish name, 1-3 words"},
+                "price": {"kind": "text", "path": ".s_product_catalog_dish_price", "hint": "Price with currency, e.g. $5.00"},
+                "description": {"kind": "text", "path": ".s_product_catalog_dish_description", "optional": true, "hint": "One appetizing sentence describing the item"}
+            },
+            "images": {}
+        },
+        "category_2_items": {
+            "path": ".row > div:last-child > ul > li",
+            "min": 1,
+            "max": 6,
+            "slots": {
+                "name": {"kind": "text", "path": ".s_product_catalog_dish_name", "hint": "Product or dish name, 1-3 words"},
+                "price": {"kind": "text", "path": ".s_product_catalog_dish_price", "hint": "Price with currency, e.g. $25.00"},
+                "description": {"kind": "text", "path": ".s_product_catalog_dish_description", "optional": true, "hint": "One appetizing sentence describing the item"}
+            },
+            "images": {}
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

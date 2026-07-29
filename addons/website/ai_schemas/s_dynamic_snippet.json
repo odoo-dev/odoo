@@ -1,0 +1,25 @@
+{
+    "snippet": "s_dynamic_snippet",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Feed title, 2-6 words"},
+        "description": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short sentence introducing the feed"}
+    },
+    "repeats": {},
+    "images": {},
+    "options": {
+        "core": {
+            "filter": {"vocab": "dynamic_filter:*"},
+            "template_key": {"vocab": "dynamic_template:*"},
+            "number_of_records": {
+                "mechanism": "data_attr",
+                "attribute": "data-number-of-records",
+                "values": ["2", "3", "4", "6", "8"],
+                "desc": "How many records to show. The rendering template must belong to the same model as the content source filter."
+            },
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {}
+    }
+}

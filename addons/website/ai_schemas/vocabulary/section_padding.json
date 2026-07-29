@@ -1,0 +1,9 @@
+{
+    "name": "section_padding",
+    "notes": "Vertical padding inside a section, in pixels, applied with Odoo padding classes (pt<N> for top, pb<N> for bottom). Most snippets ship with sensible padding: only set this to deliberately tighten or loosen the rhythm. Never use Bootstrap margin (m*-*) or gutter (g-*) classes for section spacing.",
+    "apply": {
+        "mechanism": "class_prefix",
+        "remove_pattern": "^{prefix}\\d+$"
+    },
+    "values": [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 96, 112, 128, 160, 192, 224, 256]
+}

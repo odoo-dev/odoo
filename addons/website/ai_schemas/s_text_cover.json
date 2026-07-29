@@ -1,0 +1,22 @@
+{
+    "snippet": "s_text_cover",
+    "content": {
+        "title": {"kind": "text", "path": "h1", "hint": "Main headline, 2-6 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One or two supporting sentences"},
+        "button": {"kind": "button", "path": "a.btn-primary", "optional": true, "hint": "Primary call-to-action label, 1-4 words"}
+    },
+    "repeats": {},
+    "images": {
+        "side_image": {"kind": "bg", "path": "div.oe_img_bg", "hint": "Large photo filling the right half of the section, portrait or landscape"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

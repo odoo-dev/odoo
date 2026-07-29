@@ -1,0 +1,20 @@
+{
+    "snippet": "s_cta_centered",
+    "content": {
+        "title": {"kind": "text", "path": "h2.card-title", "hint": "Punchy statement or social proof, one sentence"},
+        "text": {"kind": "text", "path": "p.card-text", "optional": true, "hint": "Short supporting line, one sentence"},
+        "button": {"kind": "button", "path": "a.btn-secondary", "hint": "Call-to-action label, 1-3 words"}
+    },
+    "repeats": {},
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

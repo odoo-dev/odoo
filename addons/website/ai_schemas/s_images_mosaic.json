@@ -1,0 +1,29 @@
+{
+    "snippet": "s_images_mosaic",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Heading in the first mosaic cell, 3-6 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One supporting sentence"}
+    },
+    "repeats": {
+        "images": {
+            "path": ".row > .col-6",
+            "min": 2,
+            "max": 8,
+            "slots": {},
+            "images": {
+                "image": {"kind": "img", "path": "img", "hint": "Square photo masked by a geometric shape"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

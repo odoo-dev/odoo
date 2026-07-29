@@ -1,0 +1,30 @@
+{
+    "snippet": "s_numbers",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 3-6 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One or two sentences introducing the metrics"}
+    },
+    "repeats": {
+        "numbers": {
+            "path": ".row > div.col-lg-2",
+            "min": 2,
+            "max": 3,
+            "slots": {
+                "value": {"kind": "text", "path": "span.s_number", "hint": "Short figure, e.g. 12k, 45%, 8+"},
+                "label": {"kind": "text", "path": "span.h5-fs", "hint": "What the figure measures, 1-3 words"}
+            },
+            "images": {}
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

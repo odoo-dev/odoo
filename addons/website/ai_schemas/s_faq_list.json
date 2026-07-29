@@ -1,0 +1,30 @@
+{
+    "snippet": "s_faq_list",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-4 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short introductory sentence"}
+    },
+    "repeats": {
+        "questions": {
+            "path": ".row > div",
+            "min": 2,
+            "max": 9,
+            "slots": {
+                "question": {"kind": "text", "path": "h3", "hint": "The question, one short sentence"},
+                "answer": {"kind": "text", "path": "p", "hint": "The answer, 1-2 sentences"}
+            },
+            "images": {}
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

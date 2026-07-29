@@ -1,0 +1,21 @@
+{
+    "snippet": "s_striped",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 3-7 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One supporting sentence"}
+    },
+    "repeats": {},
+    "images": {
+        "image": {"kind": "img", "path": "div.col-lg-8 img", "hint": "Large centered photo below the headline, landscape"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

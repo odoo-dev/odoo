@@ -32,6 +32,7 @@ from . import res_lang
 from . import theme_models
 from . import website_configurator_feature
 from . import website_form
+from . import website_snippet_ai_schema
 from . import website_snippet_filter
 from . import website_visitor
 from . import website_controller_page

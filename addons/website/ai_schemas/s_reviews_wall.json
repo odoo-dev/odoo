@@ -1,0 +1,33 @@
+{
+    "snippet": "s_reviews_wall",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-4 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short supporting sentence"}
+    },
+    "repeats": {
+        "reviews": {
+            "path": "div[data-name=\"Review\"]",
+            "min": 2,
+            "max": 9,
+            "slots": {
+                "quote": {"kind": "text", "path": "p.s_blockquote_quote", "hint": "Customer testimonial in quotes, 2-3 sentences"},
+                "name": {"kind": "text", "path": ".s_blockquote_author > strong", "hint": "Reviewer's full name"},
+                "role": {"kind": "text", "path": "span.text-muted", "hint": "Reviewer's job title, 2-4 words"}
+            },
+            "images": {
+                "avatar": {"kind": "img", "path": "img.s_blockquote_avatar", "hint": "Small square headshot of the reviewer"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

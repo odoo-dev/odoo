@@ -1,0 +1,22 @@
+{
+    "snippet": "s_about_bold",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Bold two-sentence statement, 10-20 words; the second sentence is rendered in a muted color"},
+        "text": {"kind": "text", "path": ".offset-lg-5 > p:first-child", "hint": "First paragraph, two or three sentences"},
+        "text_2": {"kind": "text", "path": ".offset-lg-5 > p:nth-child(2)", "optional": true, "hint": "Second paragraph, one or two sentences"}
+    },
+    "repeats": {},
+    "images": {
+        "image": {"kind": "img", "path": ".offset-lg-5 > img", "hint": "Large photo below the paragraphs, e.g. a team or portrait shot"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "snippet": "s_references",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-4 words"},
+        "subtitle": {"kind": "text", "path": "p.lead", "optional": true, "hint": "One short supporting sentence"},
+        "link": {"kind": "link", "path": "a", "optional": true, "hint": "Short call-to-action link label, e.g. to case studies"}
+    },
+    "repeats": {
+        "logos": {
+            "path": ".row > div",
+            "min": 2,
+            "max": 12,
+            "slots": {},
+            "images": {
+                "logo": {"kind": "img", "path": "img", "hint": "Partner or client logo, on transparent or white background"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

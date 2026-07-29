@@ -1,0 +1,24 @@
+{
+    "snippet": "s_contact_info",
+    "content": {
+        "title": {"kind": "text", "path": "h2", "hint": "Section headline, 2-4 words"},
+        "intro": {"kind": "text", "path": "p.lead", "optional": true, "hint": "Welcoming paragraph inviting visitors to reach out, 2-3 sentences"},
+        "email": {"kind": "link", "path": ".row > div:nth-child(2) a", "hint": "Contact email address (label and mailto link)"},
+        "phone": {"kind": "link", "path": ".row > div:nth-child(3) a", "hint": "Contact phone number (label and tel link)"},
+        "address": {"kind": "text", "path": ".row > div:nth-child(4) > p", "hint": "Street address, one line"}
+    },
+    "repeats": {},
+    "images": {
+        "photo": {"kind": "img", "path": "img", "hint": "Landscape photo of the office, storefront or team"}
+    },
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}

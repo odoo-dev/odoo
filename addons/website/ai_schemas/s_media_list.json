@@ -1,0 +1,30 @@
+{
+    "snippet": "s_media_list",
+    "content": {},
+    "repeats": {
+        "items": {
+            "path": ".s_media_list_item",
+            "min": 2,
+            "max": 5,
+            "slots": {
+                "title": {"kind": "text", "path": "h3", "hint": "Item heading, 2-5 words"},
+                "text": {"kind": "text", "path": "p", "hint": "One or two sentences about the item"},
+                "link": {"kind": "link", "path": "a", "optional": true, "hint": "Read-more link label, 2-4 words"}
+            },
+            "images": {
+                "image": {"kind": "img", "path": "img.s_media_list_img", "hint": "Landscape photo shown beside the text"}
+            }
+        }
+    },
+    "images": {},
+    "options": {
+        "core": {
+            "color_combination": {"vocab": "color_combination"},
+            "padding_top": {"vocab": "section_padding", "prefix": "pt"},
+            "padding_bottom": {"vocab": "section_padding", "prefix": "pb"}
+        },
+        "extended": {
+            "text_align": {"vocab": "text_align"}
+        }
+    }
+}
