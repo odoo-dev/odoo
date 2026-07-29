@@ -68,6 +68,7 @@ const registriesContent = new WeakMap();
  */
 let currentApp = null;
 let testEnv = {};
+let pluginConfig = {};
 
 // Registers all registries for cleanup in all tests
 beforeEach(function registerMainRegistryForCleanup() {
@@ -76,6 +77,7 @@ beforeEach(function registerMainRegistryForCleanup() {
 afterEach(function restoreMainRegistry() {
     restoreRegistry(registry);
     clearTestEnv();
+    pluginConfig = {};
 });
 
 beforeEach(() => {
@@ -107,6 +109,13 @@ export function assignDialogTestEnv(dialogData) {
             ...dialogData,
         },
     });
+}
+
+/**
+ * @param {Record<PropertyKey, any>} config
+ */
+export function assignPluginConfig(config) {
+    Object.assign(pluginConfig, config);
 }
 
 /**
@@ -208,6 +217,7 @@ export async function makeTestApp(options) {
     }
 
     const app = new TestApp({
+        config: pluginConfig,
         customDirectives,
         dev: false,
         env: Object.assign(makeEnv(), testEnv),

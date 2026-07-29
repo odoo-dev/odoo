@@ -39,6 +39,7 @@ import { globalCachedFetch } from "./_framework/module_set.hoot";
 
 export {
     assignDialogTestEnv,
+    assignPluginConfig,
     assignTestEnv,
     clearRegistry,
     clearTestEnv,
