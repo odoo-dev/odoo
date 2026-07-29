@@ -47,6 +47,7 @@ from . import mail_message
 from . import mail_template
 from . import merge_partner_automatic
 from . import res_currency
+from . import res_company
 from . import account_report
 from . import onboarding_onboarding_step
 from . import template_generic_coa

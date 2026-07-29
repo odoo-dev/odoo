@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import SQL, date_utils
 
+from dateutil.relativedelta import relativedelta
 
 class ResCurrency(models.Model):
     _inherit = 'res.currency'
@@ -130,109 +131,42 @@ class ResCurrency(models.Model):
         """ Per company, a list of {date_from, date_to, rate} intervals giving the
             average rate to apply to a P&L move dated within that interval.
         """
-        if date_from:
-            # date_from is set (for example, a bounded report column - even one whose window is crossed by a fiscal year-end,
-            #  e.g., a custom Nov-Feb range): the whole window is treated as ONE period with one average.
-            single_window = [(date_from, date_to)]
-            average = {}
-            for company in companies:
-                date2rate = historical.get(company.id)
-                if date2rate:
-                    average[company.id] = self._average_rate_intervals(date2rate, single_window, date_from, date_to)
-            return average
-
-        # date_from is empty (e.g., initial balance): split per fiscal year.
-        custom_fiscal_years = self._prefetch_custom_fiscal_years(companies)
-        boundaries_cache = self.env.cr.cache.setdefault('res_currency_fiscalyear_boundaries', {})
         average = {}
         for company in companies:
             date2rate = historical.get(company.id)
             if not date2rate:
                 continue
             window_start = min(date2rate)
-            boundaries = self._get_boundaries(company, custom_fiscal_years[company.id], window_start, date_to, boundaries_cache)
-            average[company.id] = self._average_rate_intervals(date2rate, boundaries, window_start, date_to)
+            intervals = company._get_fiscalyear_intervals(
+                fields.Date.to_date(window_start),
+                fields.Date.to_date(date_to),
+                date_from=fields.Date.to_date(date_from),
+            )
+            average[company.id] = self._get_average_rate_intervals(company, intervals)
 
         return average
 
-    @api.model
-    def _average_rate_intervals(self, date2rate, boundaries, window_start, window_end):
-        sorted_dates = sorted(d for d in date2rate if window_start <= d <= window_end)
-        intervals = []
+    def _get_average_rate_intervals(self, company, intervals):
+        rate_intervals = []
 
-        bucket_start = 0
-        nb_dates = len(sorted_dates)
-        boundary_idx = 0
+        next_rate = (rate for _comp, _rate_date, rate in self._get_raw_rates(
+            company,
+            str(intervals[0]),
+            str(intervals[-1] - relativedelta(days=1))
+        ))
 
-        while bucket_start < nb_dates:
-            while boundaries[boundary_idx][1] < sorted_dates[bucket_start]:
-                boundary_idx += 1
-            boundary_date_to = boundaries[boundary_idx][1]
-
-            bucket_end = bucket_start
-            rate_sum = 0.0
-            while bucket_end < nb_dates and sorted_dates[bucket_end] <= boundary_date_to:
-                rate_sum += date2rate[sorted_dates[bucket_end]]
-                bucket_end += 1
-
-            nb_days_in_bucket = bucket_end - bucket_start
-            intervals.append({
-                'date_from': sorted_dates[bucket_start],
-                'date_to': boundary_date_to,
-                'rate': rate_sum / nb_days_in_bucket,
+        for i in range(len(intervals) - 1):
+            date_from = intervals[i]
+            date_to = intervals[i + 1] - relativedelta(days=1) 
+            period = list(date_utils.date_range(date_from, date_to, relativedelta(days=1)))
+            avg_rate = sum(next(next_rate) for _day in period) / len(period)
+            rate_intervals.append({
+                'date_from': str(date_from),
+                'date_to': str(date_to),
+                'rate': avg_rate,
             })
-            bucket_start = bucket_end
 
-        return intervals
-
-    @api.model
-    def _get_boundaries(self, company, custom_records, window_start, window_end, boundaries_cache):
-        cache_entry = boundaries_cache.setdefault(company.id, {'min': None, 'max': None, 'boundaries': []})
-
-        def fiscalyear_covering(date_str):
-            for custom_date_from, custom_date_to in custom_records:
-                if custom_date_from <= date_str <= custom_date_to:
-                    return custom_date_from, custom_date_to
-
-            default_date_from, default_date_to = date_utils.get_fiscal_year(
-                fields.Date.to_date(date_str),
-                day=company.fiscalyear_last_day,
-                month=int(company.fiscalyear_last_month),
-            )
-            fy_date_from, fy_date_to = str(default_date_from), str(default_date_to)
-            for custom_date_from, custom_date_to in custom_records:
-                if custom_date_from <= fy_date_from <= custom_date_to:
-                    fy_date_from = fields.Date.to_string(fields.Date.to_date(custom_date_to) + timedelta(days=1))
-                if custom_date_from <= fy_date_to <= custom_date_to:
-                    fy_date_to = fields.Date.to_string(fields.Date.to_date(custom_date_from) - timedelta(days=1))
-            return fy_date_from, fy_date_to
-
-        def append_boundaries_covering(range_from, range_to):
-            date_cursor = range_from
-            while date_cursor <= range_to:
-                fy_date_from, fy_date_to = fiscalyear_covering(date_cursor)
-                if not cache_entry['boundaries'] or cache_entry['boundaries'][-1] != (fy_date_from, fy_date_to):
-                    cache_entry['boundaries'].append((fy_date_from, fy_date_to))
-                date_cursor = fields.Date.to_string(fields.Date.to_date(fy_date_to) + timedelta(days=1))
-
-        if cache_entry['min'] is None:
-            append_boundaries_covering(window_start, window_end)
-            cache_entry['min'], cache_entry['max'] = window_start, window_end
-        else:
-            if window_start < cache_entry['min']:
-                cache_entry['boundaries'] = []
-                append_boundaries_covering(window_start, cache_entry['max'])
-                cache_entry['min'] = window_start
-            if window_end > cache_entry['max']:
-                append_boundaries_covering(cache_entry['max'], window_end)
-                cache_entry['max'] = window_end
-
-        return cache_entry['boundaries']
-
-    @api.model
-    def _prefetch_custom_fiscal_years(self, companies):
-        return {company.id: [] for company in companies}
-
+        return rate_intervals
 
 class ResCurrencyRate(models.Model):
     _inherit = 'res.currency.rate'
