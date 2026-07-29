@@ -45,10 +45,10 @@ class TestValuationReconciliationCommon(TestStockValuationCommon, TestSaleStockC
         test_product = self.product_standard_auto
         self._make_in_move(test_product, 11, 13)
 
-        sale_order = self._so_deliver(test_product, quantity=1, price=66.0, picking=False, partner=self.partner_b, date_order='2108-01-01', currency=self.other_currency)
+        sale_order = self._so_deliver(test_product, quantity=1, price=66.0, picking=False, partner=self.partner_b, date_order='2108-01-01')
         self._process_pickings(sale_order.picking_ids)
 
-        self._create_invoice(test_product, quantity=1, price_unit=66.0, invoice_date='2018-02-12', currency_id=self.other_currency.id, account_id=self.account_income.id)
+        self._create_invoice(test_product, quantity=1, price_unit=66.0, invoice_date='2018-02-12', account_id=self.account_income.id)
 
         amls = self.env['account.move.line'].search([('product_id', '=', test_product.id)])
         self.assertRecordValues(amls, [
@@ -66,9 +66,9 @@ class TestValuationReconciliationCommon(TestStockValuationCommon, TestSaleStockC
         self.product_standard_auto.standard_price = 13
         self._make_in_move(test_product, 11, 13)
 
-        sale_order = self._so_deliver(test_product, quantity=1, price=66.0, picking=False, partner=self.partner_b, date_order='2018-01-01', currency=self.other_currency)
+        sale_order = self._so_deliver(test_product, quantity=1, price=66.0, picking=False, partner=self.partner_b, date_order='2018-01-01')
 
-        invoice = self._create_invoice(test_product, quantity=1, price_unit=66.0, invoice_date='2018-02-03', currency_id=self.other_currency.id, account_id=self.account_income.id)
+        invoice = self._create_invoice(test_product, quantity=1, price_unit=66.0, invoice_date='2018-02-03', account_id=self.account_income.id)
 
         self._process_pickings(sale_order.picking_ids)
 
@@ -105,12 +105,12 @@ class TestValuationReconciliationCommon(TestStockValuationCommon, TestSaleStockC
         test_product = self.product_standard_auto
         self._make_in_move(test_product, 11, 13)
 
-        sale_order = self._so_deliver(test_product, quantity=5, price=66.0, picking=False, partner=self.partner_b, date_order='2018-01-01', currency=self.other_currency)
+        sale_order = self._so_deliver(test_product, quantity=5, price=66.0, picking=False, partner=self.partner_b, date_order='2018-01-01')
 
         self._process_pickings(sale_order.picking_ids, quantity=2.0)
 
-        self._create_invoice(test_product, quantity=3, price_unit=66.0, invoice_date='2018-02-03', currency_id=self.other_currency.id, account_id=self.account_income.id)
-        self._create_invoice(test_product, quantity=2, price_unit=66.0, invoice_date='2018-03-12', currency_id=self.other_currency.id, account_id=self.account_income.id)
+        self._create_invoice(test_product, quantity=3, price_unit=66.0, invoice_date='2018-02-03', account_id=self.account_income.id)
+        self._create_invoice(test_product, quantity=2, price_unit=66.0, invoice_date='2018-03-12', account_id=self.account_income.id)
 
         self._process_pickings(sale_order.picking_ids.filtered(lambda x: x.state != 'done'), quantity=3.0)
 

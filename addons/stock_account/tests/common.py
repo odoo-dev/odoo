@@ -5,10 +5,10 @@ from dateutil.relativedelta import relativedelta
 from odoo import Command, fields
 from odoo.tools.misc import clean_context
 from odoo.tests import Form
-from odoo.addons.base.tests.common import BaseCommon
+from odoo.addons.stock.tests.common import TestStockCommon
 
 
-class TestStockValuationCommon(BaseCommon):
+class TestStockValuationCommon(TestStockCommon):
     # Override
     @classmethod
     def _create_company(cls, **create_values):
