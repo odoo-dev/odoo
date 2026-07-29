@@ -84,6 +84,10 @@ class WebclientController(ThreadController):
                     lambda res: self._store_init_messaging_global_fields(res, bus_last_id),
                 )
         if name == "mail.thread":
+            if not isinstance(request.env[params['thread_model']], request.env.registry['mail.thread']):
+                thread = request.env[params["thread_model"]].browse(params["thread_id"])
+                store.add(thread, self._store_thread_info, as_thread=True)
+                return
             thread = self._get_thread_with_access(
                 params["thread_model"],
                 params["thread_id"],
@@ -145,6 +149,10 @@ class WebclientController(ThreadController):
             store.add(valid.mail_message_id, "_store_notification_fields")
         if name == "/mail/thread/messages":
             request.update_context(add_chatter_fields=True)
+            if not isinstance(request.env[params['thread_model']], request.env.registry['mail.thread']):
+                thread = request.env[params["thread_model"]].browse(params["thread_id"])
+                store.add(thread, self._store_thread_info, as_thread=True)
+                return
             if thread := self._get_thread_with_access(
                 params["thread_model"],
                 params["thread_id"],
@@ -157,6 +165,13 @@ class WebclientController(ThreadController):
                 )
                 if not request.env.user._is_public():
                     messages.set_message_done()
+
+    @staticmethod
+    def _store_thread_info(res):
+        res.attr(
+            "has_mail_thread",
+            lambda t: isinstance(t, request.env.registry["mail.thread"]),
+        )
 
     @classmethod
     def _process_request_for_internal_user(self, store: Store, name, params):
