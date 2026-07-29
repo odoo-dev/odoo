@@ -320,9 +320,12 @@ class App extends owl.App {
         const env = config.env ?? {};
         if (config.plugins) {
             if (config.plugins instanceof owl.Resource) {
-                config.plugins.add(EnvPlugin);
+                const plugins = config.plugins.items;
+                config.plugins = {
+                    items: owl.computed(() => [EnvPlugin].concat(...plugins())),
+                };
             } else {
-                config.plugins.push(EnvPlugin);
+                config.plugins = [EnvPlugin, ...config.plugins];
             }
         } else {
             config.plugins = [EnvPlugin];
