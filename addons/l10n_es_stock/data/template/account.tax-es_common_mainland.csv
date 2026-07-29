@@ -1,2 +1,2 @@
-"id","name","l10n_es_applicability"
-"account_tax_template_rebu","REBU","01"
+"id","name","l10n_es_applicability","l10n_es_is_rebu_tax"
+"account_tax_template_rebu","REBU","01","True"

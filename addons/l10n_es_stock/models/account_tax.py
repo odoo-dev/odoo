@@ -1,13 +1,14 @@
-from odoo import models
+from odoo import fields, models
 
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
+    l10n_es_is_rebu_tax = fields.Boolean()
+
     def _prepare_base_line_for_taxes_computation(self, record, **kwargs):
         base_line = super()._prepare_base_line_for_taxes_computation(record, **kwargs)
-        rebu_tax = self.env.ref('account.2_account_tax_template_rebu')
-        if rebu_tax in base_line['tax_ids']:
+        if record is not None and any(tax.l10n_es_is_rebu_tax for tax in base_line['tax_ids']):
             def load(field, fallback):
                 return self._get_base_line_field_value_from_record(record, field, kwargs, fallback)
             purchase_price = load('purchase_price', 0.0) if 'purchase_price' in record._fields else 0.0
@@ -16,9 +17,8 @@ class AccountTax(models.Model):
         return base_line
 
     def _add_tax_details_in_base_line(self, base_line, company, rounding_method=None):
-        rebu_tax = self.env.ref('account.2_account_tax_template_rebu')
 
-        if not (rebu_tax in base_line['tax_ids'] and base_line.get('purchase_price')):
+        if not (any(tax.l10n_es_is_rebu_tax for tax in base_line['tax_ids']) and base_line.get('purchase_price')):
             return super()._add_tax_details_in_base_line(base_line, company, rounding_method=rounding_method)
 
         rounding_method = rounding_method or company.tax_calculation_rounding_method
