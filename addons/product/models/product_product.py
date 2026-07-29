@@ -7,6 +7,7 @@ from collections import defaultdict
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
+from odoo.modules.db import FunctionStatus
 from odoo.tools import float_compare, groupby, OrderedSet
 from odoo.tools.image import is_image_size_above
 from odoo.tools.misc import unique
@@ -123,6 +124,18 @@ class ProductProduct(models.Model):
     is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
     is_in_selected_section_of_order = fields.Boolean(search='_search_is_in_selected_section_of_order')
+
+    _default_code_gin_idx = models.Index(
+        lambda registry: (
+            "USING GIN(unaccent(default_code) gin_trgm_ops)"
+            if registry.has_trigram and registry.has_unaccent == FunctionStatus.INDEXABLE
+            else (
+                "USING GIN(default_code gin_trgm_ops)"
+                if registry.has_trigram
+                else ""
+            )
+        )
+    )
 
     @api.depends('image_variant_1920', 'image_variant_1024')
     def _compute_can_image_variant_1024_be_zoomed(self):
