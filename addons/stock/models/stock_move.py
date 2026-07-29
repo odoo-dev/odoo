@@ -90,6 +90,7 @@ class StockMove(models.Model):
         bypass_search_access=True, index=True, check_company=True)
     location_usage = fields.Selection(string="Source Location Type", related='location_id.usage')
     location_dest_usage = fields.Selection(string="Destination Location Type", related='location_dest_id.usage')
+    is_intercompany_delivery = fields.Boolean("Is Intercompany Delivery", compute='_compute_is_intercompany_delivery', search='_search_is_intercompany_delivery')
     partner_id = fields.Many2one(
         'res.partner', 'Destination Address ',
         help="Optional address where goods are to be delivered, specifically used for allotment",
@@ -263,6 +264,25 @@ class StockMove(models.Model):
                 # - The location dest is an out location (i.e. Customers) but the final dest is different (e.g. Inter-Company transfers)
                 location_dest = move.forecasted_location_id
             move.location_dest_id = location_dest
+
+    @api.depends('location_dest_id')
+    def _compute_is_intercompany_delivery(self):
+        intercompany_transit_loc = self.env.ref('stock.stock_location_inter_company', False)
+        if not intercompany_transit_loc:
+            self.is_intercompany_delivery = False
+        else:
+            interco_dest_moves = self.filtered(lambda m: m.location_dest_id == intercompany_transit_loc)
+            interco_dest_moves.is_intercompany_delivery = True
+            (self - interco_dest_moves).is_intercompany_delivery = False
+
+    @api.model
+    def _search_is_intercompany_delivery(self, operator, value):
+        intercompany_transit_loc = self.env.ref('stock.stock_location_inter_company', False)
+        if not intercompany_transit_loc:
+            return [('id', '=', False)]
+        if operator not in ('in', 'not in'):
+            return NotImplemented
+        return [('location_dest_id', operator, [intercompany_transit_loc.id])]
 
     @api.depends('quantity', 'uom_id')
     def _compute_quantity_product_uom(self):
