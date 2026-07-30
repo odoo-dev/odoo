@@ -49,6 +49,25 @@ class ResPartner(models.Model):
         l10n_sa_commercial_partners.is_company = True
         super(ResPartner, self - l10n_sa_commercial_partners)._compute_is_company()
 
+    @api.model
+    def _l10n_sa_get_identification_schemes(self):
+        """ Return the ZATCA identification schemes as `(scheme, label)` pairs, sorted by sequence.
+
+        A scheme is an `SA_` identifier key without its prefix: that is what ZATCA expects as
+        `schemeID`, and what is stored in `l10n_sa_edi_additional_identification_scheme`.
+        """
+        metadata = self._get_all_additional_identifiers_metadata()
+        sa_metadata = sorted(
+            ((key, vals) for key, vals in metadata.items() if key.startswith('SA_')),
+            key=lambda item: (item[1].get('sequence', 100), item[0]),
+        )
+        schemes = []
+        for key, vals in sa_metadata:
+            scheme = key.removeprefix('SA_')
+            label = vals.get('label')
+            schemes.append((scheme, label or scheme))
+        return schemes
+
     @api.depends('additional_identifiers')
     def _compute_l10n_sa_edi_additional_identification_fields(self):
         for partner in self:
@@ -66,6 +85,21 @@ class ResPartner(models.Model):
         for partner in self:
             scheme = partner.l10n_sa_edi_additional_identification_scheme
             number = partner.l10n_sa_edi_additional_identification_number
+            if scheme == 'TIN' and not number:
+                # The TIN is not asked for on the form: it is the VAT number
+                number = partner.vat
+            # ZATCA expects a single additional identifier, and the compute returns the first one it
+            # finds: the previously selected scheme has to go, or it would win over the new one.
+            identifiers = partner.additional_identifiers or {}
+            selected_key = f'SA_{scheme}' if scheme else None
+            replaced = {
+                key for key in identifiers
+                if key.startswith('SA_') and key != selected_key
+            }
+            if replaced:
+                partner.additional_identifiers = {
+                    key: value for key, value in identifiers.items() if key not in replaced
+                }
             if scheme:
                 partner._set_additional_identifier(f'SA_{scheme}', number or False)
 

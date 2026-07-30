@@ -16,7 +16,7 @@ class L10nSAPortalAccount(PortalAccount):
         # EXTENDS portal
         rendering_values = super()._prepare_address_form_values(partner_sudo, *args, **kwargs)
         if self._is_sa_company():
-            rendering_values['identification_schemes'] = dict(request.env['res.partner']._fields['l10n_sa_edi_additional_identification_scheme']._description_selection(request.env)).items()
+            rendering_values['identification_schemes'] = request.env['res.partner']._l10n_sa_get_identification_schemes()
 
         return rendering_values
 
