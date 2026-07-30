@@ -213,7 +213,6 @@ export function useThrottleForAnimation(func) {
     return throttledForAnimation;
 }
 
-
 /**
  * Hook that animates a progress value from 0 to 1 over a given duration.
  * The animation starts immediately and is automatically stopped when the
@@ -227,34 +226,51 @@ export function useThrottleForAnimation(func) {
  */
 export function useTimer(duration) {
     const progress = signal(0);
+
+    let isRunning = false;
     let start = Date.now();
     let rId = null;
 
     const animate = () => {
-        rId = requestAnimationFrame(() => {
-            const elapsed = Date.now() - start;
-            progress.set(clamp(elapsed / duration, 0, 1));
-            if (elapsed < duration) {
-                animate();
-            }
-        });
-    }
+        if (!isRunning) {
+            return;
+        }
 
-    const stop = () => cancelAnimationFrame(rId);
+        const elapsed = Date.now() - start;
+        progress.set(clamp(elapsed / duration, 0, 1));
+
+        if (elapsed < duration && isRunning) {
+            rId = requestAnimationFrame(animate);
+        } else {
+            rId = null;
+            isRunning = false;
+        }
+    };
+
+    const stop = () => {
+        isRunning = false;
+        if (rId !== null) {
+            cancelAnimationFrame(rId);
+            rId = null;
+        }
+    };
 
     const reset = () => {
-        stop()
+        stop();
         start = Date.now();
-        animate();
-    }
+        isRunning = true;
+        rId = requestAnimationFrame(animate);
+    };
 
     const resume = () => {
         stop();
-        start = Date.now() - (progress() * duration);
-        animate();
-    }
+        start = Date.now() - progress() * duration;
+        isRunning = true;
+        rId = requestAnimationFrame(animate);
+    };
 
-    animate();
+    isRunning = true;
+    rId = requestAnimationFrame(animate);
 
     onWillDestroy(stop);
 
