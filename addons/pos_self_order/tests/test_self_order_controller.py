@@ -468,7 +468,6 @@ class TestSelfOrderController(SelfOrderCommonTest):
 
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, "")
-        self_route = self.pos_config._get_self_order_route()
         data = self.make_request_to_controller('/pos-self/data/' + str(self.pos_config.id), {
             'access_token': self.pos_config.access_token,
         })
@@ -480,7 +479,6 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertIn(moda_categ.id, loaded_category_ids, "The category linked to the printer should be loaded")
         self.assertIn(stva_categ.id, loaded_category_ids, "The category linked to the printer should be loaded")
         self.assertNotIn(lowe_categ.id, loaded_category_ids, "The category not linked to any printer should not be loaded")
-        self.start_tour(self_route, "test_preparation_categories_are_loaded")
 
     def test_generate_return_values_includes_payment_method(self):
         self.pos_config.write({

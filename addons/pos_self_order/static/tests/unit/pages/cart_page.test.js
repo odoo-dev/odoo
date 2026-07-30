@@ -323,7 +323,7 @@ test("payButton", async () => {
 });
 
 test("OrderWidget renders back and pay buttons in the DOM", async () => {
-    const store = await setupSelfPosEnv();
+    const store = await setupSelfPosEnv("kiosk", "each", "counter", {}, true);
     await getFilledSelfOrder(store);
     store.hasPaymentMethod = () => true;
     await mountWithCleanup(CartPage, {});
