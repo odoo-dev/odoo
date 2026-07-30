@@ -4,6 +4,7 @@ import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { Component, proxy, signal } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -25,6 +26,7 @@ export class AddToBoard extends Component {
     static components = { Dropdown };
     static props = {};
 
+    searchModel = useSearchModel();
     autofocusRef = signal.ref();
 
     setup() {
@@ -39,8 +41,8 @@ export class AddToBoard extends Component {
     //---------------------------------------------------------------------
 
     async addToBoard() {
-        const { domain, globalContext } = this.env.searchModel;
-        const { context, groupBys, orderBy } = this.env.searchModel.getPreFavoriteValues();
+        const { domain, globalContext } = this.searchModel;
+        const { context, groupBys, orderBy } = this.searchModel.getPreFavoriteValues();
         const contextToSave = {
             ...Object.fromEntries(
                 Object.entries(globalContext).filter(

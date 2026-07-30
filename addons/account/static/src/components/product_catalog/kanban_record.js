@@ -2,14 +2,16 @@ import { useSubEnv } from "@web/owl2/utils";
 import { ProductCatalogKanbanRecord } from "@product/product_catalog/kanban_record";
 import { ProductCatalogAccountMoveLine } from "./account_move_line";
 import { patch } from "@web/core/utils/patch";
+import { useSearchModel } from "@web/search/search_model";
 
 patch(ProductCatalogKanbanRecord.prototype, {
     setup() {
         super.setup();
+        this.searchModel = useSearchModel();
 
         useSubEnv({
             ...this.env,
-            selectedSectionId: this.env.searchModel.selectedSection.sectionId,
+            selectedSectionId: this.searchModel.selectedSection.sectionId,
         });
     },
 
@@ -23,7 +25,7 @@ patch(ProductCatalogKanbanRecord.prototype, {
     _getUpdateQuantityAndGetPriceParams() {
         return {
             ...super._getUpdateQuantityAndGetPriceParams(),
-            section_id: this.env.selectedSectionId ?? this.env.searchModel.selectedSection.sectionId,
+            section_id: this.env.selectedSectionId ?? this.searchModel.selectedSection.sectionId,
         };
     },
 
@@ -44,7 +46,7 @@ patch(ProductCatalogKanbanRecord.prototype, {
     },
 
     notifyLineCountChange(lineCountChange) {
-        this.env.searchModel.trigger('section-line-count-change', {
+        this.searchModel.trigger('section-line-count-change', {
             sectionId: this.env.selectedSectionId,
             lineCountChange: lineCountChange,
         });

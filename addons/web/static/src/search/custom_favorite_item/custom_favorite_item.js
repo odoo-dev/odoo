@@ -1,10 +1,10 @@
-import { _t } from "@web/core/l10n/translation";
-import { AccordionItem } from "@web/core/dropdown/accordion_item";
+import { Component, proxy, signal } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { AccordionItem } from "@web/core/dropdown/accordion_item";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-
-import { Component, proxy, signal } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -13,6 +13,8 @@ export const customFavoriteItemProps = {};
 export class CustomFavoriteItem extends Component {
     static template = "web.CustomFavoriteItem";
     static components = { CheckBox, AccordionItem };
+
+    searchModel = useSearchModel();
 
     descriptionRef = signal.ref();
 
@@ -39,7 +41,7 @@ export class CustomFavoriteItem extends Component {
         }
         const { description, isDefault } = this.state;
         const embeddedActionId = this.env.config.currentEmbeddedActionId || false;
-        const serverSideId = await this.env.searchModel.createNewFavorite({
+        const serverSideId = await this.searchModel.createNewFavorite({
             description,
             isDefault,
             isShared,

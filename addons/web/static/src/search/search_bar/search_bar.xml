@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.SearchBar.Facets">
-        <t t-foreach="this.env.searchModel.facets" t-as="facet" t-key="facet_index">
+        <t t-foreach="this.searchModel.facets" t-as="facet" t-key="facet_index">
             <div class="o_searchview_facet position-relative d-inline-flex align-items-stretch rounded-2 bg-200 text-nowrap opacity-trigger-hover mw-100"
                 t-att-class="{o_facet_with_domain: facet.domain }"
                 role="listitem"
@@ -22,7 +22,7 @@
                         'btn btn-favourite': facet.type == 'favorite'
                     }"
                     >
-                    <i t-if="facet.icon" class="oi oi-fw oi-filled small" t-att-class="{'oi-flip-vertical': facet.type == 'groupBy' and this.env.searchModel.orderByCount === 'Asc'}" t-att-data-icon="facet.icon" role="image"/>
+                    <i t-if="facet.icon" class="oi oi-fw oi-filled small" t-att-class="{'oi-flip-vertical': facet.type == 'groupBy' and this.searchModel.orderByCount === 'Asc'}" t-att-data-icon="facet.icon" role="image"/>
                     <small t-else="" class="px-1" t-out="facet.title"/>
 
                     <!-- Editable facets' overlay -->

@@ -10,6 +10,7 @@ import { user } from "@web/core/user";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ErrorDialog } from "@web/core/errors/error_dialogs";
 import { PromoteMailPluginsDialog } from "@crm/components/promote_mail_plugins_dialog/promote_mail_plugins_dialog";
+import { useSearchModel } from "@web/search/search_model";
 
 export const MODULE_STATUS = {
     NOT_INSTALLED: "NOT_INSTALLED",
@@ -22,6 +23,8 @@ export class LeadGenerationDropdown extends Component {
     static template = "crm.lead_generation_dropdown";
     static props = {};
     static components = { Dropdown, DropdownItem };
+
+    searchModel = useSearchModel();
 
     setup() {
         this.orm = useService("orm");
@@ -238,7 +241,7 @@ export class LeadGenerationDropdown extends Component {
     }
 
     redirectToImport() {
-        const { context, resModel } = this.env.searchModel;
+        const { context, resModel } = this.searchModel;
         this.action.doAction({
             type: "ir.actions.client",
             tag: "import",

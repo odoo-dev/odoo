@@ -1,17 +1,17 @@
-import { useLayoutEffect } from "@web/owl2/utils";
-import { _t } from "@web/core/l10n/translation";
+import { Component, onMounted, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { Pager } from "@web/core/pager/pager";
-import { useService } from "@web/core/utils/hooks";
-import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useCommand } from "@web/core/commands/command_hook";
+import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
-import { Breadcrumbs } from "../breadcrumbs/breadcrumbs";
-
-import { Component, onMounted, plugin, proxy, signal, t, useProps } from "@odoo/owl";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
+import { _t } from "@web/core/l10n/translation";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { Pager } from "@web/core/pager/pager";
+import { useService } from "@web/core/utils/hooks";
+import { useLayoutEffect } from "@web/owl2/utils";
+import { useOptionalSearchModel } from "@web/search/search_model";
+import { Breadcrumbs } from "../breadcrumbs/breadcrumbs";
 import { EmbeddedActionsPanel, useEmbeddedActions } from "./embedded_actions";
 
 const STICKY_CLASS = "o_mobile_sticky";
@@ -29,6 +29,9 @@ export class ControlPanel extends Component {
         Breadcrumbs,
         EmbeddedActionsPanel,
     };
+
+    searchModel = useOptionalSearchModel();
+
     props = useProps({
         display: t.object().optional(DEFAULT_DISPLAY),
     });
@@ -38,7 +41,7 @@ export class ControlPanel extends Component {
     setup() {
         this.embeddedPanelState = useEmbeddedActions();
         this.actionService = useService("action");
-        this.offlinePlugin = plugin(OfflinePlugin);
+        this.offlinePlugin = usePlugin(OfflinePlugin);
         this.uiService = useService("ui");
         this.pagerProps = this.env.config.pagerProps
             ? proxy(this.env.config.pagerProps)
@@ -172,7 +175,7 @@ export class ControlPanel extends Component {
     onMainButtonsKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey === "arrowdown") {
-            this.env.searchModel.trigger("focus-view");
+            this.searchModel.trigger("focus-view");
             ev.preventDefault();
             ev.stopPropagation();
         }

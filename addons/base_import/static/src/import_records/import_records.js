@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -18,6 +19,8 @@ export class ImportRecords extends Component {
     static components = { DropdownItem };
     static props = {};
 
+    searchModel = useSearchModel();
+
     setup() {
         this.action = useService("action");
     }
@@ -27,7 +30,7 @@ export class ImportRecords extends Component {
     //---------------------------------------------------------------------
 
     importRecords() {
-        const { context, resModel } = this.env.searchModel;
+        const { context, resModel } = this.searchModel;
         this.action.doAction({
             type: "ir.actions.client",
             tag: "import",

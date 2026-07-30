@@ -1,9 +1,9 @@
+import { AccountFileUploader } from "@account/components/account_file_uploader/account_file_uploader";
+import { Component, proxy } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { AccountFileUploader } from "@account/components/account_file_uploader/account_file_uploader";
+import { useSearchModel } from "@web/search/search_model";
 import { DocumentFileUploader } from "../document_file_uploader/document_file_uploader";
-
-import { Component, proxy } from "@odoo/owl";
 
 export class BillGuide extends Component {
     static template = "account.BillGuide";
@@ -13,13 +13,15 @@ export class BillGuide extends Component {
     };
     static props = ["*"];  // could contain view_widget props
 
+    searchModel = useSearchModel();
+
     setup() {
         this.lazySession = useService("lazy_session");
         this.action = useService("action");
         this.ui = useService("ui");
 
         const rec = this.props.record;
-        const ctx = this.env.searchModel.context;
+        const ctx = this.searchModel.context;
         if (rec) {
             // prepare context from journal record
             this.context = {
@@ -43,7 +45,7 @@ export class BillGuide extends Component {
         this.action.doActionButton({
             resModel: model,
             name: action,
-            context: this.context || this.env.searchModel.context,
+            context: this.context || this.searchModel.context,
             type: 'object',
         });
     }
@@ -53,7 +55,7 @@ export class BillGuide extends Component {
             type: "ir.actions.act_window",
             res_model: "account.move",
             views: [[false, "form"]],
-            context: this.context || this.env.searchModel.context,
+            context: this.context || this.searchModel.context,
         });
     }
 

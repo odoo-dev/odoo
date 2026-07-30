@@ -26,7 +26,7 @@ export class LunchKanbanRenderer extends LunchRendererMixin(KanbanRenderer) {
     };
 
     getGroupsOrRecords() {
-        const { locationId } = this.env.searchModel.lunchState;
+        const { locationId } = this.searchModel.lunchState;
         if (!locationId) {
             return [];
         } else {

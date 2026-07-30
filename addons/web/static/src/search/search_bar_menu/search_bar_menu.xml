@@ -5,7 +5,7 @@
         <SearchBarDropdown menuClass="'o_search_bar_menu d-flex flex-wrap flex-lg-nowrap w-100 w-md-auto mx-md-auto mt-2 py-3'"
                 position="'bottom-end'"
                 state="this.props.dropdownState"
-                t-if="this.env.searchModel.searchMenuTypes.size"
+                t-if="this.searchModel.searchMenuTypes.size"
                 bottomSheet="false"
                 popoverWillCloseOnClickAway="this.props.popoverWillCloseOnClickAway"
             >
@@ -17,7 +17,7 @@
             </button>
             <t t-set-slot="content">
                 <!-- Filter -->
-                <t t-if="this.env.searchModel.searchMenuTypes.has('filter')">
+                <t t-if="this.searchModel.searchMenuTypes.has('filter')">
                     <div class="o_dropdown_container o_filter_menu w-100 w-lg-auto h-100 px-3 mb-4 mb-lg-0 border-end">
                         <div class="px-3 fs-5 mb-2">
                             <i class="oi oi-filled me-2 text-primary" t-att-data-icon="this.facet_icons.filter"/>
@@ -69,7 +69,7 @@
                     </div>
                 </t>
                 <!-- GroupBy -->
-                <t t-if="this.env.searchModel.searchMenuTypes.has('groupBy')">
+                <t t-if="this.searchModel.searchMenuTypes.has('groupBy')">
                     <div class="o_dropdown_container o_group_by_menu w-100 w-lg-auto h-100 px-3 mb-4 mb-lg-0 border-end">
                         <div class="px-3 fs-5 mb-2">
                             <i class="oi me-2 text-action" t-att-data-icon="this.facet_icons.groupBy"/>
@@ -119,7 +119,7 @@
                     </div>
                 </t>
                 <!-- Favorite -->
-                <t t-if="this.env.searchModel.searchMenuTypes.has('favorite')">
+                <t t-if="this.searchModel.searchMenuTypes.has('favorite')">
                     <div class="o_dropdown_container o_favorite_menu w-100 w-lg-auto h-100 px-3">
                         <t t-set="sharedFavoritesItems" t-value="this.sharedFavorites" />
                         <t t-set="favoriteItems" t-value="this.favorites" />

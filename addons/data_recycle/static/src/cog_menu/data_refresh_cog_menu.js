@@ -2,6 +2,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -9,6 +10,8 @@ export class DataRefreshCogMenu extends Component {
     static template = "data_recycle.DataRefreshCogMenu";
     static components = { DropdownItem };
     static props = {};
+
+    searchModel = useSearchModel();
 
     setup() {
         this.action = useService("action");
@@ -19,7 +22,7 @@ export class DataRefreshCogMenu extends Component {
         // ['fieldName', '=', <id>]. We extract that id from the
         // current domain and pass it in the action context so that,
         // after refresh, the same rule remains selected in seachpanel.
-        const domain = this.env.searchModel.domain;
+        const domain = this.searchModel.domain;
         return domain.find((d) => Array.isArray(d) && d[0] === fieldName && d[1] === "=")?.[2];
     }
 
@@ -38,7 +41,8 @@ export class DataRefreshCogMenu extends Component {
 
 export const DataRefreshCogMenuItem = {
     Component: DataRefreshCogMenu,
-    isDisplayed: ({ searchModel }) => {
+    isDisplayed() {
+        const searchModel = useSearchModel();
         return searchModel.resModel === "data_recycle.record";
     },
     groupNumber: 50,

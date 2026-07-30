@@ -20,6 +20,6 @@ export class StockOrderpointSearchPanel extends SearchPanel {
 
     async applyGlobalHorizonDays(ev) {
         this.globalHorizonDays.value = Math.max(parseInt(ev.target.value || 0), 0);
-        await this.env.searchModel.applyGlobalHorizonDays(this.globalHorizonDays.value);
+        await this.searchModel.applyGlobalHorizonDays(this.globalHorizonDays.value);
     }
 }

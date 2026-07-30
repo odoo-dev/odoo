@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="lunch.NoContentHelper" owl="1">
-        <t t-set="showNoLocationHelper" t-value="!this.env.searchModel.lunchState.locationId"/>
+        <t t-set="showNoLocationHelper" t-value="!this.searchModel.lunchState.locationId"/>
 
         <div t-if="showNoLocationHelper and !this.showNoContentHelper" class="o_view_nocontent" style="pointer-events: all">
             <div class="o_nocontent_help">

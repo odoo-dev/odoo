@@ -1,12 +1,13 @@
-import { onWillRender } from "@web/owl2/utils";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, plugin, proxy, signal, t, useProps } from "@odoo/owl";
-import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { fuzzyLookup } from "@web/core/utils/search";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { fuzzyLookup } from "@web/core/utils/search";
+import { onWillRender } from "@web/owl2/utils";
+import { useSearchModel } from "@web/search/search_model";
 
 const INITIAL_SEARCH_LIMIT = 8;
 
@@ -16,6 +17,9 @@ export class OfflineSearchBar extends Component {
         Dropdown,
         DropdownItem,
     };
+
+    searchModel = useSearchModel();
+
     props = useProps({
         autofocus: t.boolean().optional(),
         toggler: t.object().optional(),
@@ -55,7 +59,7 @@ export class OfflineSearchBar extends Component {
         });
 
         onWillRender(() => {
-            const currentSearch = this.env.searchModel.getCurrentSearch();
+            const currentSearch = this.searchModel.getCurrentSearch();
             this.currentSearch =
                 this.allSearches.find((search) => search.key === currentSearch.key) ||
                 currentSearch;
@@ -78,7 +82,7 @@ export class OfflineSearchBar extends Component {
 
     selectSearch(search) {
         this.state.value = search.key;
-        this.env.searchModel.applySearch(search);
+        this.searchModel.applySearch(search);
     }
 
     onBackspace() {

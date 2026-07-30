@@ -35,14 +35,14 @@ describe("SearchModel", () => {
         `,
         });
 
-        const filterId = Object.keys(component.env.searchModel.searchItems).map((key) =>
+        const filterId = Object.keys(component.searchModel.searchItems).map((key) =>
             Number(key)
         )[0];
-        component.env.searchModel.toggleDateGroupBy(filterId);
-        expect(component.env.searchModel.groupBy).toEqual(["date_order:hour"]);
-        component.env.searchModel.toggleDateGroupBy(filterId, "day");
-        expect(component.env.searchModel.groupBy).toEqual(["date_order:day", "date_order:hour"]);
-        component.env.searchModel.toggleDateGroupBy(filterId, "hour");
-        expect(component.env.searchModel.groupBy).toEqual(["date_order:day"]);
+        component.searchModel.toggleDateGroupBy(filterId);
+        expect(component.searchModel.groupBy).toEqual(["date_order:hour"]);
+        component.searchModel.toggleDateGroupBy(filterId, "day");
+        expect(component.searchModel.groupBy).toEqual(["date_order:day", "date_order:hour"]);
+        component.searchModel.toggleDateGroupBy(filterId, "hour");
+        expect(component.searchModel.groupBy).toEqual(["date_order:day"]);
     });
 });

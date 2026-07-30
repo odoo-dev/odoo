@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { Component, signal } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 
 export class ButtonNewContractWidget extends Component {
     static template = "hr.ButtonNewContract";
@@ -11,6 +12,7 @@ export class ButtonNewContractWidget extends Component {
         ...standardWidgetProps,
     };
 
+    searchModel = useSearchModel();
     datetimePickerTargetRef = signal.ref();
 
     /** @override **/
@@ -61,7 +63,7 @@ export class ButtonNewContractWidget extends Component {
         await record.save();
         await this.props.record.model.load({
             context: {
-                ...this.props.record.model.env.searchModel.context,
+                ...this.searchModel.context,
                 version_id: version_id,
             },
         });

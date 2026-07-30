@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { Component, onWillStart } from "@odoo/owl";
 import { getActionRecords, getPresenceActionItems } from "../views/hooks";
 import { useService } from "@web/core/utils/hooks";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -57,7 +58,10 @@ cogMenuRegistry.add(
     {
         Component: PresenceCogMenu,
         groupNumber: 40,
-        isDisplayed: ({ searchModel }) => { return searchModel.resModel === "hr.employee" },
+        isDisplayed() {
+            const searchModel = useSearchModel();
+            return searchModel.resModel === "hr.employee";
+        },
     },
     { sequence: 1 }
 );

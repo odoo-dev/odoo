@@ -1,17 +1,29 @@
-import { EventBus, toRaw, plugin } from "@odoo/owl";
+import {
+    EventBus,
+    plugin,
+    Plugin,
+    providePlugins,
+    t,
+    toRaw,
+    useConfig,
+    usePlugin,
+    useScope,
+} from "@odoo/owl";
+import { router } from "@web/core/browser/router";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { getDefaultDomain } from "@web/core/domain_selector/utils";
 import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { rpcBus } from "@web/core/network/rpc";
+import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
 import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
 import { deepCopy } from "@web/core/utils/objects";
-import { router } from "@web/core/browser/router";
+import { hashCode } from "@web/core/utils/strings";
 import { SearchArchParser } from "./search_arch_parser";
 import {
     constructDateDomain,
@@ -22,9 +34,7 @@ import {
     rankInterval,
     yearSelected,
 } from "./utils/dates";
-import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { FACET_COLORS, FACET_ICONS } from "./utils/misc";
-import { hashCode } from "@web/core/utils/strings";
 
 const { DateTime } = luxon;
 
@@ -2636,4 +2646,29 @@ export class SearchModel extends EventBus {
 
         this.searchPanelInfo = { ...searchPanelInfo, loaded: false, shouldReload: false };
     }
+}
+
+class SearchModelPlugin extends Plugin {
+    model = useConfig("model", t.instanceOf(SearchModel));
+}
+
+/**
+ * @returns {SearchModel}
+ */
+export function useSearchModel() {
+    return usePlugin(SearchModelPlugin).model;
+}
+
+/**
+ * @returns {SearchModel | null}
+ */
+export function useOptionalSearchModel() {
+    return useScope().pluginManager.getPlugin(SearchModelPlugin)?.model ?? null;
+}
+
+/**
+ * @returns {SearchModel | null}
+ */
+export function provideSearchModel(model) {
+    providePlugins([SearchModelPlugin], { model });
 }

@@ -1,4 +1,3 @@
-import { useLayoutEffect } from "@web/owl2/utils";
 import { Component, onPatched, onWillDestroy, proxy, signal, t, useProps } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -10,16 +9,18 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
+import { useLayoutEffect } from "@web/owl2/utils";
+import { useOptionalSearchModel } from "@web/search/search_model";
+import { ActionHelper } from "@web/views/action_helper";
 import { isNull } from "@web/views/utils";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { useBounceButton } from "@web/views/view_hook";
+import { Widget } from "@web/views/widgets/widget";
 import { KanbanColumnExamplesDialog } from "./kanban_column_examples_dialog";
 import { KanbanColumnQuickCreate } from "./kanban_column_quick_create";
 import { KanbanHeader } from "./kanban_header";
 import { KanbanRecord } from "./kanban_record";
 import { KanbanRecordQuickCreate } from "./kanban_record_quick_create";
-import { Widget } from "@web/views/widgets/widget";
-import { ActionHelper } from "@web/views/action_helper";
 
 const DRAGGABLE_GROUP_TYPES = ["many2one"];
 
@@ -68,6 +69,9 @@ export class KanbanRenderer extends Component {
         Widget,
         ActionHelper,
     };
+
+    searchModel = useOptionalSearchModel();
+
     props = useProps(kanbanRendererProps);
 
     rootRef = signal.ref();
@@ -164,8 +168,8 @@ export class KanbanRenderer extends Component {
             this.dialogClose.forEach((close) => close());
         });
 
-        if (this.env.searchModel) {
-            useBus(this.env.searchModel, "focus-view", () => {
+        if (this.searchModel) {
+            useBus(this.searchModel, "focus-view", () => {
                 const { model } = this.props.list;
                 if (model.useSampleModel || !model.hasData()) {
                     return;
@@ -220,12 +224,12 @@ export class KanbanRenderer extends Component {
         });
 
         const arrowsOptions = { area: () => this.rootRef(), allowRepeat: true };
-        if (this.env.searchModel) {
+        if (this.searchModel) {
             useHotkey(
                 "ArrowUp",
                 ({ area }) => {
                     if (!this.focusNextCard(area, "up")) {
-                        this.env.searchModel.trigger("focus-search");
+                        this.searchModel.trigger("focus-search");
                     }
                 },
                 arrowsOptions

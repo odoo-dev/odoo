@@ -4,10 +4,12 @@ import { useOwnedDialogs } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { AttendanceCalendarOverview } from "@hr_attendance/components/attendance_calendar/attendance_calendar_overview";
 import { TimeOffFormViewDialog } from "@hr_holidays/views/view_dialog/form_view_dialog";
+import { useSearchModel } from "@web/search/search_model";
 
 patch(AttendanceCalendarOverview.prototype, {
     setup() {
         super.setup();
+        this.searchModel = useSearchModel();
         this.displayDialog = useOwnedDialogs();
         this.state = proxy({
             ...this.state,
@@ -17,7 +19,7 @@ patch(AttendanceCalendarOverview.prototype, {
 
     async loadData() {
         const { start, end } = this.props.dateRange;
-        const employeeId = this.env.searchModel.context.active_id;
+        const employeeId = this.searchModel.context.active_id;
         const attendace_data = await this.orm.call(
             "hr.employee",
             "get_attendace_data_by_employee",
@@ -30,8 +32,8 @@ patch(AttendanceCalendarOverview.prototype, {
 
     newTimeOffRequest() {
         const context = {};
-        if (this.env.searchModel.context.active_id && this.env.searchModel.context.active_model === "hr.employee") {
-            context["default_employee_id"] = this.env.searchModel.context.active_id;
+        if (this.searchModel.context.active_id && this.searchModel.context.active_model === "hr.employee") {
+            context["default_employee_id"] = this.searchModel.context.active_id;
         }
         context['form_view_ref'] = "hr_holidays.hr_leave_view_form_dashboard_new_time_off";
         this.displayDialog(TimeOffFormViewDialog, {

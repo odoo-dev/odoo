@@ -4,6 +4,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { DateTimeInput } from '@web/core/datetime/datetime_input';
 import { Component, onWillStart, markup, xml, proxy } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 const { DateTime } = luxon;
 
 export class LunchCurrency extends Component {
@@ -112,6 +113,9 @@ export class LunchDashboard extends Component {
     };
     static props = ["openOrderLine"];
     static template = "lunch.LunchDashboard";
+
+    searchModel = useSearchModel();
+
     setup() {
         super.setup();
         this.uiService = useService("ui");
@@ -123,7 +127,7 @@ export class LunchDashboard extends Component {
         useBus(this.env.bus, 'lunch_update_dashboard', () => this._fetchLunchInfos());
         onWillStart(async () => {
             await this._fetchLunchInfos()
-            this.env.searchModel.updateLocationId(this.state.infos.user_location[0]);
+            this.searchModel.updateLocationId(this.state.infos.user_location[0]);
         });
     }
 
@@ -131,7 +135,7 @@ export class LunchDashboard extends Component {
         return await rpc(route, {
             ...args,
             context: user.context,
-            user_id: this.env.searchModel.lunchState.userId,
+            user_id: this.searchModel.lunchState.userId,
         })
     }
 
@@ -173,7 +177,7 @@ export class LunchDashboard extends Component {
         if (!value) {
             return;
         }
-        this.env.searchModel.updateUserId(value[0].id);
+        this.searchModel.updateUserId(value[0].id);
         await this._fetchLunchInfos();
     }
 
@@ -186,11 +190,11 @@ export class LunchDashboard extends Component {
             location_id: value[0].id,
         });
         await this._fetchLunchInfos();
-        this.env.searchModel.updateLocationId(value[0].id);
+        this.searchModel.updateLocationId(value[0].id);
     }
 
     async onUpdateLunchTime(value) {
         this.state.date = value || DateTime.now();
-        this.env.searchModel.updateDate(this.state.date);
+        this.searchModel.updateDate(this.state.date);
     }
 }

@@ -1,11 +1,14 @@
-import { queryAll, queryAllTexts, queryOne, queryText } from "@odoo/hoot";
-import { Component, useProps, xml } from "@odoo/owl";
+import { beforeEach, queryAll, queryAllTexts, queryOne, queryText } from "@odoo/hoot";
+import { Component, Plugin, useProps, xml } from "@odoo/owl";
 import { WithSearch } from "@web/search/with_search/with_search";
 import { getDefaultConfig } from "@web/views/view";
 import { assignTestEnv } from "./app_test_helpers";
 import { findComponent, mountWithCleanup } from "./component_test_helpers";
 import { contains } from "./dom_test_helpers";
 import { isSmall } from "./ui_test_helpers";
+import { services } from "@web/core/services";
+import { SearchModel } from "@web/search/search_model";
+import { useService } from "@web/core/utils/hooks";
 
 const ensureSearchView = async () => {
     if (
@@ -22,6 +25,22 @@ const ensureSearchBarMenu = async () => {
         await toggleSearchBarMenu();
     }
 };
+
+class SearchModelPlugin extends Plugin {
+    static sequence = 101;
+    model = new SearchModel(getDefaultConfig(), {
+        orm: useService("orm"),
+        view: useService("view"),
+        field: useService("field"),
+        name: useService("name"),
+        dialog: useService("dialog"),
+        treeProcessor: useService("tree_processor"),
+    });
+}
+
+beforeEach(() => {
+    services.add(SearchModelPlugin);
+});
 
 //-----------------------------------------------------------------------------
 // Search view

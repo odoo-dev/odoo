@@ -1,19 +1,20 @@
 import { Component, proxy, t, useProps } from "@odoo/owl";
-import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
-import { SearchBarDropdown } from "../search_bar_dropdown";
+import { browser } from "@web/core/browser/browser";
+import { useCommand } from "@web/core/commands/command_hook";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { AccordionItem } from "@web/core/dropdown/accordion_item";
+import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { dropdownProps } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { sortBy } from "@web/core/utils/arrays";
 import { useBus, useService } from "@web/core/utils/hooks";
-import { browser } from "@web/core/browser/browser";
-import { useCommand } from "@web/core/commands/command_hook";
-import { AccordionItem } from "@web/core/dropdown/accordion_item";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { CustomGroupByItem } from "@web/search/custom_group_by_item/custom_group_by_item";
-import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
+import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
+import { useSearchModel } from "@web/search/search_model";
 import { FACET_ICONS, GROUPABLE_TYPES } from "@web/search/utils/misc";
-import { _t } from "@web/core/l10n/translation";
+import { SearchBarDropdown } from "../search_bar_dropdown";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -27,6 +28,9 @@ export class SearchBarMenu extends Component {
         AccordionItem,
         PropertiesGroupByItem,
     };
+
+    searchModel = useSearchModel();
+
     props = useProps({
         dropdownState: dropdownProps.state,
         popoverWillCloseOnClickAway: t.function().optional(() => () => true),
@@ -38,7 +42,7 @@ export class SearchBarMenu extends Component {
         this.actionService = useService("action");
         // GroupBy
         const fields = [];
-        for (const [fieldName, field] of Object.entries(this.env.searchModel.searchViewFields)) {
+        for (const [fieldName, field] of Object.entries(this.searchModel.searchViewFields)) {
             if (this.validateField(fieldName, field)) {
                 fields.push(Object.assign({ name: fieldName }, field));
             }
@@ -46,7 +50,7 @@ export class SearchBarMenu extends Component {
         this.fields = sortBy(fields, "string");
         // Favorite
         this.state = proxy({ sharedFavoritesExpanded: false });
-        useBus(this.env.searchModel, "update", this.render);
+        useBus(this.searchModel, "update", this.render);
         this.dialogService = useService("dialog");
         this.notificationService = useService("notification");
 
@@ -62,13 +66,13 @@ export class SearchBarMenu extends Component {
 
     // Filter Panel
     get filterItems() {
-        return this.env.searchModel.getSearchItems((searchItem) =>
+        return this.searchModel.getSearchItems((searchItem) =>
             ["filter", "dateFilter", "parentFilter", "lazyParentFilter"].includes(searchItem.type)
         );
     }
 
     async onAddCustomFilterClick() {
-        this.env.searchModel.spawnCustomFilterDialog();
+        this.searchModel.spawnCustomFilterDialog();
     }
 
     /**
@@ -78,21 +82,21 @@ export class SearchBarMenu extends Component {
      */
     onFilterSelected({ itemId, optionId }) {
         if (optionId) {
-            this.env.searchModel.toggleParentFilter(itemId, optionId);
+            this.searchModel.toggleParentFilter(itemId, optionId);
         } else {
-            this.env.searchModel.toggleSearchItem(itemId);
+            this.searchModel.toggleSearchItem(itemId);
         }
     }
 
     async onToggle({ itemId, optionsParams }) {
         if (optionsParams.toBeLoaded) {
-            await this.env.searchModel.loadLazyParentFilter(itemId);
+            await this.searchModel.loadLazyParentFilter(itemId);
             this.render();
         }
     }
 
     async onLoadMoreOptions({ itemId }) {
-        await this.env.searchModel.loadMoreOptions(itemId);
+        await this.searchModel.loadMoreOptions(itemId);
         this.render();
     }
 
@@ -101,14 +105,14 @@ export class SearchBarMenu extends Component {
      * @returns {boolean}
      */
     get hideCustomGroupBy() {
-        return this.env.searchModel.hideCustomGroupBy || false;
+        return this.searchModel.hideCustomGroupBy || false;
     }
 
     /**
      * @returns {Object[]}
      */
     get groupByItems() {
-        return this.env.searchModel.getSearchItems(
+        return this.searchModel.getSearchItems(
             (searchItem) =>
                 ["groupBy", "dateGroupBy"].includes(searchItem.type) && !searchItem.isProperty
         );
@@ -131,9 +135,9 @@ export class SearchBarMenu extends Component {
      */
     onGroupBySelected({ itemId, optionId }) {
         if (optionId) {
-            this.env.searchModel.toggleDateGroupBy(itemId, optionId);
+            this.searchModel.toggleDateGroupBy(itemId, optionId);
         } else {
-            this.env.searchModel.toggleSearchItem(itemId);
+            this.searchModel.toggleSearchItem(itemId);
         }
     }
 
@@ -141,19 +145,19 @@ export class SearchBarMenu extends Component {
      * @param {string} fieldName
      */
     onAddCustomGroup(fieldName) {
-        this.env.searchModel.createNewGroupBy(fieldName);
+        this.searchModel.createNewGroupBy(fieldName);
     }
 
     // Favorite Panel
 
     get favorites() {
-        return this.env.searchModel.getSearchItems(
+        return this.searchModel.getSearchItems(
             (searchItem) => searchItem.type === "favorite" && searchItem.userIds.length === 1
         );
     }
 
     get sharedFavorites() {
-        const sharedFavorites = this.env.searchModel.getSearchItems(
+        const sharedFavorites = this.searchModel.getSearchItems(
             (searchItem) => searchItem.type === "favorite" && searchItem.userIds.length !== 1
         );
         if (sharedFavorites.length <= 4 || this.state.sharedFavoritesExpanded) {
@@ -179,7 +183,7 @@ export class SearchBarMenu extends Component {
     }
 
     onFavoriteSelected(itemId) {
-        this.env.searchModel.toggleSearchItem(itemId);
+        this.searchModel.toggleSearchItem(itemId);
     }
 
     editFavorite(itemId) {
@@ -190,7 +194,7 @@ export class SearchBarMenu extends Component {
             context: {
                 form_view_ref: "base.ir_filters_view_edit_form",
             },
-            res_id: this.env.searchModel.searchItems[itemId].serverSideId,
+            res_id: this.searchModel.searchItems[itemId].serverSideId,
         });
     }
 
@@ -200,7 +204,7 @@ export class SearchBarMenu extends Component {
      */
     async shareViewUrl() {
         let shareUrl = browser.location.href;
-        const extra = this.env.searchModel.generateQueryString();
+        const extra = this.searchModel.generateQueryString();
         if (extra) {
             const [base, hash = ""] = browser.location.href.split("#");
             shareUrl = base + (base.includes("?") ? "&" : "?") + extra + (hash ? "#" + hash : "");

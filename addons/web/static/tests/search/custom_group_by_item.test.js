@@ -110,11 +110,11 @@ test(`add a date field in "Custom Group" activate a groupby with global default 
     });
 
     await toggleSearchBarMenu();
-    expect(component.env.searchModel.groupBy).toEqual([]);
+    expect(component.searchModel.groupBy).toEqual([]);
     expect(`.o_add_custom_group_menu`).toHaveCount(1); // Custom Group
 
     await selectGroup("date");
-    expect(component.env.searchModel.groupBy).toEqual(["date:month"]);
+    expect(component.searchModel.groupBy).toEqual(["date:month"]);
     expect(getFacetTexts()).toEqual(["Date: Month"]);
     expect(isItemSelected("Date")).toBe(true);
 

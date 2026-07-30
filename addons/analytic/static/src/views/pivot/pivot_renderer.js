@@ -10,7 +10,7 @@ export class AnalyticPivotRenderer extends PivotRenderer {
         if (typeof(optionId) === "number") {
             itemId = optionId;
         }
-        let searchItems = this.env.searchModel.getSearchItems(
+        let searchItems = this.searchModel.getSearchItems(
             (searchItem) =>
                 ["groupBy", "dateGroupBy"].includes(searchItem.type) && !searchItem.custom
         );

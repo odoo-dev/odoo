@@ -82,7 +82,7 @@ test(`toggle a "simple" filter in filter menu works`, async () => {
     await toggleSearchBarMenu();
     expect(getFacetTexts()).toEqual([]);
     expect(isItemSelected("Foo")).toBe(false);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
     expect(".o_menu_item[role=menuitemcheckbox]").toHaveCount(1);
     expect(queryFirst`.o_menu_item`).toHaveProperty("ariaChecked", "false");
 
@@ -91,12 +91,12 @@ test(`toggle a "simple" filter in filter menu works`, async () => {
     expect(getFacetTexts()).toEqual(["Foo"]);
     expect(`.o_searchview .o_searchview_facet .o_searchview_facet_label`).toHaveCount(1);
     expect(isItemSelected("Foo")).toBe(true);
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "=", "qsdf"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "=", "qsdf"]]);
 
     await toggleMenuItem("Foo");
     expect(getFacetTexts()).toEqual([]);
     expect(isItemSelected("Foo")).toBe(false);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 });
 
 test("filter by a date field using period works", async () => {
@@ -117,7 +117,7 @@ test("filter by a date field using period works", async () => {
     await toggleMenuItem("Date");
 
     // default filter should be activated with the global default period 'this_month'
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-03-01"],
         ["date_field", "<=", "2017-03-31"],
@@ -138,7 +138,7 @@ test("filter by a date field using period works", async () => {
     ]);
 
     await toggleMenuItemOption("Date", "March");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -147,7 +147,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "February");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-02-01"],
         ["date_field", "<=", "2017-02-28"],
@@ -157,7 +157,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "February");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -166,7 +166,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "January");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-01-31"],
@@ -176,7 +176,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "Q4");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "|",
         "&",
         ["date_field", ">=", "2017-01-01"],
@@ -191,7 +191,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "January");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-10-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -201,7 +201,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "Q4");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -210,7 +210,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "Q1");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-03-31"],
@@ -220,7 +220,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "Q1");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -229,11 +229,11 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "2017");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
 
     await toggleMenuItemOption("Date", "2017");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2017-01-01"],
         ["date_field", "<=", "2017-12-31"],
@@ -242,7 +242,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "2016");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "|",
         "&",
         ["date_field", ">=", "2016-01-01"],
@@ -256,7 +256,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "2015");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "|",
         "&",
         ["date_field", ">=", "2015-01-01"],
@@ -275,7 +275,7 @@ test("filter by a date field using period works", async () => {
     expect(isOptionSelected("Date", "2017")).toBe(true);
 
     await toggleMenuItemOption("Date", "March");
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "|",
         "&",
         ["date_field", ">=", "2015-03-01"],
@@ -309,7 +309,7 @@ test("filter by a date field using period works even in January", async () => {
         `,
         context: { search_default_some_filter: 1 },
     });
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2016-12-01"],
         ["date_field", "<=", "2016-12-31"],
@@ -337,7 +337,7 @@ test("filter by a date field using period works even with an endYear in the past
         `,
         context: { search_default_some_filter: 1 },
     });
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2015-01-01"],
         ["date_field", "<=", "2015-01-31"],
@@ -373,7 +373,7 @@ test("filter by a date field using period works even with a startYear in the fut
         `,
         context: { search_default_some_filter: 1 },
     });
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["date_field", ">=", "2019-01-01"],
         ["date_field", "<=", "2019-01-31"],
@@ -407,7 +407,7 @@ test("`context` key in <filter> is used", async () => {
         `,
         context: { search_default_some_filter: 1 },
     });
-    expect(searchBarMenu.env.searchModel.context).toEqual({
+    expect(searchBarMenu.searchModel.context).toEqual({
         coucou_1: 1,
         lang: "en",
         tz: "taht",
@@ -428,7 +428,7 @@ test("Filter with JSON-parsable domain works", async () => {
         `,
         context: { search_default_gently_weeps: 1 },
     });
-    expect(searchBarMenu.env.searchModel.domain).toEqual([["foo", "=", "Gently Weeps"]]);
+    expect(searchBarMenu.searchModel.domain).toEqual([["foo", "=", "Gently Weeps"]]);
 });
 
 test("filter with date attribute set as search_default", async () => {
@@ -489,7 +489,7 @@ test("date filter with custom option set as default_period", async () => {
     await toggleMenuItem("Date");
     expect(isItemSelected("Date")).toBe(true);
     expect(isOptionSelected("Date", "Today")).toBe(true);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([["date_field", "=", "2019-07-31"]]);
+    expect(searchBarMenu.searchModel.domain).toEqual([["date_field", "=", "2019-07-31"]]);
 });
 
 test("date filter with default_period in the context", async () => {
@@ -535,7 +535,7 @@ for (const contextValue of ["True", "1"]) {
         await toggleMenuItem("Date");
         expect(isItemSelected("Date")).toBe(true);
         expect(isOptionSelected("Date", "Today")).toBe(true);
-        expect(searchBarMenu.env.searchModel.domain).toEqual([["date_field", "=", "2019-07-31"]]);
+        expect(searchBarMenu.searchModel.domain).toEqual([["date_field", "=", "2019-07-31"]]);
     });
 }
 
@@ -560,11 +560,11 @@ test("Inner filter: toggle", async () => {
 
     await contains(`.o_item_option:eq(1)`).click();
     expect(isItemSelected("Foo")).toBe(true);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([["foo", "=", "qsdf"]]);
+    expect(searchBarMenu.searchModel.domain).toEqual([["foo", "=", "qsdf"]]);
 
     await contains(`.o_item_option:eq(0)`).click();
     expect(isItemSelected("Foo")).toBe(true);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([
+    expect(searchBarMenu.searchModel.domain).toEqual([
         "|",
         ["foo", "=", "abcd"],
         ["foo", "=", "qsdf"],
@@ -592,7 +592,7 @@ test("Inner filter: domain is correctly combined with other filters", async () =
     await contains(`.o_menu_item:eq(1)`).click();
     expect(isItemSelected("Foo")).toBe(true);
     expect(isItemSelected("Bar")).toBe(true);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([
+    expect(searchBarMenu.searchModel.domain).toEqual([
         "|",
         ["foo", "=", "abcd"],
         ["bar", "=", "meow"],
@@ -603,7 +603,7 @@ test("Inner filter: domain is correctly combined with other filters", async () =
     expect(`.o_item_option`).toHaveCount(0);
     expect(isItemSelected("Foo")).toBe(true);
     expect(isItemSelected("Bar")).toBe(false);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([["foo", "=", "abcd"]]);
+    expect(searchBarMenu.searchModel.domain).toEqual([["foo", "=", "abcd"]]);
 });
 
 test("filter domains are correcly combined by OR and AND", async () => {
@@ -625,7 +625,7 @@ test("filter domains are correcly combined by OR and AND", async () => {
             search_default_f2_g2: true,
         },
     });
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["foo", "=", "f1_g1"],
         "|",
@@ -758,7 +758,7 @@ test("Add a custom filter", async () => {
         },
     });
     expect(getFacetTexts()).toEqual(["Filter"]);
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "=", "abc"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "=", "abc"]]);
 
     await toggleSearchBarMenu();
     expect(".o_filter_menu .o_menu_item:not(.o_add_custom_filter)").toHaveCount(1);
@@ -770,7 +770,7 @@ test("Add a custom filter", async () => {
     await clickOnButtonAddRule(-1);
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual(["Filter", "Id = 1", "Id = 1", "Id = 1"]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["foo", "=", "abc"],
         "&",
@@ -798,7 +798,7 @@ test("Add a custom filter containing an expression", async () => {
         searchViewArch: `<search />`,
     });
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await toggleSearchBarMenu();
     await openAddCustomFilterDialog();
@@ -807,7 +807,7 @@ test("Add a custom filter containing an expression", async () => {
     );
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Foo = uid or 1 or "a"`]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         ["foo", "in", [7, 1, "a"]], // uid = 7
     ]);
 });
@@ -823,7 +823,7 @@ test("Add a custom filter containing a between operator", async () => {
         searchViewArch: `<search />`,
     });
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await toggleSearchBarMenu();
     await openAddCustomFilterDialog();
@@ -832,7 +832,7 @@ test("Add a custom filter containing a between operator", async () => {
     );
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Id between 0 and 10`]);
-    expect(searchBar.env.searchModel.domain).toEqual(["&", ["id", ">=", 0], ["id", "<=", 10]]);
+    expect(searchBar.searchModel.domain).toEqual(["&", ["id", ">=", 0], ["id", "<=", 10]]);
 });
 
 test("consistent display of ! in debug mode", async () => {
@@ -854,7 +854,7 @@ test("consistent display of ! in debug mode", async () => {
 
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`! ( Foo = 1 or Id = 2 )`]);
-    expect(searchBar.env.searchModel.domain).toEqual(["!", "|", ["foo", "=", 1], ["id", "=", 2]]);
+    expect(searchBar.searchModel.domain).toEqual(["!", "|", ["foo", "=", 1], ["id", "=", 2]]);
 });
 
 test("display of (not) set in facets", async () => {
@@ -868,7 +868,7 @@ test("display of (not) set in facets", async () => {
     });
 
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await toggleSearchBarMenu();
     await openAddCustomFilterDialog();
@@ -876,13 +876,13 @@ test("display of (not) set in facets", async () => {
     await contains(".o_model_field_selector_popover_item_name:contains(Boolean)").click();
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Boolean ${label("set")}`]);
-    expect(searchBar.env.searchModel.domain).toEqual([["boolean", "!=", false]]);
+    expect(searchBar.searchModel.domain).toEqual([["boolean", "!=", false]]);
 
     await contains(".o_searchview_facet_label").click();
     await selectOperator("not set");
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Boolean ${label("not set")}`]);
-    expect(searchBar.env.searchModel.domain).toEqual([["boolean", "=", false]]);
+    expect(searchBar.searchModel.domain).toEqual([["boolean", "=", false]]);
 });
 
 test("relative date and datetime fields facets display", async () => {
@@ -895,7 +895,7 @@ test("relative date and datetime fields facets display", async () => {
         searchViewArch: `<search/>`,
     });
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     // Pick a datetime field and select relative range option
     await toggleSearchBarMenu();
@@ -909,7 +909,7 @@ test("relative date and datetime fields facets display", async () => {
     await contains(`${SELECTORS.valueEditor} select:last`).select('"month"');
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual(["Created on is in last 5 months"]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["create_date", ">=", "today -5m"],
         ["create_date", "<", "today"],
@@ -921,7 +921,7 @@ test("relative date and datetime fields facets display", async () => {
     await contains(`${SELECTORS.valueEditor} select:last`).select('"week"');
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual(["Created on is in next 6 weeks"]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["create_date", ">", "today +1d"],
         ["create_date", "<=", "today +6w +1d"],
@@ -981,7 +981,7 @@ test("display names in facets", async () => {
         `Bar ${label("set")}`,
         "Id = 2",
     ]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["bar", "=", 1],
         "&",
@@ -1028,7 +1028,7 @@ test("display names in facets (with a property)", async () => {
     await contains(".modal footer button").click();
 
     expect(getFacetTexts()).toEqual(["Properties \u2794 M2O = John"]);
-    expect(searchBar.env.searchModel.domain).toEqual([["properties.m2o", "=", 1]]);
+    expect(searchBar.searchModel.domain).toEqual([["properties.m2o", "=", 1]]);
 });
 
 test("group by properties", async () => {
@@ -1112,12 +1112,12 @@ test("group by properties", async () => {
         "Week",
         "Day",
     ]);
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
 
     await contains(queryAll`.o_accordion_values .o_accordion_values .dropdown-item`[1]).click();
     await animationFrame();
-    expect(searchBar.env.searchModel.groupBy).toEqual(["properties.my_datetime:quarter"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["properties.my_datetime:quarter"]);
     expect(getFacetTexts()).toEqual(["My Datetime: Quarter"]);
 });
 
@@ -1131,7 +1131,7 @@ test("shorten descriptions of long lists", async function () {
         searchViewArch: `<search />`,
     });
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await toggleSearchBarMenu();
     await openAddCustomFilterDialog();
@@ -1141,7 +1141,7 @@ test("shorten descriptions of long lists", async function () {
     );
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Id = ${values.slice(0, 4).join(" or ")} or ...`]);
-    expect(searchBar.env.searchModel.domain).toEqual([["id", "in", values]]);
+    expect(searchBar.searchModel.domain).toEqual([["id", "in", values]]);
 });
 
 test(`"in range" facets`, async () => {
@@ -1164,7 +1164,7 @@ test(`"in range" facets`, async () => {
     expect(getFacetTexts()).toEqual([
         "Birthday between 03/11/2019 and 03/11/2019 or Birthday is in Today",
     ]);
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "|",
         "&",
         ["birthday", ">=", "2019-03-11"],
@@ -1187,14 +1187,14 @@ test(`Custom filter with "&"" as value`, async function () {
         searchViewArch: `<search />`,
     });
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await toggleSearchBarMenu();
     await openAddCustomFilterDialog();
     await contains(`.o_domain_selector_debug_container textarea`).edit(`[("foo", "ilike", "&")]`);
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Foo contains &`]);
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "&"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "&"]]);
 });
 
 test("lazy selection filter", async () => {
@@ -1217,7 +1217,7 @@ test("lazy selection filter", async () => {
     expect(`.o_accordion_values .o_item_option`).toHaveCount(3);
     expect(queryAllTexts(`.o_accordion_values .o_item_option`)).toEqual(["ABC", "DEF", "GHI"]);
     await toggleMenuItemOption("Selection", "ABC");
-    expect(searchBar.env.searchModel.domain).toEqual([["selection", "=", "abc"]]);
+    expect(searchBar.searchModel.domain).toEqual([["selection", "=", "abc"]]);
 });
 
 test("lazy many2one filter", async () => {
@@ -1272,7 +1272,7 @@ test("lazy many2one filter", async () => {
         "More...",
     ]);
     await toggleMenuItemOption("Bar", "Christophe");
-    expect(searchBar.env.searchModel.domain).toEqual([["bar", "=", 4]]);
+    expect(searchBar.searchModel.domain).toEqual([["bar", "=", 4]]);
     await toggleMenuItemOption("Bar", "More...");
     expect.verifySteps(["web_search_read 16 partners"]);
     expect(`.o_accordion_values .o_item_option`).toHaveCount(10);
@@ -1320,7 +1320,7 @@ test("lazy many2one filter with multiple domains", async () => {
     expect(`.o_accordion_values .o_item_option`).toHaveCount(2);
     expect(queryAllTexts(`.o_accordion_values .o_item_option`)).toEqual(["John", "David"]);
     await toggleMenuItemOption("Bar", "David");
-    expect(searchBar.env.searchModel.domain).toEqual(["&", ["foo", "!=", "a"], ["bar", "=", 2]], {
+    expect(searchBar.searchModel.domain).toEqual(["&", ["foo", "!=", "a"], ["bar", "=", 2]], {
         message:
             "domain on filter is combined with the option, field domain is applied to the option search",
     });

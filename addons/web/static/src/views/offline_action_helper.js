@@ -1,8 +1,11 @@
 import { Component, onWillStart, plugin } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { useSearchModel } from "@web/search/search_model";
 
 export class OfflineActionHelper extends Component {
     static template = "web.OfflineActionHelper";
+
+    searchModel = useSearchModel();
 
     setup() {
         const offlinePlugin = plugin(OfflinePlugin);
@@ -15,6 +18,6 @@ export class OfflineActionHelper extends Component {
     }
 
     onResetFilters() {
-        this.env.searchModel.applySearch(this.searches[0]);
+        this.searchModel.applySearch(this.searches[0]);
     }
 }

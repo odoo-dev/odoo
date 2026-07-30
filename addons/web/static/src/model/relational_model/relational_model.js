@@ -5,9 +5,11 @@ import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { ConnectionLostError } from "@web/core/network/rpc";
+import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { shallowEqual } from "@web/core/utils/arrays";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { deepCopy, pick } from "@web/core/utils/objects";
+import { useSearchModel } from "@web/search/search_model";
 import { orderByToString } from "@web/search/utils/order_by";
 import { Model } from "../model";
 import { DynamicGroupList } from "./dynamic_group_list";
@@ -25,7 +27,6 @@ import {
     getId,
     makeActiveField,
 } from "./utils";
-import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 
 /**
  * @typedef {import("@web/core/context").Context} Context
@@ -126,6 +127,7 @@ export class RelationalModel extends Model {
     static withCache = true;
 
     offlinePlugin = plugin(OfflinePlugin);
+    searchModel = useSearchModel();
 
     /**
      * @param {RelationalModelParams} params
@@ -791,7 +793,7 @@ export class RelationalModel extends Model {
         if (markAsAvailableOffline) {
             const params = config.isMonoRecord
                 ? { resId }
-                : { search: this.env.searchModel.getCurrentSearch() };
+                : { search: this.searchModel.getCurrentSearch() };
             this.offlinePlugin.setAvailableOffline(actionId, viewType, params);
         }
     }

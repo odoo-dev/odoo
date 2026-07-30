@@ -46,8 +46,10 @@ import {
     validateSearch,
 } from "@web/../tests/web_test_helpers";
 import { cookie } from "@web/core/browser/cookie";
-import { SearchBar, DROPDOWN_CLOSE_DELAY } from "@web/search/search_bar/search_bar";
+import { DROPDOWN_CLOSE_DELAY, SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
+import { useSearchModel } from "@web/search/search_model";
+
 class Partner extends models.Model {
     name = fields.Char();
     bar = fields.Many2one({ relation: "partner" });
@@ -331,7 +333,7 @@ test("search date and datetime fields. Support of timezones", async () => {
     await keyDown("Enter");
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Birthday 07/15/1983"]);
-    expect(searchBar.env.searchModel.domain).toEqual([["birthday", "=", "1983-07-15"]]);
+    expect(searchBar.searchModel.domain).toEqual([["birthday", "=", "1983-07-15"]]);
 
     // Close Facet
     await click(`.o_searchview_facet .o_facet_remove`);
@@ -346,9 +348,7 @@ test("search date and datetime fields. Support of timezones", async () => {
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual([
         "Birth DateTime 07/15/1983 00:00:00",
     ]);
-    expect(searchBar.env.searchModel.domain).toEqual([
-        ["birth_datetime", "=", "1983-07-14 18:00:00"],
-    ]);
+    expect(searchBar.searchModel.domain).toEqual([["birth_datetime", "=", "1983-07-14 18:00:00"]]);
 });
 
 test("autocomplete menu clickout interactions", async () => {
@@ -406,7 +406,7 @@ test("select an autocomplete field", async () => {
     await keyDown("Enter");
     await animationFrame();
     expect(`.o_searchview_input_container .o_facet_values`).toHaveText("a");
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "a"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "a"]]);
 });
 
 test("select an autocomplete field with `context` key", async () => {
@@ -414,7 +414,7 @@ test("select an autocomplete field with `context` key", async () => {
     class TestComponent extends Component {
         static template = xml`<SearchBar/>`;
         static components = { SearchBar };
-        props = useProps();
+        searchModel = useSearchModel();
         setup() {
             onWillUpdateProps(() => {
                 updateCount++;
@@ -441,8 +441,8 @@ test("select an autocomplete field with `context` key", async () => {
     await animationFrame();
     expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Bar First record"]);
     expect(updateCount).toBe(1);
-    expect(searchBar.env.searchModel.domain).toEqual([["bar", "=", 1]]);
-    expect(searchBar.env.searchModel.context.bar).toEqual([1]);
+    expect(searchBar.searchModel.domain).toEqual([["bar", "=", 1]]);
+    expect(searchBar.searchModel.context.bar).toEqual([1]);
 
     // 'r' key to filter on bar "Second Record"
     await editSearch("record");
@@ -461,8 +461,8 @@ test("select an autocomplete field with `context` key", async () => {
         "Bar First record or Second record",
     ]);
     expect(updateCount).toBe(2);
-    expect(searchBar.env.searchModel.domain).toEqual(["|", ["bar", "=", 1], ["bar", "=", 2]]);
-    expect(searchBar.env.searchModel.context.bar).toEqual([1, 2]);
+    expect(searchBar.searchModel.domain).toEqual(["|", ["bar", "=", 1], ["bar", "=", 2]]);
+    expect(searchBar.searchModel.context.bar).toEqual([1, 2]);
 });
 
 test.tags("desktop");
@@ -624,19 +624,19 @@ test("select autocompleted many2one", async () => {
             </search>
         `,
     });
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("rec");
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-last-child(2)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([["bar", "child_of", "rec"]]);
+    expect(searchBar.searchModel.domain).toEqual([["bar", "child_of", "rec"]]);
 
     await removeFacet("Bar rec");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("rec");
     await contains(".o_expand").click();
     await contains(".o_searchview_autocomplete .o-dropdown-item.o_indent").click();
-    expect(searchBar.env.searchModel.domain).toEqual([["bar", "child_of", 1]]);
+    expect(searchBar.searchModel.domain).toEqual([["bar", "child_of", 1]]);
 });
 
 test(`"null" as autocomplete value`, async () => {
@@ -645,13 +645,13 @@ test(`"null" as autocomplete value`, async () => {
         searchMenuTypes: [],
         searchViewId: false,
     });
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("null");
     expect(`.o_searchview_autocomplete .focus`).toHaveText("Search Foo for: null");
 
     await contains(".o_searchview_autocomplete .o-dropdown-item.focus a").click();
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "null"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "null"]]);
 });
 
 test("autocompletion with a boolean field", async () => {
@@ -665,7 +665,7 @@ test("autocompletion with a boolean field", async () => {
             </search>
         `,
     });
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("y");
     expect(`.o_searchview_autocomplete .o-dropdown-item`).toHaveCount(2);
@@ -675,10 +675,10 @@ test("autocompletion with a boolean field", async () => {
 
     // select "Yes"
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-last-child(2)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([["bool", "=", true]]);
+    expect(searchBar.searchModel.domain).toEqual([["bool", "=", true]]);
 
     await removeFacet("Bool Yes");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("No");
     expect(`.o_searchview_autocomplete .o-dropdown-item`).toHaveCount(2);
@@ -688,7 +688,7 @@ test("autocompletion with a boolean field", async () => {
 
     // select "No"
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-last-child(2)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([["bool", "=", false]]);
+    expect(searchBar.searchModel.domain).toEqual([["bool", "=", false]]);
 });
 
 test("autocompletion with a selection field", async () => {
@@ -710,7 +710,7 @@ test("autocompletion with a selection field", async () => {
             </search>
         `,
     });
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("a");
     expect(`.o_searchview_autocomplete .o-dropdown-item`).toHaveCount(2);
@@ -724,10 +724,10 @@ test("autocompletion with a selection field", async () => {
     expect(`.o_searchview_autocomplete .o-dropdown-item:eq(2)`).toHaveText("AEF");
     // select "AEF"
     await contains(`.o_searchview_autocomplete .o-dropdown-item:eq(2)`).click();
-    expect(searchBar.env.searchModel.domain).toEqual([["selection_field", "=", "aef"]]);
+    expect(searchBar.searchModel.domain).toEqual([["selection_field", "=", "aef"]]);
 
     await removeFacet("Selection Field AEF");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("h");
     expect(`.o_searchview_autocomplete .o-dropdown-item`).toHaveCount(2);
@@ -741,7 +741,7 @@ test("autocompletion with a selection field", async () => {
 
     // select "GHI"
     await contains(`.o_searchview_autocomplete .o-dropdown-item:eq(1)`).click();
-    expect(searchBar.env.searchModel.domain).toEqual([["selection_field", "=", "ghi"]]);
+    expect(searchBar.searchModel.domain).toEqual([["selection_field", "=", "ghi"]]);
 });
 
 test("the search value is trimmed to remove unnecessary spaces", async () => {
@@ -757,14 +757,14 @@ test("the search value is trimmed to remove unnecessary spaces", async () => {
     });
     await editSearch("bar");
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "bar"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "bar"]]);
 
     await removeFacet("Foo bar");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("   bar ");
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "bar"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "bar"]]);
 });
 
 test("reference fields are supported in search view", async () => {
@@ -780,18 +780,18 @@ test("reference fields are supported in search view", async () => {
             </search>
         `,
     });
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("ref");
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["ref", "ilike", "ref"]]);
+    expect(searchBar.searchModel.domain).toEqual([["ref", "ilike", "ref"]]);
 
     await removeFacet("Ref ref");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("ref002");
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["ref", "ilike", "ref002"]]);
+    expect(searchBar.searchModel.domain).toEqual([["ref", "ilike", "ref002"]]);
 });
 
 test("expand an asynchronous menu and change the selected item with the mouse during expansion", async () => {
@@ -898,7 +898,7 @@ test("many2one_reference fields are supported in search view", async () => {
         `,
     });
 
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("12");
     expect(queryAllTexts`.o_searchview_autocomplete .o-dropdown-item`).toEqual([
@@ -909,10 +909,10 @@ test("many2one_reference fields are supported in search view", async () => {
 
     await keyDown("ArrowDown");
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["res_id", "=", 12]]);
+    expect(searchBar.searchModel.domain).toEqual([["res_id", "=", 12]]);
 
     await removeFacet("Resource ID 12");
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 
     await editSearch("abc");
     expect(queryAllTexts`.o_searchview_autocomplete .o-dropdown-item`).toEqual([
@@ -921,7 +921,7 @@ test("many2one_reference fields are supported in search view", async () => {
     ]);
 
     await validateSearch();
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "abc"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "abc"]]);
 });
 
 test("check kwargs of a rpc call with a domain", async () => {
@@ -962,7 +962,7 @@ test("check kwargs of a rpc call with a domain", async () => {
     await animationFrame();
     await keyDown("Enter");
     await animationFrame();
-    expect(searchBar.env.searchModel.domain).toEqual([["company", "=", 5]]);
+    expect(searchBar.searchModel.domain).toEqual([["company", "=", 5]]);
 });
 
 test("should wait label promises for many2one search defaults", async () => {
@@ -1179,7 +1179,7 @@ test("search a property", async () => {
     // select Bobby
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(3) .o_expand").click();
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(5)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["bar", "=", 1],
         ["properties.my_partners", "in", 6],
@@ -1204,7 +1204,7 @@ test("search a property", async () => {
 
     // select the selection option "AA"
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(5)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         "&",
         ["bar", "=", 1],
@@ -1219,7 +1219,7 @@ test("search a property", async () => {
     await editSearch("a");
     await contains(".o_expand").click();
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(4)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         "&",
         ["bar", "=", 1],
@@ -1253,7 +1253,7 @@ test("search a property", async () => {
         "Custom Filter...",
     ]);
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(4)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["bar", "=", 1],
         ["properties.my_partner", "=", 10],
@@ -1277,7 +1277,7 @@ test("search a property", async () => {
     ]);
 
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(7)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         "&",
         ["bar", "=", 1],
@@ -1301,7 +1301,7 @@ test("search a property", async () => {
         "Custom Filter...",
     ]);
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(5)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         "&",
         ["bar", "=", 1],
@@ -1320,7 +1320,7 @@ test("search a property", async () => {
     await editSearch("Bobby");
     await contains(".o_expand").click();
     await contains(".o_searchview_autocomplete .o-dropdown-item:nth-child(2)").click();
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         "&",
         ["bar", "=", 1],
@@ -1515,13 +1515,13 @@ test("edit a filter with context: context is kept after edition", async () => {
         },
     });
     expect(getFacetTexts()).toEqual(["Filter"]);
-    expect(searchBar.env.searchModel.context.specialKey).toBe("abc");
+    expect(searchBar.searchModel.context.specialKey).toBe("abc");
 
     await contains(".o_facet_with_domain .o_searchview_facet_label").click();
     await contains(`.modal ${SELECTORS.addNewRule}`).click();
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([`Foo = abc`, `Foo = abc`]);
-    expect(searchBar.env.searchModel.context.specialKey).toBe("abc");
+    expect(searchBar.searchModel.context.specialKey).toBe("abc");
 });
 
 test("edit a favorite", async () => {
@@ -2019,5 +2019,5 @@ test("search on full query without waiting for display synchronisation", async (
     await press("6");
     expect(".o-dropdown-item:first").toHaveText("Search Foo for: 01234");
     await keyDown("Enter");
-    expect(searchBar.env.searchModel.domain).toEqual([["foo", "ilike", "0123456"]]);
+    expect(searchBar.searchModel.domain).toEqual([["foo", "ilike", "0123456"]]);
 });

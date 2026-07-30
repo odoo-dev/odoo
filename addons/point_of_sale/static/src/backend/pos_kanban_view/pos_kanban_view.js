@@ -96,7 +96,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
             await updatePosKanbanViewState(this.orm, this.posState);
             return result;
         } finally {
-            this.env.searchModel.clearQuery();
+            this.searchModel.clearQuery();
         }
     }
 

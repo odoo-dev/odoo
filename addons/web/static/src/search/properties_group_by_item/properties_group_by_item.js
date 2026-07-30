@@ -1,8 +1,9 @@
-import { useChildSubEnv } from "@web/owl2/utils";
-import { AccordionItem, ACCORDION } from "@web/core/dropdown/accordion_item";
+import { Component, proxy, t, useProps } from "@odoo/owl";
+import { ACCORDION, AccordionItem } from "@web/core/dropdown/accordion_item";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { useChildSubEnv } from "@web/owl2/utils";
+import { useSearchModel } from "@web/search/search_model";
 
 export class PropertiesGroupByItem extends Component {
     static template = "web.PropertiesGroupByItem";
@@ -11,6 +12,8 @@ export class PropertiesGroupByItem extends Component {
         item: t.object(),
         onGroup: t.function(),
     });
+
+    searchModel = useSearchModel();
 
     setup() {
         this.state = proxy({ groupByItems: [] });
@@ -45,7 +48,7 @@ export class PropertiesGroupByItem extends Component {
         }
         this.definitionLoaded = true;
 
-        await this.env.searchModel.fillSearchViewItemsProperty();
+        await this.searchModel.fillSearchViewItemsProperty();
         this._updateGroupByItems();
     }
 
@@ -61,7 +64,7 @@ export class PropertiesGroupByItem extends Component {
      * Update the component state to sync it with the search model group item.
      */
     _updateGroupByItems() {
-        this.state.groupByItems = this.env.searchModel.getSearchItems(
+        this.state.groupByItems = this.searchModel.getSearchItems(
             (searchItem) =>
                 ["groupBy", "dateGroupBy"].includes(searchItem.type) &&
                 searchItem.isProperty &&

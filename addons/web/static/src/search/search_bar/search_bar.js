@@ -1,19 +1,20 @@
+import { Component, plugin, proxy, signal, status, t, useProps } from "@odoo/owl";
+import { hasTouch } from "@web/core/browser/feature_detection";
 import { Domain } from "@web/core/domain";
+import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
+import { _t } from "@web/core/l10n/translation";
+import { useNavigation } from "@web/core/navigation/navigation";
+import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
-import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import { fuzzyTest } from "@web/core/utils/search";
-import { _t } from "@web/core/l10n/translation";
-import { SearchBarMenu } from "../search_bar_menu/search_bar_menu";
-import { Component, plugin, proxy, signal, status, t, useProps } from "@odoo/owl";
-import { OfflinePlugin } from "@web/core/offline/offline_plugin";
-import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
-import { hasTouch } from "@web/core/browser/feature_detection";
+import { useSearchModel } from "@web/search/search_model";
 import { SearchBarDropdown } from "../search_bar_dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useNavigation } from "@web/core/navigation/navigation";
+import { SearchBarMenu } from "../search_bar_menu/search_bar_menu";
 
 const parsers = registry.category("parsers");
 
@@ -50,6 +51,9 @@ export class SearchBar extends Component {
         SearchBarDropdown,
         DropdownItem,
     };
+
+    searchModel = useSearchModel();
+
     props = useProps({
         autofocus: t.boolean().optional(true),
         slots: t
@@ -60,6 +64,7 @@ export class SearchBar extends Component {
             .optional(),
         toggler: t.object().optional(),
     });
+
     root = signal.ref();
     facetContainerRef = signal.ref();
     inputRef = signal.ref();
@@ -67,8 +72,8 @@ export class SearchBar extends Component {
     setup() {
         this.dialogService = useService("dialog");
         this.offlinePlugin = plugin(OfflinePlugin);
-        this.fields = this.env.searchModel.searchViewFields;
-        this.searchItemsFields = this.env.searchModel.getSearchItems((f) => f.type === "field");
+        this.fields = this.searchModel.searchViewFields;
+        this.searchItemsFields = this.searchModel.getSearchItems((f) => f.type === "field");
         this.ui = useService("ui");
 
         this.visibilityState = proxy(this.props.toggler?.state || { showSearchBar: true });
@@ -105,11 +110,11 @@ export class SearchBar extends Component {
             return !(inputEl && (inputEl === target || inputEl.contains(target)));
         };
 
-        useBus(this.env.searchModel, "focus-search", () => {
+        useBus(this.searchModel, "focus-search", () => {
             this.inputRef().focus();
         });
 
-        useBus(this.env.searchModel, "update", this.render);
+        useBus(this.searchModel, "update", this.render);
     }
 
     /**
@@ -117,7 +122,7 @@ export class SearchBar extends Component {
      * @param {Object}
      */
     getSearchItem(id) {
-        return this.env.searchModel.searchItems[id];
+        return this.searchModel.searchItems[id];
     }
 
     /**
@@ -299,7 +304,7 @@ export class SearchBar extends Component {
      * @returns {Object[]}
      */
     getSearchItemsProperties(searchItem) {
-        return this.env.searchModel.getSearchItemsProperties(searchItem);
+        return this.searchModel.getSearchItemsProperties(searchItem);
     }
 
     /**
@@ -319,7 +324,7 @@ export class SearchBar extends Component {
             let domain = [];
             if (searchItem.domain) {
                 const domainEvalContext = {
-                    ...this.env.searchModel.domainEvalContext,
+                    ...this.searchModel.domainEvalContext,
                     ...field.context,
                 };
                 domain = new Domain(searchItem.domain).toList(domainEvalContext);
@@ -332,7 +337,7 @@ export class SearchBar extends Component {
             const limitToFetch = this.state.subItemsLimits[searchItem.id] + 1;
             options = await this.orm.call(relation, "name_search", [], {
                 domain: domain,
-                context: { ...this.env.searchModel.globalContext, ...field.context },
+                context: { ...this.searchModel.globalContext, ...field.context },
                 limit: limitToFetch,
                 name: query.trim(),
             });
@@ -401,7 +406,7 @@ export class SearchBar extends Component {
      * @param {Object} facet
      */
     removeFacet(facet) {
-        this.env.searchModel.deactivateGroup(facet.groupId);
+        this.searchModel.deactivateGroup(facet.groupId);
         this.inputRef().focus();
     }
 
@@ -418,7 +423,7 @@ export class SearchBar extends Component {
      */
     selectItem(item) {
         if (item.isAddCustomFilterButton) {
-            return this.env.searchModel.spawnCustomFilterDialog();
+            return this.searchModel.spawnCustomFilterDialog();
         }
 
         const searchItem = this.getSearchItem(item.searchItemId);
@@ -446,7 +451,7 @@ export class SearchBar extends Component {
                 label = this.state.query;
                 value = parseValue(this.state.query.trim(), fieldType);
             }
-            this.env.searchModel.addAutoCompletionValues(searchItemId, { label, operator, value });
+            this.searchModel.addAutoCompletionValues(searchItemId, { label, operator, value });
         }
 
         if (item.loadMore) {
@@ -494,10 +499,10 @@ export class SearchBar extends Component {
             hotkeys: {
                 enter: {
                     isAvailable: () => !this.inputDropdownState.isOpen,
-                    callback: () => this.env.searchModel.search() /** @todo keep this thing ?*/,
+                    callback: () => this.searchModel.search() /** @todo keep this thing ?*/,
                 },
                 arrowdown: {
-                    callback: () => this.env.searchModel.trigger("focus-view"),
+                    callback: () => this.searchModel.trigger("focus-view"),
                 },
                 backspace: {
                     bypassEditableProtection: true,
@@ -506,7 +511,7 @@ export class SearchBar extends Component {
                         isFacet(target) ||
                         (target.selectionStart === 0 && target.selectionEnd === 0),
                     callback: (navigator) => {
-                        const facets = this.env.searchModel.facets;
+                        const facets = this.searchModel.facets;
                         if (isFacet(navigator.activeItem.el)) {
                             this.removeFacet(facets[navigator.activeItemIndex]);
                         } else if (facets.length > 0) {
@@ -604,7 +609,7 @@ export class SearchBar extends Component {
                         } else if (item && item.isFieldProperty) {
                             navigator.items[findIndex(item.propertyItemId)]?.setActive();
                         } else if (this.inputRef().selectionStart === 0) {
-                            navigator.items[this.env.searchModel.facets.length - 1]?.setActive();
+                            navigator.items[this.searchModel.facets.length - 1]?.setActive();
                         }
                     },
                 },
@@ -618,24 +623,24 @@ export class SearchBar extends Component {
 
     onFacetLabelClick(target, facet) {
         const { domain, groupId } = facet;
-        if ((this.env.searchModel.canOrderByCount && facet.type === "groupBy") || !domain) {
+        if ((this.searchModel.canOrderByCount && facet.type === "groupBy") || !domain) {
             return;
         }
-        const { resModel } = this.env.searchModel;
+        const { resModel } = this.searchModel;
         this.dialogService.add(DomainSelectorDialog, {
             resModel,
             domain,
-            context: this.env.searchModel.domainEvalContext,
+            context: this.searchModel.domainEvalContext,
             onConfirm: (nextDomain) => {
                 if (nextDomain !== domain) {
-                    this.env.searchModel.splitAndAddDomain(nextDomain, groupId);
+                    this.searchModel.splitAndAddDomain(nextDomain, groupId);
                 }
             },
             disableConfirmButton: (domain) => domain === `[]`,
             title: _t("Custom Filter"),
             confirmButtonText: _t("Search"),
             discardButtonText: _t("Discard"),
-            isDebugMode: this.env.searchModel.isDebugMode,
+            isDebugMode: this.searchModel.isDebugMode,
         });
     }
 
@@ -693,7 +698,7 @@ export class SearchBar extends Component {
 
     onClickSearchIcon() {
         if (!this.state.query.length) {
-            this.env.searchModel.search();
+            this.searchModel.search();
         } else {
             const item = this.items.find((item) => item.id === this.lastActiveItemId);
             if (item) {

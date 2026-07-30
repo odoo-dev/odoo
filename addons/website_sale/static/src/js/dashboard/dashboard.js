@@ -1,8 +1,9 @@
-import { _t } from '@web/core/l10n/translation';
 import { Component, onWillStart, proxy } from '@odoo/owl';
 import { formatCurrency } from '@web/core/currency';
-import { useService, useBus } from '@web/core/utils/hooks';
-import { DateFilterButton, DATE_OPTIONS } from '../date_filter_button/date_filter_button';
+import { _t } from '@web/core/l10n/translation';
+import { useBus, useService } from '@web/core/utils/hooks';
+import { useSearchModel } from '@web/search/search_model';
+import { DATE_OPTIONS, DateFilterButton } from '../date_filter_button/date_filter_button';
 
 export const CARD_COLORS_MAPPING = {
     'to_fulfill': 'purple',
@@ -23,6 +24,8 @@ export class Dashboard extends Component {
     static props = {};
 	static components = { DateFilterButton };
 
+	searchModel = useSearchModel();
+
 	setup() {
 		this.state = proxy({
 			dashboardData: {},
@@ -42,7 +45,7 @@ export class Dashboard extends Component {
             { key: 'sales', title: _t("Sales"), monetary: true },
         ]
 
-		useBus(this.env.searchModel, 'update', () => {
+		useBus(this.searchModel, 'update', () => {
             for (const [cardName, filters] of Object.entries(CARD_FILTERS_MAPPING)) {
                 if (this.isSameFilter(filters)) {
 					this.state.selectedCard = cardName;
@@ -84,17 +87,17 @@ export class Dashboard extends Component {
 	 * the filters found in `filters`.
 	 */
     setFilters(filters) {
-        const searchItems = this.env.searchModel.getSearchItems((item) =>
+        const searchItems = this.searchModel.getSearchItems((item) =>
 			filters.includes(item.name)
 		);
-		this.env.searchModel.query = [];
+		this.searchModel.query = [];
 		for (const item of searchItems) {
-			this.env.searchModel.toggleSearchItem(item.id);
+			this.searchModel.toggleSearchItem(item.id);
 		}
     }
 
 	isSameFilter(filters) {
-		const activeFilters = this.env.searchModel.getSearchItems(
+		const activeFilters = this.searchModel.getSearchItems(
 			(el) => el.isActive && el.type === 'filter'
 		);
 		const activeFilterNames = activeFilters && activeFilters.map((el) => el.name);

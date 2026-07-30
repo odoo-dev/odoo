@@ -3,6 +3,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -18,6 +19,8 @@ export class SearchJobApplicant extends Component {
     static components = { DropdownItem };
     static props = {};
 
+    searchModel = useSearchModel();
+
     setup() {
         this.action = useService("action");
     }
@@ -27,7 +30,7 @@ export class SearchJobApplicant extends Component {
     //---------------------------------------------------------------------
 
     async openMatchingJobApplicants() {
-        const { globalContext } = this.env.searchModel;
+        const { globalContext } = this.searchModel;
         const action = await this.env.services.orm.call(
             "hr.job",
             "action_job_add_applicants",
@@ -41,7 +44,8 @@ export class SearchJobApplicant extends Component {
 export const searchJobApplicant = {
     Component: SearchJobApplicant,
     groupNumber: STATIC_ACTIONS_GROUP_NUMBER,
-    isDisplayed: ({ config, searchModel }) => {
+    isDisplayed({ config }) {
+        const searchModel = useSearchModel();
         return (
             searchModel.resModel === "hr.applicant" &&
             searchModel.globalContext.allow_search_matching_applicants &&

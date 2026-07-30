@@ -1,6 +1,7 @@
 import { ListController } from '@web/views/list/list_controller';
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useSearchModel } from '@web/search/search_model';
 
 export class StockOrderpointListController extends ListController {
     static template = "stock.StockOrderpoint.listView";
@@ -10,6 +11,8 @@ export class StockOrderpointListController extends ListController {
         Dropdown,
         DropdownItem,
     }
+
+    searchModel = useSearchModel();
 
     get nbSelected() {
         return this.model.root.selection.length;
@@ -35,7 +38,7 @@ export class StockOrderpointListController extends ListController {
     }
 
     async createRecord() {
-        const location_id = this.env.searchModel.categories.find((category) => category.fieldName === "location_id")?.activeValueId;
+        const location_id = this.searchModel.categories.find((category) => category.fieldName === "location_id")?.activeValueId;
         await super.createRecord(...arguments);
         if (this.editedRecord && location_id) {
             this.editedRecord.update({ location_id: { id: location_id } });

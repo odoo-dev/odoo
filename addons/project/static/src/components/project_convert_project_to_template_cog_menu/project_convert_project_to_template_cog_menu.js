@@ -3,6 +3,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -11,6 +12,8 @@ class ConvertProjectToTemplateCogMenu extends Component {
     static components = { DropdownItem };
     static props = {};
 
+    searchModel = useSearchModel();
+
     setup() {
         this.action = useService("action");
     }
@@ -18,7 +21,7 @@ class ConvertProjectToTemplateCogMenu extends Component {
     toggleProjectTemplateMode() {
         this.action.doActionButton({
             type: "object",
-            resId: this.env.searchModel.context.active_id,
+            resId: this.searchModel.context.active_id,
             name: "action_toggle_project_template_mode",
             resModel: "project.project",
         });
@@ -28,7 +31,8 @@ class ConvertProjectToTemplateCogMenu extends Component {
 export const ConvertProjectToTemplateMenuItem = {
     Component: ConvertProjectToTemplateCogMenu,
     groupNumber: 0,
-    isDisplayed: async ({ config, searchModel }) => {
+    async isDisplayed({ config }) {
+        const searchModel = useSearchModel();
         const isManager = await user.hasGroup("project.group_project_manager");
         return (
             isManager &&

@@ -20,7 +20,7 @@ export class LunchListRenderer extends LunchRendererMixin(ListRenderer) {
 
     setup() {
         super.setup();
-        const { locationId } = this.env.searchModel.lunchState;
+        const { locationId } = this.searchModel.lunchState;
         if (!locationId) {
             this.props.list.records = [];
         }

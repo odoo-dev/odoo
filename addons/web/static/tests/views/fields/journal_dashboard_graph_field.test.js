@@ -85,8 +85,8 @@ defineModels([Partner, User]);
 // Kanban
 // WOWL remove this helper and user the control panel instead
 const reload = async (kanban, params = {}) => {
-    kanban.env.searchModel.reload(params);
-    kanban.env.searchModel.search();
+    kanban.searchModel.reload(params);
+    kanban.searchModel.search();
     await animationFrame();
 };
 

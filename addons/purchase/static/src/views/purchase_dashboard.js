@@ -1,10 +1,12 @@
 import { Component, onWillStart, plugin, proxy } from "@odoo/owl";
 import { ORM } from "@web/core/orm_plugin";
+import { useSearchModel } from "@web/search/search_model";
 
 export class PurchaseDashBoard extends Component {
     static template = "purchase.PurchaseDashboard";
 
     orm = plugin(ORM);
+    searchModel = useSearchModel();
 
     setup() {
         this.state = proxy({
@@ -37,12 +39,10 @@ export class PurchaseDashBoard extends Component {
     setSearchContext(ev) {
         const filter_name = ev.currentTarget.getAttribute("filter_name");
         const filters = filter_name.split(",");
-        const searchItems = this.env.searchModel.getSearchItems((item) =>
-            filters.includes(item.name)
-        );
-        this.env.searchModel.query = [];
+        const searchItems = this.searchModel.getSearchItems((item) => filters.includes(item.name));
+        this.searchModel.query = [];
         for (const item of searchItems) {
-            this.env.searchModel.toggleSearchItem(item.id);
+            this.searchModel.toggleSearchItem(item.id);
         }
     }
 }

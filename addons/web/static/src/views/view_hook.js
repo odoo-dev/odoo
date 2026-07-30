@@ -1,18 +1,18 @@
-import { render, useComponent, useLayoutEffect } from "@web/owl2/utils";
-import { _t } from "@web/core/l10n/translation";
-import { useBus, useService } from "@web/core/utils/hooks";
-import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { browser } from "@web/core/browser/browser";
-import { evaluateExpr } from "@web/core/py_js/py";
+import {
+    ConfirmationDialog,
+    deleteConfirmationMessage,
+} from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { rpc } from "@web/core/network/rpc";
-import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
-import {
-    deleteConfirmationMessage,
-    ConfirmationDialog,
-} from "@web/core/confirmation_dialog/confirmation_dialog";
-
+import { evaluateExpr } from "@web/core/py_js/py";
+import { useBus, useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { DynamicList } from "@web/model/relational_model/dynamic_list";
+import { render, useComponent, useLayoutEffect } from "@web/owl2/utils";
+import { useSearchModel } from "@web/search/search_model";
+import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
 
 /**
  * Allows for a component (usually a View component) to handle links with
@@ -132,7 +132,8 @@ export function useBounceButton(containerRef, shouldBounce) {
 }
 
 export function useExportRecords(env, context, getDefaultExportList) {
-    const { model, searchModel } = env;
+    const { model } = env;
+    const searchModel = useSearchModel();
     useBus(searchModel, "direct-export-data", async () => {
         _downloadExport(getDefaultExportList(), false, "xlsx");
     });

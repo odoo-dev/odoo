@@ -1,13 +1,15 @@
 import { describe, expect, test } from "@odoo/hoot";
+import { mockDate, mockTimeZone } from "@odoo/hoot-mock";
 import { Component, useProps, xml } from "@odoo/owl";
 import { defineModels, fields, models, mountWithSearch } from "@web/../tests/web_test_helpers";
-import { mockDate, mockTimeZone } from "@odoo/hoot-mock";
+import { useSearchModel } from "@web/search/search_model";
 
 describe.current.tags("headless");
 
 class TestComponent extends Component {
     static template = xml`<div class="o_test_component"/>`;
     props = useProps();
+    searchModel = useSearchModel();
 }
 
 async function createSearchModel(searchProps = {}, config = {}) {
@@ -20,7 +22,7 @@ async function createSearchModel(searchProps = {}, config = {}) {
         },
         config
     );
-    return component.env.searchModel;
+    return component.searchModel;
 }
 
 function sanitizeSearchItems(model) {

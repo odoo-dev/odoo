@@ -3,6 +3,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 import { Component, markup } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 
 export const AbstractDocumentFileUploader = (T = Component)  => class AbstractDocumentFileUploader extends T {
 
@@ -86,6 +87,8 @@ export class DocumentFileUploader extends AbstractDocumentFileUploader() {
         resModel: {type: String, optional: true},
     };
 
+    searchModel = useSearchModel();
+
     // To define specific resModal from another model
     getResModel() {
         return this.props.resModel;
@@ -93,10 +96,10 @@ export class DocumentFileUploader extends AbstractDocumentFileUploader() {
 
     get cleanContext() {
         // clean the context to ensure the `create` call doesn't fail from unknown `default_*` context
-        return Object.fromEntries(Object.entries(this.env.searchModel.context).filter(([key]) => !key.startsWith('default_')));
+        return Object.fromEntries(Object.entries(this.searchModel.context).filter(([key]) => !key.startsWith('default_')));
     }
 
     get onUploadCompleteContext() {
-        return {...this.extraContext, ...this.env.searchModel.context};
+        return {...this.extraContext, ...this.searchModel.context};
     }
 }

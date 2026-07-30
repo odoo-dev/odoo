@@ -36,11 +36,11 @@ import {
     onWillUnmount,
     plugin,
     proxy,
-    useProps,
     signal,
     status,
     t,
     useListener,
+    useProps,
 } from "@odoo/owl";
 import { getCurrencyRates } from "@web/core/currency";
 import { _t } from "@web/core/l10n/translation";
@@ -50,6 +50,7 @@ import { user } from "@web/core/user";
 import { odoomark } from "@web/core/utils/html";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
+import { useOptionalSearchModel } from "@web/search/search_model";
 import { ActionHelper } from "@web/views/action_helper";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
 import { MultiCurrencyPopover } from "@web/views/view_components/multi_currency_popover";
@@ -138,6 +139,9 @@ export class ListRenderer extends Component {
         ActionHelper,
         GroupConfigMenu,
     };
+
+    searchModel = useOptionalSearchModel();
+
     props = useProps(listRendererProps);
 
     setup() {
@@ -261,8 +265,8 @@ export class ListRenderer extends Component {
             onDrop: (params) => this.sortDrop(dataRowId, dataGroupId, params),
         });
 
-        if (this.env.searchModel) {
-            useBus(this.env.searchModel, "focus-view", () => {
+        if (this.searchModel) {
+            useBus(this.searchModel, "focus-view", () => {
                 if (this.props.list.model.useSampleModel) {
                     return;
                 }
@@ -2054,8 +2058,8 @@ export class ListRenderer extends Component {
         switch (hotkey) {
             case "arrowup":
                 toFocus = this.findFocusFutureCell(cell, cellIsInGroupRow, "up");
-                if (!toFocus && this.env.searchModel) {
-                    this.env.searchModel.trigger("focus-search");
+                if (!toFocus && this.searchModel) {
+                    this.searchModel.trigger("focus-search");
                     return true;
                 }
                 break;

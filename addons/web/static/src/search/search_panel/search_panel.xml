@@ -54,7 +54,7 @@
 
 <t t-name="web.SearchPanelContent">
     <div class="o_search_panel flex-grow-0 flex-shrink-0 h-100 pb-5 px-2 bg-view overflow-auto position-relative"
-         t-att-class="this.env.searchModel.searchPanelInfo.className"
+         t-att-class="this.searchModel.searchPanelInfo.className"
          t-ref="this.root">
         <div t-if="!this.uiService.isSmall" class="d-flex align-items-center pt-2">
 

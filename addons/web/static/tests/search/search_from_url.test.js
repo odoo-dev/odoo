@@ -51,15 +51,15 @@ test("URL with single filter creates filter with domain", async () => {
     const searchBar = await mountWithSearch(SearchBar, { resModel: "mock.purchase.order" });
 
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
-    expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "sent"]]);
-    const shared = searchBar.env.searchModel.getSearchItems(
+    expect(searchBar.searchModel.domain).toEqual([["state", "=", "sent"]]);
+    const shared = searchBar.searchModel.getSearchItems(
         (it) => it.isActive && it.description === "Shared"
     )[0];
     expect(new Domain(shared.domain).toList()).toEqual([["state", "=", "sent"]]);
 
     // Removing the "Shared" filter should reset domain
     await contains(".o_facet_remove").click();
-    expect(searchBar.env.searchModel.domain).toEqual([]);
+    expect(searchBar.searchModel.domain).toEqual([]);
 });
 
 test("URL with multiple filters creates shared filter", async () => {
@@ -67,13 +67,13 @@ test("URL with multiple filters creates shared filter", async () => {
     redirect("?domain=" + encodeURIComponent(domain));
     const searchBar = await mountWithSearch(SearchBar, { resModel: "mock.purchase.order" });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1); // Only show 1 "shared filter"
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["state", "=", "sent"],
         ["partner_id", "ilike", "me"],
     ]);
     // Also check that the search item has the correct domain (so user can edit it by clicking on it)
-    const shared = searchBar.env.searchModel.getSearchItems(
+    const shared = searchBar.searchModel.getSearchItems(
         (it) => it.isActive && it.description === "Shared"
     )[0];
     expect(new Domain(shared.domain).toString()).toEqual(domain);
@@ -87,7 +87,7 @@ test("URL with single existing groupBy activates it", async () => {
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["partner_id"]);
 });
 
 test("URL with multiple groupBy (incl. custom), creates and activates single groupBy", async () => {
@@ -98,8 +98,8 @@ test("URL with multiple groupBy (incl. custom), creates and activates single gro
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["state", "partner_id"]);
-    const activeState = searchBar.env.searchModel.getSearchItems(
+    expect(searchBar.searchModel.groupBy).toEqual(["state", "partner_id"]);
+    const activeState = searchBar.searchModel.getSearchItems(
         (it) => it.isActive && it.description === "State" // New filter for custom groupBy
     );
     expect(activeState).toHaveLength(1);
@@ -112,7 +112,7 @@ test("URL groupBy with sub-items activated", async () => {
         searchMenuTypes: ["groupBy"],
         searchViewId: false,
     });
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_order:year"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_order:year"]);
 });
 
 test("URL with groupBy and orderBy activates ordered groupBy", async () => {
@@ -125,8 +125,8 @@ test("URL with groupBy and orderBy activates ordered groupBy", async () => {
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
-    expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
+    expect(searchBar.searchModel.groupBy).toEqual(["partner_id"]);
+    expect(searchBar.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
 });
 
 test("URL with filter + groupBy + orderBy activates filters", async () => {
@@ -142,12 +142,12 @@ test("URL with filter + groupBy + orderBy activates filters", async () => {
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(2); // One for the shared filter and one for the groupby
-    expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "sent"]]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
-    expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: true, name: "__count" }]);
+    expect(searchBar.searchModel.domain).toEqual([["state", "=", "sent"]]);
+    expect(searchBar.searchModel.groupBy).toEqual(["partner_id"]);
+    expect(searchBar.searchModel.orderBy).toEqual([{ asc: true, name: "__count" }]);
 
     // Regenerating the url should give the same result as before, without the "?"
-    expect(searchBar.env.searchModel.generateQueryString()).toEqual(url.slice(1));
+    expect(searchBar.searchModel.generateQueryString()).toEqual(url.slice(1));
 });
 
 test("Bad URL with 1 faulty part still gets applied", async () => {
@@ -171,8 +171,8 @@ test("Bad URL with 1 faulty part still gets applied", async () => {
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(2); // One for the shared filter and one for the groupby
-    expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "sent"]]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
+    expect(searchBar.searchModel.domain).toEqual([["state", "=", "sent"]]);
+    expect(searchBar.searchModel.groupBy).toEqual(["partner_id"]);
 
     expect.verifySteps(["Partial error notification"]);
 });
@@ -201,7 +201,7 @@ test("Bad URL reverts to default filters", async () => {
     });
 
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1); // Uses the default filter;
-    expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "draft"]]);
+    expect(searchBar.searchModel.domain).toEqual([["state", "=", "draft"]]);
 
     expect.verifySteps(["Error notification"]);
 });
@@ -223,7 +223,7 @@ test("Good URL does not apply default filters", async () => {
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1); // Only the shared filter;
 
     // Ensure domain does NOT include the default filter's domain
-    expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "sent"]]);
+    expect(searchBar.searchModel.domain).toEqual([["state", "=", "sent"]]);
 });
 
 // TODO JESC Fix this after owl refactor

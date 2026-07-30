@@ -4,6 +4,7 @@ import { CrmKanbanArchParser } from "@crm/views/crm_kanban/crm_kanban_arch_parse
 import { CrmKanbanRenderer } from "@crm/views/crm_kanban/crm_kanban_renderer";
 import { rottingKanbanView } from "@mail/js/rotting_mixin/rotting_kanban_view";
 import { LeadGenerationDropdown } from "../../components/lead_generation_dropdown/lead_generation_dropdown";
+import { useSearchModel } from "@web/search/search_model";
 
 export const crmKanbanView = {
     ...rottingKanbanView,
@@ -13,7 +14,10 @@ export const crmKanbanView = {
         static components = {
             ...rottingKanbanView.Controller.components,
             LeadGenerationDropdown,
-        }
+        };
+
+        searchModel = useSearchModel();
+
         get progressBarAggregateFields() {
             const res = super.progressBarAggregateFields;
             const progressAttributes = this.props.archInfo.progressAttributes;

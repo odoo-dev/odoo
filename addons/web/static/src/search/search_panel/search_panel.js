@@ -5,6 +5,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { render } from "@web/owl2/utils";
 import { useSetupAction } from "@web/search/action_hook";
+import { useSearchModel } from "@web/search/search_model";
 
 //-------------------------------------------------------------------------
 // Helpers
@@ -47,6 +48,8 @@ export class SearchPanel extends Component {
         filtersGroup: "web.SearchPanel.FiltersGroup",
     };
 
+    searchModel = useSearchModel();
+
     root = signal.ref();
 
     setup() {
@@ -69,8 +72,8 @@ export class SearchPanel extends Component {
             this.state.sidebarExpanded = exprToBoolean(sidebarExpandedPreference);
         }
 
-        useBus(this.env.searchModel, "update", async () => {
-            await this.env.searchModel.sectionsPromise;
+        useBus(this.searchModel, "update", async () => {
+            await this.searchModel.sectionsPromise;
             this.updateActiveValues();
             render(this);
         });
@@ -90,14 +93,14 @@ export class SearchPanel extends Component {
         });
 
         onWillStart(async () => {
-            await this.env.searchModel.sectionsPromise;
+            await this.searchModel.sectionsPromise;
             this.expandDefaultValue();
             this.expandValues();
             this.updateActiveValues();
         });
 
         onWillUpdateProps(async () => {
-            await this.env.searchModel.sectionsPromise;
+            await this.searchModel.sectionsPromise;
             this.updateActiveValues();
         });
     }
@@ -107,7 +110,7 @@ export class SearchPanel extends Component {
     //---------------------------------------------------------------------
 
     get sections() {
-        return this.env.searchModel.getSections((s) => !s.empty);
+        return this.searchModel.getSections((s) => !s.empty);
     }
 
     //---------------------------------------------------------------------
@@ -157,7 +160,7 @@ export class SearchPanel extends Component {
         if (this.hasImportedState) {
             return;
         }
-        const categories = this.env.searchModel.getSections((s) => s.type === "category");
+        const categories = this.searchModel.getSections((s) => s.type === "category");
         for (const category of categories) {
             this.state.expanded[category.id] = {};
             if (category.activeValueId) {
@@ -173,7 +176,7 @@ export class SearchPanel extends Component {
         if (this.hasImportedState) {
             return;
         }
-        const categories = this.env.searchModel.getSections((s) => s.type === "category");
+        const categories = this.searchModel.getSections((s) => s.type === "category");
         for (const category of categories) {
             if (category.depth === 0) {
                 continue;
@@ -215,7 +218,7 @@ export class SearchPanel extends Component {
      * @returns {Object[]}
      */
     getCategorySelection() {
-        const activeCategories = this.env.searchModel.getSections(isActiveCategory);
+        const activeCategories = this.searchModel.getSections(isActiveCategory);
         const selection = [];
         for (const category of activeCategories) {
             const parentIds = this.getAncestorValueIds(category, category.activeValueId);
@@ -238,7 +241,7 @@ export class SearchPanel extends Component {
      * @returns {Object[]}
      */
     getFilterSelection() {
-        const filters = this.env.searchModel.getSections(isFilter);
+        const filters = this.searchModel.getSections(isFilter);
         const selection = [];
         for (const { groups, values, icon, icon_class, color } of filters) {
             let filterValues;
@@ -279,7 +282,7 @@ export class SearchPanel extends Component {
      */
     clearSelection(sectionId = 0) {
         const sectionIds = sectionId ? [sectionId] : Object.keys(this.state.active).map(Number);
-        this.env.searchModel.clearSections(sectionIds);
+        this.searchModel.clearSections(sectionIds);
     }
 
     /**
@@ -300,7 +303,7 @@ export class SearchPanel extends Component {
             this.getDropdownState(category.id).close();
         }
         if (category.activeValueId !== value.id) {
-            this.env.searchModel.toggleCategoryValue(category.id, value.id);
+            this.searchModel.toggleCategoryValue(category.id, value.id);
         }
     }
 
@@ -329,7 +332,7 @@ export class SearchPanel extends Component {
             valueIds.push(id);
             this.state.active[filterId][id] = !checked;
         });
-        this.env.searchModel.toggleFilterValues(filterId, valueIds, !checked);
+        this.searchModel.toggleFilterValues(filterId, valueIds, !checked);
     }
 
     /**
@@ -340,14 +343,14 @@ export class SearchPanel extends Component {
      */
     toggleFilterValue(filterId, valueId, { currentTarget }) {
         this.state.active[filterId][valueId] = currentTarget.checked;
-        this.env.searchModel.toggleFilterValues(filterId, [valueId]);
+        this.searchModel.toggleFilterValues(filterId, [valueId]);
     }
 
     onFilterValueKeydown(ev, filterId, valueId) {
         if (ev.key === "Enter" || ev.key === " ") {
             ev.preventDefault();
             this.state.active[filterId][valueId] = !this.state.active[filterId][valueId];
-            this.env.searchModel.toggleFilterValues(filterId, [valueId]);
+            this.searchModel.toggleFilterValues(filterId, [valueId]);
         }
     }
 

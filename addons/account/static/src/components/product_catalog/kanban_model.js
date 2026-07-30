@@ -3,7 +3,7 @@ import { patch } from "@web/core/utils/patch";
 
 patch(ProductCatalogKanbanModel.prototype, {
     async _loadData(params) {
-        const selectedSection = this.env.searchModel.selectedSection;
+        const selectedSection = this.searchModel.selectedSection;
         if (selectedSection.filtered) {
             params = {
                 ...params,
@@ -20,7 +20,7 @@ patch(ProductCatalogKanbanModel.prototype, {
     _getOrderLinesInfoParams(params, productIds) {
         return {
             ...super._getOrderLinesInfoParams(params, productIds),
-            section_id: this.env.searchModel.selectedSection.sectionId,
+            section_id: this.searchModel.selectedSection.sectionId,
         };
     }
 })

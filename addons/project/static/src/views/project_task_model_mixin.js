@@ -1,32 +1,32 @@
 import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
+import { useSearchModel } from "@web/search/search_model";
 
 export const ProjectTaskModelMixin = (T) =>
     class ProjectTaskModelMixin extends T {
+        searchModel = useSearchModel();
+
         _processSearchDomain(domain) {
-            const { my_tasks, subtask_action, activity_action } =
-                this.env.searchModel.globalContext;
+            const { my_tasks, subtask_action, activity_action } = this.searchModel.globalContext;
             const showSubtasks =
                 my_tasks ||
                 subtask_action ||
                 activity_action ||
                 JSON.parse(browser.localStorage.getItem("showSubtasks"));
             if (
-                ["project.task", "report.project.task.user"].includes(
-                    this.env.searchModel.resModel
-                ) &&
+                ["project.task", "report.project.task.user"].includes(this.searchModel.resModel) &&
                 !showSubtasks
             ) {
                 domain = Domain.and([domain, [["display_in_project", "=", true]]]).toList({});
             }
-            if (this.env.searchModel.context?.render_task_templates) {
+            if (this.searchModel.context?.render_task_templates) {
                 domain = Domain.removeDomainLeaves(domain, [
                     "has_template_ancestor",
                     "has_project_template",
                 ]);
                 domain = Domain.and([domain, [["has_template_ancestor", "=", true]]]).toList({});
                 // Allow to filter on task templates having no project
-                const projectId = this.env.searchModel.context?.default_project_id || false;
+                const projectId = this.searchModel.context?.default_project_id || false;
                 if (projectId) {
                     domain = Domain.and([
                         Domain.removeDomainLeaves(domain, ["project_id"]).toList(),

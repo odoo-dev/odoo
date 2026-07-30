@@ -2,10 +2,13 @@ import { useService } from '@web/core/utils/hooks';
 import { formatMonetary } from "@web/views/fields/formatters";
 import { Component, onWillStart, proxy, onWillUpdateProps } from "@odoo/owl";
 import { Domain } from "@web/core/domain";
+import { useSearchModel } from '@web/search/search_model';
 
 export class ExpenseDashboard extends Component {
     static template = "hr_expense.ExpenseDashboard";
     static props = {};
+
+    searchModel = useSearchModel();
 
     setup() {
         super.setup();
@@ -23,7 +26,7 @@ export class ExpenseDashboard extends Component {
     }
 
     async fetchExpenseDashboardData() {
-        const domain = this.env.searchModel?.domain ?? [];
+        const domain = this.searchModel?.domain ?? [];
         const expense_states = await this.orm
             .cache({
                 type: "disk",
@@ -40,7 +43,7 @@ export class ExpenseDashboard extends Component {
     }
 
     async applyFilter(filterName) {
-        const searchModel = this.env.searchModel;
+        const searchModel = this.searchModel;
 
         // Search for active filters implying an expense state
         const stateActiveFilters = searchModel.query.filter(item => {

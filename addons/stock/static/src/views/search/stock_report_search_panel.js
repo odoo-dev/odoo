@@ -21,27 +21,27 @@ export class StockReportSearchPanel extends SearchPanel {
     }
 
     get warehouses() {
-        return this.env.searchModel.getWarehouses();
+        return this.searchModel.getWarehouses();
     }
 
     clearWarehouseContext() {
-        this.env.searchModel.clearWarehouseContext();
+        this.searchModel.clearWarehouseContext();
         this.selectedWarehouse = null;
     }
 
     applyWarehouseContext(warehouse_id) {
-        this.env.searchModel.applyWarehouseContext(warehouse_id);
+        this.searchModel.applyWarehouseContext(warehouse_id);
         this.selectedWarehouse = warehouse_id;
     }
 
     onDateApply(date) {
         this.dateState.inventoryDate = date;
         const isoDate = date ? date.toUTC().toFormat("yyyy-MM-dd HH:mm:ss") : false;
-        this.env.searchModel.applyDateContext(isoDate);
+        this.searchModel.applyDateContext(isoDate);
     }
 
     clearDate() {
         this.dateState.inventoryDate = false;
-        this.env.searchModel.applyDateContext(false);
+        this.searchModel.applyDateContext(false);
     }
 }

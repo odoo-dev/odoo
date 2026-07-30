@@ -1,9 +1,9 @@
-import { useEnv } from "@web/owl2/utils";
+import { onWillStart, proxy } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
+import { useSearchModel } from "@web/search/search_model";
 import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
-import { onWillStart, proxy } from "@odoo/owl";
 
 /**
  * Used to share code and keep the same behaviour on different types of 'website
@@ -13,7 +13,7 @@ import { onWillStart, proxy } from "@odoo/owl";
  * to filter content).
  */
 export function usePageManager({ resModel, createAction }) {
-    const env = useEnv();
+    const searchModel = useSearchModel();
     const website = useService("website");
     const dialog = useService("dialog");
     const actionService = useService("action");
@@ -25,7 +25,7 @@ export function usePageManager({ resModel, createAction }) {
     onWillStart(async () => {
         // `fetchWebsites()` already done by parent PageSearchModel
         websiteSelection.push(...website.websites);
-        state.activeWebsite = await env.searchModel.getCurrentWebsite();
+        state.activeWebsite = await searchModel.getCurrentWebsite();
     });
 
     async function createWebsiteContent() {

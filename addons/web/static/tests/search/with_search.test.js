@@ -1,4 +1,3 @@
-import { useSubEnv } from "@web/owl2/utils";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, onWillStart, onWillUpdateProps, proxy, t, useProps, xml } from "@odoo/owl";
@@ -13,8 +12,9 @@ import {
     toggleMenuItem,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
-
+import { useSubEnv } from "@web/owl2/utils";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
+import { useSearchModel } from "@web/search/search_model";
 import { WithSearch } from "@web/search/with_search/with_search";
 
 class Animal extends models.Model {
@@ -54,16 +54,16 @@ test("simple rendering", async () => {
     expect(".o_test_component").toHaveText("Test component content");
 });
 
-test("search model in sub env", async () => {
+test("search model in sub scope", async () => {
     class TestComponent extends Component {
-        props = useProps();
+        searchModel = useSearchModel();
         static template = xml`<div class="o_test_component">Test component content</div>`;
     }
 
     const component = await mountWithSearch(TestComponent, {
         resModel: "animal",
     });
-    expect(component.env.searchModel).not.toBeEmpty();
+    expect(component.searchModel).not.toBeEmpty();
 });
 
 test("search query props are passed as props to concrete component", async () => {

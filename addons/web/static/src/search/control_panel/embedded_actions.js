@@ -1,15 +1,16 @@
-import { Component, proxy, useProps, t, signal, useLayoutEffect, useEnv } from "@odoo/owl";
-import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { AccordionItem } from "@web/core/dropdown/accordion_item";
+import { Component, proxy, signal, t, useEnv, useLayoutEffect, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Transition } from "@web/core/transition";
-import { useSortable } from "@web/core/utils/sortable_owl";
-import { user } from "@web/core/user";
 import { makeContext } from "@web/core/context";
+import { AccordionItem } from "@web/core/dropdown/accordion_item";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { _t } from "@web/core/l10n/translation";
+import { Transition } from "@web/core/transition";
+import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
+import { useSortable } from "@web/core/utils/sortable_owl";
+import { useOptionalSearchModel } from "@web/search/search_model";
 
 export class EmbeddedActionsConfigHandler {
     constructor(parentActionId, currentActiveId, parentResModel, ormService) {
@@ -60,12 +61,13 @@ export class EmbeddedActionsConfigHandler {
 }
 
 export class EmbeddedActionsState {
-    constructor(env, orm, actionService, dialogService, notificationService) {
-        this.env = env;
-        this.orm = orm;
-        this.actionService = actionService;
-        this.dialogService = dialogService;
-        this.notificationService = notificationService;
+    constructor() {
+        this.env = useEnv();
+        this.orm = useService("orm");
+        this.actionService = useService("action");
+        this.dialogService = useService("dialog");
+        this.notificationService = useService("notification");
+        this.searchModel = useOptionalSearchModel();
 
         let defaultEmbeddedActions = this.env.config.embeddedActions;
         if (this.env.config.embeddedActions?.length > 0 && !this.env.config.parentActionId) {
@@ -90,7 +92,7 @@ export class EmbeddedActionsState {
             this.env.config.embeddedActions?.[0]?.parent_action_id[0] ||
             this.env.config.embeddedActions?.[0]?.parent_action_id ||
             "";
-        const currentActiveId = this.env.searchModel?.globalContext.active_id || false;
+        const currentActiveId = this.searchModel?.globalContext.active_id || false;
 
         this.currentEmbeddedActionId = this.env.config.currentEmbeddedActionId;
         this.currentEmbeddedAction =
@@ -224,7 +226,7 @@ export class EmbeddedActionsState {
         const values = {
             parent_action_id: parent_action_id[0],
             parent_res_model,
-            parent_res_id: this.env.searchModel.globalContext.active_id,
+            parent_res_id: this.searchModel.globalContext.active_id,
             user_id: userId,
             is_deletable: true,
             default_view_mode: this.env.config.viewType,
@@ -242,7 +244,7 @@ export class EmbeddedActionsState {
 
         const embeddedActionId = await this.orm.create("ir.embedded.actions", [values]);
         const description = `${newActionName}`;
-        this.env.searchModel.createNewFavorite({
+        this.searchModel.createNewFavorite({
             description,
             isDefault: true,
             isShared: newActionIsShared,
@@ -300,7 +302,7 @@ export class EmbeddedActionsState {
         await this.orm.unlink("ir.embedded.actions", [action.id]);
 
         if (action.id === currentEmbeddedAction?.id) {
-            const { active_id, active_model } = this.env.searchModel.globalContext;
+            const { active_id, active_model } = this.searchModel.globalContext;
             const actionContext = action.context ? makeContext([action.context]) : {};
             this.actionService.doAction(action.parent_action_id[0] || action.parent_action_id, {
                 additionalContext: { ...actionContext, active_id, active_model },
@@ -311,7 +313,7 @@ export class EmbeddedActionsState {
 
     async onEmbeddedActionClick(action) {
         this.env.config.setEmbeddedActions(this.embeddedInfos.embeddedActions);
-        const { active_id, active_model } = this.env.searchModel.globalContext;
+        const { active_id, active_model } = this.searchModel.globalContext;
         const actionContext = action.context ? makeContext([action.context]) : {};
         const context = {
             ...actionContext,
@@ -324,7 +326,7 @@ export class EmbeddedActionsState {
         this.actionService.doActionButton(
             {
                 type: action.python_method ? "object" : "action",
-                resId: this.env.searchModel?.globalContext.active_id,
+                resId: this.searchModel?.globalContext.active_id,
                 name: action.python_method || action.action_id[0] || action.action_id,
                 resModel: action.parent_res_model,
                 context,
@@ -370,17 +372,7 @@ export class EmbeddedActionsState {
 }
 
 export function useEmbeddedActions() {
-    const env = useEnv();
-    const orm = useService("orm");
-    const actionService = useService("action");
-    const dialogService = useService("dialog");
-    const notificationService = useService("notification");
-
-    const state = proxy(
-        new EmbeddedActionsState(env, orm, actionService, dialogService, notificationService)
-    );
-
-    return state;
+    return proxy(new EmbeddedActionsState());
 }
 
 export class EmbeddedActionsPanel extends Component {

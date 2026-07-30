@@ -5,10 +5,12 @@ import { useService } from "@web/core/utils/hooks";
 import { statusBarField, StatusBarField } from "@web/views/fields/statusbar/statusbar_field";
 import { _t } from "@web/core/l10n/translation";
 import { signal } from "@odoo/owl";
+import { useSearchModel } from "@web/search/search_model";
 
 export class VersionsTimeline extends StatusBarField {
     static template = "hr.VersionsTimeline";
 
+    searchModel = useSearchModel();
     datetimePickerTargetRef = signal.ref();
 
     /** @override **/
@@ -60,7 +62,7 @@ export class VersionsTimeline extends StatusBarField {
 
         await this.props.record.model.load({
             context: {
-                ...this.props.record.model.env.searchModel.context,
+                ...this.searchModel.context,
                 version_id: version_id,
             },
         });
@@ -76,7 +78,7 @@ export class VersionsTimeline extends StatusBarField {
         await record.save();
         await this.props.record.model.load({
             context: {
-                ...this.props.record.model.env.searchModel.context,
+                ...this.searchModel.context,
                 version_id: item.value,
             },
         });

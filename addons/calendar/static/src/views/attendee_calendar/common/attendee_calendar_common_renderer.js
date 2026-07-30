@@ -1,5 +1,6 @@
-import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
 import { AttendeeCalendarCommonPopover } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_popover";
+import { useOptionalSearchModel } from "@web/search/search_model";
+import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
 
 export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
     static eventTemplate = "calendar.AttendeeCalendarCommonRenderer.event";
@@ -8,9 +9,11 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
         Popover: AttendeeCalendarCommonPopover,
     };
 
+    searchModel = useOptionalSearchModel();
+
     /**
      * @override
-     * 
+     *
      * In month view, do not limit the number of displayed events using a fixed event limit.
      * Instead, explicitly set the "dayMaxEventRows" to "true" to dynamically limit the number
      * of displayed events depending on the available day cell height.
@@ -19,7 +22,8 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
     get interactiveOptions() {
         return {
             ...super.interactiveOptions,
-            dayMaxEventRows: this.props.model.scale === "month" ? true : this.props.model.eventLimit,
+            dayMaxEventRows:
+                this.props.model.scale === "month" ? true : this.props.model.eventLimit,
         };
     }
 
@@ -76,7 +80,7 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
         if (!id && !allDay && !end && ["day", "week"].includes(this.props.model.scale)) {
             if (res.start?.minute === 15 || res.start?.minute === 45) {
                 res.start = res.start.set({
-                    minute: res.start.minute - 15
+                    minute: res.start.minute - 15,
                 });
             }
         }
@@ -93,9 +97,9 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
         const record = this.props.model.records[event.id];
         if (
             record &&
-            this.env.searchModel?.context?.default_calendar_event_id === parseInt(event.id) &&
+            this.searchModel?.context?.default_calendar_event_id === parseInt(event.id) &&
             !this.popover.isOpen &&
-            !el.classList.contains('fc-event-dragging')
+            !el.classList.contains("fc-event-dragging")
         ) {
             this.openPopover(el, record);
         }

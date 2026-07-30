@@ -80,7 +80,7 @@ test(`toggle a "simple" groupby in groupby menu works`, async () => {
     });
     await toggleSearchBarMenu();
 
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
     expect(isItemSelected("Foo")).toBe(false);
 
@@ -91,13 +91,13 @@ test(`toggle a "simple" groupby in groupby menu works`, async () => {
 
     await toggleMenuItem("Foo");
     expect(menuItem).toHaveProperty("ariaChecked", "true");
-    expect(searchBar.env.searchModel.groupBy).toEqual(["foo"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["foo"]);
     expect(getFacetTexts()).toEqual(["Foo"]);
     expect(`.o_searchview .o_searchview_facet .o_searchview_facet_label`).toHaveCount(1);
     expect(isItemSelected("Foo")).toBe(true);
 
     await toggleMenuItem("Foo");
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
     expect(isItemSelected("Foo")).toBe(false);
 });
@@ -136,12 +136,12 @@ test(`remove a "Group By" facet properly unchecks groupbys in groupby menu`, asy
     });
     await toggleSearchBarMenu();
     expect(getFacetTexts()).toEqual(["Foo"]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["foo"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["foo"]);
     expect(isItemSelected("Foo")).toBe(true);
 
     await removeFacet("Foo");
     expect(getFacetTexts()).toEqual([]);
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
 
     await toggleSearchBarMenu();
     expect(isItemSelected("Foo")).toBe(false);
@@ -160,20 +160,20 @@ test("group by a date field using interval works", async () => {
         context: { search_default_date: 1 },
     });
     await toggleSearchBarMenu();
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:week"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:week"]);
 
     await toggleMenuItem("Date");
     expect(isOptionSelected("Date", "Week")).toBe(true);
     expect(queryAllTexts`.o_item_option`).toEqual(["Year", "Quarter", "Month", "Week", "Day"]);
 
     await toggleMenuItemOption("Date", "Year");
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:year", "date_field:week"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:year", "date_field:week"]);
     expect(getFacetTexts()).toEqual(["Date: Year\n>\nDate: Week"]);
     expect(isOptionSelected("Date", "Year")).toBe(true);
     expect(isOptionSelected("Date", "Week")).toBe(true);
 
     await toggleMenuItemOption("Date", "Month");
-    expect(searchBar.env.searchModel.groupBy).toEqual([
+    expect(searchBar.searchModel.groupBy).toEqual([
         "date_field:year",
         "date_field:month",
         "date_field:week",
@@ -184,18 +184,18 @@ test("group by a date field using interval works", async () => {
     expect(isOptionSelected("Date", "Week")).toBe(true);
 
     await toggleMenuItemOption("Date", "Week");
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:year", "date_field:month"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:year", "date_field:month"]);
     expect(getFacetTexts()).toEqual(["Date: Year\n>\nDate: Month"]);
     expect(isOptionSelected("Date", "Year")).toBe(true);
     expect(isOptionSelected("Date", "Month")).toBe(true);
 
     await toggleMenuItemOption("Date", "Month");
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:year"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:year"]);
     expect(getFacetTexts()).toEqual(["Date: Year"]);
     expect(isOptionSelected("Date", "Year")).toBe(true);
 
     await toggleMenuItemOption("Date", "Year");
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
 });
 
@@ -258,7 +258,7 @@ test("default groupbys can be ordered", async () => {
     });
 
     // the default groupbys should be activated in the right order
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:week", "birthday:month"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:week", "birthday:month"]);
     expect(getFacetTexts()).toEqual(["Date: Week\n>\nBirthday: Month"]);
 });
 
@@ -327,7 +327,7 @@ test("falsy search default groupbys are not activated", async () => {
         `,
         context: { search_default_birthday: false, search_default_foo: 0 },
     });
-    expect(searchBar.env.searchModel.groupBy).toEqual([]);
+    expect(searchBar.searchModel.groupBy).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
 });
 

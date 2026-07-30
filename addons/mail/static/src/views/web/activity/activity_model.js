@@ -19,7 +19,7 @@ export class ActivityModel extends RelationalModel {
         this.activityData = await this.orm.call("mail.activity", "get_activity_data", [], {
             res_model: this.config.resModel,
             context: params.context,
-            domain: params.domain || this.env.searchModel._domain,
+            domain: params.domain || this.searchModel._domain,
             limit: params.limit || this.initialLimit,
             offset: params.offset || 0,
             fetch_done: false,

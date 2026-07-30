@@ -1,8 +1,8 @@
-import { useSubEnv } from "@web/owl2/utils";
 import { Component, onWillStart, onWillUpdateProps, t, toRaw, useProps } from "@odoo/owl";
-import { CallbackRecorder, useSetupAction } from "@web/search/action_hook";
-import { SearchModel } from "@web/search/search_model";
 import { useBus, useService } from "@web/core/utils/hooks";
+import { useSubEnv } from "@web/owl2/utils";
+import { CallbackRecorder, useSetupAction } from "@web/search/action_hook";
+import { provideSearchModel, SearchModel } from "@web/search/search_model";
 
 export const SEARCH_KEYS = ["context", "domain", "groupBy", "orderBy"];
 
@@ -69,7 +69,8 @@ export class WithSearch extends Component {
         const searchPanelState = this.props.globalState?.searchPanel
             ? JSON.parse(this.props.globalState?.searchPanel)
             : null;
-        useSubEnv({ searchModel: this.searchModel, searchPanelState });
+        useSubEnv({ searchPanelState });
+        provideSearchModel(this.searchModel);
 
         useBus(this.searchModel, "update", () => this.render());
         useSetupAction({

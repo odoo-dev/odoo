@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -34,7 +35,10 @@ cogMenuRegistry.add(
     {
         Component: ExportWorkEntriesCogMenu,
         groupNumber: 40,
-        isDisplayed: ({ searchModel }) => { return searchModel.resModel === "hr.employee" },
+        isDisplayed() {
+            const searchModel = useSearchModel();
+            return searchModel.resModel === "hr.employee";
+        },
     },
     { sequence: 1 }
 );

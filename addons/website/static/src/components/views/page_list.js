@@ -1,17 +1,20 @@
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { useSearchModel } from "@web/search/search_model";
+import { listView } from "@web/views/list/list_view";
+import { DeletePageDialog, DuplicatePageDialog } from "@website/components/dialog/page_properties";
 import { usePageManager } from "./page_manager_hook";
 import { PageSearchModel } from "./page_search_model";
-import { registry } from "@web/core/registry";
-import { listView } from "@web/views/list/list_view";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { DeletePageDialog, DuplicatePageDialog } from "@website/components/dialog/page_properties";
-import { useService } from "@web/core/utils/hooks";
-import { rpc } from "@web/core/network/rpc";
 
 export class PageListController extends listView.Controller {
     static components = {
         ...listView.Controller.components,
     };
+
+    searchModel = useSearchModel();
 
     /**
      * @override
@@ -72,7 +75,7 @@ export class PageListController extends listView.Controller {
                 this.dialog.add(DuplicatePageDialog, {
                     pageIds: resIds,
                     onDuplicate: () => {
-                        this.env.searchModel.refreshFilterForAllWebsites();
+                        this.searchModel.refreshFilterForAllWebsites();
                     },
                 });
             };

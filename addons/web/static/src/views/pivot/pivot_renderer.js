@@ -13,6 +13,7 @@ import { sortBy } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
 import { CustomGroupByItem } from "@web/search/custom_group_by_item/custom_group_by_item";
 import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
+import { useSearchModel } from "@web/search/search_model";
 import { getIntervalOptions } from "@web/search/utils/dates";
 import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { MultiCurrencyPopover } from "@web/views/view_components/multi_currency_popover";
@@ -46,6 +47,9 @@ export class PivotRenderer extends Component {
         PropertiesGroupByItem,
         ReportViewMeasures,
     };
+
+    searchModel = useSearchModel();
+
     props = useProps(["model", "buttonTemplate"]);
 
     tableRef = signal.ref();
@@ -70,7 +74,7 @@ export class PivotRenderer extends Component {
             position: "right",
         });
         const fields = [];
-        for (const [fieldName, field] of Object.entries(this.env.searchModel.searchViewFields)) {
+        for (const [fieldName, field] of Object.entries(this.searchModel.searchViewFields)) {
             if (this.validateField(fieldName, field)) {
                 fields.push(Object.assign({ name: fieldName }, field));
             }
@@ -124,7 +128,7 @@ export class PivotRenderer extends Component {
      * @returns {Object[]}
      */
     get groupByItems() {
-        let items = this.env.searchModel.getSearchItems(
+        let items = this.searchModel.getSearchItems(
             (searchItem) =>
                 ["groupBy", "dateGroupBy"].includes(searchItem.type) && !searchItem.custom
         );
@@ -153,7 +157,7 @@ export class PivotRenderer extends Component {
      * @returns {boolean}
      */
     get hideCustomGroupBy() {
-        return this.env.searchModel.hideCustomGroupBy || false;
+        return this.searchModel.hideCustomGroupBy || false;
     }
 
     /**

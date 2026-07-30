@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
+import { useSearchModel } from "@web/search/search_model";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -83,13 +84,15 @@ export class FetchEInvoices extends Component {
     static props = {};
     static components = { DropdownItem };
 
+    searchModel = useSearchModel();
+
     setup() {
         super.setup();
         this.action = useService("action");
     }
 
     get buttonConfig() {
-        return getButtonConfig(this.env.searchModel);
+        return getButtonConfig(this.searchModel);
     }
 
     get buttonLabel() {
@@ -97,7 +100,7 @@ export class FetchEInvoices extends Component {
     }
 
     async fetchEInvoices() {
-        const actionData = await getActionData(this.env.searchModel);
+        const actionData = await getActionData(this.searchModel);
         if (!actionData) {
             return;
         }
@@ -117,7 +120,8 @@ export class FetchEInvoices extends Component {
 export const fetchEInvoicesActionMenu = {
     Component: FetchEInvoices,
     groupNumber: ACTIONS_GROUP_NUMBER,
-    isDisplayed: async ({ searchModel }) => {
+    async isDisplayed() {
+        const searchModel = useSearchModel();
         if (searchModel.resModel !== "account.move") {
             return false;
         }

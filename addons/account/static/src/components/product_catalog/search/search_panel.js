@@ -18,7 +18,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             newSectionName: "",
         });
 
-        useBus(this.env.searchModel, 'section-line-count-change', this.updateSectionLineCount);
+        useBus(this.searchModel, 'section-line-count-change', this.updateSectionLineCount);
 
         onWillStart(async () => await this.loadSections());
     }
@@ -33,7 +33,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
     }
 
     get selectedSection() {
-        return this.env.searchModel.selectedSection;
+        return this.searchModel.selectedSection;
     }
 
     onDragStart(sectionId, ev) {
@@ -68,7 +68,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
     }
 
     setSelectedSection(sectionId=null, filtered=false) {
-        this.env.searchModel.setSelectedSection(sectionId, filtered);
+        this.searchModel.setSelectedSection(sectionId, filtered);
     }
 
     async createSection() {

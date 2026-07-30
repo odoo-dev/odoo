@@ -7,12 +7,14 @@ import { ListController } from "@web/views/list/list_controller";
 import { onWillStart } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { userHasEmployeeInCurrentCompany } from "@hr_holidays/utils";
+import { useSearchModel } from "@web/search/search_model";
 
 export class HolidaysListController extends ListController {
     static template = "hr_holidays.HolidaysListView";
 
     setup() {
-        useBus(this.env.searchModel, "direct-export-data", (ev) => {
+        const searchModel = useSearchModel();
+        useBus(searchModel, "direct-export-data", (ev) => {
             ev.stopImmediatePropagation();
             exportTimeOffRecords({
                 resModel: this.model.root.resModel,
@@ -39,7 +41,9 @@ export class HolidaysListController extends ListController {
             const ignoreHasEmployee = ignoreActions.includes(this.env.config.actionXmlId);
             if (!hasEmployee && !ignoreHasEmployee) {
                 this.env.services.notification.add(
-                    _t("You are not linked to an employee in the current company, so you cannot create requests for yourself."),
+                    _t(
+                        "You are not linked to an employee in the current company, so you cannot create requests for yourself."
+                    ),
                     { type: "warning" }
                 );
             }

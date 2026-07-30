@@ -11,6 +11,7 @@ import { SearchBar } from "@web/search/search_bar/search_bar";
 import { usePager } from "@web/search/pager_hook";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { useSearchModel } from "@web/search/search_model";
 
 export class ActivityController extends Component {
     static components = { Layout, SearchBar, CogMenu };
@@ -21,6 +22,8 @@ export class ActivityController extends Component {
         archInfo: Object,
     };
     static template = "mail.ActivityController";
+
+    searchModel = useSearchModel();
 
     setup() {
         this.archInfo = this.props.archInfo;
@@ -67,14 +70,14 @@ export class ActivityController extends Component {
     }
 
     getSearchProps() {
-        const { comparision, context, domain, groupBy, orderBy } = this.env.searchModel;
+        const { comparision, context, domain, groupBy, orderBy } = this.searchModel;
         return { comparision, context, domain, groupBy, orderBy };
     }
 
     get getSelectCreateDialogProps() {
         return {
             resModel: this.props.resModel,
-            searchViewId: this.env.searchModel.searchViewId,
+            searchViewId: this.searchModel.searchViewId,
             domain: this.model.originalDomain,
             title: _t("Search: %s", this.props.archInfo.title),
             multiSelect: false,

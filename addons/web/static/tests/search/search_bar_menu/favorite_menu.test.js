@@ -131,7 +131,7 @@ test("default favorite is not activated if activateFavorite is set to false", as
     });
     await toggleSearchBarMenu();
     expect(isItemSelected("My favorite")).toBe(false);
-    expect(searchBarMenu.env.searchModel.domain).toEqual([]);
+    expect(searchBarMenu.searchModel.domain).toEqual([]);
     expect(getFacetTexts()).toEqual([]);
 });
 
@@ -242,14 +242,14 @@ test(`toggle favorite correctly clears filter, groupbys and field "options"`, as
             search_default_foo: "a",
         },
     });
-    expect(searchBar.env.searchModel.domain).toEqual([
+    expect(searchBar.searchModel.domain).toEqual([
         "&",
         ["foo", "ilike", "a"],
         "&",
         ["date_field", ">=", "2019-01-01"],
         ["date_field", "<=", "2019-12-31"],
     ]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["date_field:month"]);
+    expect(searchBar.searchModel.groupBy).toEqual(["date_field:month"]);
     expect(getFacetTexts()).toEqual([
         "Foo\na",
         "Date Field Filter: 2019",
@@ -265,8 +265,8 @@ test(`toggle favorite correctly clears filter, groupbys and field "options"`, as
 
     await toggleMenuItem("My favorite");
     expect(favorite).toHaveProperty("ariaChecked", "true");
-    expect(searchBar.env.searchModel.domain).toEqual(["!", ["foo", "=", "qsdf"]]);
-    expect(searchBar.env.searchModel.groupBy).toEqual(["foo"]);
+    expect(searchBar.searchModel.domain).toEqual(["!", ["foo", "=", "qsdf"]]);
+    expect(searchBar.searchModel.groupBy).toEqual(["foo"]);
     expect(getFacetTexts()).toEqual(["My favorite"]);
 });
 
@@ -370,7 +370,7 @@ test("display unparseable filter", async () => {
     );
     expect(".o_favorite_menu .o_favorite_item span[title]").toHaveClass("text-muted");
     await contains(".o_favorite_menu .o_favorite_item").click();
-    expect(searchBarMenu.env.searchModel.domain).toEqual([]);
+    expect(searchBarMenu.searchModel.domain).toEqual([]);
     await editFavorite("My favorite");
     expect.verifySteps(["doAction ir.filters: 987"]);
 });

@@ -17,9 +17,9 @@ import {
     toggleMenuItem,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
-
 import { range } from "@web/core/utils/numbers";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
+import { useSearchModel } from "@web/search/search_model";
 import { SearchPanel } from "@web/search/search_panel/search_panel";
 import { WebClient } from "@web/webclient/webclient";
 
@@ -53,10 +53,12 @@ class TestComponent extends Component {
     static components = { SearchBarMenu, SearchPanel };
     static template = xml`
         <div class="o_test_component">
-            <SearchPanel t-if="this.env.searchModel.display.searchPanel" />
+            <SearchPanel t-if="this.searchModel.display.searchPanel" />
             <SearchBarMenu />
         </div>
     `;
+
+    searchModel = useSearchModel();
     props = useProps();
 
     setup() {
@@ -805,7 +807,7 @@ test("use category (on many2many) to refine search", async () => {
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
     expect(`.o_search_panel_category_value:eq(1) .active`).toHaveCount(1);
     // Since #3641f23, all domains `[(x, '=', value)]` become `[(x, 'in', [value])]`.
-    expect(component.env.searchModel.domain).toEqual([
+    expect(component.searchModel.domain).toEqual([
         "&",
         ["bar", "=", true],
         ["company_ids", "=", 3],
@@ -815,7 +817,7 @@ test("use category (on many2many) to refine search", async () => {
     await contains(queryAll`.o_search_panel_category_value header`[2]).click();
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
     expect(`.o_search_panel_category_value:eq(2) .active`).toHaveCount(1);
-    expect(component.env.searchModel.domain).toEqual([
+    expect(component.searchModel.domain).toEqual([
         "&",
         ["bar", "=", true],
         ["company_ids", "=", 5],
@@ -825,7 +827,7 @@ test("use category (on many2many) to refine search", async () => {
     await contains(queryAll`.o_search_panel_category_value header`[0]).click();
     expect(`.o_search_panel_category_value .active`).toHaveCount(1);
     expect(`.o_search_panel_category_value:first .active`).toHaveCount(1);
-    expect(component.env.searchModel.domain).toEqual([["bar", "=", true]]);
+    expect(component.searchModel.domain).toEqual([["bar", "=", true]]);
 });
 
 test("category has been archived", async () => {

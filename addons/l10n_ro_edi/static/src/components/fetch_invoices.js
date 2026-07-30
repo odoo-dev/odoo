@@ -3,6 +3,7 @@ import { registry } from "@web/core/registry";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { useSearchModel } from "@web/search/search_model";
 
 
 export class FetchInvoicesCogMenu extends Component {
@@ -10,12 +11,14 @@ export class FetchInvoicesCogMenu extends Component {
     static props = {};
     static components = { DropdownItem };
 
+    searchModel = useSearchModel();
+
     setup() {
         this.action = useService("action");
     }
 
     async fetchInvoices() {
-        const { context } = this.env.searchModel;
+        const { context } = this.searchModel;
         return this.action.doActionButton({
             type: "object",
             resModel: "account.move",
@@ -28,7 +31,8 @@ export class FetchInvoicesCogMenu extends Component {
 export const CogMenuItem = {
     Component: FetchInvoicesCogMenu,
     groupNumber: 20,
-    isDisplayed: async ({ config, searchModel }) => {
+    async isDisplayed({ config }) {
+        const searchModel = useSearchModel();
         const data = await searchModel.orm.read("res.company", [user.activeCompany.id], ["country_code"]);
         return (
             data[0]?.country_code === 'RO' &&

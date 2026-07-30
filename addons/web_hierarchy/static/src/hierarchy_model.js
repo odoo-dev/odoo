@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { Model } from "@web/model/model";
 import { getFieldsSpec } from "@web/model/relational_model/utils";
+import { useOptionalSearchModel } from "@web/search/search_model";
 import { orderByToString } from "@web/search/utils/order_by";
 
 let nodeId = 0;
@@ -500,6 +501,8 @@ export class HierarchyForest {
 export class HierarchyModel extends Model {
     static services = ["notification"];
 
+    searchModel = useOptionalSearchModel();
+
     setup(params, { notification }) {
         this.keepLast = new KeepLast();
         this.mutex = new Mutex();
@@ -560,11 +563,11 @@ export class HierarchyModel extends Model {
      * @returns {import("@web/src/core/domain").DomainListRepr} global domain
      */
     get globalDomain() {
-        if (!this.env.searchModel?.globalDomain.length) {
+        if (!this.searchModel?.globalDomain.length) {
             return [];
         }
-        return new Domain(this.env.searchModel.globalDomain).toList(
-            this.env.searchModel.domainEvalContext
+        return new Domain(this.searchModel.globalDomain).toList(
+            this.searchModel.domainEvalContext
         );
     }
 
@@ -792,22 +795,22 @@ export class HierarchyModel extends Model {
      * @returns {boolean}
      */
     isSearchDefaultOrEmpty() {
-        if (!this.env.searchModel) {
+        if (!this.searchModel) {
             return true;
         }
         const isDisabledOptionalSearchMenuType = (type) => {
             return (
                 ["filter", "groupBy", "favorite"].includes(type) &&
-                !this.env.searchModel.searchMenuTypes.has(type)
+                !this.searchModel.searchMenuTypes.has(type)
             );
         };
-        const activeSearchItems = this.env.searchModel.getSearchItems(
+        const activeSearchItems = this.searchModel.getSearchItems(
             (item) => item.isActive && !isDisabledOptionalSearchMenuType(item.type)
         );
         if (!activeSearchItems.length) {
             return true;
         }
-        const defaultSearchItems = this.env.searchModel.getSearchItems(
+        const defaultSearchItems = this.searchModel.getSearchItems(
             (item) =>
                 item.isDefault &&
                 item.type !== "favorite" &&

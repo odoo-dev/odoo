@@ -1,8 +1,11 @@
 import { useEnv, useSubEnv } from "@web/owl2/utils";
 import { ProductCatalogKanbanController } from "@product/product_catalog/kanban_controller";
 import { useDebounced } from "@web/core/utils/timing";
+import { useSearchModel } from "@web/search/search_model";
 
 export class PurchaseSuggestCatalogKanbanController extends ProductCatalogKanbanController {
+    searchModel = useSearchModel();
+
     setup() {
         super.setup();
         this.suggest = useEnv().suggest;
@@ -27,23 +30,22 @@ export class PurchaseSuggestCatalogKanbanController extends ProductCatalogKanban
 
     // Reloads catalog with suggestions
     async _kanbanReload() {
-        this.env.searchModel.searchPanelInfo.shouldReload = true; // Changing suggestion might change categories available
-        await this.env.searchModel._notify(); // Reload through searchModel with ctx (without double reload)
+        this.searchModel.searchPanelInfo.shouldReload = true; // Changing suggestion might change categories available
+        await this.searchModel._notify(); // Reload through searchModel with ctx (without double reload)
         await this._computeTotalEstimatedPrice();
     }
 
     /** Add all suggested products to the purchase order */
     async onAddAll() {
-        const { searchModel } = this.env;
-        const { sectionId } = searchModel.selectedSection;
+        const { sectionId } = this.searchModel.selectedSection;
         const lineCountChange = await this.model.orm.call(
             "purchase.order",
             "action_purchase_order_suggest",
             [this.props.context.product_catalog_order_id],
-            { context: searchModel.globalContext }
+            { context: this.searchModel.globalContext }
         );
-        searchModel.toggleFilters(["suggested", "products_in_purchase_order"], true);
-        searchModel.trigger("section-line-count-change", {
+        this.searchModel.toggleFilters(["suggested", "products_in_purchase_order"], true);
+        this.searchModel.trigger("section-line-count-change", {
             sectionId,
             lineCountChange,
         });
@@ -55,7 +57,7 @@ export class PurchaseSuggestCatalogKanbanController extends ProductCatalogKanban
             "purchase_stock.suggest_toggle_state",
             JSON.stringify({ isOn: this.suggest.suggestToggle.isOn })
         );
-        this.env.searchModel.toggleFilters(
+        this.searchModel.toggleFilters(
             ["suggested", "products_in_purchase_order"],
             this.suggest.suggestToggle.isOn
         );

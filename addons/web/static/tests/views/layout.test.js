@@ -1,4 +1,3 @@
-import { useChildSubEnv, useSubEnv } from "@web/owl2/utils";
 import { expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, onWillStart, proxy, useProps, xml } from "@odoo/owl";
@@ -10,10 +9,11 @@ import {
     mountWithCleanup,
     mountWithSearch,
 } from "@web/../tests/web_test_helpers";
+import { useChildSubEnv } from "@web/owl2/utils";
 
 import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
-import { SearchModel } from "@web/search/search_model";
+import { provideSearchModel, SearchModel } from "@web/search/search_model";
 import { getDefaultConfig } from "@web/views/view";
 
 class Foo extends models.Model {
@@ -104,7 +104,7 @@ test(`Rendering with default ControlPanel and SearchPanel`, async () => {
                 orm: useService("orm"),
                 view: useService("view"),
             });
-            useSubEnv({ searchModel: this.searchModel });
+            provideSearchModel(this.searchModel);
             onWillStart(async () => {
                 await this.searchModel.load({ resModel: "foo", searchViewId: false });
             });

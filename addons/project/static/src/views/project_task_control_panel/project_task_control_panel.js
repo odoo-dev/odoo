@@ -14,7 +14,7 @@ export class ProjectTaskControlPanel extends ControlPanel {
     }
 
     get showTaskOptions() {
-        const context = this.env.searchModel.globalContext;
+        const context = this.searchModel.globalContext;
         return (
             !context.my_tasks &&
             !context.activity_action &&
@@ -32,7 +32,7 @@ export class ProjectTaskControlPanel extends ControlPanel {
     onClickShowSubtasks(ev) {
         this.embeddedPanelState.showSubtasks = !this.embeddedPanelState.showSubtasks;
         browser.localStorage.setItem(this.showSubtasksKey, this.embeddedPanelState.showSubtasks);
-        this.env.searchModel.search();
+        this.searchModel.search();
     }
 
     getDropdownClass(action) {
