@@ -4,16 +4,21 @@ from odoo import api, fields, models
 class ProjectTemplateCreateWizard(models.TransientModel):
     _inherit = 'project.template.create.wizard'
 
+    partner_id = fields.Many2one('res.partner')
     customer_action = fields.Selection([
         ('create', 'Create a new customer'),
         ('exist', 'Link to an existing customer'),
         ('nothing', 'Do not link to a customer'),
     ], string='Project Customer', default='create')
-    is_customer_action_visible = fields.Boolean(compute='_compute_customer_action_visibility', export_string_translation=False)
 
-    def _compute_customer_action_visibility(self):
-        for wizard in self:
-            wizard.is_customer_action_visible = not bool(self.env.context.get("default_partner_id"))
+    def _get_template_whitelist_fields(self):
+        res = super()._get_template_whitelist_fields()
+        # The customer is chosen in the wizard when creating a project from a
+        # lead, and is never copied from the template (see
+        # `project.project._get_template_field_blacklist`).
+        if self.env.context.get('default_lead_id') and 'partner_id' not in res:
+            res.append('partner_id')
+        return res
 
     @api.model
     def action_open_template_view(self):

@@ -14,6 +14,7 @@
             <field name="date_start" position="before">
                 <field
                     name="partner_id"
+                    class="o_sale_project_partner_id"
                     string="Customer"
                     invisible="not allow_billable"
                     placeholder="Select who to bill..."
