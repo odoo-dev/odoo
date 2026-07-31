@@ -730,10 +730,11 @@ class GeventServer(CommonServer):
             (self.interface, self.port),
             family=socket.AF_INET6 if ':' in self.interface else socket.AF_INET,
             backlog=128,
+            # SO_REUSEPORT must be set before bind() for the other gevent
+            # workers to be able to listen on the same address.
+            reuse_port=hasattr(socket, 'SO_REUSEPORT'),
             dualstack_ipv6=self.interface == '::',
         )
-        if hasattr(socket, 'SO_REUSEPORT'):
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         sock.setblocking(0)
 
         host, port, *_ = sock.getsockname()
