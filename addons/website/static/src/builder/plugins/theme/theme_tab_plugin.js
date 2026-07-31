@@ -403,6 +403,7 @@ export class ChangeColorPaletteAction extends CustomizeWebsiteVariableAction {
             return;
         }
         await super.apply(context);
+        this.dependencies.customizeWebsite.refreshPaletteShapes();
         setBuilderCSSVariables(getHtmlStyle(this.document));
         await Promise.allSettled(
             this.getResource("on_website_color_updated_handlers").map((handler) =>

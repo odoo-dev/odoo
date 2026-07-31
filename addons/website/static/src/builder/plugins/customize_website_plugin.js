@@ -47,7 +47,14 @@ export const NO_IMAGE_SELECTION = Symbol.for("NoImageSelection");
 
 export class CustomizeWebsitePlugin extends Plugin {
     static id = "customizeWebsite";
-    static dependencies = ["builderActions", "domObserver", "savePlugin", "edit_interaction", "websiteBridge"];
+    static dependencies = [
+        "backgroundShapeOption",
+        "builderActions",
+        "domObserver",
+        "savePlugin",
+        "edit_interaction",
+        "websiteBridge",
+    ];
     static shared = [
         "customizeWebsiteColors",
         "customizeWebsiteVariables",
@@ -56,6 +63,7 @@ export class CustomizeWebsitePlugin extends Plugin {
         "toggleTemplate",
         "withCustomHistory",
         "populateCache",
+        "refreshPaletteShapes",
         "loadConfigKey",
         "getConfigKey",
         "getWebsiteVariableValue",
@@ -273,6 +281,37 @@ export class CustomizeWebsitePlugin extends Plugin {
             }
         });
         this.dependencies.edit_interaction.restartInteractions();
+    }
+
+    // -------------------------------------------------------------------------
+    // Refreshes the background shapes whose color is a palette variable after a
+    // palette change.
+    // -------------------------------------------------------------------------
+    refreshPaletteShapes() {
+        const isPaletteColor = (color) => /^o-color-[1-5]$/.test(color);
+        const style = getHtmlStyle(this.document);
+        const { getShapeData, getShapeSrc } = this.dependencies.backgroundShapeOption;
+        for (const sectionEl of this.document.querySelectorAll("[data-oe-shape-data]")) {
+            const shapeEl = sectionEl.querySelector(":scope > .o_we_shape");
+            if (!shapeEl?.style.backgroundImage) {
+                continue;
+            }
+            const shapeData = getShapeData(sectionEl);
+            const colorEntries = Object.entries(shapeData.colors || {});
+            if (!colorEntries.some(([, color]) => isPaletteColor(color))) {
+                continue;
+            }
+            const colors = Object.fromEntries(
+                colorEntries.map(([key, color]) => [
+                    key,
+                    isPaletteColor(color) ? getCSSVariableValue(color, style) || color : color,
+                ])
+            );
+            shapeEl.style.setProperty(
+                "background-image",
+                `url("${getShapeSrc({ ...shapeData, colors })}")`
+            );
+        }
     }
 
     // -------------------------------------------------------------------------
