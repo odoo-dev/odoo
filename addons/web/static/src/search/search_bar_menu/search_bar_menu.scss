@@ -2,11 +2,32 @@
 // ============================================================================
 $o-search-bar-menu-max-width: calc(100vw - #{map-get($spacers, 3) * 2 });
 
+// The popover is anchored to the whole compact bar (facets + input). Rather than
+// appearing as a regular dropdown below it, it should read as replacing the
+// compact bar entirely while open, so pull it back up to overlap it instead of
+// sitting flush underneath. This height is an approximation of the compact
+// bar's own rendered height (.o_searchview.form-control.py-1);
+.o_search_bar_popover {
+    margin-top: -2.375rem;
+    max-width: $o-search-bar-menu-max-width !important;
+}
+
+// Section 1: full clone of the compact bar's facets + a comfortable, real input.
+// Rendered regardless of which Section-2 content (autocomplete vs. filter/groupby/
+// favorite) is active, so it isn't scoped under .o_search_bar_menu below.
+.o_search_bar_menu_facets {
+    min-width: MIN(24rem, #{$o-search-bar-menu-max-width});
+    max-width: $o-search-bar-menu-max-width;
+
+    .o_searchview_input {
+        min-width: 8rem;
+    }
+}
+
 .o_search_bar_menu {
 
     max-width: $o-search-bar-menu-max-width;
     .o_dropdown_container {
-        border-color: $dropdown-divider-bg !important;
         min-width: 200px;
     }
 
@@ -23,12 +44,6 @@ $o-search-bar-menu-max-width: calc(100vw - #{map-get($spacers, 3) * 2 });
 
         i {
             visibility: var(--show-on-hover, hidden);
-        }
-    }
-
-    @include media-breakpoint-up(lg) {
-        .o_dropdown_container {
-            max-width: calc(#{$o-search-bar-menu-max-width} / 6);
         }
     }
 }

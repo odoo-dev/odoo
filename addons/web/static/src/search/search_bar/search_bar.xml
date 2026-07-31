@@ -2,36 +2,52 @@
 <templates xml:space="preserve">
 
     <t t-name="web.SearchBar.Facets">
-        <t t-foreach="this.env.searchModel.facets" t-as="facet" t-key="facet_index">
-            <div class="o_searchview_facet position-relative d-inline-flex rounded-2 border border-transparent text-nowrap opacity-trigger-hover mw-100"
+        <t t-foreach="facetsToShow" t-as="facet" t-key="facet_index">
+            <div
+                class="o_searchview_facet overflow-hidden position-relative flex-shrink-0 d-inline-flex rounded-2 text-nowrap opacity-trigger-hover mw-100"
                 t-att-class="{
                     'o_facet_with_domain': facet.domain,
                     'o_facet_groupby': facet.type == 'groupBy',
-                    'o_facet_favorite': facet.type == 'favorite'
+                    'o_facet_favorite': facet.type == 'favorite',
+                    'small bg-100': !facetsDesign,
+                    'border pe-1': facetsDesign,
                 }"
                 role="listitem"
                 aria-label="search"
                 tabindex="0"
                 >
-                <div class="o_searchview_facet_content d-flex align-items-center gap-1">
-                    <div class="o_searchview_facet_label position-relative d-flex rounded-2 p-1 small overflow-hidden"
+                <div
+                    class="o_searchview_facet_content d-flex align-items-center gap-1"
+                    t-att-class="{
+                        'gap-1': !facetsDesign,
+                        'gap-2': facetsDesign,
+                    }"
+                >
+                    <div class="o_searchview_facet_label position-relative d-flex align-items-center h-100 p-1 overflow-hidden"
                         t-on-click="(ev) => this.onFacetLabelClick(ev.target, facet)"
                         t-att-role="facet.domain ? 'button' : 'img'"
                         t-att-class="{
                             'bg-primary-subtle text-primary': facet.type == 'field' || facet.type == 'filter',
                         }"
-                        >
-                        <i t-if="facet.icon" class="fa-fw" t-att-class="facet.icon" role="image"/>
+                    >
+                        <i
+                            t-if="facet.icon"
+                            class="oi oi-filled"
+                            t-att-class="{ 'p-1': facetsDesign }"
+                            t-att-data-icon="facet.icon"
+                            role="presentation"
+                        />
                         <small t-else="" class="lh-1 fw-bold" t-out="facet.title + ':'"/>
 
                         <!-- Editable facets' overlay -->
                         <span t-if="facet.domain"
-                            class="o_facet_overlay position-absolute top-0 end-100 transition-base d-flex p-1"
+                            class="o_facet_overlay position-absolute h-100 w-100 top-0 start-0 transition-base d-flex"
                             t-att-class="{
                                 'o_facet_no_icon pe-2': !facet.icon,
-                                'bg-primary-subtle text-primary': facet.type == 'field' || facet.type == 'filter',
-                            }">
-                            <i class="fa fa-pencil fa-fw"/>
+                                'align-items-center justify-content-center text-bg-primary': facet.type == 'field' || facet.type == 'filter',
+                            }"
+                        >
+                            <i class="oi oi-filled text-center" data-icon="edit" title="Edit facet"/>
                         </span>
                     </div>
                     <div class="o_facet_values position-relative d-flex flex-wrap align-items-center text-wrap overflow-hidden">
@@ -41,96 +57,77 @@
                         >
                             <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
                                 <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
-                                <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
+                                <span class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
                             </t>
                         </span>
                     </div>
                 </div>
-                <button class="o_facet_remove oi oi-close btn btn-link d-flex align-items-center px-1 py-0 text-danger d-print-none"
+                <button
+                    class="o_facet_remove oi btn btn-link d-flex align-items-center px-1 text-danger d-print-none"
+                    t-att-class="{
+                        'py-0': !facetsDesign,
+                        'py-1': facetsDesign,
+                    }"
                     aria-label="Remove"
                     title="Remove"
                     t-on-click="() => this.onFacetRemove(facet)"
                     tabindex="-1"
+                    data-icon="close"
                 />
             </div>
         </t>
     </t>
 
-    <t t-name="web.SearchBar.QuickSearchItems">
-        <t t-foreach="this.items" t-as="item" t-key="item.id">
-            <DropdownItem
-                class="{ o_indent: item.isChild }"
-                attrs="{ id: item.id }"
-                onSelected="() => this.selectItem(item)"
-                closingMode="'none'"
-            >
-                <t t-if="item.isParent">
-                    <a t-att-class="{ o_expand: true, 'ms-4': item.isFieldProperty}"
-                        href="#"
-                        t-on-click.stop.prevent="() => this.toggleItem(item, !item.isExpanded)"
-                        >
-                        <i class="oi" t-attf-data-icon="{{ item.isExpanded ? 'arrow_drop_down' : 'arrow_right' }}"/>
-                    </a>
-                </t>
-                <a href="#" t-on-click.prevent="" t-att-class="{'ps-3 pe-2 text-truncate': item.isFieldProperty }" t-att-title="item.title">
-                    <t t-if="item.isAddCustomFilterButton"><span class="text-action">Custom Filter...</span></t>
-                    <t t-elif="item.loadMore"><span class="text-action"><t t-out="item.label"/></span></t>
-                    <t t-elif="item.isChild">
-                        <t t-out="item.label"/>
-                    </t>
-                    <t t-elif="!item.isFieldProperty" > Search </t> <b t-out="item.searchItemDescription"/> <t t-if="item.preposition"> <t t-out="item.preposition"/>: <b class="fst-italic text-primary" t-out="item.label"/> </t>
-                </a>
-            </DropdownItem>
-        </t>
-    </t>
-
     <t t-name="web.SearchBar">
         <div t-if="this.visibilityState.showSearchBar" class="o_cp_searchview d-flex input-group" role="search" t-ref="this.root">
-            <SearchBarDropdown
-                state="this.inputDropdownState"
-                manual="true"
-                noClasses="true"
-                position="'bottom-fit'"
-                menuClass="'o_searchview_autocomplete'"
-                navigationOptions="this.inputDropdownNavOptions"
-                onStateChanged.bind="this.onInputDropdownChanged"
-                menuRef="this.menuRef"
-                bottomSheet="false"
-                popoverWillCloseOnClickAway="this.popoverWillCloseOnClickAway"
-            >
-                <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 border-end-0"
-                    role="search" aria-autocomplete="list">
-                    <button class="d-print-none btn border-0 p-0"
-                        aria-label="Search..."
-                        title="Search..."
-                        t-on-click="this.onClickSearchIcon"
-                    >
-                        <i class="o_searchview_icon oi me-2" data-icon="search"
-                            role="img"
-                        />
-                    </button>
-                    <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1 align-items-center mw-100" t-ref="this.facetContainerRef">
-                        <t t-call="web.SearchBar.Facets"/>
-                        <input type="text"
-                            class="o_searchview_input o_input d-print-none flex-grow-1 w-auto border-0"
-                            accesskey="Q"
-                            placeholder="Search..."
-                            role="searchbox"
-                            t-ref="this.inputRef"
-                            t-on-click="this.onSearchClick"
-                            t-on-input="this.onSearchInput"
-                            t-on-compositionend="this.onCompositionEnd"
-                        />
-                    </div>
-                </div>
-                <t t-set-slot="content">
-                    <t t-call="web.SearchBar.QuickSearchItems"/>
-                </t>
-            </SearchBarDropdown>
             <SearchBarMenu
-                dropdownState="this.searchBarDropdownState"
+                dropdownState="this.dropdownState"
                 popoverWillCloseOnClickAway="this.popoverWillCloseOnClickAway"
+                onRemoveFacet.bind="this.onFacetRemove"
+                onFacetLabelClick.bind="this.onFacetLabelClick"
+                focusCompactInput="() => this.inputRef().focus()"
+                handoff="this.handoff"
             >
+                <t t-set-slot="toggler">
+                    <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 border-end-0"
+                         t-att-class="{ 'o_search_bar_menu_open opacity-0': this.dropdownState.isOpen }"
+                         role="search" aria-autocomplete="list"
+                         t-on-click.self="this.onSearchClick"
+                    >
+                        <div class="o_searchview_input_container d-flex flex-nowrap gap-1 align-items-center flex-grow-1 overflow-hidden" t-ref="this.facetContainerRef">
+                            <!-- All facets are always rendered here; adjustVisibleFacets() hides the
+                                 overflow via a CSS class so their true widths stay measurable. -->
+                            <t t-set="facetsToShow" t-value="this.env.searchModel.facets"/>
+                            <t t-call="web.SearchBar.Facets"/>
+                            <span t-if="this.env.searchModel.facets.length > this.state.visibleFacetCount"
+                                class="o_searchview_facet_overflow btn btn-link d-flex align-items-center flex-shrink-0 px-1 py-0 text-nowrap"
+                                role="button"
+                                t-on-click="this.onOverflowBadgeClick"
+                            >
+                                +<t t-esc="this.env.searchModel.facets.length - this.state.visibleFacetCount"/>
+                            </span>
+                            <input type="text"
+                                class="o_searchview_input o_input d-print-none flex-shrink-0 border-0 flex-grow-1"
+                                accesskey="Q"
+                                placeholder="Search..."
+                                role="searchbox"
+                                t-ref="this.inputRef"
+                                t-on-click="this.onSearchClick"
+                                t-on-input="this.onSearchInput"
+                                t-on-compositionend="this.onCompositionEnd"
+                            />
+                        </div>
+                        <button class="d-print-none btn border-0 p-0"
+                                aria-label="Search..."
+                                title="Search..."
+                                t-on-click="this.onSearchClick"
+                        >
+                            <i class="o_searchview_icon oi me-2" data-icon="search"
+                               role="img"
+                            />
+                        </button>
+                    </div>
+                </t>
                 <t t-call-slot="search-bar-additional-menu"/>
             </SearchBarMenu>
         </div>

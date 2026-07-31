@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CustomFavoriteItem">
-        <AccordionItem class="'o_add_favorite text-truncate'" description.translate="Save current search">
+        <AccordionItem class="'o_add_favorite'" description.translate="Save current search">
             <div class="px-3 py-1">
                 <input type="text"
                     class="o_input my-1"

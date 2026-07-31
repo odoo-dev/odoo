@@ -8,10 +8,6 @@
     @include media-only(screen) {
         .o_control_panel_breadcrumbs {
             --#{$variable-prefix}breadcrumb-font-size: #{$small-font-size};
-
-            @include media-breakpoint-up(md) {
-                min-width: 200px;
-            }
         }
 
         @include media-breakpoint-down(md) {
@@ -24,16 +20,11 @@
         @include media-breakpoint-up(lg) {
             .o_control_panel_breadcrumbs, .o_control_panel_navigation {
                 flex: 1;
+                flex-basis: 33%;
             }
 
             .o_control_panel_actions {
-                min-width: MIN(500px, 33%);
-            }
-        }
-
-        @include media-breakpoint-up(xl) {
-            .o_control_panel_actions {
-                min-width: MIN(600px, 33%);
+                min-width: 33%;
             }
         }
     }

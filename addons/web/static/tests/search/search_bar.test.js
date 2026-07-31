@@ -46,8 +46,13 @@ import {
     validateSearch,
 } from "@web/../tests/web_test_helpers";
 import { cookie } from "@web/core/browser/cookie";
-import { SearchBar, DROPDOWN_CLOSE_DELAY } from "@web/search/search_bar/search_bar";
+import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
+
+// The compact bar no longer debounce-closes its own autocomplete (that logic moved
+// into SearchBarMenu, which now just toggles Section 2's content reactively instead
+// of closing); kept as a small grace wait for the tests below.
+const DROPDOWN_CLOSE_DELAY = 10;
 class Partner extends models.Model {
     name = fields.Char();
     bar = fields.Many2one({ relation: "partner" });

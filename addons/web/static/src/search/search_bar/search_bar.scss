@@ -45,14 +45,35 @@
         }
     }
 
-    .o_searchview_facet_content:hover .o_facet_overlay {
-        transform: translateX(100%);
+    .o_searchview_facet_content:not(:hover) .o_facet_overlay {
+        transform: translateX(-100%);
     }
     // Temporary workaround to get the subtle gradient when hovering facet that use the field name instead of the filter icon.
     // This should probably be done using a pseudo element instead.
     .o_facet_no_icon {
         mask-image: linear-gradient(90deg,#000 0, #000 calc(100% - 8px), transparent 100%);
     }
+}
+
+// The compact bar keeps facets + input on a single line; overflowing facets
+// collapse behind a "+N" badge (see SearchBar.adjustVisibleFacets()). The full,
+// wrapping version of this row lives in the SearchBarMenu popover instead.
+.o_searchview_input_container {
+    flex-wrap: nowrap;
+
+    // Only the compact bar's own input gets a fixed width and no growth; the
+    // popover's cloned input (a different container, see search_bar_menu.scss)
+    // is unaffected by this selector.
+    > .o_searchview_input {
+        width: 8rem;
+        flex: 0 0 auto;
+    }
+}
+
+.o_searchview_facet_overflow {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    white-space: nowrap;
 }
 
 .o_searchview_autocomplete {
