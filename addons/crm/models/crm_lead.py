@@ -5,8 +5,10 @@ import re
 from ast import literal_eval
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta, UTC
+from textwrap import dedent
 from zoneinfo import ZoneInfo
 
+from lxml import etree
 from markupsafe import Markup
 
 from odoo import api, fields, models, modules, tools
@@ -2858,3 +2860,78 @@ class CrmLead(models.Model):
                 } for element in sorted_scores_with_name[::-1][:3] if tools.float_compare(element[0], 0.50, 2) > 0
             ],
         }
+
+from odoo.tools import html2plaintext
+from textwrap import dedent
+from odoo import fields
+from lxml import etree
+from odoo.tools.profiler import Profiler
+from odoo.addons.account.models.mail_message import bypass_token
+
+def _remove_quoted_content(body):
+    """ Drop the parts of a message body tagged as quoted/signature
+    content (``data-o-mail-quote``) """
+    if not body:
+        return body
+    tree = etree.fromstring(body, parser=etree.HTMLParser())
+    for quoted in tree.xpath('//*[@data-o-mail-quote="1"]'):
+        parent = quoted.getparent()
+        if parent is not None:
+            parent.remove(quoted)
+    return etree.tostring(tree, encoding='unicode')
+
+def _clean_mail_messages(batch_size=300):
+    query = """
+    SELECT COUNT(*)
+    FROM mail_message message
+    JOIN crm_lead lead ON message.res_id = lead.id
+    WHERE message.model = 'crm.lead'
+    AND lead.active IS NOT TRUE
+    AND lead.won_status = 'lost'
+    AND lead.write_date < NOW() - INTERVAL '1 year';
+    """
+    # 244M messages to delete, from 16M leads
+
+
+    # note: can include old leads that recieved messages more recently.
+    # e.g. Mantavya's message on Odoo Experience 2026 India
+
+    # batch_size=1
+    domain = [
+        ('active', '=', False),
+        ('won_status', '=', 'lost'),
+        ('write_date', '<', '-1y'),
+        ('message_ids', '!=', False)
+    ]
+    leads = self.env['crm.lead'].search(domain, limit=batch_size)
+
+    def message_header(message):
+        author = message.author_id.name if message.author_id else f"<{message.email_from}>"
+        if message.subject:
+            subject = f"Subject: {message.subject}\n\n"
+        else:
+            subject = ""
+        return f"From: {author}\nDate: {message.date} (UTC)\n{subject}"
+
+    now = fields.Datetime.now()
+    blob_prefix = dedent(f"""
+    Message history before {now} (UTC)
+    All messages related to this lead have been moved to the description.
+    """)
+    for lead in leads:
+        message_blob = ""
+        for message in lead.message_ids:
+            author = message.author_id.name if message.author_id else message.email_from
+            message_blob += message_header(message)
+            message_blob += html2plaintext(_remove_quoted_content(message.body)) + "\n\n"
+        description = (lead.description or "") + "\n" + blob_prefix + message_blob
+        lead.description = description
+    #     print(lead.description)
+    # print(leads)
+    leads.message_ids.with_context(bypass_audit=bypass_token).unlink()
+
+import time
+start = time.time()
+with Profiler(db='openerp', description="LUL mail_message clean") as profiler:
+    _clean_mail_messages()
+print("Done in", time.time() - start, "seconds")
