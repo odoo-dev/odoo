@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, get_lang
 from odoo.tools.float_utils import float_compare, float_round
 
@@ -96,6 +97,11 @@ class PurchaseOrderLine(models.Model):
     )
 
     amount_to_invoice_at_date = fields.Float(string='Amount', compute='_compute_amount_to_invoice_at_date')
+
+    prepaid_expense = fields.Boolean(
+        string='Prepaid Expense', search='_search_prepaid_expense', store=False)
+    bill_to_receive = fields.Boolean(
+        string='Bill to Receive', search='_search_bill_to_receive', store=False)
 
     partner_id = fields.Many2one('res.partner', related='order_id.partner_id', string='Partner', readonly=True, store=True, index='btree_not_null')
     currency_id = fields.Many2one(related='order_id.currency_id', string='Currency')
@@ -337,6 +343,61 @@ class PurchaseOrderLine(models.Model):
     def _compute_amount_to_invoice_at_date(self):
         for line in self:
             line.amount_to_invoice_at_date = (line.qty_received_at_date - line.qty_invoiced_at_date) * line.price_unit_discounted
+
+    def _get_accrual_domain(self):
+        """ Reused by account.accrued.orders.wizard and stock_account's
+        Stock Valuation report. """
+        return Domain([
+            ('state', '=', 'purchase'),
+            ('display_type', '=', False),
+            ('is_downpayment', '=', False),
+        ])
+
+    def _search_prepaid_expense(self, operator, value):
+        if operator != 'i   n':
+            return NotImplemented
+        return [('id', 'in', self._get_accrual_line_ids('prepaid').ids)]
+
+    def _search_bill_to_receive(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
+        return [('id', 'in', self._get_accrual_line_ids('bill_to_receive').ids)]
+
+    @api.model
+    def _get_accrual_line_ids(self, mode=False, date=False, extra_domain=None):
+        """ Order lines whose invoiced and received quantities are out of sync, i.e. that need
+        an accrual entry as of `date` (today if not given). `mode` splits the result by the
+        direction of the mismatch: 'prepaid' (invoiced ahead of receipt) or 'bill_to_receive'
+        (received ahead of invoicing). Reused by the `prepaid_expense`/`bill_to_receive` filters
+        and by `res.company._get_accrual_candidate_lines`.
+        """
+        candidate_domain = Domain.OR([
+            [('qty_to_invoice', '!=', 0)],
+            [
+                ('order_id.invoice_status', '=', 'invoiced'),
+                ('order_id.receipt_status', 'in', ('pending', 'partial')),
+            ],
+        ])
+        if date:
+            # Also match lines settled after `date`: nothing left to accrue
+            # today, but there was a mismatch back then.
+            candidate_domain |= Domain.OR([
+                [('invoice_lines.move_id.date', '>', date)],
+                [('move_ids.date', '>', datetime.combine(date, time.max))],
+            ])
+        domain = self._get_accrual_domain() & candidate_domain
+        if extra_domain:
+            domain &= extra_domain
+        order_lines = self.env['purchase.order.line'].search(domain)
+        accrual_entry_date = date or fields.Date.context_today(self)
+        # Applied after the search: flushing pending computations with this
+        # context would corrupt the stored quantities with at-date values.
+        order_lines = order_lines.with_context(accrual_entry_date=fields.Date.to_string(accrual_entry_date))
+        if mode == 'prepaid':
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+        elif mode == 'bill_to_receive':
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
+        return order_lines
 
     @api.model_create_multi
     def create(self, vals_list):

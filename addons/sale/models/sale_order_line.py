@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from markupsafe import Markup
 
@@ -376,6 +376,12 @@ class SaleOrderLine(models.Model):
     )
     qty_invoiced_at_date = fields.Float(
         string="Invoiced", compute="_compute_qty_invoiced_at_date", digits="Product Unit"
+    )
+    deferred_revenue = fields.Boolean(
+        string="Deferred Revenue", search="_search_deferred_revenue", store=False
+    )
+    invoice_to_be_issued = fields.Boolean(
+        string="Invoice to be Issued", search="_search_invoice_to_be_issued", store=False
     )
 
     # Technical field holding custom data for the taxes computation engine.
@@ -1527,6 +1533,64 @@ class SaleOrderLine(models.Model):
             line.amount_to_invoice_at_date = (
                 line.qty_delivered_at_date - line.qty_invoiced_at_date
             ) * line.price_unit
+
+    def _get_accrual_domain(self):
+        """ Reused by account.accrued.orders.wizard and stock_account's
+        Stock Valuation report. """
+        return Domain([
+            ("state", "=", "sale"),
+            ("display_type", "=", False),
+            ("is_downpayment", "=", False),
+            ("product_id.type", "!=", "combo"),
+        ])
+
+    def _search_deferred_revenue(self, operator, value):
+        if operator != "in":
+            return NotImplemented
+        return [("id", "in", self._get_accrual_line_ids("deferred").ids)]
+
+    def _search_invoice_to_be_issued(self, operator, value):
+        if operator != "in":
+            return NotImplemented
+        return [("id", "in", self._get_accrual_line_ids("invoice_issued").ids)]
+
+    @api.model
+    def _get_accrual_line_ids(self, mode=False, date=False, extra_domain=None):
+        """ Order lines whose invoiced and delivered quantities are out of sync, i.e. that need
+        an accrual entry as of `date` (today if not given). `mode` splits the result by the
+        direction of the mismatch: 'deferred' (invoiced ahead of delivery) or 'invoice_issued'
+        (delivered ahead of invoicing). Reused by the `deferred_revenue`/`invoice_to_be_issued`
+        filters and by `res.company._get_accrual_candidate_lines`.
+        """
+        if not date:
+            date = self.env.context.get('accrual_entry_date')
+        candidate_domain = Domain.OR([
+            [("qty_to_invoice", "!=", 0)],
+            [
+                ("order_id.invoice_status", "=", "invoiced"),
+                ("order_id.delivery_status", "in", ("pending", "started", "partial")),
+            ],
+        ])
+        if date:
+            # Also match lines settled after `date`: nothing left to accrue
+            # today, but there was a mismatch back then.
+            candidate_domain |= Domain.OR([
+                [("invoice_lines.move_id.date", ">", date)],
+                [("move_ids.date", ">", datetime.combine(date, time.max))],
+            ])
+        domain = self._get_accrual_domain() & candidate_domain
+        if extra_domain:
+            domain &= extra_domain
+        order_lines = self.env["sale.order.line"].search(domain)
+        accrual_entry_date = date or fields.Date.context_today(self)
+        # Applied after the search: flushing pending computations with this
+        # context would corrupt the stored quantities with at-date values.
+        order_lines = order_lines.with_context(accrual_entry_date=fields.Date.to_string(accrual_entry_date))
+        if mode == "deferred":
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+        elif mode == "invoice_issued":
+            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
+        return order_lines
 
     @api.depends("order_id.partner_id", "product_id")
     def _compute_analytic_distribution(self):

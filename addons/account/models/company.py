@@ -1205,38 +1205,89 @@ class ResCompany(models.Model):
 
             company.company_vat_placeholder = self.env._(expected_vat or '')  # pylint: disable=E8502
 
-    def action_close_stock_valuation(self, at_date=None, auto_post=False, raise_error_if_closed=True):
+    def action_close_stock_valuation(self, at_date=None, auto_post=False, raise_error_if_closed=True, include_accruals=False):
+        # Accruals are posted *before* the closing entry is computed: the
+        # closing entry's Stock Variation then reflects their impact
+        # already, instead of double-correcting the same gap.
         self.ensure_one()
         at_date = fields.Date.to_date(at_date) or fields.Date.context_today(self)
         last_closing_date = self._get_last_closing_date()
         if last_closing_date and at_date < fields.Date.to_date(last_closing_date):
             raise UserError(self.env._('It exists closing entries after the selected date. Cancel them before generate an entry prior to them'))
+
+        accrual_moves = self.env['account.move']
+        if include_accruals:
+            accrual_moves = self._generate_accrual_entries(date=at_date)
+
         aml_vals_list = self.with_context(allowed_company_ids=self.ids)._action_close_stock_valuation(at_date=at_date)
 
-        if not aml_vals_list:
+        if not aml_vals_list and not accrual_moves:
             # if we come from cron there might be no move to create for this company, but some for other companies
             if not raise_error_if_closed:
                 return
             raise UserError(_("Everything is correctly closed"))
-        if not self.account_stock_journal_id:
-            raise UserError(self.env._("Please set the Journal for Inventory Valuation in the settings."))
-        if not self.account_stock_valuation_id:
-            raise UserError(self.env._("Please set the Valuation Account for Inventory Valuation in the settings."))
 
-        moves_vals = {
-            'journal_id': self.account_stock_journal_id.id,
-            'date': at_date,
-            'ref': _('Stock Closing'),
-            'inventory_closing': True,
-            'line_ids': [Command.create(aml_vals) for aml_vals in aml_vals_list],
-            'company_id': self.id,
-            **self._get_closing_move_extra_vals(at_date),
+        closing_move = self.env['account.move']
+        if aml_vals_list:
+            if not self.account_stock_journal_id:
+                raise UserError(self.env._("Please set the Journal for Inventory Valuation in the settings."))
+            if not self.account_stock_valuation_id:
+                raise UserError(self.env._("Please set the Valuation Account for Inventory Valuation in the settings."))
+
+            moves_vals = {
+                'journal_id': self.account_stock_journal_id.id,
+                'date': at_date,
+                'ref': _('Stock Closing'),
+                'inventory_closing': True,
+                'line_ids': [Command.create(aml_vals) for aml_vals in aml_vals_list],
+                'company_id': self.id,
+                **self._get_closing_move_extra_vals(at_date),
+            }
+            closing_move = self.env['account.move'].create(moves_vals)
+            if auto_post:
+                closing_move._post()
+
+        if not include_accruals:
+            return closing_move._get_records_action(name=_("Journal Items"))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Journal Items"),
+            'res_model': 'account.move',
+            'views': [(False, 'list'), (False, 'form')],
+            'domain': [('id', 'in', (closing_move | accrual_moves).ids)],
         }
-        account_move = self.env['account.move'].create(moves_vals)
-        if auto_post:
-            account_move._post()
 
-        return account_move._get_records_action(name=_("Journal Items"))
+    def _get_accrual_candidate_lines(self, date=False):
+        """ Hook overridden by purchase / sale.
+
+        :return: a list of (is_purchase, order_lines) tuples.
+        """
+        return []
+
+    def _generate_accrual_entries(self, date=False):
+        self.ensure_one()
+        accrual_entry_date = date or fields.Date.context_today(self)
+        moves = self.env['account.move']
+        for __, candidate_lines in self._get_accrual_candidate_lines(date=date):
+            for __, lines in candidate_lines.grouped('currency_id').items():
+                wizard = self.env['account.accrued.orders.wizard'].with_context(
+                    active_model=lines._name,
+                    active_ids=lines.ids,
+                    accrual_entry_date=fields.Date.to_string(accrual_entry_date),
+                ).new({
+                    'company_id': self.id,
+                    'date': accrual_entry_date,
+                })
+                move_vals, __ = wizard._compute_move_vals()
+                # Skip empty moves, and lines whose accrual account isn't
+                # configured (no account to post them on).
+                if not move_vals['line_ids'] or any(
+                    not vals.get('account_id') for _, __, vals in move_vals['line_ids']
+                ):
+                    continue
+                action = wizard.create_entries(auto_post=True)
+                moves |= self.env['account.move'].search(action['domain'])
+        return moves
 
     def get_inventory_value(self, at_date=None):
         """ Current inventory value, i.e. what the products physically on hand are worth.

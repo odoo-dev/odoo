@@ -71,11 +71,7 @@ class StockValuationReport(models.AbstractModel):
             'label': self.env._("Stock Variation"),
             'value': 0,
         }
-        lines_by_account_id = defaultdict(lambda: {
-            'debit': 0,
-            'credit': 0,
-            'lines': [],
-        })
+        lines_by_account_id = defaultdict(float)
         for vals in stock_valuation_account_vals:
             account_ids.add(vals['account_id'])
             stock_variation['value'] += vals['balance']
@@ -83,9 +79,9 @@ class StockValuationReport(models.AbstractModel):
             lines_by_account_id[vals['account_id']]['credit'] -= vals['balance'] if vals['balance'] < 0 else 0
         stock_variation['lines'] = [{
             'account_id': account_id,
-            'debit': vals['debit'],
-            'credit': vals['credit'],
-        } for (account_id, vals) in lines_by_account_id.items()]
+            'debit': balance if balance > 0 else 0,
+            'credit': -balance if balance < 0 else 0,
+        } for (account_id, balance) in lines_by_account_id.items()]
 
         accounts_read_data = self.env['account.account'].search_read(
             [('id', 'in', account_ids)],

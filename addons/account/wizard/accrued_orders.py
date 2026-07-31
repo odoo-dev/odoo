@@ -133,6 +133,18 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             })
         return values
 
+    def _get_accrual_line_ids(self, order, lines, accrual_entry_date):
+        """ Of `lines` (candidates from a single order), the ones that still
+        need an accrual as of `accrual_entry_date`. The amount check can't be
+        a domain since it depends on the `accrual_entry_date` context.
+        """
+        candidate_lines = (lines & order.order_line).filtered_domain(lines._get_accrual_domain())
+        dated_lines = candidate_lines.with_context(accrual_entry_date=accrual_entry_date)
+        precision_digits = self.env['decimal.precision'].precision_get('Product Unit')
+        return dated_lines.filtered(
+            lambda l: fields.Float.compare(l.amount_to_invoice_at_date, 0, precision_digits=precision_digits) != 0
+        )
+
     def _compute_move_vals(self):
         self.ensure_one()
         move_lines = []
@@ -163,18 +175,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             else:
                 accrual_entry_date = self.env.context.get('accrual_entry_date')
                 accrual_entry_date = fields.Date.from_string(accrual_entry_date) if accrual_entry_date else self.date
-                precision_digits = self.env['decimal.precision'].precision_get('Product Unit')
-                order_lines = lines.with_context(accrual_entry_date=accrual_entry_date).filtered(
-                    # We only want non-comment lines (no sections, notes, ...) and include all lines
-                    # for purchase orders but exclude downpayment lines for sales orders.
-                    lambda l: not l.display_type and not l.is_downpayment and
-                    l.id in order.order_line.ids and
-                    fields.Float.compare(
-                        l.amount_to_invoice_at_date,
-                        0,
-                        precision_digits=precision_digits,
-                    ) != 0
-                )
+                order_lines = self._get_accrual_line_ids(order, lines, accrual_entry_date)
                 for order_line in order_lines:
                     for vals in self._get_accrual_line_vals(order, order_line, is_purchase, accrual_entry_date):
                         move_lines.append(Command.create(vals))
@@ -213,20 +214,21 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             reverse_entry=reverse_move._get_html_link(),
         )
 
-    def create_entries(self):
+    def create_entries(self, auto_post=True):
         self.ensure_one()
 
         if self.reversal_date <= self.date:
             raise UserError(_('Reversal date must be posterior to date.'))
         move_vals, orders_with_entries = self._compute_move_vals()
         move = self.env['account.move'].create(move_vals)
-        move._post()
         reverse_move = move._reverse_moves(default_values_list=[{
             'ref': _('Reversal of: %s', move.ref),
             'name': '/',
             'date': self.reversal_date,
         }])
-        reverse_move._post()
+        if auto_post:
+            move._post()
+            reverse_move._post()
         for order in orders_with_entries:
             order.message_post(body=self._get_accrual_message_body(move, reverse_move))
         return {
