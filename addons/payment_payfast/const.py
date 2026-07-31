@@ -18,18 +18,18 @@ PAYFAST_API_VERSION = "v1"
 TOKENIZATION_SUBSCRIPTION_TYPE = "2"
 
 # Mapping of Odoo payment method codes to the `payment_method` value expected by Payfast.
+# Only covers codes with a matching `payment.method` record in `data/payment_method_data.xml`;
+# Payfast also accepts a few others (debit_card, masterpass, store_card) that aren't exposed here
+# for lack of a distinct icon to represent them with in Odoo's checkout.
 # https://developers.payfast.co.za/docs#step_1_form_fields
 PAYMENT_METHODS_MAPPING = {
     "eft": "ef",
     "card": "cc",
-    "debit_card": "dc",
-    "masterpass": "mp",
     "mobicred": "mc",
     "scode": "sc",
     "snapscan": "ss",
     "zapper": "zp",
     "moretyme": "mt",
-    "store_card": "rc",
     "mukuru": "mu",
     "apple_pay": "ap",
     "samsung_pay": "sp",

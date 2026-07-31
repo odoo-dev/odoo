@@ -4,7 +4,6 @@
     <record id="payment.payment_provider_payfast" model="payment.provider">
         <field name="code">payfast</field>
         <field name="redirect_form_view_id" ref="payment.generic_redirect_form"/>
-        <field name="allow_tokenization">True</field>
     </record>
 
 </odoo>

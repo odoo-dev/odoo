@@ -57,6 +57,7 @@ class PaymentTransaction(models.Model):
             "name_first": partner_first_name or partner_last_name or "",
             "name_last": partner_last_name or "",
             "email_address": self.partner_email or "",
+            "cell_number": self.partner_phone or "",
             "m_payment_id": self.reference,
             "amount": f"{self.amount:.2f}",
             "item_name": self.reference,
@@ -123,40 +124,6 @@ class PaymentTransaction(models.Model):
             return {}
         return {"provider_ref": token, "payment_details": self.payment_method_id.name}
 
-    def _send_refund_request(self):
-        """Override of `payment` to send a refund request to Payfast."""
-        if self.provider_code != "payfast":
-            return super()._send_refund_request()
-
-        if not self.provider_id.is_live:
-            raise ValidationError(
-                self.env._(
-                    "Payfast refunds are not available in Sandbox mode; this can only be tested "
-                    "with live credentials."
-                )
-            )
-
-        payment_id = self.source_transaction_id.provider_reference
-        # Amounts on Payfast's account-level API are always in cents (ZAR), unlike the
-        # checkout/ITN flow above which uses a decimal string.
-        body = {
-            "amount": payment_utils.to_minor_currency_units(-self.amount, self.currency_id),
-            "notify_buyer": 1,
-        }
-        self.provider_id._payfast_send_api_request("POST", f"refunds/{payment_id}", json_body=body)
-
-        # Payfast's refund response schema isn't confirmed by public docs; treat a non-error HTTP
-        # status (checked in `_payfast_send_api_request`) as a successfully requested refund.
-        # `amount_gross` must be included: `_validate_amount` re-derives the amount from this same
-        # payload via `_extract_amount_data` and errors out (even reverting a `done` transaction)
-        # if it comes back empty. `-self.amount` because refund transactions carry a negative
-        # amount in Odoo, while `_extract_amount_data`/`_validate_amount` expect a positive one.
-        self._record({
-            "payment_status": "COMPLETE",
-            "pf_payment_id": payment_id,
-            "amount_gross": f"{-self.amount:.2f}",
-        })
-
     def _send_payment_request(self):
         """Override of `payment` to charge a saved token on demand through Payfast."""
         if self.provider_code != "payfast":
@@ -167,13 +134,18 @@ class PaymentTransaction(models.Model):
             "amount": payment_utils.to_minor_currency_units(self.amount, self.currency_id),
             "item_name": self.reference,
         }
-        self.provider_id._payfast_send_api_request(
-            "POST", f"subscriptions/{token}/adhoc", json_body=body
+        response = self.provider_id._send_api_request(
+            "POST", f"subscriptions/{token}/adhoc", json=body
         )
 
-        # Payfast's adhoc-charge response schema isn't confirmed by public docs; treat a non-error
-        # HTTP status (checked in `_payfast_send_api_request`) as a successfully requested charge.
+        # The adhoc-charge endpoint confirms or rejects the charge synchronously in its response
+        # (a non-2xx status, already turned into a `ValidationError` by `_send_api_request`, means
+        # the charge was rejected); reaching this point means it was successful.
         # `amount_gross` must be included: `_validate_amount` re-derives the amount from this same
         # payload via `_extract_amount_data` and errors out (even reverting a `done` transaction)
         # if it comes back empty.
-        self._record({"payment_status": "COMPLETE", "amount_gross": f"{self.amount:.2f}"})
+        self._record({
+            "payment_status": "COMPLETE",
+            "amount_gross": f"{self.amount:.2f}",
+            "pf_payment_id": response.get("data", {}).get("pf_payment_id"),
+        })

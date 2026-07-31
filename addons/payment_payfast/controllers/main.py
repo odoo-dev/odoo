@@ -1,16 +1,46 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import hmac
 import pprint
 import socket
-from urllib.parse import quote_plus, urlparse
+import time
+from urllib.parse import quote_plus, urlsplit
 
 from odoo import http
 from odoo.http import request
 
+from odoo.addons.payment.controllers.payment_status import PaymentStatus
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_payfast import const
 
 _logger = get_payment_logger(__name__)
+
+# Cache of {host: (ip_set, resolved_at)} to avoid a blocking DNS lookup on every notification.
+_HOST_IPS_CACHE = {}
+_HOST_IPS_CACHE_TTL = 3600  # Payfast's ITN hostnames are stable infrastructure.
+
+
+def _resolve_host_ips(host):
+    """Resolve a hostname to its IP addresses, caching the result for `_HOST_IPS_CACHE_TTL`
+    seconds.
+
+    A resolution failure falls back on the last known-good result instead of caching an empty
+    set, so that a transient DNS outage doesn't permanently degrade the check.
+
+    :param str host: The hostname to resolve.
+    :return: The resolved IP addresses, or an empty set if none are cached and resolution fails.
+    :rtype: set
+    """
+    cached = _HOST_IPS_CACHE.get(host)
+    now = time.monotonic()
+    if cached and now - cached[1] < _HOST_IPS_CACHE_TTL:
+        return cached[0]
+    try:
+        ips = set(socket.gethostbyname_ex(host)[2])
+    except OSError:
+        return cached[0] if cached else set()
+    _HOST_IPS_CACHE[host] = (ips, now)
+    return ips
 
 
 class PayfastController(http.Controller):
@@ -35,9 +65,18 @@ class PayfastController(http.Controller):
     def payfast_cancel_from_checkout(self, **data):
         """Handle the customer's redirection back to Odoo after cancelling the payment.
 
+        Note: Payfast sends no identifying data at all on this route (no `m_payment_id`), and
+        never follows up with an ITN for a payment that was never attempted; the transaction
+        being monitored in the customer's session is used instead. A synthetic `CANCELLED`
+        payload is recorded like any other payment data, going through the same guarded
+        (asynchronous) `_apply_updates` path as a real ITN would.
+
         :param dict data: The un-trusted data forwarded by Payfast as query params.
         """
         _logger.info("Handling cancellation from Payfast with data:\n%s", pprint.pformat(data))
+        tx_sudo = PaymentStatus()._get_monitored_transaction()
+        if tx_sudo and tx_sudo.provider_code == "payfast":
+            tx_sudo._record({"payment_status": "CANCELLED"})
         return request.redirect("/payment/status")
 
     @http.route(_notify_url, type="http", auth="public", methods=["POST"], csrf=False)
@@ -123,7 +162,7 @@ class PayfastController(http.Controller):
         """
         received_signature = data.get("signature", "")
         expected_signature = provider_sudo._payfast_generate_signature(data, incoming=True)
-        return received_signature == expected_signature
+        return hmac.compare_digest(received_signature, expected_signature)
 
     @staticmethod
     def _verify_source():
@@ -136,16 +175,13 @@ class PayfastController(http.Controller):
         :return: Whether the referrer is a valid Payfast host.
         :rtype: bool
         """
-        referer_host = urlparse(request.httprequest.headers.get("Referer", "")).hostname
+        referer_host = urlsplit(request.httprequest.headers.get("Referer", "")).hostname
         if not referer_host:
             return False
 
         valid_hosts = set(const.VALID_NOTIFICATION_HOSTS)
         for host in const.VALID_NOTIFICATION_HOSTS:
-            try:
-                valid_hosts.update(socket.gethostbyname_ex(host)[2])
-            except OSError:
-                continue  # DNS resolution failed; fall back on the hostname-only checks.
+            valid_hosts.update(_resolve_host_ips(host))
 
         return referer_host in valid_hosts
 
@@ -173,4 +209,6 @@ class PayfastController(http.Controller):
         :return: The url-encoded parameter string.
         :rtype: str
         """
-        return "&".join(f"{key}={quote_plus(str(value))}" for key, value in data.items())
+        return "&".join(
+            f"{key}={quote_plus(str(value))}" for key, value in data.items() if key != "signature"
+        )

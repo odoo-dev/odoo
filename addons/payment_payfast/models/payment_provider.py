@@ -49,6 +49,17 @@ class PaymentProvider(models.Model):
             ):
                 raise ValidationError(provider.env._("Only ZAR is supported by Payfast."))
 
+    @api.constrains("allow_tokenization", "payfast_passphrase")
+    def _check_payfast_passphrase_for_tokenization(self):
+        for provider in self.filtered(lambda p: p.code == "payfast"):
+            if provider.allow_tokenization and not provider.payfast_passphrase:
+                raise ValidationError(
+                    provider.env._(
+                        "A Passphrase must be set on the Payfast provider to enable tokenized "
+                        "payments."
+                    )
+                )
+
     # === CRUD METHODS === #
 
     def _get_default_payment_method_codes(self):
@@ -111,9 +122,12 @@ class PaymentProvider(models.Model):
         pairs = []
         for key in ordered_keys:
             value = values.get(key)
-            if not incoming and value in (None, ""):
-                continue
-            pairs.append(f"{key}={quote_plus(str(value).strip())}")
+            if incoming:
+                pairs.append(f"{key}={quote_plus(str(value))}")
+            else:
+                if value in (None, ""):
+                    continue
+                pairs.append(f"{key}={quote_plus(str(value).strip())}")
         param_string = "&".join(pairs)
 
         if self.payfast_passphrase:
@@ -168,51 +182,25 @@ class PaymentProvider(models.Model):
         )
         return hashlib.md5(param_string.encode()).hexdigest()  # noqa: S324
 
-    def _payfast_send_api_request(self, method, endpoint, json_body=None):
-        """Send a request to Payfast's account-level API (refunds, subscriptions, ...).
+    def _build_request_url(self, endpoint, **kwargs):
+        """Override of `payment` to build the URL of Payfast's account-level API request."""
+        if self.code != "payfast":
+            return super()._build_request_url(endpoint, **kwargs)
+        url = f"{const.PAYFAST_API_URL}/{endpoint}"
+        if not self.is_live:
+            # Sandbox credentials are only accepted with this query param (as Payfast's own SDK
+            # does); left out of the URL used for the signature, matching the SDK's behavior.
+            url += "?testing=true"
+        return url
 
-        This is a separate, JSON-based API from the checkout/ITN flow above, authenticated with
-        its own header-based signature scheme. When not in live mode, a `testing=true` query
-        param is appended (as Payfast's own SDK does) so sandbox credentials are accepted; it is
-        deliberately left out of the signature, matching the SDK's behavior.
-        https://developers.payfast.co.za/api
-
-        :param str method: The HTTP method of the request.
-        :param str endpoint: The endpoint to reach, e.g. `refunds/<pf_payment_id>`.
-        :param dict json_body: The JSON-serializable body of the request, if any.
-        :return: The response's JSON content.
-        :rtype: dict
-        :raise ValidationError: If the request could not be made, or Payfast returned an error.
-        """
-        self.ensure_one()
+    def _build_request_headers(self, method, endpoint, payload, **kwargs):
+        """Override of `payment` to sign Payfast's account-level API request."""
+        if self.code != "payfast":
+            return super()._build_request_headers(method, endpoint, payload, **kwargs)
         headers = {
             "merchant-id": self.payfast_merchant_id,
             "version": const.PAYFAST_API_VERSION,
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S%z"),
         }
-        headers["signature"] = self._payfast_generate_api_signature({
-            **headers,
-            **(json_body or {}),
-        })
-
-        try:
-            response = requests.request(
-                method,
-                f"{const.PAYFAST_API_URL}/{endpoint}",
-                params={"testing": "true"} if not self.is_live else None,
-                json=json_body,
-                headers=headers,
-                timeout=10,
-            )
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            _logger.exception("Payfast's API returned an error:\n%s", response.text)
-            raise ValidationError(
-                self.env._("Payfast's API returned an error: %(error)s", error=response.text)
-            ) from e
-        except requests.exceptions.RequestException as e:
-            _logger.exception("Unable to reach Payfast's API.")
-            raise ValidationError(
-                self.env._("Could not communicate with Payfast's API: %(error)s", error=e)
-            ) from e
-        return response.json()
+        headers["signature"] = self._payfast_generate_api_signature({**headers, **(payload or {})})
+        return headers
