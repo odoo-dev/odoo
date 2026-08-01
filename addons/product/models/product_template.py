@@ -209,7 +209,7 @@ class ProductTemplate(models.Model):
     product_document_ids = fields.One2many(
         string="Documents",
         comodel_name='product.document',
-        inverse_name='res_id',
+        inverse_name='product_tmpl_id',
         domain=lambda self: [('res_model', '=', self._name)])
     product_document_count = fields.Integer(
         string="Documents Count", compute='_compute_product_document_count')

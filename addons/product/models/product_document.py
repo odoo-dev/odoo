@@ -3,6 +3,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import SQL
 
 
 class ProductDocument(models.Model):
@@ -26,6 +27,37 @@ class ProductDocument(models.Model):
         'product.template.attribute.value',
         compute='_compute_variant_attribute_value_ids',
     )
+
+    product_id = fields.Many2one('product.product', compute='_compute_product_product_id', compute_sql='_compute_sql_product_product_id', compute_sudo=True)
+    product_tmpl_id = fields.Many2one('product.product', compute='_compute_product_template_id', compute_sql='_compute_sql_product_template_id', compute_sudo=True)
+
+    @api.depends('model', 'res_id')
+    def _compute_product_product_id(self):
+        for doc in self:
+            doc.product_id = doc.res_id if doc.model == 'product.product' else False
+
+    def _compute_sql_product_product_id(self, table):
+        attachment = table.ir_attachment_id
+        return SQL("CASE WHEN %s = 'product.product' THEN %s END", attachment.res_model, attachment.res_id)
+
+    @api.depends('model', 'res_id', 'product_id.product_tmpl_id')
+    def _compute_product_template_id(self):
+        for doc in self:
+            doc.product_id = doc.res_id if doc.model == 'product.template' else doc.product_id.product_tmpl_id
+
+    def _compute_sql_product_template_id(self, table):
+        attachment = table.ir_attachment_id
+        product_alias = table._make_alias('product_product')
+        table._query.add_join('LEFT JOIN', product_alias, self.env.registry['product.product']._table, SQL(
+            "%s.id = %s AND %s = 'product.product'",
+            SQL.identifier(product_alias),
+            table.res_id,
+            table.model,
+        ))
+        return SQL("""CASE
+            WHEN %(model)s = 'product.template' THEN %(res_id)s
+            WHEN %(model)s = 'product.product' THEN %(product_id)s
+            END""", model=attachment.res_model, res_id=attachment.res_id, product_id=SQL.identifier(product_alias, 'product_tmpl_id'))
 
     @api.depends('res_model', 'res_id')
     def _compute_variant_attribute_value_ids(self):
