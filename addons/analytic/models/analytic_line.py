@@ -3,7 +3,7 @@ from dateutil.relativedelta import relativedelta
 from lxml.builder import E
 
 from odoo import api, fields, models, _
-from odoo.tools import date_utils
+from odoo.tools import SQL
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
 
@@ -27,8 +27,10 @@ class AnalyticPlanFieldsMixin(models.AbstractModel):
         comodel_name='account.analytic.account',
         string='Analytic Account',
         compute='_compute_auto_account',
+        compute_sql='_compute_sql_auto_account',
         inverse='_inverse_auto_account',
         search='_search_auto_account',
+        compute_sudo=False,
     )
 
     @api.depends_context('analytic_plan_id')
@@ -36,6 +38,12 @@ class AnalyticPlanFieldsMixin(models.AbstractModel):
         plan = self.env['account.analytic.plan'].browse(self.env.context.get('analytic_plan_id'))
         for line in self:
             line.auto_account_id = bool(plan) and line[plan._column_name()]
+
+    def _compute_sql_auto_account(self, table):
+        plan = self.env['account.analytic.plan'].browse(self.env.context.get('analytic_plan_id'))
+        if not plan:
+            return SQL("NULL::integer")
+        return table[plan._column_name()]
 
     def _compute_partner_id(self):
         # TO OVERRIDE
