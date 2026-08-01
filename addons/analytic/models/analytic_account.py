@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
-import itertools
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, RedirectWarning
+from odoo.fields import Domain
 from odoo.tools import groupby, SQL
 
 
@@ -55,7 +54,10 @@ class AccountAnalyticAccount(models.Model):
     line_ids = fields.One2many(
         'account.analytic.line',
         'auto_account_id',  # magic link to the right column (plan) by using the context in the view
+        # XXX aaaaahhh
         string="Analytic Lines",
+        compute='_compute_line_ids',
+        search='_search_line_ids',
     )
 
     company_id = fields.Many2one(
@@ -92,6 +94,24 @@ class AccountAnalyticAccount(models.Model):
         related="company_id.currency_id",
         string="Currency",
     )
+
+    @api.depends_context('analytic_plan_id')
+    def _compute_line_ids(self):
+        self.line_ids = self.env['account.analytic.line']
+        if not self.env.context.get('analytic_plan_id'):
+            return
+        lines = self.env['account.analytic.line'].search(fields.Domain.custom(to_sql=lambda table: SQL("%s IN %s", table.auto_account_id, tuple(self.ids))))
+        for account, account_lines in lines.grouped('auto_account_id').items():
+            account.budget_line_ids = account_lines
+
+    def _search_line_ids(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
+        # XXX real implem to handle False
+        if not self.env.context.get('analytic_plan_id') or not value:
+            return Domain.FALSE
+        query = self.env['account.analytic.line']._search(fields.Domain.custom(to_sql=lambda table: SQL("%s IN %s", table.auto_account_id, tuple(value))))
+        return Domain('id', 'in', query)
 
     @api.constrains('company_id')
     def _check_company_consistency(self):
