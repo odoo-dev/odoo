@@ -944,6 +944,7 @@ class One2many(_RelationalMulti):
                 field.setup(comodel)
             except KeyError:
                 raise ValueError(f"{self.inverse_name!r} declared in {self!r} does not exist on {comodel._name!r}.")
+            assert field.store or not self.store, f"{self} cannot be stored if the inverse {field} is not stored!"
 
     def setup_inverses(self, registry, inverses):
         if self.inverse_name:
@@ -1207,23 +1208,7 @@ class One2many(_RelationalMulti):
         model = table._model
         comodel = model.env[self.comodel_name].sudo()
         inverse_field = comodel._fields[self.inverse_name]
-        if not (inverse_field.store or inverse_field.compute_sql):
-            # determine ids1 in model related to ids2
-            # TODO should we support this in the future?
-            recs = comodel.browse(coquery).with_context(prefetch_fields=False)
-            if inverse_field.relational:
-                inverses = inverse_field.__get__(recs)
-            else:
-                # int values, map them
-                inverses = model.browse(inverse_field.__get__(rec) for rec in recs)
-            subselect = inverses._as_query(ordered=False).subselect()
-            return SQL(
-                "%s%s%s",
-                table.id,
-                SQL_OPERATORS['in' if exists else 'not in'],
-                subselect,
-            )
-
+        assert inverse_field.store or inverse_field.compute_sql, f"Cannot search {self} with an inverse that has no SQL representation"
         subselect = coquery.subselect(
             SQL("%s AS __inverse", coquery.table[inverse_field.name]),
         )
