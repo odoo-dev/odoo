@@ -367,6 +367,8 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     onIframeLoad(ev) {
+        // TEMP repro diagnostic, revert before commit
+        console.log(`TEMP repro: onIframeLoad start t=${performance.now().toFixed(1)}`);
         // FIX Chrome-only. If you have the backend in a language A but the
         // website in English only, you can 1) modify a record's (event,
         // product...) name in language A (say "New Name").
@@ -419,6 +421,8 @@ export class WebsiteBuilderClientAction extends Component {
         this.preparePublicRootReady();
         this.setupClickListener();
         this.replaceBrowserUrl();
+        // TEMP repro diagnostic, revert before commit
+        console.log(`TEMP repro: resolveIframeLoaded call t=${performance.now().toFixed(1)}`);
         this.resolveIframeLoaded();
         this.addWelcomeMessage();
         this.websiteService.hideLoader();
@@ -631,9 +635,13 @@ export class WebsiteBuilderClientAction extends Component {
     preparePublicRootReady() {
         const deferred = Promise.withResolvers();
         this.publicRootReady = deferred;
+        // TEMP repro diagnostic, revert before commit
+        console.log(`TEMP repro: preparePublicRootReady listener attached t=${performance.now().toFixed(1)}`);
         this.websiteContent.el.contentWindow.addEventListener(
             "PUBLIC-ROOT-READY",
             (event) => {
+                // TEMP repro diagnostic, revert before commit
+                console.log(`TEMP repro: PUBLIC-ROOT-READY received t=${performance.now().toFixed(1)}`);
                 this.websiteService.websiteRootInstance = event.detail.rootInstance;
                 deferred.resolve();
             },
