@@ -24,10 +24,17 @@ export class WebsiteSystrayItem extends Component {
     };
 
     setup() {
+        this.website = useService("website");
+        // TEMP repro diagnostic, revert before commit
+        console.log(`TEMP repro: WebsiteSystrayItem onWillStart begin t=${performance.now().toFixed(1)}`);
         onWillStart(async () => {
             this.iframeEl = await this.props.iframeLoaded;
+            // TEMP repro diagnostic, revert before commit
+            console.log(
+                `TEMP repro: WebsiteSystrayItem onWillStart resolved t=${performance.now().toFixed(1)} ` +
+                `isRestrictedEditor=${this.isRestrictedEditor} canEdit=${!!this.canEdit}`
+            );
         });
-        this.website = useService("website");
     }
 
     get hasMultiWebsites() {
