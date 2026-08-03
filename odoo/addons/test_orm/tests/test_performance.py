@@ -741,6 +741,48 @@ class TestMapped(TransactionCase):
                 rec.line_ids.mapped('value')
 
 
+@tagged('prefetch_invalidate')
+@tagged('at_install', '-post_install')  # LEGACY at_install
+class TestPrefetchInvalidatedByUnrelatedUnlink(TransactionCase):
+
+    @warmup
+    def test_prefetch_survives_when_nothing_intervenes(self):
+        root = self._build(20)
+        self.env.invalidate_all()
+
+        children = root.child_ids
+
+        with self.assertQueryCount(2):
+            for child in children:
+                child.child_ids.name
+
+    @warmup
+    def test_prefetch_broken_by_intervening_unlink(self):
+        n_children = 20
+        Model = self.env['test_performance.simple.minded']
+        root = Model.create({'name': 'root'})
+        children = Model.create([
+            {'name': f'child {i}', 'parent_id': root.id}
+            for i in range(n_children)
+        ])
+        Model.create([
+            {'name': f'grandchild {i}', 'parent_id': child.id}
+            for i, child in enumerate(children)
+        ])
+        self.env.invalidate_all()
+
+        children = root.child_ids
+
+        # completely unrelated model unlink, break the prefetch batching above.
+        unrelated = self.env['test_performance.tag'].create({'name': 'unrelated'})
+        unrelated.unlink()
+
+        with self.assertQueryCount(40):  # 2 queries x 20 children instead of 2 total
+            for child in children:
+                child.child_ids.name
+
+
+
 @tagged('increment_perf')
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestIncrementFieldsSkipLock(TransactionCase):

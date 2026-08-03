@@ -2861,7 +2861,7 @@ class CrmLead(models.Model):
             ],
         }
 
-from odoo.tools import html2plaintext
+'''
 from textwrap import dedent
 from odoo import fields
 from lxml import etree
@@ -2880,7 +2880,7 @@ def _remove_quoted_content(body):
             parent.remove(quoted)
     return etree.tostring(tree, encoding='unicode')
 
-def _clean_mail_messages(batch_size=300):
+def _clean_mail_messages(batch_size=30):
     query = """
     SELECT COUNT(*)
     FROM mail_message message
@@ -2894,7 +2894,9 @@ def _clean_mail_messages(batch_size=300):
 
 
     # note: can include old leads that recieved messages more recently.
-    # e.g. Mantavya's message on Odoo Experience 2026 India
+    # e.g. Mantavya's message for Odoo Experience 2026 India
+
+    # self = self.with_context(active_test=False)
 
     # batch_size=1
     domain = [
@@ -2923,15 +2925,22 @@ def _clean_mail_messages(batch_size=300):
         for message in lead.message_ids:
             author = message.author_id.name if message.author_id else message.email_from
             message_blob += message_header(message)
-            message_blob += html2plaintext(_remove_quoted_content(message.body)) + "\n\n"
+            message_blob += fields.Html.to_plaintext(_remove_quoted_content(message.body)) + "\n\n"
         description = (lead.description or "") + "\n" + blob_prefix + message_blob
         lead.description = description
     #     print(lead.description)
     # print(leads)
-    leads.message_ids.with_context(bypass_audit=bypass_token).unlink()
+    messages = leads.with_context(bypass_audit=bypass_token).message_ids
+    notifications = messages.notification_ids
+    # notifications.fetch(['author_id', 'mail_message_id']) # prefetch
+    messages.unlink()
 
 import time
 start = time.time()
-with Profiler(db='openerp', description="LUL mail_message clean") as profiler:
-    _clean_mail_messages()
+_clean_mail_messages()
+# with Profiler(db='openerp', description="LUL mail_message clean") as profiler:
 print("Done in", time.time() - start, "seconds")
+
+# notifications
+# attachments
+'''
