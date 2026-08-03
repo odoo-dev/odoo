@@ -726,9 +726,7 @@ class TestReports(TestReportsCommon):
         warehouse = self.env.ref('stock.warehouse0')
         warehouse.reception_steps = 'three_steps'
         # Product config.
-        mto_route = self.env.ref('stock.route_warehouse0_mto')
-        mto_route.product_selectable = True
-        self.product.write({'route_ids': [(4, mto_route.id)]})
+        self.product.write({'route_ids': [(4, self.env.ref('stock.route_warehouse0_mto').id)]})
         # Create a RR
         reordering_rule = self.env['stock.warehouse.orderpoint'].create({
             'name': 'Product RR',
@@ -862,7 +860,6 @@ class TestReports(TestReportsCommon):
         })
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        mto_route.product_selectable = True
         self.product.route_ids = mto_route + replenish_route
         self.env['stock.quant']._update_available_quantity(self.product, wh_2.lot_stock_id, 5)
 

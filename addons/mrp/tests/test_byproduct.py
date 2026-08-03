@@ -14,6 +14,7 @@ class TestMrpByProduct(common.TransactionCase):
         cls.warehouse = cls.env.ref('stock.warehouse0')
         route_manufacture = cls.warehouse.manufacture_pull_id.route_id.id
         route_mto = cls.warehouse.mto_pull_id.route_id.id
+        cls.warehouse.manufacture_pull_id.route_id.product_selectable = True
         cls.uom_unit_id = cls.env.ref('uom.product_uom_unit').id
         def create_product(name, route_ids=[]):
             return cls.env['product.product'].create({

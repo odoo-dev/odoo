@@ -47,7 +47,6 @@ class TestCarrierPropagation(TransactionCase):
         })
         mto_route = cls.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        mto_route.product_selectable = True
         cls.warehouse.mto_pull_id.procure_method = "make_to_stock"
         cls.mto_product = cls.ProductProduct.create({
             'name': 'MTO Product',
@@ -340,8 +339,8 @@ class TestCarrierPropagationPostInstall(TestCarrierPropagation):
         push_rule.propagate_carrier = True
 
         buy_route = self.env.ref('purchase_stock.route_warehouse0_buy')
+        buy_route.product_selectable = True
         mto_route = self.env.ref('stock.route_warehouse0_mto')
-        (mto_route + buy_route).product_selectable = True
         mto_route.rule_ids.procure_method = 'make_to_order'
 
         express_delivery = self.normal_delivery.copy({'name': 'Express Delivery'})

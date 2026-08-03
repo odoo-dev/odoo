@@ -79,12 +79,11 @@ class TestSaleMrpInvoices(TestSaleCommon):
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         manufacturing_route = self.env.ref('mrp.route_warehouse0_manufacture')
-        routes = mto_route + manufacturing_route
-        routes.product_selectable = True
+        manufacturing_route.product_selectable = True
         product = self.env['product.product'].create({
             'name': 'SuperProduct',
             'is_storable': True,
-            'route_ids': routes,
+            'route_ids': [Command.set((mto_route + manufacturing_route).ids)],
         })
 
         product.bom_ids = [Command.create({

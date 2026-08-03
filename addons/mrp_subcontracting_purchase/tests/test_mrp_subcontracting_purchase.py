@@ -145,6 +145,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         Test the source PO smart button both when the Resupply subcontractor rule is MTO and MTSO
         """
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route.product_selectable = True
         (self.comp1 + self.comp2).write({'route_ids': [Command.link(resupply_sub_on_order_route.id)]})
 
         # Create 2 subcontracted PO's, one to be resupplied in MTO the other in MTSO
@@ -634,7 +635,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         mto_route.active = True
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         self.comp2.bom_ids.unlink()
-        (mto_route + resupply_sub_on_order_route).product_selectable = True
+        resupply_sub_on_order_route.product_selectable = True
         (self.comp1 | self.comp2).write({
              'route_ids': [
                 Command.link(resupply_sub_on_order_route.id),
@@ -718,7 +719,6 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         """
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        mto_route.product_selectable = True
         self.comp2.bom_ids.unlink()
         self.finished.route_ids = mto_route.ids
         self.env['product.supplierinfo'].create({

@@ -18,6 +18,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.route_mto.active = True
+        cls.warehouse_1.manufacture_pull_id.route_id.product_selectable = True
         # Update the product_1 with type, route, Manufacturing Lead Time and Customer Lead Time
         with Form(cls.product_1) as p1:
             # `type` is invisible in the view,

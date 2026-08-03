@@ -221,7 +221,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
-        (mto_route + manufacture_route).product_selectable = True
+        manufacture_route.product_selectable = True
         self.comp2.write({'route_ids': [(4, manufacture_route.id, None)]})
         self.comp2.write({'route_ids': [(4, mto_route.id, None)]})
 
@@ -283,7 +283,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         manufacture_route = self.env['stock.route'].search([('name', '=', 'Manufacture')])
-        (mto_route + manufacture_route).product_selectable = True
+        manufacture_route.product_selectable = True
         self.comp2.write({'route_ids': [(6, None, [manufacture_route.id, mto_route.id])]})
         picking_type_in = self.env.ref('stock.picking_type_in')
         self.env.ref('mrp_subcontracting.route_resupply_subcontractor_mto').active = False

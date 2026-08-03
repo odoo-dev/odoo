@@ -578,6 +578,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
         manu_route = self.warehouse.manufacture_pull_id.route_id
         buy_route = self.warehouse.buy_pull_id.route_id
+        (manu_route + buy_route).product_selectable = True
 
         # un-prioritize the buy rules
         self.env['stock.rule'].search([]).sequence = 1
@@ -661,7 +662,9 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         """Test to ensure json_popover data is correctly computed for BoM.
         """
         buy_route = self.warehouse.buy_pull_id.route_id
-        self.kit_1.route_ids = self.kit_3.route_ids = [Command.set([self.warehouse.manufacture_pull_id.route_id.id])]
+        manu_route = self.warehouse.manufacture_pull_id.route_id
+        (buy_route + manu_route).product_selectable = True
+        self.kit_1.route_ids = self.kit_3.route_ids = [Command.set([manu_route.id])]
         bom1, bom2 = self.kit_1.bom_ids, self.kit_3.bom_ids
         bom1.type = bom2.type = 'normal'
         self.component_f.is_storable = self.component_g.is_storable = False
@@ -1071,7 +1074,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         route_buy = self.warehouse.buy_pull_id.route_id
         route_mto = self.warehouse.mto_pull_id.route_id
         route_mto.rule_ids.procure_method = "make_to_order"
-        (route_buy + route_mto).product_selectable = True
+        route_buy.product_selectable = True
         self.component_a.write({
             'seller_ids': [
                 Command.create({'partner_id': self.partner_a.id},
@@ -1125,7 +1128,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         route_buy = self.warehouse.buy_pull_id.route_id
         route_mto = self.warehouse.mto_pull_id.route_id
         route_mto.rule_ids.procure_method = "make_to_order"
-        (route_buy + route_mto).product_selectable = True
+        route_buy.product_selectable = True
         self.component_a.write({
             'seller_ids': [
                 Command.create({'partner_id': self.partner_a.id},
@@ -1186,6 +1189,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         warehouse = self.warehouse
         buy_route = warehouse.buy_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
+        (buy_route + manufacture_route).product_selectable = True
 
         avco_category = self.env['product.category'].create({
             'name': 'AVCO',
@@ -1387,6 +1391,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         reduces the quantity of the MTO purchase aswell.
         '''
         route_buy = self.warehouse.buy_pull_id.route_id
+        route_buy.product_selectable = True
         route_mto = self.warehouse.mto_pull_id.route_id
         route_mto.active = True
         route_mto.rule_ids.procure_method = "make_to_order"

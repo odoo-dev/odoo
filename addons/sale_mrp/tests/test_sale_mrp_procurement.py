@@ -22,6 +22,7 @@ class TestSaleMrpProcurement(TransactionCase):
         # Required for `tracking` to be visible in the view
         self.env.user.group_ids += self.env.ref('stock.group_production_lot')
         self.env.ref('stock.route_warehouse0_mto').active = True
+        self.env.ref('mrp.route_warehouse0_manufacture').product_selectable = True
         warehouse0 = self.env.ref('stock.warehouse0')
         # In order to test the sale_mrp module in OpenERP, I start by creating a new product 'Slider Mobile'
         # I define product category Mobile Products Sellable.
@@ -94,6 +95,7 @@ class TestSaleMrpProcurement(TransactionCase):
         # Required for `tracking` to be visible in the view
         self.env.user.group_ids += self.env.ref('stock.group_production_lot')
         self.env.ref('stock.route_warehouse0_mto').active = True
+        self.env.ref('mrp.route_warehouse0_manufacture').product_selectable = True
         # Create warehouse
         self.customer_location = self.env['ir.model.data']._xmlid_to_res_id('stock.stock_location_customers')
         self.warehouse = self.env['stock.warehouse'].sudo().create({
@@ -202,6 +204,7 @@ class TestSaleMrpProcurement(TransactionCase):
         """
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         manufacture_route = warehouse.manufacture_pull_id.route_id
+        manufacture_route.product_selectable = True
 
         warehouse.manufacture_steps = 'pbm_sam'
         warehouse.sam_loc_id.location_id = warehouse.lot_stock_id
@@ -292,6 +295,7 @@ class TestSaleMrpProcurement(TransactionCase):
         """
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
         manufacture_route = warehouse.manufacture_pull_id.route_id
+        manufacture_route.product_selectable = True
         mto_route = warehouse.mto_pull_id.route_id
         mto_route.active = True
 

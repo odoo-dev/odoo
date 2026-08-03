@@ -37,7 +37,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         - Po created for the component.
         """
         # self.warehouse.manufacture_pull_id.route_id.write({'sequence': 20})
-        self.env.ref('stock.route_warehouse0_mto').update({'active': True, 'product_selectable': True})
+        self.env.ref('stock.route_warehouse0_mto').active = True
         mto_route = self.env['stock.route'].search([('name', '=', 'Replenish on Order (MTO)')])
         dropship_route = self.env['stock.route'].search([('name', '=', 'Dropship')])
         self.comp1.route_ids = [Command.link(mto_route.id)]
@@ -371,7 +371,6 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         ])
         route_mto = self.env.ref('stock.route_warehouse0_mto')
         route_mto.active = True
-        route_mto.product_selectable = True
         component = self.env['product.product'].create([{
             'name': 'Common Component',
             'is_storable': True,

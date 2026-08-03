@@ -364,6 +364,7 @@ class TestCreatePicking(ProductVariantsCommon):
             'name': 'Jhon'
         })
 
+        self.env.ref('purchase_stock.route_warehouse0_buy').product_selectable = True
         product = self.env['product.product'].create({
             'name': 'product',
             'is_storable': True,
@@ -511,6 +512,7 @@ class TestCreatePicking(ProductVariantsCommon):
         warehouse1 = self.env.ref('stock.warehouse0')
         route_buy = warehouse1.buy_pull_id.route_id
         route_mto = warehouse1.mto_pull_id.route_id
+        route_buy.product_selectable = True
 
         product = self.env['product.product'].create({
             'name': 'Usb Keyboard',
@@ -654,6 +656,7 @@ class TestCreatePicking(ProductVariantsCommon):
         # This needs to be tried with MTO route activated
         self.env['stock.route'].browse(self.ref('stock.route_warehouse0_mto')).action_unarchive()
         self.env['stock.route'].browse(self.ref('stock.route_warehouse0_mto')).rule_ids.procure_method = "make_to_order"
+        self.env.ref('purchase_stock.route_warehouse0_buy').product_selectable = True
         product = self.env['product.product'].create({
             'name': 'product',
             'is_storable': True,
