@@ -164,6 +164,7 @@ class HrLeave(models.Model):
             domain=[
                 ('resource_id', '=', False),
                 ('company_id', 'in', indian_leaves.company_id.ids),
+                ('is_exceptional_days', '=', False),
             ],
             groupby=['company_id'],
             aggregates=['id:recordset'],

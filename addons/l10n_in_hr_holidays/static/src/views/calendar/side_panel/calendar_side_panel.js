@@ -10,5 +10,10 @@ patch(TimeOffCalendarSidePanel.prototype, {
             this.specialDays().optionalHolidays || []
           )
         );
+        this.exceptionalDays = computed(() =>
+          this._mapIsoToDatetimes(
+            this.specialDays().exceptionalDays || []
+          )
+        );
     }
 });
