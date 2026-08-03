@@ -127,6 +127,8 @@ desktop_windows
 device_thermostat
 dialpad
 diamond
+dine_in
+takeout_dining_2
 directions_bike
 directions_boat
 directions_bus

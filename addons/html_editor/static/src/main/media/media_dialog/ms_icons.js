@@ -520,6 +520,10 @@ const MS_ICONS = {
         has_fill: true,
         tags: "award brilliant clean crystal cut diamond exclusive expensive facet fashion gem gems geometric jewel jewelry logo luxury pointed polygon precious premium prize quality retail shape sharp simple special stone valuable valuables value",
     },
+    dine_in: {
+        has_fill: false,
+        tags: "bistro booking business cafe chairs cutlery dine in dining dining room eatery eating enjoy establishment food food service fork human indoor inside knife leisure meal menu people person place setting relax reserve restaurant seating serve service spoon table",
+    },
     directions_bike: {
         has_fill: false,
         tags: "activity bicycle bike cycling direction directions exercise fitness green transport health human journey map maps mobility navigation outdoor path person public recreation ride riding road route sport street transport transportation travel two wheels urban vehicle workout",
@@ -1583,6 +1587,10 @@ const MS_ICONS = {
     tag: {
         has_fill: false,
         tags: "app banner bookmark button categorize classification corner diagonal document favorite file fold folded corner hash hashtag key label marker media note numbers organise page paper pound ribbon save shape slant social symbol tag trend triangle ui ui element web",
+    },
+    takeout_dining_2: {
+        has_fill: true,
+        tags: "box catering container courier cutlery delivery delivery service dining dinner eat fast food food fork knife lunch meal order order online packaging pickup prepared food restaurant service spoon take away takeout to go transportation",
     },
     terminal: {
         has_fill: false,

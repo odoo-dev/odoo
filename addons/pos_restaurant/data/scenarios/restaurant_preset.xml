@@ -19,6 +19,7 @@
         <record model="pos.preset" id="pos_takein_preset">
             <field name="name">Dine In</field>
             <field name="color">4</field>
+            <field name="icon">dine_in</field>
         </record>
         <record model="pos.preset" id="pos_takeout_preset">
             <field name="name">Takeout</field>
@@ -26,11 +27,13 @@
             <field name="identification">name</field>
             <field name="use_timing">True</field>
             <field name="resource_calendar_id" eval="ref('pos_resource_preset')"/>
+            <field name="icon">local_shipping</field>
         </record>
         <record model="pos.preset" id="pos_delivery_preset">
             <field name="name">Delivery</field>
             <field name="color">2</field>
             <field name="identification">address</field>
+            <field name="icon">inventory_2</field>
         </record>
     </data>
 </odoo>

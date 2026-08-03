@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="point_of_sale.IconPickerField">
+        <div class="d-flex flex-wrap gap-2">
+
+            <t t-foreach="this.icons" t-as="icon" t-key="icon">
+
+                <button
+                    type="button"
+                    class="btn px-1"
+                    t-att-class="this.value === icon ? 'btn-primary' : 'btn-outline-secondary'"
+                    t-on-click="() => this.selectIcon(icon)"
+                >
+                    <i class="oi" t-att-data-icon="icon" role="img" t-att-aria-label="icon"/>
+                </button>
+
+            </t>
+
+        </div>
+    </t>
+
+</templates>

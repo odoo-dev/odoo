@@ -54,6 +54,18 @@
                                 <span invisible="not is_return or pricelist_id" class="oe_inline ps-2 text-info">Tip: add a return pricelist (i.e. 0€)</span>
                             </div>
                             <field name="color" widget="color_picker"/>
+                            <field name="icon"
+                                widget="icon_picker_pos"
+                                options="{
+                                    'icons': [
+                                        'local_shipping',
+                                        'inventory_2',
+                                        'restaurant',
+                                        'dine_in',
+                                        'takeout_dining_2',
+                                    ]
+                                }"
+                            />                          
                         </group>
                     </group>
                     <notebook>

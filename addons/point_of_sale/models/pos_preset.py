@@ -21,6 +21,7 @@ class PosPreset(models.Model):
     has_image = fields.Boolean(compute='_compute_has_image')
     count_linked_orders = fields.Integer(compute='_compute_count_linked_orders')
     count_linked_config = fields.Integer(compute='_compute_count_linked_config')
+    icon = fields.Char(string='Icon')
 
     # Service Fee
     service_fee = fields.Boolean(string='Service Fee', default=False)
@@ -63,7 +64,7 @@ class PosPreset(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ['id', 'name', 'pricelist_id', 'fiscal_position_id', 'is_return', 'color', 'has_image', 'write_date', 'identification',
-            'use_timing', 'slots_per_interval', 'interval_time', 'attendance_ids',
+            'use_timing', 'slots_per_interval', 'interval_time', 'attendance_ids', 'icon',
             'service_fee', 'service_fee_product_id', 'service_fee_type', 'service_fee_amount', 'service_fee_based_on']
 
     def _compute_count_linked_orders(self):
