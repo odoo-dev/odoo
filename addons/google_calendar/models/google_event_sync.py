@@ -21,13 +21,6 @@ _logger = logging.getLogger(__name__)
 class GoogleEventSync(models.AbstractModel):
     _name = 'google.event.sync'
     _inherit = ['google.sync']
-    _description = 'Google Event Sync'
-
-    # This field is used to determine if a calendar needs to be moved on Google.
-    # If it is falsy, it means that the event is in the correct place/has not been moved.
-    # If it contains a calendar path, it means we should try to move the event and reset the field on a success.
-    last_google_calendar_sync_path = fields.Char(copy=False)
-    # Active management is required for synced records (both events and recurrences) - see unlink() for more info.
     active = fields.Boolean(default=True)
 
     def write(self, vals):
@@ -36,6 +29,7 @@ class GoogleEventSync(models.AbstractModel):
         if 'need_sync' not in vals and vals.keys() & synced_fields and not self.env.user.google_synchronization_stopped:
             vals['need_sync'] = True
 
+<<<<<<< HEAD
         if 'calendar_id' in vals or 'user_id' in vals:
             for record in self:
                 if 'calendar_id' in vals:
@@ -63,6 +57,13 @@ class GoogleEventSync(models.AbstractModel):
                         record._google_values(),
                         timeout=3
                     )
+=======
+        result = super().write(vals)
+        if self.env.user._get_google_sync_status() != "sync_paused":
+            for record in self:
+                if record.need_sync and record.google_id:
+                    record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
 
         return result
 
@@ -85,6 +86,7 @@ class GoogleEventSync(models.AbstractModel):
             return True
         return super().unlink()
 
+<<<<<<< HEAD
     def _handle_calendar_change(self, google_service, new_calendar_id):
         self.ensure_one()
         if not self.calendar_id or not self.google_id or not self._get_event_owner():
@@ -102,6 +104,8 @@ class GoogleEventSync(models.AbstractModel):
             self.with_user(self._get_event_user())._google_delete(google_service, self.calendar_id.get_google_path(), self.google_id)
             self.write({'google_id': False, 'last_google_calendar_sync_path': False, 'need_sync': True})
 
+=======
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
     @api.model_create_multi
     def create(self, vals_list):
         user_ids = {v['user_id'] for v in vals_list if v.get('user_id')}
@@ -115,6 +119,7 @@ class GoogleEventSync(models.AbstractModel):
         self._handle_allday_recurrences_edge_case(records, vals_list)
 
         google_service = GoogleCalendarService(self.env['google.service'])
+<<<<<<< HEAD
         for record in records:
             if record._get_event_owner():
                 owner_sync_active = record._get_event_owner()._get_google_sync_status() == "sync_active"
@@ -128,6 +133,12 @@ class GoogleEventSync(models.AbstractModel):
                     record._google_values(),
                     timeout=3
                 )
+=======
+        if self.env.user._get_google_sync_status() != "sync_paused":
+            for record in records:
+                if record.need_sync and record.active:
+                    record.with_user(record._get_event_user())._google_insert(google_service, record._google_values(), timeout=3)
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         return records
 
     def _handle_allday_recurrences_edge_case(self, records, vals_list):
@@ -147,6 +158,10 @@ class GoogleEventSync(models.AbstractModel):
         writeable_values = {
             'google_id': request_values['id'],
             'need_sync': False,
+<<<<<<< HEAD
+=======
+            'last_google_calendar_sync_id': 'primary' if google_values.get('primary', False) else google_values.get('id'),
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         }
         return writeable_values
 
@@ -161,6 +176,7 @@ class GoogleEventSync(models.AbstractModel):
 
         updated_records = records_to_sync.filtered('google_id')
         new_records = records_to_sync - updated_records
+<<<<<<< HEAD
         for record in cancelled_records:
             if record.google_id and record.need_sync:
                 record.with_user(record._get_event_user())._google_delete(google_service, record._get_google_calendar_path(), record.google_id)
@@ -182,13 +198,29 @@ class GoogleEventSync(models.AbstractModel):
                 record.google_id,
                 record._google_values()
             )
+=======
+        if self.env.user._get_google_sync_status() != "sync_paused":
+            for record in cancelled_records:
+                if record.google_id and record.need_sync:
+                    record.with_user(record._get_event_user())._google_delete(google_service, record.google_id)
+            for record in new_records:
+                if record._is_google_insertion_blocked(sender_user=self.env.user):
+                    continue
+                record.with_user(record._get_event_user())._google_insert(google_service, record._google_values())
+            for record in updated_records:
+                record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values())
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
 
     def _cancel(self):
         self.with_context(dont_notify=True).write({'google_id': False})
         self.unlink()
 
     @api.model
+<<<<<<< HEAD
     def _sync_google2odoo(self, google_events: GoogleEvent, calendar, write_dates=None, default_reminders=()):
+=======
+    def _sync_google2odoo(self, google_events: GoogleEvent, write_dates=None, default_reminders=()):
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         """Synchronize Google recurrences in Odoo. Creates new recurrences, updates
         existing ones.
 
@@ -205,10 +237,17 @@ class GoogleEventSync(models.AbstractModel):
         new = google_events - existing - google_events.cancelled() - self._get_skipped_google_events(google_events)
 
         odoo_values = [
+<<<<<<< HEAD
             dict(self._odoo_values(e, calendar, default_reminders), need_sync=False)
             for e in new
         ]
         new_odoo = self.with_context(dont_notify=True, skip_contact_description=True)._create_from_google(new, calendar,
+=======
+            dict(self._odoo_values(e, default_reminders), need_sync=False)
+            for e in new
+        ]
+        new_odoo = self.with_context(dont_notify=True, skip_contact_description=True)._create_from_google(new,
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
                                                                                                           odoo_values)
         cancelled = existing.cancelled()
         cancelled_odoo = self.browse(cancelled.odoo_ids(self.env))
@@ -240,8 +279,13 @@ class GoogleEventSync(models.AbstractModel):
             odoo_record_write_date = write_dates.get(odoo_record.id, odoo_record.write_date)
             # Migration from 13.4 does not fill write_date. Therefore, we force the update from Google.
             if not odoo_record_write_date or updated >= odoo_record_write_date.replace(tzinfo=datetime.UTC):
+<<<<<<< HEAD
                 vals = dict(self._odoo_values(gevent, calendar, default_reminders), need_sync=False)
                 odoo_record.with_context(dont_notify=True)._write_from_google(gevent, vals, calendar)
+=======
+                vals = dict(self._odoo_values(gevent, default_reminders), need_sync=False)
+                odoo_record.with_context(dont_notify=True)._write_from_google(gevent, vals)
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
                 synced_records |= odoo_record
 
         return synced_records
@@ -278,7 +322,11 @@ class GoogleEventSync(models.AbstractModel):
                 name = event.name
                 # prevent to sync other events
                 self.calendar_event_ids.need_sync = False
+<<<<<<< HEAD
                 error_log = f"Error while syncing recurrence [{self.id} - {self.name} - {self.rrule}]: "
+=======
+                error_log = "Error while syncing recurrence [{id} - {name} - {rrule}]: ".format(id=self.id, name=self.name, rrule=self.rrule)
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
 
             # We don't have right access on the event or the request paramaters were bad.
             # https://developers.google.com/calendar/v3/errors#403_forbidden_for_non-organizer
@@ -287,6 +335,7 @@ class GoogleEventSync(models.AbstractModel):
             else:
                 reason = _("Google gave the following explanation: %s", response['error'].get('message'))
 
+<<<<<<< HEAD
             error_log += ("The event (%(id)s - %(name)s at %(start)s) could not be synced. It will not be synced while "
                          "it is not updated. Reason: %(reason)s" % {'id': event_ids, 'start': start, 'name': name,
                                                                     'reason': reason})
@@ -294,6 +343,16 @@ class GoogleEventSync(models.AbstractModel):
 
             body = Markup(_("The following event could not be synced with Google Calendar.<br/>"
                             "It will not be synced as long as it is not updated.<br/>")) + reason
+=======
+            error_log += "The event (%(id)s - %(name)s at %(start)s) could not be synced. It will not be synced while " \
+                         "it is not updated. Reason: %(reason)s" % {'id': event_ids, 'start': start, 'name': name,
+                                                                    'reason': reason}
+            _logger.warning(error_log)
+
+            body = _("The following event could not be synced with Google Calendar.") + Markup("<br/>") + \
+                   _("It will not be synced as long at it is not updated.") + Markup("<br/>") + \
+                   reason
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
 
             if event:
                 event.message_post(
@@ -303,13 +362,18 @@ class GoogleEventSync(models.AbstractModel):
                 )
 
     @after_commit
+<<<<<<< HEAD
     def _google_delete(self, google_service: GoogleCalendarService, calendar, google_id, timeout=TIMEOUT):
         if self.env.user._get_google_sync_status() != "sync_active" or not calendar:
             return
+=======
+    def _google_delete(self, google_service: GoogleCalendarService, google_id, timeout=TIMEOUT):
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 is_recurrence = self.env.context.get('is_recurrence', False)
                 google_service.google_service = google_service.google_service.with_context(is_recurrence=is_recurrence)
+<<<<<<< HEAD
                 google_service.delete(google_id, calendar, token=token, timeout=timeout)
                 # When the record has been deleted on our side, we need to delete it on google but we don't want
                 # to raise an error because the record don't exists anymore.
@@ -319,18 +383,32 @@ class GoogleEventSync(models.AbstractModel):
     def _google_patch(self, google_service: GoogleCalendarService, calendar, google_id, values, timeout=TIMEOUT):
         if self.env.user._get_google_sync_status() != "sync_active" or not calendar:
             return
+=======
+                google_service.delete(google_id, token=token, timeout=timeout)
+                # When the record has been deleted on our side, we need to delete it on google but we don't want
+                # to raise an error because the record don't exists anymore.
+                self.exists().with_context(dont_notify=True).need_sync = False
+
+    @after_commit
+    def _google_patch(self, google_service: GoogleCalendarService, google_id, values, timeout=TIMEOUT):
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
                     send_updates = not self._is_event_over()
                     google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
+<<<<<<< HEAD
                     google_service.patch(google_id, values, calendar, token=token, timeout=timeout)
+=======
+                    google_service.patch(google_id, values, token=token, timeout=timeout)
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
                 if values:
                     self.exists().with_context(dont_notify=True).need_sync = False
 
+<<<<<<< HEAD
     @after_commit
     def _google_move(self, google_service: GoogleCalendarService, source_calendar, destination_calendar, timeout=TIMEOUT):
         """
@@ -364,6 +442,8 @@ class GoogleEventSync(models.AbstractModel):
                 if e.response.status_code in (400, 403):
                     self._google_error_handling(e)
 
+=======
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
     def _need_video_call(self):
         """ Implement this method to return True if the event needs a video call
         :return: bool
@@ -372,21 +452,32 @@ class GoogleEventSync(models.AbstractModel):
         return True
 
     @after_commit
+<<<<<<< HEAD
     def _google_insert(self, google_service: GoogleCalendarService, calendar, values, timeout=TIMEOUT):
         if not values or self.env.user._get_google_sync_status() != "sync_active" or not calendar:
+=======
+    def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
+        if not values:
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
             return
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:
                 try:
                     send_updates = self.env.context.get('send_updates', True) and not self._is_event_over()
                     google_service.google_service = google_service.google_service.with_context(send_updates=send_updates)
+<<<<<<< HEAD
                     google_values = google_service.insert(values, calendar, token=token, timeout=timeout, need_video_call=self._need_video_call())
+=======
+                    google_values = google_service.insert(values, token=token, timeout=timeout,
+                                                          need_video_call=self._need_video_call())
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
                     self.with_context(dont_notify=True).write(self._get_post_sync_values(values, google_values))
                 except HTTPError as e:
                     if e.response.status_code in (400, 403):
                         self._google_error_handling(e)
                         self.with_context(dont_notify=True).need_sync = False
 
+<<<<<<< HEAD
     def _get_records_to_sync(self, calendar, full_sync=False):
         """Return records that should be synced from Odoo to Google
 
@@ -405,6 +496,15 @@ class GoogleEventSync(models.AbstractModel):
         else:
             domain &= Domain('calendar_id', '=', calendar.id)
 
+=======
+    def _get_records_to_sync(self, full_sync=False):
+        """Return records that should be synced from Odoo to Google
+
+        :param full_sync: If True, all events attended by the user are returned
+        :return: events
+        """
+        domain = self._get_sync_domain()
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         if not full_sync:
             is_active_clause = Domain(self._active_name, '=', True) if self._active_name else Domain.TRUE
             domain &= (Domain('google_id', '=', False) & is_active_clause) | Domain('need_sync', '=', True)
@@ -421,11 +521,19 @@ class GoogleEventSync(models.AbstractModel):
         domain &= (Domain('google_id', '=', False) & is_active_clause) | Domain('need_sync', '=', True)
         return self.search_count(domain, limit=1) > 0
 
+<<<<<<< HEAD
     def _write_from_google(self, gevent, vals, calendar):
         self.write(vals)
 
     @api.model
     def _create_from_google(self, gevents, calendar, vals_list):
+=======
+    def _write_from_google(self, gevent, vals):
+        self.write(vals)
+
+    @api.model
+    def _create_from_google(self, gevents, vals_list):
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)
         return self.create(vals_list)
 
     @api.model
@@ -454,6 +562,7 @@ class GoogleEventSync(models.AbstractModel):
         """
         raise NotImplementedError()
 
+<<<<<<< HEAD
     def _get_event_owner(self):
         """ Gets the owner of the calendar the event belongs to. If the event is not in a calendar,
         it returns the event organizer. If neither is specified, returns False.
@@ -470,3 +579,13 @@ class GoogleEventSync(models.AbstractModel):
         if self.calendar_id:
             return self.calendar_id.get_google_path()
         return 'primary'
+=======
+    def _is_google_insertion_blocked(self, sender_user):
+        """
+        Returns True if the record insertion to Google should be blocked.
+        This is a necessary step for ensuring data match between Odoo and Google,
+        as it avoids that events have permanently the wrong organizer in Google
+        by not synchronizing records through owner and not through the attendees.
+        """
+        raise NotImplementedError()
+>>>>>>> 48e97fee3466 ([MOV] google_calendar: extract generic behavior of sync files)

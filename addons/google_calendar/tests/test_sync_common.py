@@ -8,7 +8,8 @@ from unittest.mock import patch
 from odoo.addons.google_calendar.utils.google_calendar_service import GoogleCalendarService
 from odoo.addons.google_account.models.google_service import GoogleService
 from odoo.addons.google_calendar.models.res_users import ResUsers
-from odoo.addons.google_calendar.models.google_sync import google_calendar_token, GoogleCalendarSync
+from odoo.addons.google_calendar.models.google_event_sync import GoogleEventSync
+from odoo.addons.google_calendar.models.google_sync import google_calendar_token
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests.common import HttpCase
 from odoo.tools import mute_logger
@@ -99,10 +100,7 @@ class TestSyncGoogle(HttpCase):
         with self.env.cr.savepoint(), \
              patch.object(GoogleEventSync, '_google_insert', autospec=True, wraps=GoogleEventSync, side_effect=_mock_insert), \
              patch.object(GoogleEventSync, '_google_delete', autospec=True, wraps=GoogleEventSync, side_effect=_mock_delete), \
-             patch.object(GoogleEventSync, '_google_patch', autospec=True, wraps=GoogleEventSync, side_effect=_mock_patch), \
-             patch.object(GoogleEventSync, '_google_move', autospec=True, wraps=GoogleEventSync, side_effect=_mock_move), \
-             patch.object(CalendarCalendar, '_google_calendar_insert', autospec=True, side_effect=_mock_insert_calendar), \
-             patch.object(CalendarCalendar, '_google_calendar_patch', autospec=True, side_effect=_mock_patch_calendar):
+             patch.object(GoogleEventSync, '_google_patch', autospec=True, wraps=GoogleEventSync, side_effect=_mock_patch):
             yield
 
     @contextmanager
