@@ -195,7 +195,7 @@
                         <div class="clearfix"/>
                     </page>
                      <page string="Services" name="services">
-                        <field name="repair_service_line_ids" readonly="state in ['done', 'cancel']">
+                        <field name="repair_service_line_ids" mode="list,kanban" readonly="state in ['done', 'cancel']">
                             <list string="text" editable="bottom">
                                 <control>
                                     <create string="Add a line"/>
@@ -221,6 +221,39 @@
                                     options="{'no_open': True, 'no_create': True}"
                                     widget="many2one_uom"/>
                             </list>
+                            <kanban class="o_kanban_mobile">
+                                <field name="sequence"/>
+                                <field name="product_id"/>
+                                <field name="description"/>
+                                <field name="quantity"/>
+                                <field name="uom_id"/>
+                                <control>
+                                    <create string="Add a line"/>
+                                    <button name="action_add_service_from_repair_catalog" string="Catalog" type="object"
+                                        class="btn-secondary" context="{'order_id': parent.id}"/>
+                                </control>
+                                <templates>
+                                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                                        <aside class="col-2 p-1">
+                                            <span t-att-title="record.product_id.value">
+                                                <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                            </span>
+                                        </aside>
+                                        <main class="col">
+                                            <div class="d-flex justify-content-between align-items-baseline gap-2">
+                                                <field name="product_id" class="fw-bold"/>
+                                                <span class="text-nowrap fw-bolder">
+                                                    <field name="quantity"/>
+                                                    <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                                </span>
+                                            </div>
+                                            <div class="text-muted" invisible="not description">
+                                                <field name="description"/>
+                                            </div>
+                                        </main>
+                                    </t>
+                                </templates>
+                            </kanban>
                         </field>
                     </page>
                     <page string="Repair Notes" name="repair_notes">
