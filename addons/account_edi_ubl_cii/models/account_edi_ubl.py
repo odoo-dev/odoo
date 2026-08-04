@@ -22,6 +22,10 @@ from odoo.addons.account_edi_ubl_cii.tools.partner_identifiers import (
     normalize_vat_for_ubl,
 )
 
+from odoo.addons.account.tools import dict_to_xml
+from lxml import etree
+
+
 _logger = logging.getLogger(__name__)
 
 
@@ -1158,7 +1162,7 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _ubl_add_tax_currency_code_node_company_currency_if_foreign_currency(self, vals):
         company = vals['company']
-        currency = vals['currency_id']
+        currency = vals['currency']
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': None if currency == company.currency_id else company.currency_id.name}
 
     def _ubl_add_tax_currency_code_node_company_currency(self, vals):
@@ -1529,7 +1533,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
         iter_currency = [(currency, '_currency')]
         if currency != company_currency:
@@ -1651,7 +1655,7 @@ class AccountEdiUBL(models.AbstractModel):
                 nodes.append(tax_total_node)
 
     def _ubl_add_legal_monetary_total_line_extension_amount_node(self, vals, in_foreign_currency=True):
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
 
         line_extension_amount = sum(
             line_node['cbc:LineExtensionAmount']['_text']
@@ -1668,7 +1672,7 @@ class AccountEdiUBL(models.AbstractModel):
             minus sum of allowance amount on document level
             plus sum of charges on document level.
         """
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
 
         tax_exlusive_amount = node['cbc:LineExtensionAmount']['_text']
@@ -1686,7 +1690,7 @@ class AccountEdiUBL(models.AbstractModel):
         }
 
     def _ubl_add_legal_monetary_total_tax_inclusive_amount_node(self, vals, in_foreign_currency=True):
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
         document_node = vals['document_node']
         node = vals['legal_monetary_total_node']
 
@@ -1709,7 +1713,7 @@ class AccountEdiUBL(models.AbstractModel):
         }
 
     def _ubl_add_legal_monetary_total_allowance_charge_total_amount_node(self, vals, in_foreign_currency=True):
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
 
         total_allowance = sum(
@@ -1735,7 +1739,7 @@ class AccountEdiUBL(models.AbstractModel):
         })
 
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
 
         payable_rounding_amount = (node['cbc:PayableRoundingAmount'] or {}).get('_text') or 0.0
@@ -1793,7 +1797,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
         AccountTax = self.env['account.tax']
         base_lines = vals['base_lines']
-        currency = vals['currency_id']
+        currency = vals['currency']
         node = vals['legal_monetary_total_node']
         tax_inclusive_amount = node['cbc:TaxInclusiveAmount']['_text']
 
@@ -1842,7 +1846,6 @@ class AccountEdiUBL(models.AbstractModel):
     def _fill_document_values_invoice(self, vals):
         document_node = vals['document_node']
         document_node['_template'] = Invoice
-        document_node['_nsmap'][None] = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
         self._ubl_add_version_id_node(vals)
         self._ubl_add_customization_id_node(vals)
         self._ubl_add_profile_id_node(vals)
@@ -1869,7 +1872,6 @@ class AccountEdiUBL(models.AbstractModel):
     def _fill_document_values_credit_note(self, vals):
         document_node = vals['document_node']
         document_node['_template'] = CreditNote
-        document_node['_nsmap'][None] = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
         self._ubl_add_version_id_node(vals)
         self._ubl_add_customization_id_node(vals)
         self._ubl_add_profile_id_node(vals)
@@ -1895,7 +1897,6 @@ class AccountEdiUBL(models.AbstractModel):
     def _fill_document_values_debit_note(self, vals):
         document_node = vals['document_node']
         document_node['_template'] = DebitNote
-        document_node['_nsmap'][None] = "urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2"
         self._ubl_add_version_id_node(vals)
         self._ubl_add_customization_id_node(vals)
         self._ubl_add_profile_id_node(vals)
@@ -1917,11 +1918,22 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_tax_totals_nodes(vals)
         self._ubl_add_requested_monetary_total_node(vals)
 
+    def _fill_nsmap_values(self, vals):
+        nsmap = vals['document_node']['_nsmap']
+
+        if self._is_document(vals, 'invoice', 'self_invoice'):
+            nsmap[None] = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+        elif self._is_document(vals, 'credit_note', 'self_credit_note'):
+            nsmap[None] = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+        elif self._is_document(vals, 'debit_note'):
+            nsmap[None] = "urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2"
+
+        nsmap['cac'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+        nsmap['cbc'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+        nsmap['ext'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+
     def _fill_document_values(self, vals):
-        document_node = vals['document_node']
-        document_node['_nsmap']['cac'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-        document_node['_nsmap']['cbc'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-        document_node['_nsmap']['ext'] = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+        self._fill_nsmap_values(vals)
 
         if self._is_document(vals, 'invoice', 'self_invoice'):
             self._fill_document_values_invoice(vals)
@@ -1930,22 +1942,37 @@ class AccountEdiUBL(models.AbstractModel):
         elif self._is_document(vals, 'debit_note'):
             self._fill_document_values_debit_note(vals)
 
-    def _export_document_node_constraints(self, vals):
+    def _export_constraints(self, vals):
         return {}
 
     def _export_document(self, vals):
+        """ Generates an UBL 2.1 xml for a given invoice. """
+        invoice = vals['invoice']
+
         vals['document_node'] = {
             '_nsmap': {},
             '_template': Invoice,
         }
+
+        # 1. Validate the structure of the taxes
+        self._validate_taxes(invoice.invoice_line_ids.tax_ids)
+
+        # 2. Instantiate the XML builder
         self._fill_document_values(vals)
 
-        vals['constraints'] = {
-            k: v
-            for k, v in self._export_document_node_constraints(vals).items()
-            if v
-        }
-        return vals
+        # 3. Run constraints
+        constraints = self._export_constraints(vals)
+        errors = [constraint for constraint in constraints.values() if constraint]
+
+        # 4. Render the XML
+        xml_content = dict_to_xml(
+            vals['document_node'],
+            nsmap=vals['document_node']['_nsmap'],
+            template=vals['document_node']['_template'],
+        )
+
+        # 5. Format the XML
+        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), set(errors)
 
     def _ubl_add_values_document_type(self, vals):
         invoice = vals['invoice']

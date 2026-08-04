@@ -22,7 +22,8 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_cius_ro.xml"
 
-    def _get_document_type_code_node(self, invoice, invoice_data):
+    def _get_embedded_document_type_code_node(self, invoice, invoice_data):
+        # OVERRIDE account_edi_common
         # [UBL-SR-43] DocumentTypeCode should only show up on a CreditNote XML with the value '50'
         if invoice.move_type == 'out_refund':
             return {'_text': '50'}
@@ -184,10 +185,7 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
 
     def _export_invoice_constraints(self, invoice, vals):
         # OVERRIDE 'account.edi.xml.ubl_bis3': don't apply Peppol rules
-        constraints = self.env['account.edi.xml.ubl_20']._export_invoice_constraints(invoice, vals)
-        constraints.update(
-            self._invoice_constraints_cen_en16931_ubl(invoice, vals)
-        )
+        constraints = self._export_constraints(invoice, vals)
 
         # Default VAT is only allowed for the receiver (customer), not the provider (supplier)
         supplier = vals['supplier'].commercial_partner_id

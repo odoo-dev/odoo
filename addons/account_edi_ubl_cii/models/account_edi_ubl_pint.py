@@ -9,6 +9,9 @@ class AccountEdiUBLPint(models.AbstractModel):
     _inherit = 'account.edi.ubl'
     _description = "UBL PINT"
 
+    def _can_export_selfbilling(self):
+        return bool(self._get_customization_id(process_type='selfbilling'))
+
     # -------------------------------------------------------------------------
     # EXPORT: NODES
     # -------------------------------------------------------------------------
@@ -179,8 +182,6 @@ class AccountEdiUBLPint(models.AbstractModel):
 
     def _ubl_add_party_tax_scheme_nodes(self, vals):
         super()._ubl_add_party_tax_scheme_nodes(vals)
-        if vals['no_party_tax_scheme']:
-            return
 
         super()._ubl_add_party_tax_scheme_nodes_vat_gst(vals)
 
@@ -386,7 +387,7 @@ class AccountEdiUBLPint(models.AbstractModel):
 
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
         super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)
-        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
 
         if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
@@ -427,3 +428,7 @@ class AccountEdiUBLPint(models.AbstractModel):
         AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], company, in_foreign_currency=False)
 
         return vals
+
+    def _export_constraints(self, vals):
+        # TODO add generic PINT constraints: https://docs.peppol.eu/poac/aunz/pint-aunz/trn-invoice/rule/PINT-UBL-validation-preprocessed/
+        return super()._export_constraints(vals)

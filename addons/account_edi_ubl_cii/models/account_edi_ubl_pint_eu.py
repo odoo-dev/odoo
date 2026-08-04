@@ -92,8 +92,8 @@ class AccountEdiUBLPintEU(models.AbstractModel):
                     }
                 })
 
-    def _export_document_node_constraints(self, vals):
-        constraints = super()._export_document_node_constraints(vals)
+    def _export_constraints(self, vals):
+        constraints = super()._export_constraints(vals)
         document_node = vals['document_node']
         nsmap = document_node['_nsmap']
 

@@ -221,6 +221,9 @@ class AccountEdiCommon(models.AbstractModel):
     def _can_export_selfbilling(self):
         return False
 
+    def _get_embedded_document_type_code_node(self, vals):
+        return {'_text': 390}  # Default linked document code
+
     # -------------------------------------------------------------------------
     # TAXES
     # -------------------------------------------------------------------------

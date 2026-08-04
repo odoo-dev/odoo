@@ -5,7 +5,7 @@ from odoo import models
 
 class AccountEdiXmlUbl_A_Nz(models.AbstractModel):
     _name = 'account.edi.xml.ubl_a_nz'
-    _inherit = ["account.edi.ubl_pint"]
+    _inherit = "account.edi.ubl_pint"
     _description = "PINT A-NZ"
 
     """
@@ -54,5 +54,6 @@ class AccountEdiXmlUbl_A_Nz(models.AbstractModel):
 
         return tax_total_keys
 
-    def _export_document_node_constraints(self, vals):
-        return super().export_constrains()
+    def _export_constraints(self, vals):
+        # TODO add the constrains for PINT ANZ: https://docs.peppol.eu/poac/aunz/pint-aunz/trn-invoice/rule/PINT-jurisdiction-aligned-rules/
+        return super()._export_constraints(vals)

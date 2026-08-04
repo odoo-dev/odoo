@@ -39,18 +39,18 @@ class AccountEdiUBLCenEn16931(models.AbstractModel):
         return super()._line_nodes_filter_base_lines(vals, filter_function=new_filter_function)
 
     def _ubl_add_party_tax_scheme_nodes(self, vals):
-        super()._ubl_add_party_tax_scheme_nodes(vals)
-
         # [BR-O-03]/[BR-O-04]/[BR-O-05] no party tax scheme with "Not subject to VAT" VAT Category Code
         base_lines = vals['base_lines']
-        vals['no_party_tax_scheme'] = (
+        if (
             'ubl_cii_tax_category_code' in self.env['account.tax']._fields
             and any(
                 tax_data['tax'].ubl_cii_tax_category_code == 'O'
                 for base_line in base_lines
                 for tax_data in base_line['tax_details']['taxes_data']
             )
-        )
+        ):
+            return
+        return super()._ubl_add_party_tax_scheme_nodes(vals)
 
     def _ubl_add_allowance_charge_nodes(self, vals):
         super()._ubl_add_allowance_charge_nodes(vals)
@@ -89,8 +89,8 @@ class AccountEdiUBLCenEn16931(models.AbstractModel):
 
         return tax_total_keys
 
-    def _export_document_node_constraints(self, vals):
-        constraints = super()._export_document_node_constraints(vals)
+    def _export_constraints(self, vals):
+        constraints = super()._export_constraints(vals)
         if not self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
             return constraints
 

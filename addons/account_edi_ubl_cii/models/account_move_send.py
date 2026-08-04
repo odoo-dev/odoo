@@ -256,10 +256,9 @@ class AccountMoveSend(models.AbstractModel):
         pdf_values = invoice.invoice_pdf_report_id or invoice_data.get('pdf_attachment_values') or invoice_data['proforma_pdf_attachment_values']
 
         edi_model = invoice_data["ubl_cii_xml_options"]["builder"]
-        doc_type_code_node = edi_model._get_document_type_code_node(invoice, invoice_data)
-        vals = {'invoice': invoice}
-        edi_model._add_invoice_config_vals(vals)
-        nsmap = edi_model._get_document_nsmap(vals)
+        vals = {'invoice': invoice, 'document_node': {'_nsmap': {}}}
+        edi_model._fill_nsmap_values(vals)
+        doc_type_code_node = edi_model._get_embedded_document_type_code_node(vals)
 
         attachments_to_embed = [
             {
@@ -292,7 +291,7 @@ class AccountMoveSend(models.AbstractModel):
                     }
                 }
             }
-            tree.insert(anchor_index, dict_to_xml(additional_document_reference_node, nsmap=nsmap))
+            tree.insert(anchor_index, dict_to_xml(additional_document_reference_node, nsmap=vals['document_node']['_nsmap']))
 
         invoice_data['ubl_cii_xml_attachment_values']['raw'] = etree.tostring(
             cleanup_xml_node(tree), xml_declaration=True, encoding='UTF-8'

@@ -102,9 +102,8 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
             } if vals['document_type'] == 'credit_note' else None,
         })
 
-    def _get_document_type_code_node(self, invoice, invoice_data):
-        # EXTENDS 'account_edi_ubl_cii
-        # http://www.datypic.com/sc/ubl20/e-cbc_DocumentTypeCode.html
+    def _get_embedded_document_type_code_node(self, vals):
+        invoice = vals['invoice']
         return {
             '_text': '380' if invoice.move_type == 'out_invoice' else '381',
             'listAgencyID': '6',
