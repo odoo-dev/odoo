@@ -123,6 +123,45 @@
             </field>
         </record>
 
+        <record id="view_move_linked_kanban" model="ir.ui.view">
+            <field name="name">stock.move.linked.kanban</field>
+            <field name="model">stock.move</field>
+            <field name="priority">1000</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" create="0" delete="0">
+                    <field name="location_id"/>
+                    <field name="location_dest_id"/>
+                    <field name="product_uom_qty"/>
+                    <field name="uom_id"/>
+                    <field name="state"/>
+                    <templates>
+                        <t t-name="card" class="row g-0 ps-0 pe-0">
+                            <main class="col">
+                                <div class="d-flex justify-content-between align-items-baseline gap-2">
+                                    <div class="fw-bold">
+                                        <field name="location_id"/>
+                                        <span class="mx-1">→</span>
+                                        <field name="location_dest_id"/>
+                                    </div>
+                                    <field name="state" widget="badge"
+                                        decoration-danger="state == 'cancel'"
+                                        decoration-info="state == 'assigned'"
+                                        decoration-muted="state == 'draft'"
+                                        decoration-success="state == 'done'"
+                                        decoration-warning="state not in ('draft', 'cancel', 'done', 'assigned')"/>
+                                </div>
+                                <div class="text-muted">
+                                    Quantity:
+                                    <field name="product_uom_qty"/>
+                                    <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                </div>
+                            </main>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
         <record id="view_stock_move_operations" model="ir.ui.view">
             <field name="name">stock.move.operations.form</field>
             <field name="model">stock.move</field>
@@ -165,8 +204,9 @@
                     </group>
                     <div class="mt-3 mx-n3 d-flex flex-column justify-content-center o_stock_move_lines_padded">
                         <field name="move_line_ids"
+                            mode="list,kanban"
                             readonly="state == 'cancel' or (state == 'done' and is_locked) or not product_id"
-                            context="{'list_view_ref': 'stock.view_stock_move_line_operation_tree', 'form_view_ref': 'stock.view_move_line_mobile_form', 'default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id, 'active_picking_id': picking_id}"
+                            context="{'list_view_ref': 'stock.view_stock_move_line_operation_tree', 'kanban_view_ref': 'stock.view_stock_move_line_kanban', 'form_view_ref': 'stock.view_move_line_mobile_form', 'default_picking_id': picking_id, 'default_move_id': id, 'default_product_id': product_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id, 'active_picking_id': picking_id}"
                             widget="sml_x2_many"/>
                     </div>
                 </form>
@@ -305,7 +345,8 @@
                             <field name="procure_method" readonly="state != 'draft'" groups="stock.group_adv_location"/>
                         </group>
                         <group name="linked_group" string="Linked Moves" groups="base.group_no_one" colspan="2" invisible="is_scrap">
-                            <field name="move_orig_ids" string="Origin Moves" readonly="1">
+                            <field name="move_orig_ids" string="Origin Moves" readonly="1" mode="list,kanban"
+                                context="{'kanban_view_ref': 'stock.view_move_linked_kanban'}">
                                 <list>
                                     <field name="location_id"/>
                                     <field name="location_dest_id"/>
@@ -314,7 +355,8 @@
                                     <field name="state"/>
                                 </list>
                             </field>
-                            <field name="move_dest_ids" string="Destination Moves" readonly="1">
+                            <field name="move_dest_ids" string="Destination Moves" readonly="1" mode="list,kanban"
+                                context="{'kanban_view_ref': 'stock.view_move_linked_kanban'}">
                                 <list>
                                     <field name="location_id"/>
                                     <field name="location_dest_id"/>

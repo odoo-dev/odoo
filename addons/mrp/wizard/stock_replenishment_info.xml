@@ -24,7 +24,43 @@
             <xpath expr="//page" position="before">
                 <page string="Bills of Materials" name="page_boms" invisible="not show_bom_tab">
                     <field name="bom_id" invisible="1"/>
-                    <field name="bom_ids" readonly="1" context="{'list_view_ref': 'mrp.mrp_bom_replenishment_tree_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}"/>
+                    <field name="bom_ids" readonly="1" mode="list,kanban" context="{'list_view_ref': 'mrp.mrp_bom_replenishment_tree_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}">
+                        <kanban class="o_kanban_mobile" create="0" delete="0">
+                            <field name="product_tmpl_id"/>
+                            <field name="product_id"/>
+                            <field name="product_qty"/>
+                            <field name="uom_id"/>
+                            <field name="code"/>
+                            <field name="type"/>
+                            <field name="show_set_bom_button"/>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <main class="col">
+                                        <div class="d-flex align-items-baseline justify-content-between gap-2">
+                                            <field name="product_tmpl_id" class="fw-bold"/>
+                                            <span class="text-nowrap fw-bolder">
+                                                <field name="product_qty"/>
+                                                <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                            </span>
+                                        </div>
+                                        <div class="text-muted" invisible="not product_id">
+                                            Variant:
+                                            <field name="product_id"/>
+                                        </div>
+                                        <div class="d-flex align-items-baseline gap-2 text-muted" invisible="not code">
+                                            <span>Reference:</span>
+                                            <field name="code"/>
+                                        </div>
+                                        <div class="d-flex align-items-baseline gap-2 text-muted">
+                                            <span>Type:</span>
+                                            <field name="type"/>
+                                        </div>
+                                        <button name="action_set_bom_on_orderpoint" type="object" string="Set as Bill of Materials" class="btn btn-secondary btn-sm mt-2" invisible="not show_set_bom_button"/>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
                 </page>
             </xpath>
         </field>

@@ -223,13 +223,28 @@
                         </group>
                     </group>
                     <group string="Rules" >
-                        <field name="rule_ids" colspan="2" nolabel="1" context="{'default_company_id': company_id, 'form_view_ref':'stock.view_route_rule_form'}">
+                        <field name="rule_ids" mode="list,kanban" colspan="2" nolabel="1" context="{'default_company_id': company_id, 'form_view_ref':'stock.view_route_rule_form'}">
                             <list>
                                 <field name="sequence" widget="handle"/>
                                 <field name="action"/>
                                 <field name="location_src_id" options="{'no_create': True}"/>
                                 <field name="location_dest_id" options="{'no_create': True}"/>
                             </list>
+                            <kanban class="o_kanban_mobile">
+                                <templates>
+                                    <t t-name="card">
+                                        <field name="action" class="fw-bold"/>
+                                        <div class="d-flex justify-content-between gap-2 mt-2">
+                                            <span class="text-muted">Source</span>
+                                            <field name="location_src_id" class="text-end"/>
+                                        </div>
+                                        <div class="d-flex justify-content-between gap-2">
+                                            <span class="text-muted">Destination</span>
+                                            <field name="location_dest_id" class="text-end"/>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
                         </field>
                     </group>
                     </sheet>

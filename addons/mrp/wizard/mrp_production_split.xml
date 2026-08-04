@@ -7,7 +7,7 @@
             <field name="model">mrp.production.split.multi</field>
             <field name="arch" type="xml">
                 <form string="Split Productions">
-                    <field name="production_ids">
+                    <field name="production_ids" mode="list,kanban">
                         <list create="0" editable="top">
                             <field name="production_id"/>
                             <field name="product_id"/>
@@ -16,6 +16,35 @@
                             <field name="uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                             <button name="action_prepare_split" type="object" icon="content_cut" title="Split Production"/>
                         </list>
+                        <kanban class="o_kanban_mobile" create="0">
+                            <field name="production_id"/>
+                            <field name="product_id"/>
+                            <field name="product_qty"/>
+                            <field name="production_capacity"/>
+                            <field name="uom_id"/>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <main class="col">
+                                        <div class="d-flex align-items-baseline justify-content-between gap-2">
+                                            <field name="production_id" class="fw-bold"/>
+                                            <button name="action_prepare_split" type="object" icon="fa-scissors" title="Split Production" class="btn btn-link p-0"/>
+                                        </div>
+                                        <field name="product_id"/>
+                                        <div class="d-flex align-items-baseline gap-2 text-muted">
+                                            <span>Quantity:</span>
+                                            <span class="text-nowrap">
+                                                <field name="product_qty"/>
+                                                <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-baseline gap-2 text-muted">
+                                            <span>Capacity:</span>
+                                            <field name="production_capacity"/>
+                                        </div>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                     <footer>
                         <button class="btn-secondary" special="cancel" data-hotkey="x"/>
@@ -50,12 +79,35 @@
                             <field name="num_splits"/>
                         </group>
                     </group>
-                    <field name="production_detailed_vals_ids" invisible="max_batch_size &lt;= 0">
+                    <field name="production_detailed_vals_ids" invisible="max_batch_size &lt;= 0" mode="list,kanban">
                         <list editable="top">
                             <field name="date"/>
                             <field name="user_id"/>
                             <field name="quantity"/>
                         </list>
+                        <kanban class="o_kanban_mobile">
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="quantity"/>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <main class="col">
+                                        <div class="d-flex align-items-baseline gap-1">
+                                            <span class="text-muted">Schedule Date:</span>
+                                            <field name="date" class="fw-bold"/>
+                                        </div>
+                                        <div class="d-flex align-items-baseline gap-1">
+                                            <span class="text-muted">Quantity:</span>
+                                            <field name="quantity" class="fw-bold"/>
+                                        </div>
+                                        <div class="d-flex align-items-baseline gap-1">
+                                            <span class="text-muted">Responsible:</span>
+                                            <field name="user_id" class="fw-bold"/>
+                                        </div>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                     <field name="production_split_multi_id" invisible="1"/>
                     <field name="valid_details" invisible="1"/>

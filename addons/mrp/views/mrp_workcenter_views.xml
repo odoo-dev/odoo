@@ -356,6 +356,44 @@
                                         <field name="time_start" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
                                         <field name="time_stop" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
                                     </list>
+                                    <kanban class="o_kanban_mobile">
+                                        <field name="product_id"/>
+                                        <field name="capacity"/>
+                                        <field name="uom_id"/>
+                                        <field name="time_start"/>
+                                        <field name="time_stop"/>
+                                        <templates>
+                                            <t t-name="card" class="row g-0 ps-0 pe-0">
+                                                <aside class="col-2 p-1" invisible="not product_id">
+                                                    <span t-att-title="record.product_id.value">
+                                                        <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                                    </span>
+                                                </aside>
+                                                <main class="col">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <field name="product_id" class="fw-bold"/>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <field name="capacity" class="fw-bolder float-end pe-1"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        Capacity:
+                                                        <field name="capacity"/> <field name="uom_id"/>
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        Setup Time:
+                                                        <field name="time_start" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
+                                                    </div>
+                                                    <div class="text-muted">
+                                                        Cleanup Time:
+                                                        <field name="time_stop" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
+                                                    </div>
+                                                </main>
+                                            </t>
+                                        </templates>
+                                    </kanban>
                                 </field>
                             </page>
                         </notebook>

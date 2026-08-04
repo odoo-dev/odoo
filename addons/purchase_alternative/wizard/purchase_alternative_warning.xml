@@ -6,7 +6,7 @@
             <field name="model">purchase.alternative.warning</field>
             <field name="arch" type="xml">
                 <form string="Alternative Warning">
-                    <field name="alternative_po_ids" nolabel="1" readonly="1">
+                    <field name="alternative_po_ids" nolabel="1" readonly="1" mode="list,kanban">
                         <list create="0" delete="0" edit="0">
                             <field name="currency_id" column_invisible="1"/> <!-- Invisible fields -->
                             <field name="partner_id" readonly="state in ['cancel', 'purchase']"/>
@@ -15,6 +15,39 @@
                             <field name="amount_total"/>
                             <field name="state"/>
                         </list>
+                        <kanban class="o_kanban_mobile" create="0" delete="0" default_order="amount_total_cc, date_planned, id">
+                            <field name="currency_id"/>
+                            <field name="partner_id"/>
+                            <field name="name"/>
+                            <field name="date_planned"/>
+                            <field name="amount_total"/>
+                            <field name="state"/>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <main class="col">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <field name="partner_id" class="fw-bold"/>
+                                            <field name="state" widget="badge"
+                                                decoration-danger="state == 'cancel'"
+                                                decoration-info="state in ('draft', 'sent')"
+                                                decoration-success="state == 'purchase'"
+                                                decoration-warning="state == 'to approve'"/>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-baseline gap-2">
+                                            <span class="text-muted">
+                                                Reference:
+                                                <field name="name"/>
+                                            </span>
+                                            <field name="amount_total" widget="monetary" class="fw-bold text-nowrap"/>
+                                        </div>
+                                        <div class="text-muted" invisible="not date_planned">
+                                            Expected:
+                                            <field name="date_planned"/>
+                                        </div>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                     <footer>
                         <button name="action_cancel_alternatives" string="Cancel Alternatives" data-hotkey="q" type="object" colspan="1" class="btn-primary"/>

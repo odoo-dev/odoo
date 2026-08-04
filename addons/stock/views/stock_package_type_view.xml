@@ -53,11 +53,22 @@
                     </page>
                     <page string="Capacity" groups="stock.group_stock_multi_locations">
                         <group name="storage_categories">
-                            <field name="storage_category_capacity_ids" context="{'default_package_type_id': id}" nolabel="1">
+                            <field name="storage_category_capacity_ids" mode="list,kanban" context="{'default_package_type_id': id}" nolabel="1">
                                 <list editable="bottom">
                                     <field name="storage_category_id"/>
                                     <field name="quantity"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="storage_category_id" class="fw-bold"/>
+                                            <div class="d-flex justify-content-between gap-2 mt-2">
+                                                <span class="text-muted">Capacity</span>
+                                                <field name="quantity" class="text-end"/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </group>
                     </page>

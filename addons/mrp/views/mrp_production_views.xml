@@ -522,11 +522,61 @@
                                     <button name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="not show_details_visible or has_tracking not in ['lot', 'serial']"/>
                                     <button class="o_optional_button btn" name="action_show_details" type="object" title="Show Details" string="Details" context="{'default_product_uom_qty': 0}" invisible="(has_tracking in ['lot', 'serial']) or not show_details_visible"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <field name="product_id"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="forecast_availability"/>
+                                    <field name="forecast_expected_date"/>
+                                    <field name="state"/>
+                                    <field name="picked"/>
+                                    <field name="show_details_visible"/>
+                                    <field name="has_tracking"/>
+                                    <field name="lot_ids"/>
+                                    <control>
+                                        <create string="Add a line"/>
+                                        <button name="action_add_from_catalog_raw" string="Catalog" type="object" class="btn-secondary" context="{'order_id': parent.id}"/>
+                                    </control>
+                                    <templates>
+                                        <t t-name="card" class="row g-0 ps-0 pe-0">
+                                            <aside class="col-2 p-1">
+                                                <span t-att-title="record.product_id.value">
+                                                    <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                                </span>
+                                            </aside>
+                                            <main class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <field name="product_id" class="fw-bold"/>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <field name="forecast_availability" widget="forecast_widget" invisible="parent.state in ['done', 'cancel']"/>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted">
+                                                    To Consume:
+                                                    <field name="product_uom_qty"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" invisible="parent.state == 'draft'">
+                                                    Consumed:
+                                                    <field name="quantity"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" invisible="not lot_ids">
+                                                    Lot/Serial Numbers:
+                                                    <field name="lot_ids" widget="many2many_tags"/>
+                                                </div>
+                                                <field name="picked" class="text-muted" invisible="parent.state == 'draft'"/>
+                                                <button name="action_show_details" type="object" title="Show Details" string="Details" class="btn btn-secondary mt-2" context="{'default_product_uom_qty': 0}" invisible="not show_details_visible"/>
+                                            </main>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
                         <page string="Work Orders" name="operations" groups="mrp.group_mrp_routings">
                             <field name="workorder_ids"
-                                context="{'list_view_ref': 'mrp.mrp_production_workorder_tree_editable_view_mo_form', 'from_manufacturing_order': True}"
+                                context="{'list_view_ref': 'mrp.mrp_production_workorder_tree_editable_view_mo_form', 'kanban_view_ref': 'mrp.mrp_production_workorder_kanban_view_mo_form', 'from_manufacturing_order': True}"
                                 create="id != False and state != 'done'"
                                 />
                         </page>
@@ -579,6 +629,59 @@
                                     <button name="action_show_details" type="object" title="Show Details" icon="format_list_bulleted" invisible="has_tracking not in ['lot', 'serial'] or not show_details_visible"/>
                                     <button class="o_optional_button btn btn-light" name="action_show_details" type="object" title="Show Details" icon="format_list_bulleted" invisible="has_tracking in ['lot', 'serial'] or not show_details_visible"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <field name="product_id"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="cost_share"/>
+                                    <field name="state"/>
+                                    <field name="picked"/>
+                                    <field name="show_details_visible"/>
+                                    <field name="has_tracking"/>
+                                    <field name="lot_ids"/>
+                                    <control>
+                                        <create string="Add a line"/>
+                                        <button name="action_add_from_catalog_byproduct" string="Catalog" type="object" class="btn-secondary" context="{'order_id': parent.id}"/>
+                                    </control>
+                                    <templates>
+                                        <t t-name="card" class="row g-0 ps-0 pe-0">
+                                            <aside class="col-2 p-1">
+                                                <span t-att-title="record.product_id.value">
+                                                    <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                                </span>
+                                            </aside>
+                                            <main class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <field name="product_id" class="fw-bold"/>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <field name="state" widget="badge"/>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted">
+                                                    To Produce:
+                                                    <field name="product_uom_qty"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" invisible="parent.state == 'draft'">
+                                                    Produced:
+                                                    <field name="quantity"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" invisible="not cost_share">
+                                                    Cost Share:
+                                                    <field name="cost_share"/>%
+                                                </div>
+                                                <div class="text-muted" invisible="not lot_ids">
+                                                    Lot/Serial Numbers:
+                                                    <field name="lot_ids" widget="many2many_tags"/>
+                                                </div>
+                                                <field name="picked" class="text-muted" invisible="parent.state == 'draft'"/>
+                                                <button name="action_show_details" type="object" title="Show Details" icon="fa-list" class="btn btn-secondary mt-2" invisible="not show_details_visible"/>
+                                            </main>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
                         <page string="Miscellaneous" name="miscellaneous">

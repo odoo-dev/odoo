@@ -37,6 +37,58 @@
         </field>
     </record>
 
+    <record id="product_supplierinfo_replenishment_kanban_view" model="ir.ui.view">
+        <field name="name">product.supplierinfo.replenishment.kanban.view</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="mode">primary</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" create="0" delete="0" default_order="sequence, id">
+                <field name="sequence"/>
+                <field name="partner_id"/>
+                <field name="price"/>
+                <field name="currency_id"/>
+                <field name="min_qty"/>
+                <field name="uom_id"/>
+                <field name="delay"/>
+                <field name="last_purchase_date"/>
+                <field name="show_set_supplier_button"/>
+                <templates>
+                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                        <main class="col">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <field name="partner_id" class="fw-bold"/>
+                                <span class="badge text-bg-primary" invisible="parent.supplierinfo_id != id">Selected</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-baseline gap-2 text-muted">
+                                <span>Unit Price:</span>
+                                <field name="price" widget="monetary" class="fw-bold text-nowrap"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-baseline gap-2 text-muted">
+                                <span>Minimum Quantity:</span>
+                                <span class="text-nowrap">
+                                    <field name="min_qty" decoration-danger="min_qty &gt; parent.qty_to_order"/>
+                                    <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                </span>
+                            </div>
+                            <div class="text-muted">
+                                Delivery Time:
+                                <field name="delay"/> days
+                            </div>
+                            <div class="text-muted" invisible="not last_purchase_date">
+                                Last Purchase:
+                                <field name="last_purchase_date"/>
+                            </div>
+                            <button name="action_set_supplier" type="object" string="Set as Supplier"
+                                class="btn btn-secondary btn-sm mt-2"
+                                invisible="not show_set_supplier_button"/>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="view_stock_replenishment_info_stock_purchase_inherit" model="ir.ui.view">
         <field name="name">stock.replenishment.information.purchase.stock.inherit</field>
         <field name="model">stock.replenishment.info</field>
@@ -45,7 +97,7 @@
             <xpath expr="//page" position="before">
                 <page string="Vendors" name="page_vendors" invisible="not show_vendor_tab">
                     <field name="supplierinfo_id" invisible="1"/>
-                    <field name="supplierinfo_ids" readonly="1" context="{'list_view_ref': 'purchase_stock.product_supplierinfo_replenishment_tree_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}"/>
+                    <field name="supplierinfo_ids" readonly="1" mode="list,kanban" context="{'list_view_ref': 'purchase_stock.product_supplierinfo_replenishment_tree_view', 'kanban_view_ref': 'purchase_stock.product_supplierinfo_replenishment_kanban_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}"/>
                 </page>
             </xpath>
         </field>

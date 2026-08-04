@@ -103,6 +103,43 @@
                                     <field name="allowed_operation_ids" column_invisible="True"/>
                                     <field name="operation_id" groups="mrp.group_mrp_routings" optional="hidden" column_invisible="parent.type not in ('normal', 'phantom')" options="{'no_quick_create':True,'no_create_edit':True}"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="uom_id"/>
+                                    <field name="operation_id"/>
+                                    <control>
+                                        <create string="Add a line"/>
+                                        <button name="action_add_from_catalog" string="Catalog" type="object" class="btn-secondary" context="{'order_id': parent.id}"/>
+                                    </control>
+                                    <templates>
+                                        <t t-name="card" class="row g-0 ps-0 pe-0">
+                                            <aside class="col-2 p-1">
+                                                <span t-att-title="record.product_id.value">
+                                                    <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                                </span>
+                                            </aside>
+                                            <main class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <field name="product_id" class="fw-bold"/>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <field name="product_qty" class="fw-bolder float-end pe-1"/>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted">
+                                                    Quantity:
+                                                    <field name="product_qty"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" groups="mrp.group_mrp_routings" invisible="not operation_id">
+                                                    Operation:
+                                                    <field name="operation_id"/>
+                                                </div>
+                                            </main>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
                         <page string="Operations"
@@ -110,7 +147,7 @@
                             invisible="type not in ('normal', 'phantom')"
                             groups="mrp.group_mrp_routings">
                                 <field name="operation_ids" invisible="operation_ids.length == 0"
-                                context="{'bom_id_invisible': True, 'default_bom_id': id, 'list_view_ref': 'mrp.mrp_routing_workcenter_bom_tree_view', 'target': 'new'}"/>
+                                context="{'bom_id_invisible': True, 'default_bom_id': id, 'list_view_ref': 'mrp.mrp_routing_workcenter_bom_tree_view', 'kanban_view_ref': 'mrp.mrp_routing_workcenter_bom_kanban_view', 'target': 'new'}"/>
                                 <div invisible="operation_ids.length != 0">
                                     <div class="o_mrp_routing_image bill_of_material position-relative">
                                         <img class="position-absolute" src="/mrp/static/img/routing_shopfloor.png" alt="Shop Floor"/>
@@ -163,6 +200,48 @@
                                     <field name="possible_bom_product_template_attribute_value_ids" column_invisible="True"/>
                                     <field name="bom_product_template_attribute_value_ids" optional="hide" widget="many2many_tags" options="{'no_create': True}" column_invisible="parent.product_id" groups="product.group_product_variant"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="uom_id"/>
+                                    <field name="cost_share"/>
+                                    <field name="operation_id"/>
+                                    <control>
+                                        <create string="Add a line"/>
+                                        <button name="action_add_from_catalog" string="Catalog" type="object" class="btn-secondary" context="{'order_id': parent.id}"/>
+                                    </control>
+                                    <templates>
+                                        <t t-name="card" class="row g-0 ps-0 pe-0">
+                                            <aside class="col-2 p-1">
+                                                <span t-att-title="record.product_id.value">
+                                                    <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                                </span>
+                                            </aside>
+                                            <main class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <field name="product_id" class="fw-bold"/>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <field name="product_qty" class="fw-bolder float-end pe-1"/>
+                                                    </div>
+                                                </div>
+                                                <div class="text-muted">
+                                                    Quantity:
+                                                    <field name="product_qty"/> <field name="uom_id"/>
+                                                </div>
+                                                <div class="text-muted" invisible="not cost_share">
+                                                    Cost Share:
+                                                    <field name="cost_share"/>%
+                                                </div>
+                                                <div class="text-muted" groups="mrp.group_mrp_routings" invisible="not operation_id">
+                                                    Operation:
+                                                    <field name="operation_id"/>
+                                                </div>
+                                            </main>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                        </page>
                         <page string="Miscellaneous" name="miscellaneous">

@@ -149,6 +149,77 @@
         </field>
     </record>
 
+    <record id="mrp_production_workorder_kanban_view_mo_form" model="ir.ui.view">
+        <field name="name">mrp.production.work.order.kanban.mo.form</field>
+        <field name="model">mrp.workorder</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" default_order="sequence,date_start">
+                <field name="sequence"/>
+                <field name="name"/>
+                <field name="workcenter_id"/>
+                <field name="product_id"/>
+                <field name="qty_remaining"/>
+                <field name="date_start"/>
+                <field name="date_finished"/>
+                <field name="duration_expected"/>
+                <field name="duration"/>
+                <field name="state"/>
+                <field name="production_state"/>
+                <field name="working_state"/>
+                <field name="is_user_working"/>
+                <field name="has_planning_issues"/>
+                <field name="has_conflicts"/>
+                <templates>
+                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                        <aside class="col-2 p-1">
+                            <span t-att-title="record.product_id.value">
+                                <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                            </span>
+                        </aside>
+                        <main class="col">
+                            <div class="row">
+                                <div class="col">
+                                    <field name="name" class="fw-bold"/>
+                                </div>
+                                <div class="col-auto">
+                                    <field name="state" widget="mo_view_list_dropdown" options="{'no_open': True, 'display': 'badge'}" invisible="production_state == 'draft'"/>
+                                </div>
+                            </div>
+                            <div class="text-muted">
+                                Work Center:
+                                <field name="workcenter_id"/>
+                            </div>
+                            <div class="text-muted">
+                                Product:
+                                <field name="product_id"/>
+                            </div>
+                            <div class="text-muted">
+                                Quantity:
+                                <field name="qty_remaining"/>
+                            </div>
+                            <div class="text-muted">
+                                Expected Duration:
+                                <field name="duration_expected" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
+                            </div>
+                            <div class="text-muted" invisible="production_state == 'draft'">
+                                Real Duration:
+                                <field name="duration" widget="mrp_timer"/>
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                <button name="button_start" type="object" title="Start" class="btn btn-success"
+                                    invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or state in ('done', 'cancel') or is_user_working" icon="fa-play"/>
+                                <button name="button_pending" type="object" title="Pause" class="btn btn-warning" icon="fa-pause"
+                                    invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working"/>
+                                <button name="button_finish" type="object" title="Done" class="btn btn-success" icon="fa-check"
+                                    invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working"/>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="mrp_production_workorder_tree_view" model="ir.ui.view">
         <field name="name">mrp.production.work.order.list</field>
         <field name="model">mrp.workorder</field>
@@ -414,6 +485,44 @@
                                 <field name="company_id" column_invisible="True"/>
                                 <field name="loss_id" string="Productivity" optional="hide"/>
                             </list>
+                            <kanban class="o_kanban_mobile">
+                                <field name="user_id"/>
+                                <field name="duration"/>
+                                <field name="workcenter_id"/>
+                                <field name="date_start"/>
+                                <field name="date_end"/>
+                                <field name="loss_id"/>
+                                <templates>
+                                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                                        <main class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <field name="user_id" class="fw-bold" widget="many2one_avatar_user"/>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <field name="duration" class="fw-bolder float-end pe-1" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted">
+                                                Work Center:
+                                                <field name="workcenter_id"/>
+                                            </div>
+                                            <div class="text-muted" invisible="not date_start">
+                                                Start:
+                                                <field name="date_start"/>
+                                            </div>
+                                            <div class="text-muted" invisible="not date_end">
+                                                End:
+                                                <field name="date_end"/>
+                                            </div>
+                                            <div class="text-muted" invisible="not loss_id">
+                                                Productivity:
+                                                <field name="loss_id"/>
+                                            </div>
+                                        </main>
+                                    </t>
+                                </templates>
+                            </kanban>
                             <form>
                                 <group>
                                     <group>
@@ -451,11 +560,59 @@
                             <field name="product_qty_available" string="On Hand" optional="hide" invisible="not is_storable"/>
                             <field name="product_virtual_available" string="Forecasted" optional="hide" invisible="not is_storable"/>
                         </list>
+                        <kanban class="o_kanban_mobile">
+                            <field name="product_id"/>
+                            <field name="product_qty"/>
+                            <field name="quantity"/>
+                            <field name="picked"/>
+                            <field name="is_storable"/>
+                            <field name="product_qty_available"/>
+                            <field name="product_virtual_available"/>
+                            <control>
+                                <button string="Add component" name="action_add_from_catalog_wo" type="object" class="btn-secondary" context="{'order_id': parent.id}"/>
+                            </control>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <aside class="col-2 p-1">
+                                        <span t-att-title="record.product_id.value">
+                                            <field name="product_id" widget="image" options="{'preview_image': 'image_128', 'img_class': 'object-fit-contain w-100'}"/>
+                                        </span>
+                                    </aside>
+                                    <main class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                <field name="product_id" class="fw-bold"/>
+                                            </div>
+                                            <div class="col-auto">
+                                                <field name="quantity" class="fw-bolder float-end pe-1"/>
+                                            </div>
+                                        </div>
+                                        <div class="text-muted">
+                                            Demand:
+                                            <field name="product_qty"/>
+                                        </div>
+                                        <div class="text-muted">
+                                            Quantity:
+                                            <field name="quantity"/>
+                                        </div>
+                                        <field name="picked" class="text-muted"/>
+                                        <div class="text-muted" invisible="not is_storable">
+                                            On Hand:
+                                            <field name="product_qty_available"/>
+                                        </div>
+                                        <div class="text-muted" invisible="not is_storable">
+                                            Forecasted:
+                                            <field name="product_virtual_available"/>
+                                        </div>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                 </page>
                 <field name="allow_workorder_dependencies" invisible="1"/>
                 <page string="Blocked By" name="dependencies" invisible="not blocked_by_workorder_ids">
-                    <field name="blocked_by_workorder_ids" nolabel="1" readonly="1">
+                    <field name="blocked_by_workorder_ids" nolabel="1" readonly="1" mode="list,kanban">
                         <list>
                             <field name="company_id" column_invisible="True"/>
                             <field name="name" string="Operation" readonly="state in ['cancel', 'done']"/>
@@ -470,6 +627,42 @@
                                 column_invisible="parent.state == 'draft'"
                                 invisible="production_state == 'draft'"/>
                         </list>
+                        <kanban class="o_kanban_mobile">
+                            <field name="name"/>
+                            <field name="workcenter_id"/>
+                            <field name="date_start"/>
+                            <field name="date_finished"/>
+                            <field name="production_state"/>
+                            <field name="state"/>
+                            <templates>
+                                <t t-name="card" class="row g-0 ps-0 pe-0">
+                                    <main class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                <field name="name" class="fw-bold"/>
+                                            </div>
+                                            <div class="col-auto">
+                                                <field name="state" widget="mo_view_list_dropdown"
+                                                    options="{'no_open': True, 'display': 'badge'}"
+                                                    invisible="production_state == 'draft'"/>
+                                            </div>
+                                        </div>
+                                        <div class="text-muted" invisible="not workcenter_id">
+                                            Work Center:
+                                            <field name="workcenter_id"/>
+                                        </div>
+                                        <div class="text-muted" invisible="not date_start">
+                                            Start:
+                                            <field name="date_start"/>
+                                        </div>
+                                        <div class="text-muted" invisible="not date_finished">
+                                            End:
+                                            <field name="date_finished"/>
+                                        </div>
+                                    </main>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                 </page>
                 </notebook>

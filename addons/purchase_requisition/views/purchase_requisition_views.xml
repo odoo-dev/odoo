@@ -79,7 +79,7 @@
                 </group>
                 <notebook>
                     <page string="Products" name="products">
-                        <field name="line_ids" widget="product_label_section_and_note_field_o2m" readonly="state == 'done'" aggregated_fields="price_subtotal" options="{'subsections': True}">
+                        <field name="line_ids" widget="product_label_section_and_note_field_o2m" mode="list,kanban" readonly="state == 'done'" aggregated_fields="price_subtotal" options="{'subsections': True}">
                             <list string="Products" editable="bottom">
                                 <control>
                                     <create name="add_product_control" string="Add a product"/>
@@ -128,6 +128,52 @@
                                     </group>
                                 </group>
                             </form>
+                            <kanban class="o_kanban_mobile">
+                                <field name="display_type"/>
+                                <field name="currency_id"/>
+                                <control>
+                                    <create string="Add a product"/>
+                                </control>
+                                <templates>
+                                    <t t-name="card">
+                                        <t t-if="!record.display_type.raw_value">
+                                            <div class="row g-0 align-items-start">
+                                                <div class="col pe-2 fw-bold">
+                                                    <field name="product_id"/>
+                                                </div>
+                                                <div class="col-auto fw-bold text-nowrap">
+                                                    <field name="price_subtotal" widget="monetary"/>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted" invisible="not name">
+                                                <field name="name"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                Quantity:
+                                                <field name="product_qty"/>
+                                                <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                Ordered:
+                                                <field name="qty_ordered"/>
+                                                <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                Unit Price:
+                                                <field name="price_unit" widget="monetary"
+                                                    options="{'currency_field': 'currency_id'}"/>
+                                            </div>
+                                        </t>
+                                        <div t-else="" t-att-class="{
+                                                'fw-bolder': record.display_type.raw_value === 'line_section',
+                                                'fw-bold': record.display_type.raw_value === 'line_subsection',
+                                                'fst-italic': record.display_type.raw_value === 'line_note',
+                                            }">
+                                            <field name="name"/>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
                         </field>
                         <separator string="Terms and Conditions"/>
                         <field name="description" class="oe-bordered-editor"/>

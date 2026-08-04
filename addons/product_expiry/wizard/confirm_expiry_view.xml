@@ -9,11 +9,26 @@
                     <field name="description"/>
                 </p>
                 <field name="show_lots" invisible="1"/>
-                <field name="lot_ids" invisible="not show_lots">
+                <field name="lot_ids" invisible="not show_lots" mode="list,kanban">
                     <list string="Expired Lot(s)">
                         <field name="product_id"/>
                         <field name="name"/>
                     </list>
+                    <kanban class="o_kanban_mobile" create="0" delete="0">
+                        <field name="product_id"/>
+                        <field name="name"/>
+                        <templates>
+                            <t t-name="card" class="row g-0 ps-0 pe-0">
+                                <main class="col">
+                                    <field name="product_id" class="fw-bold"/>
+                                    <div class="text-muted">
+                                        Lot/Serial Number:
+                                        <field name="name"/>
+                                    </div>
+                                </main>
+                            </t>
+                        </templates>
+                    </kanban>
                 </field>
                 <footer>
                     <button name="process"

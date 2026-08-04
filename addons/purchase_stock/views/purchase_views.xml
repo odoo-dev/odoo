@@ -83,7 +83,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='invoice_lines']" position="after">
                 <separator string="Stock Moves"/>
-                <field name="move_ids"/>
+                <field name="move_ids" mode="list,kanban"
+                    context="{'kanban_view_ref': 'stock.view_move_linked_kanban'}"/>
             </xpath>
         </field>
     </record>

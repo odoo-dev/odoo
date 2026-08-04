@@ -26,22 +26,47 @@
                     </group>
                     <notebook>
                         <page string="Capacity by Package" name="package_capacity" groups="stock.group_tracking_lot">
-                            <field name="package_capacity_ids" context="{'default_storage_category_id': id, 'default_company_id': company_id}">
+                            <field name="package_capacity_ids" mode="list,kanban" context="{'default_storage_category_id': id, 'default_company_id': company_id}">
                                 <list editable="bottom">
                                     <field name="package_type_id" required="1"/>
                                     <field name="quantity"/>
                                     <field name="company_id" column_invisible="True"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="package_type_id" class="fw-bold"/>
+                                            <div class="d-flex justify-content-between gap-2 mt-2">
+                                                <span class="text-muted">Capacity</span>
+                                                <field name="quantity" class="text-end"/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
                         <page string="Capacity by Product" name="product_capacity">
-                            <field name="product_capacity_ids" context="{'default_storage_category_id': id, 'default_company_id': company_id}">
+                            <field name="product_capacity_ids" mode="list,kanban" context="{'default_storage_category_id': id, 'default_company_id': company_id}">
                                 <list editable="bottom">
                                     <field name="product_id" required="1" context="{'default_is_storable': True}"/>
                                     <field name="quantity"/>
                                     <field name="uom_id" groups="uom.group_uom" options="{'no_create': True, 'no_open': True}" widget="many2one_uom"/>
                                     <field name="company_id" column_invisible="True"/>
                                 </list>
+                                <kanban class="o_kanban_mobile">
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="product_id" class="fw-bold"/>
+                                            <div class="d-flex justify-content-between gap-2 mt-2">
+                                                <span class="text-muted">Capacity</span>
+                                                <span class="text-end">
+                                                    <field name="quantity"/>
+                                                    <field name="uom_id" groups="uom.group_uom" class="ms-1"/>
+                                                </span>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
                             </field>
                         </page>
                     </notebook>

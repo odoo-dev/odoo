@@ -15,7 +15,7 @@
                             <button name="action_compare_alternative_lines" type="object" class="btn-link d-block" string="Compare Product Lines" icon="bar_chart" invisible="not alternative_po_ids"/>
                         </div>
                     </group>
-                    <field name="alternative_po_ids" readonly="not id" widget="many2many_alt_pos" context="{'quotation_only': True}">
+                    <field name="alternative_po_ids" readonly="not id" widget="many2many_alt_pos" mode="list,kanban" context="{'quotation_only': True}">
                         <list string="Alternative Purchase Order" decoration-muted="state in ['cancel', 'purchase']" default_order="amount_total_cc, date_planned, id">
                             <control>
                                 <create string="Link to Existing RfQ"/>
@@ -29,6 +29,35 @@
                             <field name="amount_total_cc" widget="monetary" optional="hide"/>
                             <field name="state"/>
                         </list>
+                        <kanban class="o_kanban_mobile" default_order="amount_total_cc, date_planned, id">
+                            <field name="currency_id"/>
+                            <control>
+                                <create string="Link to Existing RfQ"/>
+                            </control>
+                            <templates>
+                                <t t-name="card">
+                                    <div class="row">
+                                        <field name="partner_id" class="fw-bold col-8"/>
+                                        <field name="state" widget="badge" class="col-4 text-end"/>
+                                    </div>
+                                    <div class="row">
+                                        <span class="col-8 text-muted">
+                                            Reference:
+                                            <field name="name"/>
+                                        </span>
+                                        <span class="fw-bold col-4 text-end">
+                                            <field name="amount_total" widget="monetary"/>
+                                        </span>
+                                    </div>
+                                    <div class="row">
+                                        <span class="col-8 text-muted">
+                                            Expected:
+                                            <field name="date_planned"/>
+                                        </span>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
                     </field>
                 </page>
             </xpath>
