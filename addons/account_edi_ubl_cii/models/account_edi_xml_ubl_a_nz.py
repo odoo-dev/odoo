@@ -5,8 +5,8 @@ from odoo import models
 
 class AccountEdiXmlUbl_A_Nz(models.AbstractModel):
     _name = 'account.edi.xml.ubl_a_nz'
-    _inherit = ["account.edi.xml.ubl_bis3"]
-    _description = "A-NZ BIS Billing 3.0"
+    _inherit = ["account.edi.ubl_pint"]
+    _description = "PINT A-NZ"
 
     """
     * Documentation: https://github.com/A-NZ-PEPPOL/A-NZ-PEPPOL-BIS-3.0/tree/master/Specifications
@@ -25,22 +25,23 @@ class AccountEdiXmlUbl_A_Nz(models.AbstractModel):
 
     def _get_customization_id(self, process_type='billing'):
         if process_type == 'billing':
-            return 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0'
+            return 'urn:peppol:pint:billing-1@aanz-1'
+
+    def _ubl_add_customization_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl
+        super()._ubl_add_customization_id_node(vals)
+        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@aanz-1'
 
     def _ubl_get_line_allowance_charge_discount_node(self, vals, discount_values):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.xml.ubl
         discount_node = super()._ubl_get_line_allowance_charge_discount_node(vals, discount_values)
         discount_node['cbc:AllowanceChargeReason'] = None
         discount_node['cbc:MultiplierFactorNumeric'] = None
         discount_node['cbc:BaseAmount'] = None
         return discount_node
 
-    def _ubl_add_tax_currency_code_node(self, vals):
-        # OVERRIDE
-        self._ubl_add_tax_currency_code_node_empty(vals)
-
     def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.xml.ubl
         tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
 
         company_currency = vals['company'].currency_id
@@ -53,7 +54,5 @@ class AccountEdiXmlUbl_A_Nz(models.AbstractModel):
 
         return tax_total_keys
 
-    def _ubl_add_customization_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_customization_id_node(vals)
-        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0'
+    def _export_document_node_constraints(self, vals):
+        return super().export_constrains()

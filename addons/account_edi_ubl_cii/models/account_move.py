@@ -224,7 +224,7 @@ class AccountMove(models.Model):
                     return 'account.edi.xml.ubl_de'
                 if customization_id == 'urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0':
                     return 'account.edi.xml.ubl_nl'
-                if customization_id == 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0':
+                if customization_id == 'urn:peppol:pint:billing-1@aanz-1':
                     return 'account.edi.xml.ubl_a_nz'
                 if customization_id == 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:sg:3.0':
                     return 'account.edi.xml.ubl_sg'
