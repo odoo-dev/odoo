@@ -381,10 +381,9 @@ class TestMrpStockReports(TestReportsCommon):
         })
 
         mo.action_confirm()
-        # check that the mo and bom cost are correctly calculated after mo confirmation
+        # Check that the MO cost is correctly calculated after MO confirmation.
         overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
         self.assertEqual(round(overview_values['data']['operations']['summary']['mo_cost'], 2), 14.45)
-        self.assertEqual(round(overview_values['data']['operations']['summary']['bom_cost'], 2), 14.44)
         mo.button_mark_done()
         mo.qty_produced = 0.
 
@@ -512,134 +511,6 @@ class TestMrpStockReports(TestReportsCommon):
         self.assertEqual(repl0[0]['summary']['quantity'], 3)
         self.assertEqual(repl1[0]['summary']['quantity'], 5)
 
-    def test_report_price_variants(self):
-        """
-        This tests the MO's report price when a variant is involved. It makes sure
-        that the BoM price takes only the current variant and not all of them. It also
-        tests that the lines that were removed from the MO but are still in the bom are
-        used in the BoM cost computing. Lastly, it makes sure that Kits are also accounted
-        for and used in the BoM cost as they should.
-        """
-        # Create a color variant, which will be used to create a Product
-        attribute_color = self.env['product.attribute'].create({'name': 'Color'})
-        value_black, value_white = self.env['product.attribute.value'].create([
-            {
-                'name': 'Black',
-                'attribute_id': attribute_color.id,
-            },
-            {
-                'name': 'White',
-                'attribute_id': attribute_color.id,
-            },
-        ])
-        # Create 3 product templates, one for the variants, to check to not all variants are used
-        # to compute the cost of the MO, another one to make sure the 'missing components' are still
-        # taken into account (they are the product that were removed from the MO but are still present
-        # in the BoM), and the last one to make sure that kits are still taken in as well.
-        product_variants, missing_product, kit_product = self.env['product.template'].create([
-            {
-                'name': 'Variant Product',
-                'type': 'consu',
-                'attribute_line_ids': [Command.create(
-                    {
-                        'attribute_id': attribute_color.id,
-                        'value_ids': [
-                            Command.link(value_black.id),
-                            Command.link(value_white.id),
-                        ],
-                    },
-                )],
-            },
-            {
-                'name': 'Missing Component',
-                'type': 'consu',
-                'standard_price': 40,
-            },
-            {
-                'name': 'Kit Product',
-                'type': 'consu',
-                'standard_price': 60,
-            },
-        ])
-
-        variant_black = product_variants.product_variant_ids[0]
-        variant_white = product_variants.product_variant_ids[1]
-        variant_black.standard_price = 50
-        variant_white.standard_price = 30
-        bom_normal, _ = self.env['mrp.bom'].create([
-            {
-                'product_tmpl_id': product_variants.id,
-                'type': 'normal',
-                'bom_line_ids': [Command.create({
-                    'product_id': missing_product.product_variant_id.id,
-                    'product_qty': 1,
-                }),
-                Command.create({
-                    'product_id': kit_product.product_variant_id.id,
-                    'product_qty': 1,
-                })],
-            },
-            {
-                'product_tmpl_id': kit_product.id,
-                'type': 'phantom',
-                'bom_line_ids': [Command.create({
-                    'product_id': missing_product.product_variant_id.id,
-                    'product_qty': 1,
-                })]
-            },
-        ])
-        white_tmpl = bom_normal.product_tmpl_id.product_variant_ids.product_template_attribute_value_ids.filtered(lambda tmpl: tmpl.product_attribute_value_id == value_white)
-        black_tmpl = bom_normal.product_tmpl_id.product_variant_ids.product_template_attribute_value_ids.filtered(lambda tmpl: tmpl.product_attribute_value_id == value_black)
-        black_white_product, black_product, white_product = self.env['product.product'].create([{
-                'name': 'Black White',
-                'type': 'consu',
-                'standard_price': 25,
-            },
-            {
-                'name': 'Black Only',
-                'type': 'consu',
-                'standard_price': 15,
-            },
-            {
-                'name': 'White Only',
-                'type': 'consu',
-                'standard_price': 10,
-            },
-        ])
-        self.env['mrp.bom.line'].create([{
-                'bom_id': bom_normal.id,
-                'product_id': black_white_product.id,
-                'product_qty': 1,
-                'bom_product_template_attribute_value_ids': [Command.set([black_tmpl.id, white_tmpl.id])],
-            },
-            {
-                'bom_id': bom_normal.id,
-                'product_id': black_product.id,
-                'product_qty': 1,
-                'bom_product_template_attribute_value_ids': [Command.set([black_tmpl.id])],
-            },
-                        {
-                'bom_id': bom_normal.id,
-                'product_id': white_product.id,
-                'product_qty': 1,
-                'bom_product_template_attribute_value_ids': [Command.set([white_tmpl.id])],
-            }
-        ])
-        mo = self.env['mrp.production'].create({
-            'product_id': variant_black.id,
-            'product_qty': 1,
-            'bom_id': bom_normal.id,
-        })
-        mo_report = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
-        self.assertEqual(mo_report['data']['extras']['unit_bom_cost'], mo_report['data']['extras']['unit_mo_cost'], 'The BoM unit cost should be equal to the sum of the products of said BoM')
-        # Check that the missing components (the components that were removed from the MO but are still in the BoM)
-        # are taken into account when computing the BoM cost
-        mo.move_raw_ids.filtered(lambda m: m.product_id == missing_product.product_variant_id and m.bom_line_id.bom_id.type != 'phantom').unlink()
-        # When a product has two possible variants, and then is deleted, it should be taken in the missing components
-        mo.move_raw_ids.filtered(lambda m: m.product_id == black_white_product and m.bom_line_id.bom_id.type != 'phantom').unlink()
-        mo_report = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
-        self.assertEqual(mo_report['data']['extras']['unit_bom_cost'], mo_report['data']['extras']['unit_mo_cost'] + missing_product.standard_price + black_white_product.standard_price, 'The BoM unit cost should take the missing components into account, which are the deleted MO lines')
-
     def test_mo_overview_operation_cost(self):
         """ Test that operations correctly compute their cost depending on their cost_mode. """
         expedition_33 = self.product
@@ -680,18 +551,14 @@ class TestMrpStockReports(TestReportsCommon):
 
         overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
         self.assertEqual(overview_values['data']['operations']['details'][0]['mo_cost'], 33.0)
-        self.assertEqual(overview_values['data']['operations']['details'][0]['real_cost'], 5.5)
         self.assertEqual(overview_values['data']['operations']['details'][1]['mo_cost'], 33.0)
-        self.assertEqual(overview_values['data']['operations']['details'][1]['real_cost'], 33.0)
 
-        # Costs should stay the same for a done MO and/or if the cost_mode of the operation is changed
+        # Once done, the MO Cost column uses the actual cost
         mo.button_mark_done()
         bom_baguette.operation_ids.filtered(lambda o: o.cost_mode == 'estimated').cost_mode = 'actual'
         overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
-        self.assertEqual(overview_values['data']['operations']['details'][0]['mo_cost'], 33.0)
-        self.assertEqual(overview_values['data']['operations']['details'][0]['real_cost'], 5.5)
+        self.assertEqual(overview_values['data']['operations']['details'][0]['mo_cost'], 5.5)
         self.assertEqual(overview_values['data']['operations']['details'][1]['mo_cost'], 33.0)
-        self.assertEqual(overview_values['data']['operations']['details'][1]['real_cost'], 33.0)
 
     def test_mo_overview_with_different_uom(self):
         """Ensure that the MO overview correctly computes costs
@@ -718,9 +585,8 @@ class TestMrpStockReports(TestReportsCommon):
         })
 
         mo.action_confirm()
-        # check that the mo and bom cost are correctly calculated after mo confirmation
+        # Check that the MO cost is correctly calculated after MO confirmation.
         overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)
-        self.assertEqual(overview_values['data']['components'][0]['summary']['bom_cost'], 120)
         self.assertEqual(overview_values['data']['components'][0]['summary']['mo_cost'], 120)
 
         # Test without BoM
@@ -737,7 +603,6 @@ class TestMrpStockReports(TestReportsCommon):
         })
         mo_no_bom.action_confirm()
         overview_values_no_bom = self.env['report.mrp.report_mo_overview'].get_report_values(mo_no_bom.id)
-        self.assertEqual(overview_values_no_bom['data']['components'][0]['summary']['bom_cost'], 120)
         self.assertEqual(overview_values_no_bom['data']['components'][0]['summary']['mo_cost'], 120)
 
     def test_forecast_report_cross_warehouse_mo(self):
