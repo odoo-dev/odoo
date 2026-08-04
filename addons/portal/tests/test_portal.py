@@ -169,6 +169,28 @@ class TestUsersHttp(BaseCommon, HttpCase):
         # Assert the account is completely deleted
         self.assertFalse(portal_user.exists())
 
+    def test_address_submit_parent_name_does_not_update_normal_customer_name(self):
+        # Setting parent_name on a normal customer (no parent) should create a parent company,
+        # not update the customer's own name.
+        portal_user = self.portal_user.partner_id
+        original_name = portal_user.name
+        self.assertFalse(portal_user.parent_id)
+
+        self.authenticate(self.portal_user.login, self.portal_user.login)
+        self.url_open(
+            url='/my/address/submit',
+            data={
+                **self.address_test_data,
+                'name': portal_user.name,
+                'parent_name': 'Test Company',
+                'partner_id': str(portal_user.id),
+                'csrf_token': Request.csrf_token(self),
+            }
+        )
+        self.assertEqual(portal_user.name, original_name)
+        self.assertTrue(portal_user.parent_id)
+        self.assertEqual(portal_user.parent_id.name, 'Test Company')
+
     def test_submit_address_from_anonymous_partner(self):
         portal_user = self.portal_user
         self.authenticate(portal_user.login, portal_user.login)
