@@ -704,6 +704,26 @@ class HrLeaveAllocation(models.Model):
             '|', ('nextcall', '=', False), ('nextcall', '<=', today)])
         allocations._process_accrual_plans()
 
+    def _discard_fake_allocation(self):
+        """ Drop a throwaway `new(origin=...)` recordset used to simulate accrual
+        processing without persisting it. `invalidate_recordset()` alone is not
+        enough: new records are never recomputed on invalidation (they have no
+        row to recompute from, see `Model._recompute_field`), so a computed field
+        touched by the simulation (e.g. `name`, which depends on `number_of_days`)
+        is left marked "to compute" forever once its cache is cleared. Since new
+        records sharing the same origin/ref compare equal (`NewId.__eq__`), that
+        dangling flag can later be picked up together with an unrelated record
+        sharing the same origin/ref and crash trying to compute a value for a
+        record that no longer has any cached data.
+
+        Only fields currently pending a recomputation are checked (usually none
+        or very few), instead of looping on every field of the model.
+        """
+        self.invalidate_recordset()
+        for field in list(self.env.transaction.tocompute):
+            if field.model_name == self._name:
+                self.env.remove_to_compute(field, self)
+
     def _get_future_leaves_on(self, accrual_date):
         # As computing future accrual allocation days automatically updates the allocation,
         # We need to create a temporary copy of that allocation to return the difference in number of days
@@ -725,7 +745,8 @@ class HrLeaveAllocation(models.Model):
             res = float_round(fake_allocation.number_of_hours_display - self.number_of_hours_display, precision_digits=2)
         else:
             res = round((fake_allocation.number_of_days - self.number_of_days), 2)
-        fake_allocation.invalidate_recordset()
+
+        fake_allocation._discard_fake_allocation()
         return res
 
     def _get_next_states_by_state(self):

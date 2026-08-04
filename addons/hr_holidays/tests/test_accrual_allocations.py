@@ -2301,6 +2301,60 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         with form.level_ids.new() as level:
             self.assertEqual(level.added_value_type, 'hour')
 
+    def test_get_future_leaves_on_does_not_leave_dangling_recompute(self):
+        """
+            `_get_future_leaves_on` simulates future accruals on a throwaway
+            `new(origin=allocation)` record and discards it with `invalidate_recordset()`.
+            As a new record, that fake allocation has no database row to recompute its
+            pending fields from, so `invalidate_recordset()` leaves them marked "to
+            compute" instead of resolving them (see `Model._recompute_field`).
+            Its cache is cleared regardless, so that pending flag can never be resolved:
+            since new records sharing the same origin compare equal (`NewId.__eq__`), any
+            other record sharing that origin can later be batched with it for
+            recomputation and crash with a `KeyError` trying to compute a value for a
+            record that no longer has any cached data (e.g. when creating a new
+            allocation reusing an accrual plan with a carry-over milestone already
+            validated on another allocation).
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].create({
+            'name': 'Accrual Plan For Test',
+            'accrued_gain_time': 'start',
+            'can_be_carryover': True,
+            'carryover_date': 'year_start',
+            'level_ids': [Command.create({
+                'milestone_date': 'after',
+                'start_count': 1,
+                'start_type': 'day',
+                'added_value': 1,
+                'added_value_type': 'day',
+                'frequency': 'monthly',
+                'action_with_unused_accruals': 'all',
+                'accrual_validity': True,
+                'accrual_validity_count': 3,
+                'accrual_validity_type': 'month',
+            })],
+        })
+        with freeze_time('2023-07-15'):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation',
+                'employee_id': self.employee_emp.id,
+                'work_entry_type_id': self.work_entry_type.id,
+                'date_from': '2023-07-15',
+                'allocation_type': 'accrual',
+                'accrual_plan_id': accrual_plan.id,
+            })
+            allocation._action_validate()
+            allocation._get_future_leaves_on(date(2024, 6, 1))
+
+        name_field = self.env['hr.leave.allocation']._fields['name']
+        pending_ids = self.env.transaction.tocompute.get(name_field, ())
+        dangling = [id_ for id_ in pending_ids if getattr(id_, 'origin', None) == allocation.id]
+        self.assertFalse(
+            dangling,
+            "The fake allocation used to simulate future accruals must not leave a "
+            "dangling pending recomputation once its cache has been invalidated",
+        )
+
     def test_accrual_immediate_cron_run(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
             'name': 'Weekly accrual',
