@@ -26,7 +26,7 @@
                                 zeroes.
                             </p>
                         </div>
-                        <field name="rule_ids">
+                        <field name="rule_ids" mode="list,kanban">
                             <list string='Tables'>
                                 <field name="sequence" widget="handle"/>
                                 <field name="name" />
@@ -34,6 +34,31 @@
                                 <field name="encoding" />
                                 <field name="pattern" />
                             </list>
+                            <kanban class="o_kanban_mobile" default_order="sequence, id">
+                                <field name="sequence"/>
+                                <field name="name"/>
+                                <field name="type"/>
+                                <field name="encoding"/>
+                                <field name="pattern"/>
+                                <templates>
+                                    <t t-name="card">
+                                        <div class="d-flex justify-content-between align-items-center gap-2">
+                                            <div class="fw-bold flex-grow-1 text-break" style="min-width: 0;">
+                                                <field name="name"/>
+                                            </div>
+                                            <div class="flex-shrink-0">
+                                                <field name="type" widget="badge"/>
+                                            </div>
+                                        </div>
+                                        <div class="text-muted text-break">
+                                            Pattern: <field name="pattern"/>
+                                        </div>
+                                        <div class="text-muted" invisible="type == 'alias'">
+                                            Encoding: <field name="encoding"/>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
                         </field>
                     </sheet>
                 </form>
