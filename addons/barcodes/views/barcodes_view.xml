@@ -26,7 +26,7 @@
                                 zeroes.
                             </p>
                         </div>
-                        <field name="rule_ids">
+                        <field name="rule_ids" mode="list,kanban">
                             <list string='Tables'>
                                 <field name="sequence" widget="handle"/>
                                 <field name="name" />
@@ -34,6 +34,35 @@
                                 <field name="encoding" />
                                 <field name="pattern" />
                             </list>
+                            <kanban class="o_kanban_mobile" default_order="sequence, id">
+                                <field name="sequence"/>
+                                <field name="name"/>
+                                <field name="type"/>
+                                <field name="encoding"/>
+                                <field name="pattern"/>
+                                <templates>
+                                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                                        <main class="col">
+                                            <div class="d-flex justify-content-between align-items-baseline gap-2">
+                                                <field name="name" class="fw-bold"/>
+                                                <field name="type" widget="badge"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                Pattern:
+                                                <field name="pattern"/>
+                                            </div>
+                                            <div class="text-muted" invisible="type == 'alias'">
+                                                Encoding:
+                                                <field name="encoding"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                Sequence:
+                                                <field name="sequence"/>
+                                            </div>
+                                        </main>
+                                    </t>
+                                </templates>
+                            </kanban>
                         </field>
                     </sheet>
                 </form>
