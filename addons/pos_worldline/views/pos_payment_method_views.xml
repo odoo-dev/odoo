@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="pos_payment_method_view_form_inherit_pos_mollie" model="ir.ui.view">
-        <field name="name">pos.payment.method.form.inherit.mollie</field>
+    <record id="pos_payment_method_view_form_inherit_pos_worldline" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.inherit.worldline</field>
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'mollie'">
-                    <page name="settings" string="Mollie">
+                <notebook invisible="payment_provider != 'worldline_cloud'">
+                    <page name="settings" string="Worldline">
                         <group>
-                            <field name="mollie_payment_provider_id" invisible="payment_provider != 'mollie'" required="payment_provider == 'mollie'"/>
-                            <field name="mollie_terminal_id" invisible="payment_provider != 'mollie'" required="payment_provider == 'mollie'"/>
+                            <field name="worldline_merchant_id" invisible="payment_provider != 'worldline_cloud'" required="payment_provider == 'worldline_cloud'"/>
+                            <field name="worldline_terminal_id" invisible="payment_provider != 'worldline_cloud'" required="payment_provider == 'worldline_cloud'"/>
+                            <field name="test_mode" invisible="payment_provider != 'worldline_cloud'"/>
+                            <field name="worldline_api_url" invisible="payment_provider != 'worldline_cloud'" readonly="1"/>
+                            <field name="worldline_webhook_url" invisible="payment_provider != 'worldline_cloud'" readonly="1" widget="CopyClipboardChar"/>
+                            <field name="worldline_local_test_url" invisible="payment_provider != 'worldline_cloud'" groups="base.group_no_one"/>
                         </group>
                     </page>
                 </notebook>
