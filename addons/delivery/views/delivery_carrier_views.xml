@@ -142,7 +142,40 @@
                     <notebook>
                         <page name="pricing" string="Pricing" invisible="delivery_type != 'base_on_rule'">
                             <group name="general">
-                                <field name="price_rule_ids" nolabel="1"/>
+                                <field name="price_rule_ids" mode="list,kanban" nolabel="1"
+                                    context="{'list_view_ref': 'delivery.view_delivery_price_rule_tree', 'form_view_ref': 'delivery.view_delivery_price_rule_form'}">
+                                    <kanban class="o_kanban_mobile">
+                                        <field name="currency_id"/>
+                                        <templates>
+                                            <t t-name="card">
+                                                <div class="fw-bold mb-2">
+                                                    <span>If </span>
+                                                    <field name="variable"/>
+                                                    <span> </span>
+                                                    <field name="operator"/>
+                                                    <span> </span>
+                                                    <field name="max_value"/>
+                                                    <span invisible="not variable_unit"> </span>
+                                                    <field name="variable_unit" invisible="not variable_unit"/>
+                                                </div>
+                                                <div class="d-flex justify-content-between gap-2 mt-2">
+                                                    <span class="text-muted text-nowrap flex-shrink-0">Base Price</span>
+                                                    <span class="min-w-0 text-end text-break">
+                                                        <field name="list_base_price" widget="monetary"/>
+                                                    </span>
+                                                </div>
+                                                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-baseline">
+                                                    <span class="text-muted text-nowrap flex-shrink-0">Variable Price</span>
+                                                    <span class="ms-auto d-inline-flex align-items-baseline gap-1 text-nowrap">
+                                                        <field name="list_price" widget="monetary" readonly="1" class="oe_inline"/>
+                                                        <span>x</span>
+                                                        <field name="variable_factor" readonly="1" class="oe_inline"/>
+                                                    </span>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                </field>
                             </group>
                         </page>
                         <page string="Availability" name="destination">
