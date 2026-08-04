@@ -232,3 +232,30 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def _get_type(self, name, code):
+        return self.env['hr.work.entry.type'].sudo().create({
+            'name': name,
+            'code': code,
+            'requires_allocation': True,
+            'count_days_as': 'working',
+            'include_public_holidays_in_duration': False,
+        })
+
+    def test_search_virtual_remaining_leaves_works_with_gt(self):
+        self.env = self.env(user=self.employee_hruser.user_id)
+        emp = self.employee_hruser
+
+        type1 = self._get_type('Type 1', 'T1')
+        type2 = self._get_type('Type 2', 'T2')
+        type3 = self._get_type('Type 3', 'T3')
+
+        self._allocate_leave(emp, type1, 5, '2026-01-01').action_approve()
+        self._allocate_leave(emp, type2, 2, '2026-01-01').action_approve()
+        self._allocate_leave(emp, type3, 5, '2026-01-01').action_approve()
+
+        searchedLeaves = self.env["hr.work.entry.type"].search([("virtual_remaining_leaves", ">", 20)])
+
+        self.assertIn(type1, searchedLeaves)
+        self.assertNotIn(type2, searchedLeaves)
+        self.assertIn(type3, searchedLeaves)
