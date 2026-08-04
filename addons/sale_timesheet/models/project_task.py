@@ -62,6 +62,12 @@ class ProjectTask(models.Model):
         sol_per_domain = dict()
         for task in self:
             domain = tuple(task._get_last_sol_of_customer_domain())
+            domain = tuple(
+                (leaf[0], leaf[1], tuple(leaf[2]))
+                if isinstance(leaf, tuple) and len(leaf) == 3 and isinstance(leaf[2], list)
+                else leaf
+                for leaf in task._get_last_sol_of_customer_domain()
+            )
             if not domain:
                 task.last_sol_of_customer = False
                 continue
