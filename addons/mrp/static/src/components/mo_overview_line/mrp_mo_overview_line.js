@@ -22,6 +22,7 @@ export class MoOverviewLine extends Component {
                 formatted_state: { type: String, optional: true },
                 has_bom: { type: Boolean, optional: true },
                 quantity: Number,
+                quantity_decorator: { type: [String, Boolean], optional: true },
                 replenish_quantity: { type: Number, optional: true },
                 uom: { type: String, optional: true },
                 uom_name: { type: String, optional: true },
@@ -29,6 +30,8 @@ export class MoOverviewLine extends Component {
                 quantity_free: { type: [Number, Boolean], optional: true },
                 quantity_on_hand: { type: [Number, Boolean], optional: true },
                 quantity_reserved: { type: Number, optional: true },
+                quantity_consumed: { type: [Number, Boolean], optional: true },
+                quantity_consumed_decorator: { type: [String, Boolean], optional: true },
                 receipt: {
                     type: Object,
                     shape: {
@@ -41,10 +44,6 @@ export class MoOverviewLine extends Component {
                 },
                 unit_cost: { type: Number, optional: true },
                 mo_cost: { type: [Number, Boolean], optional: true },
-                mo_cost_decorator: { type: [String, Boolean], optional: true },
-                bom_cost: { type: [Number, Boolean], optional: true },
-                real_cost: { type: [Number, Boolean], optional: true },
-                real_cost_decorator: { type: [String, Boolean], optional: true },
                 currency_id: Number,
                 currency: { type: String, optional: true },
                 production_id: { type: Number, optional: true },

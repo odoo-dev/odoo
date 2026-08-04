@@ -47,18 +47,12 @@ export class MoOverview extends Component {
             [this.activeId],
         );
         this.state.data = reportValues.data;
-        if (this.isProductionStarted) {
-            this.state.showOptions.bomCosts = false;
-        } else {
-            this.state.showOptions.realCosts = false;
-        }
         if (this.isProductionDone) {
-            // Hide Availabilities / Receipts / Status / MO Cost columns when the MO is done.
+            // Hide Availabilities / Receipts / Status columns when the MO is done.
             this.state.showOptions.availabilities = false;
             this.state.showOptions.receipts = false;
             this.state.showOptions.replenishments = false;
             this.state.showOptions.unitCosts = true;
-            this.state.showOptions.moCosts = false;
         }
         this.state.showOptions.uom = reportValues.context.show_uom;
         this.context = reportValues.context;
@@ -105,8 +99,6 @@ export class MoOverview extends Component {
             receipts: true,
             unitCosts: false,
             moCosts: true,
-            bomCosts: false,
-            realCosts: true,
         };
     }
 
@@ -148,13 +140,7 @@ export class MoOverview extends Component {
         return this.state.showOptions.moCosts;
     }
 
-    get showBomCosts() {
-        return this.state.showOptions.bomCosts;
-    }
 
-    get showRealCosts() {
-        return this.state.showOptions.realCosts;
-    }
 
     get hasBom() {
         return this.state.data?.summary?.has_bom;
@@ -183,7 +169,7 @@ export class MoOverview extends Component {
     get totalColspan() {
         let colspan = 2;  // Name & Quantity
         if (this.showReplenishments) colspan++;
-        if (this.showAvailabilities) colspan += 2;  // Free to use / On Hand & Reserved
+        if (this.showAvailabilities) colspan += 2;  // Free to use / On Hand & Consumed
         if (this.showUom) colspan++;
         if (this.showReceipts) colspan++;
         if (this.showUnitCosts) colspan++;
@@ -197,8 +183,6 @@ export class MoOverview extends Component {
             + `&receipts=${+this.state.showOptions.receipts}`
             + `&unitCosts=${+this.state.showOptions.unitCosts}`
             + `&moCosts=${+this.state.showOptions.moCosts}`
-            + `&bomCosts=${+this.state.showOptions.bomCosts}`
-            + `&realCosts=${+this.state.showOptions.realCosts}`
             + `&unfoldedIds=${JSON.stringify(Array.from(this.unfoldedIds))}`;
     }
 }
