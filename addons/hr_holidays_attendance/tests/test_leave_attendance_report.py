@@ -11,6 +11,18 @@ from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 @tagged('-at_install', 'post_install', 'holidays_attendance')
 class TestLeaveAttendanceReport(TestHrHolidaysCommon):
 
+    def _expected_hours(self, calendar, date):
+        """ Hours `calendar` actually schedules for `date`'s weekday (and week
+            type, for two-weeks calendars) -- the value hr.leave.attendance.report
+            is expected to compute for that date. Not assumed to be uniform: the
+            default calendar in some databases already varies by weekday (e.g. a
+            shorter Friday), so tests must not hardcode a single flat number. """
+        attendances = calendar.attendance_ids.filtered(lambda att: att.dayofweek == str(date.weekday()))
+        if calendar.two_weeks_calendar:
+            week_type = str(self.env['resource.calendar.attendance'].get_week_type(date))
+            attendances = attendances.filtered(lambda att: att.week_type == week_type)
+        return round(sum(attendances.mapped('duration_hours')), 2)
+
     def test_overlap_leave_and_public_holiday(self):
         emp = self.employee_emp
         today = fields.Date.today()
@@ -44,11 +56,12 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
             '&', '|', ('date', '=', monday), ('date', '=', wednesday),
             ('employee_id', '=', emp.id),
         ])
-        self.assertRecordValues(non_overlap_days, [{
-            'expected_hours': 8.0,
-            'leave_hours': 8.0,
-            'difference_hours': 0.0,
-        } for _ in range(2)])
+        expected_wednesday = self._expected_hours(emp.resource_calendar_id, wednesday)
+        expected_monday = self._expected_hours(emp.resource_calendar_id, monday)
+        self.assertRecordValues(non_overlap_days, [
+            {'expected_hours': expected_wednesday, 'leave_hours': expected_wednesday, 'difference_hours': 0.0},
+            {'expected_hours': expected_monday, 'leave_hours': expected_monday, 'difference_hours': 0.0},
+        ])
 
     def test_report_all_branches(self):
         """ Characterisation test for the report's SQL view.
@@ -149,16 +162,18 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
 
         # -- attendance: the report sums hr.attendance.worked_hours --------
         for wd in (0, 1, 2):
+            expected = self._expected_hours(calendar, day(0, wd))
             self.assertRecordValues(row(day(0, wd)), [{
                 'worked_hours': worked[wd],
-                'expected_hours': 8.0,
+                'expected_hours': expected,
                 'leave_hours': 0.0,
-                'difference_hours': round(worked[wd] - 8.0, 2),
+                'difference_hours': round(worked[wd] - expected, 2),
             }])
         # plain working day: no attendance, no leave
+        expected_thu = self._expected_hours(calendar, day(0, 3))
         self.assertRecordValues(row(day(0, 3)), [{
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 0.0, 'difference_hours': -8.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_thu,
+            'leave_hours': 0.0, 'difference_hours': -expected_thu}])
 
         # -- non-report days ---------------------------------------------
         self.assertFalse(row(day(0, 4)), "public holiday -> no row")
@@ -166,30 +181,35 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         self.assertFalse(row(day(0, 6)), "Sunday -> no row")
         self.assertFalse(row(day(3, 0)), "company-wide closure -> no row")
 
-        # -- leave, type EXCLUDES public holidays (16h over 2 working days)
+        # -- leave, type EXCLUDES public holidays (over 2 working days)
+        expected_mon1 = self._expected_hours(calendar, day(1, 0))
         self.assertRecordValues(row(day(1, 0)), [{
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 8.0, 'difference_hours': 0.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_mon1,
+            'leave_hours': expected_mon1, 'difference_hours': 0.0}])
         self.assertFalse(row(day(1, 1)), "public holiday inside leave -> no row")
+        expected_wed1 = self._expected_hours(calendar, day(1, 2))
         self.assertRecordValues(row(day(1, 2)), [{
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 8.0, 'difference_hours': 0.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_wed1,
+            'leave_hours': expected_wed1, 'difference_hours': 0.0}])
 
-        # -- leave, type INCLUDES public holidays (24h over 3 working days)
+        # -- leave, type INCLUDES public holidays (over 3 working days)
+        expected_mon2 = self._expected_hours(calendar, day(2, 0))
         self.assertRecordValues(row(day(2, 0)), [{
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 8.0, 'difference_hours': 0.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_mon2,
+            'leave_hours': expected_mon2, 'difference_hours': 0.0}])
         self.assertFalse(row(day(2, 1)), "public holiday inside leave -> no row")
+        expected_wed2 = self._expected_hours(calendar, day(2, 2))
         self.assertRecordValues(row(day(2, 2)), [{
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 8.0, 'difference_hours': 0.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_wed2,
+            'leave_hours': expected_wed2, 'difference_hours': 0.0}])
 
         # -- contract bounds ---------------------------------------------
         self.assertFalse(row(monday - timedelta(days=21)),
                          "working day before contract start -> no row")
+        expected_last = self._expected_hours(calendar, day(5, 2))
         self.assertRecordValues(row(day(5, 2)), [{   # last contracted day
-            'worked_hours': 0.0, 'expected_hours': 8.0,
-            'leave_hours': 0.0, 'difference_hours': -8.0}])
+            'worked_hours': 0.0, 'expected_hours': expected_last,
+            'leave_hours': 0.0, 'difference_hours': -expected_last}])
         self.assertFalse(row(day(5, 3)),
                          "working day after contract end -> no row")
 
@@ -247,17 +267,117 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         # week 0: only version A's range covers it -> calendar_a.
         self.assertRecordValues(row(day(0, 3)), [{
             'schedule_id': calendar_a.id,
-            'expected_hours': round(calendar_a.hours_per_day, 2),
+            'expected_hours': self._expected_hours(calendar_a, day(0, 3)),
         }])
         # week 1 Monday: both versions cover it -- the later date_version
         # (version B) must win.
         self.assertRecordValues(row(day(1, 0)), [{
             'schedule_id': calendar_b.id,
-            'expected_hours': round(calendar_b.hours_per_day, 2),
+            'expected_hours': self._expected_hours(calendar_b, day(1, 0)),
         }])
         # week 1 Thursday: calendar_b doesn't work Thursdays -> no row, even
         # though version A (still active, on calendar_a) would have worked it.
         self.assertFalse(row(day(1, 3)), "Thursday isn't worked on calendar_b -> no row")
+
+    def test_expected_hours_follow_weekday_schedule(self):
+        """ `expected_hours` must reflect the hours actually scheduled for
+            that specific weekday, not the calendar's average hours/day: a
+            calendar working Monday 8h and Tuesday 4h averages to 6h/day, but
+            the report must still show 8.0 on Monday and 4.0 on Tuesday."""
+        emp = self.employee_emp
+        today = fields.Date.today()
+        monday = today - timedelta(days=today.weekday() + 7 * 8)
+        tuesday = monday + timedelta(days=1)
+        Report = self.env['hr.leave.attendance.report']
+
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Monday 8h / Tuesday 4h',
+            'company_id': self.company.id,
+            'attendance_ids': [
+                (0, 0, {'name': 'Monday', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 16}),
+                (0, 0, {'name': 'Tuesday', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12}),
+            ],
+        })
+        emp.contract_date_start = monday - timedelta(days=7)
+        emp.resource_calendar_id = calendar.id
+        self.env.flush_all()
+
+        # hours per day is 6, not 8 or 4 because it is an average of the week
+        self.assertEqual(calendar.hours_per_day, 6.0)
+
+        def row(d):
+            return Report.search([('employee_id', '=', emp.id), ('date', '=', d)])
+
+        self.assertRecordValues(row(monday), [{'expected_hours': 8.0, 'difference_hours': -8.0}])
+        self.assertRecordValues(row(tuesday), [{'expected_hours': 4.0, 'difference_hours': -4.0}])
+
+    def test_expected_hours_follow_biweekly_schedule(self):
+        """ `expected_hours` on a two-weeks calendar must follow the exact week
+            actually in effect for a given date, not blend both weeks together. """
+        emp = self.employee_emp
+        today = fields.Date.today()
+        monday = today - timedelta(days=today.weekday() + 7 * 8)
+        Report = self.env['hr.leave.attendance.report']
+        get_week_type = self.env['resource.calendar.attendance'].get_week_type
+
+        def row(d):
+            return Report.search([('employee_id', '=', emp.id), ('date', '=', d)])
+
+        emp.contract_date_start = monday - timedelta(days=7)
+
+        # Test for calendar matches actual week: a weekday worked in one week
+        # and not in the other (e.g. every-other-Friday-off) must follow the
+        # week actually in effect, and must not appear at all when it isn't
+        # worked -- whichever week_type each date falls on, so the fixture
+        # stays correct regardless of where "today" falls on the global
+        # 2-week clock.
+        friday_full = monday + timedelta(days=4)
+        friday_short = friday_full + timedelta(days=7)  # next week -> opposite parity
+        monday_short = friday_short - timedelta(days=4)
+        full_week_type = str(get_week_type(friday_full))
+        short_week_type = str(get_week_type(friday_short))
+
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Every other Friday off',
+            'company_id': self.company.id,
+            'two_weeks_calendar': True,
+            'attendance_ids': (
+                [(0, 0, {'name': 'Full week', 'dayofweek': str(wd), 'week_type': full_week_type,
+                          'hour_from': 8, 'hour_to': 16}) for wd in range(5)]  # Mon-Fri
+                + [(0, 0, {'name': 'Short week', 'dayofweek': str(wd), 'week_type': short_week_type,
+                            'hour_from': 8, 'hour_to': 16}) for wd in range(4)]  # Mon-Thu
+            ),
+        })
+        emp.resource_calendar_id = calendar.id
+        self.env.flush_all()
+
+        self.assertRecordValues(row(friday_full), [{'expected_hours': 8.0, 'difference_hours': -8.0}])
+        self.assertFalse(row(friday_short), "Friday isn't worked on the short week -> no row")
+        self.assertRecordValues(row(monday_short), [{'expected_hours': 8.0, 'difference_hours': -8.0}])
+
+        # Test for different hours per week: the same weekday worked in both
+        # weeks but for a different number of hours (e.g. Monday 8h in week 1,
+        # 8.5h in week 2) must also follow the exact week in effect.
+        monday_next = monday + timedelta(days=7)  # next week -> opposite parity
+        week_a_type = str(get_week_type(monday))
+        week_b_type = str(get_week_type(monday_next))
+
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Bi weekly calendar',
+            'company_id': self.company.id,
+            'two_weeks_calendar': True,
+            'attendance_ids': [
+                (0, 0, {'name': 'Week 1 Monday', 'dayofweek': '0', 'week_type': week_a_type,
+                        'hour_from': 8, 'hour_to': 16}),
+                (0, 0, {'name': 'Week 2 Monday', 'dayofweek': '0', 'week_type': week_b_type,
+                        'hour_from': 8, 'hour_to': 16.5}),
+            ],
+        })
+        emp.resource_calendar_id = calendar.id
+        self.env.flush_all()
+
+        self.assertRecordValues(row(monday), [{'expected_hours': 8.0, 'difference_hours': -8.0}])
+        self.assertRecordValues(row(monday_next), [{'expected_hours': 8.5, 'difference_hours': -8.5}])
 
     def test_holiday_timezone_midnight_rollover(self):
         """ A closure covering one Brussels-local day must exclude that day
@@ -291,11 +411,12 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         self.env.flush_all()
 
         self.assertFalse(row(tuesday), "closure covers Tuesday in Brussels time -> no row")
+        expected = self._expected_hours(calendar, monday)
         self.assertRecordValues(row(monday), [{
             'worked_hours': 0.0,
-            'expected_hours': round(calendar.hours_per_day, 2),
+            'expected_hours': expected,
             'leave_hours': 0.0,
-            'difference_hours': -round(calendar.hours_per_day, 2),
+            'difference_hours': -expected,
         }])
 
     def test_overlap_leave_and_public_holiday_excluded(self):
@@ -334,10 +455,12 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
             '&', '|', ('date', '=', monday), ('date', '=', wednesday),
             ('employee_id', '=', emp.id),
         ])
-        # Tuesday is a public holiday -> no report row; the leave's 16h are
-        # spread over the 2 remaining working days -> 8h each.
-        self.assertRecordValues(non_overlap_days, [{
-            'expected_hours': 8.0,
-            'leave_hours': 8.0,
-            'difference_hours': 0.0,
-        } for _ in range(2)])
+        # Tuesday is a public holiday -> no report row; the leave is spread
+        # over the 2 remaining working days -> each gets its own day's hours.
+        # rows come back latest day first (see `_select`'s ORDER BY)
+        expected_wednesday = self._expected_hours(emp.resource_calendar_id, wednesday)
+        expected_monday = self._expected_hours(emp.resource_calendar_id, monday)
+        self.assertRecordValues(non_overlap_days, [
+            {'expected_hours': expected_wednesday, 'leave_hours': expected_wednesday, 'difference_hours': 0.0},
+            {'expected_hours': expected_monday, 'leave_hours': expected_monday, 'difference_hours': 0.0},
+        ])
