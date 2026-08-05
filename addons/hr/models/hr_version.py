@@ -100,6 +100,10 @@ class HrVersion(models.Model):
     private_country_id = fields.Many2one("res.country", string="Private Country", index='btree_not_null',
                                          groups="hr.group_hr_user", tracking=1, default=lambda self: self.env.company.country_id)
 
+    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
+    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
+    work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
+
     distance_home_work = fields.Integer(string="Home-Work Distance", groups="hr.group_hr_user", tracking=1)
     km_home_work = fields.Integer(string="Home-Work Distance in Km", groups="hr.group_hr_user",
                                   compute="_compute_km_home_work", inverse="_inverse_km_home_work", store=True, tracking=1)
@@ -242,6 +246,13 @@ class HrVersion(models.Model):
             states = self.env["res.country.state"].search([])
             for version in versions_without_countries:
                 version.allowed_country_state_ids = states
+
+    @api.depends('employee_id.name', 'permit_no')
+    def _compute_work_permit_name(self):
+        for version in self:
+            name = version.employee_id.name.replace(' ', '_') + '_' if version.employee_id.name else ''
+            permit_no = '_' + version.permit_no if version.permit_no else ''
+            version.work_permit_name = "%swork_permit%s" % (name, permit_no)
 
     @api.constrains('employee_id', 'contract_date_start', 'contract_date_end')
     def _check_dates(self):
