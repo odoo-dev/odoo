@@ -16,7 +16,7 @@
                  class="o_timeoff_card d-flex justify-content-center gap-3"
                  role="button"
             >
-                <div class="d-inline-flex flex-row align-items-center justify-content-center bg-warning-subtle bg-gradient rounded p-4 gap-2 cursor-pointer o_timeoff_card_inner">
+                <div class="d-inline-flex flex-row align-items-center justify-content-center bg-warning-subtle bg-gradient rounded px-4 py-2 gap-2 cursor-pointer o_timeoff_card_inner">
                     <span class="o_timeoff_duration font-monospace">
                         <t t-out="this.state.allocationRequestDaysHours"/>
                     </span>
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <a
-                    class="btn btn-secondary d-inline-flex flex-column gap-2 align-items-center justify-content-center bg-gradient shadow-sm rounded p-4 gap-2 cursor-pointer o_timeoff_card_inner"
+                    class="btn btn-secondary d-inline-flex flex-column gap-2 align-items-center justify-content-center bg-gradient shadow-sm rounded p-3 gap-2 cursor-pointer o_timeoff_card_inner"
                     role="button"
                     t-on-click.prevent="this.openNewAllocation"
                 >
