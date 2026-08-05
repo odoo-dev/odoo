@@ -208,8 +208,8 @@ export class DomObserverPlugin extends Plugin {
         // Processors
         // ----------
 
-        pending_history_commit_data_processors: withSequence(0, (data) =>
-            this.processPendingData(data)
+        pending_history_commit_data_processors: withSequence(0, (data, options) =>
+            this.processPendingData(data, options)
         ),
         snapshot_history_commit_data_processors: (data) => {
             data.mutations = childNodes(this.editable)
@@ -405,9 +405,12 @@ export class DomObserverPlugin extends Plugin {
      *
      * @typedef { import("./history_plugin").HistoryCommitData } HistoryCommitData
      * @param { HistoryCommitData } data
+     * @param { Object } [options = {}]
+     * @param { boolean } [options.skipNormalize = false] Whether the DOM is
+     *  already normalized, in which case the normalization is skipped.
      * @returns { HistoryCommitData & { mutations: SerializedMutation[] } }
      */
-    processPendingData(data) {
+    processPendingData(data, { skipNormalize = false } = {}) {
         const hasRelatedCommit = !!data.relatedCommit;
         // Stage the observer's current changes.
         if (hasRelatedCommit) {
@@ -417,19 +420,21 @@ export class DomObserverPlugin extends Plugin {
         }
         const currentMutationsCount = this.mutations.length;
         if (currentMutationsCount) {
-            // Normalize the mutated nodes. Note: this can cause other commits
-            // to be written.
-            const commitRoot = this.getMutationsCommonAncestor(this.mutations) || this.editable;
-            this.processThrough("normalize_processors", commitRoot);
-            if (!hasRelatedCommit) {
-                this.trigger("on_pending_mutations_normalized_handlers");
+            if (!skipNormalize) {
+                // Normalize the mutated nodes. Note: this can cause other
+                // commits to be written.
+                const commitRoot = this.getMutationsCommonAncestor(this.mutations) || this.editable;
+                this.processThrough("normalize_processors", commitRoot);
+                if (!hasRelatedCommit) {
+                    this.trigger("on_pending_mutations_normalized_handlers");
+                }
+                this.flush();
             }
-            this.flush();
             if (currentMutationsCount === this.mutations.length) {
-                // If there was no added staged mutation during the
-                // normalization commit, force the trigger of a content_updated
-                // to allow i.e. the hint plugin to react to non-observed
-                // changes (i.e. a div becoming a baseContainer).
+                // No mutation was staged on top of the initial ones (the
+                // normalization added none, or was skipped). Force the trigger
+                // of a content_updated to allow i.e. the hint plugin to react to
+                // non-observed changes (i.e. a div becoming a baseContainer).
                 this.triggerContentUpdated();
             }
         }

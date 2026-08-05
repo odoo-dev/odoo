@@ -1314,3 +1314,40 @@ describe("grouped undo/redo", () => {
         expect(getContent(el)).toBe(abc_def_ghi_);
     });
 });
+
+describe("normalization on undo/redo", () => {
+    test("should not grow the commits when undoing and redoing", async () => {
+        const { editor } = await setupEditor('<p><a href="#/">link</a>[]b</p>');
+        await insertText(editor, "a");
+        // An undo/redo commit is the reverse of the commit it relates to, so
+        // it must hold the same number of mutations.
+        const expectSameSizeAsRelatedCommit = () => {
+            const { data } = editor.shared.history.getCommits().at(-1);
+            expect(data.mutations).toHaveLength(data.relatedCommit.data.mutations.length);
+        };
+        undo(editor);
+        expectSameSizeAsRelatedCommit();
+        redo(editor);
+        expectSameSizeAsRelatedCommit();
+        undo(editor);
+        expectSameSizeAsRelatedCommit();
+        redo(editor);
+        expectSameSizeAsRelatedCommit();
+    });
+
+    test("should restore the same content when undoing and redoing around a link", async () => {
+        await testEditor({
+            contentBefore: '<p><a href="#/">link</a>[]b</p>',
+            stepFunction: async (editor) => {
+                await insertText(editor, "a"); // <p><a href="#/">link</a>a[]b</p>
+                undo(editor); // <p><a href="#/">link</a>[]b</p>
+                redo(editor); // <p><a href="#/">link</a>a[]b</p>
+                undo(editor); // <p><a href="#/">link</a>[]b</p>
+            },
+            // The FEFFs are compared too: they are what a normalization of the
+            // restored state would have re-created.
+            contentAfterEdit: '<p>\ufeff<a href="#/">\ufefflink\ufeff</a>\ufeff[]b</p>',
+            contentAfter: '<p><a href="#/">link</a>[]b</p>',
+        });
+    });
+});
