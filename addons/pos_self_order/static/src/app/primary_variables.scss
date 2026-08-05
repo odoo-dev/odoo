@@ -6,20 +6,20 @@ $o-so-font-size-4k: $o-so-font-size-base * $o-so-4k-multiplier !default;
 $o-so-font-size-kiosk: $o-so-font-size-base * $o-so-kiosk-multiplier !default;
 
 // Mirror enterprise grayscale
-$o-white: #FFF !default;
+$o-white: #fff !default;
 $o-black: #000 !default;
 
-$o-gray-100: #F9FAFB !default;
+$o-gray-100: #f9fafb !default;
 $o-gray-200: #eeeeee !default;
 $o-gray-300: #d8dadd !default;
 $o-gray-400: #9a9ca5 !default;
 $o-gray-500: #7c7f89 !default;
 $o-gray-600: #5f636f !default;
 $o-gray-700: #374151 !default;
-$o-gray-800: #1F2937 !default;
+$o-gray-800: #1f2937 !default;
 $o-gray-900: #111827 !default;
 
-$o-kiosk-color: #714B67 !default;
+$o-kiosk-color: #714b97 !default;
 $o-brand-primary: $o-kiosk-color !default;
 
 // Buttons
@@ -28,49 +28,50 @@ $o-brand-primary: $o-kiosk-color !default;
 // Notice: each map's entry is passed directly to the Bootstrap mixin, meaning
 // that all states must be defined, there can't be omissions.
 $o-btns-bs-override: () !default;
-$o-btns-bs-override: map-merge((
-    "primary": (
-        background: $o-brand-primary,
-        border: $o-brand-primary,
-        color: $o-white,
+$o-btns-bs-override: map-merge(
+    (
+        "primary": (
+            background: $o-brand-primary,
+            border: $o-brand-primary,
+            color: $o-white,
 
-        hover-background: $o-brand-primary,
-        hover-border: $o-brand-primary,
-        hover-color: $o-white,
+            hover-background: $o-brand-primary,
+            hover-border: $o-brand-primary,
+            hover-color: $o-white,
 
-        active-background: darken($o-brand-primary, 15%),
-        active-border: darken($o-brand-primary, 20%),
-        active-color: $o-white,
+            active-background: darken($o-brand-primary, 15%),
+            active-border: darken($o-brand-primary, 20%),
+            active-color: $o-white,
+        ),
+        "light": (
+            background: $o-white,
+            border: $o-gray-300,
+            color: $o-gray-700,
+
+            hover-background: $o-white,
+            hover-border: var(--companyColor),
+            hover-color: $o-gray-900,
+
+            active-background: $o-white,
+            active-border: var(--companyColor),
+            active-color: $o-gray-900,
+        ),
+        "secondary": (
+            background: $o-gray-200,
+            border: $o-gray-200,
+            color: $o-gray-700,
+
+            hover-background: $o-gray-200,
+            hover-border: $o-gray-200,
+            hover-color: $o-gray-800,
+
+            active-background: $o-gray-300,
+            active-border: $o-gray-300,
+            active-color: $o-gray-800,
+        ),
     ),
-    "light": (
-        background: $o-white,
-        border: $o-gray-300,
-        color: $o-gray-700,
-
-        hover-background: $o-white,
-        hover-border: var(--companyColor),
-        hover-color: $o-gray-900,
-
-        active-background:  $o-white,
-        active-border: var(--companyColor),
-        active-color: $o-gray-900,
-    ),
-    "secondary": (
-        background: $o-gray-200,
-        border: $o-gray-200,
-        color: $o-gray-700,
-
-        hover-background: $o-gray-200,
-        hover-border: $o-gray-200,
-        hover-color: $o-gray-800,
-
-        active-background: $o-gray-300,
-        active-border: $o-gray-300,
-        active-color: $o-gray-800,
-    ),
-), $o-btns-bs-override);
-
-
+    $o-btns-bs-override
+);
 
 // Mixins
 @mixin o-so-landscape() {
@@ -87,9 +88,9 @@ $o-btns-bs-override: map-merge((
 
 @mixin o-kiosk() {
     @include media-breakpoint-up(lg) {
-         .kiosk {
-             @content;
-         }
+        .kiosk {
+            @content;
+        }
     }
 }
 
@@ -109,10 +110,6 @@ $o-btns-bs-override: map-merge((
     }
 }
 
-
-
-
-
 /* This mixin generates utility classes scoped to a specific media context, such as kiosk-specific layouts.
 
  - Spacing utilities (`margin`, `padding`, `gap`, and directional variants)
@@ -121,14 +118,12 @@ $o-btns-bs-override: map-merge((
  */
 
 @mixin generate-kiosk-utilities($context) {
-
     .container-#{$context}-fluid {
         width: 100% !important;
         max-width: 100% !important;
     }
 
-
-    @each $key, $value in  $spacers {
+    @each $key, $value in $spacers {
         // Gap
         .gap-#{$context}-#{$key} {
             gap: $value !important;
@@ -260,14 +255,14 @@ $o-btns-bs-override: map-merge((
 
     //Grid
     @for $i from 1 through 12 {
-      .g-col-#{$context}-#{$i} {
-        grid-column: auto / span #{$i} !important;
-      }
+        .g-col-#{$context}-#{$i} {
+            grid-column: auto / span #{$i} !important;
+        }
 
-      .col-#{$context}-#{$i} {
-        flex: 0 0 auto;
-        width: (100% / 12) * $i !important;
-      }
+        .col-#{$context}-#{$i} {
+            flex: 0 0 auto;
+            width: (100% / 12) * $i !important;
+        }
     }
 
     .text-#{$context}-center {
@@ -285,19 +280,13 @@ $o-btns-bs-override: map-merge((
     $width-utilities: 25, 50, 75, 100;
 
     @each $w in $width-utilities {
-      .w-#{$context}-#{$w} {
-        width: #{$w}% !important;
-      }
+        .w-#{$context}-#{$w} {
+            width: #{$w}% !important;
+        }
     }
 
     // Add the auto width utility separately
     .w-#{$context}-auto {
-      width: auto !important;
+        width: auto !important;
     }
 }
-
-
-
-
-
-

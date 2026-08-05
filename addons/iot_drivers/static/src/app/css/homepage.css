@@ -1,6 +1,6 @@
 :root {
-    --odoo-purple: #714B67
-} 
+    --odoo-purple: #714B97
+}
 
 .color-primary {
     color: var(--odoo-purple);
@@ -39,12 +39,16 @@
     border-color: #017E8480 !important;
 }
 
-.odoo-bg-primary, .bg-primary, .form-check-input:checked, .nav-pills .nav-link.active {
+.odoo-bg-primary,
+.bg-primary,
+.form-check-input:checked,
+.nav-pills .nav-link.active {
     background-color: var(--odoo-purple) !important;
     border-color: var(--odoo-purple) !important;
 }
 
-.odoo-bg-secondary, .bg-secondary {
+.odoo-bg-secondary,
+.bg-secondary {
     background-color: #017E84 !important;
 }
 

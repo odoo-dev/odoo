@@ -46,8 +46,8 @@ class WebManifest(http.Controller):
             'scope': '/odoo',
             'start_url': '/odoo',
             'display': 'standalone',
-            'background_color': '#714B67',
-            'theme_color': '#714B67',
+            'background_color': '#714B97',
+            'theme_color': '#714B97',
             'prefer_related_applications': False,
         }
         icon_sizes = ['192x192', '512x512']
@@ -170,8 +170,8 @@ class WebManifest(http.Controller):
             'scope': path,
             'start_url': path,
             'display': 'standalone',
-            'background_color': '#714B67',
-            'theme_color': '#714B67',
+            'background_color': '#714B97',
+            'theme_color': '#714B97',
             'prefer_related_applications': False,
             'shortcuts': self._get_scoped_app_shortcuts(app_id)
         }

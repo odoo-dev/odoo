@@ -348,9 +348,9 @@
                 filter: grayscale(.6);
                 }
                 .card button {
-                background-color: #714B67;
+                background-color: #714B97;
                 color: #FFFFFF;
-                border: 1px solid #714B67;
+                border: 1px solid #714B97;
                 border-radius: .25rem;
                 padding: .5rem 1rem;
                 cursor: pointer;

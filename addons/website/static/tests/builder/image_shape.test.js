@@ -285,7 +285,7 @@ test("Should change the shape color of an image", async () => {
     );
     expect(`:iframe .test-options-target img`).toHaveAttribute(
         "data-shape-colors",
-        "#714B67;#F0CDA8;#F6F5F4;;#1B1319"
+        "#714B97;#F0CDA8;#F6F5F4;;#1B1319"
     );
 
     await contains(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).click();
@@ -342,7 +342,7 @@ test("Should change the shape color of an image with a class color", async () =>
     );
     expect(`:iframe .test-options-target img`).toHaveAttribute(
         "data-shape-colors",
-        "#714B67;#F0CDA8;#F6F5F4;;#1B1319"
+        "#714B97;#F0CDA8;#F6F5F4;;#1B1319"
     );
 
     await contains(`[data-label="Colors"] .o_we_color_preview:nth-child(1)`).click();

@@ -8,7 +8,7 @@ import { formatFloat } from "@web/views/fields/formatters";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 const CHART_COLORS = [
-    "#714B67",
+    "#714B97",
     "#9467bd",
     "#2ca02c",
     "#ff7f0e",
