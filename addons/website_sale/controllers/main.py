@@ -158,7 +158,11 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def _get_shop_domain(self, search, category, attribute_value_dict, search_in_description=True):
         domains = [request.website.sale_product_domain()]
         if search:
+            search_fields = request.env['product.template']._get_website_sale_search_fields(
+                search_in_description
+            )
             for srch in search.split(" "):
+<<<<<<< 0d2a2007f7133231c5eb272bdc95983dd19ff8fc
                 subdomains = [
                     Domain("name", "ilike", srch),
                     Domain("variants_default_code", "ilike", srch),
@@ -168,6 +172,19 @@ class WebsiteSale(payment_portal.PaymentPortal):
                         Domain("website_description", "ilike", srch),
                         Domain("description_sale", "ilike", srch),
                     ))
+||||||| 2f0f8e5e00685129b5bbe954117bc9f80a568e88
+                subdomains = [
+                    Domain('name', 'ilike', srch),
+                    Domain('variants_default_code', 'ilike', srch),
+                ]
+                if search_in_description:
+                    subdomains.extend((
+                        Domain('website_description', 'ilike', srch),
+                        Domain('description_sale', 'ilike', srch),
+                    ))
+=======
+                subdomains = [Domain(field, 'ilike', srch) for field in search_fields]
+>>>>>>> e9d435d1c865e1f462ce2e4bb2c0715ec97c8b10
                 extra_subdomain = self._add_search_subdomains_hook(srch)
                 if extra_subdomain:
                     subdomains.append(extra_subdomain)

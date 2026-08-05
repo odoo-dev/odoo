@@ -1205,6 +1205,13 @@ class ProductTemplate(models.Model):
         ]
 
     @api.model
+    def _get_website_sale_search_fields(self, search_in_description=True):
+        search_fields = ['name', 'variants_default_code']
+        if search_in_description:
+            search_fields += ['description_sale', 'description_ecommerce']
+        return search_fields
+
+    @api.model
     def _search_get_detail(self, website, order, options):
         domains = [website.sale_product_domain()]
         category = options.get("category")
@@ -1234,6 +1241,7 @@ class ProductTemplate(models.Model):
             domains.append([("list_price", "<=", max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
+<<<<<<< 0d2a2007f7133231c5eb272bdc95983dd19ff8fc
         search_fields = [
             "name",
             "default_code",
@@ -1244,6 +1252,13 @@ class ProductTemplate(models.Model):
             "description_sale",
         ]
         fetch_fields = ["id", "name", "website_url", "description_ecommerce", "description_sale"]
+||||||| 2f0f8e5e00685129b5bbe954117bc9f80a568e88
+        search_fields = ['name', 'default_code', 'variants_default_code']
+        fetch_fields = ['id', 'name', 'website_url']
+=======
+        search_fields = self._get_website_sale_search_fields(with_description)
+        fetch_fields = ['id', 'name', 'website_url']
+>>>>>>> e9d435d1c865e1f462ce2e4bb2c0715ec97c8b10
         mapping = {
             "name": {"name": "name", "type": "text", "match": True},
             "website_url": {"name": "website_url", "type": "text", "truncate": False},
@@ -1254,6 +1269,35 @@ class ProductTemplate(models.Model):
             "attribute_value_ids": {"name": "attribute_value_ids", "type": "tags", "match": True, "force_show": True},
             "description_sale": {"name": "description_sale", "type": "text", "html": True, "match": True},
         }
+<<<<<<< 0d2a2007f7133231c5eb272bdc95983dd19ff8fc
+||||||| 2f0f8e5e00685129b5bbe954117bc9f80a568e88
+        if with_image:
+            mapping['image_url'] = {'name': 'image_url', 'type': 'html'}
+        if with_description:
+            # Internal note is not part of the rendering.
+            search_fields.append('description')
+            fetch_fields.append('description')
+            search_fields.append('description_sale')
+            fetch_fields.append('description_sale')
+            mapping['description'] = {'name': 'description_sale', 'type': 'text', 'match': True}
+        if with_price:
+            mapping['detail'] = {'name': 'price', 'type': 'html', 'display_currency': options['display_currency']}
+            mapping['detail_strike'] = {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']}
+        if with_category:
+            mapping['extra_link'] = {'name': 'category', 'type': 'html'}
+=======
+        if with_image:
+            mapping['image_url'] = {'name': 'image_url', 'type': 'html'}
+        if with_description:
+            fetch_fields.append('description_sale')
+            fetch_fields.append('description_ecommerce')
+            mapping['description'] = {'name': 'description_sale', 'type': 'text', 'match': True}
+        if with_price:
+            mapping['detail'] = {'name': 'price', 'type': 'html', 'display_currency': options['display_currency']}
+            mapping['detail_strike'] = {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']}
+        if with_category:
+            mapping['extra_link'] = {'name': 'category', 'type': 'html'}
+>>>>>>> e9d435d1c865e1f462ce2e4bb2c0715ec97c8b10
         return {
             "model": "product.template",
             "base_domain": domains,
