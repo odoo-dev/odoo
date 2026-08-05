@@ -45,7 +45,7 @@
             <t t-set-slot="content">
                 <!-- Section 1: full clone of the compact bar's facets + a real, comfortable input -->
                 <div
-                    class="o_search_bar_menu_facets position-sticky top-0 z-1 d-flex flex-wrap align-items-center gap-1 px-3 py-2 w-100 bg-view mb-2"
+                    class="o_search_bar_menu_facets position-sticky top-0 z-1 d-flex flex-wrap align-items-center px-3 py-2 w-100 bg-view mb-2"
                     role="search"
                     t-ref="this.facetContainerRef"
                     t-att-class="{ 'shadow-sm': this.facetContainerRefSticky.isSticky }"

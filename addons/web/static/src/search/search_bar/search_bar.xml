@@ -9,21 +9,15 @@
                     'o_facet_with_domain': facet.domain,
                     'o_facet_groupby': facet.type == 'groupBy',
                     'o_facet_favorite': facet.type == 'favorite',
-                    'small bg-100': !facetsDesign,
-                    'border pe-1': facetsDesign,
+                    'small': !facetsDesign,
+                    'pe-1': facetsDesign,
                 }"
                 role="listitem"
                 aria-label="search"
                 tabindex="0"
                 >
-                <div
-                    class="o_searchview_facet_content d-flex align-items-center gap-1"
-                    t-att-class="{
-                        'gap-1': !facetsDesign,
-                        'gap-2': facetsDesign,
-                    }"
-                >
-                    <div class="o_searchview_facet_label position-relative d-flex align-items-center h-100 p-1 overflow-hidden"
+                <div class="o_searchview_facet_content d-flex align-items-center gap-1">
+                    <div class="o_searchview_facet_label position-relative d-flex align-items-center h-100 p-1 rounded-2 overflow-hidden"
                         t-on-click="(ev) => this.onFacetLabelClick(ev.target, facet)"
                         t-att-role="facet.domain ? 'button' : 'img'"
                         t-att-class="{
@@ -62,18 +56,23 @@
                         </span>
                     </div>
                 </div>
-                <button
-                    class="o_facet_remove oi btn btn-link d-flex align-items-center px-1 text-danger d-print-none"
-                    t-att-class="{
-                        'py-0': !facetsDesign,
-                        'py-1': facetsDesign,
-                    }"
-                    aria-label="Remove"
-                    title="Remove"
-                    t-on-click="() => this.onFacetRemove(facet)"
-                    tabindex="-1"
-                    data-icon="close"
-                />
+                <div class="position-relative d-flex">
+                    <span class="position-absolute opacity-100 opacity-0-hover" t-att-class="{'lh-lg': facetsDesign}">
+                        ,
+                    </span>
+                    <button
+                        class="o_facet_remove oi btn btn-link d-flex align-items-center ps-0 pe-1 text-danger d-print-none opacity-0 opacity-100-hover"
+                        t-att-class="{
+                            'py-0': !facetsDesign,
+                            'py-1': facetsDesign,
+                        }"
+                        aria-label="Remove"
+                        title="Remove"
+                        t-on-click="() => this.onFacetRemove(facet)"
+                        tabindex="-1"
+                        data-icon="close"
+                    />
+                </div>
             </div>
         </t>
     </t>
@@ -94,7 +93,7 @@
                          role="search" aria-autocomplete="list"
                          t-on-click.self="this.onSearchClick"
                     >
-                        <div class="o_searchview_input_container d-flex flex-nowrap gap-1 align-items-center flex-grow-1 overflow-hidden" t-ref="this.facetContainerRef">
+                        <div class="o_searchview_input_container d-flex flex-nowrap align-items-center flex-grow-1" t-ref="this.facetContainerRef">
                             <!-- All facets are always rendered here; adjustVisibleFacets() hides the
                                  overflow via a CSS class so their true widths stay measurable. -->
                             <t t-set="facetsToShow" t-value="this.env.searchModel.facets"/>
