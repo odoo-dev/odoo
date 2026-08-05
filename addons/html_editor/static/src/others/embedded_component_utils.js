@@ -4,7 +4,6 @@ import {
     onPatched,
     onWillDestroy,
     onWillPatch,
-    onWillStart,
     proxy,
     signal,
     t,
@@ -130,6 +129,7 @@ export function useEditableDescendants() {
             "Missing `getEditableDescendants` function in the `embedding` provided to the `EmbeddedComponentPlugin`."
         );
     }
+    const selectionManager = env.selectionManager;
 
     /**
      * @param {boolean} checkHost
@@ -141,12 +141,18 @@ export function useEditableDescendants() {
                 refs[name]().replaceChildren(editableDescendants[name]);
             }
         }
-        restoreSelection?.();
-        restoreSelection = null;
+        if (selectionManager) {
+            selectionManager.restoreSelection?.();
+            selectionManager.restoreSelection = null;
+        }
     }
 
     function saveSelection() {
-        restoreSelection = env.editorShared?.selection?.preserveSelection().restore || null;
+        if (!selectionManager) {
+            return;
+        }
+        selectionManager.restoreSelection =
+            env.editorShared?.selection?.preserveSelection().restore || null;
     }
 
     const props = useProps({
@@ -174,15 +180,6 @@ export function useEditableDescendants() {
         }
     );
 
-    /** @type {(() => void) | null} */
-    let restoreSelection = null;
-
-    // FIXME: this is not optimal, as the selection preservation is started before
-    // any asynchronous task has been finished, and it *could* theoretically have
-    // changed between 'saveSelection' and 'applyRestoreSelection'. But as we do
-    // not have a hook between 'onWillStart' and 'onMounted', and as this case is
-    // mostly theoretical at this point, this should suffice for now.
-    onWillStart(saveSelection);
     onWillPatch(saveSelection);
     onMounted(() => applyRestoreSelection(false));
     onPatched(() => applyRestoreSelection(true));
