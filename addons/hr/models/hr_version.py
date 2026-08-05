@@ -82,6 +82,9 @@ class HrVersion(models.Model):
         tracking=1)
     passport_id = fields.Char('Passport No', groups="hr.group_hr_user", tracking=1)
     passport_expiration_date = fields.Date('Passport Expiration Date', groups="hr.group_hr_user", tracking=1)
+    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
+    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
+    work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     sex = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
