@@ -327,11 +327,11 @@ class StockMove(models.Model):
         if procurements:
             self.env['stock.rule'].run(procurements)
 
-    def _do_unreserve(self):
+    def _do_unreserve(self, skip_mo_check=False):
         # Moves with a quantity should be protected from unreservation (similar to picked).
         # This override is to do that for moves which got updated from updating qty_producing as
         # they are not marked as picked any more
-        if not self.env.context.get('skip_mo_check'):
+        if not skip_mo_check:
             protected = self.filtered(
                 lambda m: m.raw_material_production_id
                 and not m.picked
@@ -341,11 +341,11 @@ class StockMove(models.Model):
             return super(StockMove, self - protected)._do_unreserve()
         return super()._do_unreserve()
 
-    def _action_assign(self, force_qty=False):
+    def _action_assign(self, force_qty=False, skip_mo_check=False):
         # Moves with a quantity should be protected from re-assignation (similar to picked).
         # This override is to do that for moves which got updated from updating qty_producing as
         # they are not marked as picked any more
-        if not self.env.context.get('skip_mo_check'):
+        if not skip_mo_check:
             protected = self.filtered(
                 lambda m: m.raw_material_production_id
                 and not m.picked
@@ -438,9 +438,9 @@ class StockMove(models.Model):
         workorder = self.env['mrp.workorder'].browse(self.env.context.get('order_id'))
         return workorder.with_context(child_field='move_raw_ids').action_add_from_catalog()
 
-    def _action_cancel(self):
+    def _action_cancel(self, skip_mo_check=False):
         res = super(StockMove, self)._action_cancel()
-        if not 'skip_mo_check' in self.env.context:
+        if not skip_mo_check:
             mo_to_cancel = self.mapped('raw_material_production_id').filtered(lambda p: all(m.state == 'cancel' for m in p.move_raw_ids))
             if mo_to_cancel:
                 mo_to_cancel.action_cancel()

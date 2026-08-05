@@ -1963,7 +1963,7 @@ class MrpProduction(models.Model):
             self.workorder_ids.filtered(lambda x: x.state not in ['done', 'cancel']).action_cancel()
         finish_moves = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         raw_moves = self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
-        (finish_moves | raw_moves).with_context(skip_mo_check=True)._action_cancel()
+        (finish_moves | raw_moves)._action_cancel(skip_mo_check=True)
         picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel') and not (x.move_ids.move_dest_ids or any(mo.state == 'done' for mo in x.production_ids)))
         picking_ids.action_cancel()
 
@@ -1994,8 +1994,8 @@ class MrpProduction(models.Model):
             elif move.state != 'cancel':
                 moves_to_do.add(move.id)
 
-        self.with_context(skip_mo_check=True).env['stock.move'].browse(moves_to_do)._action_done(cancel_backorder=cancel_backorder)
-        self.with_context(skip_mo_check=True).env['stock.move'].browse(moves_to_cancel)._action_cancel()
+        self.env['stock.move'].browse(moves_to_do)._action_done(cancel_backorder=cancel_backorder, skip_mo_check=True)
+        self.env['stock.move'].browse(moves_to_cancel)._action_cancel(skip_mo_check=True)
         moves_to_do = self.move_raw_ids.filtered(lambda x: x.state == 'done') - self.env['stock.move'].browse(moves_not_to_do)
         # Create a dict to avoid calling filtered inside for loops.
         moves_to_do_by_order = defaultdict(lambda: self.env['stock.move'], [

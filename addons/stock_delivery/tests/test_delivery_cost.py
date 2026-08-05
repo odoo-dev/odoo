@@ -116,8 +116,7 @@ class TestDeliveryCost(common.TransactionCase):
         with self.assertRaises(UserError):
             delivery_line.write({'price_unit': 99.0})
 
-        # Validating the picking sets the allow_delivery_cost_update context
-        # so the real carrier price is written through the lock
+        # Validating the real carrier price is written through the lock
         picking = so.picking_ids[0]
         picking.move_ids.quantity = 1.0
         picking.move_ids.picked = True
