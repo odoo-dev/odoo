@@ -88,6 +88,11 @@ class HrVersion(models.Model):
         ('other', 'Other'),
     ], groups="hr.group_hr_user", tracking=1, help="This is the legal sex as recognized by the state, used for official and statutory purposes.")
 
+    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user")
+    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user")
+    work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
+    work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
+
     private_street = fields.Char(string="Private Street", groups="hr.group_hr_user", tracking=1)
     private_street2 = fields.Char(string="Private Street2", groups="hr.group_hr_user", tracking=1)
     private_city = fields.Char(string="Private City", groups="hr.group_hr_user", tracking=1)
@@ -242,6 +247,13 @@ class HrVersion(models.Model):
             states = self.env["res.country.state"].search([])
             for version in versions_without_countries:
                 version.allowed_country_state_ids = states
+
+    @api.depends('employee_id.name', 'permit_no')
+    def _compute_work_permit_name(self):
+        for version in self:
+            emp_name = version.employee_id.name.replace(' ', '_') + '_' if version.employee_id and version.employee_id.name else ''
+            permit_no = '_' + version.permit_no if version.permit_no else ''
+            version.work_permit_name = f"{emp_name}work_permit{permit_no}"
 
     @api.constrains('employee_id', 'contract_date_start', 'contract_date_end')
     def _check_dates(self):
