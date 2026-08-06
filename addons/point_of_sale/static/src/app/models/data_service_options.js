@@ -5,9 +5,7 @@ export class DataServiceOptions {
         return {
             "pos.order": {
                 key: "uuid",
-                condition: (record) =>
-                    record.canBeRemovedFromIndexedDB &&
-                    record.pos_session_id !== parseInt(odoo.pos_session_id),
+                condition: (record) => record.canBeRemovedFromIndexedDB,
             },
             "pos.order.line": {
                 key: "uuid",

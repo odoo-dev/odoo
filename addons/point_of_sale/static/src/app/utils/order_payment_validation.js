@@ -149,6 +149,7 @@ export default class OrderPaymentValidation {
         this.pos.addPendingOrder([this.order.id]);
         this.order.state = "paid";
         this.pos.data.localUnsyncedPaidOrderUuids().add(this.order.uuid);
+        await this.pos.data.synchronizeLocalDataInIndexedDB();
 
         this.pos.customerDisplay.send({ processingValidation: true });
         try {
@@ -227,9 +228,6 @@ export default class OrderPaymentValidation {
 
     handleValidationError(error) {
         if (error instanceof ConnectionLostError) {
-            // Bypass the 300ms debounce to immediately persist the paid order to IndexedDB.
-            // Without this, a page reload within the debounce window permanently loses the order.
-            this.pos.data.synchronizeLocalDataInIndexedDB();
             this.afterOrderValidation();
             Promise.reject(error);
         } else if (error instanceof RPCError) {

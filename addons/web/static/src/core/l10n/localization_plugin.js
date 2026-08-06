@@ -1,6 +1,6 @@
 import { onWillDestroy, onWillStart, usePlugin, Plugin, useListener } from "@odoo/owl";
 import { session } from "@web/session";
-import { jsToPyLocale } from "@web/core/l10n/utils";
+import { jsToPyLocale, pyToJsLocale } from "@web/core/l10n/utils";
 import { user } from "@web/core/user";
 import { browser } from "@web/core/browser/browser";
 import { services } from "@web/core/services";
@@ -18,6 +18,63 @@ import { IndexedDB } from "@web/core/utils/indexed_db";
 import { registry } from "@web/core/registry";
 
 const { Settings } = luxon;
+
+export function getFallbackLangParameters(locale) {
+    const params = {
+        date_format: "%m/%d/%Y",
+        time_format: "%H:%M:%S",
+        decimal_point: ".",
+        direction: "ltr",
+        grouping: "[]",
+        thousands_sep: ",",
+        week_start: 1,
+    };
+
+    try {
+        const numberParts = new Intl.NumberFormat(locale).formatToParts(1234567.5);
+        const decimal = numberParts.find((part) => part.type === "decimal");
+        const group = numberParts.find((part) => part.type === "group");
+        if (decimal) {
+            params.decimal_point = decimal.value;
+        }
+        if (group) {
+            params.thousands_sep = group.value;
+            params.grouping = "[3,0]";
+        }
+
+        const fields = { day: "%d", month: "%m", year: "%Y" };
+        const dateFormat = new Intl.DateTimeFormat(locale)
+            .formatToParts(new Date(2024, 0, 2))
+            .map((part) => fields[part.type] ?? (part.type === "literal" ? part.value : ""))
+            .join("");
+        if (["%d", "%m", "%Y"].every((field) => dateFormat.includes(field))) {
+            params.date_format = dateFormat;
+        }
+
+        const { hourCycle } = new Intl.DateTimeFormat(locale, {
+            hour: "numeric",
+        }).resolvedOptions();
+        if (hourCycle === "h11" || hourCycle === "h12") {
+            params.time_format = "%I:%M:%S %p";
+        }
+
+        if (typeof Intl.Locale === "function") {
+            const intlLocale = new Intl.Locale(locale);
+            const weekInfo = intlLocale.weekInfo ?? intlLocale.getWeekInfo?.();
+            if (weekInfo?.firstDay) {
+                params.week_start = weekInfo.firstDay;
+            }
+            const textInfo = intlLocale.textInfo ?? intlLocale.getTextInfo?.();
+            if (textInfo?.direction) {
+                params.direction = textInfo.direction;
+            }
+        }
+    } catch {
+        // ignore
+    }
+
+    return params;
+}
 
 /** @type {[RegExp, string][]} */
 const NUMBERING_SYSTEMS = [
@@ -82,6 +139,14 @@ export class LocalizationPlugin extends Plugin {
             this.updateTranslations(storedTranslations);
         } else {
             await translationProm;
+            if (!translatedTerms[translationLoaded]) {
+                this.updateTranslations({
+                    modules: {},
+                    lang_parameters: getFallbackLangParameters(
+                        pyToJsLocale(user.lang) || browser.navigator.language
+                    ),
+                });
+            }
         }
 
         translatedTerms[translationLoaded] = true;
@@ -102,25 +167,35 @@ export class LocalizationPlugin extends Plugin {
     async fetchTranslations(hash) {
         let queryString = objectToUrlEncodedString({ hash, lang: this.lang });
         queryString = queryString.length > 0 ? `?${queryString}` : queryString;
-        const response = await browser.fetch(`${this.translationURL}${queryString}`, {
-            cache: "no-store",
-        });
-        if (!response.ok) {
-            throw new Error("Error while fetching translations");
-        }
-        const result = await response.json();
-        if (result.hash !== hash) {
-            this.localizationDB.write(
-                this.translationURL,
-                JSON.stringify({ lang: this.lang }),
-                result
-            );
-            this.updateTranslations(result);
+        try {
+            const response = await browser.fetch(`${this.translationURL}${queryString}`, {
+                cache: "no-store",
+            });
+            if (!response.ok) {
+                throw new Error("Error while fetching translations");
+            }
+            const result = await response.json();
+            if (result && result.hash !== hash) {
+                this.localizationDB.write(
+                    this.translationURL,
+                    JSON.stringify({ lang: this.lang }),
+                    result
+                );
+                this.updateTranslations(result);
+            }
+        } catch (error) {
+            if (error instanceof TypeError) {
+                console.warn("Could not fetch translations from server (offline)", error);
+            } else {
+                console.error("Could not load translations", error);
+            }
         }
     }
 
     updateTranslations(result) {
-        // Eventually, we want a new python route to return directly the good result.
+        if (!result || !result.modules) {
+            return;
+        }
         const terms = {};
         for (const addon of Object.keys(result.modules)) {
             terms[addon] = {};
@@ -131,20 +206,20 @@ export class LocalizationPlugin extends Plugin {
         }
         Object.assign(translatedTerms, terms);
 
-        const userLocalization = result.lang_parameters;
-        const dateFormat = strftimeToLuxonFormat(userLocalization.date_format);
-        const timeFormat = strftimeToLuxonFormat(userLocalization.time_format);
+        const userLocalization = result.lang_parameters || {};
+        const dateFormat = strftimeToLuxonFormat(userLocalization.date_format || "%m/%d/%Y");
+        const timeFormat = strftimeToLuxonFormat(userLocalization.time_format || "%H:%M:%S");
 
         Object.assign(localization, {
             dateFormat,
             timeFormat,
             dateTimeFormat: `${dateFormat} ${timeFormat}`,
-            decimalPoint: userLocalization.decimal_point,
-            direction: userLocalization.direction,
-            grouping: JSON.parse(userLocalization.grouping),
-            multiLang: result.multi_lang,
-            thousandsSep: userLocalization.thousands_sep,
-            weekStart: userLocalization.week_start,
+            decimalPoint: userLocalization.decimal_point || ".",
+            direction: userLocalization.direction || "ltr",
+            grouping: JSON.parse(userLocalization.grouping || "[]"),
+            multiLang: result.multi_lang || false,
+            thousandsSep: userLocalization.thousands_sep || ",",
+            weekStart: userLocalization.week_start || 1,
         });
     }
 }

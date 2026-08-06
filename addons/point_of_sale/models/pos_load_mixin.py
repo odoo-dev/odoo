@@ -58,7 +58,7 @@ class PosLoadMixin(models.AbstractModel):
                 if params.type == 'one2many' and params.inverse_name:
                     relations[name]['inverse_name'] = params.inverse_name
                 if params.type == 'many2many':
-                    relations[name]['relation_table'] = params.relation
+                    relations[name]['relation_table'] = params.relation or ''
             else:
                 relations[name] = {
                     'name': name,

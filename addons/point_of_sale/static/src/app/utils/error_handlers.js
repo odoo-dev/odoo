@@ -34,22 +34,26 @@ function rpcErrorHandler(env, error, originalError) {
 registry.category("error_handlers").add("pos-rpcErrorHandler", rpcErrorHandler);
 
 export function offlineErrorHandler(env, error, originalError) {
-    const pos = useService("pos");
-    const dialog = useService("dialog");
-    if (originalError instanceof ConnectionLostError) {
-        if (!pos.data.network.warningTriggered) {
-            dialog.add(AlertDialog, {
-                title: _t("Connection Lost"),
-                body: _t(
-                    "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
-                ),
-                confirmLabel: _t("Continue with limited functionality"),
-            });
-            pos.data.network.warningTriggered = true;
-        }
-
+    if (!(originalError instanceof ConnectionLostError)) {
+        return;
+    }
+    const network = env.services.pos?.data?.network;
+    if (network?.warningTriggered) {
         return true;
     }
+
+    useService("dialog").add(AlertDialog, {
+        title: _t("Connection Lost"),
+        body: _t(
+            "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
+        ),
+        confirmLabel: _t("Continue with limited functionality"),
+    });
+    if (network) {
+        network.warningTriggered = true;
+    }
+
+    return true;
 }
 registry.category("error_handlers").add("pos-offlineErrorHandler", offlineErrorHandler);
 

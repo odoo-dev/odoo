@@ -793,11 +793,27 @@ export class PosStore extends WithLazyGetterTrap {
     async deleteOrders(orders, serverIds = [], ignoreChange = false) {
         const ordersToDelete = [];
         const actionPosOrderCancelCall = async (orderIds) => {
-            await this.data.call("pos.order", "cancel_order_from_pos", [orderIds], {
-                context: {
-                    device_identifier: this.device.identifier,
-                },
-            });
+            const numericIds = orderIds.filter((id) => typeof id === "number");
+            if (!numericIds.length) {
+                return;
+            }
+            if (this.data.network.offline) {
+                this.addPendingOrder(numericIds, true);
+                return;
+            }
+            try {
+                await this.data.call("pos.order", "cancel_order_from_pos", [numericIds], {
+                    context: {
+                        device_identifier: this.device.identifier,
+                    },
+                });
+            } catch (error) {
+                if (error instanceof ConnectionLostError) {
+                    this.addPendingOrder(numericIds, true);
+                } else {
+                    throw error;
+                }
+            }
         };
         try {
             for (const order of orders) {
@@ -810,10 +826,16 @@ export class PosStore extends WithLazyGetterTrap {
                         const orderPresetDate = DateTime.fromISO(order.preset_time);
                         const isSame = DateTime.now().hasSame(orderPresetDate, "day");
                         if (!order.preset_time || isSame) {
-                            await this.sendOrderInPreparation(order, {
-                                cancelled: true,
-                                orderDone: true,
-                            });
+                            try {
+                                await this.sendOrderInPreparation(order, {
+                                    cancelled: true,
+                                    orderDone: true,
+                                });
+                            } catch (error) {
+                                if (!(error instanceof ConnectionLostError)) {
+                                    throw error;
+                                }
+                            }
                         }
                     }
 
@@ -902,13 +924,12 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async afterProcessServerData() {
-        // Adding the not synced paid orders to the pending orders
-        const paidUnsyncedOrderIds = this.models["pos.order"]
-            .filter((order) => order.isUnsyncedPaid)
+        const pendingOrderIds = this.models["pos.order"]
+            .filter((order) => !order.isSynced || order.isDirty())
             .map((order) => order.id);
 
-        if (paidUnsyncedOrderIds.length > 0) {
-            this.addPendingOrder(paidUnsyncedOrderIds);
+        if (pendingOrderIds.length > 0) {
+            this.addPendingOrder(pendingOrderIds);
         }
 
         const openOrders = this.data.models["pos.order"].filter((order) => !order.finalized);
@@ -1634,7 +1655,9 @@ export class PosStore extends WithLazyGetterTrap {
                 this.pendingOrder["write"].delete(id);
             }
 
-            this.pendingOrder["delete"].add(...orderIds);
+            for (const id of orderIds) {
+                this.pendingOrder["delete"].add(id);
+            }
             return true;
         }
 
@@ -1750,10 +1773,11 @@ export class PosStore extends WithLazyGetterTrap {
 
         for (const order of orders) {
             const context = this.getSyncAllOrdersContext([order], options);
-            await this.preSyncAllOrders([order]);
             this.syncingOrders.add(order.uuid);
 
             try {
+                await this.preSyncAllOrders([order]);
+
                 const serialized = order.serializeForORM({ keepCommands: true });
                 const data = await this.data.call("pos.order", "sync_from_ui", [[serialized]], {
                     context,
@@ -1800,7 +1824,7 @@ export class PosStore extends WithLazyGetterTrap {
                     errorOccurred = true;
                 }
             } finally {
-                orders.forEach((order) => this.syncingOrders.delete(order.uuid));
+                this.syncingOrders.delete(order.uuid);
             }
         }
 
@@ -2419,6 +2443,9 @@ export class PosStore extends WithLazyGetterTrap {
      * Close other tabs that contain the same pos session.
      */
     closeOtherTabs() {
+        if (!this.session) {
+            return;
+        }
         localStorage["message"] = "";
         localStorage["message"] = JSON.stringify({
             message: "close_tabs",

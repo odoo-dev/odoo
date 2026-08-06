@@ -169,6 +169,11 @@ export class Navbar extends Component {
     get showCashMoveButton() {
         return this.pos.showCashMoveButton;
     }
+
+    get hasPendingSync() {
+        return this.pos.data.network.pendingCount > 0;
+    }
+
     getOrderTabs() {
         return this.pos.getOpenOrders().filter((order) => !order.table_id);
     }
