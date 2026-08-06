@@ -1,6 +1,6 @@
 import { test, expect, describe } from "@odoo/hoot";
 import { getFilledOrder, setupPosEnv, createPaymentLine } from "../utils";
-import { definePosModels } from "../data/generate_model_definitions";
+import { definePosModels, hootPosModels } from "../data/generate_model_definitions";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import {
     getStrNotes,
@@ -9,6 +9,7 @@ import {
 import { prepareRoundingVals } from "../accounting/utils";
 import { getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { localization } from "@web/core/l10n/localization";
+
 const { DateTime } = luxon;
 
 definePosModels();
@@ -770,4 +771,22 @@ describe("pos_store.js", () => {
         await store.setTip(numberBuffer.getFloat());
         expect(order.tip_amount).toBe(2.5);
     });
+});
+
+test("[Point of Sale] mock server models only contain tracked POS fields", async () => {
+    const store = await setupPosEnv();
+
+    // Ensure mock server records stay in sync with the fields tracked by the
+    // POS models. If a mock record contains a field that is not declared in the
+    // corresponding POS model, the mock likely needs to be updated.
+    const modelsToCheck = ["product.template", "product.product"];
+    const mockModels = hootPosModels.filter((model) => modelsToCheck.includes(model._name));
+
+    for (const ServerModel of mockModels) {
+        const trackedFields = Object.keys(store.models[ServerModel._name].fields);
+        const recordsWithUnknownFields = new ServerModel()._records.filter((record) =>
+            Object.keys(record).some((fieldName) => !trackedFields.includes(fieldName))
+        );
+        expect(recordsWithUnknownFields).toHaveLength(0);
+    }
 });
