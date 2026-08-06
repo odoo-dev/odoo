@@ -12,6 +12,10 @@ class TestRunbotDemo(TransactionCase):
         self.assertTrue(website, "At least one website should exist")
         self.assertTrue(website.name, "Website should have a name")
 
+    def test_math(self):
+        """Basic Math"""
+        self.assertEqual(1, 2, "1 is not equals to 2")
+
     def test_website_page_creation(self):
         """Check that we can create a simple website page."""
         website = self.env['website'].search([], limit=1)
