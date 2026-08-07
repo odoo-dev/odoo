@@ -36,17 +36,17 @@
                                 </span>
                                 <span name="biyearly" invisible="frequency != 'biyearly'">
                                     on the
-                                    <field nolabel="1" name="first_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="first_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'" widget="dynamic_day_selection" month_field="first_month"/>
                                     of
                                     <field name="first_month" class="o_hr_narrow_field-5" placeholder="select a month" required="frequency == 'biyearly'"/>
                                     and the
-                                    <field nolabel="1" name="second_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="second_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'" widget="dynamic_day_selection" month_field="second_month"/>
                                     of
                                     <field nolabel="1" name="second_month" class="o_hr_narrow_field-5" placeholder="select a month" required="frequency == 'biyearly'"/>
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
                                     on the
-                                    <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" required="frequency == 'yearly'" placeholder="select a day"/>
+                                    <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" required="frequency == 'yearly'" placeholder="select a day" widget="dynamic_day_selection" month_field="yearly_month"/>
                                     of
                                     <field nolabel="1" name="yearly_month" class="o_hr_narrow_field-5" required="frequency == 'yearly'" placeholder="select a month"/>
                                 </span>
