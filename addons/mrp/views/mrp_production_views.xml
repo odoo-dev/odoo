@@ -383,9 +383,14 @@
                             </div>
                         </group>
                         <group name="group_extra_info">
+                            <!--
                             <label name="scheduled_date" for="date_start" string="Scheduled Date" invisible="state in ['progress', 'to_close', 'done', 'cancel']"/>
                             <label name="start_date" for="date_start" string="Start Date" invisible="state not in ['progress', 'to_close', 'done', 'cancel']"/>
-                            <div class="o_row" name="date_start">
+                            -->
+                            <label name="scheduled_date" for="date_start" string="Scheduled Date" invisible="state in ['progress', 'to_close', 'done'] or is_planned"/>
+                            <label name="planned_date" for="date_start" string="Planned Date" invisible="state in ['progress', 'to_close', 'done'] or not is_planned"/>
+                            <label name="start_date" for="date_start" string="Start Date" invisible="state in ['draft', 'confirmed', 'done', 'cancel']"/>
+                            <div class="o_row" name="date_start" invisible="state == 'done'">
                                 <field name="date_start"
                                     readonly="state in ['done', 'to_close', 'cancel']"
                                     decoration-warning="state not in ('done', 'cancel') and date_start &lt; now"
@@ -396,7 +401,7 @@
                                 <field name="delay_alert_date" invisible="1"/>
                                 <field nolabel="1" name="json_popover" widget="stock_rescheduling_popover" invisible="not json_popover"/>
                             </div>
-                            <field name="date_finished" string="End Date" readonly="is_locked" invisible="state != 'done'" help="Date at which you finished production."/>
+                            <field name="date_finished" string="Effective Date" readonly="is_locked" invisible="state != 'done'" help="Date at which you finished production."/>
                             <field name="components_availability_state" invisible="1"/>
                             <field name="components_availability" invisible="state not in ['confirmed', 'progress']"
                                 decoration-success="reservation_state == 'assigned' or components_availability_state == 'available'"
