@@ -232,3 +232,33 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'Test Time Off 5',
+            'requires_allocation': True,
+            'allows_negative': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        self.env['hr.leave.allocation'].create({
+            'name': 'Regular allocation',
+            'date_from': '2026-08-01',
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': work_entry_type.id,
+            'number_of_days': 6,
+        }).action_approve()
+
+        domain = [
+            ('id', '=', work_entry_type.id),
+            ('virtual_remaining_leaves', '>', 0),
+        ]
+
+        # Test _search_virtual_remaining_leaves method
+        work_entry_type_ids = self.env['hr.work.entry.type'].with_context(
+            employee_id=self.employee_emp_id,
+        ).search(domain)
+
+        self.assertEqual(work_entry_type_ids.virtual_remaining_leaves, 6)
