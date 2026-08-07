@@ -11,7 +11,7 @@
 
 This module adds a custom Sales Team for the Point of Sale. This enables you to view and manage your point of sale sales with more ease.
 """,
-    'depends': ['pos_online_payment', 'sale_management'],
+    'depends': ['point_of_sale', 'sale_management'],
     'data': [
         'data/pos_sale_data.xml',
         'views/point_of_sale_report.xml',

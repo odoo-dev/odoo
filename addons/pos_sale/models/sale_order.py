@@ -17,6 +17,9 @@ class SaleOrder(models.Model):
         compute='_compute_amount_unpaid',
         store=True,
     )
+    # A cashier settling a sale order has to know what was already paid on it, so the
+    # field is widened from the accounting group it is otherwise reserved to.
+    transaction_ids = fields.Many2many(groups="account.group_account_invoice,point_of_sale.group_pos_user")
 
     @api.model
     def _load_pos_data_domain(self, data, config):
@@ -34,7 +37,7 @@ class SaleOrder(models.Model):
             [('product_variant_ids.id', 'in', product_ids)]
         )
         config = self.env['pos.config'].browse(config_id).exists()
-        transactions = self.sudo().transaction_ids
+        transactions = self.transaction_ids
         return {
             'sale.order': self._load_pos_data_read(self, config),
             'sale.order.line': self.env['sale.order.line']._load_pos_data_read(self.order_line, config),

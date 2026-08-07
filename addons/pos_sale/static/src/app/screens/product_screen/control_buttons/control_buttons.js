@@ -10,10 +10,6 @@ patch(ControlButtons.prototype, {
             list_view_ref: "pos_sale.sale_order_list_inherit_pos_sale",
             search_default_unpaid_orders_filter: true,
         };
-        if (this.partner) {
-            context["search_default_partner_id"] = this.partner.id;
-        }
-
         let domain = [
             ["state", "!=", "cancel"],
             ["invoice_status", "!=", "invoiced"],

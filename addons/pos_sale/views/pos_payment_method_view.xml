@@ -5,9 +5,6 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <!-- <xpath expr="//group//field[@name='type']" position="attributes">
-                <attribute name="readonly" add="use_sale_order_payment" separator=" or "/>
-            </xpath> -->
             <group name="Payment methods" position="attributes">
                 <attribute name="invisible" add="use_sale_order_payment" separator=" or "/>
             </group>

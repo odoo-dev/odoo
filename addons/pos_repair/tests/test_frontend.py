@@ -8,15 +8,6 @@ class TestUi(TestPosStockHttpCommon):
 
     _test_user_groups = None  # FIXME list needed groups
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.pos_user.write({
-            'group_ids': [
-                (4, cls.env.ref('account.group_account_invoice').id),
-            ]
-        })
-
     def test_pos_repair(self):
         self.product_1 = self.env['product.product'].create({
             'name': 'Test product 1'

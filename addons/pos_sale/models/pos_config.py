@@ -12,23 +12,24 @@ class PosConfig(models.Model):
     def _get_default_sol_product(self):
         return self.env.ref('pos_sale.default_sol_product', raise_if_not_found=False)
 
-    def _default_sale_order_payment_method(self):
-        payment_method = self.env['pos.payment.method'].with_context(active_test=False).search(
+    def _get_sale_order_payment_method(self, company):
+        """Return the payment method settling online paid sale orders for ``company``."""
+        return self.env['pos.payment.method'].with_context(active_test=False).search(
             [
-                *self.env['pos.payment.method']._check_company_domain(self.env.company),
+                *self.env['pos.payment.method']._check_company_domain(company),
                 ('use_sale_order_payment', '=', True)
             ],
             limit=1,
         )
-        if not payment_method:
-            payment_method = self.env['pos.payment.method'].create({
-                'name': _('Online Paid SO Payment'),
-                'company_id': self.env.company.id,
-                'use_sale_order_payment': True,
-                'active': False,
-                'type': 'pay_later',
-            })
-        return payment_method
+
+    def _create_sale_order_payment_method(self, company):
+        return self.env['pos.payment.method'].create({
+            'name': _('Online Paid SO Payment'),
+            'company_id': company.id,
+            'use_sale_order_payment': True,
+            'active': False,
+            'type': 'pay_later',
+        })
 
     def _default_payment_methods(self):
         """Filter out settle payment method from default payment methods."""
@@ -51,9 +52,21 @@ class PosConfig(models.Model):
     sale_order_payment_method_id = fields.Many2one(
         'pos.payment.method',
         string='Sale Order Payment Method',
-        default=_default_sale_order_payment_method,
+        check_company=True,
         help="Payment method used to settle Sale Orders that were already paid online."
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        configs = super().create(vals_list)
+        # Not a field default: the payment method is company specific, while a default
+        # can only look at `self.env.company`, and creating a record from a default
+        # would spawn one every time a `pos.config` form is opened.
+        missing = configs.filtered(lambda config: not config.sale_order_payment_method_id)
+        for company, company_configs in missing.grouped('company_id').items():
+            company_configs.sale_order_payment_method_id = self._get_sale_order_payment_method(company) \
+                or self._create_sale_order_payment_method(company)
+        return configs
 
     def _get_special_products(self):
         res = super()._get_special_products()
@@ -71,11 +84,14 @@ class PosConfig(models.Model):
         if default_sol_product := self._get_default_sol_product():
             values['default_product_id'] = default_sol_product.id
 
-        if sale_order_payment_method := self._default_sale_order_payment_method():
-            values['sale_order_payment_method_id'] = sale_order_payment_method.id
-
+        configs = self.with_context(active_test=False).search([])
         if values:
-            self.with_context(active_test=False).search([]).write(values)
+            configs.write(values)
+
+        # The settlement payment method is company specific, so each company gets its own.
+        for company, company_configs in configs.grouped('company_id').items():
+            payment_method = self._get_sale_order_payment_method(company) or self._create_sale_order_payment_method(company)
+            company_configs.sale_order_payment_method_id = payment_method
 
     def _get_allowed_payment_methods(self):
-        return super()._get_allowed_payment_methods() + self.sale_order_payment_method_id
+        return super()._get_allowed_payment_methods() | self.sale_order_payment_method_id

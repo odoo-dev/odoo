@@ -187,36 +187,66 @@ patch(PosStore.prototype, {
             await this.updateSOLines(line, converted_line, newLine, newLineValues, state);
         }
 
-        const paymentMethod = this.config.sale_order_payment_method_id;
-        const currentAccountPaymentIds = new Set(
-            posOrder.payment_ids.map((p) => p.online_account_payment_id?.id).filter(Boolean)
-        );
-        const onlineTransactions = paymentMethod ? sale_order.transaction_ids : [];
-        for (const transaction of onlineTransactions) {
-            if (
-                !transaction.payment_id ||
-                currentAccountPaymentIds.has(transaction.payment_id.id)
-            ) {
-                continue;
-            }
-            this.models["pos.payment"].create({
-                pos_order_id: posOrder,
-                payment_method_id: paymentMethod,
-                name: _t("Online Payment : %s", transaction.payment_id.name),
-                online_account_payment_id: transaction.payment_id,
-                account_move_id: transaction.payment_id.move_id,
-                amount: transaction.amount,
-            });
-        }
-        // Add a down payment for transactions when automatic invoice is disabled
-        const paidDiff = posOrder.amount_total - sale_order.amount_unpaid;
+        const settledOnlineAmount = this.settleSOOnlinePayments(sale_order, posOrder);
+
+        // Add a down payment for the transactions that are not settled by a payment line,
+        // when automatic invoice is disabled
+        const paidDiff = posOrder.amount_total - sale_order.amount_unpaid - settledOnlineAmount;
+        const remainingPaid = sale_order.amount_paid - settledOnlineAmount;
         const currency = sale_order.currency_id || this.currency;
-        if (currency.isPositive(sale_order.amount_paid) && !currency.isZero(paidDiff)) {
+        if (currency.isPositive(remainingPaid) && !currency.isZero(paidDiff)) {
             if (!(await this.loadDownPaymentProduct())) {
                 return;
             }
             this.addDownPaymentProductOrderlineToOrder(sale_order, -paidDiff, false);
         }
+    },
+    /**
+     * Add a non editable payment line for each payment already made on the sale order,
+     * so the cashier only has to collect what is left to pay.
+     *
+     * @returns {number} the amount of the sale order settled by those payment lines
+     */
+    settleSOOnlinePayments(sale_order, posOrder) {
+        const paymentMethod = this.config.sale_order_payment_method_id;
+        if (!paymentMethod) {
+            return 0;
+        }
+
+        const settledAccountPaymentIds = this._getSettledAccountPaymentIds(posOrder);
+        let settledAmount = 0;
+        for (const transaction of sale_order.transaction_ids) {
+            const accountPayment = transaction.payment_id;
+            if (!accountPayment || settledAccountPaymentIds.has(accountPayment.id)) {
+                continue;
+            }
+            this.models["pos.payment"].create({
+                pos_order_id: posOrder,
+                payment_method_id: paymentMethod,
+                name: _t("Online Payment: %s", accountPayment.name),
+                account_move_id: accountPayment.move_id,
+                amount: transaction.amount,
+                ...this._getSOPaymentVals(transaction),
+            });
+            settledAccountPaymentIds.add(accountPayment.id);
+            settledAmount += transaction.amount;
+        }
+        return settledAmount;
+    },
+    /**
+     * Extra values tying the POS payment to the accounting payment already made on the
+     * sale order. Filled in by `pos_sale_online_payment`.
+     */
+    _getSOPaymentVals(transaction) {
+        return {};
+    },
+    /**
+     * Ids of the accounting payments already settled by a payment line of `posOrder`,
+     * so importing the same sale order twice does not pay it twice. Filled in by
+     * `pos_sale_online_payment`.
+     */
+    _getSettledAccountPaymentIds(posOrder) {
+        return new Set();
     },
 
     async updateSOLines(line, convertedLine, newLine, newLineValues, state) {

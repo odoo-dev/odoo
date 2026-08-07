@@ -94,7 +94,7 @@ export function checkOrdersListNotEmpty() {
     return [...ProductScreen.clickControlButton("Quotation / Order"), isOrdersListNotEmpty()];
 }
 
-export function removeUnpiadFilter() {
+export function removeUnpaidFilter() {
     return {
         content: "Remove 'Not Paid' filter",
         trigger: `.modal:not(.o_inactive_modal) .o_searchview .o_facet_remove`,

@@ -167,9 +167,19 @@ class PosOrder(models.Model):
                     _logger.info("Added %s %s to pos.order #%s", field, list(added_ids), pos_order.id)
                 order[field] = []
 
+    def _get_customer_account_payments(self):
+        """Payments leaving an amount due on the customer account.
+
+        Such an order is always invoiced individually, so that the receivable is
+        tracked per customer instead of ending up in the session receivable.
+        """
+        return self.payment_ids.filtered(
+            lambda payment: payment.payment_method_id.type == 'pay_later',
+        )
+
     def _generate_order_invoice(self):
         self.ensure_one()
-        has_paylater_pm = any(payment.payment_method_id.type == 'pay_later' for payment in self.payment_ids)
+        has_paylater_pm = bool(self._get_customer_account_payments())
         if (self.to_invoice or has_paylater_pm) and self.state == 'paid' and self.config_id.journal_id and not self.is_singly_invoiced:
             self.to_invoice = True  # Ensure true if has_paylater_pm is true
             should_generate_pdf = self.env.context.get('generate_pdf') or self.config_id.use_download_invoice
@@ -1394,15 +1404,6 @@ class PosOrder(models.Model):
         aggregated_per_line = self._aggregate_base_line_and_prepare_account_move_line_data(base_lines)
         return aggregated_per_line + zero_price_lines
 
-    def _get_payment_amounts_by_method(self):
-        """Aggregate pos.payment amounts by payment method for the account move line data."""
-        payment_amounts_by_method = {}   # pm -> total signed amount
-        for payment in self.payment_ids:
-            pm = payment.payment_method_id
-            payment_amounts_by_method.setdefault(pm, 0.0)
-            payment_amounts_by_method[pm] += payment.amount
-        return payment_amounts_by_method
-
     def _prepare_account_move_line_data_for_payments(self, partner=None):
         """
         Aggregate pos.payment amounts by payment method for the session receipt.
@@ -1414,10 +1415,15 @@ class PosOrder(models.Model):
         Skipped:
           - payments whose order is already invoiced (handled by a separate flow)
         """
+        combined = {}   # pm -> total signed amount
         session = self.session_id  # Always single record in this context
         today = fields.Date.context_today(self)
 
-        combined = self._get_payment_amounts_by_method()
+        for payment in self.payment_ids:
+            pm = payment.payment_method_id
+            combined.setdefault(pm, 0.0)
+            combined[pm] += payment.amount
+
         # Combined payments: aggregate all orders for a given PM into one slot
         result = []
         for pm, amount in combined.items():

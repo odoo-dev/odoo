@@ -11,7 +11,7 @@ class PaymentTransaction(models.Model):
     def _load_pos_data_domain(self, data, config):
         transaction_ids = [
             tx_id
-            for sale_order in data['sale.order']
+            for sale_order in data.get('sale.order', [])
             for tx_id in sale_order['transaction_ids']
         ]
         return [
