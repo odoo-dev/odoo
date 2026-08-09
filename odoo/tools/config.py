@@ -500,6 +500,11 @@ class configmanager:
                          "--gevent-workers", dest="gevent_workers", my_default=1,
                          help="Specify the number of gevent workers in prefork mode. (requires SO_REUSEPORT)",
                          type="int"))
+        group.add_option(PosixOnlyOption(
+                         "--max-async-workers", dest="max_async_workers", my_default=1,
+                         help="Maximum number of asyncio WorkerAsync processes for long-lived AI agent "
+                              "loops (default 1). Set to 0 to disable.",
+                         type="int"))
         group.add_option("--limit-memory-soft", dest="limit_memory_soft", my_default=2048 * 1024 * 1024,
                          help="Maximum allowed virtual memory per worker (in bytes), when reached the worker be "
                          "reset after the current request (default 2048MiB).",
@@ -529,6 +534,11 @@ class configmanager:
         group.add_option("--limit-time-real-cron", dest="limit_time_real_cron", my_default=-1,
                          help="Maximum allowed Real time per cron job. (default: --limit-time-real). "
                               "Set to 0 for no limit. ",
+                         type="int")
+        group.add_option("--limit-time-real-async", dest="limit_time_real_async", my_default=30,
+                         help="Maximum silence (seconds) without a WorkerAsync pipe heartbeat before the "
+                              "master kills and respawns it (default 30). Measures event-loop liveness, "
+                              "not LLM job duration. Set to -1 to disable.",
                          type="int")
         group.add_option(PosixOnlyOption(
                          "--limit-request", dest="limit_request", my_default=2**16,

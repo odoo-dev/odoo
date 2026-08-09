@@ -5,6 +5,7 @@ import collections
 import contextlib
 import contextvars
 import errno
+import json
 import logging
 import os
 import os.path
@@ -801,11 +802,16 @@ class PreforkServer(CommonServer):
         self.cron_timeout = config['limit_time_real_cron'] or None
         if self.cron_timeout == -1:
             self.cron_timeout = self.timeout
+        # Missed pipe-ping budget for WorkerAsync.
+        self.async_timeout = config['limit_time_real_async']
+        if self.async_timeout in (-1, 0):
+            self.async_timeout = None
         # working vars
         self.beat = 4
         self.socket = None
         self.workers_http = {}
         self.workers_cron = {}
+        self.workers_async = {}
         self.workers = {}
         self.generation = 0
         self.queue = collections.deque()
@@ -873,6 +879,7 @@ class PreforkServer(CommonServer):
             try:
                 self.workers_http.pop(pid, None)
                 self.workers_cron.pop(pid, None)
+                self.workers_async.pop(pid, None)
                 u = self.workers.pop(pid)
                 u.close()
             except OSError:
@@ -962,6 +969,10 @@ class PreforkServer(CommonServer):
             while len(self.servers_gevent) < config['gevent_workers']:
                 check_registries()
                 self.gevent_spawn()
+            # N asyncio workers for long-lived AI agent loops (claim via DB lease).
+            while len(self.workers_async) < config['max_async_workers']:
+                check_registries()
+                self.worker_spawn(WorkerAsync, self.workers_async)
         while len(self.workers_cron) < config['max_cron_threads']:
             check_registries()
             self.worker_spawn(WorkerCron, self.workers_cron)
@@ -1343,6 +1354,218 @@ class WorkerHTTP(Worker):
         else:
             with client:
                 contextvars.Context().run(self.process_request, client, addr)
+
+
+class AsyncHandler:
+    """LISTEN/NOTIFY handler for :class:`WorkerAsync`. Subclass and set ``channel``."""
+
+    channel: str
+
+    async def setup(self):
+        pass
+
+    async def handle(self, payload):
+        raise NotImplementedError
+
+    async def teardown(self):
+        pass
+
+
+# AsyncHandler subclasses registered by server-wide addons at import time
+# (same idea as ``CommonServer.on_stop`` used by ``bus``). Async-worker addons
+# must be listed in ``--load`` so ``load_server_wide_modules()`` imports them
+# before workers fork. Duplicate classes are ignored; duplicate channel
+# raises when :class:`WorkerAsync` starts.
+_async_handler_factories: OrderedSet[type[AsyncHandler]] = OrderedSet()
+
+
+def register_async_handler(handler_cls: type[AsyncHandler]):
+    """Register an :class:`AsyncHandler` subclass for :class:`WorkerAsync`.
+
+    Call this at import time from a server-wide module (``--load=...,my_module``).
+    ``handler_cls`` must set ``channel`` (PostgreSQL LISTEN identifier, also the
+    liveness key for :func:`async_worker_alive`).
+    """
+    _async_handler_factories.add(handler_cls)
+
+
+# Session-level shared advisory lock per handler channel, held on the
+# WorkerAsync LISTEN connection. HTTP workers probe with an exclusive xact lock:
+# success → that handler is not running.
+ASYNC_WORKER_LOCK_NAMESPACE = 'odoo_async_worker'
+
+
+def async_worker_alive(channel):
+    """True when a :class:`WorkerAsync` is listening on ``channel``."""
+    try:
+        with sql_db.db_connect(config['db_system']).cursor() as cr:
+            cr.execute(
+                "SELECT pg_try_advisory_xact_lock(hashtext(%s), hashtext(%s))",
+                [ASYNC_WORKER_LOCK_NAMESPACE, channel],
+            )
+            return not cr.fetchone()[0]
+    except Exception:  # noqa: BLE001
+        _logger.warning("Could not probe async handler %s liveness", channel, exc_info=True)
+        return False
+
+
+class WorkerAsync(Worker):
+    """Dedicated asyncio child woken by PostgreSQL LISTEN/NOTIFY.
+
+    Same ping loop as :class:`Worker` (check_limits → ping → sleep) but on the
+    process main thread with asyncio. A long-lived ``notifies()`` task dispatches
+    handlers so long work does not block pings. ``sleep`` waits on the
+    ``set_wakeup_fd`` pipe (SIGINT) or beat. Does not accept HTTP connections.
+    Watchdog timeout is ``multi.async_timeout`` (missed pipe pings), not max
+    job duration.
+    """
+
+    def __init__(self, multi):
+        super().__init__(multi)
+        self.watchdog_timeout = multi.async_timeout
+        self.handlers = {}
+        self.dbconn = None
+
+    def start(self):
+        super().start()
+        if self.multi.socket:
+            self.multi.socket.close()
+            self.multi.socket = None
+        signal.signal(signal.SIGXCPU, signal.SIG_DFL)  # no RLIMIT_CPU on this worker
+        sql_db.close_all()
+        Registry.delete_all()
+        set_limit_memory_hard()
+
+        for handler_cls in _async_handler_factories:
+            handler = handler_cls()
+            if handler.channel in self.handlers:
+                raise Exception(f"Async handler channel {handler.channel!r} already registered")
+            self.handlers[handler.channel] = handler
+
+    def check_limits(self):
+        if self.ppid != os.getppid():
+            self.logger.info("Parent changed")
+            self.alive = False
+        memory = memory_info(psutil.Process(os.getpid()))
+        if config['limit_memory_soft'] and memory > config['limit_memory_soft']:
+            self.logger.info("Virtual memory limit (%s) reached.", memory)
+            self.alive = False
+
+    def run(self):
+        import asyncio
+
+        self.start()
+        self.setproctitle("asyncio")
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self._runloop())
+        except SystemExit:
+            raise
+        except BaseException as exc:
+            self.logger.exception("Exception occurred, exiting...")
+            raise SystemExit(1) from exc
+        finally:
+            with contextlib.suppress(Exception):
+                loop.run_until_complete(loop.shutdown_asyncgens())
+            loop.close()
+            self.logger.info("Exiting cleanly")
+            self.stop()
+
+    async def _runloop(self):
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+        self._wake = asyncio.Event()
+        loop.add_reader(self.wakeup_fd_r, self._wake.set)
+        listener = None
+        try:
+            for handler in self.handlers.values():
+                await handler.setup()
+            if self.handlers:
+                await self._listen()
+            if self.dbconn is not None:
+                listener = asyncio.create_task(self._notify_loop())
+            while self.alive:
+                self.check_limits()
+                self.multi.pipe_ping(self.watchdog_pipe)
+                await self.sleep()
+                if not self.alive:
+                    break
+                if listener is not None and listener.done():
+                    listener.result()
+        finally:
+            if listener is not None:
+                listener.cancel()
+                await asyncio.gather(listener, return_exceptions=True)
+            loop.remove_reader(self.wakeup_fd_r)
+            empty_pipe(self.wakeup_fd_r)
+            for handler in self.handlers.values():
+                with contextlib.suppress(Exception):
+                    await handler.teardown()
+            if self.dbconn is not None:
+                with contextlib.suppress(Exception):
+                    await self.dbconn.close()
+                self.dbconn = None
+
+    async def _listen(self):
+        """LISTEN on db_system for handler channels (WorkerCron does this in start)."""
+        import psycopg
+        from odoo.sql_db import connection_info_for
+
+        _dsn, connection_info = connection_info_for(config['db_system'])
+        if 'database' in connection_info:
+            connection_info['dbname'] = connection_info.pop('database')
+        self.dbconn = await psycopg.AsyncConnection.connect(**connection_info)
+        cur = await self.dbconn.execute("SELECT pg_is_in_recovery()")
+        in_recovery = (await cur.fetchone())[0]
+        if in_recovery:
+            self.logger.warning("PG cluster in recovery mode, async trigger not activated")
+            with contextlib.suppress(Exception):
+                await self.dbconn.close()
+            self.dbconn = None
+            return
+        for channel in self.handlers:
+            await self.dbconn.execute(
+                psycopg.sql.SQL("LISTEN {}").format(psycopg.sql.Identifier(channel))
+            )
+            await self.dbconn.execute(
+                "SELECT pg_advisory_lock_shared(hashtext(%s), hashtext(%s))",
+                [ASYNC_WORKER_LOCK_NAMESPACE, channel],
+            )
+        await self.dbconn.commit()
+
+    async def _notify_loop(self):
+        import asyncio
+
+        async for notify in self.dbconn.notifies():
+            handler = self.handlers.get(notify.channel)
+            if not handler:
+                continue
+            try:
+                payload = json.loads(notify.payload) if notify.payload else {}
+            except json.JSONDecodeError:
+                self.logger.info("Invalid notify payload on %s", notify.channel)
+                continue
+            asyncio.create_task(self.process_notify(handler, payload))
+
+    async def sleep(self):
+        """Wait until SIGINT pipe or beat. NOTIFY is handled by ``_notify_loop``."""
+        import asyncio
+
+        try:
+            await asyncio.wait_for(self._wake.wait(), self.multi.beat)
+        except TimeoutError:
+            pass
+        finally:
+            empty_pipe(self.wakeup_fd_r)
+            self._wake.clear()
+
+    async def process_notify(self, handler, payload):
+        try:
+            await handler.handle(payload)
+        except Exception:  # noqa: BLE001
+            self.logger.exception("Async handler failed")
 
 
 class WorkerCron(Worker):
