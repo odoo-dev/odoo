@@ -84,3 +84,9 @@ class AccountMove(models.Model):
             if move.country_code == 'SE':
                 move.show_delivery_date = move.is_sale_document()
 
+    
+    def _post(self, soft=True):
+        for move in self:
+            if move.country_code == 'SE' and move.is_sale_document() and not move.delivery_date:
+                move.delivery_date = move.invoice_date or fields.Date.context_today(self)
+        return super()._post(soft)
