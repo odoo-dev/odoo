@@ -49,7 +49,13 @@ class AccountMoveLine(models.Model):
                 JOIN account_move move ON move.id = base_line.move_id
                 JOIN account_move_line_account_tax_rel rel ON rel.account_move_line_id = base_line.id
                 JOIN filtered_aml account_move_line
-                    ON COALESCE(account_move_line.group_tax_id, account_move_line.tax_line_id) = rel.account_tax_id
+                    ON (
+                        COALESCE(account_move_line.group_tax_id, account_move_line.tax_line_id) = rel.account_tax_id
+                        OR (
+                            base_line.tax_repartition_line_id IS NOT NULL
+                            AND account_move_line.tax_line_id = rel.account_tax_id
+                        )
+                    )
                     AND account_move_line.move_id = base_line.move_id
                     AND account_move_line.currency_id = base_line.currency_id
                     AND account_move_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
@@ -64,20 +70,34 @@ class AccountMoveLine(models.Model):
                 ) AND (
                     tax_rep.account_id IS NOT NULL
                     OR base_line.account_id = account_move_line.account_id
-                ) AND NOT EXISTS (
-                    SELECT 1
-                    FROM account_move_line_account_tax_rel ltr
-                    WHERE ltr.account_move_line_id = account_move_line.id
-                    AND NOT EXISTS (
-                        SELECT 1
-                        FROM account_move_line_account_tax_rel br
-                        LEFT JOIN account_tax_filiation_rel tax_filiation
-                            ON tax_filiation.parent_tax = br.account_tax_id
-                        WHERE br.account_move_line_id = base_line.id
-                        AND (
-                            br.account_tax_id = ltr.account_tax_id
-                            OR tax_filiation.child_tax = ltr.account_tax_id
-                        )
+                ) AND (
+                    NOT t.is_base_affected
+                    OR NOT t.include_base_amount
+                    OR (
+                        SELECT base_taxes.tax_ids[
+                            ARRAY_LENGTH(base_taxes.tax_ids, 1) - COALESCE(ARRAY_LENGTH(tax_line_taxes.tax_ids, 1), 0):ARRAY_LENGTH(base_taxes.tax_ids, 1)
+                        ] = ARRAY[account_move_line.tax_line_id] || tax_line_taxes.tax_ids
+                        FROM (
+                            SELECT ARRAY(
+                                SELECT COALESCE(child_tax.id, tax.id)
+                                FROM account_move_line_account_tax_rel base_rel
+                                JOIN account_tax tax ON tax.id = base_rel.account_tax_id
+                                LEFT JOIN account_tax_filiation_rel tax_filiation
+                                    ON tax_filiation.parent_tax = tax.id
+                                LEFT JOIN account_tax child_tax ON child_tax.id = tax_filiation.child_tax
+                                WHERE base_rel.account_move_line_id = base_line.id
+                                ORDER BY tax.sequence, tax.id, child_tax.sequence, child_tax.id
+                            ) AS tax_ids
+                        ) base_taxes,
+                        (
+                            SELECT ARRAY(
+                                SELECT tax_rel.account_tax_id
+                                FROM account_move_line_account_tax_rel tax_rel
+                                JOIN account_tax tax ON tax.id = tax_rel.account_tax_id
+                                WHERE tax_rel.account_move_line_id = account_move_line.id
+                                ORDER BY tax.sequence, tax.id
+                            ) AS tax_ids
+                        ) tax_line_taxes
                     )
                 ) AND (
                     (t.analytic IS NOT TRUE AND tax_rep.use_in_tax_closing IS TRUE)
