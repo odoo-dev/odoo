@@ -76,9 +76,12 @@ class IrModuleModule(models.Model):
                     -> We want to upgrade every website using this theme.
         """
         if request and request.db and request.env and request.context.get('apply_new_theme'):
-            self = self.with_context(apply_new_theme=True)
+            additional_context = {'apply_new_theme': True}
+        else:
+            additional_context = {}
 
-        for module in self:
+
+        for module in self.with_context(additional_context):
             if module.name.startswith('theme_') and vals.get('state') == 'installed':
                 _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
 
