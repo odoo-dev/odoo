@@ -222,10 +222,10 @@ class HrEmployee(models.Model):
     }
     """
 
-    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
-    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
+    permit_no = fields.Char('Work Permit No', related='version_id.permit_no', inherited=True, groups="hr.group_hr_user", tracking=True)
+    work_permit_expiration_date = fields.Date(related='version_id.work_permit_expiration_date', inherited=True, groups="hr.group_hr_user", tracking=True)
     has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user")
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
