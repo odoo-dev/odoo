@@ -1470,7 +1470,6 @@ class MrpProduction(models.Model):
             # sudo needed for portal users
             if move.picked or move.sudo()._should_bypass_set_qty_producing():
                 continue
-
             new_qty = move.uom_id.round((self.qty_producing - self.qty_produced) * move.unit_factor)
             if move.has_tracking in ['lot', 'serial']:
                 relevant_orig_ids = set()

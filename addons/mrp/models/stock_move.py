@@ -553,8 +553,30 @@ class StockMove(models.Model):
     def _should_bypass_set_qty_producing(self):
         if self.state in ('done', 'cancel'):
             return True
+        # When a work order is started via button_start, qty_producing is set on
+        # the WO which triggers _set_qty_producing on the whole MO via the field
+        # inverse. Without a guard this would auto-consume components assigned to
+        # other, not-yet-started work orders.
+        #
+        # button_start injects 'wo_starting_id' into the context before assigning
+        # qty_producing. The inverse and production._set_qty_producing inherit that
+        # context, allowing us to identify exactly which WO is being started and
+        # skip only the moves of OTHER unstarted WOs.
+        #
+        # No other caller of production._set_qty_producing sets 'wo_starting_id'
+        # (not action_generate_serial, not _onchange_qty_producing, not
+        # button_produce), so those paths are completely unaffected.
+        wo_starting_id = self.env.context.get('wo_starting_id')
+        if wo_starting_id \
+                and self.operation_id \
+                and self.workorder_id \
+                and self.workorder_id.id != wo_starting_id \
+                and self.workorder_id.state not in ('progress', 'done'):
+            return True
         # Do not update extra product quantities
         return self.uom_id.is_zero(self.product_uom_qty)
+
+
 
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         vals = super()._prepare_move_line_vals(quantity, reserved_quant)

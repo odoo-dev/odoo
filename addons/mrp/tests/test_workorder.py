@@ -131,3 +131,59 @@ class TestWorkorder(TestMrpCommon):
             ],
             field_names=['operation_id'],
         )
+
+    def test_start_wo1_does_not_consume_wo2_components(self):
+        """Starting WO 1 must not auto-consume components assigned to WO 2.
+        Scenario:
+        - BOM has 2 operations (op1, op2) and 2 components.
+        - product_2 (comp WO1) is linked to op1; it has on-hand stock and is fully reserved.
+        - product_3 (comp WO2) is linked to op2; it has NO stock (quantity = 0).
+        - When WO 1 is started, only product_2's quantity should be auto-set.
+        - product_3 must remain untouched (quantity = 0) until WO 2 is started.
+        """
+        self.env['stock.quant']._update_available_quantity(
+            self.product_2, self.warehouse_1.lot_stock_id, 10.0
+        )
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': self.product_8.product_tmpl_id.id,
+            'product_id': self.product_8.id,
+            'product_qty': 1.0,
+            'type': 'normal',
+            'operation_ids': [
+                Command.create({'name': 'Operation 1', 'workcenter_id': self.workcenter_1.id, 'sequence': 1}),
+                Command.create({'name': 'Operation 2', 'workcenter_id': self.workcenter_2.id, 'sequence': 2}),
+            ],
+            'bom_line_ids': [
+                Command.create({'product_id': self.product_2.id, 'product_qty': 1.0}),
+                Command.create({'product_id': self.product_3.id, 'product_qty': 1.0}),
+            ],
+        })
+        op1, op2 = bom.operation_ids.sorted('sequence')
+        bom.bom_line_ids.filtered(lambda l: l.product_id == self.product_2).operation_id = op1
+        bom.bom_line_ids.filtered(lambda l: l.product_id == self.product_3).operation_id = op2
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product_8.id,
+            'product_qty': 1.0,
+            'bom_id': bom.id,
+        })
+        mo.action_confirm()
+        mo.action_assign()
+        wo1, wo2 = mo.workorder_ids.sorted('sequence')
+        move_wo1 = mo.move_raw_ids.filtered(lambda m: m.product_id == self.product_2)
+        move_wo2 = mo.move_raw_ids.filtered(lambda m: m.product_id == self.product_3)
+        self.assertEqual(move_wo1.workorder_id, wo1, "product_2 move should be linked to WO1")
+        self.assertEqual(move_wo2.workorder_id, wo2, "product_3 move should be linked to WO2")
+        self.assertAlmostEqual(move_wo1.quantity, 1.0, msg="product_2 should be fully reserved")
+        self.assertAlmostEqual(move_wo2.quantity, 0.0, msg="product_3 has no stock, quantity must be 0")
+        # === Start WO 1 ===
+        wo1.button_start()
+        # product_2 quantity should now be auto-set (it belongs to WO1 which is in progress)
+        self.assertAlmostEqual(
+            move_wo1.quantity, 1.0,
+            msg="Starting WO1 should auto-fill product_2 quantity"
+        )
+        # product_3 must remain untouched (WO2 is still in 'ready' state, not started)
+        self.assertAlmostEqual(
+            move_wo2.quantity, 0.0,
+            msg="Starting WO1 must NOT auto-consume product_3 (assigned to WO2 which hasn't started)"
+        )

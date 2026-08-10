@@ -204,6 +204,7 @@ class MrpWorkorder(models.Model):
                 workorder.production_id.qty_producing = workorder.qty_producing
                 workorder.production_id._set_qty_producing(False)
 
+
     @api.depends('blocked_by_workorder_ids.qty_produced', 'blocked_by_workorder_ids.state')
     def _compute_qty_ready(self):
         for workorder in self:
@@ -664,7 +665,10 @@ class MrpWorkorder(models.Model):
                 raise UserError(_('You cannot start a work order that is already done or cancelled'))
 
             if wo.qty_producing == 0:
-                wo.qty_producing = wo.qty_remaining
+                # Set context so that _set_qty_producing (triggered by this assignment
+                # through the field inverse) knows which WO is being started and can
+                # skip components assigned to other, not-yet-started work orders.
+                wo.with_context(wo_starting_id=wo.id).qty_producing = wo.qty_remaining
 
             if wo._should_start_timer():
                 self.env['mrp.workcenter.productivity'].create(
