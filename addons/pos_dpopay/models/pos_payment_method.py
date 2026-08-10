@@ -93,7 +93,7 @@ class PosPaymentMethod(models.Model):
         try:
             def _send_request(token_expired=False):
                 headers = self._dpopay_headers(token_expired)
-                _logger.info('Sending request to %s | Mode: %s | Headers: %s | Source ID: %s', url, mode, list(headers.keys()), payload.get('sourceId'))
+                _logger.info('Sending request to %s | Mode: %s | Headers: %s | Source ID: %s | TransactionType: %s', url, mode, list(headers.keys()), payload.get('sourceId'), payload.get('transactionType'))
                 response = requests.post(url, json=payload, headers=headers, timeout=DPOPAY_DEFAULT_TIMEOUT)
                 response_json = response.json()
                 return response, response_json
@@ -114,8 +114,8 @@ class PosPaymentMethod(models.Model):
             error_code = str(error_json.get('error_code') or error_json.get('errorCode') or error_json.get('resultCode'))
             error_message = error_json.get('errorMessage') or error_json.get('error_description') or error_json.get('resultDescription') or str(error_json)
 
-            if error_code == "403":
-                error_message = _("Please ensure the device is online and confirm that the Merchant ID (MID) and Terminal ID (TID) are correct. %s", error_message)
+            if error_code == "403" and error_message == "Terminal not ready":
+                error_message = _("%s. Please ensure the device is online and confirm that the Merchant ID (MID) and Terminal ID (TID) are correct.", error_message)
 
             if error_code == "999911":
                 error_message = _("Invalid Chain ID. Please verify the configuration. %s", error_message)
