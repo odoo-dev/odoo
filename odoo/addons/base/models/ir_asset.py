@@ -140,12 +140,20 @@ class IrAsset(models.Model):
         """
         installed = self._get_installed_addons_list()
         addons = self._get_active_addons_list(**assets_params)
+        return self._get_asset_paths_for_addons(bundle, addons, installed, **assets_params)
 
+    def _get_asset_paths_for_addons(self, bundle, addons, installed, **assets_params):
+        """
+        Same as `_get_asset_paths`, for a given list of addons instead of the
+        active ones, e.g. to resolve a bundle as another database would. Only
+        the 'ir.asset' records the data of those addons creates are applied,
+        as the other ones do not exist on such a database.
+        """
         asset_paths = AssetPaths()
 
         addons = self._topological_sort(tuple(addons))
 
-        self._fill_asset_paths(bundle, asset_paths, [], addons, installed, **assets_params)
+        self._fill_asset_paths(bundle, asset_paths, [], addons, installed, data_addons=tuple(addons), **assets_params)
         return asset_paths.list
 
     def _fill_asset_paths(self, bundle, asset_paths, seen, addons, installed, **assets_params):
@@ -236,16 +244,25 @@ class IrAsset(models.Model):
             # this should never happen
             raise ValueError("Unexpected directive")
 
-    def _get_related_assets(self, domain, **kwargs):
+    def _get_related_assets(self, domain, data_addons=None, **kwargs):
         """
         Returns a set of assets matching the domain, regardless of their
         active state. This method can be overridden to filter the results.
         :param domain: search domain
+        :param data_addons: when given, discard the records created by the data
+            of an addon outside of that list, as another database does not have
+            them. The records no addon owns are kept.
         :returns: ir.asset recordset
         """
         # active_test is needed to disable some assets through filter_duplicate for website
         # they will be filtered on active afterward
-        return self.with_context(active_test=False).sudo().search(domain, order='sequence, id')
+        assets = self.with_context(active_test=False).sudo().search(domain, order='sequence, id')
+        if data_addons is not None and assets:
+            data = self.env['ir.model.data'].sudo().search_read(
+                [('model', '=', 'ir.asset'), ('res_id', 'in', assets.ids)], ['module', 'res_id'])
+            foreign = {values['res_id'] for values in data if values['module'] not in data_addons}
+            assets = assets.filtered(lambda asset: asset.id not in foreign)
+        return assets
 
     def _get_related_bundle(self, target_path_def, root_bundle):
         """
