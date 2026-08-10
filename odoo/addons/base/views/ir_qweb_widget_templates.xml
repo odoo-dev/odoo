@@ -45,10 +45,10 @@
                 </span>
             </div>
             <div class="d-flex align-items-center gap-1" t-if="phone and 'phone' in fields">
-                <i t-if="not options.get('no_marker') or options.get('phone_icons')" class="oi oi-filled oi-fw" data-icon="phone" role="img" aria-label="Phone" title="Phone"/> <span class="o_force_ltr" itemprop="telephone" t-out="phone"/>
+                <i t-if="not options.get('no_marker') or options.get('phone_icons')" class="oi" data-icon="phone" role="img" aria-label="Phone" title="Phone"/> <span class="o_force_ltr" itemprop="telephone" t-out="phone"/>
             </div>
             <div class="d-flex align-items-center gap-1" t-if="mobile and 'mobile' in fields">
-                <i t-if="not options.get('no_marker') or options.get('phone_icons')" class="oi oi-fw" data-icon="smartphone" role="img" aria-label="Mobile" title="Mobile"/> <span class="o_force_ltr" itemprop="telephone" t-out="mobile"/>
+                <i t-if="not options.get('no_marker') or options.get('phone_icons')" class="oi" data-icon="smartphone" role="img" aria-label="Mobile" title="Mobile"/> <span class="o_force_ltr" itemprop="telephone" t-out="mobile"/>
             </div>
             <!-- Prevent issue with iOS Safari parsing of schema data without telephone itemprops -->
             <div t-if="not (phone and 'phone' in fields) and not (mobile and 'mobile' in fields)" itemprop="telephone"/>
@@ -56,7 +56,7 @@
                 <i t-if="not options.get('no_marker')" class="oi oi-fw" data-icon="public" role="img" aria-label="Website" title="Website"/>
                 <a class="text-break w-100" t-att-href="website and '%s%s' % ('http://' if '://' not in website else '',website)"><span itemprop="website" t-out="website"/></a>
             </div>
-            <div class="d-flex align-items-baseline gap-1" t-if="email and 'email' in fields"><i t-if="not options.get('no_marker')" class="oi oi-fw oi-filled" data-icon="mail" role="img" aria-label="Email" title="Email"/> <span class="text-break w-100" itemprop="email" t-out="email"/></div>
+            <div class="d-flex align-items-baseline gap-1" t-if="email and 'email' in fields"><i t-if="not options.get('no_marker')" class="oi" data-icon="mail" role="img" aria-label="Email" title="Email"/> <span class="text-break w-100" itemprop="email" t-out="email"/></div>
         </div>
         <div t-if="vat and 'vat' in fields"><span t-out="vat_label"/>: <span itemprop="vatID" t-out="vat"/></div>
         <t t-if="object.country_id and object.country_id.name_position == 'after'">

@@ -65,6 +65,14 @@ $report-text-colors: null;
     float: left;
 }
 
+.oi {
+    font-family: 'Material Symbols Outlined';
+}
+.oi::before {
+    text-rendering: auto;
+}
+.oi[data-icon="phone"]::before        { content: "\e0b0"; }
+
 // Report footer need to support bootstrap columns (2, 3 and 4 columns)
 // Even if the width is smaller than the media querry limit from bootstrap.
 // This need come from the footer being editable via the Odoo editor.
