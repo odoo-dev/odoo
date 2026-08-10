@@ -18,7 +18,7 @@ export class ActivityButton extends Component {
         this.popover = usePopover(ActivityListPopover, { position: "bottom-start" });
         this.env = useEnv();
         this.defaultActivityStateClass = "text-muted";
-        this.defaultActivityDecorationClass = "btn-link text-dark";
+        this.defaultActivityDecorationClass = "btn-light";
     }
 
     get buttonClass() {
