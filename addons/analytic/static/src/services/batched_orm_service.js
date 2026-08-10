@@ -77,6 +77,7 @@ export const batchedOrmService = {
         "read",
         "readGroup",
         "search",
+        "searchRead",
         "unlink",
         "webSearchRead",
         "write",

@@ -51,6 +51,7 @@ export class AnalyticDistribution extends Component {
     setup(){
         this.orm = useService("orm");
         this.batchedOrm = useService("batchedOrm");
+        this.analyticDistributionService = useService("analytic_distribution");
 
         this.state = useState({
             showDropdown: false,
@@ -269,8 +270,9 @@ export class AnalyticDistribution extends Component {
         }
         this.state.formattedData = distribution;
         if (accountNotFound) {
-            // Analytic accounts in the json were not found, save the json without them
-            await this.save();
+            // Queue this widget for batched cleanup. This avoids triggering one
+            // update/onchange per widget by combining all stale account removals
+            this.analyticDistributionService.schedule(this);
         }
     }
 
