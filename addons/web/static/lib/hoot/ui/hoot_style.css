@@ -119,7 +119,7 @@ ul {
     -webkit-font-smoothing: antialiased;
     -webkit-font-feature-settings: 'liga';
     -moz-osx-font-smoothing: grayscale;
-    -moz-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
 }
 
 .oi:before {
@@ -128,8 +128,13 @@ ul {
     text-rendering: geometricPrecision;
 }
 
-.oi-filled[data-icon]:not([data-icon=""]):not([data-icon^="oi_"]):before {
-    content: attr(data-icon) "_f";
+/* Fill is switched with the font's 'ss01' stylistic set: concatenating
+ * `attr(data-icon) "_f"` makes Gecko lay out the two content items as separate
+ * text runs, and the ligature straddling them gets its advance charged twice,
+ * which pushes filled icons off-center in Firefox. */
+.oi-filled {
+    -webkit-font-feature-settings: 'liga', 'ss01';
+    font-feature-settings: 'liga', 'ss01';
 }
 
 .oi-flip-horizontal {

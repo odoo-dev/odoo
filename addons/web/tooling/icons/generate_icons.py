@@ -10,8 +10,11 @@ Two-stage pipeline:
 
 2. **Process** — instantiate two static builds (FILL=0 and FILL=1), detect which
    icons have a distinct filled shape, strip unused glyphs with fontext, and
-   merge both builds into a single optimized WOFF2.  Filled glyphs get a ``_f``
-   suffix on the ligature sequence: ``home`` → outlined, ``home_f`` → filled.
+   merge both builds into a single optimized WOFF2.  A filled glyph is reachable
+   two ways: through the ``ss01`` stylistic set (``home`` + ``font-feature-
+   settings: 'ss01'``), which is what ``.oi-filled`` uses, and through a ``_f``
+   suffix on the ligature sequence (``home_f``), kept for the stylesheets that
+   spell the filled name out in a ``content`` declaration.
 
 Outputs
 -------
@@ -43,7 +46,10 @@ from pathlib import Path
 
 try:
     from fontTools import subset
-    from fontTools.otlLib.builder import buildLigatureSubstSubtable
+    from fontTools.otlLib.builder import (
+        buildLigatureSubstSubtable,
+        buildSingleSubstSubtable,
+    )
     from fontTools.pens import recordingPen, transformPen, ttGlyphPen
     from fontTools.ttLib import TTFont, newTable, removeOverlaps
     from fontTools.ttLib.tables import otTables
@@ -56,6 +62,16 @@ except ImportError as exc:
     ) from exc
 
 FILL_SUFFIX = "_f"
+
+# Stylistic set mapping each outlined glyph to its filled counterpart, so that
+# `.oi-filled` can switch to the filled artwork with `font-feature-settings`
+# instead of appending FILL_SUFFIX to the ligature name.  Concatenating in
+# `content: attr(data-icon) "_f"` makes Gecko lay out the two content items as
+# separate text runs; the ligature then straddles the boundary and its advance
+# is charged to both parts, which widened the box by `2 / len(name + "_f")` em
+# and pushed the icon off-center (Chromium shapes the items as one run, so the
+# offset only showed in Firefox).
+FILL_FEATURE = "ss01"
 
 # Private Use Area used by the `_pua_cmap` fonts. The generated
 # Python mapping is the public contract; callers should never persist these
@@ -255,9 +271,26 @@ def resolve_icons(font: TTFont, icon_names: list[str]) -> dict[str, str]:
     return results
 
 
-def build_ligatures(font: TTFont, ligatures: dict[str, str]) -> list[str]:
-    """Replace every GSUB lookup with a single ligature lookup mapping each name
-    in *ligatures* to its glyph, and return the names that could not be encoded.
+def make_feature_record(tag: str, lookup_indices: list[int]) -> otTables.FeatureRecord:
+    feature = otTables.Feature()
+    feature.FeatureParams = None
+    feature.LookupListIndex = lookup_indices
+    feature.LookupCount = len(lookup_indices)
+    record = otTables.FeatureRecord()
+    record.FeatureTag = tag
+    record.Feature = feature
+    return record
+
+
+def build_gsub(font: TTFont, ligatures: dict[str, str], filled_glyphs: dict[str, str]) -> list[str]:
+    """Rebuild the GSUB table from scratch and return the names that could not be
+    encoded.
+
+    Two lookups are emitted: a ``liga`` ligature lookup mapping each name in
+    *ligatures* to its glyph, and a ``ss01`` single substitution mapping each
+    outlined glyph in *filled_glyphs* to its filled counterpart (see
+    :data:`FILL_FEATURE`).  The ligature lookup comes first so that a shaper
+    honouring both features resolves the name before swapping the artwork.
 
     Rebuilding the table instead of merging the ones the two subsets came with is
     what makes the icon names unambiguous.  Inside a ligature set the *first*
@@ -278,18 +311,38 @@ def build_ligatures(font: TTFont, ligatures: dict[str, str]) -> list[str]:
             continue
         mapping[seq] = glyph_name
 
-    lookup = otTables.Lookup()
-    lookup.LookupType = 4
-    lookup.LookupFlag = 0
-    lookup.SubTable = [buildLigatureSubstSubtable(mapping)]
-    lookup.SubTableCount = 1
+    liga_lookup = otTables.Lookup()
+    liga_lookup.LookupType = 4
+    liga_lookup.LookupFlag = 0
+    liga_lookup.SubTable = [buildLigatureSubstSubtable(mapping)]
+    liga_lookup.SubTableCount = 1
+
+    lookups = [liga_lookup]
+    # FeatureRecords must stay sorted by tag, and 'liga' < 'ss01' already is.
+    features = [make_feature_record('liga', [0])]
+
+    if filled_glyphs:
+        fill_lookup = otTables.Lookup()
+        fill_lookup.LookupType = 1
+        fill_lookup.LookupFlag = 0
+        fill_lookup.SubTable = [buildSingleSubstSubtable(filled_glyphs)]
+        fill_lookup.SubTableCount = 1
+        lookups.append(fill_lookup)
+        features.append(make_feature_record(FILL_FEATURE, [len(lookups) - 1]))
 
     gsub = font['GSUB'].table
-    gsub.LookupList.Lookup = [lookup]
-    gsub.LookupList.LookupCount = 1
-    for feature_record in gsub.FeatureList.FeatureRecord:
-        feature_record.Feature.LookupListIndex = [0]
-        feature_record.Feature.LookupCount = 1
+    gsub.LookupList.Lookup = lookups
+    gsub.LookupList.LookupCount = len(lookups)
+    gsub.FeatureList.FeatureRecord = features
+    gsub.FeatureList.FeatureCount = len(features)
+    for script_record in gsub.ScriptList.ScriptRecord:
+        script = script_record.Script
+        lang_systems = [r.LangSys for r in script.LangSysRecord]
+        if script.DefaultLangSys:
+            lang_systems.append(script.DefaultLangSys)
+        for lang_sys in lang_systems:
+            lang_sys.FeatureIndex = list(range(len(features)))
+            lang_sys.FeatureCount = len(features)
     return unencodable
 
 
@@ -706,6 +759,7 @@ def build_font(
     # ligature behind it doesn't render the outlined icon, it lets the shaper
     # match whatever it can find inside the name instead.
     ligatures = {}
+    filled_glyphs = {}
     unresolved = []
     for icon, src in glyphs_map.items():
         if src not in outline_glyph:
@@ -713,8 +767,13 @@ def build_font(
             continue
         ligatures[icon] = outline_glyph[src]
         ligatures[icon + FILL_SUFFIX] = fill_glyph.get(src, outline_glyph[src])
+        # A glyph shared by several names (``help`` / ``help_outline`` …) is
+        # listed once; icons with no filled variant are left out entirely, the
+        # feature then being a no-op for them.
+        if src in fill_glyph and fill_glyph[src] != outline_glyph[src]:
+            filled_glyphs[outline_glyph[src]] = fill_glyph[src]
 
-    unresolved += build_ligatures(merged, ligatures)
+    unresolved += build_gsub(merged, ligatures, filled_glyphs)
     if unresolved:
         print(f"  {len(unresolved)} icons could not be encoded: {sorted(unresolved)}")  # noqa: T201
 
