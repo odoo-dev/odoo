@@ -30,6 +30,7 @@
         border-top-right-radius: calc(var(--Card-border-radius-top, 0px) - var(--Card-border-width, #{$border-width}));
     }
 
+
     @media (pointer: fine) {
         .o_dropdown_kanban {
             visibility: hidden;

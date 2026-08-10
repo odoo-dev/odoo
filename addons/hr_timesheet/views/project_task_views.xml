@@ -183,16 +183,16 @@
                     <field name="allow_timesheets"/>
                     <field name="encode_uom_in_days" invisible="1"/>
                 </templates>
-                <xpath expr="//div[hasclass('o_secondary_info')]" position="inside">
+                <xpath expr="//div[hasclass('o_project_deadline_wrap')]" position="after">
                    <t name="allocated_hours" t-if="record.allocated_hours.raw_value &gt; 0 and record.allow_timesheets.raw_value" groups="hr_timesheet.group_hr_timesheet_user">
                         <t t-set="color" t-value="' text-success'"/>
                         <t t-set="color" t-value="' text-warning'" t-if="record.progress.raw_value &gt;= 0.8 and record.progress.raw_value &lt;= 1"/>
                         <t t-set="color" t-value="' text-danger'" t-if="record.remaining_hours.raw_value &lt; 0"/>
                         <t t-set="title" t-if="record.encode_uom_in_days.raw_value">Remaining days</t>
                         <t t-set="title" t-else="">Time Remaining</t>
-                        <div tabindex="0" role="button" t-attf-class="d-inline-flex align-items-center gap-1 {{ color }}" t-att-title="title">
-                            <i class="oi" data-icon="timer"/>
-                            <field name="remaining_hours" widget="timesheet_uom" class="small"/>
+                        <div tabindex="0" role="button" t-attf-class="d-inline-flex align-items-center gap-1 {{ color }}">
+                            <i class="oi o_cursor_help" data-icon="timer" t-att-title="title" t-att-data-tooltip="title"/>
+                            <field name="remaining_hours" widget="timesheet_uom"/>
                         </div>
                    </t>
                 </xpath>
