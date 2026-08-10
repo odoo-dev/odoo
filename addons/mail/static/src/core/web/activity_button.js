@@ -14,11 +14,14 @@ export class ActivityButton extends Component {
 
     setup() {
         super.setup();
-        this.props = useProps({ record: types.instanceOf(Record) });
+        this.props = useProps({
+            record: types.instanceOf(Record),
+            buttonClasses: types.string().optional(),
+        });
         this.popover = usePopover(ActivityListPopover, { position: "bottom-start" });
         this.env = useEnv();
         this.defaultActivityStateClass = "text-muted";
-        this.defaultActivityDecorationClass = "btn-link text-dark";
+        this.defaultActivityDecorationClass = "btn-light";
     }
 
     get buttonClass() {
