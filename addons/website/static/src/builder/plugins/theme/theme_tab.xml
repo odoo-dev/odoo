@@ -206,4 +206,115 @@
     </BuilderContext>
 </t>
 
+<t t-name="website.ThemeCursorOption">
+    <BuilderContext preview="false">
+        <BuilderRow label.translate="Page">
+            <BuilderSelect action="'customizeWebsiteVariable'" actionParam="'cursor-preset'">
+                <BuilderSelectItem actionValue="''" label.translate="Default">
+                    <i class="oi oi-fw" data-icon="mouse" role="img"/>
+                    <span>Default</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'dot'" label.translate="Dot">
+                    <Image src="'/website/static/src/img/cursors/dot.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Dot</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'ring'" label.translate="Ring">
+                    <Image src="'/website/static/src/img/cursors/ring.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Ring</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'retro-arrow'" label.translate="Retro Arrow">
+                    <Image src="'/website/static/src/img/cursors/retro_arrow.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Retro Arrow</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'pen'" label.translate="Pen">
+                    <Image src="'/website/static/src/img/cursors/pen.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Pen</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'crosshair-thin'" label.translate="Thin Crosshair">
+                    <Image src="'/website/static/src/img/cursors/crosshair_thin.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Thin Crosshair</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'crosshair'" label.translate="System Crosshair">
+                    <i class="oi oi-fw" data-icon="my_location" role="img"/>
+                    <span>System Crosshair</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'grab'" label.translate="Grab">
+                    <i class="oi oi-fw" data-icon="open_with" role="img"/>
+                    <span>Grab</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'hidden'" label.translate="Hidden" title.translate="Hides the mouse cursor entirely. Make sure the page stays usable without it.">
+                    <i class="oi oi-fw" data-icon="visibility_off" role="img"/>
+                    <span>Hidden</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'custom'" id="'cursor_custom_opt'" label.translate="Custom">
+                    <i class="oi oi-fw" data-icon="upload" role="img"/>
+                    <span>Custom</span>
+                </BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Image" level="1" t-if="this.isActiveItem('cursor_custom_opt')">
+            <BuilderButton action="'uploadCursorImage'" actionParam="'base'" id="'cursor_custom_img_opt'"
+                preview="false" title.translate="Upload a cursor image">Upload</BuilderButton>
+            <BuilderButton t-if="this.isActiveItem('cursor_custom_img_opt')"
+                action="'replaceCursorImage'" actionParam="'base'"
+                preview="false" title.translate="Replace Image">Replace</BuilderButton>
+            <BuilderButton t-if="this.isActiveItem('cursor_custom_img_opt')"
+                action="'removeCursorImage'" actionParam="'base'"
+                preview="false" icon="'close_small'" className="'btn-danger-color-hover'"/>
+        </BuilderRow>
+
+        <BuilderRow label.translate="Links &amp; Buttons"
+            tooltip.translate="Cursor shown over links, buttons and other clickable elements.">
+            <BuilderSelect action="'customizeWebsiteVariable'" actionParam="'cursor-interactive-preset'">
+                <BuilderSelectItem actionValue="''" label.translate="Same as page">
+                    <i class="oi oi-fw" data-icon="arrow_upward" role="img"/>
+                    <span>Same as page</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'pointer'" label.translate="Hand">
+                    <i class="oi oi-fw" data-icon="back_hand" role="img"/>
+                    <span>Hand</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'dot'" label.translate="Dot">
+                    <Image src="'/website/static/src/img/cursors/dot.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Dot</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'ring'" label.translate="Ring">
+                    <Image src="'/website/static/src/img/cursors/ring.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Ring</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'retro-arrow'" label.translate="Retro Arrow">
+                    <Image src="'/website/static/src/img/cursors/retro_arrow.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Retro Arrow</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'pen'" label.translate="Pen">
+                    <Image src="'/website/static/src/img/cursors/pen.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Pen</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'crosshair-thin'" label.translate="Thin Crosshair">
+                    <Image src="'/website/static/src/img/cursors/crosshair_thin.png'" attrs="{ width: 16, height: 16 }"/>
+                    <span>Thin Crosshair</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'hidden'" label.translate="Hidden">
+                    <i class="oi oi-fw" data-icon="visibility_off" role="img"/>
+                    <span>Hidden</span>
+                </BuilderSelectItem>
+                <BuilderSelectItem actionValue="'custom'" id="'cursor_int_custom_opt'" label.translate="Custom">
+                    <i class="oi oi-fw" data-icon="upload" role="img"/>
+                    <span>Custom</span>
+                </BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Image" level="1" t-if="this.isActiveItem('cursor_int_custom_opt')">
+            <BuilderButton action="'uploadCursorImage'" actionParam="'interactive'" id="'cursor_int_img_opt'"
+                preview="false" title.translate="Upload a cursor image">Upload</BuilderButton>
+            <BuilderButton t-if="this.isActiveItem('cursor_int_img_opt')"
+                action="'replaceCursorImage'" actionParam="'interactive'"
+                preview="false" title.translate="Replace Image">Replace</BuilderButton>
+            <BuilderButton t-if="this.isActiveItem('cursor_int_img_opt')"
+                action="'removeCursorImage'" actionParam="'interactive'"
+                preview="false" icon="'close_small'" className="'btn-danger-color-hover'"/>
+        </BuilderRow>
+    </BuilderContext>
+</t>
+
 </templates>

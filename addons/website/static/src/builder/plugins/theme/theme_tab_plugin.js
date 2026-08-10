@@ -3,6 +3,12 @@ import { Plugin } from "@html_editor/plugin";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { withSequence } from "@html_editor/utils/resource";
 import { ThemeAdvancedOption } from "./theme_advanced_option";
+import {
+    RemoveCursorImageAction,
+    ReplaceCursorImageAction,
+    ThemeCursorOption,
+    UploadCursorImageAction,
+} from "@website/builder/plugins/theme/theme_cursor_option";
 import { ThemeShadowOption } from "./theme_shadow_option";
 import { ThemeButtonOption } from "./theme_button_option";
 import { ThemeColorsOption } from "./theme_colors_option";
@@ -58,6 +64,7 @@ export const OPTION_POSITIONS = {
     LINK: 60,
     INPUT: 70,
     SHADOW: 80,
+    CURSOR: 85,
     ADVANCED: 90,
 };
 
@@ -120,6 +127,9 @@ export class ThemeTabPlugin extends Plugin {
             CustomizeWebsiteFontWeightAction,
             EditCustomCodeAction,
             ConfigureApiKeyAction,
+            UploadCursorImageAction,
+            ReplaceCursorImageAction,
+            RemoveCursorImageAction,
         },
         theme_options: [
             withSequence(
@@ -180,6 +190,10 @@ export class ThemeTabPlugin extends Plugin {
             withSequence(
                 OPTION_POSITIONS.SHADOW,
                 this.getThemeOptionBlock("theme-shadow", _t("Shadow"), ThemeShadowOption)
+            ),
+            withSequence(
+                OPTION_POSITIONS.CURSOR,
+                this.getThemeOptionBlock("theme-cursor", _t("Cursor"), ThemeCursorOption)
             ),
             withSequence(
                 OPTION_POSITIONS.ADVANCED,

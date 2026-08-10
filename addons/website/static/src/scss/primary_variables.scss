@@ -2113,6 +2113,16 @@ $o-base-website-values-palette: (
     'body-image-pattern-height': null,
     'body-image-background-position': null,
 
+    // Site-wide mouse cursor. A "preset" is either one of the images shipped in
+    // website/static/src/img/cursors (see $o-cursor-art-presets), a native CSS
+    // cursor keyword, 'hidden' (cursor: none) or 'custom' (uploaded image).
+    // The 'interactive' variants apply to links, buttons and other clickable
+    // elements; when unset they fall back to the page cursor.
+    'cursor-preset': null,
+    'cursor-image': null,
+    'cursor-interactive-preset': null,
+    'cursor-interactive-image': null,
+
     'layout': 'full', // 'full' / 'boxed'
     'color-palettes-name': null, // Default to the individual variables for each color palette type
 

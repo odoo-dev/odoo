@@ -226,6 +226,73 @@ $-seen-urls: ();
 
 };
 
+$o-cursor-art-path: '/website/static/src/img/cursors/' !default;
+
+$o-cursor-art-presets: (
+    'dot': ('file': 'dot.png', 'x': 16, 'y': 16),
+    'ring': ('file': 'ring.png', 'x': 16, 'y': 16),
+    'retro-arrow': ('file': 'retro_arrow.png', 'x': 2, 'y': 2),
+    'pen': ('file': 'pen.png', 'x': 2, 'y': 30),
+    'crosshair-thin': ('file': 'crosshair_thin.png', 'x': 16, 'y': 16),
+) !default;
+
+// Native CSS cursor keywords the theme tab is allowed to set.
+$o-cursor-native-presets: (
+    'pointer', 'crosshair', 'help', 'progress', 'grab', 'zoom-in', 'move'
+) !default;
+
+@mixin o-cursor($preset, $image, $fallback) {
+    @if $preset == 'hidden' {
+        cursor: none;
+    } @else if map-has-key($o-cursor-art-presets, $preset) {
+        // The hotspot of the shipped images is a property of the artwork, hence
+        // fixed in $o-cursor-art-presets rather than configurable.
+        $-art: map-get($o-cursor-art-presets, $preset);
+        cursor: url("#{str-slice($o-cursor-art-path, 1)}#{map-get($-art, 'file')}") #{map-get($-art, 'x')} #{map-get($-art, 'y')}, #{$fallback};
+    } @else if $preset == 'custom' and $image {
+        // No hotspot given: the click point is the top left corner of the
+        // uploaded image.
+        cursor: url("#{str-slice($image, 1)}"), #{$fallback};
+    } @else if index($o-cursor-native-presets, $preset) {
+        cursor: #{$preset};
+    }
+}
+
+$-o-cursor-preset: o-website-value('cursor-preset');
+$-o-cursor-image: o-website-value('cursor-image');
+
+$-o-cursor-int-preset: o-website-value('cursor-interactive-preset');
+$-o-cursor-int-image: o-website-value('cursor-interactive-image');
+
+// No cursor set for clickable elements: reuse the page one.
+@if not $-o-cursor-int-preset {
+    $-o-cursor-int-preset: $-o-cursor-preset;
+    $-o-cursor-int-image: $-o-cursor-image;
+}
+
+@if ($-o-cursor-preset and $-o-cursor-preset != 'default') or ($-o-cursor-int-preset and $-o-cursor-int-preset != 'default') {
+    body {
+        @include o-cursor($-o-cursor-preset, $-o-cursor-image, auto);
+
+        a[href],
+        button,
+        .btn,
+        [role="button"],
+        summary,
+        label[for],
+        select,
+        input[type="submit"],
+        input[type="button"],
+        input[type="reset"] {
+            @include o-cursor($-o-cursor-int-preset, $-o-cursor-int-image, pointer);
+        }
+
+        &.editor_enable .oe_drop_zone {
+            cursor: auto;
+        }
+    }
+}
+
 // Manage custom offcanvas such as the one used for mobile mega menu nav
 // where a dropdown behaves as offcanvas.
 $o-mega-menu-nav-height: 3rem !default;
