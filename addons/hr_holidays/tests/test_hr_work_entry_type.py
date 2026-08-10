@@ -232,3 +232,49 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """Test the search of virtual_remaining_leaves method of hr.work.entry.type"""
+
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+
+        unlimited_work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Unlimited Time Off',
+            'code': 'Unlimited Time Off',
+            'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        limited_work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Paid Time Off',
+            'code': 'Paid Time Off',
+            'requires_allocation': True,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        self.env['hr.leave.allocation'].create({
+            'employee_id': employee.id,
+            'work_entry_type_id': limited_work_entry_type.id,
+            'number_of_days': 5,
+        }).action_approve()
+
+        work_entry_types = self.env['hr.work.entry.type'].with_context(employee_id=employee.id)
+        self.assertEqual(limited_work_entry_type.with_context(employee_id=employee.id).virtual_remaining_leaves, 5)
+
+        self.assertIn(
+            unlimited_work_entry_type,
+            work_entry_types.search([('virtual_remaining_leaves', '>', 1000)]),
+            "A time off type without allocation requirement should always match",
+        )
+
+        # A type that requires an allocation is filtered on its actual remaining leaves.
+        self.assertIn(
+            limited_work_entry_type,
+            work_entry_types.search([('virtual_remaining_leaves', '>', 3)]),
+        )
+        self.assertNotIn(
+            limited_work_entry_type,
+            work_entry_types.search([('virtual_remaining_leaves', '>', 5)]),
+        )
