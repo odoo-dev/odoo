@@ -52,8 +52,4 @@
 
 .o_website_sale_dashboard {
     background-color: $o-control-panel-background-color;
-
-    @include media-breakpoint-up(md) {
-        border-bottom: $border-width $border-style $border-color;
-    }
 }
