@@ -29,6 +29,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
         domain = [('company_id', '=', self.env.company.id)] + (extra_domain or [])
         tax_details_query = self.env['account.move.line']._get_query_tax_details_from_domain(domain, fallback=fallback)
         self.env['account.move.line'].flush_model()
+        self.env['account.tax.repartition.line'].flush_model()
         self.cr.execute(tax_details_query)
         tax_details_res = self.cr.dictfetchall()
         return sorted(tax_details_res, key=lambda x: (x['base_line_id'], abs(x['base_amount']), abs(x['tax_amount'])))
@@ -1343,10 +1344,16 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
         })
         base_lines, tax_lines = self._dispatch_move_lines(invoice)
 
-        # The tax line must still match the base line even if it uses another account.
         tax_lines.account_id = self.company_data['default_account_assets']
 
-        tax_details = self._get_tax_details(fallback=True)
+        tax_details = self._get_tax_details(fallback=True, extra_domain=[('move_id', '=', invoice.id)])
+        self.assertTaxDetailsValues(tax_details, [])
+
+        percent_tax.invoice_repartition_line_ids.filtered(
+            lambda x: x.repartition_type == 'tax'
+        ).account_id = self.company_data['default_account_assets']
+
+        tax_details = self._get_tax_details(fallback=True, extra_domain=[('move_id', '=', invoice.id)])
         self.assertTaxDetailsValues(
             tax_details,
             [
