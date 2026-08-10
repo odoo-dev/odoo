@@ -3,6 +3,8 @@ import { OdooChartCorePlugin } from "./plugins/odoo_chart_core_plugin";
 import { ChartOdooLinkPlugin } from "./plugins/chart_odoo_link_plugin";
 import { OdooChartCoreViewPlugin } from "./plugins/odoo_chart_core_view_plugin";
 import { chartOdooLinkPlugin } from "./odoo_link/odoo_link_chartjs_plugin";
+// Registers the "odoo_pivot" chart data source in chartDataSourceRegistry.
+import "./odoo_chart/odoo_chart_pivot_datasource";
 
 const { chartJsExtensionRegistry } = spreadsheet.registries;
 
