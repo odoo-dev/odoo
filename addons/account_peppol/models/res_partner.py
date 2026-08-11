@@ -231,12 +231,20 @@ class ResPartner(models.Model):
         return res
 
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
+        partners_to_recompute = self.filtered(
+            lambda p: not p.peppol_endpoint and p.country_id.code in PEPPOL_LIST
+        )
+
+        if partners_to_recompute:
+            super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
+        partners_to_recompute = self.filtered(
+            lambda p: not p.peppol_eas and p.country_id.code in PEPPOL_LIST
+        )
+
+        if partners_to_recompute:
+            super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS

@@ -388,3 +388,42 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_skip_existing_peppol_endpoint(self):
+        country_be = self.env.ref('base.be')
+        partner_to_compute = self.env['res.partner'].create({
+            'name': 'FooToCompute',
+            'country_id': country_be.id,
+            'vat': 'BE0477472701',
+            'peppol_endpoint': False,
+            'peppol_eas': False,
+        })
+
+        custom_endpoint = '0000000001'
+        custom_eas = '0208'
+        partner_already_set = self.env['res.partner'].create({
+            'name': 'FooAlreadySet',
+            'country_id': country_be.id,
+            'vat': 'BE0477472701',
+            'peppol_endpoint': custom_endpoint,
+            'peppol_eas': custom_eas,
+        })
+
+        (partner_to_compute | partner_already_set)._compute_peppol_endpoint()
+        (partner_to_compute | partner_already_set)._compute_peppol_eas()
+
+        self.assertTrue(
+            partner_to_compute.peppol_endpoint,
+            "Endpoint should be computed for partners that don't have it yet.",
+        )
+
+        self.assertEqual(
+            partner_already_set.peppol_endpoint,
+            custom_endpoint,
+            "Existing endpoint should not be overwritten.",
+        )
+        self.assertEqual(
+            partner_already_set.peppol_eas,
+            custom_eas,
+            "Existing EAS should not be overwritten.",
+        )
