@@ -235,7 +235,7 @@ class TestHttpWebJson_2(TestHttpBase):
         # reading an image on the user
         res = self.db_url_open(
             '/json/2/res.users/read',
-            data=r'{"ids": [%d], "fields": ["image_128"], "context": {"include_binary_content": true}}' % self.jackoneill.id,
+            data=r'{"ids": [%d], "fields": ["image_128"]}' % self.jackoneill.id,
             headers=CT_JSON | self.bearer_header,
         ).raise_for_status()
         self.assertIn('"image_128": {"', res.text, "Image missing")
@@ -250,14 +250,6 @@ class TestHttpWebJson_2(TestHttpBase):
         res = self.db_url_open(
             '/json/2/ir.attachment/search_read',
             data=r'{"domain": [["id", "=", %d]], "fields": ["raw"], "limit": 1}' % attachment.id,
-            headers=CT_JSON | self.bearer_header,
-        ).raise_for_status()
-        self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "size": %s, "checksum": "%s"}}]' % (attachment.id, attachment.raw.size, attachment.checksum))
-        self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
-
-        res = self.db_url_open(
-            '/json/2/ir.attachment/search_read',
-            data=r'{"domain": [["id", "=", %d]], "fields": ["raw"], "limit": 1, "context": {"include_binary_content": true}}' % attachment.id,
             headers=CT_JSON | self.bearer_header,
         ).raise_for_status()
         self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "content": "%s", "size": %s, "checksum": "%s"}}]' % (attachment.id, expected_datas, attachment.raw.size, attachment.checksum))

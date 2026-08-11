@@ -2815,10 +2815,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             for field in fields:
                 self.assertEqual(vals[field], read_value)
 
-        record = record.with_context(include_binary_content=False)
-        assertBinaryValue({'checksum': checksum, 'size': binary_value.size})
-
-        record = record.with_context(include_binary_content=True)
         content = base64.b64encode(binary_value.content).decode()
         assertBinaryValue({'checksum': checksum, 'size': binary_value.size, 'content': content})
 

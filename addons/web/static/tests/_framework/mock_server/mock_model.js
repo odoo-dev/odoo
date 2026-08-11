@@ -2182,7 +2182,7 @@ export class Model extends Array {
             }
         }
         if (ids[0]) {
-            serverValues = this.read(ids, fieldsFromView, kwargs)[0];
+            serverValues = this.read(ids, fieldsFromView, "web", kwargs)[0];
         } else if (firstOnChange) {
             // It is the new semantics: no field in arguments means we are in
             // a default_get + onchange situation
@@ -2735,7 +2735,7 @@ export class Model extends Array {
         if (!fieldNames.length) {
             fieldNames = ["id"];
         }
-        const records = this.read(ids, fieldNames, kwargs);
+        const records = this.read(ids, fieldNames, "web", kwargs);
         this._unityReadRecords(records, specification, kwargs);
         return records;
     }
@@ -3038,7 +3038,8 @@ export class Model extends Array {
             length,
             records: this.read(
                 records.map((r) => r.id),
-                unique(["id", ...fieldNames])
+                unique(["id", ...fieldNames]),
+                "web",
             ),
         };
         if (countLimit) {
@@ -3367,7 +3368,6 @@ export class Model extends Array {
      * @param {string | false} [load="_classic_read"]
      */
     _read_format(idOrIds, fnames = [], load = "_classic_read", kwargs) {
-        const context = kwargs?.context;
         const ids = ensureArray(idOrIds);
         const fieldNames = unique(["id", ...fnames]);
 
@@ -3458,7 +3458,7 @@ export class Model extends Array {
                             result[field.name].filename = filename;
                         }
                     }
-                    if (context?.include_binary_content) {
+                    if (load != 'web') {
                         result[field.name].content = content;
                     }
                     if (content) {
@@ -3590,10 +3590,10 @@ export class Model extends Array {
                     for (const record of records) {
                         if (record[fieldName] !== false) {
                             if (!relatedFields) {
-                                record[fieldName] = record[fieldName][0];
+                                record[fieldName] = record[fieldName];
                             } else {
                                 record[fieldName] = getRelation(field).web_read(
-                                    [record[fieldName][0]],
+                                    [record[fieldName]],
                                     relatedFields,
                                     makeKwArgs({ context: {...context, ...spec[fieldName].context} })
                                 )[0];

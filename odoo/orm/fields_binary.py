@@ -9,7 +9,6 @@ from operator import attrgetter
 import psycopg2
 
 from odoo.exceptions import UserError
-from odoo.modules import module
 from odoo.tools import SQL
 from odoo.tools.binary import EMPTY_BINARY, BinaryBytes, BinaryValue
 
@@ -34,7 +33,6 @@ class Binary(Field[BinaryValue]):
 
     prefetch = False                    # not prefetched by default
     attachment = True                   # whether value is stored in attachment
-    auto_include_content_limit = 2048
 
     @functools.cached_property
     def column_type(self):
@@ -133,20 +131,15 @@ class Binary(Field[BinaryValue]):
         if not value:
             return False
         value = self.convert_to_cache(value, record, validate=False)
-        res = {}
-        # Include the file name
         filename = value.filename
-        if filename and filename != self.name:
-            res['filename'] = filename
-        # For NewIds, always include the content, otherwise check the context
-        include_content = not any(record._ids) or record.env.context.get('include_binary_content', 'auto')
-        if include_content == 'auto':
-            # allows to avoid roundtrips to the database for small contents
-            include_content = not module.current_test and value.size <= self.auto_include_content_limit
-        if include_content:
-            res['content'] = value.to_base64()
-        res['size'] = value.size
-        res['checksum'] = value.checksum()
+        res = {
+            'filename': filename,
+            'content': value.to_base64(),
+            'size': value.size,
+            'checksum': value.checksum(),
+        }
+        if not filename or filename == self.name:  # remove empty name
+            res.pop('filename')
         return res
 
     def read(self, records):
@@ -262,7 +255,6 @@ class Image(Binary):
     max_width = 0
     max_height = 0
     verify_resolution = True
-    auto_include_content_limit = 8192
 
     def setup(self, model):
         super().setup(model)

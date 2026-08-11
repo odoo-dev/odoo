@@ -67,7 +67,7 @@ class PartnerType extends models.Model {
 
 defineModels([Partner, PartnerType]);
 
-test("ImageField is correctly rendered (without binary content)", async () => {
+test("ImageField is correctly rendered", async () => {
     expect.assertions(10);
 
     Partner._records[0].write_date = "2017-02-08 10:00:00";
@@ -95,9 +95,6 @@ test("ImageField is correctly rendered (without binary content)", async () => {
                 <field name="document" widget="image" options="{'size': [90, 90]}"/>
             </form>
         `,
-        context: {
-            include_binary_content: false,  // the default, but force here anyways
-        },
     });
 
     expect(".o_field_widget[name='document']").toHaveClass("o_field_image", {
@@ -109,78 +106,6 @@ test("ImageField is correctly rendered (without binary content)", async () => {
     expect('div[name="document"] img').toHaveAttribute(
         "data-src",
         /.*image\/partner\/\d+\/document.*/,
-        { message: "the image should have the correct src" }
-    );
-    expect(".o_field_widget[name='document'] img").toHaveClass("img-fluid", {
-        message: "the image should have the correct class",
-    });
-    expect(".o_field_widget[name='document'] img").toHaveAttribute("width", "90", {
-        message: "the image should correctly set its attributes",
-    });
-    expect(".o_field_widget[name='document'] img").toHaveStyle(
-        {
-            maxWidth: "90px",
-            width: "90px",
-            height: "90px",
-        },
-        {
-            message: "the image should correctly set its attributes",
-        }
-    );
-    expect(".o_field_image .o_select_file_button").toHaveCount(1, {
-        message: "the image can be edited",
-    });
-    expect(".o_field_image .o_clear_file_button").toHaveCount(1, {
-        message: "the image can be deleted",
-    });
-    expect("input.o_input_file").toHaveAttribute("accept", "image/*,dummy/allowAndroidCamera", {
-        message:
-            'the default value for the attribute "accept" on the "image" widget must be "image/*"',
-    });
-});
-
-test("ImageField is correctly rendered (with binary content)", async () => {
-    expect.assertions(10);
-
-    Partner._records[0].write_date = "2017-02-08 10:00:00";
-    Partner._records[0].document = MY_IMAGE;
-
-    onRpc("web_read", ({ kwargs }) => {
-        expect(kwargs.specification).toEqual(
-            {
-                display_name: {},
-                document: {},
-                write_date: {},
-            },
-            {
-                message:
-                    "The fields document, name and write_date should be present when reading an image",
-            }
-        );
-    });
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        resId: 1,
-        arch: /* xml */ `
-            <form>
-                <field name="document" widget="image" options="{'size': [90, 90]}"/>
-            </form>
-        `,
-        context: {
-            include_binary_content: true,
-        },
-    });
-
-    expect(".o_field_widget[name='document']").toHaveClass("o_field_image", {
-        message: "the widget should have the correct class",
-    });
-    expect(".o_field_widget[name='document'] img").toHaveCount(1, {
-        message: "the widget should contain an image",
-    });
-    expect('div[name="document"] img').toHaveAttribute(
-        "data-src",
-        `data:image/png;base64,${MY_IMAGE}`,
         { message: "the image should have the correct src" }
     );
     expect(".o_field_widget[name='document'] img").toHaveClass("img-fluid", {
@@ -350,14 +275,11 @@ test("ImageField is correctly replaced when given an incorrect value", async () 
                 <field name="document" widget="image" options="{'size': [90, 90]}"/>
             </form>
         `,
-        context: {
-            include_binary_content: true,
-        },
     });
 
     expect(`div[name="document"] img`).toHaveAttribute(
         "data-src",
-        "data:image/png;base64,incorrect_base64_value",  // XXX failing
+        `${getOrigin()}/web/image/partner/1/document?unique=4edd60db`,
         {
             message: "the image has the invalid src by default",
         }
@@ -615,14 +537,11 @@ test("ImageField: zoom and zoom_delay options (readonly)", async () => {
                 <field name="document" widget="image" options="{'zoom': true, 'zoom_delay': 600}" readonly="1" />
             </form>
         `,
-        context: {
-            include_binary_content: true,
-        },
     });
     // data-tooltip attribute is used by the tooltip service
     expect(".o_field_image img").toHaveAttribute(
         "data-tooltip-info",
-        `{"url":"data:image/png;base64,${MY_IMAGE}"}`,
+        `{"url":"${getOrigin()}/web/image/partner/1/document?unique=9497c82b"}`,
         { message: "shows a tooltip on hover" }
     );
     expect(".o_field_image img").toHaveAttribute("data-tooltip-delay", "600", {
@@ -707,12 +626,13 @@ test("ImageField in subviews is loaded correctly", async () => {
                 </field>
             </form>
         `,
-        context: {
-            include_binary_content: true,
-        },
     });
 
-    expect(`img[data-src="data:image/png;base64,${MY_IMAGE}"]`).toHaveCount(1);
+    expect("img").toHaveAttribute(
+        "data-src",
+        `${getOrigin()}/web/image/partner/1/document?unique=9497c82b`,
+        { message: "shows a tooltip on hover" }
+    );
     expect(".o_kanban_record:not(.o_kanban_ghost):not(.o-kanban-button-new)").toHaveCount(1);
 
     // Actual flow: click on an element of the m2m to get its form view
@@ -720,7 +640,11 @@ test("ImageField in subviews is loaded correctly", async () => {
     await animationFrame();
     expect(".modal").toHaveCount(1, { message: "The modal should have opened" });
 
-    expect(`img[data-src="data:image/gif;base64,${PRODUCT_IMAGE}"]`).toHaveCount(1);
+    expect(".modal img").toHaveAttribute(
+        "data-src",
+        `${getOrigin()}/web/image/partner.type/12/image?unique=4e095659`,
+        { message: "shows a tooltip on hover" }
+    );
 });
 
 test("ImageField in x2many list is loaded correctly", async () => {
@@ -741,17 +665,15 @@ test("ImageField in x2many list is loaded correctly", async () => {
                 </field>
             </form>
         `,
-        context: {
-            include_binary_content: true,
-        },
     });
 
     expect("tr.o_data_row").toHaveCount(1, {
         message: "There should be one record in the many2many",
     });
-    expect(`img[data-src="data:image/gif;base64,${PRODUCT_IMAGE}"]`).toHaveCount(1, {
-        message: "The list's image is in the DOM",
-    });
+    expect("tr.o_data_row img").toHaveAttribute(
+        "data-src",
+        `${getOrigin()}/web/image/partner.type/12/image?unique=4e095659`,
+    );
 });
 
 test("ImageField with required attribute", async () => {

@@ -210,7 +210,7 @@ class PosSession(models.Model):
 
     def load_data(self, models_to_load):
         response = {}
-        session = self.with_context(include_binary_content=True)
+        session = self
         response['pos.session'] = session._load_pos_data_search_read(response, self.config_id)
 
         for model in self._load_pos_data_models(self.config_id):

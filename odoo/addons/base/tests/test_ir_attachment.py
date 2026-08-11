@@ -258,7 +258,7 @@ class TestIrAttachment(TransactionCaseWithUserDemo):
             autospec=True,
         ) as patch_file_read:
             self.env['res.partner'].search_read(
-                [('id', 'in', main_partner.ids)], ['image_128']
+                [('id', 'in', main_partner.ids)], ['image_128'], load='web',
             )
             self.assertEqual(patch_file_read.call_count, 0)
 

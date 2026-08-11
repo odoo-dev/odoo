@@ -317,7 +317,7 @@ class Base(models.AbstractModel):
             # this also avoid a call to read on the co-model that might have different access rules
             values_list = [{'id': id_} for id_ in self._ids]
         else:
-            values_list: list[dict] = self.read(fields_to_read, load=None)
+            values_list: list[dict] = self.read(fields_to_read, load='web')
 
         if not values_list:
             return values_list
