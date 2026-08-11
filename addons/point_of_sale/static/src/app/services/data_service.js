@@ -410,7 +410,11 @@ export class PosData {
                     } else {
                         if (data_to_remove[model] && data_to_remove[model].length > 0) {
                             const remove_ids = data_to_remove[model];
-                            local = local.filter((r) => !remove_ids.includes(r.id));
+                            // Lookup through a Set: `includes` inside the filter made this
+                            // O(local * remove_ids), which bites on reloads of a large
+                            // catalog, exactly when local data is at its biggest.
+                            const remove_id_set = new Set(remove_ids);
+                            local = local.filter((r) => !remove_id_set.has(r.id));
                             this.indexedDB.delete(model, remove_ids);
                         }
                         localData[model] = local.concat(values);

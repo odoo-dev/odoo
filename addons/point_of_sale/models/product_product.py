@@ -31,10 +31,20 @@ class ProductProduct(models.Model):
     def _load_pos_data_fields(self, config):
         taxes = self.env['account.tax'].search(self.env['account.tax']._check_company_domain(config.company_id.id))
         product_fields = taxes._eval_taxes_computation_prepare_product_fields()
-        return list(product_fields.union({
-            'id', 'lst_price', 'display_name', 'product_tmpl_id', 'product_template_variant_value_ids', 'currency_id', 'cost_currency_id',
-            'product_template_attribute_value_ids', 'barcode', 'product_tag_ids', 'default_code', 'standard_price'
-        }))
+        # 'product_tag_ids' is deliberately absent: nothing reads the tags of a variant.
+        # The two places that display tags (pos_self_order) read them off the template,
+        # and pos_hr / pos_loyalty use the distinct 'all_product_tag_ids'. pos_loyalty
+        # adds the field back on its own when a reward domain filters on it.
+        fields = product_fields.union({
+            'id', 'lst_price', 'display_name', 'product_tmpl_id', 'product_template_variant_value_ids',
+            'product_template_attribute_value_ids', 'barcode', 'default_code', 'standard_price'
+        })
+        # See product.template._load_pos_data_fields: these are only needed to convert the
+        # prices server-side, and no conversion is possible when the PoS runs in the
+        # currency of the company the products belong to.
+        if config.currency_id != config.company_id.currency_id:
+            fields |= {'currency_id', 'cost_currency_id'}
+        return list(fields)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_active_pos_session_or_special_product(self):

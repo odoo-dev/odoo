@@ -789,9 +789,12 @@ export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {
                         if (!isUpdate) {
                             createdIds.push(record.id);
                         } else {
+                            // `vals`, not `rawData`: the latter is the whole
+                            // {model: records} payload, so subscribers were handed model
+                            // names where they expect the updated field names.
                             modelEvents.triggerEvents("update", {
                                 id: record.id,
-                                fields: Object.keys(rawData),
+                                fields: Object.keys(vals),
                             });
                         }
                         resultsArray.push(record);

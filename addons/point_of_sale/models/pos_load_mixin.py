@@ -85,7 +85,9 @@ class PosLoadMixin(models.AbstractModel):
         """
         records_by_currency = defaultdict(list)
         for record in records:
-            currency_id = record[currency_field]
+            # ``get``: the currency field is only loaded when a conversion can actually
+            # happen, so its absence means there is nothing to convert.
+            currency_id = record.get(currency_field)
             if currency_id and currency_id != config.currency_id.id:
                 records_by_currency[currency_id].append(record)
 
