@@ -174,8 +174,11 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config_id):
+        # 'barcode' is deliberately absent: it is computed from the single variant, which
+        # made it the most expensive field of the whole template read, and every barcode
+        # lookup in the PoS goes through product.product instead.
         return [
-            'id', 'display_name', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'barcode', 'name', 'list_price', 'is_favorite',
+            'id', 'display_name', 'standard_price', 'categ_id', 'pos_categ_ids', 'taxes_id', 'name', 'list_price', 'is_favorite',
             'default_code', 'to_weight', 'uom_id', 'description_sale', 'description', 'type', 'service_tracking', 'is_storable',
             'write_date', 'color', 'pos_sequence', 'available_in_pos', 'attribute_line_ids', 'active', 'image_128', 'combo_ids', 'product_variant_ids', 'public_description',
             'pos_optional_product_ids', 'sequence', 'product_tag_ids', 'currency_id', 'cost_currency_id',
