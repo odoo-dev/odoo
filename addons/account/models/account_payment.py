@@ -1117,8 +1117,11 @@ class AccountPayment(models.Model):
             for pay in need_move
         ]
         moves = self.env['account.move'].create(move_vals)
+        if self.env.context.get('skip_mark_as_paid'):
+            return
+
         for pay, move in zip(need_move, moves):
-            pay.write({'move_id': move.id, 'state': 'paid'})
+            pay.write({'move_id': move.id})#, 'state': 'paid'})
 
     def _generate_move_vals(self, write_off_line_vals=None, force_balance=None, line_ids=None):
         """ Prepare the values needed to create a move for self. """
@@ -1180,6 +1183,8 @@ class AccountPayment(models.Model):
                     method_name=self.payment_method_line_id.name,
                     partner=payment.partner_id.display_name,
                 ))
+        if self.env.context.get('skip_mark_as_paid'):
+            return
         # Avoid going back one state when clicking on the confirm action in the payment list view and having paid expenses selected
         # We need to set values to each payment to avoid recomputation later
         self.filtered(lambda pay: pay.state in {False, 'draft', 'paid'}).state = 'paid'
