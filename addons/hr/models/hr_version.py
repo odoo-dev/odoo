@@ -82,6 +82,9 @@ class HrVersion(models.Model):
         tracking=1)
     passport_id = fields.Char('Passport No', groups="hr.group_hr_user", tracking=1)
     passport_expiration_date = fields.Date('Passport Expiration Date', groups="hr.group_hr_user", tracking=1)
+    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=1)
+    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=1)
+    work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
     sex = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
@@ -210,6 +213,13 @@ class HrVersion(models.Model):
         'CHECK(wage >= 0)',
         'The wage must be a positive value.',
     )
+
+    @api.depends('employee_id.name', 'permit_no')
+    def _compute_work_permit_name(self):
+        for version in self:
+            name = version.employee_id.name.replace(' ', '_') + '_' if version.employee_id.name else ''
+            permit_no = '_' + version.permit_no if version.permit_no else ''
+            version.work_permit_name = "%swork_permit%s" % (name, permit_no)
 
     @api.depends('employee_id.company_id')
     def _compute_company_id(self):
