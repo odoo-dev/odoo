@@ -85,10 +85,28 @@ class AccountMoveLine(models.Model):
                     AND account_move_line.currency_id = base_line.currency_id
                     AND account_move_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
                     AND (
-                        account_move_line.applied_tax_id = base_line.applied_tax_id
+                        (
+                            account_move_line.applied_tax_id = base_line.applied_tax_id
+                            AND base_line.tax_repartition_line_id IS NULL
+                        )
                         OR (
                             base_line.tax_repartition_line_id IS NOT NULL
                             AND account_move_line.tax_line_id = base_line.applied_tax_id
+                            AND (
+                                NOT EXISTS (
+                                    SELECT 1
+                                    FROM account_tax_filiation_rel tax_filiation
+                                    WHERE tax_filiation.parent_tax = account_move_line.group_tax_id
+                                    AND tax_filiation.child_tax = account_move_line.tax_line_id
+                                )
+                                AND NOT EXISTS (
+                                    SELECT 1
+                                    FROM account_tax_filiation_rel tax_filiation
+                                    WHERE tax_filiation.parent_tax = base_line.group_tax_id
+                                      AND tax_filiation.child_tax = account_move_line.tax_line_id
+                                )
+                                OR account_move_line.group_tax_id = base_line.group_tax_id
+                            )
                         )
                     )
                 JOIN account_tax t ON account_move_line.tax_line_id = t.id

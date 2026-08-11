@@ -196,7 +196,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 'base_line_id': base_lines[0].id,
                 'tax_line_id': tax_lines[2].id,
                 'base_amount': -1000.0,
-                'tax_amount': -75.0,
+                'tax_amount': -100.0,
             },
             {
                 'base_line_id': base_lines[0].id,
@@ -208,19 +208,19 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 'base_line_id': base_lines[1].id,
                 'tax_line_id': tax_lines[3].id,
                 'base_amount': -1000.0,
-                'tax_amount': -95.65,
+                'tax_amount': -100.0,
             },
             {
                 'base_line_id': base_lines[2].id,
                 'tax_line_id': tax_lines[3].id,
                 'base_amount': -1000.0,
-                'tax_amount': -95.65,
+                'tax_amount': -100.0,
             },
             {
                 'base_line_id': base_lines[3].id,
                 'tax_line_id': tax_lines[3].id,
                 'base_amount': -2000.0,
-                'tax_amount': -191.31,
+                'tax_amount': -200.0,
             },
             {
                 'base_line_id': base_lines[3].id,
@@ -238,25 +238,13 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 'base_line_id': tax_lines[1].id,
                 'tax_line_id': tax_lines[2].id,
                 'base_amount': -200.0,
-                'tax_amount': -15.0,
-            },
-            {
-                'base_line_id': tax_lines[1].id,
-                'tax_line_id': tax_lines[3].id,
-                'base_amount': -200.0,
-                'tax_amount': -19.13,
-            },
-            {
-                'base_line_id': tax_lines[0].id,
-                'tax_line_id': tax_lines[2].id,
-                'base_amount': -400.0,
-                'tax_amount': -30.0,
+                'tax_amount': -20.0,
             },
             {
                 'base_line_id': tax_lines[0].id,
                 'tax_line_id': tax_lines[3].id,
                 'base_amount': -400.0,
-                'tax_amount': -38.26,
+                'tax_amount': -40.0,
             },
         ])
         self.assertTotalAmounts(invoice, tax_details)
