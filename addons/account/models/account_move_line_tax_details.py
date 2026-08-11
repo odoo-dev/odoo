@@ -93,7 +93,25 @@ class AccountMoveLine(models.Model):
                             base_line.tax_repartition_line_id IS NOT NULL
                             AND account_move_line.tax_line_id = base_line.applied_tax_id
                             AND (
-                                account_move_line.group_tax_id = base_line.group_tax_id
+                                account_move_line.group_tax_id IS NOT DISTINCT FROM base_line.group_tax_id
+                                OR (
+                                    base_line.group_tax_id IS NULL
+                                    AND EXISTS (
+                                        SELECT 1
+                                        FROM base_lines origin_base_line
+                                        WHERE origin_base_line.move_id = base_line.move_id
+                                        AND origin_base_line.currency_id = base_line.currency_id
+                                        AND origin_base_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
+                                        AND origin_base_line.tax_repartition_line_id IS NULL
+                                        AND origin_base_line.applied_tax_id = account_move_line.group_tax_id
+                                        AND EXISTS (
+                                            SELECT 1
+                                            FROM base_lines origin_tax_base_line
+                                            WHERE origin_tax_base_line.id = origin_base_line.id
+                                            AND origin_tax_base_line.applied_tax_id = base_line.tax_line_id
+                                        )
+                                    )
+                                )
                                 OR (
                                     NOT EXISTS (
                                         SELECT 1
