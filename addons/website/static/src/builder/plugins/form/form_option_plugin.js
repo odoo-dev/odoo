@@ -177,6 +177,7 @@ export class FormOptionPlugin extends Plugin {
             FormToggleRecaptchaLegalAction,
             ToggleFormStepsAction,
             AddFormStepAction,
+            StepsIndicatorColorAction,
             // Field actions
             CustomFieldAction,
             ExistingFieldAction,
@@ -453,6 +454,7 @@ export class FormOptionPlugin extends Plugin {
         } else {
             formEl.classList.remove("s_website_form_multistep");
             delete formEl.dataset.stepsIndicator;
+            formEl.style.removeProperty("--form-steps-indicator-color");
             rowsEl.classList.add("row");
             for (const stepEl of this.getFormStepEls(formEl)) {
                 while (stepEl.firstChild) {
@@ -1503,6 +1505,22 @@ export class AddFormStepAction extends BuilderAction {
         if (stepEl) {
             this.dependencies.builderOptions.setNextTarget(stepEl);
         }
+    }
+}
+export class StepsIndicatorColorAction extends BuilderAction {
+    static id = "stepsIndicatorColor";
+    static dependencies = ["builderActions"];
+    setup() {
+        // Read by the runtime progress indicator (dots / bar), which is not
+        // part of the saved page: only the variable is.
+        this.colorVarName = "--form-steps-indicator-color";
+        this.style = this.dependencies.builderActions.getAction("styleAction");
+    }
+    getValue(args) {
+        return this.style.getValue({ ...args, params: { mainParam: this.colorVarName } });
+    }
+    apply(args) {
+        this.style.apply({ ...args, params: { mainParam: this.colorVarName } });
     }
 }
 export class SetNumberInputDisplayAction extends BuilderAction {

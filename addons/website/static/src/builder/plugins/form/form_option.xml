@@ -32,8 +32,9 @@
         <BuilderSelect preview="false">
             <BuilderSelectItem dataAttributeAction="'stepsIndicator'" dataAttributeActionValue="'dots'">Dots</BuilderSelectItem>
             <BuilderSelectItem dataAttributeAction="'stepsIndicator'" dataAttributeActionValue="'bar'">Progress Bar</BuilderSelectItem>
-            <BuilderSelectItem dataAttributeAction="'stepsIndicator'" dataAttributeActionValue="'none'">None</BuilderSelectItem>
+            <BuilderSelectItem dataAttributeAction="'stepsIndicator'" dataAttributeActionValue="'none'" id="'steps_indicator_none_opt'">None</BuilderSelectItem>
         </BuilderSelect>
+        <BuilderColorPicker t-if="!this.isActiveItem('steps_indicator_none_opt')" enabledTabs="['solid', 'custom']" action="'stepsIndicatorColor'"/>
     </BuilderRow>
     <BuilderRow label.translate="Steps" level="1" t-if="this.isActiveItem('form_steps_opt')">
         <BuilderButton action="'addFormStep'" preview="false" title.translate="Add a new step at the end of the form">Add Step</BuilderButton>
