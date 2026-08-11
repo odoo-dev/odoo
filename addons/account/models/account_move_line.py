@@ -229,12 +229,6 @@ class AccountMoveLine(models.Model):
         check_company=True,
         tracking=True,
     )
-    group_tax_id = fields.Many2one(
-        comodel_name='account.tax',
-        string="Originator Group of Taxes",
-        index='btree_not_null',
-        check_company=True,
-    )
     tax_line_id = fields.Many2one(
         comodel_name='account.tax',
         string='Originator Tax',
@@ -3825,7 +3819,6 @@ class AccountMoveLine(models.Model):
             'tax_repartition_line_id': self.tax_repartition_line_id.id,
             'tax_ids': [Command.set(self.tax_ids.ids)] + kwargs.pop('tax_ids', []),
             'tax_tag_ids': [Command.set(self.tax_tag_ids.ids)],
-            'group_tax_id': self.group_tax_id.id,
             'partner_id': self.partner_id.id,
             **kwargs,
         }

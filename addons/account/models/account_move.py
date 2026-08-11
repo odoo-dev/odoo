@@ -5238,7 +5238,6 @@ class AccountMove(models.Model):
                     'tax_repartition_line_id': tax_rep.id,
                     'tax_ids': tax_line_vals['tax_ids'],
                     'tax_tag_ids': tax_line_vals['tax_tag_ids'],
-                    'group_tax_id': tax_line_vals['group_tax_id'],
                 }
 
                 res['tax_lines'][payment_term_line][frozendict(grouping_dict)] = {

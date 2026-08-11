@@ -24,18 +24,22 @@ class AccountMoveLine(models.Model):
             base_lines AS (
                 SELECT
                     f.*,
-                    rel.account_tax_id AS applied_tax_id,
+                    rel.account_tax_id AS source_tax_id,
+                    COALESCE(child_tax.id, tax.id) AS applied_tax_id,
                     ARRAY(
-                        SELECT COALESCE(child_tax.id, tax.id)
+                        SELECT COALESCE(child_tax2.id, tax2.id)
                         FROM account_move_line_account_tax_rel rel2
-                        JOIN account_tax tax ON tax.id = rel2.account_tax_id
-                        LEFT JOIN account_tax_filiation_rel tax_filiation ON tax_filiation.parent_tax = tax.id
-                        LEFT JOIN account_tax child_tax ON child_tax.id = tax_filiation.child_tax
+                        JOIN account_tax tax2 ON tax2.id = rel2.account_tax_id
+                        LEFT JOIN account_tax_filiation_rel tax_filiation2 ON tax_filiation2.parent_tax = tax2.id
+                        LEFT JOIN account_tax child_tax2 ON child_tax2.id = tax_filiation2.child_tax
                         WHERE rel2.account_move_line_id = f.id
-                        ORDER BY tax.sequence, tax.id, child_tax.sequence, child_tax.id
+                        ORDER BY tax2.sequence, tax2.id, child_tax2.sequence, child_tax2.id
                     ) AS applied_tax_ids
                 FROM filtered_aml f
                 JOIN account_move_line_account_tax_rel rel ON f.id = rel.account_move_line_id
+                JOIN account_tax tax ON tax.id = rel.account_tax_id
+                LEFT JOIN account_tax_filiation_rel tax_filiation ON tax_filiation.parent_tax = tax.id
+                LEFT JOIN account_tax child_tax ON child_tax.id = tax_filiation.child_tax
             ),
             tax_lines AS (
                 SELECT
@@ -43,7 +47,6 @@ class AccountMoveLine(models.Model):
                     tax_rep.account_id AS rep_account_id,
                     tax_rep.factor_percent,
                     tax_rep.use_in_tax_closing,
-                    COALESCE(f.group_tax_id, f.tax_line_id) AS applied_tax_id,
                     ARRAY(
                         SELECT rel.account_tax_id
                         FROM account_move_line_account_tax_rel rel
@@ -63,8 +66,9 @@ class AccountMoveLine(models.Model):
                     base_line.move_id,
                     account_move_line.display_type,
                     account_move_line.tax_line_id AS tax_id,
-                    account_move_line.group_tax_id,
                     account_move_line.tax_repartition_line_id,
+                    base_line.source_tax_id,
+                    base_line.tax_line_id AS base_tax_id,
                     base_line.account_id AS base_account_id,
                     t.sequence,
                     CASE WHEN t.amount_type <> 'fixed' THEN base_line.balance ELSE base_line.quantity END AS base_value,
@@ -84,45 +88,7 @@ class AccountMoveLine(models.Model):
                     ON account_move_line.move_id = base_line.move_id
                     AND account_move_line.currency_id = base_line.currency_id
                     AND account_move_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
-                    AND (
-                        (
-                            account_move_line.applied_tax_id = base_line.applied_tax_id
-                            AND base_line.tax_repartition_line_id IS NULL
-                        )
-                        OR (
-                            base_line.tax_repartition_line_id IS NOT NULL
-                            AND account_move_line.tax_line_id = base_line.applied_tax_id
-                            AND (
-                                account_move_line.group_tax_id IS NOT DISTINCT FROM base_line.group_tax_id
-                                OR (
-                                    base_line.group_tax_id IS NULL
-                                    AND EXISTS (
-                                        SELECT 1
-                                        FROM base_lines origin_base_line
-                                        WHERE origin_base_line.move_id = base_line.move_id
-                                        AND origin_base_line.currency_id = base_line.currency_id
-                                        AND origin_base_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
-                                        AND origin_base_line.tax_repartition_line_id IS NULL
-                                        AND origin_base_line.applied_tax_id = account_move_line.group_tax_id
-                                        AND EXISTS (
-                                            SELECT 1
-                                            FROM base_lines origin_tax_base_line
-                                            WHERE origin_tax_base_line.id = origin_base_line.id
-                                            AND origin_tax_base_line.applied_tax_id = base_line.tax_line_id
-                                        )
-                                    )
-                                )
-                                OR (
-                                    NOT EXISTS (
-                                        SELECT 1
-                                        FROM account_tax_filiation_rel tax_filiation
-                                        WHERE tax_filiation.parent_tax IN (account_move_line.group_tax_id, base_line.group_tax_id)
-                                        AND tax_filiation.child_tax = account_move_line.tax_line_id
-                                    )
-                                )
-                            )
-                        )
-                    )
+                    AND account_move_line.tax_line_id = base_line.applied_tax_id
                 JOIN account_tax t ON account_move_line.tax_line_id = t.id
                 JOIN res_currency curr ON curr.id = account_move_line.currency_id
                 JOIN res_currency comp_curr ON comp_curr.id = account_move_line.company_currency_id
@@ -171,8 +137,9 @@ class AccountMoveLine(models.Model):
                 tax_line_id,
                 display_type,
                 tax_id,
-                group_tax_id,
                 tax_exigible,
+                source_tax_id,
+                base_tax_id,
                 base_account_id,
                 tax_repartition_line_id,
                 base_amount,

@@ -44,13 +44,13 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
 
     def assertTotalAmounts(self, moves, tax_details):
         tax_lines = moves.line_ids.filtered('tax_line_id')
-        taxes = tax_lines.mapped(lambda x: x.group_tax_id or x.tax_line_id)
+        taxes = tax_lines.tax_line_id
         for tax in taxes:
-            lines = tax_lines.filtered(lambda x: (x.group_tax_id or x.tax_line_id) == tax)
+            lines = tax_lines.filtered(lambda x: x.tax_line_id == tax)
             tax_amount = sum(lines.mapped('balance'))
             tax_details_amount = sum(x['tax_amount']
                                      for x in tax_details
-                                     if (x['group_tax_id'] or x['tax_id']) == tax.id)
+                                     if x['tax_id'] == tax.id)
             self.assertAlmostEqual(tax_amount, tax_details_amount)
 
     def test_affect_base_amount_1(self):
@@ -188,7 +188,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
         self.assertTaxDetailsValues(tax_details, [
             {
                 'base_line_id': base_lines[0].id,
-                'tax_line_id': tax_lines[4].id,
+                'tax_line_id': tax_lines[3].id,
                 'base_amount': -1000.0,
                 'tax_amount': -50.0,
             },
@@ -206,19 +206,19 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
             },
             {
                 'base_line_id': base_lines[1].id,
-                'tax_line_id': tax_lines[3].id,
+                'tax_line_id': tax_lines[2].id,
                 'base_amount': -1000.0,
                 'tax_amount': -100.0,
             },
             {
                 'base_line_id': base_lines[2].id,
-                'tax_line_id': tax_lines[3].id,
+                'tax_line_id': tax_lines[2].id,
                 'base_amount': -1000.0,
                 'tax_amount': -100.0,
             },
             {
                 'base_line_id': base_lines[3].id,
-                'tax_line_id': tax_lines[3].id,
+                'tax_line_id': tax_lines[2].id,
                 'base_amount': -2000.0,
                 'tax_amount': -200.0,
             },
@@ -230,7 +230,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
             },
             {
                 'base_line_id': tax_lines[1].id,
-                'tax_line_id': tax_lines[4].id,
+                'tax_line_id': tax_lines[3].id,
                 'base_amount': -200.0,
                 'tax_amount': -10.0,
             },
@@ -242,7 +242,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
             },
             {
                 'base_line_id': tax_lines[0].id,
-                'tax_line_id': tax_lines[3].id,
+                'tax_line_id': tax_lines[2].id,
                 'base_amount': -400.0,
                 'tax_amount': -40.0,
             },
@@ -1302,7 +1302,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                 },
                 {
                     'base_line_id': base_lines[1].id,
-                    'tax_line_id': tax_lines[1].id,
+                    'tax_line_id': tax_lines[0].id,
                     'base_amount': -1000.0,
                     'tax_amount': -100.0,
                 },

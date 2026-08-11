@@ -1762,7 +1762,6 @@ class AccountTax(models.Model):
             'record': record,
             'id': load('id', 0),
             'tax_repartition_line_id': load('tax_repartition_line_id', self.env['account.tax.repartition.line']),
-            'group_tax_id': load('group_tax_id', self.env['account.tax']),
             'tax_ids': load('tax_ids', self.env['account.tax']),
             'tax_tag_ids': load('tax_tag_ids', self.env['account.account.tag']),
             'currency_id': currency,
@@ -2401,7 +2400,6 @@ class AccountTax(models.Model):
             'tax_repartition_line_id': tax_rep.id,
             'partner_id': base_line['partner_id'].id,
             'currency_id': base_line['currency_id'].id,
-            'group_tax_id': tax_data['group'].id,
             'analytic_distribution': (
                 base_line_grouping_key['analytic_distribution']
                 if tax.analytic or not tax_rep.use_in_tax_closing
@@ -2428,7 +2426,6 @@ class AccountTax(models.Model):
             'tax_repartition_line_id': tax_line['tax_repartition_line_id'].id,
             'partner_id': tax_line['partner_id'].id,
             'currency_id': tax_line['currency_id'].id,
-            'group_tax_id': tax_line['group_tax_id'].id,
             'analytic_distribution': tax_line['analytic_distribution'],
             'account_id': tax_line['account_id'].id,
             'tax_ids': [Command.set(tax_line['tax_ids'].ids)],
