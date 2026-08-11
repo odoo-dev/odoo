@@ -21,6 +21,24 @@ class AccountMoveLine(models.Model):
                 FROM %(table_references)s
                 WHERE %(search_condition)s
             ),
+            base_aml AS (
+                SELECT *
+                FROM filtered_aml
+                UNION
+                SELECT base_line.*
+                FROM account_move_line base_line
+                WHERE base_line.tax_line_id IS NOT NULL
+                    AND EXISTS (
+                        SELECT 1
+                        FROM filtered_aml filtered_line
+                        WHERE filtered_line.move_id = base_line.move_id
+                    )
+                    AND EXISTS (
+                        SELECT 1
+                        FROM account_move_line_account_tax_rel rel
+                        WHERE rel.account_move_line_id = base_line.id
+                    )
+            ),
             base_lines AS (
                 SELECT
                     f.*,
@@ -35,7 +53,7 @@ class AccountMoveLine(models.Model):
                         WHERE rel2.account_move_line_id = f.id
                         ORDER BY tax2.sequence, tax2.id, child_tax2.sequence, child_tax2.id
                     ) AS applied_tax_ids
-                FROM filtered_aml f
+                FROM base_aml f
                 JOIN account_move_line_account_tax_rel rel ON f.id = rel.account_move_line_id
                 JOIN account_tax tax ON tax.id = rel.account_tax_id
                 LEFT JOIN account_tax_filiation_rel tax_filiation ON tax_filiation.parent_tax = tax.id
@@ -90,6 +108,7 @@ class AccountMoveLine(models.Model):
                     AND account_move_line.partner_id IS NOT DISTINCT FROM base_line.partner_id
                     AND account_move_line.tax_line_id = base_line.applied_tax_id
                 JOIN account_tax t ON account_move_line.tax_line_id = t.id
+                LEFT JOIN account_tax base_t ON base_line.tax_line_id = base_t.id
                 JOIN res_currency curr ON curr.id = account_move_line.currency_id
                 JOIN res_currency comp_curr ON comp_curr.id = account_move_line.company_currency_id
                 WHERE (
@@ -108,6 +127,10 @@ class AccountMoveLine(models.Model):
                     OR base_line.analytic_distribution = account_move_line.analytic_distribution
                 ) AND (
                     account_move_line.rep_account_id IS NOT NULL
+                    OR (
+                        base_t.tax_exigibility = 'on_payment'
+                        AND base_t.cash_basis_transition_account_id IS NOT NULL
+                    )
                     OR (
                         t.tax_exigibility = 'on_payment'
                         AND t.cash_basis_transition_account_id IS NOT NULL
