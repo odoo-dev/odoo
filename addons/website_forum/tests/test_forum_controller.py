@@ -79,12 +79,12 @@ class TestForumController(TestForumCommon, HttpCase):
         with self.assertRaises(AccessError):
             self.user_employee.partner_id.with_user(self.user_portal).check_access('read')
 
-        forum_slug = self.env['ir.http']._slug(self.base_forum)
-        forum_post = self.forum_post(self.user_employee, self.base_forum)
+        forum_slug = self.env['ir.http']._slug(self.forum)
+        forum_post = self.forum_post(self.user_employee, self.forum)
         forum_post.with_user(self.user_employee).is_follower = True
         forum_answer = self.env['forum.post'].with_user(self.user_employee).create({
             'name': 'This is an answer',
-            'forum_id': self.base_forum.id,
+            'forum_id': self.forum.id,
             'parent_id': forum_post.id,
         })
         forum_answer.with_user(self.user_employee).is_follower = True
@@ -103,7 +103,7 @@ class TestForumController(TestForumCommon, HttpCase):
         )
         self.assertEqual(res.status_code, 403)
 
-        self.user_portal.karma = KARMA['com_own']
+        self.user_portal.karma = KARMA['com_all']
         res = self.url_open(
             f'/forum/{forum_slug}/post/{forum_answer_slug}/comment',
             data=data,
