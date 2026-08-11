@@ -149,7 +149,7 @@ class StockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', compute='_compute_picking_type_id', store=True, readonly=False, check_company=True, index='btree_not_null')
     is_inventory = fields.Boolean('Inventory')
     inventory_name = fields.Char(readonly=True)
-    move_line_ids = fields.One2many('stock.move.line', 'move_id')
+    move_line_ids = fields.One2many('stock.move.line', 'move_id', write_sequence=26)
     package_ids = fields.One2many('stock.package', string='Packages', compute="_compute_package_ids")
     origin_returned_move_id = fields.Many2one(
         'stock.move', 'Origin return move', copy=False, index=True,
@@ -897,7 +897,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                 move_to_recompute_state |= self - move_to_unreserve - receipt_moves_to_reassign
         if 'date_deadline' in vals:
             self._set_date_deadline(vals.get('date_deadline'))
-        if 'move_orig_ids' in vals or ('move_line_ids' in vals and 'quantity' in vals):
+        if 'move_orig_ids' in vals:
             move_to_recompute_state |= self.filtered(lambda m: m.state not in ['draft', 'cancel', 'done'])
         if 'location_id' in vals:
             move_to_check_location = self.filtered(lambda m: m.location_id.id != vals.get('location_id'))
