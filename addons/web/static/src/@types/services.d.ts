@@ -3,7 +3,7 @@ declare module "services" {
 
     import { titleService } from "@web/core/browser/title_service";
     import { commandService } from "@web/core/commands/command_service";
-    import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
+    import { datetimePickerService } from "@web/core/datetime/datetimepicker_plugin";
     import { dialogService } from "@web/core/dialog/dialog_service";
     import { effectService } from "@web/core/effects/effect_plugin";
     import { frequentEmojiService } from "@web/core/emoji_picker/frequent_emoji_service";
