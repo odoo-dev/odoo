@@ -51,6 +51,12 @@ class SaleOrderLine(models.Model):
 
     def _get_protected_fields(self):
         fields = super()._get_protected_fields()
-        if self.env.context.get('allow_delivery_cost_update') and all(self.mapped('is_delivery')):
+        if all(self.mapped('is_delivery')) and all(line._can_update_delivery_cost() for line in self):
             fields = [f for f in fields if f not in ('price_unit', 'name')]
         return fields
+
+    def _can_update_delivery_cost(self):
+        self.ensure_one()
+        return self.currency_id.is_zero(self.price_unit) and all(
+            picking._can_update_delivery_cost() for picking in self.order_id.picking_ids
+        )
