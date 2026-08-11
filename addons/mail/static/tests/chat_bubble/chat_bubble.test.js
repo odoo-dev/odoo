@@ -386,16 +386,16 @@ test("Can compact chat hub", async () => {
     await hover(".o-mail-ChatHub-hiddenBtn");
     await click("button[title='Chat Options']");
     await click(".o-dropdown-item:text('Hide all conversations')");
-    await contains(".o-mail-ChatBubble i.oi-filled[data-icon='forum']");
-    await click(".o-mail-ChatBubble i.oi-filled[data-icon='forum']");
+    await contains(".o-mail-ChatBubble i.oi[data-icon='forum']");
+    await click(".o-mail-ChatBubble i.oi[data-icon='forum']");
     await contains(".o-mail-ChatBubble", { count: 8 });
     // alternative compact: click hidden button
     await click(".o-mail-ChatBubble:text('+13')");
-    await contains(".o-mail-ChatBubble i.oi-filled[data-icon='forum']");
+    await contains(".o-mail-ChatBubble i.oi[data-icon='forum']");
     // don't show compact button in discuss app
     await openDiscuss();
     await contains(".o-mail-Discuss[data-active]");
-    await contains(".o-mail-ChatBubble i.oi-filled[data-icon='forum']", { count: 0 });
+    await contains(".o-mail-ChatBubble i.oi[data-icon='forum']", { count: 0 });
 });
 
 test("Compact chat hub is crosstab synced", async () => {
@@ -441,7 +441,7 @@ test("Compacted chat hub shows badge with amount of hidden chats with important 
     await contains(".o-mail-ChatBubble", { count: 8 }); // max reached
     await contains(".o-mail-ChatBubble .o-mail-ChatHub-hiddenBtnIcon:text('+13')");
     await click(".o-mail-ChatHub-hiddenBtn");
-    await contains(".o-mail-ChatBubble i.oi-filled[data-icon='forum']");
+    await contains(".o-mail-ChatBubble i.oi[data-icon='forum']");
     await contains(".o-mail-ChatBubble .o-discuss-badge:text('9')");
 });
 

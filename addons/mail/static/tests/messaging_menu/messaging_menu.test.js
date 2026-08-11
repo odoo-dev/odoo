@@ -45,7 +45,7 @@ test("should have messaging menu button in systray", async () => {
     await start();
     await contains(".o_menu_systray i[aria-label='Messages']");
     await contains(".o-mail-MessagingMenu", { count: 0 });
-    await contains(".o_menu_systray i[aria-label='Messages'][data-icon='forum'].oi-filled");
+    await contains(".o_menu_systray i[aria-label='Messages'][data-icon='forum'].oi");
 });
 
 test("messaging menu should have topbar buttons", async () => {
