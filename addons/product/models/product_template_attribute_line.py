@@ -170,7 +170,7 @@ class ProductTemplateAttributeLine(models.Model):
         # - For single value lines because the values are directly removed from
         #   the variants.
         # - For values that are present on variants that can be deleted.
-        self.product_template_value_ids._only_active().unlink()
+        self.product_template_value_ids._only_active().with_context(no_delete_product_template=True).unlink()
         # Keep a reference to the related templates before the deletion.
         templates = self.product_tmpl_id
         # Now delete or archive the lines.

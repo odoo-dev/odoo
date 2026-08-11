@@ -200,6 +200,10 @@ class TestVariants(ProductVariantsCommon):
                 ])
                 self.assertEqual(len(products), 1)
 
+    def test_unlink_all_variants(self):
+        self.product_template_sofa.product_variant_ids.unlink()
+        self.assertFalse(self.product_template_sofa.exists())
+
     def test_variants_creation_multi_update(self):
         test_template = self.env['product.template'].create({
             'name': 'Sofa',

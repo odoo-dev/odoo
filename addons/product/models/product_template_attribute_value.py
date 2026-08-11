@@ -134,7 +134,7 @@ class ProductTemplateAttributeValue(models.Model):
             })
         # Try to remove the variants before deleting to potentially remove some
         # blocking references.
-        self.ptav_product_variant_ids._unlink_or_archive()
+        self.ptav_product_variant_ids.with_context(no_delete_product_template=True)._unlink_or_archive()
         # Now delete or archive the values.
         ptav_to_archive = self.env['product.template.attribute.value']
         for ptav in self:
