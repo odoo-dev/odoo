@@ -232,3 +232,25 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_time_off_type_dropdown_search(self):
+        """ Test that loading the time off types (hr.work.entry.type) dropdown list
+            does not raise any traceback during search or selection.
+        """
+        self.env['hr.work.entry.type'].create({
+            'name': 'Test Paid Time Off',
+            'code': 'TPTO',
+            'requires_allocation': True,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        domain = [('virtual_remaining_leaves', '>', 0)]
+
+        res = self.env['hr.work.entry.type'].with_user(self.user_employee_id).name_search(
+            name='',
+            domain=domain,
+            operator='ilike',
+            limit=8,
+        )
+        self.assertIsNotNone(res)
