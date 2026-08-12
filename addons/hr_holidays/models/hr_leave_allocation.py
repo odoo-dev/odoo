@@ -466,6 +466,7 @@ class HrLeaveAllocation(models.Model):
                 start_date = max(start_date, prev_level_end)
             else:
                 start_date = max(start_date, first_level_start_date)
+            return start_date
 
         already_accrued = {allocation.id: allocation.already_accrued or (allocation.number_of_days != 0 and allocation.accrual_plan_id.accrued_gain_time == 'start') for allocation in self}
         first_allocation = _("""This allocation have already ran once, any modification won't be effective to the days allocated to the employee. If you need to change the configuration of the allocation, delete and create a new one.""")
@@ -503,6 +504,7 @@ class HrLeaveAllocation(models.Model):
                 if log:
                     allocation._message_log(body=first_allocation)
             (current_level, current_level_idx) = (False, 0)
+            on_level_transition = False
             current_level_maximum_leave = 0.0
             # all subsequent runs, at every loop:
             # get current level and normal period boundaries, then set nextcall, adjusted for level transition and carryover
@@ -527,13 +529,29 @@ class HrLeaveAllocation(models.Model):
                 # 1. Passing from one level to another, if mode is set to 'immediately'
                 current_level_last_date = False
                 on_level_transition = False
-                if current_level_idx < (len(level_ids) - 1) and allocation.accrual_plan_id.transition_mode == 'immediately':
+                transition_mode = allocation.accrual_plan_id.transition_mode
+                if current_level_idx < (len(level_ids) - 1) and transition_mode == 'immediately':
                     next_level = level_ids[current_level_idx + 1]
                     current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
                     if allocation.nextcall != current_level_last_date:
                         nextcall = min(nextcall, current_level_last_date)
                     else:
                         on_level_transition = True
+                        # The next level starts now: the next accrual date follows its frequency
+                        nextcall = next_level._get_next_date(allocation.nextcall)
+                elif transition_mode == 'end_of_accrual':
+                    if current_level_idx < (len(level_ids) - 1):
+                        next_level = level_ids[current_level_idx + 1]
+                        # The next level starts exactly at the end of a period: the next accrual date follows its frequency
+                        if allocation.nextcall == period_end == next_level._get_level_transition_date(allocation.date_from):
+                            nextcall = next_level._get_next_date(allocation.nextcall)
+                    if current_level_idx > 0:
+                        # The last period of the previous level ends now: the current level actually starts on this date
+                        previous_level = level_ids[current_level_idx - 1]
+                        on_level_transition = (
+                            allocation.lastcall < current_level._get_level_transition_date(allocation.date_from)
+                            and allocation.nextcall == previous_level._get_next_date(allocation.lastcall)
+                        )
                 # 2. On carry-over date
                 carryover_date = allocation._get_carryover_date(allocation.nextcall)
                 if allocation.nextcall < carryover_date < nextcall:
@@ -566,7 +584,7 @@ class HrLeaveAllocation(models.Model):
                         allocation.number_of_days = max(0, allocation.number_of_days - expiring_days)
                         allocation.expiring_carryover_days = 0
 
-                is_accrual_date = allocation.nextcall == period_end or allocation.nextcall == current_level_last_date
+                is_accrual_date = allocation.nextcall in (period_end, current_level_last_date) or on_level_transition
                 if not allocation.already_accrued and (is_accrual_date or on_level_transition) and \
                         allocation.accrual_plan_id.accrued_gain_time == 'start':
                     start_date = _get_period_start_date(allocation, period_start, current_level, current_level_idx, level_ids, first_level_start_date)
@@ -655,6 +673,7 @@ class HrLeaveAllocation(models.Model):
                 current_level = level_starts.get(allocation.actual_lastcall) or current_level or first_level
                 period_start = current_level._get_previous_date(allocation.actual_lastcall)
                 if allocation.actual_lastcall in {period_start, allocation.date_from} | set(level_starts.keys())\
+                        or on_level_transition\
                         or (allocation.actual_lastcall - get_timedelta(current_level.accrual_validity_count, current_level.accrual_validity_type)
                         in {period_start, allocation.date_from} | set(level_starts.keys())):
                     period_end = current_level._get_next_date(allocation.lastcall)
