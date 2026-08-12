@@ -18,25 +18,23 @@ export class MaintenanceRequestStateSelection extends StateSelectionField {
         super.setup();
         this.uiService = useService("ui");
         this.icons = {
-            normal: "",
-            changes_requested: "priority_high",
-            approved: "",
+            normal: "circle",
+            changes_requested: "error",
+            approved: "circle",
             done: "check_circle",
             cancelled: "cancel",
         };
         this.classIcons = {
-            normal: "o_status",
-            changes_requested: "o_status",
-            approved: "o_status o_status_green",
             done: "oi-filled",
+            approved: "oi-filled",
             cancelled: "oi-filled",
         };
         this.colorIcons = {
-            normal: "",
-            changes_requested: "o_status_changes_requested",
+            normal: "text-muted",
+            changes_requested: "o_status_orange",
             approved: "text-success",
-            done: "text-success",
-            cancelled: "text-danger",
+            done: "o_status_green",
+            cancelled: "o_status_red",
         };
         this.colorButton = {
             normal: "btn-outline-secondary",
@@ -69,7 +67,10 @@ export class MaintenanceRequestStateSelection extends StateSelectionField {
     }
 
     getTogglerClass(currentValue) {
-        return this.isKanbanOrMobileView ? "p-0" : `o_state_button btn rounded-pill ${this.colorButton[currentValue]}`;
+        return `
+            ${this.props.viewType === "card" ? "btn-sm" : ""}
+            ${this.isKanbanOrMobileView ? "p-0" : `o_state_button btn rounded-pill ${this.colorButton[currentValue]}`}
+        `;
     }
 }
 
