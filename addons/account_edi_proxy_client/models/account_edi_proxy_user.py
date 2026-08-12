@@ -137,9 +137,12 @@ class AccountEdiProxyClientUser(models.Model):
         if proxy_error:
             error_code = proxy_error['code']
             if error_code == 'refresh_token_expired':
-                self._renew_token()
+                if self.env.context.get('account_edi_proxy_user_renew_token'):
+                    raise AccountEdiProxyError(error_code, proxy_error['message'] or False)
+                user = self.with_context(account_edi_proxy_user_renew_token=True)
+                user._renew_token()
                 self.env.cr.commit()  # We do not want to lose it if in the _make_request below something goes wrong
-                return self._make_request(url, params)
+                return user._make_request(url, params)
             if error_code == 'invalid_signature':
                 raise AccountEdiProxyError(
                     error_code,
