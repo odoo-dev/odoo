@@ -951,15 +951,25 @@ class Website(Home):
                 })
 
         suggested_controllers = []
-        for name, url, mod in self.env.website.get_suggested_controllers():
+        candidate_urls = []
+        for name, url in self.env.website.get_suggested_controllers():
             if needle.lower() in name.lower() or needle.lower() in url.lower():
-                module_sudo = mod and request.env.ref('base.module_%s' % mod, False).sudo()
-                icon = mod and '%s' % (module_sudo and module_sudo.icon or mod) or ''
-                suggested_controllers.append({
-                    'value': url,
-                    'icon': icon,
-                    'label': '%s (%s)' % (url, name),
-                })
+                candidate_urls.append((name, url))
+
+        # Filter out controller URLs that don't actually exist on this website
+        # (e.g. /contactus requires website_crm, /blog requires website_blog).
+        # We do this here in a single batched check so the client only needs
+        # one RPC (/website/get_suggested_links) instead of two.
+        if candidate_urls:
+            existing = self.env.website.is_page_existing(
+                [url for _, url in candidate_urls]
+            )
+            for name, url in candidate_urls:
+                if existing.get(url):
+                    suggested_controllers.append({
+                        'value': url,
+                        'label': '%s (%s)' % (url, name),
+                    })
 
         return {
             'matching_pages': sorted(matching_pages, key=lambda o: o['label']),

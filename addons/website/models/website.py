@@ -1940,56 +1940,88 @@ class Website(models.CachedModel):
             Returns a boolean, whether the page is considered to exist for the
             current website. This is a heuristic and is not perfectly reliable.
         """
-        # The page exists if there is a 'website.page' record with this url
-        if len(self._get_website_pages(domain=[('url', '=', page), ('view_id', '!=', False)], limit=1)) > 0:
-            return True
+        return self.is_page_existing([page])[page]
 
-        # The page is considered to exist if there is a 'website.rewrite' record
-        # that does a redirect 301 or 302, for simplicity we do not check
-        # further whether the redirection points to an existing url.
-        redirects_domain = self.env.website.website_domain() & Domain(
-            [('url_from', '=', page), ('redirect_type', 'in', ('301', '302'))]
+    def is_page_existing(self, pages):
+        """
+        Returns a dict mapping each URL in ``pages`` to a boolean indicating
+        whether the page is considered to exist for the current website.
+
+        Uses batched DB queries (IN clauses) for the ``website.page`` and
+        ``website.rewrite`` checks so the whole list costs 2 SQL round-trips
+        instead of 2*N. Only URLs that pass neither check fall back to the
+        per-URL router lookup.
+
+        :param list[str] pages: list of URL paths to check
+        :rtype: dict[str, bool]
+        """
+        result = {page: False for page in pages}
+        remaining = list(pages)
+
+        # --- 1. Batch website.page check ---
+        existing_pages = self._get_website_pages(
+            domain=[('url', 'in', remaining), ('view_id', '!=', False)]
         )
-        if len(self.env['website.rewrite'].search(redirects_domain, limit=1)) > 0:
-            return True
+        found_urls = set(existing_pages.mapped('url'))
+        for url in found_urls:
+            result[url] = True
+        remaining = [url for url in remaining if url not in found_urls]
 
+        if not remaining:
+            return result
+
+        # --- 2. Batch website.rewrite check ---
+        redirects_domain = self.env.website.website_domain() & Domain(
+            [('url_from', 'in', remaining), ('redirect_type', 'in', ('301', '302'))]
+        )
+        redirect_urls = set(
+            self.env['website.rewrite'].search(redirects_domain).mapped('url_from')
+        )
+        for url in redirect_urls:
+            result[url] = True
+        remaining = [url for url in remaining if url not in redirect_urls]
+
+        if not remaining:
+            return result
+
+        # --- 3. Per-URL router check (only for URLs resolved by neither above) ---
         router = self.env['ir.http'].routing_map().bind('')
-        # If there is no rules matching this page, it does not exists
-        if not router.test(path_info=page, method='GET'):
-            return False
+        for page in remaining:
+            if not router.test(path_info=page, method='GET'):
+                continue
+            try:
+                rule, args = router.match(page, method='GET', return_rule=True)
+            except werkzeug.routing.RequestRedirect:
+                # The page is considered to exist if it redirects (this happens
+                # if there is a 'website.rewrite' 308).
+                result[page] = True
+                continue
+            try:
+                # The rule may have restrictions for records appearing in its URL.
+                for arg in args:
+                    if isinstance(args[arg], models.BaseModel):
+                        args[arg] = args[arg].with_user(self.env.uid)
+                        if hasattr(args[arg], 'website_id') and args[arg].website_id and args[arg].website_id != self:
+                            break
+                else:
+                    rule.build(args, append_unknown=False)
+                    result[page] = True
+            except MissingError:
+                pass
 
-        try:
-            rule, args = router.match(page, method='GET', return_rule=True)
-        except werkzeug.routing.RequestRedirect:
-            # The page is considered to exist if it redirects (this happens if
-            # there is a 'website.rewrite' 308), for simplicity we do not check
-            # further whether the redirection points to an existing url.
-            return True
+        return result
 
-        try:
-            # The rule may have restriction for some records that appear in its
-            # url, these are checked by `rule.build`.
-            for arg in args:
-                if isinstance(args[arg], models.BaseModel):
-                    # Models from `router.match` are missing users in their env
-                    args[arg] = args[arg].with_user(self.env.uid)
-                    # For record that may be related to a website, we skip them
-                    # if they are for a different website than the current one
-                    if hasattr(args[arg], 'website_id') and args[arg].website_id and args[arg].website_id != self:
-                        return False
-            rule.build(args, append_unknown=False)
-        except MissingError:
-            return False
-        return True
 
     def get_suggested_controllers(self):
         """
-            Returns a tuple (name, url, icon).
-            Where icon can be a module name, or a path
+            Returns a list of tuples (name, url) for internal pages that should
+            be suggested to the user when choosing a URL (e.g. in the link
+            dialog or the URL picker). Each addon can extend this list to add
+            its own controller URLs.
         """
         suggested_controllers = [
-            (_('Homepage'), self.env['ir.http']._url_for('/'), 'website'),
-            (_('Contact Us'), self.env['ir.http']._url_for('/contactus'), 'website_crm'),
+            (_('Homepage'), self.env['ir.http']._url_for('/')),
+            (_('Contact Us'), self.env['ir.http']._url_for('/contactus')),
         ]
         return suggested_controllers
 
