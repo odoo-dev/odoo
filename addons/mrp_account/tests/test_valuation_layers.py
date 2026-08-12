@@ -1,6 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 """ Implementation of "INVENTORY VALUATION TESTS (With valuation layers)" spreadsheet. """
 
+from datetime import timedelta
+
+from freezegun import freeze_time
+
 from odoo.fields import Command
 from odoo.addons.mrp_account.tests.common import TestBomPriceCommon
 from odoo import fields
@@ -68,6 +72,178 @@ class TestMrpValuationStandard(TestBomPriceCommon):
         self.assertEqual(self.dining_table.total_value, 2 * PRICE + 10 + 20)
         self._make_out_move(self.dining_table, 1)
         self.assertEqual(self.dining_table.total_value, (2 * PRICE + 10 + 20) / 2)
+
+    def test_get_value_from_production_uses_current_component_values(self):
+        self.glass.sudo().categ_id = self.category_fifo  # setup master-data
+        self.dining_table.sudo().categ_id = self.category_fifo  # setup master-data
+
+        self._make_in_move(self.glass, 2, 10)
+        mo = self._create_mo(self.bom_1, 1)
+        self._produce(mo)
+        mo.button_mark_done()
+
+        component_move = mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        finished_move = mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        component_move.move_line_ids.quantity = 2
+
+        production_value = finished_move._get_value_from_production(finished_move._get_valued_qty())
+        self.assertEqual(production_value['quantity'], 1)
+        self.assertEqual(production_value['value'], PRICE + 20)
+
+    def test_update_component_value_updates_finished_value(self):
+        self.glass.sudo().categ_id = self.category_fifo  # setup master-data
+        self.dining_table.sudo().categ_id = self.category_fifo  # setup master-data
+
+        self._make_in_move(self.glass, 2, 10)
+        mo = self._create_mo(self.bom_1, 1)
+        self._produce(mo)
+        mo.button_mark_done()
+
+        component_move = mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        finished_move = mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        component_move.move_line_ids.quantity = 2
+
+        self.assertEqual(component_move.value, -20)
+        self.assertEqual(finished_move.value, PRICE + 20)
+        self.assertEqual(self.dining_table.total_value, PRICE + 20)
+
+    def _assert_incoming_component_value_update_revalues_finished_product(self, category):
+        self.glass.sudo().categ_id = category  # setup master-data
+        self.dining_table.sudo().categ_id = category  # setup master-data
+
+        incoming_move = self._make_in_move(self.glass, 1, 10)
+        mo = self._create_mo(self.bom_1, 1)
+        self._produce(mo)
+        mo.button_mark_done()
+
+        component_move = mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        finished_move = mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        self.assertEqual(component_move.value, -10)
+        self.assertEqual(finished_move.value, PRICE + 10)
+
+        incoming_move.value_manual = 100
+
+        self.assertEqual(component_move.value, -100)
+        self.assertEqual(finished_move.value, PRICE + 100)
+        self.assertEqual(self.dining_table.total_value, PRICE + 100)
+
+    def test_avco_incoming_component_value_update_revalues_finished_product(self):
+        self._assert_incoming_component_value_update_revalues_finished_product(self.category_avco)
+
+    def test_fifo_incoming_component_value_update_revalues_finished_product(self):
+        self._assert_incoming_component_value_update_revalues_finished_product(self.category_fifo)
+
+    def _assert_component_quantity_changes_revalue_finished_product(self, category):
+        self.glass.sudo().categ_id = category  # setup master-data
+        self.dining_table.sudo().categ_id = category  # setup master-data
+        extra_component = self._create_product(
+            'Additional Component', 0, quantity=0, category=category,
+        )
+
+        self._make_in_move(self.glass, 1, 10)
+        self._make_in_move(extra_component, 3, 20)
+        mo = self._create_mo(self.bom_1, 1)
+        self._produce(mo)
+        mo.button_mark_done()
+
+        finished_move = mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        self.assertEqual(finished_move.value, PRICE + 10)
+
+        extra_move = self.env['stock.move'].create({
+            'product_id': extra_component.id,
+            'product_uom_qty': 2,
+            'quantity': 2,
+            'uom_id': extra_component.uom_id.id,
+            'location_id': mo.location_src_id.id,
+            'location_dest_id': mo.production_location_id.id,
+            'raw_material_production_id': mo.id,
+            'picking_type_id': mo.picking_type_id.id,
+            'company_id': mo.company_id.id,
+        })
+        self.assertEqual(extra_move.value, -40)
+        self.assertEqual(finished_move.value, PRICE + 10 + 40)
+
+        extra_move.quantity = 3
+        self.assertEqual(extra_move.value, -60)
+        self.assertEqual(finished_move.value, PRICE + 10 + 60)
+
+        extra_move.quantity = 0
+        self.assertEqual(extra_move.value, 0)
+        self.assertEqual(finished_move.value, PRICE + 10)
+
+    def test_avco_component_quantity_changes_revalue_finished_product(self):
+        self._assert_component_quantity_changes_revalue_finished_product(self.category_avco)
+
+    def test_fifo_component_quantity_changes_revalue_finished_product(self):
+        self._assert_component_quantity_changes_revalue_finished_product(self.category_fifo)
+
+    def test_avco_component_quantity_change_revalues_later_mo(self):
+        self.glass.sudo().categ_id = self.category_avco  # setup master-data
+        self.dining_table.sudo().categ_id = self.category_avco  # setup master-data
+        now = fields.Datetime.now()
+
+        with freeze_time(now - timedelta(days=4)):
+            self._make_in_move(self.glass, 2, 10)
+        with freeze_time(now - timedelta(days=3)):
+            first_mo = self._create_mo(self.bom_1, 1)
+            self._produce(first_mo)
+            first_mo.button_mark_done()
+        with freeze_time(now - timedelta(days=2)):
+            self._make_in_move(self.glass, 1, 20)
+        with freeze_time(now - timedelta(days=1)):
+            later_mo = self._create_mo(self.bom_1, 1)
+            self._produce(later_mo)
+            later_mo.button_mark_done()
+
+        first_component_move = first_mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        first_finished_move = first_mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        later_component_move = later_mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        later_finished_move = later_mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        self.assertEqual(first_component_move.value, -10)
+        self.assertEqual(first_finished_move.value, PRICE + 10)
+        self.assertEqual(later_component_move.value, -15)
+        self.assertEqual(later_finished_move.value, PRICE + 15)
+
+        first_component_move.move_line_ids.quantity = 2
+
+        self.assertEqual(first_component_move.value, -20)
+        self.assertEqual(first_finished_move.value, PRICE + 20)
+        self.assertEqual(later_component_move.value, -20)
+        self.assertEqual(later_finished_move.value, PRICE + 20)
+
+    def test_fifo_component_quantity_change_revalues_later_mo(self):
+        self.glass.sudo().categ_id = self.category_fifo  # setup master-data
+        self.dining_table.sudo().categ_id = self.category_fifo  # setup master-data
+        now = fields.Datetime.now()
+
+        with freeze_time(now - timedelta(days=5)):
+            self._make_in_move(self.glass, 2, 10)
+        with freeze_time(now - timedelta(days=4)):
+            self._make_in_move(self.glass, 2, 20)
+        with freeze_time(now - timedelta(days=3)):
+            first_mo = self._create_mo(self.bom_1, 1)
+            self._produce(first_mo)
+            first_mo.button_mark_done()
+        with freeze_time(now - timedelta(days=1)):
+            later_mo = self._create_mo(self.bom_1, 2)
+            self._produce(later_mo)
+            later_mo.button_mark_done()
+
+        first_component_move = first_mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        first_finished_move = first_mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        later_component_move = later_mo.move_raw_ids.filtered(lambda move: move.product_id == self.glass)
+        later_finished_move = later_mo.move_finished_ids.filtered(lambda move: move.product_id == self.dining_table)
+        self.assertEqual(first_component_move.value, -10)
+        self.assertEqual(first_finished_move.value, PRICE + 10)
+        self.assertEqual(later_component_move.value, -30)
+        self.assertEqual(later_finished_move.value, 2 * PRICE + 30)
+
+        first_component_move.move_line_ids.quantity = 2
+
+        self.assertEqual(first_component_move.value, -20)
+        self.assertEqual(first_finished_move.value, PRICE + 20)
+        self.assertEqual(later_component_move.value, -40)
+        self.assertEqual(later_finished_move.value, 2 * PRICE + 40)
 
     def test_fifo_unbuild(self):
         """ This test creates an MO and then creates an unbuild
