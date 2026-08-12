@@ -189,9 +189,8 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         Expected:
         Tax         | Taxes     | Base      | Amount
         --------------------------------------------
-        21% incl    | /         | 100       | 21
-        12%         | 21% incl  | 121       | 14.52
-        12%         | /         | 100       | 12
+        21% incl    | 12%       | 100       | 21
+        12%         | /         | 221       | 26.52
         '''
         invoice = self._create_invoice_taxes_per_line(
             taxes_per_line=[
@@ -200,10 +199,9 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             ],
             post=True,
         )
-        self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted('balance'), [
+        self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted(lambda x: -x.balance), [
             {'name': self.percent_tax_1_incl.name,      'tax_base_amount': -100.0,   'balance': -21.0,   'tax_ids': [self.percent_tax_2.id]},
-            {'name': self.percent_tax_2.name,           'tax_base_amount': -121.0,   'balance': -14.52,  'tax_ids': []},
-            {'name': self.percent_tax_2.name,           'tax_base_amount': -100.0,   'balance': -12.0,   'tax_ids': []},
+            {'name': self.percent_tax_2.name,           'tax_base_amount': -221.0,   'balance': -26.52,  'tax_ids': []},
         ])
 
     def _create_tax_tag(self, tag_name):
