@@ -150,6 +150,56 @@ class TestFuzzy(ProductVariantsCommon):
         )
         self.assertIn(self.product_template_sofa, results[0]["results"])
 
+    def test_search_attribute_value_shows_variant_price_and_image(self):
+        """Searching an attribute value should show that variant's price and image."""
+        website = self.env.ref("base.default_website")
+        material = self.env["product.attribute"].create({
+            "name": "Material",
+            "value_ids": [
+                Command.create({"name": "Zyntholite"}),
+                Command.create({"name": "Quarvex"}),
+            ],
+        })
+        table = self.env["product.template"].create({
+            "name": "Test Table",
+            "list_price": 100.0,
+            "is_published": True,
+            "taxes_id": [Command.clear()],
+            "attribute_line_ids": [
+                Command.create({
+                    "attribute_id": material.id,
+                    "value_ids": [Command.set(material.value_ids.ids)],
+                })
+            ],
+        })
+        ptav_quarvex = table.attribute_line_ids.product_template_value_ids.filtered(
+            lambda ptav: ptav.name == "Quarvex"
+        )
+        ptav_quarvex.price_extra = 50.0
+        variant_quarvex = table._get_variant_for_combination(ptav_quarvex)
+
+        options = {"display_currency": website.currency_id, "allowFuzzy": False}
+        _, results, _ = website.with_context(website_id=website.id)._search_with_fuzzy(
+            "product_template", "Quarvex", 0, 5, "name asc", options
+        )
+        with HttpRoutingMockRequest(self.env, website=website) as request:
+            request.pricelist = self.env["product.pricelist"].create({"name": "Test pricelist"})
+            request.fiscal_position = (
+                self
+                .env["account.fiscal.position"]
+                .sudo()
+                .create({"name": "Test fiscal position"})
+            )
+            results_data = website._search_render_results(results, 5)[0]["results_data"]
+
+        self.assertEqual(len(results_data), 1, "Only the test table should match")
+        suggestion = results_data[0]
+        self.assertEqual(
+            suggestion["image_url"],
+            f"/web/image/product.product/{variant_quarvex.id}/image_128",
+        )
+        self.assertIn("150.00", suggestion["price"])
+
     def test_search_product_tags(self):
         """ Tests that when searching a product by its tags, we only fetch the tags visible to customers"""
         website = self.env.ref("base.default_website")
