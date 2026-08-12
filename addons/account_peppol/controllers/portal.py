@@ -35,8 +35,20 @@ class PortalAccount(CustomerPortal):
             edi_format = address_values.get('invoice_edi_format')
             if request.env['res.country'].browse(int(address_values.get('country_id'))).code not in PEPPOL_LIST:
                 invalid_fields.add('country_id')
-                address_values['country_id'] = 'error'
                 error_messages.append(_("That country is not available for Peppol."))
+                return invalid_fields, missing_fields, error_messages
+            if not peppol_eas or not peppol_endpoint or not edi_format:
+                if not peppol_eas:
+                    missing_fields.add('routing_scheme')
+                if not peppol_endpoint:
+                    missing_fields.add('routing_endpoint')
+                if not edi_format:
+                    missing_fields.add('invoice_edi_format')
+                error_messages.append(self.env._(
+                    "If you want to be invoiced by Peppol, you must set your Peppol configuration"
+                    " (Peppol EAS, Peppol Endpoint and EDI Format)."
+                ))
+                return invalid_fields, missing_fields, error_messages
             result = request.env['res.partner']._validate_identifier_by_scheme(peppol_eas, peppol_endpoint)
             if not result['valid']:
                 invalid_fields.add('invalid_peppol_endpoint')
