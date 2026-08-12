@@ -26,27 +26,26 @@ $oi-fw-ratio: 1.28571429; // Matches .fa-fw
     direction: ltr;
     speak: never;
     -webkit-font-smoothing: antialiased;
-    -webkit-font-feature-settings: 'liga';
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: 'liga';
 
     &:before {
         display: inline-block;
         content: attr(data-icon);
         text-rendering: geometricPrecision;
     }
-    // Filled variants are reached through the font's 'ss01' stylistic set, which
-    // maps each outlined glyph to its filled counterpart, rather than by
-    // appending "_f" to the ligature name.  `content: attr(data-icon) "_f"` is
-    // laid out by Gecko as two separate text runs: the ligature then straddles
-    // the boundary and its advance gets charged to both parts, which widened the
-    // box and pushed filled icons off-center in Firefox only (Chromium shapes
-    // both content items as a single run).
-    // Both spellings stay valid in the font, see
+    // Filled variants are reached through the font's 'FILL' axis, which swaps
+    // each outlined glyph for its filled counterpart, rather than by appending
+    // "_f" to the ligature name.  `content: attr(data-icon) "_f"` is laid out by
+    // Gecko as two separate text runs: the ligature then straddles the boundary
+    // and its advance gets charged to both parts, which widened the box and
+    // pushed filled icons off-center in Firefox only (Chromium shapes both
+    // content items as a single run).
+    // The axis snaps at 0.5 instead of interpolating, so only 0 and 1 are
+    // meaningful.  Both spellings stay valid in the font, see
     // `odoo/addons/web/tooling/icons/generate_icons.py`.
     &.oi-filled {
-        -webkit-font-feature-settings: 'liga', 'ss01';
-        font-feature-settings: 'liga', 'ss01';
+        -webkit-font-variation-settings: 'FILL' 1;
+        font-variation-settings: 'FILL' 1;
     }
 }
 
