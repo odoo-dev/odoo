@@ -12,11 +12,3 @@ class ResConfigSettings(models.TransientModel):
         string='Default PoS Symbol',
         help='Default Sinvoice Symbol for PoS.',
     )
-    pos_l10n_vn_pos_symbol = fields.Many2one(
-        related="pos_config_id.l10n_vn_pos_symbol",
-        readonly=False,
-    )
-    pos_l10n_vn_auto_send_to_sinvoice = fields.Boolean(
-        related="pos_config_id.l10n_vn_auto_send_to_sinvoice",
-        readonly=False,
-    )

@@ -11,12 +11,76 @@
         </field>
     </record>
 
+    <!-- A kiosk is unattended, so every setting that needs a cashier is irrelevant to it. -->
     <record id="pos_config_view_form_inherit_pos_self_order" model="ir.ui.view">
         <field name="name">pos.config.form.inherited.pos.self.order</field>
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
+            <setting id="is_restaurant" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
             <setting id="multiple_employee_session" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="iface_big_scrollbars" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="iface_group_by_categ" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="is_order_shared" position="attributes">
+                <attribute name="invisible">module_pos_restaurant or self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="pos_appointment_setting" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="cash_rounding" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="use_fast_payment" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="set_maximum_difference" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="iface_tipproduct" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="multiple_prices_setting" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="price_control" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="manual_discount" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="pos_global_discount" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="margin_and_cost" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="flexible_taxes" position="attributes">
+                <attribute name="invisible">use_presets or self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="order_edit_tracking" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="pos-avatax" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="iface_printbill" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="basic_receipt" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="customer_display" position="attributes">
+                <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
+            </setting>
+            <setting id="iface_orderline_notes" position="attributes">
                 <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
             </setting>
         </field>

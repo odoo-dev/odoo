@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="res_config_settings_view_form" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.inherit.pos_discount</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form" />
+    <record id="pos_config_view_form_inherit_pos_discount" model="ir.ui.view">
+        <field name="name">pos.config.form.view.inherit.pos_discount</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
         <field name="arch" type="xml">
-            <div id="warning_text_pos_discount" position="replace">
-                <div class="row">
-                    <label string="Discount Product" for="pos_discount_product_id" class="col-lg-3 o_light_label"/>
-                    <field name="pos_discount_product_id" required="pos_module_pos_discount"/>
+            <xpath expr="//setting[@id='pos_global_discount']" position="inside">
+                <div class="content-group mt16" invisible="not module_pos_discount">
+                    <div class="row">
+                        <label string="Discount Product" for="discount_product_id" class="col-lg-3 o_light_label"/>
+                        <field name="discount_product_id" required="module_pos_discount"/>
+                    </div>
+                    <div class="row">
+                        <label string="Discount %" for="discount_pc" class="col-lg-3 o_light_label"/>
+                        <field name="discount_pc"/>
+                    </div>
                 </div>
-                <div class="row">
-                    <label string="Discount %" for="pos_discount_pc" class="col-lg-3 o_light_label"/>
-                    <field name="pos_discount_pc"/>
-                </div>
-            </div>
+            </xpath>
         </field>
     </record>
 </odoo>

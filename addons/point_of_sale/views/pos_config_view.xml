@@ -9,17 +9,19 @@
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="country_code" invisible="1"/>
+                    <field name="is_kiosk" invisible="1"/>
                     <field name="company_has_template" invisible="1"/>
                     <field name="has_active_session" invisible="1"/>
-                    <field name="other_devices" invisible="1"/>
-                    <field name="module_pos_hr" invisible="1"/>
 
                     <div class="oe_title" id="title">
                         <label for="name"/>
                         <h1><field name="name" placeholder="e.g. NYC Shop"/></h1>
                     </div>
-                    <!-- HIDE this div in create_mode (when '+ New Shop' is clicked in the general settings.) -->
-                    <div invisible="context.get('pos_config_create_mode', False)">
+
+                    <!-- Alert when active session -->
+                    <div id="pos_config_alerts">
                         <div class="o_notification_alert alert alert-warning" invisible="not has_active_session" role="alert">
                             A session is currently opened for this PoS. Some settings can only be changed after the session is closed.
                             <button class="btn" style="padding:0" name="close_ui" type="object">Click here to close the session</button>
@@ -29,42 +31,299 @@
                         </div>
                     </div>
 
-                    <!-- SHOW this div in create_mode (when '+ New Shop' is clicked in the general settings.) -->
-                    <div id="restaurant_on_create" class="row mt16 o_settings_container" invisible="not context.get('pos_config_create_mode', False)">
-                        <setting>
-                                <field name="module_pos_restaurant" />
-                        </setting>
-                    </div>
-
-                    <!-- HIDE this div in create_mode (when '+ New Shop' is clicked in the general settings.) -->
-                    <div invisible="context.get('pos_config_create_mode', False)">
+                    <!-- Full PoS Configuration Notebook -->
+                    <div>
                         <notebook>
-                            <page string="Configuration" name="configuration">
+                            <page string="General &amp; Interface" name="interface_general">
                                 <div class="row mt16 o_settings_container">
-                                    <setting id = "multiple_employee_session"
-                                            title="Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form."
-                                            string="Log in with Employees"
-                                            help="Allow to log and switch between selected Employees">
-                                        <field name="module_pos_hr" readonly="has_active_session" />
-                                        <div class="content-group mt16" invisible="not module_pos_hr">
-                                            <div class="text-warning" id="warning_text_employees">
-                                                Save this page and come back here to set up the feature.
+                                    <setting id="is_restaurant">
+                                        <field name="module_pos_restaurant" readonly="has_active_session"/>
+                                    </setting>
+                                    <setting id="multiple_employee_session" title="Employees can scan their badge or enter a PIN to log in to a PoS session." string="Log in with Employees" help="Allow to log and switch between selected Employees">
+                                        <field name="module_pos_hr" readonly="has_active_session"/>
+                                    </setting>
+                                    <setting id="pos_presets" string="Take out / Delivery / Members" help="Define presets to manage taxes &amp; prices for dine in, take out, members...">
+                                        <field name="use_presets"/>
+                                        <div class="content-group" invisible="not use_presets">
+                                            <div class="row">
+                                                <label for="available_preset_ids" class="col-lg-3" string="Available"/>
+                                                <field name="available_preset_ids" widget="many2many_tags" options="{'no_quick_create': True, 'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
+                                            </div>
+                                            <div class="row">
+                                                <label for="default_preset_id" class="col-lg-3" string="Default"/>
+                                                <field name="default_preset_id" options="{'no_create': True}" required="use_presets" domain="[('id', 'in', available_preset_ids)]"/>
                                             </div>
                                         </div>
                                     </setting>
+                                    <setting id="hide_pictures" string="Hide pictures in POS" help="Self-ordering interfaces are not impacted.">
+                                        <div class="content-group">
+                                            <div>
+                                                <field name="show_product_images"/>
+                                                <label for="show_product_images" string="Show product images" class="fw-normal me-1"/>
+                                            </div>
+                                            <div>
+                                                <field name="show_category_images"/>
+                                                <label for="show_category_images" string="Show category images" class="fw-normal me-1"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="iface_big_scrollbars" help="Improve navigation for imprecise industrial touchscreens">
+                                        <field name="iface_big_scrollbars"/>
+                                    </setting>
+                                    <setting id="iface_group_by_categ" help="Display products grouped by categories.">
+                                        <field name="iface_group_by_categ"/>
+                                    </setting>
+                                    <setting id="pos_appointment_setting" help="Online reservation for Point of Sale">
+                                        <field name="module_pos_appointment" string="Booking" widget="upgrade_boolean"/>
+                                        <div class="content-group mt16" id="pos_appointment_booking" invisible="not module_pos_appointment"/>
+                                    </setting>
+                                    <setting string="Share Open Orders" help="Allow to access each other's active orders" id="is_order_shared" invisible="module_pos_restaurant">
+                                        <div class="content-group">
+                                            <div class="row mt16">
+                                                <label string="Trusted POS" for="trusted_config_ids" class="col-lg-3 o_light_label"/>
+                                                <field name="trusted_config_ids" widget="many2many_tags" options="{'no_create':'true'}" domain="[('id', '!=', id), ('module_pos_restaurant', '=', False)]" placeholder="Select PoS to start sharing orders"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="default_pos_partner" groups="base.group_no_one">
+                                        <label string="Default PoS Partner for closing" for="default_partner_id"/>
+                                        <div class="text-muted mb-1">
+                                            The partner account will be used to generate out receipts.
+                                        </div>
+                                        <field name="default_partner_id" create="0"/>
+                                    </setting>
+                                </div>
+                            </page>
+
+                            <page string="Payment &amp; Cash" name="payment_cash">
+                                <div class="row mt16 o_settings_container">
+                                    <setting id="payment_methods_new" string="Payment Methods" help="Payment methods available for this PoS">
+                                        <field name="payment_method_ids" colspan="4" widget="many2many_tags" readonly="has_active_session" required="company_has_template" options="{'no_quick_create': True}"/>
+                                    </setting>
+                                    <setting id="auto_validate_electronic_payment" string="Automatically validate order" help="Automatically validates orders paid with a payment terminal.">
+                                        <field name="auto_validate_electronic_payment"/>
+                                    </setting>
+                                    <setting id="cash_rounding" string="Total Rounding" help="Define the smallest coinage of the currency used to pay by cash">
+                                        <field name="cash_rounding" readonly="has_active_session"/>
+                                        <div class="content-group mt16" invisible="not cash_rounding">
+                                            <div class="row mt16">
+                                                <label string="Rounding Method" for="rounding_method" class="col-lg-3 o_light_label"/>
+                                                <field name="rounding_method" required="cash_rounding" readonly="has_active_session" options="{'no_quick_create': True}"/>
+                                            </div>
+                                            <div class="row mt16">
+                                                <div class="col">
+                                                    <field name="only_round_cash_method" readonly="has_active_session"/>
+                                                    <label string="Apply only on cash methods" for="only_round_cash_method" class="o_light_label"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="use_fast_payment" title="Online payment, delivery payment, terminal payment, and methods that require customer identification are not supported for fast payment validation." help="Shortcut to skip payment screen">
+                                        <field name="use_fast_payment" string="One-click Payment"/>
+                                        <div class="content-group mt16" invisible="not use_fast_payment">
+                                            <label for="fast_payment_method_ids" class="fw-bold me-2"/>
+                                            <field name="fast_payment_method_ids" widget="many2many_tags" string="Payment Methods" options="{'no_create': True}" required="use_fast_payment" domain="[('id', 'in', payment_method_ids), ('payment_provider', '=', False), ('type', '!=', 'pay_later')]"/>
+                                        </div>
+                                    </setting>
+                                    <setting id="set_maximum_difference" help="Set a maximum difference allowed between expected and counted money during session closing">
+                                        <field name="set_maximum_difference"/>
+                                        <div class="content-group mt16" invisible="not set_maximum_difference">
+                                            <label for="amount_authorized_diff" string="Authorized Difference" class="fw-normal me-1"/>
+                                            <field name="amount_authorized_diff"/>
+                                        </div>
+                                    </setting>
+                                    <setting id="iface_tipproduct" string="Tips" help="Accept customer tips or convert change to a tip">
+                                        <field name="iface_tipproduct"/>
+                                        <div class="content-group" invisible="not iface_tipproduct">
+                                            <div class="row mt16" id="tip_product">
+                                                <label string="Tip Product" for="tip_product_id" class="col-lg-3 o_light_label"/>
+                                                <field name="tip_product_id"/>
+                                            </div>
+                                            <div>
+                                                <field name="set_tip_after_payment" class="oe_inline"/>
+                                                <label class="fw-normal" for="set_tip_after_payment" string="Add tip after payment"/>
+                                            </div>
+                                            <div class="d-flex" invisible="not set_tip_after_payment">
+                                                <label class="o_light_label col-lg-2" for="tip_percentage_1" string="Tip 1:"/>
+                                                <div class="o_row ms-2">
+                                                    <field name="tip_percentage_1"/>
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex" invisible="not set_tip_after_payment">
+                                                <label class="o_light_label col-lg-2" for="tip_percentage_2" string="Tip 2:"/>
+                                                <div class="o_row ms-2">
+                                                    <field name="tip_percentage_2"/>
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex" invisible="not set_tip_after_payment">
+                                                <label class="o_light_label col-lg-2" for="tip_percentage_3" string="Tip 3:"/>
+                                                <div class="o_row ms-2">
+                                                    <field name="tip_percentage_3"/>
+                                                    <span>%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                </div>
+                            </page>
+
+                            <page string="Products &amp; Pricing" name="products_pricing">
+                                <div class="row mt16 o_settings_container">
+                                    <setting id="limit_categories" help="Pick which product PoS categories are available">
+                                        <field name="limit_categories"/>
+                                        <div class="content-group mt16" invisible="not limit_categories">
+                                            <field name="iface_available_categ_ids" widget="many2many_tags"/>
+                                        </div>
+                                    </setting>
+                                    <setting id="multiple_prices_setting" string="Flexible Pricelists" help="Set multiple prices per product, automated discounts, etc.">
+                                        <field name="use_pricelist"/>
+                                        <div class="content-group" invisible="not use_pricelist">
+                                            <div class="row mt16">
+                                                <label string="Available" for="available_pricelist_ids" class="col-lg-3 o_light_label"/>
+                                                <field name="available_pricelist_ids" widget="many2many_tags" domain="['|',('company_id', '=', company_id),('company_id', '=', False)]"/>
+                                            </div>
+                                            <div class="row mt16">
+                                                <label string="Default" for="pricelist_id" class="col-lg-3 o_light_label"/>
+                                                <field name="pricelist_id" options="{'no_create': True}"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="price_control" string="Price Control" help="Restrict price modification to managers">
+                                        <field name="restrict_price_control"/>
+                                    </setting>
+                                    <setting id="product_prices" string="Product Prices" help="Product prices on receipts">
+                                        <field name="iface_tax_included" class="o_light_label" widget="radio"/>
+                                    </setting>
+                                    <setting id="manual_discount" help="Allow cashiers to set a discount per line">
+                                        <field name="manual_discount"/>
+                                    </setting>
+                                    <setting id="pos_global_discount" help="Adds a button to set a global discount">
+                                        <field name="module_pos_discount"/>
+                                    </setting>
+                                    <setting id="margin_and_cost" string="Show margins &amp; costs" help="Show margins &amp; costs on product information">
+                                        <field name="is_margins_costs_accessible_to_every_user"/>
+                                    </setting>
+                                    <setting id="fallback_nomenclature">
+                                        <label for="fallback_nomenclature_id" string="Fallback Nomenclature" class="col-lg-3 o_light_label"/>
+                                        <field name="fallback_nomenclature_id"/>
+                                    </setting>
+                                </div>
+                            </page>
+
+                            <page string="Accounting &amp; Fiscal" name="accounting_fiscal">
+                                <div class="row mt16 o_settings_container">
+                                    <setting string="Default Journal" id="pos_default_journals" help="Default journal for orders not invoiced">
+                                        <div class="content-group mt16">
+                                            <div class="row">
+                                                <label string="Orders Journal" for="journal_id" class="col-lg-3 o_light_label" options="{'no_open': True, 'no_create': True}"/>
+                                                <field name="journal_id" domain="[('company_id', '=', company_id), ('type', 'in', ('general', 'sale'))]" context="{'default_company_id': company_id, 'default_type': 'general'}" required="company_has_template"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="flexible_taxes" invisible="use_presets" string="Flexible Taxes" help="Use fiscal positions to get different taxes by order">
+                                        <field name="tax_regime_selection"/>
+                                        <div class="content-group mt16" invisible="not tax_regime_selection">
+                                            <div class="row">
+                                                <label string="Default" for="default_fiscal_position_id" class="col-lg-3 o_light_label"/>
+                                                <field name="default_fiscal_position_id"/>
+                                            </div>
+                                            <div class="row">
+                                                <label string="Allowed" for="fiscal_position_ids" class="col-lg-3 o_light_label"/>
+                                                <field name="fiscal_position_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="order_edit_tracking" help="Store edited orders in the backend">
+                                        <field name="order_edit_tracking"/>
+                                    </setting>
+                                    <setting string="Closing Entry by product" id="pos_closing_entry_by_product" help="Display breakdown of sales lines by product in closing entry">
+                                        <field name="use_closing_entry_by_product"/>
+                                    </setting>
+                                    <setting id="pos-avatax" help="Use automatic taxes mapping with Avatax">
+                                        <field name="module_pos_avatax"/>
+                                    </setting>
+                                    <setting id="pos_download_invoice" help="Download invoice on device whenever order is invoiced">
+                                        <field name="use_download_invoice"/>
+                                    </setting>
+                                </div>
+                            </page>
+
+                            <page string="Bills &amp; Receipts" name="bills_receipts">
+                                <div class="row mt16 o_settings_container">
+                                    <setting id="pos_header_footer" help="Add custom message to header and footer">
+                                        <field name="use_header_or_footer"/>
+                                        <div class="content-group mt16" invisible="not use_header_or_footer">
+                                            <div>
+                                                <label string="Header" for="receipt_header" class="col-lg-2 o_light_label"/>
+                                                <field name="receipt_header" placeholder="e.g. Company Address, Website"/>
+                                            </div>
+                                            <div>
+                                                <label string="Footer" for="receipt_footer" class="col-lg-2 o_light_label"/>
+                                                <field name="receipt_footer" placeholder="e.g. Return Policy, Thanks for shopping with us!"/>
+                                            </div>
+                                        </div>
+                                    </setting>
+                                    <setting id="auto_printing" help="Print receipts automatically once payment is registered">
+                                        <field name="iface_print_auto"/>
+                                    </setting>
+                                    <setting string="Early Receipt Printing" help="Allow printing receipt before payment" id="iface_printbill">
+                                        <field name="iface_printbill"/>
+                                    </setting>
+                                    <setting id="basic_receipt" help="Print gift ticket without prices">
+                                        <field name="basic_receipt"/>
+                                    </setting>
+                                    <setting id="pos_sms" help="Send Text receipt Using SMS">
+                                        <field name="module_pos_sms"/>
+                                    </setting>
+                                    <setting id="pos_contact_info" help="Fill in if shop info differs from company info">
+                                        <field name="use_custom_receipt_info"/>
+                                        <!-- The `phone`/`email`/`website`/`receipt_address` fields fall back to the
+                                             company values, so they double as placeholders for the custom ones. -->
+                                        <field name="phone" invisible="1"/>
+                                        <field name="email" invisible="1"/>
+                                        <field name="website" invisible="1"/>
+                                        <field name="receipt_address" invisible="1"/>
+                                        <div class="content-group row">
+                                            <label for="custom_phone" class="col-lg-3 o_light_label" string="Phone" invisible="not use_custom_receipt_info"/>
+                                            <field name="custom_phone" options="{'placeholder_field': 'phone'}" invisible="not use_custom_receipt_info"/>
+                                        </div>
+                                        <div class="content-group row">
+                                            <label for="custom_email" class="col-lg-3 o_light_label" string="Email" invisible="not use_custom_receipt_info"/>
+                                            <field name="custom_email" options="{'placeholder_field': 'email'}" invisible="not use_custom_receipt_info"/>
+                                        </div>
+                                        <div class="content-group row">
+                                            <label for="custom_website" class="col-lg-3 o_light_label" string="Website" invisible="not use_custom_receipt_info"/>
+                                            <field name="custom_website" options="{'placeholder_field': 'website'}" invisible="not use_custom_receipt_info"/>
+                                        </div>
+                                        <div class="content-group row">
+                                            <label for="custom_receipt_address" class="col-lg-3 o_light_label" string="Address" invisible="not use_custom_receipt_info"/>
+                                            <field name="custom_receipt_address" options="{'placeholder_field': 'receipt_address'}" invisible="not use_custom_receipt_info"/>
+                                        </div>
+                                        <div class="content-group row">
+                                            <label for="custom_logo" class="col-lg-3 o_light_label" string="Logo" invisible="not use_custom_receipt_info"/>
+                                            <field name="custom_logo" invisible="not use_custom_receipt_info" filename="custom_logo_name" options="{'accepted_file_extensions': '.jpg,.jpeg,.png,.webp,.svg,.ico,.bmp,.svf,.tif,.tiff'}"/>
+                                        </div>
+                                    </setting>
+                                </div>
+                            </page>
+
+                            <page string="Devices &amp; Printers" name="devices_printers">
+                                <div class="row mt16 o_settings_container">
+                                    <setting id="customer_display" string="Customer Display" help="Set background image of customer display">
+                                        <label for="customer_display_bg_img"/>
+                                        <field name="customer_display_bg_img" class="w-100" filename="customer_display_bg_img_name"/>
+                                    </setting>
                                     <setting id="other_devices" string="Receipt Printers" help="Connect printers to your PoS">
-                                        <field name="other_devices" />
+                                        <field name="other_devices"/>
                                         <div class="content-group" invisible="not other_devices">
                                             <div class="row mb-2">
                                                 <div class="col-lg-2 o_light_label">
                                                     <label string="Available" for="receipt_printer_ids"/>
                                                 </div>
                                                 <div class="col-lg-5">
-                                                    <field name="receipt_printer_ids"
-                                                        class="w-100 pt-1"
-                                                        widget="many2many_tags"
-                                                        context="{'default_use_type': 'receipt'}"
-                                                        options="{'no_quick_create': True}"/>
+                                                    <field name="receipt_printer_ids" class="w-100 pt-1" widget="many2many_tags" context="{'default_use_type': 'receipt'}" options="{'no_quick_create': True}"/>
                                                 </div>
                                                 <div class="col-lg-5">
                                                     <widget name="point_of_sale_test_epos"/>
@@ -80,33 +339,31 @@
                                                     <label string="Available" for="preparation_printer_ids"/>
                                                 </div>
                                                 <div class="col-lg-5">
-                                                    <field name="preparation_printer_ids"
-                                                        class="w-100 pt-1"
-                                                        widget="many2many_tags"
-                                                        context="{'default_use_type': 'preparation'}"
-                                                        options="{'no_quick_create': True}"/>
+                                                    <field name="preparation_printer_ids" class="w-100 pt-1" widget="many2many_tags" context="{'default_use_type': 'preparation'}" options="{'no_quick_create': True}"/>
                                                 </div>
                                             </div>
                                         </div>
                                     </setting>
-                                    <setting>
-                                        <field name="default_partner_id" />
+                                    <setting id="usb_scale" string="USB Scale" help="Connect a compatible scale directly via USB to this device">
+                                        <widget name="point_of_sale_connect_web_serial_scale"/>
+                                    </setting>
+                                    <setting string="Internal Notes" help="Add internal notes on order lines" id="iface_orderline_notes">
+                                        <div class="content-group">
+                                            <div class="mt16">
+                                                <label string="Note Models" for="note_ids" class="o_light_label me-2"/>
+                                                <field name="note_ids" widget="many2many_tags" readonly="has_active_session" placeholder="All notes"/>
+                                            </div>
+                                            <div>
+                                                <button name="%(point_of_sale.action_pos_note_model)d" icon="east" type="action" string="Notes" class="btn-link"/>
+                                            </div>
+                                        </div>
                                     </setting>
                                 </div>
                             </page>
-                            <page name="checklist" string="Check list">
-                                <widget name="lna_checklist" />
-                            </page>
                         </notebook>
-                        <div groups="base.group_system">
-                            <p>
-                                More settings: <a href="#" name="%(action_pos_configuration)d" type="action" class="btn-link o_form_uri" role="button">Configurations > Settings</a>
-                            </p>
-                        </div>
                     </div>
                 </sheet>
 
-                <!-- Replace the default save/discard buttons so that when any of the buttons is clicked, the modal immediately closes. -->
                 <footer invisible="not context.get('pos_config_open_modal', False)">
                     <button string="Save" special="save" class="btn-primary"/>
                     <button class="btn-secondary" special="cancel"/>
@@ -120,8 +377,8 @@
         <field name="model">pos.config</field>
         <field name="arch" type="xml">
             <list string="Point of Sale Configuration">
-                <field name="name" />
-                <field name="company_id"  options="{'no_create': True}" groups="base.group_multi_company"/>
+                <field name="name"/>
+                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                 <field name="last_session_closing_date" string="Closing"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="current_cash_register_balance" widget="monetary" string="Balance"/>
@@ -146,7 +403,7 @@
         <field name="res_model">pos.config</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="domain"></field>
-        <field name="search_view_id" ref="view_pos_config_search" />
+        <field name="search_view_id" ref="view_pos_config_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new PoS
@@ -156,12 +413,19 @@
         </field>
     </record>
 
+    <menuitem id="menu_pos_config_pos"
+        name="Point of Sale"
+        parent="menu_point_config_product"
+        sequence="1"
+        action="action_pos_config_kanban"
+        groups="group_pos_manager"/>
+
     <record id="action_pos_config_tree" model="ir.actions.act_window">
         <field name="name">Point of Sale List</field>
         <field name="res_model">pos.config</field>
         <field name="view_mode">list,form</field>
         <field name="domain"></field>
-        <field name="search_view_id" ref="view_pos_config_search" />
+        <field name="search_view_id" ref="view_pos_config_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new PoS
@@ -174,7 +438,7 @@
     <record id="pos_product_attribute_action" model="ir.actions.act_window">
         <field name="name">Attributes</field>
         <field name="res_model">product.attribute</field>
-        <field name="view_id" ref="product.attribute_tree_view" />
+        <field name="view_id" ref="product.attribute_tree_view"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create product attributes
@@ -184,14 +448,14 @@
         </field>
     </record>
 
-    <!-- Products sub Category -->
     <menuitem id="menu_products_pos_category"
         action="point_of_sale.product_pos_category_action"
         parent="point_of_sale.pos_menu_products_configuration"
         sequence="1"/>
+
     <menuitem id="pos_menu_products_attribute_action"
         action="pos_product_attribute_action"
-        parent="point_of_sale.pos_menu_products_configuration"  groups="product.group_product_variant" sequence="2"/>
+        parent="point_of_sale.pos_menu_products_configuration" groups="product.group_product_variant" sequence="2"/>
 
     <menuitem id="menu_pos_dashboard" action="action_pos_config_kanban" parent="menu_point_root" name="Dashboard" sequence="1"/>
 

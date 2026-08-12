@@ -127,6 +127,12 @@ class PosConfig(models.Model):
     available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists',
         help="Make several pricelists available in the Point of Sale. You can also apply a pricelist to specific customers from their contact form (in Sales tab). To be valid, this pricelist must be listed here as an available pricelist. Otherwise the default pricelist will apply.")
     company_id = fields.Many2one('res.company', string='Company', required=True, index=True, default=lambda self: self.env.company)
+    # Lets the localization modules show/hide their settings on this form, the way
+    # they used to do it with `res.config.settings.country_code`.
+    country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
+    is_kiosk = fields.Boolean(string="Is Kiosk", compute='_compute_is_kiosk',
+        help="Technical field, set by the self-order module. A kiosk is unattended, "
+             "so the settings that need a cashier do not apply to it.")
     group_pos_manager_id = fields.Many2one('res.groups', string='Point of Sale Manager Group', default=_get_group_pos_manager,
         help='This field is there to pass the id of the pos manager group to the point of sale client.')
     group_pos_user_id = fields.Many2one('res.groups', string='Point of Sale User Group', default=_get_group_pos_user,
@@ -334,6 +340,10 @@ class PosConfig(models.Model):
     def _compute_cash_control(self):
         for config in self:
             config.cash_control = bool(config.payment_method_ids.filtered(lambda pm: pm.type == 'cash'))
+
+    def _compute_is_kiosk(self):
+        # Overridden by `pos_self_order`, which is the module introducing kiosks.
+        self.is_kiosk = False
 
     @api.depends('company_id')
     def _compute_company_has_template(self):
@@ -656,12 +666,15 @@ class PosConfig(models.Model):
                 vals['tip_product_id'] = False
                 vals['set_tip_after_payment'] = False
 
+            self._reset_disabled_features_on_vals(vals)
             self._check_header_footer(vals)
 
         pos_configs = super().create(vals_list)
         pos_configs._create_sequences()
         pos_configs.sudo()._check_modules_to_install()
         pos_configs.sudo()._check_groups_implied()
+        pos_configs.sudo()._apply_feature_groups()
+        pos_configs._sync_trusted_config_ids()
         pos_configs._update_preparation_printers_menuitem_visibility()
         # If you plan to add something after this, use a new environment. The one above is no longer valid after the modules install.
         return pos_configs
@@ -715,6 +728,61 @@ class PosConfig(models.Model):
             else:
                 raise UserError(_('The default tip product is missing. Please manually specify the tip product. (See Tips field.)'))
 
+    def _get_disabled_feature_resets(self):
+        """ Map a master switch to the values to reset when it is turned off. """
+        return {
+            'use_header_or_footer': {'receipt_header': False, 'receipt_footer': False},
+            'limit_categories': {'iface_available_categ_ids': [fields.Command.clear()]},
+        }
+
+    def _reset_disabled_features_on_vals(self, vals):
+        """ Clear the values that only make sense while their master switch is on.
+        They used to be reset by the computes of the settings view.
+        """
+        for switch, resets in self._get_disabled_feature_resets().items():
+            if switch in vals and not vals[switch]:
+                for fname, value in resets.items():
+                    vals.setdefault(fname, value)
+
+    def _get_feature_groups(self):
+        """ Map a pos.config feature to the group that must be activated to make
+        the rest of the feature usable outside of the PoS.
+        """
+        return {
+            'use_presets': 'point_of_sale.group_pos_preset',
+            'use_pricelist': 'product.group_product_pricelist',
+            'cash_rounding': 'account.group_cash_rounding',
+        }
+
+    def _apply_feature_groups(self, vals=None):
+        """ Enabling one of these features on a PoS must reveal the matching menus
+        and fields to every user. This used to be done by `res.config.settings`
+        through its `group_*` fields.
+        """
+        groups = self.env['res.groups']
+        for fname, group_xmlid in self._get_feature_groups().items():
+            if vals is not None and fname not in vals:
+                continue
+            if any(config[fname] for config in self):
+                groups |= self.env.ref(group_xmlid)
+        if groups:
+            groups.implied_by_ids |= self.env.ref('base.group_user')
+
+    def _sync_trusted_config_ids(self):
+        """ Sharing open orders only works both ways, so mirror the link on the
+        other side of the relation.
+        """
+        for config in self:
+            for trusted in config.trusted_config_ids:
+                if config not in trusted.trusted_config_ids:
+                    trusted._add_trusted_config_id(config)
+            for other in self.search([
+                ('trusted_config_ids', 'in', config.id),
+                ('id', '!=', config.id),
+                ('id', 'not in', config.trusted_config_ids.ids),
+            ]):
+                other._remove_trusted_config_id(config)
+
     def _update_preparation_printers_menuitem_visibility(self):
         prepa_printers_menuitem = self.sudo().env.ref('point_of_sale.menu_pos_preparation_printer', raise_if_not_found=False)
         if prepa_printers_menuitem:
@@ -739,6 +807,7 @@ class PosConfig(models.Model):
                 and (default_tip := self._get_default_tip_product()):
             vals['tip_product_id'] = default_tip.id
 
+        self._reset_disabled_features_on_vals(vals)
         self._check_header_footer(vals)
         self._reset_default_on_vals(vals)
         if ('use_order_printer' in vals and not vals['use_order_printer']):
@@ -776,6 +845,9 @@ class PosConfig(models.Model):
         self.sudo()._set_fiscal_position()
         self.sudo()._check_modules_to_install()
         self.sudo()._check_groups_implied()
+        self.sudo()._apply_feature_groups(vals)
+        if 'trusted_config_ids' in vals:
+            self._sync_trusted_config_ids()
         if 'use_order_printer' in vals:
             self._update_preparation_printers_menuitem_visibility()
         return result

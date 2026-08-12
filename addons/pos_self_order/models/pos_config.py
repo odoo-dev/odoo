@@ -9,7 +9,8 @@ import qrcode
 import qrcode.image.svg
 
 from odoo import _, api, fields, models, release
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.tools.misc import split_every
 
 
 class PosConfig(models.Model):
@@ -168,7 +169,7 @@ class PosConfig(models.Model):
     def write(self, vals):
         self._prepare_self_order_splash_screen([vals])
         for record in self:
-            if vals.get('self_ordering_mode') == 'kiosk' or (vals.get('pos_self_ordering_mode') == 'mobile' and vals.get('pos_self_ordering_service_mode') == 'counter'):
+            if vals.get('self_ordering_mode') == 'kiosk':
                 vals['self_ordering_pay_after'] = 'each'
 
             if (not vals.get('module_pos_restaurant') and not record.module_pos_restaurant) and vals.get('self_ordering_mode') == 'mobile':
@@ -186,16 +187,52 @@ class PosConfig(models.Model):
             if vals.get('self_ordering_mode') == 'mobile' and vals.get('self_ordering_pay_after') == 'meal':
                 vals['self_ordering_service_mode'] = 'table'
 
+        leaving_kiosk = self._apply_kiosk_constraints(vals)
         res = super().write(vals)
+        leaving_kiosk._drop_kiosk_only_cash_methods()
         self._ensure_public_attachments()
         self._prepare_self_order_custom_btn()
         return res
+
+    def _apply_kiosk_constraints(self, vals):
+        """ A kiosk is unattended, so it cannot be a restaurant PoS. Returns the
+        configs that are leaving kiosk mode, as they may keep cash payment
+        methods that are only allowed on a kiosk.
+        """
+        if 'self_ordering_mode' not in vals:
+            return self.browse()
+
+        if vals['self_ordering_mode'] == 'kiosk':
+            vals['module_pos_restaurant'] = False
+            return self.browse()
+
+        for record in self:
+            if not vals.get('module_pos_restaurant') and not record.module_pos_restaurant:
+                vals.setdefault('self_ordering_service_mode', 'counter')
+
+        if 'payment_method_ids' in vals:
+            return self.browse()
+        return self.filtered(lambda c: c.self_ordering_mode == 'kiosk')
+
+    def _drop_kiosk_only_cash_methods(self):
+        """ Cash is only allowed on a kiosk when no other (non kiosk) PoS uses the
+        method, so it has to be dropped when the PoS stops being a kiosk.
+        """
+        for record in self:
+            cash_methods = record.payment_method_ids.filtered(lambda pm: pm.type == 'cash' and not pm.payment_provider)
+            if cash_methods:
+                record.payment_method_ids = [fields.Command.unlink(pm.id) for pm in cash_methods]
 
     def _ensure_public_attachments(self):
         attachments = self.self_ordering_image_background_ids | self.self_ordering_image_home_ids
         attachments = attachments.filtered(lambda a: not a.public)
         if attachments:
             attachments.sudo().write({"public": True})
+
+    @api.depends("self_ordering_mode")
+    def _compute_is_kiosk(self):
+        for record in self:
+            record.is_kiosk = record.self_ordering_mode == 'kiosk'
 
     @api.depends("module_pos_restaurant")
     def _compute_self_order(self):
@@ -208,6 +245,19 @@ class PosConfig(models.Model):
         if not release.version_info[-1]:
             selection_each_label = f"{selection_each_label} {_('(require Odoo Enterprise)')}"
         return [("meal", _("Meal")), ("each", selection_each_label)]
+
+    @api.onchange('self_ordering_default_language_id', 'self_ordering_available_language_ids')
+    def _onchange_self_ordering_languages(self):
+        if self.self_ordering_default_language_id not in self.self_ordering_available_language_ids:
+            self.self_ordering_available_language_ids |= self.self_ordering_default_language_id
+        if not self.self_ordering_default_language_id and self.self_ordering_available_language_ids:
+            self.self_ordering_default_language_id = self.self_ordering_available_language_ids[0]
+
+    @api.constrains('self_ordering_pay_after', 'self_ordering_mode')
+    def _check_self_ordering_pay_after(self):
+        for record in self:
+            if record.self_ordering_mode == 'kiosk' and record.self_ordering_pay_after != 'each':
+                raise ValidationError(_("Only pay after each is available with kiosk mode."))
 
     @api.constrains('self_ordering_default_user_id')
     def _check_default_user(self):
@@ -288,6 +338,140 @@ class PosConfig(models.Model):
             "url": self._get_self_order_route(),
             "target": "new",
         }
+
+    def custom_link_action(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "pos_self_order.custom_link",
+            "views": [[False, "list"]],
+            "domain": ['|', ['pos_config_ids', 'in', self.id], ["pos_config_ids", "=", False]],
+        }
+
+    def update_access_tokens(self):
+        self.ensure_one()
+        self._update_access_token()
+
+    def _generate_excel(self, rows, headers):
+        import xlsxwriter  # noqa: PLC0415
+        with BytesIO() as buffer:
+            with xlsxwriter.Workbook(buffer, {'in_memory': True}) as workbook:
+                worksheet = workbook.add_worksheet()
+
+                for col, header in enumerate(headers):
+                    worksheet.write(0, col, header)
+                for row_idx, row in enumerate(rows, start=1):
+                    for col_idx, cell in enumerate(row):
+                        worksheet.write(row_idx, col_idx, cell)
+            return buffer.getvalue()
+
+    def get_pos_qr_stands(self):
+        """Redirect to get the free stands with the data of QR codes for the current POS config"""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.client",
+            "tag": "pos_qr_stands",
+            "params": {
+                "data": self.get_pos_qr_order_data(),
+            },
+        }
+
+    def generate_qr_codes_zip(self):
+        if self.self_ordering_mode not in ['mobile', 'consultation']:
+            raise ValidationError(_("QR codes can only be generated in mobile or consultation mode."))
+
+        qr_images = []
+        excel_rows = []
+
+        if self.module_pos_restaurant:
+            table_ids = self.floor_ids.table_ids
+
+            if not table_ids:
+                raise ValidationError(_("In Self-Order mode, you must have at least one table to generate QR codes"))
+
+            for row_num, table in enumerate(table_ids, start=1):
+                table_number = table.table_number
+                floor_name = table.floor_id.name
+                url = unquote(self._get_self_order_url(table.id))
+                qr_images.append({
+                    'images': self._generate_single_qr_code__(url),
+                    'name': f"{floor_name} - {table_number}",
+                })
+                excel_rows.append([self.name, floor_name, table_number, url])
+            headers = ['Pos config', 'Floor', 'Table id', 'Url shortened']
+        else:
+            url = unquote(self._get_self_order_url())
+            qr_images.append({
+                'images': self._generate_single_qr_code__(url),
+                'name': "generic",
+            })
+            excel_rows.append([self.name, url])
+            headers = ['Pos config', 'Url shortened']
+
+        xlsx_content = self._generate_excel(excel_rows, headers)
+
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", 0) as zip_file:
+            zip_file.writestr("Table_url.xlsx", xlsx_content)
+            for index, qr_image in enumerate(qr_images):
+                with zip_file.open(f"{qr_image['name']} ({index + 1}).png", "w") as buf:
+                    qr_image['images']['png'].save(buf, format="PNG")
+                with zip_file.open(f"{qr_image['name']} ({index + 1}).svg", "w") as buf:
+                    buf.write(qr_image['images']['svg'].to_string())
+        zip_buffer.seek(0)
+
+        self.env["ir.attachment"].search([
+            ("name", "=", "self_order_qr_code.zip"),
+        ]).unlink()
+
+        attachment_id = self.env["ir.attachment"].create({
+            "name": "self_order_qr_code.zip",
+            "type": "binary",
+            "raw": zip_buffer.read(),
+            "res_model": self._name,
+            "res_id": self.id,
+        })
+
+        return {
+            "type": "ir.actions.act_url",
+            "url": f"/web/content/{attachment_id.id}",
+            "target": "new",
+        }
+
+    def generate_qr_codes_page(self):
+        """
+        Generate the data needed to print the QR codes page
+        """
+        name = ""
+        url = unquote(self._get_self_order_url())
+        if self.self_ordering_mode == 'mobile' and self.module_pos_restaurant:
+            table_ids = self.floor_ids.table_ids
+            if not table_ids:
+                raise ValidationError(_("In Self-Order mode, you must have at least one table to generate QR codes"))
+
+            if self.self_ordering_service_mode == 'table':
+                url = unquote(self._get_self_order_url(table_ids[0].id))
+                name = table_ids[0].table_number
+
+        return self.env.ref("pos_self_order.report_self_order_qr_codes_page").report_action(
+            [], data={
+                'pos_name': self.name,
+                'floors': [
+                    {
+                        "name": floor.get("name"),
+                        "type": floor.get("type"),
+                        "table_rows": list(split_every(3, floor["tables"], list)),
+                    }
+                    for floor in self._get_qr_code_data()
+                ],
+                'table_mode': self.self_ordering_mode and self.module_pos_restaurant and self.self_ordering_service_mode == 'table',
+                'self_order': self.self_ordering_mode == 'mobile',
+                'table_example': {
+                    'name': name,
+                    'decoded_url': url or "",
+                }
+            }
+        )
 
     def _load_self_data_models(self):
         return ['pos.session', 'pos.preset', 'resource.calendar.attendance', 'pos.order', 'pos.order.line', 'pos.payment', 'pos.payment.method', 'res.partner',

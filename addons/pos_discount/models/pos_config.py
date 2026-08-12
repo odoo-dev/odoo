@@ -20,6 +20,30 @@ class PosConfig(models.Model):
         for conf in configs:
             conf.discount_product_id = product if conf.module_pos_discount and product and (not product.company_id or product.company_id == conf.company_id) else False
 
+    def _reset_discount_product_on_vals(self, vals):
+        """ Prefill (resp. clear) the discount product when the global discount
+        feature is enabled (resp. disabled), so that the user does not have to
+        pick the default product themselves.
+        """
+        if 'module_pos_discount' not in vals or 'discount_product_id' in vals:
+            return
+        if not vals['module_pos_discount']:
+            vals['discount_product_id'] = False
+            return
+        default_product = self.env.ref('pos_discount.product_product_consumable', raise_if_not_found=False)
+        if not default_product:
+            return
+        for config in self:
+            if config.discount_product_id:
+                continue
+            if not default_product.company_id or default_product.company_id == config.company_id:
+                config.discount_product_id = default_product
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._reset_discount_product_on_vals(vals)
+        return res
+
     def open_ui(self):
         for config in self:
             if not self.current_session_id and config.module_pos_discount and not config.discount_product_id:

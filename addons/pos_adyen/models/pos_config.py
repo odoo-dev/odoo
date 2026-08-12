@@ -18,3 +18,9 @@ class PosConfig(models.Model):
         for config in self:
             if config.adyen_ask_customer_for_tip and (not config.tip_product_id or not config.iface_tipproduct):
                 raise ValidationError(_("Please configure a tip product for POS %s to support tipping with Adyen.", config.name))
+
+    def write(self, vals):
+        # Asking the terminal for a tip only makes sense when tips are enabled.
+        if 'iface_tipproduct' in vals and not vals['iface_tipproduct']:
+            vals.setdefault('adyen_ask_customer_for_tip', False)
+        return super().write(vals)

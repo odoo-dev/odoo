@@ -1,34 +1,31 @@
 <?xml version="1.0"?>
 <odoo>
-    <record id="res_config_settings_view_form" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.inherit.pos_restaurant</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+    <record id="pos_config_view_form_inherit_pos_restaurant" model="ir.ui.view">
+        <field name="name">pos.config.form.view.inherit.pos_restaurant</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
-            <div id="warning_text_pos_restaurant" position="replace"/>
-            <block id="restaurant_section" position="inside">
-                <setting id="floor_and_table_map" string="Floors &amp; Tables Map" help="Design floors and assign orders to tables" documentation="/applications/sales/point_of_sale/restaurant/floors_tables.html" invisible="use_kiosk_mode or not pos_module_pos_restaurant">
-                    <div class="content-group">
-                        <div class="mt16">
-                            <label string="Floors" for="pos_floor_ids" class="o_light_label me-2"/>
-                            <field name="pos_floor_ids" widget="many2many_tags" readonly="pos_has_active_session" />
-                        </div>
-                        <div>
-                            <button name="%(pos_restaurant.action_restaurant_floor_form)d" icon="east" type="action" string="Floors" class="btn-link"/>
-                        </div>
+            <xpath expr="//setting[@id='is_restaurant']" position="inside">
+                <div class="content-group mt16" invisible="not module_pos_restaurant">
+                    <div class="row">
+                        <label string="Floors" for="floor_ids" class="o_light_label me-2"/>
+                        <field name="floor_ids" widget="many2many_tags" readonly="has_active_session"/>
                     </div>
+                    <div>
+                        <button name="%(pos_restaurant.action_restaurant_floor_form)d" icon="east" type="action" string="Floors" class="btn-link"/>
+                    </div>
+                </div>
+            </xpath>
+            <xpath expr="//page[@name='interface_general']/div" position="inside">
+                <setting invisible="not module_pos_restaurant" help="Select the table first or after registering the order">
+                    <field name="default_screen" widget="radio"/>
                 </setting>
-            </block>
-            <block id="pos_interface_section" position="inside">
-                <setting invisible="not pos_module_pos_restaurant or use_kiosk_mode" help="Select the table first or after registering the order">
-                    <field name="pos_default_screen" widget="radio"/>
+            </xpath>
+            <xpath expr="//page[@name='devices_printers']/div" position="inside">
+                <setting string="Automatic course allocation" help="Assign categories to default course" id="use_course_allocation" invisible="not module_pos_restaurant">
+                    <field name="use_course_allocation"/>
                 </setting>
-            </block>
-            <block id="pos_preparation_section" position="inside">
-                <setting string="Automatic course allocation" help="Assign categories to default course" id="use_course_allocation" invisible="not pos_module_pos_restaurant">
-                    <field name="pos_use_course_allocation"/>
-                </setting>
-            </block>
+            </xpath>
         </field>
     </record>
 </odoo>
