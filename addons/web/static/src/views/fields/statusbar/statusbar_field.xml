@@ -13,7 +13,7 @@
     </t>
 
     <t t-name="web.StatusBarField">
-        <div class="o_statusbar_status" t-ref="this.rootRef" role="radiogroup" aria-label="Statusbar">
+        <div class="o_statusbar_status o_switcher" t-ref="this.rootRef" role="radiogroup" aria-label="Statusbar">
             <Dropdown position="'bottom-end'">
                 <button
                     t-ref="this.afterRef"
@@ -45,6 +45,7 @@
                     t-out="item.label"
                     t-on-click="() => this.selectItem(item)"
                 />
+                <i t-if="!item_last" class="oi align-self-center opacity-75 d-none d-md-inline" data-icon="chevron_forward"/>
             </t>
             <Dropdown position="'bottom-start'">
                 <button
