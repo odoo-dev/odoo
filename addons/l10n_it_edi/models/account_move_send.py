@@ -23,7 +23,7 @@ class AccountMoveSend(models.AbstractModel):
 
     @api.model
     def _display_attachments_widget(self, edi_format, sending_methods):
-        return edi_format == 'it_edi_xml' and 'it_edi_send' in sending_methods or super()._display_attachments_widget(edi_format, sending_methods)
+        return edi_format == 'it_edi_xml' or 'it_edi_send' in sending_methods or super()._display_attachments_widget(edi_format, sending_methods)
 
     # -------------------------------------------------------------------------
     # ALERTS
