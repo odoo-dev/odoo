@@ -124,3 +124,13 @@ class ResPartner(models.Model):
     def _unlink_if_pos_no_orders(self):
         if self.sudo().pos_order_ids:
             raise ValidationError(_('You cannot delete a customer that has point of sales orders. You can archive it instead.'))
+
+    def _get_current_partner(self, *, pos_order=False, **kwargs):
+        """Override `portal` to get current partner from pos_order if user is not signed up."""
+        if pos_order:
+            public_user = self.env.ref('base.public_user')
+            return (
+                (pos_order.partner_id != public_user and pos_order.partner_id)
+                or self.env["res.partner"]  # Avoid returning public user's partner
+            )
+        return super()._get_current_partner(pos_order=pos_order, **kwargs)
