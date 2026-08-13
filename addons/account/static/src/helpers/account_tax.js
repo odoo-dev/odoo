@@ -104,6 +104,7 @@ export const accountTaxHelpers = {
             if (batch.length > 0) {
                 const same_batch =
                     tax.amount_type === batch[0].amount_type &&
+                    tax.is_tax_on_margin === batch[0].is_tax_on_margin &&
                     (special_mode || this.is_price_included(tax, { document_tax_mode }) === this.is_price_included(batch[0], { document_tax_mode })) &&
                     tax.include_base_amount === batch[0].include_base_amount &&
                     ((tax.include_base_amount && !is_base_affected) || !tax.include_base_amount);
@@ -228,6 +229,14 @@ export const accountTaxHelpers = {
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
     eval_tax_amount_price_included(tax, batch, raw_base, evaluation_context) {
+        if (tax.is_tax_on_margin) {
+            const grossMargin = evaluation_context.margin_amount * evaluation_context.quantity;
+            const totalPercentage =
+                batch.reduce((sum, batchTax) => sum + batchTax.amount, 0) / 100.0;
+            const toPriceExcludedFactor =
+                totalPercentage !== -1 ? 1 / (1 + totalPercentage) : 0.0;
+            return (grossMargin * toPriceExcludedFactor * tax.amount) / 100.0;
+        }
         if (tax.amount_type === "percent") {
             const total_percentage =
                 batch.reduce((sum, batch_tax) => sum + batch_tax.amount, 0) / 100.0;
@@ -247,6 +256,10 @@ export const accountTaxHelpers = {
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
     eval_tax_amount_price_excluded(tax, batch, raw_base, evaluation_context) {
+        if (tax.is_tax_on_margin) {
+            const grossMargin = evaluation_context.margin_amount * evaluation_context.quantity;
+            return (grossMargin * tax.amount) / 100.0;
+        }
         if (tax.amount_type === "percent") {
             return (raw_base * tax.amount) / 100.0;
         }
@@ -280,6 +293,7 @@ export const accountTaxHelpers = {
             special_mode = null,
             filter_tax_function = null,
             document_tax_mode = null,
+            margin_amount = 0.0,
         } = {}
     ) {
         const self = this;
@@ -337,6 +351,7 @@ export const accountTaxHelpers = {
             special_mode: special_mode,
             filter_tax_function: filter_tax_function,
             document_tax_mode: document_tax_mode,
+            margin_amount: margin_amount,
         });
         let sorted_taxes = batching_results.sorted_taxes;
         const taxes_data = {};
@@ -462,21 +477,32 @@ export const accountTaxHelpers = {
         return {
             total_excluded: total_excluded,
             total_included: total_included,
-            taxes_data: taxes_data_list.map((tax_data) =>
-                Object.assign(
-                    {},
-                    {
-                        tax: tax_data.tax,
-                        taxes: tax_data.taxes,
-                        group: batching_results.group_per_tax[tax_data.tax.id],
-                        batch: batching_results.batch_per_tax[tax_data.tax.id],
-                        tax_amount: tax_data.tax_amount,
-                        price_include: tax_data.price_include,
-                        base_amount: tax_data.base,
-                        is_reverse_charge: tax_data.is_reverse_charge || false,
+            taxes_data: taxes_data_list.map((tax_data) => {
+                let baseAmount = tax_data.base;
+                const marginData = {};
+                if (tax_data.tax.is_tax_on_margin) {
+                    const grossMargin = margin_amount * quantity;
+                    marginData.margin_purchase_amount = raw_base - grossMargin;
+                    baseAmount = grossMargin;
+                    if (tax_data.price_include && (!special_mode || special_mode === "total_included")) {
+                        baseAmount -= tax_data.batch.reduce(
+                            (sum, batchTax) => sum + taxes_data[batchTax.id].tax_amount,
+                            0
+                        );
                     }
-                )
-            ),
+                }
+                return {
+                    tax: tax_data.tax,
+                    taxes: tax_data.taxes,
+                    group: batching_results.group_per_tax[tax_data.tax.id],
+                    batch: batching_results.batch_per_tax[tax_data.tax.id],
+                    tax_amount: tax_data.tax_amount,
+                    price_include: tax_data.price_include,
+                    base_amount: baseAmount,
+                    is_reverse_charge: tax_data.is_reverse_charge || false,
+                    ...marginData,
+                };
+            }),
         };
     },
 
@@ -678,6 +704,7 @@ export const accountTaxHelpers = {
             price_unit: load("price_unit", 0.0),
             quantity: load("quantity", 0.0),
             discount: load("discount", 0.0),
+            margin_amount: load("margin_amount", 0.0),
             currency_id: currency,
             sign: load("sign", 1.0),
             special_mode: kwargs.special_mode || null,
@@ -739,6 +766,7 @@ export const accountTaxHelpers = {
                 special_mode: base_line.special_mode,
                 filter_tax_function: base_line.filter_tax_function,
                 document_tax_mode: base_line.document_tax_mode,
+                margin_amount: base_line.margin_amount,
             }
         );
 
@@ -1976,6 +2004,7 @@ export const accountTaxHelpers = {
                 price_unit: base_line.quantity * price_unit_after_discount,
                 quantity: 1.0,
                 discount: 0.0,
+                margin_amount: base_line.quantity * base_line.margin_amount,
             });
             const raw_grouping_key = {
                 tax_ids: new_base_line.tax_ids.map((tax) => tax.id),
@@ -2004,6 +2033,7 @@ export const accountTaxHelpers = {
             let target_base_line = base_line_map[grouping_key_json];
             if (target_base_line) {
                 target_base_line.price_unit += new_base_line.price_unit;
+                target_base_line.margin_amount += new_base_line.margin_amount;
                 target_base_line.tax_details = this.merge_tax_details(
                     target_base_line.tax_details,
                     base_line.tax_details

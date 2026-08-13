@@ -709,6 +709,13 @@ class PurchaseOrder(models.Model):
         for order in self:
             if order.state not in ['draft', 'sent']:
                 continue
+            missing_margin_lines = order.order_line.filtered(
+                lambda line: line.has_tax_on_margin and order.currency_id.is_zero(line.margin_amount)
+            )
+            if missing_margin_lines:
+                raise UserError(_(
+                    "A gross margin per unit is required before confirming every line that uses a Tax on Margin."
+                ))
             error_msg = order._confirmation_error_message()
             if error_msg:
                 raise UserError(error_msg)

@@ -36,6 +36,12 @@ class PurchaseOrderLine(models.Model):
         store=True, readonly=False)
     tax_ids = fields.Many2many('account.tax', string='Taxes', context={'active_test': False, 'hide_original_tax_ids': True})
     document_tax_mode = fields.Selection(related='order_id.document_tax_mode')
+    has_tax_on_margin = fields.Boolean(compute='_compute_has_tax_on_margin')
+    margin_amount = fields.Monetary(
+        string='Gross Margin per Unit',
+        currency_field='currency_id',
+        help='Gross margin per unit, including the price-included margin tax.',
+    )
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     uom_id = fields.Many2one('uom.uom', string='Unit', domain="[('id', 'in', allowed_uom_ids)]", ondelete='restrict')
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], change_default=True, index='btree_not_null', ondelete='restrict')
@@ -123,7 +129,7 @@ class PurchaseOrderLine(models.Model):
     technical_price_unit = fields.Float(help="Technical field for price computation", readonly=False, store=True,
                                         compute='_compute_price_unit_and_date_planned_and_name')
 
-    @api.depends('product_qty', 'price_unit', 'tax_ids', 'discount', 'document_tax_mode')
+    @api.depends('product_qty', 'price_unit', 'tax_ids', 'discount', 'document_tax_mode', 'margin_amount')
     def _compute_amount(self):
         AccountTax = self.env['account.tax']
         for line in self:
@@ -138,6 +144,11 @@ class PurchaseOrderLine(models.Model):
                 tax_data['tax_amount_currency'] * tax_data['tax'].non_deductible_amount
                 for tax_data in base_line['tax_details']['taxes_data']
             )
+
+    @api.depends('tax_ids', 'tax_ids.is_tax_on_margin')
+    def _compute_has_tax_on_margin(self):
+        for line in self:
+            line.has_tax_on_margin = any(line.tax_ids.mapped('is_tax_on_margin'))
 
     def _prepare_base_line_for_taxes_computation(self):
         """ Convert the current record to a dictionary in order to use the generic taxes computation method
@@ -699,6 +710,7 @@ class PurchaseOrderLine(models.Model):
             'quantity': -self.qty_to_invoice if move and move.move_type == 'in_refund' else self.qty_to_invoice,
             'discount': self.discount,
             'price_unit': self.currency_id._convert(self.price_unit, aml_currency, self.company_id, date, round=False),
+            'margin_amount': self.currency_id._convert(self.margin_amount, aml_currency, self.company_id, date, round=False),
             'tax_ids': [(6, 0, self.tax_ids.ids)],
             'purchase_line_id': self.id,
             'is_downpayment': self.is_downpayment,

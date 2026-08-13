@@ -296,6 +296,13 @@
                                         widget="many2one_uom"
                                         force_save="1" optional="show"/>
                                     <field name="price_unit" readonly="qty_invoiced != 0"/>
+                                    <field name="has_tax_on_margin" column_invisible="True"/>
+                                    <field name="margin_amount"
+                                           string="Gross Margin/Unit"
+                                           required="has_tax_on_margin"
+                                           invisible="not has_tax_on_margin"
+                                           readonly="qty_invoiced != 0"
+                                           optional="show"/>
                                     <field name="tax_ids" widget="many2many_tax_tags" domain="[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id), ('active', '=', True)]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_create': True}" optional="show" readonly="is_downpayment"/>
                                     <field name="discount" string="Disc.%" width="50px" readonly="qty_invoiced != 0" optional="hide"/>
                                     <field name="price_subtotal" string="Amount" column_invisible="parent.document_tax_mode == 'tax_included'"/>
@@ -326,6 +333,10 @@
                                                 <field name="qty_received" string="Received Quantity" invisible="parent.state != 'purchase'" readonly="qty_received_method != 'manual'"/>
                                                 <field name="qty_invoiced" string="Billed Quantity" invisible="parent.state != 'purchase'"/>
                                                 <field name="price_unit"/>
+                                                <field name="has_tax_on_margin" invisible="1"/>
+                                                <field name="margin_amount"
+                                                       required="has_tax_on_margin"
+                                                       invisible="not has_tax_on_margin"/>
                                                 <field name="discount"/>
                                                 <field name="tax_ids" widget="many2many_tax_tags" domain="[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]" options="{'no_create': True}"/>
                                             </group>

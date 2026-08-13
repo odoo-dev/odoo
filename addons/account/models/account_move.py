@@ -1218,7 +1218,7 @@ class AccountMove(models.Model):
                         total_tax_currency += line.amount_currency
                         total += line.balance
                         total_currency += line.amount_currency
-                    elif line.display_type in ('product', 'rounding', 'non_deductible_product', 'non_deductible_product_total'):
+                    elif line.display_type in ('product', 'margin', 'rounding', 'non_deductible_product', 'non_deductible_product_total'):
                         # Untaxed amount.
                         total_untaxed += line.balance
                         total_untaxed_currency += line.amount_currency
@@ -1915,6 +1915,34 @@ class AccountMove(models.Model):
             else:
                 # Non-invoice moves don't support that field (because of multicurrency: all lines of the invoice share the same currency)
                 move.tax_totals = None
+
+    def _get_invoice_report_tax_totals(self):
+        """Return customer-facing totals without exposing margin-scheme tax details."""
+        self.ensure_one()
+        if not any(self.invoice_line_ids.mapped('has_tax_on_margin')):
+            return self.tax_totals
+
+        AccountTax = self.env['account.tax']
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines(round_from_tax_lines=False)
+        for base_line in base_lines:
+            if base_line['tax_ids'].filtered('is_tax_on_margin'):
+                base_line['filter_tax_function'] = lambda tax: not tax.is_tax_on_margin
+
+        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
+        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        tax_totals = AccountTax._get_tax_totals_summary(
+            base_lines=base_lines,
+            currency=self.currency_id,
+            company=self.company_id,
+            cash_rounding=self.invoice_cash_rounding_id,
+        )
+        tax_totals['display_in_company_currency'] = (
+            self.company_id.display_invoice_tax_company_currency
+            and self.company_currency_id != self.currency_id
+            and tax_totals['has_tax_groups']
+            and self.is_sale_document(include_receipts=True)
+        )
+        return tax_totals
 
     @api.depends('show_payment_term_details')
     def _compute_payment_term_details(self):
@@ -3273,7 +3301,7 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'margin_amount']
             else:
                 extra_fields = ['amount_currency']
             return list(grouping_key.keys()) + extra_fields
@@ -3458,6 +3486,93 @@ class AccountMove(models.Model):
             # Need to use currency_id as a key to avoid writing with multiple currencies
             for (currency_id, values), lines in grouped_update.items():
                 self.env['account.move.line'].browse(lines).write(dict(values))
+        if to_delete:
+            self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
+        if to_create:
+            self.env['account.move.line'].create(to_create)
+
+    @contextmanager
+    def _sync_margin_lines(self, container):
+        yield
+
+        AccountTax = self.env['account.tax']
+        to_create = []
+        to_delete = []
+        for move in container['records']:
+            if move.state != 'draft' or not move.is_invoice(include_receipts=True):
+                continue
+
+            existing_margin_lines = move.line_ids.filtered(
+                lambda line: line.display_type == 'margin'
+            ).sorted('id')
+            margin_line_values = []
+            base_lines, _tax_lines = move._get_rounded_base_and_tax_lines()
+            AccountTax._add_accounting_data_in_base_lines_tax_details(
+                base_lines,
+                move.company_id,
+                include_caba_tags=move.always_tax_exigible,
+            )
+
+            for base_line in base_lines:
+                margin_tax_data = next(
+                    (
+                        tax_data
+                        for tax_data in base_line['tax_details']['taxes_data']
+                        if tax_data['tax'].is_tax_on_margin
+                    ),
+                    None,
+                )
+                if not margin_tax_data:
+                    continue
+
+                product_line = base_line['record']
+                currency = base_line['currency_id']
+                rate = base_line['rate']
+                sign = base_line['sign']
+                purchase_amount_currency = currency.round(
+                    margin_tax_data.get('margin_purchase_amount') or 0.0
+                )
+                purchase_amount = (
+                    move.company_currency_id.round(purchase_amount_currency / rate)
+                    if rate
+                    else 0.0
+                )
+                margin_amount_currency = margin_tax_data['base_amount_currency']
+                margin_amount = margin_tax_data['base_amount']
+
+                extra_line_values = AccountTax._prepare_margin_line_values(
+                    base_line,
+                    margin_tax_data,
+                    move.company_id,
+                )
+
+                product_line.write({
+                    'amount_currency': sign * purchase_amount_currency,
+                    'balance': sign * purchase_amount,
+                    **extra_line_values['product_line'],
+                })
+                margin_line_values.append({
+                    'move_id': move.id,
+                    'account_id': product_line.account_id.id,
+                    'partner_id': product_line.partner_id.id,
+                    'currency_id': currency.id,
+                    'display_type': 'margin',
+                    'name': self.env._('Margin'),
+                    'amount_currency': sign * margin_amount_currency,
+                    'balance': sign * margin_amount,
+                    'tax_ids': [Command.set(product_line.tax_ids.filtered('is_tax_on_margin').ids)],
+                    'analytic_distribution': product_line.analytic_distribution,
+                    'sequence': product_line.sequence + 1,
+                    **extra_line_values['margin_line'],
+                })
+
+            while existing_margin_lines and margin_line_values:
+                margin_line = existing_margin_lines[0]
+                margin_line.write(margin_line_values.pop(0))
+                existing_margin_lines -= margin_line
+            to_delete.extend(existing_margin_lines.ids)
+            to_create.extend(margin_line_values)
+
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
@@ -3720,6 +3835,7 @@ class AccountMove(models.Model):
                     line_type='discount',
                     container=invoice_container,
                 )),
+            (45, self._sync_margin_lines(invoice_container)),
             (50, self._sync_tax_lines(tax_container)),
             (60, self._sync_non_deductible_base_lines(invoice_container)),
             (70, self._sync_dynamic_line(
@@ -5933,6 +6049,13 @@ class AccountMove(models.Model):
         validation_msgs = set()
 
         for invoice in self.filtered(lambda move: move.is_invoice(include_receipts=True)):
+            missing_margin_lines = invoice.invoice_line_ids.filtered(
+                lambda line: line.has_tax_on_margin and invoice.currency_id.is_zero(line.margin_amount)
+            )
+            if missing_margin_lines:
+                validation_msgs.add(self.env._(
+                    "A gross margin per unit is required before posting every line that uses a Tax on Margin."
+                ))
             if (
                 invoice.quick_edit_mode
                 and invoice.quick_edit_total_amount

@@ -393,6 +393,7 @@ class AccountMoveLine(models.Model):
             ('non_deductible_product_total', 'Non Deductible Products Total'),
             ('non_deductible_product', 'Non Deductible Products'),
             ('non_deductible_tax', 'Non Deductible Tax'),
+            ('margin', 'Margin'),
         ],
         compute='_compute_display_type', store=True, readonly=False, precompute=True,
         required=True,
@@ -435,6 +436,18 @@ class AccountMoveLine(models.Model):
         help="The optional quantity expressed by this line, eg: number of product sold. "
              "The quantity is not a legal requirement but is very useful for some reports.",
     )
+    has_tax_on_margin = fields.Boolean(compute='_compute_has_tax_on_margin')
+    margin_amount = fields.Monetary(
+        string='Gross Margin per Unit',
+        currency_field='currency_id',
+        help='Gross margin per unit, including any price-included margin tax.',
+    )
+
+    @api.depends('tax_ids', 'tax_ids.is_tax_on_margin')
+    def _compute_has_tax_on_margin(self):
+        for line in self:
+            line.has_tax_on_margin = any(line.tax_ids.mapped('is_tax_on_margin'))
+
     date_maturity = fields.Date(
         string='Due Date',
         index=True,
@@ -1214,7 +1227,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.sequence = seq_map.get(line.display_type, 100)
 
-    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id', 'document_tax_mode')
+    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id', 'document_tax_mode', 'margin_amount')
     def _compute_totals(self):
         """ Compute 'price_subtotal' / 'price_total' outside of `_sync_tax_lines` because those values must be visible for the
         user on the UI with draft moves and the dynamic lines are synchronized only when saving the record.
@@ -3851,9 +3864,10 @@ class AccountMoveLine(models.Model):
         result = [{
             'name': self.name,
             'product': False,
-            'taxes': [tax.tax_label for tax in children_lines.tax_ids if tax.tax_label] if not self.collapse_prices else [],
+            'taxes': [tax.tax_label for tax in children_lines.tax_ids if tax.tax_label and not tax.is_tax_on_margin] if not self.collapse_prices else [],
             'price_subtotal': section_subtotal,
             'price_total': section_total,
+            'price_report': children_lines._get_invoice_report_amount(),
             'display_type': self.display_type,
             'quantity': 0,
             'line_uom': False,
@@ -3867,9 +3881,10 @@ class AccountMoveLine(models.Model):
             result.append({
                 'name': line.name,
                 'product': line.product_id,
-                'taxes': [tax.tax_label for tax in line.tax_ids if tax.tax_label],
+                'taxes': [tax.tax_label for tax in line.tax_ids if tax.tax_label and not tax.is_tax_on_margin],
                 'price_subtotal': line.price_subtotal,
                 'price_total': line.price_total,
+                'price_report': line._get_invoice_report_amount(),
                 'display_type': line.display_type,
                 'quantity': line.quantity,
                 'line_uom': line.product_uom_id,
@@ -3881,9 +3896,10 @@ class AccountMoveLine(models.Model):
             lines_in_subsection = children_lines.filtered(lambda l: l.parent_id == subsection_line)
             for taxes, lines_for_tax_group in groupby(lines_in_subsection, key=lambda l: l.tax_ids):
                 lines_for_tax_group = sum(lines_for_tax_group, start=self.env['account.move.line'])
-                tax_labels = [tax.tax_label for tax in taxes if tax.tax_label]
+                tax_labels = [tax.tax_label for tax in taxes if tax.tax_label and not tax.is_tax_on_margin]
                 subtotal = sum(l.price_subtotal for l in lines_for_tax_group)
                 total = sum(l.price_total for l in lines_for_tax_group)
+                report_amount = lines_for_tax_group._get_invoice_report_amount()
                 if not subtotal and not tax_labels:
                     continue
                 if subsection_line.collapse_composition:
@@ -3893,6 +3909,7 @@ class AccountMoveLine(models.Model):
                         'taxes': tax_labels,
                         'price_subtotal': subtotal,
                         'price_total': total,
+                        'price_report': report_amount,
                         'display_type': 'product',
                         'quantity': 1,
                         'line_uom': False,
@@ -3907,6 +3924,7 @@ class AccountMoveLine(models.Model):
                             'taxes': tax_labels if (line == subsection_line and not self.collapse_prices) or (line != subsection_line and self.collapse_prices) else [],
                             'price_subtotal': subtotal if line == subsection_line else line.price_subtotal,
                             'price_total': total if line == subsection_line else line.price_total,
+                            'price_report': report_amount if line == subsection_line else line._get_invoice_report_amount(),
                             'display_type': line.display_type,
                             'quantity': line.quantity,
                             'line_uom': line.product_uom_id,
@@ -3918,9 +3936,18 @@ class AccountMoveLine(models.Model):
             'taxes': [],
             'price_subtotal': 0.0,
             'price_total': 0.0,
+            'price_report': 0.0,
             'quantity': 0,
             'display_type': 'product',
         }]
+
+    def _get_invoice_report_amount(self):
+        return sum(
+            line.price_total
+            if line.has_tax_on_margin or line.move_id.document_tax_mode == 'tax_included'
+            else line.price_subtotal
+            for line in self
+        )
 
     def get_section_subtotal(self):
         section_lines = self._get_section_lines()
@@ -3929,6 +3956,9 @@ class AccountMoveLine(models.Model):
     def get_section_total(self):
         section_lines = self._get_section_lines()
         return sum(section_lines.mapped('price_total'))
+
+    def get_section_report_amount(self):
+        return self._get_section_lines()._get_invoice_report_amount()
 
     def _get_section_lines(self):
         self.ensure_one()
