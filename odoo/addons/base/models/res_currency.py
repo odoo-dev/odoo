@@ -5,6 +5,7 @@ import logging
 import math
 
 from lxml import etree
+from string import capwords
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
@@ -178,7 +179,8 @@ class Currency(models.Model):
         self.ensure_one()
         def _num2words(number, lang):
             try:
-                return num2words(number, lang=lang).title()
+                # return num2words(number, lang=lang).title()
+                return capwords(num2words(number, lang=lang))
             except NotImplementedError:
                 return num2words(number, lang='en').title()
 
