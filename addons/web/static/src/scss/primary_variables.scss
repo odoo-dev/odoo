@@ -99,6 +99,12 @@ $o-theme-text-colors: (
     "danger": #d23f3a,
 )!default;
 
+// Gradients
+$o-gradient:    null !default;
+$o-gradient-sm: null !default;
+$o-gradient-lg: null !default;
+$o-gradient-btn:  null !default;
+
 // Opacities
 $o-opacity-disabled: .5 !default;
 $o-opacity-muted: .76 !default;
