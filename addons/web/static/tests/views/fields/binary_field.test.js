@@ -448,3 +448,30 @@ test("doesn't crash if value is not a string", async () => {
     });
     expect(".o_field_binary input").toHaveValue("");
 });
+
+test("empty file upload shows an error and keeps the existing value", async () => {
+    await mountView({
+        resModel: "res.partner",
+        resId: 1,
+        type: "form",
+        arch: `<form><field name="document"/></form>`,
+    });
+
+    const input = `.o_field_widget[name="document"].o_field_binary .o_input`;
+    expect(input).toHaveValue("coucou==");
+
+    await click(`.o_select_file_button`);
+    await animationFrame();
+
+    const emptyFile = new File([""], "empty_file.txt", { type: "text/plain" });
+    await setInputFiles([emptyFile]);
+    await animationFrame();
+
+    expect(".o_notification_manager .o_notification").toHaveCount(1);
+    expect(".o_notification_manager .o_notification .o_notification_content").toHaveText(
+        "There was a problem while uploading your file."
+    );
+    expect(input).toHaveValue("coucou==", {
+        message: "The binary field should keep the existing value after an empty file upload",
+    });
+});
