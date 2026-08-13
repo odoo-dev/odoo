@@ -156,6 +156,16 @@ class TestHrHolidaysCommon(common.TransactionCase):
         })
         return leave
 
+    def _allocate_leave(self, employee, work_entry_type, num_days, valid_from, valid_to=False):
+        return self.env['hr.leave.allocation'].sudo().create({
+            'name': 'Alloc',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type.id,
+            'number_of_days': num_days,
+            'date_from': valid_from,
+            'date_to': valid_to,
+        })
+
     def _create_form_test_accrual_allocation(self, work_entry_type, date_from, employee, accrual_plan, date_to=None, creator_user=None):
         allocation = self.env['hr.leave.allocation']
         if creator_user:
