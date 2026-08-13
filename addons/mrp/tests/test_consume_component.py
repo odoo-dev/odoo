@@ -441,6 +441,7 @@ class TestConsumeComponent(TestConsumeComponentCommon):
         self.assertRecordValues(mo.move_raw_ids, [
             {'should_consume_qty': 1.0, 'quantity': 1.0, 'picked': False},
         ])
+        mo.action_start()
         move = self.env['stock.move'].create({
             'product_id': compo2.id,
             'raw_material_production_id': mo.id,
@@ -497,12 +498,6 @@ class TestConsumeComponent(TestConsumeComponentCommon):
             with mo_form.move_raw_ids.new() as move_raw:
                 move_raw.product_id = self.raw_serial
                 move_raw.product_uom_qty = 1.0
-        # The following step does not exactly reproduce the flow performed from the UI
-        # since adding a new move line from the detailed operations will be done by
-        # opening the quant list view cleaning certain default context keys
-        with Form.from_action(self.env, mo.move_raw_ids.action_show_details()) as wiz_form:
-            with wiz_form.move_line_ids.new() as move_line:
-                move_line.lot_id = sn
         mo.button_mark_done()
         self.assertRecordValues(mo.move_raw_ids, [
             {'quantity': 1.0, 'lot_ids': sn.ids, 'state': 'done'},

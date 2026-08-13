@@ -524,7 +524,7 @@ class StockMove(models.Model):
         self.ensure_one()
         return {
             'state': 'draft' if self.state == 'draft' else 'confirmed',
-            'reservation_date': self.reservation_date,
+            'date': fields.Datetime.now(),
             'date_deadline': self.date_deadline,
             'move_orig_ids': [Command.link(m.id) for m in self.mapped('move_orig_ids')],
             'move_dest_ids': [Command.link(m.id) for m in self.mapped('move_dest_ids')],
