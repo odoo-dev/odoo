@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import models
 from odoo.addons.account.models.chart_template import template
 
 
