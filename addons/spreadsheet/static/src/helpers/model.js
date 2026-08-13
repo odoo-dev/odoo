@@ -5,7 +5,7 @@ import { isLoadingError } from "@spreadsheet/o_spreadsheet/errors";
 import { OdooSpreadsheetModel } from "@spreadsheet/model";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 
-const { formatValue, isDefined, toCartesian, toXC } = helpers;
+const { formatValue, isDefined, toCartesian, toXC, waitForSpreadsheetDataLoaded } = helpers;
 import {
     isMarkdownViewUrl,
     isMarkdownIrMenuIdUrl,
@@ -59,6 +59,7 @@ export async function waitForOdooSources(model) {
  * @returns {Promise<void>}
  */
 export async function waitForDataLoaded(model) {
+    await waitForSpreadsheetDataLoaded(model);
     await waitForOdooSources(model);
     const odooDataProvider = model.config.custom.odooDataProvider;
     if (!odooDataProvider) {
