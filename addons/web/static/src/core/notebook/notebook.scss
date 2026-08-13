@@ -33,10 +33,19 @@
                 opacity: .3;
             }
         }
+
+        &:first-child .nav-link {
+            border-top-left-radius: var(--nav-tabs-border-radius);
+        }
+
+        &:last-child .nav-link {
+            border-top-right-radius: var(--nav-tabs-border-radius);
+        }
     }
 
     .nav-link {
         border-color: var(--Notebook__link-border-color, transparent);
+        border-radius: 0;
 
         &.active {
             &, &:hover, &:focus, &:active {
