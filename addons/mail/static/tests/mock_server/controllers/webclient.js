@@ -10,7 +10,11 @@ registerStoreHandler(
     function store_mail_thread(store, params) {
         store.add(this.env[params.thread_model].browse(params.thread_id), "_store_thread_fields", {
             as_thread: true,
-            fields_params: { request_list: params.request_list, chatter_fields: true },
+            fields_params: {
+                request_list: params.request_list,
+                chatter_fields: true,
+                known_pinned_message_ids: params.known_pinned_message_ids,
+            },
         });
     },
     { audience: "everyone" }

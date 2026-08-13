@@ -262,9 +262,7 @@ const chatterPatch = {
         return _t("Following");
     },
     get hasPinnedMessages() {
-        return (
-            this.state.thread?.has_pinned_messages || this.state.thread?.pinnedMessages?.length > 0
-        );
+        return this.state.thread?.pinned_messages_count > 0;
     },
     /**
      * @returns {boolean}
@@ -281,7 +279,7 @@ const chatterPatch = {
             "contact_fields",
             "defaultSubject",
             "followers",
-            "has_pinned_messages",
+            "pinned_messages_count",
             "scheduledMessages",
             "showSubjectInSmallComposer",
             "suggestedRecipients",
@@ -358,13 +356,13 @@ const chatterPatch = {
             return false;
         }
     },
-    onClickPinnedMessages() {
+    async onClickPinnedMessages() {
         this.closeSearch();
         const isOpening = this.state.activePanel !== CHATTER_PANEL.PINNED_MESSAGES;
-        this.state.activePanel = isOpening ? CHATTER_PANEL.PINNED_MESSAGES : CHATTER_PANEL.NONE;
         if (isOpening) {
-            this.state.thread?.fetchPinnedMessages();
+            await this.state.thread?.fetchPinnedMessages();
         }
+        this.state.activePanel = isOpening ? CHATTER_PANEL.PINNED_MESSAGES : CHATTER_PANEL.NONE;
     },
     onClickSearch() {
         this.state.activePanel =

@@ -3068,7 +3068,18 @@ class MailThread(models.AbstractModel):
             "UPDATE mail_message SET pinned_at=%(pinned_at)s WHERE id=%(id)s",
             {"pinned_at": fields.Datetime.now() if pinned else None, "id": message.id},
         )
-        Store(bus_channel=message).add(message, ["pinned_at"])
+        pinned_messages_count = self.env["mail.message"].search_count(
+            [
+                ["model", "=", self._name],
+                ["pinned_at", "!=", False],
+                ["res_id", "=", self.id],
+            ]
+        )
+        Store(bus_channel=message).add(message, ["pinned_at"]).add(
+            self,
+            {"pinned_messages_count": pinned_messages_count},
+            as_thread=True,
+        )
         return True
 
     # ------------------------------------------------------------
@@ -5176,7 +5187,9 @@ class MailThread(models.AbstractModel):
     # STORE
     # ------------------------------------------------------
 
-    def _store_thread_fields(self, res: Store.FieldList, *, request_list, **kwargs):
+    def _store_thread_fields(
+        self, res: Store.FieldList, *, request_list, known_pinned_message_ids=None, **kwargs
+    ):
         if res.is_for_current_user():
             res.attr("hasReadAccess", lambda t: t.sudo(False).has_access("read"))
             res.attr("hasWriteAccess", lambda t: t.sudo(False).has_access("write"))
@@ -5251,16 +5264,23 @@ class MailThread(models.AbstractModel):
             & Domain("model", "=", self._name)
             & Domain("pinned_at", "!=", False)
         )
-        if res.is_for_internal_users() and "has_pinned_messages" in request_list:
+        if res.is_for_internal_users() and "pinned_messages_count" in request_list:
             pinned_count_by_tid = defaultdict(
                 int,
                 self.env["mail.message"]._read_group(pinned_domain, ["res_id"], ["__count"]),
             )
-            res.attr("has_pinned_messages", lambda t: pinned_count_by_tid[t.id] > 0)
+            res.attr("pinned_messages_count", lambda t: pinned_count_by_tid[t.id])
         if res.is_for_internal_users() and "pinned_messages" in request_list:
+            known_pinned_messages = self.env["mail.message"].search(
+                Domain("id", "in", known_pinned_message_ids or [])
+                & Domain("res_id", "in", self.ids)
+                & Domain("model", "=", self._name)
+            )
             messages_by_tid = defaultdict(
                 self.env["mail.message"].browse,
-                self.env["mail.message"].search_fetch(pinned_domain).grouped("res_id"),
+                (self.env["mail.message"].search_fetch(pinned_domain) | known_pinned_messages).grouped(
+                    "res_id"
+                ),
             )
             res.many(
                 "pinned_messages",

@@ -479,6 +479,15 @@ export class DiscussChannel extends models.ServerModel {
                 ]),
             { predicate: (channel) => channel.parent_channel_id }
         );
+        if (res.is_for_internal_users()) {
+            res.attr("pinned_messages_count", (channel) =>
+                MailMessage.search_count([
+                    ["model", "=", "discuss.channel"],
+                    ["res_id", "=", channel.id],
+                    ["pinned_at", "!=", false],
+                ])
+            );
+        }
         res.attr("name");
         res.many("channel_name_member_ids", "_store_member_fields", {
             sort: "id",

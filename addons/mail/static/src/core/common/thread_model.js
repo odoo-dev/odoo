@@ -74,11 +74,11 @@ export class Thread extends Record {
     });
     create_uid = fields.One("res.users");
     /**
-     * Server-side value used in chatter to determine if the thread has pinned messages without
-     * having to load them all. Dynamic value should count "pinnedMessages" instead.
-     * @type {boolean}
+     * Server-side count used in chatter to display the number of pinned messages without having
+     * to load them all.
+     * @type {number}
      **/
-    has_pinned_messages;
+    pinned_messages_count;
     /** @type {number} */
     id;
     /** @type {string} */
@@ -290,10 +290,12 @@ export class Thread extends Record {
 
     async fetchPinnedMessages() {
         await this.store.fetchStoreData("mail.thread", {
+            known_pinned_message_ids: this.pinnedMessages.map((message) => message.id),
             thread_model: this.model,
             thread_id: this.id,
             request_list: ["pinned_messages"],
         });
+        this.pinned_messages_count = this.pinnedMessages.length;
     }
 
     get accessRestrictedToGroupText() {

@@ -339,11 +339,20 @@ export class MailThread extends models.ServerModel {
         const pinned_at = pinned && serializeDateTime(DateTime.now());
         MailMessage.write([message_id], { pinned_at });
         const [thread] = this.read(id);
+        const pinned_messages_count = MailMessage.search_count([
+            ["model", "=", this._name],
+            ["pinned_at", "!=", false],
+            ["res_id", "=", id],
+        ]);
         BusBus._sendone(
             thread,
             "mail.record/insert",
-            new Store().add(MailMessage.browse(message_id), { pinned_at }).as_dict()
+            new Store()
+                .add(MailMessage.browse(message_id), { pinned_at })
+                .add(this.browse(id), { pinned_messages_count }, { as_thread: true })
+                .as_dict()
         );
+        return true;
     }
 
     /**
@@ -603,7 +612,7 @@ export class MailThread extends models.ServerModel {
         return false;
     }
 
-    _store_thread_fields(res, { request_list = [] } = {}) {
+    _store_thread_fields(res, { known_pinned_message_ids = [], request_list = [] } = {}) {
         /** @type {import("mock_models").IrAttachment} */
         const IrAttachment = this.env["ir.attachment"];
         /** @type {import("mock_models").MailActivity} */
@@ -699,16 +708,28 @@ export class MailThread extends models.ServerModel {
             ["res_id", "=", t.id],
             ["pinned_at", "!=", false],
         ];
-        if (res.is_for_internal_users() && request_list.includes("has_pinned_messages")) {
-            res.attr(
-                "has_pinned_messages",
-                (t) => MailMessage._filter(pinned_domain(t)).length > 0
-            );
+        if (res.is_for_internal_users() && request_list.includes("pinned_messages_count")) {
+            res.attr("pinned_messages_count", (t) => MailMessage._filter(pinned_domain(t)).length);
         }
         if (res.is_for_internal_users() && request_list.includes("pinned_messages")) {
+            const knownPinnedMessages = MailMessage.browse(
+                MailMessage.search([
+                    ["id", "in", known_pinned_message_ids],
+                    ["model", "=", this._name],
+                    ["res_id", "in", this.ids],
+                ])
+            );
             res.many("pinned_messages", "_store_message_fields", {
                 only_data: true,
-                value: (t) => MailMessage.browse(MailMessage.search(pinned_domain(t))),
+                value: (t) =>
+                    MailMessage.browse([
+                        ...new Set([
+                            ...MailMessage.search(pinned_domain(t)),
+                            ...knownPinnedMessages
+                                .filter((message) => message.res_id === t.id)
+                                .map((message) => message.id),
+                        ]),
+                    ]),
             });
         }
         if (request_list.includes("scheduledMessages")) {

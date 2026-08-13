@@ -1511,6 +1511,21 @@ class DiscussChannel(models.Model):
         res.attr("last_interest_dt")
         res.attr("member_count")
         res.attr("message_count", predicate=lambda c: c.parent_channel_id)
+        if res.is_for_internal_users():
+            pinned_count_by_channel_id = defaultdict(
+                int,
+                self.env["mail.message"]._read_group(
+                    Domain("model", "=", self._name)
+                    & Domain("res_id", "in", self.ids)
+                    & Domain("pinned_at", "!=", False),
+                    ["res_id"],
+                    ["__count"],
+                ),
+            )
+            res.attr(
+                "pinned_messages_count",
+                lambda channel: pinned_count_by_channel_id[channel.id],
+            )
         res.attr("name")
         res.many(
             "channel_name_member_ids",

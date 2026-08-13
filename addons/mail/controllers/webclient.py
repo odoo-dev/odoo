@@ -44,7 +44,14 @@ class WebclientController(ThreadController):
 
     @store_handler("mail.thread", audience="everyone")
     def store_mail_thread(
-        self, store, thread_model, thread_id, request_list, access_params=None, **kwargs
+        self,
+        store,
+        thread_model,
+        thread_id,
+        request_list,
+        access_params=None,
+        known_pinned_message_ids=None,
+        **kwargs,
     ):
         thread = self._get_thread_with_access(
             thread_model, thread_id, mode="read", **(access_params or {})
@@ -56,7 +63,11 @@ class WebclientController(ThreadController):
             store.add(
                 thread,
                 "_store_thread_fields",
-                fields_params={"request_list": request_list, "chatter_fields": True},
+                fields_params={
+                    "request_list": request_list,
+                    "chatter_fields": True,
+                    "known_pinned_message_ids": known_pinned_message_ids,
+                },
                 as_thread=True,
             )
 
