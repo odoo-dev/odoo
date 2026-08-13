@@ -4827,7 +4827,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         leave = self.env['hr.leave'].create({
             'employee_id': self.employee_emp.id,
             'holiday_status_id': self.leave_type.id,
-            'request_date_from': datetime.date.today() + relativedelta(days=2),
-            'request_date_to': datetime.date.today() + relativedelta(days=3),
+            'request_date_from': datetime.date.today() + relativedelta(days=10),
+            'request_date_to': datetime.date.today() + relativedelta(days=15),
         })
         self.assertTrue(leave.action_approve())
