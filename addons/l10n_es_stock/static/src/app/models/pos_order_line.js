@@ -7,7 +7,6 @@ patch(PosOrderline.prototype, {
         if(!this.product_id) {
             return
         }
-        this.computeRebuPurchasePrice();
     },
 
     isRebuLine() {
@@ -15,14 +14,41 @@ patch(PosOrderline.prototype, {
     },
 
     computeRebuPurchasePrice() {
-        const lots = this.pack_lot_ids.map((pl) => pl.lot_id).filter(Boolean);
-        if (lots.length) {
-            this.total_cost = lots.reduce((sum, lot) => sum + lot.l10n_es_rebu_purchase_price, 0);
-            this.purchase_price = this.total_cost / lots.length;
+        if (this.pack_lot_ids.length) {
+            this.total_cost = this.pack_lot_ids.reduce((sum, pl) => sum + (pl.standard_price || 0), 0);
+            this.purchase_price = this.total_cost / this.pack_lot_ids.length;
         } else {
             this.purchase_price = this.product_id.standard_price;
             this.total_cost = 0.0;
         }
     },
-})
 
+    setPackLotLines({modifiedPackLotLines, newPackLotLines, setQuantity = true}) {
+        const lotLinesToRemove = [];
+
+        for (const lotLine of this.pack_lot_ids) {
+            const modifiedLotName = modifiedPackLotLines[lotLine.id];
+            if (modifiedLotName) {
+                lotLine.lot_name
+            } else {
+                lotLinesToRemove.push(lotLine)
+            }
+        }
+
+        for (const lotLine of lotLinesToRemove) {
+            lotLine.delete();
+        }
+
+        for (const newLotLine of newPackLotLines) {
+            this.models["pos.pack.operation.lot"].create({
+                lot_name: newLotLine.lot_name,
+                standard_price: newLotLine.standard_price ?? 0,
+                pos_order_line_id: this,
+            });
+        }
+
+        if(!this.product_id.to_weight && setQuantity) {
+            this.setQuantityByLot();
+        }
+    }
+})

@@ -3,9 +3,8 @@
     'name': "Spain - Stock",
     'category': 'Stock',
     'depends': [
-        'point_of_sale', 'sale', 'l10n_es', 'account', 'stock', 'l10n_es'
+        'sale', 'account', 'l10n_es', 'pos_stock'
     ],
-    'data': [],
     'assets': {
         'point_of_sale._assets_pos': [
             'l10n_es_stock/static/src/app/models/*',

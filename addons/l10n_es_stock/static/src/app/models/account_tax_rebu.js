@@ -25,7 +25,7 @@ patch(accountTaxHelpers, {
                 rounding_method,
                 product: base_line.product_id,
                 product_uom: base_line.product_uom_id,
-                special_mode: base_line.special_mode,
+                special_mode: "total_included",
                 filter_tax_function: base_line.filter_tax_function,
             }
         );

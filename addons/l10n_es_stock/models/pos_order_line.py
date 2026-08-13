@@ -17,3 +17,12 @@ class PosOrderLine(models.Model):
             else:
                 line.purchase_price = line.product_id.standard_price
                 line.total_cost = 0
+
+    @api.model
+    def get_existing_lots(self, company_id, config_id, product_id):
+        result = super().get_existing_lots(company_id, config_id, product_id)
+        lots = self.env['stock.lot'].sudo().browse([r['id'] for r in result])
+        cost_by_lot_id = {lot.id: lot.standard_price for lot in lots}
+        for r in result:
+            r['standard_price'] = cost_by_lot_id.get(r['id'], 0.0)
+        return result

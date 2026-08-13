@@ -5,6 +5,7 @@ patch(PosOrderlineAccounting.prototype, {
     prepareBaseLineForTaxesComputationExtraValues(customValues = {}) {
         const values = super.prepareBaseLineForTaxesComputationExtraValues(customValues);
         if (this.isRebuLine()) {
+            this.computeRebuPurchasePrice()
             values.purchase_price = this.purchase_price || 0;
         }
         return values;

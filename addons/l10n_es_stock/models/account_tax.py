@@ -8,13 +8,18 @@ class AccountTax(models.Model):
 
     def _prepare_base_line_for_taxes_computation(self, record, **kwargs):
         base_line = super()._prepare_base_line_for_taxes_computation(record, **kwargs)
-        if record is not None and any(tax.l10n_es_is_rebu_tax for tax in base_line['tax_ids']):
+        if isinstance(record, models.BaseModel) and any(tax.l10n_es_is_rebu_tax for tax in base_line['tax_ids']):
             def load(field, fallback):
                 return self._get_base_line_field_value_from_record(record, field, kwargs, fallback)
             purchase_price = load('purchase_price', 0.0) if 'purchase_price' in record._fields else 0.0
             total_cost = load('total_cost', 0.0) if 'total_cost' in record._fields else 0.0
             base_line['purchase_price'] = max(purchase_price, total_cost)
         return base_line
+
+    def _load_pos_data_fields(self, config_id):
+        params = super()._load_pos_data_fields(config_id)
+        params.append('l10n_es_is_rebu_tax')
+        return params
 
     def _add_tax_details_in_base_line(self, base_line, company, rounding_method=None):
 
@@ -34,7 +39,7 @@ class AccountTax(models.Model):
             rounding_method=rounding_method,
             product=base_line['product_id'],
             product_uom=base_line['product_uom_id'],
-            special_mode=base_line['special_mode'],
+            special_mode='total_included',
             filter_tax_function=base_line['filter_tax_function'],
             document_tax_mode=base_line['document_tax_mode'],
         )
