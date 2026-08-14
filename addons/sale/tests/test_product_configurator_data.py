@@ -328,14 +328,10 @@ class TestProductConfiguratorData(HttpCaseWithUserDemo, ProductVariantsCommon, S
         )
 
         def _get_ptavs():
-            return product_template_2lines_2attributes.with_context(
-                active_test=False
-            ).attribute_line_ids.product_template_value_ids
+            return product_template_2lines_2attributes.attribute_line_ids.product_template_value_ids
 
         def _get_archived_variants():
-            return product_template_2lines_2attributes.with_context(
-                active_test=False
-            ).product_variant_ids.filtered(lambda p: not p.active)
+            return product_template_2lines_2attributes.all_product_variant_ids.filtered(lambda p: not p.active)
 
         def _get_active_variants():
             return product_template_2lines_2attributes.product_variant_ids
