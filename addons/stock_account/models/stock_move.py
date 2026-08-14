@@ -138,8 +138,15 @@ class StockMove(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        if self._get_in_move_lines() and not self._is_dropshipped_returned():
-            return True
+        if self._is_dropshipped_returned():
+            return False
+        for move_line in self.move_line_ids:
+            if not move_line.picked:
+                continue
+            if move_line._should_exclude_for_valuation():
+                continue
+            if not move_line.location_id._should_be_valued() and move_line.location_dest_id._should_be_valued():
+                return True
         return False
 
     def _get_out_move_lines(self):
@@ -168,8 +175,15 @@ class StockMove(models.Model):
         :rtype: bool
         """
         self.ensure_one()
-        if self._get_out_move_lines() and not self._is_dropshipped():
-            return True
+        if self._is_dropshipped():
+            return False
+        for move_line in self.move_line_ids:
+            if not move_line.picked:
+                continue
+            if move_line._should_exclude_for_valuation():
+                continue
+            if move_line.location_id._should_be_valued() and not move_line.location_dest_id._should_be_valued():
+                return True
         return False
 
     def _is_dropshipped(self):
