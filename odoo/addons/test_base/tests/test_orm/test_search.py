@@ -696,7 +696,7 @@ class TestSearchRelated(TransactionCase):
                     AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                         SELECT "test_orm_related_bar"."id"
                         FROM "test_orm_related_bar"
-                        WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                        WHERE "test_orm_related_bar"."name" IN %s
                         AND "test_orm_related_bar"."id" < %s
                     )
                 )
@@ -739,7 +739,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related__foo_id__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                     AND "test_orm_related_bar"."id" < %s
                 )
             ))
@@ -1138,7 +1138,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                     AND "test_orm_related_bar"."id" < %s
                 )
             ) AND "test_orm_related_foo"."id" < %s
@@ -1156,7 +1156,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                 )
             ) AND "test_orm_related_foo"."id" < %s
             ORDER BY "test_orm_related_foo"."id"
@@ -1531,7 +1531,7 @@ class TestSearchAccessOperator(TransactionCase):
                 SELECT "test_orm_message"."discussion" AS __inverse FROM "test_orm_message"
                 LEFT JOIN "test_orm_discussion" AS "test_orm_message__discussion"
                 ON ("test_orm_message"."discussion" = "test_orm_message__discussion"."id")
-                WHERE ("test_orm_message"."active" IS TRUE AND "test_orm_message"."discussion" IS NOT NULL AND "test_orm_message"."name" ILIKE %s)
+                WHERE ("test_orm_message"."discussion" IS NOT NULL AND "test_orm_message"."name" ILIKE %s)
                 AND ("test_orm_message"."discussion" IS NOT NULL
                     AND "test_orm_message__discussion"."id" IS NOT NULL
                     AND "test_orm_message__discussion"."id" < %s)

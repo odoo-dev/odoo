@@ -1944,9 +1944,9 @@ class TestQueries(TransactionCase):
             {'name': 'a1', 'parent_id': pub_active.id},
             {'name': 'a2', 'parent_id': pub_inactive.id},
             {'name': 'a3', 'parent_id': pub_active.id, 'child_ids': [Command.create({'name': 'not PRI'})]},
-            {'name': 'ua4', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_inactive.id)]},
         ])
         inaccessible_records = PartnerCateg.create([
+            {'name': 'ua4', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_inactive.id)]},
             {'name': 'ua1'},  # No public parent
             {'name': 'ua2', 'parent_id': pri_active.id},
             {'name': 'ua3', 'parent_id': pub_active.id, 'child_ids': [Command.link(pri_active.id)]},
@@ -1969,7 +1969,6 @@ class TestQueries(TransactionCase):
                             FROM "test_orm_partner_category"
                             WHERE
                                 (
-                                    "test_orm_partner_category"."active" IS TRUE
                                     "test_orm_partner_category"."name" ->> %s ILIKE %s
                                     AND "test_orm_partner_category"."parent_id" IS NOT NULL
                                 )
