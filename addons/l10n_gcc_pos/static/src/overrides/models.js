@@ -10,6 +10,7 @@ patch(PosStore.prototype, {
             is_gcc_country: ["SA", "AE", "BH", "OM", "QA", "KW"].includes(
                 this.company.country?.code
             ),
+            show_title: Boolean(order),
         };
     },
 });

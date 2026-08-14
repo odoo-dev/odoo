@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="l10n_sa_edi_pos.ZatcaErrorPopup">
+        <div class="popup popup-confirm">
+            <div class="modal-header">
+                <h4 class="modal-title title drag-handle">
+                    <t t-esc="props.title"/>
+                </h4>
+            </div>
+            <main class="modal-body">
+                <t t-out="props.body"/>
+            </main>
+            <footer class="footer modal-footer">
+                <div class="button confirm btn btn-lg btn-primary" t-on-click="confirm">
+                    <t t-esc="props.confirmText"/>
+                </div>
+            </footer>
+        </div>
+    </t>
+
+</templates>
