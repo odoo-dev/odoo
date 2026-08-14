@@ -957,14 +957,6 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__tag_ids__rel"
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__tag_ids__rel"."task_id"
-                    AND "test_read_group_task__tag_ids__rel"."tag_id" IN (
-                        SELECT
-                            "test_read_group_tag"."id"
-                        FROM
-                            "test_read_group_tag"
-                        WHERE
-                            "test_read_group_tag"."active" IS TRUE
-                    )
                 )
             WHERE "test_read_group_task"."id" IN %s
             GROUP BY "test_read_group_task__tag_ids__rel"."tag_id"
@@ -979,7 +971,8 @@ class TestPrivateReadGroup(common.TransactionCase):
                 ),
                 [
                     (active_tag, ["Both tags", "Active tag"]),
-                    (Tag, ["Archive tag", "No tag"]),
+                    (archive_tag, ["Both tags", "Archive tag"]),
+                    (Tag, ["No tag"]),
                 ],
             )
 
