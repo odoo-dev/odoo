@@ -91,6 +91,7 @@
                     hasOpenFormViewButton="this.hasOpenFormViewButton"
                     openRecord.bind="this.openRecord"
                     noContentHelp="this.props.info.noContentHelp"
+                    picto="this.props.info.picto"
                     onAdd.bind="this.createRecord"
                     optionalActiveFields="this.optionalActiveFields"
                     readonly="this.props.readonly"

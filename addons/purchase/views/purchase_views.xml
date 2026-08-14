@@ -56,8 +56,9 @@
             Command.create({'view_mode': 'activity'})]"/>
         <field name="context">{"search_default_filter_to_purchase": 1, "purchase_product_template": 1, "show_lst_price": False, "show_standard_price": True}</field>
         <field name="search_view_id" ref="product.product_template_search_view"/>
+        <field name="picto">Poof</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             No product found. Let's create one!
           </p><p>
             You must define a product for everything you sell or purchase,
@@ -981,8 +982,9 @@
                 'search_default_order_date_last_year': 1,
                 'search_default_groupby_product': 1,
         }</field>
+        <field name="picto">Poof</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No purchase order were made for this product yet!
             </p>
         </field>

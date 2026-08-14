@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.PaperPlane">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#PaperPlane_1)">
+<path d="M58.3433 0.727295L14.2355 23.5288L26.111 27.9968L34.4235 42.9303L43.2062 34.4287L51.9888 37.7331L58.3433 0.727295Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M34.4236 42.9303V30.6109L49.1368 9.8877L26.1111 27.9968M34.4236 30.6109L43.2063 33.9152" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5.65613 63.2728C11.9824 58.5516 24.8286 66.8487 31.6586 46.3524" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 4"/>
+</g>
+<defs>
+<clipPath id="PaperPlane_1">
+<rect  fill="white"/>
+</clipPath>
+</defs>
+</svg>
+    </t>
+
+</templates>

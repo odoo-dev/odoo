@@ -140,8 +140,9 @@
         <field name="view_id" ref="view_location_tree2"/>
         <field name="search_view_id" ref="view_location_search"/>
         <field name="context">{'search_default_in_location':1}</field>
+        <field name="picto">Poof</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Add a new location
           </p><p>
             Define your locations to reflect your warehouse structure and

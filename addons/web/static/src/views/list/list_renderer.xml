@@ -9,7 +9,7 @@
             t-ref="this.rootRef"
         >
             <t t-if="this.showNoContentHelper">
-                <ActionHelper noContentHelp="this.props.noContentHelp"/>
+                <ActionHelper noContentHelp="this.props.noContentHelp" picto="this.props.picto"/>
             </t>
             <table t-attf-class="o_list_table table table-sm table-hover position-relative mb-0 {{this.props.list.isGrouped ? 'o_list_table_grouped' : 'o_list_table_ungrouped table-striped'}}" t-ref="this.tableRef">
                 <thead>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.EmptyEnvelope">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.0425 13.6429L3.56396 22.1217V63H60.4362V22.1217L51.0637 13.6429M3.56396 22.1217L27.3718 41.5672M60.4362 22.1217L36.4858 41.5672M27.3718 41.5672L32.0055 37.4412L36.4858 41.5672L60.4362 63M3.56396 63L27.3718 41.5672" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M25.7324 7.2257C25.7324 5.99437 26.1 4.7907 26.7887 3.76689C27.4775 2.74308 28.4564 1.94511 29.6017 1.47391C30.747 1.0027 32.0072 0.879408 33.2231 1.11963C34.4389 1.35985 35.5557 1.95279 36.4323 2.82347C37.3089 3.69415 37.9058 4.80346 38.1477 6.01113C38.3895 7.21879 38.2654 8.47057 37.791 9.60817C37.3166 10.7458 36.5132 11.7181 35.4825 12.4022C33.7848 13.5289 32.0003 15.1032 32.0003 17.1407V18.9447" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+<circle cx="32.0002" cy="24.6523" r="1.37594" fill="currentColor"/>
+</svg>
+    </t>
+
+</templates>

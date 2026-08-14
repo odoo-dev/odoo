@@ -174,6 +174,7 @@ const STANDARD_PROPS = [
 
     "useSampleModel",
     "noContentHelp",
+    "picto",
     "className",
 
     "display",
@@ -421,9 +422,12 @@ export class View extends Component {
             }
         }
 
-        const { noContentHelp } = props;
+        const { noContentHelp, picto } = props;
         if (noContentHelp) {
             viewProps.info.noContentHelp = noContentHelp;
+        }
+        if (picto) {
+            viewProps.info.picto = picto;
         }
 
         const searchMenuTypes =

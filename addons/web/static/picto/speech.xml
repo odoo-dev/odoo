@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.Speech">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#Speech_1)">
+<path d="M53.2963 10.5813C65.1254 20.9566 66.3033 38.957 55.928 50.7861C45.5526 62.6152 27.553 63.7937 15.7239 53.4184C15.0509 52.8282 14.4144 52.2113 13.8106 51.5742L1.69152 50.3656C1.10402 50.307 0.800603 49.6339 1.14515 49.1545L7.32872 40.5475C4.45406 31.3754 6.28997 20.9691 13.0916 13.2144C23.4669 1.38525 41.4672 0.206015 53.2963 10.5813Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+<ellipse cx="22.7611" cy="33" rx="2" ry="2" fill="currentColor"/>
+<ellipse cx="35.0001" cy="33" rx="2" ry="2" fill="currentColor"/>
+<ellipse cx="47.239" cy="33" rx="2" ry="2" fill="currentColor"/>
+</g>
+<defs>
+<clipPath id="Speech_1">
+<rect  fill="white"/>
+</clipPath>
+</defs>
+</svg>
+    </t>
+
+</templates>
