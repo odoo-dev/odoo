@@ -40,7 +40,7 @@ class PaypalController(http.Controller):
             self._paypal_capture_order(tx_sudo, order_id)
 
     @http.route(_return_url, type="http", auth="public", methods=["GET"], save_session=False)
-    def paypal_return_from_checkout(self, **data):
+    def paypal_return_from_checkout(self, token=None, **data):
         """Process the payment data sent by PayPal after redirection from an alternative payment
         method checkout.
 
@@ -55,7 +55,7 @@ class PaypalController(http.Controller):
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
         if tx_sudo:
-            order_id = data.get("token") or tx_sudo.provider_reference
+            order_id = token or tx_sudo.provider_reference
             try:
                 if tx_sudo.payment_method_code in {"paypal", "card"}:
                     self._paypal_capture_order(tx_sudo, order_id)
@@ -71,7 +71,7 @@ class PaypalController(http.Controller):
         return request.redirect("/payment/status")
 
     @http.route(_cancel_url, type="http", auth="public", methods=["GET"], save_session=False)
-    def paypal_cancel_payment(self, **data):
+    def paypal_cancel_payment(self, token=None, **data):
         """Process the payment cancellation initated by the customer sent by PayPal after
         redirection from an alternative payment method checkout.
 
@@ -86,7 +86,7 @@ class PaypalController(http.Controller):
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
         if tx_sudo:
-            order_id = data.get("token") or tx_sudo.provider_reference
+            order_id = token or tx_sudo.provider_reference
             try:
                 order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")
             except ValidationError:
@@ -241,7 +241,6 @@ class PaypalController(http.Controller):
         customer_id = resource.get("customer", {}).get("id")
         if not (vault_id and customer_id):
             return
-
         tx_sudo = (
             self
             .env["payment.transaction"]
@@ -259,7 +258,6 @@ class PaypalController(http.Controller):
         )
         if not tx_sudo:
             return
-
         # Guard against duplicate deliveries
         if (
             self
@@ -271,13 +269,7 @@ class PaypalController(http.Controller):
             ])
         ):
             return
-
-        try:
-            self._verify_notification_origin(notification_data, tx_sudo)
-        except ValidationError:
-            _logger.warning("Unable to verify the origin of the PayPal vault notification.")
-            return
-
+        self._verify_notification_origin(notification_data, tx_sudo)
         tx_sudo.with_context(payment_safe_write=True)._paypal_tokenize_from_notification(resource)
 
     def _verify_notification_origin(self, payment_data, tx_sudo=None, provider_sudo=None):
