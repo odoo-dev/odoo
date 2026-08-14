@@ -7,7 +7,8 @@
         <KanbanMany2One t-props="m2oProps">
             <t t-set-slot="avatar">
                 <span class="o_avatar o_m2o_avatar">
-                    <img t-attf-src="/web/image/{{relation}}/{{value.id}}/avatar_128?unique={{value.write_date.toMillis()}}" class="rounded"/>
+                    <t t-set="unique" t-value="this.value?.write_date ? this.value.write_date.toMillis() : undefined"/>
+                    <img t-attf-src="/web/image/{{relation}}/{{value.id}}/avatar_128?unique={{unique}}" class="rounded"/>
                 </span>
             </t>
             <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
