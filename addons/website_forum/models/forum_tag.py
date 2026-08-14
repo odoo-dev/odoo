@@ -19,7 +19,7 @@ class ForumTag(models.Model):
     forum_id = fields.Many2one('forum.forum', string='Forum', required=True)
     post_ids = fields.Many2many(
         'forum.post', 'forum_tag_rel', 'forum_tag_id', 'forum_post_id',
-        string='Posts', domain=[('state', '=', 'active')])
+        string='Posts', domain=[('state', '=', 'active'), ('active', '=', True)])
     posts_count = fields.Integer('Number of Posts', compute='_compute_posts_count', store=True)
     _name_uniq = models.Constraint(
         'unique (name, forum_id)',
