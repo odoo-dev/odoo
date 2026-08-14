@@ -725,7 +725,7 @@ class TestSearchRelated(TransactionCase):
                     AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                         SELECT "test_orm_related_bar"."id"
                         FROM "test_orm_related_bar"
-                        WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                        WHERE "test_orm_related_bar"."name" IN %s
                         AND "test_orm_related_bar"."id" < %s
                     )
                 )
@@ -768,7 +768,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related__foo_id__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                     AND "test_orm_related_bar"."id" < %s
                 )
             ))
@@ -1167,7 +1167,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                     AND "test_orm_related_bar"."id" < %s
                 )
             ) AND "test_orm_related_foo"."id" < %s
@@ -1185,7 +1185,7 @@ class TestSearchRelated(TransactionCase):
                 AND "test_orm_related_foo__bar_ids"."test_orm_related_bar_id" IN (
                     SELECT "test_orm_related_bar"."id"
                     FROM "test_orm_related_bar"
-                    WHERE ("test_orm_related_bar"."active" IS TRUE AND "test_orm_related_bar"."name" IN %s)
+                    WHERE "test_orm_related_bar"."name" IN %s
                 )
             ) AND "test_orm_related_foo"."id" < %s
             ORDER BY "test_orm_related_foo"."id"
