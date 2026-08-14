@@ -178,7 +178,8 @@ class ProductTemplate(models.Model):
         inverse='_inverse_import_attribute_values',
         store=False, copy=False)
 
-    product_variant_ids = fields.One2many('product.product', 'product_tmpl_id', 'Products', required=True)
+    all_product_variant_ids = fields.One2many('product.product', 'product_tmpl_id', 'Products (incl. archived)', required=True)
+    product_variant_ids = fields.One2many('product.product', 'product_tmpl_id', 'Products', required=True, domain=[('active', '=', True)])
     # performance: product_variant_id provides prefetching on the first product variant only
     product_variant_id = fields.Many2one('product.product', 'Product', compute='_compute_product_variant_id')
 
@@ -353,17 +354,14 @@ class ProductTemplate(models.Model):
         :return: None
         """
         for template in self:
-            variant_count = len(template.product_variant_ids)
-            if variant_count == 1:
-                template[fname] = template.product_variant_ids[fname]
-            elif variant_count == 0 and self.env.context.get("active_test", True):
-                # If the product has no active variants, retry without the active_test
-                template_ctx = template.with_context(active_test=False)
-                template_ctx._compute_template_field_from_variant_field(
-                    fname, default=default, multi_variant=multi_variant
-                )
+            variants = template.product_variant_ids
+            if not variants:
+                # If the product has no active variants, try archived variants
+                variants = template.all_product_variant_ids
+            if len(variants) == 1:
+                template[fname] = variants[fname]
             elif multi_variant:
-                values = template.product_variant_ids.mapped(fname)
+                values = variants.mapped(fname)
                 if len(set(values)) == 1:
                     template[fname] = values[0]
             else:
@@ -381,7 +379,7 @@ class ProductTemplate(models.Model):
             if count == 1 or (update_all_variants and count > 1):
                 template.product_variant_ids[fname] = template[fname]
             elif count == 0:
-                archived_variants = template.with_context(active_test=False).product_variant_ids
+                archived_variants = template.all_product_variant_ids
                 archived_count = len(archived_variants)
                 if archived_count == 1 or (update_all_variants and archived_count > 1):
                     archived_variants[fname] = template[fname]
@@ -607,7 +605,7 @@ class ProductTemplate(models.Model):
 
     @api.onchange('uom_id')
     def _onchange_uom_id(self):
-        if self._origin.uom_id == self.uom_id or not self.with_context(active_test=False).product_variant_ids._trigger_uom_warning():
+        if self._origin.uom_id == self.uom_id or not self.all_product_variant_ids._trigger_uom_warning():
             return
         message = _(
             'Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n'
@@ -760,7 +758,7 @@ class ProductTemplate(models.Model):
         if (self.env.context.get("create_product_product", True) and 'attribute_line_ids' in vals) or (vals.get('active') and len(self.product_variant_ids) == 0):
             self._create_variant_ids()
         if 'active' in vals and not vals.get('active'):
-            self.with_context(active_test=False).mapped('product_variant_ids').write({'active': vals.get('active')})
+            self.all_product_variant_ids.write({'active': vals.get('active')})
         if 'image_1920' in vals:
             self.env['product.product'].invalidate_model([
                 'image_1920',
@@ -1022,7 +1020,7 @@ class ProductTemplate(models.Model):
         for tmpl_id in self:
             lines_without_no_variants = tmpl_id.valid_product_template_attribute_line_ids._without_no_variant_attributes()
 
-            all_variants = tmpl_id.with_context(active_test=False).product_variant_ids.sorted(lambda p: (p.active, -p.id))
+            all_variants = tmpl_id.all_product_variant_ids.sorted(lambda p: (p.active, -p.id))
 
             current_variants_to_create = []
             current_variants_to_activate = Product
@@ -1206,7 +1204,7 @@ class ProductTemplate(models.Model):
                (e.g: Not available with Color: Black)
         """
         self.ensure_one()
-        archived_products = self.with_context(active_test=False).product_variant_ids.filtered(lambda l: not l.active)
+        archived_products = self.all_product_variant_ids.filtered(lambda l: not l.active)
         active_combinations = set(tuple(product.product_template_attribute_value_ids.ids) for product in self.product_variant_ids)
         return {
             'exclusions': self._complete_inverse_exclusions(

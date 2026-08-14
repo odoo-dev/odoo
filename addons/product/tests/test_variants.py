@@ -446,8 +446,7 @@ class TestVariants(ProductVariantsCommon):
         variant_1.action_archive()
         self.assertFalse(variant_1.active)
         self.assertEqual(len(template.product_variant_ids), 1)
-        self.assertEqual(len(template.with_context(
-            active_test=False).product_variant_ids), 2)
+        self.assertEqual(len(template.all_product_variant_ids), 2)
         variant_1.action_unarchive()
         self.assertTrue(variant_1.active)
         self.assertTrue(template.active)
@@ -1732,7 +1731,7 @@ class TestVariantsArchive(ProductVariantsCommon):
         self.assertTrue(template.exists(), "Template should not be deleted when adding attributes to archived template")
         self.assertFalse(template.active, "Template should remain archived")
         # Verify new variants are created but remain archived
-        all_variants = template.product_variant_ids
+        all_variants = template.all_product_variant_ids
         self.assertEqual(len(all_variants), 2, "Should create 2 variants: S+Red and S+Blue")
         for variant in all_variants:
             self.assertFalse(variant.active, "Variants should remain archived when template is archived")
