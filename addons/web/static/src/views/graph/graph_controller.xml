@@ -86,7 +86,7 @@
                 </t>
                 <t t-if="this.model.isReady() and this.model.data">
                     <t t-if="!this.model.hasData() or this.model.useSampleModel and this.props.info.noContentHelp">
-                        <ActionHelper noContentHelp="this.props.info.noContentHelp" />
+                        <ActionHelper noContentHelp="this.props.info.noContentHelp" picto="this.props.info.picto" />
                     </t>
                     <t t-component="this.props.Renderer" model="this.model" buttonTemplate="this.props.buttonTemplate" />
                 </t>

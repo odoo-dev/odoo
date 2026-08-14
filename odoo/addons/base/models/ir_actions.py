@@ -303,6 +303,13 @@ class IrActionsAct_Window(models.Model):
     mobile_view_mode = fields.Char(default="kanban", help="First view mode in mobile and small screen environments (default='kanban'). If it can't be found among available view modes, the same mode as for wider screens is used)")
     usage = fields.Char(string='Action Usage',
                         help="Used to filter menu and home actions from the user form.")
+    picto = fields.Char(
+        string="Pictogram",
+        default="EmptyFolder",
+        help="A web.picto.* QWeb template shown in the view's "
+             "empty-state helper, above the help text. Set to False "
+             "to not render any pictogram.",
+    )
     view_ids = fields.One2many('ir.actions.act_window.view', 'act_window_id', string='No of Views')
     views = fields.Json(compute='_compute_views',
         help="This function field computes the ordered list of views that should be enabled "
@@ -360,6 +367,7 @@ class IrActionsAct_Window(models.Model):
         return super()._get_readable_fields() | {
             "context", "cache", "mobile_view_mode", "domain", "filter", "group_ids", "limit",
             "res_id", "res_model", "search_view_id", "target", "view_id", "view_mode", "views", "embedded_action_ids",
+            "picto",
             # this is used by frontend, with the document layout wizard before send and print
             "close_on_report_download",
         }

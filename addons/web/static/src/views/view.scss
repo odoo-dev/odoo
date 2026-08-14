@@ -22,23 +22,6 @@
     .o_nocontent_help {
         @include o-nocontent-empty;
 
-        .o_view_nocontent_smiling_face:before {
-            @extend %o-nocontent-init-image;
-            width: 120px;
-            height: 140px;
-            background: transparent url(/web/static/img/smiling_face.svg) no-repeat center;
-        }
-
-        .o_view_nocontent_neutral_face:before {
-            @extend %o-nocontent-init-image;
-            width: 120px;
-            height: 140px;
-            background: transparent url(/web/static/img/neutral_face.svg) no-repeat center;
-        }
-
-        .o_view_nocontent_empty_folder:before {
-            @extend %o-nocontent-empty-document;
-        }
 
         .o_empty_custom_dashboard {
             min-height: 327px;
@@ -48,6 +31,13 @@
             background: transparent url(/web/static/img/graph_background.png) no-repeat 0 0;
         }
     }
+}
+
+// Very low selector specificity
+:where(.o_view_nocontent .o_picto) {
+    opacity: 0.7;
+    width: 120px;
+    margin-bottom: 1.4rem;
 }
 
 // Naive heuristic to leave enough space for the nocontent helper in dialogs

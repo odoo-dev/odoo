@@ -54,6 +54,7 @@ export const kanbanRendererProps = {
     readonly: t.any().optional(),
     forceGlobalClick: t.any().optional(),
     noContentHelp: t.any().optional(),
+    picto: t.or([t.string(), t.boolean()]).optional(),
     scrollTop: t.any().optional(() => () => {}),
     canQuickCreate: t.any().optional(),
     quickCreateState: t.any().optional(),
@@ -162,7 +163,7 @@ export class KanbanRenderer extends Component {
                         ".o_kanban_group",
                         ".o_kanban_header",
                         ".o_column_quick_create",
-                        ".o_view_nocontent_smiling_face",
+                        ".o_nocontent_help",
                     ].join(", ")
                 );
             }
