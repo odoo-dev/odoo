@@ -1006,7 +1006,7 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         # sending normal message
         with self.with_user("employee"):
-            channel_msg = channel.message_post(body="Test", message_type="comment", subtype_xmlid="mail.mt_comment")
+            channel_msg = channel.with_env(self.env).message_post(body="Test", message_type="comment", subtype_xmlid="mail.mt_comment")
         all_notif = self.env["mail.notification"].search([
             ("mail_message_id", "=", channel_msg.id),
             ("res_partner_id", "=", all_test_user.partner_id.id)
@@ -1029,7 +1029,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         with self.assertBus(notifications):
             # sending mention message
             with self.with_user("employee"):
-                channel_msg = channel.message_post(
+                channel_msg = channel.with_env(self.env).message_post(
                     body="Test @mentions",
                     partner_ids=all_users.partner_id.ids,
                     message_type="comment",
@@ -1061,7 +1061,7 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         # sending normal message
         with self.with_user("employee"):
-            channel_msg = channel.message_post(body="Test", message_type="comment", subtype_xmlid="mail.mt_comment")
+            channel_msg = channel.with_env(self.env).message_post(body="Test", message_type="comment", subtype_xmlid="mail.mt_comment")
         all_notif = self.env["mail.notification"].search([
             ("mail_message_id", "=", channel_msg.id),
             ("res_partner_id", "=", all_test_user.partner_id.id)
@@ -1080,7 +1080,7 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         # sending mention message
         with self.with_user("employee"):
-            channel_msg = channel.message_post(body="Test @mentions", partner_ids=(all_test_user.partner_id + mentions_test_user.partner_id + nothing_test_user.partner_id).ids, message_type="comment", subtype_xmlid="mail.mt_comment")
+            channel_msg = channel.with_env(self.env).message_post(body="Test @mentions", partner_ids=(all_test_user.partner_id + mentions_test_user.partner_id + nothing_test_user.partner_id).ids, message_type="comment", subtype_xmlid="mail.mt_comment")
         all_notif = self.env["mail.notification"].search([
             ("mail_message_id", "=", channel_msg.id),
             ("res_partner_id", "=", all_test_user.partner_id.id)

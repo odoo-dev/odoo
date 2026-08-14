@@ -858,7 +858,8 @@ class DiscussChannel(models.Model):
                 **(create_member_params or {}),
                 'partner_id': partner.id,
                 'channel_id': channel.id,
-            } for partner in partners - existing_members.partner_id]
+            } for partner in partners - existing_members.partner_id
+            if not any(u._is_public() for u in partner.user_ids)]
             members_to_create += [{
                 **(create_member_params or {}),
                 'guest_id': guest.id,
