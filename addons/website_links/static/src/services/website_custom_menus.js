@@ -7,7 +7,6 @@ import { session } from "@web/session";
 
 registry.category("website_custom_menus").add("website_links.menu_link_tracker", {
     Component: LinkTrackerDialog,
-    openWidget: (services) => services.website.goToWebsite({ path: `/r?u=${encodeURIComponent(services.website.contentWindow.location.href)}` }),
     isDisplayed: (env) => env.services.website.currentWebsite && env.services.website.contentWindow && window.location.pathname !== "/r",
     getProps: async ({ orm, website, notification }) => {
         const model = "link.tracker";
