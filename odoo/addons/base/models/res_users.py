@@ -238,7 +238,7 @@ class ResUsers(models.Model):
         default=lambda self: self.env.company.id,
         help='The default company for this user.', context={'user_preference': True})
     company_ids = fields.Many2many('res.company', 'res_company_users_rel', 'user_id', 'cid',
-        string='Companies', default=lambda self: self.env.company.ids)
+        string='Companies', default=lambda self: self.env.company.ids, domain=[('active', '=', True)])
 
     # overridden inherited fields to bypass access rights, in case you have
     # access to the user but not its corresponding partner
