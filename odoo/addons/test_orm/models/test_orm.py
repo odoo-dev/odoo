@@ -1262,17 +1262,17 @@ class TestOrmModel_Active_Field(models.Model):
     name = fields.Char()
     active = fields.Boolean(default=True)
     parent_id = fields.Many2one('test_orm.model_active_field')
-    children_ids = fields.One2many('test_orm.model_active_field', 'parent_id')
-    all_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id', domain=[])
+    children_ids = fields.One2many('test_orm.model_active_field', 'parent_id', domain=[('active', '=', True)])
+    all_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id')
     active_children_ids = fields.One2many('test_orm.model_active_field', 'parent_id', domain=[('active', '=', True)])
     relatives_ids = fields.Many2many(
         'test_orm.model_active_field',
         'model_active_field_relatives_rel', 'source_id', 'dest_id',
+        domain=[('active', '=', True)],
     )
     all_relatives_ids = fields.Many2many(
         'test_orm.model_active_field',
         'model_active_field_relatives_rel', 'source_id', 'dest_id',
-        domain=[],
     )
     a_relatives_ids = fields.Many2many(
         'test_orm.model_active_field',
