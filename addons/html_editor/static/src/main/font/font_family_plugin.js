@@ -62,7 +62,7 @@ export class FontFamilyPlugin extends Plugin {
                 description: _t("Select font family"),
                 Component: FontFamilySelector,
                 props: {
-                    fontFamilyItems: fontFamilyItems,
+                    fontFamilyItems: this.fontFamilyItems,
                     currentFontFamily: this.fontFamily,
                     focusEditable: () => this.dependencies.selection.focusEditable(),
                     onSelected: (item) => {
@@ -84,16 +84,24 @@ export class FontFamilyPlugin extends Plugin {
         on_history_commit_redone_handlers: this.updateCurrentFontFamily.bind(this),
     };
 
+    get fontFamilyItems() {
+        return fontFamilyItems;
+    }
+
+    getCurrentFontFamily(anchorElement) {
+        return getComputedStyle(anchorElement).fontFamily;
+    }
+
     updateCurrentFontFamily(ev) {
         const selelectionData = this.dependencies.selection.getSelectionData();
         if (!selelectionData.documentSelectionIsInEditable) {
             return;
         }
         const anchorElement = closestElement(selelectionData.editableSelection.anchorNode);
-        const anchorElementFontFamily = getComputedStyle(anchorElement).fontFamily;
+        const anchorElementFontFamily = this.getCurrentFontFamily(anchorElement);
         const currentFontItem =
             anchorElementFontFamily &&
-            fontFamilyItems.find((item) => item.fontFamily === anchorElementFontFamily);
+            this.fontFamilyItems.find((item) => item.fontFamily === anchorElementFontFamily);
 
         this.fontFamily.displayName = (currentFontItem || defaultFontFamily).nameShort;
     }
