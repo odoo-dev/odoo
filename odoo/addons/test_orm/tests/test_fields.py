@@ -3456,9 +3456,10 @@ class TestX2many(TransactionExpressionCase):
         parent = Model.create({
             'children_ids': [
                 Command.create({'name': 'A', 'active': True}),
-                Command.create({'name': 'B', 'active': False}),
+                Command.create({'name': 'B', 'active': True}),
             ],
         })
+        parent.all_children_ids[1].active = False  # make B inactive
 
         # a one2many field without context does not match its inactive children
         self.assertIn(parent, self._search(Model, [('children_ids.name', '=', 'A')]))
@@ -3490,9 +3491,9 @@ class TestX2many(TransactionExpressionCase):
                 Command.create({'name': 'B', 'active': False}),
             ],
         })
-        child_a, child_b = parent.with_context(active_test=False).relatives_ids
+        child_a, child_b = parent.all_relatives_ids
 
-        # a many2many field without context does not match its inactive children
+        # a many2many field matches its inactive children
         self.assertIn(parent, self._search(Model, [('relatives_ids.name', '=', 'A')]))
         self.assertNotIn(parent, self._search(Model, [('relatives_ids.name', '=', 'B')]))
         # Same result when it used _search_display_name
