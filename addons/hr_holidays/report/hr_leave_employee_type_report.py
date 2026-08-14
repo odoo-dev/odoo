@@ -257,7 +257,7 @@ class HrLeaveEmployeeTypeReport(models.Model):
             'search_view_id': [self.env.ref('hr_holidays.view_search_hr_holidays_employee_type_report').id],
             'domain': domain,
             'help': _("""
-                <p class="o_view_nocontent_empty_folder">
+                <p>
                     No Balance yet!
                 </p>
                 <p>

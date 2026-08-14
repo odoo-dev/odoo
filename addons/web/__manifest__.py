@@ -55,6 +55,7 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web._assets_core'),
 
             ('include', 'web.icons_fonts'),
+            'web/static/picto/*.xml',
             'web/static/src/webclient/navbar/navbar.scss',
             'web/static/src/scss/animation.scss',
             'web/static/src/scss/mimetypes.scss',
@@ -176,6 +177,7 @@ This module provides the core of the Odoo Web Client.
             ('include', 'web._assets_bootstrap_frontend'),
 
             ('include', 'web.icons_fonts'),
+            'web/static/picto/*.xml',
             'web/static/src/webclient/navbar/navbar.scss',
             'web/static/src/scss/animation.scss',
             'web/static/src/scss/base_frontend.scss',

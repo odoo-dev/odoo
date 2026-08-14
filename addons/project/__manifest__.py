@@ -121,6 +121,7 @@
             ('include', 'web._assets_bootstrap_backend'),
 
             ('include', 'web.icons_fonts'),
+            'web/static/picto/*.xml',
             'web/static/src/webclient/navbar/navbar.scss',
             'web/static/src/scss/animation.scss',
             'web/static/src/scss/mimetypes.scss',

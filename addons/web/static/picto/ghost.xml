@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.ghost">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M25.3164 1.45459H23.6765C13.7393 1.45459 6.63358 10.1587 5.1973 19.9915C3.45001 31.9535 9.08819 45.762 11.1562 57.5011C14.2761 64.6325 22.7845 56.4429 27.5259 59.1727L29.4755 60.2953C32.6566 62.1268 36.131 61.7245 39.2683 60.1135C45.285 57.0238 50.5925 64.3377 56.3156 62.1191C59.2391 60.9858 60.0799 57.2498 57.9239 54.9733L54.628 51.4932C48.6285 45.1584 44.6646 29.4241 44.6646 20.8028C44.6646 10.1171 36.0021 1.45459 25.3164 1.45459Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="13.5273" cy="21.4017" rx="2.60253" ry="4.97145" fill="currentColor"/>
+            <ellipse cx="24.5242" cy="21.4017" rx="2.60253" ry="4.97145" fill="currentColor"/>
+        </svg>
+    </t>
+
+</templates>

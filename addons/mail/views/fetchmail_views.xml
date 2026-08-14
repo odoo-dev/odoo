@@ -115,8 +115,9 @@
             <field name="view_id" ref="view_email_server_tree"/>
             <field name="search_view_id" ref="view_email_server_search"/>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <div>
-                    <b class="o_view_nocontent_smiling_face">
+                    <b>
                         No Incoming Servers yet
                     </b>
                 </div>

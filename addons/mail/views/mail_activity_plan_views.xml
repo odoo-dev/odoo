@@ -164,7 +164,8 @@
             <field name="view_mode">list,kanban,form</field>
             <field name="search_view_id" ref="mail_activity_plan_view_search"/>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <picto name="empty_folder"/>
+                <p>
                     Create an Activity Plan
                 </p>
                 <p>

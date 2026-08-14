@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.unknown">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M62.7207 63V8.65902L56.1984 1H7.69788L1.27905 8.65902V63H62.7207Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1.27905 8.65894H62.7207" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M27.6597 30.0155C27.6597 29.1646 27.9142 28.3328 28.3911 27.6253C28.868 26.9178 29.5459 26.3664 30.339 26.0408C31.1321 25.7151 32.0047 25.6299 32.8467 25.7959C33.6886 25.9619 34.4619 26.3717 35.0689 26.9734C35.6759 27.5751 36.0893 28.3416 36.2568 29.1762C36.4242 30.0108 36.3383 30.8758 36.0098 31.662C35.6813 32.4481 35.125 33.12 34.4112 33.5928C33.2352 34.3717 31.9999 35.4614 31.9999 36.872V38.114" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="31.9999" cy="43.7995" r="1.80829" fill="currentColor"/>
+        </svg>
+    </t>
+
+</templates>

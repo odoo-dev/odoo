@@ -201,6 +201,7 @@
         <field name="path">payment-transactions</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
+            <picto name="empty_folder"/>
             <p class="o_view_nocontent_neutral_face">
                 There are no transactions to show
             </p>

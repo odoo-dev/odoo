@@ -572,6 +572,7 @@
             <field name="search_view_id" ref="hr_expense_view_search"/>
             <field name="context">{'search_default_my_open_expenses': 1, 'search_default_action_required': 1}</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <div class="o_view_nocontent_expense_receipt o_view_pink_overlay">
                     <p class="o_view_nocontent_expense_receipt_image"/>
                     <h2 class="d-md-block">
@@ -618,6 +619,7 @@
             <field name="domain">[('manager_id', '=?', context.get('active_id'))]</field>
             <field name="context">{'searchpanel_default_state': ['submitted']}</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <div class="o_view_nocontent_expense_receipt o_view_pink_overlay">
                     <p class="o_view_nocontent_expense_receipt_image"/>
                     <h2 class="d-md-block">
@@ -635,7 +637,8 @@
             <field name="search_view_id" ref="hr_expense_view_search_with_panel"/>
             <field name="context">{ 'searchpanel_default_state': ["draft", "submitted", "approve", "posted", "in_payment", "paid"] }</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_empty_folder">
+                <picto name="empty_folder"/>
+                <p>
                     No data yet!
                 </p><p>
                     Create new expenses to get statistics.
@@ -675,7 +678,8 @@
             }
             </field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 Create a new expense
               </p><p>
                 Once you have created your expense, submit it to your manager who will validate it.
@@ -702,7 +706,8 @@
                 'default_department_id': active_id}
             </field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <picto name="empty_folder"/>
+                <p>
                     No data yet!
                 </p>
             </field>

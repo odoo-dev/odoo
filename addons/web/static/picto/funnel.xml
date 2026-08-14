@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.funnel">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M31.9999 12.9308C43.8246 12.9308 53.4104 14.5131 53.4104 16.465L53.4105 18.7986L35.2585 41.2113L33.3408 60.0574C33.4 60.1166 33.3251 60.2999 33.1528 60.5562C32.9372 60.8767 32.5692 61.3114 32.1207 61.7599C31.6722 62.2084 31.2375 62.5764 30.917 62.792C30.6607 62.9643 30.4774 63.0392 30.4182 62.98L28.7417 41.2113L10.5895 18.7986L10.5894 16.465C10.5894 15.5017 12.9242 14.6284 16.7106 13.9909" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10.5894 16.465C10.5894 18.4169 20.1753 19.9991 31.9999 19.9991C43.8246 19.9991 53.4104 18.4168 53.4104 16.465" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M28.987 12.4967C28.987 15.0615 26.9078 17.1407 24.343 17.1407C21.7783 17.1407 19.6991 15.0615 19.6991 12.4967C19.6991 9.93194 21.7783 7.85278 24.343 7.85278C26.9078 7.85278 28.987 9.93194 28.987 12.4967Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="39.7615" cy="5.64393" r="4.64393" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </t>
+
+</templates>

@@ -74,7 +74,7 @@ class LinkTrackerClick(models.Model):
             'domain': domain,
             'context': context,
         }
-        action['help'] = Markup('<p class="o_view_nocontent_smiling_face">%s</p><p>%s</p>') % (
+        action['help'] = Markup('<p>%s</p><p>%s</p>') % (
             helper_header, helper_message,
         )
         return action

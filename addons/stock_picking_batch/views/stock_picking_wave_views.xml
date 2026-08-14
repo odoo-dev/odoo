@@ -66,6 +66,7 @@
         <field name="domain">[('is_wave', '=', True)]</field>
         <field name="search_view_id" ref="stock_picking_batch_filter"/>
         <field name="help" type="html">
+            <picto name="empty_folder"/>
             <div class="container mt-5">
                 <div class="row g-5">
                     <div class="col-lg-4">

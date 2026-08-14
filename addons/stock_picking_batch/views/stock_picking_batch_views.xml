@@ -287,6 +287,7 @@
         <field name="context">{'search_default_draft': True, 'search_default_in_progress': True, 'skip_acquisition_date': True}</field>
         <field name="search_view_id" ref="stock_picking_batch_filter"/>
         <field name="help" type="html">
+            <picto name="empty_folder"/>
             <div class="container mt-5">
                 <div class="row g-5">
                     <div class="col-lg-4" style="opacity: 0.5;">

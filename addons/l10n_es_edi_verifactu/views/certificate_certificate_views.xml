@@ -19,6 +19,7 @@
             <field name="view_mode">list,form</field>
             <field name="context">{'scope': 'verifactu', 'search_default_scope_verifactu': 1}</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p class="oe_view_nocontent_create">Create the first certificate</p>
             </field>
         </record>

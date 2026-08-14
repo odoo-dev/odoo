@@ -74,7 +74,7 @@ class MailingFilter(models.Model):
             'domain': literal_eval(self.mailing_domain),
             'context': {'create': False},
             'help': self.env._("""
-                <p class="o_view_nocontent_smiling_face">No record currently matches your rules!</p>
+                <p>No record currently matches your rules!</p>
             """),
         }
 

@@ -28,7 +28,8 @@
         <field name="res_model">res.partner.grade</field>
         <field name="search_view_id" ref="res_partner_grade_view_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <picto name="poof"/>
+            <p>
                 Create a Partner Level
             </p><p>
                 Partner Levels allow you to rank your Partners based on their performances.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.magnet">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.2753 26.3555L26.454 11.1768L35.9005 20.9235L21.7969 34.7522C18.6381 37.911 18.6381 43.0324 21.7969 46.1912C24.9557 49.35 30.0772 49.35 33.236 46.1912L47.4306 31.61L56.8114 41.5342L41.6327 56.7129C33.2497 65.0959 19.6582 65.0959 11.2753 56.7129C2.89229 48.3299 2.89229 34.7384 11.2753 26.3555Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M30.853 25.6961L21.3938 16.2369M51.7512 46.5944L42.2215 37.0646L42.182 37.0251" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M48.1642 15.5218H43L53.7569 1.00012L50.1111 11.488H57.5218L43 25.2029L48.1642 15.5218Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </t>
+
+</templates>

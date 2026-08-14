@@ -9,7 +9,8 @@
             <field name="domain">[('state', 'not in', ('done', 'cancel'))]</field>
             <field name="context">{'search_default_workcenter_id': active_id}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <picto name="empty_folder"/>
+                <p>
                     No work orders to do!
                 </p><p>
                     Work orders are operations to do as part of a manufacturing order.
@@ -76,7 +77,8 @@
             <field name="domain">[('workcenter_id','=',active_id)]</field>
             <field name="context">{'search_default_thismonth':True}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <picto name="empty_folder"/>
+                <p>
                     Overall Equipment Effectiveness: no working or blocked time
                 </p>
             </field>
@@ -91,7 +93,8 @@
                                    'default_workcenter_id': active_id,
                                    'search_default_workcenter_id': [active_id]}</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_empty_folder">
+              <picto name="empty_folder"/>
+              <p>
                 No productivity loss for this equipment
               </p>
             </field>
@@ -131,7 +134,8 @@
                                    'search_default_filter_to_plan': True,
                                    'workcenter_to_plan_on': active_id}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <picto name="empty_folder"/>
+                <p>
                     No work orders to do!
                 </p><p>
                     Work orders are operations to do as part of a manufacturing order.
@@ -391,7 +395,8 @@
                 (0, 0, {'view_mode': 'form', 'view_id': ref('mrp_workcenter_view')})]"/>
             <field name="search_view_id" ref="view_mrp_workcenter_search"/>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 Create a new work center
               </p><p>
                 Manufacturing operations are processed at work centers. A work center can
@@ -409,7 +414,8 @@
             <field name="view_id" ref="mrp_workcenter_kanban"/>
             <field name="search_view_id" ref="view_mrp_workcenter_search"/>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 Create a new work center
               </p><p>
                 Manufacturing operations are processed at work centers. A work center can
@@ -582,7 +588,8 @@
         <field name="domain">[]</field>
         <field name="context">{'search_default_workcenter_group': 1, 'search_default_loss_group': 2, 'create':False,'edit':False}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <picto name="poof"/>
+            <p>
                 Overall Equipment Effectiveness: no working or blocked time
             </p>
         </field>

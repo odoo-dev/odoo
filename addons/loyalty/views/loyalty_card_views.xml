@@ -94,6 +94,7 @@
         <field name="domain">[('program_id', '=', active_id)]</field>
         <field name="context">{'create': False}</field>
         <field name="help" type="html">
+            <picto name="empty_folder"/>
             <h1>No Coupons Found.</h1>
             <p>There haven't been any coupons generated yet.</p>
         </field>

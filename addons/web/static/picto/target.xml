@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.picto.target">
+        <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.0622 47.6562L13.5678 62.1447L16.6344 62.1447L20.5329 48.9175" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M44.6228 47.0376L48.7689 62.1448L45.9762 62.1448L42.0005 48.5441" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M29.7356 51.2736L29.7356 56.4429H32.7844V51.2736" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M51.4216 14.7562C53.5685 18.2123 54.858 22.265 54.9836 26.6251C55.3626 39.7778 45.0074 50.7475 31.8546 51.1265C18.7018 51.5054 7.73217 41.1502 7.35319 27.9974C6.97421 14.8447 17.3294 3.87503 30.4822 3.49605C35.1759 3.36081 39.5915 4.59255 43.3471 6.83058" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M45.7143 16.9168C48.1558 19.457 49.1486 23.3414 49.248 26.7903C49.5357 36.7754 41.6744 45.1031 31.6893 45.3908C21.7043 45.6785 13.3765 37.8173 13.0888 27.8322C12.8011 17.8471 20.6624 9.51933 30.6475 9.23163C34.6964 9.11496 38.3799 10.4248 41.714 12.6184" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M41.8621 20.682C42.9957 22.5069 43.6765 24.6467 43.7428 26.9488C43.9429 33.8935 38.4754 39.6854 31.5307 39.8855C24.5861 40.0856 18.7941 34.6181 18.594 27.6734C18.3939 20.7288 23.8614 14.9368 30.8061 14.7367C33.2844 14.6653 35.6158 15.3156 37.5988 16.4973" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M37.5157 25.1406C37.7281 25.7626 37.852 26.4266 37.872 27.118C37.9786 30.8203 35.0638 33.9082 31.3615 34.0148C27.6591 34.1215 24.5713 31.2067 24.4646 27.5043C24.358 23.802 27.2728 20.7142 30.9752 20.6075C31.8234 20.5831 32.6394 20.7172 33.3947 20.9831" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M53.2274 5.25342L31.1147 27.366" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M48.1397 12.0471L51.7899 12.0471L57.3332 6.50382L53.8469 6.19582M46.463 10.6711L46.2861 6.54323L51.8293 1L52.269 4.79078" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </t>
+
+</templates>

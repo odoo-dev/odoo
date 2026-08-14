@@ -370,7 +370,8 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="context">{}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <picto name="poof"/>
+            <p>
                 Create a new product
             </p>
         </field>
@@ -416,7 +417,8 @@
             <field name="search_view_id" ref="product_search_form_view"/>
             <field name="view_mode">list,form</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 Create a new product variant
               </p><p>
                 You must define a product for everything you sell or purchase,

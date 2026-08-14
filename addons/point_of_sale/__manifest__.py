@@ -228,6 +228,7 @@
             "web/static/src/core/browser/router.js",
             "web/static/src/core/debug/**/*",
             'web/static/src/model/**/*',
+            'web/static/picto/*.xml',
             'web/static/src/views/**/*',
             'web/static/src/search/**/*',
             'web/static/src/webclient/actions/**/*',

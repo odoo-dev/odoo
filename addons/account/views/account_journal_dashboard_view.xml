@@ -403,6 +403,7 @@
         <field name="context">{'search_default_dashboard':1}</field>
         <field name="domain">[]</field>
         <field name="help" type="html">
+            <picto name="empty_folder"/>
             <p class="o_view_nocontent_neutral_face">
                 This is the accounting dashboard
             </p><p>

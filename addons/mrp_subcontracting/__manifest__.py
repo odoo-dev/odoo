@@ -98,6 +98,7 @@
             'web/static/src/core/**/*',
             ('remove', 'web/static/src/core/emoji_picker/emoji_data.js'),
             'web/static/src/search/**/*',
+            'web/static/picto/*.xml',
             'web/static/src/views/*.js',
             'web/static/src/views/*.xml',
             'web/static/src/views/*.scss',

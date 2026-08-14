@@ -20,7 +20,8 @@
             <field name="view_mode">list,kanban,form</field>
             <field name="view_id" ref="im_livechat_channel_config_view_kanban"/>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 No live chat channel found. Let's create one!
               </p><p>
                 Chat with your website visitors in real time by creating a

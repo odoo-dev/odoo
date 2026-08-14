@@ -44,7 +44,8 @@
             <field name="domain"></field>
             <field name="search_view_id" ref="view_data_recycle_record_search" />
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 No cleaning suggestions
               </p>
               <p>
@@ -60,7 +61,8 @@
             <field name="context">{ 'searchpanel_default_recycle_model_id': active_id }</field>
             <field name="search_view_id" ref="view_data_recycle_record_search" />
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 No cleaning suggestions
               </p>
               <p>

@@ -24,7 +24,8 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="search_view_id" ref="hr_work_entry_type_view_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <picto name="poof"/>
+            <p>
                 Create a new Time type
             </p>
         </field>

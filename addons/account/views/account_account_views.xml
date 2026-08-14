@@ -200,7 +200,8 @@
             <field name="view_id" ref="view_account_list"/>
             <field name="context">{'include_inactive_account_parents': True}</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <picto name="empty_folder"/>
+              <p>
                 Add a new account
               </p><p>
                 An account is part of a ledger allowing your company
