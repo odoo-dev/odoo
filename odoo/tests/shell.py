@@ -3,7 +3,7 @@ __all__ = ['run_tests']
 import logging
 import re
 import sys
-from psycopg2.extensions import STATUS_READY
+from psycopg.pq import TransactionStatus
 
 import odoo
 from odoo.modules.registry import Registry
@@ -32,7 +32,7 @@ def run_tests(env, test_tags, modules=None, reload_tests=False):
         # some tests need the http daemon to be available...
         server.http_spawn()
 
-    if env.cr._cnx.status != STATUS_READY:
+    if env.cr._cnx.info.transaction_status != TransactionStatus.IDLE:
         # rollback the cr in case it holds a database lock which may cause deadlock while running tests
         _logger.warning("Rolling backin the transaction before testing")
         env.cr.rollback()
