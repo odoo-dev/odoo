@@ -21,7 +21,7 @@ from enum import IntEnum
 from importlib import resources
 from zoneinfo import TZPATH
 
-import psycopg2
+import psycopg
 from psycopg2.extras import Json
 
 import odoo.api
@@ -313,7 +313,7 @@ def _check_faketime_mode(db_name: str) -> None:
             new_now = cursor.fetchone()[0]
             _logger.info("Faketime mode, new cursor now is %s", new_now)
             cursor.commit()
-    except psycopg2.Error:
+    except psycopg.Error:
         _logger.warning("Unable to set fakedtimed NOW()", exc_info=True)
 
 
@@ -325,7 +325,7 @@ def _create_empty_database(db_name: str) -> None:
     db_system_name = config['db_system']
     try:
         sys_cr = odoo.sql_db.db_connect(db_system_name).cursor()
-    except psycopg2.errors.OperationalError:
+    except psycopg.errors.OperationalError:
         # If we use the `db_name` as the system database and we are trying to
         # create it, try to use postgres as the system database.
         if db_system_name == 'postgres' or db_system_name != db_name:
@@ -366,7 +366,7 @@ def _create_empty_database(db_name: str) -> None:
                 # change in the lifetime of a database. If they do change, all
                 # indexes created with this function become corrupted!
                 cr.execute("ALTER FUNCTION unaccent(text) IMMUTABLE")
-    except psycopg2.Error as e:
+    except psycopg.Error as e:
         _logger.warning("Unable to create PostgreSQL extensions : %s", e)
     _check_faketime_mode(db_name)
 
@@ -375,7 +375,7 @@ def _create_empty_database(db_name: str) -> None:
         db = odoo.sql_db.db_connect(db_name)
         with db.cursor() as cr:
             cr.execute("GRANT CREATE ON SCHEMA PUBLIC TO PUBLIC")
-    except psycopg2.Error as e:
+    except psycopg.Error as e:
         _logger.warning("Unable to make public schema public-accessible: %s", e)
 
 
@@ -507,7 +507,7 @@ def _drop_conn(cr: Cursor, db_name: str) -> None:
     """
     assert cr.dbname == config['db_system']
     assert cr._cnx.autocommit
-    with suppress(psycopg2.Error):
+    with suppress(psycopg.Error):
         cr.execute("""
             SELECT pg_terminate_backend(pid)
               FROM pg_stat_activity
@@ -529,7 +529,7 @@ def drop(db_name: str) -> None:
 
         try:
             cr.execute(SQL('DROP DATABASE %s', quoted_identifier(cr, db_name)))
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             e.add_note(f"When trying to drop {db_name}")
             raise
         _logger.info("DROP DB: %s", db_name)
@@ -676,7 +676,7 @@ def rename(
                 quoted_identifier(cr, old_name),
                 quoted_identifier(cr, new_name),
             ))
-        except psycopg2.Error as e:
+        except psycopg.Error as e:
             e.add_note(f"Renaming {old_name} to {new_name}")
             raise
         _logger.info("RENAME DB: %s -> %s", old_name, new_name)
@@ -716,7 +716,7 @@ def list_dbs(*, force=False):
               ORDER BY datname
             """, (ignore_templates_list,))
             return [name for (name,) in cr.fetchall()]
-        except psycopg2.Error:
+        except psycopg.Error:
             _logger.exception("Listing databases failed:")
             return []
 
@@ -724,7 +724,7 @@ def list_dbs(*, force=False):
 def exist(db_name):
     try:
         odoo.sql_db.db_connect(db_name).cursor().close()
-    except psycopg2.OperationalError:
+    except psycopg.OperationalError:
         return False
     else:
         return True

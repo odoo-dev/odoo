@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.survey.tests import common
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 from odoo.exceptions import AccessError
 from odoo.tests import tagged
 

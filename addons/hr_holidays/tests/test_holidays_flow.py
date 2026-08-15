@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo.tests import reports as test_reports
 from odoo.tools import date_utils, mute_logger

@@ -6,7 +6,7 @@ from odoo.tests import Form
 from odoo.addons.sale.tests.common import TestSaleCommon
 from odoo.exceptions import ValidationError
 from odoo.tests.common import tagged
-from psycopg2.errors import NotNullViolation
+from psycopg.errors import NotNullViolation
 
 
 @tagged('post_install', '-at_install')

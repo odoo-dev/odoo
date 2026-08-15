@@ -6,7 +6,7 @@ import email.policy
 
 from unittest.mock import patch
 
-import psycopg2.errors
+import psycopg.errors
 
 from odoo import tools
 from odoo.addons.base.tests import mail_examples
@@ -141,7 +141,7 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
     @mute_logger('odoo.sql_db')
     def test_mail_server_auth_cert_requires_tls(self):
-        with self.assertRaises(psycopg2.errors.CheckViolation):
+        with self.assertRaises(psycopg.errors.CheckViolation):
             self.env['ir.mail_server'].create({
                 'name': 'test',
                 'smtp_host': 'smtp_host',

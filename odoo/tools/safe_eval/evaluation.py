@@ -21,7 +21,7 @@ import zoneinfo
 from opcode import opmap, opname
 from types import CodeType
 
-import psycopg2
+import psycopg
 import werkzeug
 
 import odoo.exceptions
@@ -378,8 +378,8 @@ _BUBBLEUP_EXCEPTIONS = (
     odoo.exceptions.ConcurrencyError,  # let retrying handle this error
     odoo.exceptions.UserError,
     odoo.exceptions.RedirectWarning,
-    psycopg2.OperationalError,  # let auto-replay of serialized transactions work its magic
-    psycopg2.IntegrityError,  # let retrying handle this error
+    psycopg.OperationalError,  # let auto-replay of serialized transactions work its magic
+    psycopg.IntegrityError,  # let retrying handle this error
     werkzeug.exceptions.HTTPException,
     ZeroDivisionError,
 )

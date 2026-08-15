@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo.tests import tagged, common
 from odoo.tools import mute_logger
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 
 @tagged('at_install', '-post_install')

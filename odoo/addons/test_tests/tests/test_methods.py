@@ -2,7 +2,7 @@
 import itertools
 from unittest import mock, TestCase
 
-import psycopg2
+import psycopg
 
 from odoo.exceptions import AccessError
 from odoo.sql_db import BaseCursor
@@ -172,7 +172,7 @@ First differing element 0:
         from odoo.orm.environments import Transaction  # noqa: PLC0415
         with (
             mock.patch.object(Transaction, 'clear', side_effect=clear),
-            TestCase.assertRaises(self, psycopg2.Error),
+            TestCase.assertRaises(self, psycopg.Error),
         ):
             with self.assertRaises(AccessError):
                 raise NotImplementedError

@@ -11,8 +11,7 @@ import time
 import typing
 from datetime import datetime, timedelta, timezone
 
-import psycopg2
-import psycopg2.errors
+import psycopg.errors
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, sql_db
@@ -203,10 +202,10 @@ class IrCron(models.Model):
             _logger.warning('Skipping database %s as its base version is not %s.', db_name, BASE_VERSION)
         except BadModuleState:
             _logger.warning('Skipping database %s because of modules to install/upgrade/remove.', db_name)
-        except psycopg2.errors.UndefinedTable:
+        except psycopg.errors.UndefinedTable:
             # The table ir_cron does not exist; this is probably not an OpenERP database.
             _logger.warning('Tried to poll an undefined table on database %s.', db_name)
-        except psycopg2.ProgrammingError:
+        except psycopg.ProgrammingError:
             raise
         except Exception:
             _logger.warning('Exception in cron:', exc_info=True)
@@ -224,7 +223,7 @@ class IrCron(models.Model):
         for job_id in job_ids:
             try:
                 job = IrCron._acquire_one_job(cron_cr, job_id)
-            except psycopg2.extensions.TransactionRollbackError:
+            except psycopg.errors.TransactionRollback:
                 cron_cr.rollback()
                 _logger.debug("job %s has been processed by another worker, skip", job_id)
                 continue
@@ -318,7 +317,7 @@ class IrCron(models.Model):
         frequency, or partially done jobs).
 
         Note: It is possible that this function raises a
-              ``psycopg2.errors.SerializationFailure`` in case the job
+              ``psycopg.errors.SerializationFailure`` in case the job
               has been processed in another worker. In such case it is
               advised to roll back the transaction and to go on with the
               other jobs.
@@ -369,7 +368,7 @@ class IrCron(models.Model):
         """, cron_id=job_id, where=where_clause)
         try:
             cr.execute(query, log_exceptions=False)
-        except psycopg2.extensions.TransactionRollbackError:
+        except psycopg.errors.TransactionRollback:
             # A serialization error can occur when another cron worker
             # commits the new `nextcall` value of a cron it just ran and
             # that commit occurred just before this query. The error is

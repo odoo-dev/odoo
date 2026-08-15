@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from psycopg2 import IntegrityError
-from psycopg2.errors import NotNullViolation
+from psycopg import IntegrityError
+from psycopg.errors import NotNullViolation
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, TransactionCase, HttpCase, tagged

@@ -8,7 +8,7 @@ from odoo.tools import sql
 if typing.TYPE_CHECKING:
     from collections.abc import Callable
 
-    import psycopg2.extensions
+    import psycopg.errors
 
     from .environments import Environment
     from .models import BaseModel
@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
 
     ConstraintMessageType = (
         str
-        | Callable[[Environment, psycopg2.extensions.Diagnostics | None], str]
+        | Callable[[Environment, psycopg.errors.Diagnostic | None], str]
     )
     IndexDefinitionType = (
         str

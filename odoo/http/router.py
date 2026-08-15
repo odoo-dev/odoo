@@ -10,9 +10,9 @@ from contextlib import nullcontext
 from os.path import join as opj
 from urllib.parse import urlparse
 
-import psycopg2
+import psycopg
 import werkzeug.routing
-from psycopg2.errors import OperationalError, ReadOnlySqlTransaction
+from psycopg.errors import OperationalError, ReadOnlySqlTransaction
 from werkzeug.exceptions import (
     Forbidden,
     HTTPException,
@@ -384,7 +384,7 @@ def serve_db(request: Request) -> Response:
             request.update_context(host_id=request.env['ir.http']._get_host_id_from_domain(request.httprequest.host))
 
             request.registry = request.env.registry
-        except (AttributeError, psycopg2.OperationalError, psycopg2.ProgrammingError) as e:
+        except (AttributeError, psycopg.OperationalError, psycopg.ProgrammingError) as e:
             raise RegistryError(f"Cannot get registry {request.db}") from e
 
         # find the controller endpoint to use

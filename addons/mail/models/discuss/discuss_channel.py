@@ -5,7 +5,7 @@ from datetime import timedelta
 from hashlib import sha512
 from secrets import choice
 
-import psycopg2
+import psycopg
 from markupsafe import Markup
 
 from odoo import Command, SUPERUSER_ID, _, api, fields, models, tools
@@ -668,7 +668,7 @@ class DiscussChannel(models.Model):
                         if len(synced) == len(channel_ids):
                             with tools.mute_logger('odoo.models.unlink'):
                                 env["ir.cron.trigger"].browse(trigger.id).unlink()
-                except psycopg2.OperationalError:  # transient (serialization/lock/connection): leave the trigger so the cron drains the durable rows
+                except psycopg.OperationalError:  # transient (serialization/lock/connection): leave the trigger so the cron drains the durable rows
                     pass
         channel_ids.update(self.ids)
 

@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from lxml import etree
-from psycopg2.errors import CheckViolation
+from psycopg.errors import CheckViolation
 
 from odoo import Command, _
 from odoo.addons.project.tests.test_project_base import TestProjectCommon

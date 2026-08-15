@@ -378,8 +378,7 @@ from lxml import etree
 from dateutil.relativedelta import relativedelta
 from os.path import join as opj
 from pathlib import Path
-from psycopg2.extensions import TransactionRollbackError
-from psycopg2.errors import ReadOnlySqlTransaction
+from psycopg.errors import ReadOnlySqlTransaction, TransactionRollback
 from typing import NamedTuple, Literal
 from types import FunctionType
 from urllib.parse import unquote_plus
@@ -853,7 +852,7 @@ class IrQweb(models.AbstractModel):
                 else:
                     stack.pop()
 
-        except (TransactionRollbackError, ReadOnlySqlTransaction):
+        except (TransactionRollback, ReadOnlySqlTransaction):
             raise
 
         except Exception as error:

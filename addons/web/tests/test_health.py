@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import psycopg2
+import psycopg
 from unittest.mock import patch
 
 from odoo.tests import tagged, HttpCase
@@ -22,10 +22,10 @@ class TestWebController(HttpCase):
         self.assertEqual(payload['db_server_status'], True)
         self.assertFalse(response.cookies.get('session_id'))
 
-        def _raise_psycopg2_error(*args):
-            raise psycopg2.Error('boom')
+        def _raise_psycopg_error(*args):
+            raise psycopg.Error('boom')
 
-        with patch('odoo.sql_db.db_connect', new=_raise_psycopg2_error):
+        with patch('odoo.sql_db.db_connect', new=_raise_psycopg_error):
             response = self.url_open('/web/health?db_server_status=1')
             self.assertEqual(response.status_code, 500)
             payload = response.json()

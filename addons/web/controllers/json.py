@@ -8,7 +8,7 @@ from datetime import date
 from http import HTTPStatus
 from urllib.parse import urlencode
 
-import psycopg2.errors
+import psycopg.errors
 from dateutil.relativedelta import relativedelta
 from lxml import etree
 from werkzeug.exceptions import BadRequest, NotFound
@@ -222,7 +222,7 @@ class WebJsonController(http.Controller):
                         ro_cr.connection.set_session(readonly=True)
                     assert ro_cr.readonly
                     action_data = action.with_env(action.env(cr=ro_cr, su=False)).run()
-            except psycopg2.errors.ReadOnlySqlTransaction as e:
+            except psycopg.errors.ReadOnlySqlTransaction as e:
                 # never retry on RO connection, just leave
                 raise AccessError(action.env._("Unsupported server action")) from e
             except ValueError as e:

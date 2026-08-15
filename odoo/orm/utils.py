@@ -82,7 +82,7 @@ def check_object_name(name):
         table/column names and in other not, which leads to this kind
         of errors:
 
-            psycopg2.ProgrammingError: relation "xxx" does not exist).
+            psycopg.ProgrammingError: relation "xxx" does not exist).
 
         The same restriction should apply to both osv and osv_memory
         objects for consistency.

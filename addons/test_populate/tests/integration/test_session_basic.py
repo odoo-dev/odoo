@@ -1,4 +1,4 @@
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo.tests import TransactionCase
 from odoo.tools import mute_logger

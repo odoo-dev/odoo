@@ -10,7 +10,7 @@ from contextlib import ExitStack, nullcontext
 from datetime import datetime
 
 import psutil
-from psycopg2 import OperationalError
+from psycopg import OperationalError
 
 from odoo import tools
 from odoo.tools import SQL

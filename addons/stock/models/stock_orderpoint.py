@@ -6,7 +6,7 @@ from datetime import datetime, time, UTC
 from zoneinfo import ZoneInfo
 
 from dateutil import relativedelta
-from psycopg2 import OperationalError
+from psycopg import OperationalError
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.addons.stock.models.stock_rule import ProcurementException

@@ -5,7 +5,7 @@ import secrets
 import tempfile
 from unittest.mock import patch
 
-import psycopg2.errors
+import psycopg.errors
 
 import odoo
 from odoo.api import Environment
@@ -49,7 +49,7 @@ class TestModulesDbOperations(BaseCase):
         def drop_if_exist(db_name):
             assert db_name.startswith(db_prefix), (db_prefix, db_name)
             with (mute_logger('odoo.sql_db'),
-                  contextlib.suppress(psycopg2.errors.InvalidCatalogName)):
+                  contextlib.suppress(psycopg.errors.InvalidCatalogName)):
                 db.drop(db_name)
 
         def db_list_filter():

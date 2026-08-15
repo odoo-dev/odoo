@@ -8,7 +8,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from freezegun import freeze_time
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 from unittest.mock import patch
 
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase

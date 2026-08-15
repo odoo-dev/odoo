@@ -4,7 +4,7 @@ import itertools
 import logging
 import random
 import re
-import psycopg2
+import psycopg
 import typing
 from inspect import cleandoc
 from ast import literal_eval
@@ -2563,7 +2563,7 @@ class IrModelData(models.Model):
                         # remove it from module_data
                         module_data -= data
                         continue
-            except psycopg2.ProgrammingError:
+            except psycopg.ProgrammingError:
                 # This most likely means that the record does not exist, since record.exists()
                 # is rougly equivalent to `SELECT id FROM table WHERE id=record.id` and it may raise
                 # a ProgrammingError because the table no longer exists (and so does the

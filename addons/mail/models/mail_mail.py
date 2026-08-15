@@ -5,7 +5,7 @@ import ast
 import datetime
 import json
 import logging
-import psycopg2
+import psycopg
 import re
 import smtplib
 
@@ -956,7 +956,7 @@ class MailMail(models.Model):
                     mail.id, message_id)
                 # mail status will stay on ongoing since transaction will be rollback
                 raise
-            except (psycopg2.Error, smtplib.SMTPServerDisconnected):
+            except (psycopg.Error, smtplib.SMTPServerDisconnected):
                 # If an error with the database or SMTP session occurs, chances are that the cursor
                 # or SMTP session are unusable, causing further errors when trying to save the state.
                 _logger.exception(

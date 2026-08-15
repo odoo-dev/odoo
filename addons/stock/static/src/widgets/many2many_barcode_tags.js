@@ -7,7 +7,7 @@ import { registry } from "@web/core/registry";
 
 export class Many2XBarcodeTagsAutocomplete extends Many2XAutocomplete {
     onQuickCreateError(error, request) {
-        if (error.data?.debug && error.data.debug.includes("psycopg2.errors.UniqueViolation")) {
+        if (error.data?.debug && error.data.debug.includes("psycopg.errors.UniqueViolation")) {
             throw error;
         }
         super.onQuickCreateError(error, request);

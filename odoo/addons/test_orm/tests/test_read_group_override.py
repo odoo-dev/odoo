@@ -1,4 +1,4 @@
-from psycopg2.errors import GroupingError
+from psycopg.errors import GroupingError
 
 from odoo import models
 from odoo.tests.common import tagged, TransactionCase

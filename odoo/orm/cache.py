@@ -67,7 +67,7 @@ class ormcache:
 
     Methods implementing this decorator should never return a Recordset,
     because the underlying cursor will eventually be closed and raise a
-    `psycopg2.InterfaceError`.
+    `psycopg.InterfaceError`.
     """
     key: Callable[..., tuple]
 

@@ -17,9 +17,9 @@ from operator import itemgetter
 from typing import TYPE_CHECKING
 from weakref import WeakValueDictionary
 
-import psycopg2
-from psycopg2 import InterfaceError
-from psycopg2.pool import PoolError
+import psycopg
+from psycopg import InterfaceError
+from odoo.sql_db import PoolError
 
 import odoo
 from odoo.service.server import CommonServer
@@ -371,7 +371,7 @@ class BusDispatcher(threading.Thread):
                     notifications_by_channel = self._fetch(cr, topics)
                 self._dispatch(topics, notifications_by_channel)
                 success = True
-            except psycopg2.Error:
+            except psycopg.Error:
                 # Temporary database failure: retry quickly instead of falling back to the
                 # long retry delay used for unexpected errors.
                 if not stop_event.is_set():

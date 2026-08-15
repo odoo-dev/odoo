@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 from functools import reduce
 import json
-import psycopg2
+import psycopg
 from unittest.mock import patch, Mock
 
 
@@ -519,7 +519,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
         self.assertMoveName(copies[5], 'XMISC/2019/00004')
 
         # Can't have twice the same name
-        with self.assertRaises(psycopg2.DatabaseError), mute_logger('odoo.sql_db'):
+        with self.assertRaises(psycopg.DatabaseError), mute_logger('odoo.sql_db'):
             copies[0].name = 'XMISC/2019/00001'
 
         # Lets remove the order by date

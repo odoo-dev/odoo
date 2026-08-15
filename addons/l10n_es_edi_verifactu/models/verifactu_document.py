@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import requests.exceptions
 from lxml import etree
-from psycopg2 import OperationalError
+from psycopg import OperationalError
 from werkzeug.urls import url_quote_plus, url_encode
 
 from odoo import _, api, fields, models

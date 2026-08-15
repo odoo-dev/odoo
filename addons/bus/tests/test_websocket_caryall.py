@@ -8,7 +8,7 @@ from threading import Event
 from unittest.mock import MagicMock, patch
 from weakref import WeakSet
 
-from psycopg2.pool import PoolError
+from odoo.sql_db import PoolError
 
 try:
     import websocket as ws

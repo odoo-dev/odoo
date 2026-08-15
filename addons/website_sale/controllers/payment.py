@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from psycopg2.errors import LockNotAvailable
+from psycopg.errors import LockNotAvailable
 
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.fields import Command

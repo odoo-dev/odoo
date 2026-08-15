@@ -1,4 +1,4 @@
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo import fields
 from odoo.exceptions import AccessError, ValidationError

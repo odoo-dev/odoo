@@ -3,7 +3,7 @@ import sys
 import time
 
 from unittest.mock import patch
-from psycopg2.errors import UndefinedTable
+from psycopg.errors import UndefinedTable
 
 from odoo.exceptions import AccessError
 from odoo.tests.common import BaseCase, TransactionCase, tagged, new_test_user, HttpCase

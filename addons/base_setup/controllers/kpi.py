@@ -2,7 +2,7 @@ import logging
 from functools import cache
 from importlib import import_module
 
-import psycopg2
+import psycopg
 
 from odoo.exceptions import ValidationError
 from odoo.http import Controller, route
@@ -87,7 +87,7 @@ def _db_kpi_summary(database, api_key):
     """
     try:
         cursor = db_connect(database).cursor()
-    except psycopg2.Error:
+    except psycopg.Error:
         # Avoid leaking information about missing database to prevent scanning databases hosted on the same server
         return
 

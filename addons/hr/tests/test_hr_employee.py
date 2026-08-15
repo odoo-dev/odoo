@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from psycopg2.errors import UniqueViolation
+from psycopg.errors import UniqueViolation
 from freezegun import freeze_time
 
 from odoo import fields, Command
@@ -11,7 +11,7 @@ from odoo.tests import Form, users, new_test_user, HttpCase, tagged, Transaction
 from odoo.addons.hr.tests.common import TestHrCommon
 from odoo.tools import mute_logger
 from odoo.exceptions import UserError, ValidationError
-from psycopg2.errors import NotNullViolation
+from psycopg.errors import NotNullViolation
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install, fails post install
