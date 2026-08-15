@@ -6,8 +6,6 @@ import typing
 import warnings
 from operator import attrgetter
 
-import psycopg2
-
 from odoo.exceptions import UserError
 from odoo.tools import SQL, human_size
 from odoo.tools.binary import EMPTY_BINARY, BinaryBytes, BinaryValue
@@ -19,8 +17,8 @@ if typing.TYPE_CHECKING:
     from .query import TableSQL
     from odoo.addons.base.models.ir_attachment import IrAttachment
 
-# http://initd.org/psycopg/docs/usage.html#binary-adaptation
-# Received data is returned as `memoryview`.
+# https://www.psycopg.org/psycopg3/docs/basic/adapt.html#binary-adaptation
+# Received data is returned as `bytes`.
 
 
 class Binary(Field[BinaryValue]):
@@ -79,7 +77,7 @@ class Binary(Field[BinaryValue]):
             if (data.mimetype.startswith('image/svg') and
                     not record.env.is_system()):
                 raise UserError(record.env._("Only admins can upload SVG files."))
-        return psycopg2.Binary(value)
+        return value
 
     def convert_to_cache(self, value, records, validate=True) -> BinaryValue | None:
         if not value:
@@ -98,7 +96,7 @@ class Binary(Field[BinaryValue]):
         raise TypeError(f'{self}: use BinaryValue instead of {value.__class__.__name__}')
 
     def _insert_cache(self, records, values):
-        # values are retrieved as a memoryview from the database
+        # values are retrieved as bytes from the database
         values = [BinaryBytes(v) if v else None for v in values]
         return super()._insert_cache(records, values)
 
