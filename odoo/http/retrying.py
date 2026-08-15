@@ -5,9 +5,7 @@ import random
 import time
 import typing
 
-import psycopg2
-import psycopg2.errorcodes
-
+import psycopg
 from odoo.exceptions import ConcurrencyError, ValidationError
 from odoo.sql_db import PG_CONCURRENCY_EXCEPTIONS_TO_RETRY
 
@@ -32,7 +30,7 @@ def retrying[T](func: Callable[[], T], env: Environment, *, close_on_commit: boo
     A serialisation error occurs when two independent transactions
     attempt to commit incompatible changes such as writing different
     values on a same record. The first transaction to commit works, the
-    second is canceled with a :class:`psycopg2.errors.SerializationFailure`.
+    second is canceled with a :class:`psycopg.errors.SerializationFailure`.
 
     This function intercepts those serialization errors, rollbacks the
     transaction, reset things that might have been modified, waits a
@@ -58,8 +56,8 @@ def retrying[T](func: Callable[[], T], env: Environment, *, close_on_commit: boo
                 env.cr.flush()  # submit the changes to the database
             break
         except (
-            psycopg2.IntegrityError,
-            psycopg2.OperationalError,
+            psycopg.IntegrityError,
+            psycopg.OperationalError,
             ConcurrencyError,
         ) as exc:
             if env.cr.closed:
@@ -79,7 +77,7 @@ def retrying[T](func: Callable[[], T], env: Environment, *, close_on_commit: boo
                         e = ("Cannot retry request on input file "
                             f"{filename!r} after serialization failure")
                         raise RuntimeError(e) from exc
-            if isinstance(exc, psycopg2.IntegrityError):
+            if isinstance(exc, psycopg.IntegrityError):
                 model = env['base']
                 for rclass in env.registry.values():
                     if exc.diag.table_name == rclass._table:
@@ -91,7 +89,7 @@ def retrying[T](func: Callable[[], T], env: Environment, *, close_on_commit: boo
                 raise ValidationError(message) from exc
 
             if isinstance(exc, PG_CONCURRENCY_EXCEPTIONS_TO_RETRY):
-                error = psycopg2.errorcodes.lookup(exc.pgcode)
+                error = psycopg.errors.lookup(exc.sqlstate).__name__
             elif isinstance(exc, ConcurrencyError):
                 error = repr(exc)
             else:
