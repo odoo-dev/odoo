@@ -6,7 +6,7 @@ from collections import namedtuple
 from ast import literal_eval
 from collections import defaultdict
 from markupsafe import escape
-from psycopg2 import Error
+from psycopg import Error
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -1251,7 +1251,7 @@ class StockQuant(models.Model):
                 self.env.cr.execute(query, params)
                 self.env.invalidate_all()
         except Error as e:
-            _logger.info('an error occurred while merging quants: %s', e.pgerror)
+            _logger.info('an error occurred while merging quants: %s', e.diag.message_primary)
 
     @api.model
     def _quant_tasks(self):
