@@ -16,8 +16,8 @@ if typing.TYPE_CHECKING:
     from odoo.fields import Field
     from odoo.sql_db import Cursor
 
-import psycopg2
-from psycopg2.extensions import quote_ident
+import psycopg
+from psycopg.sql import Identifier
 
 from .func import deprecated
 from .misc import named_to_positional_printf
@@ -70,7 +70,7 @@ class SQL(metaclass=_SQLMeta):
     The combined result is available in ``_sql_tuple`` which contains ``code``,
     ``params``, ``to_flush``. This allows to combine any number of SQL terms
     without having to separately combine their parameters, which can be tedious,
-    bug-prone, and is the main downside of `psycopg2.sql
+    bug-prone, and is the main downside of `psycopg.sql
     <https://www.psycopg.org/docs/sql.html>`.
     The metadata ``to_flush`` contains fields on which the SQL code depends on.
 
@@ -376,7 +376,7 @@ def _convert_column(cr: Cursor, tablename: str, columnname: str, columntype: str
     try:
         with cr.savepoint(flush=False):
             cr.execute(query, log_exceptions=False)
-    except psycopg2.NotSupportedError:
+    except psycopg.NotSupportedError:
         drop_depending_views(cr, tablename, columnname)
         cr.execute(query)
     _schema.debug("Table %r: column %r changed to type %s", tablename, columnname, columntype)
@@ -768,5 +768,5 @@ def quoted_identifier(cr, name: str) -> SQL:
 
     Use instead of `SQL.identifier` to accept all kinds of identifiers.
     """
-    name = quote_ident(name, cr._cnx)
+    name = Identifier(name).as_string(cr._cnx)
     return SQL(name)  # pylint: disable=sql-injection
