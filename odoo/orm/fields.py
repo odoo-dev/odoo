@@ -14,7 +14,7 @@ import warnings
 from collections.abc import Set as AbstractSet
 from operator import attrgetter
 
-from psycopg2.extras import Json as PsycopgJson
+from psycopg.types.json import Jsonb
 
 from odoo.exceptions import AccessError, MissingError
 from odoo.tools import SQL, reset_cached_properties, sql
@@ -1131,7 +1131,7 @@ class Field[T]:
         fallback = record.env['ir.default']._get_model_defaults(record._name).get(self.name)
         if value == self.convert_to_column(fallback, record):
             return None
-        return PsycopgJson({record.env.company.id: value})
+        return Jsonb({record.env.company.id: value})
 
     def get_column_update(self, record: BaseModel):
         """ Return the value of record in cache as an SQL parameter formatted
@@ -1144,7 +1144,7 @@ class Field[T]:
             for ctx_key, cache in field_cache.items():
                 if (value := cache.get(record_id, SENTINEL)) is not SENTINEL:
                     values[ctx_key[0]] = self.convert_to_column(value, record)
-            return PsycopgJson(values) if values else None
+            return Jsonb(values) if values else None
         if self in record.env._field_depends_context:
             # field that will be written to the database depends on context;
             # find the first value that is set
