@@ -85,11 +85,10 @@ class NotifyTests(TransactionCase):
                 found = False
                 while not stop_event.is_set() and not found:
                     if sel.select(timeout=5):
-                        conn.poll()
-                        while conn.notifies:
+                        for notify in conn.notifies(timeout=0):
                             if notify_channels := [
                                 c
-                                for c in json.loads(conn.notifies.pop().payload)
+                                for c in json.loads(notify.payload)
                                 if c[0] == self.env.cr.dbname
                             ]:
                                 channels = notify_channels

@@ -356,18 +356,16 @@ class ThreadedServer(CommonServer):
                 select.select([pg_conn], [], [], SLEEP_INTERVAL + number)
                 time.sleep(number / 100)
                 try:
-                    pg_conn.poll()
+                    notified = OrderedSet(
+                        notif.payload
+                        for notif in pg_conn.notifies(timeout=0)
+                        if notif.channel == 'cron_trigger'
+                    )
                 except Exception:
                     if pg_conn.closed:
                         # connection closed, just exit the loop
                         return
                     raise
-                notified = OrderedSet(
-                    notif.payload
-                    for notif in pg_conn.notifies
-                    if notif.channel == 'cron_trigger'
-                )
-                pg_conn.notifies.clear()  # free resources
 
                 if time.time() - SLEEP_INTERVAL > check_all_time:
                     # check all databases
@@ -1356,6 +1354,7 @@ class WorkerCron(Worker):
         # self.db_queue keeps track of the databases to process (in order, from left to right).
         self.db_queue: deque[str] = deque()
         self.db_count: int = 0
+        self._pg_notifies: list = []
 
     def sleep(self):
         # Really sleep once all the databases have been processed.
@@ -1365,9 +1364,9 @@ class WorkerCron(Worker):
             # simulate interruptible sleep with select(wakeup_fd, timeout)
             try:
                 select.select([self.wakeup_fd_r, self.dbcursor._cnx], [], [], interval)
-                # clear pg_conn/wakeup pipe if we were interrupted
+                # Drain NOTIFY (and the socket) so the next select() does not busy-loop.
                 time.sleep(self.pid / 100 % .1)
-                self.dbcursor._cnx.poll()
+                self._pg_notifies.extend(self.dbcursor._cnx.notifies(timeout=0))
                 empty_pipe(self.wakeup_fd_r)
             except OSError as e:
                 if e.args[0] != errno.EINTR:
@@ -1387,13 +1386,12 @@ class WorkerCron(Worker):
         if not self.db_queue:
             # list databases
             db_names = OrderedSet(cron_database_list())
-            pg_conn = self.dbcursor._cnx
             notified = OrderedSet(
                 notif.payload
-                for notif in pg_conn.notifies
+                for notif in self._pg_notifies
                 if notif.channel == 'cron_trigger'
             )
-            pg_conn.notifies.clear()  # free resources
+            self._pg_notifies.clear()
             # add notified databases (in order) first in the queue
             self.db_queue.extend(db for db in notified if db in db_names)
             self.db_queue.extend(db for db in db_names if db not in notified)

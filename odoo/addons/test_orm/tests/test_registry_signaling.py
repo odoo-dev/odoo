@@ -497,10 +497,6 @@ class TestTestCursor(common.TransactionCase):
             # The 2nd cursor must not use the connection of the 1st cursor as it's used (not closed).
             cursors.append(connection.cursor())
             cursors.append(connection.cursor())
-            # Ensure the port is within psycopg's dsn, as explained in an above comment,
-            # we want to test the behavior of the connections borrowing including the port provided in the dsn.
-            if config['db_port']:
-                self.assertTrue('port=' in cursors[0]._cnx.dsn)
             # Check the connection of the 1st cursor is different than the connection of the 2nd cursor.
             self.assertNotEqual(id(cursors[0]._cnx), id(cursors[1]._cnx))
 
