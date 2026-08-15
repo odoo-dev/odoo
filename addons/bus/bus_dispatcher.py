@@ -327,10 +327,9 @@ class BusDispatcher(threading.Thread):
             while not stop_event.is_set():
                 if not sel.select(POLL_TIMEOUT):
                     continue
-                conn.poll()
                 channels_by_dbname = defaultdict(list)
-                while conn.notifies:
-                    for channel in orjson.loads(conn.notifies.pop().payload):
+                for notify in conn.notifies(timeout=0):
+                    for channel in orjson.loads(notify.payload):
                         try:  # noqa: SIM105
                             channels_by_dbname[channel[0]].append(tuplify(channel))
                         except (IndexError, TypeError):
