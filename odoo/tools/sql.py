@@ -8,11 +8,10 @@ import logging
 import re
 import typing
 from binascii import crc32
+from collections.abc import Iterable
 from collections import defaultdict
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Iterable
-
     from odoo.fields import Field
     from odoo.sql_db import Cursor
 
@@ -44,6 +43,17 @@ class _SQLMeta(type):
             return SQL(f'"{name}"', to_flush=to_flush)
         assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
         return SQL(f'"{name}"."{subname}"', to_flush=to_flush)
+
+    @staticmethod
+    def values(rows: Iterable) -> SQL:
+        """Compose a ``VALUES`` list with one placeholder per cell.
+
+        Unlike a Python ``tuple`` (psycopg2 record / ``TupleInDumper``), each
+        value keeps its own type, and ``SQL("DEFAULT")`` stays a keyword.
+        """
+        return SQL(", ").join(
+            SQL("(%s)", SQL(", ").join(row)) for row in rows
+        )
 
 
 class SQL(metaclass=_SQLMeta):

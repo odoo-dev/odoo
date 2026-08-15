@@ -1794,7 +1794,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1811,7 +1811,7 @@ class TestFlushSearch(TransactionCase):
             SET "country_id" = "__tmp"."country_id"::"int4",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "country_id", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "country_id", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1831,7 +1831,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_country"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1854,7 +1854,7 @@ class TestFlushSearch(TransactionCase):
             SET "country_id" = "__tmp"."country_id"::"int4",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "country_id", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "country_id", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1878,7 +1878,7 @@ class TestFlushSearch(TransactionCase):
             SET "move_id" = "__tmp"."move_id"::"int4",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "move_id", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "move_id", "write_date", "write_uid")
             WHERE "test_orm_payment"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_payment"."id"
@@ -1896,7 +1896,7 @@ class TestFlushSearch(TransactionCase):
             SET "tag_repeat" = "__tmp"."tag_repeat"::"int4",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "tag_repeat", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "tag_repeat", "write_date", "write_uid")
             WHERE "test_orm_move"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_payment"."id"
@@ -1924,7 +1924,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1941,7 +1941,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1958,7 +1958,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_country"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -1978,7 +1978,7 @@ class TestFlushSearch(TransactionCase):
             SET "country_id" = "__tmp"."country_id"::"int4",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "country_id", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "country_id", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id"
@@ -2009,7 +2009,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id", "test_orm_city"."name"
@@ -2025,7 +2025,7 @@ class TestFlushSearch(TransactionCase):
             SET "name" = "__tmp"."name"::"varchar",
                 "write_date" = "__tmp"."write_date"::"timestamp",
                 "write_uid" = "__tmp"."write_uid"::"int4"
-            FROM (VALUES %s) AS "__tmp"("id", "name", "write_date", "write_uid")
+            FROM (VALUES (%s, %s, %s, %s)) AS "__tmp"("id", "name", "write_date", "write_uid")
             WHERE "test_orm_city"."id" = "__tmp"."id"
         ''', '''
             SELECT "test_orm_city"."id", "test_orm_city"."name"

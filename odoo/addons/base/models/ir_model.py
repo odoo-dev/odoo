@@ -95,7 +95,7 @@ def query_insert(cr, table, rows):
             "INSERT INTO %s (%s) VALUES %s RETURNING id",
             SQL.identifier(table),
             SQL(",").join(map(SQL.identifier, cols)),
-            SQL(",").join(
+            SQL.values(
                 tuple(row.get(col) for col in cols)
                 for row in srows
             ),
@@ -175,7 +175,7 @@ def upsert_en(model, fnames, rows, conflict):
         """,
         table=SQL.identifier(model._table),
         cols=comma(SQL.identifier(fname) for fname in fnames),
-        values=comma(values),
+        values=SQL.values(values),
         conflict=comma(SQL.identifier(fname) for fname in conflict),
         excluded=comma(
             (
