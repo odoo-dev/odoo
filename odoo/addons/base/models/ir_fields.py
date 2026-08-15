@@ -6,6 +6,8 @@ import json
 from datetime import UTC
 from typing import NamedTuple
 
+import psycopg
+
 from odoo import api, Command, fields, models
 from odoo.tools import OrderedSet, SQL
 from odoo.tools.translate import _, code_translations, LazyTranslate
@@ -134,7 +136,15 @@ class IrFieldsConverter(models.AbstractModel):
                             # uniform handling
                             w = ImportWarning(w)
                         log(field, w)
-                except (UnicodeEncodeError, UnicodeDecodeError) as e:
+                except (UnicodeEncodeError, UnicodeDecodeError, psycopg.DataError) as e:
+                    # psycopg3 raises DataError when a string containing a NUL
+                    # byte is adapted, whereas psycopg2 raised UnicodeEncodeError.
+                    # Client-side adaptation errors have no SQLSTATE and don't
+                    # require an immediate rollback; load() handles it after
+                    # all records have been converted. Server-side DataErrors
+                    # may have aborted the transaction, so recover now.
+                    if getattr(e, 'sqlstate', None):
+                        savepoint.rollback()
                     log(field, ValueError(str(e)))
                 except ValueError as e:
                     if import_file_context:
