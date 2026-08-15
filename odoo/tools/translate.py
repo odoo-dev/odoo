@@ -32,7 +32,7 @@ from tokenize import generate_tokens, STRING, NEWLINE, INDENT, DEDENT
 from babel.messages import extract
 from lxml import etree, html
 from markupsafe import escape, Markup
-from psycopg2.extras import Json
+from psycopg.types.json import Jsonb
 
 import odoo
 from odoo.exceptions import UserError, ValidationError
@@ -2051,7 +2051,7 @@ class TranslationImporter:
                             if f'_{lang}' in values:
                                 changed_values[f'_{lang}'] = None
                         if changed_values:
-                            params.append((id_, Json(changed_values)))
+                            params.append((id_, Jsonb(changed_values)))
                     if params:
                         env.execute_query(SQL("""
                             UPDATE %(table)s AS m
@@ -2079,7 +2079,7 @@ class TranslationImporter:
                         module, name = xmlid.split('.', maxsplit=1)
                         imd_modules.append(module)
                         imd_names.append(name)
-                        values.append(Json(translations))
+                        values.append(Jsonb(translations))
 
                     field = SQL.identifier(field_name)
                     if force_overwrite:
@@ -2405,7 +2405,7 @@ def _get_translation_upgrade_queries(cr, field):
                     for lang in sorted(missing_languages):
                         new_values[lang] = src_value
             query = f'UPDATE "{Model._table}" SET "{field.name}" = %s WHERE id = %s'
-            migrate_queries.append(cr.mogrify(query, [Json(new_values), id_]).decode())
+            migrate_queries.append(cr.mogrify(query, [Jsonb(new_values), id_]).decode())
 
         query = "DELETE FROM _ir_translation WHERE type = 'model_terms' AND state = 'translated' AND name = %s"
         cleanup_queries.append(cr.mogrify(query, [translation_name]).decode())

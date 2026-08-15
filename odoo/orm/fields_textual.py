@@ -10,7 +10,7 @@ from operator import attrgetter
 
 from markupsafe import Markup
 from markupsafe import escape as markup_escape
-from psycopg2.extras import Json as PsycopgJson
+from psycopg.types.json import Jsonb
 
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.logging import COLOR_PATTERN, DEFAULT, GREEN, RED
@@ -104,13 +104,13 @@ class BaseString(Field[str | typing.Literal[False]]):
                 return None
         cache_value_dict.setdefault('en_US', cache_value_dict.get(lang, next(iter(cache_value_dict.values()))))
         StoredTranslations(cache_value_dict).validate(record.env, self)
-        return PsycopgJson(cache_value_dict)
+        return Jsonb(cache_value_dict)
 
     def get_column_update(self, record):
         if self.translate:
             assert self not in record.env._field_depends_context, f"translated field {self} cannot depend on context"
             value = record.env.transaction.field_data[self][record.id]
-            return PsycopgJson(value) if value else None
+            return Jsonb(value) if value else None
         return super().get_column_update(record)
 
     def convert_to_cache(self, value, records, validate=True):

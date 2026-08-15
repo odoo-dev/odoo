@@ -4,7 +4,7 @@ import copy
 import json
 import typing
 
-from psycopg2.extras import Json as PsycopgJson
+from psycopg.types.json import Jsonb
 
 from odoo.tools import SQL, json_default
 
@@ -77,7 +77,7 @@ class Json(Field):
             value = self.convert_to_cache(value, record)
         if value is None:
             return None
-        return PsycopgJson(value)
+        return Jsonb(value)
 
     def convert_to_export(self, value, record):
         if not value:

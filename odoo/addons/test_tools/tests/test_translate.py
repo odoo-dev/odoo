@@ -6,7 +6,7 @@ import time
 from hashlib import sha256
 from unittest.mock import patch
 
-from psycopg2.extras import Json
+from psycopg.types.json import Jsonb
 
 from odoo import fields
 from odoo.exceptions import UserError, ValidationError
@@ -1147,7 +1147,7 @@ class TestXMLTranslation(TransactionCase):
         query = """UPDATE ir_ui_view
                       SET arch_db = %s
                     WHERE id = %s"""
-        self.env.cr.execute(query, (Json(val), view.id))
+        self.env.cr.execute(query, (Jsonb(val), view.id))
         return view
 
     def test_copy(self):

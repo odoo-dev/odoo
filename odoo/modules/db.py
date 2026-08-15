@@ -22,7 +22,7 @@ from importlib import resources
 from zoneinfo import TZPATH
 
 import psycopg
-from psycopg2.extras import Json
+from psycopg.types.json import Jsonb
 
 import odoo.api
 import odoo.modules
@@ -89,13 +89,13 @@ def initialize(cr: Cursor) -> None:
                     category_id, auto_install, state, web, license, application, icon, sequence, summary) \
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id', (
             info['author'],
-            info['website'], module_name, Json({'en_US': info['name']}),
-            Json({'en_US': info['description']}), category_id,
+            info['website'], module_name, Jsonb({'en_US': info['name']}),
+            Jsonb({'en_US': info['description']}), category_id,
             info['auto_install'] is not False, state,
             info['web'],
             info['license'],
             info['application'], info['icon'],
-            info['sequence'], Json({'en_US': info['summary']})))
+            info['sequence'], Jsonb({'en_US': info['summary']})))
         row = cr.fetchone()
         assert row is not None  # for typing
         module_id = row[0]
@@ -175,7 +175,7 @@ def create_categories(cr: Cursor, categories: list[str]) -> int | None:
         if not row:
             cr.execute('INSERT INTO ir_module_category \
                     (name, parent_id) \
-                    VALUES (%s, %s) RETURNING id', (Json({'en_US': categories[0]}), p_id))
+                    VALUES (%s, %s) RETURNING id', (Jsonb({'en_US': categories[0]}), p_id))
             row = cr.fetchone()
             assert row is not None  # for typing
             p_id = row[0]

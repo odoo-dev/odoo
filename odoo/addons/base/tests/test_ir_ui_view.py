@@ -10,7 +10,7 @@ from collections import defaultdict
 from lxml import etree
 from lxml.builder import E
 from psycopg import IntegrityError
-from psycopg2.extras import Json
+from psycopg.types.json import Jsonb
 
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import common, tagged
@@ -1927,7 +1927,7 @@ class TestViews(ViewCase):
                 kw['type'] = self.cr.fetchone()[0]
             else:
                 kw['type'] = etree.fromstring(arch_db).tag
-            kw['arch_db'] = Json({'en_US': arch_db}) if self.env.lang in (None, 'en_US') else Json({'en_US': arch_db, self.env.lang: arch_db})
+            kw['arch_db'] = Jsonb({'en_US': arch_db}) if self.env.lang in (None, 'en_US') else Jsonb({'en_US': arch_db, self.env.lang: arch_db})
         for field_name, field in self.env['ir.ui.view']._fields.items():
             if field.required and field_name not in kw:
                 kw[field_name] = field.default(self.env['ir.ui.view'])
@@ -3829,7 +3829,7 @@ class TestViewTranslations(common.TransactionCase):
         for lang, trans_terms in kwargs.items():
             val[lang] = archf % trans_terms
         query = "UPDATE ir_ui_view SET arch_db = %s WHERE id = %s"
-        self.env.cr.execute(query, [Json(val), view.id])
+        self.env.cr.execute(query, [Jsonb(val), view.id])
         self.env.invalidate_all()
         return view
 

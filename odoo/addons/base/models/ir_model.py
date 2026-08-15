@@ -12,7 +12,7 @@ from collections import defaultdict
 from collections.abc import Mapping
 from operator import itemgetter
 
-from psycopg2.extras import Json
+from psycopg.types.json import Jsonb
 
 from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -160,7 +160,7 @@ def upsert_en(model, fnames, rows, conflict):
         return val
 
     def jsonify(val):
-        return Json({'en_US': val}) if val is not None else val
+        return Jsonb({'en_US': val}) if val is not None else val
 
     wrappers = [(jsonify if model._fields[fname].translate else identity) for fname in fnames]
     values = [
@@ -1712,10 +1712,10 @@ class IrModelFieldsSelection(models.Model):
                                     cur_row['value'], model_name, field_name)
                     rows_to_remove.append(cur_row['id'])
             elif cur_row is None:
-                new_row['name'] = Json({'en_US': new_row['name']})
+                new_row['name'] = Jsonb({'en_US': new_row['name']})
                 rows_to_insert.append(dict(new_row, field_id=field_id))
             elif any(new_row[key] != cur_row[key] for key in new_row):
-                new_row['name'] = Json({'en_US': new_row['name']})
+                new_row['name'] = Jsonb({'en_US': new_row['name']})
                 rows_to_update.append(dict(new_row, id=cur_row['id']))
 
         if rows_to_insert:
@@ -2048,7 +2048,7 @@ class IrModelConstraint(models.Model):
                         (SELECT id FROM ir_model WHERE model=%s),
                         %s, %s, %s)
                 RETURNING id
-                """, conname, self.env.uid, self.env.uid, module, model._name, type, definition, Json({'en_US': message})
+                """, conname, self.env.uid, self.env.uid, module, model._name, type, definition, Jsonb({'en_US': message})
             ))
             return self.browse(cons_id)
         [cons] = rows
@@ -2060,7 +2060,7 @@ class IrModelConstraint(models.Model):
                 SET write_date=now() AT TIME ZONE 'UTC',
                     write_uid = %s, type = %s, definition = %s, message = %s
                 WHERE id = %s""",
-                self.env.uid, type, definition, Json({'en_US': message}), cons_id
+                self.env.uid, type, definition, Jsonb({'en_US': message}), cons_id
             ))
         return self.browse(cons_id)
 
