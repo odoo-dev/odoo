@@ -159,6 +159,12 @@ class TestSQL(BaseCase):
         with self.assertRaises(AssertionError):
             sql = SQL.identifier('foo', 'ba"r')
 
+    def test_sql_values(self):
+        sql = SQL.values([(1, 'a'), (2, SQL("DEFAULT"))])
+        code, params, _flush = sql._sql_tuple
+        self.assertEqual(code, "(%s, %s), (%s, DEFAULT)")
+        self.assertEqual(params, (1, 'a', 2))
+
     def test_sql_with_sql_parameters(self):
         sql = SQL("SELECT id FROM table WHERE foo=%s AND %s", 1, SQL("bar=%s", 2))
         code, params, _flush = sql._sql_tuple

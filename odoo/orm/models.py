@@ -4040,7 +4040,7 @@ class BaseModel(metaclass=MetaModel):
                 """,
                 table=SQL.identifier(self._table),
                 assignments=SQL(", ").join(assignments),
-                values=SQL(", ").join(rows),
+                values=SQL.values(rows),
                 columns=SQL(", ").join(columns),
             ))
 
@@ -4347,13 +4347,17 @@ class BaseModel(metaclass=MetaModel):
                 for row in rows:
                     row.append(SQL_DEFAULT)
 
-            cr.execute(SQL(
-                'INSERT INTO %s (%s) VALUES %s RETURNING "id"',
-                SQL.identifier(self._table),
-                SQL(', ').join(map(SQL.identifier, columns)),
-                SQL(', ').join(SQL("(%s)", SQL(', ').join(row)) for row in rows),
-            ))
-            ids.extend(id_ for id_, in cr.fetchall())
+            # PostgreSQL extended-query protocol: at most PARAMS_MAX bind
+            # parameters per statement. Each VALUES cell is one parameter
+            # (DEFAULT is inlined; len(columns) is a safe per-row upper bound).
+            for row_sublist in split_every(max(1, cr.PARAMS_MAX // len(columns)), rows):
+                cr.execute(SQL(
+                    'INSERT INTO %s (%s) VALUES %s RETURNING "id"',
+                    SQL.identifier(self._table),
+                    SQL(', ').join(map(SQL.identifier, columns)),
+                    SQL.values(row_sublist),
+                ))
+                ids.extend(id_ for id_, in cr.fetchall())
 
         # put the new records in cache, and update inverse fields, for many2one
         records = self.browse(ids)

@@ -597,7 +597,7 @@ class Profiler:
                     query = SQL(
                         "INSERT INTO ir_profile(%s) VALUES %s RETURNING id",
                         SQL(",").join(map(SQL.identifier, values)),
-                        tuple(values.values()),
+                        SQL.values([values.values()]),
                     )
                     cr.execute(query)
                     self.profile_id = cr.fetchone()[0]

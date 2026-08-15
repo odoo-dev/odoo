@@ -279,6 +279,8 @@ class Cursor(_CursorProtocol):
 
     """
     IN_MAX = 1000   # decent limit on size of IN queries - guideline = Oracle limit
+    # PostgreSQL extended-query protocol encodes the parameter count as uint16.
+    PARAMS_MAX = 65535
 
     def __init__(self, cnx: PsycoConnection, dbname: str):
         super().__init__()
