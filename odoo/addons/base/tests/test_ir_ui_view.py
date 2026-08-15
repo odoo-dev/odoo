@@ -9,7 +9,7 @@ from collections import defaultdict
 
 from lxml import etree
 from lxml.builder import E
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 from psycopg2.extras import Json
 
 from odoo.exceptions import AccessError, UserError, ValidationError

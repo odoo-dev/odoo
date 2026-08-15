@@ -49,7 +49,7 @@ Depends:
  python3-passlib,
  python3-polib,
  python3-psutil,
- python3-psycopg2,
+ python3-psycopg,
  python3-openssl,
  python3-pypdf2 | python3-pypdf,
  python3-rjsmin,

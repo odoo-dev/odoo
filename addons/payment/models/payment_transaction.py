@@ -4,7 +4,7 @@ import re
 import unicodedata
 from datetime import datetime
 
-import psycopg2
+import psycopg
 from dateutil import relativedelta
 from markupsafe import Markup
 
@@ -1286,7 +1286,7 @@ class PaymentTransaction(models.Model):
                         payment_safe_write=True
                     )._post_process()
                     self.env.cr.commit()
-            except psycopg2.OperationalError:
+            except psycopg.OperationalError:
                 self.env.cr.rollback()  # Rollback and try later.
             except Exception:
                 _logger.exception(

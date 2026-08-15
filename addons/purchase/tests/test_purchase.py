@@ -3,7 +3,7 @@ from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from psycopg2.errors import IntegrityError
+from psycopg.errors import IntegrityError
 
 from odoo import Command, fields
 from odoo.exceptions import UserError

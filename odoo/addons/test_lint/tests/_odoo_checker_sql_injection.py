@@ -249,9 +249,9 @@ class OdooBaseChecker(BaseChecker):
             return True
 
         infered = utils.safe_infer(node)
-        # The package 'psycopg2' must be installed to infer
+        # The package 'psycopg' must be installed to infer
         # ignore sql.SQL().format or variable that can be infered as constant
-        if infered and infered.pytype().startswith('psycopg2'):
+        if infered and infered.pytype().startswith('psycopg'):
             return True
         if self._is_constexpr(node):  # If we can infer the value at compile time, it cannot be injected
             return True

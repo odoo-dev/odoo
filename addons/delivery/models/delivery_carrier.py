@@ -2,7 +2,7 @@
 
 import re
 
-import psycopg2
+import psycopg
 
 from odoo import SUPERUSER_ID, Command, api, fields, models
 from odoo.exceptions import UserError
@@ -473,7 +473,7 @@ class DeliveryCarrier(models.Model):
                         "func": func,
                         "line": 1,
                     })
-            except psycopg2.Error:
+            except psycopg.Error:
                 pass
 
     # ------------------------------------------------ #

@@ -19,8 +19,8 @@ from queue import PriorityQueue
 from urllib.parse import urlparse
 from weakref import WeakSet
 
-import psycopg2
-from psycopg2.pool import PoolError
+import psycopg
+from odoo.sql_db import PoolError
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 from werkzeug.local import LocalProxy
@@ -718,8 +718,8 @@ class WebsocketRequest:
                 self.registry = self.env.registry
             except (
                 AttributeError,
-                psycopg2.OperationalError,
-                psycopg2.ProgrammingError,
+                psycopg.OperationalError,
+                psycopg.ProgrammingError,
             ) as exc:
                 raise InvalidDatabaseException() from exc
             retrying(

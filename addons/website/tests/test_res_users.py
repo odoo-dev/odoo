@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-import psycopg2
+import psycopg
 
 from odoo import Command
 from odoo.exceptions import ValidationError
@@ -41,7 +41,7 @@ class TestWebsiteResUsers(TransactionCase):
     def test_change_login(self):
         new_test_user(self.env, login='Pou', website_id=self.website_1.id, groups='base.group_portal')
         user_belle = new_test_user(self.env, login='Belle', website_id=self.website_1.id, groups='base.group_portal')
-        with self.assertRaises(psycopg2.errors.UniqueViolation), mute_logger('odoo.sql_db'):
+        with self.assertRaises(psycopg.errors.UniqueViolation), mute_logger('odoo.sql_db'):
             user_belle.login = 'Pou'
 
     def test_change_login_no_website(self):

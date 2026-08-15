@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 
-from psycopg2.errors import InsufficientPrivilege
+from psycopg.errors import InsufficientPrivilege
 
 from odoo.release import author as __author__  # noqa: F401
 from odoo.release import version as __version__  # noqa: F401

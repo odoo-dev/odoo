@@ -4,7 +4,7 @@ import base64
 import json
 
 from markupsafe import Markup
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 import re
 from werkzeug.exceptions import BadRequest
 

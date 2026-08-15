@@ -4,7 +4,7 @@ from ast import literal_eval
 from collections import defaultdict
 import itertools
 import logging
-import psycopg2
+import psycopg
 import datetime
 
 from odoo import api, fields, models
@@ -184,7 +184,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                             dst_record_id=dst_record.id,
                             src_record_ids=src_records.ids,
                         ))
-                except psycopg2.Error:
+                except psycopg.Error:
                     # updating fails, most likely due to a violated unique constraint
                     # keeping record with nonexistent partner_id is useless, better delete it
                     self.env.execute_query(SQL(
@@ -219,7 +219,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                 with mute_logger('odoo.sql_db'), self.env.cr.savepoint():
                     records.sudo().write({field_id: dst_record.id})
                     records.env.flush_all()
-            except psycopg2.Error:
+            except psycopg.Error:
                 # updating fails, most likely due to a violated unique constraint
                 # keeping record with nonexistent partner_id is useless, better delete it
                 records.sudo().unlink()

@@ -9,7 +9,7 @@ from collections import OrderedDict, defaultdict
 from textwrap import dedent
 
 import lxml.html
-import psycopg2
+import psycopg
 from docutils import nodes
 from docutils.core import publish_string
 from docutils.transforms import Transform, writer_aux
@@ -624,7 +624,7 @@ class IrModuleModule(models.Model):
             self.env.cr.execute("SELECT pg_advisory_xact_lock_shared(hashtext('registry_loading')) NOWAIT")
             # raise error if another transaction is trying to schedule module operations concurrently
             self.env.cr.execute("LOCK ir_module_module IN EXCLUSIVE MODE")
-        except psycopg2.OperationalError:
+        except psycopg.OperationalError:
             self.env.cr.rollback()
             raise UserError(_("Odoo is currently processing another module operation.\n"
                                "Please try again later or contact your system administrator."))
@@ -634,7 +634,7 @@ class IrModuleModule(models.Model):
             # running cron job and prevent it from finishing, and since the ir_cron table is locked
             # during execution, the lock won't be released until timeout.
             self.env.cr.execute("SELECT FROM ir_cron FOR UPDATE")
-        except psycopg2.OperationalError:
+        except psycopg.OperationalError:
             self.env.cr.rollback()
             raise UserError(_("Odoo is currently processing a scheduled action.\n"
                               "Module operations are not possible at this time, "

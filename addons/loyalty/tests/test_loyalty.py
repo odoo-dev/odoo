@@ -3,7 +3,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo import Command, fields
 from odoo.exceptions import UserError, ValidationError

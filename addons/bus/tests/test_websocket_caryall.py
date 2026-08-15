@@ -3,7 +3,7 @@
 import gc
 import json
 from collections import defaultdict
-from psycopg2.pool import PoolError
+from odoo.sql_db import PoolError
 from threading import Event
 from unittest.mock import MagicMock, patch
 from weakref import WeakSet

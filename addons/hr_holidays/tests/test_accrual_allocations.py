@@ -2,7 +2,7 @@ import datetime
 from freezegun import freeze_time
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo import Command, fields
 from odoo.exceptions import UserError

@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 from werkzeug.urls import url_unquote_plus
 
 from odoo.addons.base.tests.files import PNG_RAW

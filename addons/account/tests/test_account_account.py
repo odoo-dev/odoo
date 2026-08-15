@@ -3,7 +3,7 @@ from odoo.addons.account.tests.common import TestAccountMergeCommon
 from odoo.tests import Form, tagged, new_test_user
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import mute_logger
-import psycopg2
+import psycopg
 from freezegun import freeze_time
 
 @tagged('post_install', '-at_install')
@@ -247,7 +247,7 @@ class TestAccountAccount(TestAccountMergeCommon):
         with self.assertRaises(UserError):
             self.env['account.account'].name_create('550003 Existing Account')
         # account code is mandatory and providing a name without a code should raise an error
-        with self.assertRaises(psycopg2.DatabaseError), mute_logger('odoo.sql_db'):
+        with self.assertRaises(psycopg.DatabaseError), mute_logger('odoo.sql_db'):
             self.env['account.account'].with_context(import_file=True).name_create('Existing Account')
         account_id = self.env['account.account'].with_context(import_file=True).name_create('550003 Existing Account')[0]
         account = self.env['account.account'].browse(account_id)

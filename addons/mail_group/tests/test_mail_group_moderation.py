@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo import Command, tools
 from odoo.addons.mail_group.tests.data import GROUP_TEMPLATE

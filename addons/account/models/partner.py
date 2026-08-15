@@ -5,7 +5,7 @@ import logging
 import re
 
 from collections import defaultdict
-from psycopg2 import errors as pgerrors
+from psycopg import errors as pgerrors
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError

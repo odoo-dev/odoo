@@ -4,8 +4,8 @@ import logging
 from functools import partial
 from unittest.mock import patch
 
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_REPEATABLE_READ
+import psycopg
+from psycopg import IsolationLevel
 
 from odoo import api
 from odoo.modules.registry import Registry
@@ -278,7 +278,7 @@ class TestRealCursor(BaseCase):
     def test_using_closed_cursor(self):
         with self.cursor() as cr:
             cr.close()
-            with self.assertRaises(psycopg2.InterfaceError):
+            with self.assertRaises(psycopg.InterfaceError):
                 cr.execute("SELECT 1")
 
     def test_multiple_close_call_cursor(self):
@@ -288,7 +288,7 @@ class TestRealCursor(BaseCase):
 
     def test_transaction_isolation_cursor(self):
         with self.cursor() as cr:
-            self.assertEqual(cr.connection.isolation_level, ISOLATION_LEVEL_REPEATABLE_READ)
+            self.assertEqual(cr.connection.isolation_level, IsolationLevel.REPEATABLE_READ)
 
     def test_connection_readonly(self):
         # even without db_replica, we expect the connection to be readonly for consistency
@@ -467,7 +467,7 @@ class TestTestCursor(common.TransactionCase):
         self.assertIn('WARNING:odoo.sql_db:Found different un-closed cursor', msg)
         # avoid a warning on teardown (when self.cr finds a still on the stack)
         # as well as ensure the stack matches our expectations
-        with self.assertRaises(psycopg2.errors.InvalidSavepointSpecification):
+        with self.assertRaises(psycopg.errors.InvalidSavepointSpecification):
             with self.assertLogs('odoo.sql_db', level=logging.WARNING) as cm:
                 b.close()
 

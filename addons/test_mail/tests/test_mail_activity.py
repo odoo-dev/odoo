@@ -7,7 +7,7 @@ from unittest.mock import DEFAULT
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo import fields, exceptions, tests
 from odoo.addons.bus.tests.common import BusResult

@@ -9,7 +9,7 @@ from odoo.tools.sql import index_exists
 import logging
 import re
 from collections import defaultdict
-from psycopg2 import errors as pgerrors
+from psycopg import errors as pgerrors
 
 _logger = logging.getLogger(__name__)
 

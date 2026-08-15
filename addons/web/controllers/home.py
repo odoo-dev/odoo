@@ -4,7 +4,7 @@ import json
 import logging
 from urllib.parse import urlsplit
 
-import psycopg2
+import psycopg
 
 import odoo.exceptions
 from odoo.exceptions import AccessError
@@ -205,7 +205,7 @@ class Home(Controller):
             try:
                 odoo.sql_db.db_connect(config['db_system']).cursor().close()
                 health_info['db_server_status'] = True
-            except psycopg2.Error:
+            except psycopg.Error:
                 health_info['db_server_status'] = False
                 health_info['status'] = 'fail'
                 status = 500

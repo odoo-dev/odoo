@@ -18,7 +18,7 @@ from contextlib import closing, ExitStack
 from functools import partial
 from operator import attrgetter
 
-import psycopg2.sql
+import psycopg.sql
 
 from odoo import sql_db
 from odoo.exceptions import ConcurrencyError
@@ -75,11 +75,11 @@ _CACHES_BY_KEY = {
 _REPLICA_RETRY_TIME = 20 * 60  # 20 minutes
 
 
-def _unaccent(x: SQL | str | psycopg2.sql.Composable) -> SQL | str | psycopg2.sql.Composed:
+def _unaccent(x: SQL | str | psycopg.sql.Composable) -> SQL | str | psycopg.sql.Composed:
     if isinstance(x, SQL):
         return SQL("unaccent(%s)", x)
-    if isinstance(x, psycopg2.sql.Composable):
-        return psycopg2.sql.SQL('unaccent({})').format(x)
+    if isinstance(x, psycopg.sql.Composable):
+        return psycopg.sql.SQL('unaccent({})').format(x)
     return f'unaccent({x})'
 
 
@@ -204,7 +204,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                         logger_level = logging.WARNING
                         cr.execute("SELECT pg_advisory_lock(hashtext('registry_loading'))", log_exceptions=False)
                         logger_level = logging.ERROR
-                    except psycopg2.errors.DeadlockDetected:
+                    except psycopg.errors.DeadlockDetected:
                         # multiple workers were loading the database and try to upgrade it, only one will succeed
                         raise ConcurrencyError("Deadlock when waiting for lock to update the registry") from None
                     cr.commit()  # commit after acquiring the lock to re-start the transaction
@@ -968,7 +968,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                         if stale:
                             sql.drop_index(cr, indexname, tablename)
                         sql.create_index(cr, indexname, tablename, [expression], method, where)
-                except psycopg2.OperationalError:
+                except psycopg.OperationalError:
                     _schema.error("Unable to add index %r for %s", indexname, self)
 
             elif not index and tablename == existing.get(indexname, (None, None))[0]:
@@ -1152,7 +1152,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     cr = self._db_readonly.cursor()
                     self._db_readonly_failed_time = None
                     return cr
-                except psycopg2.OperationalError:
+                except psycopg.OperationalError:
                     self._db_readonly_failed_time = time.monotonic()
                     _logger.warning("Failed to open a readonly cursor, falling back to read-write cursor for %dmin %dsec", *divmod(_REPLICA_RETRY_TIME, 60))
             threading.current_thread().cursor_mode = 'ro->rw'

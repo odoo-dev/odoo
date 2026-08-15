@@ -1,4 +1,4 @@
-from psycopg2 import IntegrityError
+from psycopg import IntegrityError
 
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase

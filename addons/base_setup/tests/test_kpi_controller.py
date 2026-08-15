@@ -1,7 +1,7 @@
 from datetime import timedelta
 from unittest.mock import MagicMock
 
-from psycopg2 import OperationalError
+from psycopg import OperationalError
 
 from odoo import fields, release
 from odoo.addons.base_setup.controllers import kpi as kpi_controller

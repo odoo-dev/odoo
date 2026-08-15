@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg
 import unittest
 from collections import abc
 from unittest.mock import patch
@@ -127,7 +127,7 @@ class PropertiesCase(TestPropertiesMixin):
         self.assertEqual(definition_record.properties_definition, [])
 
         field = self.env["ir.model.fields"].sudo()._get('test_orm.emailmessage', 'properties')
-        with self.assertRaises(psycopg2.errors.UniqueViolation):
+        with self.assertRaises(psycopg.errors.UniqueViolation):
             self.env['properties.base.definition'].create({'properties_field_id': field.id})
 
         with self.assertRaises(AccessError):

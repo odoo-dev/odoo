@@ -1150,7 +1150,7 @@ class TestMailMailRace(MailCommon):
                     # record already locked by send, all good
                     bounce_deferred.append(True)
                 else:
-                    # this should trigger psycopg2.extensions.TransactionRollbackError in send().
+                    # this should trigger psycopg.errors.TransactionRollback in send().
                     # Only here to simulate the initial use case
                     # If the record is lock, this line would create a deadlock since we are in the same thread
                     # In practice, the update will wait the end of the send() transaction and set the notif as bounce, as expeced
