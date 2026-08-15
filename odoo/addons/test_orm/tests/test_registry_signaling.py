@@ -295,12 +295,12 @@ class TestRealCursor(BaseCase):
         with self.registry.cursor(readonly=False) as cr:
             cr.execute('SHOW transaction_read_only')
             self.assertEqual(cr.fetchone(), ('off',))
-            self.assertFalse(cr._cnx.readonly)
+            self.assertFalse(cr._cnx.read_only)
 
         with self.registry.cursor(readonly=True) as cr:
             cr.execute('SHOW transaction_read_only')
             self.assertEqual(cr.fetchone(), ('on',))
-            self.assertTrue(cr._cnx.readonly)
+            self.assertTrue(cr._cnx.read_only)
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
