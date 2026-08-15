@@ -18,8 +18,8 @@ from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Self
 
-import psycopg2
-from psycopg2.errors import (
+import psycopg
+from psycopg.errors import (
     CheckViolation,
     ExclusionViolation,
     NotNullViolation,
@@ -284,7 +284,7 @@ class JobExecutor(ABC):
                 seed = derive_seed_from(seed, retry_count)
                 retry_count += 1
 
-                error = psycopg2.errorcodes.lookup(exc.pgcode)
+                error = psycopg.errors.lookup(exc.sqlstate).__name__
 
                 msg = None
                 if isinstance(exc, CheckViolation | ExclusionViolation):

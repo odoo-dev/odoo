@@ -4,8 +4,7 @@ import logging
 import pprint
 
 import werkzeug
-from psycopg2.errorcodes import SERIALIZATION_FAILURE
-from psycopg2.errors import SerializationFailure
+from psycopg.errors import SerializationFailure
 
 from odoo import http
 from odoo.exceptions import AccessError, ConcurrencyError, UserError
@@ -85,7 +84,7 @@ class TestHttp(http.Controller):
     @http.route('/test_http/trigger-retrying', type='http', auth='public')
     def trigger_retrying(self):
         sf = SerializationFailure()
-        sf.__setstate__({'pgcode': SERIALIZATION_FAILURE})
+        sf.__setstate__({'sqlstate': SerializationFailure.sqlstate})
         raise sf
 
     # =====================================================
@@ -265,7 +264,7 @@ class TestHttp(http.Controller):
         if should_fail:
             should_fail = False  # Fail once
             sf = SerializationFailure()
-            sf.__setstate__({'pgcode': SERIALIZATION_FAILURE})
+            sf.__setstate__({'sqlstate': SerializationFailure.sqlstate})
             raise sf
 
         return data.decode()
