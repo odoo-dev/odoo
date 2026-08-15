@@ -812,14 +812,13 @@ def _initialize_safe_whitelist():
     safe_whitelist.add_function('odoo.tools.business_data.street_split')
     safe_whitelist.add_function('odoo.tools.translate.html_translate')
     # Psycopg
-    safe_whitelist.add_class('psycopg2.InterfaceError')
-    safe_whitelist.add_class('psycopg2.OperationalError')
-    safe_whitelist.add_class('psycopg2.ProgrammingError')
-    safe_whitelist.add_class('psycopg2.errors.*')
-    safe_whitelist.add_class('psycopg2.extensions.TransactionRollbackError')
+    safe_whitelist.add_class('psycopg.InterfaceError')
+    safe_whitelist.add_class('psycopg.OperationalError')
+    safe_whitelist.add_class('psycopg.ProgrammingError')
+    safe_whitelist.add_class('psycopg.errors.*')
     # Cursor
-    safe_whitelist.add_function('cursor.fetchall')
-    safe_whitelist.add_function('cursor.fetchone')
+    safe_whitelist.add_function('psycopg.cursor.Cursor.fetchall')
+    safe_whitelist.add_function('psycopg.cursor.Cursor.fetchone')
     # Collections
     safe_whitelist.add_class('collections.defaultdict')
     safe_whitelist.add_class('collections.OrderedDict')
