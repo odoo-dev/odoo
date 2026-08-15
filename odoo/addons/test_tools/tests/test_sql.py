@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from psycopg2.errors import CheckViolation
+from psycopg.errors import CheckViolation
 
 from odoo.tests.common import tagged, BaseCase, TransactionCase
 from odoo.tools import SQL, mute_logger, sql

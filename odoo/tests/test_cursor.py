@@ -60,7 +60,7 @@ class TestCursor(Cursor):
                 self._cursors_stack
                 and (last_cursor := self._cursors_stack[-1])
                 and last_cursor.readonly
-                and not self._cnx.readonly
+                and not self._cnx.read_only
                 and last_cursor._cnx._savepoint
             ):
                 raise Exception('Opening a read/write test cursor from a readonly one')  # noqa: TRY301
@@ -110,15 +110,12 @@ class TestCursor(Cursor):
 class MockedPsycoConnection(_base_PsycoConnection):
     def __init__(self, cursor: Cursor, readonly: bool):
         self._cursor = cursor
-        self.readonly = readonly
+        self.read_only = readonly
         # In order to simulate commit and rollback, the connection maintains a
         # savepoint at its last commit. This savepoint is created lazily.
         self._savepoint: Savepoint | None = None
         self._obj = None
         self._when_closed = lambda: None
-
-    def set_session(self, *a, **kw):
-        pass  # ignoring
 
     def give_back(self, keep_in_pool=True):
         del self._obj
@@ -132,7 +129,7 @@ class MockedPsycoConnection(_base_PsycoConnection):
         # artefacts and should be invisible.
         obj = self._obj
         self._savepoint = Savepoint(obj)
-        if self.readonly:
+        if self.read_only:
             # this will simulate a readonly connection
             obj.execute('SET TRANSACTION READ ONLY')
 
@@ -140,7 +137,7 @@ class MockedPsycoConnection(_base_PsycoConnection):
         if self._savepoint is not None:
             # readonly transaction must rollback the read only flag
             # in any case, no changes have been made
-            self._savepoint.close(rollback=self.readonly)
+            self._savepoint.close(rollback=self.read_only)
             self._savepoint = None
 
     def rollback(self):

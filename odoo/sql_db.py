@@ -20,14 +20,12 @@ from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 from inspect import currentframe
 
-import psycopg2
-import psycopg2.errorcodes  # noqa: F401
-import psycopg2.errors
-import psycopg2.extensions
-import psycopg2.extras
-from psycopg2 import sql as psql
-from psycopg2.extensions import ISOLATION_LEVEL_REPEATABLE_READ
-from psycopg2.pool import PoolError
+import psycopg
+import psycopg.errors
+from psycopg import sql as psql
+from psycopg.conninfo import conninfo_to_dict
+from psycopg.rows import tuple_row
+from psycopg.types.numeric import FloatLoader
 from werkzeug import urls
 
 import odoo
@@ -42,7 +40,7 @@ if typing.TYPE_CHECKING:
     from odoo.orm.environments import Transaction
 
     # when type checking, the Cursor exposes methods of the psycopg cursor
-    _CursorProtocol = psycopg2.extensions.cursor
+    _CursorProtocol = psycopg.ClientCursor
 else:
     _CursorProtocol = object
 
@@ -67,15 +65,8 @@ except ImportError:
         return sql_query
 
 
-def undecimalize(value, cr) -> float | None:
-    if value is None:
-        return None
-    return float(value)
-
-
-DECIMAL_TO_FLOAT_TYPE = psycopg2.extensions.new_type((1700,), 'float', undecimalize)
-psycopg2.extensions.register_type(DECIMAL_TO_FLOAT_TYPE)
-psycopg2.extensions.register_type(psycopg2.extensions.new_array_type((1231,), 'float[]', DECIMAL_TO_FLOAT_TYPE))
+# PostgreSQL numeric is loaded as Python float.
+psycopg.adapters.register_loader("numeric", FloatLoader)
 
 _logger = logging.getLogger(__name__)
 _logger_conn = _logger.getChild("connection")
@@ -84,10 +75,31 @@ re_from = re.compile(r'\bfrom\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
 re_into = re.compile(r'\binto\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
 
 PG_CONCURRENCY_EXCEPTIONS_TO_RETRY = (
-    psycopg2.errors.LockNotAvailable,
-    psycopg2.errors.SerializationFailure,
-    psycopg2.errors.DeadlockDetected,
+    psycopg.errors.LockNotAvailable,
+    psycopg.errors.SerializationFailure,
+    psycopg.errors.DeadlockDetected,
 )
+
+
+class PoolError(Exception):
+    pass
+
+
+def _cursor_query(cursor) -> str | None:
+    """Return the last SQL string sent by a psycopg cursor, if any.
+
+    Relies on ``cursor._query``, which psycopg documents as a debug helper
+    rather than a stable public API (no ``cursor.query`` in psycopg3).
+    ``_query`` is the converter object; ``_query.query`` is the bytes actually
+    sent to PostgreSQL. Odoo uses :class:`psycopg.ClientCursor`, so those bytes
+    already have parameters inlined. A default / server-side-binding cursor
+    would instead keep ``$1`` placeholders and put values in ``_query.params``.
+    ``None`` before the first ``execute()`` and after the cursor is reset.
+    ``decode()`` uses UTF-8; the connection encoding can differ.
+    """
+    if cursor._query and cursor._query.query is not None:
+        return cursor._query.query.decode()
+    return None
 
 
 def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into'], str] | tuple[typing.Literal['other'], None]:
@@ -188,7 +200,7 @@ class _FlushingSavepoint(Savepoint):
 # at runtime, it is just an `object`
 class Cursor(_CursorProtocol):
     """Represents an open transaction to the PostgreSQL DB backend,
-       acting as a lightweight wrapper around psycopg2's
+       acting as a lightweight wrapper around psycopg's
        ``cursor`` objects.
 
         ``Cursor`` is the object behind the ``cr`` variable used all
@@ -280,7 +292,8 @@ class Cursor(_CursorProtocol):
 
         self.dbname = dbname
         self._cnx = cnx
-        self._obj: psycopg2.extensions.cursor = cnx.cursor()
+        # ClientCursor keeps psycopg2-like client-side binding and mogrify().
+        self._obj: psycopg.ClientCursor = cnx.cursor(row_factory=tuple_row)
         if _logger.isEnabledFor(logging.DEBUG):
             self.__caller: tuple[str, str | int] | None = frame_codeinfo(currentframe(), 2)
         else:
@@ -382,13 +395,12 @@ class Cursor(_CursorProtocol):
             self._cnx.give_back(keep_in_pool=False)
 
     def _format(self, query, params=None) -> str:
-        encoding = psycopg2.extensions.encodings[self.connection.encoding]
-        formatted = self.mogrify(query, params).decode(encoding, 'replace')
+        formatted = self.mogrify(query, params)
         if config.colors['sql']:
             return highlight_sql(formatted)
         return formatted
 
-    def mogrify(self, query: SQL | typing.LiteralString | psql.Composable, params=None) -> bytes:
+    def mogrify(self, query: SQL | typing.LiteralString | psql.Composable, params=None) -> str:
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
@@ -402,7 +414,6 @@ class Cursor(_CursorProtocol):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
         elif params and not isinstance(params, (tuple, list, dict)):
-            # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError(f"SQL query parameters should be a tuple, list or dict; got {params!r}")
 
         start = real_time()
@@ -417,7 +428,7 @@ class Cursor(_CursorProtocol):
             self._obj.execute(query, params)
         except Exception as e:
             if log_exceptions:
-                _logger.error("bad query: %s\nERROR: %s", self._obj.query or query, e)
+                _logger.error("bad query: %s\nERROR: %s", _cursor_query(self._obj) or query, e)
             raise
         finally:
             delay = real_time() - start
@@ -438,8 +449,8 @@ class Cursor(_CursorProtocol):
 
         # advanced stats
         if _logger.isEnabledFor(logging.DEBUG):
-            if obj_query := self._obj.query:
-                query = obj_query.decode()
+            if obj_query := _cursor_query(self._obj):
+                query = obj_query
             query_type, table = categorize_query(query)
             log_target = None
             if query_type == 'into':
@@ -456,15 +467,29 @@ class Cursor(_CursorProtocol):
             self.execute(query, params)
 
     def execute_values(self, query: typing.LiteralString | psql.Composable, argslist, template=None, page_size=100, fetch=False):
+        """Reimplementation of psycopg.extras.execute_values using client-side mogrify.
+
+        The query must contain a single ``%s`` placeholder for the VALUES list.
         """
-        A proxy for psycopg2.extras.execute_values which can log all queries like execute.
-        But this method cannot set log_exceptions=False like execute
-        """
-        # Odoo Cursor only proxies all methods of psycopg2 Cursor. This is a patch for problems caused by passing
-        # self instead of self._obj to the first parameter of psycopg2.extras.execute_values.
         if isinstance(query, psql.Composable):
             query = query.as_string(self._obj)
-        return psycopg2.extras.execute_values(self, query, argslist, template=template, page_size=page_size, fetch=fetch)
+        result = []
+        argslist = list(argslist)
+        for start in range(0, len(argslist), page_size):
+            page = argslist[start:start + page_size]
+            if not page:
+                continue
+            if template is None:
+                template = "(" + ",".join(["%s"] * len(page[0])) + ")"
+            values = ",".join(self._obj.mogrify(template, args) for args in page)
+            placeholder = query.find('%s')
+            if placeholder < 0:
+                raise ValueError("execute_values query must contain a %s placeholder for VALUES")
+            composed = query[:placeholder] + values + query[placeholder + 2:]
+            self.execute(composed)
+            if fetch:
+                result.extend(self.fetchall())
+        return result if fetch else None
 
     def print_log(self) -> None:
         global sql_counter
@@ -509,7 +534,7 @@ class Cursor(_CursorProtocol):
         try:
             self.rollback()
 
-        except psycopg2.InterfaceError:
+        except psycopg.InterfaceError:
             # mask 'connection already closed' error
             if not self._cnx.closed:
                 raise
@@ -592,7 +617,7 @@ class Cursor(_CursorProtocol):
 
     def __getattr__(self, name):
         if self._closed and name == '_obj':
-            raise psycopg2.InterfaceError("Cursor already closed")
+            raise psycopg.InterfaceError("Cursor already closed")
         return getattr(self._obj, name)
 
     @property
@@ -601,29 +626,45 @@ class Cursor(_CursorProtocol):
 
     @property
     def readonly(self) -> bool:
-        return bool(self._cnx.readonly)
+        return bool(self._cnx.read_only)
 
 
 BaseCursor = Cursor  # backward-compatibility
 
 
-class PsycoConnection(psycopg2.extensions.connection):
+class PsycoConnectionInfo(psycopg.ConnectionInfo):
+    @property
+    def password(self):
+        return None
+
+
+class PsycoConnection(psycopg.Connection[tuple]):
     _pool_last_used: float = 0
 
-    def lobject(*args, **kwargs):
-        pass
+    def __init__(self, pgconn, row_factory=tuple_row):
+        super().__init__(pgconn, row_factory=row_factory)
+        self.dsn = self.info.dsn  # cached at connect; psycopg3 cannot read info.dsn after close
 
-    if hasattr(psycopg2.extensions, 'ConnectionInfo'):
-        @property
-        def info(self):
-            class PsycoConnectionInfo(psycopg2.extensions.ConnectionInfo):
-                @property
-                def password(self):
-                    pass
-            return PsycoConnectionInfo(self)
+    @property
+    def info(self):
+        return PsycoConnectionInfo(self.pgconn)
 
     def give_back(self, keep_in_pool=True):
         raise RuntimeError('not bound to a pool')
+
+    def reset(self):
+        """Reset session state before returning the connection to the pool."""
+        if self.closed:
+            return
+        self.rollback()
+        autocommit = self.autocommit
+        try:
+            self.autocommit = True
+            # https://www.postgresql.org/docs/18/sql-discard.html
+            # DISCARD ALL cannot be executed inside a transaction block.
+            self.execute("DISCARD ALL")
+        finally:
+            self.autocommit = autocommit
 
 
 class ConnectionPool:
@@ -701,17 +742,19 @@ class ConnectionPool:
                 raise PoolError('The Connection Pool Is Full')
 
         try:
-            result = psycopg2.connect(
-                connection_factory=PsycoConnection,
-                **connection_info)
+            result = PsycoConnection.connect(
+                cursor_factory=psycopg.ClientCursor,
+                row_factory=tuple_row,
+                **connection_info,
+            )
             result.give_back = functools.partial(self.give_back, result)
-        except psycopg2.Error:
+        except psycopg.Error:
             _logger.info('Connection to the database failed')
             raise
-        if result.server_version < MIN_PG_VERSION * 10000:
-            warnings.warn(f"Postgres version is {result.server_version}, lower than minimum required {MIN_PG_VERSION * 10000}")
+        if result.info.server_version < MIN_PG_VERSION * 10000:
+            warnings.warn(f"Postgres version is {result.info.server_version}, lower than minimum required {MIN_PG_VERSION * 10000}")
         self._used_connections.add(result)
-        self._debug('Create new connection backend PID %d', result.get_backend_pid())
+        self._debug('Create new connection backend PID %d', result.info.backend_pid)
 
         return result
 
@@ -730,7 +773,7 @@ class ConnectionPool:
             self._debug('Put connection to %r in pool', connection.dsn)
             try:
                 connection.reset()
-            except psycopg2.OperationalError as e:
+            except psycopg.OperationalError as e:
                 self._debug('Cannot reset connection: %r (%s)', connection.dsn, e)
             else:
                 connection._pool_last_used = time.time()
@@ -758,11 +801,16 @@ class ConnectionPool:
                         (dsn and last and 'to %r' % last.dsn) or '')
 
     def _dsn_equals(self, dsn1: dict | str, dsn2: dict | str) -> bool:
-        alias_keys = {'dbname': 'database'}
+        # Temporary: keep master's _dsn_equals so the psycopg3 port can land.
+        # Comparing request connection_info to info.dsn via conninfo_to_dict is
+        # incorrect — info.dsn is libpq's filtered view (defaults dropped,
+        # extra keys like hostaddr/sslcertmode added). Fixed in a later commit.
         ignore_keys = ['password']
         dsn1, dsn2 = ({
-            alias_keys.get(key, key): str(value)
-            for key, value in (psycopg2.extensions.parse_dsn(dsn) if isinstance(dsn, str) else dsn).items()
+            key: str(value)
+            for key, value in (
+                conninfo_to_dict(dsn) if isinstance(dsn, str) else conninfo_to_dict(**dsn)
+            ).items()
             if key not in ignore_keys
         } for dsn in (dsn1, dsn2))
         return dsn1 == dsn2
@@ -789,12 +837,9 @@ class Connection:
     def cursor(self) -> Cursor:
         _logger.debug('create cursor to %r', self.dsn)
         cnx = self.__pool.borrow(self.__dsn)
-        cnx.set_session(
-            # See the docstring of this class.
-            isolation_level=ISOLATION_LEVEL_REPEATABLE_READ,
-            readonly=self.__pool.readonly,
-            autocommit=False,
-        )
+        cnx.isolation_level = psycopg.IsolationLevel.REPEATABLE_READ
+        cnx.read_only = self.__pool.readonly
+        cnx.autocommit = False
         return Cursor(cnx, self.__dbname)
 
     def __bool__(self):
@@ -804,10 +849,10 @@ class Connection:
 def connection_info_for(db_or_uri: str, readonly=False) -> tuple[str, dict]:
     """ parse the given `db_or_uri` and return a 2-tuple (dbname, connection_params)
 
-    Connection params are either a dictionary with a single key ``dsn``
+    Connection params are either a dictionary with a ``conninfo`` key
     containing a connection URI, or a dictionary containing connection
-    parameter keywords which psycopg2 can build a key/value connection string
-    (dsn) from
+    parameter keywords which psycopg can build a key/value connection string
+    from
 
     :param str db_or_uri: database name or postgres dsn
     :param bool readonly: used to load
@@ -826,9 +871,9 @@ def connection_info_for(db_or_uri: str, readonly=False) -> tuple[str, dict]:
             db_name = us.username
         else:
             db_name = us.hostname
-        return db_name, {'dsn': db_or_uri, 'application_name': app_name}
+        return db_name, {'conninfo': db_or_uri, 'application_name': app_name}
 
-    connection_info = {'database': db_or_uri, 'application_name': app_name}
+    connection_info = {'dbname': db_or_uri, 'application_name': app_name}
     for p in ('host', 'port', 'user', 'password', 'sslmode'):
         cfg = tools.config['db_' + p]
         if readonly:

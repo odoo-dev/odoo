@@ -26,7 +26,6 @@ import contextlib
 import functools
 import inspect
 import itertools
-import io
 import json
 import logging
 import re
@@ -38,9 +37,9 @@ from collections.abc import Callable, Iterable, Mapping
 from inspect import getmembers
 from operator import call, itemgetter
 
-import psycopg2.errors
-import psycopg2.extensions
-from psycopg2.extras import Json
+import psycopg
+import psycopg.errors
+from psycopg.types.json import Jsonb
 
 from odoo.exceptions import AccessError, LockError, MissingError, ValidationError, UserError
 from odoo.tools import (
@@ -110,7 +109,7 @@ regex_read_group_spec = re.compile(r'(\w+)(\.([\w\.]+))?(?::(\w+))?$')  # For _r
 
 INSERT_BATCH_SIZE = 100
 UPDATE_BATCH_SIZE = 100
-SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
+SQL_DEFAULT = SQL("DEFAULT")
 
 # hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
 NO_ACCESS = '.'
@@ -682,26 +681,9 @@ class BaseModel(metaclass=MetaModel):
         )
         fields = ['module', 'model', 'name', 'res_id']
 
-        # disable eventual async callback / support for the extent of
-        # the COPY FROM, as these are apparently incompatible
-        callback = psycopg2.extensions.get_wait_callback()
-        psycopg2.extensions.set_wait_callback(None)
-        try:
-            cr.copy_from(io.StringIO(
-                u'\n'.join(
-                    u"%s\t%s\t%s\t%d" % (
-                        modname,
-                        record._name,
-                        xids[record.id][1],
-                        record.id,
-                    )
-                    for record in missing
-                )),
-                table='ir_model_data',
-                columns=fields,
-            )
-        finally:
-            psycopg2.extensions.set_wait_callback(callback)
+        with cr.copy("COPY ir_model_data (module, model, name, res_id) FROM STDIN") as copy:
+            for record in missing:
+                copy.write_row((modname, record._name, xids[record.id][1], record.id))
         self.env['ir.model.data'].invalidate_model(fields)
 
         return (
@@ -1006,7 +988,7 @@ class BaseModel(metaclass=MetaModel):
                     recs = self._load_records(data_list, mode == 'update')
                     ids.extend(recs.ids)
                 return
-            except psycopg2.InternalError as e:
+            except psycopg.InternalError as e:
                 # broken transaction, exit and hope the source error was already logged
                 if not any(message['type'] == 'error' for message in messages):
                     info = data_list[0]['info']
@@ -1024,11 +1006,11 @@ class BaseModel(metaclass=MetaModel):
                     rec = self._load_records([rec_data], mode == 'update')
                     cr.flush()  # make sure flush exceptions are raised here
                     ids.append(rec.id)
-                except psycopg2.Warning as e:
+                except psycopg.Warning as e:
                     savepoint.rollback()
                     info = rec_data['info']
                     messages.append(dict(info, type='warning', message=str(e)))
-                except psycopg2.Error as e:
+                except psycopg.Error as e:
                     savepoint.rollback()
                     info = rec_data['info']
                     pg_error_info = {'message': self._sql_error_to_message(e)}
@@ -2597,7 +2579,7 @@ class BaseModel(metaclass=MetaModel):
             obj.apply_to_database(self)
 
     @api.model
-    def _sql_error_to_message(self, exc: psycopg2.Error) -> str:
+    def _sql_error_to_message(self, exc: psycopg.Error) -> str:
         """ Convert a database exception to a user error message depending on the model.
 
         Note that the cursor on self has to be in a valid state.
@@ -2615,7 +2597,7 @@ class BaseModel(metaclass=MetaModel):
         return self._sql_error_to_message_generic(exc)
 
     @api.model
-    def _sql_error_to_message_generic(self, exc: psycopg2.Error) -> str:
+    def _sql_error_to_message_generic(self, exc: psycopg.Error) -> str:
         """ Convert a database exception to a generic user error message. """
         diag = exc.diag
         unknown = self.env._('Unknown')
@@ -2638,13 +2620,13 @@ class BaseModel(metaclass=MetaModel):
         else:
             info['field_display'] = f"'{format_list(self.env, columns)}'"
 
-        if isinstance(exc, psycopg2.errors.NotNullViolation):
+        if isinstance(exc, psycopg.errors.NotNullViolation):
             return self.env._(
                 "Missing required field %(field_display)s for model %(model_display)s",
                 **info,
             )
 
-        if isinstance(exc, psycopg2.errors.ForeignKeyViolation):
+        if isinstance(exc, psycopg.errors.ForeignKeyViolation):
             if len(columns) != 1:
                 info['field_display'] = info['constraint_name']
             return self.env._(
@@ -2655,13 +2637,13 @@ class BaseModel(metaclass=MetaModel):
                 **info,
             )
 
-        if isinstance(exc, psycopg2.errors.UniqueViolation) and columns:
+        if isinstance(exc, psycopg.errors.UniqueViolation) and columns:
             column_names = [self._fields[f].string if f in self._fields else f for f in columns]
             info['field_display'] = f"'{', '.join(columns)}' ({format_list(self.env, column_names)})"
             info['detail'] = diag.message_detail  # contains conflicting key and value
             return self.env._("The value for %(field_display)s already exists.\n\nDetail: %(detail)s\n", **info)
 
-        # No good message can be created for psycopg2.errors.CheckViolation
+        # No good message can be created for psycopg.errors.CheckViolation
 
         # fallback
         return exception_to_unicode(exc)
@@ -2927,8 +2909,8 @@ class BaseModel(metaclass=MetaModel):
                 """,
                 table=SQL.identifier(self._table),
                 field=SQL.identifier(field_name),
-                fallback=Json({'en_US': translation_fallback}),
-                value=Json(translations),
+                fallback=Jsonb({'en_US': translation_fallback}),
+                value=Jsonb(translations),
                 id=self.id,
             ))
         else:
@@ -4369,7 +4351,7 @@ class BaseModel(metaclass=MetaModel):
                 'INSERT INTO %s (%s) VALUES %s RETURNING "id"',
                 SQL.identifier(self._table),
                 SQL(', ').join(map(SQL.identifier, columns)),
-                SQL(', ').join(tuple(row) for row in rows),
+                SQL(', ').join(SQL("(%s)", SQL(', ').join(row)) for row in rows),
             ))
             ids.extend(id_ for id_, in cr.fetchall())
 
