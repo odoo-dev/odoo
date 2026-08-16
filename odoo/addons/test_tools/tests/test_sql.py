@@ -2,12 +2,35 @@
 
 from psycopg.errors import CheckViolation
 
+from odoo.sql_db import categorize_query
 from odoo.tests.common import tagged, BaseCase, TransactionCase
 from odoo.tools import SQL, mute_logger, sql
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestSQL(BaseCase):
+
+    def test_categorize_copy_query(self):
+        self.assertEqual(
+            categorize_query("COPY ir_model_data (module, model, name, res_id) FROM STDIN"),
+            ('into', 'ir_model_data'),
+        )
+        self.assertEqual(
+            categorize_query("COPY public.product_unspsc_code TO STDOUT"),
+            ('from', 'product_unspsc_code'),
+        )
+        self.assertEqual(
+            categorize_query('COPY public . "product_unspsc_code" TO STDOUT'),
+            ('from', 'product_unspsc_code'),
+        )
+        self.assertEqual(
+            categorize_query('COPY "foo-bar" FROM STDIN'),
+            ('into', 'foo-bar'),
+        )
+        self.assertEqual(
+            categorize_query("COPY BINARY foo FROM STDIN"),
+            ('into', 'foo'),
+        )
 
     def test_sql_empty(self):
         sql = SQL()

@@ -302,6 +302,22 @@ class TestRealCursor(BaseCase):
             self.assertEqual(cr.fetchone(), ('on',))
             self.assertTrue(cr._cnx.read_only)
 
+    def test_copy_logs_like_execute(self):
+        with self.cursor() as cr:
+            cr.execute("CREATE TEMP TABLE sql_copy_log (id integer, name text)")
+            before = cr.sql_log_count
+            with cr.copy("COPY sql_copy_log (id, name) FROM STDIN") as copy:
+                copy.write_row((1, 'a'))
+            self.assertEqual(cr.sql_log_count, before + 1)
+            cr.execute("SELECT id, name FROM sql_copy_log")
+            self.assertEqual(cr.fetchall(), [(1, 'a')])
+
+    def test_copy_logs_bad_query(self):
+        with self.cursor() as cr:
+            with self.assertLogs('odoo.sql_db', level='ERROR'), self.assertRaises(psycopg.Error):
+                with cr.copy("COPY sql_copy_log_missing (id) FROM STDIN") as copy:
+                    copy.write_row((1,))
+
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestHTTPCursor(HttpCase):

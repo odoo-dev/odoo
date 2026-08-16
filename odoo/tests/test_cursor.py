@@ -83,6 +83,14 @@ class TestCursor(Cursor):
         self._cnx._check_savepoint()
         return super().execute(*args, **kwargs)
 
+    def copy(self, *args, **kwargs):
+        if self.closed:
+            raise psycopg.InterfaceError("Cursor already closed")
+        if self._now is None:
+            self._now = datetime.now()
+        self._cnx._check_savepoint()
+        return super().copy(*args, **kwargs)
+
     def _close(self):
         try:
             super()._close()

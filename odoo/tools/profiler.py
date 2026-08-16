@@ -181,7 +181,14 @@ class SQLCollector(Collector):
             'start': query_start,
             'time': query_time,
         }
-        sample = self.add(entry)
+        # Query tracing is implemented by the internal ``_trace_query``
+        # context manager, but it should not become part of the recorded
+        # application call stack.  Keep the public operation (``execute`` or
+        # ``copy``) as the leaf frame, as it was before the refactor.
+        frame = sys._getframe().f_back
+        while frame is not None and frame.f_code.co_name in {'_trace_query', '__enter__'}:
+            frame = frame.f_back
+        sample = self.add(entry, frame=frame)
 
         def update_sample(delay):
             sample['time'] = delay

@@ -72,6 +72,16 @@ _logger_conn = _logger.getChild("connection")
 
 re_from = re.compile(r'\bfrom\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
 re_into = re.compile(r'\binto\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
+# Unquoted names: same charset as re_from/re_into. Quoted names: anything but '"'.
+# Optional schema.table (whitespace around '.') and (columns) before FROM|TO.
+re_copy = re.compile(
+    r'\bcopy\s+(?:binary\s+)?'
+    r'(?:(?:"[^"]+"|[a-zA-Z_0-9]+)\s*\.\s*)?'
+    r'(?:"([^"]+)"|([a-zA-Z_0-9]+))'
+    r'(?:\s*\([^)]*\))?'
+    r'\s+(from|to)\b',
+    re.IGNORECASE,
+)
 
 PG_CONCURRENCY_EXCEPTIONS_TO_RETRY = (
     psycopg.errors.LockNotAvailable,
@@ -102,6 +112,13 @@ def _cursor_query(cursor) -> str | None:
 
 
 def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into'], str] | tuple[typing.Literal['other'], None]:
+    res_copy = re_copy.search(decoded_query)
+    if res_copy:
+        # COPY table FROM ... writes into the table; COPY ... TO reads from it
+        table = res_copy.group(1) or res_copy.group(2)
+        direction = res_copy.group(3).lower()
+        return ('into' if direction == 'from' else 'from'), table
+
     res_into = re_into.search(decoded_query)
     # prioritize `insert` over `select` so `select` subqueries are not
     # considered when inside a `insert`
@@ -405,16 +422,16 @@ class Cursor(_CursorProtocol):
             query, params, _fields = query._sql_tuple
         return self._obj.mogrify(query, params)
 
-    def execute(self, query: SQL | typing.LiteralString | psql.Composable, params=None, log_exceptions: bool = True) -> None:
-        """ Execute a query inside the current transaction. """
-        global sql_counter
-
+    def _normalize_query(self, query, params=None):
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
         elif params and not isinstance(params, (tuple, list, dict)):
             raise ValueError(f"SQL query parameters should be a tuple, list or dict; got {params!r}")
+        return query, params
 
+    @contextmanager
+    def _trace_query(self, query, params=None, log_exceptions: bool = True):
         start = real_time()
         update_query_endtime_functions = []
         current_thread = threading.current_thread()
@@ -424,7 +441,7 @@ class Cursor(_CursorProtocol):
                 update_query_endtime_functions.append(func)
 
         try:
-            self._obj.execute(query, params)
+            yield
         except Exception as e:
             if log_exceptions:
                 _logger.error("bad query: %s\nERROR: %s", _cursor_query(self._obj) or query, e)
@@ -439,7 +456,7 @@ class Cursor(_CursorProtocol):
 
         # simple query count is always computed
         self.sql_log_count += 1
-        sql_counter += 1
+        odoo.sql_db.sql_counter += 1
 
         if hasattr(current_thread, 'query_count'):
             current_thread.query_count += 1
@@ -456,9 +473,15 @@ class Cursor(_CursorProtocol):
                 log_target = self.sql_into_log
             elif query_type == 'from':
                 log_target = self.sql_from_log
-            if log_target:
+            if log_target is not None:
                 stat_count, stat_time = log_target.get(table or '', (0, 0))
                 log_target[table or ''] = (stat_count + 1, stat_time + delay * 1E6)
+
+    def execute(self, query: SQL | typing.LiteralString | psql.Composable, params=None, log_exceptions: bool = True) -> None:
+        """ Execute a query inside the current transaction. """
+        query, params = self._normalize_query(query, params)
+        with self._trace_query(query, params, log_exceptions):
+            self._obj.execute(query, params)
 
     def executemany(self, query: typing.LiteralString | psql.Composable, vars_list) -> None:
         """Execute the query for each row in the vars_list."""
@@ -489,6 +512,14 @@ class Cursor(_CursorProtocol):
             if fetch:
                 result.extend(self.fetchall())
         return result if fetch else None
+
+    @contextmanager
+    def copy(self, statement: SQL | typing.LiteralString | psql.Composable, params=None, *, writer=None, log_exceptions: bool = True):
+        """Initiate a ``COPY`` operation and yield a psycopg ``Copy`` object."""
+        statement, params = self._normalize_query(statement, params)
+        with self._trace_query(statement, params, log_exceptions):
+            with self._obj.copy(statement, params, writer=writer) as copy:
+                yield copy
 
     def print_log(self) -> None:
         global sql_counter
