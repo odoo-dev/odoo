@@ -34,6 +34,12 @@
                     <field name="reinvoice_policy" widget="radio"/>
                 </group>
             </group>
+            <label id="free_qty_no_stock" position="attributes">
+                <attribute name="invisible">type != 'consu'  or not is_storable</attribute>
+            </label>
+            <div name="free_qty_no_stock" position="attributes">
+                <attribute name="invisible">type != 'consu'  or not is_storable</attribute>
+            </div>
         </field>
     </record>
 

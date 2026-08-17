@@ -120,9 +120,14 @@
                                             <field name="uom_name" class="ms-2 oe_inline" groups="uom.group_uom"/>
                                         </div>
                                     </div>
-                                    <label id="free_qty_no_stock" for="free_qty" invisible="type != 'consu'  or not is_storable"/>
-                                    <div name="free_qty_no_stock" class="o_row w-100" invisible="type != 'consu' or not is_storable">
+                                    <label id="free_qty_no_stock" for="free_qty" invisible="1"/>
+                                    <div name="free_qty_no_stock" class="o_row w-100" invisible="1">
                                         <field name="free_qty" style="max-width: fit-content;" readonly="True"/>
+                                        <field name="uom_name" class="ms-2 oe_inline" groups="uom.group_uom"/>
+                                    </div>
+                                    <label id="forecasted_qty_no_stock" for="virtual_available" invisible="1"/>
+                                    <div name="forecasted_qty_no_stock" class="o_row w-100" invisible="1">
+                                        <field name="virtual_available" style="max-width: fit-content;" readonly="True"/>
                                         <field name="uom_name" class="ms-2 oe_inline" groups="uom.group_uom"/>
                                     </div>
                                 </group>
@@ -150,7 +155,7 @@
                                             or (product_variant_count == 0 and is_dynamically_created)
                                         ))"
                                     >
-                                        
+
                                         <field
                                             name="standard_price"
                                             widget="monetary"
