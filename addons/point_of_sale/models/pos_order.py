@@ -1180,6 +1180,7 @@ class PosOrder(models.Model):
         return not self.session_id.update_stock_at_closing or self._force_create_picking_real_time()
 
     def _force_create_picking_real_time(self):
+        # test commit 
         return self.company_id.anglo_saxon_accounting and self.to_invoice
 
     def _create_order_picking(self):
