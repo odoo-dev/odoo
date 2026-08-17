@@ -1173,6 +1173,7 @@ class PosOrder(models.Model):
 
     @api.model
     def _get_refunded_orders(self, order):
+        breakpoint()
         refunded_orderline_ids = [line[2]['refunded_orderline_id'] for line in order['lines'] if line[0] in [0, 1] and line[2].get('refunded_orderline_id')]
         return self.env['pos.order.line'].browse(refunded_orderline_ids).mapped('order_id')
 
