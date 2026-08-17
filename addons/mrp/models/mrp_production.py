@@ -1021,6 +1021,10 @@ class MrpProduction(models.Model):
         for move_str in ('move_raw_ids', 'move_finished_ids'):
             if move_str not in vals or self.state in ['cancel', 'done']:
                 continue
+            vals[move_str] = [
+                cmd for cmd in vals[move_str]
+                if cmd[0] not in (Command.DELETE, Command.UPDATE) or cmd[1]
+            ]
             # When adding a move raw/finished, it should have the source location's `warehouse_id`.
             # Before, it was handle by an onchange, now it's forced if not already in vals.
             warehouse_id = self.location_src_id.warehouse_id.id

@@ -558,6 +558,62 @@ class TestMrpOrder(TestMrpCommon):
         production = production_form.save()
         production.button_mark_done()
 
+    def test_update_product_qty_twice_with_workorder(self):
+        """Regression test: changing product_qty twice on a confirmed MO (with a workorder)
+        must not raise 'AssertionError: Invalid falsy real id'.
+
+        Steps to reproduce (UI):
+        1. Create a BoM with an operation (60 min) and a component.
+        2. Create an MO from that BoM with qty=1 and confirm it.
+        3. Change product_qty to 2, click elsewhere (triggers intermediate write).
+        4. Change product_qty to 5, click Save.
+
+        The web client accumulates ORM commands and can include Command.DELETE(0) for a
+        virtual (unsaved) move record created in the browser cache during step 3.
+        mrp.production.write() filters out such falsy-id DELETE commands before they
+        reach the ORM's browse([0]), which raises "Invalid falsy real id" in v19.
+        Fix mirrors the filter(None, res_ids) pattern used in mail_template.py (PR #227477).
+        """
+        bom = self.env['mrp.bom'].create({
+            'product_id': self.product_6.id,
+            'product_tmpl_id': self.product_6.product_tmpl_id.id,
+            'product_qty': 1,
+            'uom_id': self.product_6.uom_id.id,
+            'type': 'normal',
+            'bom_line_ids': [
+                Command.create({'product_id': self.product_2.id, 'product_qty': 1}),
+            ],
+            'operation_ids': [
+                Command.create({
+                    'name': 'Test Operation',
+                    'workcenter_id': self.workcenter_1.id,
+                    'time_cycle': 60,
+                    'sequence': 1,
+                }),
+            ],
+        })
+        # Step 1: Create MO with qty=1 and confirm
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product_6.id,
+            'bom_id': bom.id,
+            'product_qty': 1,
+            'uom_id': self.product_6.uom_id.id,
+        })
+        mo.action_confirm()
+        self.assertEqual(mo.state, 'confirmed')
+        original_move = mo.move_raw_ids
+        self.assertEqual(len(original_move), 1)
+        mo.write({'product_qty': 2})
+        mo.write({
+            'product_qty': 5,
+            'move_raw_ids': [
+                Command.delete(0),           # falsy virtual id — must be silently ignored
+                Command.update(original_move.id, {'product_uom_qty': 5}),
+            ],
+        })
+        self.assertEqual(mo.product_qty, 5)
+        self.assertEqual(mo.move_raw_ids.product_uom_qty, 5)
+
     def test_update_plan_date(self):
         """Editing the scheduled date after planning the MO should unplan the MO, and adjust the date on the stock moves"""
         date_start = datetime(2023, 5, 15, 9, 0)
