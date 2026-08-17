@@ -1043,6 +1043,7 @@ class ProductCategory(models.Model):
             category.total_route_ids = routes
 
 
+
 class ProductPackaging(models.Model):
     _inherit = "product.packaging"
 
