@@ -1011,6 +1011,7 @@ class ProductTemplate(models.Model):
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
+
     route_ids = fields.Many2many(
         'stock.route', 'stock_route_categ', 'categ_id', 'route_id', 'Routes',
         domain=[('product_categ_selectable', '=', True)])
