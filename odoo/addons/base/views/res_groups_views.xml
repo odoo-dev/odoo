@@ -119,21 +119,21 @@
                             class="oe_stat_button" icon="account_tree">
                             <field name="implied_count" widget="statinfo" string="Implied Groups"/>
                         </button>
-                        <button type="object" name="action_show_all_users"
+                        <button type="object" name="action_view_all_user_ids"
                             class="oe_stat_button" icon="groups">
                             <field name="all_users_count" widget="statinfo" string="Implied Users"/>
                         </button>
-                        <button type="object" name="action_view_access_ids"
+                        <button type="object" name="action_view_all_implied_access_ids"
                             class="oe_stat_button" icon="lock">
-                            <field name="access_count" widget="statinfo" string="Implied Rights"/>
+                            <field name="access_count" widget="statinfo" string="Audit all the implied access rights"/>
                         </button>
-                        <button type="object" name="action_view_implied_menus"
+                        <button type="object" name="action_view_all_implied_menus"
                                 class="oe_stat_button" icon="menu">
-                            <field name="menu_access_count" widget="statinfo" string="Implying Menus"/>
+                            <field name="menu_access_count" widget="statinfo" string="Audit all implied menus"/>
                         </button>
-                        <button type="object" name="action_view_implied_views"
+                        <button type="object" name="action_view_all_implied_views"
                                 class="oe_stat_button" icon="tv">
-                            <field name="view_access_count" widget="statinfo" string="Implying Views"/>
+                            <field name="view_access_count" widget="statinfo" string="Audit all implied views"/>
                         </button>
                     </div>
 
@@ -149,7 +149,7 @@
                         <page string="Dependencies" name="inherit_groups">
                             <group>
                                 <field name="implied_by_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
-                                <field name="implied_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
+                                <field name="all_implied_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
                                 <field name="disjoint_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
                             </group>
                         </page>

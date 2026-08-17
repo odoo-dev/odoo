@@ -459,6 +459,18 @@ class ResGroups(models.Model):
         for group in self:
             group.view_access_count = len(group.view_access)
 
+    def action_view_all_user_ids(self):
+        self.ensure_one()
+        return {
+            'name': self.env._('Users and implied users of %(group)s', group=self.display_name),
+            'view_mode': 'list,form',
+            'res_model': 'res.users',
+            'type': 'ir.actions.act_window',
+            'context': {'create': False, 'delete': False, 'form_view_ref': 'base.view_users_form'},
+            'domain': [('id', 'in', self.all_user_ids.ids)],
+            'target': 'current',
+        }
+
     def action_show_all_users(self):
         self.ensure_one()
         return {
@@ -491,6 +503,16 @@ class ResGroups(models.Model):
             'domain': [('implied_ids', 'in', self.ids)],
         }
 
+    def action_view_all_implied_access_ids(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Audit all the implied access rights"),
+            'res_model': 'ir.access',
+            'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            'domain': [('group_id', 'in', self.all_implied_ids.ids)],
+        }
+
     def action_view_access_ids(self):
         self.ensure_one()
         return {
@@ -501,6 +523,16 @@ class ResGroups(models.Model):
             'domain': [('group_id', 'in', self.ids)],
         }
 
+    def action_view_all_implied_menus(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Audit all implied menus"),
+            'res_model': 'ir.ui.menu',
+            'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            'domain': [('group_ids', 'in', self.all_implied_ids.ids)],
+        }
+
     def action_view_implied_menus(self):
         self.ensure_one()
         return {
@@ -509,6 +541,16 @@ class ResGroups(models.Model):
             'res_model': 'ir.ui.menu',
             'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
             'domain': [('group_ids', 'in', self.ids)],
+        }
+
+    def action_view_all_implied_views(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Audit all implied views"),
+            'res_model': 'ir.ui.view',
+            'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            'domain': [('group_ids', 'in', self.all_implied_ids.ids)],
         }
 
     def action_view_implied_views(self):
