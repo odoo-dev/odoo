@@ -5594,6 +5594,34 @@ class TestMrpOrder(TestMrpCommon):
             mo_form.bom_id = self.env['mrp.bom']
             self.assertEqual(len(mo_form.workorder_ids), 0)
 
+    def test_workorder_repeated_qty_onchanges_before_save(self):
+        """Repeated quantity onchanges must preserve virtual work orders."""
+        product = self.env['product.product'].create({
+            'name': 'Product with an operation',
+            'is_storable': True,
+        })
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'product_qty': 2.0,
+            'operation_ids': [Command.create({
+                'name': 'Two-hour operation',
+                'workcenter_id': self.workcenter_1.id,
+                'time_cycle': 120.0,
+            })],
+        })
+        mo = self.env['mrp.production'].new({
+            'product_id': product.id,
+            'bom_id': bom.id,
+            'product_qty': 1.0,
+        })
+
+        mo._compute_workorder_ids()
+        workorder_id = mo.workorder_ids.id
+        for quantity in (2.0, 5.0):
+            mo.product_qty = quantity
+            mo._compute_workorder_ids()
+            self.assertIs(mo.workorder_ids.id, workorder_id)
+
     def test_consumption_issue_only_for_compatible_variant(self):
         """A consumption issue should not be triggered for components that are not compatible with the produced variant."""
         # Case 1: Product variant = red
