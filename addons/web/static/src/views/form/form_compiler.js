@@ -96,6 +96,107 @@ export class FormCompiler extends ViewCompiler {
     }
 
     /**
+     * Labels the fields that are displayed as a box on small screens without
+     * belonging to a group, as the arch seldom labels them.
+     *
+     * @param {Element} arch a form arch node
+     */
+    addImplicitLabels(arch) {
+        // an "o_outlined" element is displayed as a box, and so is the element
+        // holding the field of a title (usually a heading)
+        for (const box of arch.querySelectorAll(".o_outlined, .oe_title > *")) {
+            if (this.addImplicitLabel(box)) {
+                box.classList.add("o_outlined");
+            }
+        }
+    }
+
+    /**
+     * Adds a <label/> to the field of an element displayed as a box on small
+     * screens (@see form_controller_m3.scss), unless the arch labels it itself.
+     * Such a label defaults to the name of the field, is drawn over the border of
+     * the box and is only displayed in that layout.
+     *
+     * @param {Element} box
+     * @returns {boolean} whether the box holds a field
+     */
+    addImplicitLabel(box) {
+        if (box.closest("group")) {
+            return false; // the cells of a group are labelled by "compileInnerGroup"
+        }
+        const fieldNode = getTag(box, true) === "field" ? box : box.querySelector("field");
+        if (!fieldNode) {
+            return false;
+        }
+        if (!this.hasArchLabel(fieldNode)) {
+            const label = createElement("label", {
+                for: fieldNode.getAttribute("id") || fieldNode.getAttribute("name"),
+                class: "o_label_implicit d-md-none",
+            });
+            const invisible = box.getAttribute("invisible");
+            if (invisible) {
+                label.setAttribute("invisible", invisible); // hidden along with its box
+            }
+            box.before(label);
+        }
+        return true;
+    }
+
+    /**
+     * The root of the view a given arch node belongs to. A nested view (e.g. the
+     * list of an x2many field) is always defined inside a <field/>, whose content
+     * is compiled apart: its nodes don't take part in the view holding the field.
+     *
+     * @param {Element} node
+     * @returns {Element|Document}
+     */
+    getArchViewRoot(node) {
+        return node.parentElement?.closest("field") || node.getRootNode();
+    }
+
+    /**
+     * Whether the arch defines a <label/> targeting the given field node. In that
+     * case, no default label must be generated for it.
+     *
+     * @param {Element} fieldNode
+     * @returns {boolean}
+     */
+    hasArchLabel(fieldNode) {
+        const forAttr = fieldNode.getAttribute("id") || fieldNode.getAttribute("name");
+        const viewRoot = this.getArchViewRoot(fieldNode);
+        // a label of a nested view doesn't label the fields of this one, even
+        // though it may target the same field name
+        return [...viewRoot.querySelectorAll(`label[for='${forAttr}']`)].some(
+            (label) => this.getArchViewRoot(label) === viewRoot
+        );
+    }
+
+    /**
+     * Props of the FormLabel of a field, defaulting to the name of that field.
+     *
+     * @param {Element} fieldNode a field arch node
+     * @returns {Record<string, string>|null} null if no label can be generated
+     */
+    getFieldLabelProps(fieldNode) {
+        const fieldId = fieldNode.getAttribute("field_id");
+        const fieldName = fieldNode.getAttribute("name");
+        if (!fieldId || !fieldName) {
+            return null;
+        }
+        const string = fieldNode.getAttribute("string");
+        return {
+            id: `'${fieldId}'`,
+            fieldName: `'${fieldName}'`,
+            record: `__comp__.props.record`,
+            string:
+                string === null
+                    ? `__comp__.props.record.fields.${fieldName}.string`
+                    : toStringExpression(string),
+            fieldInfo: `__comp__.props.archInfo.fieldNodes['${fieldId}']`,
+        };
+    }
+
+    /**
      * @param {string} fieldName
      * @returns {Element[]}
      */
@@ -213,6 +314,7 @@ export class FormCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileForm(el, params) {
+        this.addImplicitLabels(el);
         let sheetNode = null;
         for (const sheet of el.querySelectorAll("sheet")) {
             if (sheet.closest("form") === el) {
@@ -346,19 +448,18 @@ export class FormCompiler extends ViewCompiler {
                     ? !exprToBoolean(child.getAttribute("nolabel"))
                     : true;
                 slotContent = this.compileNode(child, { ...params, currentSlot: mainSlot }, false);
-                if (slotContent && addLabel && !isOuterGroup && !isTextNode(slotContent)) {
-                    itemSpan = itemSpan === 1 ? itemSpan + 1 : itemSpan;
-                    const fieldName = child.getAttribute("name");
-                    const fieldId = slotContent.getAttribute("id") || fieldName;
-                    const props = {
-                        id: `${fieldId}`,
-                        fieldName: `'${fieldName}'`,
-                        record: `__comp__.props.record`,
-                        string: child.hasAttribute("string")
-                            ? toStringExpression(child.getAttribute("string"))
-                            : `__comp__.props.record.fields.${fieldName}.string`,
-                        fieldInfo: `__comp__.props.archInfo.fieldNodes[${fieldId}]`,
-                    };
+                // On small screens, a field is displayed inside a box whose label is drawn
+                // over its border: it thus always needs a label. When the arch asks for
+                // none (and doesn't provide one itself), an implicit label is added: it is
+                // only displayed in that layout and takes no space in the grid.
+                const implicit = !addLabel && !this.hasArchLabel(child);
+                const props = addLabel || implicit ? this.getFieldLabelProps(child) : null;
+                if (slotContent && props && !isOuterGroup && !isTextNode(slotContent)) {
+                    if (implicit) {
+                        mainSlot.setAttribute("implicitLabel", "true");
+                    } else {
+                        itemSpan = itemSpan === 1 ? itemSpan + 1 : itemSpan;
+                    }
                     mainSlot.setAttribute("props", objectToString(props));
                     mainSlot.setAttribute("Component", "__comp__.constructor.components.FormLabel");
                     mainSlot.setAttribute("subType", "'item_component'");

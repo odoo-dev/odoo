@@ -4996,13 +4996,70 @@ test(`nolabel`, async () => {
         `,
         resId: 1,
     });
-    expect(`label.o_form_label`).toHaveCount(2);
-    expect(`label.o_form_label:eq(0)`).toHaveText("Product");
-    expect(`label.o_form_label:eq(1)`).toHaveText("Bar");
+    // fields with a "nolabel" attribute get an implicit label (the name of the
+    // field), which is only displayed on small screens
+    expect(`label.o_form_label`).toHaveCount(5);
+    expect(queryAllTexts(`label.o_form_label`)).toEqual([
+        "Foo",
+        "Product",
+        "Int field",
+        "Float field",
+        "Bar",
+    ]);
+    expect(`.firstgroup .o_wrap_label`).toHaveClass(["o_label_implicit", "d-md-none"]);
+    expect(`.secondgroup .o_label_implicit`).toHaveCount(2);
     expect(`.firstgroup div`).toHaveStyle("");
-    expect(`.secondgroup div.o_wrap_label`).toHaveCount(1);
-    expect(`.secondgroup div.o_wrap_input`).toHaveCount(1);
-    expect(`.secondgroup div.o_cell`).toHaveCount(4);
+    expect(`.secondgroup div.o_wrap_label`).toHaveCount(3);
+    expect(`.secondgroup div.o_wrap_input`).toHaveCount(3);
+    expect(`.secondgroup div.o_cell`).toHaveCount(6);
+});
+
+test(`implicit label of the fields outside of a group`, async () => {
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        arch: `
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="foo"/></h1>
+                    </div>
+                    <div class="o_outlined">
+                        <field name="int_field"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="float_field"/>
+                        <h1><field name="float_field"/></h1>
+                    </div>
+                    <field name="child_ids">
+                        <list><field name="foo"/></list>
+                        <form>
+                            <group>
+                                <label for="foo" string="Nested Foo"/>
+                                <div><field name="foo"/></div>
+                            </group>
+                        </form>
+                    </field>
+                </sheet>
+            </form>
+        `,
+        resId: 1,
+    });
+    // a field displayed as a box on small screens gets a label, which is only
+    // displayed in that layout and is added right before the box. The label
+    // targeting "foo" in the nested view doesn't label the title.
+    expect(queryAllTexts(`label.o_form_label`)).toEqual(["Foo", "Int field", "Float field"]);
+    expect(`.oe_title:eq(0) > *:first-child`).toHaveClass([
+        "o_form_label",
+        "o_label_implicit",
+        "d-md-none",
+    ]);
+    expect(`label.o_label_implicit + .o_outlined`).toHaveCount(2);
+    // the element holding the field of a title is displayed as a box
+    expect(`.oe_title:eq(0) > h1`).toHaveClass("o_outlined");
+    expect(`.oe_title:eq(1) > h1`).toHaveClass("o_outlined");
+    // the label of the arch is left as is
+    expect(`.oe_title:eq(1) > *:first-child`).not.toHaveClass("o_label_implicit");
 });
 
 test(`many2one in a one2many`, async () => {
@@ -8928,7 +8985,16 @@ test(`form rendering with groups with col/colspan`, async () => {
 
     expect(`.field_group > .o_cell:nth-child(5)`).toHaveClass("o_wrap_label");
 
-    expect(`.field_group > .o_cell:nth-child(9)`).toHaveClass("o_wrap_label");
+    // "bar" and "int_field" have a "nolabel" attribute: they get an implicit label,
+    // which doesn't take any space in the grid (only displayed on small screens)
+    expect(`.field_group > .o_wrap_field_inline > .o_cell:first-child`).toHaveClass([
+        "o_wrap_label",
+        "o_label_implicit",
+    ]);
+    expect(`.field_group > .o_cell:nth-child(7)`).toHaveClass(["o_wrap_label", "o_label_implicit"]);
+    expect(`.field_group > .o_cell:nth-child(8)`).toHaveAttribute("style", "grid-column: span 3;");
+
+    expect(`.field_group > .o_cell:nth-child(10)`).toHaveClass("o_wrap_label");
 });
 
 test(`form rendering innergroup: separator should take one line`, async () => {

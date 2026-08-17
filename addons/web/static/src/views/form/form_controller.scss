@@ -440,6 +440,12 @@
                 grid-column: span 2;
             }
         }
+        @include media-breakpoint-up(md) {
+            // default label is not rendered here, its field thus remains alone on its row
+            .o_label_implicit:first-child + .o_cell:last-child {
+                grid-column: span 2;
+            }
+        }
     }
 
     @include media-breakpoint-up(sm) {
