@@ -1480,7 +1480,7 @@ class AccountAccount(models.Model):
             table=SQL.identifier(self._table),
             fields_drop_company_ids=SQL(', ').join(
                 SQL(
-                    "%(field)s = NULLIF(%(field)s - %(company_ids)s, '{}'::jsonb)",
+                    "%(field)s = NULLIF(%(field)s - %(company_ids)s::text[], '{}'::jsonb)",
                     field=SQL.identifier(field_name),
                     company_ids=list(new_account_id_by_company_id)
                 )

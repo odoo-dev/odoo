@@ -2369,10 +2369,14 @@ class IrModelData(models.Model):
     def _build_update_xmlids_query(self, sub_rows, update):
         cols = self._build_insert_xmlids_values()
         row_names = SQL(',').join(map(SQL.identifier, cols.keys()))
-        row_values = SQL(',').join(
-            [r[i] for r in sub_rows] if placeholder == '%s' else [placeholder] * len(sub_rows)
-            for i, placeholder in enumerate(cols.values())
-        )
+        # list[str] dumps as unknown; UNNEST() needs an explicit array type.
+        unnest_args = []
+        for i, (col, placeholder) in enumerate(cols.items()):
+            values = [placeholder] * len(sub_rows) if placeholder != '%s' else [r[i] for r in sub_rows]
+            if self._fields[col].column_type[0] in ('varchar', 'text'):
+                values = SQL("%s::text[]", values)
+            unnest_args.append(values)
+        row_values = SQL(',').join(unnest_args)
         return SQL("""
             INSERT INTO ir_model_data(%s)
             SELECT * FROM UNNEST(%s)
