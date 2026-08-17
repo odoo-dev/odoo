@@ -1042,10 +1042,10 @@ class SaleOrder(models.Model):
                         sale_order.origin = duplicate_order.name
                         OR sale_order.client_order_ref = duplicate_order.client_order_ref
                        )
-                 WHERE sale_order.id IN %(orders)s
+                 WHERE sale_order.id = ANY(%(orders)s)
               GROUP BY sale_order.id
             """,
-                orders=tuple(orders.ids),
+                orders=list(orders.ids),
             )
         )
         return {order_id: set(duplicate_ids) for order_id, duplicate_ids in result}

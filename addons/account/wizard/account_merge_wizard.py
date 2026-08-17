@@ -145,9 +145,9 @@ class AccountMergeWizard(models.TransientModel):
             """
             SELECT jsonb_object_agg(key, value)
               FROM account_account, jsonb_each_text(account_account.code_store)
-             WHERE account_account.id IN %(account_ids)s
+             WHERE account_account.id = ANY(%(account_ids)s)
             """,
-            account_ids=tuple(accounts.ids),
+            account_ids=list(accounts.ids),
             to_flush=accounts._fields['code_store'],
         ))[0][0]
 
@@ -171,9 +171,9 @@ class AccountMergeWizard(models.TransientModel):
             """
                  SELECT id, name
                    FROM account_account
-                  WHERE id IN %(account_ids)s
+                  WHERE id = ANY(%(account_ids)s)
             """,
-            account_ids=tuple(accounts.ids),
+            account_ids=list(accounts.ids),
         ))
         account_name_by_id = dict(account_names)
 
@@ -197,9 +197,9 @@ class AccountMergeWizard(models.TransientModel):
         self.env.cr.execute(SQL(
             """
              DELETE FROM account_account
-              WHERE id IN %(account_ids_to_delete)s
+              WHERE id = ANY(%(account_ids_to_delete)s)
             """,
-            account_ids_to_delete=tuple(accounts_to_remove.ids),
+            account_ids_to_delete=list(accounts_to_remove.ids),
         ))
 
         # Clear ir.model.data ormcache

@@ -1318,8 +1318,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         stale_items = item_future_start | item_just_activated | item_to_modify
         stale_items.flush_model()
         self.env.cr.execute(
-            "UPDATE product_pricelist_item SET write_date = %s WHERE id IN %s",
-            (old_date, tuple(stale_items.ids)),
+            "UPDATE product_pricelist_item SET write_date = %s WHERE id = ANY(%s)",
+            (old_date, list(stale_items.ids)),
         )
         stale_items.invalidate_recordset(['write_date'])
 

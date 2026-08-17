@@ -87,16 +87,16 @@ class TestConcurrencyPromoCode(BaseCase):
                     DELETE FROM loyalty_rule WHERE program_id = %(program_id)s;
                     DELETE FROM loyalty_reward WHERE program_id = %(program_id)s;
                     DELETE FROM loyalty_program WHERE id = %(program_id)s;
-                    DELETE FROM sale_order_line WHERE id IN %(sol_ids)s;
-                    DELETE FROM sale_order WHERE id IN %(so_ids)s;
-                    DELETE FROM res_partner WHERE id IN %(partner_ids)s;
+                    DELETE FROM sale_order_line WHERE id = ANY(%(sol_ids)s);
+                    DELETE FROM sale_order WHERE id = ANY(%(so_ids)s);
+                    DELETE FROM res_partner WHERE id = ANY(%(partner_ids)s);
                     DELETE FROM product_product WHERE id = %(product_id)s;
                 """,
                     {
                         "program_id": cls.promo_code_program.id,
-                        "sol_ids": tuple(cls.order_lines.ids),
-                        "so_ids": (cls.order_partner_1.id, cls.order_partner_2.id),
-                        "partner_ids": (cls.partner_1.id, cls.partner_2.id),
+                        "sol_ids": cls.order_lines.ids,
+                        "so_ids": [cls.order_partner_1.id, cls.order_partner_2.id],
+                        "partner_ids": [cls.partner_1.id, cls.partner_2.id],
                         "product_id": cls.product.id,
                     },
                 )

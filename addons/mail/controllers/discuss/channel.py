@@ -308,11 +308,11 @@ class ChannelController(http.Controller):
                           SELECT id,
                                   ROW_NUMBER() OVER (PARTITION BY channel_id ORDER BY id) AS rn
                             FROM discuss_channel_member
-                           WHERE channel_id IN %s
+                           WHERE channel_id = ANY(%s)
                       )
                      WHERE rn <= 4;
                 """,
-                (tuple(sub_channels.ids),),
+                (list(sub_channels.ids),),
             )
             store.add(
                 self.env["discuss.channel.member"].browse([r[0] for r in self.env.cr.fetchall()]),

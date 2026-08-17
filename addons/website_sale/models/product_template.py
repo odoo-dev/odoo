@@ -466,7 +466,7 @@ class ProductTemplate(models.Model):
                          GROUP BY pt.id, pt2.id) ranked
                  WHERE rn <= %(max_products)s
                 """,
-                pt_ids=list(self.ids),
+                pt_ids=self.ids,
                 max_products=max_products,
             )
         )

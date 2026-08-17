@@ -130,7 +130,7 @@ class ProjectProject(models.Model):
                                 JOIN sale_order_line sol ON sol.order_id = so.id
                                WHERE sol.id = pp.sale_line_id
                                  AND so.invoice_status = %(invoice_status)s))
-               AND id in %(ids)s""", ids=tuple(self.ids), invoice_status=invoice_status))
+               AND id = ANY(%(ids)s)""", ids=list(self.ids), invoice_status=invoice_status))
         return self.env['project.project'].browse(id_ for id_, in result)
 
     @api.depends('sale_order_id.invoice_status', 'tasks.sale_order_id.invoice_status')

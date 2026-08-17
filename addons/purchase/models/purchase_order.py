@@ -412,9 +412,9 @@ class PurchaseOrder(models.Model):
                     po.origin = duplicate_po.name
                     OR po.partner_ref = duplicate_po.partner_ref
                 )
-            WHERE po.id IN %(orders)s
+            WHERE po.id = ANY(%(orders)s)
             GROUP BY po.id
-        """, orders=tuple(orders.ids)))
+        """, orders=list(orders.ids)))
 
         return {order_id: set(duplicate_ids) for order_id, duplicate_ids in result}
 

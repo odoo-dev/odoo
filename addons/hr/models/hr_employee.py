@@ -1149,7 +1149,7 @@ class HrEmployee(models.Model):
         id_field = SQL.identifier(table._alias, 'id')
         when_cases = SQL('\n').join(
             [
-                SQL('WHEN %s IN %s THEN %s', id_field, records._ids, state)
+                SQL('WHEN %s = ANY(%s) THEN %s', id_field, records.ids, state)
                 for state, records in states_map.items()
             ],
         )

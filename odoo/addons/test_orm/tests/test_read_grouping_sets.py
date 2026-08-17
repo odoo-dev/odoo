@@ -149,7 +149,7 @@ class TestPrivateReadGroupingSets(common.TransactionCase):
                 LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids__rel" ON (
                     "test_read_group_task"."id" = "test_read_group_task__user_ids__rel"."task_id"
                 )
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY GROUPING SETS (
                 ("test_read_group_task__user_ids__rel"."user_id", "test_read_group_task"."key"),
                 ("test_read_group_task__user_ids__rel"."user_id"))
@@ -164,7 +164,7 @@ class TestPrivateReadGroupingSets(common.TransactionCase):
                 COUNT(*),
                 SUM("test_read_group_task"."integer")
             FROM "test_read_group_task"
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY GROUPING SETS (("test_read_group_task"."key"), ())
             ORDER BY "test_read_group_task"."key" ASC
             """,
@@ -196,7 +196,7 @@ class TestPrivateReadGroupingSets(common.TransactionCase):
                 LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids__rel" ON (
                     "test_read_group_task"."id" = "test_read_group_task__user_ids__rel"."task_id"
                 )
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY GROUPING SETS (
                 ("test_read_group_task__user_ids__rel"."user_id", "test_read_group_task"."key"),
                 ("test_read_group_task__user_ids__rel"."user_id"))
@@ -211,7 +211,7 @@ class TestPrivateReadGroupingSets(common.TransactionCase):
                 COUNT(*),
                 SUM("test_read_group_task"."integer")
             FROM "test_read_group_task"
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY GROUPING SETS (("test_read_group_task"."key"), ())
             ORDER BY "test_read_group_task"."key" ASC
             """,

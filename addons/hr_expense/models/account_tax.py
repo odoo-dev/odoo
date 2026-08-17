@@ -21,8 +21,8 @@ class AccountTax(models.Model):
                     SELECT 1
                     FROM expense_tax AS exp
                     WHERE account_tax.id = exp.tax_id
-                ) AND id IN %s
-            """, [tuple(taxes_to_compute)])
+                ) AND id = ANY(%s)
+            """, [list(taxes_to_compute)])
 
             used_taxes.update([tax[0] for tax in self.env.cr.fetchall()])
 

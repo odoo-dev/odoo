@@ -150,7 +150,7 @@ def initialize(cr: Cursor) -> None:
 
         if not to_auto_install:
             break
-        cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name in %s""", (tuple(to_auto_install),))
+        cr.execute("""UPDATE ir_module_module SET state='to install' WHERE name = ANY(%s)""", (list(to_auto_install),))
 
 
 def create_categories(cr: Cursor, categories: list[str]) -> int | None:
@@ -698,7 +698,7 @@ def list_dbs(*, force=False):
         return sorted(odoo.tools.config['db_name'])
 
     chosen_template = odoo.tools.config['db_template']
-    ignore_templates_list = tuple({'postgres', chosen_template})
+    ignore_templates_list = list({'postgres', chosen_template})
     db = odoo.sql_db.db_connect(config['db_system'])
     with closing(db.cursor()) as cr:
         try:
@@ -712,7 +712,7 @@ def list_dbs(*, force=False):
                    )
                    AND NOT datistemplate
                    AND datallowconn
-                   AND datname NOT IN %s
+                   AND datname <> ALL(%s)
               ORDER BY datname
             """, (ignore_templates_list,))
             return [name for (name,) in cr.fetchall()]

@@ -719,8 +719,8 @@ actual arch.
         """This method is meant to be overridden by other modules.
         """
         return SQL("""SELECT res_id FROM ir_model_data
-                  WHERE res_id IN %(res_ids)s AND model = 'ir.ui.view' AND module IN %(modules)s
-               """, res_ids=self._ids, modules=tuple(modules))
+                  WHERE res_id = ANY(%(res_ids)s) AND model = 'ir.ui.view' AND module = ANY(%(modules)s)
+               """, res_ids=self.ids, modules=list(modules))
 
     def _get_inheriting_views(self):
         """
@@ -745,7 +745,7 @@ actual arch.
             WITH RECURSIVE ir_ui_view_inherits AS (
                 SELECT ir_ui_view.id, %(aliased_names)s
                 FROM ir_ui_view
-                WHERE id IN %(ids)s AND (%(where_clause)s)
+                WHERE id = ANY(%(ids)s) AND (%(where_clause)s)
             UNION
                 SELECT ir_ui_view.id, %(aliased_names)s
                 FROM ir_ui_view
@@ -761,7 +761,7 @@ actual arch.
         """,
             aliased_names=aliased_names,
             field_names=SQL(', ').join(SQL.identifier('v', f) for f in field_names),
-            ids=tuple(self.ids), where_clause=where_clause)
+            ids=self.ids, where_clause=where_clause)
         # ORDER BY v.priority, v.id:
         # 1/ sort by priority: abritrary value set by developers on some
         #    views to solve "dependency hell" problems and force a view
@@ -2598,11 +2598,11 @@ actual arch.
         # only validate the views that still exist...
         prefix = module + '.'
         prefix_len = len(prefix)
-        names = tuple(
+        names = [
             xmlid[prefix_len:]
             for xmlid in self.pool.loaded_xmlids
             if xmlid.startswith(prefix)
-        )
+        ]
         if not names:
             return
 
@@ -2612,7 +2612,7 @@ actual arch.
             SELECT v.id
             FROM ir_ui_view v
             JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
-            WHERE md.module = %s AND md.name IN %s AND md.noupdate
+            WHERE md.module = %s AND md.name = ANY(%s) AND md.noupdate
         """, module, names)))
 
         views._check_xml()

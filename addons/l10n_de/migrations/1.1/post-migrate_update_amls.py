@@ -17,11 +17,11 @@ def migrate(cr, version):
             """
             UPDATE account_account_tag_account_move_line_rel
                SET account_account_tag_id = %s
-             WHERE account_account_tag_id IN %s;
+             WHERE account_account_tag_id = ANY(%s);
             """,
             [
                 tags_60.filtered(lambda tag: tag.tax_negate)[0].id,
-                tuple(tags_68.filtered(lambda tag: tag.tax_negate).ids)
+                list(tags_68.filtered(lambda tag: tag.tax_negate).ids)
             ]
         )
 
@@ -30,10 +30,10 @@ def migrate(cr, version):
             """
             UPDATE account_account_tag_account_move_line_rel
                SET account_account_tag_id = %s
-             WHERE account_account_tag_id IN %s;
+             WHERE account_account_tag_id = ANY(%s);
             """,
             [
                 tags_60.filtered(lambda tag: not tag.tax_negate)[0].id,
-                tuple(tags_68.filtered(lambda tag: not tag.tax_negate).ids)
+                list(tags_68.filtered(lambda tag: not tag.tax_negate).ids)
             ]
         )

@@ -49,8 +49,7 @@ class _SQLMeta(type):
     def values(rows: Iterable) -> SQL:
         """Compose a ``VALUES`` list with one placeholder per cell.
 
-        Unlike a Python ``tuple`` (psycopg2 record / ``TupleInDumper``), each
-        value keeps its own type, and ``SQL("DEFAULT")`` stays a keyword.
+        Each value keeps its own type, and ``SQL("DEFAULT")`` stays a keyword.
         """
         return SQL(", ").join(
             SQL("(%s)", SQL(", ").join(row)) for row in rows
@@ -210,10 +209,10 @@ def existing_tables(cr: Cursor, tablenames: Iterable[str]) -> list[str]:
     cr.execute(SQL("""
         SELECT c.relname
           FROM pg_class c
-         WHERE c.relname IN %s
+         WHERE c.relname = ANY(%s)
            AND c.relkind IN ('r', 'v', 'm')
            AND c.relnamespace = current_schema::regnamespace
-    """, tuple(tablenames)))
+    """, list(tablenames)))
     return [row[0] for row in cr.fetchall()]
 
 

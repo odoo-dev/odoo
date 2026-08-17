@@ -431,19 +431,19 @@ class TestPermissions(TransactionCaseWithUserDemo):
             """
             SELECT "ir_attachment"."id"
             FROM "ir_attachment"
-            WHERE ("ir_attachment"."res_field" IN %s AND "ir_attachment"."res_id" IN %s AND "ir_attachment"."res_model" IN %s) AND (
+            WHERE ("ir_attachment"."res_field" = ANY(%s) AND "ir_attachment"."res_id" = ANY(%s) AND "ir_attachment"."res_model" = ANY(%s)) AND (
                 "ir_attachment"."public" IS TRUE
                 OR (
-                    ("ir_attachment"."res_field" IN %s OR "ir_attachment"."res_field" IS NULL)
-                    AND "ir_attachment"."res_id" IN (
+                    ("ir_attachment"."res_field" = ANY(%s) OR "ir_attachment"."res_field" IS NULL)
+                    AND "ir_attachment"."res_id" = ANY((
                         SELECT "res_partner"."id"
                         FROM "res_partner"
-                        WHERE "res_partner"."id" IN %s AND (
-                            ("res_partner"."company_id" IN %s OR "res_partner"."company_id" IS NULL)
+                        WHERE "res_partner"."id" = ANY(%s) AND (
+                            ("res_partner"."company_id" = ANY(%s) OR "res_partner"."company_id" IS NULL)
                             OR "res_partner"."partner_share" IS NOT TRUE
                         )
-                    )
-                    AND "ir_attachment"."res_model" IN %s
+                    ))
+                    AND "ir_attachment"."res_model" = ANY(%s)
                 )
             )
             ORDER BY "ir_attachment"."id" DESC

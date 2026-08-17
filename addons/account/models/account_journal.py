@@ -350,7 +350,7 @@ class AccountJournal(models.Model):
         if manage_providers:
             providers = self.env['payment.provider'].sudo().search([
                 *self.env['payment.provider']._check_company_domain(self.company_id),
-                ('code', 'in', tuple(electronic_names)),
+                ('code', 'in', list(electronic_names)),
             ])
             for provider in providers:
                 providers_per_code.setdefault(provider.company_id.id, {}).setdefault(provider._get_code(), set()).add(provider.id)
@@ -372,9 +372,9 @@ class AccountJournal(models.Model):
                     FROM account_payment_method_line apml
                     JOIN account_journal journal ON journal.id = apml.journal_id
                     JOIN account_payment_method apm ON apm.id = apml.payment_method_id
-                    WHERE apm.id IN %s
+                    WHERE apm.id = ANY(%s)
                 ''',
-                [tuple(unique_electronic_ids)],
+                [list(unique_electronic_ids)],
             )
             for pay_method_id, company_id, journal_id, provider_id in self.env.cr.fetchall():
                 values = method_information_mapping[pay_method_id]
@@ -1178,7 +1178,7 @@ class AccountJournal(models.Model):
         self.ensure_one()
         nb_lines, balance, amount_currency = self.env['account.move.line']._read_group(
             domain=([
-                ('account_id', 'in', tuple(self.default_account_id.ids)),
+                ('account_id', 'in', list(self.default_account_id.ids)),
                 ('display_type', 'not in', ('line_section', 'line_subsection', 'line_note')),
                 ('parent_state', '!=', 'cancel'),
             ] + (domain or [])),

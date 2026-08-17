@@ -889,7 +889,7 @@ class MrpWorkorder(models.Model):
             SELECT wo1.id, wo2.id
             FROM mrp_workorder wo1, mrp_workorder wo2
             WHERE
-                wo1.id IN %s
+                wo1.id = ANY(%s)
                 AND wo1.state IN ('blocked', 'ready')
                 AND wo2.state IN ('blocked', 'ready', 'progress')
                 AND wo1.id != wo2.id
@@ -897,7 +897,7 @@ class MrpWorkorder(models.Model):
                 AND (DATE_TRUNC('second', wo2.date_start), DATE_TRUNC('second', wo2.date_finished))
                     OVERLAPS (DATE_TRUNC('second', wo1.date_start), DATE_TRUNC('second', wo1.date_finished))
         """
-        self.env.cr.execute(sql, [tuple(self.ids)])
+        self.env.cr.execute(sql, [list(self.ids)])
         res = defaultdict(list)
         for wo1, wo2 in self.env.cr.fetchall():
             res[wo1].append(wo2)

@@ -1717,11 +1717,11 @@ class CrmLead(models.Model):
                    /* Select only once each partner
                       to not create duplicated followers */
              WHERE mf.res_model = 'crm.lead'
-               AND mf.res_id IN %(lead_ids)s
+               AND mf.res_id = ANY(%(lead_ids)s)
                AND destf IS NULL
           GROUP BY mf.partner_id
             ''',
-            {'lead_ids': tuple(opportunities.ids), 'lead_id': self.id},
+            {'lead_ids': list(opportunities.ids), 'lead_id': self.id},
         )
         followers_to_update = [r[0] for r in self.env.cr.fetchall()]
         followers_to_update = self.env['mail.followers'].browse(followers_to_update).sudo()
@@ -2440,7 +2440,7 @@ class CrmLead(models.Model):
                                                THEN (%s)
                                                ELSE (probability)
                                           END
-                        WHERE id in %s"""
+                        WHERE id = ANY(%s)"""
 
         # Update by a maximum number of leads at the same time, one batch by transaction :
         # - avoid memory errors
@@ -2453,7 +2453,7 @@ class CrmLead(models.Model):
             for lead_ids_current in tools.split_every(PLS_UPDATE_BATCH_STEP, probability_lead_ids):
                 transactions_count += 1
                 try:
-                    self.env.cr.execute(update_sql, (probability, probability, tuple(lead_ids_current)))
+                    self.env.cr.execute(update_sql, (probability, probability, list(lead_ids_current)))
                     # auto-commit except in testing mode
                     if auto_commit:
                         self.env.cr.commit()

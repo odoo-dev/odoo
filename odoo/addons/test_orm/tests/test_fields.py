@@ -2602,7 +2602,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         with self.assertQueries(["""
             SELECT "test_orm_model_active_field"."id"
             FROM "test_orm_model_active_field"
-            WHERE "test_orm_model_active_field"."id" NOT IN %s
+            WHERE "test_orm_model_active_field"."id" <> ALL(%s)
             ORDER BY "test_orm_model_active_field"."id"
         """]):
             Model.search([('id', '!=', 1)])
@@ -3166,7 +3166,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
                    "test_orm_prefetch"."write_uid",
                    "test_orm_prefetch"."write_date"
             FROM "test_orm_prefetch"
-            WHERE "test_orm_prefetch"."id" IN %s
+            WHERE "test_orm_prefetch"."id" = ANY(%s)
         """]):
             records.mapped('name')  # fetch all fields with prefetch=True
 
@@ -3177,7 +3177,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
                 "test_orm_prefetch"."hermione",
                 "test_orm_prefetch"."ron"
             FROM "test_orm_prefetch"
-            WHERE "test_orm_prefetch"."id" IN %s
+            WHERE "test_orm_prefetch"."id" = ANY(%s)
         """]):
             records.mapped('harry')  # fetch all fields with prefetch='Harry Potter'
             records.mapped('hermione')  # fetched already
@@ -3189,7 +3189,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
                 "test_orm_prefetch"."hansel",
                 "test_orm_prefetch"."gretel"
             FROM "test_orm_prefetch"
-            WHERE "test_orm_prefetch"."id" IN %s
+            WHERE "test_orm_prefetch"."id" = ANY(%s)
         """]):
             records.mapped('hansel')  # fetch all fields with prefetch='Hansel and Gretel'
             records.mapped('gretel')  # fetched already
@@ -4822,7 +4822,7 @@ def select(model, *fnames):
         f'"{table}"."{fname}"' if not model_fields[fname].translate else f'"{table}"."{fname}"->>%s'
         for fname in ['id'] + list(fnames)
     )
-    return f'SELECT {terms} FROM "{table}" WHERE "{table}"."id" IN %s'
+    return f'SELECT {terms} FROM "{table}" WHERE "{table}"."id" = ANY(%s)'
 
 
 def insert(model, *fnames, rowcount=1):
@@ -5382,7 +5382,7 @@ class TestPrecompute(TransactionCase):
 
         fnames = [fname for fname, field in currency._fields.items() if field.prefetch]
         QUERIES = [
-            'SELECT "res_currency"."id" FROM "res_currency" WHERE "res_currency"."id" IN %s',  # env.ref for currency
+            'SELECT "res_currency"."id" FROM "res_currency" WHERE "res_currency"."id" = ANY(%s)',  # env.ref for currency
             select(currency, *fnames),
             insert(model, 'amount', 'currency_id'),
             select(model, 'currency_id'),
@@ -5468,7 +5468,7 @@ class TestModifiedPerformance(TransactionCase):
                    "test_orm_modified_line"."create_uid",
                    "test_orm_modified_line"."create_date"
             FROM "test_orm_modified_line"
-            WHERE "test_orm_modified_line"."id" IN %s
+            WHERE "test_orm_modified_line"."id" = ANY(%s)
         """], flush=False):
             self.modified_line_a_child_child.price = 4
         self.assertEqual(self.modified_line_a_child_child.total_price_quantity, 20)

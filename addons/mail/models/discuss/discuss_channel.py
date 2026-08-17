@@ -247,8 +247,8 @@ class DiscussChannel(models.Model):
                  ORDER BY id
                     LIMIT 3
                 ) as member ON TRUE
-             WHERE channel.id IN %s
-        """, (tuple(to_compute.ids),))
+             WHERE channel.id = ANY(%s)
+        """, (list(to_compute.ids),))
         channel_id_to_member_ids = defaultdict(list)
         for channel_id, member_id in self.env.cr.fetchall():
             channel_id_to_member_ids[channel_id].append(member_id)
@@ -1084,10 +1084,10 @@ class DiscussChannel(models.Model):
              LEFT JOIN res_users users on partner.id = users.partner_id
                  WHERE partner.active IS TRUE
                        AND partner.email != %(email)s
-                       AND partner.id IN %(partner_ids)s AND partner.id != %(author_id)s
+                       AND partner.id = ANY(%(partner_ids)s) AND partner.id != %(author_id)s
                 """,
                 email=email_from or "",
-                partner_ids=tuple(pids),
+                partner_ids=list(pids),
                 author_id=author_id or 0,
             )
             self.env.cr.execute(sql_query)
@@ -1572,19 +1572,19 @@ class DiscussChannel(models.Model):
             SELECT M.channel_id
             FROM discuss_channel C, discuss_channel_member M
             WHERE M.channel_id = C.id
-                AND M.partner_id IN %(partner_ids)s
+                AND M.partner_id = ANY(%(partner_ids)s)
                 AND C.channel_type LIKE 'chat'
                 AND NOT EXISTS (
                     SELECT 1
                     FROM discuss_channel_member M2
                     WHERE M2.channel_id = C.id
-                        AND M2.partner_id NOT IN %(partner_ids)s
+                        AND M2.partner_id <> ALL(%(partner_ids)s)
                 )
             GROUP BY M.channel_id
             HAVING ARRAY_AGG(DISTINCT M.partner_id ORDER BY M.partner_id) = %(sorted_partner_ids)s::integer[]
             LIMIT 1
                 """,
-                partner_ids=tuple(partners.ids),
+                partner_ids=list(partners.ids),
                 sorted_partner_ids=sorted(partners.ids),
             )
         )
@@ -1767,12 +1767,12 @@ class DiscussChannel(models.Model):
                    SELECT last_message_id
                      FROM discuss_channel
         LEFT JOIN LATERAL %s AS t(last_message_id) ON TRUE
-                    WHERE discuss_channel.id IN %s
+                    WHERE discuss_channel.id = ANY(%s)
                  GROUP BY discuss_channel.id, t.last_message_id
                  ORDER BY discuss_channel.id
             """,
             messages_query.subselect(),
-            tuple(self.ids),
+            list(self.ids),
         )
         return messages.browse(mid for mid, in self.env.execute_query(sql) if mid)
 
@@ -1794,12 +1794,12 @@ class DiscussChannel(models.Model):
                    SELECT last_needaction_message_id
                      FROM discuss_channel
         LEFT JOIN LATERAL %s AS t(last_needaction_message_id) ON TRUE
-                    WHERE discuss_channel.id IN %s
+                    WHERE discuss_channel.id = ANY(%s)
                  GROUP BY discuss_channel.id, t.last_needaction_message_id
                  ORDER BY discuss_channel.id
             """,
             messages_query.subselect(),
-            tuple(self.ids),
+            list(self.ids),
         )
         return messages.browse(mid for mid, in self.env.execute_query(sql) if mid)
 

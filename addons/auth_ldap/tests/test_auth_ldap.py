@@ -259,8 +259,8 @@ class TestAuthLDAP(HttpCaseWithUserDemo):
 
         # The password must not have been set in the "local" database
         self.env.cr.execute(
-            "SELECT password FROM res_users WHERE id IN %s",
-            [tuple((self.user_demo + self.user_admin).ids)],
+            "SELECT password FROM res_users WHERE id = ANY(%s)",
+            [list((self.user_demo + self.user_admin).ids)],
         )
         for [password] in self.env.cr.fetchall():
             self.assertFalse(password, "The local password should not have been set")

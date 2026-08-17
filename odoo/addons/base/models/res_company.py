@@ -258,14 +258,14 @@ class ResCompany(models.CachedModel):
               FROM ir_module_module module,
                    res_country country
              WHERE module.auto_install
-               AND state NOT IN %(install_states)s
+               AND state <> ALL(%(install_states)s)
                AND NOT EXISTS (
                        SELECT 1
                          FROM ir_module_module_dependency d
                          JOIN ir_module_module mdep ON (d.name = mdep.name)
                         WHERE d.module_id = module.id
                           AND d.auto_install_required
-                          AND mdep.state NOT IN %(install_states)s
+                          AND mdep.state <> ALL(%(install_states)s)
                    )
                AND EXISTS (
                        SELECT 1
@@ -277,7 +277,7 @@ class ResCompany(models.CachedModel):
           GROUP BY country.id
         """, {
             'country_ids': self.country_id.ids,
-            'install_states': ('installed', 'to install', 'to upgrade'),
+            'install_states': ['installed', 'to install', 'to upgrade'],
         })
         mapping = dict(self.env.cr.fetchall())
         for company in self:

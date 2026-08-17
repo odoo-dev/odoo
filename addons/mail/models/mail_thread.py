@@ -279,8 +279,8 @@ class MailThread(models.AbstractModel):
             self.env.cr.execute(""" SELECT msg.res_id FROM mail_message msg
                                  RIGHT JOIN mail_notification rel
                                  ON rel.mail_message_id = msg.id AND rel.res_partner_id = %s AND (rel.is_read = false OR rel.is_read IS NULL)
-                                 WHERE msg.model = %s AND msg.res_id in %s AND msg.message_type != 'user_notification'""",
-                             (self.env.user.partner_id.id, self._name, tuple(self.ids),))
+                                 WHERE msg.model = %s AND msg.res_id = ANY(%s) AND msg.message_type != 'user_notification'""",
+                             (self.env.user.partner_id.id, self._name, list(self.ids)))
             for result in self.env.cr.fetchall():
                 res[result[0]] += 1
 
@@ -303,10 +303,10 @@ class MailThread(models.AbstractModel):
                      WHERE notif.notification_status in ('exception', 'bounce')
                        AND notif.author_id = %(author_id)s
                        AND msg.model = %(model_name)s
-                       AND msg.res_id in %(res_ids)s
+                       AND msg.res_id = ANY(%(res_ids)s)
                        AND msg.message_type != 'user_notification'
                   GROUP BY msg.res_id
-            """, {'author_id': self.env.user.partner_id.id, 'model_name': self._name, 'res_ids': tuple(self.ids)})
+            """, {'author_id': self.env.user.partner_id.id, 'model_name': self._name, 'res_ids': list(self.ids)})
             res.update(self.env.cr.fetchall())
 
         for record in self:
@@ -2279,7 +2279,7 @@ class MailThread(models.AbstractModel):
             by incoming email;
         :param str incoming_email_cc: comma-separated list of emails, already notified
             by incoming email;
-        :param list(tuple(str, bytes), tuple(str, bytes, dict)) attachments: list of attachment
+        :param list(list(str, bytes), list(str, bytes, dict)) attachments: list of attachment
             tuples in the form ``(name, content)`` or ``(name, content, info)`` where content
             is NOT base64 encoded;
         :param list attachment_ids: list of existing attachments to link to this message
@@ -2819,7 +2819,7 @@ class MailThread(models.AbstractModel):
           notification mechanism;
         :param list(int) partner_ids: partner_ids to notify in addition to partners
             computed based on subtype / followers matching;
-        :param list(tuple(str,str), tuple(str,str, dict)) attachments: list of attachment
+        :param list(list(str,str), list(str,str, dict)) attachments: list of attachment
             tuples in the form ``(name,content)`` or ``(name,content, info)`` where content
             is NOT base64 encoded;
         :param list attachment_ids: list of existing attachments to link to this message

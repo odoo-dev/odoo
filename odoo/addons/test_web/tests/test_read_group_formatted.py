@@ -1734,7 +1734,7 @@ class TestFormattedReadGroup(common.TransactionCase):
             LEFT JOIN (
                 SELECT "test_read_group_related_foo".*
                 FROM "test_read_group_related_foo"
-                WHERE "test_read_group_related_foo"."id" IN %s
+                WHERE "test_read_group_related_foo"."id" = ANY(%s)
             ) AS "{alias_join}"
                 ON (
                     "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
@@ -1924,7 +1924,7 @@ class TestFormattedReadGroup(common.TransactionCase):
             LEFT JOIN (
                 SELECT "test_read_group_related_foo".*
                 FROM "test_read_group_related_foo"
-                WHERE "test_read_group_related_foo"."id" IN %s
+                WHERE "test_read_group_related_foo"."id" = ANY(%s)
             ) AS "{alias_join}" ON (
                 "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
             )

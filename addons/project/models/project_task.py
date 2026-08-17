@@ -1810,7 +1810,7 @@ class ProjectTask(models.Model):
                      AS (
                      SELECT id, id as supertask_id
                        FROM project_task
-                      WHERE id IN %(ancestor_ids)s
+                      WHERE id = ANY(%(ancestor_ids)s)
                       UNION
                          SELECT t.id, tree.supertask_id
                            FROM project_task t
@@ -1824,7 +1824,7 @@ class ProjectTask(models.Model):
                GROUP BY supertask_id
                 """,
                 {
-                    "ancestor_ids": tuple(self.ids),
+                    "ancestor_ids": list(self.ids),
                     "active": self.env.context.get('active_test', True),
                 }
             )

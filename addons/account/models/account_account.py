@@ -190,7 +190,7 @@ class AccountAccount(models.Model):
             WHERE journal.currency_id IS NOT NULL
             AND journal.currency_id != company.currency_id
             AND account.currency_id != journal.currency_id
-            AND account.id IN %(accounts)s
+            AND account.id = ANY(%(accounts)s)
 
             UNION ALL
 
@@ -206,7 +206,7 @@ class AccountAccount(models.Model):
             AND journal.currency_id != company.currency_id
             AND account.currency_id != journal.currency_id
             AND apm.payment_type = 'inbound'
-            AND account.id IN %(accounts)s
+            AND account.id = ANY(%(accounts)s)
 
             UNION ALL
 
@@ -222,9 +222,9 @@ class AccountAccount(models.Model):
             AND journal.currency_id != company.currency_id
             AND account.currency_id != journal.currency_id
             AND apm.payment_type = 'outbound'
-            AND account.id IN %(accounts)s
+            AND account.id = ANY(%(accounts)s)
         ''', {
-            'accounts': tuple(self.ids)
+            'accounts': list(self.ids)
         })
         res = self.env.cr.fetchone()
         if res:
@@ -268,11 +268,11 @@ class AccountAccount(models.Model):
             SELECT account.id
             FROM account_account account
             JOIN account_journal journal ON journal.default_account_id = account.id
-            WHERE account.id IN %s
+            WHERE account.id = ANY(%s)
             AND account.account_type IN ('asset_receivable', 'liability_payable')
             AND journal.type IN ('sale', 'purchase')
             LIMIT 1;
-        ''', [tuple(self.ids)])
+        ''', [list(self.ids)])
 
         if self.env.cr.fetchone():
             raise ValidationError(_("The account is already in use in a 'sale' or 'purchase' journal. This means that the account's type couldn't be 'receivable' or 'payable'."))
@@ -295,9 +295,9 @@ class AccountAccount(models.Model):
               FROM account_journal journal
               JOIN account_account account ON journal.default_account_id = account.id
              WHERE account.account_type IN ('asset_receivable', 'liability_payable')
-               AND account.id IN %s
+               AND account.id = ANY(%s)
              LIMIT 1;
-        ''', [tuple(self.ids)])
+        ''', [list(self.ids)])
 
         if self.env.cr.fetchone():
             raise ValidationError(_("You cannot change the type of an account set as Bank Account on a journal to Receivable or Payable."))
@@ -360,10 +360,10 @@ class AccountAccount(models.Model):
                         FROM account_account_res_company_rel rel
                         JOIN res_company
                             ON res_company.id = rel.res_company_id
-                        WHERE rel.res_company_id IN %(authorized_company_ids)s
+                        WHERE rel.res_company_id = ANY(%(authorized_company_ids)s)
                     ORDER BY rel.account_account_id, company_id
                     )""",
-                    authorized_company_ids=self.env.user._get_company_ids(),
+                    authorized_company_ids=list(self.env.user._get_company_ids()),
                     to_flush=self._fields['company_ids'],
                 ),
                 SQL('account_first_company.account_id = %(account_id)s', account_id=table.id),
@@ -389,7 +389,7 @@ class AccountAccount(models.Model):
         query = Query(self)
         placeholder_code_sql = self.env['account.account']._field_to_sql('account_account', 'placeholder_code', query)
         if operator == 'in':
-            query.add_where(SQL("%s IN %s", placeholder_code_sql, tuple(value)))
+            query.add_where(SQL("%s = ANY(%s)", placeholder_code_sql, list(value)))
         else:
             query.add_where(SQL("%s ILIKE %s", placeholder_code_sql, value))
         return [('id', 'in', query)]
@@ -620,10 +620,10 @@ class AccountAccount(models.Model):
                    SUM(line.credit) AS credit
               FROM account_move_line line
              WHERE line.move_id = %(opening_move_id)s
-               AND line.account_id IN %(account_ids)s
+               AND line.account_id = ANY(%(account_ids)s)
              GROUP BY line.account_id
             """,
-            account_ids=tuple(self.ids),
+            account_ids=list(self.ids),
             opening_move_id=opening_move.id,
         ))
         result = {r['account_id']: r for r in self.env.cr.dictfetchall()}
@@ -806,9 +806,9 @@ class AccountAccount(models.Model):
             )
         if order == self._order and (preferred_account_ids := self.env.context.get('preferred_account_ids')):
             sql_order = SQL(
-                "%(id)s in %(preferred_account_ids)s %(direction)s, %(base_order)s",
+                "%(id)s = ANY(%(preferred_account_ids)s) %(direction)s, %(base_order)s",
                 id=table.id,
-                preferred_account_ids=tuple(map(int, preferred_account_ids)),
+                preferred_account_ids=list(map(int, preferred_account_ids)),
                 direction=SQL('ASC') if reverse else SQL('DESC'),
                 base_order=sql_order,
             )
@@ -1354,7 +1354,7 @@ class AccountAccount(models.Model):
                    FROM (%(query_company_id)s) table_with_company_id
                   WHERE table_with_company_id.id = %(model_column)s
                     AND %(table)s.%(account_column)s = %(account_id)s
-                    AND table_with_company_id.company_id IN %(company_ids_to_update)s
+                    AND table_with_company_id.company_id = ANY(%(company_ids_to_update)s)
                 """,
                 table=SQL.identifier(table),
                 account_column=SQL.identifier(account_column),
@@ -1362,7 +1362,7 @@ class AccountAccount(models.Model):
                 query_company_id=query_company_id,
                 model_column=SQL.identifier(table, model_column),
                 account_id=self.id,
-                company_ids_to_update=tuple(new_account_id_by_company_id),
+                company_ids_to_update=list(new_account_id_by_company_id),
             ))
         for field in self.env.registry.many2one_company_dependents[self._name]:
             self.env.cr.execute(SQL(
@@ -1401,14 +1401,14 @@ class AccountAccount(models.Model):
                    FROM (%(query_company_id)s) table_with_company_id
                   WHERE table_with_company_id.id = %(table)s.id
                     AND %(column)s = %(value_to_update)s
-                    AND table_with_company_id.company_id IN %(company_ids_to_update)s
+                    AND table_with_company_id.company_id = ANY(%(company_ids_to_update)s)
                 """,
                 table=SQL.identifier(self.env[model]._table),
                 column=SQL.identifier(field_to_update.name),
                 new_account_id_by_company_id_json=new_account_id_by_company_id_json,
                 query_company_id=query_company_id,
                 value_to_update=f'account.account,{self.id}',
-                company_ids_to_update=tuple(new_account_id_by_company_id),
+                company_ids_to_update=list(new_account_id_by_company_id),
             ))
 
         # 3.3: Update Many2OneReference fields that reference account.account
@@ -1431,7 +1431,7 @@ class AccountAccount(models.Model):
                   WHERE table_with_company_id.id = %(table)s.id
                     AND %(column)s = %(account_id)s
                     AND %(model_column)s = 'account.account'
-                    AND table_with_company_id.company_id IN %(company_ids_to_update)s
+                    AND table_with_company_id.company_id = ANY(%(company_ids_to_update)s)
                 """,
                 table=SQL.identifier(self.env[model]._table),
                 column=SQL.identifier(field_to_update.name),
@@ -1439,7 +1439,7 @@ class AccountAccount(models.Model):
                 query_company_id=query_company_id,
                 account_id=self.id,
                 model_column=SQL.identifier(model_field),
-                company_ids_to_update=tuple(new_account_id_by_company_id),
+                company_ids_to_update=list(new_account_id_by_company_id),
             ))
 
         # 3.4: Update company_dependent fields
@@ -1455,7 +1455,7 @@ class AccountAccount(models.Model):
             FROM %(table)s old, new_account_company a2c
             WHERE old.id = %(old_id)s
             AND a2c.account_id = new.id
-            AND new.id IN %(new_ids)s
+            AND new.id = ANY(%(new_ids)s)
             """,
             new_account_id_by_company_id_json=new_account_id_by_company_id_json,
             table=SQL.identifier(self._table),
@@ -1472,7 +1472,7 @@ class AccountAccount(models.Model):
                 if field.company_dependent
             ),
             old_id=self.id,
-            new_ids=tuple(new_accounts.ids)
+            new_ids=list(new_accounts.ids)
         ))
         # On the original account, remove values for other companies
         self.env.cr.execute(SQL(

@@ -848,7 +848,7 @@ class HrLeaveAllocation(models.Model):
             if allocation.validation_type == 'hr':
                 partners_to_subscribe.add(allocation.employee_id.sudo().parent_id.user_id.partner_id.id)
                 partners_to_subscribe.add(allocation.employee_id.leave_manager_id.partner_id.id)
-            allocation.message_subscribe(partner_ids=tuple(partners_to_subscribe))
+            allocation.message_subscribe(partner_ids=list(partners_to_subscribe))
             if not self.env.context.get('import_file'):
                 allocation.activity_update()
             if allocation.validation_type == 'no_validation' and allocation.state == 'confirm':

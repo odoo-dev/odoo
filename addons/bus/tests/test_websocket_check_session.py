@@ -74,8 +74,8 @@ class TestWebsocketCheckSession(WebsocketCase, HttpCase):
             {key: sql for key, sql in bob_params.items() if key != "where"},
             {key: sql for key, sql in jane_params.items() if key != "where"},
         )
-        self.assertEqual(bob_params["where"], SQL("res_users.id IN %s", (bob.id,)))
-        self.assertEqual(jane_params["where"], SQL("res_users.id IN %s", (jane.id,)))
+        self.assertEqual(bob_params["where"], SQL("res_users.id = ANY(%s)", [bob.id]))
+        self.assertEqual(jane_params["where"], SQL("res_users.id = ANY(%s)", [jane.id]))
 
     def test_update_cache_when_registry_changes(self):
         bob = new_test_user(self.env, "bob", groups="base.group_user")

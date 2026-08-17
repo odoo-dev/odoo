@@ -96,7 +96,7 @@ def query_insert(cr, table, rows):
             SQL.identifier(table),
             SQL(",").join(map(SQL.identifier, cols)),
             SQL.values(
-                tuple(row.get(col) for col in cols)
+                list(row.get(col) for col in cols)
                 for row in srows
             ),
         )
@@ -137,10 +137,10 @@ def select_en(model, fnames, model_names):
         for fname in fnames
     )
     query = SQL(
-        "SELECT %s FROM %s WHERE model IN %s",
+        "SELECT %s FROM %s WHERE model = ANY(%s)",
         cols,
         SQL.identifier(model._table),
-        tuple(model_names),
+        list(model_names),
     )
     return model.env.execute_query(query)
 
@@ -164,7 +164,7 @@ def upsert_en(model, fnames, rows, conflict):
 
     wrappers = [(jsonify if model._fields[fname].translate else identity) for fname in fnames]
     values = [
-        tuple(func(val) for func, val in zip(wrappers, row))
+        [func(val) for func, val in zip(wrappers, row)]
         for row in rows
     ]
     comma = SQL(", ").join
@@ -373,24 +373,24 @@ class IrModel(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_related_attachments(self):
         """ Delete attachment associated with the models being deleted. """
-        models = tuple(self.mapped('model'))
+        models = self.mapped('model')
 
         # Get files attached solely to the models being deleted (and none other)
         fname_rows = self.env.execute_query(SQL(
             """
             SELECT DISTINCT store_fname
             FROM ir_attachment
-            WHERE res_model IN %s AND store_fname IS NOT NULL
+            WHERE res_model = ANY(%s) AND store_fname IS NOT NULL
             EXCEPT
             SELECT store_fname
             FROM ir_attachment
-            WHERE res_model NOT IN %s
+            WHERE res_model <> ALL(%s)
             """,
             models, models,
         ))
 
         self.env.execute_query(SQL(
-            "DELETE FROM ir_attachment WHERE res_model IN %s",
+            "DELETE FROM ir_attachment WHERE res_model = ANY(%s)",
             models,
         ))
 
@@ -945,8 +945,8 @@ class IrModelFields(models.Model):
         if tables_to_drop:
             # drop the relation tables that are not used by other fields
             self.env.cr.execute("""SELECT relation_table FROM ir_model_fields
-                                WHERE relation_table IN %s AND id NOT IN %s""",
-                             (tuple(tables_to_drop), tuple(self.ids)))
+                                WHERE relation_table = ANY(%s) AND id <> ALL(%s)""",
+                             (list(tables_to_drop), self.ids))
             tables_to_keep = {row[0] for row in self.env.cr.fetchall()}
             for rel_name in tables_to_drop - tables_to_keep:
                 self.env.cr.execute(SQL('DROP TABLE %s', SQL.identifier(rel_name)))
@@ -1550,9 +1550,9 @@ class IrModelInherit(models.Model):
                   FROM ir_model_inherit i
                   JOIN ir_model m
                     ON m.id = i.model_id
-                 WHERE m.model IN %s
+                 WHERE m.model = ANY(%s)
             """,
-            [tuple(model_names)]
+            [list(model_names)]
         )
         existing = {}
         inh_ids = {}
@@ -1652,9 +1652,9 @@ class IrModelFieldsSelection(models.Model):
         query = """
             SELECT s.field_id, s.value, s.name->>'en_US', s.sequence
             FROM ir_model_fields_selection s, ir_model_fields f
-            WHERE s.field_id = f.id AND f.model IN %s
+            WHERE s.field_id = f.id AND f.model = ANY(%s)
         """
-        cr.execute(query, [tuple(model_names)])
+        cr.execute(query, [list(model_names)])
         existing = {row[:2]: row[2:] for row in cr.fetchall()}
 
         # create or update rows
@@ -1672,9 +1672,9 @@ class IrModelFieldsSelection(models.Model):
         query = """
             SELECT f.model, f.name, s.value, s.id
             FROM ir_model_fields_selection s, ir_model_fields f
-            WHERE s.field_id = f.id AND f.model IN %s
+            WHERE s.field_id = f.id AND f.model = ANY(%s)
         """
-        cr.execute(query, [tuple(model_names)])
+        cr.execute(query, [list(model_names)])
         selection_ids = {row[:3]: row[3] for row in cr.fetchall()}
 
         data_list = []
@@ -1855,11 +1855,11 @@ class IrModelFieldsSelection(models.Model):
                 # if this fails then we're shit out of luck and there's nothing
                 # we can do except fix on a case-by-case basis
                 self.env.execute_query(SQL(
-                    "UPDATE %s SET %s=%s WHERE id IN %s",
+                    "UPDATE %s SET %s=%s WHERE id = ANY(%s)",
                     SQL.identifier(records._table),
                     SQL.identifier(fname),
                     field.convert_to_column_insert(value, records),
-                    records._ids,
+                    records.ids,
                 ))
                 records.invalidate_recordset([fname])
 
@@ -1995,9 +1995,9 @@ class IrModelConstraint(models.Model):
                     FROM pg_constraint cs
                     JOIN pg_class cl
                     ON (cs.conrelid = cl.oid)
-                    WHERE cs.contype IN %s AND cs.conname = %s AND cl.relname = %s
+                    WHERE cs.contype = ANY(%s) AND cs.conname = %s AND cl.relname = %s
                     AND cl.relnamespace = current_schema::regnamespace
-                    """, ('c', 'u', 'x') if typ == 'u' else (typ,), hname, table
+                    """, ['c', 'u', 'x'] if typ == 'u' else [typ], hname, table
                 )):
                     self.env.execute_query(SQL(
                         'ALTER TABLE %s DROP CONSTRAINT %s',
@@ -2302,7 +2302,7 @@ class IrModelData(models.Model):
                 WHERE d.module=%s
             """, SQL.identifier(model._table), prefix)
             for subsuffixes in split_every(self.env.cr.IN_MAX, suffixes):
-                result.extend(self.env.execute_query(SQL("%s AND d.name IN %s", query, subsuffixes)))
+                result.extend(self.env.execute_query(SQL("%s AND d.name = ANY(%s)", query, list(subsuffixes))))
 
         return result
 
@@ -2598,9 +2598,9 @@ class IrModelData(models.Model):
         loaded_xmlids = self.pool.loaded_xmlids
 
         query = """ SELECT id, module || '.' || name, model, res_id FROM ir_model_data
-                    WHERE module IN %s AND res_id IS NOT NULL AND COALESCE(noupdate, false) != %s ORDER BY id DESC
+                    WHERE module = ANY(%s) AND res_id IS NOT NULL AND COALESCE(noupdate, false) != %s ORDER BY id DESC
                 """
-        self.env.cr.execute(query, (tuple(modules), True))
+        self.env.cr.execute(query, (list(modules), True))
         for (id, xmlid, model, res_id) in self.env.cr.fetchall():
             if xmlid in loaded_xmlids:
                 continue

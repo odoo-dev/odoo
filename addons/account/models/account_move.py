@@ -1268,7 +1268,7 @@ class AccountMove(models.Model):
         groups.get('unpaid', self.browse()).payment_state = 'not_paid'
         invoices = groups.get('invoices', self.browse())
 
-        stored_ids = tuple(invoices.ids)
+        stored_ids = list(invoices.ids)
         if stored_ids:
             self.env['account.partial.reconcile'].flush_model()
             self.env['account.payment'].flush_model(['is_matched'])
@@ -1294,7 +1294,7 @@ class AccountMove(models.Model):
                     JOIN account_move_line counterpart_line ON counterpart_line.id = part.%s
                     JOIN account_move counterpart_move ON counterpart_move.id = counterpart_line.move_id
                     LEFT JOIN account_payment pay ON pay.id = counterpart_move.origin_payment_id
-                    WHERE source_line.move_id IN %s AND counterpart_line.move_id != source_line.move_id
+                    WHERE source_line.move_id = ANY(%s) AND counterpart_line.move_id != source_line.move_id
                     GROUP BY source_line.id, source_line.move_id, account.account_type
                 ''', SQL.identifier(source_field), SQL.identifier(counterpart_field), stored_ids))
 
@@ -2203,15 +2203,15 @@ class AccountMove(models.Model):
                   JOIN account_move AS duplicate_move
                     ON move.company_id = duplicate_move.company_id
                    AND move.id != duplicate_move.id
-                   AND duplicate_move.state IN %(matching_states)s
+                   AND duplicate_move.state = ANY(%(matching_states)s)
                    AND move.move_type = duplicate_move.move_type
                    AND move.currency_id = duplicate_move.currency_id
                    AND (%(move_type_sql_condition)s)
-                 WHERE move.id IN %(moves)s
+                 WHERE move.id = ANY(%(moves)s)
                  GROUP BY move.id
                 """,
-                matching_states=tuple(matching_states),
-                moves=tuple(moves.ids or [0]),
+                matching_states=list(matching_states),
+                moves=list(moves.ids or [0]),
                 move_table_and_alias=move_table_and_alias,
                 move_type_sql_condition=move_type_sql_condition,
             )))
@@ -2497,11 +2497,11 @@ class AccountMove(models.Model):
             JOIN account_move invoice ON invoice.id = counterpart_line.move_id
             JOIN account_account account ON account.id = line.account_id
             WHERE account.account_type IN ('asset_receivable', 'liability_payable')
-                AND invoice.id IN %(invoice_ids)s
+                AND invoice.id = ANY(%(invoice_ids)s)
                 AND line.id != counterpart_line.id
             GROUP BY invoice.id, invoice.move_type
             """,
-            invoice_ids=tuple(self.ids),
+            invoice_ids=list(self.ids),
         ))) if self.ids else {}
         for move in self:
             move.reconciled_payment_ids = self.env['account.payment'].browse(invoice_payment_links.get(move.id))._filtered_access('read') | move.matched_payment_ids
@@ -2922,10 +2922,10 @@ class AccountMove(models.Model):
               JOIN account_move move ON move.id = line.move_id
               JOIN res_company company ON company.id = move.company_id
               JOIN res_currency currency ON currency.id = company.currency_id
-             WHERE line.move_id IN %s
+             WHERE line.move_id = ANY(%s)
           GROUP BY line.move_id, currency.decimal_places
             HAVING ROUND(SUM(line.balance), currency.decimal_places) != 0
-        ''', tuple(moves.ids)))
+        ''', list(moves.ids)))
 
     def _check_fiscal_lock_dates(self):
         if self.env.context.get('bypass_lock_check') is BYPASS_LOCK_CHECK:
@@ -5485,7 +5485,7 @@ class AccountMove(models.Model):
         reconciled_lines = self.line_ids.filtered(lambda l: l.account_type in ('asset_receivable', 'liability_payable'))
         tax_lines = self.line_ids.filtered('tax_repartition_line_id')
         if reconciled_lines.ids:
-            reconciled_line_ids = tuple(reconciled_lines.ids)
+            reconciled_line_ids = list(reconciled_lines.ids)
             queries += [
                 # Partials linked to the receivable / payable including the exchange diff.
                 # and exchange diff on receivable / payable but linked to the counterpart lines.
@@ -5504,7 +5504,7 @@ class AccountMove(models.Model):
                             counterpart_line.company_currency_id AS part_company_currency_id
                         FROM account_partial_reconcile part
                         JOIN account_move_line counterpart_line ON counterpart_line.id = part.credit_move_id
-                        WHERE part.debit_move_id IN %(reconciled_line_ids)s
+                        WHERE part.debit_move_id = ANY(%(reconciled_line_ids)s)
 
                         UNION ALL
 
@@ -5521,7 +5521,7 @@ class AccountMove(models.Model):
                             counterpart_line.company_currency_id AS part_company_currency_id
                         FROM account_partial_reconcile part
                         JOIN account_move_line counterpart_line ON counterpart_line.id = part.debit_move_id
-                        WHERE part.credit_move_id IN %(reconciled_line_ids)s
+                        WHERE part.credit_move_id = ANY(%(reconciled_line_ids)s)
 
                         UNION ALL
 
@@ -5543,7 +5543,7 @@ class AccountMove(models.Model):
                             exchange_line.id = part2.debit_move_id
                             AND exchange_line.move_id = part.exchange_move_id
                         WHERE
-                            part.debit_move_id IN %(reconciled_line_ids)s
+                            part.debit_move_id = ANY(%(reconciled_line_ids)s)
                             AND part.exchange_move_id IS NOT NULL
 
                         UNION ALL
@@ -5566,14 +5566,14 @@ class AccountMove(models.Model):
                             exchange_line.id = part2.credit_move_id
                             AND exchange_line.move_id = part.exchange_move_id
                         WHERE
-                            part.credit_move_id IN %(reconciled_line_ids)s
+                            part.credit_move_id = ANY(%(reconciled_line_ids)s)
                             AND part.exchange_move_id IS NOT NULL
                     """,
                     reconciled_line_ids=reconciled_line_ids,
                 ),
             ]
         if tax_lines.ids:
-            tax_line_ids = tuple(tax_lines.ids)
+            tax_line_ids = list(tax_lines.ids)
             queries += [
                 SQL(
                     """
@@ -5590,7 +5590,7 @@ class AccountMove(models.Model):
                             counterpart_line.company_currency_id AS part_company_currency_id
                         FROM account_partial_reconcile part
                         JOIN account_move_line counterpart_line ON counterpart_line.id = part.credit_move_id
-                        WHERE part.debit_move_id IN %(tax_line_ids)s
+                        WHERE part.debit_move_id = ANY(%(tax_line_ids)s)
 
                         UNION ALL
 
@@ -5607,7 +5607,7 @@ class AccountMove(models.Model):
                             counterpart_line.company_currency_id AS part_company_currency_id
                         FROM account_partial_reconcile part
                         JOIN account_move_line counterpart_line ON counterpart_line.id = part.debit_move_id
-                        WHERE part.credit_move_id IN %(tax_line_ids)s
+                        WHERE part.credit_move_id = ANY(%(tax_line_ids)s)
 
                         UNION ALL
 
@@ -5629,7 +5629,7 @@ class AccountMove(models.Model):
                             exchange_line.id = part2.debit_move_id
                             AND exchange_line.move_id = part.exchange_move_id
                         WHERE
-                            part.debit_move_id IN %(tax_line_ids)s
+                            part.debit_move_id = ANY(%(tax_line_ids)s)
                             AND part.exchange_move_id IS NOT NULL
 
                         UNION ALL
@@ -5652,7 +5652,7 @@ class AccountMove(models.Model):
                             exchange_line.id = part2.credit_move_id
                             AND exchange_line.move_id = part.exchange_move_id
                         WHERE
-                            part.credit_move_id IN %(tax_line_ids)s
+                            part.credit_move_id = ANY(%(tax_line_ids)s)
                             AND part.exchange_move_id IS NOT NULL
                     """,
                     tax_line_ids=tax_line_ids,
@@ -6779,10 +6779,10 @@ class AccountMove(models.Model):
                         ORDER BY move.date, move.id
                            LIMIT 1
                       ) AS next_move ON TRUE
-                WHERE current_move.id in %(ids)s
+                WHERE current_move.id = ANY(%(ids)s)
                   AND next_move.state = 'draft'
             """,
-            ids=recurring_moves._ids,
+            ids=recurring_moves.ids,
         ))]
         self.browse(next_draft_moves_ids).unlink()
 
@@ -6794,9 +6794,9 @@ class AccountMove(models.Model):
                 """
                     SELECT DISTINCT exchange_move_id
                     FROM account_partial_reconcile
-                    WHERE exchange_move_id IN %s
+                    WHERE exchange_move_id = ANY(%s)
                 """,
-                tuple(self.ids),
+                list(self.ids),
             )
             exchange_move_ids = {id_ for id_, in self.env.execute_query(sql)}
 

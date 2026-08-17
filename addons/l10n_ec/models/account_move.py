@@ -187,9 +187,9 @@ class AccountMove(models.Model):
             ])
             if document_types:
                 where_string += """
-                AND l10n_latam_document_type_id in %(l10n_latam_document_type_id)s
+                AND l10n_latam_document_type_id = ANY(%(l10n_latam_document_type_id)s)
                 """
-                param["l10n_latam_document_type_id"] = tuple(document_types.ids)
+                param["l10n_latam_document_type_id"] = document_types.ids
         return where_string, param
 
     def _skip_format_document_number(self):

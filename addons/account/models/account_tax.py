@@ -366,8 +366,8 @@ class AccountTax(models.Model):
                         SELECT 1
                         FROM account_move_line_account_tax_rel AS line
                         WHERE account_tax.id = line.account_tax_id
-                    ) AND id IN %s
-                    """, tuple(self.ids),
+                    ) AND id = ANY(%s)
+                    """, self.ids,
             )))
             taxes_to_compute = set(self.ids) - used_taxes
 
@@ -381,8 +381,8 @@ class AccountTax(models.Model):
                             SELECT 1
                             FROM account_reconcile_model_line_account_tax_rel AS reco
                             WHERE account_tax.id = reco.account_tax_id
-                        ) AND id IN %s
-                        """, tuple(taxes_to_compute)
+                        ) AND id = ANY(%s)
+                        """, list(taxes_to_compute)
                 )))
                 taxes_to_compute -= used_taxes
 

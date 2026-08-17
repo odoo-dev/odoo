@@ -10,11 +10,11 @@ def migrate(cr, version):
                                 f"l10n_ro.account_tax_report_ro_tva_rd{code}" for code in ["24", "25", "26"]]
 
     report_line_ids = [env.ref(line, raise_if_not_found=False) for line in report_lines]
-    report_line_ids = tuple(line.id for line in report_line_ids if line)
+    report_line_ids = [line.id for line in report_line_ids if line]
     remove_aggregation_line_ids = [env.ref(line, raise_if_not_found=False) for line in remove_aggregation_lines]
-    remove_aggregation_line_ids = tuple(line.id for line in remove_aggregation_line_ids if line)
+    remove_aggregation_line_ids = [line.id for line in remove_aggregation_line_ids if line]
 
     if report_line_ids:
-        cr.execute("DELETE FROM account_report_line WHERE id IN %s", (report_line_ids,))
+        cr.execute("DELETE FROM account_report_line WHERE id = ANY(%s)", (report_line_ids,))
     if remove_aggregation_line_ids:
-        cr.execute("DELETE FROM account_report_expression where report_line_id IN %s", (remove_aggregation_line_ids,))
+        cr.execute("DELETE FROM account_report_expression where report_line_id = ANY(%s)", (remove_aggregation_line_ids,))

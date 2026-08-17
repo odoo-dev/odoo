@@ -20,8 +20,8 @@ class HrEmployee(models.Model):
                              WHERE project_id IS NOT NULL AND employee_id = e.id
                              LIMIT 1)
                       FROM hr_employee e
-                     WHERE id in %s """,
-                tuple(self.ids),
+                     WHERE id = ANY(%s) """,
+                list(self.ids),
             )))
         else:
             result = {}

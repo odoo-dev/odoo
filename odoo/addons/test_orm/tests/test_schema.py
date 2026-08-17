@@ -145,9 +145,9 @@ class TestSchema(common.TransactionCase):
         query = SQL("""
             SELECT indexdef
               FROM pg_indexes
-             WHERE tablename IN %(table_names)s
+             WHERE tablename = ANY(%(table_names)s)
                AND indexdef LIKE %(indexdef)s
-        """, table_names=table_names, indexdef=indexdef)
+        """, table_names=list(table_names), indexdef=indexdef)
         return self.env.execute_query_dict(query)
 
     def _expected_table_data(self, override=None):

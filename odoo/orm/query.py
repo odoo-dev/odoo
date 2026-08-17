@@ -220,7 +220,7 @@ class Query:
                 # because an empty tuple leads to a syntax error
                 # and a tuple containing just None creates issues for `NOT IN`
                 return SQL("(SELECT 1 WHERE FALSE)")
-            return SQL("%s", self._ids)
+            return SQL("%s", list(self._ids))
 
         if self.limit is not None or self.offset:
             # in this case, the ORDER BY clause is necessary
@@ -274,7 +274,7 @@ class Query:
             self._where_clauses.append(SQL('1=1'))
             self.order = alias.ordinality
         else:
-            self.add_where(SQL("%s IN %s", self.table.id, ids))
+            self.add_where(SQL("%s = ANY(%s)", self.table.id, list(ids)))
         self._ids = ids
 
     def __str__(self) -> str:

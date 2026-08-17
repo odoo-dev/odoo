@@ -55,8 +55,8 @@ class MailingList(models.Model):
             self.env.cr.execute('''
                 SELECT mailing_list_id, count(*)
                 FROM mail_mass_mailing_list_rel
-                WHERE mailing_list_id IN %s
-                GROUP BY mailing_list_id''', (tuple(self.ids),))
+                WHERE mailing_list_id = ANY(%s)
+                GROUP BY mailing_list_id''', (self.ids,))
             data = dict(self.env.cr.fetchall())
         for mailing_list in self:
             mailing_list.mailing_count = data.get(mailing_list._origin.id, 0)
@@ -85,10 +85,10 @@ class MailingList(models.Model):
                 LEFT OUTER JOIN mailing_subscription list_sub
                 ON mc.id = list_sub.contact_id
                 WHERE mc.message_bounce > 0
-                AND list_sub.list_id in %s
+                AND list_sub.list_id = ANY(%s)
                 GROUP BY list_sub.list_id
             '''
-            self.env.cr.execute(sql, (tuple(self.ids),))
+            self.env.cr.execute(sql, (self.ids,))
             bounce_per_mailing = dict(self.env.cr.fetchall())
 
         # 3. Compute and assign all counts / pct fields
@@ -265,7 +265,7 @@ class MailingList(models.Model):
                             FROM mailing_contact src_contact
                             JOIN mailing_subscription src_sub
                               ON src_contact.id = src_sub.contact_id
-                             AND src_sub.list_id IN %(src_list_ids)s
+                             AND src_sub.list_id = ANY(%(src_list_ids)s)
                              AND (%(contact_condition)s)
                              AND (%(src_fields)s) NOT IN (
                                SELECT %(target_fields)s
@@ -282,7 +282,7 @@ class MailingList(models.Model):
         """,
         contact_condition=contact_condition,
         src_fields=_get_key(SQL('src_contact')),
-        src_list_ids=tuple(src_lists.ids),
+        src_list_ids=src_lists.ids,
         target_fields=_get_key(SQL('target_contact')),
         target_list_id=self.id,
         )
@@ -292,15 +292,15 @@ class MailingList(models.Model):
             DELETE FROM mailing_contact AS src_contact
                   USING mailing_subscription as src_sub
                   WHERE src_sub.contact_id = src_contact.id
-                    AND src_sub.list_id IN %(src_list_ids)s
+                    AND src_sub.list_id = ANY(%(src_list_ids)s)
                     AND src_contact.id NOT IN (
                         SELECT other_contact.id
                           FROM mailing_subscription other_sub
                           JOIN mailing_contact other_contact ON other_sub.contact_id = other_contact.id
-                         WHERE other_sub.list_id NOT IN %(src_list_ids)s
+                         WHERE other_sub.list_id <> ALL(%(src_list_ids)s)
                     )
         """,
-        src_list_ids=tuple(src_lists.ids),
+        src_list_ids=src_lists.ids,
         )
         self.env.cr.execute(update_query)
         self.env.cr.execute(unlink_query)
@@ -459,10 +459,10 @@ class MailingList(models.Model):
                 FROM
                     mailing_subscription r
                     {self._get_contact_statistics_joins()}
-                WHERE list_id IN %s
+                WHERE list_id = ANY(%s)
                 GROUP BY
                     list_id;
-            ''', (tuple(self.ids), ))
+            ''', (self.ids, ))
             res = self.env.cr.dictfetchall()
 
         contact_counts = {}

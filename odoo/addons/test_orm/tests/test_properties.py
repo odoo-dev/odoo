@@ -318,7 +318,7 @@ class PropertiesCase(TestPropertiesMixin):
             ''' SELECT "test_orm_message"."id",
                        "test_orm_message"."attributes"
                 FROM "test_orm_message"
-                WHERE "test_orm_message"."id" IN %s
+                WHERE "test_orm_message"."id" = ANY(%s)
             ''',
             ''' SELECT "test_orm_message"."id",
                        "test_orm_message"."discussion",
@@ -334,7 +334,7 @@ class PropertiesCase(TestPropertiesMixin):
                        "test_orm_message"."write_uid",
                        "test_orm_message"."write_date"
                 FROM "test_orm_message"
-                WHERE "test_orm_message"."id" IN %s
+                WHERE "test_orm_message"."id" = ANY(%s)
             ''',
             # read the definition on the definition record
             ''' SELECT "test_orm_discussion"."id",
@@ -348,12 +348,12 @@ class PropertiesCase(TestPropertiesMixin):
                        "test_orm_discussion"."write_uid",
                        "test_orm_discussion"."write_date"
                 FROM "test_orm_discussion"
-                WHERE "test_orm_discussion"."id" IN %s
+                WHERE "test_orm_discussion"."id" = ANY(%s)
             ''',
             # check the many2one existence
             ''' SELECT "test_orm_partner"."id"
                 FROM "test_orm_partner"
-                WHERE "test_orm_partner"."id" IN %s
+                WHERE "test_orm_partner"."id" = ANY(%s)
             ''',
             ''' SELECT "test_orm_partner"."id",
                        "test_orm_partner"."name",
@@ -369,7 +369,7 @@ class PropertiesCase(TestPropertiesMixin):
                        "test_orm_partner"."write_uid",
                        "test_orm_partner"."write_date"
                 FROM "test_orm_partner"
-                WHERE "test_orm_partner"."id" IN %s
+                WHERE "test_orm_partner"."id" = ANY(%s)
             ''',
         ]
 

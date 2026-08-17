@@ -159,8 +159,8 @@ class test_inherits(common.TransactionCase):
             SELECT "test_box"."id"
             FROM "test_box"
             JOIN "test_unit" AS "test_box__unit_id" ON ("test_box"."unit_id" = "test_box__unit_id"."id")
-            WHERE "test_box"."id" IN %s
-            AND "test_box__unit_id"."state" IN %s
+            WHERE "test_box"."id" = ANY(%s)
+            AND "test_box__unit_id"."state" = ANY(%s)
             ORDER BY "test_box__unit_id"."readonly_name"
         """]):
             model.search([('id', 'in', box_ids)], order='readonly_name')

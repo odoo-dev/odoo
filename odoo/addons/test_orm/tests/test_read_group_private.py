@@ -842,7 +842,7 @@ class TestPrivateReadGroup(common.TransactionCase):
             FROM "test_read_group_task"
                 LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids__rel"
                     ON ("test_read_group_task"."id" = "test_read_group_task__user_ids__rel"."task_id")
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY "test_read_group_task__user_ids__rel"."user_id"
             ORDER BY "test_read_group_task__user_ids__rel"."user_id" ASC
         """
@@ -867,7 +867,7 @@ class TestPrivateReadGroup(common.TransactionCase):
             FROM "test_read_group_task"
                 LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids__rel"
                     ON ("test_read_group_task"."id" = "test_read_group_task__user_ids__rel"."task_id")
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY "test_read_group_task__user_ids__rel"."user_id"
             ORDER BY "test_read_group_task__user_ids__rel"."user_id" DESC
         """
@@ -907,11 +907,11 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN "test_read_group_task_user_rel" AS "test_read_group_task__user_ids__rel"
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__user_ids__rel"."task_id"
-                    AND "test_read_group_task__user_ids__rel"."user_id" IN (
+                    AND "test_read_group_task__user_ids__rel"."user_id" = ANY((
                         SELECT "test_read_group_user"."id"
                         FROM "test_read_group_user"
-                        WHERE "test_read_group_user"."id" IN %s
-                    )
+                        WHERE "test_read_group_user"."id" = ANY(%s)
+                    ))
                 )
             GROUP BY "test_read_group_task__user_ids__rel"."user_id"
             ORDER BY "test_read_group_task__user_ids__rel"."user_id" ASC
@@ -957,16 +957,16 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__tag_ids__rel"
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__tag_ids__rel"."task_id"
-                    AND "test_read_group_task__tag_ids__rel"."tag_id" IN (
+                    AND "test_read_group_task__tag_ids__rel"."tag_id" = ANY((
                         SELECT
                             "test_read_group_tag"."id"
                         FROM
                             "test_read_group_tag"
                         WHERE
                             "test_read_group_tag"."active" IS TRUE
-                    )
+                    ))
                 )
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY "test_read_group_task__tag_ids__rel"."tag_id"
             ORDER BY "test_read_group_task__tag_ids__rel"."tag_id" ASC
             """,
@@ -991,16 +991,16 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN "test_read_group_task_tag_rel" AS "test_read_group_task__active_tag_ids__rel"
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__active_tag_ids__rel"."task_id"
-                    AND "test_read_group_task__active_tag_ids__rel"."tag_id" IN (
+                    AND "test_read_group_task__active_tag_ids__rel"."tag_id" = ANY((
                         SELECT
                             "test_read_group_tag"."id"
                         FROM
                             "test_read_group_tag"
                         WHERE
                             "test_read_group_tag"."active" IS TRUE
-                    )
+                    ))
                 )
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY "test_read_group_task__active_tag_ids__rel"."tag_id"
             ORDER BY "test_read_group_task__active_tag_ids__rel"."tag_id" ASC
             """,
@@ -1026,7 +1026,7 @@ class TestPrivateReadGroup(common.TransactionCase):
                 ON (
                     "test_read_group_task"."id" = "test_read_group_task__all_tag_ids__rel"."task_id"
                 )
-            WHERE "test_read_group_task"."id" IN %s
+            WHERE "test_read_group_task"."id" = ANY(%s)
             GROUP BY "test_read_group_task__all_tag_ids__rel"."tag_id"
             ORDER BY "test_read_group_task__all_tag_ids__rel"."tag_id" ASC
             """,
@@ -1273,11 +1273,11 @@ class TestPrivateReadGroup(common.TransactionCase):
                 ON ("test_read_group_related_foo"."bar_id" = "test_read_group_related_foo__bar_id"."id")
             LEFT JOIN "test_read_group_related_bar_test_read_group_related_base_rel" AS "test_read_group_related_foo__bar_id__base_ids__rel"
                 ON ("test_read_group_related_foo__bar_id"."id" = "test_read_group_related_foo__bar_id__base_ids__rel"."test_read_group_related_bar_id"
-                    AND "test_read_group_related_foo__bar_id__base_ids__rel"."test_read_group_related_base_id" IN (
+                    AND "test_read_group_related_foo__bar_id__base_ids__rel"."test_read_group_related_base_id" = ANY((
                         SELECT "test_read_group_related_base"."id"
                         FROM "test_read_group_related_base"
-                        WHERE "test_read_group_related_base"."id" IN %s
-                    )
+                        WHERE "test_read_group_related_base"."id" = ANY(%s)
+                    ))
                 )
             GROUP BY "test_read_group_related_foo__bar_id__base_ids__rel"."test_read_group_related_base_id"
             ORDER BY "test_read_group_related_foo__bar_id__base_ids__rel"."test_read_group_related_base_id" ASC
@@ -1391,7 +1391,7 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN (
                 SELECT "test_read_group_related_foo".*
                 FROM "test_read_group_related_foo"
-                WHERE "test_read_group_related_foo"."id" IN %s
+                WHERE "test_read_group_related_foo"."id" = ANY(%s)
             ) AS "{alias_join}"
             ON (
                 "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
@@ -1503,7 +1503,7 @@ class TestPrivateReadGroup(common.TransactionCase):
             LEFT JOIN (
                 SELECT "test_read_group_related_foo".*
                 FROM "test_read_group_related_foo"
-                WHERE "test_read_group_related_foo"."id" IN %s
+                WHERE "test_read_group_related_foo"."id" = ANY(%s)
             ) AS "{alias_join}" ON (
                 "test_read_group_related_base"."foo_id" = "{alias_join}"."id"
             )

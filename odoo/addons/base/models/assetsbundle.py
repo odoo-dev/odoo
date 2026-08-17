@@ -188,8 +188,8 @@ class AssetsBundle(object):
         """
         to_delete = set(attach.store_fname for attach in attachments if attach.store_fname)
         self.env.cr.execute(f"""DELETE FROM {attachments._table} WHERE id IN (
-            SELECT id FROM {attachments._table} WHERE id in %s FOR NO KEY UPDATE SKIP LOCKED
-        )""", [tuple(attachments.ids)])
+            SELECT id FROM {attachments._table} WHERE id = ANY(%s) FOR NO KEY UPDATE SKIP LOCKED
+        )""", [attachments.ids])
         for fpath in to_delete:
             attachments._file_delete(fpath)
 

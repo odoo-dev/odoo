@@ -141,7 +141,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
             column_sql = SQL.identifier(column)
 
             if not self.env.execute_query(SQL(
-                "SELECT FROM %s WHERE %s IN %s LIMIT 1", table_sql, column_sql, tuple(src_records.ids)
+                "SELECT FROM %s WHERE %s = ANY(%s) LIMIT 1", table_sql, column_sql, src_records.ids
             )):
                 continue  # no record
 
@@ -261,7 +261,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                 SET %(field)s = (
                     SELECT jsonb_object_agg(key,
                         CASE
-                            WHEN value::int IN %(src_record_ids)s
+                            WHEN value::int = ANY(%(src_record_ids)s)
                             THEN %(dest_record_id)s
                             ELSE value::int
                         END
@@ -272,7 +272,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                 """,
                 table=SQL.identifier(self.env[field.model_name]._table),
                 field=SQL.identifier(field.name),
-                src_record_ids=tuple(src_records.ids),
+                src_record_ids=src_records.ids,
                 dest_record_id=dst_record.id,
             ))
 
@@ -282,7 +282,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
             UPDATE ir_default
             SET json_value =
                 CASE
-                    WHEN json_value::int IN %(src_record_ids)s
+                    WHEN json_value::int = ANY(%(src_record_ids)s)
                     THEN %(dest_record_id)s
                     ELSE json_value
                 END
@@ -293,7 +293,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
             AND f.ttype = 'many2one'
             AND json_value ~ '^[0-9]+$';
             """,
-            src_record_ids=tuple(src_records.ids),
+            src_record_ids=src_records.ids,
             dest_record_id=str(dst_record.id),
             model_name=dst_record._name,
         ))
@@ -313,7 +313,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                 WITH source AS (
                     SELECT %(field)s
                     FROM  %(table)s
-                    WHERE id IN %(source_ids)s
+                    WHERE id = ANY(%(source_ids)s)
                     ORDER BY id
                 ), source_agg AS (
                     SELECT jsonb_object_agg(key, value) AS value
@@ -327,7 +327,7 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
                 table=SQL.identifier(dst_record._table),
                 field=SQL.identifier(fname),
                 destination_id=dst_record.id,
-                source_ids=tuple(src_records.ids),
+                source_ids=src_records.ids,
             ))
 
     @api.model

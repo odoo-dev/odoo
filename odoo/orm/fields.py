@@ -1438,7 +1438,7 @@ class Field[T]:
         if operator in ('in', 'not in'):
             assert isinstance(value, COLLECTION_TYPES), \
                 f"condition_to_sql() 'in' operator expects a collection, not a {value!r}"
-            params = tuple(_value_to_column(v) for v in value if v is not False and v is not None)
+            params = [_value_to_column(v) for v in value if v is not False and v is not None]
             null_in_condition = len(params) < len(value)
             # if we have a value treated as null
             if (null_value := self.falsy_value) is not None:
@@ -1450,7 +1450,10 @@ class Field[T]:
 
             sql = None
             if params:
-                sql = SQL("%s%s%s", sql_field, SQL_OPERATORS[operator], params)
+                sql = (
+                    SQL("%s = ANY(%s)", sql_field, list(params)) if operator == 'in'
+                    else SQL("%s <> ALL(%s)", sql_field, list(params))
+                )
 
             if (operator == 'in') == null_in_condition:
                 # field in {val, False} => field IN vals OR field IS NULL
@@ -1516,8 +1519,10 @@ class Field[T]:
                 subselect = SQL("(%s)", value)
             else:
                 raise TypeError(f"condition_to_sql() operator 'any!' accepts SQL or Query, got {value}")
-            sql_operator = SQL_OPERATORS["in" if operator == "any!" else "not in"]
-            return SQL("%s%s%s", sql_field, sql_operator, subselect)
+            return (
+                SQL("%s = ANY(%s)", sql_field, subselect) if operator == 'any!'
+                else SQL("%s <> ALL(%s)", sql_field, subselect)
+            )
 
         raise NotImplementedError(f"Invalid operator {operator!r} for SQL in domain term {(field_expr, operator, value)!r}")
 

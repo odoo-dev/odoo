@@ -2010,8 +2010,8 @@ class Website(models.CachedModel):
                AND f.store = true
                AND m.transient = false
                AND f.model NOT LIKE 'ir.actions%%'
-               AND f.model NOT IN %s
-        """, ([self._get_html_fields_blacklist()]))
+               AND f.model <> ALL(%s)
+        """, [list(self._get_html_fields_blacklist())])
         for model_name, field_name, in cr.fetchall():
             try:
                 model = self.env[model_name]

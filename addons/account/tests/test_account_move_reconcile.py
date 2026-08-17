@@ -193,9 +193,9 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 COALESCE(SUM(line.balance), 0.0)            AS total_balance,
                 COALESCE(SUM(line.amount_currency), 0.0)    AS total_amount_currency
             FROM account_move_line line
-            WHERE line.account_id IN %s
+            WHERE line.account_id = ANY(%s)
             GROUP BY line.account_id
-        ''', [tuple(expected_values.keys())])
+        ''', [list(expected_values.keys())])
         for account_id, total_balance, total_amount_currency in self.cr.fetchall():
             account, expected_balance, expected_amount_currency = expected_values[account_id]
             self.assertEqual(
@@ -6104,8 +6104,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             with self.assertQueries([
                 """...FROM "account_partial_reconcile" WHERE "account_partial_reconcile"."credit_move_id...""",  # search partials for credit lines (none)
                 """...FROM "account_partial_reconcile" WHERE "account_partial_reconcile"."debit_move_id...""",  # search partials for debit lines
-                """...FROM "account_partial_reconcile" WHERE "account_partial_reconcile"."id" IN %s...""",  # read partials (from debit lines)
-                """...FROM "account_move_line" WHERE "account_move_line"."id" IN %s...""",  # read credit lines
+                """...FROM "account_partial_reconcile" WHERE "account_partial_reconcile"."id" = ANY(%s)...""",  # read partials (from debit lines)
+                """...FROM "account_move_line" WHERE "account_move_line"."id" = ANY(%s)...""",  # read credit lines
             ]):
                 self.assertEqual((line_1 + line_3 + line_5).reconciled_lines_ids, line_2 + line_4)
         warmup(test)(self)

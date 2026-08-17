@@ -139,7 +139,7 @@ class ResCompany(models.Model):
             ) for company in companies),
         )
         res = self.env.execute_query(
-            self._l10n_fr_pdp_get_f10_moves_query(tuple(account_ids), date_company_conditions),
+            self._l10n_fr_pdp_get_f10_moves_query(list(account_ids), date_company_conditions),
         )
         moves = self.env['account.move'].browse(move_id for move_id, in res)
         moves._compute_l10n_fr_pdp_flow_10_operation_type()
@@ -150,7 +150,7 @@ class ResCompany(models.Model):
             -- payments --
             SELECT move.id
               FROM account_move move
-              JOIN account_move_line reco_aml ON reco_aml.move_id = move.id AND reco_aml.account_id IN %(account_ids)s
+              JOIN account_move_line reco_aml ON reco_aml.move_id = move.id AND reco_aml.account_id = ANY(%(account_ids)s)
               JOIN account_partial_reconcile apr ON apr.debit_move_id = reco_aml.id OR apr.credit_move_id = reco_aml.id
              WHERE move.move_type = 'entry'
                AND %(date_company_conditions)s

@@ -653,8 +653,8 @@ class BaseModel(metaclass=MetaModel):
         cr.execute(SQL("""
             SELECT res_id, module, name
             FROM ir_model_data
-            WHERE model = %s AND res_id IN %s
-        """, self._name, tuple(self.ids)))
+            WHERE model = %s AND res_id = ANY(%s)
+        """, self._name, list(self.ids)))
         xids = {
             res_id: (module, name)
             for res_id, module, name in cr.fetchall()
@@ -2165,7 +2165,13 @@ class BaseModel(metaclass=MetaModel):
                 if operator not in SUPPORTED:
                     raise ValueError(f"Invalid having clause {item!r}: supported comparators are {SUPPORTED}")
                 sql_left = self._read_group_select(table, left)
-                stack.append(SQL("%s%s%s", sql_left, SQL_OPERATORS[operator], right))
+                if operator in ('in', 'not in') and isinstance(right, COLLECTION_TYPES):
+                    stack.append(
+                        SQL("%s <> ALL(%s)", sql_left, list(right)) if operator == 'not in'
+                        else SQL("%s = ANY(%s)", sql_left, list(right))
+                    )
+                else:
+                    stack.append(SQL("%s%s%s", sql_left, SQL_OPERATORS[operator], right))
             else:
                 raise ValueError(f"Invalid having clause {item!r}: it should be a domain-like clause")
 
@@ -2451,8 +2457,8 @@ class BaseModel(metaclass=MetaModel):
                    AND c.oid=a.attrelid
                    AND a.attisdropped=%s
                    AND pg_catalog.format_type(a.atttypid, a.atttypmod) NOT IN ('cid', 'tid', 'oid', 'xid')
-                   AND a.attname NOT IN %s """,
-            self._table, False, tuple(cols),
+                   AND a.attname <> ALL(%s) """,
+            self._table, False, list(cols),
         ))
 
         for row in cr.dictfetchall():
@@ -3669,8 +3675,8 @@ class BaseModel(metaclass=MetaModel):
             records = self.browse(sub_ids)
 
             cr.execute(SQL(
-                "DELETE FROM %s WHERE id IN %s",
-                SQL.identifier(self._table), sub_ids,
+                "DELETE FROM %s WHERE id = ANY(%s)",
+                SQL.identifier(self._table), list(sub_ids),
             ))
 
             # Removing the ir_model_data reference if the record being deleted
@@ -3688,8 +3694,8 @@ class BaseModel(metaclass=MetaModel):
             # ir_attachment is overridden to hide attachments of deleted
             # records)
             cr.execute(SQL(
-                "SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s",
-                self._name, sub_ids,
+                "SELECT id FROM ir_attachment WHERE res_model=%s AND res_id = ANY(%s)",
+                self._name, list(sub_ids),
             ))
             ir_attachment_unlink |= Attachment.browse(row[0] for row in cr.fetchall())
 
@@ -3736,7 +3742,7 @@ class BaseModel(metaclass=MetaModel):
                             SELECT jsonb_object_agg(
                                 key,
                                 CASE
-                                    WHEN value::int4 in %(ids)s THEN NULL
+                                    WHEN value::int4 = ANY(%(ids)s) THEN NULL
                                     ELSE value::int4
                                 END)
                             FROM jsonb_each_text(%(field)s)
@@ -3746,7 +3752,7 @@ class BaseModel(metaclass=MetaModel):
                         """,
                         table=SQL.identifier(model._table),
                         field=SQL.identifier(field.name),
-                        ids=sub_ids,
+                        ids=list(sub_ids),
                         jsonpath=f"$.* ? ({' || '.join(f'@ == {id_}' for id_ in sub_ids)})",
                     ))
 
@@ -4436,11 +4442,11 @@ class BaseModel(metaclass=MetaModel):
                         FROM %(table)s parent
                         WHERE parent.id=node.%(parent)s
                     ), node.id, '/')
-                WHERE node.id IN %(ids)s
+                WHERE node.id = ANY(%(ids)s)
                 RETURNING node.id, node.parent_path """,
             table=SQL.identifier(self._table),
             parent=SQL.identifier(self._parent_name),
-            ids=tuple(self.ids),
+            ids=list(self.ids),
         ))
 
         # update the cache of updated nodes, and determine what to recompute
@@ -4474,7 +4480,7 @@ class BaseModel(metaclass=MetaModel):
                 condition = SQL('(%s != %s OR %s IS NULL)', sql_parent, parent_id, sql_parent)
             else:
                 condition = SQL('%s IS NOT NULL', sql_parent)
-            conditions.append(SQL('("id" IN %s AND %s)', tuple(ids), condition))
+            conditions.append(SQL('("id" = ANY(%s) AND %s)', list(ids), condition))
 
         rows = self.env.execute_query(SQL(
             "SELECT id FROM %s WHERE %s ORDER BY id",
@@ -4507,12 +4513,12 @@ class BaseModel(metaclass=MetaModel):
                     SET parent_path = concat(%(prefix)s, substr(child.parent_path,
                             length(node.parent_path) - length(node.id || '/') + 1))
                     FROM %(table)s node
-                    WHERE node.id IN %(ids)s
+                    WHERE node.id = ANY(%(ids)s)
                     AND child.parent_path LIKE concat(node.parent_path, %(wildcard)s)
                     RETURNING child.id, child.parent_path """,
                 table=SQL.identifier(self._table),
                 prefix=prefix,
-                ids=tuple(records.ids),
+                ids=list(records.ids),
                 wildcard='%',
             )))
 
@@ -5061,7 +5067,7 @@ class BaseModel(metaclass=MetaModel):
         if not ids:
             return self
         query = Query(self)
-        query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
+        query.add_where(SQL("%s = ANY(%s)", SQL.identifier(self._table, 'id'), list(ids)))
         real_ids = (id_ for [id_] in self.env.execute_query(query.select()))
         valid_ids = {*real_ids, *new_ids}
         return self.browse(i for i in self._ids if i in valid_ids)
@@ -5083,7 +5089,7 @@ class BaseModel(metaclass=MetaModel):
         if not ids:
             return
         query = Query(self)
-        query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
+        query.add_where(SQL("%s = ANY(%s)", SQL.identifier(self._table, 'id'), list(ids)))
         # Use SKIP LOCKED instead of NOWAIT because the later aborts the
         # transaction and we do not want to use SAVEPOINTS.
         if allow_referencing:
@@ -5115,7 +5121,7 @@ class BaseModel(metaclass=MetaModel):
             query.limit = limit - len(new_ids)
         else:
             query = Query(self)
-            query.add_where(SQL("%s IN %s", SQL.identifier(self._table, 'id'), tuple(ids)))
+            query.add_where(SQL("%s = ANY(%s)", SQL.identifier(self._table, 'id'), list(ids)))
         if not ids:
             return self
         if allow_referencing:
@@ -5173,7 +5179,7 @@ class BaseModel(metaclass=MetaModel):
             WITH RECURSIVE __reachability AS (
                 SELECT %(col1)s AS source, %(col2)s AS destination
                 FROM %(rel)s
-                WHERE %(col1)s IN %(ids)s AND %(col2)s IS NOT NULL
+                WHERE %(col1)s = ANY(%(ids)s) AND %(col2)s IS NOT NULL
             UNION
                 SELECT r.source, t.%(col2)s
                 FROM __reachability r
@@ -5183,7 +5189,7 @@ class BaseModel(metaclass=MetaModel):
             WHERE source = destination
             LIMIT 1
             """,
-            ids=tuple(self.ids),
+            ids=list(self.ids),
             rel=SQL.identifier(relation),
             col1=SQL.identifier(column1),
             col2=SQL.identifier(column2),

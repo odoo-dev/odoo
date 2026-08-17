@@ -18,7 +18,7 @@ from .fields_reference import Many2oneReference
 from .identifiers import NewId
 from .models import BaseModel
 from .query import FieldSQL, Query, TableSQL
-from .utils import COLLECTION_TYPES, Prefetch, SQL_OPERATORS, check_pg_name
+from .utils import COLLECTION_TYPES, Prefetch, check_pg_name
 
 if typing.TYPE_CHECKING:
     from odoo.tools.misc import Collector
@@ -546,11 +546,9 @@ class Many2one(_Relational):
             subselect = SQL("(%s)", value)
         else:
             raise TypeError(f"condition_to_sql() 'any' operator accepts Domain, SQL or Query, got {value}")
-        sql = SQL(
-            "%s%s%s",
-            sql_field,
-            SQL(" IN ") if positive else SQL(" NOT IN "),
-            subselect,
+        sql = (
+            SQL("%s = ANY(%s)", sql_field, subselect) if positive
+            else SQL("%s <> ALL(%s)", sql_field, subselect)
         )
         if can_be_null and not positive:
             sql = SQL("(%s IS NULL OR %s)", sql_field, sql)
@@ -1220,11 +1218,9 @@ class One2many(_RelationalMulti):
                 # int values, map them
                 inverses = model.browse(inverse_field.__get__(rec) for rec in recs)
             subselect = inverses._as_query(ordered=False).subselect()
-            return SQL(
-                "%s%s%s",
-                table.id,
-                SQL_OPERATORS['in' if exists else 'not in'],
-                subselect,
+            return (
+                SQL("%s = ANY(%s)", table.id, subselect) if exists
+                else SQL("%s <> ALL(%s)", table.id, subselect)
             )
 
         subselect = coquery.subselect(
@@ -1437,7 +1433,7 @@ class Many2many(_RelationalMulti):
         query.add_join('JOIN', self.relation, None, SQL(
             "%s = %s", sql_id2, SQL.identifier(comodel._table, 'id'),
         ))
-        query.add_where(SQL("%s IN %s", sql_id1, tuple(records.ids)))
+        query.add_where(SQL("%s = ANY(%s)", sql_id1, list(records.ids)))
 
         # retrieve pairs (record, line) and group by record
         group = defaultdict(list)
@@ -1723,10 +1719,9 @@ class Many2many(_RelationalMulti):
             result_id = TableSQLId(rel_alias._alias, rel_id2, table._query)
             if coquery.where_clause:
                 condition = SQL(
-                    "%s AND %s IN %s",
+                    "%s AND %s",
                     condition,
-                    result_id.id,
-                    coquery.subselect(),
+                    SQL("%s = ANY(%s)", result_id.id, coquery.subselect()),
                 )
             table._query.add_join(kind, rel_alias, rel_table, condition)
             return result_id
@@ -1765,14 +1760,13 @@ class Many2many(_RelationalMulti):
                 table.id,
             )
         return SQL(
-            "%sEXISTS (SELECT 1 FROM %s AS %s WHERE %s = %s AND %s IN %s)",
+            "%sEXISTS (SELECT 1 FROM %s AS %s WHERE %s = %s AND %s)",
             SQL("NOT ") if not exists else SQL(),
             SQL.identifier(rel_table),
             rel_alias,
             rel_alias[rel_id1],
             table.id,
-            rel_alias[rel_id2],
-            coquery.subselect(),
+            SQL("%s = ANY(%s)", rel_alias[rel_id2], coquery.subselect()),
         )
 
 

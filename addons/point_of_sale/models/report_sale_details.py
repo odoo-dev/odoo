@@ -137,10 +137,10 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                 FROM pos_payment AS payment,
                      pos_payment_method AS method
                 WHERE payment.payment_method_id = method.id
-                    AND payment.id IN %(payment_ids)s
+                    AND payment.id = ANY(%(payment_ids)s)
                 GROUP BY method.name, cash, payment.session_id, method.id, journal_id
                 ORDER BY method.id, payment.session_id
-            """, method_name=method_name, payment_ids=tuple(payment_ids)))
+            """, method_name=method_name, payment_ids=payment_ids))
             payments = self.env.cr.dictfetchall()
         else:
             payments = []

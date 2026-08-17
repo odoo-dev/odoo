@@ -207,7 +207,7 @@ class AccountMove(models.Model):
         self.env['account.partial.reconcile'].flush_model()
         invoices_refunded_mapping = {invoice.id: invoice.reversed_entry_id.id for invoice in self}
 
-        stored_ids = tuple(self.ids)
+        stored_ids = list(self.ids)
         queries = []
         for source_field, counterpart_field in (
             ('debit_move_id', 'credit_move_id'),
@@ -220,7 +220,7 @@ class AccountMove(models.Model):
                 FROM account_partial_reconcile part
                 JOIN account_move_line source_line ON source_line.id = part.%s
                 JOIN account_move_line counterpart_line ON counterpart_line.id = part.%s
-                WHERE source_line.move_id IN %s AND counterpart_line.move_id != source_line.move_id
+                WHERE source_line.move_id = ANY(%s) AND counterpart_line.move_id != source_line.move_id
                 GROUP BY source_move_id, counterpart_move_id
             ''', SQL.identifier(source_field), SQL.identifier(counterpart_field), stored_ids))
         payment_data = defaultdict(list)

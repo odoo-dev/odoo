@@ -17,9 +17,9 @@ class PurchaseOrderLine(models.Model):
         query = f'''
             UPDATE {self._table}
             SET qty_received_manual = qty_received, qty_received_method = 'manual'
-            WHERE id IN %(ids)s
+            WHERE id = ANY(%(ids)s)
         '''
-        self.env.cr.execute(query, {'ids': self._ids or (None,)})
+        self.env.cr.execute(query, {'ids': list(self._ids) or [None]})
         self.modified(modified_fields)
 
     qty_received_method = fields.Selection(selection_add=[('stock_moves', 'Stock Moves')],

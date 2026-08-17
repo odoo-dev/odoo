@@ -135,5 +135,5 @@ class AccountAccountTag(models.Model):
                    %(and_tag_ids)s
                 """,
                 lang=lang,
-                and_tag_ids=SQL('AND tag.id IN %s', tuple(tag_ids)) if tag_ids else SQL(''),
+                and_tag_ids=SQL('AND tag.id = ANY(%s)', list(tag_ids)) if tag_ids else SQL(''),
             ))

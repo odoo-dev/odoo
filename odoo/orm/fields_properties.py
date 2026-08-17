@@ -760,7 +760,7 @@ class Properties(Field):
             return SQL(
                 """ CASE
                         WHEN jsonb_typeof(%(property)s) = 'number'
-                         AND (%(property)s)::int IN %(table)s
+                         AND (%(property)s)::int = ANY(%(table)s)
                         THEN %(property)s
                         ELSE NULL
                      END """,

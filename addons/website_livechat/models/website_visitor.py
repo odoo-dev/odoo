@@ -152,10 +152,10 @@ class WebsiteVisitor(models.Model):
                     ORDER BY website_track.visit_datetime DESC, website_track.id DESC
                        LIMIT 3
                   ) AS website_track ON TRUE
-                 WHERE website_visitor.id IN %s
+                 WHERE website_visitor.id = ANY(%s)
               GROUP BY website_visitor.id;
             """,
-            [tuple(self.ids)],
+            [self.ids],
         )
         results = dict(self.env.cr.fetchall())
         all_track_ids = [track_id for track_list in results.values() for track_id in track_list]

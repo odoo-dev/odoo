@@ -50,8 +50,8 @@ def migrate(cr, version):
             FROM account_account_tag new_tag, account_tax_repartition_line repln
             WHERE tax_rep_tag.account_account_tag_id = %s
             AND repln.id = tax_rep_tag.account_tax_repartition_line_id
-            AND COALESCE(repln.invoice_tax_id, repln.refund_tax_id) IN %s
-        """, [new_tag.id, old_tag.id, tuple(tax_ids)])
+            AND COALESCE(repln.invoice_tax_id, repln.refund_tax_id) in %s
+        """, [new_tag.id, old_tag.id, list(tax_ids)])
 
         # Change amls in history, starting at Q3 2021 (date of introduction for the new tags)
 
@@ -63,9 +63,9 @@ def migrate(cr, version):
             WHERE aml_tag.account_move_line_id = aml.id
             AND aml_tax.account_move_line_id = aml.id
             AND aml.date >= '2021-07-01'
-            AND aml_tax.account_tax_id IN %s
+            AND aml_tax.account_tax_id = ANY(%s)
             AND aml_tag.account_account_tag_id = %s
-        """, [new_tag.id, tuple(tax_ids), old_tag.id])
+        """, [new_tag.id, list(tax_ids), old_tag.id])
 
         # Fix tax audit string
         cr.execute("""
