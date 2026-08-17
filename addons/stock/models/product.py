@@ -794,6 +794,7 @@ class ProductTemplate(models.Model):
             template.outgoing_qty = res[template.id]['outgoing_qty']
 
     def _compute_quantities_dict(self):
+        print("Hellop")
         variants_available = {
             p['id']: p for p in self.product_variant_ids._origin.read(['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty'])
         }
