@@ -17,3 +17,12 @@ class StockPicking(models.Model):
         if purchase_order := self.purchase_id:
             purchase_order.fiscal_position_id
         return super()._l10n_in_get_fiscal_position()
+
+    def _l10n_in_get_account_move_id(self):
+        """
+        To be inherited by `l10n_in_*_stock` will be ideal to use it for `l10n_in_ewaybill_stock`
+        returns related account.move if any exists
+        """
+        if purchase_order := self.purchase_id:
+            return purchase_order.invoice_ids
+        return super()._l10n_in_get_account_move_id()

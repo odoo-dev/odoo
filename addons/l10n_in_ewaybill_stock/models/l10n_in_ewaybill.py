@@ -29,6 +29,11 @@ class L10nInEwaybill(models.Model):
         store=True,
         readonly=False
     )
+    duplicate_ids = fields.One2many('l10n.in.ewaybill', compute="_compute_duplicate_ids")
+
+    def _compute_duplicate_ids(self):
+        for ewb in self:
+            ewb.duplicate_ids = ewb._find_duplicate_ewaybill()
 
     @api.depends('name', 'state')
     def _compute_display_name(self):
@@ -290,3 +295,12 @@ class L10nInEwaybill(models.Model):
         if self.picking_id and self.type_id.sub_type_code == '8':
             ewaybill_json["subSupplyDesc"] = self.type_description
         return ewaybill_json
+
+    def _find_duplicate_ewaybill(self):
+        if self.state != 'pending':
+            return self.browse()
+        if moves := self.picking_id._l10n_in_get_account_move_id():
+            return moves.l10n_in_ewaybill_ids
+        if picking := self.account_move_id._l10n_in_picking_ids():
+            return picking.l10n_in_ewaybill_ids
+        return self.browse()

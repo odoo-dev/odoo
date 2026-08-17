@@ -17,3 +17,8 @@ class StockPicking(models.Model):
         if sale_order := self.sale_id:
             return sale_order.fiscal_position_id
         return super()._l10n_in_get_fiscal_position()
+
+    def _l10n_in_get_account_move_id(self):
+        if sale_order := self.sale_id:
+            return sale_order.invoice_ids
+        return super()._l10n_in_get_account_move_id()
