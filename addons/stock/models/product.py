@@ -419,7 +419,7 @@ class ProductProduct(models.Model):
                         WITH RECURSIVE descendants AS (
                             SELECT id
                             FROM stock_location
-                            WHERE id IN %s
+                            WHERE id = ANY(%s)
 
                             UNION
 
@@ -431,7 +431,7 @@ class ProductProduct(models.Model):
                         SELECT id FROM descendants
                     )
                     """,
-                    tuple(locations.ids),
+                    locations.ids,
             )
             loc_domain = Domain('location_id', 'in', descendants_query)
             # The condition should be split for done and not-done moves as the final_dest_id only make sense

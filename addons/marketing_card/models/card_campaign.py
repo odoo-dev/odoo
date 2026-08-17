@@ -119,7 +119,7 @@ class CardCampaign(models.Model):
                   JOIN card_campaign campaign
                     ON card.campaign_id = campaign.id
                  WHERE card.active
-                   AND campaign.id IN %(card_campaign_ids)s
+                   AND campaign.id = ANY(%(card_campaign_ids)s)
               ORDER BY card.res_id,
                   CASE card.share_status
                        WHEN 'shared'  THEN 2
@@ -130,7 +130,7 @@ class CardCampaign(models.Model):
           SELECT campaign_id, share_status, COUNT(*)
             FROM first
            GROUP BY campaign_id, share_status;
-        """, card_campaign_ids=tuple(self.ids)))
+        """, card_campaign_ids=list(self.ids)))
         cards_by_status_count = self.env.cr.fetchall()
 
         for campaign_id, status, count in cards_by_status_count:

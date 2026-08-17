@@ -895,11 +895,11 @@ class HrExpense(models.Model):
                                      AND he.total_amount_currency = ex.total_amount_currency
                                      AND he.company_id = ex.company_id
                                      AND he.currency_id = ex.currency_id
-               WHERE ex.id in %(expense_ids)s
+               WHERE ex.id = ANY(%(expense_ids)s)
                GROUP BY he.employee_id, he.product_id, he.date, he.total_amount_currency, he.company_id, he.currency_id
               HAVING COUNT(he.id) > 1
             """
-            self.env.cr.execute(duplicates_query, {'expense_ids': tuple(expenses.ids)})
+            self.env.cr.execute(duplicates_query, {'expense_ids': expenses.ids})
 
             for duplicates_ids in (x[0] for x in self.env.cr.fetchall()):
                 expenses_duplicates = expenses.filtered(lambda expense: expense.id in duplicates_ids)

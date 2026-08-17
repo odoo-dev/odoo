@@ -589,8 +589,8 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
 
         # clean up after each pass
         self.env.cr.execute(
-            'delete from test_performance_base where id not in %s',
-            (tuple(initial_records.ids),)
+            'delete from test_performance_base where id <> ALL(%s)',
+            (list(initial_records.ids),)
         )
 
     def test_prefetch_compute(self):
@@ -617,7 +617,7 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
                        "test_performance_base"."write_uid",
                        "test_performance_base"."write_date"
                 FROM "test_performance_base"
-                WHERE "test_performance_base"."id" IN %s
+                WHERE "test_performance_base"."id" = ANY(%s)
             ''',
         ]
         with self.assertQueries(queries, flush=False):

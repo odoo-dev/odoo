@@ -459,7 +459,7 @@ class TestRecordset(TestOrmPartnerCommon, TransactionCase):
                     model.env.context.get('bin_size') or model.env.context.get('bin_size_' + field.name)
             ):
                 sql_field = SQL('pg_size_pretty(length(%s)::bigint)', sql_field)
-            query.add_where(SQL("%s IN %s", sql_id, tuple(ids)))
+            query.add_where(SQL("%s = ANY(%s)", sql_id, ids))
             env.cr.execute(query.select(sql_id, sql_field))
 
             # compare returned values with corresponding values in cache

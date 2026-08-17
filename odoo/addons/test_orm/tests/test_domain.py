@@ -62,7 +62,7 @@ class TestDomain(TransactionExpressionCase):
         # check database value
         self.env.flush_all()
 
-        sql = SQL("SELECT number FROM test_orm_empty_int WHERE id IN %s ORDER BY id", records._ids)
+        sql = SQL("SELECT number FROM test_orm_empty_int WHERE id = ANY(%s) ORDER BY id", records.ids)
         rows = self.env.execute_query(sql)
         self.assertEqual([row[0] for row in rows], [42, 0, 0, None])
 
@@ -111,7 +111,7 @@ class TestDomain(TransactionExpressionCase):
         # check database value
         self.env.flush_all()
 
-        sql = SQL("SELECT name FROM test_orm_empty_char WHERE id IN %s ORDER BY id", records._ids)
+        sql = SQL("SELECT name FROM test_orm_empty_char WHERE id = ANY(%s) ORDER BY id", records.ids)
         rows = self.env.execute_query(sql)
         self.assertEqual([row[0] for row in rows], ['name', '', None, None])
 

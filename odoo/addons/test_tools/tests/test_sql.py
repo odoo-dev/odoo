@@ -255,3 +255,22 @@ class TestSqlTools(TransactionCase):
         db_definition, db_comment = sql.index_definition(self.env.cr, 'test_tools_partner_test_percent_escape')
         self.assertIn('WHERE', db_definition)  # the definition is rewritten by postgres
         self.assertEqual(db_comment, comment)
+
+    def test_execute_any_array(self):
+        ids = self.env['res.partner'].search([], limit=2).ids
+        self.env.cr.execute(
+            "SELECT id FROM res_partner WHERE id = ANY(%s) ORDER BY id",
+            [ids],
+        )
+        self.assertTrue(self.env.cr.fetchall())
+        # leftover tuples from IN %s must bind as arrays, not composites
+        self.env.cr.execute(
+            "SELECT id FROM res_partner WHERE id = ANY(%s) ORDER BY id",
+            [ids],
+        )
+        self.assertTrue(self.env.cr.fetchall())
+        self.env.cr.execute(
+            "SELECT id FROM res_partner WHERE id <> ALL(%(ids)s) LIMIT 1",
+            {'ids': ids},
+        )
+        self.env.cr.fetchall()

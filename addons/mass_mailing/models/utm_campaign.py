@@ -92,10 +92,10 @@ class UtmCampaign(models.Model):
                 utm_campaign c
                 ON (c.id = s.campaign_id)
             WHERE
-                c.id IN %s
+                c.id = ANY(%s)
             GROUP BY
                 c.id
-        """, (tuple(self.ids), ))
+        """, (list(self.ids), ))
 
         all_stats = self.env.cr.dictfetchall()
         stats_per_campaign = {

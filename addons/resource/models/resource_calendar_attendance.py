@@ -134,8 +134,8 @@ class ResourceCalendarAttendance(models.Model):
         if not calendar_ids:
             return
         self.env.cr.execute(
-            "SELECT id FROM resource_calendar WHERE id IN %s ORDER BY id FOR NO KEY UPDATE",
-            [tuple(calendar_ids)],
+            "SELECT id FROM resource_calendar WHERE id = ANY(%s) ORDER BY id FOR NO KEY UPDATE",
+            [list(calendar_ids)],
         )
 
     def _check_attendances_variable_for_calendar(self, ids_to_check):

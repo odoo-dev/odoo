@@ -316,10 +316,10 @@ class MailingMailing(models.Model):
             SELECT COUNT(DISTINCT(stats.id)) AS nb_mails, COUNT(DISTINCT(clicks.mailing_trace_id)) AS nb_clicks, stats.mass_mailing_id AS id
             FROM mailing_trace AS stats
             LEFT OUTER JOIN link_tracker_click AS clicks ON clicks.mailing_trace_id = stats.id
-            WHERE stats.mass_mailing_id IN %s
+            WHERE stats.mass_mailing_id = ANY(%s)
             AND stats.trace_status not in ('bounce', 'cancel', 'error')
             GROUP BY stats.mass_mailing_id
-        """, [tuple(self.ids) or (None,)])
+        """, [list(self.ids) or [None]])
         mass_mailing_data = self.env.cr.dictfetchall()
         mapped_data = dict([(m['id'], float_round(100 * m['nb_clicks'] / m['nb_mails'], precision_digits=2)) for m in mass_mailing_data])
         for mass_mailing in self:

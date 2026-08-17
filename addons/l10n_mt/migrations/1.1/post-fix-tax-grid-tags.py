@@ -9,14 +9,14 @@ def _replace_tags_sql(cr, tax_ids, old_tag, new_tag, is_base=False):
     if not tax_ids or not old_tag or not new_tag:
         return 0
 
-    tax_ids_tuple = tuple(tax_ids.ids)
+    tax_ids_tuple = list(tax_ids.ids)
 
     if is_base:
         join_clause = "account_move_line_account_tax_rel tax_rel"
-        condition = "tag_rel.account_move_line_id = tax_rel.account_move_line_id AND tax_rel.account_tax_id IN %(tax_ids)s"
+        condition = "tag_rel.account_move_line_id = tax_rel.account_move_line_id AND tax_rel.account_tax_id = ANY(%(tax_ids)s)"
     else:
         join_clause = "account_move_line aml"
-        condition = "tag_rel.account_move_line_id = aml.id AND aml.tax_line_id IN %(tax_ids)s"
+        condition = "tag_rel.account_move_line_id = aml.id AND aml.tax_line_id = ANY(%(tax_ids)s)"
 
     cr.execute(f"""
         UPDATE account_account_tag_account_move_line_rel tag_rel

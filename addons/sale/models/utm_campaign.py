@@ -53,13 +53,13 @@ class UtmCampaign(models.Model):
                       FROM account_move_line line
                 INNER JOIN account_move move ON line.move_id = move.id
                      WHERE move.state not in ('draft', 'cancel')
-                       AND move.campaign_id IN %s
+                       AND move.campaign_id = ANY(%s)
                        AND move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                        AND line.account_id IS NOT NULL
                        AND line.display_type = 'product'
                   GROUP BY move.campaign_id
                     """,  # noqa: E501
-                    tuple(self.ids),
+                    list(self.ids),
                 )
             )
         else:

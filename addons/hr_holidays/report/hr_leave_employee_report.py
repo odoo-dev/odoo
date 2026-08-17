@@ -55,7 +55,7 @@ class HrLeaveEmployeeReport(models.Model):
                     DATE_TRUNC('day', date_to),
                     INTERVAL '1 day'
                 ) AS days_included_in_request
-                WHERE hl.employee_company_id IN %(company_ids)s
+                WHERE hl.employee_company_id = ANY(%(company_ids)s)
             )
             SELECT
                 id, leave_id, employee_id,
@@ -64,7 +64,7 @@ class HrLeaveEmployeeReport(models.Model):
                 LEAST(date_to, (day_start + INTERVAL '1 day' - INTERVAL '1 second')) AS day_aligned_date_to
             FROM leave_data;
             """,
-            company_ids=tuple(self.env.companies.ids),
+            company_ids=list(self.env.companies.ids),
         ))
         fetched_leave_field_names = [desc[0] for desc in self.env.cr.description]
         leave_records = self.env.cr.fetchall()

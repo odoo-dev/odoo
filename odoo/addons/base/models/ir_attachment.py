@@ -311,8 +311,8 @@ class IrAttachment(models.Model):
             referenced_fnames = {fname for fname, in self.env.execute_query(SQL("""
                 SELECT store_fname
                 FROM ir_attachment
-                WHERE store_fname IN %s
-                FOR UPDATE""", tuple(p[0] for p in name_pairs)
+                WHERE store_fname = ANY(%s)
+                FOR UPDATE""", [p[0] for p in name_pairs]
             ))}
             checked += len(name_pairs)
 

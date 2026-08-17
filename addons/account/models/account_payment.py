@@ -748,12 +748,12 @@ class AccountPayment(models.Model):
             JOIN account_move invoice ON invoice.id = counterpart_line.move_id
             JOIN account_account account ON account.id = line.account_id
             WHERE account.account_type IN ('asset_receivable', 'liability_payable')
-                AND payment.id IN %(payment_ids)s
+                AND payment.id = ANY(%(payment_ids)s)
                 AND line.id != counterpart_line.id
                 AND invoice.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
             GROUP BY payment.id, invoice.move_type
         ''', {
-            'payment_ids': tuple(stored_payments.ids)
+            'payment_ids': stored_payments.ids
         })
         query_res = self.env.cr.dictfetchall()
 
@@ -789,11 +789,11 @@ class AccountPayment(models.Model):
                 OR
                 part.credit_move_id = counterpart_line.id
             WHERE account.id = payment.outstanding_account_id
-                AND payment.id IN %(payment_ids)s
+                AND payment.id = ANY(%(payment_ids)s)
                 AND line.id != counterpart_line.id
                 AND counterpart_line.statement_line_id IS NOT NULL
             GROUP BY payment.id
-        ''', payment_ids=tuple(stored_payments.ids)
+        ''', payment_ids=stored_payments.ids
         )))
 
         for pay in self:
@@ -874,12 +874,12 @@ class AccountPayment(models.Model):
                                                            AND payment.date = duplicate_payment.date
                                                            AND payment.payment_type = duplicate_payment.payment_type
                                                            AND payment.amount = duplicate_payment.amount
-                                                           AND duplicate_payment.state IN %(matching_states)s
+                                                           AND duplicate_payment.state = ANY(%(matching_states)s)
                  WHERE payment.id = ANY(%(payments)s)
               GROUP BY payment.id
             """,
             payment_table_and_alias=payment_table_and_alias,
-            matching_states=tuple(matching_states),
+            matching_states=list(matching_states),
             payments=payments.ids or [0],
         )
 

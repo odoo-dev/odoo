@@ -197,12 +197,12 @@ class StockQuant(models.Model):
                            AND (sq.location_id = sml.location_id OR sq.location_id = sml.location_dest_id)
                            AND ((sq.package_id IS NULL AND (sml.package_id IS NULL OR sml.result_package_id IS NULL)) OR sq.package_id = sml.package_id OR sq.package_id = sml.result_package_id)
                      LEFT JOIN stock_move sm ON sml.move_id = sm.id
-                         WHERE sq.company_id IN %(allowed_company_ids)s
+                         WHERE sq.company_id = ANY(%(allowed_company_ids)s)
                            AND sml.state = 'done'
                            AND sm.is_inventory IS TRUE
                       GROUP BY sq.id
                     )""",
-                    allowed_company_ids=self.env.user._get_company_ids(),
+                    allowed_company_ids=list(self.env.user._get_company_ids()),
                 ),
                 SQL('last_count_per_quant.quant_id = %(quant_id)s', quant_id=table.id),
             )
@@ -1227,10 +1227,10 @@ class StockQuant(models.Model):
         if self._ids:
             query += """
                             WHERE
-                                location_id in %s
-                                AND product_id in %s
+                                location_id = ANY(%s)
+                                AND product_id = ANY(%s)
             """
-            params = [tuple(self.location_id.ids), tuple(self.product_id.ids)]
+            params = [self.location_id.ids, self.product_id.ids]
         query += """
                             GROUP BY product_id, company_id, location_id, lot_id, package_id, owner_id
                             HAVING count(id) > 1

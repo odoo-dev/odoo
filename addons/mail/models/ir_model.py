@@ -24,19 +24,19 @@ class IrModel(models.Model):
         """ Delete mail data (followers, messages, activities) associated with
         the models being deleted.
         """
-        models = tuple(self.mapped('model'))
-        model_ids = tuple(self.ids)
+        models = list(self.mapped('model'))
+        model_ids = list(self.ids)
 
-        query = "DELETE FROM mail_activity WHERE res_model_id IN %s"
+        query = "DELETE FROM mail_activity WHERE res_model_id = ANY(%s)"
         self.env.cr.execute(query, [model_ids])
 
-        query = "DELETE FROM mail_activity_type WHERE res_model IN %s"
+        query = "DELETE FROM mail_activity_type WHERE res_model = ANY(%s)"
         self.env.cr.execute(query, [models])
 
-        query = "DELETE FROM mail_followers WHERE res_model IN %s"
+        query = "DELETE FROM mail_followers WHERE res_model = ANY(%s)"
         self.env.cr.execute(query, [models])
 
-        query = "DELETE FROM mail_message WHERE model in %s"
+        query = "DELETE FROM mail_message WHERE model = ANY(%s)"
         self.env.cr.execute(query, [models])
 
     def write(self, vals):

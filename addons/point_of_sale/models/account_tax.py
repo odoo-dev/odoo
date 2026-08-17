@@ -45,8 +45,8 @@ class AccountTax(models.Model):
                     SELECT 1
                     FROM account_tax_pos_order_line_rel AS pos
                     WHERE account_tax.id = pos.account_tax_id
-                ) AND id IN %s
-            """, [tuple(taxes_to_compute)])
+                ) AND id = ANY(%s)
+            """, [list(taxes_to_compute)])
 
             used_taxes.update([tax[0] for tax in self.env.cr.fetchall()])
 

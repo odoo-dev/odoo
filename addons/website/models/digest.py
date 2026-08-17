@@ -21,9 +21,9 @@ class Digest(models.Model):
             SELECT v.website_id, count(DISTINCT t.visitor_id)
               FROM website_track t
               JOIN website_visitor v ON v.id=t.visitor_id
-             WHERE v.website_id IN %(website_ids)s AND t.visit_datetime >= %(start)s AND t.visit_datetime < %(end)s
+             WHERE v.website_id = ANY(%(website_ids)s) AND t.visit_datetime >= %(start)s AND t.visit_datetime < %(end)s
           GROUP BY v.website_id
-          """, params={'website_ids': tuple(websites.ids), 'start': start, 'end': end})
+          """, params={'website_ids': websites.ids, 'start': start, 'end': end})
         return {Website.browse(website_id): count for website_id, count in self.env.cr.fetchall()}
 
     @api.model
@@ -36,9 +36,9 @@ class Digest(models.Model):
             SELECT v.website_id, count(t.id)
               FROM website_track t
               JOIN website_visitor v ON v.id=t.visitor_id
-             WHERE v.website_id IN %(website_ids)s AND t.visit_datetime >= %(start)s AND t.visit_datetime < %(end)s
+             WHERE v.website_id = ANY(%(website_ids)s) AND t.visit_datetime >= %(start)s AND t.visit_datetime < %(end)s
           GROUP BY v.website_id
-          """, params={'website_ids': tuple(websites.ids), 'start': start, 'end': end})
+          """, params={'website_ids': websites.ids, 'start': start, 'end': end})
         return {Website.browse(website_id): count for website_id, count in self.env.cr.fetchall()}
 
     def _calculate_value_per_company(self, get_value_per_website):

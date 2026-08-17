@@ -415,9 +415,9 @@ class TestExpression(TestOrmPartnerCommon, SavepointCaseWithUserDemo, Transactio
         with_website = all_partners.filtered(lambda p: p.website)
 
         # We treat null values differently than in SQL. For instance in SQL:
-        #   SELECT id FROM test_orm_partner WHERE parent_id NOT IN (0)
+        #   SELECT id FROM test_orm_partner WHERE parent_id <> ALL((0))
         # will return only the records with non-null parent_id.
-        #   SELECT id FROM test_orm_partner WHERE parent_id IN (0)
+        #   SELECT id FROM test_orm_partner WHERE parent_id = ANY((0))
         # will return expectedly nothing (our ids always begin at 1).
         # This means the union of those two results will give only some
         # records, but not all present in database.
@@ -1782,8 +1782,8 @@ class TestQueries(TransactionCase):
                 "test_orm_partner"."active" IS TRUE
                 AND "test_orm_partner"."name" LIKE %s
                 AND (
-                    "test_orm_partner"."country_id" IN %s OR (
-                        "test_orm_partner"."email" NOT IN %s OR
+                    "test_orm_partner"."country_id" = ANY(%s) OR (
+                        "test_orm_partner"."email" <> ALL(%s) OR
                         "test_orm_partner"."email" IS NULL
                     )
                 )
@@ -1874,7 +1874,7 @@ class TestQueries(TransactionCase):
         with self.assertQueries(['''
             SELECT COUNT(*)
             FROM "test_orm_domain_expression_country"
-            WHERE "test_orm_domain_expression_country"."id" IN %s
+            WHERE "test_orm_domain_expression_country"."id" = ANY(%s)
         ''']):
             Model.search_count([('id', '=', 1)])
 
@@ -1905,7 +1905,7 @@ class TestQueries(TransactionCase):
             JOIN "test_orm_domain_expression_partner" AS "test_orm_domain_expression_users__partner_id" ON
                 ("test_orm_domain_expression_users"."partner_id" = "test_orm_domain_expression_users__partner_id"."id")
             WHERE "test_orm_domain_expression_users__partner_id"."active" IS TRUE
-            AND ("test_orm_domain_expression_users"."id" IN %s AND "test_orm_domain_expression_users"."partner_id" IN %s)
+            AND ("test_orm_domain_expression_users"."id" = ANY(%s) AND "test_orm_domain_expression_users"."partner_id" = ANY(%s))
             ORDER BY ...
         ''']):
             Model.search([])
@@ -1962,7 +1962,7 @@ class TestQueries(TransactionCase):
             FROM "test_orm_partner_category"
             LEFT JOIN "test_orm_partner_category" AS "test_orm_partner_category__parent_id" ON (
                 "test_orm_partner_category"."parent_id" = "test_orm_partner_category__parent_id"."id")
-            WHERE ("test_orm_partner_category"."active" IS TRUE AND "test_orm_partner_category"."id" IN %s)
+            WHERE ("test_orm_partner_category"."active" IS TRUE AND "test_orm_partner_category"."id" = ANY(%s))
                 AND (NOT EXISTS(
                         SELECT FROM (
                             SELECT "test_orm_partner_category"."parent_id" AS __inverse
@@ -2023,7 +2023,7 @@ class TestQueries(TransactionCase):
                 FROM "test_orm_users"
                 WHERE "test_orm_users"."name" NOT LIKE %s
             ) AS __sub WHERE __inverse = "test_orm_partner"."id")
-            AND ("test_orm_partner"."write_uid" IS NULL OR "test_orm_partner__write_uid"."login" IN %s)
+            AND ("test_orm_partner"."write_uid" IS NULL OR "test_orm_partner__write_uid"."login" = ANY(%s))
             )
             ORDER BY ...
         ''']):
@@ -2099,7 +2099,7 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN %s
+            WHERE "test_orm_partner"."business_id" = ANY(%s)
             ORDER BY ...
         ''']):
             self.Partner.search([('business_id', '=', self.business.id)])
@@ -2158,11 +2158,11 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" NOT IN (
+            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" <> ALL((
                 SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE "test_orm_business"."name" LIKE %s
-            ))
+            )))
             ORDER BY ...
         ''']):
             self.Partner.search(['!', ('business_id.name', 'like', self.business.name)])
@@ -2173,11 +2173,11 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN (
+            WHERE "test_orm_partner"."business_id" = ANY((
                 SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE ("test_orm_business"."active" IS TRUE AND "test_orm_business"."name" LIKE %s)
-            )
+            ))
             ORDER BY ...
         ''']):
             business_ids = self.business._search([('name', 'like', self.business.name)], order='id')
@@ -2187,13 +2187,13 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN (
+            WHERE "test_orm_partner"."business_id" = ANY((
                 SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE ("test_orm_business"."active" IS TRUE AND "test_orm_business"."name" LIKE %s)
                 ORDER BY ...
                 LIMIT 1
-            )
+            ))
             ORDER BY ...
         ''']):
             business_ids = self.business._search([('name', 'like', self.business.name)], order='id', limit=1)
@@ -2208,7 +2208,7 @@ class TestMany2one(TransactionCase):
         ''', '''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN %s
+            WHERE "test_orm_partner"."business_id" = ANY(%s)
             ORDER BY ...
         ''']):
             business_ids = self.business._search([('name', 'like', self.business.name)], order='id')
@@ -2224,7 +2224,7 @@ class TestMany2one(TransactionCase):
         ''', '''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN %s
+            WHERE "test_orm_partner"."business_id" = ANY(%s)
             ORDER BY ...
         ''']):
             companies = self.business.search([('name', 'like', self.business.name)], order='id')
@@ -2235,11 +2235,11 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE "test_orm_partner"."business_id" IN ((
+            WHERE "test_orm_partner"."business_id" = ANY(((
                 SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE ("test_orm_business"."active" IS TRUE AND "test_orm_business"."name" LIKE %s)
-            ))
+            )))
             ORDER BY ...
         ''']):
             business_ids = self.business._search([('name', 'like', self.business.name)], order='id')
@@ -2377,11 +2377,11 @@ class TestMany2one(TransactionCase):
         with self.assertQueries(['''
             SELECT "test_orm_partner"."id"
             FROM "test_orm_partner"
-            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" NOT IN (
+            WHERE ("test_orm_partner"."business_id" IS NULL OR "test_orm_partner"."business_id" <> ALL((
                 SELECT "test_orm_business"."id"
                 FROM "test_orm_business"
                 WHERE "test_orm_business"."name" LIKE %s
-            ))
+            )))
             ORDER BY ...
         ''']):
             self.Partner.search([('business_id', 'not like', "blablabla")])
@@ -2428,7 +2428,7 @@ class TestOne2many(TransactionCase):
             WHERE EXISTS (SELECT FROM (
                 SELECT "test_orm_domain_expression_partner_bank"."partner_id" AS __inverse
                 FROM "test_orm_domain_expression_partner_bank"
-                WHERE "test_orm_domain_expression_partner_bank"."id" IN %s
+                WHERE "test_orm_domain_expression_partner_bank"."id" = ANY(%s)
             ) AS __sub WHERE __inverse = "test_orm_domain_expression_partner"."id")
             ORDER BY ...
         ''']):
@@ -2481,7 +2481,7 @@ class TestOne2many(TransactionCase):
             WHERE EXISTS (SELECT FROM (
                 SELECT "test_orm_domain_expression_partner_bank"."partner_id" AS __inverse
                 FROM "test_orm_domain_expression_partner_bank"
-                WHERE "test_orm_domain_expression_partner_bank"."id" IN %s
+                WHERE "test_orm_domain_expression_partner_bank"."id" = ANY(%s)
             ) AS __sub WHERE __inverse = "test_orm_domain_expression_partner"."id")
             ORDER BY ...
         ''']):
@@ -2554,12 +2554,12 @@ class TestOne2many(TransactionCase):
                         SELECT "test_orm_domain_expression_partner_bank"."partner_id" AS __inverse
                         FROM "test_orm_domain_expression_partner_bank"
                         WHERE (
-                            "test_orm_domain_expression_partner_bank"."id" IN %s
+                            "test_orm_domain_expression_partner_bank"."id" = ANY(%s)
                             AND "test_orm_domain_expression_partner_bank"."sanitized_account_number" LIKE %s
                         )
                     ) AS __sub WHERE __inverse = "test_orm_domain_expression_partner"."id")
                     AND (
-                        "test_orm_domain_expression_partner"."name" NOT IN %s
+                        "test_orm_domain_expression_partner"."name" <> ALL(%s)
                         OR "test_orm_domain_expression_partner"."name" IS NULL
                     )
                     AND "test_orm_domain_expression_partner"."parent_id" IS NOT NULL
@@ -2662,7 +2662,7 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN %s
+                AND "test_orm_partner__category_id"."category_id" = ANY(%s)
             )
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2674,7 +2674,7 @@ class TestMany2many(TransactionCase):
             WHERE NOT EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN %s
+                AND "test_orm_partner__category_id"."category_id" = ANY(%s)
             )
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2686,11 +2686,11 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN (
+                AND "test_orm_partner__category_id"."category_id" = ANY((
                     SELECT "test_orm_partner_category"."id"
                     FROM "test_orm_partner_category"
                     WHERE "test_orm_partner_category"."active" is TRUE
-                )
+                ))
             )
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2702,19 +2702,19 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN (
+                AND "test_orm_partner__category_id"."category_id" = ANY((
                     SELECT "test_orm_partner_category"."id"
                     FROM "test_orm_partner_category"
                     WHERE EXISTS (
                         SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner_category__partner_ids"
                         WHERE "test_orm_partner_category__partner_ids"."category_id" = "test_orm_partner_category"."id"
-                        AND "test_orm_partner_category__partner_ids"."partner_id" IN (
+                        AND "test_orm_partner_category__partner_ids"."partner_id" = ANY((
                             SELECT "test_orm_partner"."id"
                             FROM "test_orm_partner"
                             WHERE "test_orm_partner"."name" LIKE %s
-                        )
+                        ))
                     )
-                )
+                ))
             )
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2761,7 +2761,7 @@ class TestMany2many(TransactionCase):
             WHERE (EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN %s
+                AND "test_orm_partner__category_id"."category_id" = ANY(%s)
             )
             OR NOT EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
@@ -2781,7 +2781,7 @@ class TestMany2many(TransactionCase):
             AND NOT EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN %s
+                AND "test_orm_partner__category_id"."category_id" = ANY(%s)
             ))
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2796,11 +2796,11 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN (
+                AND "test_orm_partner__category_id"."category_id" = ANY((
                     SELECT "test_orm_partner_category"."id"
                     FROM "test_orm_partner_category"
-                    WHERE "test_orm_partner_category"."name"->>%s IN %s
-                )
+                    WHERE "test_orm_partner_category"."name"->>%s = ANY(%s)
+                ))
             )
             ORDER BY "test_orm_partner"."id"
         ''']):
@@ -2816,11 +2816,11 @@ class TestMany2many(TransactionCase):
             WHERE EXISTS (
                 SELECT 1 FROM "test_orm_partner_test_orm_partner_category_rel" AS "test_orm_partner__category_id"
                 WHERE "test_orm_partner__category_id"."partner_id" = "test_orm_partner"."id"
-                AND "test_orm_partner__category_id"."category_id" IN (
+                AND "test_orm_partner__category_id"."category_id" = ANY((
                     SELECT "test_orm_partner_category"."id"
                     FROM "test_orm_partner_category"
                     WHERE "test_orm_partner_category"."name"->>%s LIKE %s
-                )
+                ))
             )
             ORDER BY "test_orm_partner"."id"
         ''']):

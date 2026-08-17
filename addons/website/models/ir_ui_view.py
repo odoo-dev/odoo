@@ -354,9 +354,9 @@ class IrUiView(models.Model):
             return super()._get_filter_xmlid_query(modules=modules)
         return SQL("""SELECT res_id
                     FROM   ir_model_data
-                    WHERE  res_id IN %(res_ids)s
+                    WHERE  res_id = ANY(%(res_ids)s)
                         AND model = 'ir.ui.view'
-                        AND module  IN %(modules)s
+                        AND module = ANY(%(modules)s)
                     UNION
                     SELECT sview.id
                     FROM   ir_ui_view sview
@@ -364,13 +364,13 @@ class IrUiView(models.Model):
                         INNER JOIN ir_model_data d
                                 ON oview.id = d.res_id
                                     AND d.model = 'ir.ui.view'
-                                    AND d.module  IN %(modules)s
-                    WHERE  sview.id IN %(res_ids)s
+                                    AND d.module = ANY(%(modules)s)
+                    WHERE  sview.id = ANY(%(res_ids)s)
                         AND sview.website_id IS NOT NULL
                         AND oview.website_id IS NULL;
                     """,
-                    res_ids=self._ids,
-                    modules=tuple(modules),
+                    res_ids=self.ids,
+                    modules=list(modules),
         )
 
     @api.model

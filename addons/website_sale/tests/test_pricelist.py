@@ -644,10 +644,10 @@ class TestWebsitePriceListAvailableGeoIP(TestWebsitePriceListAvailable):
                 SQL(
                     """
                 DELETE FROM ir_default
-                WHERE field_id IN %(field_ids)s
+                WHERE field_id = ANY(%(field_ids)s)
                 AND json_value = %(id_text)s
                 """,
-                    field_ids=tuple(field_ids),
+                    field_ids=field_ids,
                     id_text=str(self.env.user.partner_id.id),
                 )
             )

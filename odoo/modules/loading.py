@@ -308,7 +308,7 @@ def _check_module_names(cr: BaseCursor, module_names: Iterable[str]) -> None:
     mod_names = set(module_names)
     mod_names.discard('all')
     if mod_names:
-        cr.execute("SELECT count(id) AS count FROM ir_module_module WHERE name in %s", (tuple(mod_names),))
+        cr.execute("SELECT count(id) AS count FROM ir_module_module WHERE name = ANY(%s)", (list(mod_names),))
         row = cr.fetchone()
         assert row is not None  # for typing
         if row[0] != len(mod_names):
@@ -440,7 +440,7 @@ def load_modules(
             states = ('installed', 'to upgrade', 'to remove', 'to install')
         else:
             states = ('installed', 'to upgrade', 'to remove')
-        env.cr.execute("SELECT name from ir_module_module WHERE state IN %s", [states])
+        env.cr.execute("SELECT name from ir_module_module WHERE state = ANY(%s)", [list(states)])
         module_list = [name for (name,) in env.cr.fetchall() if name not in graph]
         if not module_list:
             break

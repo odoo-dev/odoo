@@ -278,14 +278,14 @@ class ModuleGraph:
                     self._remove(name)
 
     def _update_from_database(self, names: Iterable[str]) -> None:
-        names = tuple(name for name in names if name in self._modules)
+        names = [name for name in names if name in self._modules]
         if not names:
             return
         # update modules with values from the database (if exist)
         query = '''
             SELECT name, id, state, demo, latest_version AS installed_version
             FROM ir_module_module
-            WHERE name IN %s
+            WHERE name = ANY(%s)
         '''
         self._cr.execute(query, [names])
         for name, id_, state, demo, installed_version in self._cr.fetchall():

@@ -234,7 +234,7 @@ class IrModuleModule(models.Model):
 
             # then, search and group ir.model.data records
             imd_models = defaultdict(list)
-            imd_domain = [('module', '=', module.name), ('model', 'in', tuple(dmodels)), ('res_id', '!=', False)]
+            imd_domain = [('module', '=', module.name), ('model', 'in', list(dmodels)), ('res_id', '!=', False)]
             for data in IrModelData.sudo().search(imd_domain):
                 imd_models[data.model].append(data.res_id)
 
@@ -540,10 +540,10 @@ class IrModuleModule(models.Model):
                     FROM ir_module_module_dependency d
                     JOIN ir_module_module m ON (d.module_id=m.id)
                     WHERE
-                        d.name IN (SELECT name from ir_module_module where id in %s) AND
-                        m.state NOT IN %s AND
-                        m.id NOT IN %s """
-        self.env.cr.execute(query, (tuple(self.ids), tuple(exclude_states), tuple(known_deps.ids or self.ids)))
+                        d.name IN (SELECT name from ir_module_module where id = ANY(%s)) AND
+                        m.state <> ALL(%s) AND
+                        m.id <> ALL(%s) """
+        self.env.cr.execute(query, (self.ids, list(exclude_states), known_deps.ids or self.ids))
         new_deps = self.browse([row[0] for row in self.env.cr.fetchall()])
         missing_mods = new_deps - known_deps
         known_deps |= new_deps

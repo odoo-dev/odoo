@@ -228,9 +228,9 @@ class AccountJournal(models.Model):
                                    WHERE m.journal_id = j.id
                                    LIMIT 1
                               ) AS has_entries ON true
-                        WHERE j.id in %(journal_ids)s
+                        WHERE j.id = ANY(%(journal_ids)s)
             """,
-            journal_ids=tuple(self.ids),
+            journal_ids=list(self.ids),
         )
         self.env.cr.execute(sql_query)
         res = {journal_id: (has_posted, has_entries) for journal_id, has_posted, has_entries in self.env.cr.fetchall()}
@@ -346,11 +346,11 @@ class AccountJournal(models.Model):
              WHERE move.journal_id = ANY(%(journal_ids)s)
                AND move.state = 'posted'
                AND move.payment_state in ('not_paid', 'partial')
-               AND move.move_type IN %(invoice_types)s
+               AND move.move_type = ANY(%(invoice_types)s)
                AND move.company_id = ANY(%(company_ids)s)
           GROUP BY move.journal_id
         """, {
-            'invoice_types': tuple(self.env['account.move'].get_invoice_types(True)),
+            'invoice_types': list(self.env['account.move'].get_invoice_types(True)),
             'journal_ids': self.ids,
             'company_ids': self.env.companies.ids,
             'start_week1': first_day_of_week + timedelta(days=-7),
@@ -456,13 +456,13 @@ class AccountJournal(models.Model):
                    COUNT(st_line.id)
               FROM account_bank_statement_line st_line
               JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
-             WHERE st_line.journal_id IN %s
-               AND st_line.company_id IN %s
+             WHERE st_line.journal_id = ANY(%s)
+               AND st_line.company_id = ANY(%s)
                AND st_line.is_reconciled IS NOT TRUE
                AND (st_line_move.review_state IS NULL OR st_line_move.review_state NOT IN ('todo', 'anomaly'))
                AND st_line_move.state = 'posted'
           GROUP BY st_line.journal_id
-        """, [tuple(bank_cash_journals.ids), tuple(self.env.companies.ids)])
+        """, [list(bank_cash_journals.ids), list(self.env.companies.ids)])
         number_to_reconcile = {
             journal_id: count
             for journal_id, count in self.env.cr.fetchall()

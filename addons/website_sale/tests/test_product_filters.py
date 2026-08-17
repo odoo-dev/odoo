@@ -99,9 +99,9 @@ class TestWebsiteSaleProductFilters(WebsiteSaleCommon, TestProductAttributeValue
         cls.env.cr.execute(
             SQL("; ").join(
                 SQL(
-                    "UPDATE %s SET active = false WHERE id NOT IN %s",
+                    "UPDATE %s SET active = false WHERE id <> ALL(%s)",
                     SQL.identifier(recs._table),
-                    recs._ids,
+                    recs.ids,
                 )
                 for recs in (cls.product_tmpls.product_variant_ids, cls.product_tmpls)
             )

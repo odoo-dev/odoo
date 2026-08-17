@@ -39,8 +39,8 @@ def get_kpi_summary(cr, uid):
     cr.execute(SQL("""
         SELECT table_name || '.' || column_name
           FROM information_schema.columns
-         WHERE table_name || '.' || column_name IN %(columns)s
-    """, columns=tuple(expected_columns)))
+         WHERE table_name || '.' || column_name = ANY(%(columns)s)
+    """, columns=list(expected_columns)))
     existing_columns = {x[0] for x in cr.fetchall()}
     if expected_columns - existing_columns:
         # Needed columns are not present -> module is not installed

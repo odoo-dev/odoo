@@ -240,7 +240,7 @@ class ForumForum(models.Model):
                       FROM forum_tag
                      WHERE forum_id = f.id
                        AND posts_count > 0
-                       AND id IN %(allowed_ids)s
+                       AND id = ANY(%(allowed_ids)s)
                   ORDER BY posts_count DESC, name, id
                      LIMIT %(most_used_count)s
                    ) AS top_tags ON TRUE

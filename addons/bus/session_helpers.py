@@ -28,7 +28,7 @@ def _get_session_token_query_params(cr, uids):
     Only the registry level shape is cached (`SELECT`/`FROM`/`JOIN`/`GROUP BY`) as it is
     common to all users. The `WHERE` clause is added according to ``uids``.
     """
-    where = SQL("res_users.id IN %s", tuple(uids))
+    where = SQL("res_users.id = ANY(%s)", list(uids))
     if cached := _query_params_by_dbname.get(cr.dbname):
         cr.execute("SELECT MAX(id) FROM orm_signaling_registry")
         if cached["registry_sequence"] == cr.fetchone()[0]:

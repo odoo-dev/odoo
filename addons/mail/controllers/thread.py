@@ -217,14 +217,14 @@ class ThreadController(StoreController):
         request.update_context(message_post_store=store)
         if context:
             request.update_context(**context)
-        canned_response_ids = tuple(cid for cid in kwargs.get('canned_response_ids', []) if isinstance(cid, int))
+        canned_response_ids = [cid for cid in kwargs.get('canned_response_ids', []) if isinstance(cid, int)]
         if canned_response_ids:
             # Avoid serialization errors since last used update is not
             # essential and should not block message post.
             request.env.cr.execute("""
                 UPDATE mail_canned_response SET last_used=%(last_used)s
                 WHERE id IN (
-                    SELECT id from mail_canned_response WHERE id IN %(ids)s
+                    SELECT id from mail_canned_response WHERE id = ANY(%(ids)s)
                     FOR NO KEY UPDATE SKIP LOCKED
                 )
             """, {

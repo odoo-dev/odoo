@@ -35,11 +35,11 @@ class CrmTeam(models.Model):
                              WHERE move.move_type IN ('out_invoice', 'out_refund', 'out_receipt')
                                AND move.payment_state IN ('in_payment', 'paid', 'reversed')
                                AND move.state = 'posted'
-                               AND move.team_id IN %s
+                               AND move.team_id = ANY(%s)
                                AND move.date BETWEEN %s AND %s
                           GROUP BY move.team_id
                         """,
-                        tuple(self.ids),
+                        list(self.ids),
                         fields.Date.to_string(today.replace(day=1)),
                         fields.Date.to_string(today),
                     )

@@ -1135,7 +1135,7 @@ class AccountMoveLine(models.Model):
             self.env['account.partial.reconcile'].flush_model()
             self.env['res.currency'].flush_model(['decimal_places'])
 
-            aml_ids = tuple(stored_lines.ids)
+            aml_ids = list(stored_lines.ids)
             self.env.cr.execute('''
                 SELECT
                     part.debit_move_id AS line_id,
@@ -1144,7 +1144,7 @@ class AccountMoveLine(models.Model):
                     ROUND(SUM(part.debit_amount_currency), curr.decimal_places) AS amount_currency
                 FROM account_partial_reconcile part
                 JOIN res_currency curr ON curr.id = part.debit_currency_id
-                WHERE part.debit_move_id IN %s
+                WHERE part.debit_move_id = ANY(%s)
                 GROUP BY part.debit_move_id, curr.decimal_places
                 UNION ALL
                 SELECT
@@ -1154,7 +1154,7 @@ class AccountMoveLine(models.Model):
                     ROUND(SUM(part.credit_amount_currency), curr.decimal_places) AS amount_currency
                 FROM account_partial_reconcile part
                 JOIN res_currency curr ON curr.id = part.credit_currency_id
-                WHERE part.credit_move_id IN %s
+                WHERE part.credit_move_id = ANY(%s)
                 GROUP BY part.credit_move_id, curr.decimal_places
             ''', [aml_ids, aml_ids])
             amounts_map = {

@@ -49,9 +49,9 @@ class IrModelFields(models.Model):
         query = """
             SELECT model, name, id, serialization_field_id
             FROM ir_model_fields
-            WHERE model IN %s
+            WHERE model = ANY(%s)
         """
-        cr.execute(query, [tuple(model_names)])
+        cr.execute(query, [list(model_names)])
         existing = {row[:2]: row[2:] for row in cr.fetchall()}
 
         # determine updates, grouped by value
@@ -74,9 +74,9 @@ class IrModelFields(models.Model):
             return
 
         # update fields
-        query = "UPDATE ir_model_fields SET serialization_field_id=%s WHERE id IN %s"
+        query = "UPDATE ir_model_fields SET serialization_field_id=%s WHERE id = ANY(%s)"
         for value, ids in updates.items():
-            cr.execute(query, [value, tuple(ids)])
+            cr.execute(query, [value, list(ids)])
 
         records = self.browse(id_ for ids in updates.values() for id_ in ids)
         self.pool.post_init(records.modified, ['serialization_field_id'])

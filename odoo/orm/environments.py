@@ -1354,7 +1354,7 @@ class Cache:
             query = Query(model)
             sql_id = query.table.id
             sql_field = query.table[field.name]
-            query.add_where(SQL("%s IN %s", sql_id, tuple(ids)))
+            query.add_where(SQL("%s = ANY(%s)", sql_id, list(ids)))
             env.execute_query(SQL("%s", query.select(sql_id, sql_field), to_flush=()))  # execute without flush
 
             # compare returned values with corresponding values in cache

@@ -12,11 +12,11 @@ def migrate(cr, version):
          "34", "36", "37", "46", "47", "71", "74", "80", "85", "96",
          "98"]]
     report_lines = [env.ref(line, raise_if_not_found=False) for line in report_lines]
-    report_line_ids = tuple(line.id for line in report_lines if line)
+    report_line_ids = [line.id for line in report_lines if line]
 
     if balance_column:
         cr.execute("DELETE FROM account_report_column WHERE id = %s", (balance_column.id,))
     if report_line_ids:
-        cr.execute("DELETE FROM account_report_line WHERE id IN %s", (report_line_ids,))
+        cr.execute("DELETE FROM account_report_line WHERE id = ANY(%s)", (report_line_ids,))
     if tax_report:
         cr.execute("UPDATE account_report_line SET code = NULL WHERE report_id = %s", (tax_report.id,))

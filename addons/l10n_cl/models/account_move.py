@@ -134,12 +134,12 @@ class AccountMove(models.Model):
         if self.company_id.account_fiscal_country_id.code == "CL" and self.l10n_latam_use_documents:
             where_string = where_string.replace('journal_id = %(journal_id)s AND', '')
             where_string += ' AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s AND ' \
-                            'company_id = %(company_id)s AND move_type IN %(move_type)s'
+                            'company_id = %(company_id)s AND move_type = ANY(%(move_type)s)'
 
             param['company_id'] = self.company_id.id or False
             param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
-            param['move_type'] = (('in_invoice', 'in_refund') if
-                  self.l10n_latam_document_type_id._is_doc_type_vendor() else ('out_invoice', 'out_refund'))
+            param['move_type'] = (['in_invoice', 'in_refund'] if
+                  self.l10n_latam_document_type_id._is_doc_type_vendor() else ['out_invoice', 'out_refund'])
         return where_string, param
 
     def _get_name_invoice_report(self):

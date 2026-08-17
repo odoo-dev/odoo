@@ -149,10 +149,10 @@ class IrAccess(models.Model):
             """ EXISTS (
                     SELECT
                     FROM ir_model_data d
-                    WHERE d.model = %s AND d.res_id = %s AND d.module NOT IN %s
+                    WHERE d.model = %s AND d.res_id = %s AND d.module <> ALL(%s)
                 )
             """,
-            table._model._name, table.id, ('__export__', '__custom__'),
+            table._model._name, table.id, ['__export__', '__custom__'],
         )
 
     def _compute_for(self, operation: str):
@@ -163,8 +163,8 @@ class IrAccess(models.Model):
 
     # enables searching, grouping and ordering
     def _compute_sql_for(self, table, operation: str):
-        operations = tuple(IN_SELECTION[operation])
-        return SQL("%s IN %s", table.operation, operations)
+        operations = list(IN_SELECTION[operation])
+        return SQL("%s = ANY(%s)", table.operation, operations)
 
     @api.onchange('for_create', 'for_read', 'for_write', 'for_unlink')
     def _inverse_for_operations(self):

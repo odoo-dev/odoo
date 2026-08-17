@@ -139,11 +139,11 @@ class ProductTemplate(models.Model):
               JOIN product_template prod_template ON prod_variant.product_tmpl_id = prod_template.id
               JOIN uom_uom template_uom ON prod_template.uom_id = template_uom.id
               JOIN uom_uom line_uom ON line.product_uom_id = line_uom.id
-             WHERE prod_template.id IN %s
+             WHERE prod_template.id = ANY(%s)
                AND line.parent_state = 'posted'
                AND template_uom.id != line_uom.id
              LIMIT 1
-        """, [tuple(self.ids)])
+        """, [list(self.ids)])
         if self.env.cr.fetchall():
             raise ValidationError(_(
                 "This product is already being used in posted Journal Entries.\n"
