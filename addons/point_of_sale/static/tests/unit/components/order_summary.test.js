@@ -48,14 +48,15 @@ test("setLinePrice: input is per-unit tax-included price, discount is preserved"
     // User types 125 (per-unit tax-included). price_unit should be 100.
     const singleTaxLine = order.lines[0];
     await orderSummary.setLinePrice(singleTaxLine, 125);
-    expect(singleTaxLine.price_unit).toBe(100);
+    expect(singleTaxLine.price_unit).toBe(125);
+    expect(singleTaxLine.document_tax_mode).toBe("tax_included");
     expect(singleTaxLine.displayPrice).toBe(125);
 
     // multiTaxLine: 15% + 25% (both tax-excluded) = 40% total, qty=1, no discount.
     // User types 140 (per-unit tax-included). price_unit should be 100.
     const multiTaxLine = order.lines[1];
     await orderSummary.setLinePrice(multiTaxLine, 140);
-    expect(multiTaxLine.price_unit).toBe(100);
+    expect(multiTaxLine.price_unit).toBe(140);
     expect(multiTaxLine.displayPrice).toBe(140);
 
     // Discount is preserved: 10% discount on singleTaxLine.
@@ -63,6 +64,6 @@ test("setLinePrice: input is per-unit tax-included price, discount is preserved"
     // price_unit = 110 / 1.25 = 88. displayPrice = 88 * 0.9 * 1.25 = 99.
     singleTaxLine.setDiscount(10);
     await orderSummary.setLinePrice(singleTaxLine, 110);
-    expect(singleTaxLine.price_unit).toBe(88);
+    expect(singleTaxLine.price_unit).toBe(110);
     expect(singleTaxLine.displayPrice).toBe(99);
 });

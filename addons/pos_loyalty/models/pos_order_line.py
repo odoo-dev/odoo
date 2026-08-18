@@ -36,3 +36,6 @@ class PosOrderLine(models.Model):
 
     def isRefund(self):
         return super().isRefund() and not self.is_reward_line
+
+    def AllowManualPriceChange(self, line):
+        return not line.is_reward_line and super().AllowManualPriceChange(line)

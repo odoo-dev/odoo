@@ -112,4 +112,7 @@ patch(PosOrderline.prototype, {
     isRefund() {
         return super.isRefund(...arguments) && !this.is_reward_line;
     },
+    AllowManualPriceChange() {
+        return !this.is_reward_line && super.AllowManualPriceChange();
+    },
 });

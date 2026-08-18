@@ -297,9 +297,19 @@ class PosOrderLine(models.Model):
                     account_id=account,
                     is_refund=is_refund_document,
                     sign=-1 if is_refund_document else 1,
+                    document_tax_mode=self.AllowManualPriceChange(line),
                 ),
                 'uom_id': line.product_uom_id,
                 'name': product_name,
             })
 
         return base_lines
+
+    def AllowManualPriceChange(self, line):
+        if (
+            line.order_id.config_id.iface_tax_included == "total" and
+            (line.price_type == "manual" or line.order_id.is_refund_or_negative())
+        ):
+            return "tax_included"
+        else:
+            return False

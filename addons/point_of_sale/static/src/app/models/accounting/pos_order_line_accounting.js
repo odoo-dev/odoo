@@ -218,6 +218,14 @@ export class PosOrderlineAccounting extends Base {
         const product = this.getProduct();
         const priceUnit = this.price_unit || 0;
         const discount = this.getDiscount();
+        // let document_tax_mode = false;
+        // if (
+        //     order.config.iface_tax_included === "total" &&
+        //     (this.price_type === "manual" || this.isRefund())
+        // ) {
+        //     document_tax_mode = "tax_included";
+        // }
+        // console.log(document_tax_mode);
         const values = {
             ...extraValues,
             quantity: this.qty,
@@ -228,6 +236,7 @@ export class PosOrderlineAccounting extends Base {
             product_id: product,
             rate: 1.0,
             is_refund: this.isRefund(),
+            document_tax_mode: this.AllowManualPriceChange(),
             ...customValues,
         };
         if (order?.fiscal_position_id && product !== this.config.discount_product_id) {
