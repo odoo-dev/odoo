@@ -278,7 +278,7 @@ class PaymentTransaction(models.Model):
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         payload = {"amount": converted_amount, "currency": self.currency_id.name}
         response_content = self._send_api_request(
-            "POST", f"payments/{self.provider_reference}/capture", json=payload
+            "POST", f"payments/{self.source_transaction_id.provider_reference}/capture", json=payload
         )
 
         # Process the capture request response.
@@ -314,6 +314,16 @@ class PaymentTransaction(models.Model):
                 _logger.warning("Received data with missing reference.")
                 return tx
             tx = self.search([("reference", "=", reference), ("provider_code", "=", "razorpay")])
+            if tx and tx.provider_id.capture_manually and payment_data.get("status") == "captured":
+                child_tx = self.search([
+                    ("source_transaction_id", "=", tx.id),
+                    ("operation", "=", tx.operation),
+                    ("provider_code", "=", "razorpay"),
+                ], limit=1)
+                if child_tx:
+                    tx = child_tx
+                elif tx.state == "authorized":
+                    tx = self._razorpay_create_capture_tx_from_payment_data(tx, payment_data)
         else:  # 'refund'
             notes = payment_data.get("notes")
             reference = isinstance(notes, dict) and notes.get("reference")
@@ -334,6 +344,27 @@ class PaymentTransaction(models.Model):
                 else:  # The refund was initiated for an unknown source transaction.
                     pass  # Don't do anything with the refund notification.
         return tx
+
+    def _razorpay_create_capture_tx_from_payment_data(self, source_tx, payment_data):
+        """Create a capture transaction based on Razorpay data.
+
+        :param recordset source_tx: The source transaction for which a capture is initiated, as a
+                                    `payment.transaction` recordset.
+        :param dict payment_data: The payment data sent by the provider.
+        :return: The newly created capture transaction.
+        :rtype: payment.transaction
+        :raise ValidationError: If inconsistent data were received.
+        """
+        amount_to_capture = payment_data.get("amount")
+        if not amount_to_capture:
+            raise ValidationError(self.env._("Received incomplete capture data."))
+
+        converted_amount = payment_utils.to_major_currency_units(
+            amount_to_capture, source_tx.currency_id
+        )
+        return source_tx._create_child_transaction(
+            converted_amount, provider_reference=payment_data.get("id")
+        )
 
     def _razorpay_create_refund_tx_from_payment_data(self, source_tx, payment_data):
         """Create a refund transaction based on Razorpay data.
@@ -375,7 +406,12 @@ class PaymentTransaction(models.Model):
                 self._set_error(str(e))
                 return
 
-        if self.reference != entity_data["description"]:
+        expected_reference = (
+            self.source_transaction_id.reference
+            if self.source_transaction_id
+            else self.reference
+        )
+        if expected_reference != entity_data["description"]:
             _logger.warning("Received payment data with incorrect reference")
             raise Forbidden()
 

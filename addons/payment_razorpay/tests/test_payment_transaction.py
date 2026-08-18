@@ -158,3 +158,27 @@ class TestPaymentTransaction(RazorpayCommon):
         tx = self._create_transaction("direct", token_id=self._create_token().id)
         token_values = tx._extract_token_values(self.tokenize_payment_data)
         self.assertFalse(token_values)
+
+    def test_capture_creates_child_transaction(self):
+        """Test that capturing a transaction creates a child capture transaction."""
+        self.provider.capture_manually = True
+        source_tx = self._create_transaction("direct", state="authorized", provider_reference=self.payment_id)
+        with patch(
+            "odoo.addons.payment_razorpay.models.payment_provider.PaymentProvider._send_api_request",
+            return_value=dict(self.payment_data, status="captured"),
+        ) as api_request_mock:
+            child_tx = source_tx._capture()
+            self.assertEqual(child_tx.source_transaction_id, source_tx)
+            self.assertEqual(child_tx.operation, source_tx.operation)
+            self.assertTrue(api_request_mock.called)
+            self.assertIn(self.payment_id, api_request_mock.call_args[0][1])
+
+    def test_search_by_reference_returns_child_capture_tx(self):
+        """Test that _search_by_reference returns the child capture transaction when processing capture data."""
+        self.provider.capture_manually = True
+        source_tx = self._create_transaction("direct", state="authorized", provider_reference=self.payment_id)
+        child_tx = source_tx._create_child_transaction(source_tx.amount)
+        returned_tx = self.env["payment.transaction"]._search_by_reference(
+            "razorpay", dict(self.payment_data, status="captured")
+        )
+        self.assertEqual(returned_tx, child_tx)
