@@ -25,6 +25,7 @@ class L10nLatamBasePortalAccount(PortalAccount):
                 ]) if can_edit_commercial_fields else default_identification_type,
                 'vat_label': request.env._("Identification Number"),
                 'is_latam_country': True,
+                'display_b2b_fields': True,
             })
         return rendering_values
 

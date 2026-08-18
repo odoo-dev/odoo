@@ -400,11 +400,11 @@
                         class="col-form-label fw-normal label-optional"
                     />
                     <i
-                        t-if="commercial_fields_warning"
+                        t-if="commercial_fields_warning or vat_warning"
                         class="oi text-warning"
                         data-icon="info"
                         data-bs-toggle="tooltip"
-                        t-att-title="commercial_fields_warning"
+                        t-att-title="commercial_fields_warning or vat_warning"
                     />
                     <input
                         type="text"

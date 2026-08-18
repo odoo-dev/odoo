@@ -1331,9 +1331,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         is_anonymous_cart = order_sudo._is_anonymous_cart()
         # Display b2b field is feature is enabled on given website
-        rendering_values["display_b2b_fields"] = self.env.website.is_view_active(
-            "website_sale.address_b2b"
-        )
+        rendering_values["display_b2b_fields"] = rendering_values.get(
+            "display_b2b_fields", False
+        ) or self.env.website.is_view_active("website_sale.address_b2b")
 
         if rendering_values["commercial_address_update_url"]:
             rendering_values["commercial_address_update_url"] = (

@@ -63,20 +63,6 @@ class ResPartner(models.Model):
 
         return frontend_writable_fields
 
-    def _get_mandatory_billing_address_fields(self, *args, display_b2b_fields=True, **kwargs):
-        """Override `portal` to remove commercial fields from required address fields if address_b2b
-        feature is disabled."""
-        display_b2b_fields = (
-            display_b2b_fields and self.env.website.is_view_active("website_sale.address_b2b")
-        )
-        required_fields = super()._get_mandatory_billing_address_fields(
-            *args, display_b2b_fields=display_b2b_fields, **kwargs
-            )
-        if not display_b2b_fields:
-            required_fields -= set(self._commercial_fields())
-
-        return required_fields
-
     def _needs_address(self, **kwargs):
         if cart := kwargs.get("order_sudo"):
             return cart._needs_customer_address()
