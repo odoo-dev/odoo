@@ -19,7 +19,10 @@ class AccountAccount(models.Model):
         month = date_period.get("month")
         quarter = date_period.get("quarter")
         day = date_period.get("day")
-        if period_type == "year":
+        if period_type == "all_time":
+            start = date(1900, 1, 1)
+            end = date.today()
+        elif period_type == "year":
             fiscal_day = company.fiscalyear_last_day
             fiscal_month = int(company.fiscalyear_last_month)
             if not (fiscal_day == 31 and fiscal_month == 12):

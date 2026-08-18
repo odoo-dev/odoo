@@ -73,6 +73,35 @@ test("evaluation with reference to a month period", async () => {
     expect.verifySteps(["spreadsheet_fetch_debit_credit"]);
 });
 
+test("evaluation with all time period", async () => {
+    const { model } = await createModelWithDataSource({
+        mockRPC: async function (route, args) {
+            if (args.method === "spreadsheet_fetch_debit_credit") {
+                expect(args.args[0]).toEqual([
+                    {
+                        codes: ["100"],
+                        company_id: null,
+                        date_range: {
+                            range_type: "all_time",
+                        },
+                        include_unposted: false,
+                    },
+                ]);
+                expect.step("spreadsheet_fetch_debit_credit");
+                return [{ debit: 42, credit: 16 }];
+            }
+        },
+    });
+    setCellContent(model, "A1", `=ODOO.CREDIT("100", "all_time")`);
+    setCellContent(model, "A2", `=ODOO.DEBIT("100", "all_time")`);
+    setCellContent(model, "A3", `=ODOO.BALANCE("100", "all_time")`);
+    await waitForDataLoaded(model);
+    expect(getCellValue(model, "A1")).toBe(16);
+    expect(getCellValue(model, "A2")).toBe(42);
+    expect(getCellValue(model, "A3")).toBe(26);
+    expect.verifySteps(["spreadsheet_fetch_debit_credit"]);
+});
+
 test("Functions are correctly formatted", async () => {
     const { model } = await createModelWithDataSource();
     setCellContent(model, "A1", `=ODOO.CREDIT("100", "2022")`);
@@ -433,6 +462,9 @@ test("parseAccountingDate", () => {
         rangeType: "quarter",
         year: 2022,
         quarter: 4,
+    });
+    expect(parseAccountingDate({ value: "all_time" }, locale)).toEqual({
+        rangeType: "all_time",
     });
     // A number below 3000 is interpreted as a year.
     // It's interpreted as a regular spreadsheet date otherwise

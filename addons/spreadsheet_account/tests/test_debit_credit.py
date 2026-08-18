@@ -372,6 +372,48 @@ class SpreadsheetAccountingFunctionsTest(AccountTestInvoicingCommon):
             ],
         )
 
+    def test_all_time_date_period(self):
+        self.env["account.move"].create(
+            {
+                "company_id": self.company_data["company"].id,
+                "move_type": "entry",
+                "date": "2000-04-02",
+                "line_ids": [
+                    Command.create(
+                        {
+                            "name": "line_debit_c1_all_time",
+                            "account_id": self.account_revenue_c1.id,
+                            "debit": 1000,
+                        },
+                    ),
+                    Command.create(
+                        {
+                            "name": "line_credit_c1_all_time",
+                            "account_id": self.account_expense_c1.id,
+                            "credit": 1000,
+                        },
+                    ),
+                ],
+            }
+        )
+        self.assertEqual(
+            self.env["account.account"].spreadsheet_fetch_debit_credit(
+                [
+                    {
+                        "date_range": {
+                            "range_type": "all_time",
+                        },
+                        "codes": [self.account_revenue_c1.code],
+                        "company_id": None,
+                        "include_unposted": True,
+                    }
+                ]
+            ),
+            [
+                {"credit": 0.0, "debit": 1500.0},
+            ],
+        )
+
     def test_shifted_fiscal_year_date_period(self):
         self.company_data["company"].fiscalyear_last_day = 3
         self.company_data["company"].fiscalyear_last_month = "2"

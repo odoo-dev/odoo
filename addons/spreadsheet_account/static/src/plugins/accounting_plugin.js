@@ -11,7 +11,7 @@ import { camelToSnakeObject, toServerDateString } from "@spreadsheet/helpers/hel
  */
 
 export class AccountingPlugin extends OdooUIPlugin {
-    static getters = /** @type {const} */ ([
+    static getters = [
         "getAccountPrefixCredit",
         "getAccountPrefixDebit",
         "getAccountGroupCodes",
@@ -20,7 +20,7 @@ export class AccountingPlugin extends OdooUIPlugin {
         "getAccountResidual",
         "getAccountPartnerData",
         "getAccountTagData",
-    ]);
+    ];
     constructor(config) {
         super(config);
         /** @type {import("@spreadsheet/data_sources/server_data").ServerData} */
@@ -106,13 +106,15 @@ export class AccountingPlugin extends OdooUIPlugin {
      */
     _fetchAccountData(codes, dateRange, offset, companyId, includeUnposted) {
         dateRange = deepCopy(dateRange);
-        dateRange.year += offset;
-        // Excel dates start at 1899-12-30, we should not support date ranges
-        // that do not cover dates prior to it.
-        // Unfortunately, this check needs to be done right before the server
-        // call as a date to low (year <= 1) can raise an error server side.
-        if (dateRange.year < 1900) {
-            throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+        if (dateRange.rangeType !== "all_time") {
+            dateRange.year += offset;
+            // Excel dates start at 1899-12-30, we should not support date ranges
+            // that do not cover dates prior to it.
+            // Unfortunately, this check needs to be done right before the server
+            // call as a date to low (year <= 1) can raise an error server side.
+            if (dateRange.year < 1900) {
+                throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+            }
         }
         return this.serverData.batch.get(
             "account.account",
@@ -151,13 +153,15 @@ export class AccountingPlugin extends OdooUIPlugin {
      */
     getAccountResidual(codes, dateRange, offset, companyId, includeUnposted) {
         dateRange = deepCopy(dateRange);
-        dateRange.year += offset;
-        // Excel dates start at 1899-12-30, we should not support date ranges
-        // that do not cover dates prior to it.
-        // Unfortunately, this check needs to be done right before the server
-        // call as a date to low (year <= 1) can raise an error server side.
-        if (dateRange.year < 1900) {
-            throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+        if (dateRange.rangeType !== "all_time") {
+            dateRange.year += offset;
+            // Excel dates start at 1899-12-30, we should not support date ranges
+            // that do not cover dates prior to it.
+            // Unfortunately, this check needs to be done right before the server
+            // call as a date to low (year <= 1) can raise an error server side.
+            if (dateRange.year < 1900) {
+                throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+            }
         }
         const result = this.serverData.batch.get(
             "account.account",
@@ -183,13 +187,15 @@ export class AccountingPlugin extends OdooUIPlugin {
      */
     getAccountPartnerData(codes, dateRange, offset, companyId, includeUnposted, partnerIds) {
         dateRange = deepCopy(dateRange);
-        dateRange.year += offset;
-        // Excel dates start at 1899-12-30, we should not support date ranges
-        // that do not cover dates prior to it.
-        // Unfortunately, this check needs to be done right before the server
-        // call as a date to low (year <= 1) can raise an error server side.
-        if (dateRange.year < 1900) {
-            throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+        if (dateRange.rangeType !== "all_time") {
+            dateRange.year += offset;
+            // Excel dates start at 1899-12-30, we should not support date ranges
+            // that do not cover dates prior to it.
+            // Unfortunately, this check needs to be done right before the server
+            // call as a date to low (year <= 1) can raise an error server side.
+            if (dateRange.year < 1900) {
+                throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+            }
         }
         const result = this.serverData.batch.get(
             "account.account",
@@ -214,13 +220,15 @@ export class AccountingPlugin extends OdooUIPlugin {
      */
     getAccountTagData(accountTagIds, dateRange, offset, companyId, includeUnposted) {
         dateRange = deepCopy(dateRange);
-        dateRange.year += offset;
-        // Excel dates start at 1899-12-30, we should not support date ranges
-        // that do not cover dates prior to it.
-        // Unfortunately, this check needs to be done right before the server
-        // call as a date too low (year <= 1) can raise an error server side.
-        if (dateRange.year < 1900) {
-            throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+        if (dateRange.rangeType !== "all_time") {
+            dateRange.year += offset;
+            // Excel dates start at 1899-12-30, we should not support date ranges
+            // that do not cover dates prior to it.
+            // Unfortunately, this check needs to be done right before the server
+            // call as a date too low (year <= 1) can raise an error server side.
+            if (dateRange.year < 1900) {
+                throw new EvaluationError(_t("%s is not a valid year.", dateRange.year));
+            }
         }
         const result = this.serverData.batch.get(
             "account.account",

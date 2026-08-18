@@ -84,6 +84,16 @@ function parseAccountingMonth(dateRange, locale) {
 
 /**
  * @param {object | undefined} dateRange
+ * @returns {{ rangeType: "all_time" } | undefined}
+ */
+function parseAccountingAllTime(dateRange) {
+    return toString(dateRange?.value).trim().toLowerCase() === "all_time"
+        ? { rangeType: "all_time" }
+        : undefined;
+}
+
+/**
+ * @param {object | undefined} dateRange
  * @returns {YearDateRange | undefined}
  */
 function parseAccountingYear(dateRange, locale) {
@@ -120,6 +130,7 @@ function parseAccountingDay(dateRange, locale) {
 export function parseAccountingDate(dateRange, locale) {
     try {
         return (
+            parseAccountingAllTime(dateRange) ||
             parseAccountingQuarter(dateRange) ||
             parseAccountingMonth(dateRange, locale) ||
             parseAccountingYear(dateRange, locale) ||
@@ -128,7 +139,7 @@ export function parseAccountingDate(dateRange, locale) {
     } catch {
         throw new EvaluationError(
             _t(
-                `'%s' is not a valid period. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`,
+                `'%s' is not a valid period. Supported formats are "21/12/2022", "Q1/2022", "12/2022", "2022", and "all_time".`,
                 dateRange?.value
             )
         );
@@ -146,7 +157,9 @@ const ODOO_FIN_ARGS = () => [
     arg("account_codes (string)", _t("The prefix of the accounts.")),
     arg(
         "date_range (string, date)",
-        _t(`The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`)
+        _t(
+            `The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", "2022", and "all_time".`
+        )
     ),
     YEAR_OFFSET_ARG,
     COMPANY_ARG,
@@ -162,7 +175,9 @@ const ODOO_RESIDUAL_ARGS = () => [
     ),
     arg(
         "date_range (string, date, optional)",
-        _t(`The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`)
+        _t(
+            `The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", "2022", and "all_time".`
+        )
     ),
     YEAR_OFFSET_ARG,
     COMPANY_ARG,
@@ -442,7 +457,7 @@ functionRegistry.add("ODOO.BALANCE.TAG", {
         arg(
             "date_range (string, date, optional)",
             _t(
-                `The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".`
+                `The date range. Supported formats are "21/12/2022", "Q1/2022", "12/2022", "2022", and "all_time".`
             )
         ),
         YEAR_OFFSET_ARG,
