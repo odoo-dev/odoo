@@ -2,7 +2,7 @@
 import re
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.translate import mark_as_copy
 
 
@@ -147,8 +147,34 @@ class AccountReconcileModel(models.Model):
     match_label_param = fields.Char(string='Label Parameter', tracking=True)
     match_partner_ids = fields.Many2many('res.partner', string='Partners',
         help='The reconciliation model will only be applied to the selected customers/vendors.')
+    payment_tolerance = fields.Float(
+        string="Payment Tolerance",
+        required=True,
+        default=0.0,
+        tracking=True,
+    )
+    payment_tolerance_type = fields.Selection(selection=[
+        ('amount', "In amount"),
+        ('percentage', "In percentage"),
+    ], required=True, default='percentage', tracking=True)
+    matching_order = fields.Selection(selection=[
+        ('new_first', "Newest first"),
+        ('old_first', "Oldest first"),
+    ], required=True, default='old_first', tracking=True)
+    rule_type = fields.Selection(selection=[
+        ('matching_rule', "Matching rule"),
+        ('reco_model', "Reconciliation model"),
+    ], default='reco_model')
 
     line_ids = fields.One2many('account.reconcile.model.line', 'model_id', copy=True)
+
+    @api.constrains('payment_tolerance', 'payment_tolerance_type')
+    def _check_payment_tolerance(self):
+        for model in self:
+            if model.payment_tolerance_type == 'amount' and model.payment_tolerance < 0:
+                raise ValidationError(self.env._("The payment tolerance must be positive."))
+            if model.payment_tolerance_type == 'percentage' and not 0 <= model.payment_tolerance <= 100:
+                raise ValidationError(self.env._("The percentage tolerance must be between 0 and 100."))
 
     @api.constrains('match_label', 'match_label_param')
     def _check_match_label_param(self):
@@ -158,6 +184,13 @@ class AccountReconcileModel(models.Model):
                     re.compile(record.match_label_param)
                 except re.error:
                     raise UserError(_('The regex is not valid'))
+
+    @api.onchange('payment_tolerance', 'payment_tolerance_type')
+    def _on_change_tolerance(self):
+        if self.payment_tolerance_type == 'percentage' and not 0 <= self.payment_tolerance <= 100:
+            self.payment_tolerance = max(0, min(100, self.payment_tolerance))
+        elif self.payment_tolerance_type == 'amount' and self.payment_tolerance < 0:
+            self.payment_tolerance = 0
 
     @api.depends('mapped_partner_id', 'match_label', 'match_amount', 'match_partner_ids', 'trigger')
     def _compute_can_be_proposed(self):
