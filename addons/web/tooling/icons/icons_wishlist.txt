@@ -86,6 +86,7 @@ chevron_backward
 chevron_forward
 chevron_left
 chevron_right
+change_history
 child_care
 circle
 clear_all
@@ -161,6 +162,7 @@ expand_circle_up
 expand_content
 expand_less
 expand_more
+exclamation
 experiment
 explore
 extension
@@ -280,6 +282,7 @@ mic_off
 minimize
 mobile_off
 mode_comment
+money_bag
 monitor
 more_horiz
 more_vert
@@ -394,6 +397,7 @@ stacks
 stadia_controller
 star
 star_half
+stat_0
 stethoscope
 sticky_note_2
 stop
@@ -416,11 +420,13 @@ table
 table_chart
 tablet
 tag
+task
 terminal
 text_ad
 text_fields
 thumb_down
 thumb_up
+timer
 title
 today
 toggle_off
