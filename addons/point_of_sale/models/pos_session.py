@@ -863,8 +863,9 @@ class PosSession(models.Model):
 
         # Build the out_receipt lines. Returns pm_data_list so we can
         # create the matching account.payment / statement line records after posting.
+        # TODO-manv: check if changes are valid with moda
         sale_orders = non_invoiced_orders.filtered(
-            lambda order: not order.is_refund_or_negative() and order.amount_total > 0,
+            lambda order: not order.is_refund_or_negative() and order.amount_total >= 0,
         )
         refund_orders = non_invoiced_orders - sale_orders
         sales_move = self._create_session_account_move(sale_orders)
@@ -953,6 +954,10 @@ class PosSession(models.Model):
             refund,
             payments,
         )
+
+        # TODO-manv: check if changes are valid with moda
+        if not (lines_commands or payment_commands or extra_commands):
+            return self.env['account.move']
 
         # Ensure rounding method record is set on the invoice if needed
         rounding_method = self.config_id._get_rounding_method_for_invoice(orders)
