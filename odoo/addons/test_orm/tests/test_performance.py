@@ -651,6 +651,21 @@ class TestPerformance(SavepointCaseWithUserDemo):
                 for line in record.line_ids:
                     line.value
 
+    @warmup
+    def test_prefetch_related_many2one_inverse(self):
+        """Reading ``base.line_ids.related_base_id`` triggers the computation
+        of ``line.related_base_id``, which updates the cache of the inverse
+        one2many ``base.related_line_ids``.
+        """
+        base = self.env['test_performance.base'].create({
+            'line_ids': [Command.create({'value': index}) for index in range(10)]
+        })
+        self.env.invalidate_all()
+
+        with self.assertQueryCount(2):
+            # one query to fetch line_ids, one to fetch related_base_id in batch
+            base.line_ids.mapped('related_base_id')
+
 
 @tagged('bacon_and_eggs')
 @tagged('at_install', '-post_install')  # LEGACY at_install
