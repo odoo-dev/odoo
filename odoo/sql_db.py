@@ -421,7 +421,14 @@ class Cursor(_CursorProtocol):
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
-        return self._obj.mogrify(query, params)
+        # ClientCursor.mogrify() replaces _tx, which holds loaders for the
+        # current result. Restore it so a later fetchall() still works
+        # (SQL DEBUG logging formats the query after execute()).
+        tx = self._obj._tx
+        try:
+            return self._obj.mogrify(query, params)
+        finally:
+            self._obj._tx = tx
 
     def _normalize_query(self, query, params=None):
         if isinstance(query, SQL):
