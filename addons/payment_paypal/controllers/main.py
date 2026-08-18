@@ -11,6 +11,7 @@ from odoo.http import request
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_paypal import const
+from odoo.addons.payment_paypal import utils as paypal_utils
 
 _logger = get_payment_logger(__name__)
 
@@ -56,18 +57,14 @@ class PaypalController(http.Controller):
         )
         if tx_sudo:
             order_id = token or tx_sudo.provider_reference
-            try:
-                if tx_sudo.payment_method_code in {"paypal", "card"}:
-                    self._paypal_capture_order(tx_sudo, order_id)
-                else:
-                    order_details = tx_sudo._send_api_request(
-                        "GET", f"/v2/checkout/orders/{order_id}"
-                    )
-                    normalized_data = self._normalize_paypal_data(order_details)
-                    tx_sudo._record(normalized_data)
-            except ValidationError as e:
-                _logger.warning("Unable to complete the order with PayPal: %s", e)
-                tx_sudo.with_context(payment_safe_write=True)._set_error(str(e))
+            if tx_sudo.payment_method_code in {"paypal", "card"}:
+                self._paypal_capture_order(tx_sudo, order_id)
+            else:
+                order_details = tx_sudo._send_api_request(
+                    "GET", f"/v2/checkout/orders/{order_id}"
+                )
+                normalized_data = paypal_utils.normalize_paypal_payment_data(order_details)
+                tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
     @http.route(_cancel_url, type="http", auth="public", methods=["GET"], save_session=False)
@@ -92,10 +89,7 @@ class PaypalController(http.Controller):
             except ValidationError:
                 _logger.warning("Unable to fetch the order details from PayPal.")
             else:
-                order_details = tx_sudo._send_api_request(
-                    "GET", f"/v2/checkout/orders/{order_id}"
-                )
-                normalized_data = self._normalize_paypal_data(order_details)
+                normalized_data = paypal_utils.normalize_paypal_payment_data(order_details)
                 normalized_data["status"] = "CANCELED"
                 tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
@@ -128,7 +122,7 @@ class PaypalController(http.Controller):
         :param dict data: The notification data sent by PayPal.
         :return: None
         """
-        normalized_data = self._normalize_paypal_data(data.get("resource"))
+        normalized_data = paypal_utils.normalize_paypal_payment_data(data.get("resource"))
         tx_sudo = (
             self.env["payment.transaction"].sudo()._search_by_reference("paypal", normalized_data)
         )
@@ -203,31 +197,6 @@ class PaypalController(http.Controller):
         self._verify_notification_origin(data, provider_sudo=provider_sudo)
         provider_sudo.paypal_email_confirmed = True
 
-    def _normalize_paypal_data(self, data, is_capture_request=False):
-        """Normalize the payment data received from PayPal.
-
-        The payment data received from PayPal has a different format depending on whether the data
-        come from the payment request response (order creation or capture), or from the webhook.
-
-        :param dict data: The data to normalize.
-        :param bool is_capture_request: Whether the data came from the capture api call.
-        :return: The normalized data.
-        :rtype: dict
-        """
-        purchase_unit = data["purchase_units"][0]
-        result = {
-            "payment_source": data.get("payment_source"),
-            "reference_id": purchase_unit.get("reference_id"),
-            "purchase_units": data.get("purchase_units"),
-        }
-        if not is_capture_request:
-            result.update({**purchase_unit, "id": data.get("id"), "status": data.get("status")})
-        elif captured := purchase_unit.get("payments", {}).get("captures"):
-            result.update(captured[0])
-        else:
-            _logger.warning("Invalid PayPal response format, can't normalize.")
-        return result
-
     def _handle_vault_notification(self, notification_data):
         """Create a token from a `VAULT.PAYMENT-TOKEN.CREATED` webhook notification.
 
@@ -258,19 +227,23 @@ class PaypalController(http.Controller):
         )
         if not tx_sudo:
             return
-        # Guard against duplicate deliveries
-        if (
-            self
-            .env["payment.token"]
-            .sudo()
-            .search_count([
-                ("provider_id", "=", tx_sudo.provider_id.id),
-                ("provider_ref", "=", vault_id),
-            ])
-        ):
-            return
-        self._verify_notification_origin(notification_data, tx_sudo)
-        tx_sudo.with_context(payment_safe_write=True)._paypal_tokenize_from_notification(resource)
+        try:
+            self._verify_notification_origin(notification_data, tx_sudo)
+        except ValidationError:
+            tx_sudo.with_context(
+                # The verification request is idempotent; the handler is safe to replay.
+                payment_safe_write=True
+            )._set_error(self.env._("Unable to verify the tokenization data"))
+        else:
+            pm_code = tx_sudo.payment_method_code
+            payment_source = resource.get("payment_source", {}).get(pm_code, {})
+            normalized_data = {
+                "event_type": notification_data.get("event_type"),
+                "payment_source": {
+                    pm_code: {**payment_source, "attributes": {"vault": resource}}
+                },
+            }
+            tx_sudo._record(normalized_data)
 
     def _verify_notification_origin(self, payment_data, tx_sudo=None, provider_sudo=None):
         """Check that the notification was sent by PayPal.
@@ -326,7 +299,9 @@ class PaypalController(http.Controller):
         response = tx_sudo._send_api_request(
             "POST", f"/v2/checkout/orders/{order_id}/capture", idempotency_key=idempotency_key
         )
-        normalized_response = self._normalize_paypal_data(response, is_capture_request=True)
+        normalized_response = paypal_utils.normalize_paypal_payment_data(
+            response, is_capture_request=True
+        )
         tx_sudo = (
             self
             .env["payment.transaction"]

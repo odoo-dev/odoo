@@ -59,3 +59,34 @@ def format_shipping_address(tx_sudo):
     ):
         address_vals["shipping"] = format_partner_address(partner_shipping)
     return address_vals
+
+
+def normalize_paypal_payment_data(data, is_capture_request=False):
+    """Normalize the payment data received from PayPal.
+
+    The payment data received from PayPal has a different format depending on whether the data
+    come from the payment request response (order creation or capture), or from the webhook.
+
+    :param dict data: The data to normalize.
+    :param bool is_capture_request: Whether the data came from the capture api call.
+    :return: The normalized data.
+    :rtype: dict
+    """
+    purchase_unit = data["purchase_units"][0]
+    result = {
+        "payment_source": data["payment_source"],
+        "reference_id": purchase_unit.get("reference_id"),
+        "purchase_units": data["purchase_units"],
+    }
+    if not is_capture_request:
+        result.update({
+            **purchase_unit,
+            "txn_type": data.get("intent"),
+            "id": data.get("id"),
+            "status": data.get("status"),
+        })
+    elif captured := purchase_unit.get("payments", {}).get("captures"):
+        result.update({**captured[0], "txn_type": "CAPTURE"})
+    else:
+        _logger.warning("Invalid PayPal response format, can't normalize.")
+    return result

@@ -9,7 +9,7 @@ from odoo.tools import urls
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_paypal import utils as paypal_utils
-from odoo.addons.payment_paypal.const import PAYMENT_STATUS_MAPPING
+from odoo.addons.payment_paypal.const import PAYMENT_STATUS_MAPPING, VAULT_WEBHOOK_EVENTS
 from odoo.addons.payment_paypal.controllers.main import PaypalController
 
 _logger = get_payment_logger(__name__)
@@ -19,7 +19,6 @@ class PaymentTransaction(models.Model):
     _inherit = "payment.transaction"
 
     paypal_customer_id = fields.Char(string="PayPal Customer ID")
-    paypal_payer_action_url = fields.Char(string="PayPal Payer Action URL")
 
     def _get_specific_processing_values(self, processing_values):
         """Override of `payment` to return the Paypal-specific processing values.
@@ -31,16 +30,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific processing values
         :rtype: dict
         """
-        if self.provider_code != "paypal":
-            return super()._get_specific_processing_values(processing_values)
-
-        if self.token_id:
-            # Order already created by `_send_payment_request`
-            if self.paypal_payer_action_url:
-                return {"payer_action_url": self.paypal_payer_action_url}
-            return {}
-
-        if self.operation != "online_direct":
+        if self.provider_code != "paypal" or self.operation != "online_direct":
             return super()._get_specific_processing_values(processing_values)
 
         try:
@@ -92,7 +82,9 @@ class PaymentTransaction(models.Model):
             return super()._send_payment_request()
 
         response_content = self._paypal_create_order()
-        self._record(paypal_utils.normalize_paypal_payment_data(response_content))
+        self._record(
+            paypal_utils.normalize_paypal_payment_data(response_content, is_capture_request=True)
+        )
 
     def _paypal_create_order(self, payload=None):
         """Create a PayPal order for the transaction and return the API response."""
@@ -149,12 +141,7 @@ class PaymentTransaction(models.Model):
         return_url, cancel_url = self._paypal_get_return_urls(self.reference)
         if self.payment_method_code == "card":
             return {
-                "card": {
-                    "name": self.partner_name,
-                    "billing_address": invoice_address_vals.get("address", {}),
-                    "attributes": {"verification": {"method": "SCA_WHEN_REQUIRED"}},
-                    "experience_context": {"return_url": return_url, "cancel_url": cancel_url},
-                }
+                "card": self._paypal_add_card_data(return_url, cancel_url, invoice_address_vals)
             }
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
 
@@ -182,30 +169,18 @@ class PaymentTransaction(models.Model):
                     "usage": "SUBSEQUENT",
                 }
         elif self.tokenize:
-            payment_source["paypal"]["attributes"] = self._paypal_get_vault_attributes()
+            payment_source["paypal"]["attributes"] = {
+                "vault": {
+                    "permit_multiple_payment_tokens": False,
+                    "store_in_vault": "ON_SUCCESS",
+                    "usage_type": "MERCHANT",
+                    "customer_type": "CONSUMER",
+                 }
+            }
+            if customer_id := self._paypal_get_customer_id():
+                payment_source["paypal"]["attributes"]["customer"] = {"id": customer_id}
 
         return payment_source
-
-    def _paypal_get_vault_attributes(self):
-        """Return the attributes instructing PayPal to save the payment source in the vault.
-
-        See https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/
-        orders-api/paypal/.
-
-        :return: The attributes of the payment source.
-        :rtype: dict
-        """
-        attributes = {
-            "vault": {
-                "permit_multiple_payment_tokens": False,
-                "store_in_vault": "ON_SUCCESS",
-                "usage_type": "MERCHANT",
-                "customer_type": "CONSUMER",
-            }
-        }
-        if customer_id := self._paypal_get_customer_id():
-            attributes["customer"] = {"id": customer_id}
-        return attributes
 
     def _paypal_get_customer_id(self):
         existing_token = (
@@ -309,6 +284,9 @@ class PaymentTransaction(models.Model):
             self._set_canceled(state_message=self.env._("The customer left the payment page."))
             return
 
+        if payment_data.get("event_type") in VAULT_WEBHOOK_EVENTS:
+            return  # Vault notifications carry no payment state; only the token is created.
+
         # Update the provider reference.
         txn_id = payment_data.get("id")
         if not all(txn_id):
@@ -354,6 +332,9 @@ class PaymentTransaction(models.Model):
         if self.provider_code != "paypal":
             return super()._extract_amount_data(payment_data)
 
+        if payment_data.get("event_type") in VAULT_WEBHOOK_EVENTS:
+            return None
+
         amount_data = payment_data.get("amount", {})
         amount = amount_data.get("value")
         currency_code = amount_data.get("currency_code")
@@ -380,20 +361,6 @@ class PaymentTransaction(models.Model):
             .get("attributes", {})
             .get("vault", {})
         )
-
-    def _paypal_tokenize_from_notification(self, vault_data):
-        """Create a token from a `VAULT.PAYMENT-TOKEN.CREATED` webhook notification.
-
-        :param dict vault_data: The `resource` of the webhook notification, containing the vault
-                                `id`, the `customer` id, and the saved payment source.
-        :return: None
-        """
-        payment_source = vault_data.get("payment_source", {}).get(self.payment_method_code, {})
-        self._tokenize({
-            "payment_source": {
-                self.payment_method_code: {**payment_source, "attributes": {"vault": vault_data}}
-            }
-        })
 
     def _extract_token_values(self, payment_data):
         """Override of `payment` to extract the token values from the payment data."""

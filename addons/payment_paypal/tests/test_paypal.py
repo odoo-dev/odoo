@@ -8,6 +8,7 @@ from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.payment.tests.http_common import PaymentHttpCommon
+from odoo.addons.payment_paypal import utils as paypal_utils
 from odoo.addons.payment_paypal.controllers.main import PaypalController
 from odoo.addons.payment_paypal.tests.common import PaypalCommon
 
@@ -53,16 +54,16 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     def test_complete_order_confirms_transaction(self):
         """Test the processing of a webhook notification."""
         tx = self._create_transaction("direct")
-        normalized_data = PaypalController._normalize_paypal_data(
-            self, self.completed_order, is_capture_request=True
+        normalized_data = paypal_utils.normalize_paypal_payment_data(
+            self.completed_order, is_capture_request=True
         )
         tx.with_context(payment_safe_write=True)._process(normalized_data)
         self.assertEqual(tx.state, "done")
         self.assertEqual(tx.provider_reference, normalized_data["id"])
 
     def test_feedback_processing(self):
-        normalized_data = PaypalController._normalize_paypal_data(
-            self, self.payment_data.get("resource")
+        normalized_data = paypal_utils.normalize_paypal_payment_data(
+            self.payment_data.get("resource")
         )
 
         # Confirmed transaction
@@ -203,6 +204,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
             "._verify_notification_origin"
         ):
             self._make_json_request(url, data=notification)
+        self._run_processing()
         tx.invalidate_recordset()
         self.assertTrue(tx.token_id, "The vault webhook should create the token.")
         self.assertEqual(tx.token_id.provider_ref, vault_id)
@@ -217,6 +219,9 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
         paypal_pm = self.env.ref("payment_paypal.payment_method_paypal").id
         token = self._create_token(payment_method_id=paypal_pm, provider_ref="VAULT-TOKEN-1")
         tx = self._create_transaction("token", payment_method_id=paypal_pm, token_id=token.id)
+        # PayPal returns a minimal representation of the completed order: the amount and the final
+        # status live on the capture, not on the purchase unit.
+        capture_id = "CAPTURE-1"
         completed_order = {
             "id": self.order_id,
             "status": "COMPLETED",
@@ -227,7 +232,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
                     "payments": {
                         "captures": [
                             {
-                                "id": self.order_id,
+                                "id": capture_id,
                                 "status": "COMPLETED",
                                 "amount": {
                                     "currency_code": self.currency.name,
@@ -244,9 +249,17 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
             return_value=completed_order,
         ):
             tx._charge_with_token()
-        self.assertTrue(self.env["payment.data"].search([("transaction_id", "=", tx.id)]))
-        self.assertFalse(tx.paypal_payer_action_url)
-        self.assertNotIn("payer_action_url", tx._get_processing_values())
+        payment_data = self.env["payment.data"].search([("transaction_id", "=", tx.id)])
+        self.assertTrue(payment_data)
+        self.assertEqual(
+            payment_data.payload["amount"],
+            {"currency_code": self.currency.name, "value": str(self.amount)},
+            "The amount should be normalized from the capture embedded in the order.",
+        )
+
+        tx.with_context(payment_safe_write=True)._process(payment_data.payload)
+        self.assertEqual(tx.state, "done")
+        self.assertEqual(tx.provider_reference, capture_id)
         payment_source = tx._paypal_prepare_order_payload()["payment_source"]["paypal"]
         self.assertNotIn("stored_credential", payment_source)
 

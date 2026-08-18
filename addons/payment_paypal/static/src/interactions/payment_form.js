@@ -124,7 +124,7 @@ patch(PaymentForm.prototype, {
         const isCard = paymentMethodCode === 'card';
         const paypalLoadingList = document.querySelectorAll('#o_paypal_loading');
         if (!isCard) {
-            this.env.bus.trigger('hidePaymentButton');
+            this._hideInputs();
             for (const paypalLoading of paypalLoadingList) {
                 paypalLoading.classList.remove('d-none');
             }
