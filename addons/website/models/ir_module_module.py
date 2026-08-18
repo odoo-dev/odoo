@@ -9,7 +9,7 @@ from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import MissingError
 from odoo.http import request
 from odoo.modules.module import get_manifest
-from odoo.tools import escape_psql, split_every
+from odoo.tools import OrderedSet, escape_psql, split_every
 
 _logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class IrModuleModule(models.Model):
         for module in self:
             module.is_installed_on_current_website = module == self.env['website'].get_current_website().theme_id
 
-    def write(self, vals):
+    def _button_immediate_function(self, func):
         """
             Override to correctly upgrade themes after upgrade/installation of modules.
 
@@ -76,25 +76,52 @@ class IrModuleModule(models.Model):
 
                     -> We want to upgrade every website using this theme.
         """
-        if request and request.db and request.env and request.context.get('apply_new_theme'):
-            self = self.with_context(apply_new_theme=True)
+        website_to_load = defaultdict(OrderedSet)
+        data_ids = {}
 
-        for module in self:
-            if module.name.startswith('theme_') and vals.get('state') == 'installed':
-                _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
+        def update(self):
+            func(self)
+            # detect updated modules
+            modules = self.search_fetch([('name', '=like', 'theme\\_%'), ('state', '=like', 'to%')], ['name', 'state'])
+            for module in modules:
+                websites = module._theme_get_stream_website_ids()
+                if module.state == 'to upgrade' and request:
+                    websites &= request.env['website'].get_current_website()
+                if websites and module.state in ('to upgrade', 'to install'):
+                    website_to_load[module.id].update(websites.ids)
+                # detect removed xmlids
+                if module.state == 'to install':
+                    continue
+                # self._get_module_data?
+                theme_records = self._theme_model_names.values()
+                datas = self.env['ir.model.data'].search([('module', '=', module.name), ('model', 'in', list(theme_records))])
+                for data in datas:
+                    record = self.env[data.model].browse(data.res_id)
+                    copy_ids = record.with_context({
+                        'active_test': False,
+                        'MODULE_UNINSTALL_FLAG': True
+                    }).copy_ids
+                    if copy_ids and request:
+                        copy_ids = copy_ids.filtered(lambda c: c.website_id & websites)
+                    if copy_ids:
+                        data_ids[data] = copy_ids
 
-                if module.state in ['to install', 'to upgrade']:
-                    websites_to_update = module._theme_get_stream_website_ids()
+        res = super()._button_immediate_function(update)
 
-                    if module.state == 'to upgrade' and request:
-                        Website = self.env['website']
-                        current_website = Website.get_current_website()
-                        websites_to_update = current_website if current_website in websites_to_update else Website
+        for data, copy_ids in data_ids.items():
+            if not data.exists():
+                _logger.info('Deleting %s@%s (theme `copy_ids`) for website %s',
+                        copy_ids.ids, copy_ids._name, copy_ids.mapped('website_id'))
+                copy_ids.unlink()
 
-                    for website in websites_to_update:
-                        module._theme_load(website)
-
-        return super(IrModuleModule, self).write(vals)
+        for module_id, website_ids in website_to_load.items():
+            module = self.browse(module_id)
+            if module.state != 'installed':
+                continue
+            #_logger.info('Module %s has been loaded as theme template (%s)', module.name, module.state)
+            for website_id in website_ids:
+                module.with_context(apply_new_theme=True)._theme_load(self.env['website'].browse(website_id))
+        return res
 
     def _get_module_data(self, model_name):
         """
@@ -111,7 +138,8 @@ class IrModuleModule(models.Model):
         for module in self:
             imd_ids = IrModelData.search([('module', '=', module.name), ('model', '=', theme_model_name)]).mapped('res_id')
             records |= self.env[theme_model_name].with_context(active_test=False).browse(imd_ids)
-        return records
+        # sort to process in the order of creation of records
+        return records.sorted('id')
 
     def _update_records(self, model_name, website):
         """
@@ -401,9 +429,10 @@ class IrModuleModule(models.Model):
         website.theme_id = self
 
         # this will install 'self' if it is not installed yet
-        if request:
-            request.update_context(apply_new_theme=True)
         self._theme_upgrade_upstream()
+        # XXX remove this?
+        #if website in self._theme_get_stream_website_ids():
+        #    self.with_context(apply_new_theme=True)._theme_load(website)
 
         result = website.button_go_website()
         result['context']['params']['with_loader'] = True

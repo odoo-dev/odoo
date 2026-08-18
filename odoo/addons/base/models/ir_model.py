@@ -2539,6 +2539,7 @@ class IrModelData(models.Model):
 
     @api.model
     def _process_end_unlink_record(self, record):
+        # TODO remove in master
         record.unlink()
 
     @api.model
