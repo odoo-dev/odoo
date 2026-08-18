@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tax_report_vat" model="account.report">
+        <field name="name">VAT Report</field>
+        <field name="name@az">Əlavə Dəyər Vergisi Bəyannaməsi</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.az"/>
+        <field name="availability_condition">country</field>
+        <field name="allow_foreign_vat" eval="True"/>
+        <field name="column_ids">
+            <record id="tax_report_vat_column_base" model="account.report.column">
+                <field name="name">Taxable Turnover excl. VAT</field>
+                <field name="expression_label">base</field>
+            </record>
+            <record id="tax_report_vat_column_tax" model="account.report.column">
+                <field name="name">VAT Amount</field>
+                <field name="expression_label">tax</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_vat_section_part1" model="account.report.line">
+                <field name="name">Part 1 — VAT on turnover for the reporting period</field>
+                <field name="name@az">Hissə 1 — Hesabat dövründəki dövriyyə üzrə ƏDV-nin hesablanması</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_1" model="account.report.line">
+                <field name="name">Transactions subject to VAT at 18%</field>
+                <field name="name@az">ƏDV 18% dərəcə ilə cəlb olunan əməliyyatlar</field>
+                <field name="code">az_1</field>
+                <field name="hierarchy_level">3</field>
+                <field name="foldability">foldable</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_1_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_101.base+az_102.base</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_1_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_101.tax+az_102.tax</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="tax_report_vat_line_az_101" model="account.report.line">
+                        <field name="name">Supply of goods, performance of works, rendering of services</field>
+                        <field name="name@az">Malların təqdim edilməsi, işlərin görülməsi, xidmətlərin göstərilməsi üzrə əməliyyatlar</field>
+                        <field name="code">az_101</field>
+                        <field name="hierarchy_level">5</field>
+                        <field name="expression_ids">
+                            <record id="tax_report_vat_line_az_101_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-1(B)</field>
+                            </record>
+                            <record id="tax_report_vat_line_az_101_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-1(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_vat_line_az_102" model="account.report.line">
+                        <field name="name">Taxable trade mark-up on retail agri goods</field>
+                        <field name="name@az">Kənd təsərrüfatı məhsullarının pərakəndə satışı üzrə əməliyyatlar</field>
+                        <field name="code">az_102</field>
+                        <field name="hierarchy_level">5</field>
+                        <field name="expression_ids">
+                            <record id="tax_report_vat_line_az_102_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-2(B)</field>
+                            </record>
+                            <record id="tax_report_vat_line_az_102_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-2(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_112" model="account.report.line">
+                <field name="name">Agri products bought from others / imported, then sold</field>
+                <field name="name@az">Digər şəxslərdən alınan və ya idxal olunan kənd təsərrüfatı məhsullarının (xarici mənşəli balıq məhsulları istisna olmaqla) satışı üzrə əməliyyatlar</field>
+                <field name="code">az_112</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_112_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-3(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_112_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-3(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_2" model="account.report.line">
+                <field name="name">Transactions subject to VAT at 0% (zero rate)</field>
+                <field name="name@az">ƏDV-yə sıfır (0) dərəcə ilə cəlb olunan əməliyyatlar</field>
+                <field name="code">az_2</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_2_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-4(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_3" model="account.report.line">
+                <field name="name">VAT-exempt transactions</field>
+                <field name="name@az">ƏDV-dən azad olunan əməliyyatlar</field>
+                <field name="code">az_3</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_3_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-5(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_4" model="account.report.line">
+                <field name="name">Operations taxed at the 20% VAT rate</field>
+                <field name="name@az">ƏDV-nə 20 faiz dərəcə ilə tutulan əməliyyatlar</field>
+                <field name="code">az_4</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_4_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-6(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_4_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-6(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_5" model="account.report.line">
+                <field name="name">TOTAL of operations</field>
+                <field name="name@az">Əməliyyatlar üzrə CƏMİ</field>
+                <field name="code">az_5</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_5_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_1.base+az_112.base+az_2.base+az_3.base+az_4.base</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_5_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_1.tax+az_112.tax+az_4.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_section_nonres" model="account.report.line">
+                <field name="name">Non-Resident Operations</field>
+                <field name="name@az">Qeyri-rezident əməliyyatları</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_6" model="account.report.line">
+                <field name="name">Non-resident works/services</field>
+                <field name="name@az">Qeyri-rezidentin göstərdiyi xidmətlər və ya gördüyü işlər üzrə əməliyyatlar</field>
+                <field name="code">az_6</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_6_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_601.base+az_602.base</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_6_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_601.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_601" model="account.report.line">
+                <field name="name">Taxable non-resident works/services (not VAT-registered)</field>
+                <field name="name@az">ƏDV məqsədləri üçün qeydiyyata alınmayan qeyri-rezidentin xidmətləri/işləri üzrə vergiyə cəlb olunan əməliyyatlar</field>
+                <field name="code">az_601</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_601_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-7(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_601_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-7(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_602" model="account.report.line">
+                <field name="name">Exempt transactions for services/works by non-resident NOT registered for VAT purposes</field>
+                <field name="name@az">Qeyri-rezident azad olunan əməliyyatlar</field>
+                <field name="code">az_602</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_602_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-8(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_section_part2" model="account.report.line">
+                <field name="name">Part 2 — Receivables (cash-basis)</field>
+                <field name="name@az">Hissə 2 —Debitor borcları (kassa metodu)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_7" model="account.report.line">
+                <field name="name">On receivables</field>
+                <field name="name@az">Debitor borclar üzrə</field>
+                <field name="code">az_7</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_7_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_701.base+az_702.base+az_703.base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_701" model="account.report.line">
+                <field name="name">On operations taxed at 18%</field>
+                <field name="name@az">ƏDV-nə 18 faiz dərəcə ilə cəlb olunan əməliyyatlar üzrə</field>
+                <field name="code">az_701</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_701_rec" model="account.report.expression">
+                        <field name="label">rec</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-9(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_701_ta" model="account.report.expression">
+                        <field name="label">ta</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">-(az_1.base + az_112.base)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_701_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_701.rec + az_701.ta</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_702" model="account.report.line">
+                <field name="name">On operations taxed at 0%</field>
+                <field name="name@az">ƏDV-nə sıfır (0) faiz dərəcə ilə cəlb olunan əməliyyatlar üzrə</field>
+                <field name="code">az_702</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_702_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-10(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_703" model="account.report.line">
+                <field name="name">On exempt operations</field>
+                <field name="name@az">ƏDV-dən azad olunan əməliyyatlar üzrə</field>
+                <field name="code">az_703</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_703_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-11(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_section_part3" model="account.report.line">
+                <field name="name">Part 3 — Creditable input VAT</field>
+                <field name="name@az">Hissə 3 — Əvəzləşdirilən ƏDV</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_8" model="account.report.line">
+                <field name="name">Cashless payments on e-invoices (Art.175.1)</field>
+                <field name="name@az">VM 175.1-ə əsasən alınmış elektron qaimə-fakturalar üzrə nağdsız ödənilmiş məbləğ</field>
+                <field name="code">az_8</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_8_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">12(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_8_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">12(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_9" model="account.report.line">
+                <field name="name">Cashless payments on pre-2001 debts</field>
+                <field name="name@az">01.01.2001-ci il tarixinə olan borcların nağdsız qaydada ödənilmiş məbləği</field>
+                <field name="code">az_9</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_9_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">13(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_9_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">13(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_10" model="account.report.line">
+                <field name="name">Import VAT paid</field>
+                <field name="name@az">İdxalda ƏDV-yə cəlb olunmuş mallara görə ödənilmiş məbləğ</field>
+                <field name="code">az_10</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_10_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">14(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_10_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">14(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_11" model="account.report.line">
+                <field name="name">Value of exempt imports</field>
+                <field name="name@az">İdxalda ƏDV-dən azad olunan malların dəyəri</field>
+                <field name="code">az_11</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_11_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">15(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_12" model="account.report.line">
+                <field name="name">Amounts paid to a non-resident (Art. 169.4)</field>
+                <field name="name@az">VM 169.4-cü maddəsinə əsasən qeyri-rezidentə ödənilmiş məbləğ</field>
+                <field name="code">az_12</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_12_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">16(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_12_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">16(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_13" model="account.report.line">
+                <field name="name">VAT NOT creditable (Art. 175.2)</field>
+                <field name="name@az">VM 175.2-ci maddəsinə əsasən əvəzləşdirilməsinə yol verilməyən ƏDV məbləği</field>
+                <field name="code">az_13</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_13_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">17(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_14" model="account.report.line">
+                <field name="name">VAT NOT creditable (Art. 175.3)</field>
+                <field name="name@az">VM 175.3-cü maddəsinə əsasən əvəzləşdirilməsinə yol verilməyən ƏDV məbləği</field>
+                <field name="code">az_14</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_14_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">18(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_15" model="account.report.line">
+                <field name="name">VAT NOT creditable (Art. 175.4)</field>
+                <field name="name@az">VM 175.4-cü maddəsinə əsasən əvəzləşdirilməsinə yol verilməyən ƏDV məbləği</field>
+                <field name="code">az_15</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_15_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">19(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_16" model="account.report.line">
+                <field name="name">Amounts paid at the 0% rate</field>
+                <field name="name@az">ƏDV sıfır (0) faiz dərəcəsi ilə ödənilmiş məbləğ</field>
+                <field name="code">az_16</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_16_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">20(B)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_17" model="account.report.line">
+                <field name="name">TOTAL of operations</field>
+                <field name="name@az">Əməliyyatlar üzrə CƏMİ</field>
+                <field name="code">az_17</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_17_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_8.base+az_9.base+az_10.base+az_11.base+az_12.base+az_16.base</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_17_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_8.tax+az_9.tax+az_10.tax+az_12.tax-az_13.tax-az_15.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_section_part4" model="account.report.line">
+                <field name="name">Part 4 — Adjustments (Tax Code Art. 163)</field>
+                <field name="name@az">Hissə 4 — Dəqiqləşdirilən dövriyyələr (VM 163)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_18" model="account.report.line">
+                <field name="name">Calculated VAT on adjustments in taxable turnover (Art. 163)</field>
+                <field name="name@az">Vergiyə cəlb olunan dövriyyələrin dəqiqləşdirilməsi üzrə hesablanmış ƏDV (VM 163)</field>
+                <field name="code">az_18</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_18_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">21(B)</field>
+                    </record>
+                    <record id="tax_report_vat_line_az_18_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">21(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_19" model="account.report.line">
+                <field name="name">Adjustments to zero-rated turnover (Art. 163)</field>
+                <field name="name@az">Sıfır (0) dərəcəli dövriyyələrin dəqiqləşdirilməsi (VM 163)</field>
+                <field name="code">az_19</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_19_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="subformula">editable;rounding=2</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_20" model="account.report.line">
+                <field name="name">Adjustments to exempt turnover (Art. 163)</field>
+                <field name="name@az">ƏDV-dən azad olunan dövriyyələrin dəqiqləşdirilməsi (VM 163)</field>
+                <field name="code">az_20</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_20_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="subformula">editable;rounding=2</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_line_az_21" model="account.report.line">
+                <field name="name">VAT restored on reduced credits</field>
+                <field name="name@az">Əvəzləşdirmələrin azaldılmasına görə bərpa edilən ƏDV</field>
+                <field name="code">az_21</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_21_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">22(T)</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_vat_section_part5" model="account.report.line">
+                <field name="name">Part 5 — Settlement for the Reporting Period</field>
+                <field name="name@az">Hissə 5 — Hesablaşmalar (Yekun)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_vat_line_az_25" model="account.report.line">
+                <field name="name">Net payable to the budget</field>
+                <field name="name@az">BÜDCƏYƏ ÖDƏNİLMƏLİDİR / BÜDCƏDƏN QAYTARILIR</field>
+                <field name="code">az_25</field>
+                <field name="hierarchy_level">3</field>
+                <field name="expression_ids">
+                    <record id="tax_report_vat_line_az_25_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">az_5.tax+az_6.tax+az_18.tax+az_21.tax-az_17.tax</field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
