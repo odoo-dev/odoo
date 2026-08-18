@@ -26,6 +26,8 @@ class AccountInvoiceReport(models.Model):
         ('in_invoice', 'Vendor Bill'),
         ('out_refund', 'Customer Credit Note'),
         ('in_refund', 'Vendor Credit Note'),
+        ('out_receipt', 'Sales Receipt'),
+        ('in_receipt', 'Purchase Receipt'),
         ], readonly=True)
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -124,6 +126,28 @@ class AccountInvoiceReport(models.Model):
             'COALESCE(SUM(%s) / NULLIF(SUM(%s), 0.0), 0)', table.price_subtotal, table.quantity,
         )
 
+<<<<<<< 69bc1b704458f86d091aff3c48541504426463e2
+||||||| 39e512ffb63ae23852e64ca69e343310996d6bfe
+    @api.model
+    def _where(self) -> SQL:
+        return SQL(
+            '''
+            WHERE move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
+                AND line.account_id IS NOT NULL
+                AND line.display_type = 'product'
+            ''',
+        )
+=======
+    @api.model
+    def _where(self) -> SQL:
+        return SQL(
+            f'''
+            WHERE move.move_type IN ({','.join(f"'{t[0]}'" for t in self.env['account.invoice.report']._fields['move_type'].selection)})
+                AND line.account_id IS NOT NULL
+                AND line.display_type = 'product'
+            ''',
+        )
+>>>>>>> fd9c86d3a1401aa57709f60e747bb650543c36b6
 
 class ReportAccountReport_Invoice(models.AbstractModel):
     _name = 'report.account.report_invoice'
