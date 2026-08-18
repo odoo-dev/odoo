@@ -2,15 +2,39 @@
 import base64
 import io
 import json
+import logging
 import math
 from io import BytesIO
 
 import qrcode
+from markupsafe import Markup
 from PIL import Image
 
 from odoo import _, api, models, modules
 from odoo.tools.image import image_data_uri
 from odoo.tools.misc import format_datetime
+
+# Mirror of the STYLE_MAPPING in base_printer.js and epson_printer.js
+PAPER_SIZE_STYLES = {
+    '58': {'width': 360, 'font_size': 22},
+    '80': {'width': 512, 'font_size': 22},
+    'tm_u22_76': {'width': 200, 'font_size': 12},
+    'tm_u22_70': {'width': 180, 'font_size': 12},
+    'tm_u22_58': {'width': 150, 'font_size': 12},
+    'tm_u33_76': {'width': 400, 'font_size': 22},
+    'tm_u33_70': {'width': 380, 'font_size': 22},
+    'tm_p60_60': {'width': 375, 'font_size': 22},
+    'tm_l100_40': {'width': 240, 'font_size': 14},
+}
+# Mirror of LINE_HEIGHT_RATIO and the text classes in pos_ticket_printer_service.js
+LINE_HEIGHT_RATIO = 1.4
+TEXT_CLASS_RATIOS = {
+    'text-small': 0.8,
+    'text-normal': 1.0,
+    'text-large': 1.4,
+    'text-huge': 2.0,
+    'text-insane': 2.3,
+}
 
 
 def _get_str_notes(note):
@@ -194,18 +218,43 @@ class PosOrderReceipt(models.AbstractModel):
             },
         }
 
-    def order_receipt_generate_html(self, basic_receipt=False):
+    def order_receipt_generate_html(self, basic_receipt=False, printer_style=False):
+        paper_size = '58'
+        if not printer_style:
+            printer_style = self._order_receipt_paper_style_css(paper_size)
         last_order = self.env['pos.order'].search([], order='id desc', limit=1)
         report_name = 'point_of_sale.pos_order_receipt'
-        return last_order.env['ir.qweb']._render(report_name, values=self.order_receipt_generate_data(basic_receipt))
+        html = last_order.env['ir.qweb']._render(report_name, values=self.order_receipt_generate_data(basic_receipt))
+        html = html.replace(Markup('</head>'), printer_style + Markup('</head>'))
+        return html, PAPER_SIZE_STYLES[paper_size]['width']
 
-    def order_receipt_generate_image(self, basic_receipt=False, width=500, height=0):
-        content = self.order_receipt_generate_html(basic_receipt)
+    def order_receipt_generate_image(self, basic_receipt=False, width=500, height=0, printer_style=False):
+        content, width = self.order_receipt_generate_html(basic_receipt, printer_style)
         return self.env['ir.actions.report']._run_wkhtmltoimage(
             [content],
             width,
             height,
         )[0]
+
+    def _order_receipt_paper_style(self, paper_size):
+        return PAPER_SIZE_STYLES.get(paper_size) or PAPER_SIZE_STYLES['80']
+
+    def _order_receipt_paper_style_css(self, paper_size):
+        """Return the style making the receipt fit the given paper size.
+        The receipt template is designed for 80mm paper, smaller printers need
+        their own width and font sizes. Mirror method of the JS
+        setIframeSizeFromPrinter in pos_ticket_printer_service.js
+        """
+        style = self._order_receipt_paper_style(paper_size)
+        font_size = style['font_size']
+        rules = [f"#pos-receipt {{ width: {style['width']}px !important; font-size: {font_size}px !important; }}"]
+        for text_class, ratio in TEXT_CLASS_RATIOS.items():
+            size = font_size * ratio
+            rules.append(
+                f"#pos-receipt .{text_class} {{ font-size: {size}px !important; "
+                f"line-height: {size * LINE_HEIGHT_RATIO}px !important; }}"
+            )
+        return Markup("<style>%s</style>") % "\n".join(rules)
 
     # Order changes receipt generation
     def _order_change_has_prep_category(self, product, prep_categ_ids):

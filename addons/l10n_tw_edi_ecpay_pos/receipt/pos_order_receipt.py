@@ -73,7 +73,7 @@ class PosOrderReceipt(models.AbstractModel):
         return data
 
     def order_receipt_generate_html(self, basic_receipt=False):
-        content = super().order_receipt_generate_html(basic_receipt)
+        content, width = super().order_receipt_generate_html(basic_receipt)
         if any((
             self.company_id.account_fiscal_country_id.code != 'TW',
             not self.config_id.is_ecpay_enabled,
@@ -81,7 +81,7 @@ class PosOrderReceipt(models.AbstractModel):
             self.l10n_tw_edi_is_b2b,
             self.ecpay_error,
         )):
-            return content
+            return content, width
 
         ecpay_certificate_receipt = self.env['ir.qweb']._render(
             'l10n_tw_edi_ecpay_pos.ecpay_certificate_receipt',
@@ -92,4 +92,4 @@ class PosOrderReceipt(models.AbstractModel):
             values=self.order_receipt_generate_data(basic_receipt),
         )
         separator = '<div style="display:block; clear:both; height:4mm;"></div>'
-        return separator.join([content, ecpay_certificate_receipt, ecpay_transaction_receipt])
+        return separator.join([content, ecpay_certificate_receipt, ecpay_transaction_receipt]), width
