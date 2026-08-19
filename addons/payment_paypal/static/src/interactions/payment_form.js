@@ -322,7 +322,6 @@ patch(PaymentForm.prototype, {
         }
     },
 
-
     /**
      * Handle the approval event of the component and complete the payment.
      *

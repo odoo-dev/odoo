@@ -55,7 +55,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
         """Test the processing of a webhook notification."""
         tx = self._create_transaction("direct")
         normalized_data = paypal_utils.normalize_paypal_payment_data(
-            self.completed_order, is_capture_request=True
+            self.completed_order, has_capture_data=True
         )
         tx.with_context(payment_safe_write=True)._process(normalized_data)
         self.assertEqual(tx.state, "done")

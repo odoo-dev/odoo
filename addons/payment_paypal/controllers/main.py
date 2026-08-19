@@ -72,10 +72,7 @@ class PaypalController(http.Controller):
             elif tx_sudo.payment_method_code in {"paypal", "card"}:
                 self._paypal_capture_order(tx_sudo, order_id)
             else:
-                order_details = tx_sudo._send_api_request(
-                    "GET", f"/v2/checkout/orders/{order_id}"
-                )
-                normalized_data = paypal_utils.normalize_paypal_payment_data(order_details)
+                normalized_data = self._get_normalized_paypal_order(tx_sudo, order_id)
                 tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
@@ -94,18 +91,17 @@ class PaypalController(http.Controller):
             .sudo()
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
-        if tx_sudo and tx_sudo.operation == "validation":
-            tx_sudo._record({"id": tx_sudo.provider_reference, "status": "CANCELED"})
-        elif tx_sudo:
+        if tx_sudo:
             order_id = token or tx_sudo.provider_reference
             try:
-                order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")
-            except ValidationError:
-                _logger.warning("Unable to fetch the order details from PayPal.")
-            else:
-                normalized_data = paypal_utils.normalize_paypal_payment_data(order_details)
+                if tx_sudo.operation == "validation":
+                    normalized_data = {"id": tx_sudo.provider_reference}
+                else:
+                    normalized_data = self._get_normalized_paypal_order(tx_sudo, order_id)
                 normalized_data["status"] = "CANCELED"
                 tx_sudo._record(normalized_data)
+            except ValidationError:
+                _logger.warning("Unable to fetch the order details from PayPal.")
         return request.redirect("/payment/status")
 
     @http.route(_webhook_url, type="http", auth="public", methods=["POST"], csrf=False)
@@ -224,7 +220,7 @@ class PaypalController(http.Controller):
         customer_id = resource.get("customer", {}).get("id")
         if not (vault_id and customer_id):
             return
-        tx_sudo = (
+        candidate_txs_sudo = (
             self
             .env["payment.transaction"]
             .sudo()
@@ -232,15 +228,21 @@ class PaypalController(http.Controller):
                 [
                     ("provider_code", "=", "paypal"),
                     ("paypal_customer_id", "=", customer_id),
+                    ("payment_method_id.code", "in", list(resource.get("payment_source", {}))),
                     ("tokenize", "=", True),
                     ("token_id", "=", False),
+                    ("state", "in", ["pending", "authorized", "done"]),
                 ],
                 order="id desc",
-                limit=1,
             )
         )
-        if not tx_sudo:
+        if not candidate_txs_sudo:
+            _logger.warning(
+                "Received a vault notification for customer %s matching no transaction awaiting a"
+                " token.", customer_id
+            )
             return
+        tx_sudo = candidate_txs_sudo[0]
         try:
             self._verify_notification_origin(notification_data, tx_sudo)
         except ValidationError:
@@ -249,14 +251,11 @@ class PaypalController(http.Controller):
                 payment_safe_write=True
             )._set_error(self.env._("Unable to verify the tokenization data"))
         else:
-            pm_code = tx_sudo.payment_method_code
-            payment_source = resource.get("payment_source", {}).get(pm_code, {})
-            normalized_data = {
-                "event_type": notification_data.get("event_type"),
-                "payment_source": {
-                    pm_code: {**payment_source, "attributes": {"vault": resource}}
-                },
-            }
+            normalized_data = paypal_utils.normalize_paypal_payment_data(
+                resource,
+                event_type=notification_data.get("event_type"),
+                payment_method_code=tx_sudo.payment_method_code,
+            )
             tx_sudo._record(normalized_data)
 
     def _verify_notification_origin(self, payment_data, tx_sudo=None, provider_sudo=None):
@@ -314,7 +313,7 @@ class PaypalController(http.Controller):
             "POST", f"/v2/checkout/orders/{order_id}/capture", idempotency_key=idempotency_key
         )
         normalized_response = paypal_utils.normalize_paypal_payment_data(
-            response, is_capture_request=True
+            response, has_capture_data=True
         )
         tx_sudo = (
             self
@@ -324,3 +323,9 @@ class PaypalController(http.Controller):
         )
         if tx_sudo:
             tx_sudo._record(normalized_response)
+
+    def _get_normalized_paypal_order(self, tx_sudo, order_id):
+        order_details = tx_sudo._send_api_request(
+            "GET", f"/v2/checkout/orders/{order_id}"
+        )
+        return paypal_utils.normalize_paypal_payment_data(order_details)

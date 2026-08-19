@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.addons.payment.logging import get_payment_logger
+from odoo.addons.payment_paypal import const
 
 _logger = get_payment_logger(__name__)
 
@@ -61,24 +62,42 @@ def format_shipping_address(tx_sudo):
     return address_vals
 
 
-def normalize_paypal_payment_data(data, is_capture_request=False):
+def normalize_paypal_payment_data(
+    data, has_capture_data=False, event_type=None, payment_method_code=None
+):
     """Normalize the payment data received from PayPal.
 
     The payment data received from PayPal has a different format depending on whether the data
     come from the payment request response (order creation or capture), or from the webhook.
 
     :param dict data: The data to normalize.
-    :param bool is_capture_request: Whether the data came from the capture api call.
+    :param bool has_capture_data: Whether the data embed the capture to read the payment state from.
+    :param str event_type: The event type of the webhook notification the data came from, if any.
+    :param str payment_method_code: The code of the payment method of the transaction, required to
+                                    normalize the data of vault notifications.
     :return: The normalized data.
     :rtype: dict
     """
+    if event_type in const.VAULT_WEBHOOK_EVENTS:
+        return {
+            "event_type": event_type,
+            "payment_source": {
+                payment_method_code: {
+                    **data.get("payment_source", {}).get(payment_method_code, {}),
+                    "attributes": {
+                        "vault": {"id": data.get("id"), "customer": data.get("customer", {})}
+                    },
+                }
+            },
+        }
+
     purchase_unit = data["purchase_units"][0]
     result = {
         "payment_source": data["payment_source"],
         "reference_id": purchase_unit.get("reference_id"),
         "purchase_units": data["purchase_units"],
     }
-    if not is_capture_request:
+    if not has_capture_data:
         result.update({
             **purchase_unit,
             "txn_type": data.get("intent"),

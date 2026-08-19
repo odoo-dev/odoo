@@ -97,7 +97,7 @@ class PaymentTransaction(models.Model):
 
         response_content = self._paypal_create_order()
         self._record(
-            paypal_utils.normalize_paypal_payment_data(response_content, is_capture_request=True)
+            paypal_utils.normalize_paypal_payment_data(response_content, has_capture_data=True)
         )
 
     def _paypal_create_order(self, payload=None):
@@ -182,7 +182,9 @@ class PaymentTransaction(models.Model):
             "payment_source": {
                 pm_code: {
                     **vault.get("payment_source", {}).get(pm_code, {}),
-                    "attributes": {"vault": vault},
+                    "attributes": {
+                        "vault": {"id": vault["id"], "customer": vault.get("customer", {})}
+                    },
                 }
             },
         })
@@ -292,19 +294,20 @@ class PaymentTransaction(models.Model):
 
         if self.token_id:
             card_data["vault_id"] = self.token_id.provider_ref
+            card_data["stored_credential"] = {
+                "usage": "SUBSEQUENT"
+            }
             if self.operation == "offline":
-                card_data["stored_credential"] = {
+                card_data["stored_credential"].update({
                     "payment_initiator": "MERCHANT",
                     "payment_type": "UNSCHEDULED",
-                    "usage": "SUBSEQUENT",
-                }
+                })
             else:
                 card_data["attributes"] = {"verification": {"method": "SCA_WHEN_REQUIRED"}}
-                card_data["stored_credential"] = {
+                card_data["stored_credential"].update({
                     "payment_initiator": "CUSTOMER",
                     "payment_type": "ONE_TIME",
-                    "usage": "SUBSEQUENT",
-                }
+                })
             return card_data
 
         card_data["name"] = self.partner_name
@@ -422,7 +425,7 @@ class PaymentTransaction(models.Model):
             return super()._extract_amount_data(payment_data)
 
         if payment_data.get("event_type") in VAULT_WEBHOOK_EVENTS:
-            return None
+            return None  # Vault notifications carry no payment state; only the token is created.
 
         amount_data = payment_data.get("amount", {})
         amount = amount_data.get("value")
@@ -479,6 +482,8 @@ class PaymentTransaction(models.Model):
             "provider_ref": vault_id,
             "paypal_customer_id": customer_id,
             "payment_details": (
-                payment_source.get("last_digits") or payment_source.get("email_address")
+                payment_source.get("last_digits")
+                or payment_source.get("name", {}).get("given_name")
+                or payment_source.get("email_address")
             ),
         }
