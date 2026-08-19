@@ -1188,7 +1188,7 @@ class TestPdpReportsFlowLifecycle(TestL10nFrPdpCommon):
         )
         initial_flow = invoice.l10n_fr_pdp_last_flow_id
 
-        invoice.with_context(l10n_fr_pdp_bypass_draft_check=True).button_draft()
+        invoice.button_draft()
         invoice.invoice_line_ids.price_unit = 150.0
         invoice.action_post()
         invoice.is_move_sent = True
@@ -1643,7 +1643,7 @@ class TestPdpReportsFlowLifecycle(TestL10nFrPdpCommon):
         )
         flow = kept_invoice.l10n_fr_pdp_last_flow_id
 
-        draft_invoice.with_context(l10n_fr_pdp_bypass_draft_check=True).button_draft()
+        draft_invoice.button_draft()
         cancelled_invoice.button_cancel()
         self._refresh_pdp_fields(draft_invoice | cancelled_invoice)
         xml = self._build_flow_xml(flow)
@@ -2040,4 +2040,62 @@ class TestPdpReportsFlowLifecycle(TestL10nFrPdpCommon):
         self.company.l10n_fr_pdp_annuaire_start_date = False
         self.assertFalse(self.company.l10n_fr_pdp_flow_10_start_date)
         self.company._force_update_l10n_fr_f10_moves()
+        self.assertTrue(invoice.l10n_fr_pdp_last_flow_id)
+
+    def test_reset_move_to_draft(self):
+        invoice = self._create_form_invoice(
+            partner=self.b2bi_customer,
+            invoice_date='2025-09-03',
+            lines=[{
+                'price_unit': 100.0,
+                'tax_ids': self._get_tax_on_payment_20(),
+            }],
+        )
+        self.assertFalse(invoice.l10n_fr_pdp_last_flow_id.initial_flow_id)  # IN
+        self.assertTrue(invoice.l10n_fr_pdp_last_flow_id)  # IN
+        self._run_send_cron('2025-09-20', identifier='FULL-FORM-RE-INITIAL')
+        invoice.button_draft()
+        # check RE flow has been created and can successfully build a payload
+        re_flow = self.env['l10n.fr.pdp.reports.flow'].search([('initial_flow_id', '!=', False)])
+        self.assertFalse(re_flow.payload_id)
+        xml = self._build_flow_xml(re_flow)
+        # RE with no invoice
+        invoices = xml.findall('./TransactionsReport/Invoice')
+        self.assertFalse(invoices)
+        invoice.action_post()
+        # RE with re-posted invoice
+        xml = self._build_flow_xml(re_flow)
+        invoices = xml.findall('./TransactionsReport/Invoice')
+        self.assertEqual(len(invoices), 1)
+        self.assertEqual(invoices[0].findtext('ID'), invoice.name)
+
+    def test_force_update_f10_moves_find_parent_receivable_account_on_branch(self):
+        """
+        Activating PDP flow-10 reporting on a branch company should allow
+        invoices to create a PDP flow using the parent company's receivable account.
+        """
+        branch = self.env['res.company'].create({
+            'name': 'Test Branch FR',
+            'parent_id': self.company.id,
+            'country_id': self.env.ref('base.fr').id,
+            'l10n_fr_pdp_send_to_ppf': True,
+            'l10n_fr_pdp_annuaire_start_date': '2025-01-01',
+        })
+        self.proxy_user.company_id = branch.id
+
+        # Ensure the partner has a receivable account for the branch by copying from parent company
+        self.b2bi_customer.with_company(branch).property_account_receivable_id = self.b2bi_customer.with_company(self.company).property_account_receivable_id
+
+        invoice = self._create_invoice_one_line(
+            move_type='out_invoice',
+            company_id=branch,
+            partner_id=self.b2bi_customer.id,
+            invoice_date='2025-01-01',
+            product_id=self.product_a,
+            price_unit=100.0,
+            tax_ids=self._get_tax_on_payment_20(),
+            post=True,
+        )
+        branch.l10n_fr_pdp_pilot_phase = True
+        self.assertTrue(branch.l10n_fr_f10_enable_reporting)
         self.assertTrue(invoice.l10n_fr_pdp_last_flow_id)
