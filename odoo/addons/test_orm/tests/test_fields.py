@@ -4825,13 +4825,15 @@ def select(model, *fnames):
     return f'SELECT {terms} FROM "{table}" WHERE "{table}"."id" = ANY(%s)'
 
 
-def insert(model, *fnames, rowcount=1):
+def insert(model, *fnames):
     """ Return the expected query string to INSERT the given columns. """
     columns = sorted(fnames + ('create_uid', 'create_date', 'write_uid', 'write_date'))
     header = ", ".join(f'"{column}"' for column in columns)
-    row = "(" + ", ".join("%s" for _column in columns) + ")"
-    template = ", ".join(row for _index in range(rowcount))
-    return f'INSERT INTO "{model._table}" ({header}) VALUES {template} RETURNING "id"'
+    unnest = ", ".join(
+        f"%s::{model._fields[column].column_type[1]}[]"
+        for column in columns
+    )
+    return f'INSERT INTO "{model._table}" ({header}) SELECT * FROM UNNEST({unnest}) RETURNING "id"'
 
 
 def update(model, *fnames):
@@ -4955,11 +4957,7 @@ class TestComputeQueries(TransactionCase):
         model = self.env['test_orm.foo']
         model.create({})
 
-        with self.assertQueries([
-            'INSERT INTO "test_orm_foo" ("create_date", "create_uid", "name", "value1", "value2", "write_date", "write_uid") '
-            'VALUES (%s, %s, %s, %s, DEFAULT, %s, %s), (%s, %s, %s, DEFAULT, %s, %s, %s), '
-            '(%s, %s, %s, DEFAULT, DEFAULT, %s, %s), (%s, %s, DEFAULT, DEFAULT, DEFAULT, %s, %s) RETURNING "id"'
-        ]):
+        with self.assertQueries([insert(model, 'name', 'value1', 'value2')]):
             create_values = [
                 {'name': 'Foo1', 'value1': 10},
                 {'name': 'Foo2', 'value2': 12},

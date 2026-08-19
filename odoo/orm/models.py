@@ -109,7 +109,6 @@ regex_read_group_spec = re.compile(r'(\w+)(\.([\w\.]+))?(?::(\w+))?$')  # For _r
 
 INSERT_BATCH_SIZE = 100
 UPDATE_BATCH_SIZE = 100
-SQL_DEFAULT = SQL("DEFAULT")
 
 # hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
 NO_ACCESS = '.'
@@ -4329,16 +4328,16 @@ class BaseModel(metaclass=MetaModel):
             fnames = sorted({name for stored in stored_list for name in stored})
 
             columns: list[str] = []
-            rows: list[list[typing.Any]] = [[] for _ in stored_list]
+            column_values: list[list[typing.Any]] = []
             for fname in fnames:
                 field = self._fields[fname]
                 if field.column_type:
                     columns.append(fname)
-                    for stored, row in zip(stored_list, rows):
-                        if fname in stored:
-                            row.append(field.convert_to_column_insert(stored[fname], self, stored))
-                        else:
-                            row.append(SQL_DEFAULT)
+                    column_values.append([
+                        field.convert_to_column_insert(stored[fname], self, stored)
+                        if fname in stored else None
+                        for stored in stored_list
+                    ])
                 else:
                     other_fields.add(field)
 
@@ -4348,22 +4347,23 @@ class BaseModel(metaclass=MetaModel):
                     other_fields.add(field)
 
             if not columns:
-                # manage the case where we create empty records
-                columns = ['id']
-                for row in rows:
-                    row.append(SQL_DEFAULT)
-
-            # PostgreSQL extended-query protocol: at most PARAMS_MAX bind
-            # parameters per statement. Each VALUES cell is one parameter
-            # (DEFAULT is inlined; len(columns) is a safe per-row upper bound).
-            for row_sublist in split_every(max(1, cr.PARAMS_MAX // len(columns)), rows):
+                # empty records: keep table defaults (including serial id)
                 cr.execute(SQL(
-                    'INSERT INTO %s (%s) VALUES %s RETURNING "id"',
+                    'INSERT INTO %s SELECT FROM generate_series(1, %s) RETURNING "id"',
+                    SQL.identifier(self._table),
+                    len(stored_list),
+                ))
+            else:
+                cr.execute(SQL(
+                    'INSERT INTO %s (%s) SELECT * FROM UNNEST(%s) RETURNING "id"',
                     SQL.identifier(self._table),
                     SQL(', ').join(map(SQL.identifier, columns)),
-                    SQL.values(row_sublist),
+                    SQL(', ').join(
+                        SQL("%s::%s[]", values, self._fields[fname].stored_sql_column_type)
+                        for fname, values in zip(columns, column_values)
+                    ),
                 ))
-                ids.extend(id_ for id_, in cr.fetchall())
+            ids.extend(id_ for id_, in cr.fetchall())
 
         # put the new records in cache, and update inverse fields, for many2one
         records = self.browse(ids)
