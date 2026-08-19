@@ -117,6 +117,21 @@ class TestL10nArWebsiteSale(TestArCommon):
         info_qty_5 = self._get_combination_info(quantity=5)
         self.assertEqual(info_qty_5['l10n_ar_price_tax_excluded'], 888.0)
 
+        # Percentage discount test (e.g., 23% discount)
+        self.pricelist.item_ids.unlink()
+        self.pricelist.write({
+            'item_ids': [
+                Command.create({
+                    'compute_price': 'percentage',
+                    'percent_price': 23.0,
+                    'applied_on': '3_global',
+                }),
+            ],
+        })
+        info_discount = self._get_combination_info(quantity=1)
+        self.assertEqual(info_discount['l10n_ar_price_tax_excluded'], 770.0)
+
+
     def test_product_variant_prices_with_attributes(self):
         """Test variant-specific price calculation with color attribute values."""
         self.product_1.taxes_id = self.env['account.chart.template'].ref('ri_tax_vat_21_ventas')
