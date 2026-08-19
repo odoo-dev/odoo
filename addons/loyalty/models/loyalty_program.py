@@ -558,14 +558,37 @@ class LoyaltyProgram(models.Model):
         if any(program.active for program in self):
             raise UserError(self.env._("You can not delete a program in an active state"))
 
+    def _reward_ids_vals_would_be_non_empty(self, commands):
+        # loyalty reward not getting saved
+        # Simulate applying the reward_ids commands on top of the current rewards to know
+        # whether the field would end up non-empty, WITHOUT going through
+        # `Field.convert_to_cache()`: for One2many fields, that method has the side effect of
+        # calling `_update_cache()` on the *existing* target records of `UPDATE` commands. That
+        # writes the new values into their cache with `dirty=False`, which makes the ORM think
+        # those values already match the database, so the real write further down silently
+        # never flushes them. We only need a boolean here, so we compute it by hand instead.
+        resulting_ids = set(self.reward_ids.ids) if self else set()
+        for command in commands:
+            if not isinstance(command, (list, tuple)):
+                resulting_ids.add(command)
+            elif command[0] == Command.CLEAR:
+                resulting_ids.clear()
+            elif command[0] == Command.SET:
+                resulting_ids = set(command[2])
+            elif command[0] in (Command.DELETE, Command.UNLINK):
+                resulting_ids.discard(command[1])
+            elif command[0] == Command.CREATE:
+                resulting_ids.add(True)  # placeholder: a new record will exist
+            elif command[0] in (Command.UPDATE, Command.LINK):
+                resulting_ids.add(command[1])
+        return bool(resulting_ids)
+
     def write(self, vals):
         # There is an issue when we change the program type, since we clear the rewards and create
         # new ones. The ORM actually does it in this order upon writing, triggering the constraint
         # before creating the new rewards. However, we can check that the result of reward_ids would
         # actually be empty or not, and if not, skip the constraint.
-        if "reward_ids" in vals and self._fields["reward_ids"].convert_to_cache(
-            vals["reward_ids"], self.browse()
-        ):
+        if "reward_ids" in vals and self._reward_ids_vals_would_be_non_empty(vals["reward_ids"]):
             self = self.with_context(loyalty_skip_reward_check=True)
             # We need add the program type to the context to avoid getting the default value
             # ('discount') for reward type when calling the `default_get` method of

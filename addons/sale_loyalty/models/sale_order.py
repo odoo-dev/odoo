@@ -317,7 +317,7 @@ class SaleOrder(models.Model):
             float_round(
                 points / reward.required_points, precision_rounding=1, rounding_method="DOWN"
             )
-            if not reward.clear_wallet
+            if reward.clear_wallet
             else 1
         )
         cost = points if reward.clear_wallet else claimable_count * reward.required_points
