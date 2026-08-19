@@ -524,7 +524,7 @@ class PosOrder(models.Model):
             if vals.get('state') and vals['state'] in ('cancel', 'paid', 'done') and order.print_history:
                 vals['print_history'] = False
 
-        list_line = self._create_pm_change_log(vals)
+        tracked_payments = self._get_tracked_payment_values(vals)
         res = super().write(vals)
         for order in self:
             if vals.get('payment_ids'):
@@ -533,79 +533,98 @@ class PosOrder(models.Model):
                 if totally_paid_or_more < 0 and order.state in ['paid', 'done']:
                     raise UserError(_('The paid amount is different from the total amount of the order.'))
                 if totally_paid_or_more > 0 and order.state == 'paid':
-                    list_line.append(_("Warning, the paid amount is higher than the total amount. (Difference: %s)", formatLang(self.env, order.amount_paid - order.amount_total, currency_obj=order.currency_id)))
+                    tracked_payments[order].append((
+                        _("Warning, the paid amount is higher than the total amount"),
+                        order._format_tracked_amount(order.amount_total),
+                        order._format_tracked_amount(order.amount_paid),
+                    ))
                 if order.nb_print > 0 and any(command[0] in [0, 1] and command[2].get('payment_status') and command[2]['payment_status'] != 'cancelled' for command in vals.get('payment_ids')):
                     raise UserError(_('You cannot change the payment of a printed order.'))
 
-        if len(list_line) > 0:
-            body = _("Payment changes:")
-            body += self._markup_list_message(list_line)
-            for order in self:
-                if vals.get('payment_ids'):
-                    order.message_post(body=body)
-
+        self._track_pos_values(tracked_payments, body=_("Payment changes:"))
         return res
 
-    def _create_pm_change_log(self, vals):
-        if not vals.get('payment_ids'):
-            return []
+    def _get_tracked_payment_values(self, vals):
+        """ Payment changes described by `vals`, as values tracked on the orders.
 
-        message_list = []
-        new_pms = vals.get('payment_ids', [])
-        for new_pm in new_pms:
-            orm_command = new_pm[0]
+        Old values are read on the existing payments, so it has to be called
+        before the payments are written.
+        """
+        tracked_values = defaultdict(list)
+        for order in self:
+            for command in vals.get('payment_ids') or []:
+                if command[0] not in (Command.CREATE, Command.UPDATE, Command.DELETE):
+                    continue
+                payment = self.env['pos.payment'].browse(command[1])  # void when creating
+                payment_vals = command[2] if command[0] != Command.DELETE else {}
+                method = self.env['pos.payment.method'].browse(payment_vals['payment_method_id']) if payment_vals.get('payment_method_id') else payment.payment_method_id
+                old_amount = payment.amount if payment else False
+                new_amount = payment_vals.get('amount', old_amount) if command[0] != Command.DELETE else False
 
-            if orm_command == 0:
-                payment_method_id = self.env['pos.payment.method'].browse(new_pm[2].get('payment_method_id'))
-                amount = formatLang(self.env, new_pm[2].get('amount'), currency_obj=self.currency_id)
-                message_list.append(_("Added %(payment_method)s with %(amount)s",
-                    payment_method=payment_method_id.name,
-                    amount=amount))
-            elif orm_command == 1:
-                pm_id = self.env['pos.payment'].browse(new_pm[1])
-                old_pm = pm_id.payment_method_id.name
-                old_amount = formatLang(self.env, pm_id.amount, currency_obj=pm_id.currency_id)
-                new_amount = False
-                new_payment_method = False
+                if payment.payment_method_id and method != payment.payment_method_id:
+                    tracked_values[order].append((_("Payment method"), payment.payment_method_id.name, method.name))
+                if new_amount != old_amount:
+                    tracked_values[order].append((
+                        method.name,
+                        order._format_tracked_amount(old_amount, payment.currency_id),
+                        order._format_tracked_amount(new_amount, payment.currency_id),
+                    ))
+        return tracked_values
 
-                if new_pm[2].get('payment_method_id'):
-                    new_payment_method = self.env['pos.payment.method'].browse(new_pm[2].get('payment_method_id'))
-                if new_pm[2].get('amount'):
-                    new_amount = formatLang(self.env, new_pm[2].get('amount'), currency_obj=pm_id.currency_id)
+    def _format_tracked_amount(self, amount, currency=None):
+        """ Amount as displayed in the tracking messages of the order, if any. """
+        if amount is None or amount is False:
+            return False
+        return formatLang(self.env, amount, currency_obj=currency or self.currency_id)
 
-                if new_payment_method and new_amount:
-                    message_list.append(_("%(old_pm)s changed to %(new_pm)s and from %(old_amount)s to %(new_amount)s",
-                        old_pm=old_pm,
-                        new_pm=new_payment_method.name,
-                        old_amount=old_amount,
-                        new_amount=new_amount))
-                elif new_payment_method:
-                    message_list.append(_("%(old_pm)s changed to %(new_pm)s for %(old_amount)s",
-                        old_pm=old_pm,
-                        new_pm=new_payment_method.name,
-                        old_amount=old_amount))
-                elif new_amount:
-                    message_list.append(_("Amount for %(old_pm)s changed from %(old_amount)s to %(new_amount)s",
-                        old_amount=old_amount,
-                        new_amount=new_amount,
-                        old_pm=old_pm))
-            elif orm_command == 2:
-                pm_id = self.env['pos.payment'].browse(new_pm[1])
-                amount = formatLang(self.env, pm_id.amount, currency_obj=pm_id.currency_id)
-                message_list.append(_("Removed %(payment_method)s with %(amount)s",
-                    payment_method=pm_id.payment_method_id.name,
-                    amount=amount))
+    def _track_pos_values(self, tracked_values, body=None):
+        """ Log in the chatter of the orders values that are not fields of the
+        order itself, typically values of their lines or of their payments::
 
-        return message_list
+            lines.order_id._track_pos_values(
+                {line: [(line.full_product_name, line.qty, new_qty)] for line in lines},
+                body=_("Ordered quantity:"),
+            )
 
-    def _markup_list_message(self, message):
-        body = Markup("<ul>")
-        for line in message:
-            body += Markup("<li>")
-            body += line
-            body += Markup("</li>")
-        body += Markup("</ul>")
-        return body
+        Each call generates its own message, so the values of two calls never end
+        up mixed together under the body of the last one.
+
+        :param dict tracked_values: {record: [(label, old value, new value), ...]}
+            where `record` is an order or a record logged on its order (see
+            `_get_tracked_order`) and `label` is the name displayed in the chatter
+            next to the values;
+        :param body: text introducing the tracked values in the message.
+        """
+        if not tracked_values:
+            return
+
+        initial_values, end_values, fields_info = defaultdict(dict), defaultdict(dict), {}
+        for record, values in tracked_values.items():
+            order = self._get_tracked_order(record)
+            for index, (label, old_value, new_value) in enumerate(values):
+                # the values are not fields of the order, they are given a unique
+                # name so that two of them never overwrite each other
+                fname = f'{record._name},{record.id},{index}:{label}'
+                initial_values[order.id][fname] = old_value
+                end_values[order.id][fname] = new_value
+                fields_info[fname] = {
+                    'string': label,
+                    'type': self._get_tracked_value_type(old_value, new_value),
+                }
+
+        self._track_add(initial_values, end_values=end_values, fields_info=fields_info, body=body)
+        self._track_finalize()
+
+    def _get_tracked_order(self, record):
+        """ Order on which the values tracked for `record` are logged. """
+        return record if record._name == self._name else record.order_id
+
+    def _get_tracked_value_type(self, *values):
+        """ Field type used to render the given tracked values in the chatter. """
+        value = next((value for value in values if value is not None and value is not False), None)
+        if isinstance(value, models.Model):
+            return 'many2one'
+        return {bool: 'boolean', int: 'integer', float: 'float'}.get(type(value), 'char')
 
     def _get_order_name_from_pos_reference(self, session=None):
         """Return the order name from the sequence prefix and the receipt reference (``pos_reference``)."""

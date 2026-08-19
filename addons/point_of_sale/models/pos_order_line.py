@@ -2,8 +2,6 @@
 
 from uuid import uuid4
 
-from markupsafe import Markup
-
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Command
@@ -122,22 +120,26 @@ class PosOrderLine(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if self.order_id.config_id.order_edit_tracking and vals.get('qty') is not None and vals.get('qty') < self.qty:
-            self.is_edited = True
-            body = _("%(product_name)s: Ordered quantity: %(old_qty)s", product_name=self.full_product_name, old_qty=self.qty)
-            body += Markup("&rarr;") + str(vals.get('qty'))
-            for line in self:
-                line.order_id.message_post(body=line.order_id._prepare_pos_log(body))
+        if vals.get('qty') is not None:
+            edited_lines = self.filtered(lambda line: line.order_id.config_id.order_edit_tracking and vals['qty'] < line.qty)
+            edited_lines.is_edited = True
+            edited_lines._track_qty_change(vals['qty'], _("Ordered quantity:"))
         return super().write(vals)
+
+    def _track_qty_change(self, new_qty, body):
+        """ Log the new quantity of the lines in the chatter of their order. """
+        self.order_id._track_pos_values(
+            {line: [(line.full_product_name or line.product_id.display_name, line.qty, new_qty)] for line in self},
+            body=body,
+        )
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_order_state(self):
         if self.filtered(lambda x: x.order_id.state not in ["draft", "cancel"]):
             raise UserError(_("You can only unlink PoS order lines that are related to orders in new or cancelled state."))
-        for line in self.filtered(lambda line: line.order_id.config_id.order_edit_tracking):
-            line.order_id.has_deleted_line = True
-            body = _("%(product_name)s: Deleted line (quantity: %(qty)s)", product_name=line.full_product_name, qty=line.qty)
-            line.order_id.message_post(body=line.order_id._prepare_pos_log(body))
+        deleted_lines = self.filtered(lambda line: line.order_id.config_id.order_edit_tracking)
+        deleted_lines.order_id.has_deleted_line = True
+        deleted_lines._track_qty_change(0, _("Deleted line:"))
 
     @api.onchange('price_unit', 'tax_ids', 'qty', 'discount', 'product_id')
     def _onchange_amount_line_all(self):
