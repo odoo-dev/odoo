@@ -111,7 +111,8 @@ export function _t(source, ...substitutions) {
  */
 export function appTranslateFn(source, moduleName, ...substitutions) {
     const string = new TranslatedString(source, substitutions, moduleName);
-    return string.lazy ? string : string.valueOf();
+    // return string.lazy ? string : string.valueOf();
+    return string;
 }
 
 /**
