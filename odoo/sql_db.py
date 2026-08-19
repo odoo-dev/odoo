@@ -23,7 +23,6 @@ from inspect import currentframe
 import psycopg
 import psycopg.errors
 from psycopg import sql as psql
-from psycopg.conninfo import conninfo_to_dict
 from psycopg.rows import tuple_row
 from psycopg.types.numeric import FloatLoader
 from werkzeug import urls
@@ -640,10 +639,11 @@ class PsycoConnectionInfo(psycopg.ConnectionInfo):
 
 class PsycoConnection(psycopg.Connection[tuple]):
     _pool_last_used: float = 0
+    _pool_key: tuple = ()
 
     def __init__(self, pgconn, row_factory=tuple_row):
         super().__init__(pgconn, row_factory=row_factory)
-        self.dsn = self.info.dsn  # cached at connect; psycopg3 cannot read info.dsn after close
+        self.dsn = self.info.dsn  # cached; psycopg3 cannot read info.dsn after close
 
     @property
     def info(self):
@@ -665,6 +665,14 @@ class PsycoConnection(psycopg.Connection[tuple]):
             self.execute("DISCARD ALL")
         finally:
             self.autocommit = autocommit
+
+
+def _pool_key(connection_info: dict) -> tuple:
+    """Identity of a pooled connection from Odoo-built connection_info."""
+    return tuple(sorted(
+        (key, value) for key, value in connection_info.items()
+        if key != 'password'
+    ))
 
 
 class ConnectionPool:
@@ -714,6 +722,7 @@ class ConnectionPool:
         check_all = self._check_free_at < now
         self._check_free_at = now + MAX_IDLE_TIMEOUT / 10
         close_used_before = now - MAX_IDLE_TIMEOUT
+        pool_key = _pool_key(connection_info)
         selected_cnx = None
         for i, cnx in tools.reverse_enumerate(self._free_connections):
             if not cnx.closed and cnx._pool_last_used < close_used_before:
@@ -722,7 +731,7 @@ class ConnectionPool:
             if cnx.closed:
                 self._free_connections.pop(i)
                 self._debug('Removing closed connection at index %d: %r', i, cnx.dsn)
-            elif selected_cnx is None and self._dsn_equals(cnx.dsn, connection_info):
+            elif selected_cnx is None and cnx._pool_key == pool_key:
                 self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
                 self._free_connections.pop(i)
                 self._used_connections.add(cnx)
@@ -748,6 +757,7 @@ class ConnectionPool:
                 **connection_info,
             )
             result.give_back = functools.partial(self.give_back, result)
+            result._pool_key = pool_key
         except psycopg.Error:
             _logger.info('Connection to the database failed')
             raise
@@ -783,37 +793,23 @@ class ConnectionPool:
         connection.close()
 
     @locked
-    def close_all(self, dsn: dict | str | None = None):
+    def close_all(self, connection_info: dict | None = None):
         count = 0
         last = None
+        pool_key = _pool_key(connection_info) if connection_info is not None else None
         for i, cnx in tools.reverse_enumerate(self._free_connections):
-            if dsn is None or self._dsn_equals(cnx.dsn, dsn):
+            if pool_key is None or cnx._pool_key == pool_key:
                 cnx.close()
                 last = self._free_connections.pop(i)
                 count += 1
         for cnx in self._used_connections:
-            if dsn is None or self._dsn_equals(cnx.dsn, dsn):
+            if pool_key is None or cnx._pool_key == pool_key:
                 cnx.close()
                 last = cnx
                 count += 1
         if count:
             _logger.info('%r: Closed %d connections %s', self, count,
-                        (dsn and last and 'to %r' % last.dsn) or '')
-
-    def _dsn_equals(self, dsn1: dict | str, dsn2: dict | str) -> bool:
-        # Temporary: keep master's _dsn_equals so the psycopg3 port can land.
-        # Comparing request connection_info to info.dsn via conninfo_to_dict is
-        # incorrect — info.dsn is libpq's filtered view (defaults dropped,
-        # extra keys like hostaddr/sslcertmode added). Fixed in a later commit.
-        ignore_keys = ['password']
-        dsn1, dsn2 = ({
-            key: str(value)
-            for key, value in (
-                conninfo_to_dict(dsn) if isinstance(dsn, str) else conninfo_to_dict(**dsn)
-            ).items()
-            if key not in ignore_keys
-        } for dsn in (dsn1, dsn2))
-        return dsn1 == dsn2
+                        (connection_info and last and 'to %r' % last.dsn) or '')
 
 
 class Connection:

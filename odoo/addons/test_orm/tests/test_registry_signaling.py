@@ -473,20 +473,6 @@ class TestTestCursor(common.TransactionCase):
 
     def test_borrow_connection(self):
         """Tests the behavior of the postgresql connection pool recycling/borrowing"""
-        origin_db_port = config['db_port']
-        if not origin_db_port and hasattr(self.env.cr._cnx, 'info'):
-            # Check the edge case of the db port set,
-            # which is set as an integer in our DSN/connection_info
-            # but as string in the DSN of psycopg2
-            # The connections must be recycled/borrowed when the db_port is set
-            # e.g
-            # `connection.dsn`
-            # {'database': '14.0', 'port': 5432, 'sslmode': 'prefer'}
-            # must match
-            # `cr._cnx.dsn`
-            # 'port=5432 sslmode=prefer dbname=14.0'
-            config['db_port'] = self.env.cr._cnx.info.port
-
         cursors = []
         try:
             connection = db_connect(self.cr.dbname)
@@ -495,10 +481,6 @@ class TestTestCursor(common.TransactionCase):
             # The 2nd cursor must not use the connection of the 1st cursor as it's used (not closed).
             cursors.append(connection.cursor())
             cursors.append(connection.cursor())
-            # Ensure the port is within psycopg's dsn, as explained in an above comment,
-            # we want to test the behavior of the connections borrowing including the port provided in the dsn.
-            if config['db_port']:
-                self.assertTrue('port=' in cursors[0]._cnx.dsn)
             # Check the connection of the 1st cursor is different than the connection of the 2nd cursor.
             self.assertNotEqual(id(cursors[0]._cnx), id(cursors[1]._cnx))
 
@@ -510,9 +492,36 @@ class TestTestCursor(common.TransactionCase):
             self.assertEqual(id(cursors[0]._cnx), id(cursors[2]._cnx))
 
         finally:
-            # Cleanups:
-            # - Close the cursors which have been left opened
-            # - Reset the config `db_port`
+            for cursor in cursors:
+                if not cursor.closed:
+                    cursor.close()
+
+    def test_borrow_distinct_connection_info(self):
+        """Pool identity is the request connection_info, not the resolved DSN.
+
+        This records a known limitation, not a frozen requirement: omitted keys
+        vs explicit defaults (port, host, user, sslmode, ...) can open the same
+        Postgres session, but ConnectionPool will not treat those connection_info
+        dicts as equal. That is enough for Odoo (config is process-wide and
+        stable); a later change could normalize defaults if reuse must be
+        stricter/looser.
+
+        Port is only the example used here.
+        """
+        cursors = []
+        origin_db_port = config['db_port']
+        try:
+            config['db_port'] = None
+            connection = db_connect(self.cr.dbname)
+            cursors.append(connection.cursor())
+            port = cursors[0]._cnx.info.port
+            cursors[0].close()
+
+            config['db_port'] = port
+            connection_with_port = db_connect(self.cr.dbname)
+            cursors.append(connection_with_port.cursor())
+            self.assertNotEqual(id(cursors[0]._cnx), id(cursors[1]._cnx))
+        finally:
             for cursor in cursors:
                 if not cursor.closed:
                     cursor.close()
