@@ -11,6 +11,7 @@ import {
     toRaw,
     proxy,
     useEffect,
+    useProps,
 } from "@odoo/owl";
 import { useNumpadDecimal } from "@web/views/fields/numpad_decimal_hook";
 
@@ -134,9 +135,8 @@ class TaxGroupComponent extends Component {
 export class TaxTotalsComponent extends Component {
     static template = "account.TaxTotalsField";
     static components = { TaxGroupComponent };
-    static props = {
-        ...standardFieldProps,
-    };
+
+    props = useProps(standardFieldProps);
 
     totals = computed(() => this.formatData(this.props));
 
