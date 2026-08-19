@@ -34,7 +34,8 @@
       "destructuring": "all",
       "ignoreReadBeforeAssign": true
     }],
-    "arrow-body-style": ["error", "as-needed"]
+    "arrow-body-style": ["error", "as-needed"],
+    "sort-imports": ["error"]
   },
   "globals": {
     "odoo": "readonly",
