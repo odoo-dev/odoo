@@ -681,7 +681,7 @@ class ProductTemplate(models.Model):
                     template.compare_list_price, currency, self.env.company, round=False
                 )
 
-            if uom_price_enabled:
+            if uom_price_enabled and template.product_variant_id:
                 template_price_vals["base_unit_price"] = (
                     template.product_variant_id._get_base_unit_price(
                         template_price_vals["price_reduce"]
