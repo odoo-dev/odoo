@@ -45,16 +45,6 @@ class _SQLMeta(type):
         assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
         return SQL(f'"{name}"."{subname}"', to_flush=to_flush)
 
-    @staticmethod
-    def values(rows: Iterable) -> SQL:
-        """Compose a ``VALUES`` list with one placeholder per cell.
-
-        Each value keeps its own type, and ``SQL("DEFAULT")`` stays a keyword.
-        """
-        return SQL(", ").join(
-            SQL("(%s)", SQL(", ").join(row)) for row in rows
-        )
-
 
 class SQL(metaclass=_SQLMeta):
     """ An object that wraps SQL code with its parameters, like::

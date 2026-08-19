@@ -4845,10 +4845,13 @@ def update(model, *fnames):
         f'"{fname}" = "__tmp"."{fname}"::"{model._fields[fname].column_type[0]}"'
         for fname in fnames
     )
-    row = "(" + ", ".join("%s" for _column in range(1 + len(fnames))) + ")"
+    unnest = ", ".join(
+        f"%s::{model._fields[column].column_type[1]}[]"
+        for column in ('id', *fnames)
+    )
     return (
         f'UPDATE {table} SET {assignments} '
-        f'FROM (VALUES {row}) AS "__tmp"("id", {columns}) '
+        f'FROM UNNEST({unnest}) AS "__tmp"("id", {columns}) '
         f'WHERE {table}."id" = "__tmp"."id"'
     )
 

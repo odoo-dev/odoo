@@ -595,9 +595,12 @@ class Profiler:
                     if others:
                         values['others'] = json.dumps(others)
                     query = SQL(
-                        "INSERT INTO ir_profile(%s) VALUES %s RETURNING id",
+                        "INSERT INTO ir_profile(%s) SELECT * FROM UNNEST(%s) RETURNING id",
                         SQL(",").join(map(SQL.identifier, values)),
-                        SQL.values([values.values()]),
+                        SQL(",").join(
+                            SQL("%s::text[]", [value]) if isinstance(value, str) else [value]
+                            for value in values.values()
+                        ),
                     )
                     cr.execute(query)
                     self.profile_id = cr.fetchone()[0]

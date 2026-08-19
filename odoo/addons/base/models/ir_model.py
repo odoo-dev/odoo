@@ -82,7 +82,15 @@ def selection_xmlid(module, model_name, field_name, value):
     return '%s.selection__%s__%s__%s' % (module, xmodel, field_name, xvalue)
 
 
-def query_insert(cr, table, rows):
+def _unnest_field_values(model, fname, values):
+    """Bind a column array for ``UNNEST``. ``False`` is ORM-empty, not a bool."""
+    field = model._fields[fname]
+    if field.column_type[0] != 'bool':
+        values = [None if value is False else value for value in values]
+    return SQL("%s::%s[]", values, field.stored_sql_column_type)
+
+
+def query_insert(model, rows):
     """ Insert rows in a table. ``rows`` is a list of dicts, all with the same
         set of keys. Return the ids of the new rows.
     """
@@ -90,14 +98,15 @@ def query_insert(cr, table, rows):
         rows = [rows]
     cols = list(rows[0])
     ids = []
+    cr = model.env.cr
     for srows in split_every(cr.IN_MAX, rows, list):
         query = SQL(
-            "INSERT INTO %s (%s) VALUES %s RETURNING id",
-            SQL.identifier(table),
+            "INSERT INTO %s (%s) SELECT * FROM UNNEST(%s) RETURNING id",
+            SQL.identifier(model._table),
             SQL(",").join(map(SQL.identifier, cols)),
-            SQL.values(
-                list(row.get(col) for col in cols)
-                for row in srows
+            SQL(",").join(
+                _unnest_field_values(model, col, [row.get(col) for row in srows])
+                for col in cols
             ),
         )
         cr.execute(query)
@@ -169,13 +178,16 @@ def upsert_en(model, fnames, rows, conflict):
     ]
     comma = SQL(", ").join
     query = SQL("""
-        INSERT INTO %(table)s (%(cols)s) VALUES %(values)s
+        INSERT INTO %(table)s (%(cols)s) SELECT * FROM UNNEST(%(values)s)
         ON CONFLICT (%(conflict)s) DO UPDATE SET (%(cols)s) = (%(excluded)s)
         RETURNING id
         """,
         table=SQL.identifier(model._table),
         cols=comma(SQL.identifier(fname) for fname in fnames),
-        values=SQL.values(values),
+        values=comma(
+            _unnest_field_values(model, fname, [row[i] for row in values])
+            for i, fname in enumerate(fnames)
+        ),
         conflict=comma(SQL.identifier(fname) for fname in conflict),
         excluded=comma(
             (
@@ -1719,7 +1731,7 @@ class IrModelFieldsSelection(models.Model):
                 rows_to_update.append(dict(new_row, id=cur_row['id']))
 
         if rows_to_insert:
-            row_ids = query_insert(self.env.cr, self._table, rows_to_insert)
+            row_ids = query_insert(self, rows_to_insert)
             # update cur_rows for output
             for row, row_id in zip(rows_to_insert, row_ids):
                 cur_rows[row['value']] = dict(row, id=row_id)

@@ -33,7 +33,7 @@ def migrate(cr, version):
     # Update names, descriptions, legal notes and JSONB translations
     cr.execute(SQL("""
         WITH data(rec_name, name_en, desc_en, desc_ar, notes_en, tax_scope) AS (
-            VALUES %s
+            SELECT * FROM UNNEST(%s::text[], %s::text[], %s::text[], %s::text[], %s::text[], %s::text[])
         )
         UPDATE account_tax AS t
         SET
@@ -45,4 +45,11 @@ def migrate(cr, version):
         JOIN data ON imd.name ~ data.rec_name
         WHERE imd.model = 'account.tax'
         AND imd.res_id = t.id
-    """, SQL.values(TAX_VALUES_MAPPING)))
+    """,
+        [row[0] for row in TAX_VALUES_MAPPING],
+        [row[1] for row in TAX_VALUES_MAPPING],
+        [row[2] for row in TAX_VALUES_MAPPING],
+        [row[3] for row in TAX_VALUES_MAPPING],
+        [row[4] for row in TAX_VALUES_MAPPING],
+        [row[5] for row in TAX_VALUES_MAPPING],
+    ))

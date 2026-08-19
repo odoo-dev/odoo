@@ -11,7 +11,7 @@ def migrate(cr, version):
     # Set correct exemption reason codes for Saudi 0% and exempt taxes.
     cr.execute(SQL("""
         WITH reason_map(rec_name, exemption_code) AS (
-            VALUES %s
+            SELECT * FROM UNNEST(%s::text[], %s::text[])
         )
         UPDATE account_tax AS t
         SET l10n_sa_exemption_reason_code = reason_map.exemption_code
@@ -19,4 +19,7 @@ def migrate(cr, version):
         JOIN reason_map ON imd.name ~ reason_map.rec_name
         WHERE imd.model = 'account.tax'
         AND imd.res_id = t.id
-    """, SQL.values(EXEMPTION_REASON_MAPPING)))
+    """,
+        [row[0] for row in EXEMPTION_REASON_MAPPING],
+        [row[1] for row in EXEMPTION_REASON_MAPPING],
+    ))

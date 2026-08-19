@@ -4037,15 +4037,19 @@ class BaseModel(metaclass=MetaModel):
                 columns.append(column)
                 assignments.append(SQL("%s = %s", column, expr))
 
+            tmp_fnames = ('id', *fnames)
             self.env.execute_query(SQL(
                 """ UPDATE %(table)s
                     SET %(assignments)s
-                    FROM (VALUES %(values)s) AS "__tmp"("id", %(columns)s)
+                    FROM UNNEST(%(unnest)s) AS "__tmp"("id", %(columns)s)
                     WHERE %(table)s."id" = "__tmp"."id"
                 """,
                 table=SQL.identifier(self._table),
                 assignments=SQL(", ").join(assignments),
-                values=SQL.values(rows),
+                unnest=SQL(", ").join(
+                    SQL("%s::%s[]", [row[i] for row in rows], self._fields[fname].stored_sql_column_type)
+                    for i, fname in enumerate(tmp_fnames)
+                ),
                 columns=SQL(", ").join(columns),
             ))
 
