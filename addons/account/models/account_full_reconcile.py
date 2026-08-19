@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, Command
+from odoo.tools import SQL
 
 
 class AccountFullReconcile(models.Model):
@@ -25,21 +26,33 @@ class AccountFullReconcile(models.Model):
 
         self.env['account.move.line'].invalidate_model(['full_reconcile_id'])
         fulls.invalidate_recordset(['reconciled_line_ids'], flush=False)
-        self.env.cr.execute_values("""
-            UPDATE account_move_line line
-               SET full_reconcile_id = source.full_id
-              FROM (VALUES %s) AS source(full_id, line_ids)
-             WHERE line.id = ANY(source.line_ids)
-        """, [(full.id, line_ids) for full, line_ids in zip(fulls, move_line_ids)], page_size=1000)
+        line_full_ids = []
+        line_ids = []
+        for full, ids in zip(fulls, move_line_ids):
+            line_full_ids.extend([full.id] * len(ids))
+            line_ids.extend(ids)
+        if line_ids:
+            self.env.cr.execute(SQL("""
+                UPDATE account_move_line line
+                   SET full_reconcile_id = source.full_id
+                  FROM UNNEST(%s::integer[], %s::integer[]) AS source(full_id, line_id)
+                 WHERE line.id = source.line_id
+            """, line_full_ids, line_ids))
 
         self.env['account.partial.reconcile'].invalidate_model(['full_reconcile_id'])
         fulls.invalidate_recordset(['partial_reconcile_ids'], flush=False)
-        self.env.cr.execute_values("""
-            UPDATE account_partial_reconcile partial
-               SET full_reconcile_id = source.full_id
-              FROM (VALUES %s) AS source(full_id, partial_ids)
-             WHERE partial.id = ANY(source.partial_ids)
-        """, [(full.id, line_ids) for full, line_ids in zip(fulls, partial_ids)], page_size=1000)
+        partial_full_ids = []
+        partial_line_ids = []
+        for full, ids in zip(fulls, partial_ids):
+            partial_full_ids.extend([full.id] * len(ids))
+            partial_line_ids.extend(ids)
+        if partial_line_ids:
+            self.env.cr.execute(SQL("""
+                UPDATE account_partial_reconcile partial
+                   SET full_reconcile_id = source.full_id
+                  FROM UNNEST(%s::integer[], %s::integer[]) AS source(full_id, partial_id)
+                 WHERE partial.id = source.partial_id
+            """, partial_full_ids, partial_line_ids))
 
         self.env['account.partial.reconcile']._update_matching_number(fulls.reconciled_line_ids)
         return fulls
