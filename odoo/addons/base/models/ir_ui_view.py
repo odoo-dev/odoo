@@ -3455,7 +3455,10 @@ class NameManager:
             try:
                 action_id = int(name)
             except ValueError:
-                model, action_id = view.env['ir.model.data']._xmlid_to_res_model_res_id(name, raise_if_not_found=False)
+                try:
+                    model, action_id = view.env['ir.model.data']._xmlid_lookup(name)
+                except ValueError:
+                    model, action_id = False, False
                 if not action_id:
                     msg = _("Invalid xmlid %(xmlid)s for button of type action.", xmlid=name)
                     view._raise_view_error(msg, node)

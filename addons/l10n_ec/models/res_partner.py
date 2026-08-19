@@ -105,7 +105,7 @@ class ResPartner(models.Model):
 
         # This method is orm-cached, which makes it more efficient in loops than get_external_id()
         xmlid_by_res_id = {
-            self.env['ir.model.data']._xmlid_to_res_model_res_id(xmlid, raise_if_not_found=True)[1]: xmlid
+            self.env['ir.model.data']._xmlid_lookup(xmlid)[1]: xmlid
             for xmlid in id_types_by_xmlid
         }
 

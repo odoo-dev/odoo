@@ -309,7 +309,10 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_public_users(cls):
-        return [request.env['ir.model.data']._xmlid_to_res_model_res_id('base.public_user')[1]]
+        try:
+            return [request.env['ir.model.data']._xmlid_lookup('base.public_user')[1]]
+        except ValueError:
+            return []
 
     @classmethod
     def _auth_method_bearer(cls, routing: dict):

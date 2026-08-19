@@ -191,7 +191,7 @@ class ResConfigSettings(models.TransientModel):
         Groups = self.env['res.groups']
 
         def ref(xml_id):
-            res_model, res_id = IrModelData._xmlid_to_res_model_res_id(xml_id)
+            res_model, res_id = IrModelData._xmlid_lookup(xml_id)
             return self.env[res_model].browse(res_id)
 
         if fnames is None:

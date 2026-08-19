@@ -163,9 +163,12 @@ class Environment(Mapping[str, "BaseModel"]):
         :returns: Found record or None
         :raise ValueError: if record wasn't found and ``raise_if_not_found`` is True
         """
-        res_model, res_id = self['ir.model.data']._xmlid_to_res_model_res_id(
-            xml_id, raise_if_not_found=raise_if_not_found
-        )
+        try:
+            res_model, res_id = self['ir.model.data']._xmlid_lookup(xml_id)
+        except ValueError:
+            if raise_if_not_found:
+                raise
+            res_model, res_id = None, None
 
         if res_model and res_id:
             record = self[res_model].browse(res_id)
