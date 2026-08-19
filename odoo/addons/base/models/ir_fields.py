@@ -603,15 +603,16 @@ class IrFieldsConverter(models.AbstractModel):
         result = import_cache.get(xmlid)
 
         if not result:
-            module, name = xmlid.split('.', 1)
-            result = next(iter(self.env.execute_query(SQL("""
-                SELECT d.model, d.res_id
-                FROM ir_model_data d
-                JOIN %s r ON d.res_id = r.id
-                WHERE d.module = %s AND d.name = %s
-                LIMIT 1
-            """, SQL.identifier(model._table), module, name))), None)
-
+            module, _name = xmlid.split('.', 1)
+            imd = self.env['ir.model.data'].sudo()
+            cache = imd._cache_for_xmlid(module)
+            if result := cache.get(xmlid):
+                if not self.env[result[0]].browse(result[1]).exists():
+                    result = None
+            else:
+                rs = imd._lookup_xmlids((xmlid,), model)
+                if rs and rs[0][-1]:  # existing
+                    result = (rs[0][3], rs[0][4])
         if result:
             res_model, res_id = import_cache[xmlid] = result
             if res_model != model._name:

@@ -1781,7 +1781,7 @@ class Field[T]:
 
         # dirty only makes sense for stored column fields
         if self.column_type and self.store:
-            if dirty:
+            if dirty and records:
                 env._field_dirty[self].update(id_ for id_ in records._ids if id_)
             else:
                 dirty_ids = env._field_dirty.get(self)

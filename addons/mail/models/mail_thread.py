@@ -3276,10 +3276,7 @@ class MailThread(models.AbstractModel):
                 )
         elif isinstance(source_ref, str):
             try:
-                res_model, res_id = self.env['ir.model.data']._xmlid_to_res_model_res_id(
-                    source_ref,
-                    raise_if_not_found=True
-                )
+                res_model, res_id = self.env['ir.model.data']._xmlid_lookup(source_ref)
             except ValueError as e:
                 raise ValueError(
                     _('Invalid template or view source Xml ID %(source_ref)s does not exist anymore',

@@ -645,8 +645,9 @@ class IrModuleModule(models.Model):
             parent_key = f'{module}.{parent_wrap % xmlid}'
             # Equivalent to using an already cached ref, without failing on
             # missing key - because the parent records have just been created.
-            parent_id = self.env['ir.model.data']._xmlid_to_res_model_res_id(parent_key, False)
-            if not parent_id:
+            try:
+                parent_id = self.env['ir.model.data']._xmlid_lookup(parent_key)
+            except ValueError:
                 _logger.warning("No such snippet template: %r", parent_key)
                 return None
             return {

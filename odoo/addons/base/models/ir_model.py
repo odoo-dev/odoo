@@ -9,7 +9,7 @@ import typing
 from inspect import cleandoc
 from ast import literal_eval
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from operator import itemgetter
 
 from psycopg2.extras import Json
@@ -18,6 +18,7 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import BinaryBytes, frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
+from odoo.tools.func import deprecated
 from odoo.tools.safe_eval import expr_eval, safe_eval, datetime, dateutil, time
 from odoo.tools.translate import FIELD_TRANSLATE, LazyTranslate, _
 
@@ -2210,22 +2211,32 @@ class IrModelData(models.Model):
                 except Exception:  # pylint: disable=broad-except
                     xid.display_name = xid.complete_name
 
-    # NEW V8 API
     @api.model
-    @api.ormcache('xmlid')
+    @api.ormcache()#("module.partition('_')[0]")
+    def _cache_for_xmlid(self, module: str) -> dict[str, tuple[str, int]]:
+        from odoo.tools.lru import LRU
+        return LRU(10000)
+
+    @api.model
     def _xmlid_lookup(self, xmlid: str) -> tuple[str, int]:
         """Low level xmlid lookup
         Return (res_model, res_id) or raise ValueError if not found
         """
         module, name = xmlid.split('.', 1)
-        query = "SELECT model, res_id FROM ir_model_data WHERE module=%s AND name=%s"
-        self.env.cr.execute(query, [module, name])
-        result = self.env.cr.fetchone()
-        if not (result and result[1]):
-            raise ValueError('External ID not found in the system: %s' % xmlid)
-        return result
+        cache = self._cache_for_xmlid(module)
+        if result := cache.get(xmlid):
+            return result
+        self.flush_model(('module', 'name', 'model', 'res_id'))
+        rows = self.env.execute_query(SQL("SELECT module || '.' || name, model, res_id FROM ir_model_data WHERE module = %s AND name >= %s ORDER BY name LIMIT 20", module, name))
+        with cache._lock:
+            for r_name, model, res_id in rows:
+                cache[r_name] = (model, res_id)
+            if result := cache.get(xmlid):
+                return result
+        raise ValueError('External ID not found in the system: %s' % xmlid)
 
     @api.model
+    @deprecated("Since 20.0, use _xmlid_lookup and handle ValueError")
     def _xmlid_to_res_model_res_id(self, xmlid: str, raise_if_not_found: bool = False) -> tuple[str, int] | tuple[typing.Literal[False], typing.Literal[False]]:
         """ Return (res_model, res_id)"""
         try:
@@ -2236,11 +2247,18 @@ class IrModelData(models.Model):
             return (False, False)
 
     @api.model
+    # TODO deprecate as model is not validated or add param for model check
     def _xmlid_to_res_id(self, xmlid, raise_if_not_found=False):
         """ Returns res_id """
-        return self._xmlid_to_res_model_res_id(xmlid, raise_if_not_found)[1]
+        try:
+            return self._xmlid_lookup(xmlid)[1]
+        except ValueError:
+            if raise_if_not_found:
+                raise
+            return False
 
     @api.model
+    @deprecated("Since 20.0, use env.ref and check_access_rights")  # unused function
     def check_object_reference(self, module, xml_id, raise_on_access_error=False):
         """Returns (model, res_id) corresponding to a given module and xml_id (cached), if and only if the user has the necessary access rights
         to see that object, otherwise raise a ValueError if raise_on_access_error is True or returns a tuple (model found, False)"""
@@ -2282,8 +2300,11 @@ class IrModelData(models.Model):
             self.env.transaction.invalidate_ormcache('groups')
         return res
 
-    def _lookup_xmlids(self, xml_ids, model):
-        """ Look up the given XML ids of the given model. """
+    def _lookup_xmlids(self, xml_ids: Iterable[str], model: models.BaseModel) -> list[tuple[int, str, str, str, int, bool, int]]:
+        """ Look up the given XML ids and whether it matches the given model.
+
+        (d.id, d.module, d.name, d.model, d.res_id, d.noupdate, r.id)
+        """
         if not xml_ids:
             return []
 
@@ -2296,13 +2317,17 @@ class IrModelData(models.Model):
         # query xml_ids by prefix
         result = []
         for prefix, suffixes in bymodule.items():
+            cache = self._cache_for_xmlid(prefix)
             query = SQL("""
                 SELECT d.id, d.module, d.name, d.model, d.res_id, d.noupdate, r.id
                 FROM ir_model_data d LEFT JOIN %s r on d.res_id=r.id
                 WHERE d.module=%s
             """, SQL.identifier(model._table), prefix)
-            for subsuffixes in split_every(self.env.cr.IN_MAX, suffixes):
-                result.extend(self.env.execute_query(SQL("%s AND d.name IN %s", query, subsuffixes)))
+            for subsuffixes in split_every(self.env.cr.IN_MAX, sorted(suffixes)):
+                rs = self.env.execute_query(SQL("%s AND d.name IN %s", query, subsuffixes))
+                for r in rs:
+                    cache[f'{r[1]}.{r[2]}'] = (r[3], r[4])
+                result.extend(rs)
 
         return result
 
@@ -2330,17 +2355,20 @@ class IrModelData(models.Model):
             query = self._build_update_xmlids_query(sub_rows, update)
             try:
                 result = self.env.execute_query_dict(query)
+                valid_cache = not any(row['create_date'] != row['write_date'] for row in result)
+                if not valid_cache:
+                    # something was updated, notify other workers
+                    # it is possible that create_date and write_date
+                    # have the same value after an update if it was
+                    # created in the same transaction, no need to invalidate other worker cache
+                    # cache in this case.
+                    self.env.transaction.invalidate_ormcache()
                 for row in result:
                     # small optimisation: during install a lot of xmlid are created/updated.
                     # Instead of clearing the cache, set the correct value in the cache to avoid a bunch of query
-                    self._xmlid_lookup.__cache__.add_value(self, f"{row['module']}.{row['name']}", cache_value=(row['model'], row['res_id']))
-                    if row['create_date'] != row['write_date']:
-                        # something was updated, notify other workers
-                        # it is possible that create_date and write_date
-                        # have the same value after an update if it was
-                        # created in the same transaction, no need to invalidate other worker cache
-                        # cache in this case.
-                        self.env.transaction.invalidate_ormcache()
+                    if valid_cache:
+                        cached_xmlids = self._cache_for_xmlid(row['module'])
+                        cached_xmlids[f'{row['module']}.{row['name']}'] = (row['model'], row['res_id'])
                     id_ = row.pop('id')
                     self.browse(id_)._update_cache(row)
 

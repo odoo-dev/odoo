@@ -613,7 +613,12 @@ form: module.record_id""" % (xml_id,)
 
     def model_id_get(self, id_str, raise_if_not_found=True):
         id_str = self.make_xml_id(id_str)
-        return self.env['ir.model.data']._xmlid_to_res_model_res_id(id_str, raise_if_not_found=raise_if_not_found)
+        try:
+            return self.env['ir.model.data']._xmlid_lookup(id_str)
+        except ValueError:
+            if raise_if_not_found:
+                raise
+            return False, False
 
     def _tag_root(self, el):
         for rec in el:
