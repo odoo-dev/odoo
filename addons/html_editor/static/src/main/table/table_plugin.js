@@ -23,7 +23,15 @@ import { parseHTML } from "@html_editor/utils/html";
 import { DIRECTIONS, leftPos, rightPos, nodeSize } from "@html_editor/utils/position";
 import { withSequence } from "@html_editor/utils/resource";
 import { findInSelection } from "@html_editor/utils/selection";
-import { getColumnIndex, getRowIndex, getTableCells } from "@html_editor/utils/table";
+import {
+    getColumnIndex,
+    getRowIndex,
+    getTableCells,
+    getTableRoot,
+    isTableWrapper,
+    updateTableScrollContainer,
+    TABLE_WRAPPER_SELECTOR,
+} from "@html_editor/utils/table";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
@@ -103,6 +111,7 @@ export class TablePlugin extends Plugin {
         "mergeSelectedCells",
         "unmergeSelectedCell",
         "buildTableGrid",
+        "updateTableWrapper",
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -150,6 +159,27 @@ export class TablePlugin extends Plugin {
         on_redone_handlers: () => {
             delete this.tableGridMap;
         },
+        on_layout_geometry_change_handlers: () => {
+            if (this.dependencies.history.getIsCurrentStepModified()) {
+                // this.dependencies.history.addStep();
+                return;
+            }
+            let changed = false;
+            const tables = this.editable.querySelectorAll("table");
+            for (const table of tables) {
+                changed = this.updateTableWrapper(table) || changed;
+            }
+            if (changed) {
+                this.dependencies.history.addStep({
+                    extraStepInfos: { isTableWrapperStep: true },
+                });
+            }
+        },
+        is_step_reversible_predicates: (step) => {
+            if (step.extraStepInfos?.isTableWrapperStep) {
+                return false;
+            }
+        },
 
         /** Overrides */
         tab_overrides: withSequence(20, this.handleTab.bind(this)),
@@ -176,12 +206,14 @@ export class TablePlugin extends Plugin {
             }
         },
         is_selection_blocker_predicates: (node) => {
-            if (node.nodeName === "TABLE") {
+            // Only one of the two is ever a direct child of a given container,
+            // so accepting both cannot yield duplicate placeholders.
+            if (node.nodeName === "TABLE" || isTableWrapper(node)) {
                 return true;
             }
         },
         can_contain_selection_placeholder_predicates: (container) => {
-            if (container.nodeName === "TABLE") {
+            if (container.nodeName === "TABLE" || isTableWrapper(container)) {
                 return false;
             } else if (["TD", "TH"].includes(container.nodeName) && container.closest(".o_table")) {
                 return true;
@@ -194,7 +226,10 @@ export class TablePlugin extends Plugin {
         },
 
         /** Selectors */
-        move_node_whitelist_selectors: "table",
+        // A wrapped table must be dragged by its wrapper: `closestElement`
+        // returns the innermost match, so the bare `table` case is restricted
+        // to tables that have none.
+        move_node_whitelist_selectors: `${TABLE_WRAPPER_SELECTOR}, :not(${TABLE_WRAPPER_SELECTOR}) > table`,
     };
 
     setup() {
@@ -224,6 +259,27 @@ export class TablePlugin extends Plugin {
         this.onMousemove = this.onMousemove.bind(this);
 
         this.normalizeTableStructure(this.editable);
+    }
+
+    /**
+     * Measure the given tables against the space available to them, and return
+     * the updates putting their scroll containers in the right state.
+     *
+     * @param {Iterable<HTMLTableElement>} [tables]
+     * @returns {Function[]}
+     */
+    updateTableWrapper(table) {
+        if (this.config.disableTableScrollContainer) {
+            return;
+        }
+        const cursors = this.dependencies.selection.preserveSelection();
+        updateTableScrollContainer(table);
+        // if (updated) {
+        //     this.dependencies.history.addStep({
+        //         extraStepInfos: { isTableWrapperStep: true },
+        //     });
+        // }
+        cursors.restore();
     }
 
     handlePasteTableIntoExistingTable(selection, clipboardRoot) {
@@ -394,6 +450,13 @@ export class TablePlugin extends Plugin {
                 table.style.color = "";
                 table.style.backgroundColor = "";
             }
+        }
+        const wrappers = root.querySelectorAll(".o_table_wrapper");
+        for (const wrapper of wrappers) {
+            if (wrapper.firstChild?.tagName === "TABLE") {
+                continue;
+            }
+            wrapper.remove();
         }
     }
 
@@ -928,8 +991,10 @@ export class TablePlugin extends Plugin {
             return;
         }
         const baseContainer = this.dependencies.baseContainer.createBaseContainer();
-        table.before(baseContainer);
-        table.remove();
+        // Remove the scroll container along with the table, if it has one.
+        const tableRoot = getTableRoot(table);
+        tableRoot.before(baseContainer);
+        tableRoot.remove();
         this.dependencies.selection.setCursorStart(baseContainer);
     }
 
@@ -1089,11 +1154,11 @@ export class TablePlugin extends Plugin {
         // Expand range to fully include tables.
         const firstTable = fullySelectedTables[0];
         if (firstTable.contains(startContainer)) {
-            [startContainer, startOffset] = leftPos(firstTable);
+            [startContainer, startOffset] = leftPos(getTableRoot(firstTable));
         }
         const lastTable = fullySelectedTables.at(-1);
         if (lastTable.contains(endContainer)) {
-            [endContainer, endOffset] = rightPos(lastTable);
+            [endContainer, endOffset] = rightPos(getTableRoot(lastTable));
         }
         range = { startContainer, startOffset, endContainer, endOffset };
 
@@ -1254,9 +1319,9 @@ export class TablePlugin extends Plugin {
                     ["ArrowRight", "ArrowDown"].includes(ev.key) && direction === DIRECTIONS.LEFT;
                 let targetNode;
                 if (deselectingBackward) {
-                    targetNode = endTable.previousElementSibling;
+                    targetNode = getTableRoot(endTable).previousElementSibling;
                 } else if (deselectingForward) {
-                    targetNode = endTable.nextElementSibling;
+                    targetNode = getTableRoot(endTable).nextElementSibling;
                 }
                 if (targetNode) {
                     ev.preventDefault();
@@ -1657,8 +1722,8 @@ export class TablePlugin extends Plugin {
         const rowOffset = currentRowIndex + (isArrowUp ? -1 : currentCell.rowSpan);
         let targetNode = tableGrid[rowOffset]?.[currentColIndex];
         const siblingElement = isArrowUp
-            ? currentTable.previousElementSibling
-            : currentTable.nextElementSibling;
+            ? getTableRoot(currentTable).previousElementSibling
+            : getTableRoot(currentTable).nextElementSibling;
         if (!targetNode && siblingElement) {
             // If no target cell is available, navigate to sibling element
             targetNode = siblingElement;
@@ -1837,6 +1902,7 @@ export class TablePlugin extends Plugin {
      */
     normalizeTableStructure(container) {
         container.querySelectorAll("table").forEach((table) => {
+            this.updateTableWrapper(table);
             let tbody = table.tBodies[0];
             const thead = table.tHead;
 
@@ -1900,14 +1966,17 @@ export class TablePlugin extends Plugin {
             // just its rows.
             clonedContents = tableClone;
         }
-        const startTable = closestElement(selection.startContainer, "table");
-        if (clonedContents.firstChild.nodeName === "TABLE" && startTable) {
+        // A partially selected table is cloned along with its scroll container,
+        // when it has one, so both shapes have to be recognised here.
+        const isTableOrWrapper = (node) => node.nodeName === "TABLE" || isTableWrapper(node);
+        const startTable = getTableRoot(selection.startContainer);
+        if (isTableOrWrapper(clonedContents.firstChild) && startTable) {
             // Make sure the full leading table is copied.
             clonedContents.firstChild.after(startTable.cloneNode(true));
             clonedContents.firstChild.remove();
         }
-        const endTable = closestElement(selection.endContainer, "table");
-        if (clonedContents.lastChild.nodeName === "TABLE" && endTable) {
+        const endTable = getTableRoot(selection.endContainer);
+        if (isTableOrWrapper(clonedContents.lastChild) && endTable) {
             // Make sure the full trailing table is copied.
             clonedContents.lastChild.before(endTable.cloneNode(true));
             clonedContents.lastChild.remove();
