@@ -286,6 +286,9 @@ export class Thread extends Record {
     );
 
     async fetchPinnedMessages() {
+        if (this.store.self_user?.share !== false) {
+            return;
+        }
         await this.store.fetchStoreData("mail.thread", {
             thread_model: this.model,
             thread_id: this.id,

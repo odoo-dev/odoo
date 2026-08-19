@@ -136,7 +136,9 @@ export class Chatter extends Component {
         if (!thread?.id || !this.state.thread?.eq(thread)) {
             return;
         }
-        await thread.fetchThreadData(requestList);
+        if (requestList.includes("messages")) {
+            thread.fetchNewMessages();
+        }
     }
 
     onCloseFullComposerCallback() {
