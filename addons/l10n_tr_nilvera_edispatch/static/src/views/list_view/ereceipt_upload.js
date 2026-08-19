@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, t, useProps } from "@odoo/owl";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { ListController } from "@web/views/list/list_controller";
 import { registry } from "@web/core/registry";
@@ -13,11 +13,11 @@ import { StockListView } from "@stock/views/stock_empty_list_help";
 export class L10nTrEreceiptUploader extends Component {
     static template = "l10n_tr_nilvera_edispatch.L10nTrEreceiptUploader";
     static components = { FileUploader };
-    static props = {
+    props = useProps({
         ...standardWidgetProps,
-        slots: { type: Object, optional: true },
-        record: { type: Object, optional: true },
-    };
+        slots: t.object().optional(),
+        record: t.object().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");

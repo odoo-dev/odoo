@@ -1,4 +1,4 @@
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, t, useProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -13,14 +13,12 @@ export class SubtaskKanbanList extends Component {
         Field,
         SubtaskCreate,
     };
-    static props = {
-        ...standardWidgetProps,
-        isReadonly: {
-            type: Boolean,
-            optional: true,
-        },
-    };
     static template = "project.SubtaskKanbanList";
+
+    props = useProps({
+        ...standardWidgetProps,
+        isReadonly: t.boolean().optional(),
+    });
 
     setup() {
         this.actionService = useService("action");

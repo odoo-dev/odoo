@@ -5,16 +5,17 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 
 export class PurchaseFileUploader extends Component {
     static template = "purchase.DocumentFileUploader";
-    static props = {
-        ...standardWidgetProps,
-        record: { type: Object, optional: true },
-        list: { type: Object, optional: true },
-    };
     static components = { FileUploader };
+
+    props = useProps({
+        ...standardWidgetProps,
+        record: t.object().optional(),
+        list: t.object().optional(),
+    });
 
     setup() {
         this.orm = useService("orm");
@@ -42,7 +43,9 @@ export class PurchaseFileUploader extends Component {
         if (this.env.config.viewType !== "list") {
             return;
         }
-        const vendorSet = new Set(this.props.list.selection.map((record) => record.data.partner_id.id));
+        const vendorSet = new Set(
+            this.props.list.selection.map((record) => record.data.partner_id.id)
+        );
         if (vendorSet.size > 1) {
             this.dialog.add(WarningDialog, {
                 title: _t("Validation Error"),
