@@ -38,7 +38,11 @@ class PaypalController(http.Controller):
             ._search_by_reference("paypal", {"reference_id": reference})
         )
         if tx_sudo:
-            self._paypal_capture_order(tx_sudo, order_id)
+            if tx_sudo.operation == "validation":
+                # The customer approved the setup token; upgrade it to a payment token.
+                tx_sudo._paypal_create_payment_token()
+            else:
+                self._paypal_capture_order(tx_sudo, order_id)
 
     @http.route(_return_url, type="http", auth="public", methods=["GET"], save_session=False)
     def paypal_return_from_checkout(self, token=None, **data):
@@ -57,7 +61,15 @@ class PaypalController(http.Controller):
         )
         if tx_sudo:
             order_id = token or tx_sudo.provider_reference
-            if tx_sudo.payment_method_code in {"paypal", "card"}:
+            if tx_sudo.operation == "validation":
+                try:
+                    tx_sudo._paypal_create_payment_token()
+                except ValidationError as e:
+                    tx_sudo.with_context(
+                        # The setup token was not consumed; the handler is safe to replay.
+                        payment_safe_write=True
+                    )._set_error(str(e))
+            elif tx_sudo.payment_method_code in {"paypal", "card"}:
                 self._paypal_capture_order(tx_sudo, order_id)
             else:
                 order_details = tx_sudo._send_api_request(
@@ -82,7 +94,9 @@ class PaypalController(http.Controller):
             .sudo()
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
-        if tx_sudo:
+        if tx_sudo and tx_sudo.operation == "validation":
+            tx_sudo._record({"id": tx_sudo.provider_reference, "status": "CANCELED"})
+        elif tx_sudo:
             order_id = token or tx_sudo.provider_reference
             try:
                 order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")

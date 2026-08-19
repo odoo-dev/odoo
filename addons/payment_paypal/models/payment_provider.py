@@ -192,6 +192,8 @@ class PaymentProvider(models.Model):
         for provider in self.filtered(lambda p: p.code == "paypal"):
             if not provider.paypal_client_id or not provider.paypal_client_secret:
                 continue
+            if not currency_id:
+                continue  # PayPal assesses eligibility per purchase; skip it for validations.
             eligible_method_keys = provider._paypal_get_eligible_payment_method_keys(
                 partner_id,
                 amount,
@@ -260,17 +262,22 @@ class PaymentProvider(models.Model):
             return None
         return set(response_content.get("eligible_methods", {}))
 
-    def _paypal_get_inline_form_values(self, currency=None, partner_id=None):
+    def _paypal_get_inline_form_values(self, currency=None, partner_id=None, payment_method=None):
         """Return a serialized JSON of the required values to render the inline form.
 
         Note: `self.ensure_one()`
 
         :param res.currency currency: The transaction currency.
         :param int partner_id: The partner making the payment, as a `res.partner` id.
+        :param payment.method payment_method: The payment method the form is rendered for.
         :return: The JSON serial of the required values to render the inline form.
         :rtype: str
         """
         partner = self.env["res.partner"].browse(partner_id).exists()
+        # Validation operations have no currency, but the SDK requires a supported one.
+        currency = currency or self.with_context(
+            validation_pm=payment_method
+        )._get_validation_currency()
         inline_form_values = {
             "provider_id": self.id,
             "client_id": self.paypal_client_id,

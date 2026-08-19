@@ -30,10 +30,19 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific processing values
         :rtype: dict
         """
-        if self.provider_code != "paypal" or self.operation != "online_direct":
+        is_card_validation = self.operation == "validation" and self.payment_method_code == "card"
+        if (
+            self.provider_code != "paypal"
+            or (self.operation != "online_direct" and not is_card_validation)
+        ):
             return super()._get_specific_processing_values(processing_values)
 
         try:
+            if is_card_validation:
+                setup_token_data = self._paypal_create_setup_token()
+                self.provider_reference = setup_token_data["id"]
+                return {"setup_token_id": setup_token_data["id"]}
+
             order_data = self._paypal_create_order()
             self.provider_reference = order_data["id"]
         except ValidationError as e:
@@ -52,23 +61,28 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific rendering values.
         :rtype: dict
         """
-        if self.provider_code != "paypal":
+        is_validation = self.operation == "validation"
+        if self.provider_code != "paypal" or (is_validation and self.payment_method_code == "card"):
             return super()._get_specific_rendering_values(processing_values)
 
-        payload = (
-            self._paypal_prepare_order_payload()
-            if self.payment_method_code == "paypal"
-            else self._paypal_prepare_apm_order_payload()
-        )
         try:
-            order_data = self._paypal_create_order(payload=payload)
+            if is_validation:
+                order_data = self._paypal_create_setup_token()
+            else:
+                payload = (
+                    self._paypal_prepare_order_payload()
+                    if self.payment_method_code == "paypal"
+                    else self._paypal_prepare_apm_order_payload()
+                )
+                order_data = self._paypal_create_order(payload=payload)
         except ValidationError as e:
             self._set_error(str(e))
             return {}
 
         self.provider_reference = order_data["id"]
+        action_rel = "approve" if is_validation else "payer-action"
         payer_action_url = next(
-            link["href"] for link in order_data["links"] if link["rel"] == "payer-action"
+            link["href"] for link in order_data["links"] if link["rel"] == action_rel
         )
         return {
             "api_url": payer_action_url,
@@ -97,6 +111,81 @@ class PaymentTransaction(models.Model):
             json=payload if payload else self._paypal_prepare_order_payload(),
             idempotency_key=idempotency_key,
         )
+
+    def _paypal_create_setup_token(self):
+        """Create a PayPal setup token to save a payment method without a payment.
+
+        The setup token is temporary; it must be approved by the customer, then exchanged for a
+        payment token in`_paypal_create_payment_token`.
+
+        See https://developer.paypal.com/api/payment-tokens/v3/#setup-tokens_create.
+        """
+        return_url, cancel_url = self._paypal_get_return_urls(self.reference)
+        experience_context = {
+            "brand_name": self.provider_id.company_id.name,
+            "return_url": return_url,
+            "cancel_url": cancel_url,
+        }
+        if self.payment_method_code == "card":
+            payment_source = {
+                "card": {
+                    "verification_method": "SCA_WHEN_REQUIRED",
+                    "experience_context": experience_context,
+                }
+            }
+        else:
+            payment_source = {
+                "paypal": {
+                    "permit_multiple_payment_tokens": False,
+                    "usage_type": "MERCHANT",
+                    "customer_type": "CONSUMER",
+                    "experience_context": {
+                        **experience_context,
+                        "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED",
+                        "shipping_preference": "NO_SHIPPING",
+                    },
+                }
+            }
+        payload = {"payment_source": payment_source}
+        if customer_id := self._paypal_get_customer_id():
+            payload["customer"] = {"id": customer_id}  # Link the token to the existing customer.
+        return self._send_api_request(
+            "POST",
+            "/v3/vault/setup-tokens",
+            json=payload,
+            idempotency_key=payment_utils.generate_idempotency_key(
+                self, scope="setup_token_request"
+            ),
+        )
+
+    def _paypal_create_payment_token(self):
+        """Exchange the approved setup token for a payment token and record it on the transaction.
+
+        See https://developer.paypal.com/api/payment-tokens/v3/#payment-tokens_create.
+
+        :return: None
+        """
+        vault = self._send_api_request(
+            "POST",
+            "/v3/vault/payment-tokens",
+            json={
+                "payment_source": {"token": {"id": self.provider_reference, "type": "SETUP_TOKEN"}}
+            },
+            idempotency_key=payment_utils.generate_idempotency_key(
+                self, scope="payment_token_request"
+            ),
+        )
+        pm_code = self.payment_method_code
+        self._record({
+            "id": vault["id"],
+            "status": "COMPLETED",
+            "payment_source": {
+                pm_code: {
+                    **vault.get("payment_source", {}).get(pm_code, {}),
+                    "attributes": {"vault": vault},
+                }
+            },
+        })
 
     def _paypal_prepare_order_payload(self):
         """Prepare the payload for the Paypal create order request.
