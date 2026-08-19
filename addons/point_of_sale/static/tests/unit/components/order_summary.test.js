@@ -49,7 +49,7 @@ test("setLinePrice: input is per-unit tax-included price, discount is preserved"
     const singleTaxLine = order.lines[0];
     await orderSummary.setLinePrice(singleTaxLine, 125);
     expect(singleTaxLine.price_unit).toBe(125);
-    expect(singleTaxLine.document_tax_mode).toBe("tax_included");
+    expect(singleTaxLine.AllowManualPriceChange()).toBe("tax_included");
     expect(singleTaxLine.displayPrice).toBe(125);
 
     // multiTaxLine: 15% + 25% (both tax-excluded) = 40% total, qty=1, no discount.

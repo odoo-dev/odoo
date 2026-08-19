@@ -465,16 +465,6 @@ export class PosOrderline extends PosOrderlineAccounting {
                     : _t(" (after discount)"),
         };
     }
-    AllowManualPriceChange() {
-        if (
-            this.config.iface_tax_included === "total" &&
-            (this.price_type === "manual" || this.isRefund())
-        ) {
-            return "tax_included";
-        } else {
-            return false;
-        }
-    }
 }
 
 registry.category("pos_available_models").add(PosOrderline.pythonModel, PosOrderline);

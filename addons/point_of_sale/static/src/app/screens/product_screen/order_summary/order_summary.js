@@ -267,8 +267,7 @@ export class OrderSummary extends Component {
             const val = line.getQuantityFromDisplayPrice(parsedPrice);
             line.setQuantity(val, false);
         } else {
-            // price = line.getUnitPriceFromDisplayPrice(parsedPrice);
-            line.setUnitPrice(price);
+            line.setUnitPrice(parsedPrice);
         }
     }
 

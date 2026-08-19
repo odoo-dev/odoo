@@ -470,7 +470,7 @@ export class TicketScreen extends Component {
             discount: refundLine.discount,
             tax_ids: refundLine.tax_ids.map((tax) => ["link", tax]),
             refunded_orderline_id: refundLine,
-            price_type: "automatic",
+            price_type: refundLine.price_type === "manual" ? "manual" : "automatic",
             attribute_value_ids: refundLine.attribute_value_ids.map((attr) => ["link", attr]),
         };
     }

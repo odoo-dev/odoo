@@ -209,6 +209,18 @@ export class PosOrderlineAccounting extends Base {
     }
 
     /**
+     * Returns the document_tax_mode for this line:
+     * - "tax_included" when iface_tax_included is "total" and the price was manually entered
+     * - false otherwise (use the tax's own price_include setting)
+     */
+    AllowManualPriceChange() {
+        if (this.config.iface_tax_included === "total" && this.price_type === "manual") {
+            return "tax_included";
+        }
+        return false;
+    }
+
+    /**
      * Prepare extra values for the base line used in taxes computation.
      */
     prepareBaseLineForTaxesComputationExtraValues(customValues = {}) {
@@ -218,14 +230,6 @@ export class PosOrderlineAccounting extends Base {
         const product = this.getProduct();
         const priceUnit = this.price_unit || 0;
         const discount = this.getDiscount();
-        // let document_tax_mode = false;
-        // if (
-        //     order.config.iface_tax_included === "total" &&
-        //     (this.price_type === "manual" || this.isRefund())
-        // ) {
-        //     document_tax_mode = "tax_included";
-        // }
-        // console.log(document_tax_mode);
         const values = {
             ...extraValues,
             quantity: this.qty,

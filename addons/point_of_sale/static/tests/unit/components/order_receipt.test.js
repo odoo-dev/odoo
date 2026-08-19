@@ -166,7 +166,7 @@ test("ticket data renders discount details and can omit discount summary for man
         { product_tmpl_id: product, qty: 1 },
         manualPriceOrder
     );
-    manualLine.setUnitPrice(9);
+    manualLine.setUnitPrice(10.35);
     manualLine.price_type = "manual";
     addPayment(manualPriceOrder, cardPm, 10.35);
 

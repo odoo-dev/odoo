@@ -99,13 +99,18 @@ class PosOrderLine(models.Model):
         @rtype: dict
         """
         self.ensure_one()
-        return {
+        vals = {
             'name': _('%(name)s REFUND', name=self.name),
             'qty': -(self.qty - self.refunded_qty),
             'order_id': refund_order.id,
             'is_total_cost_computed': False,
             'refunded_orderline_id': self.id,
         }
+        # Carry forward price_type so that manually-priced refund lines are
+        # still interpreted as tax-inclusive by AllowManualPriceChange().
+        if self.price_type == 'manual':
+            vals['price_type'] = 'manual'
+        return vals
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -152,12 +157,14 @@ class PosOrderLine(models.Model):
         price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
         line_qty = qty or self.qty
         line_qty = -abs(line_qty) if self.order_id.is_refund_or_negative() else line_qty  # All lines quantity must be negative in refund
+        document_tax_mode = self.AllowManualPriceChange(self)
         taxes = tax_ids_after_fiscal_position.compute_all(
             price,
             self.order_id.currency_id,
             line_qty,
             product=self.product_id,
             partner=self.order_id.partner_id,
+            document_tax_mode=document_tax_mode,
         )
         return {
             'price_subtotal_incl': abs(taxes['total_included']),  # Line prices are always positive
@@ -181,7 +188,12 @@ class PosOrderLine(models.Model):
             price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
             self.price_subtotal = self.price_subtotal_incl = price * self.qty
             if (self.tax_ids):
-                taxes = self.tax_ids_after_fiscal_position.compute_all(price, self.order_id.currency_id, self.qty, product=self.product_id, partner=False)
+                document_tax_mode = self.AllowManualPriceChange(self)
+                taxes = self.tax_ids_after_fiscal_position.compute_all(
+                    price, self.order_id.currency_id, self.qty,
+                    product=self.product_id, partner=False,
+                    document_tax_mode=document_tax_mode
+                )
                 self.price_subtotal = taxes['total_excluded']
                 self.price_subtotal_incl = taxes['total_included']
 
@@ -228,7 +240,12 @@ class PosOrderLine(models.Model):
 
     def _get_discount_amount(self):
         self.ensure_one()
-        original_price = self.tax_ids_after_fiscal_position.compute_all(self.price_unit, self.currency_id, self.qty, product=self.product_id, partner=self.order_id.partner_id)['total_included']
+        document_tax_mode = self.AllowManualPriceChange(self)
+        original_price = self.tax_ids_after_fiscal_position.compute_all(
+            self.price_unit, self.currency_id, self.qty,
+            product=self.product_id, partner=self.order_id.partner_id,
+            document_tax_mode=document_tax_mode
+        )['total_included']
         # Use magnitudes and reapply the line sign
         sign = -1 if self.price_unit * self.qty < 0 else 1
         return sign * (abs(original_price) - abs(self.price_subtotal_incl))
@@ -245,7 +262,12 @@ class PosOrderLine(models.Model):
 
     def _get_price_no_discount(self, config_id):
         def get_total(line):
-            data = self.tax_ids_after_fiscal_position.compute_all(line.price_unit, line.currency_id, self.qty, product=line.product_id, partner=line.order_id.partner_id)
+            document_tax_mode = line.AllowManualPriceChange(line)
+            data = self.tax_ids_after_fiscal_position.compute_all(
+                line.price_unit, line.currency_id, self.qty,
+                product=line.product_id, partner=line.order_id.partner_id,
+                document_tax_mode=document_tax_mode
+            )
             return (
                 data['total_included']
                 if config_id.iface_tax_included == "total"
@@ -308,7 +330,7 @@ class PosOrderLine(models.Model):
     def AllowManualPriceChange(self, line):
         if (
             line.order_id.config_id.iface_tax_included == "total" and
-            (line.price_type == "manual" or line.order_id.is_refund_or_negative())
+            line.price_type == "manual"
         ):
             return "tax_included"
         else:
