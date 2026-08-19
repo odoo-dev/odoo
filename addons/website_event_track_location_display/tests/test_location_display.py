@@ -153,8 +153,16 @@ class TestLocationDisplay(TestEventOnlineCommon, HttpCase):
         self.assertIn('Test Speaker', response.text, "Speaker name should be displayed on the page.")
         self.assertIn(next_track.name, response.text, "Next track name should be displayed on the page.")
         self.assertIn(f'{display_url}/content', response.text, "Refresh content endpoint should be included in the page.")
-        self.assertIn('o_wevent_location_display_refresh_status', response.text, "Refresh status should be included in the page.")
-        self.assertNotIn('o_wevent_location_display_has_background', response.text, "Background image should not be displayed on the page.")
+        self.assertIn(
+            'website_event_track_location_display.EventTrackLocationDisplay',
+            response.text,
+            "The location display OWL component should be included in the page.",
+        )
+        self.assertNotIn(
+            'location_display_background',
+            response.text,
+            "Background image should not be displayed on the page.",
+        )
         # Check that the background image is displayed when set on the event
         self.event_0.location_display_background = (
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC'
@@ -163,14 +171,16 @@ class TestLocationDisplay(TestEventOnlineCommon, HttpCase):
         background_image_url = (
             f'/web/image/event.event/{self.event_0.id}/location_display_background'
         )
-        self.assertIn('o_wevent_location_display_has_background', response.text, "Background image should be displayed on the page.")
         self.assertIn(background_image_url, response.text, "Background image URL should be included in the page.")
         self.assertEqual(self.url_open(background_image_url).status_code, 200)
         # Check that the content endpoint returns the expected response
         content_response = self.url_open(f'{display_url}/content', json={'params': {}})
         self.assertEqual(content_response.status_code, 200)
-        self.assertIn('o_wevent_location_display_content', content_response.json()['result'])
-        self.assertIn(background_image_url, content_response.json()['result'])
+        content = content_response.json()['result']
+        self.assertEqual(content['backgroundImageUrl'], background_image_url)
+        self.assertEqual(content['locationName'], self.location.name)
+        self.assertEqual(content['liveTrack']['name'], live_track.name)
+        self.assertEqual(content['upcomingTracks'][0]['name'], next_track.name)
 
     def test_location_display_cookies_bar(self):
         """ Test that the location display page does not show the cookies bar even if it is enabled on the website. """

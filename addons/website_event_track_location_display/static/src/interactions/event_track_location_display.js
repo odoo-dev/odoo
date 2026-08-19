@@ -1,91 +1,67 @@
+import { Component, onMounted, onWillDestroy, status, useState } from "@odoo/owl";
+
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
-import { Interaction } from "@web/public/interaction";
 
 const REFRESH_INTERVAL = 30_000;
 const FAILED_REFRESH_THRESHOLD = 3;
-const BACKGROUND_CLASS = "o_wevent_location_display_has_background";
-const BACKGROUND_PROPERTY = "--o-wevent-location-display-background-image";
 
-export class EventTrackLocationDisplay extends Interaction {
-    static selector = ".o_wevent_location_display";
+export class EventTrackLocationDisplay extends Component {
+    static template = "website_event_track_location_display.EventTrackLocationDisplay";
+    static props = {
+        data: Object,
+        refreshUrl: String,
+    };
 
     setup() {
+        this.state = useState({
+            ...this.props.data,
+            isOffline: false,
+            lastUpdatedLabel: "",
+        });
         this.failedRefreshes = 0;
         this.lastUpdatedAt = new Date();
-        this.scheduleRefresh();
+
+        onMounted(() => this.scheduleRefresh());
+        onWillDestroy(() => clearTimeout(this.refreshTimeout));
     }
 
     scheduleRefresh() {
-        this.refreshTimeout = this.waitForTimeout(async () => {
+        this.refreshTimeout = setTimeout(async () => {
             await this.refreshContent();
-            this.scheduleRefresh();
+            if (status(this) !== "destroyed") {
+                this.scheduleRefresh();
+            }
         }, REFRESH_INTERVAL);
-    }
-
-    destroy() {
-        clearTimeout(this.refreshTimeout);
     }
 
     async refreshContent() {
         try {
-            const html = await this.waitFor(rpc(this.el.dataset.refreshUrl, {}, { silent: true }));
-            const content = new DOMParser()
-                .parseFromString(html.trim(), "text/html")
-                .body.firstElementChild;
-            const currentContent = this.el.querySelector(".o_wevent_location_display_content");
-            this.updateBackground(content.dataset.backgroundImageUrl);
-            this.updateCurrentTime(content.dataset.currentTime);
-            this.insert(content, currentContent, "beforebegin", false);
-            this.services["public.interactions"].stopInteractions(currentContent);
-            currentContent.remove();
+            const data = await rpc(this.props.refreshUrl, {}, { silent: true });
+            if (status(this) === "destroyed") {
+                return;
+            }
             const wasOffline = this.failedRefreshes >= FAILED_REFRESH_THRESHOLD;
+            Object.assign(this.state, data);
             this.failedRefreshes = 0;
             this.lastUpdatedAt = new Date();
             if (wasOffline) {
-                this.updateRefreshStatus();
+                this.state.isOffline = false;
             }
         } catch {
-            // Keep the last successfully loaded schedule visible while offline.
+            if (status(this) === "destroyed") {
+                return;
+            }
             this.failedRefreshes++;
             if (this.failedRefreshes === FAILED_REFRESH_THRESHOLD) {
-                this.updateRefreshStatus();
+                this.state.isOffline = true;
+                this.state.lastUpdatedLabel = this.lastUpdatedAt.toLocaleTimeString([], { timeStyle: "short" });
             }
         }
-    }
-
-    updateCurrentTime(currentTimeLabel) {
-        const timeEl = this.el.querySelector(".o_wevent_location_display_now");
-        if (timeEl && currentTimeLabel) {
-            timeEl.textContent = currentTimeLabel;
-        }
-    }
-
-    updateBackground(backgroundImageUrl) {
-        this.el.classList.toggle(BACKGROUND_CLASS, Boolean(backgroundImageUrl));
-        if (backgroundImageUrl) {
-            this.el.style.setProperty(BACKGROUND_PROPERTY, `url(${backgroundImageUrl})`);
-        } else {
-            this.el.style.removeProperty(BACKGROUND_PROPERTY);
-        }
-    }
-
-    updateRefreshStatus() {
-        const status = this.el.querySelector(".o_wevent_location_display_refresh_status");
-        if (!status) {
-            return;
-        }
-        const isOffline = this.failedRefreshes >= FAILED_REFRESH_THRESHOLD;
-        status.classList.toggle("d-none", !isOffline);
-        if (!isOffline) {
-            return;
-        }
-        const formattedTime = this.lastUpdatedAt.toLocaleTimeString([], { timeStyle: "short" });
-        status.querySelector("time").textContent = formattedTime;
     }
 }
 
-registry.category("public.interactions").add(
-    "website_event_track_location_display.event_track_location_display",
+registry.category("public_components").add(
+    "website_event_track_location_display.EventTrackLocationDisplay",
     EventTrackLocationDisplay
 );
