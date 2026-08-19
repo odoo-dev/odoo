@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import frozendict
+from odoo.tools import frozendict, SQL
 
 from collections import defaultdict
 from datetime import timedelta
@@ -214,15 +214,21 @@ class AccountPartialReconcile(models.Model):
                 line2number[partial.credit_move_id.id] = partial.id
 
         amls.flush_recordset(['full_reconcile_id'])
-        self.env.cr.execute_values("""
-            UPDATE account_move_line l
-               SET matching_number = CASE
-                       WHEN l.full_reconcile_id IS NOT NULL THEN l.full_reconcile_id::text
-                       ELSE 'P' || source.number
-                   END
-              FROM (VALUES %s) AS source(number, ids)
-             WHERE l.id = ANY(source.ids)
-        """, list(number2lines.items()), page_size=1000)
+        numbers = []
+        line_ids = []
+        for number, ids in number2lines.items():
+            numbers.extend([number] * len(ids))
+            line_ids.extend(ids)
+        if line_ids:
+            self.env.cr.execute(SQL("""
+                UPDATE account_move_line l
+                   SET matching_number = CASE
+                           WHEN l.full_reconcile_id IS NOT NULL THEN l.full_reconcile_id::text
+                           ELSE 'P' || source.number
+                       END
+                  FROM UNNEST(%s::integer[], %s::integer[]) AS source(number, id)
+                 WHERE l.id = source.id
+            """, numbers, line_ids))
         processed_amls = self.env['account.move.line'].browse([_id for ids in number2lines.values() for _id in ids])
         processed_amls.invalidate_recordset(['matching_number'])
         (amls - processed_amls).matching_number = False

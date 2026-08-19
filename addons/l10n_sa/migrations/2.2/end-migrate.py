@@ -1,3 +1,5 @@
+from odoo.tools import SQL
+
 # (rec_name_regex, name_en, desc_en, desc_ar, notes_en, tax_scope)
 TAX_VALUES_MAPPING = [
     (
@@ -29,7 +31,7 @@ TAX_VALUES_MAPPING = [
 
 def migrate(cr, version):
     # Update names, descriptions, legal notes and JSONB translations
-    cr.execute_values("""
+    cr.execute(SQL("""
         WITH data(rec_name, name_en, desc_en, desc_ar, notes_en, tax_scope) AS (
             VALUES %s
         )
@@ -42,5 +44,5 @@ def migrate(cr, version):
         FROM ir_model_data AS imd
         JOIN data ON imd.name ~ data.rec_name
         WHERE imd.model = 'account.tax'
-        AND imd.res_id = t.id;
-    """, TAX_VALUES_MAPPING)
+        AND imd.res_id = t.id
+    """, SQL.values(TAX_VALUES_MAPPING)))

@@ -491,31 +491,6 @@ class Cursor(_CursorProtocol):
         for params in vars_list:
             self.execute(query, params)
 
-    def execute_values(self, query: typing.LiteralString | psql.Composable, argslist, template=None, page_size=100, fetch=False):
-        """Reimplementation of psycopg.extras.execute_values using client-side mogrify.
-
-        The query must contain a single ``%s`` placeholder for the VALUES list.
-        """
-        if isinstance(query, psql.Composable):
-            query = query.as_string(self._obj)
-        result = []
-        argslist = list(argslist)
-        for start in range(0, len(argslist), page_size):
-            page = argslist[start:start + page_size]
-            if not page:
-                continue
-            if template is None:
-                template = "(" + ",".join(["%s"] * len(page[0])) + ")"
-            values = ",".join(self._obj.mogrify(template, args) for args in page)
-            placeholder = query.find('%s')
-            if placeholder < 0:
-                raise ValueError("execute_values query must contain a %s placeholder for VALUES")
-            composed = query[:placeholder] + values + query[placeholder + 2:]
-            self.execute(composed)
-            if fetch:
-                result.extend(self.fetchall())
-        return result if fetch else None
-
     @contextmanager
     def copy(self, statement: SQL | typing.LiteralString | psql.Composable, params=None, *, writer=None, log_exceptions: bool = True):
         """Initiate a ``COPY`` operation and yield a psycopg ``Copy`` object."""

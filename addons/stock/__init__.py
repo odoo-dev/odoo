@@ -5,6 +5,7 @@ from collections import defaultdict
 import json
 
 from odoo.fields import Domain
+from odoo.tools import SQL
 
 from . import controllers
 from . import models
@@ -79,14 +80,16 @@ def _save_current_inventory(env):
             if product.qty_available:
                 qty_available_by_product[product.id][str(company.id)] = product.qty_available
 
-    query = """
-        UPDATE product_product AS p
-        SET qty_available = v.qty::jsonb
-        FROM (VALUES %s) AS v(id, qty)
-        WHERE p.id = v.id
-    """
     values = [
         (product_id, json.dumps(quantity_per_company))
         for product_id, quantity_per_company in qty_available_by_product.items()
     ]
-    env.cr.execute_values(query, values)
+    if not values:
+        return
+    product_ids, qtys = zip(*values)
+    env.cr.execute(SQL("""
+        UPDATE product_product AS p
+        SET qty_available = v.qty::jsonb
+        FROM UNNEST(%s::integer[], %s::text[]) AS v(id, qty)
+        WHERE p.id = v.id
+    """, list(product_ids), list(qtys)))

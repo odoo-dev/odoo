@@ -1159,16 +1159,18 @@ class ProductTemplate(models.Model):
         )
         prod_tmpl_ids = self.env.cr.dictfetchall()
         max_seq = self._default_website_sequence()
-        query = f"""
-            UPDATE {self._table}
-            SET website_sequence = p.web_seq
-            FROM (VALUES %s) AS p(p_id, web_seq)
-            WHERE id = p.p_id
-        """
         values_args = [
             (prod_tmpl["id"], max_seq + i * 5) for i, prod_tmpl in enumerate(prod_tmpl_ids)
         ]
-        self.env.cr.execute_values(query, values_args)
+        if not values_args:
+            return
+        ids, seqs = zip(*values_args)
+        self.env.cr.execute(SQL("""
+            UPDATE %s
+            SET website_sequence = p.web_seq
+            FROM UNNEST(%s::integer[], %s::integer[]) AS p(p_id, web_seq)
+            WHERE id = p.p_id
+        """, SQL.identifier(self._table), list(ids), list(seqs)))
 
     def set_sequence_top(self):
         min_sequence = self.sudo().search([], order="website_sequence ASC", limit=1)
