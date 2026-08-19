@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website_event_track_location_display.EventTrackLocationDisplaySpeaker">
+        <div t-if="track.imageUrl || track.partnerName"
+            t-attf-class="o_wevent_location_display_speaker d-inline-flex align-items-start gap-3 #{isLive ? 'o_wevent_location_display_speaker_live' : ''}">
+            <div t-if="track.imageUrl" class="flex-shrink-0 rounded overflow-hidden">
+                <img class="o_wevent_location_display_speaker_image object-fit-cover"
+                    t-att-src="track.imageUrl"
+                    t-att-alt="track.partnerName || ''"/>
+            </div>
+            <div>
+                <h5 t-if="track.partnerName" t-attf-class="mb-0 #{isLive ? 'h3' : 'h4'}"
+                    t-out="track.partnerName"/>
+                <div t-attf-class="text-white-75 #{isLive ? 'fs-4' : 'fs-5'}">
+                    <span t-if="track.partnerFunction" t-out="track.partnerFunction"/>
+                    <t t-if="track.partnerFunction &amp;&amp; track.partnerCompanyName"> · </t>
+                    <span t-if="track.partnerCompanyName" t-out="track.partnerCompanyName"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="website_event_track_location_display.EventTrackLocationDisplayTrack">
+        <article t-attf-class="o_wevent_location_display_track #{isLive ? 'border rounded overflow-hidden' : ''} #{isLive &amp;&amp; state.backgroundImageUrl ? 'bg-black-25' : ''} #{!isLive &amp;&amp; !isLast ? 'border-bottom' : ''}">
+            <div t-attf-class="p-5 #{isLive ? 'px-4' : 'px-0'} #{isLive &amp;&amp; state.backgroundImageUrl ? 'bg-transparent text-white' : ''} #{isLive ? 'border-start border-5 border-primary' : ''}">
+                <div class="d-flex flex-column gap-2">
+                    <time class="h4 mb-0 font-monospace" t-out="track.formattedTime"/>
+                    <h2 t-attf-class="#{isLive ? 'display-4-fs' : 'mb-0'}" t-out="track.name"/>
+                    <div t-if="isLive &amp;&amp; track.tags.length"
+                        class="d-flex flex-wrap align-items-center gap-1 fs-4">
+                        <t t-foreach="track.tags" t-as="tag" t-key="tag.id">
+                            <span t-attf-class="badge rounded-pill o_color_#{tag.color}" t-out="tag.name"/>
+                        </t>
+                    </div>
+                </div>
+                <div t-if="isLive" class="o_wevent_location_display_live_details mt-5">
+                    <div class="d-flex flex-wrap gap-4">
+                        <t t-call="website_event_track_location_display.EventTrackLocationDisplaySpeaker"/>
+                    </div>
+                </div>
+                <div t-else="" class="d-flex gap-4 flex-wrap mt-4">
+                    <t t-call="website_event_track_location_display.EventTrackLocationDisplaySpeaker"/>
+                </div>
+            </div>
+        </article>
+    </t>
+
+    <t t-name="website_event_track_location_display.EventTrackLocationDisplayEmptyState">
+        <t t-if="state.nextTrack">
+            <section t-attf-class="o_wevent_location_display_empty d-flex flex-column justify-content-center #{emptySectionClasses || ''}"
+                t-att-aria-labelledby="['none', 'finished'].includes(state.liveStatus) ? 'o_wevent_location_display_empty_status' : 'o_wevent_location_display_empty_title'">
+                <t t-if="['none', 'finished'].includes(state.liveStatus)">
+                    <div>
+                        <t t-if="state.liveStatus === 'none'">
+                            <h2 id="o_wevent_location_display_empty_status" class="display-4-fs">No talks today</h2>
+                            <div class="fs-3">Nothing is scheduled in this room today.</div>
+                        </t>
+                        <t t-else="">
+                            <h2 id="o_wevent_location_display_empty_status" class="display-4-fs">That’s all for today</h2>
+                            <div class="fs-3">Thanks for joining us.</div>
+                        </t>
+                    </div>
+                </t>
+                <div t-att-class="['none', 'finished'].includes(state.liveStatus) ? 'mt-5' : ''">
+                    <span class="badge bg-primary text-uppercase font-monospace mb-3 fs-5"
+                        t-out="state.formattedTrackDayLabel"/>
+                    <div t-attf-class="o_wevent_location_display_upcoming_list border rounded px-4 #{state.backgroundImageUrl ? 'bg-black-25 text-white' : ''}">
+                        <t t-set="track" t-value="state.nextTrack"/>
+                        <t t-set="isLive" t-value="false"/>
+                        <t t-set="isLast" t-value="true"/>
+                        <t t-call="website_event_track_location_display.EventTrackLocationDisplayTrack"/>
+                    </div>
+                </div>
+            </section>
+        </t>
+        <t t-else="">
+            <section t-attf-class="o_wevent_location_display_empty d-flex flex-column align-items-center justify-content-center text-center #{emptySectionClasses || 'flex-grow-1'}">
+                <h2 t-att-class="state.liveStatus !== 'live' ? 'display-4-fs' : ''">End of the day</h2>
+                <div t-att-class="state.liveStatus !== 'live' ? 'fs-3' : 'fs-4'">Thanks for joining us.</div>
+            </section>
+        </t>
+    </t>
+
+    <t t-name="website_event_track_location_display.EventTrackLocationDisplay" owl="1">
+        <header class="d-flex align-items-center justify-content-between gap-3 mb-5">
+            <img class="o_wevent_location_display_logo"
+                t-att-src="state.websiteLogoUrl"
+                t-att-alt="state.websiteLogoAlt"
+                t-att-title="state.websiteName"/>
+            <div class="text-end">
+                <time class="o_wevent_location_display_now d-block fs-5 font-monospace mb-1"
+                    t-out="state.currentTimeLabel"/>
+                <h1 class="h2 mb-0">
+                    <i class="fa fa-map-marker me-2" aria-hidden="true"/>
+                    <span t-out="state.locationName"/>
+                </h1>
+            </div>
+        </header>
+        <main t-ref="content" aria-live="polite" aria-atomic="true"
+            t-attf-class="o_wevent_location_display_content d-flex flex-column flex-grow-1 #{state.liveStatus === 'live' ? 'pt-4 pt-lg-5' : ''}">
+            <t t-if="['none', 'finished'].includes(state.liveStatus)">
+                <t t-set="emptySectionClasses" t-value="''"/>
+                <t t-call="website_event_track_location_display.EventTrackLocationDisplayEmptyState"/>
+            </t>
+            <t t-elif="['live', 'gap'].includes(state.liveStatus)">
+                <section class="o_wevent_location_display_live"
+                    t-att-aria-label="state.liveStatus === 'live' ? 'Live now' : undefined"
+                    t-att-aria-labelledby="state.liveStatus === 'gap' ? 'o_wevent_location_display_live_title' : undefined">
+                    <t t-if="state.liveStatus === 'live'">
+                        <h2 id="o_wevent_location_display_upcoming_title" class="my-3 h1">
+                            <span class="o_wevent_location_display_live_badge d-inline-block align-middle me-2 bg-danger rounded-pill"/>
+                            Live Now
+                        </h2>
+                        <t t-set="track" t-value="state.liveTrack"/>
+                        <t t-set="isLive" t-value="true"/>
+                        <t t-set="isLast" t-value="true"/>
+                        <t t-call="website_event_track_location_display.EventTrackLocationDisplayTrack"/>
+                    </t>
+                    <div t-else="">
+                        <h2 id="o_wevent_location_display_live_title" class="display-4-fs">Nothing planned right now</h2>
+                        <div class="fs-3">The next session will begin shortly.</div>
+                    </div>
+                </section>
+
+                <section t-if="state.upcomingTracks.length"
+                    class="o_wevent_location_display_upcoming mt-5"
+                    aria-labelledby="o_wevent_location_display_upcoming_title">
+                    <h2 id="o_wevent_location_display_upcoming_title" class="my-3">Coming up</h2>
+                    <div t-attf-class="o_wevent_location_display_upcoming_list border rounded px-4 #{state.backgroundImageUrl ? 'bg-black-25 text-white' : ''}">
+                        <t t-foreach="state.upcomingTracks" t-as="track" t-key="track.id">
+                            <t t-set="isLive" t-value="false"/>
+                            <t t-set="isLast" t-value="track_index === state.upcomingTracks.length - 1"/>
+                            <t t-call="website_event_track_location_display.EventTrackLocationDisplayTrack"/>
+                        </t>
+                    </div>
+                </section>
+                <t t-elif="state.liveStatus === 'live'">
+                    <t t-set="emptySectionClasses" t-value="'mt-5'"/>
+                    <t t-call="website_event_track_location_display.EventTrackLocationDisplayEmptyState"/>
+                </t>
+            </t>
+        </main>
+        <div t-attf-class="o_wevent_location_display_refresh_status position-fixed end-0 bottom-0 z-1 m-2 px-2 py-1 text-warning-emphasis small fw-semibold #{state.isOffline ? '' : 'd-none'}"
+            role="status">
+            <i class="fa fa-chain-broken me-1 align-middle" aria-hidden="true"/>
+            <span>Last updated at </span>
+            <time t-out="state.lastUpdatedLabel"/>
+        </div>
+        <div class="o_wevent_location_display_fade position-fixed bottom-0 start-0 end-0"
+            aria-hidden="true"/>
+    </t>
+
+</templates>

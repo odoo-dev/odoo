@@ -12,6 +12,9 @@
         'web.assets_frontend': [
             'website_event_track_location_display/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'website_event_track_location_display/static/tests/tours/*.js',
+        ],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',

@@ -23,8 +23,7 @@ class EventTrackLocationDisplayController(http.Controller):
             'tomorrow_start': datetime.combine(local_today + timedelta(days=1), time.min, tzinfo=event_zone).astimezone(UTC).replace(tzinfo=None),
         }
 
-    def _get_location_display_schedule(self, event, location_id, time_data=None):
-        time_data = time_data or self._get_event_time_data(event)
+    def _get_location_display_schedule(self, event, location_id, time_data):
         track_domain = [
             ('date', '!=', False),
             ('date_end', '!=', False),
@@ -67,13 +66,35 @@ class EventTrackLocationDisplayController(http.Controller):
             end_time=tools.format_time(request.env, track.date_end, tz=tz, time_format='short'),
         )
 
-    def _get_location_display_values(self, event_id, location_id):
+    def _serialize_track(self, track, tz):
+        if not track:
+            return False
+        return {
+            'id': track.id,
+            'name': track.name,
+            'formattedTime': self._format_track_time(track, tz),
+            'partnerName': track.partner_name or False,
+            'partnerFunction': track.partner_function or False,
+            'partnerCompanyName': track.partner_company_name or False,
+            'imageUrl': f'/web/image/event.track/{track.id}/image' if track.image else False,
+            'tags': [
+                {
+                    'id': tag.id,
+                    'name': tag.name,
+                    'color': tag.color or 0,
+                }
+                for tag in track.tag_ids
+            ],
+        }
+
+    def _get_location_display_data(self, event_id, location_id):
         event = request.env['event.event'].search([
             ('id', '=', event_id),
             ('website_published', '=', True),
             ('website_track', '=', True),
+            ('website_id', 'in', (request.website.id, False)),
         ], limit=1)
-        if not event or not event.can_access_from_current_website():
+        if not event:
             raise NotFound()
         time_data = self._get_event_time_data(event)
         schedule = self._get_location_display_schedule(event, location_id, time_data)
@@ -92,30 +113,38 @@ class EventTrackLocationDisplayController(http.Controller):
             else False
         )
         return {
-            'event': event,
-            'location_id': location_id,
-            'location_name': schedule['location_name'],
-            'location_display_background_url': background_image_url,
-            'current_time_label': '%s %s' % (
+            'websiteName': request.website.name,
+            'websiteLogoUrl': f'/web/image/website/{request.website.id}/logo/',
+            'websiteLogoAlt': request.env._("Logo of %(website_name)s", website_name=request.website.name),
+            'locationName': schedule['location_name'],
+            'backgroundImageUrl': background_image_url,
+            'currentTimeLabel': '%s %s' % (
                 tools.format_time(request.env, time_data['now'], tz=time_data['event_tz'], time_format='short'),
                 time_data['local_now'].tzname(),
             ),
-            'formatted_track_day_label': formatted_track_day_label,
-            'format_track_time': lambda track: self._format_track_time(track, time_data['event_tz']),
-            **schedule,
+            'formattedTrackDayLabel': formatted_track_day_label,
+            'liveStatus': schedule['live_status'],
+            'liveTrack': self._serialize_track(schedule['live_track'], time_data['event_tz']),
+            'nextTrack': self._serialize_track(next_track, time_data['event_tz']),
+            'upcomingTracks': [
+                self._serialize_track(track, time_data['event_tz'])
+                for track in schedule['upcoming_tracks']
+            ],
         }
 
     @http.route('/event/<int:event_id>/location-display/<int:location_id>', type='http', auth='public', website=True, sitemap=False, readonly=True)
     def location_display(self, event_id, location_id):
+        display_data = self._get_location_display_data(event_id, location_id)
         return request.render(
             'website_event_track_location_display.event_track_location_display',
-            self._get_location_display_values(event_id, location_id),
+            {
+                'display_data': display_data,
+                'event_id': event_id,
+                'location_id': location_id,
+            },
             headers=[('Cache-Control', 'no-store')]
         )
 
     @http.route('/event/<int:event_id>/location-display/<int:location_id>/content', type='jsonrpc', auth='public', website=True, sitemap=False, readonly=True)
     def location_display_content(self, event_id, location_id):
-        return request.env['ir.ui.view']._render_template(
-            'website_event_track_location_display.event_track_location_display_content',
-            self._get_location_display_values(event_id, location_id),
-        )
+        return self._get_location_display_data(event_id, location_id)
