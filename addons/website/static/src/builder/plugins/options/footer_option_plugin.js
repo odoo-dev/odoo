@@ -1,9 +1,8 @@
 import { registry } from "@web/core/registry";
 import { Plugin } from "@html_editor/plugin";
-import { rpc } from "@web/core/network/rpc";
-import { BuilderAction } from "@html_builder/core/builder_action";
 import { FooterTemplateChoice } from "./footer_template_option";
 import { _t } from "@web/core/l10n/translation";
+import { WebsiteConfigAction } from "../customize_website_plugin";
 
 /** @typedef {import("@odoo/owl").Component} Component */
 
@@ -60,6 +59,7 @@ export class FooterOptionPlugin extends Plugin {
                         varName: info.name,
                         view: info.view ?? `website.template_footer_${info.name}`,
                         title: info.title,
+                        resetViewArch: true
                     },
                 })),
         ],
@@ -88,44 +88,8 @@ export class FooterOptionPlugin extends Plugin {
     }
 }
 
-export class WebsiteConfigFooterAction extends BuilderAction {
+export class WebsiteConfigFooterAction extends WebsiteConfigAction {
     static id = "websiteConfigFooter";
-    static dependencies = ["builderActions", "customizeWebsite"];
-    setup() {
-        this.reload = {};
-    }
-    isApplied({ params: { vars } }) {
-        for (const [name, value] of Object.entries(vars)) {
-            if (
-                !this.dependencies.builderActions
-                    .getAction("customizeWebsiteVariable")
-                    .isApplied({ params: { mainParam: name }, value })
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
-    async apply({ params: { vars, view }, selectableContext }) {
-        const possibleValues = new Set();
-        for (const item of selectableContext.items) {
-            for (const a of item.getActions()) {
-                if (a.actionId === "websiteConfigFooter") {
-                    possibleValues.add(a.actionParam.view);
-                }
-            }
-        }
-        await Promise.all([
-            this.dependencies.customizeWebsite.makeSCSSCusto(
-                "/website/static/src/scss/options/user_values.scss",
-                vars
-            ),
-            rpc("/website/update_footer_template", {
-                template_key: view,
-                possible_values: [...possibleValues],
-            }),
-        ]);
-    }
 }
 
 registry.category("website-plugins").add(FooterOptionPlugin.id, FooterOptionPlugin);

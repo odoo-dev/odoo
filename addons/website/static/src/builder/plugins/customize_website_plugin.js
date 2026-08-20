@@ -807,6 +807,7 @@ export class WebsiteConfigAction extends BuilderAction {
                 defs.map((def) => def.resolve());
                 return;
             } else {
+                console.log("enable:", [...aggregatedToEnable], "disable:", [...aggregatedToDisable], "reset:",  shouldReset)
                 rpc("/website/theme_customize_data", {
                     is_view_data: isViewData,
                     enable: [...aggregatedToEnable],
