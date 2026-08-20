@@ -169,6 +169,8 @@ class PurchaseRequisitionLine(models.Model):
     _rec_name = 'product_id'
     _order = 'sequence, id'
 
+    # TODO VFE no catalog for purchase requisition lines ?
+
     sequence = fields.Integer(string='Sequence', default=10)
     display_type = fields.Selection([
         ('line_section', "Section"),

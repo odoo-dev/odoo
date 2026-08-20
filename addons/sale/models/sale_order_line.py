@@ -14,7 +14,7 @@ class SaleOrderLine(models.Model):
     _inherit = [
         "analytic.mixin",
         "res.currency.rate.consolidation.mixin",
-        "product.catalog.line.mixin",
+        "ordered.product.line.mixin",
     ]
     _description = "Sales Order Line"
     _rec_names_search = ("name", "order_id.name")
@@ -71,14 +71,6 @@ class SaleOrderLine(models.Model):
     tax_country_id = fields.Many2one(related="order_id.tax_country_id")
 
     # Fields specifying custom line logic
-    display_type = fields.Selection(
-        selection=[
-            ("line_section", "Section"),
-            ("line_subsection", "Subsection"),
-            ("line_note", "Note"),
-        ],
-        default=False,
-    )
     is_configurable_product = fields.Boolean(
         string="Is the product configurable?",
         related="product_template_id.has_configurable_attributes",
@@ -1561,27 +1553,6 @@ class SaleOrderLine(models.Model):
             # line.ids checks whether it's a new record not yet saved
             line.product_uom_readonly = line.ids and line.state in ["sale", "cancel"]
 
-    def _compute_parent_id(self):
-        sale_order_lines = set(self)
-        for order, lines in self.grouped("order_id").items():
-            if not order:
-                lines.parent_id = False
-                continue
-            last_section = False
-            last_sub = False
-            for line in order.order_line.sorted("sequence"):
-                if line.display_type == "line_section":
-                    last_section = line
-                    if line in sale_order_lines:
-                        line.parent_id = False
-                    last_sub = False
-                elif line.display_type == "line_subsection":
-                    if line in sale_order_lines:
-                        line.parent_id = last_section
-                    last_sub = line
-                elif line in sale_order_lines:
-                    line.parent_id = last_sub or last_section
-
     def _compute_mandatory_product(self):
         self.mandatory_product = (
             self.env["ir.config_parameter"].sudo().get_bool("sale.mandatory_product")
@@ -1854,12 +1825,13 @@ class SaleOrderLine(models.Model):
                 )
             )
 
-    # === CATALOG ===#
+    # === Ordered Line Mixin - Catalog & (sub)sections ===#
 
-    @api.readonly
-    def action_add_from_catalog(self):
-        order = self.env["sale.order"].browse(self.env.context.get("order_id"))
-        return order.with_context(child_field="order_line").action_add_from_catalog()
+    def _get_parent_field(self) -> str:
+        return 'order_id'
+
+    def _get_child_field_on_parent_model(self) -> str:
+        return 'order_line'
 
     def _get_quantity_field(self) -> str:
         return "product_uom_qty"
@@ -2027,12 +1999,6 @@ class SaleOrderLine(models.Model):
             ]
         return res
 
-    def _get_section_totals(self, totals_field):
-        """Return the total/subtotal amount sale order lines linked to section."""
-        self.ensure_one()
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped(totals_field))
-
     def _get_combo_totals(self, totals_field):
         """Return the total/subtotal amount sale order lines linked to combo."""
         self.ensure_one()
@@ -2049,10 +2015,6 @@ class SaleOrderLine(models.Model):
             # For (sub)sections, check if any child line has taxes.
             or (self.display_type and any(line._has_taxes() for line in self._get_section_lines()))
         )
-
-    def _get_section_lines(self):
-        self.ensure_one()
-        return self.order_id.order_line.filtered(self._is_line_in_section)
 
     # === CORE METHODS OVERRIDES ===#
 

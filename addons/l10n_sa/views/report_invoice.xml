@@ -188,7 +188,7 @@
         </xpath>
         <xpath expr="//span[@t-out='section_subtotal']/.." position="after">
             <td colspan="1" class="text-end o_price_total">
-                <span t-out="line._l10n_gcc_get_section_total()" class="text-nowrap" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                <span t-out="line.get_section_total()" class="text-nowrap" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
             </td>
         </xpath>
         <!-- End Invoice lines table -->

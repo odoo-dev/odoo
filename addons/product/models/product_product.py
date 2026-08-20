@@ -155,6 +155,7 @@ class ProductProduct(models.Model):
 
     is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
+    # TODO VFE move to account
     is_in_selected_section_of_order = fields.Boolean(
         search='_search_is_in_selected_section_of_order',
         store=False,

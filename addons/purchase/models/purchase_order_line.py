@@ -14,7 +14,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = [
         'analytic.mixin',
         'res.currency.rate.consolidation.mixin',
-        'product.catalog.line.mixin',
+        'ordered.product.line.mixin',
     ]
     _description = 'Purchase Order Line'
     _order = 'order_id, sequence, id'
@@ -97,10 +97,6 @@ class PurchaseOrderLine(models.Model):
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
-    display_type = fields.Selection([
-        ('line_section', "Section"),
-        ('line_subsection', "Subsection"),
-        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
     is_downpayment = fields.Boolean()
     selected_seller_id = fields.Many2one('product.supplierinfo', compute='_compute_selected_seller_id', help='Technical field to get the vendor pricelist used to generate this line')
 
@@ -334,7 +330,7 @@ class PurchaseOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for values in vals_list:
-            if values.get('display_type', self.default_get(['display_type'])['display_type']):
+            if values.get('display_type', self.default_get(['display_type']).get('display_type')):
                 values.update(product_id=False, price_unit=0, product_uom_qty=0, uom_id=False, date_planned=False)
             else:
                 values.update(self._prepare_add_missing_fields(values))
@@ -586,30 +582,11 @@ class PurchaseOrderLine(models.Model):
             price_unit *= self.product_id.uom_id.factor / self.uom_id.factor
         return price_unit
 
-    def _compute_parent_id(self):
-        purchase_order_lines = set(self)
-        for order, lines in self.grouped('order_id').items():
-            if not order:
-                lines.parent_id = False
-                continue
-            last_section = False
-            last_sub = False
-            for line in order.order_line.sorted('sequence'):
-                if line.display_type == 'line_section':
-                    last_section = line
-                    if line in purchase_order_lines:
-                        line.parent_id = False
-                    last_sub = False
-                elif line.display_type == 'line_subsection':
-                    if line in purchase_order_lines:
-                        line.parent_id = last_section
-                    last_sub = line
-                elif line in purchase_order_lines:
-                    line.parent_id = last_sub or last_section
+    def _get_parent_field(self) -> str:
+        return 'order_id'
 
-    def action_add_from_catalog(self):
-        order = self.env['purchase.order'].browse(self.env.context.get('order_id'))
-        return order.with_context(child_field='order_line').action_add_from_catalog()
+    def _get_child_field_on_parent_model(self) -> str:
+        return 'order_line'
 
     def _get_quantity_field(self) -> str:
         return "product_qty"
@@ -838,11 +815,3 @@ class PurchaseOrderLine(models.Model):
     def _get_rounding(self):
         self.ensure_one()
         return self.uom_id.rounding
-
-    def _get_section_totals(self):
-        section_lines = self.order_id.order_line.filtered(self._is_line_in_section)
-        return sum(section_lines.mapped('price_subtotal'))
-
-    def _get_section_lines(self):
-        self.ensure_one()
-        return self.order_id.order_line.filtered(self._is_line_in_section)
