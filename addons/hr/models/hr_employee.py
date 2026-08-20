@@ -1887,17 +1887,21 @@ class HrEmployee(models.Model):
         # Returns a dict {employee_id: tz}
         return {emp.id: emp._get_tz(date=date) for emp in self}
 
-    def _get_calendars(self, date_from=None):
-        res = super()._get_calendars(date_from=date_from)
-        if not date_from:
-            return res
+    def _get_active_contract_version_by_employee(self, date_from):
+        """Return, for each employee in self, the ``hr.version`` effective at ``date_from``
+        within the contract running on that date (if any).
 
-        date_from = fields.Date.to_date(date_from)
+        A schedule change made within the same contract (e.g. switching an employee from
+        part-time to full-time) creates a new version sharing the same contract dates, so
+        several versions can match the contract window: the one actually applicable at
+        ``date_from`` is the most recent one whose ``date_version`` is not after it.
+        """
         versions_by_employee = self.env['hr.version'].sudo()._read_group(
             domain=[
                 ('employee_id', 'in', self.ids),
                 ('contract_date_start', '!=', False),
                 ('contract_date_start', '<=', date_from),
+                ('date_version', '<=', date_from),
                 '|',
                     ('contract_date_end', '=', False),
                     ('contract_date_end', '>=', date_from),
@@ -1905,9 +1909,19 @@ class HrEmployee(models.Model):
             groupby=['employee_id'],
             aggregates=['id:recordset'],
         )
-        for employee, versions in versions_by_employee:
-            if versions:
-                res[employee.id] = versions[0].resource_calendar_id.sudo(self.env.su)
+        return {
+            employee.id: max(versions, key=lambda v: v.date_version)
+            for employee, versions in versions_by_employee if versions
+        }
+
+    def _get_calendars(self, date_from=None):
+        res = super()._get_calendars(date_from=date_from)
+        if not date_from:
+            return res
+
+        date_from = fields.Date.to_date(date_from)
+        for employee_id, version in self._get_active_contract_version_by_employee(date_from).items():
+            res[employee_id] = version.resource_calendar_id.sudo(self.env.su)
         return res
 
     def _get_hours_per_week_batch(self, date_from=None):
@@ -1916,21 +1930,8 @@ class HrEmployee(models.Model):
             return res
 
         date_from = fields.Date.to_date(date_from)
-        versions_by_employee = self.env['hr.version'].sudo()._read_group(
-            domain=[
-                ('employee_id', 'in', self.ids),
-                ('contract_date_start', '!=', False),
-                ('contract_date_start', '<=', date_from),
-                '|',
-                    ('contract_date_end', '=', False),
-                    ('contract_date_end', '>=', date_from),
-            ],
-            groupby=['employee_id'],
-            aggregates=['id:recordset'],
-        )
-        for employee, versions in versions_by_employee:
-            if versions:
-                res[employee.id] = versions[0].hours_per_week
+        for employee_id, version in self._get_active_contract_version_by_employee(date_from).items():
+            res[employee_id] = version.hours_per_week
         return res
 
     def _get_hours_per_day_batch(self, date_from=None):
@@ -1939,21 +1940,8 @@ class HrEmployee(models.Model):
             return res
 
         date_from = fields.Date.to_date(date_from)
-        versions_by_employee = self.env['hr.version'].sudo()._read_group(
-            domain=[
-                ('employee_id', 'in', self.ids),
-                ('contract_date_start', '!=', False),
-                ('contract_date_start', '<=', date_from),
-                '|',
-                    ('contract_date_end', '=', False),
-                    ('contract_date_end', '>=', date_from),
-            ],
-            groupby=['employee_id'],
-            aggregates=['id:recordset'],
-        )
-        for employee, versions in versions_by_employee:
-            if versions:
-                res[employee.id] = versions[0].hours_per_day
+        for employee_id, version in self._get_active_contract_version_by_employee(date_from).items():
+            res[employee_id] = version.hours_per_day
         return res
 
     def _get_version_periods(self, start, stop, field=None, check_contract=False):
