@@ -7,11 +7,13 @@ import psycopg
 import psycopg.errors
 
 import odoo
+from odoo.addons.base.models.ir_sequence import _pg_int
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.modules.registry import Registry
 from odoo.tests import tagged, common
 from odoo.tests.common import BaseCase, TransactionCase
+from odoo.tools import SQL
 from odoo.tools.misc import mute_logger
 
 ADMIN_USER_ID = common.ADMIN_USER_ID
@@ -36,6 +38,26 @@ def drop_sequence(code):
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestIrSequenceStandard(BaseCase):
     """ A few tests for a 'Standard' (i.e. PostgreSQL) sequence. """
+
+    def test_create_alter_sequence_sql_has_no_bind_params(self):
+        """CREATE/ALTER SEQUENCE cannot take server-side bind parameters."""
+        create = SQL(
+            "CREATE SEQUENCE %s INCREMENT BY %s START WITH %s",
+            SQL.identifier('ir_sequence_1'), _pg_int(2), _pg_int(10),
+        )
+        code, params, _ = create._sql_tuple
+        self.assertEqual(code, 'CREATE SEQUENCE "ir_sequence_1" INCREMENT BY 2 START WITH 10')
+        self.assertEqual(params, ())
+
+        alter = SQL(
+            "ALTER SEQUENCE %s%s%s",
+            SQL.identifier('ir_sequence_1'),
+            SQL(" INCREMENT BY %s", _pg_int(3)),
+            SQL(" RESTART WITH %s", _pg_int(20)),
+        )
+        code, params, _ = alter._sql_tuple
+        self.assertEqual(code, 'ALTER SEQUENCE "ir_sequence_1" INCREMENT BY 3 RESTART WITH 20')
+        self.assertEqual(params, ())
 
     def test_ir_sequence_create(self):
         """ Try to create a sequence object. """

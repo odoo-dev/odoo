@@ -145,7 +145,7 @@ class ReportProjectTaskUser(models.Model):
                           AND pm.deadline <= CAST(now() AS DATE)
                     LEFT JOIN task_dependencies_rel td ON td.depends_on_id = t.id
                     LEFT JOIN project_project p ON p.id = t.project_id
-        """, RATING_LIMIT_MIN)
+        """, SQL("%s" % RATING_LIMIT_MIN))
 
     def _where(self):
         return SQL("""

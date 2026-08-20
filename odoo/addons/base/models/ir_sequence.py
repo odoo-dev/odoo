@@ -9,11 +9,19 @@ from odoo.tools import SQL
 _logger = logging.getLogger(__name__)
 
 
+def _pg_int(value: int) -> SQL:
+    """Inline an integer; CREATE/ALTER SEQUENCE cannot take bind parameters."""
+    return SQL("%s" % int(value))
+
+
 def _create_sequence(cr, seq_name: str, number_increment: int, number_next: int):
     """ Create a PostreSQL sequence. """
     if number_increment == 0:
         raise UserError(_('Step must not be zero.'))
-    sql = SQL("CREATE SEQUENCE %s INCREMENT BY %s START WITH %s", SQL.identifier(seq_name), number_increment, number_next)
+    sql = SQL(
+        "CREATE SEQUENCE %s INCREMENT BY %s START WITH %s",
+        SQL.identifier(seq_name), _pg_int(number_increment), _pg_int(number_next),
+    )
     cr.execute(sql)
 
 
@@ -43,8 +51,8 @@ def _alter_sequence(cr, seq_name, number_increment=None, number_next=None):
     statement = SQL(
         "ALTER SEQUENCE %s%s%s",
         SQL.identifier(seq_name),
-        SQL(" INCREMENT BY %s", number_increment) if number_increment is not None else SQL(),
-        SQL(" RESTART WITH %s", number_next) if number_next is not None else SQL(),
+        SQL(" INCREMENT BY %s", _pg_int(number_increment)) if number_increment is not None else SQL(),
+        SQL(" RESTART WITH %s", _pg_int(number_next)) if number_next is not None else SQL(),
     )
     cr.execute(statement)
 
