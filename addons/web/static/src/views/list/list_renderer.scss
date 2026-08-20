@@ -317,6 +317,12 @@
 
                     .btn-group {
                         display: flex;
+                        // The pager wraps its buttons in a padded, bordered container.
+                        // Inside a group header it would make the row taller than its
+                        // collapsed state, so reset it here.
+                        padding: 0;
+                        border: 0;
+                        background: none;
                     }
 
                     .o_pager_previous,
