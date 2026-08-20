@@ -131,7 +131,7 @@ class ResCurrency(models.CachedModel):
         if not sql_rates:
             return SQL("1.0")
         rates_query = SQL(
-            "(SELECT * FROM UNNEST(%s, %s) AS v(currency_id, rate))",
+            "(SELECT * FROM UNNEST(%s::integer[], %s::float8[]) AS v(currency_id, rate))",
             list(sql_rates.keys()), list(sql_rates.values())
         )
         alias = table._query.make_alias(table._alias, currency_field + "__rate")

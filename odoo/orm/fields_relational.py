@@ -1378,7 +1378,9 @@ class Many2many(_RelationalMulti):
                 rel=SQL.identifier(self.relation),
                 id1=SQL.identifier(self.column1),
                 id2=SQL.identifier(self.column2),
-                comment=f"RELATION BETWEEN {model._table} AND {comodel._table}",
+                comment=sql._sql_string_literal(
+                    f"RELATION BETWEEN {model._table} AND {comodel._table}"
+                ),
             ))
             _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
             model.pool.post_init(self.update_db_foreign_keys, model)
@@ -1593,7 +1595,7 @@ class Many2many(_RelationalMulti):
         if is_real and self.store:
             if add_pairs:
                 cr.execute(SQL(
-                    "INSERT INTO %s (%s, %s) SELECT * FROM UNNEST(%s, %s) ON CONFLICT DO NOTHING",
+                    "INSERT INTO %s (%s, %s) SELECT * FROM UNNEST(%s::integer[], %s::integer[]) ON CONFLICT DO NOTHING",
                     SQL.identifier(self.relation),
                     SQL.identifier(self.column1),
                     SQL.identifier(self.column2),
@@ -1602,7 +1604,7 @@ class Many2many(_RelationalMulti):
                 ))
             if remove_pairs:
                 cr.execute(SQL(
-                    "DELETE FROM %s WHERE (%s, %s) IN (SELECT * FROM UNNEST(%s, %s))",
+                    "DELETE FROM %s WHERE (%s, %s) IN (SELECT * FROM UNNEST(%s::integer[], %s::integer[]))",
                     SQL.identifier(self.relation),
                     SQL.identifier(self.column1),
                     SQL.identifier(self.column2),

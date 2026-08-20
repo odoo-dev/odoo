@@ -220,7 +220,7 @@ class Query:
                 # because an empty tuple leads to a syntax error
                 # and a tuple containing just None creates issues for `NOT IN`
                 return SQL("(SELECT 1 WHERE FALSE)")
-            return SQL("%s", list(self._ids))
+            return SQL("%s::integer[]", list(self._ids))
 
         if self.limit is not None or self.offset:
             # in this case, the ORDER BY clause is necessary
@@ -259,7 +259,7 @@ class Query:
             # expected order of ids:
             #   SELECT "stuff".id
             #   FROM "stuff"
-            #   JOIN (SELECT * FROM unnest(%s) WITH ORDINALITY) AS "stuff__ids"
+            #   JOIN (SELECT * FROM unnest(%s::integer[]) WITH ORDINALITY) AS "stuff__ids"
             #       ON ("stuff"."id" = "stuff__ids"."unnest")
             #   WHERE 1=1  -- some code uses the fact there is a WHERE to detect restrictions
             #   ORDER BY "stuff__ids"."ordinality"
@@ -268,7 +268,7 @@ class Query:
             self.add_join(
                 'JOIN',
                 alias,
-                SQL('(SELECT * FROM unnest(%s) WITH ORDINALITY)', list(ids)),
+                SQL('(SELECT * FROM unnest(%s::integer[]) WITH ORDINALITY)', list(ids)),
                 SQL('%s = %s', table.id, alias.unnest),
             )
             self._where_clauses.append(SQL('1=1'))

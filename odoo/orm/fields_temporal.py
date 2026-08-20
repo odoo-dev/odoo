@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
-from odoo.tools import SQL, date_utils, get_lang
+from odoo.tools import SQL, date_utils, get_lang, sql
 
 from .fields import Field, _logger
 from .utils import (
@@ -87,7 +87,11 @@ class BaseDate[T](Field[T | typing.Literal[False]]):
         if ftype == 'datetime' and (timezone := model.env.context.get('tz')):
             # only use the timezone from the context
             if timezone in date_utils.all_timezones:
-                sql_expr = SQL("timezone(%s, timezone('UTC', %s))", timezone, sql_expr)
+                # Inline constants: SELECT/GROUP BY must be the same SQL text.
+                sql_expr = SQL(
+                    "timezone(%s, timezone('UTC', %s))",
+                    sql._sql_string_literal(timezone), sql_expr,
+                )
             else:
                 _logger.warning("Grouping in unknown / legacy timezone %r", timezone)
         if property_name == 'tz':
@@ -95,19 +99,22 @@ class BaseDate[T](Field[T | typing.Literal[False]]):
             return sql_expr
         if property_name in READ_GROUP_NUMBER_GRANULARITY:
             granularity = READ_GROUP_NUMBER_GRANULARITY[property_name]
-            return SQL('date_part(%s, %s)', granularity, sql_expr)
+            return SQL('date_part(%s, %s)', sql._sql_string_literal(granularity), sql_expr)
 
         if property_name == 'week':
             # first_week_day: 0=Monday, 1=Tuesday, ...
             first_week_day = int(get_lang(model.env).week_start) - 1
             days_offset = first_week_day and 7 - first_week_day
-            interval = f"-{days_offset} DAY"
+            interval = sql._sql_string_literal(f"-{days_offset} DAY")
             sql_expr = SQL(
                 "(date_trunc('week', %s::timestamp - INTERVAL %s) + INTERVAL %s)",
                 sql_expr, interval, interval,
             )
         elif property_name in READ_GROUP_TIME_GRANULARITY:
-            sql_expr = SQL("date_trunc(%s, %s::timestamp)", property_name, sql_expr)
+            sql_expr = SQL(
+                "date_trunc(%s, %s::timestamp)",
+                sql._sql_string_literal(property_name), sql_expr,
+            )
         else:
             raise ValueError(f'Error when processing the granularity {property_name} is not supported. Only {", ".join(READ_GROUP_ALL_TIME_GRANULARITY.keys())} are supported')
         if ftype == 'date':

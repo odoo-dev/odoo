@@ -125,7 +125,7 @@ class AccountAccountTag(models.Model):
             self.env.cr.execute(SQL(
                 """
                 UPDATE account_account_tag tag
-                   SET name = tag.name || jsonb_build_object(%(lang)s, substring(tag.name->>'en_US' FOR 1) || (report_line.name->>%(lang)s))
+                   SET name = tag.name || jsonb_build_object(%(lang)s::text, substring(tag.name->>'en_US' FOR 1) || (report_line.name->>%(lang)s))
                   FROM account_report_line report_line
                   JOIN account_report report ON report.id = report_line.report_id
                  WHERE tag.applicability = 'taxes'

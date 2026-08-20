@@ -4511,11 +4511,11 @@ class BaseModel(metaclass=MetaModel):
             # update parent_path of all records and their descendants
             updated = dict(self.env.execute_query(SQL(
                 """ UPDATE %(table)s child
-                    SET parent_path = concat(%(prefix)s, substr(child.parent_path,
+                    SET parent_path = concat(%(prefix)s::text, substr(child.parent_path,
                             length(node.parent_path) - length(node.id || '/') + 1))
                     FROM %(table)s node
                     WHERE node.id = ANY(%(ids)s)
-                    AND child.parent_path LIKE concat(node.parent_path, %(wildcard)s)
+                    AND child.parent_path LIKE concat(node.parent_path, %(wildcard)s::text)
                     RETURNING child.id, child.parent_path """,
                 table=SQL.identifier(self._table),
                 prefix=prefix,

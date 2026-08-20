@@ -19,7 +19,7 @@ class IrModuleModule(models.Model):
 
         def set_field(fname):
             lang_items = (
-                SQL("%(lang)s, o_step.%(fname)s->>%(lang)s", lang=lang, fname=fname)
+                SQL("%(lang)s::text, o_step.%(fname)s->>%(lang)s", lang=lang, fname=fname)
                 for lang in to_langs
             )
             # PSQL functions take 100 args max, and we're generating 2 per lang

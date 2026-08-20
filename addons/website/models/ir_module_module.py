@@ -548,7 +548,7 @@ class IrModuleModule(models.Model):
         if not default_menu:
             return res
 
-        lang_value_list = [SQL("%(lang)s, o_menu.name->>%(lang)s", lang=lang) for lang in langs if lang != 'en_US']
+        lang_value_list = [SQL("%(lang)s::text, o_menu.name->>%(lang)s", lang=lang) for lang in langs if lang != 'en_US']
         update_jsonb_list = [SQL('jsonb_build_object(%s)', SQL(', ').join(items)) for items in split_every(50, lang_value_list)]
         update_jsonb = SQL(' || ').join(update_jsonb_list)
         o_menu_name = SQL('menu.name || %s' if overwrite else '%s || menu.name', update_jsonb)

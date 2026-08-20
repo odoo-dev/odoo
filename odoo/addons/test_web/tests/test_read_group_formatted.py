@@ -2151,7 +2151,7 @@ class TestFormattedReadGroupMonetary(common.TransactionCase):
                 SUM("test_read_group_aggregate_monetary"."total_in_currency_id" / COALESCE("test_read_group_aggregate_monetary__currency_id__rate"."rate", 1.0))
             FROM
                 "test_read_group_aggregate_monetary"
-            LEFT JOIN LATERAL (SELECT * FROM UNNEST(%s, %s) AS v(currency_id, rate)) AS "test_read_group_aggregate_monetary__currency_id__rate"
+            LEFT JOIN LATERAL (SELECT * FROM UNNEST(%s::integer[], %s::float8[]) AS v(currency_id, rate)) AS "test_read_group_aggregate_monetary__currency_id__rate"
             ON ("test_read_group_aggregate_monetary__currency_id__rate"."currency_id" = "test_read_group_aggregate_monetary"."currency_id")
         """]):
             self.assertEqual(
@@ -2238,7 +2238,7 @@ class TestFormattedReadGroupMonetary(common.TransactionCase):
                 SUM("test_read_group_aggregate_monetary"."total_in_currency_id" / COALESCE("test_read_group_aggregate_monetary__currency_id__rate"."rate", 1.0))
             FROM
                 "test_read_group_aggregate_monetary"
-            LEFT JOIN LATERAL (SELECT * FROM UNNEST(%s, %s) AS v(currency_id, rate)) AS "test_read_group_aggregate_monetary__currency_id__rate"
+            LEFT JOIN LATERAL (SELECT * FROM UNNEST(%s::integer[], %s::float8[]) AS v(currency_id, rate)) AS "test_read_group_aggregate_monetary__currency_id__rate"
             ON ("test_read_group_aggregate_monetary__currency_id__rate"."currency_id" = "test_read_group_aggregate_monetary"."currency_id")
         """]):
             self.assertEqual(

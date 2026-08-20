@@ -2388,9 +2388,7 @@ class IrModelData(models.Model):
         unnest_args = []
         for i, (col, placeholder) in enumerate(cols.items()):
             values = [placeholder] * len(sub_rows) if placeholder != '%s' else [r[i] for r in sub_rows]
-            if self._fields[col].column_type[0] in ('varchar', 'text'):
-                values = SQL("%s::text[]", values)
-            unnest_args.append(values)
+            unnest_args.append(_unnest_field_values(self, col, values))
         row_values = SQL(',').join(unnest_args)
         return SQL("""
             INSERT INTO ir_model_data(%s)
