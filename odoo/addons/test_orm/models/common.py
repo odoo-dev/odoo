@@ -21,6 +21,7 @@ class TestOrmMixed(models.Model):
     integer = fields.Integer()
     float = fields.Float()
     numeric = fields.Float(digits=(0, False))
+    numeric_unlimited = fields.Float(digits=0)
     number = fields.Float(digits=(0, 2))
     float_default = fields.Float(default=3.14)
     float_precision = fields.Float(digits='ORM Precision')

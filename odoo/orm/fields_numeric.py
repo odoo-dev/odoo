@@ -161,6 +161,8 @@ class Float(Field[float]):
             _precision, scale = digits
             value_float = float_round(value, precision_digits=scale)
             value = float_repr(value_float, precision_digits=scale)
+        elif self._column_type[0] == 'numeric':
+            value = str(value_float)
         if self.company_dependent:
             return value_float
         return value
@@ -265,7 +267,7 @@ class Monetary(Field[float]):
         value = float(value or 0.0)
         if currency:
             return float_repr(currency.round(value), currency.decimal_places)
-        return value
+        return str(value)
 
     def convert_to_cache(self, value, records, validate=True):
         # cache format: float

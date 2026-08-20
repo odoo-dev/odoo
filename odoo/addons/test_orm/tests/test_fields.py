@@ -1020,6 +1020,20 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(count, 0, "Precommit not ran enough times")
         self.assertEqual(record.value, 10, "Flush not triggered correctly")
 
+    def test_20_float_numeric_unlimited_unnest(self):
+        """Unlimited numeric floats must round-trip through UNNEST without float8[]."""
+        field = self.env['test_orm.mixed']._fields['numeric_unlimited']
+        third = 10.0 * (1.0 / 3.0)
+        self.assertIsInstance(field.convert_to_column(third, self.env['test_orm.mixed']), str)
+
+        rest = [0.0, 10.0, 15.0, third, 15.0, 15.0, 10.0, 15.0, 10.0, 0.0, third, third]
+        values = rest + [100.0 - sum(rest)]
+        self.assertEqual(sum(values), 100.0)
+
+        records = self.env['test_orm.mixed'].create([{'numeric_unlimited': value} for value in values])
+        self.env.invalidate_all()
+        self.assertEqual(sum(records.mapped('numeric_unlimited')), 100.0)
+
     def test_20_float(self):
         """ test rounding of float fields """
         record = self.env['test_orm.mixed'].create({})
