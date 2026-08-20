@@ -1526,7 +1526,7 @@ class ResUsersApikeys(models.Model):
             key varchar not null,
             create_date timestamp without time zone DEFAULT (now() at time zone 'utc')
         )
-        """, table=table, index_size=INDEX_SIZE))
+        """, table=table, index_size=SQL("%s" % INDEX_SIZE)))
 
         index_name = self._table + "_user_id_index_idx"
         if len(index_name) > 63:

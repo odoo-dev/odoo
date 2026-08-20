@@ -25,6 +25,14 @@ _schema = logging.getLogger('odoo.schema')
 
 IDENT_RE = re.compile(r'^[a-z0-9_][a-z0-9_$\-]*$', re.IGNORECASE)
 
+
+def _sql_string_literal(value: str) -> SQL:
+    """Return ``value`` as an inlined PostgreSQL string literal.
+
+    ``COMMENT ON ... IS`` (and similar DDL) cannot take a bind parameter.
+    """
+    return SQL("'%s'" % str(value).replace("'", "''").replace("%", "%%"))
+
 _CONFDELTYPES = {
     'RESTRICT': 'r',
     'NO ACTION': 'a',
@@ -276,13 +284,14 @@ def create_model_table(cr: Cursor, tablename: str, comment: str | None = None, c
     if comment:
         queries.append(SQL(
             "COMMENT ON TABLE %s IS %s",
-            SQL.identifier(tablename), comment,
+            SQL.identifier(tablename), _sql_string_literal(comment),
         ))
     for colname, _, colcomment in columns:
-        queries.append(SQL(
-            "COMMENT ON COLUMN %s IS %s",
-            SQL.identifier(tablename, colname), colcomment,
-        ))
+        if colcomment is not None:
+            queries.append(SQL(
+                "COMMENT ON COLUMN %s IS %s",
+                SQL.identifier(tablename, colname), _sql_string_literal(colcomment),
+            ))
     cr.execute(SQL("; ").join(queries))
 
     _schema.debug("Table %r: created", tablename)
@@ -326,7 +335,7 @@ def create_column(cr: Cursor, tablename: str, columnname: str, columntype: str |
     if comment:
         sql = SQL("%s; %s", sql, SQL(
             "COMMENT ON COLUMN %s IS %s",
-            SQL.identifier(tablename, columnname), comment,
+            SQL.identifier(tablename, columnname), _sql_string_literal(comment),
         ))
     cr.execute(sql)
     _schema.debug("Table %r: added column %r of type %s", tablename, columnname, columntype)
@@ -451,7 +460,7 @@ def add_constraint(cr: Cursor, tablename: str, constraintname: str, definition: 
     )
     query2 = SQL(
         "COMMENT ON CONSTRAINT %s ON %s IS %s",
-        SQL.identifier(constraintname), SQL.identifier(tablename), definition,
+        SQL.identifier(constraintname), SQL.identifier(tablename), _sql_string_literal(definition),
     )
     cr.execute(query1, log_exceptions=False)
     cr.execute(query2, log_exceptions=False)
@@ -606,7 +615,7 @@ def add_index(cr: Cursor, indexname: str, tablename: str, definition: str, *, un
     )
     query_comment = SQL(
         "COMMENT ON INDEX %s IS %s",
-        SQL.identifier(indexname), comment,
+        SQL.identifier(indexname), _sql_string_literal(comment),
     ) if comment else SQL()
     cr.execute(query, log_exceptions=False)
     if query_comment:

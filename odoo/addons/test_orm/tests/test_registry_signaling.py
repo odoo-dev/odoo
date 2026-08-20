@@ -303,7 +303,7 @@ class TestRealCursor(BaseCase):
             self.assertTrue(cr._cnx.read_only)
 
     def test_mogrify_keeps_pending_result(self):
-        """psycopg ClientCursor.mogrify() must not drop a pending result."""
+        """Cursor.mogrify() must not drop a pending result."""
         with self.cursor() as cr:
             cr.execute("SELECT 1")
             cr.mogrify("SELECT %s", (2,))

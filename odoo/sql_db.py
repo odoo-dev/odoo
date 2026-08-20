@@ -39,7 +39,7 @@ if typing.TYPE_CHECKING:
     from odoo.orm.environments import Transaction
 
     # when type checking, the Cursor exposes methods of the psycopg cursor
-    _CursorProtocol = psycopg.ClientCursor
+    _CursorProtocol = psycopg.Cursor
 else:
     _CursorProtocol = object
 
@@ -99,11 +99,11 @@ def _cursor_query(cursor) -> str | None:
     Relies on ``cursor._query``, which psycopg documents as a debug helper
     rather than a stable public API (no ``cursor.query`` in psycopg3).
     ``_query`` is the converter object; ``_query.query`` is the bytes actually
-    sent to PostgreSQL. Odoo uses :class:`psycopg.ClientCursor`, so those bytes
-    already have parameters inlined. A default / server-side-binding cursor
-    would instead keep ``$1`` placeholders and put values in ``_query.params``.
-    ``None`` before the first ``execute()`` and after the cursor is reset.
-    ``decode()`` uses UTF-8; the connection encoding can differ.
+    sent to PostgreSQL. Odoo uses the default server-side-binding
+    :class:`psycopg.Cursor`, so those bytes keep ``$1`` placeholders and values
+    live in ``_query.params``. ``None`` before the first ``execute()`` and after
+    the cursor is reset. ``decode()`` uses UTF-8; the connection encoding can
+    differ.
     """
     if cursor._query and cursor._query.query is not None:
         return cursor._query.query.decode()
@@ -309,8 +309,7 @@ class Cursor(_CursorProtocol):
 
         self.dbname = dbname
         self._cnx = cnx
-        # ClientCursor keeps psycopg2-like client-side binding and mogrify().
-        self._obj: psycopg.ClientCursor = cnx.cursor(row_factory=tuple_row)
+        self._obj: psycopg.Cursor = cnx.cursor(row_factory=tuple_row)
         if _logger.isEnabledFor(logging.DEBUG):
             self.__caller: tuple[str, str | int] | None = frame_codeinfo(currentframe(), 2)
         else:
@@ -670,6 +669,9 @@ class PsycoConnection(psycopg.Connection[tuple]):
             # https://www.postgresql.org/docs/18/sql-discard.html
             # DISCARD ALL cannot be executed inside a transaction block.
             self.execute("DISCARD ALL")
+            # DISCARD ALL deallocates server-side prepared statements; drop
+            # the client cache or the next execute of a cached query fails.
+            self._prepared.clear()
         finally:
             self.autocommit = autocommit
 
@@ -759,7 +761,6 @@ class ConnectionPool:
 
         try:
             result = PsycoConnection.connect(
-                cursor_factory=psycopg.ClientCursor,
                 row_factory=tuple_row,
                 **connection_info,
             )
