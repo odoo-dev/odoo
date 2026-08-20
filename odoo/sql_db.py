@@ -72,6 +72,12 @@ _logger_conn = _logger.getChild("connection")
 
 re_from = re.compile(r'\bfrom\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
 re_into = re.compile(r'\binto\s+"?([a-zA-Z_0-9]+)\b', re.IGNORECASE)
+# ALTER TABLE (and CREATE OR REPLACE VIEW) can change SELECT * row types.
+# psycopg only drops prepared statements on DROP/ROLLBACK, so we must.
+re_invalidate_prepared = re.compile(
+    r'^\s*(ALTER\b|CREATE\s+OR\s+REPLACE\s+(?:MATERIALIZED\s+)?VIEW\b)',
+    re.IGNORECASE,
+)
 # Unquoted names: same charset as re_from/re_into. Quoted names: anything but '"'.
 # Optional schema.table (whitespace around '.') and (columns) before FROM|TO.
 re_copy = re.compile(
@@ -480,11 +486,17 @@ class Cursor(_CursorProtocol):
                 stat_count, stat_time = log_target.get(table or '', (0, 0))
                 log_target[table or ''] = (stat_count + 1, stat_time + delay * 1E6)
 
+    def _invalidate_prepared_if_schema_change(self, query) -> None:
+        sql = query if isinstance(query, str) else query.decode() if isinstance(query, bytes) else ''
+        if sql and re_invalidate_prepared.match(sql):
+            self._cnx._prepared.clear()
+
     def execute(self, query: SQL | typing.LiteralString | psql.Composable, params=None, log_exceptions: bool = True) -> None:
         """ Execute a query inside the current transaction. """
         query, params = self._normalize_query(query, params)
         with self._trace_query(query, params, log_exceptions):
             self._obj.execute(query, params)
+        self._invalidate_prepared_if_schema_change(query)
 
     def executemany(self, query: typing.LiteralString | psql.Composable, vars_list) -> None:
         """Execute the query for each row in the vars_list."""

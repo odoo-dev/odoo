@@ -302,6 +302,18 @@ class TestRealCursor(BaseCase):
             self.assertEqual(cr.fetchone(), ('on',))
             self.assertTrue(cr._cnx.read_only)
 
+    def test_prepared_select_star_survives_alter_table(self):
+        """ALTER TABLE must drop cached plans so SELECT * can see new columns."""
+        with self.cursor() as cr:
+            cr.execute("CREATE TEMP TABLE prep_plan_change (id integer)")
+            cr._cnx.prepare_threshold = 1
+            for _ in range(2):
+                cr.execute("SELECT * FROM prep_plan_change")
+                cr.fetchall()
+            cr.execute("ALTER TABLE prep_plan_change ADD COLUMN name text")
+            cr.execute("SELECT * FROM prep_plan_change")
+            self.assertEqual([col.name for col in cr.description], ['id', 'name'])
+
     def test_mogrify_keeps_pending_result(self):
         """Cursor.mogrify() must not drop a pending result."""
         with self.cursor() as cr:
