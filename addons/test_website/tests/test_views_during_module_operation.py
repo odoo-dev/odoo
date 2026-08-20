@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.website.tools import MockRequest
 from odoo.tests import standalone
 
 
@@ -98,8 +97,6 @@ def test_02_copy_ids_views_unlink_on_module_update(env):
       2. Remove the theme.ir.ui.view's copy_ids (sort of the COW views)
          -> Not working for now
       3. (not impact other website using this theme, see below)
-         -> This is done through odoo/odoo@96ef4885a79 but did not come with
-            tests
 
       Point 2. was not working, this test aims to ensure it will now.
       Note: This can't be done through a `ondelete=cascade` as this would
@@ -107,10 +104,10 @@ def test_02_copy_ids_views_unlink_on_module_update(env):
             be against the multi-website rule:
             "What is done on a website should not alter other websites."
 
-            Regarding the flow described above, if a theme module was updated
-            through the command line (or via the UI, but this is not possible in
-            standard as theme modules are hidden from the Apps), it should
-            update every website using this theme.
+            Updating a theme module (through the command line, or from the Apps
+            as theme modules are hidden from the website interface) should
+            update every website using this theme. Applying a theme from the
+            website interface should only alter the website it is applied on.
     """
     View = env['ir.ui.view']
     ThemeView = env['theme.ir.ui.view']
@@ -201,19 +198,18 @@ def test_02_copy_ids_views_unlink_on_module_update(env):
 
     view_website_1, view_website_2, theme_child_view = _simulate_xml_view()
 
-    # Upgrade the module
-    with MockRequest(env, website=website_1):
-        theme_default.button_immediate_upgrade()
-    env.reset()  # clear the set of environments
-    env = env()  # get an environment that refers to the new registry
+    # Apply the theme on website_1 only
+    theme_default.with_context(website_id=website_1.id).button_choose_theme()
 
-    # Ensure the theme.ir.ui.view got removed (since there is an IMD but not
-    # present in XML files)
-    view = env.ref('theme_default.theme_child_view', False)
-    assert not view, "Theme view should have been removed during module update."
-    assert not theme_child_view.exists(),\
-        "Theme view should have been removed during module update. (2)"
+    # The module was not updated, the theme.ir.ui.view is still there
+    assert theme_child_view.exists(),\
+        "Theme view should not have been removed by a theme selection."
 
-    # Ensure only website_1 copy_ids got removed, website_2 should be untouched
-    assert not view_website_1.exists() and view_website_2.exists(),\
-        "Only website_1 copy should be removed (2)"
+    # website_1 copy_ids got recreated from the theme.ir.ui.view...
+    assert not view_website_1.exists(), "website_1 copy should have been reloaded"
+    assert View.search(domain + [('website_id', '=', website_1.id)]),\
+        "website_1 copy should have been reloaded (2)"
+
+    # ... while website_2 was left untouched
+    assert view_website_2.exists(),\
+        "website_2 copy should not be altered by a theme applied on website_1"

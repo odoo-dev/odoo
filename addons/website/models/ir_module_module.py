@@ -7,7 +7,6 @@ from collections import defaultdict, OrderedDict
 from odoo import api, fields, models
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import MissingError
-from odoo.http import request
 from odoo.modules.module import get_manifest
 from odoo.tools import escape_psql, split_every
 
@@ -65,33 +64,17 @@ class IrModuleModule(models.Model):
 
             # Upgrade
 
-                There are 2 cases to handle when upgrading a theme:
-
-                * When clicking on the theme upgrade button on the interface,
-                    in which case there will be an http request made.
-
-                    -> We want to upgrade the current website only, not any other.
-
-                * When upgrading with -u, in which case no request should be set.
-
-                    -> We want to upgrade every website using this theme.
+                A theme is only upgraded from the command line (-u) or from the
+                Apps, in which case we want to upgrade every website using it.
+                Applying a theme from the website interface does not upgrade the
+                module, see ``button_choose_theme``.
         """
-        if request and request.db and request.env and request.context.get('apply_new_theme'):
-            self = self.with_context(apply_new_theme=True)
-
         for module in self:
             if module.name.startswith('theme_') and vals.get('state') == 'installed':
                 _logger.info('Module %s has been loaded as theme template (%s)' % (module.name, module.state))
 
                 if module.state in ['to install', 'to upgrade']:
-                    websites_to_update = module._theme_get_stream_website_ids()
-
-                    if module.state == 'to upgrade' and request:
-                        Website = self.env['website']
-                        current_website = Website.get_current_website()
-                        websites_to_update = current_website if current_website in websites_to_update else Website
-
-                    for website in websites_to_update:
+                    for website in module._theme_get_stream_website_ids():
                         module._theme_load(website)
 
         return super(IrModuleModule, self).write(vals)
@@ -232,7 +215,11 @@ class IrModuleModule(models.Model):
 
             :param website: ``website`` model on which to load the themes
         """
-        for module in self:
+        # the website to load the theme on is given as an argument, it must not
+        # depend on the website of the environment
+        themes = self.with_context(website_id=None)
+
+        for module in themes:
             _logger.info('Load theme %s for website %s from template.' % (module.mapped('name'), website.id))
 
             module._generate_primary_snippet_templates()
@@ -240,7 +227,6 @@ class IrModuleModule(models.Model):
                 module._update_records(model_name, website)
 
             if self._context.get('apply_new_theme'):
-                # Both the theme install and upgrade flow ends up here.
                 # The _post_copy() is supposed to be called only when the theme
                 # is installed for the first time on a website.
                 # It will basically select some header and footer template.
@@ -350,14 +336,9 @@ class IrModuleModule(models.Model):
         return websites
 
     def _theme_upgrade_upstream(self):
-        """ Upgrade the upstream dependencies of a theme, and install it if necessary. """
-        def install_or_upgrade(theme):
-            if theme.state != 'installed':
-                theme.button_install()
-            themes = theme + theme._theme_get_upstream()
-            themes.filtered(lambda m: m.state == 'installed').button_upgrade()
-
-        self._button_immediate_function(install_or_upgrade)
+        """ Install a theme and its upstream dependencies if necessary. """
+        if self.state != 'installed':
+            self._button_immediate_function(lambda theme: theme.button_install())
 
     @api.model
     def _theme_remove(self, website):
@@ -401,9 +382,11 @@ class IrModuleModule(models.Model):
         website.theme_id = self
 
         # this will install 'self' if it is not installed yet
-        if request:
-            request.update_context(apply_new_theme=True)
         self._theme_upgrade_upstream()
+
+        # `apply_new_theme` makes `_theme_load` call the `_post_copy` of every
+        # theme of the stream, see ``_theme_load``.
+        self._theme_get_stream_themes().with_context(apply_new_theme=True)._theme_load(website)
 
         result = website.button_go_website()
         result['context']['params']['with_loader'] = True
@@ -418,11 +401,11 @@ class IrModuleModule(models.Model):
         """
             Refresh the current theme of the current website.
 
-            To refresh it, we only need to upgrade the modules.
-            Indeed the (re)loading of the theme will be done automatically on ``write``.
+            The theme is reloaded on the current website only, so that the other
+            websites using it are left untouched.
         """
         website = self.env['website'].get_current_website()
-        website.theme_id._theme_upgrade_upstream()
+        website.theme_id._theme_get_stream_themes()._theme_load(website)
 
     @api.model
     def update_list(self):
