@@ -6704,11 +6704,10 @@ ${code}`;
       if (ast.context) {
         const dynCtxVar = generateId("ctx");
         this.addLine(`const ${dynCtxVar} = ${compileExpr(ast.context)};`);
-        if (ast.attrs) {
-          ctxExpr = `Object.assign({}, ${dynCtxVar}, {this: ${dynCtxVar}}${attrs.length ? ", " + ctxString : ""})`;
+        if (attrs.length) {
+          ctxExpr = `Object.assign({this: ${dynCtxVar}}, ${ctxString})`;
         } else {
-          const thisCtx = `{this: ${dynCtxVar}}`;
-          ctxExpr = `Object.assign({}, ${dynCtxVar}, ${thisCtx}${attrs.length ? ", " + ctxString : ""})`;
+          ctxExpr = `{this: ${dynCtxVar}}`;
         }
       } else {
         if (attrs.length === 0) {
@@ -6846,7 +6845,9 @@ ${code}`;
     getPropString(props2, dynProps) {
       let propString = `{${props2.join(",")}}`;
       if (dynProps) {
-        propString = `Object.assign({}, ${compileExpr(dynProps)}${props2.length ? ", " + propString : ""})`;
+        propString = `Object.assign({}, ${compileExpr(dynProps)}${
+          props.length ? ", " + propString : ""
+        })`;
       }
       return propString;
     }
@@ -6943,7 +6944,9 @@ ${code}`;
       this.helpers.add("createComponent");
       this.staticDefs.push({
         id,
-        expr: `createComponent(app, ${ast.isDynamic ? null : expr}, ${!ast.isDynamic}, ${!!ast.slots}, ${!!ast.dynamicProps}, [${propList}])`
+        expr: `createComponent(app, ${
+          ast.isDynamic ? null : expr
+        }, ${!ast.isDynamic}, ${!!ast.slots}, ${!!ast.dynamicProps}, [${propList}])`,
       });
       if (ast.isDynamic) {
         keyArg = `(${expr}).name + ${keyArg}`;

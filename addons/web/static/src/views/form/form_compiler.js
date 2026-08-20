@@ -66,7 +66,8 @@ export class FormCompiler extends ViewCompiler {
     compile(key, params = {}) {
         const compiled = super.compile(...arguments);
         if (!params.isSubView) {
-            compiled.children[0].setAttribute("t-ref", "__comp__.rootRef");
+            const lastIndex = compiled.children.length - 1;
+            compiled.children[lastIndex].setAttribute("t-ref", "__comp__.rootRef");
         }
         return compiled;
     }

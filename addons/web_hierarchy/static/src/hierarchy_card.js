@@ -26,7 +26,9 @@ export class HierarchyCard extends Component {
 
     setup() {
         const { archInfo } = this.props;
-        this.templates = useViewCompiler(this.constructor.Compiler, archInfo.templateDocs);
+        this.templates = useViewCompiler(this.constructor.Compiler, archInfo.templateDocs, {
+            availableContextKeys: this.renderingContextKeys,
+        });
         this.evaluateBooleanExpr = evaluateBooleanExpr;
     }
 
@@ -36,6 +38,10 @@ export class HierarchyCard extends Component {
             classNames.push("o_hierarchy_node_unfolded");
         }
         return classNames.join(" ");
+    }
+
+    get renderingContextKeys() {
+        return ["context", "JSON", "luxon", "record", "__comp__", "__record__"];
     }
 
     getRenderingContext(data) {

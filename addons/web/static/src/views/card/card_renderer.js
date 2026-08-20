@@ -102,7 +102,9 @@ export class CardRenderer extends Component {
         const ViewCompiler = Compiler || this.constructor.Compiler;
         const { templateDocs: templates } = archInfo;
 
-        this.templates = useViewCompiler(ViewCompiler, templates);
+        this.templates = useViewCompiler(ViewCompiler, templates, {
+            availableContextKeys: this.renderingContextKeys,
+        });
 
         this.dataState = proxy({ widget: {} });
         this.createWidget(this.props);
@@ -157,5 +159,9 @@ export class CardRenderer extends Component {
             __comp__: Object.assign(Object.create(this), { this: this }),
         };
         return renderingContext;
+    }
+
+    get renderingContextKeys() {
+        return ["context", "JSON", "luxon", "record", "selection_mode", "widget", "__comp__"];
     }
 }

@@ -73,8 +73,14 @@ export class ActivityRecord extends Component {
             isHtmlEmpty,
         };
         const { templateDocs } = this.props.archInfo;
-        const templates = useViewCompiler(ActivityCompiler, templateDocs);
+        const templates = useViewCompiler(ActivityCompiler, templateDocs, {
+            availableContextKeys: this.renderingContextKeys,
+        });
         this.recordTemplate = templates["activity-box"];
+    }
+
+    get renderingContextKeys() {
+        return ["record", "activity_image", "user_context", "widget", "luxon", "__comp__"];
     }
 
     getRenderingContext() {

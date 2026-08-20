@@ -23,4 +23,8 @@ export class ProjectTaskKanbanRecord extends KanbanRecord {
         context["state"] = this.state;
         return context;
     }
+
+    get renderingContextKeys() {
+        return super.renderingContextKeys.concat("state");
+    }
 }

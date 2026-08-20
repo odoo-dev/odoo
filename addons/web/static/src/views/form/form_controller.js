@@ -264,7 +264,10 @@ export class FormController extends Component {
             const buttonBoxTemplates = useViewCompiler(
                 this.props.Compiler || FormCompiler,
                 { ButtonBox: xmlDocButtonBox },
-                { isSubView: true }
+                {
+                    isSubView: true,
+                    availableContextKeys: ["__comp__"],
+                }
             );
             this.buttonBoxTemplate = buttonBoxTemplates.ButtonBox;
         }

@@ -66,7 +66,9 @@ export class FormRenderer extends Component {
         const { archInfo, Compiler, record } = this.props;
         const templates = { FormRenderer: archInfo.xmlDoc };
         this.state = proxy({}); // Used by Form Compiler
-        this.templates = useViewCompiler(Compiler || FormCompiler, templates);
+        this.templates = useViewCompiler(Compiler || FormCompiler, templates, {
+            availableContextKeys: ["__comp__"],
+        });
         useSubEnv({ model: record.model });
         this.uiService = useService("ui");
         this.onResize = useDebounced(() => render(this), 200);

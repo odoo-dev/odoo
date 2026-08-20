@@ -250,13 +250,23 @@ export class ViewCompiler {
     /**
      * @param {string} key
      * @param {Record<string, any>} params
-     * @returns {string}
+     * @returns {Element}
      */
     compile(key, params = {}) {
         const root = this.templates[key].cloneNode(true);
         const child = this.compileNode(root, params);
-        const newRoot = createElement("t", child ? [child] : []);
-        newRoot.setAttribute("t-translation", "off");
+        const newRoot = createElement("t", { "t-translation": "off" });
+        if (child) {
+            const ctxKeys = params.availableContextKeys || [];
+            for (const key of ctxKeys) {
+                append(
+                    newRoot,
+                    createElement("t", { "t-set": key, "t-value": `this?this.${key}:${key}` }, [""])
+                );
+            }
+            append(newRoot, createElement("t", { "t-set": "this", "t-value": "" }, [""]));
+            append(newRoot, child);
+        }
         return newRoot;
     }
 
