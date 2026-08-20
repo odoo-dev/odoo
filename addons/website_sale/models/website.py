@@ -824,7 +824,10 @@ class Website(models.Model):
                 limit=1,
             )
             if abandoned_cart_sudo:
-                if not self.env.cr.readonly:
+                last_tx = abandoned_cart_sudo.get_portal_last_transaction()
+                if last_tx and last_tx.state in ('pending', 'authorized', 'done'):
+                    abandoned_cart_sudo = self.env['sale.order']
+                elif not self.env.cr.readonly:
                     # Force the recomputation of the pricelist and fiscal position when resurrecting
                     # an abandoned cart
                     abandoned_cart_sudo._update_address(partner_sudo.id, ["partner_id"])
