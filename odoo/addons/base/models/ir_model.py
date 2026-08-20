@@ -502,7 +502,7 @@ class IrModel(models.Model):
             'model': model._name,
             'name': model._description,
             'explanation': "\n\n".join(explanations) if explanations else False,
-            'order': model._order,
+            'order': str(model._order),  # todo: fix the `_order = False`
             'info': next(cls.__doc__ for cls in self.env.registry[model._name].mro() if cls.__doc__),
             'state': 'manual' if model._custom else 'base',
             'abstract': model._abstract,
