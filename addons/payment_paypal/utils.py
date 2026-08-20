@@ -62,6 +62,20 @@ def format_shipping_address(tx_sudo):
     return address_vals
 
 
+def format_vault_payment_source(vault_data, payment_method_code):
+    """Format the vault data to the payment source of the normalized payment data."""
+    return {
+        payment_method_code: {
+            **vault_data.get("payment_source", {}).get(payment_method_code, {}),
+            "attributes": {
+                "vault": {
+                    "id": vault_data.get("id"),
+                    "customer": vault_data.get("customer", {}),
+                }
+            },
+        }
+    }
+
 def normalize_paypal_payment_data(
     data, has_capture_data=False, event_type=None, payment_method_code=None
 ):
@@ -81,14 +95,7 @@ def normalize_paypal_payment_data(
     if event_type in const.VAULT_WEBHOOK_EVENTS:
         return {
             "event_type": event_type,
-            "payment_source": {
-                payment_method_code: {
-                    **data.get("payment_source", {}).get(payment_method_code, {}),
-                    "attributes": {
-                        "vault": {"id": data.get("id"), "customer": data.get("customer", {})}
-                    },
-                }
-            },
+            "payment_source": format_vault_payment_source(data, payment_method_code),
         }
 
     purchase_unit = data["purchase_units"][0]

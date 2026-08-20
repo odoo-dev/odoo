@@ -62,17 +62,11 @@ class PaypalController(http.Controller):
         if tx_sudo:
             order_id = token or tx_sudo.provider_reference
             if tx_sudo.operation == "validation":
-                try:
-                    tx_sudo._paypal_create_payment_token()
-                except ValidationError as e:
-                    tx_sudo.with_context(
-                        # The setup token was not consumed; the handler is safe to replay.
-                        payment_safe_write=True
-                    )._set_error(str(e))
+                tx_sudo._paypal_create_payment_token()
             elif tx_sudo.payment_method_code in {"paypal", "card"}:
                 self._paypal_capture_order(tx_sudo, order_id)
             else:
-                normalized_data = self._get_normalized_paypal_order(tx_sudo, order_id)
+                normalized_data = self._fetch_normalized_paypal_order(tx_sudo, order_id)
                 tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
@@ -93,15 +87,12 @@ class PaypalController(http.Controller):
         )
         if tx_sudo:
             order_id = token or tx_sudo.provider_reference
-            try:
-                if tx_sudo.operation == "validation":
-                    normalized_data = {"id": tx_sudo.provider_reference}
-                else:
-                    normalized_data = self._get_normalized_paypal_order(tx_sudo, order_id)
-                normalized_data["status"] = "CANCELED"
-                tx_sudo._record(normalized_data)
-            except ValidationError:
-                _logger.warning("Unable to fetch the order details from PayPal.")
+            if tx_sudo.operation == "validation":
+                normalized_data = {"id": tx_sudo.provider_reference}
+            else:
+                normalized_data = self._fetch_normalized_paypal_order(tx_sudo, order_id)
+            normalized_data["status"] = "CANCELED"
+            tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
     @http.route(_webhook_url, type="http", auth="public", methods=["POST"], csrf=False)
@@ -216,33 +207,19 @@ class PaypalController(http.Controller):
         :return: None
         """
         resource = notification_data.get("resource", {})
-        vault_id = resource.get("id")
-        customer_id = resource.get("customer", {}).get("id")
-        if not (vault_id and customer_id):
+        provider_reference = resource.get("metadata", {}).get("order_id")
+        if not provider_reference:
             return
-        candidate_txs_sudo = (
-            self
-            .env["payment.transaction"]
+        tx_sudo = (
+            self.env["payment.transaction"]
             .sudo()
             .search(
-                [
-                    ("provider_code", "=", "paypal"),
-                    ("paypal_customer_id", "=", customer_id),
-                    ("payment_method_id.code", "in", list(resource.get("payment_source", {}))),
-                    ("tokenize", "=", True),
-                    ("token_id", "=", False),
-                    ("state", "in", ["pending", "authorized", "done"]),
-                ],
-                order="id desc",
+                [("provider_code", "=", "paypal"), ("provider_reference", "=", provider_reference)],
+                limit=1,
             )
         )
-        if not candidate_txs_sudo:
-            _logger.warning(
-                "Received a vault notification for customer %s matching no transaction awaiting a"
-                " token.", customer_id
-            )
+        if not tx_sudo or tx_sudo.token_id:
             return
-        tx_sudo = candidate_txs_sudo[0]
         try:
             self._verify_notification_origin(notification_data, tx_sudo)
         except ValidationError:
@@ -324,7 +301,7 @@ class PaypalController(http.Controller):
         if tx_sudo:
             tx_sudo._record(normalized_response)
 
-    def _get_normalized_paypal_order(self, tx_sudo, order_id):
+    def _fetch_normalized_paypal_order(self, tx_sudo, order_id):
         order_details = tx_sudo._send_api_request(
             "GET", f"/v2/checkout/orders/{order_id}"
         )

@@ -11,14 +11,11 @@ class PaymentToken(models.Model):
     # === COMPUTE METHODS === #
 
     @api.depends("payment_details", "create_date")
-    def _compute_display_name(self):
+    def _build_display_name(self, *args, should_pad=True, **kwargs):
         """Override of `payment` to only pad the display name of card tokens.
 
         The payment details of PayPal wallet tokens are not card digits, so they must not be padded.
         """
-        unpadded_tokens = self.filtered(
-            lambda token: token.provider_code == "paypal" and token.payment_method_code != "card"
-        )
-        for token in unpadded_tokens:
-            token.display_name = token.sudo()._build_display_name(should_pad=False)
-        super(PaymentToken, self - unpadded_tokens)._compute_display_name()
+        if self.provider_code != "paypal" or self.payment_method_code == "card":
+            return super()._build_display_name(*args, should_pad=should_pad, **kwargs)
+        return super()._build_display_name(*args, should_pad=False, **kwargs)

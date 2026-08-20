@@ -127,26 +127,29 @@ class PaymentTransaction(models.Model):
             "cancel_url": cancel_url,
         }
         if self.payment_method_code == "card":
-            payment_source = {
-                "card": {
-                    "verification_method": "SCA_WHEN_REQUIRED",
-                    "experience_context": experience_context,
+            payload = {
+                "payment_source": {
+                    "card": {
+                        "verification_method": "SCA_WHEN_REQUIRED",
+                        "experience_context": experience_context,
+                    }
                 }
             }
         else:
-            payment_source = {
-                "paypal": {
-                    "permit_multiple_payment_tokens": False,
-                    "usage_type": "MERCHANT",
-                    "customer_type": "CONSUMER",
-                    "experience_context": {
-                        **experience_context,
-                        "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED",
-                        "shipping_preference": "NO_SHIPPING",
-                    },
+            payload = {
+                "payment_source": {
+                    "paypal": {
+                        "permit_multiple_payment_tokens": False,
+                        "usage_type": "MERCHANT",
+                        "customer_type": "CONSUMER",
+                        "experience_context": {
+                            **experience_context,
+                            "payment_method_preference": "IMMEDIATE_PAYMENT_REQUIRED",
+                            "shipping_preference": "NO_SHIPPING",
+                        },
+                    }
                 }
             }
-        payload = {"payment_source": payment_source}
         if customer_id := self._paypal_get_customer_id():
             payload["customer"] = {"id": customer_id}  # Link the token to the existing customer.
         return self._send_api_request(
@@ -175,18 +178,12 @@ class PaymentTransaction(models.Model):
                 self, scope="payment_token_request"
             ),
         )
-        pm_code = self.payment_method_code
         self._record({
             "id": vault["id"],
             "status": "COMPLETED",
-            "payment_source": {
-                pm_code: {
-                    **vault.get("payment_source", {}).get(pm_code, {}),
-                    "attributes": {
-                        "vault": {"id": vault["id"], "customer": vault.get("customer", {})}
-                    },
-                }
-            },
+            "payment_source": paypal_utils.format_vault_payment_source(
+                vault, self.payment_method_code
+            ),
         })
 
     def _paypal_prepare_order_payload(self):

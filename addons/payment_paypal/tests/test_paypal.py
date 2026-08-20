@@ -168,7 +168,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     @mute_logger("odoo.addons.payment_paypal.controllers.main")
     def test_deferred_vaulting_creates_token_from_webhook(self):
         """A wallet vaulted asynchronously (vault.status APPROVED, no vault id) is tokenized from
-        the VAULT.PAYMENT-TOKEN.CREATED webhook, correlated through the customer id."""
+        the VAULT.PAYMENT-TOKEN.CREATED webhook, correlated through the order id."""
         paypal_pm = self.env.ref("payment_paypal.payment_method_paypal").id
         tx = self._create_transaction("direct", payment_method_id=paypal_pm, tokenize=True)
         customer_id = "CUSTOMER123"
@@ -195,6 +195,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
             "resource": {
                 "id": vault_id,
                 "customer": {"id": customer_id},
+                "metadata": {"order_id": self.order_id},
                 "payment_source": {"paypal": {"email_address": "buyer@example.com"}},
             },
         }
