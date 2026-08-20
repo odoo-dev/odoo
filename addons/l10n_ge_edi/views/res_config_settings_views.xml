@@ -31,6 +31,16 @@
                                 <label string="Service Password" for="l10n_ge_edi_sp" class="col-lg-3 o_light_label"/>
                                 <field name="l10n_ge_edi_sp" password="True"/>
                             </div>
+                            <div class="row" invisible="not l10n_ge_edi_su or not l10n_ge_edi_sp">
+                                <label string="Bills Synced Until" for="l10n_ge_edi_last_fetched_date" class="col-lg-3 o_light_label"/>
+                                <field name="l10n_ge_edi_last_fetched_date" readonly="l10n_ge_edi_last_fetched_date"
+                                       force_save="1" placeholder="Not synced yet"/>
+                            </div>
+                            <div class="text-warning mt-2" invisible="not l10n_ge_edi_su or not l10n_ge_edi_sp or l10n_ge_edi_last_fetched_date">
+                                <i class="fa fa-exclamation-triangle" role="img" aria-label="Warning"/>
+                                Set the date to start syncing vendor bills from. It is only reset
+                                when the Service User or Service Password changes.
+                            </div>
                             <div class="mt16">
                                 <button name="l10n_ge_edi_test_connection" type="object" class="btn-link"
                                         invisible="not l10n_ge_edi_su or not l10n_ge_edi_sp">

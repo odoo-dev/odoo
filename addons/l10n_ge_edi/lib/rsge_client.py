@@ -15,6 +15,8 @@
 #   here either, since RS.ge doesn't use the UBL format at all.
 import logging
 import threading
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from lxml import etree
 from zeep.plugins import HistoryPlugin
@@ -25,6 +27,12 @@ _lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 
 NTOSSERVICE_WSDL_URL = 'https://www.revenue.mof.ge/ntosservice/ntosservice.asmx?WSDL'
+
+# RS.ge reads and writes every timestamp in Georgian local time, which has no DST.
+_RSGE_TIMEZONE = ZoneInfo("Asia/Tbilisi")
+
+_OPERATION_DATE_FLOOR = datetime(1, 1, 1)
+_OPERATION_DATE_CEILING = datetime(9999, 12, 31)
 
 _client_cache = {}
 _client_cache_lock = threading.Lock()
@@ -40,6 +48,15 @@ _RSGE_INVOICE_STATUS_MAP = {
     7: "confirmed_cancelled",
     8: "confirmed_correction",
 }
+
+
+def to_rsge_datetime(value):
+    """Convert a naive UTC datetime to the naive Georgian local time RS.ge expects."""
+    return (
+        value.replace(tzinfo=timezone.utc)
+        .astimezone(_RSGE_TIMEZONE)
+        .replace(tzinfo=None)
+    )
 
 
 def get_rsge_invoice_status(status):
@@ -307,26 +324,55 @@ class RSgeClient:
             return None
         return result["k_id"]
 
-    def get_invoice_lines(self, user_id, invoice_id):
-        """Fetch an invoice's lines from RS.ge via `get_invoice_desc`, given its header id."""
+    def _call_diffgram(self, operation, **kwargs):
+        """Call a list-returning RS.ge method and parse its diffgram response into row dicts.
+
+        As noted at the top of this file, `zeep` raises instead of deserializing these responses,
+        so the raw envelope is recovered from the history plugin and parsed by hand.
+        """
         client, history = _get_diffgram_client()
         try:
-            client.service.get_invoice_desc(
-                user_id=user_id,
-                invois_id=invoice_id,
-                su=self.su,
-                sp=self.sp,
-            )
+            getattr(client.service, operation)(**kwargs)
         except zeep.exceptions.LookupError:
             return _parse_diffgram_rows(history.last_received["envelope"])
         except ValueError:
             return []
         except zeep.exceptions.Fault as fault:
-            _logger.info("RS.ge get_invoice_desc() SOAP fault: %s", fault)
+            _logger.info("RS.ge %s() SOAP fault: %s", operation, fault)
             raise RSgeError("soap_fault", str(fault), raw=fault) from fault
         except zeep.exceptions.Error as error:
-            _logger.info("RS.ge get_invoice_desc() connection error: %s", error)
+            _logger.info("RS.ge %s() connection error: %s", operation, error)
             raise RSgeError("connection", str(error), raw=error) from error
+        return []
+
+    def get_invoice_lines(self, user_id, invoice_id):
+        """Fetch an invoice's lines from RS.ge via `get_invoice_desc`, given its header id."""
+        return self._call_diffgram(
+            "get_invoice_desc",
+            user_id=user_id,
+            invois_id=invoice_id,
+            su=self.su,
+            sp=self.sp,
+        )
+
+    def get_buyer_invoices(self, user_id, un_id, start_date, end_date):
+        """Fetch the invoices registered against buyer `un_id` between `start_date` and `end_date`.
+
+        Both dates are naive UTC. Only the registration range is narrowed: an invoice registered
+        today can carry a far older operation date, and constraining that range to the same window
+        silently drops those.
+        """
+        return self._call_diffgram(
+            "get_buyer_invoices",
+            user_id=user_id,
+            un_id=un_id,
+            s_dt=to_rsge_datetime(start_date),
+            e_dt=to_rsge_datetime(end_date),
+            op_s_dt=_OPERATION_DATE_FLOOR,
+            op_e_dt=_OPERATION_DATE_CEILING,
+            su=self.su,
+            sp=self.sp,
+        )
 
 
 def translate_rsge_error(env, error):

@@ -9,6 +9,10 @@ class ResConfigSettings(models.TransientModel):
 
     l10n_ge_edi_su = fields.Char(related='company_id.l10n_ge_edi_su', readonly=False)
     l10n_ge_edi_sp = fields.Char(related='company_id.l10n_ge_edi_sp', readonly=False)
+    l10n_ge_edi_last_fetched_date = fields.Datetime(
+        related="company_id.l10n_ge_edi_last_fetched_date",
+        readonly=False,
+    )
 
     def l10n_ge_edi_test_connection(self):
         """ Test the RS.ge service-user credentials via the `chek` SOAP method. """

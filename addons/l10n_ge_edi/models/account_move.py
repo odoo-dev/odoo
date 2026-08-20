@@ -1,5 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, fields, models
+import logging
+import math
+import time
+from datetime import datetime, timedelta
+
+from odoo import Command, api, fields, models
 from odoo.exceptions import UserError
 
 from odoo.addons.l10n_ge_edi.lib.rsge_client import (
@@ -7,6 +12,13 @@ from odoo.addons.l10n_ge_edi.lib.rsge_client import (
     get_rsge_invoice_status,
     translate_rsge_error,
 )
+
+_logger = logging.getLogger(__name__)
+
+# RS.ge returns every matching document in one uncapped response, so the backlog is walked
+# in fixed windows rather than a single call.
+FETCH_WINDOW = timedelta(hours=12)
+FETCH_TIME_BUDGET = 60
 
 
 class AccountMove(models.Model):
@@ -269,6 +281,151 @@ class AccountMove(models.Model):
 
         self.l10n_ge_edi_state = get_rsge_invoice_status(invoice_data["status"])
         self.message_post(body=self.env._("Cancellation requested from RS.ge."))
+
+    def _l10n_ge_edi_fetch_vendor_bills(self):
+        # A user must never trigger a fetch against another company's RS.ge account.
+        company = self.env.company
+        if company.country_code == "GE" and company.sudo().l10n_ge_edi_user_id:
+            self._l10n_ge_edi_fetch_company_vendor_bills(company)
+
+    def _cron_l10n_ge_edi_fetch_vendor_bills(self):
+        # res.company's own country_id/country_code are computed, so the only searchable
+        # path to the country is through the company's partner.
+        company_domain = [
+            ("partner_id.country_id.code", "=", "GE"),
+            ("l10n_ge_edi_user_id", ">", 0),
+        ]
+        for company in self.env["res.company"].sudo().search(company_domain):
+            if company.l10n_ge_edi_last_fetched_date:
+                self.with_company(company)._l10n_ge_edi_fetch_company_vendor_bills(
+                    company
+                )
+            else:
+                _logger.warning(
+                    "RS.ge: no sync start date set for %s, skipping it until one is set in "
+                    "the Accounting settings.",
+                    company.display_name,
+                )
+
+    def _l10n_ge_edi_fetch_company_vendor_bills(self, company):
+        company_sudo = company.sudo()
+        start_date = company_sudo.l10n_ge_edi_last_fetched_date
+        if not start_date:
+            raise UserError(
+                self.env._(
+                    "No sync start date is set for %(company)s. Set one in the RS.ge section of "
+                    "the Accounting settings before fetching vendor bills.",
+                    company=company.display_name,
+                ),
+            )
+
+        client = company._get_rsge_client()
+        user_id = company_sudo.l10n_ge_edi_user_id
+        un_id = int(company.partner_id.l10n_ge_edi_un_id)
+        cron = self.env["ir.cron"]
+        started_at = time.monotonic()
+
+        now = fields.Datetime.now()
+        while start_date < now:
+            end_date = min(start_date + FETCH_WINDOW, now)
+            try:
+                rows = client.get_buyer_invoices(
+                    user_id=user_id,
+                    un_id=un_id,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
+            except RSgeError as error:
+                raise UserError(translate_rsge_error(self.env, error)) from error
+
+            _logger.info(
+                "RS.ge: %s documents registered between %s and %s for %s",
+                len(rows),
+                start_date,
+                end_date,
+                company.display_name,
+            )
+            for row in rows:
+                self._l10n_ge_edi_create_vendor_bill(company, row)
+
+            company_sudo.l10n_ge_edi_last_fetched_date = end_date
+            start_date = end_date
+
+            remaining_windows = math.ceil((now - end_date) / FETCH_WINDOW)
+            cron_time_left = cron._commit_progress(
+                processed=1,
+                remaining=remaining_windows,
+            )
+            if not cron_time_left or time.monotonic() - started_at > FETCH_TIME_BUDGET:
+                break
+
+    def _l10n_ge_edi_create_vendor_bill(self, company, row):
+        if row["STATUS"] not in {"1", "2"}:
+            return self.browse()
+
+        invoice_id = row["ID"]
+        existing_bill = self.search(
+            [
+                ("company_id", "=", company.id),
+                ("l10n_ge_edi_invoice_id", "=", invoice_id),
+            ],
+            limit=1,
+        )
+        if existing_bill:
+            return existing_bill
+
+        client = company._get_rsge_client()
+        remote_lines = client.get_invoice_lines(
+            user_id=company.sudo().l10n_ge_edi_user_id,
+            invoice_id=int(invoice_id),
+        )
+        tax = (
+            self.env["account.chart.template"]
+            .with_company(company)
+            .ref("ge_vat_purchase_18", raise_if_not_found=False)
+        )
+
+        line_commands = []
+        for remote_line in remote_lines:
+            quantity = float(remote_line.get("G_NUMBER") or 0) or 1
+            # FULL_AMOUNT is VAT inclusive, DRG_AMOUNT is the VAT it contains (-1 when exempt).
+            full_amount = float(remote_line.get("FULL_AMOUNT") or 0)
+            vat_amount = max(float(remote_line.get("DRG_AMOUNT") or 0), 0)
+            line_commands.append(
+                Command.create(
+                    {
+                        "name": remote_line.get("GOODS") or "",
+                        "quantity": quantity,
+                        "price_unit": (full_amount - vat_amount) / quantity,
+                        "tax_ids": [Command.set(tax.ids)],
+                        "l10n_ge_edi_line_id": remote_line.get("ID"),
+                    }
+                ),
+            )
+
+        bill = self.create(
+            {
+                "move_type": "in_invoice",
+                "company_id": company.id,
+                # RS.ge stamps its own offset, and the operation date is the calendar day the seller
+                # declared, so it is taken as-is rather than shifted into UTC.
+                "invoice_date": datetime.fromisoformat(row["OPERATION_DT"]).date(),
+                "ref": f"{row['F_SERIES']}-{row['F_NUMBER']}",
+                "l10n_ge_edi_invoice_id": invoice_id,
+                "l10n_ge_edi_f_series": row["F_SERIES"],
+                "l10n_ge_edi_f_number": int(row["F_NUMBER"]),
+                "l10n_ge_edi_state": get_rsge_invoice_status(int(row["STATUS"])),
+                "invoice_line_ids": line_commands,
+            }
+        )
+        bill.message_post(
+            body=self.env._(
+                "Fetched from RS.ge. Set the vendor before posting: %(name)s (TIN %(tin)s).",
+                name=row.get("ORG_NAME") or "",
+                tin=row.get("SA_IDENT_NO") or "",
+            ),
+        )
+        return bill
 
     def _l10n_ge_edi_refresh_all_statuses(self):
         invoices_to_update = self.search(

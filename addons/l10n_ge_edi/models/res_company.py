@@ -20,6 +20,20 @@ class ResCompany(models.Model):
         store=True,
     )
 
+    l10n_ge_edi_last_fetched_date = fields.Datetime(
+        string="Fetch Bills Registered After",
+        # Defaulted so that an empty value only ever means "the credentials just changed".
+        default=fields.Datetime.now,
+        help="Vendor bills are fetched from RS.ge starting from this date. Reset whenever the "
+        "RS.ge credentials change, since a different service user sees different documents.",
+    )
+
+    def write(self, vals):
+        # EXTENDS 'base'
+        if {"l10n_ge_edi_su", "l10n_ge_edi_sp"} & vals.keys():
+            vals = {**vals, "l10n_ge_edi_last_fetched_date": False}
+        return super().write(vals)
+
     @api.depends("l10n_ge_edi_su", "l10n_ge_edi_sp")
     def _compute_l10n_ge_edi_user_id(self):
         for company in self:
