@@ -146,7 +146,10 @@ export class DeletePlugin extends Plugin {
     /**
      * @param {EditorSelection} [selection]
      */
-    deleteSelection(selection = this.dependencies.selection.getEditableSelection()) {
+    deleteSelection(
+        selection = this.dependencies.selection.getEditableSelection(),
+        direction = "forward"
+    ) {
         // @todo @phoenix: handle non-collapsed selection around a ZWS
         // see collapseIfZWS
 
@@ -181,7 +184,7 @@ export class DeletePlugin extends Plugin {
         }
 
         range = this.deleteRange(range);
-        this.setCursorFromRange(range);
+        this.setCursorFromRange(range, { collapseToEnd: direction === "backward" });
     }
 
     /**
@@ -196,7 +199,7 @@ export class DeletePlugin extends Plugin {
         this.dispatchTo("before_delete_handlers");
 
         if (!selection.isCollapsed) {
-            this.deleteSelection(selection);
+            this.deleteSelection(selection, direction);
         } else if (direction === "backward") {
             this.deleteBackward(selection, granularity);
         } else if (direction === "forward") {
