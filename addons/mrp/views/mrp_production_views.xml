@@ -318,7 +318,7 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <h1 class="o_outlined d-flex align-items-center gap-2">
+                        <h1 class="d-flex align-items-center gap-2">
                             <field name="priority" widget="priority"/>
                             <field name="name" placeholder="Manufacturing Reference"/>
                         </h1>

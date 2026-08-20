@@ -54,7 +54,7 @@
                         <widget name="web_ribbon" title="Won" invisible="won_status != 'won'"/>
                         <div class="d-flex flex-column-reverse flex-md-row">
                             <div class="oe_title w-100">
-                                <h1 class="o_outlined">
+                                <h1>
                                     <field class="text-break" options="{'line_breaks': False}" widget="text" name="name" placeholder="e.g. Product Pricing"/>
                                 </h1>
                             </div>
