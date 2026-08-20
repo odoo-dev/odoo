@@ -2909,6 +2909,55 @@ class TestBoM(TestMrpCommon):
         self.env['mrp.routing.workcenter'].search([]).unlink()
         self.assertFalse(self.bom_1.show_copy_operations_button, "The copy operations button should be visible even if the current BoM is empty.")
 
+    def test_open_exploded_bom_lines_keeps_hierarchy_order(self):
+        """The exploded BoM list should keep the hierarchy order and not the default sequence order.
+
+        BoM structure:
+        --------------------------
+        f1 --|-- f1c1
+             |-- Product 4 (bom) --|-- Product 2
+             |                     |-- Product 1
+             |-- Product 5 (kit) --|-- Product 4
+             |                     |-- Product 3
+             |-- f2 (bom) --|-- f2c1
+             |              |-- Product 5 (kit) --|-- Product 4
+             |                                    |-- Product 3
+        """
+
+        f1, f1c1, f2, f2c1 = self.make_prods(4)
+        self.env['mrp.bom'].create({
+            'product_tmpl_id': f2.product_tmpl_id.id,
+            'bom_line_ids': [
+                Command.create({'product_id': f2c1.id}),
+                Command.create({'product_id': self.product_5.id}),
+            ],
+        })
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': f1.product_tmpl_id.id,
+            'bom_line_ids': [
+                Command.create({'product_id': f1c1.id}),
+                Command.create({'product_id': self.product_4.id}),
+                Command.create({'product_id': self.product_5.id}),
+                Command.create({'product_id': f2.id}),
+            ],
+        })
+
+        action = bom.action_open_exploded_bom_lines()
+        exploded_line_ids = self.env['mrp.bom.line'].with_context(action['context']).search(action['domain']).ids
+        self.assertEqual(
+            exploded_line_ids,
+            action['context']['forced_order_ids'],
+            "The exploded BoM lines should follow the hierarchy order, not the default sequence order.",
+        )
+
+        # check that the search filter returns the expected exploded line.
+        matching_line_id = self.env['mrp.bom.line'].with_context(action['context']).search([('id', '=', bom.bom_line_ids[1].id)]).id
+        self.assertEqual(
+            matching_line_id,
+            bom.bom_line_ids[1].id,
+            "Filtering the exploded BoM list should return only the matching BoM line.",
+        )
+
 
 class TestTourBoM(HttpCase):
     @classmethod
