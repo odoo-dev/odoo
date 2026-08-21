@@ -7,8 +7,8 @@
         <field name="search_view_id" ref="mail.mail_activity_plan_view_search"/>
         <field name="context">{'default_res_model': 'sale.order'}</field>
         <field name="domain">[('res_model', '=', 'sale.order')]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Sale Order Activity Plan
             </p>

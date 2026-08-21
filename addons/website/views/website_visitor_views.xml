@@ -265,8 +265,8 @@
         <field name="path">visitors</field>
         <field name="view_mode">kanban,list,form,graph</field>
         <field name="context">{'search_default_filter_last_7_days':1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             No Visitors yet!
           </p><p>
@@ -308,8 +308,8 @@
             (0, 0, {'view_mode': 'list', 'view_id': ref('website_visitor_track_view_tree')}),
             (0, 0, {'view_mode': 'graph', 'view_id': ref('website_visitor_track_view_graph')}),
         ]"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Wait for visitors to come to your website to see the pages they viewed.
           </p>

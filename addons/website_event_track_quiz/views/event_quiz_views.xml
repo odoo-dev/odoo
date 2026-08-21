@@ -64,8 +64,8 @@
         <field name="res_model">event.quiz</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'create': False}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
               No Quiz added yet!
             </p><p>

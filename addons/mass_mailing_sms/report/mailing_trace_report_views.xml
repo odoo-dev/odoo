@@ -52,8 +52,8 @@
         <field name="res_model">mailing.trace.report</field>
         <field name="view_mode">graph,pivot,list</field>
         <field name="domain">[('mailing_type', '=', 'sms')]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p><p>

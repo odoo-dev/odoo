@@ -6,8 +6,8 @@
             <field name="name">Cash Roundings</field>
             <field name="res_model">account.cash.rounding</field>
             <field name="view_mode">list,form</field>
-            <field name="picto">Poof</field>
             <field name="help" type="html">
+                <picto name="poof"/>
                 <p>Create the first cash rounding</p>
             </field>
         </record>

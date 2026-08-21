@@ -59,8 +59,8 @@
         <field name="name">Events Mail Schedulers</field>
         <field name="res_model">event.mail</field>
         <field name="context">{'create': False}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Nothing Scheduled yet!
             </p><p>

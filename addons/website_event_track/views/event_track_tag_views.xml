@@ -71,8 +71,8 @@
     <record model="ir.actions.act_window" id="action_event_track_tag">
         <field name="name">Track Tags</field>
         <field name="res_model">event.track.tag</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Track Tag
             </p><p>

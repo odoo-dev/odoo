@@ -76,8 +76,8 @@
         <field name="domain">[('certification', '=', True)]</field>
         <field name="search_view_id" ref="survey_survey_view_search_slides"/>
         <field name="context">{'default_certification': True, 'default_scoring_type': 'scoring_with_answers'}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Certification
             </p>

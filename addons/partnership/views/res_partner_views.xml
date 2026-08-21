@@ -6,8 +6,8 @@
         <field name="view_mode">list,kanban,form,activity</field>
         <field name="context">{"search_default_specific_property_product_pricelist": active_id, "default_specific_property_product_pricelist": active_id}</field>
         <field name="domain">[('specific_property_product_pricelist', '=', active_id)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>
@@ -22,8 +22,8 @@
         <field name="view_mode">list,kanban,form,activity</field>
         <field name="domain">[('grade_id', '=', active_id)]</field>
         <field name="context">{"search_default_grade_id": active_id, "default_grade_id": active_id}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>

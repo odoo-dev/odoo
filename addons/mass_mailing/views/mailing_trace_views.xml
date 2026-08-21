@@ -151,8 +151,8 @@
         <field name="view_mode">graph,list,form,pivot</field>
         <field name="domain">[]</field>
         <field name="context">{'search_default_mass_mailing_id': active_id}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>

@@ -42,8 +42,8 @@
         <field name="name">Optout Reasons</field>
         <field name="res_model">mailing.subscription.optout</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet.
             </p>

@@ -98,8 +98,8 @@
         <field name="res_model">project.project.stage</field>
         <field name="path">project-stages</field>
         <field name="view_mode">list,kanban,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
               No stages found. Let's create one!
             </p><p>

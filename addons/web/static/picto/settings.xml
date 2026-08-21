@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.Settings">
+    <t t-name="web.picto.settings">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6.74672 10.8031L10.7864 6.76339L17.0073 10.2853L18.1983 14.1753L31.7089 27.6859L27.6692 31.7255L14.1586 18.215L10.2686 17.0239L6.74672 10.8031Z" stroke="currentColor" stroke-width="2"/>
             <path d="M26.2248 35.8577C25.4845 35.0705 25.5034 33.8376 26.2675 33.0734L33.0167 26.3243C33.7808 25.5601 35.0137 25.5412 35.801 26.2815L54.3133 43.6902C57.4194 46.6111 57.4948 51.5219 54.4799 54.5368C51.465 57.5517 46.5542 57.4762 43.6333 54.3702L26.2248 35.8577Z" stroke="currentColor" stroke-width="2"/>

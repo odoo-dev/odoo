@@ -158,8 +158,8 @@
         <field name="name">Team Members</field>
         <field name="res_model">crm.team.member</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a new salesman
             </p><p>

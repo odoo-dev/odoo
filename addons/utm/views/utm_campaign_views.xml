@@ -121,8 +121,8 @@
         <field name="name">Campaigns</field>
         <field name="res_model">utm.campaign</field>
         <field name="view_mode">list,kanban,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a campaign
             </p>

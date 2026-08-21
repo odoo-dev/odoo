@@ -9,8 +9,8 @@
                 [('name', '=like', 'delivery_%'),
                 ('name', 'not in', ['delivery_stock_picking_batch', 'delivery_iot'])]
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Buy Odoo Enterprise now to get more providers.
                 </p>

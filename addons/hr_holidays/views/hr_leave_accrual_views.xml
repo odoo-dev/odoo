@@ -255,8 +255,8 @@
         <field name="name">Accrual Plans</field>
         <field name="res_model">hr.leave.accrual.plan</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create an Accrual Plan
             </p>

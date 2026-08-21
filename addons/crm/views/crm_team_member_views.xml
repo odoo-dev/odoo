@@ -67,8 +67,8 @@
     </record>
 
     <record id="sales_team.crm_team_member_action" model="ir.actions.act_window">
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a Team Member
             </p><p>

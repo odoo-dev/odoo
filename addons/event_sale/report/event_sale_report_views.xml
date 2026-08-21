@@ -137,8 +137,8 @@
             'search_default_event_date_start': 1,
             'pivot_measures': ['__count__', 'sale_price_untaxed', 'sale_price'],
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Event Revenues yet!
             </p><p>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.RecurringDonation">
+    <t t-name="web.picto.recurring_donation">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M32.0003 45.5857C33.804 43.5677 39.7343 39.2857 37.9555 36.0651C36.8736 34.1062 34.0578 34.1062 32.9758 36.0651L32.0003 37.8314L31.0247 36.0651C29.9428 34.1062 27.127 34.1062 26.045 36.0651C24.2663 39.2857 30.1965 43.5677 32.0003 45.5857Z" stroke="currentColor" stroke-linejoin="round"/>
             <path d="M46.0682 49.9169V30.4065L43.0814 21.5247H20.8711L17.9316 30.4065V49.9169H46.0682Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.Mailbox">
+    <t t-name="web.picto.mailbox">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M48.235 21.383L48.3324 14.9374L45.5501 16.4841L45.4528 22.9297L48.235 21.383Z" fill="currentColor"/>
             <path d="M36.7306 21.1034L45.5501 16.4841M45.5501 16.4841L48.3324 14.9374L48.235 21.383L45.4528 22.9297L45.5501 16.4841Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

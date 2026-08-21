@@ -174,8 +174,8 @@
             'default_is_so_line_edited': True,
             "is_timesheet": 1,
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No activities found. Let's start a new one!
             </p>

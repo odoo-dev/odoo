@@ -289,8 +289,8 @@
             'search_default_taken': True,
         }</field>
         <field name="search_view_id" ref="event_registration_view_search_event_specific"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Attendees yet!
             </p><p>
@@ -307,8 +307,8 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('event_id', '=', active_id)]</field>
         <field name="context">{'default_event_id': active_id, 'is_registration_desk_view': True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Attendees yet!
             </p><p>
@@ -322,8 +322,8 @@
         <field name="name">Attendees</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="context">{'search_default_filter_is_ongoing': True, 'is_registration_desk_view': True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Attendees expected yet!
             </p><p>
@@ -353,8 +353,8 @@
             }
         </field>
         <field name="search_view_id" ref="view_registration_search"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Attendees yet!
             </p><p>
@@ -376,8 +376,8 @@
             }
         </field>
         <field name="search_view_id" ref="event_registration_view_search_event_specific"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Attendees yet!
             </p><p>

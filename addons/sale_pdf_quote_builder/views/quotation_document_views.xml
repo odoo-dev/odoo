@@ -160,8 +160,8 @@
         <field name="name">Headers/Footers</field>
         <field name="res_model">quotation.document</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Upload quotation headers and footers
             </p>

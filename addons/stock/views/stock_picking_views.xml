@@ -657,8 +657,8 @@
                 'search_default_todo': '1',
             }</field>
             <field name="search_view_id" ref="stock_move_line_view_search"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No operations found. Let's create a transfer!
                 </p>

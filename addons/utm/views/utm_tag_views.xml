@@ -13,8 +13,8 @@
     <record id="action_view_utm_tag" model="ir.actions.act_window">
         <field name="name">Campaign Tags</field>
         <field name="res_model">utm.tag</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Tag
             </p><p>

@@ -8,8 +8,8 @@
             <field name="search_view_id" ref="mail.mail_activity_plan_view_search"/>
             <field name="context">{'default_res_model': 'crm.lead'}</field>
             <field name="domain">[('res_model', '=', 'crm.lead')]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a Lead Activity Plan
                 </p>

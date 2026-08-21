@@ -169,8 +169,8 @@
         <field name="res_model">timesheets.analysis.report</field>
         <field name="path">timesheets-billing</field>
         <field name="domain">[('project_id', '!=', False)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>

@@ -66,8 +66,8 @@
             <field name="name">Categories</field>
             <field name="res_model">discuss.category</field>
             <field name="view_mode">list,form,kanban</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No categories found. Let's create one!
                 </p>

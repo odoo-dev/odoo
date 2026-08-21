@@ -81,8 +81,8 @@
             <field name="view_mode">list,form,kanban</field>
             <field name="search_view_id" ref="mail_canned_response_view_search"/>
             <field name="context">{}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No canned response found. Let's create one!
                 </p><p>

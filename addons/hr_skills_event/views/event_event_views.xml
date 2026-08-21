@@ -5,8 +5,8 @@
         <field name="res_model">event.event</field>
         <field name="view_mode">kanban,calendar,list,form,pivot,graph,activity</field>
         <field name="domain">[('is_multi_slots', '=', True), ('registration_ids', 'any', [('partner_id.employee', '=', True)])]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create an Event
           </p><p>

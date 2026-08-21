@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.Hole">
+    <t t-name="web.picto.hole">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M25.1699 39.7797C36.0156 39.7797 45.1958 44.1126 48.2882 50.0856C45.1948 55.0752 36.0146 58.6949 25.1699 58.6949C14.3247 58.6949 5.14393 55.0755 2.0509 50.0856C5.14311 44.1124 14.3239 39.7797 25.1699 39.7797Z" fill="currentColor"/>
             <ellipse cx="25.1695" cy="46.0847" rx="24.1695" ry="12.6101" stroke="currentColor" stroke-width="2"/>

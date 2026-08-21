@@ -82,8 +82,8 @@
         <field name="name">Campaigns</field>
         <field name="res_model">utm.campaign</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create a mailing campaign
             </p><p>

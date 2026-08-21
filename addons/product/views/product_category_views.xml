@@ -66,8 +66,8 @@
         <field name="path">product-categories</field>
         <field name="search_view_id" ref="product_category_search_view"/>
         <field name="view_id" ref="product_category_list_view"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a new product category
             </p>

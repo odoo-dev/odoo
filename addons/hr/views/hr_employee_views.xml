@@ -93,8 +93,8 @@
             <field name="context">{'chat_icon': True}</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="hr.view_employee_filter"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create an employee.
                 </p><p>
@@ -785,8 +785,8 @@
             <field name="context">{'chat_icon': True}</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="view_employee_filter"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create an employee
                 </p><p>

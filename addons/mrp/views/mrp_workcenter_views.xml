@@ -8,8 +8,8 @@
             <field name="search_view_id" ref="view_mrp_production_work_order_search"/>
             <field name="domain">[('state', 'not in', ('done', 'cancel'))]</field>
             <field name="context">{'search_default_workcenter_id': active_id}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No work orders to do!
                 </p><p>
@@ -76,8 +76,8 @@
             <field name="view_mode">graph,pivot,list,form</field>
             <field name="domain">[('workcenter_id','=',active_id)]</field>
             <field name="context">{'search_default_thismonth':True}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Overall Equipment Effectiveness: no working or blocked time
                 </p>
@@ -132,8 +132,8 @@
                                    'search_default_blocked': True,
                                    'search_default_filter_to_plan': True,
                                    'workcenter_to_plan_on': active_id}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No work orders to do!
                 </p><p>
@@ -584,8 +584,8 @@
         <field name="view_mode">graph,pivot,list,form</field>
         <field name="domain">[]</field>
         <field name="context">{'search_default_workcenter_group': 1, 'search_default_loss_group': 2, 'create':False,'edit':False}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Overall Equipment Effectiveness: no working or blocked time
             </p>

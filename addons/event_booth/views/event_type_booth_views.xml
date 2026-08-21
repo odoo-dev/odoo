@@ -73,8 +73,8 @@
         <field name="name">Event Type Booths</field>
         <field name="res_model">event.type.booth</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Type Booth
             </p><p>

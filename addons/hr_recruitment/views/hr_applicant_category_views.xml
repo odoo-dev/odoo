@@ -30,8 +30,8 @@
         <record id="hr_applicant_category_action" model="ir.actions.act_window">
             <field name="name">Tags</field>
             <field name="res_model">hr.applicant.category</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Add a new tag
                 </p>

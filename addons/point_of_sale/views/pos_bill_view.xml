@@ -32,8 +32,8 @@
         <field name="name">Coins/Bills</field>
         <field name="res_model">pos.bill</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add coins and bills
             </p>

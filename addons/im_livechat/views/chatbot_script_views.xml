@@ -68,8 +68,8 @@
         <field name="name">Chatbot</field>
         <field name="res_model">chatbot.script</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No chatbots found. Let's create one!
             </p><p>

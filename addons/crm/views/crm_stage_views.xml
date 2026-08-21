@@ -70,8 +70,8 @@
         <field name="name">Stages</field>
         <field name="res_model">crm.stage</field>
         <field name="view_id" ref="crm.crm_stage_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Set a new stage in your opportunity pipeline
           </p><p>

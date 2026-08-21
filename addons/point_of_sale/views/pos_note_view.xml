@@ -16,8 +16,8 @@
         <field name="name">Note Models</field>
         <field name="res_model">pos.note</field>
         <field name="view_mode">list</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create predefined notes
             </p><p>

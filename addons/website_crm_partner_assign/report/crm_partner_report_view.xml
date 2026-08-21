@@ -47,8 +47,8 @@
             <field name="context">{'group_by':[]}</field>
             <field name="view_mode">graph</field>
             <field name="domain">[('grade_id', '!=', False)]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data yet!
                 </p>

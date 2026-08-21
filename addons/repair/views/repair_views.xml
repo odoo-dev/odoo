@@ -412,8 +412,8 @@
         <record id="action_repair_order_tag" model="ir.actions.act_window">
             <field name="name">Tags</field>
             <field name="res_model">repair.tags</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                 Create a new tag
               </p>

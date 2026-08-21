@@ -354,8 +354,8 @@
                 'default_move_journal_types': ('bank', 'cash'),
             }</field>
             <field name="view_id" ref="view_account_payment_tree"/>
-            <field name="picto">EmptyFolder</field> <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                   Register a payment
                 </p><p>
@@ -376,8 +376,8 @@
                 'default_move_journal_types': ('bank', 'cash'),
             }</field>
             <field name="view_id" ref="view_account_supplier_payment_tree"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                   Register a payment
                 </p><p>
@@ -393,8 +393,8 @@
             <field name="context">{'default_payment_type': 'outbound', 'search_default_transfers_filter': 1}</field>
             <field name="domain">[]</field>
             <field name="view_id" ref="view_account_supplier_payment_tree"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                   Register a payment
                 </p><p>

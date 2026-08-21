@@ -207,8 +207,8 @@
         <field name="res_model">fleet.vehicle.log.contract</field>
         <field name="view_mode">list,kanban,form,graph,pivot,activity</field>
         <field name="context">{'search_default_open': 1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create a new contract
           </p><p>
@@ -398,8 +398,8 @@
         <field name="res_model">fleet.vehicle.log.services</field>
         <field name="view_mode">list,kanban,form,graph,pivot,activity</field>
         <field name="context">{'search_default_groupby_service_type_id': 1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create a new service entry
           </p><p>

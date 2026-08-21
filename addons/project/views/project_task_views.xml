@@ -215,8 +215,8 @@
                 'display_milestone_deadline': True,
             }</field>
             <field name="search_view_id" ref="view_task_search_form"/>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -324,8 +324,8 @@
             <field name="search_view_id" ref="project.view_task_search_form"/>
             <field name="domain">[('id', 'child_of', active_id), ('id', '!=', active_id)]</field>
             <field name="context">{'show_project_update': False, 'default_parent_id': active_id}</field>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -957,8 +957,8 @@
             <field name="context">{'search_default_my_tasks': 1}</field>
             <field name="domain">[('project_id', '!=', False), ('has_template_ancestor', '=', False)]</field>
             <field name="search_view_id" ref="view_task_search_form"/>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -1069,8 +1069,8 @@
             }</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="domain">[('user_ids', 'in', uid), ('has_template_ancestor', '=', False), ('has_project_template', '=', False)]</field>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -1122,8 +1122,8 @@
             <field name="domain">[('has_template_ancestor', '=', False), ('has_project_template', '=', False)]</field>
             <field name="context">{'search_default_open_tasks': 1, 'default_user_ids': [(4, uid)]}</field>
             <field name="search_view_id" ref="view_task_search_form"/>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -1222,8 +1222,8 @@
             <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="domain">[('has_template_ancestor', '=', False), ('has_project_template', '=', False)]</field>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>
@@ -1283,8 +1283,8 @@
             <field name="context">{'default_milestone_id': active_id}</field>
             <field name="domain">[('milestone_id', '=', active_id)]</field>
             <field name="search_view_id" ref="view_task_search_form"/>
-            <field name="picto">EmptyPuzzle</field>
             <field name="help" type="html">
+                <picto name="empty_puzzle"/>
                 <p>
                     No tasks found. Let's create one!
                 </p>

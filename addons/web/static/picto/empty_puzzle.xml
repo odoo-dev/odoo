@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.EmptyPuzzle">
+    <t t-name="web.picto.empty_puzzle">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M61.4211 42.9615L56.8852 43.139M57.1599 54.54L53.0537 52.6047M49.3317 62.6329L47.4922 58.4829M38.6614 63.0002L39.1434 58.4865M29.266 58.7238L31.6278 54.8472" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M23.4145 49.8519L2.18237 44.1628L8.00419 22.4354M7.92591 22.7276L13.7477 1.00024L35.4751 6.82207L57.2024 12.6439L51.4439 34.1349" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

@@ -12,8 +12,8 @@
             "is_timesheet": 1,
         }</field>
         <field name="domain">[('reinvoice_move_id', '=', active_id), ('project_id', '!=', False)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No activities found
             </p>

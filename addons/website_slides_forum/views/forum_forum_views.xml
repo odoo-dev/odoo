@@ -44,8 +44,8 @@
         <field name="view_mode">list,form</field>
         <field name="domain">[('slide_channel_ids', '!=', False)]</field>
         <field name="view_id" ref="forum_forum_view_tree_slides"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Forum
             </p>

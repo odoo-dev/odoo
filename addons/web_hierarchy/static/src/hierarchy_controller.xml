@@ -28,7 +28,7 @@
                 </t>
                 <t t-set-slot="default" t-slot-scope="layout">
                 <t t-if="this.displayNoContent">
-					<ActionHelper noContentHelp="this.props.info.noContentHelp" picto="this.props.info.picto"/>
+					<ActionHelper noContentHelp="this.props.info.noContentHelp"/>
                 </t>
                     <t t-component="this.props.Renderer"
                         model="this.model"

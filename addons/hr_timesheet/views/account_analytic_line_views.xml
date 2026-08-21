@@ -507,8 +507,8 @@
                 'search_default_week':1,
                 'is_timesheet': 1,
             }</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No activities found. Let's start a new one!
               </p>
@@ -569,8 +569,8 @@
                 'default_employee_id': active_id,
                 "is_timesheet": 1,
             }</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Record a new activity
                 </p><p>

@@ -35,8 +35,8 @@
         <field name="res_model">forum.tag</field>
         <field name="path">forum-tags</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a new tag
             </p>

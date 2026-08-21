@@ -82,13 +82,15 @@ safe_attrs = defs.safe_attrs | frozenset(
      'data-language-id',
      'data-bs-toggle',  # support nav-tabs
      'data-icon',
+     'module',  # `<picto/>`, see SANITIZE_TAGS ('name' is already safe)
      ])
 
 defs.link_attrs |= {'xlink:href'}
 
 SANITIZE_TAGS = {
-    # allow new semantic HTML5 tags
-    'allow_tags': defs.tags | frozenset('article bdi section header footer hgroup nav aside figure main'.split() + [etree.Comment]),
+    # allow new semantic HTML5 tags, and `picto` (the pictogram DSL of the
+    # "no content" helpers, rendered client side by `web.ActionHelper`)
+    'allow_tags': defs.tags | frozenset('article bdi section header footer hgroup nav aside figure main picto'.split() + [etree.Comment]),
     'kill_tags': ['base', 'embed', 'frame', 'head', 'iframe', 'link', 'meta',
                   'noscript', 'object', 'script', 'style', 'title'],
     'remove_tags': ['html', 'body'],

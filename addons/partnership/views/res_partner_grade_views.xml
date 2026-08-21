@@ -27,8 +27,8 @@
         <field name="name">Levels</field>
         <field name="res_model">res.partner.grade</field>
         <field name="search_view_id" ref="res_partner_grade_view_search"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Partner Level
             </p><p>

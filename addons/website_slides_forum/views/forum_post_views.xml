@@ -7,8 +7,8 @@
         <field name="view_mode">list,graph,pivot,form</field>
         <field name="domain">[('forum_id.slide_channel_ids', '!=', False)]</field>
         <field name="context">{'search_default_questions': 1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Forum Post yet!
             </p>

@@ -53,8 +53,8 @@
         <field name="res_model">uom.uom</field>
         <field name="view_id" ref="uom_uom_view_list"/>
         <field name="search_view_id" ref="uom_uom_view_search"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Add a new unit of measure
           </p>

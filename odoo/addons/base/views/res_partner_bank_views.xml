@@ -95,8 +95,8 @@
             <field name="name">Bank Accounts</field>
             <field name="res_model">res.partner.bank</field>
             <field name="view_mode">list,form</field>
-            <field name="picto">Poof</field>
             <field name="help" type="html">
+                <picto name="poof"/>
                 <p>
                     Create a Bank Account
                 </p>

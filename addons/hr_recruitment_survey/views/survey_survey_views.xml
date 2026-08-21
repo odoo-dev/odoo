@@ -79,8 +79,8 @@
                 'default_survey_type': 'recruitment',
             }
         </field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new survey
             </p><p>

@@ -9,7 +9,7 @@
             t-ref="this.rootRef"
         >
             <t t-if="this.showNoContentHelper">
-                <ActionHelper noContentHelp="this.props.noContentHelp" picto="this.props.picto"/>
+                <ActionHelper noContentHelp="this.props.noContentHelp"/>
             </t>
 
             <t t-set="unGroupedStyleClasses" t-valuef="table-striped"/>

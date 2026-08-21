@@ -370,8 +370,8 @@
         <field name="res_model">payment.provider</field>
         <field name="path">payment-providers</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No providers available
             </p>

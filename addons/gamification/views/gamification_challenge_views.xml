@@ -149,8 +149,8 @@
         <field name="res_model">gamification.challenge</field>
         <field name="view_mode">kanban,list</field>
         <field name="context">{'search_default_inprogress':True, 'default_inprogress':True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a new challenge
             </p><p>

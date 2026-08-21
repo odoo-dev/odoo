@@ -106,8 +106,8 @@
     <record model="ir.actions.act_window" id="action_event_type">
         <field name="name">Event Templates</field>
         <field name="res_model">event.type</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create an Event Template
             </p><p>

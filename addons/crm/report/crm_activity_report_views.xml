@@ -96,8 +96,8 @@
                 'graph_groupbys': ['date:month', 'subtype_id'],
             }</field>
             <field name="domain">[]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Let's get to work!
                 </p><p>
@@ -112,8 +112,8 @@
             <field name="view_mode">graph,pivot,list</field>
             <field name="context">{'search_default_team_id': active_id}</field>
             <field name="domain">[]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Let's get to work!
                 </p><p>

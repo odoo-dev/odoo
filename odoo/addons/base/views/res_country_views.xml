@@ -73,8 +73,8 @@
     <record id="action_country" model="ir.actions.act_window">
         <field name="name">Countries</field>
         <field name="res_model">res.country</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No Country Found!
             </p><p>

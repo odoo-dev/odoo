@@ -18,8 +18,8 @@
                     'default_type': 'lead',
                 }
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a new lead
                 </p><p>
@@ -47,8 +47,8 @@
                     'show_lead_gen_button': True,
                 }
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a new lead
                 </p><p>

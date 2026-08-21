@@ -138,8 +138,8 @@
         <field name="res_model">product.supplierinfo</field>
         <field name="view_mode">list,form,kanban</field>
         <field name="context">{'visible_product_tmpl_id': False, 'search_default_active': True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No vendor pricelist found
             </p><p>

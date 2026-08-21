@@ -33,8 +33,8 @@
     <record id="event_sponsor_type_action" model="ir.actions.act_window">
         <field name="name">Sponsor Levels</field>
         <field name="res_model">event.sponsor.type</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Sponsor Level
             </p><p>

@@ -84,8 +84,8 @@
         <field name="res_model">payment.token</field>
         <field name="path">payment-tokens</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 There is no token created yet.
             </p>

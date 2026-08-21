@@ -91,8 +91,8 @@
         <field name="res_model">event.track.stage</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="view_id" ref="event_track_stage_view_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Add a new stage in the task pipeline
           </p><p>

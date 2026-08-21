@@ -247,8 +247,8 @@
             'search_default_todo': True,
             'default_user_ids': [uid],
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -270,8 +270,8 @@
             'search_default_cancelled': True,
             'default_category_id': active_id,
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -292,8 +292,8 @@
             'default_equipment_id': active_id,
         }</field>
         <field name="domain">[('equipment_id', '=', active_id)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -311,8 +311,8 @@
             'default_maintenance_team_id': active_id,
         }</field>
         <field name="domain">[('maintenance_team_id', '=', active_id), ('maintenance_type', 'in', context.get('maintenance_type', ['preventive', 'corrective']))]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -328,8 +328,8 @@
         <field name="view_mode">calendar,kanban,list,form,pivot,graph,activity</field>
         <field name="view_id" ref="hr_equipment_view_calendar"/>
         <field name="context">{'search_default_todo': True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -344,8 +344,8 @@
         <field name="path">maintenance-requests-analysis</field>
         <field name="view_mode">graph,pivot,kanban,list,form,calendar,activity</field>
         <field name="context">{'search_default_todo': True}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new maintenance request
             </p><p>
@@ -546,8 +546,8 @@
         <field name="path">equipments</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="view_id" ref="hr_equipment_view_kanban"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new equipment
             </p><p>
@@ -568,8 +568,8 @@
             'search_default_category_id': [active_id],
             'default_category_id': active_id,
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new equipment
             </p><p>
@@ -672,8 +672,8 @@
         <field name="path">equipement-categories</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="view_id" ref="hr_equipment_category_view_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new equipment category
             </p>
@@ -743,8 +743,8 @@
         <field name="res_model">maintenance.stage</field>
         <field name="path">maintenance-stages</field>
         <field name="view_mode">list,kanban,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Add a new stage in the maintenance request
           </p>
@@ -933,8 +933,8 @@
         <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'list', 'view_id': ref('maintenance_team_view_tree')}),
                 (0, 0, {'view_mode': 'kanban', 'view_id': ref('maintenance_team_view_kanban')})]"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Add a team in the maintenance request
           </p>
@@ -947,8 +947,8 @@
         <field name="res_model">maintenance.team</field>
         <field name="view_mode">kanban,form</field>
         <field name="view_id" ref="maintenance_team_kanban"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Add a new stage in the maintenance request
           </p>

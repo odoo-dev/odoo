@@ -193,8 +193,8 @@
         <field name="res_model">mail.group</field>
         <field name="path">mail-groups</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>Create a Mail Group</p>
             <p>Mailing groups are communities that like to discuss a specific topic together.</p>
         </field>

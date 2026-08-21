@@ -115,7 +115,6 @@ export const listRendererProps = {
     onOpenFormView: t.any().optional(),
     hasOpenFormViewButton: t.any().optional(),
     noContentHelp: t.any().optional(),
-    picto: t.or([t.string(), t.boolean()]).optional(),
     nestedKeyOptionalFieldsData: t.any().optional(),
     optionalActiveFields: t.any().optional(),
     readonly: t.any().optional(),

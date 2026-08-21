@@ -38,8 +38,8 @@
         <field name="name">GIB Tax Offices</field>
         <field name="res_model">l10n_tr.tax.office</field>
         <field name="view_id" ref="l10n_tr_tax_office_view_list"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Tax Office
             </p>

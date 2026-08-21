@@ -32,7 +32,7 @@
                     <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
                 </t>
                 <t t-if="this.model.isReady() and this.displayNoContent">
-                    <ActionHelper noContentHelp="this.props.info.noContentHelp" picto="this.props.info.picto"/>
+                    <ActionHelper noContentHelp="this.props.info.noContentHelp"/>
                 </t>
                 <t t-if="this.model.isReady()" t-component="this.props.Renderer" model="this.model" buttonTemplate="this.props.buttonTemplate"/>
             </Layout>

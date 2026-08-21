@@ -88,7 +88,6 @@
                     deleteRecord.bind="this.deleteRecord"
                     openRecord.bind="this.openRecord"
                     noContentHelp="this.props.info.noContentHelp"
-                    picto="this.props.info.picto"
                     scrollTop.bind="this.scrollTop"
                     canQuickCreate="this.canQuickCreate"
                     quickCreateState="this.quickCreateState"

@@ -58,8 +58,8 @@
         <field name="res_model">event.track.visitor</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'create': False}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
               No Track Visitors yet!
             </p><p>

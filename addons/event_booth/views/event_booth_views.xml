@@ -185,8 +185,8 @@
         <field name="view_mode">kanban,list,form,graph,pivot</field>
         <field name="domain">[]</field>
         <field name="context">{'search_default_group_by_state': 1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Booth
             </p><p>
@@ -201,8 +201,8 @@
         <field name="view_mode">kanban,list,form,graph,pivot</field>
         <field name="domain">[('event_id', '=', active_id)]</field>
         <field name="context">{'default_event_id': active_id, 'search_default_group_by_state': 1}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Booth
             </p><p>

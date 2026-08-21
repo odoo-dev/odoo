@@ -47,8 +47,8 @@
         <field name="name">Fed. States</field>
         <field name="res_model">res.country.state</field>
         <field name="view_id" ref="view_country_state_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a State
             </p><p>

@@ -487,8 +487,8 @@
         <field name="view_mode">calendar,list,form,activity</field>
         <field name="view_id" ref="view_calendar_event_calendar"/>
         <field name="search_view_id" ref="view_calendar_event_search"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             No meetings found. Let's schedule one!
           </p><p>

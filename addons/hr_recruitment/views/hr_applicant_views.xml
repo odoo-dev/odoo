@@ -658,8 +658,8 @@
             (0, 0, {'view_mode': 'graph', 'view_id': ref('hr_applicant_view_graph')}),
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('hr_applicant_view_pivot')})]"/>
         <field name="context">{'search_default_creation_month': 1, 'search_default_job': 2}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>
@@ -675,8 +675,8 @@
             'search_default_department_id': [active_id],
             'default_department_id': active_id}
         </field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>
@@ -693,8 +693,8 @@
             'search_default_job_id': [active_id],
             'default_job_id': active_id}
         </field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p>

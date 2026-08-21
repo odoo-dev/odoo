@@ -8,8 +8,8 @@
         <field name="domain">[('partner_id', 'child_of', active_ids)]</field>
         <field name="context">{'default_partner_id': active_id}</field>
         <field name="group_ids" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create a new quotation, the first step of a new sale!
             </p><p>

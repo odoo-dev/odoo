@@ -87,8 +87,8 @@
             <field name="view_mode">graph,pivot</field>
             <field name="search_view_id" ref="view_report_pos_order_search"/>
             <field name="context">{'group_by':[], 'search_default_not_cancelled': 1}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data yet!
                 </p><p>

@@ -35,8 +35,8 @@
         <field name="name">Printers</field>
         <field name="res_model">pos.printer</field>
         <field name="view_mode">list,kanban,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Add a new printer
             </p><p>

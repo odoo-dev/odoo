@@ -129,8 +129,8 @@
         <field name="search_view_id" ref="lunch_cashmove_report_view_search_2"/>
         <field name="context">{"search_default_group_by_user":1}</field>
         <field name="view_id" ref="lunch_cashmove_report_view_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create a new payment
           </p><p>

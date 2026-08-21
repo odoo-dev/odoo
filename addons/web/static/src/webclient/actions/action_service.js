@@ -761,7 +761,7 @@ export function makeActionManager(env, router = _router) {
             }
         }
 
-        const specialKeys = ["help", "useSampleModel", "limit", "count", "picto"];
+        const specialKeys = ["help", "useSampleModel", "limit", "count"];
         for (const key of specialKeys) {
             if (key in action) {
                 if (key === "help") {

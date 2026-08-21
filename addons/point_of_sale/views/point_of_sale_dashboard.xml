@@ -40,8 +40,8 @@
             'search_default_config_id': [active_id],
             'default_config_id': active_id}
         </field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p><p>

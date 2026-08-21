@@ -33,8 +33,8 @@
         <field name="name">Members</field>
         <field name="res_model">mail.group.member</field>
         <field name="view_mode">list</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>No Members in this list yet!</p>
             <p>Let people subscribe to your list online or manually add them here.</p>
         </field>

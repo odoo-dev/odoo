@@ -701,8 +701,8 @@
                 'search_default_department_id': [active_id],
                 'default_department_id': active_id}
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data yet!
                 </p>

@@ -229,8 +229,8 @@
         <field name="res_model">mailing.list</field>
         <field name="path">mailing-lists</field>
         <field name="view_mode">kanban,list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create a Mailing List
           </p><p>

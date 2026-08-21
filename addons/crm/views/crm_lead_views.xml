@@ -1024,8 +1024,8 @@
                     'search_default_to_process':1,
                 }
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a Lead
                 </p><p>
@@ -1079,8 +1079,8 @@
                 'search_default_assigned_to_me': 1,
             }
             </field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Looks like nothing is planned.
                 </p><p>
@@ -1207,8 +1207,8 @@
                 'forecast_field': 'date_deadline',
                 'crm_lead_prioritize_team_help': 1,
             }</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No opportunity to display!
                 </p><p>

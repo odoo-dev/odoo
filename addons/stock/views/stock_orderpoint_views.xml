@@ -198,8 +198,8 @@
         <field name="view_id" ref="view_warehouse_orderpoint_tree_editable_show_trigger"/>
         <field name="search_view_id" ref="warehouse_orderpoint_search"/>
         <field name="context">{'search_default_trigger': 'auto'}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             No reordering rule found
           </p><p>

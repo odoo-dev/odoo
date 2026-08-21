@@ -8,8 +8,8 @@
             <field name="res_model">gamification.karma.rank</field>
             <field name="path">ranks</field>
             <field name="view_mode">list,form</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a new rank
                 </p><p>

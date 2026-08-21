@@ -23,8 +23,8 @@
         <field name="view_mode">list,form,graph</field>
         <field name="domain">[('slide_category', '=', 'certification')]</field>
         <field name="context">{'default_slide_category': 'certification'}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a new certification
             </p>

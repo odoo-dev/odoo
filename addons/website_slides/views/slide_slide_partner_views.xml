@@ -65,8 +65,8 @@
         <field name="search_view_id" ref="website_slides.slide_slide_partner_view_search"/>
         <field name="context">{'default_slide_id': active_id}</field>
         <field name="domain">[('slide_id', '=', active_id)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 <strong>No Attendee Yet!</strong>
             </p>

@@ -252,8 +252,8 @@
                 'default_mailing_type': 'sms',
                 'mailing_sms': True
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+          <picto name="poof"/>
           <p>
             Create a SMS Marketing Mailing
           </p><p>

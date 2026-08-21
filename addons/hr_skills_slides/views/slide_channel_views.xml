@@ -27,8 +27,8 @@
         <field name="res_model">slide.channel</field>
         <field name="view_mode">list,kanban,form</field>
         <field name="view_id" ref="slide_channel_view_list"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 <strong>Create a course</strong>
             </p>

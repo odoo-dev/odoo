@@ -41,8 +41,8 @@
         <field name="name">Tags</field>
         <field name="res_model">crm.tag</field>
         <field name="view_id" ref="sales_team_crm_tag_view_tree"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create CRM Tags
             </p><p>

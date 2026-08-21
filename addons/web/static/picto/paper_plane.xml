@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <t t-name="web.picto.PaperPlane">
+    <t t-name="web.picto.paper_plane">
         <svg t-att-class="'o_picto ' + (class or '')"  viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M58.1138 1L14.3906 23.6027L26.1626 28.0317L34.4026 42.835L43.1087 34.4075L51.8147 37.683L58.1138 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M34.4028 42.835V30.623L48.9876 10.0806L26.1627 28.0317M34.4028 30.623L43.1088 33.8985" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>

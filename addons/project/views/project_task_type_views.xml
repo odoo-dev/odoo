@@ -125,8 +125,8 @@
             <field name="view_mode">list,kanban,form</field>
             <field name="domain">[('project_ids','=', project_id)]</field>
             <field name="view_id" ref="task_type_tree_inherited"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                 Create a new stage in the task pipeline
                 </p><p>

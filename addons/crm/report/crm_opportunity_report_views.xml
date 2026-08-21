@@ -191,8 +191,8 @@
                           (0, 0, {'view_mode': 'graph', 'view_id': ref('crm_opportunity_report_view_graph')}),
                           (0, 0, {'view_mode': 'pivot', 'view_id': ref('crm_opportunity_report_view_pivot')}),
                           (0, 0, {'view_mode': 'list', 'view_id': ref('crm_lead_view_tree_opportunity_reporting')})]"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data found!
                 </p><p>
@@ -218,8 +218,8 @@
                           (0, 0, {'view_mode': 'form', 'view_id': ref('crm_lead_view_form')}),
                           (0, 0, {'view_mode': 'list', 'view_id': ref('crm_lead_view_tree_reporting')}),
                          ]"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data found!
                 </p><p>

@@ -54,7 +54,6 @@ export const kanbanRendererProps = {
     readonly: t.any().optional(),
     forceGlobalClick: t.any().optional(),
     noContentHelp: t.any().optional(),
-    picto: t.or([t.string(), t.boolean()]).optional(),
     scrollTop: t.any().optional(() => () => {}),
     canQuickCreate: t.any().optional(),
     quickCreateState: t.any().optional(),

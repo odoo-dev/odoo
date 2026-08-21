@@ -7,8 +7,8 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="domain">['|', ('res_model', '=', False), ('res_model', '=', 'project.task')]</field>
         <field name="context">{'default_res_model': 'project.task'}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No activity types found. Let's create one!
             </p><p>

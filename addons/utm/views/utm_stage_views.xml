@@ -42,8 +42,8 @@
         <field name="name">UTM Stages</field>
         <field name="res_model">utm.stage</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create a stage for your campaigns
             </p><p>

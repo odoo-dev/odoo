@@ -28,8 +28,8 @@
         <field name="name">Recurring Plans</field>
         <field name="res_model">crm.recurring.plan</field>
         <field name="view_mode">list</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Recurring Plan
             </p>

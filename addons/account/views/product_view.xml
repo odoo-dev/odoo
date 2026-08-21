@@ -33,8 +33,8 @@
                 Command.create({'view_mode': 'form'}),
                 Command.create({'view_mode': 'activity'})]"/>
             <field name="context">{'search_default_filter_to_sell': 1}</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                   Create a new sellable product
                 </p>
@@ -51,8 +51,8 @@
                 Command.create({'view_mode': 'list', 'view_id': ref('account.product_template_list_view_purchasable_inherit')}),
                 Command.create({'view_mode': 'form'}),
                 Command.create({'view_mode': 'activity'})]"/>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                   Create a new purchasable product
                 </p>

@@ -153,8 +153,8 @@
         <field name="context">{
             'search_default_created_by_me': 1
         }</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Dynamic List
             </p>

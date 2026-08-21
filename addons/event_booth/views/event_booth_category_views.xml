@@ -52,8 +52,8 @@
         <field name="name">Booth Category</field>
         <field name="res_model">event.booth.category</field>
         <field name="view_mode">list,form</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Booth Category
             </p>

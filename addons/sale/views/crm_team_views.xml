@@ -15,8 +15,8 @@
         </field>
         <field name="domain">[]</field>
         <field name="search_view_id" ref="sale.sale_order_view_search_inherit_quotation"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create a new quotation, the first step of a new sale!
             </p><p>
@@ -49,8 +49,8 @@
                 'default_team_id': active_id,
             }
         </field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
             Create a new quotation, the first step of a new sale!
             </p><p>

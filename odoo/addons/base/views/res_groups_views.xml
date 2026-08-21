@@ -219,8 +219,8 @@
             <field name="name">Groups</field>
             <field name="res_model">res.groups</field>
             <field name="view_mode">list,kanban,form</field>
-            <field name="picto">Poof</field>
             <field name="help" type="html">
+                <picto name="poof"/>
                 <p>
                     No groups found. Let's create one!
                 </p>

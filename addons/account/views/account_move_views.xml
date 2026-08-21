@@ -2199,8 +2199,8 @@
             <field name="view_id" ref="view_move_line_payment_tree"/>
             <field name="search_view_id" ref="view_account_move_line_payment_filter"/>
             <field name="domain">[('parent_state', '=', 'posted'), ('date_maturity', '!=', False), ('amount_residual', '!=', 0), ('account_id.reconcile', '=', True)]</field>
-            <field name="picto">Poof</field>
             <field name="help" type="html">
+                <picto name="poof"/>
                 <p>
                     Amounts to settle
                 </p><p>

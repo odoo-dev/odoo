@@ -87,8 +87,8 @@
         <field name="path">ecommerce-categories</field>
         <field name="view_mode">list,form</field>
         <field name="view_id" eval="False"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Define a new category
             </p><p>

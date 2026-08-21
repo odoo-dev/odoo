@@ -4,8 +4,8 @@
          <field name="name">ICE Servers</field>
          <field name="res_model">mail.ice.server</field>
          <field name="view_mode">list,form,kanban</field>
-         <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>No ICE servers found. Let's create one!</p>
             <p>Use your own servers for calls to manage heavy traffic and ensure reliability if Twilio is unavailable.</p>
         </field>

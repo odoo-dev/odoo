@@ -99,8 +99,8 @@
             }
         </field>
         <field name="search_view_id" ref="account.view_account_invoice_filter"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a customer invoice
             </p><p>

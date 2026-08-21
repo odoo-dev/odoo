@@ -34,8 +34,8 @@
     <record id="action_country_group" model="ir.actions.act_window">
         <field name="name">Country Group</field>
         <field name="res_model">res.country.group</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Create a Country Group
             </p><p>

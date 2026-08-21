@@ -269,8 +269,8 @@
         <field name="res_model">pos.order</field>
         <field name="view_mode">graph,list,form,kanban,pivot</field>
         <field name="domain">[('state', 'not in', ['draft', 'cancel']), ('account_move', '=', False)]</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No data yet!
             </p><p>

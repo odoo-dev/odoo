@@ -30,8 +30,8 @@
             <field name="name">Content Tags</field>
             <field name="res_model">slide.tag</field>
             <field name="view_mode">list,form</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Create a Content Tag
                 </p>
@@ -346,8 +346,8 @@
             <field name="view_mode">kanban,list,form</field>
             <field name="context">{'search_default_own_publications':True}</field>
             <field name="domain">[('is_category', '=', False)]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     Add Content
                 </p>
@@ -364,8 +364,8 @@
             <field name="view_mode">graph,list,form,pivot</field>
             <field name="context">{"search_default_published": 1}</field>
             <field name="domain">[('is_category', '=', False)]</field>
-            <field name="picto">EmptyFolder</field>
             <field name="help" type="html">
+                <picto name="empty_folder"/>
                 <p>
                     No data yet!
                 </p><p>

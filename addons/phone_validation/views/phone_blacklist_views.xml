@@ -51,8 +51,8 @@
         <field name="res_model">phone.blacklist</field>
         <field name="view_id" ref="phone_blacklist_view_tree"/>
         <field name="search_view_id" ref="phone_blacklist_view_search"/>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 Add a phone number in the blacklist
             </p><p>

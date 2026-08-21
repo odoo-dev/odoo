@@ -99,8 +99,8 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('project_id', '=', active_id)]</field>
         <field name="context">{'default_project_id': active_id}</field>
-        <field name="picto">Poof</field>
         <field name="help" type="html">
+            <picto name="poof"/>
             <p>
                 No milestones found. Let's create one!
             </p>
