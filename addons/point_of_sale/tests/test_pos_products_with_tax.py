@@ -13,6 +13,7 @@ class TestPoSProductsWithTax(TestPoSCommon):
     """ Test normal configuration PoS selling products with tax
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move/rename to test_pos_products.py
 
     def setUp(self):
         super(TestPoSProductsWithTax, self).setUp()

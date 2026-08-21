@@ -7,6 +7,7 @@ from odoo.addons.point_of_sale.tests.common import CommonPosTest
 @tagged('post_install', '-at_install')
 class TestPosCashDifferenceTax(CommonPosTest):
 
+    # TODO-PARP: Can be removed
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

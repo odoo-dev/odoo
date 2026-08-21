@@ -14,6 +14,7 @@ class TestPointOfSaleFlow(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
 
+    # TODO-PARP: remove (no use)
     def setup_tags(self):
         tags = self.env['account.account.tag'].create([
             {

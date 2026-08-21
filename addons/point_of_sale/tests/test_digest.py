@@ -11,6 +11,7 @@ from odoo.tests import tagged
 class TestAccountDigest(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     @classmethod
     @mute_logger('odoo.models.unlink')

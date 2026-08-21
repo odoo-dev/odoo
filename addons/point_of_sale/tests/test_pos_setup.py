@@ -14,6 +14,7 @@ class TestPoSSetup(TestPoSCommon):
     If a test fails here, then it means there are inconsistencies in what we expect in the setup.
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     def setUp(self):
         super(TestPoSSetup, self).setUp()

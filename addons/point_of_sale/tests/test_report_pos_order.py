@@ -8,6 +8,7 @@ from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 class TestReportPoSOrder(TestPoSCommon):
 
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move/Rename to test_pos_report.py
 
     def setUp(self):
         super(TestReportPoSOrder, self).setUp()
