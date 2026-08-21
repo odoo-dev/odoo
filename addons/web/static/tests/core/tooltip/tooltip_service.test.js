@@ -191,7 +191,7 @@ test("tooltip with a template, no info", async () => {
         `;
     }
 
-    registerTemplate("my_tooltip_template", /* xml */ `<i t-out='env.tooltip_text'/>`);
+    registerTemplate("my_tooltip_template", /* xml */ `<i t-out='this.env.tooltip_text'/>`);
     assignTestEnv({ tooltip_text: "tooltip" });
     await mountWithCleanup(MyComponent);
 
@@ -224,8 +224,8 @@ test("tooltip with a template and info", async () => {
         "my_tooltip_template",
         /* xml */ `
             <ul>
-                <li>X: <t t-out="x"/></li>
-                <li>Y: <t t-out="y"/></li>
+                <li>X: <t t-out="this.x"/></li>
+                <li>Y: <t t-out="this.y"/></li>
             </ul>
         `
     );

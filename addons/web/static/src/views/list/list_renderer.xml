@@ -459,8 +459,8 @@
     </t>
 
     <t t-name="web.ListHeaderTooltip">
-        <t t-out="field.label"/>
-        <div t-if="field.help" class="mt-2" t-out="field.help"/>
+        <t t-out="this.field.label"/>
+        <div t-if="this.field.help" class="mt-2" t-out="this.field.help"/>
     </t>
 
 </templates>

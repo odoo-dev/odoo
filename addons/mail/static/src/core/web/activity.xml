@@ -68,12 +68,12 @@
 </t>
 
 <t t-name="mail.ActivityTooltip">
-    <span t-if="activity.activity_type_id">Activity type: <t t-out="activity.activity_type_id.name"/></span><br/>
-    <span>Created on: <t t-out="activity.dateCreateFormatted"/></span><br/>
-    <span>Created by: <t t-out="activity.create_uid_name"/></span><br/>
-    <t t-if="activity.user_id_name"><span>Assigned to: <t t-out="activity.user_id_name"/></span><br/></t>
-    <t t-elif="activity.role_id_name"><span>Role: <t t-out="activity.role_id_name"/></span><br/></t>
-    <span>Due on: <t t-out="activity.dateDeadlineFormatted"/></span>
+    <span t-if="this.activity.activity_type_id">Activity type: <t t-out="this.activity.activity_type_id.name"/></span><br/>
+    <span>Created on: <t t-out="this.activity.dateCreateFormatted"/></span><br/>
+    <span>Created by: <t t-out="this.activity.create_uid_name"/></span><br/>
+    <t t-if="this.activity.user_id_name"><span>Assigned to: <t t-out="this.activity.user_id_name"/></span><br/></t>
+    <t t-elif="this.activity.role_id_name"><span>Role: <t t-out="this.activity.role_id_name"/></span><br/></t>
+    <span>Due on: <t t-out="this.activity.dateDeadlineFormatted"/></span>
 </t>
 
 </templates>
