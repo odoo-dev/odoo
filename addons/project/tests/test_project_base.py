@@ -76,7 +76,14 @@ class TestProjectCommon(TransactionCase):
             'login': 'bastien',
             'email': 'bastien.projectmanager@example.com',
             'group_ids': [(6, 0, [user_group_employee.id, user_group_project_manager.id, user_group_partner_manager.id])]})
-
+        cls.user_portal_1 = Users.create({
+            'login': 'Lelitre',
+            'name': 'Valid Lelitre',
+            'email': 'valid.lelitre@agrolait.com',
+            'partner_id': cls.partner_1.id,
+            'signature': 'SignLelitre',
+            'notification_type': 'email',
+            'group_ids': [(6, 0, [cls.env.ref('base.group_public').id])]})
         # Test 'Pigs' project
         cls.project_pigs = cls.env['project.project'].with_context({'mail_create_nolog': True}).create({
             'name': 'Pigs',

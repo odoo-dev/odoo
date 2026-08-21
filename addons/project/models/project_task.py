@@ -1272,7 +1272,7 @@ class ProjectTask(models.Model):
                     advanced_collabs_count = self.env['project.collaborator'].sudo().search_count([
                         ('project_id', 'in', projects.ids),
                         ('partner_id', '=', self.env.user.partner_id.id),
-                        ('limited_access', '=', False),
+                        ('access_mode', '=', 'advanced_edit'),
                     ])
                     if advanced_collabs_count != len(projects):
                         raise AccessError(self.env._("You need Advanced Edit access to change the stage or priority of a task."))
@@ -2239,7 +2239,6 @@ class ProjectTask(models.Model):
 
     def project_sharing_toggle_is_follower(self):
         self.ensure_one()
-        self.check_access('write')
         is_follower = self.message_is_follower
         if is_follower:
             self.sudo().message_unsubscribe(self.env.user.partner_id.ids)

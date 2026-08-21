@@ -441,10 +441,31 @@ class TestAccessRightsInvitedUsers(TestAccessRights):
         cls.project_pigs.privacy_visibility = 'invited_users'
         cls.project_user = mail_new_test_user(cls.env, 'Project user', groups='project.group_project_user')
 
-    @users('admin')
-    def test_admin_access_invited_project(self):
-        self.assertFalse(self.project_pigs.collaborator_ids)
-        self.assertEqual(self.project_pigs.with_user(self.env.user).name, 'Pigs')
+    def test_customer_access_invited_project(self):
+        self.assertEqual(len(self.project_pigs.collaborator_ids), 1, "There should be exactly one collaborator auto-generated.")
+        collaborator = self.project_pigs.collaborator_ids
+
+        self.assertEqual(
+            collaborator.partner_id,
+            self.project_pigs.partner_id,
+            "The auto-generated collaborator should be the project's customer."
+        )
+        self.assertEqual(
+            collaborator.access_mode,
+            'view',
+            "The auto-generated collaborator should have 'view' access mode."
+        )
+        collab_user = self.project_pigs.partner_id.user_ids[0]
+        customer_project = self.project_pigs.with_user(collab_user)
+
+        self.assertEqual(
+            customer_project.name,
+            'Pigs',
+            "The customer should be able to read the project name with 'view' access."
+        )
+
+        with self.assertRaises(AccessError, msg="The collaborator only has 'view' access mode and should be blocked from writing."):
+            customer_project.write({'name': 'Hacked by Customer'})
 
     @users('Project user', 'Internal user', 'Portal user')
     def test_other_users_access_invited_project(self):
