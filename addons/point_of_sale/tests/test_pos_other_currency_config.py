@@ -9,6 +9,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
     """ Test PoS with basic configuration
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_pos_accounting.py
 
     def setUp(self):
         super(TestPoSOtherCurrencyConfig, self).setUp()

@@ -9,6 +9,7 @@ class TestPosMargin(TestPoSCommon):
     The tests contain the base scenarios.
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     def setUp(self):
         super(TestPosMargin, self).setUp()

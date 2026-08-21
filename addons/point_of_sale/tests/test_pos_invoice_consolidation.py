@@ -7,6 +7,7 @@ from odoo.tests.common import tagged
 class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move/rename to test_pos_products.py
 
     def setUp(cls):
         super().setUp()

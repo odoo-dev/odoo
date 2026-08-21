@@ -10,6 +10,7 @@ from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 class TestBackend(TestPoSCommon):
 
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     def test_onchange_payment_provider(self):
         pm = self.env['pos.payment.method'].create({'name': 'Test PM', 'type': 'bank'})
