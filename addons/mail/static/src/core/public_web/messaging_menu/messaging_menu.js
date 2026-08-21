@@ -19,10 +19,10 @@ export class MessagingMenu extends Component {
     isIosPwa = isIOS() && isDisplayStandalone();
     filteredMessages = computed(() => {
         const messages = this.activeTab().sortedMessages;
-        if (!this.state().selectedFilter?.includesMessage) {
+        if (!this.props.state().selectedFilter?.includesMessage) {
             return messages;
         }
-        return messages.filter((m) => this.state().selectedFilter?.includesMessage(m));
+        return messages.filter((m) => this.props.state().selectedFilter?.includesMessage(m));
     });
     messages = computed(() => {
         if (this.searchTerm()) {
@@ -40,7 +40,7 @@ export class MessagingMenu extends Component {
         this.messageSearch = useSearch({
             fetch: (term) =>
                 this.activeTab().loadMore({
-                    filter: this.state().selectedFilter,
+                    filter: this.props.state().selectedFilter,
                     searchTerm: term,
                 }),
             filter: (term) =>
@@ -55,21 +55,17 @@ export class MessagingMenu extends Component {
             deps: () => [this.filteredMessages()],
         });
         this.store = useService("mail.store");
-        this.state = useProps.static(
-            "state",
-            types.signal(types.instanceOf(this.store.MessagingMenuUIState))
-        );
-        this.activeTab = computed(() => this.state().activeTab);
-        this.close = useProps.static("close", types.function().optional());
-        this.searchInputAutofocus = useProps.static(
-            "searchInputAutofocus",
-            types.signal(types.number()).optional()
-        );
+        this.props = useProps({
+            close: types.function().optional().static(),
+            searchInputAutofocus: types.signal(types.number()).optional(),
+            state: types.signal(types.instanceOf(this.store.MessagingMenuUIState)),
+        });
+        this.activeTab = computed(() => this.props.state().activeTab);
         this.ui = useService("ui");
-        // Bound once so `onClickMessage` is a stable (useProps.static) handler.
+        // Bound once so `onClickMessage` is a stable (propStatic) handler.
         this.onClickMessage = this.onClickMessage.bind(this);
         useOnBottomScrolled(this.tabContentRef, () =>
-            this.activeTab().loadMore({ filter: this.state().selectedFilter })
+            this.activeTab().loadMore({ filter: this.props.state().selectedFilter })
         );
         // On search term change: update the search state.
         useEffect(() => {
@@ -96,7 +92,7 @@ export class MessagingMenu extends Component {
      */
     get showNotificationHubExtras() {
         const menu = this.store.messagingMenu;
-        return !this.searchTerm() && this.state().activeTab.eq(menu.odooBotNotificationsTab);
+        return !this.searchTerm() && this.props.state().activeTab.eq(menu.odooBotNotificationsTab);
     }
 
     get showPushPermissionRequest() {
@@ -115,7 +111,7 @@ export class MessagingMenu extends Component {
     onClickAction(action) {
         action.onClick();
         if (!action.preventDropdownClose) {
-            this.close?.();
+            this.props.close?.();
         }
     }
 
@@ -149,6 +145,6 @@ export class MessagingMenu extends Component {
                 }
                 throw error;
             });
-        this.close?.();
+        this.props.close?.();
     }
 }
