@@ -7,6 +7,7 @@ from odoo.tests import tagged
 class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     @classmethod
     def setUpClass(cls):

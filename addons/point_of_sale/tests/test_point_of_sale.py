@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestPointOfSale(TransactionCase):
+    # TODO-PARP: Move to test_point_of_sale_flow.py
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

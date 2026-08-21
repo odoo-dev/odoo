@@ -7,6 +7,7 @@ from odoo import tools
 
 @tagged('post_install', '-at_install')
 class TestUi(HttpCase):
+    # TODO-PARP: Move to test_frontend.py
 
 	# Avoid "A Chart of Accounts is not yet installed in your current company."
 	# Everything is set up correctly even without installed CoA

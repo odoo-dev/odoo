@@ -15,6 +15,7 @@ class TestConfigureShops(TestPoSCommon):
         pos_config_id field.
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     def _remove_on_payment_taxes(self):
         """ Call this when testing the res.config.settings with Form.

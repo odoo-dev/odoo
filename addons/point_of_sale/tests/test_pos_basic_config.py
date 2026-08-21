@@ -15,6 +15,7 @@ class TestPoSBasicConfig(TestPoSCommon):
     More specialized cases are tested in other tests.
     """
     _test_user_groups = None  # FIXME list needed groups
+    # TODO-PARP: Move to test_point_of_sale_flow.py
 
     def setUp(self):
         super(TestPoSBasicConfig, self).setUp()
