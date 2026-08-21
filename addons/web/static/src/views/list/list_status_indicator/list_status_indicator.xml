@@ -1,0 +1,7 @@
+<t t-name="web.ListView.StatusIndicator" t-inherit="web.FormStatusIndicator" t-inherit-mode="primary">
+    <xpath expr="//button[hasclass('o_form_button_cancel')]" position="attributes">
+        <attribute name="t-on-mousedown">this.props.onMouseDownDiscard</attribute>
+    </xpath>
+
+    <xpath expr="//span[hasclass('text-danger')]" position="replace" />
+</t>
