@@ -6,7 +6,7 @@ import logging
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import fields, models, api
+from odoo import _, fields, models, api
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import BinaryBytes
@@ -170,6 +170,25 @@ class IrProfile(models.Model):
         limit = self.env['ir.config_parameter'].sudo().get_str('base.profiling_enabled_until')
         return limit if str(fields.Datetime.now()) < limit else None
 
+    def _create_queries_records(self):
+        queries_generated = dict(self.env['ir.profile.query']._read_group(
+            domain=[('profile_id', 'in', self.filtered('sql_count').ids)],
+            groupby=['profile_id'],
+            aggregates=['__count'],
+        ))
+        vals_list = []
+        for profile in self:
+            if not queries_generated.get(profile):
+                blob = json.loads(profile.sql)
+                vals_list.extend({
+                    'profile_id': profile.id,
+                    'sequence': i,
+                    'query': query['query'],
+                    'full_query': query['full_query'],
+                    'time': query['time'],
+                } for i, query in enumerate(blob))
+        self.env['ir.profile.query'].create(vals_list)
+
     @api.model
     def set_profiling(self, profile=None, collectors=None, params=None):
         """
@@ -225,6 +244,16 @@ class IrProfile(models.Model):
             'type': 'ir.actions.act_url',
             'url': f'/web/profile_config/{ids}',
             'target': 'new',
+        }
+
+    def action_sql_queries(self):
+        self._create_queries_records()
+        return {
+            'name': _('Sql queries'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'ir.profile.query',
+            'view_mode': 'list,form',
+            'domain': [('profile_id', 'in', self.ids)]
         }
 
 class BaseEnableProfilingWizard(models.TransientModel):
