@@ -302,6 +302,16 @@ class TestRealCursor(BaseCase):
             self.assertEqual(cr.fetchone(), ('on',))
             self.assertTrue(cr._cnx.read_only)
 
+    def test_mogrify_keeps_pending_result(self):
+        """psycopg ClientCursor.mogrify() must not drop a pending result."""
+        with self.cursor() as cr:
+            cr.execute("SELECT 1")
+            cr.mogrify("SELECT %s", (2,))
+            self.assertEqual(cr.fetchall(), [(1,)])
+            with cr._enable_logging():
+                cr.execute("SELECT 1")
+                self.assertEqual(cr.fetchall(), [(1,)])
+
     def test_copy_logs_like_execute(self):
         with self.cursor() as cr:
             cr.execute("CREATE TEMP TABLE sql_copy_log (id integer, name text)")

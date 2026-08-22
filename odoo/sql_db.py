@@ -422,7 +422,8 @@ class Cursor(_CursorProtocol):
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
-        return self._obj.mogrify(query, params)
+        # Separate ClientCursor: Cursor.mogrify() replaces _tx (result loaders).
+        return psycopg.ClientCursor(self._cnx).mogrify(query, params)
 
     def _normalize_query(self, query, params=None):
         if isinstance(query, SQL):
