@@ -1212,6 +1212,81 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
         self.assertEqual(len(new_invoice.invoice_line_ids), 1, "Only the refunded line should be invoiced again")
         self.assertEqual(new_invoice.invoice_line_ids.sale_line_ids, so_line1, "The invoiced line should be the refunded line")
 
+    def test_timesheet_not_freed_by_unrelated_credit_note_reconciliation(self):
+        """An invoice whose balance is cleared by a credit note that reverses a *different*
+        invoice must not have its timesheets treated as re-invoiceable, even though this makes
+        `payment_state` become 'reversed' on it (accounting-wise, that flag only means "settled
+        by a credit note", not "this invoice was itself reversed")."""
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
+        })
+        so_line = self.env['sale.order.line'].create({
+            'product_id': self.product_delivery_timesheet2.id,
+            'product_uom_qty': 1,
+            'order_id': sale_order.id,
+        })
+        sale_order.action_confirm()
+        task = so_line.task_id
+        timesheet_a = self.env['account.analytic.line'].create({
+            'name': 'Timesheet A',
+            'project_id': task.project_id.id,
+            'task_id': task.id,
+            'unit_amount': 5,
+            'employee_id': self.employee_user.id,
+        })
+
+        invoice_a = sale_order._create_invoices()[0]
+        invoice_a.action_post()
+        self.assertEqual(timesheet_a.timesheet_invoice_id, invoice_a)
+
+        # The customer already paid invoice A in full, so its receivable line is reconciled
+        # with the payment (not with the credit note created below).
+        self._register_payment(invoice_a)
+        self.assertEqual(invoice_a.payment_state, 'paid')
+
+        # Fully credit invoice A: this properly reverses A, so its timesheet is freed...
+        reversal_wizard = self.env['account.move.reversal'].with_context(
+            active_model='account.move',
+            active_ids=invoice_a.ids,
+        ).create({
+            'reason': 'full refund',
+            'journal_id': invoice_a.journal_id.id,
+        })
+        credit_note_a = self.env['account.move'].browse(reversal_wizard.refund_moves()['res_id'])
+        credit_note_a.action_post()
+        self.assertFalse(timesheet_a.timesheet_invoice_id, "Timesheet A should be freed by the reversal of invoice A")
+
+        # ... which lets it be picked up again when reissuing invoice B.
+        invoice_b = sale_order._create_invoices()[0]
+        invoice_b.action_post()
+        self.assertEqual(timesheet_a.timesheet_invoice_id, invoice_b, "Timesheet A should now be linked to invoice B")
+
+        # Settle invoice B against the credit note of A (netting, no reversal of B itself).
+        (invoice_b + credit_note_a).line_ids.filtered(
+            lambda line: line.account_type == 'asset_receivable'
+        ).reconcile()
+        self.assertEqual(invoice_b.payment_state, 'reversed',
+            "Invoice B is fully settled by a credit note, so payment_state becomes 'reversed' "
+            "even though B itself was never reversed")
+
+        # New timesheet for further work; invoicing it must not steal timesheet A from invoice B.
+        timesheet_b = self.env['account.analytic.line'].create({
+            'name': 'Timesheet B',
+            'project_id': task.project_id.id,
+            'task_id': task.id,
+            'unit_amount': 3,
+            'employee_id': self.employee_user.id,
+        })
+        invoice_c = sale_order._create_invoices()[0]
+        invoice_c.action_post()
+
+        self.assertEqual(timesheet_a.timesheet_invoice_id, invoice_b,
+            "Timesheet A must stay linked to invoice B, which was never reversed")
+        self.assertEqual(timesheet_b.timesheet_invoice_id, invoice_c,
+            "Timesheet B (the new work) should be linked to invoice C")
+
     def test_invoice_with_already_invoiced_timesheets(self):
         """Checks that when an invoice is created, the hours that have already been invoiced aren't taken into
         account."""
