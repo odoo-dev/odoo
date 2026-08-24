@@ -761,15 +761,20 @@ export function makeActionManager(env, router = _router) {
             }
         }
 
-        const specialKeys = ["help", "useSampleModel", "limit", "count"];
+        const specialKeys = ["useSampleModel", "limit", "count"];
         for (const key of specialKeys) {
             if (key in action) {
-                if (key === "help") {
-                    viewProps.noContentHelp = action.help;
-                } else {
-                    viewProps[key] = action[key];
-                }
+                viewProps[key] = action[key];
             }
+        }
+        // `help` is removed from the action when empty (see `_preprocessAction`),
+        // so `noContentHelp` stays undefined when there is nothing to display:
+        // this is what tells the views whether they have a helper at all
+        if (action.help || action.nocontent_picto_url) {
+            viewProps.noContentHelp = {
+                pictoUrl: action.nocontent_picto_url || undefined,
+                help: action.help,
+            };
         }
 
         if (context.search_disable_custom_filters) {

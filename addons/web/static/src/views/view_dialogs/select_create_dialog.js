@@ -1,6 +1,7 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { renderToMarkup } from "@web/core/utils/render";
+import { noContentHelpType } from "@web/views/action_helper";
 import { View } from "@web/views/view";
 
 import { FormViewDialog } from "./form_view_dialog";
@@ -29,7 +30,7 @@ export const selectCreateDialogProps = {
     title: t.string().optional(),
     noCreate: t.boolean().optional(),
     onUnselect: t.function().optional(),
-    noContentHelp: t.string().optional(), // Markup
+    noContentHelp: noContentHelpType.optional(),
 };
 
 export class SelectCreateDialog extends Component {
@@ -42,7 +43,7 @@ export class SelectCreateDialog extends Component {
         this.dialogService = useService("dialog");
         this.uiService = useService("ui");
         this.state = proxy({ resIds: [] });
-        const noContentHelp = this.props.noContentHelp || getDefaultNoContentHelp();
+        const noContentHelp = this.props.noContentHelp || { help: getDefaultNoContentHelp() };
         this.busy = false; // flag used to ensure we only call once the onSelected/onUnselect props
         this.baseViewProps = {
             display: { searchPanel: false, controlPanel: { buttons: false } },

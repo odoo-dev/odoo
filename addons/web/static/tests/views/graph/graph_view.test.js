@@ -1236,9 +1236,11 @@ test("no content helper", async () => {
     await mountView({
         type: "graph",
         resModel: "foo",
-        noContentHelp: /* xml */ `
+        noContentHelp: {
+            help: /* xml */ `
             <p class="abc">This helper should not be displayed in graph views</p>
         `,
+        },
     });
 
     expect(".o_graph_canvas_container canvas").toHaveCount(1);
@@ -1250,9 +1252,11 @@ test("no content helper after update", async () => {
     await mountView({
         type: "graph",
         resModel: "foo",
-        noContentHelp: /* xml */ `
+        noContentHelp: {
+            help: /* xml */ `
             <p class="abc">This helper should not be displayed in graph views</p>
         `,
+        },
         config: {
             views: [[false, "search"]],
         },
@@ -1276,9 +1280,11 @@ test("display the provided no content helper when search has no matching data", 
     await mountView({
         type: "graph",
         resModel: "foo",
-        noContentHelp: /* xml */ `
+        noContentHelp: {
+            help: /* xml */ `
             <p class="abc">This helper should be displayed</p>
         `,
+        },
     });
 
     expect(".o_graph_canvas_container canvas").toHaveCount(1);
@@ -2363,7 +2369,7 @@ test("empty graph view with sample data", async () => {
                 <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]" />
             </search>
         `,
-        noContentHelp: /* xml */ `<p class="abc">click to add a foo</p>`,
+        noContentHelp: { help: /* xml */ `<p class="abc">click to add a foo</p>` },
     });
 
     expect(".o_graph_view .o_content").toHaveClass("o_view_sample_data");
@@ -2393,7 +2399,7 @@ test("non empty graph view with sample data", async () => {
                 <filter name="false_domain" string="False Domain" domain="[(0, '=', 1)]" />
             </search>
         `,
-        noContentHelp: /* xml */ `<p class="abc">click to add a foo</p>`,
+        noContentHelp: { help: /* xml */ `<p class="abc">click to add a foo</p>` },
     });
 
     expect(".o_content").not.toHaveClass("o_view_sample_data");
@@ -2418,7 +2424,7 @@ test("empty graph view without sample data after filter", async () => {
             </graph>
         `,
         domain: Domain.FALSE.toList(),
-        noContentHelp: /* xml */ `<p class="abc">click to add a foo</p>`,
+        noContentHelp: { help: /* xml */ `<p class="abc">click to add a foo</p>` },
     });
 
     expect(".o_graph_canvas_container canvas").toHaveCount(0);

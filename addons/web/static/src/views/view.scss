@@ -50,6 +50,16 @@
     }
 }
 
+// Very low selector specificity: applies to the inlined pictogram of a helper,
+// as well as to the plain <img> the pictograms are still referenced by outside
+// of the action helpers
+:where(.o_view_nocontent .o_picto),
+:where(.o_view_nocontent img[src^="/web/static/picto/"]) {
+    opacity: 0.7;
+    width: 120px;
+    margin-bottom: 1.4rem;
+}
+
 // Naive heuristic to leave enough space for the nocontent helper in dialogs
 .o_dialog {
     .o_content:has(.o_view_nocontent) {

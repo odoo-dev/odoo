@@ -236,6 +236,7 @@
                                 </group>
                             </group>
                             <group name="help" string="Help">
+                                <field name="nocontent_picto_url" placeholder="/web/static/picto/empty_folder.svg"/>
                                 <field colspan="2" name="help" options="{'codeview': true}" nolabel="1" class="oe-bordered-editor"/>
                             </group>
                             <group name="views_tree" string="Views">

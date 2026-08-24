@@ -836,7 +836,7 @@ test("SelectCreateDialog empty list, noContentHelp props", async () => {
         `;
     getService("dialog").add(SelectCreateDialog, {
         resModel: "partner",
-        noContentHelp: renderToMarkup(template),
+        noContentHelp: { help: renderToMarkup(template) },
     });
     await animationFrame();
 
@@ -925,7 +925,7 @@ test("SelectCreateDialog empty kanban, noContentHelp props", async () => {
         `;
     getService("dialog").add(SelectCreateDialog, {
         resModel: "partner",
-        noContentHelp: renderToMarkup(template),
+        noContentHelp: { help: renderToMarkup(template) },
     });
     await animationFrame();
 

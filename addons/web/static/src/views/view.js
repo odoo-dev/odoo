@@ -64,7 +64,7 @@ import { session } from "@web/session";
  * @property {OrderTerm[]} [orderBy]
  *
  * @property {boolean} [useSampleModel]
- * @property {string} [noContentHelp]
+ * @property {{pictoUrl?: string, help?: string}} [noContentHelp]
  *
  * @property {Record<string, any>} [display={}] to rework
  *

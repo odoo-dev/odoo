@@ -2755,7 +2755,7 @@ test("remove nocontent helper after adding a record", async () => {
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, { message: "there should be a nocontent helper" });
@@ -2796,7 +2796,7 @@ test("remove nocontent helper when adding a record", async () => {
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, { message: "there should be a nocontent helper" });
@@ -2836,7 +2836,7 @@ test("nocontent helper is displayed again after canceling quick create", async (
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     await quickCreateKanbanRecord();
@@ -2872,7 +2872,7 @@ test("empty grouped kanban with sample data and click quick create", async () =>
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(2, { message: "there should be two columns" });
@@ -2923,7 +2923,7 @@ test("empty grouped kanban with sample data and cancel quick create", async () =
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
     expect(".o_kanban_group").toHaveCount(2, { message: "there should be two columns" });
     expect(".o_content").toHaveClass("o_view_sample_data");
@@ -2970,7 +2970,7 @@ test("quick create record in grouped kanban with sample data", async () => {
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(2, { message: "there should be two columns" });

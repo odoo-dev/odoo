@@ -2943,7 +2943,7 @@ test(`list view with multiple groupbys`, async () => {
         type: "list",
         arch: `<list><field name="foo"/><field name="bar"/></list>`,
         groupBy: ["bar", "foo"],
-        noContentHelp: "<p>should not be displayed</p>",
+        noContentHelp: { help: "<p>should not be displayed</p>" },
     });
     expect(`.o_view_nocontent`).toHaveCount(0);
     expect(`.o_group_has_content`).toHaveCount(2);
@@ -7835,7 +7835,7 @@ test(`bounce create button when no data and click on empty area`, async () => {
         resModel: "foo",
         type: "list",
         arch: `<list><field name="foo"/></list>`,
-        noContentHelp: "click to add a record",
+        noContentHelp: { help: "click to add a record" },
         searchViewArch: `
             <search>
                 <filter name="Empty List" domain="[('id', '&lt;', 0)]"/>
@@ -7863,7 +7863,7 @@ test(`no content helper when no data`, async () => {
         resModel: "foo",
         type: "list",
         arch: `<list><field name="foo"/></list>`,
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
     });
     expect(`.o_view_nocontent`).toHaveCount(1, { message: "should display the no content helper" });
     expect(`.o_list_view table`).toHaveCount(1, { message: "should have a table in the dom" });
@@ -7907,7 +7907,7 @@ test(`empty list with sample data`, async () => {
             </list>
         `,
         context: { search_default_empty: true },
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
         searchViewArch: `
             <search>
                 <filter name="empty" domain="[('id', '&lt;', 0)]"/>
@@ -8183,7 +8183,7 @@ test(`non empty editable list with sample data: delete all records`, async () =>
             </list>
         `,
         domain: Domain.TRUE.toList(),
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
         actionMenus: {},
     });
 
@@ -8218,7 +8218,7 @@ test(`empty editable list with sample data: start create record and cancel`, asy
             </list>
         `,
         domain: Domain.FALSE.toList(),
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
     });
 
     // Initial state: sample data and nocontent helper displayed
@@ -8254,7 +8254,7 @@ test(`empty editable list with sample data: create and delete record`, async () 
             </list>
         `,
         domain: Domain.FALSE.toList(),
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
         actionMenus: {},
     });
 
@@ -8301,7 +8301,7 @@ test(`empty editable list with sample data: create and duplicate record`, async 
             </list>
         `,
         domain: [["int_field", "=", 0]],
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
         actionMenus: {},
     });
 
@@ -8760,7 +8760,7 @@ test(`list view, editable, without data`, async () => {
                 <button type="object" icon="add_box" icon_class="oi-filled" name="method"/>
             </list>
         `,
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
     });
 
     expect(`.o_view_nocontent`).toHaveCount(1, {
@@ -19353,7 +19353,7 @@ test(`hide pager in the list view with sample data`, async () => {
                 <field name="int_field"/>
             </list>
         `,
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
     });
 
     expect(".o_content").toHaveClass("o_view_sample_data");
@@ -19514,7 +19514,7 @@ test(`cell-level keyboard navigation in multiple grouped list`, async () => {
             </list>
         `,
         groupBy: ["bar", "foo"],
-        noContentHelp: "<p>should not be displayed</p>",
+        noContentHelp: { help: "<p>should not be displayed</p>" },
     });
 
     expect(`.o_data_row`).toHaveCount(0);

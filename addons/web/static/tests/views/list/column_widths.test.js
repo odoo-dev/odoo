@@ -1152,7 +1152,7 @@ test(`freeze widths: add a record in empty list`, async () => {
                 <field name="text"/>
             </list>
         `,
-        noContentHelp: '<p class="hello">click to add a foo</p>',
+        noContentHelp: { help: '<p class="hello">click to add a foo</p>' },
     });
     expect(`.o_view_nocontent`).toHaveCount(1, { message: "should have no content help" });
     const initialWidths = getColumnWidths();
@@ -1182,7 +1182,7 @@ test(`freeze widths: add a record in empty list with handle widget`, async () =>
                 <field name="foo"/>
             </list>
         `,
-        noContentHelp: '<p class="hello">click to add a foo</p>',
+        noContentHelp: { help: '<p class="hello">click to add a foo</p>' },
     });
     expect(`.o_view_nocontent`).toHaveCount(1, { message: "should have no content help" });
     const initialWidths = getColumnWidths();

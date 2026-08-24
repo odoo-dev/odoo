@@ -3344,7 +3344,7 @@ test("nocontent helper after adding a record (kanban with progressbar)", async (
             </kanban>`,
         groupBy: ["product_id"],
         domain: [["foo", "=", "abcd"]],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, { message: "the nocontent helper is displayed" });
@@ -3425,7 +3425,7 @@ test("no content helper when no data", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: '<p class="hello">click to add a partner</p>',
+        noContentHelp: { help: '<p class="hello">click to add a partner</p>' },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, { message: "should display the no content helper" });
@@ -3468,7 +3468,7 @@ test("no nocontent helper for grouped kanban with empty groups", async () => {
                 </templates>
             </kanban>`,
         groupBy: ["product_id"],
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(2, { message: "there should be two columns" });
@@ -3489,7 +3489,7 @@ test("stages nocontent helper for grouped kanban with no records", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(0, { message: "there should be no columns" });
@@ -3512,7 +3512,7 @@ test("basic nocontent helper is shown when no longer creating column", async () 
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent.o_kanban_group_nocontent").toHaveCount(1, {
@@ -3559,7 +3559,7 @@ test("no nocontent helper is hidden when quick creating a column", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent").toHaveCount(1, { message: "there should be a nocontent helper" });
@@ -3585,7 +3585,7 @@ test("nocontent helper for grouped kanban (on m2o field) with no records with no
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(0, { message: "there should be no columns" });
@@ -3612,7 +3612,7 @@ test("nocontent helper for grouped kanban (on date field) with no records with n
                     </t>
                 </templates>
             </kanban>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group").toHaveCount(0);
@@ -3636,7 +3636,7 @@ test("empty grouped kanban with sample data and no columns", async () => {
             </kanban>`,
         resModel: "partner",
         type: "kanban",
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_group_nocontent").toHaveCount(1);
@@ -3677,7 +3677,7 @@ test("empty kanban with sample data grouped by date range (fill temporal)", asyn
         groupBy: ["date:month"],
         resModel: "partner",
         type: "kanban",
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_view_nocontent").toHaveCount(1);
@@ -3737,7 +3737,7 @@ test("empty kanban with sample data", async () => {
             <search>
                 <filter name="no_match" string="Match nothing" domain="[['id', '=', 0]]"/>
             </search>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_content").toHaveClass("o_view_sample_data");
@@ -3865,7 +3865,7 @@ test("non empty kanban with sample data", async () => {
             <search>
                 <filter name="no_match" string="Match nothing" domain="[['id', '=', 0]]"/>
             </search>`,
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_content").not.toHaveClass("o_view_sample_data");
@@ -4197,7 +4197,7 @@ test("bounce create button when no data and click on empty area", async () => {
             <search>
                 <filter name="no_match" string="Match nothing" domain="[['id', '=', 0]]"/>
             </search>`,
-        noContentHelp: "click to add a partner",
+        noContentHelp: { help: "click to add a partner" },
     });
 
     await contains(".o_kanban_view").click();
@@ -6551,7 +6551,7 @@ test("sample server: _mockWebReadGroup API", async () => {
         groupBy: ["date:month"],
         resModel: "partner",
         type: "kanban",
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_kanban_view .o_view_sample_data").toHaveCount(1);
@@ -7587,7 +7587,7 @@ test("hide pager in the kanban view with sample data", async () => {
             </kanban>`,
         resModel: "partner",
         type: "kanban",
-        noContentHelp: "No content helper",
+        noContentHelp: { help: "No content helper" },
     });
 
     expect(".o_content").toHaveClass("o_view_sample_data");

@@ -916,14 +916,14 @@ test("non empty prop 'noContentHelp'", async function () {
         props = useProps();
         static template = xml`<div/>`;
         setup() {
-            expect(this.props.info.noContentHelp).toBe("<div>Help</div>");
+            expect(this.props.info.noContentHelp.help).toBe("<div>Help</div>");
         }
     }
     viewRegistry.add("toy", { type: "toy", Controller: ToyController }, { force: true });
     const props = {
         resModel: "animal",
         type: "toy",
-        noContentHelp: "<div>Help</div>",
+        noContentHelp: { help: "<div>Help</div>" },
     };
     await mountWithCleanup(View, { props });
 });
