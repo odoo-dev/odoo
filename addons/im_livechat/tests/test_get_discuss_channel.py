@@ -4,7 +4,8 @@ from datetime import timedelta
 from freezegun import freeze_time
 from unittest.mock import patch, PropertyMock
 
-from odoo import fields
+from odoo import Command, fields
+from odoo.addons.im_livechat.models.discuss_channel_member import VISITOR_PINNED_SESSION_TARGET
 from odoo.addons.im_livechat.tests.common import TestImLivechatCommon
 from odoo.addons.mail.tests.common import MailCommon
 from odoo.tests import new_test_user
@@ -426,6 +427,37 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             member_of_operator._gc_unpin_livechat_sessions()
         self.assertTrue(member_of_operator.is_pinned, "unread channel should not be unpinned after autovacuum")
         self.assertFalse(member_of_operator.channel_id.livechat_end_dt)
+
+    def test_visitor_sessions_unpinned_after_limit(self):
+        guest = self.env["mail.guest"].create({"name": "Batman"})
+        now = fields.Datetime.now()
+        channels = self.env["discuss.channel"].create([
+            {
+                "channel_type": "livechat",
+                "last_interest_dt": now - timedelta(minutes=index),
+                "livechat_channel_id": self.livechat_channel.id,
+                "name": f"Livechat Session {index}",
+                "channel_member_ids": [Command.create({
+                    "guest_id": guest.id,
+                    "livechat_member_type": "visitor",
+                })],
+            }
+            for index in range(VISITOR_PINNED_SESSION_TARGET + 2)
+        ])
+        unread_channel = channels[-1]
+        unread_channel.message_post(body="Unread message", message_type="comment")
+        unread_channel.last_interest_dt = now - timedelta(days=1)
+        active_channel = channels[-2]
+        (channels - active_channel).livechat_end_dt = now
+        visitor_members = channels.livechat_customer_history_ids.member_id
+        active_member = active_channel.channel_member_ids & visitor_members
+        unread_member = unread_channel.channel_member_ids & visitor_members
+        self.assertNotEqual(unread_member.message_unread_counter, 0)
+        with freeze_time(fields.Datetime.to_string(now + timedelta(seconds=1))):
+            visitor_members._gc_unpin_livechat_sessions()
+        self.assertTrue(active_member.is_pinned)
+        self.assertTrue(unread_member.is_pinned)
+        self.assertEqual(len(visitor_members.filtered("is_pinned")),VISITOR_PINNED_SESSION_TARGET)
 
     def test_livechat_manager_can_invite_anyone(self):
         channel = self.env["discuss.channel"].create(

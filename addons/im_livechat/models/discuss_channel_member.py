@@ -1,10 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime, timedelta
-
-from odoo import api, models, fields
+from odoo import api, fields, models
 from odoo.fields import Domain
 from odoo.addons.mail.tools.discuss import Store
+
+# Keep up to this many pinned sessions per visitor.
+# Active and unread sessions stay pinned even when this target is exceeded.
+VISITOR_PINNED_SESSION_TARGET = 25
 
 
 class DiscussChannelMember(models.Model):
@@ -147,18 +149,39 @@ class DiscussChannelMember(models.Model):
 
     @api.autovacuum
     def _gc_unpin_livechat_sessions(self):
-        """ Unpin read livechat sessions with no activity for at least one day to
-            clean the operator's interface """
-        members = self.env['discuss.channel.member'].search([
-            ('is_pinned', '=', True),
-            ('last_seen_dt', '<=', datetime.now() - timedelta(days=1)),
-            ('channel_id.channel_type', '=', 'livechat'),
+        """Unpin outdated livechat sessions from agents' and visitors' interfaces.
+        Read agent sessions expire after one day. Visitors keep their 25 most
+        recent sessions, while ongoing or unread sessions are always protected.
+        """
+        now = fields.Datetime.now()
+        agent_sessions_to_unpin = self.env["discuss.channel.member"].search([
+            ("is_pinned", "=", True),
+            ("channel_id.channel_type", "=", "livechat"),
+            ("livechat_member_type", "=", "agent"),
+            ("last_seen_dt", "<=", "now -1d"),
+            ("is_unread", "=", False),
         ])
-        sessions_to_be_unpinned = members.filtered(lambda m: m.message_unread_counter == 0)
-        sessions_to_be_unpinned.channel_id.livechat_end_dt = fields.Datetime.now()
-        for member, store in sessions_to_be_unpinned._get_member_store_list():
+        visitor_members = self.env["discuss.channel.member"].search([
+            ("is_pinned", "=", True),
+            ("channel_id.channel_type", "=", "livechat"),
+            ("livechat_member_type", "=", "visitor"),
+        ]).sorted(
+            lambda member: (member.channel_id.last_interest_dt, member.channel_id.id, member.id),
+            reverse=True,
+        )
+        visitor_sessions_to_unpin = self.env["discuss.channel.member"]
+        for persona_members in visitor_members.grouped(lambda member: member.partner_id or member.guest_id).values():
+            sessions_over_limit_count = (len(persona_members) - VISITOR_PINNED_SESSION_TARGET)
+            if sessions_over_limit_count <= 0:
+                continue
+            visitor_sessions_to_unpin += persona_members.filtered(
+                lambda m: m.channel_id.livechat_end_dt and not m.is_unread,
+            )[-sessions_over_limit_count:]
+        sessions_to_unpin = agent_sessions_to_unpin + visitor_sessions_to_unpin
+        agent_sessions_to_unpin.channel_id.filtered(lambda channel: not channel.livechat_end_dt).livechat_end_dt = now
+        for member, store in sessions_to_unpin._get_member_store_list():
             store.add(member.channel_id, {"close_chat_window": True})
-        sessions_to_be_unpinned.unpin_dt = fields.Datetime.now()
+        sessions_to_unpin.unpin_dt = now
 
     def _store_member_fields(self, res: Store.FieldList):
         super()._store_member_fields(res)
