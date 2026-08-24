@@ -9,7 +9,6 @@ export class ForecastedDetails extends Component {
         docs: Object,
         openView: Function,
         reloadReport: Function,
-        warehouses: Array,
     };
 
     setup() {
@@ -311,7 +310,7 @@ export class ForecastedDetails extends Component {
 
     get warehouseMap() {
         return Object.fromEntries(
-            this.props.warehouses.map((warehouse) => [warehouse.id, warehouse])
+            this.props.docs.warehouses.map((warehouse) => [warehouse.id, warehouse])
         );
     }
 }
