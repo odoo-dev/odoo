@@ -7,10 +7,11 @@
     }
 
     .oi-lg {
-        font-size: 1.75em;
-        margin-top: -2.5px;
-        max-width: 20px;
-        max-height: 20px;
+        width: $font-size-base * 1.36;
+        height: $font-size-base * 1.36;
+        font-size: 1.36em;
+        margin-top: -0.5px;
+        text-align: center;
     }
 
     .o_status_blocked {
@@ -20,21 +21,15 @@
 
 .event_state_selection_menu {
     .oi {
-        margin-top: -1.5px;
-        font-size: 1.315em;
-        vertical-align: -6%;
-        transform: translateX(-50%);
-    }
-
-    .o_status {
         margin-top: 1px;
         width: 14.65px;
         height: 14.65px;
+        font-size: 1em;
         text-align: center;
+        transform: translateX(-50%);
     }
 
     .o_status_blocked {
         color: $warning;
     }
 }
-
