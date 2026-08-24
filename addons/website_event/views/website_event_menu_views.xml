@@ -50,7 +50,8 @@
         <field name="view_mode">list,form</field>
         <field name="context">{'create': False}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No Website Menu Items yet!
             </p><p>
                 This technical menu displays all event sub-menu items.

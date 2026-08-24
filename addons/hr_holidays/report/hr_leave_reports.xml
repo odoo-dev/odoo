@@ -82,7 +82,8 @@
         <field name="domain">[]</field>
         <field name="context">{'search_default_group_type': 1, 'search_default_approve': 1, 'search_default_validated': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No Time off yet!
             </p>
             <p>
@@ -104,7 +105,8 @@
         }
         </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No data yet!
             </p>
         </field>

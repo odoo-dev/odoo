@@ -71,7 +71,8 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="search_view_id" ref="project_role_view_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No project role found. Let's create one!
             </p>
             <p>

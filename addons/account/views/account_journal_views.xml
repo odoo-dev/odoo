@@ -259,7 +259,8 @@
                 (0, 0, {'view_mode': 'kanban', 'view_id': ref('account_journal_view_kanban')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('view_account_journal_form')})]"/>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <img src="/web/static/picto/empty_folder.svg"/>
+              <p>
                 Add a journal
               </p><p>
                 A journal is used to record transactions of all accounting data
@@ -303,6 +304,7 @@
             <field name="res_model">account.journal.group</field>
             <field name="path">multi-ledger</field>
             <field name="help" type="html">
+                <img src="/web/static/picto/empty_folder.svg"/>
                 <p class="o_view_nocontent_multi_ledger"/>
                 <h2 class="d-md-block">Ledger group allows managing multiple accounting standards.</h2>
                 <p>

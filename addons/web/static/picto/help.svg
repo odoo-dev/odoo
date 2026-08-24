@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="o_picto" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M44.4187 60.6103L37.4787 43.9716M26.4835 44.1288L19.6159 60.8255M43.5827 26.7966L60.2453 19.8463M43.8666 37.7627L60.5393 44.6205M44.3464 3.75232L37.4787 20.449M19.5433 4.04635L26.4835 20.6849M20.5643 37.6888L3.90183 44.6391M20.139 26.7966L3.46631 19.9388" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="32" cy="32" r="12.2083" stroke="currentColor" stroke-width="2"/>
+    <circle cx="32" cy="32" r="31" stroke="currentColor" stroke-width="2"/>
+</svg>

@@ -10,7 +10,8 @@
                 ('name', 'not in', ['delivery_stock_picking_batch', 'delivery_iot'])]
             </field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                     Buy Odoo Enterprise now to get more providers.
                 </p>
             </field>

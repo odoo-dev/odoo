@@ -253,7 +253,8 @@
                 'mailing_sms': True
         }</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <img src="/web/static/picto/poof.svg"/>
+          <p>
             Create a SMS Marketing Mailing
           </p><p>
             Write an appealing SMS Text Message, define recipients and track its results.

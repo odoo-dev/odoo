@@ -321,7 +321,11 @@
     height: 80px;
     margin-top: 30px;
     margin-bottom: 30px;
-    background: transparent url(/web/static/img/empty_folder.svg) no-repeat center;
+    // masked so that the pictogram follows the text color, as it does when
+    // inlined by the "no content" helpers
+    opacity: 0.7;
+    background: currentColor;
+    mask: url(/web/static/picto/empty_folder.svg) no-repeat center / contain;
 }
 
 // Sample data

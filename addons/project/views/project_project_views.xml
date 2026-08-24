@@ -680,7 +680,8 @@
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="target">current</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                     No projects found. Let's create one!
                 </p>
                 <p>
@@ -700,7 +701,8 @@
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="target">main</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                     No projects found. Let's create one!
                 </p>
                 <p>
@@ -735,7 +737,8 @@
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="context">{'display_milestone_deadline': True}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                    No projects found. Let's create one!
                 </p>
                 <p>
@@ -753,7 +756,8 @@
             <field name="search_view_id" ref="view_project_project_filter"/>
             <field name="context">{'display_milestone_deadline': True}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                    No projects found. Let's create one!
                 </p>
                 <p>
@@ -856,7 +860,8 @@
             <field name="view_mode">list,kanban,form</field>
             <field name="context">{'default_is_template': True}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                    No project templates found. Let's create one!
                 </p>
                 <p>

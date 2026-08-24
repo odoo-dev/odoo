@@ -55,6 +55,7 @@
         <field name="res_model">account.sale.closing</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
+            <img src="/web/static/picto/empty_folder.svg"/>
             <p class="o_view_nocontent_nocreate">
                 The closings are created by Odoo
                 </p><p>

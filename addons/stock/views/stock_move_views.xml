@@ -434,7 +434,8 @@
                 'pivot_measures': ['product_qty', '__count__'],
                 }</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <img src="/web/static/picto/empty_folder.svg"/>
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory
@@ -456,7 +457,8 @@
                 'search_default_incoming': 3
             }</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <img src="/web/static/picto/empty_folder.svg"/>
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory
@@ -478,7 +480,8 @@
                 'search_default_outgoing': 3
             }</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <img src="/web/static/picto/empty_folder.svg"/>
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg class="o_picto" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M53.2974 10.5813C65.1265 20.9566 66.3044 38.957 55.9291 50.7861C45.5537 62.6152 27.5541 63.7937 15.725 53.4184C15.052 52.8282 14.4155 52.2113 13.8117 51.5742L1.69262 50.3656C1.10512 50.307 0.801702 49.6339 1.14625 49.1545L7.32982 40.5475C4.45516 31.3754 6.29107 20.9691 13.0927 13.2144C23.468 1.38525 41.4683 0.206015 53.2974 10.5813Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    <ellipse cx="22.7622" cy="33" rx="2" ry="2" fill="currentColor"/>
+    <ellipse cx="35.0012" cy="33" rx="2" ry="2" fill="currentColor"/>
+    <ellipse cx="47.2401" cy="33" rx="2" ry="2" fill="currentColor"/>
+</svg>

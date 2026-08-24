@@ -164,7 +164,8 @@
                 }
             </field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_empty_folder">
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>
                     No data yet!
                 </p><p>
                     Start a conversation to populate your chat history.
@@ -218,7 +219,8 @@
             }</field>
             <field name="search_view_id" ref="discuss_channel_view_search"/>
             <field name="help" type="html">
-                <p class="o_view_nocontent_empty_folder">No data yet!</p>
+                <img src="/web/static/picto/empty_folder.svg"/>
+                <p>No data yet!</p>
                 <p>Start a conversation to populate your chat history.</p>
             </field>
         </record>

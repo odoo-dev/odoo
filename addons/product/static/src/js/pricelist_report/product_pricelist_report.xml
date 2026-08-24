@@ -101,7 +101,7 @@
                 <t t-if="this.noProducts">
                     <div class="o_view_nocontent" role="alert">
                         <div class="o_nocontent_help">
-                            <p class="o_view_nocontent_smiling_face">
+                            <p>
                                 No products found in the report
                             </p>
                             <p class="fs-5">

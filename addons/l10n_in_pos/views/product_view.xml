@@ -28,7 +28,8 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('l10n_in_hsn_missing_in_pos', '=', True)]</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 Create a new product variant
             </p>
             <p>

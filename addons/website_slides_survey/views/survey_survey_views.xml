@@ -77,7 +77,8 @@
         <field name="search_view_id" ref="survey_survey_view_search_slides"/>
         <field name="context">{'default_certification': True, 'default_scoring_type': 'scoring_with_answers'}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 Create a Certification
             </p>
             <p>

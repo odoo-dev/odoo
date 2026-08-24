@@ -459,7 +459,8 @@
             'allow_search_matching_applicants': 1
         }</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No applications yet
             </p><p>
                 Odoo helps you track applicants in the recruitment
@@ -499,7 +500,8 @@
             'search_default_talent_pool_ids': active_ids,
         }</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No Talents in the pool yet
             </p>
             <p>
@@ -524,7 +526,8 @@
         <field name="search_view_id" ref="hr_applicant_view_search_bis"/>
         <field name="context">{'search_default_applicants': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No applications yet
             </p><p>
                 Odoo helps you track applicants in the recruitment
@@ -659,7 +662,8 @@
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('hr_applicant_view_pivot')})]"/>
         <field name="context">{'search_default_creation_month': 1, 'search_default_job': 2}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No data yet!
             </p>
         </field>
@@ -675,7 +679,8 @@
             'default_department_id': active_id}
         </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No data yet!
             </p>
         </field>
@@ -692,7 +697,8 @@
             'default_job_id': active_id}
         </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 No data yet!
             </p>
         </field>

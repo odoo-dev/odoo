@@ -56,14 +56,14 @@ class HrEmployeeSkill(models.Model):
         action["context"] = {"show_certificate": show_certificate_button}
         if self.env.user.has_group("hr.group_hr_manager"):
             action["help"] = (
-                self.env._("""<p class="o_view_nocontent_smiling_face">No Certifications available. Navigate to Skill types!</p>
+                self.env._("""<p>No Certifications available. Navigate to Skill types!</p>
                 <a type="action" name="hr_skills.hr_skill_type_action" class="btn btn-primary">
                 Show Skill Types
                 </a>""")
             )
         else:
             action["help"] = self.env._(
-                """<p class="o_view_nocontent_smiling_face">No Certifications available!</p>"""
+                """<p>No Certifications available!</p>"""
             )
         return action
 

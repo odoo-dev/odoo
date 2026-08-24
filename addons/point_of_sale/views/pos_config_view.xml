@@ -148,7 +148,8 @@
         <field name="domain"></field>
         <field name="search_view_id" ref="view_pos_config_search" />
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 Create a new PoS
             </p><p>
                 Configure at least one Point of Sale.
@@ -163,7 +164,8 @@
         <field name="domain"></field>
         <field name="search_view_id" ref="view_pos_config_search" />
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 Create a new PoS
             </p><p>
                 Configure at least one Point of Sale.
@@ -176,7 +178,8 @@
         <field name="res_model">product.attribute</field>
         <field name="view_id" ref="product.attribute_tree_view" />
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <img src="/web/static/picto/poof.svg"/>
+            <p>
                 Create product attributes
             </p><p>
                 Product attribute allow you to manage the different variation possible for a product. 

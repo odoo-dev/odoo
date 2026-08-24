@@ -400,7 +400,8 @@
             }
         </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No attendance records found
             </p><p>
                 The attendance reporting of your employees will be displayed here.
@@ -489,7 +490,8 @@
         </field>
         <field name="domain">[('check_out', '!=', False), ('overtime_hours', '!=', 0)]</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No attendance records found
             </p><p>
                 The attendance reporting of your employees will be displayed here.
@@ -586,7 +588,8 @@
             }
         </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <img src="/web/static/picto/empty_folder.svg"/>
+            <p>
                 No overtime records found
             </p><p>
                 The overtime reporting of your employees will be displayed here.
