@@ -607,7 +607,8 @@ class IrFieldsConverter(models.AbstractModel):
             imd = self.env['ir.model.data'].sudo()
             cache = imd._cache_for_xmlid(module)
             if result := cache.get(xmlid):
-                if not self.env[result[0]].browse(result[1]).exists():
+                # while loading, the cache only holds ids this transaction just wrote or verified
+                if self.env.registry.ready and not self.env[result[0]].browse(result[1]).exists():
                     result = None
             else:
                 rs = imd._lookup_xmlids((xmlid,), model)

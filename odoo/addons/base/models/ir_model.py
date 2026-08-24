@@ -2326,7 +2326,8 @@ class IrModelData(models.Model):
             for subsuffixes in split_every(self.env.cr.IN_MAX, sorted(suffixes)):
                 rs = self.env.execute_query(SQL("%s AND d.name IN %s", query, subsuffixes))
                 for r in rs:
-                    cache[f'{r[1]}.{r[2]}'] = (r[3], r[4])
+                    if r[-1]:  # only cache the ids whose record still exists
+                        cache[f'{r[1]}.{r[2]}'] = (r[3], r[4])
                 result.extend(rs)
 
         return result
