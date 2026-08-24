@@ -1,12 +1,12 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 import { formatFloat } from "../formatters";
 import { parseFloat } from "../parsers";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, useProps } from "@odoo/owl";
 
 export const floatFieldProps = {
     ...standardFieldProps,
@@ -24,7 +24,7 @@ export class FloatField extends Component {
     static template = "web.FloatField";
     props = useProps(floatFieldProps);
 
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         this.state = proxy({

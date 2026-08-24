@@ -30,7 +30,7 @@
                 <PartnerAutoComplete
                     value="this.props.record.data[this.props.name] || ''"
                     sources="this.getSources(this.props.name)"
-                    input="this.inputRef"
+                    input="this.inputRef.observeValue()"
                     placeholder="this.props.placeholder || ''"
                 >
                     <t t-set-slot="partnerOption" t-slot-scope="partnerOptionScope">

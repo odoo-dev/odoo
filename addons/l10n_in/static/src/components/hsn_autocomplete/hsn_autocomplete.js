@@ -1,9 +1,9 @@
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { useProps, signal, t } from "@odoo/owl";
+import { useProps, t } from "@odoo/owl";
 import { CharField, charField, charFieldProps } from "@web/views/fields/char/char_field";
-import { useInputField } from "@web/views/fields/input_field_hook";
+import { createInputFieldRef, useInputField } from "@web/views/fields/input_field_hook";
 
 const l10N_IN_HSN_SERVICE_URL = "https://services.gst.gov.in/commonservices/hsn/search/qsearch";
 
@@ -20,7 +20,7 @@ export class L10nInHsnAutoComplete extends CharField {
 
     setup() {
         super.setup();
-        this.inputRef = signal.ref();
+        this.inputRef = createInputFieldRef();
         useInputField({
             getValue: () => this.props.record.data[this.props.name] || "",
             parse: (v) => this.parse(v),

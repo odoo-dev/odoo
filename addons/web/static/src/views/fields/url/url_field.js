@@ -1,9 +1,9 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 
 export class UrlField extends Component {
     static template = "web.UrlField";
@@ -14,7 +14,7 @@ export class UrlField extends Component {
         websitePath: t.boolean().optional(),
     });
 
-    inputRef = signal.ref();
+    inputRef = createInputFieldRef();
 
     setup() {
         useInputField({ getValue: () => this.value, ref: this.inputRef });

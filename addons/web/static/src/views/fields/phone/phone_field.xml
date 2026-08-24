@@ -14,7 +14,7 @@
                     type="tel"
                     autocomplete="off"
                     t-att-placeholder="this.props.placeholder"
-                    t-ref="this.inputRef"
+                    t-ref="this.inputRef.observeValue()"
                 />
                 <t t-if="this.props.displayButtons" t-call="web.PhoneFieldActions"/>
             </t>

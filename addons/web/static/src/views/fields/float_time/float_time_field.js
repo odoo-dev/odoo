@@ -1,12 +1,12 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { formatFloatTime } from "../formatters";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 import { DurationParseError, InvalidNumberError, parseFloatTime } from "../parsers";
 
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, useProps } from "@odoo/owl";
 import { usePopover } from "@web/core/popover/popover_hook";
 
 export const floatTimeFieldProps = {
@@ -19,7 +19,7 @@ export const floatTimeFieldProps = {
 export class FloatTimeField extends Component {
     static template = "web.FloatTimeField";
     props = useProps(floatTimeFieldProps);
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         this.inputFloatTimeRef = useInputField({

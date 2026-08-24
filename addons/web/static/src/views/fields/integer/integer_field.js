@@ -2,11 +2,11 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { formatInteger } from "../formatters";
 import { parseInteger } from "../parsers";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, useProps } from "@odoo/owl";
 
 export const integerFieldProps = {
     ...standardFieldProps,
@@ -23,7 +23,7 @@ export class IntegerField extends Component {
     static template = "web.IntegerField";
     props = useProps(integerFieldProps);
 
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         this.state = proxy({

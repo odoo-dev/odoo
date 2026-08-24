@@ -1,10 +1,10 @@
-import { useProps, signal, t } from "@odoo/owl";
+import { useProps, t } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { CharField, charField, charFieldProps } from "@web/views/fields/char/char_field";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { googlePlacesSession } from "../google_places_session";
-import { useInputField } from "@web/views/fields/input_field_hook";
+import { createInputFieldRef, useInputField } from "@web/views/fields/input_field_hook";
 
 const standardAddressFields = {
     street: {
@@ -48,7 +48,7 @@ export class AddressAutoComplete extends CharField {
 
     setup() {
         super.setup();
-        this.input = signal.ref();
+        this.input = createInputFieldRef();
         useInputField({
             ref: this.input,
             getValue: () => this.props.record.data[this.props.name] || "",

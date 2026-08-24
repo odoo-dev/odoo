@@ -33,7 +33,7 @@
                             t-att-id="this.props.id"
                             t-att-placeholder="this.props.placeholder"
                             t-att-rows="this.rowCount"
-                            t-ref="this.textareaRef"
+                            t-ref="this.textareaRef.observeValue()"
                             t-on-blur="this.onBlur"
                             t-on-input="this.debouncedOnLabelInput"
                             t-on-keydown="this.onLabelKeydown"

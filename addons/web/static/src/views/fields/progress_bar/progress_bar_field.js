@@ -3,7 +3,7 @@ import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 import { parseFloat } from "../parsers";
-import { useInputField } from "@web/views/fields/input_field_hook";
+import { createInputFieldRef, useInputField } from "@web/views/fields/input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
 import { Component, proxy, signal, t, useProps } from "@odoo/owl";
@@ -19,7 +19,7 @@ export class ProgressBarField extends Component {
     });
 
     root = signal.ref();
-    currentValueRef = signal.ref();
+    currentValueRef = createInputFieldRef();
 
     setup() {
         useNumpadDecimal(this.root);

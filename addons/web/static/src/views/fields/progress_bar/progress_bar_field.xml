@@ -11,7 +11,7 @@
                 <t t-if="this.isPercentage">
                     <input
                         t-if="this.isEditable"
-                        t-ref="this.currentValueRef"
+                        t-ref="this.currentValueRef.observeValue()"
                         class="o_input h-100"
                         type="text"
                         inputmode="decimal"
@@ -28,7 +28,7 @@
                 <t t-else="">
                     <input
                         t-if="this.isEditable"
-                        t-ref="this.currentValueRef"
+                        t-ref="this.currentValueRef.observeValue()"
                         class="o_input h-100"
                         type="text"
                         inputmode="decimal"

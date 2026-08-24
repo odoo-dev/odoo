@@ -6,7 +6,7 @@ import { Component, onMounted, onPatched, onWillUnmount, proxy, signal, useProps
 import { many2OneFieldProps } from "@web/views/fields/many2one/many2one_field";
 import { useProductAndLabelAutoresize } from "./product_and_label_autoresize";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
-import { useInputField } from "@web/views/fields/input_field_hook";
+import { createInputFieldRef, useInputField } from "@web/views/fields/input_field_hook";
 
 export const ProductNameAndDescriptionListRendererMixin = {
 
@@ -42,7 +42,7 @@ export class ProductNameAndDescriptionField extends Component {
         this.isPrintMode = proxy({ value: false });
         this.labelVisibility = proxy({ value: false });
         this.switchToLabel = false;
-        this.labelNode = signal.ref();
+        this.labelNode = createInputFieldRef();;
         useProductAndLabelAutoresize(this.labelNode, { targetParentName: this.props.name });
         this.productNode = signal.ref();
         useProductAndLabelAutoresize(this.productNode, { targetParentName: this.props.name });

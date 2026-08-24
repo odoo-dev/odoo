@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloatTime } from "@web/views/fields/parsers";
-import { useInputField } from "@web/views/fields/input_field_hook";
+import { createInputFieldRef, useInputField } from "@web/views/fields/input_field_hook";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import {
@@ -11,7 +11,6 @@ import {
     onWillDestroy,
     useProps,
     proxy,
-    signal,
     t,
 } from "@odoo/owl";
 
@@ -98,7 +97,7 @@ class MrpTimerField extends Component {
     static components = { MrpTimer };
     props = useProps(standardFieldProps);
 
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         this.orm = useService("orm");

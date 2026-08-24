@@ -3,12 +3,12 @@ import { registry } from "@web/core/registry";
 import { useAutoresize } from "@web/core/utils/autoresize";
 import { useSpellCheck } from "@web/core/utils/hooks";
 import { useDynamicPlaceholder } from "../dynamic_placeholder_hook";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { parseInteger } from "../parsers";
 import { standardFieldProps } from "../standard_field_props";
 import { TranslationButton } from "../translation/translation";
 
-import { Component, onMounted, onPatched, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, onMounted, onPatched, t, useListener, useProps } from "@odoo/owl";
 
 export const textFieldProps = {
     ...standardFieldProps,
@@ -25,7 +25,7 @@ export class TextField extends Component {
         TranslationButton,
     };
     props = useProps(textFieldProps);
-    textareaRef = signal.ref();
+    textareaRef = createInputFieldRef();
 
     setup() {
         if (this.props.dynamicPlaceholder) {

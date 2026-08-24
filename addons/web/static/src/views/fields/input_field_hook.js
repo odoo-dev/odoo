@@ -1,7 +1,32 @@
-import { onMounted, onPatched, untrack, useListener, useProps } from "@odoo/owl";
+import { onMounted, onPatched, signal, untrack, useListener, useProps } from "@odoo/owl";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { useBus } from "@web/core/utils/hooks";
-import { onWillRender } from "@web/owl2/utils";
+
+const valueReadersByRef = new WeakMap();
+
+/**
+ * @typedef {import("@odoo/owl").Signal<HTMLInputElement | HTMLTextAreaElement> & {
+ *   observeValue: () => import("@odoo/owl").Signal<HTMLInputElement | HTMLTextAreaElement>
+ * }} InputFieldRef
+ */
+
+/**
+ * Creates the signal ref expected by {@link useInputField}.
+ *
+ * @returns {InputFieldRef}
+ */
+export function createInputFieldRef() {
+    const inputRef = signal.ref();
+    const valueReaders = [];
+    valueReadersByRef.set(inputRef, valueReaders);
+    inputRef.observeValue = () => {
+        for (const readValue of valueReaders) {
+            readValue();
+        }
+        return inputRef;
+    };
+    return inputRef;
+}
 
 /**
  * This hook is meant to be used by field components that use an input or
@@ -9,17 +34,25 @@ import { onWillRender } from "@web/owl2/utils";
  * erased by an update of the model (typically coming from an onchange) when the
  * user is currently editing it.
  *
+ * The field template must evaluate `ref.observeValue()` during rendering and pass
+ * the result to `t-ref`. This makes `getValue` a render dependency.
+ *
  * @param {Object} params
  * @param {() => string} params.getValue a function that returns the value to write in
  *   the input, if the user isn't currently editing it
  * @param {(value: string) => any} [params.parse] a function that parses the value of the input.
- * @param {Ref<HTMLInputElement | HTMLTextAreaElement> | (() => HTMLInputElement | HTMLTextAreaElement | null)} params.ref a ref or signal containing the input/textarea
+ * @param {InputFieldRef} params.ref a signal ref containing the input/textarea
  * @param {boolean} [params.preventLineBreaks] Prevent line breaks in input when set
  * @param {string} [params.fieldName]
  * @param {() => boolean} [params.shouldSave] if true, save the record with the new value
  */
 export function useInputField(params) {
     const inputRef = params.ref;
+    const valueReaders = valueReadersByRef.get(inputRef);
+    if (!valueReaders) {
+        throw new Error("useInputField expects a ref created by createInputFieldRef");
+    }
+    valueReaders.push(params.getValue);
     const getEl = () => (inputRef ? untrack(inputRef) : null);
     const props = useProps();
     const fieldName = params.fieldName || props.name;
@@ -108,11 +141,6 @@ export function useInputField(params) {
     useListener(inputRef, "input", onInput);
     useListener(inputRef, "change", onChange);
     useListener(inputRef, "keydown", onKeydown);
-
-    // We need to call getValue to always observe
-    // the corresponding value in the record. Otherwise, in some cases,
-    // if the value in the record change the component isn't patched.
-    onWillRender(() => params.getValue());
 
     /**
      * Sometimes, a patch can happen with possible a new value for the field

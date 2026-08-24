@@ -2,12 +2,12 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { formatMonetary } from "../formatters";
 import { parseFloat } from "../parsers";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { nbsp } from "@web/core/utils/strings";
 
-import { Component, proxy, signal, t, onMounted, onPatched, useProps } from "@odoo/owl";
+import { Component, proxy, t, onMounted, onPatched, useProps } from "@odoo/owl";
 import { getCurrency } from "@web/core/currency";
 
 export const monetaryFieldProps = {
@@ -23,7 +23,7 @@ export class MonetaryField extends Component {
     static template = "web.MonetaryField";
     props = useProps(monetaryFieldProps);
 
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         this.inputRef = useInputField(this.inputOptions);

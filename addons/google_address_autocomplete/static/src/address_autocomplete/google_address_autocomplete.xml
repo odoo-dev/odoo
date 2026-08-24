@@ -12,7 +12,7 @@
                 placeholder="this.props.placeholder"
                 searchOnInputClick="false"
                 inputDebounceDelay="350"
-                input="this.input"
+                input="this.input.observeValue()"
             >
                 <t t-set-slot="option" t-slot-scope="optionScope">
                     <strong t-out="optionScope.label"/>

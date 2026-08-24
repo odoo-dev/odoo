@@ -2,11 +2,11 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { formatPercentage } from "../formatters";
 import { parsePercentage } from "../parsers";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { useNumpadDecimal } from "../numpad_decimal_hook";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 
 export class PercentageField extends Component {
     static template = "web.PercentageField";
@@ -16,7 +16,7 @@ export class PercentageField extends Component {
         noSymbol: t.boolean().optional(),
     });
 
-    numpadDecimalRef = signal.ref();
+    numpadDecimalRef = createInputFieldRef();
 
     setup() {
         useInputField({

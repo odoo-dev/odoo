@@ -3,11 +3,11 @@ import { registry } from "@web/core/registry";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { useDynamicPlaceholder } from "../dynamic_placeholder_hook";
 import { formatChar } from "../formatters";
-import { useInputField } from "../input_field_hook";
+import { createInputFieldRef, useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { TranslationButton } from "../translation/translation";
 
-import { Component, onMounted, onPatched, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, onMounted, onPatched, t, useListener, useProps } from "@odoo/owl";
 
 export const charFieldProps = {
     ...standardFieldProps,
@@ -24,7 +24,7 @@ export class CharField extends Component {
         TranslationButton,
     };
     props = useProps(charFieldProps);
-    input = signal.ref();
+    input = createInputFieldRef();
 
     setup() {
         if (this.props.dynamicPlaceholder) {
