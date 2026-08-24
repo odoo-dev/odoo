@@ -43,8 +43,9 @@
         <field name="name">GIB Codes</field>
         <field name="res_model">l10n_tr_nilvera_einvoice.account.tax.code</field>
         <field name="view_id" ref="l10n_tr_nilvera_einvoice_account_tax_code_view_list"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a GIB Reason
             </p>
         </field>

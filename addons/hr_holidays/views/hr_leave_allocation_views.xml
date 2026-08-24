@@ -549,8 +549,9 @@
         <field name="res_model">hr.leave.allocation</field>
         <field name="view_mode">list,kanban,form,activity</field>
         <field name="search_view_id" ref="hr_holidays.hr_leave_allocation_view_search_my"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new allocation request
             </p><p>
                 You can create a new allocation or follow the approval status of the current ones.
@@ -579,8 +580,9 @@
         <field name="context">{}</field>
         <field name="domain">[]</field>
         <field name="search_view_id" ref="hr_holidays.hr_leave_allocation_view_search_manager"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new allocation request
             </p><p>
                 You can create a new allocation or follow the approval status of the current ones.
@@ -604,8 +606,9 @@
         <field name="context">{'search_default_my_team': 1,'search_default_approve': 2, 'search_default_active_employee': 3}</field>
         <field name="domain">[]</field>
         <field name="search_view_id" ref="hr_holidays.hr_leave_allocation_view_search_manager"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new allocation request
             </p><p>
                 You can create a new allocation or follow the approval status of the current ones.

@@ -43,8 +43,9 @@
         <field name="res_model">utm.medium</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="utm_medium_view_search"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a Medium
             </p><p>
                 UTM Mediums track the mean that was used to attract traffic (e.g. "Website", "X", ...).

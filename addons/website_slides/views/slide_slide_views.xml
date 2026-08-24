@@ -30,8 +30,9 @@
             <field name="name">Content Tags</field>
             <field name="res_model">slide.tag</field>
             <field name="view_mode">list,form</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a Content Tag
                 </p>
                 <p>
@@ -345,8 +346,9 @@
             <field name="view_mode">kanban,list,form</field>
             <field name="context">{'search_default_own_publications':True}</field>
             <field name="domain">[('is_category', '=', False)]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Add Content
                 </p>
                 <p>
@@ -362,8 +364,9 @@
             <field name="view_mode">graph,list,form,pivot</field>
             <field name="context">{"search_default_published": 1}</field>
             <field name="domain">[('is_category', '=', False)]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     No data yet!
                 </p><p>
                     Create new content for your eLearning

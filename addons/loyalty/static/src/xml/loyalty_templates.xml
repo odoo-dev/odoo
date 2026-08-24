@@ -11,7 +11,7 @@
     <t t-name="loyalty.LoyaltyActionHelper">
         <div class="o_view_nocontent">
             <div class="o_nocontent_help container mt-5 my-lg-auto">
-                <t t-out="this.props.noContentHelp"/>
+                <t t-out="this.props.noContentHelp.help"/>
                 <div class="row g-2 g-md-3 mx-auto mt-2 justify-content-center">
                     <div class="col-12 col-md-4 col-xl-3" t-foreach="Object.entries(this.loyaltyTemplateData)" t-as="data" t-key="data[0]">
                         <t t-set="loyalty_el_icon" t-value="data[1].icon"/>

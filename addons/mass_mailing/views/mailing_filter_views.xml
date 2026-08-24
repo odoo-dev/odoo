@@ -153,8 +153,9 @@
         <field name="context">{
             'search_default_created_by_me': 1
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a Dynamic List
             </p>
             <p>

@@ -94,8 +94,9 @@
         <field name="path">talent-pool</field>
         <field name="res_model">hr.talent.pool</field>
         <field name="view_mode">kanban,list,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No talent pools yet
             </p>
         </field>

@@ -35,8 +35,8 @@
                 <main class="h-100 align-content-center">
                     <div class="o_view_nocontent">
                         <div class="justify-content-center o_nocontent_help col-6">
-                            <img src="/web/static/img/smiling_face.svg"/>
-                            <p class="o_view_nocontent_smiling_face row justify-content-center col-6 offset-3 pt-3">
+                            <img src="/web/static/picto/empty_folder.svg"/>
+                            <p class="row justify-content-center col-6 offset-3 pt-3">
                                 Nothing to see yet!
                             </p>
                             <div class="row justify-content-center col-6 offset-3 pb-5">

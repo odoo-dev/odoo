@@ -19,8 +19,9 @@
         <field name="path">badges</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="gamification_badge_view_search"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new badge
             </p><p>
                 A badge is a symbolic token granted to a user as a sign of reward.

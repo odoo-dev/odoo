@@ -402,8 +402,9 @@
         <field name="usage">menu</field>
         <field name="context">{'search_default_dashboard':1}</field>
         <field name="domain">[]</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_neutral_face">
+            <p>
                 This is the accounting dashboard
             </p><p>
                 If you have not installed a chart of account, please install one first.<br/>

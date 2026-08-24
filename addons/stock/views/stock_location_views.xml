@@ -140,8 +140,9 @@
         <field name="view_id" ref="view_location_tree2"/>
         <field name="search_view_id" ref="view_location_search"/>
         <field name="context">{'search_default_in_location':1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Add a new location
           </p><p>
             Define your locations to reflect your warehouse structure and
@@ -253,8 +254,9 @@
             <field name="res_model">stock.route</field>
             <field name="view_mode">list,form</field>
             <field name="view_id" ref="stock_location_route_tree" />
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Add a new route
               </p><p>
                 You can define here the main routes that run through

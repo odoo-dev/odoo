@@ -136,8 +136,9 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="domain">[('is_primary', '=', True)]</field>
         <field name="context">{'active_test': False, 'search_default_available_pms': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No payment methods found for your payment providers.
             </p>
             <p>

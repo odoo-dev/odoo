@@ -215,8 +215,9 @@
             <field name="name">Ratings</field>
             <field name="res_model">rating.rating</field>
             <field name="view_mode">kanban,list,graph,pivot,form</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_empty_folder">
+                <p>
                     No rating yet
                 </p><p>
                     There is no rating for this object at the moment.

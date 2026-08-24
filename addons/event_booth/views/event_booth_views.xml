@@ -185,8 +185,9 @@
         <field name="view_mode">kanban,list,form,graph,pivot</field>
         <field name="domain">[]</field>
         <field name="context">{'search_default_group_by_state': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a Booth
             </p><p>
                 Booths are the physical stands that you rent during your event.
@@ -200,8 +201,9 @@
         <field name="view_mode">kanban,list,form,graph,pivot</field>
         <field name="domain">[('event_id', '=', active_id)]</field>
         <field name="context">{'default_event_id': active_id, 'search_default_group_by_state': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a Booth
             </p><p>
                 Booths are the physical stands that you rent during your event.

@@ -36,8 +36,9 @@
             <field name="domain">[]</field>
             <field name="context">{'chat_icon': True}</field>
             <field name="view_id" eval="False"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create an employee.
                 </p><p>
                     Find all the information on employees.
@@ -252,8 +253,9 @@
             <field name="context">{'chat_icon': True}</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="hr_employee_public_view_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create an employee
                 </p><p>
                     Find all the information on employees

@@ -43,8 +43,9 @@
         <field name="name">References</field>
         <field name="res_model">stock.reference</field>
         <field name="view_mode">list,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Stock Reference
             </p><p>
                 Start transferring goods to see references

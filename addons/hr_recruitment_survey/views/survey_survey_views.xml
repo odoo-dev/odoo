@@ -79,8 +79,9 @@
                 'default_survey_type': 'recruitment',
             }
         </field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Add a new survey
             </p><p>
                 You can create surveys used for recruitments. Design easily your interview,

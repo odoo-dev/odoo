@@ -70,8 +70,9 @@
         <field name="name">Stages</field>
         <field name="res_model">crm.stage</field>
         <field name="view_id" ref="crm.crm_stage_tree"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Set a new stage in your opportunity pipeline
           </p><p>
             Stages allow salespersons to easily track how a specific opportunity

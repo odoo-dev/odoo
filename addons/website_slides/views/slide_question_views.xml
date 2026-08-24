@@ -73,8 +73,9 @@
         <field name="res_model">slide.question</field>
         <field name="view_mode">list,graph,pivot,form</field>
         <field name="view_id" ref="slide_question_view_tree_report"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No Quiz data yet!
             </p>
             <p>

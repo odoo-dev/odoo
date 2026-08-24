@@ -65,6 +65,7 @@
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('stock_picking_batch.stock_picking_wave_kanban')})]"/>
         <field name="domain">[('is_wave', '=', True)]</field>
         <field name="search_view_id" ref="stock_picking_batch_filter"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
             <div class="container mt-5">
                 <div class="row g-5">

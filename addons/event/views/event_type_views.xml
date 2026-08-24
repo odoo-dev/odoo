@@ -106,8 +106,9 @@
     <record model="ir.actions.act_window" id="action_event_type">
         <field name="name">Event Templates</field>
         <field name="res_model">event.type</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create an Event Template
             </p><p>
                 Event Templates combine configurations you use often and are

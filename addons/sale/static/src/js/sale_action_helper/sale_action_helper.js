@@ -5,7 +5,7 @@ import { SaleActionHelperDialog } from "./sale_action_helper_dialog";
 export class SaleActionHelper extends Component {
     static template = "sale.SaleActionHelper";
     static props = {
-        noContentHelp: String,
+        noContentHelp: Object,
     }
 
     setup() {

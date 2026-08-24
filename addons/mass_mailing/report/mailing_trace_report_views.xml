@@ -89,8 +89,9 @@
            <field name="res_model">mailing.trace.report</field>
            <field name="domain">[('mailing_type', '=', 'mail')]</field>
            <field name="view_mode">pivot,graph,list</field>
-           <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+<field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
+<field name="help" type="html">
+                <p>
                     No Mailing Data yet!
                 </p>
                 <p>

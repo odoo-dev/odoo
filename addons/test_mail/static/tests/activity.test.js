@@ -414,7 +414,7 @@ test("activity view: no content rendering", async () => {
         views: [[false, "activity"]],
     });
     await contains(".o_view_nocontent");
-    await contains(".o_view_nocontent .o_view_nocontent_empty_folder", {
+    await contains(".o_view_nocontent .o_nocontent_help p", {
         text: "No data to display",
     });
 });

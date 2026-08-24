@@ -95,8 +95,9 @@
             <field name="name">Bank Accounts</field>
             <field name="res_model">res.partner.bank</field>
             <field name="view_mode">list,form</field>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a Bank Account
                 </p>
                 <p>

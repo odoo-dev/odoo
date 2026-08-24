@@ -66,8 +66,9 @@
         <field name="view_mode">list</field>
         <field name="view_id" ref="hr_attendance.hr_version_list_view_enhanced_hr_attendance"/>
         <field name="search_view_id" ref="hr_attendance.hr_version_search_view_enhanced_hr_attendance"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No Records.
             </p><p>
                 There are no employees assigned to this overtime ruleset.
@@ -82,8 +83,9 @@
         <field name="target">new</field>
         <field name="view_id" ref="hr_attendance.hr_version_list_view_enhanced_hr_attendance_add"/>
         <field name="search_view_id" ref="hr_attendance.hr_version_search_view_enhanced_hr_attendance"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No Records.
             </p><p>
                 There are no employees without this overtime ruleset.

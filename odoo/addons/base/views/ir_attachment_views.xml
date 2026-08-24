@@ -89,8 +89,9 @@
             <field name="res_model">ir.attachment</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="view_attachment_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a new document
                 </p>
                 <p>

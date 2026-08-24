@@ -169,8 +169,9 @@
             <field name="view_mode">list,form,kanban</field>
             <field name="search_view_id" ref="view_department_filter"/>
             <field name="domain">[("has_read_access", "=", True)]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a new department
                 </p><p>
                     Structure Employees per department and have an overview of e.g.
@@ -210,8 +211,9 @@
             <field name="path">departments</field>
             <field name="domain">[("has_read_access", "=", True)]</field>
             <field name="search_view_id" ref="view_department_filter"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a new department
                 </p><p>
                     Structure Employees per department and have an overview of e.g.

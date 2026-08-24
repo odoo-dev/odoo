@@ -94,8 +94,9 @@
             <field name="view_mode">list,kanban</field>
             <field name="context">{'search_default_group_by_user': True, 'search_default_group_by_definition': True}</field>
             <field name="domain">[('challenge_id.challenge_category', '=', 'hr')]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a new goal
                 </p><p>
                     A goal is defined by a user and a goal type.
@@ -111,8 +112,9 @@
             <field name="view_mode">kanban,list,form</field>
             <field name="domain">[('challenge_category', '=', 'hr')]</field>
             <field name="context">{'search_default_inprogress':True, 'default_inprogress':True}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Create a new challenge
                 </p><p>
                     Assign a list of goals to chosen users to evaluate them.

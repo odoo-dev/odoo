@@ -96,8 +96,9 @@
                 'graph_groupbys': ['date:month', 'subtype_id'],
             }</field>
             <field name="domain">[]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Let's get to work!
                 </p><p>
                     Activities marked as Done on Leads will appear here, providing an overview of lead interactions.
@@ -111,8 +112,9 @@
             <field name="view_mode">graph,pivot,list</field>
             <field name="context">{'search_default_team_id': active_id}</field>
             <field name="domain">[]</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Let's get to work!
                 </p><p>
                     Activities marked as Done on Leads will appear here, providing an overview of lead interactions.

@@ -22,8 +22,9 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,list,form,activity</field>
         <field name="context">{'search_default_filter_to_availabe_pos': 1, 'default_available_in_pos': True, 'create_variant_never': 'no_variant', '_pos_self_order': True, 'list_view_ref': 'point_of_sale.product_template_tree_view_point_of_sale'}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create new product
             </p><p>
                 Define products and categories for POS retail and restaurant
@@ -40,8 +41,9 @@
         <field name="name">Combo Choices</field>
         <field name="res_model">product.combo</field>
         <field name="view_id" ref="product.product_combo_view_tree"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Add combo choices
             </p><p>
                 Build flexible product combinations.

@@ -161,8 +161,9 @@
         <field name="view_id" ref="survey_user_input_view_tree"></field>
         <field name="search_view_id" ref="survey_user_input_view_search"/>
         <field name="context">{'search_default_group_by_survey': True}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No answers yet!
             </p><p>
                 You can share your links through different means: email, invite shortcut, live presentation, ...
@@ -180,8 +181,9 @@
             'search_default_group_by_survey': True,
             'search_default_certified': True,
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No certified participant yet!
             </p>
         </field>
@@ -253,8 +255,9 @@
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="survey_user_input_line_view_search"/>
         <field name="context">{'search_default_group_by_survey': True, 'search_default_group_by_user_input': True}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_empty_folder">
+          <p>
             No user input lines found
           </p>
         </field>

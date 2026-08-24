@@ -289,8 +289,9 @@
             'show_todo_mail_helper': True,
             'show_task_options': False,
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No to-do found. Let's create one!
             </p><p>
                 Keep your work organized by using memos and to-do lists.

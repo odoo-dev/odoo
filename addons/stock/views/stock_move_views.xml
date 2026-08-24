@@ -433,8 +433,9 @@
             <field name="context">{'search_default_done': 1,
                 'pivot_measures': ['product_qty', '__count__'],
                 }</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory
@@ -455,8 +456,9 @@
                 'search_default_groupby_location_id': 2,
                 'search_default_incoming': 3
             }</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory
@@ -477,8 +479,9 @@
                 'search_default_groupby_location_id': 2,
                 'search_default_outgoing': 3
             }</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 No stock move found
               </p><p>
                 This menu gives you the full traceability of inventory

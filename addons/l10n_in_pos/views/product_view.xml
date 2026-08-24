@@ -27,8 +27,9 @@
         <field name="res_model">product.product</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('l10n_in_hsn_missing_in_pos', '=', True)]</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new product variant
             </p>
             <p>

@@ -5,8 +5,9 @@
         <field name="res_model">website.visitor</field>
         <field name="view_mode">kanban,list,form,graph</field>
         <field name="domain">[('event_track_wishlisted_ids', 'in', [active_id])]</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Wait for visitors to add this track to their list of favorites
             </p>
         </field>
@@ -261,8 +262,9 @@
         <field name="name">Event Tracks</field>
         <field name="res_model">event.track</field>
         <field name="view_mode">kanban,list,form,calendar,graph,activity</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
               Create a Track
             </p><p>
               Tracks define your event schedule. They can be talks, workshops or any similar activity.
@@ -275,8 +277,9 @@
         <field name="name">Event Tracks</field>
         <field name="view_mode">kanban,list,form,calendar,graph,activity</field>
         <field name="context">{'search_default_event_id': active_id, 'default_event_id': active_id}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a Track
           </p><p>
             Tracks define your event schedule. They can be talks, workshops or any similar activity.
@@ -289,8 +292,9 @@
         <field name="res_model">event.track</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('wishlist_visitor_ids', 'in', [active_id])]</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No track favorited by this visitor
             </p>
         </field>

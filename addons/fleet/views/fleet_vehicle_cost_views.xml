@@ -207,8 +207,9 @@
         <field name="res_model">fleet.vehicle.log.contract</field>
         <field name="view_mode">list,kanban,form,graph,pivot,activity</field>
         <field name="context">{'search_default_open': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new contract
           </p><p>
             Manage all your contracts (leasing, insurances, etc.) with
@@ -397,8 +398,9 @@
         <field name="res_model">fleet.vehicle.log.services</field>
         <field name="view_mode">list,kanban,form,graph,pivot,activity</field>
         <field name="context">{'search_default_groupby_service_type_id': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new service entry
           </p><p>
             Track all the services done on your vehicle.

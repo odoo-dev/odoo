@@ -411,8 +411,9 @@
                 "is_my_timesheets": 1,
             }</field>
             <field name="search_view_id" ref="hr_timesheet_line_my_timesheet_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 No activities found. Let's start a new one!
               </p>
               <p>
@@ -496,8 +497,9 @@
                 'search_default_week':1,
                 'is_timesheet': 1,
             }</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     No activities found. Let's start a new one!
               </p>
               <p>
@@ -557,8 +559,9 @@
                 'default_employee_id': active_id,
                 "is_timesheet": 1,
             }</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Record a new activity
                 </p><p>
                     You can register and track your workings hours by project every
@@ -580,8 +583,9 @@
                 "is_timesheet": 1,
             }</field>
             <field name="search_view_id" ref="hr_timesheet_line_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Record a new activity
               </p><p>
                 Track your working hours by projects every day and invoice this time to your customers.

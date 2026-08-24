@@ -146,6 +146,7 @@
             <field name="res_model">mrp.routing.workcenter</field>
             <field name="view_mode">list,kanban,form</field>
             <field name="view_id" ref="mrp_routing_workcenter_tree_view"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
                 <div class="o_mrp_routing_image settings position-relative">
                     <img class="position-absolute" src="/mrp/static/img/routing_shopfloor.png" alt="Shop Floor"/>

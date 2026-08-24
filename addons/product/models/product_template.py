@@ -934,7 +934,7 @@ class ProductTemplate(models.Model):
             'domain': self._get_product_document_domain(),
             'target': 'current',
             'help': """
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     %s
                 </p>
                 <p>

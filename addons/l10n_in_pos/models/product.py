@@ -53,7 +53,7 @@ class ProductProduct(models.Model):
                     ('l10n_in_hsn_missing_in_pos', '=', True)
                 ],
                 'help': """
-                    <p class="o_view_nocontent_smiling_face">
+                    <p>
                         Create a new product variant
                     </p>
                     <p>

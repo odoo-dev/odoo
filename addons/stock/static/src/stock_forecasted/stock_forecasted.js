@@ -118,7 +118,7 @@ export class StockForecasted extends Component {
     }
 
     get graphInfo() {
-        return { noContentHelp: _t("Try to add some incoming or outgoing transfers.") };
+        return { noContentHelp: { help: _t("Try to add some incoming or outgoing transfers.") } };
     }
 
     async openView(resModel, view, resId=false, domain = false) {

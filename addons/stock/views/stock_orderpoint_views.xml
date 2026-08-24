@@ -168,6 +168,7 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="view_id" ref="view_warehouse_orderpoint_tree_editable"/>
         <field name="search_view_id" ref="stock_reorder_report_search"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_replenishment">
             You are good, no replenishment to perform!
@@ -198,8 +199,9 @@
         <field name="view_id" ref="view_warehouse_orderpoint_tree_editable_show_trigger"/>
         <field name="search_view_id" ref="warehouse_orderpoint_search"/>
         <field name="context">{'search_default_trigger': 'auto'}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             No reordering rule found
           </p><p>
             Define a minimum stock rule so that Odoo automatically creates requests for quotations or confirmed manufacturing orders to resupply your stock.

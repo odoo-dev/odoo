@@ -93,6 +93,7 @@
         <field name="view_mode">list,form</field>
         <field name="domain">[('program_id', '=', active_id)]</field>
         <field name="context">{'create': False}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
             <h1>No Coupons Found.</h1>
             <p>There haven't been any coupons generated yet.</p>

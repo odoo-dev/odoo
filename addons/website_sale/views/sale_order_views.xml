@@ -166,8 +166,9 @@
         <field name="domain">[]</field>
         <field name="context">{'show_sale': True, 'search_default_order_confirmed': 1, 'search_default_from_website': 1}</field>
         <field name="search_view_id" ref="view_sales_order_filter_ecommerce"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 There is no confirmed order from the website
             </p>
         </field>
@@ -192,8 +193,9 @@
         <field name="domain">[('state', '=', 'sent'), ('website_id', '!=', False)]</field>
         <field name="context">{'show_sale': True, 'create': False}</field>
         <field name="search_view_id" ref="view_sales_order_filter_ecommerce"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 There is no unpaid order from the website yet
             </p><p>
                 Process the order once the payment is received.
@@ -231,8 +233,9 @@
         <field name="domain">[('state', '=', 'sale'), ('order_line', '!=', False), ('invoice_status', '=', 'to invoice'), ('website_id', '!=', False)]</field>
         <field name="context">{'show_sale': True, 'search_default_order_confirmed': 1, 'create': False}</field>
         <field name="search_view_id" ref="view_sales_order_filter_ecommerce"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 You don't have any order to invoice from the website
             </p>
         </field>
@@ -249,8 +252,9 @@
         <field name="context" eval="{'show_sale': True, 'create': False, 'public_partner_id': ref('base.public_partner'), 'search_default_recovery_email': True}"/>
         <field name="view_id" ref="sale.view_quotation_tree"/>
         <field name="search_view_id" ref="sale_order_abandoned_cart_search"/>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No abandoned carts found
             </p><p>
                 You'll find here all the carts abandoned by your visitors.

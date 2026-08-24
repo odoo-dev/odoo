@@ -1187,8 +1187,9 @@
         <field name="search_view_id" ref="sale_order_view_search_inherit_sale"/>
         <field name="context">{'search_default_sales' : 1}</field>
         <field name="path">orders</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new quotation, the first step of a new sale!
             </p><p>
                 Once the quotation is confirmed, it becomes a sales order.<br/> You will be able to create an invoice and collect the payment.
@@ -1246,6 +1247,7 @@
         <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
         <field name="search_view_id" ref="sale_order_view_search_inherit_quotation"/>
         <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
             <br/>
             <h2>
@@ -1276,8 +1278,9 @@
         <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
         <field name="search_view_id" ref="sale_order_view_search_inherit_quotation"/>
         <field name="context">{'search_default_my_quotation': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
             Beat competitors with stunning quotations!
             </p><p>
             Boost sales with online payments or signatures, upsells, and a great customer portal.

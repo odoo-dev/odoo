@@ -91,8 +91,9 @@
             'list_view_ref': 'website_sale.product_template_view_tree_website_sale',
             'kanban_view_ref': 'website_sale.product_template_view_kanban_website_sale'
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new product
             </p><p>
                 A product can be either a physical product or a service that you sell to your customers.

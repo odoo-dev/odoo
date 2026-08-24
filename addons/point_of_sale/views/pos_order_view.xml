@@ -258,8 +258,9 @@
         <field name="view_mode">list,form,kanban,pivot</field>
         <field name="view_id" eval="False"/>
         <field name="domain">[]</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No orders found
             </p><p>
                 To record new orders, start a new session.
@@ -272,8 +273,9 @@
         <field name="res_model">pos.order</field>
         <field name="view_mode">graph,list,form,kanban,pivot</field>
         <field name="domain">[('state', 'not in', ['draft', 'cancel']), ('account_move', '=', False)]</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet!
             </p><p>
                 Create a new POS order

@@ -252,8 +252,9 @@
                 'default_mailing_type': 'sms',
                 'mailing_sms': True
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a SMS Marketing Mailing
           </p><p>
             Write an appealing SMS Text Message, define recipients and track its results.

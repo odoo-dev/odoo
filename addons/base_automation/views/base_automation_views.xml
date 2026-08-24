@@ -247,6 +247,7 @@
             <field name="view_mode">kanban,list,form</field>
             <field name="view_id" ref="view_base_automation_kanban"/>
             <field name="context">{'search_default_inactive': 1}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
                 <img class="w-100 w-md-75"
                 src="/base_automation/static/img/automation.svg" />

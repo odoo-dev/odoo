@@ -6,7 +6,7 @@
             <t t-if="this.showNoContentHelper">
                 <div class="o_view_nocontent" role="alert">
                     <div class="o_nocontent_help">
-                        <p class="o_view_nocontent_smiling_face">
+                        <p>
                             No Products for the selected Vendor.
                         </p>
                         <p>

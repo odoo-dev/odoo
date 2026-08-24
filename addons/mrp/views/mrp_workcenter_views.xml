@@ -8,8 +8,9 @@
             <field name="search_view_id" ref="view_mrp_production_work_order_search"/>
             <field name="domain">[('state', 'not in', ('done', 'cancel'))]</field>
             <field name="context">{'search_default_workcenter_id': active_id}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     No work orders to do!
                 </p><p>
                     Work orders are operations to do as part of a manufacturing order.
@@ -75,8 +76,9 @@
             <field name="view_mode">graph,pivot,list,form</field>
             <field name="domain">[('workcenter_id','=',active_id)]</field>
             <field name="context">{'search_default_thismonth':True}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     Overall Equipment Effectiveness: no working or blocked time
                 </p>
             </field>
@@ -90,8 +92,9 @@
                                    'search_default_quality': '1',
                                    'default_workcenter_id': active_id,
                                    'search_default_workcenter_id': [active_id]}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_empty_folder">
+              <p>
                 No productivity loss for this equipment
               </p>
             </field>
@@ -130,8 +133,9 @@
                                    'search_default_blocked': True,
                                    'search_default_filter_to_plan': True,
                                    'workcenter_to_plan_on': active_id}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     No work orders to do!
                 </p><p>
                     Work orders are operations to do as part of a manufacturing order.
@@ -390,8 +394,9 @@
                 (0, 0, {'view_mode': 'kanban', 'view_id': ref('mrp_workcenter_view_kanban')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('mrp_workcenter_view')})]"/>
             <field name="search_view_id" ref="view_mrp_workcenter_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a new work center
               </p><p>
                 Manufacturing operations are processed at work centers. A work center can
@@ -408,8 +413,9 @@
             <field name="view_mode">kanban,form</field>
             <field name="view_id" ref="mrp_workcenter_kanban"/>
             <field name="search_view_id" ref="view_mrp_workcenter_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a new work center
               </p><p>
                 Manufacturing operations are processed at work centers. A work center can
@@ -581,8 +587,9 @@
         <field name="view_mode">graph,pivot,list,form</field>
         <field name="domain">[]</field>
         <field name="context">{'search_default_workcenter_group': 1, 'search_default_loss_group': 2, 'create':False,'edit':False}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Overall Equipment Effectiveness: no working or blocked time
             </p>
         </field>

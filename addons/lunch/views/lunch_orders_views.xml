@@ -139,8 +139,9 @@
         <field name="view_mode">list,kanban,pivot</field>
         <field name="search_view_id" ref="lunch_order_view_search"/>
         <field name="context">{"search_default_is_mine":1, "search_default_group_by_date": 1, 'show_reorder_button': True}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-        <p class="o_view_nocontent_empty_folder">
+        <p>
             No previous order found
         </p><p>
             There is no previous order recorded. Click on "My Lunch" and then create a new lunch order.
@@ -154,8 +155,9 @@
         <field name="view_mode">list,kanban</field>
         <field name="search_view_id" ref="lunch_order_view_search"/>
         <field name="context">{"search_default_group_by_supplier":1, "search_default_date_filter":1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_empty_folder">
+          <p>
             Nothing to order today
           </p><p>
             Here you can see today's orders grouped by vendors.
@@ -169,8 +171,9 @@
         <field name="view_mode">list,kanban,pivot</field>
         <field name="search_view_id" ref="lunch_order_view_search"/>
         <field name="context">{"search_default_group_by_supplier":1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_empty_folder">
+          <p>
             No lunch order yet
           </p><p>
             Summary of all lunch orders, grouped by vendor and by date.

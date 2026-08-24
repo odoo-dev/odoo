@@ -112,8 +112,9 @@
         <field name="view_mode">list,kanban,form</field>
         <field name="search_view_id" ref="product_pricelist_view_search" />
         <field name="context">{"default_base":'list_price'}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
             Create a new pricelist
             </p><p>
             A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.

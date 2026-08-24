@@ -458,8 +458,9 @@
             'dialog_size':'medium',
             'allow_search_matching_applicants': 1
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No applications yet
             </p><p>
                 Odoo helps you track applicants in the recruitment
@@ -498,8 +499,9 @@
             'default_talent_pool_ids': active_ids,
             'search_default_talent_pool_ids': active_ids,
         }</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No Talents in the pool yet
             </p>
             <p>
@@ -523,8 +525,9 @@
         <field name="view_id" eval="False"/>
         <field name="search_view_id" ref="hr_applicant_view_search_bis"/>
         <field name="context">{'search_default_applicants': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No applications yet
             </p><p>
                 Odoo helps you track applicants in the recruitment
@@ -658,8 +661,9 @@
             (0, 0, {'view_mode': 'graph', 'view_id': ref('hr_applicant_view_graph')}),
             (0, 0, {'view_mode': 'pivot', 'view_id': ref('hr_applicant_view_pivot')})]"/>
         <field name="context">{'search_default_creation_month': 1, 'search_default_job': 2}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet!
             </p>
         </field>
@@ -674,8 +678,9 @@
             'search_default_department_id': [active_id],
             'default_department_id': active_id}
         </field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet!
             </p>
         </field>
@@ -691,8 +696,9 @@
             'search_default_job_id': [active_id],
             'default_job_id': active_id}
         </field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet!
             </p>
         </field>

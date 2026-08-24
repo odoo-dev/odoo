@@ -106,8 +106,9 @@
         <field name="domain">[('resource_id', '=', False)]</field>
         <field name="view_id" ref="resource_calendar_leaves_tree_inherit"/>
         <field name="context">{'search_default_filter_date': True}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No Public Holidays yet!
             </p>
             <p>

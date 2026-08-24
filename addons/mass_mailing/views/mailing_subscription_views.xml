@@ -95,8 +95,9 @@
             'search_default_group_by_opt_out_reason_id': 1,
         }</field>
         <field name="domain">[('opt_out', '=', True)]</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet.
             </p><p>
                 Come back later to discover why contacts unsubscribe.<br/>

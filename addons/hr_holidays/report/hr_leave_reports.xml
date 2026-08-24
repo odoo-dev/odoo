@@ -81,8 +81,9 @@
         <field name="search_view_id" ref="view_hr_holidays_filter_report"/>
         <field name="domain">[]</field>
         <field name="context">{'search_default_group_type': 1, 'search_default_approve': 1, 'search_default_validated': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
+            <p>
                 No Time off yet!
             </p>
             <p>
@@ -103,8 +104,9 @@
             'search_default_group_date_from': 'month',
         }
         </field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No data yet!
             </p>
         </field>

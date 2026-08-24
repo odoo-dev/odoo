@@ -91,8 +91,9 @@
         <field name="view_id" eval="False"/>
         <field name="domain">[]</field>
         <field name="context">{'search_default_group_by_account': 1}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Add a new payment method
             </p>
             <p>

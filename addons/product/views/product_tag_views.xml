@@ -61,8 +61,9 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" eval="False"/>
         <field name="context">{'create': True}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Define a new tag
           </p><p>
             Tags are used to search product for a given theme.

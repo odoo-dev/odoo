@@ -47,7 +47,7 @@
                         <p t-if="this.searchWord">No products found for <b>"<t t-out="this.searchWord"/>"</b> in this category.</p>
                          <div t-elif="!this.pos.selectedCategory" class="o_view_nocontent">
                             <div class="o_nocontent_help">
-                                <p class="o_view_nocontent_smiling_face">No Product Yet?</p>
+                                <p>No Product Yet?</p>
                                 <p>Scan a barcode to create automatically, or load our sample data.</p>
                                 <p >
                                     <button class="btn btn-lg btn-primary me-2" t-on-click="()=> this.doLoadSampleData.call()" t-att-disabled="this.doLoadSampleData.status === 'loading' ? 'disabled' : null">

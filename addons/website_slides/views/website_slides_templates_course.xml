@@ -502,7 +502,7 @@
 <template id="course_slides_list_placeholder" name="Course Placeholder Content">
     <div class="my-5 d-flex">
         <div class="mx-auto">
-            <img class="mx-auto mb-3" src="/web/static/img/smiling_face.svg"/>
+            <img class="mx-auto mb-3" src="/web/static/picto/empty_folder.svg"/>
             <div class="text-muted fw-bold">No lessons are available yet.</div>
         </div>
     </div>

@@ -313,8 +313,9 @@
             <field name="res_model">slide.channel</field>
             <field name="view_mode">kanban,list,form</field>
             <field name="view_id" ref="slide_channel_view_kanban"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     <strong>Create a course</strong>
                 </p>
                 <p>
@@ -330,8 +331,9 @@
             <field name="view_mode">list,graph,pivot,form</field>
             <field name="view_id" ref="slide_channel_view_tree_report"/>
             <field name="context">{"search_default_filter_published":1}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
+                <p>
                     <strong>Create a course</strong>
                 </p>
                 <p>

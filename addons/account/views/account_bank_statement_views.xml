@@ -71,8 +71,9 @@
             <field name="domain">[('journal_id.type', '=', 'bank')]</field>
             <field name="context">{'journal_type':'bank'}</field>
             <field name="search_view_id" ref="view_bank_statement_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Register a bank statement
               </p><p>
                 A bank statement is a summary of all financial transactions
@@ -92,8 +93,9 @@
             <field name="domain">[('journal_id.type', '=', 'credit')]</field>
             <field name="context">{'journal_type': 'credit'}</field>
             <field name="search_view_id" ref="view_bank_statement_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Register a bank statement
               </p><p>
                 A credit statement is a summary of all financial transactions
@@ -198,8 +200,9 @@
             <field name="search_view_id" ref="view_bank_statement_search"/>
             <field name="domain">[('journal_id.type', '=', 'cash')]</field>
             <field name="context">{'journal_type':'cash'}</field>
+            <field name="nocontent_picto_url">/web/static/picto/empty_folder.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a new cash log
               </p><p>
                 A Cash Register allows you to manage cash entries in your cash

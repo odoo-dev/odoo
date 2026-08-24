@@ -22,24 +22,6 @@
     .o_nocontent_help {
         @include o-nocontent-empty;
 
-        .o_view_nocontent_smiling_face:before {
-            @extend %o-nocontent-init-image;
-            width: 120px;
-            height: 140px;
-            background: transparent url(/web/static/img/smiling_face.svg) no-repeat center;
-        }
-
-        .o_view_nocontent_neutral_face:before {
-            @extend %o-nocontent-init-image;
-            width: 120px;
-            height: 140px;
-            background: transparent url(/web/static/img/neutral_face.svg) no-repeat center;
-        }
-
-        .o_view_nocontent_empty_folder:before {
-            @extend %o-nocontent-empty-document;
-        }
-
         .o_empty_custom_dashboard {
             min-height: 327px;
             margin-left: -$grid-gutter-width/2;
@@ -50,9 +32,8 @@
     }
 }
 
-// Very low selector specificity: applies to the inlined pictogram of a helper,
-// as well as to the plain <img> the pictograms are still referenced by outside
-// of the action helpers
+// Very low selector specificity: applies to the <img> of a help as well as to
+// the <svg> it is replaced by
 :where(.o_view_nocontent .o_picto),
 :where(.o_view_nocontent img[src^="/web/static/picto/"]) {
     opacity: 0.7;

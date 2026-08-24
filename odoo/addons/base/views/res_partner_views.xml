@@ -408,8 +408,9 @@
             <field name="view_mode">list,kanban,form</field>
             <field name="context">{'res_partner_search_mode': 'customer'}</field>
             <field name="search_view_id" ref="view_res_partner_filter"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a Contact in your address book
               </p><p>
                 Odoo helps you track all activities related to your contacts.
@@ -443,8 +444,9 @@
             <field name="domain">[]</field>
             <field name="context">{'res_partner_search_mode': 'customer'}</field>
             <field name="filter" eval="True"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a new customer in your address book
               </p><p>
                 Odoo helps you easily track all activities related to a customer.
@@ -477,8 +479,9 @@
             <field name="view_mode">kanban,list,form</field>
             <field name="context">{'res_partner_search_mode': 'supplier'}</field>
             <field name="filter" eval="True"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a new vendor in your address book
               </p><p>
                 Odoo helps you easily track all activities related to a vendor.
@@ -556,8 +559,9 @@
             <field name="name">Contact Tags</field>
             <field name="res_model">res.partner.category</field>
             <field name="search_view_id" ref="res_partner_category_view_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create a Contact Tag
               </p><p>
                 Assign tags to your contacts to organize, filter and track them.
@@ -612,8 +616,9 @@
             <field name="res_model">res.partner.industry</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="res_partner_industry_view_search"/>
+            <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
             <field name="help" type="html">
-              <p class="o_view_nocontent_smiling_face">
+              <p>
                 Create an Industry
               </p><p>
                 Specify industries to classify your contacts and draw up reports.

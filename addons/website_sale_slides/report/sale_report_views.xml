@@ -18,8 +18,9 @@
         <field name="domain">[("product_id.channel_ids", "!=", False)]</field>
         <field name="context">{'group_by': ['date', 'product_id'], 'pivot_measures': ['price_total']}</field>
         <field name="view_id" ref="sale_report_view_graph_slides"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No sales data yet!
             </p>
             <p>Come back once your courses starts selling to report on your revenues.</p>

@@ -364,8 +364,9 @@
         <field name="path">fleet</field>
         <field name="res_model">fleet.vehicle</field>
         <field name="view_mode">kanban,list,form,pivot,activity</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Ready to manage your fleet more efficiently?
           </p><p>
             Let's create your first vehicle.
@@ -434,8 +435,9 @@
         <field name="name">Odometers</field>
         <field name="res_model">fleet.vehicle.odometer</field>
         <field name="view_mode">list,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new odometer log
           </p><p>
             You can add various odometer entries for all vehicles.
@@ -494,8 +496,9 @@
         <field name="view_mode">list,form</field>
         <field name="domain">[('category', '=', 'contract')]</field>
         <field name="context">{"default_category" : 'contract'}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new type of contract
           </p><p>
             Contract types define the kinds of vehicle agreements you can track.
@@ -512,8 +515,9 @@
         <field name="view_mode">list,form</field>
         <field name="domain">[('category', '=', 'service')]</field>
         <field name="context">{"default_category" : 'service'}</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new type of service
           </p><p>
             Service types define categories of vehicle maintenance and servicing.
@@ -556,8 +560,9 @@
         <field name="name">Status</field>
         <field name="res_model">fleet.vehicle.state</field>
         <field name="view_mode">list,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Create a new vehicle status
           </p><p>
             You can customize available status to track the evolution of
@@ -597,8 +602,9 @@
     <record id="fleet_vehicle_tag_action" model="ir.actions.act_window">
         <field name="name">Tags</field>
         <field name="res_model">fleet.vehicle.tag</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Add a new tag
             </p>
         </field>

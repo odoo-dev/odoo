@@ -4,8 +4,9 @@
         <field name="name">Operations Types</field>
         <field name="res_model">stock.picking.type</field>
         <field name="view_mode">list,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 No transfer found. Let's create one!
             </p><p>
                 Transfers allow you to move products from one location to another.
@@ -18,8 +19,9 @@
         <field name="path">inventory</field>
         <field name="res_model">stock.picking.type</field>
         <field name="view_mode">kanban,form</field>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
             Create a new operation type
             </p><p>
             The operation type system allows you to assign each stock

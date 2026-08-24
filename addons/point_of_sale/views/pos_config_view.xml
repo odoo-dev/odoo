@@ -147,8 +147,9 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="domain"></field>
         <field name="search_view_id" ref="view_pos_config_search" />
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new PoS
             </p><p>
                 Configure at least one Point of Sale.
@@ -162,8 +163,9 @@
         <field name="view_mode">list,form</field>
         <field name="domain"></field>
         <field name="search_view_id" ref="view_pos_config_search" />
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create a new PoS
             </p><p>
                 Configure at least one Point of Sale.
@@ -175,8 +177,9 @@
         <field name="name">Attributes</field>
         <field name="res_model">product.attribute</field>
         <field name="view_id" ref="product.attribute_tree_view" />
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p>
                 Create product attributes
             </p><p>
                 Product attribute allow you to manage the different variation possible for a product. 

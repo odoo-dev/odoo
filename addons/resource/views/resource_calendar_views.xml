@@ -99,8 +99,9 @@
         <field name="domain">['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]</field>
         <field name="view_id" eval="False"/>
         <field name="search_view_id" ref="view_resource_calendar_search"/>
+        <field name="nocontent_picto_url">/web/static/picto/poof.svg</field>
         <field name="help" type="html">
-          <p class="o_view_nocontent_smiling_face">
+          <p>
             Define working hours and time table that could be scheduled to your project members
           </p>
         </field>
