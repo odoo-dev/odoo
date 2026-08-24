@@ -60,6 +60,10 @@ class ResConfigSettings(models.TransientModel):
 
     tax_calculation_rounding_method = fields.Selection(
         related='company_id.tax_calculation_rounding_method', string='Tax calculation rounding method', readonly=False)
+    tax_on_margin_enabled = fields.Boolean(
+        related='company_id.tax_on_margin_enabled',
+        readonly=False,
+    )
     account_journal_suspense_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Bank Suspense',

@@ -32,6 +32,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'wizard/account_move_reversal_view.xml',
         'wizard/account_resequence_views.xml',
         'wizard/account_payment_register_views.xml',
+        'wizard/account_tax_margin_wizard_views.xml',
         'views/account_move_views.xml',
         'wizard/setup_wizards_view.xml',
         'views/account_account_views.xml',

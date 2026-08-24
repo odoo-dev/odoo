@@ -819,6 +819,12 @@
                         <button name="preview_invoice" type="object" string="Preview" data-hotkey="o"
                                 title="Preview invoice"
                                 invisible="move_type not in ('out_invoice', 'out_refund') or state in ('draft', 'cancel')"/>
+                        <button name="action_open_tax_on_margin_wizard"
+                                type="object"
+                                string="Compute Tax on Margin"
+                                class="btn-secondary"
+                                groups="account.group_account_invoice"
+                                invisible="not id or state != 'posted' or move_type != 'out_invoice' or not tax_on_margin_enabled or not has_tax_on_margin_lines"/>
                         <!-- Reverse -->
                         <button name="%(action_view_account_move_reversal)d" string="Reverse Entry"
                                 type="action" groups="account.group_account_invoice" data-hotkey="z"
@@ -1044,6 +1050,8 @@
                         <field name="id" invisible="1"/>
                         <field name="state" invisible="1"/>
                         <field name="company_id" invisible="1"/>
+                        <field name="tax_on_margin_enabled" invisible="1"/>
+                        <field name="has_tax_on_margin_lines" invisible="1"/>
                         <field name="journal_id" invisible="1"/>
                         <field name="show_name_warning" invisible="1"/>
                         <field name="posted_before" invisible="1"/>
@@ -1329,6 +1337,7 @@
                                         <!-- required for @api.onchange('product_id') -->
                                         <field name="product_uom_id" column_invisible="True"/>
                                         <field name="price_unit" string="Price"/>
+                                        <field name="has_tax_on_margin" column_invisible="True"/>
                                         <field name="discount" width="50px" string="Disc.%" optional="hide"/>
                                         <field name="tax_ids" widget="many2many_tax_tags"
                                                domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id)]"
@@ -1339,6 +1348,11 @@
                                                }"
                                                options="{'no_create': True}"
                                                optional="show"/>
+                                        <field name="margin_amount"
+                                               string="Gross Margin/Unit"
+                                               optional="show"
+                                               required="has_tax_on_margin and parent.tax_on_margin_enabled"
+                                               invisible="not has_tax_on_margin or not parent.tax_on_margin_enabled"/>
                                         <field name="deductible_percentage"
                                                column_invisible="parent.move_type not in ('in_invoice', 'in_refund', 'in_receipt')"
                                                string="Professional"
@@ -1443,6 +1457,10 @@
                                                 <field name="quantity"/>
                                                 <field name="product_uom_id" groups="uom.group_uom" widget="many2one_uom"/>
                                                 <field name="price_unit"/>
+                                                <field name="has_tax_on_margin" invisible="1"/>
+                                                <field name="margin_amount"
+                                                       required="has_tax_on_margin and parent.tax_on_margin_enabled"
+                                                       invisible="not has_tax_on_margin or not parent.tax_on_margin_enabled"/>
                                                 <field name="discount" string="Disc.%"/>
                                             </group>
                                             <group>

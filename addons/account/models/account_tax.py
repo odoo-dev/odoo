@@ -244,6 +244,18 @@ class AccountTax(models.Model):
         copy=False,
         readonly=True,
     )
+    is_tax_on_margin = fields.Boolean(
+        string="Tax on Margin",
+        help="Use this tax to create a VAT regularization entry from the gross margin entered on the invoice line.",
+    )
+
+    @api.constrains('is_tax_on_margin', 'amount_type', 'price_include_override')
+    def _check_tax_on_margin_configuration(self):
+        for tax in self.filtered('is_tax_on_margin'):
+            if tax.amount_type != 'percent':
+                raise ValidationError(self.env._("Tax on Margin can only be enabled on percentage taxes."))
+            if tax.price_include_override != 'tax_included':
+                raise ValidationError(self.env._("Tax on Margin must be explicitly included in the price."))
 
     @api.constrains('company_id', 'name', 'type_tax_use', 'tax_scope', 'country_id')
     def _constrains_name(self):
@@ -961,6 +973,7 @@ class AccountTax(models.Model):
             if batch:
                 same_batch = (
                     tax.amount_type == batch[0].amount_type
+                    and tax.is_tax_on_margin == batch[0].is_tax_on_margin
                     and (special_mode or tax._is_price_included(document_tax_mode) == batch[0]._is_price_included(document_tax_mode))
                     and tax.include_base_amount == batch[0].include_base_amount
                     and (
@@ -1114,6 +1127,10 @@ class AccountTax(models.Model):
         :return:                    The tax amount.
         """
         self.ensure_one()
+        if self.is_tax_on_margin:
+            total_percentage = sum(tax.amount for tax in batch) / 100.0
+            to_price_excluded_factor = 1 / (1 + total_percentage) if total_percentage != -1 else 0.0
+            return evaluation_context['taxable_margin'] * to_price_excluded_factor * self.amount / 100.0
         if self.amount_type == 'percent':
             total_percentage = sum(tax.amount for tax in batch) / 100.0
             to_price_excluded_factor = 1 / (1 + total_percentage) if total_percentage != -1 else 0.0
@@ -1134,6 +1151,8 @@ class AccountTax(models.Model):
         :return:                    The tax amount.
         """
         self.ensure_one()
+        if self.is_tax_on_margin:
+            return evaluation_context['taxable_margin'] * self.amount / 100.0
         if self.amount_type == 'percent':
             return raw_base * self.amount / 100.0
 
@@ -1154,6 +1173,7 @@ class AccountTax(models.Model):
         manual_tax_amounts=None,
         filter_tax_function=None,
         document_tax_mode=None,
+        margin_amount=0.0,
     ):
         """ Compute the tax/base amounts for the current taxes.
 
@@ -1238,6 +1258,9 @@ class AccountTax(models.Model):
         raw_base = quantity * price_unit
         if rounding_method == 'round_per_line':
             raw_base = float_round(raw_base, precision_rounding=precision_rounding)
+        taxable_margin = max(margin_amount, 0.0) * abs(quantity)
+        if raw_base < 0.0:
+            taxable_margin = -taxable_margin
 
         evaluation_context = {
             'product': sorted_taxes._eval_taxes_computation_turn_to_product_values(product=product),
@@ -1247,6 +1270,7 @@ class AccountTax(models.Model):
             'raw_base': raw_base,
             'special_mode': special_mode,
             'document_tax_mode': document_tax_mode,
+            'taxable_margin': taxable_margin,
         }
 
         # Define the order in which the taxes must be evaluated.
@@ -1320,24 +1344,34 @@ class AccountTax(models.Model):
         else:
             total_included = total_excluded = raw_base
 
+        taxes_data_result = []
+        for tax_data in taxes_data_list:
+            tax = tax_data['tax']
+            base_amount = tax_data['base']
+            if tax.is_tax_on_margin:
+                base_amount = taxable_margin
+                if tax_data['price_include'] and special_mode in (False, 'total_included'):
+                    base_amount -= sum(
+                        taxes_data[batch_tax.id]['tax_amount']
+                        for batch_tax in tax_data['batch']
+                    )
+            taxes_data_result.append({
+                'tax': tax,
+                'taxes': tax_data['taxes'],
+                'group': batching_results['group_per_tax'].get(tax.id) or self.env['account.tax'],
+                'batch': batching_results['batch_per_tax'][tax.id],
+                'tax_amount': tax_data['tax_amount'],
+                'price_include': tax_data['price_include'],
+                'original_price_include': tax_data['original_price_include'],
+                'raw_base': raw_base,
+                'base_amount': base_amount,
+                'is_reverse_charge': tax_data.get('is_reverse_charge', False),
+            })
+
         return {
             'total_excluded': total_excluded,
             'total_included': total_included,
-            'taxes_data': [
-                {
-                    'tax': tax_data['tax'],
-                    'taxes': tax_data['taxes'],
-                    'group': batching_results['group_per_tax'].get(tax_data['tax'].id) or self.env['account.tax'],
-                    'batch': batching_results['batch_per_tax'][tax_data['tax'].id],
-                    'tax_amount': tax_data['tax_amount'],
-                    'price_include': tax_data['price_include'],
-                    'original_price_include': tax_data['original_price_include'],
-                    'raw_base': raw_base,
-                    'base_amount': tax_data['base'],
-                    'is_reverse_charge': tax_data.get('is_reverse_charge', False),
-                }
-                for tax_data in taxes_data_list
-            ],
+            'taxes_data': taxes_data_result,
         }
 
     # -------------------------------------------------------------------------
@@ -1634,6 +1668,7 @@ class AccountTax(models.Model):
             'price_unit': load('price_unit', 0.0),
             'quantity': load('quantity', 0.0),
             'discount': load('discount', 0.0),
+            'margin_amount': load('margin_amount', 0.0),
             'currency_id': currency,
 
             # The special_mode for the taxes computation:
@@ -1785,6 +1820,7 @@ class AccountTax(models.Model):
             special_mode=base_line['special_mode'],
             filter_tax_function=base_line['filter_tax_function'],
             document_tax_mode=base_line['document_tax_mode'],
+            margin_amount=base_line['margin_amount'],
         )
 
         # Only python side for professional with reverse charge
@@ -3484,6 +3520,7 @@ class AccountTax(models.Model):
                 price_unit=base_line['quantity'] * price_unit_after_discount,
                 quantity=1.0,
                 discount=0.0,
+                margin_amount=base_line['quantity'] * base_line['margin_amount'],
             )
             grouping_key = {'tax_ids': new_base_line['tax_ids']}
             if grouping_function:
@@ -3497,6 +3534,7 @@ class AccountTax(models.Model):
             target_base_line = base_line_map.get(grouping_key)
             if target_base_line:
                 target_base_line['price_unit'] += new_base_line['price_unit']
+                target_base_line['margin_amount'] += new_base_line['margin_amount']
                 target_base_line['tax_details'] = self._merge_tax_details(
                     tax_details_1=target_base_line['tax_details'],
                     tax_details_2=base_line['tax_details'],

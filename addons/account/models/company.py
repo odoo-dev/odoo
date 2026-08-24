@@ -131,6 +131,10 @@ class ResCompany(models.Model):
         ('round_globally', 'Round per Tax'),
         ('round_per_line', 'Round per Line'),
         ], default='round_globally', string='Tax Calculation Rounding Method')
+    tax_on_margin_enabled = fields.Boolean(
+        string="Tax on Margin",
+        help="Enable VAT regularization entries based on customer invoice-line margins.",
+    )
     currency_exchange_journal_id = fields.Many2one('account.journal', string="Exchange Gain or Loss Journal", domain=[('type', '=', 'general')])
     income_currency_exchange_account_id = fields.Many2one(
         comodel_name='account.account',

@@ -2,6 +2,7 @@
 # pylint: disable=C0326
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.exceptions import UserError
 from odoo.tests import tagged, Form, freeze_time
 
 
@@ -122,6 +123,108 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         invoice.invoice_line_ids[0].tax_ids = self.percent_tax_1
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id'), [
             {'name': self.percent_tax_1.name, 'tax_base_amount': -100, 'balance': -21, 'tax_ids': []},
+        ])
+
+    def _create_margin_tax(self, amount=21):
+        margin_tax = self.env['account.tax'].create({
+            'name': f'{amount}% Tax on Margin',
+            'amount_type': 'percent',
+            'amount': amount,
+            'type_tax_use': 'sale',
+            'price_include_override': 'tax_included',
+            'is_tax_on_margin': True,
+        })
+        margin_tax.invoice_repartition_line_ids.filtered(
+            lambda line: line.repartition_type == 'base'
+        ).tag_ids = self.base_tag
+        margin_tax.invoice_repartition_line_ids.filtered(
+            lambda line: line.repartition_type == 'tax'
+        ).write({
+            'account_id': self.company_data['default_account_tax_sale'].id,
+            'tag_ids': [Command.set(self.tax_tag.ids)],
+        })
+        return margin_tax
+
+    def test_tax_on_margin_creates_adjustment_entry(self):
+        self.env.company.write({
+            'tax_on_margin_enabled': True,
+            'automatic_entry_default_journal_id': self.company_data['default_journal_misc'].id,
+        })
+        margin_tax = self._create_margin_tax()
+        invoice = self._create_invoice_taxes_per_line([(8500, margin_tax)])
+        invoice.invoice_line_ids.margin_amount = 500
+
+        self.assertFalse(invoice.line_ids.filtered('tax_line_id'))
+        self.assertRecordValues(invoice, [{
+            'amount_untaxed': 8500.0,
+            'amount_tax': 0.0,
+            'amount_total': 8500.0,
+        }])
+        invoice.action_post()
+
+        action = invoice.action_open_tax_on_margin_wizard()
+        with Form(self.env[action['res_model']].with_context(action['context'])) as wizard_form:
+            wizard = wizard_form.save()
+
+        self.assertEqual(wizard.move_line_ids, invoice.invoice_line_ids)
+        result = wizard.action_complete()
+        adjustment = self.env['account.move'].browse(result['res_id'])
+
+        self.assertEqual(adjustment.state, 'draft')
+        self.assertEqual(adjustment.adjusting_entry_origin_move_ids, invoice)
+        self.assertEqual(invoice.adjusting_entries_move_ids, adjustment)
+        self.assertRecordValues(adjustment.line_ids.sorted('balance', reverse=True), [
+            {
+                'name': 'Negated Margin Base',
+                'balance': 500.0,
+                'account_id': self.company_data['default_account_revenue'].id,
+                'tax_ids': [],
+                'tax_tag_ids': [],
+                'tax_base_amount': 0.0,
+            },
+            {
+                'name': margin_tax.name,
+                'balance': -86.78,
+                'account_id': self.company_data['default_account_tax_sale'].id,
+                'tax_ids': [],
+                'tax_tag_ids': self.tax_tag.ids,
+                'tax_base_amount': -413.22,
+            },
+            {
+                'name': 'Taxable Margin',
+                'balance': -413.22,
+                'account_id': self.company_data['default_account_revenue'].id,
+                'tax_ids': margin_tax.ids,
+                'tax_tag_ids': self.base_tag.ids,
+                'tax_base_amount': 0.0,
+            },
+        ])
+        with self.assertRaisesRegex(UserError, "already exists"):
+            wizard.action_complete()
+
+    def test_tax_on_margin_clamps_before_aggregation(self):
+        self.env.company.write({
+            'tax_on_margin_enabled': True,
+            'automatic_entry_default_journal_id': self.company_data['default_journal_misc'].id,
+        })
+        margin_tax = self._create_margin_tax()
+        invoice = self._create_invoice_taxes_per_line([(1000, margin_tax)] * 5)
+        for line, margin in zip(invoice.invoice_line_ids, (500, -100, 200, 0, 50)):
+            line.margin_amount = margin
+        invoice.action_post()
+
+        wizard = self.env['account.move.tax.margin.wizard'].with_context(
+            active_model='account.move',
+            active_id=invoice.id,
+            active_ids=invoice.ids,
+        ).create({})
+        result = wizard.action_complete()
+        adjustment = self.env['account.move'].browse(result['res_id'])
+
+        self.assertRecordValues(adjustment.line_ids.sorted('balance', reverse=True), [
+            {'name': 'Negated Margin Base', 'balance': 750.0},
+            {'name': margin_tax.name, 'balance': -130.17},
+            {'name': 'Taxable Margin', 'balance': -619.83},
         ])
 
     def test_one_tax_per_line(self):

@@ -192,6 +192,8 @@ class AccountMove(models.Model):
         compute='_compute_company_id', inverse='_inverse_company_id', store=True, readonly=False, precompute=True,
         index=True,
     )
+    tax_on_margin_enabled = fields.Boolean(related='company_id.tax_on_margin_enabled')
+    has_tax_on_margin_lines = fields.Boolean(compute='_compute_has_tax_on_margin_lines')
     line_ids = fields.One2many(
         'account.move.line',
         'move_id',
@@ -1669,6 +1671,8 @@ class AccountMove(models.Model):
             'special_mode': False if is_invoice else 'total_excluded',
             'name': product_line.name,
         }
+        if is_invoice and product_line.has_tax_on_margin:
+            kwargs['filter_tax_function'] = lambda tax: not tax.is_tax_on_margin
 
         computation_key = (product_line.extra_tax_data or {}).get('computation_key', '')
         if computation_key.startswith('global_discount'):
@@ -1920,6 +1924,34 @@ class AccountMove(models.Model):
             else:
                 # Non-invoice moves don't support that field (because of multicurrency: all lines of the invoice share the same currency)
                 move.tax_totals = None
+
+    def _get_invoice_report_tax_totals(self):
+        """Return customer-facing totals without exposing margin-scheme tax details."""
+        self.ensure_one()
+        if not self.invoice_line_ids.filtered('has_tax_on_margin'):
+            return self.tax_totals
+
+        AccountTax = self.env['account.tax']
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines(round_from_tax_lines=False)
+        for base_line in base_lines:
+            if base_line['tax_ids'].filtered('is_tax_on_margin'):
+                base_line['filter_tax_function'] = lambda tax: not tax.is_tax_on_margin
+
+        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
+        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        tax_totals = AccountTax._get_tax_totals_summary(
+            base_lines=base_lines,
+            currency=self.currency_id,
+            company=self.company_id,
+            cash_rounding=self.invoice_cash_rounding_id,
+        )
+        tax_totals['display_in_company_currency'] = (
+            self.company_id.display_invoice_tax_company_currency
+            and self.company_currency_id != self.currency_id
+            and tax_totals['has_tax_groups']
+            and self.is_sale_document(include_receipts=True)
+        )
+        return tax_totals
 
     @api.depends('show_payment_term_details')
     def _compute_payment_term_details(self):
@@ -6501,6 +6533,47 @@ class AccountMove(models.Model):
         if any(m.payment_state == 'blocked' for m in self):
             raise UserError(self.env._("You cannot register payments for blocked invoices."))
         return self.line_ids.action_register_payment()
+
+    @api.depends('invoice_line_ids.has_tax_on_margin')
+    def _compute_has_tax_on_margin_lines(self):
+        for move in self:
+            move.has_tax_on_margin_lines = bool(move.invoice_line_ids.filtered('has_tax_on_margin'))
+
+    def _get_tax_on_margin_invoice_lines(self):
+        return self.invoice_line_ids.filtered(
+            lambda line: line.display_type == 'product' and line.has_tax_on_margin
+        )
+
+    def _validate_tax_on_margin_computation(self):
+        if len(self) != 1 or self.move_type != 'out_invoice' or self.state != 'posted':
+            raise UserError(_(
+                "Tax on Margin can only be computed on one posted customer invoice."
+            ))
+        if not self.company_id.tax_on_margin_enabled:
+            raise UserError(_(
+                "Enable Tax on Margin in the Accounting settings of %(company)s first.",
+                company=self.company_id.display_name,
+            ))
+        if not self._get_tax_on_margin_invoice_lines():
+            raise UserError(_(
+                "Select a Tax on Margin on at least one invoice line."
+            ))
+
+    def action_open_tax_on_margin_wizard(self):
+        self.ensure_one()
+        self._validate_tax_on_margin_computation()
+        return {
+            'name': _("Compute Tax on Margin"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move.tax.margin.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_model': 'account.move',
+                'active_id': self.id,
+                'active_ids': self.ids,
+            },
+        }
 
     def action_duplicate(self):
         # offer the possibility to duplicate thanks to a button instead of a hidden menu, which is more visible

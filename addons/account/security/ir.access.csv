@@ -93,6 +93,7 @@ access_account_payment_readonly,account.payment,account.payment,account.group_ac
 access_account_payment,account.payment,account.payment,account.group_account_invoice,crud,
 account_payment_comp_rule,Account payment company rule,account.payment,,crud,"[('company_id', 'in', company_ids)]"
 access_account_payment_register,access.account.payment.register,account.payment.register,account.group_account_invoice,cru,
+access_account_move_tax_margin_wizard,account.move.tax.margin.wizard,account.move.tax.margin.wizard,account.group_account_invoice,cru,
 access_account_automatic_entry_wizard,access.account.automatic.entry.wizard,account.automatic.entry.wizard,account.group_account_user,cru,
 access_account_autopost_bills_wizard,access.account.autopost.bills.wizard,account.autopost.bills.wizard,account.group_account_invoice,cru,
 access_account_resequence,access.account.resequence.wizard,account.resequence.wizard,account.group_account_manager,cru,
