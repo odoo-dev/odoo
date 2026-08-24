@@ -24,7 +24,7 @@ export class ForecastedWarehouseFilter extends Component {
     get warehousesItems() {
         return this.warehouses.map((warehouse) => ({
             id: warehouse.id,
-            label: warehouse.name,
+            label: warehouse.display_name,
             onSelected: () => this._onSelected(warehouse.id),
         }));
     }

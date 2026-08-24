@@ -36,8 +36,8 @@ export class StockForecasted extends Component {
             this.context.active_id = this.props.action.params.active_id;
             this.reloadReport();
         }
-        this.warehouses = proxy([]);
-        this.variants = proxy([]);
+        this.warehouses = [];
+        this.variants = [];
 
         onWillStart(this._getReportValues);
     }
@@ -46,13 +46,9 @@ export class StockForecasted extends Component {
         await this._getResModel();
         const isTemplate = !this.resModel || this.resModel === 'product.template';
         this.reportModelName = `stock.forecasted_product_${isTemplate ? "template" : "product"}`;
-        await this._loadWarehouses();
-        if (this.context.has_variants) {
-            await this._loadVariants();
-        }
         const reportValues = await this.orm.call(this.reportModelName, "get_report_values", [], {
             context: this.context,
-            docids: [this.variantId || this.productId],
+            docids: [this.productId],
         });
         this.docs = {
             ...reportValues.docs,
@@ -60,6 +56,10 @@ export class StockForecasted extends Component {
             lead_horizon_date: this.context.lead_horizon_date,
             qty_to_order: this.context.qty_to_order,
         };
+        await this._loadWarehouses();
+        if (this.context.has_variants) {
+            await this._loadVariants();
+        }
     }
 
     async _getResModel(){
@@ -85,11 +85,11 @@ export class StockForecasted extends Component {
         }
     }
 
-    async _loadWarehouses() {
-        const warehouses = await this.orm.searchRead("stock.warehouse", [], ["id", "name"]);
+    _loadWarehouses() {
+        const warehouses = this.docs.warehouses
         this.warehouses =
             warehouses.length > 1
-                ? [{ id: 0, name: _t("All Warehouses") }, ...warehouses]
+                ? [{ id: 0, display_name: _t("All Warehouses") }, ...warehouses]
                 : warehouses;
 
         // If no warehouse is selected by the user, set a default.
@@ -98,12 +98,8 @@ export class StockForecasted extends Component {
         }
     }
 
-    async _loadVariants() {
-        const variants = await this.orm.searchRead(
-            "product.product",
-            [["product_tmpl_id", "=", this.productId]],
-            ["id", "display_name"]
-        );
+    _loadVariants() {
+        const variants = this.docs.product_variants
         this.variants = [{ id: 0, display_name: _t("All Variants") }, ...variants];
 
         // If no variant is selected by the user, set a default.
@@ -112,20 +108,12 @@ export class StockForecasted extends Component {
         }
     }
 
-    async updateWarehouse(id) {
-        const hasPreviousValue = this.warehouseId !== undefined;
+    updateWarehouse(id) {
         this.context.warehouse_id = id;
-        if (hasPreviousValue) {
-            await this.reloadReport();
-        }
     }
 
-    async updateVariant(id) {
-        const hasPreviousValue = this.variantId !== undefined;
+    updateVariant(id) {
         this.context.variant_id = id;
-        if (hasPreviousValue) {
-            await this.reloadReport();
-        }
     }
 
     async reloadReport() {
@@ -152,6 +140,29 @@ export class StockForecasted extends Component {
         return this.warehouseId === 0
             ? this.warehouses.filter(({ id }) => id > 0).map(({ id }) => id)
             : [this.warehouseId];
+    }
+
+    get filteredDocs() {
+        const { variant_id: variant, warehouse_id: warehouse } = this.context;
+
+        if (!variant && !warehouse) {
+            return this.docs;
+        }
+        const filteredDocs = {
+            ...this.docs,
+            lines: this.docs.lines.filter((l) => (!variant || l.product.id === variant) && (!warehouse || l.warehouse_id === warehouse)),
+            product: Object.fromEntries(
+                Object.entries(this.docs.product).filter(([key]) => {
+                    const[productId, warehouseId] = key.split("_").map(Number);
+                    return (
+                        (!variant || productId === variant) &&
+                        (!warehouse || warehouseId === warehouse)
+                    );
+                })
+            ),
+            product_variants_ids : variant ? [variant] : this.docs.product_variant_ids,
+        };
+        return filteredDocs;
     }
 
     get graphDomain() {

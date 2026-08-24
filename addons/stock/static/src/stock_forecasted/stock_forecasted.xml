@@ -13,7 +13,7 @@
             </t>
         </ControlPanel>
         <div class="o-content pt-3 container-fluid overflow-auto o_stock_forecasted_page">
-            <ForecastedHeader docs="this.docs" openView.bind="this.openView"
+            <ForecastedHeader docs="this.filteredDocs" openView.bind="this.openView"
                 selectedWarehouseIds="this.selectedWarehouseIds"/>
             <View type="'graph'"
                 viewId="this.stock_report_view_graph"
@@ -23,7 +23,7 @@
                 context="{fill_temporal: false}"
                 info="this.graphInfo"
                 useSampleModel="true"/>
-            <ForecastedDetails docs="this.docs" openView.bind="this.openView"
+            <ForecastedDetails docs="this.filteredDocs" openView.bind="this.openView"
                 reloadReport.bind="this.reloadReport"
                 warehouses="this.warehouses"/>
         </div>

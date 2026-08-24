@@ -4,7 +4,7 @@
     <t t-name="stock.ForecastedWarehouseFilter">
         <Dropdown items="this.warehousesItems">
             <button class="btn btn-secondary text-truncate" style="max-width: 30ch">
-                <span class="oi" data-icon="home"/> Warehouse: <t t-out="this.activeWarehouse.name"/>
+                <span class="oi" data-icon="home"/> Warehouse: <t t-out="this.activeWarehouse.display_name"/>
             </button>
         </Dropdown>
     </t>
