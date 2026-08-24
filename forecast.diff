@@ -1,0 +1,1894 @@
+diff --git a/addons/mrp/report/mrp_report_mo_overview.py b/addons/mrp/report/mrp_report_mo_overview.py
+index 457a33168aa8..726d651e9fd6 100644
+--- a/addons/mrp/report/mrp_report_mo_overview.py
++++ b/addons/mrp/report/mrp_report_mo_overview.py
+@@ -672,7 +672,8 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
+         unknown_products = products.filtered(lambda product: product.id not in replenish_data.get('products', {}))
+         if unknown_products:
+             location_ids = self._get_location_ids(production, replenish_data)
+-            forecast_lines = self.env['stock.forecasted_product_product']._get_report_lines(False, unknown_products.ids, location_ids, production.location_src_id, read=False)
++            warehouse_by_location = defaultdict(lambda: production.warehouse_id.id)
++            forecast_lines = self.env['stock.forecasted_product_product']._get_report_lines(False, unknown_products.ids, location_ids, production.warehouse_id.lot_stock_id, warehouse_by_location, read=False)
+             forecast_lines = self._add_origins_to_forecast(forecast_lines)
+             for product in unknown_products:
+                 extra_docs = self._get_extra_replenishments(product)
+diff --git a/addons/mrp/report/stock_forecasted.py b/addons/mrp/report/stock_forecasted.py
+index ed8586821bef..0e6895acc4af 100644
+--- a/addons/mrp/report/stock_forecasted.py
++++ b/addons/mrp/report/stock_forecasted.py
+@@ -7,8 +7,8 @@ from odoo import api, models
+ class StockForecasted_Product_Product(models.AbstractModel):
+     _inherit = 'stock.forecasted_product_product'
+ 
+-    def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
+-        line = super()._prepare_report_line(quantity, move_out, move_in, replenishment_filled, product, reserved_move, in_transit, read)
++    def _prepare_report_line(self, quantity, move_out=None, move_in=None, warehouse_id=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
++        line = super()._prepare_report_line(quantity, move_out, move_in, warehouse_id, replenishment_filled, product, reserved_move, in_transit, read)
+ 
+         if not move_out or not move_out.raw_material_production_id or not read:
+             return line
+@@ -32,8 +32,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
+             ('raw_material_production_id', '!=', False),
+             ('location_id', 'in', wh_location_ids),
+         ]
+-        in_product_qty = {k.id: v for k, v in self.env['mrp.production'].sudo()._read_group(in_domain, aggregates=['product_qty:sum'], groupby=['product_id'])}
+-        out_product_qty = {k.id: v for k, v in self.env['stock.move']._read_group(out_domain, aggregates=['product_qty:sum'], groupby=['product_id'])}
++        in_product_qty = {(f'{k.id}_{v.id}'): s for k, v, s in self.env['mrp.production'].sudo()._read_group(in_domain, aggregates=['product_qty:sum'], groupby=['product_id', 'warehouse_id'])}
++        out_product_qty = {(f'{k.id}_{v.id}'): s for k, v, s in self.env['stock.move']._read_group(out_domain, aggregates=['product_qty:sum'], groupby=['product_id', 'warehouse_id'])}
+ 
+         self._add_product_quantities(res, product_template_ids, product_ids, 'draft_production_qty', in_product_qty, out_product_qty)
+ 
+diff --git a/addons/mrp/static/src/mrp_forecasted/forecasted_buttons.js b/addons/mrp/static/src/mrp_forecasted/forecasted_buttons.js
+index 7a16ef936788..81fe57ef6753 100644
+--- a/addons/mrp/static/src/mrp_forecasted/forecasted_buttons.js
++++ b/addons/mrp/static/src/mrp_forecasted/forecasted_buttons.js
+@@ -1,10 +1,12 @@
+ import { ForecastedButtons } from "@stock/stock_forecasted/forecasted_buttons";
++import { useService } from "@web/core/utils/hooks";
+ import { patch } from "@web/core/utils/patch";
+ import { onWillStart } from "@odoo/owl";
+ 
+ patch(ForecastedButtons.prototype, {
+     setup() {
+         super.setup();
++        this.orm = useService("orm");
+         onWillStart(async () =>{
+             const fields = this.resModel === "product.template" ? ['bom_ids'] : ['bom_ids', 'variant_bom_ids'];
+             const res = (await this.orm.call(this.resModel, 'read', [this.productId], { fields }))[0];
+diff --git a/addons/mrp/static/src/mrp_forecasted/forecasted_details.xml b/addons/mrp/static/src/mrp_forecasted/forecasted_details.xml
+index 49d35e1d4d83..fd81e6955248 100644
+--- a/addons/mrp/static/src/mrp_forecasted/forecasted_details.xml
++++ b/addons/mrp/static/src/mrp_forecasted/forecasted_details.xml
+@@ -2,7 +2,8 @@
+ <templates id="template">
+     <t t-name="mrp.ForecastedDetails" t-inherit="stock.ForecastedDetails" t-inherit-mode="extension">
+         <xpath expr="//tr[@name='draft_picking_in']" position="after">
+-            <tr t-if="currentProduct.draft_production_qty.in" name="draft_mo_in" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++            <tr t-if="currentProduct.draft_production_qty and currentProduct.draft_production_qty.in" name="draft_mo_in"
++                t-att-class="{'d-none':this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                 <td/>
+                 <td>Production of Draft MO</td>
+                 <td class="text-end text-success">
+@@ -11,7 +12,8 @@
+             </tr>
+         </xpath>
+         <xpath expr="//tr[@name='draft_picking_out']" position="after">
+-            <tr t-if="currentProduct.draft_production_qty.out" name="draft_mo_out" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++            <tr t-if="currentProduct.draft_production_qty and currentProduct.draft_production_qty.out" name="draft_mo_out" 
++                t-att-class="{'d-none':this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                 <td/>
+                 <td>Component of Draft MO</td>
+                 <td class="text-end">
+diff --git a/addons/product_expiry/report/stock_forecasted.py b/addons/product_expiry/report/stock_forecasted.py
+index fffe356b5f27..e5d56789346f 100644
+--- a/addons/product_expiry/report/stock_forecasted.py
++++ b/addons/product_expiry/report/stock_forecasted.py
+@@ -1,4 +1,5 @@
+ # Part of Odoo. See LICENSE file for full copyright and licensing details.
++from collections import defaultdict
+ from datetime import date
+ 
+ from odoo import models
+@@ -12,9 +13,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         res = super()._get_report_header(product_template_ids, product_ids, wh_location_ids)
+         res["use_expiration_date"] = any(self.env['product.product'].browse(res["product_variants_ids"]).mapped('use_expiration_date'))
+         if res["use_expiration_date"]:
+-            products = self._get_products(product_template_ids, product_ids)
+-            for product in products:
+-                res["product"][product.id]["to_remove_qty"] = res["product"][product.id]['quantity_on_hand'] + res["product"][product.id]['incoming_qty'] - res["product"][product.id]['outgoing_qty'] - res["product"][product.id]['virtual_available']
++            for product, qties in res['product'].items():
++                res['product'][product]['to_remove_qty'] = qties['qty_available'] + qties['incoming_qty'] - qties['outgoing_qty'] - qties['virtual_available']
+         return res
+ 
+     def _get_quant_domain(self, location_ids, products):
+@@ -28,37 +28,43 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         res += [('removal_date', '<=', date.today())]
+         return res
+ 
+-    def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
+-        res = super()._prepare_report_line(quantity, move_out, move_in, replenishment_filled, product, reserved_move, in_transit, read)
++    def _prepare_report_line(self, quantity, move_out=None, move_in=None, warehouse_id=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
++        res = super()._prepare_report_line(quantity, move_out, move_in, warehouse_id, replenishment_filled, product, reserved_move, in_transit, read)
+         removal_date = self.env.context.get('removal_date')
+         if removal_date:
+             res["removal_date"] = removal_date if removal_date == -1 else format_date(self.env, removal_date)
+         return res
+ 
+-    def _free_stock_lines(self, product, free_stock, moves_data, wh_location_ids, read):
++    def _free_stock_lines(self, product, free_stock, moves_data, wh_location_ids, wh_with_lines, read):
+         res = []
+         if product.use_expiration_date:
+-            reserved_expired, unreserved_expired = self.env['stock.quant']._read_group(self._get_expired_quant_domain(wh_location_ids, product), aggregates=['reserved_quantity:sum', 'available_quantity:sum'])[0]
+-            # Insert the "To remove now" line here, before the free stock line
+-            if not product.uom_id.is_zero(unreserved_expired):
+-                res += [self.with_context(removal_date=-1)._prepare_report_line(unreserved_expired, product=product, read=read)]
+-            # Insert the "To remove on" lines here, before the free stock line
++            for warehouse, reserved_expired, unreserved_expired in self.env['stock.quant']._read_group(
++                self._get_expired_quant_domain(wh_location_ids, product),
++                ['warehouse_id'], ['reserved_quantity:sum', 'available_quantity:sum']
++            ):
++                # Insert the "To remove now" line here, before the free stock line
++                if not product.uom_id.is_zero(unreserved_expired):
++                    res += [self.with_context(removal_date=-1)._prepare_report_line(unreserved_expired, warehouse_id=warehouse.id, product=product, read=read)]
++                # Insert the "To remove on" lines here, before the free stock line
++
++                # Compensate for any reserved products that are no longer fresh
++                free_stock[warehouse.id] += reserved_expired
+ 
+-            to_reduce = sum(d['taken_from_stock'] for d in moves_data.values())
++            to_reduce = defaultdict(float)
++            for move, data in moves_data.items():
++                to_reduce[move.location_id.warehouse_id.id] += data['taken_from_stock']
+ 
+-            for removal_date, free_stock_at_date in self.env['stock.quant']._read_group(
++            for removal_date, warehouse, free_stock_at_date in self.env['stock.quant']._read_group(
+                     self._get_quant_domain(wh_location_ids, product),
+-                ['removal_date:day'], ['available_quantity:sum']
++                ['removal_date:day', 'warehouse_id'], ['available_quantity:sum']
+             ):
+-                to_reduce_here = min(to_reduce, free_stock_at_date)
+-                to_reduce -= to_reduce_here
++                to_reduce_here = min(to_reduce[warehouse.id], free_stock_at_date)
++                to_reduce[warehouse.id] -= to_reduce_here
+                 free_stock_at_date -= to_reduce_here
+                 if not product.uom_id.is_zero(free_stock_at_date) and removal_date:
+-                    res.append(self.with_context(removal_date=removal_date)._prepare_report_line(free_stock_at_date, product=product, read=read))
++                    res.append(self.with_context(removal_date=removal_date)._prepare_report_line(free_stock_at_date, warehouse_id=warehouse.id, product=product, read=read))
+ 
+-            # Compensate for any reserved products that are no longer fresh
+-            free_stock += reserved_expired
+-        return res + super()._free_stock_lines(product, free_stock, moves_data, wh_location_ids, read)
++        return res + super()._free_stock_lines(product, free_stock, moves_data, wh_location_ids, wh_with_lines, read)
+ 
+ 
+ StockForecasted_Product_Product._get_expired_quant_domain.__override__ = False  # whitelist super()
+diff --git a/addons/product_expiry/static/src/forecasted_details.js b/addons/product_expiry/static/src/forecasted_details.js
+index 3dee0d9d4367..5b73777dab78 100644
+--- a/addons/product_expiry/static/src/forecasted_details.js
++++ b/addons/product_expiry/static/src/forecasted_details.js
+@@ -15,11 +15,11 @@ patch(ForecastedDetails.prototype, {
+         // Whenever there's a Free Stock line without an expiration date,
+         // remove the quantities "to remove" from this line to improve readibility
+         super._prepareData();
+-        for (const productId of this.productIds){
+-            if (!(productId in this.FreeStockLinesPerProduct)){
++        for (const key of this.productIds){
++            if (!(key in this.FreeStockLinesPerProduct)){
+                 continue;
+             }
+-            const lines = this.FreeStockLinesPerProduct[productId]
++            const lines = this.FreeStockLinesPerProduct[key]
+             let noRemovalDateLine = lines.find(line => !line.removal_date);
+             let withRemovalDateLines = lines.filter(line => line.removal_date);
+             if (noRemovalDateLine && withRemovalDateLines.length) {
+@@ -34,7 +34,7 @@ patch(ForecastedDetails.prototype, {
+     },
+     _sameLineRule(line, nextLine){
+         const res = super._sameLineRule(line, nextLine);
+-        const FreeStock = this.FreeStockLinesPerProduct[line.product.id] || [];
++        const FreeStock = this.FreeStockLinesPerProduct[this._getGroupKey(line)] || [];
+         return res || (FreeStock.includes(line) && FreeStock.includes(nextLine));
+     }
+ });
+diff --git a/addons/purchase_stock/report/stock_forecasted.py b/addons/purchase_stock/report/stock_forecasted.py
+index 9ecc7cb79039..88985545d10d 100644
+--- a/addons/purchase_stock/report/stock_forecasted.py
++++ b/addons/purchase_stock/report/stock_forecasted.py
+@@ -18,14 +18,20 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         else:
+             company = self.env.company
+         domain += [('company_id', '=', company.id)]
+-        po_lines = self.env['purchase.order.line'].sudo().search(domain).grouped('product_id')
+-        in_qty = {k.id: sum(v.mapped('product_uom_qty')) for k, v in po_lines.items()}
++        po_lines = self.env['purchase.order.line'].sudo().search(domain).grouped(lambda l: (l.product_id, l.order_id.picking_type_id.warehouse_id))
++        in_qty = {(f'{k[0].id}_{k[1].id}'): sum(v.mapped('product_uom_qty')) for k, v in po_lines.items()}
+         self._add_product_quantities(res, product_template_ids, product_ids, 'draft_purchase_qty', in_qty)
+-        for product in self._get_products(product_template_ids, product_ids):
+-            if product not in po_lines:
+-                continue
+-            res['product'][product.id]['draft_purchase_orders'] = po_lines[product].mapped("order_id").sorted(key=lambda po: po.name).read(fields=['id', 'name'])
+-            res['product'][product.id]['draft_purchase_orders_matched'] = self.env.context.get('purchase_line_to_match_id') in po_lines[product].ids
++        for (product, warehouse), lines in po_lines.items():
++            product_data = res["product"][f"{product.id}_{warehouse.id}"]
++            product_data["draft_purchase_orders"] = (
++                lines.mapped("order_id")
++                .sorted(key=lambda po: po.name)
++                .read(["id", "name"])
++            )
++
++            product_data["draft_purchase_orders_matched"] = (
++                self.env.context.get("purchase_line_to_match_id") in lines.ids
++            )
+         return res
+ 
+     def _product_purchase_domain(self, product_template_ids, product_ids):
+diff --git a/addons/purchase_stock/static/src/purchase_stock_forecasted/forecasted_details.xml b/addons/purchase_stock/static/src/purchase_stock_forecasted/forecasted_details.xml
+index 565ea0af2b02..6bd3401bb154 100644
+--- a/addons/purchase_stock/static/src/purchase_stock_forecasted/forecasted_details.xml
++++ b/addons/purchase_stock/static/src/purchase_stock_forecasted/forecasted_details.xml
+@@ -2,10 +2,14 @@
+ <templates id="template" xml:space="preserve">
+      <t t-name="purchase_stock.ForecastedDetails" t-inherit="stock.ForecastedDetails" t-inherit-mode="extension">
+          <xpath expr="//tr[@name='draft_picking_in']" position="after">
+-            <tr t-if="currentProduct.draft_purchase_qty.in" name="draft_po_in"
+-            t-attf-class="#{currentProduct.draft_purchase_orders_matched and 'table-info'} #{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++            <tr t-if="currentProduct.draft_purchase_qty and currentProduct.draft_purchase_qty.in" name="draft_po_in"
++                t-att-class="{
++                    'table-info': currentProduct.draft_purchase_orders_matched,
++                    'd-none': this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)],
++                }">
+                 <td/>
+                 <td>Requests for quotation :
++
+                     <t t-foreach="currentProduct.draft_purchase_orders" t-as="purchase_order" t-key="purchase_order_index">
+                         <t t-if="purchase_order_index > 0"> | </t>
+                         <a t-attf-href="#" t-out="purchase_order.name"
+diff --git a/addons/sale_purchase_stock/tests/test_access_rights.py b/addons/sale_purchase_stock/tests/test_access_rights.py
+index 3688915c96e1..30b06024b45f 100644
+--- a/addons/sale_purchase_stock/tests/test_access_rights.py
++++ b/addons/sale_purchase_stock/tests/test_access_rights.py
+@@ -135,6 +135,7 @@ class TestAccessRights(TestCommonSalePurchaseNoChart):
+                 'uom_id': self.product.uom_id.id,
+             })]
+         })
++        po_warehouse_id = po.picking_type_id.warehouse_id.id
+         # This PO belongs to a different company, it should not be shown
+         different_company_po = self.env['purchase.order'].create({
+             'company_id': self.env['res.company'].create({'name': 'Different Company'}).id,
+@@ -157,8 +158,8 @@ class TestAccessRights(TestCommonSalePurchaseNoChart):
+         # No exception was raised, but user is not allowed to edit pickings
+         self.assertEqual(report_values['docs']['user_can_edit_pickings'], False)
+         # The data in the report includes only the first PO
+-        self.assertEqual(report_values['docs']['product'][self.product.id]['draft_purchase_qty']['in'], 1)
+-        self.assertEqual(report_values['docs']['product'][self.product.id]['draft_purchase_orders'], [{'id': po.id, 'name': po.name}])
++        self.assertEqual(report_values['docs']['product'][f'{self.product.id}_{po_warehouse_id}']['draft_purchase_qty']['in'], 1)
++        self.assertEqual(report_values['docs']['product'][f'{self.product.id}_{po_warehouse_id}']['draft_purchase_orders'], [{'id': po.id, 'name': po.name}])
+         # A sales user cannot access the PO directly, despite viewing it's info in the report
+         with self.assertRaises(AccessError, msg='Sales user is not allowed to access a PO'):
+             po.with_user(self.user_salesperson).button_confirm()
+diff --git a/addons/sale_stock/report/stock_forecasted.py b/addons/sale_stock/report/stock_forecasted.py
+index 3b741127e375..a86c3fb15989 100644
+--- a/addons/sale_stock/report/stock_forecasted.py
++++ b/addons/sale_stock/report/stock_forecasted.py
+@@ -7,8 +7,8 @@ from odoo import models
+ class StockForecasted_Product_Product(models.AbstractModel):
+     _inherit = 'stock.forecasted_product_product'
+ 
+-    def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
+-        line = super()._prepare_report_line(quantity, move_out, move_in, replenishment_filled, product, reserved_move, in_transit, read)
++    def _prepare_report_line(self, quantity, move_out=None, move_in=None, warehouse_id=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
++        line = super()._prepare_report_line(quantity, move_out, move_in, warehouse_id, replenishment_filled, product, reserved_move, in_transit, read)
+ 
+         if not move_out or not move_out.picking_id or not move_out.picking_id.sale_id:
+             return line
+@@ -33,14 +33,20 @@ class StockForecasted_Product_Product(models.AbstractModel):
+     def _get_report_header(self, product_template_ids, product_ids, wh_location_ids):
+         res = super()._get_report_header(product_template_ids, product_ids, wh_location_ids)
+         domain = self._product_sale_domain(product_template_ids, product_ids)
+-        so_lines = self.env['sale.order.line'].sudo().search(domain).grouped('product_id')
+-        out_qty = {k.id: sum(v.mapped(lambda line: line.product_uom_id._compute_quantity(line.product_uom_qty, line.product_id.uom_id))) for k, v in so_lines.items()}
++        so_lines = self.env['sale.order.line'].sudo().search(domain).grouped(lambda l: (l.product_id, l.warehouse_id))
++        out_qty = {
++            (f'{k[0].id}_{k[1].id}'): sum(
++                v.mapped(lambda line: line.product_uom_id._compute_quantity(line.product_uom_qty, line.product_id.uom_id))
++            ) for k, v in so_lines.items()
++        }
+         self._add_product_quantities(res, product_template_ids, product_ids, 'draft_sale_qty', qty_out=out_qty)
+-        for product in self._get_products(product_template_ids, product_ids):
+-            if product not in so_lines:
+-                continue
+-            res['product'][product.id]['draft_sale_orders'] = so_lines[product].mapped("order_id").sorted(key=lambda so: so.name).read(fields=['id', 'name'])
+-            res['product'][product.id]['draft_sale_orders_matched'] = self.env.context.get('sale_line_to_match_id') in so_lines[product].ids
++        for (product, warehouse) in so_lines:
++            res["product"][f"{product.id}_{warehouse.id}"]["draft_sale_orders"] = (
++                so_lines[product, warehouse].mapped("order_id").sorted(key=lambda so: so.name).read(fields=["id", "name"])
++            )
++            res["product"][f"{product.id}_{warehouse.id}"]["draft_sale_orders_matched"] = (
++                self.env.context.get("sale_line_to_match_id") in so_lines[product, warehouse].ids
++            )
+         return res
+ 
+     def _product_sale_domain(self, product_template_ids, product_ids):
+diff --git a/addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml b/addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml
+index 561a8994e528..baaefe63c23c 100644
+--- a/addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml
++++ b/addons/sale_stock/static/src/sale_stock_forecasted/forecasted_details.xml
+@@ -2,11 +2,15 @@
+ <templates id="template" xml:space="preserve">
+     <t t-name="sale_stock.ForecastedDetails" t-inherit="stock.ForecastedDetails" t-inherit-mode="extension">
+         <xpath expr="//tr[@name='draft_picking_out']" position="after">
+-            <tr t-if="currentProduct.draft_sale_qty.out" name="draft_so_out" t-attf-class="#{currentProduct.draft_sale_orders_matched and 'table-info'} #{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++            <tr t-if="currentProduct.draft_sale_qty and currentProduct.draft_sale_qty.out" name="draft_so_out"
++                t-att-class="{
++                    'table-info': currentProduct.draft_sale_orders_matched,
++                    'd-none': this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)],
++                }">
+                 <td/>
+                 <td>
+-                <t t-set="draft_so_out_count" t-value="currentProduct.draft_sale_orders.length"/>
+-                <a t-if="draft_so_out_count == 1" href="#"
++                <t t-set=" draft_so_out_count" t-value=" currentProduct.draft_sale_orders.length"/>
++                <a t-if=" draft_so_out_count== 1" href="#"
+                     t-on-click.prevent="() => this.props.openView('sale.order', 'form', currentProduct.draft_sale_orders[0].id)">
+                     1 Quotation</a>
+                 <a t-else="" href="#"
+diff --git a/addons/sale_stock/tests/test_sale_stock_report.py b/addons/sale_stock/tests/test_sale_stock_report.py
+index 89faa9df3c80..c09b38f2953f 100644
+--- a/addons/sale_stock/tests/test_sale_stock_report.py
++++ b/addons/sale_stock/tests/test_sale_stock_report.py
+@@ -151,7 +151,7 @@ class TestSaleStockReports(TestReportsCommon):
+                 line.product_uom_qty = 3
+             sale_order = so_form.save()
+         sale_order.action_confirm()
+-
++        so_warehouse_id = sale_order.warehouse_id.id
+         # Create a draft SO with the same user for the same product
+         with Form(self.env['sale.order']) as so_form:
+             so_form.partner_id = self.partner
+@@ -171,11 +171,15 @@ class TestSaleStockReports(TestReportsCommon):
+ 
+         # Need to reset the cache otherwise it wouldn't trigger an Access Error anyway as the Sale Order is already there.
+         sale_order.env.invalidate_all()
+-        report_values = self.env['stock.forecasted_product_product'].with_user(other).get_report_values(docids=self.product.ids)
+-        self.assertEqual(len(report_values['docs']['lines']), 1)
+-        self.assertEqual(report_values['docs']['lines'][0]['document_out']['name'], sale_order.name)
+-        self.assertEqual(len(report_values['docs']['product'][self.product.id]['draft_sale_orders']), 1)
+-        self.assertEqual(report_values['docs']['product'][self.product.id]['draft_sale_orders'][0]['name'], draft.name)
++        with self.with_user(other.login):
++            _, docs, lines = self.get_report_forecast(
++                product_variant_ids=self.product.ids,
++                context={'warehouse_id': so_warehouse_id},
++            )
++        self.assertEqual(len(lines), 1)
++        self.assertEqual(lines[0]['document_out']['name'], sale_order.name)
++        self.assertEqual(len(docs['product'][f'{self.product.id}_{so_warehouse_id}']['draft_sale_orders']), 1)
++        self.assertEqual(docs['product'][f'{self.product.id}_{so_warehouse_id}']['draft_sale_orders'][0]['name'], draft.name)
+ 
+         # While 'other' can see these SO on the report, they shouldn't be able to access them.
+         with self.assertRaises(AccessError):
+diff --git a/addons/stock/models/stock_move.py b/addons/stock/models/stock_move.py
+index b5c1c8a70407..299f2850d3fe 100644
+--- a/addons/stock/models/stock_move.py
++++ b/addons/stock/models/stock_move.py
+@@ -2817,7 +2817,8 @@ Please change the quantity done or the rounding precision in your settings.""",
+         :rtype: defaultdict
+         """
+         wh_location_query = self.env['stock.location']._search([('id', 'child_of', warehouse.view_location_id.id)])
+-        forecast_lines = self.env['stock.forecasted_product_product']._get_report_lines(False, self.product_id.ids, wh_location_query, location_id or warehouse.lot_stock_id, read=False)
++        warehouse_by_location = defaultdict(lambda: warehouse.id)
++        forecast_lines = self.env['stock.forecasted_product_product']._get_report_lines(False, self.product_id.ids, wh_location_query, location_id or warehouse.lot_stock_id, warehouse_by_location, read=False)
+         result = defaultdict(lambda: (0.0, False))
+         for line in forecast_lines:
+             move_out = line.get('move_out')
+diff --git a/addons/stock/report/report_stock_quantity.xml b/addons/stock/report/report_stock_quantity.xml
+index 313800e1f05d..0387363cfbf2 100644
+--- a/addons/stock/report/report_stock_quantity.xml
++++ b/addons/stock/report/report_stock_quantity.xml
+@@ -7,10 +7,9 @@
+         <field name="arch" type="xml">
+             <graph js_class="stock_forecasted_graph" string="report_stock_quantity_graph" type="line" sample="1" disable_linking="1">
+                     <field name="date" interval="day"/>
+-                    <field name="product_id"/>
++                    <field name="warehouse_id"/>
+                     <field name="product_qty" type="measure"/>
+             </graph>
+         </field>
+     </record>
+ </odoo>
+-
+diff --git a/addons/stock/report/stock_forecasted.py b/addons/stock/report/stock_forecasted.py
+index 80a856eb696c..ddd4e4f15678 100644
+--- a/addons/stock/report/stock_forecasted.py
++++ b/addons/stock/report/stock_forecasted.py
+@@ -70,44 +70,44 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         if 'product' not in res:
+             res['product'] = dict()
+         products = self._get_products(product_template_ids, product_ids)
+-        for product in products:
+-            if product.id not in res['product']:
+-                res['product'][product.id] = {
+-                    'uom': product.uom_id.display_name,
+-                    'quantity_on_hand': product.qty_available,
+-                    'virtual_available': product.virtual_available,
+-                    'free_qty': product.free_qty,
+-                    'incoming_qty': product.incoming_qty,
+-                    'outgoing_qty': product.outgoing_qty,
++        for warehouse in self._get_warehouses():
++            wh_quantities = products.with_context(warehouse_id=warehouse.id)._compute_quantities_dict(None, None, None)
++            for product_id, quantities in wh_quantities.items():
++                res['product'][f'{product_id}_{warehouse.id}'] = quantities
++                res['product'][f'{product_id}_{warehouse.id}'].update({
++                    'uom': products.browse(product_id).uom_id.display_name,
+                     'qty': {
+-                        'in':  0.0,
+-                        'out':  0.0,
++                        'in': 0.0,
++                        'out': 0.0,
+                     },
+-                }
++                })
+ 
+     def _add_product_quantities(self, res, product_template_ids, product_ids, var_name, qty_in={}, qty_out={}):
+-        products = self._get_products(product_template_ids, product_ids)
+-        for product in products:
+-            res['product'][product.id][var_name] = {
+-                'in': qty_in.get(product.id, 0.0),
+-                'out': qty_out.get(product.id, 0.0),
++        for key, product_data in res['product'].items():
++            in_qty = qty_in.get(key, 0.0)
++            out_qty = qty_out.get(key, 0.0)
++            product_data[var_name] = {
++                'in': in_qty,
++                'out': out_qty,
+             }
+-            res['product'][product.id]['qty']['in'] += qty_in.get(product.id, 0.0)
+-            res['product'][product.id]['qty']['out'] += qty_out.get(product.id, 0.0)
++            product_data['qty']['in'] += in_qty
++            product_data['qty']['out'] += out_qty
+ 
+     def _get_product_leadtime(self, res, product_template_ids, product_ids):
+         """Return a dictionary with product lead times."""
+         products = self._get_products(product_template_ids, product_ids)
+-        location = self._get_warehouse().lot_stock_id
+-        for product in products:
+-            rule = product._get_rules_from_location(location)
+-            leadtime = rule._get_lead_days(product)
+-            if not leadtime:
+-                leadtime = [{'total_delay': 0}, {}]
+-            res['product'][product.id]['leadtime'] = {
+-                'total_delay': leadtime[0].get('total_delay', 0),
+-                'details': leadtime[1]
+-            }
++        warehouses = self._get_warehouses()
++        for warehouse in warehouses:
++            location = warehouse.lot_stock_id
++            for product in products:
++                rule = product._get_rules_from_location(location)
++                leadtime = rule._get_lead_days(product)
++                if not leadtime:
++                    leadtime = [{'total_delay': 0}, {}]
++                res['product'][f'{product.id}_{warehouse.id}']['leadtime'] = {
++                    'total_delay': leadtime[0].get('total_delay', 0),
++                    'details': leadtime[1],
++                }
+ 
+     def _get_report_header(self, product_template_ids, product_ids, wh_location_ids):
+         # Get the products we're working, fill the rendering context with some of their attributes.
+@@ -115,27 +115,39 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         if product_template_ids:
+             products = self.env['product.template'].browse(product_template_ids)
+             res.update({
+-                'product_templates' : products.read(fields=['id', 'display_name']),
+-                'product_templates_ids' : products.ids,
+-                'product_variants' : [{
+-                        'id' : pv.id,
+-                        'combination_name' : pv.product_template_attribute_value_ids._get_combination_name(),
+-                    } for pv in products.product_variant_ids],
+-                'product_variants_ids' : products.product_variant_ids.ids,
+-                'multiple_product' : len(products.product_variant_ids) > 1,
++                'product_templates': products.read(fields=['id', 'display_name']),
++                'product_templates_ids': products.ids,
++                'product_variants': products.product_variant_ids.read(fields=['id', 'display_name']),
++                'product_variants_ids': products.product_variant_ids.ids,
++                'multiple_product': len(products.product_variant_ids) > 1,
+             })
+         elif product_ids:
+             products = self.env['product.product'].browse(product_ids)
+             res.update({
+-                'product_templates' : False,
+-                'product_variants' : products.read(fields=['id', 'display_name']),
+-                'product_variants_ids' : products.ids,
+-                'multiple_product' : len(products) > 1,
++                'product_templates': False,
++                'product_variants': products.read(fields=['id', 'display_name']),
++                'product_variants_ids': products.ids,
++                'multiple_product': len(products) > 1,
+             })
+ 
+         in_domain, out_domain = self._move_draft_domain(product_template_ids, product_ids, wh_location_ids)
+-        in_sum = {k.id: v for k, v in self.env['stock.move']._read_group(in_domain, aggregates=['product_qty:sum'], groupby=['product_id'])}
+-        out_sum = {k.id: v for k, v in self.env['stock.move']._read_group(out_domain, aggregates=['product_qty:sum'], groupby=['product_id'])}
++        in_sum = {
++            (f'{product.id}_{warehouse.id}'): qty
++            for product, warehouse, qty in self.env['stock.move']._read_group(
++                in_domain,
++                aggregates=['product_qty:sum'],
++                groupby=['product_id', 'location_dest_id.warehouse_id'],
++            )
++        }
++
++        out_sum = {
++            (f'{product.id}_{warehouse.id}'): qty
++            for product, warehouse, qty in self.env['stock.move']._read_group(
++                out_domain,
++                aggregates=['product_qty:sum'],
++                groupby=['product_id', 'location_id.warehouse_id'],
++            )
++        }
+ 
+         self._get_product_quantities(res, product_template_ids, product_ids)
+         self._add_product_quantities(res, product_template_ids, product_ids, 'draft_picking_qty', in_sum, out_sum)
+@@ -150,28 +162,44 @@ class StockForecasted_Product_Product(models.AbstractModel):
+             'id': move.picking_id.id
+         }
+ 
+-    def _get_warehouse(self):
+-        return self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id', False)) or self.env['stock.warehouse'].search([['active', '=', True]])[0]
++    def _get_warehouses(self):
++        # if warehouse_id := self.env.context.get('warehouse_id'):
++        #     return self.env['stock.warehouse'].browse(warehouse_id)
++        # else:
++        return self.env['stock.warehouse'].search_fetch([('company_id', 'in', self.env.companies.ids)], ['lot_stock_id', 'view_location_id'])
+ 
+     def _get_report_data(self, product_template_ids=False, product_ids=False):
+         assert product_template_ids or product_ids
+         res = {}
+ 
+-        warehouse = self._get_warehouse()
+-        wh_location_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
+-            [('id', 'child_of', warehouse.view_location_id.id)],
+-            ['id'],
+-        )]
+-        # any quantities in this location will be considered free stock, others are free stock in transit
+-        wh_stock_location = warehouse.lot_stock_id
++        warehouses = self._get_warehouses()
++        res["warehouses"] = warehouses.read(fields=["id", "display_name"])
++        res["warehouse_ids"] = warehouses.ids
++        res['multiple_warehouses'] = len(warehouses) > 1
+ 
+-        res.update(self._get_report_header(product_template_ids, product_ids, wh_location_ids))
++        wh_locations = self.env['stock.location'].search_fetch([('id', 'child_of', warehouses.view_location_id.ids)], ['warehouse_id'])
+ 
+-        res['lines'] = self._get_report_lines(product_template_ids, product_ids, wh_location_ids, wh_stock_location)
++        # any quantities in this location will be considered free stock, others are free stock in transit
++        lines = []
++        for warehouse in warehouses:
++            warehouse_location_ids = wh_locations.filtered(
++                lambda location: location.warehouse_id == warehouse
++            ).ids
++
++            lines += self._get_report_lines(
++                product_template_ids,
++                product_ids,
++                warehouse_location_ids,
++                warehouse.lot_stock_id,
++                {location_id: warehouse.id for location_id in warehouse_location_ids},
++            )
++        res.update(self._get_report_header(product_template_ids, product_ids, wh_locations.ids))
++
++        res['lines'] = lines
+         res['user_can_edit_pickings'] = self.env.user.has_group('stock.group_stock_user')
+         return res
+ 
+-    def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
++    def _prepare_report_line(self, quantity, move_out=None, move_in=None, warehouse_id=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
+         product = product or (move_out.product_id if move_out else move_in.product_id)
+         is_late = move_out.date < move_in.date if (move_out and move_in) else False
+         delivery_late = move_out.state != 'done' and move_out.date < datetime.now() if move_out else False
+@@ -199,7 +227,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
+             'reservation': self._get_reservation_data(reserved_move) if reserved_move else False,
+             'in_transit': in_transit,
+             'is_matched': any(move_id in [move_in_id, move_out_id] for move_id in move_to_match_ids),
+-            'uom_id' : product.uom_id.read()[0] if read else product.uom_id,
++            'uom_id': product.uom_id.read()[0] if read else product.uom_id,
++            'warehouse_id': warehouse_id,
+         }
+         if move_in:
+             document_in = move_in.sudo()._get_source_document()
+@@ -236,8 +265,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
+     def _get_quant_domain(self, location_ids, products):
+         return [('location_id', 'in', location_ids), ('quantity', '>', 0), ('product_id', 'in', products.ids)]
+ 
+-    def _get_report_lines(self, product_template_ids, product_ids, wh_location_ids, wh_stock_location, read=True):
+-        def _get_out_move_reserved_data(out, linked_moves, used_reserved_moves, currents, wh_stock_location, wh_stock_sub_location_ids):
++    def _get_report_lines(self, product_template_ids, product_ids, wh_location_ids, wh_stock_locations, warehouse_by_location, read=True):
++        def _get_out_move_reserved_data(out, linked_moves, used_reserved_moves, currents, sub_location_to_stock):
+             reserved_out = 0
+             # the move to show when qty is reserved
+             reserved_move = self.env['stock.move']
+@@ -254,9 +283,10 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 reserved_out += reserved
+                 used_reserved_moves[move] += reserved
+                 # any sublocation qties needs to be reserved to the main stock location qty as well
+-                if move.location_id.id in wh_stock_sub_location_ids:
+-                    currents[out.product_id.id, wh_stock_location.id] -= reserved
+-                currents[(out.product_id.id, move.location_id.id)] -= reserved
++                parent_stock_id = sub_location_to_stock.get(move.location_id.id)
++                if parent_stock_id:
++                    currents[out.product_id.id, parent_stock_id] -= reserved
++                currents[out.product_id.id, move.location_id.id] -= reserved
+                 if move.product_id.uom_id.compare(reserved_out, out.product_qty) >= 0:
+                     break
+ 
+@@ -266,7 +296,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 'linked_moves': linked_moves,
+             }
+ 
+-        def _get_out_move_taken_from_stock_data(out, currents, reserved_data, wh_stock_location, wh_stock_sub_location_ids):
++        def _get_out_move_taken_from_stock_data(out, currents, reserved_data, sub_location_to_stock):
+             reserved_out = reserved_data['reserved']
+             demand_out = out.product_qty - reserved_out
+             linked_moves = reserved_data['linked_moves']
+@@ -293,9 +323,10 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 taken_from_stock = min(demand, move_available_qty, currents[(out.product_id.id, move.location_id.id)])
+                 if taken_from_stock > 0:
+                     # any sublocation qties needs to be removed to the main stock location qty as well
+-                    if move.location_id.id in wh_stock_sub_location_ids:
+-                        currents[out.product_id.id, wh_stock_location.id] -= taken_from_stock
+-                    currents[(out.product_id.id, move.location_id.id)] -= taken_from_stock
++                    parent_stock_id = sub_location_to_stock.get(move.location_id.id)
++                    if parent_stock_id:
++                        currents[out.product_id.id, parent_stock_id] -= taken_from_stock
++                    currents[out.product_id.id, move.location_id.id] -= taken_from_stock
+                     taken_from_stock_out += taken_from_stock
+                 demand_out -= taken_from_stock
+             return {
+@@ -304,14 +335,18 @@ class StockForecasted_Product_Product(models.AbstractModel):
+ 
+         def _reconcile_out_with_ins(lines, out, ins, demand, product_uom, read=True):
+             ins_to_remove = []
++            out_warehouse_id = warehouse_by_location[out.location_id.id]
+             for in_id in ins:
+                 in_data = in_id_to_in_data[in_id]
+                 if product_uom.is_zero(in_data['qty']):
+                     ins_to_remove.append(in_id)
+                     continue
++                if in_data['warehouse_id'] != out_warehouse_id:
++                    continue
+                 taken_from_in = min(demand, in_data['qty'])
+                 demand -= taken_from_in
+-                lines.append(self._prepare_report_line(taken_from_in, move_in=in_data['move'], move_out=out, read=read))
++                lines.append(self._prepare_report_line(taken_from_in, move_in=in_data['move'], move_out=out, warehouse_id=out_warehouse_id, read=read))
++                wh_with_lines.add(out_warehouse_id)
+                 in_data['qty'] -= taken_from_in
+                 if in_data['qty'] <= 0:
+                     ins_to_remove.append(in_id)
+@@ -377,6 +412,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 'qty': in_.product_qty,
+                 'move': in_,
+                 'move_dests': in_._rollup_move_dests(),
++                'warehouse_id': warehouse_by_location[in_.location_dest_id.id],
+             }
+             product_id = in_.product_id.id
+             ins_per_product[product_id].add(in_.id)
+@@ -387,16 +423,29 @@ class StockForecasted_Product_Product(models.AbstractModel):
+             self._get_quant_domain(wh_location_ids, outs.product_id | self._get_products(product_template_ids, product_ids)),
+             ['product_id', 'location_id'], ['quantity:sum']
+         )
+-        wh_stock_sub_location_ids = set(
+-            (wh_stock_location.search([('id', 'child_of', wh_stock_location.id)]) - wh_stock_location)._ids
++
++        # Prepare sub_location to stock mapping
++        stock_child_locations = self.env['stock.location'].search_read(
++            [('id', 'child_of', wh_stock_locations.ids), ('id', 'not in', wh_stock_locations.ids)],
++            ['id', 'parent_path']
+         )
++
++        sub_location_to_stock = {}
++        wh_stock_sub_location_ids = set()
++        for loc in stock_child_locations:
++            loc_id = loc['id']
++            wh_stock_sub_location_ids.add(loc_id)
++            path_ids = [int(p) for p in loc['parent_path'].split('/') if p]
++            sub_location_to_stock[loc_id] = next(id for id in path_ids if id in wh_stock_locations.ids)
++
+         currents = defaultdict(float)
+         for product, location, quantity in qties:
+             location_id = location.id
+             # any sublocation qties will be added to the main stock location qty as well
+-            if location_id in wh_stock_sub_location_ids:
+-                currents[product.id, wh_stock_location.id] += quantity
+-            currents[(product.id, location_id)] += quantity
++            currents[product.id, location_id] += quantity
++            parent_stock_id = sub_location_to_stock.get(location_id)
++            if parent_stock_id:
++                currents[product.id, parent_stock_id] += quantity
+         moves_data = {}
+         for out_moves in outs_per_product.values():
+             # to handle multiple out wtih same in (ex: same pick/pack for 2 outs)
+@@ -404,34 +453,44 @@ class StockForecasted_Product_Product(models.AbstractModel):
+             # for all out moves, check for linked moves and count reserved quantity
+             for out in out_moves:
+                 moves_data[out] = _get_out_move_reserved_data(
+-                    out, linked_moves_per_out[out], used_reserved_moves, currents, wh_stock_location, wh_stock_sub_location_ids
++                    out, linked_moves_per_out[out], used_reserved_moves, currents, sub_location_to_stock
+                 )
+             # another loop to remove qty from current stock after reserved is counted for
+             for out in out_moves:
+-                data = _get_out_move_taken_from_stock_data(out, currents, moves_data[out], wh_stock_location, wh_stock_sub_location_ids)
++                data = _get_out_move_taken_from_stock_data(out, currents, moves_data[out], sub_location_to_stock)
+                 moves_data[out].update(data)
+         product_sum = defaultdict(float)
+         for product_loc, quantity in currents.items():
+             if product_loc[1] not in wh_stock_sub_location_ids:
+-                product_sum[product_loc[0]] += quantity
++                product_sum[product_loc[0], warehouse_by_location[product_loc[1]]] += quantity
+         lines = []
+         for product in (ins | outs).product_id | self._get_products(product_template_ids, product_ids):
+-            lines_init_count = len(lines)
++            wh_with_lines = set()
+             unreconciled_outs = []
+             # remaining stock
+-            free_stock = currents[product.id, wh_stock_location.id]
+-            transit_stock = product_sum[product.id] - free_stock
++            free_stock = {}
++            transit_stock = {}
++            for stock_id in wh_stock_locations.ids:
++                warehouse_id = warehouse_by_location[stock_id]
++                free_qty = currents[product.id, stock_id]
++
++                free_stock[warehouse_id] = free_qty
++                transit_stock[warehouse_id] = (
++                    product_sum[product.id, warehouse_id] - free_qty
++                )
+             # add report lines and see if remaining demand can be reconciled by unreservable stock or ins
+             for out in outs_per_product[product.id]:
+                 reserved_out = moves_data[out].get('reserved')
+                 taken_from_stock_out = moves_data[out].get('taken_from_stock')
+                 reserved_move = moves_data[out].get('reserved_move')
+                 demand_out = out.product_qty
++                warehouse_id = warehouse_by_location[out.location_id.id]
+                 # Reconcile with the reserved stock.
+                 if reserved_out > 0:
+                     demand_out = max(demand_out - reserved_out, 0)
+                     in_transit = bool(reserved_move.move_orig_ids)
+-                    lines.append(self._prepare_report_line(reserved_out, move_out=out, reserved_move=reserved_move, in_transit=in_transit, read=read))
++                    lines.append(self._prepare_report_line(reserved_out, move_out=out, warehouse_id=warehouse_id, reserved_move=reserved_move, in_transit=in_transit, read=read))
++                    wh_with_lines.add(warehouse_id)
+ 
+                 if product.uom_id.is_zero(demand_out):
+                     continue
+@@ -439,17 +498,19 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 # Reconcile with the current stock.
+                 if taken_from_stock_out > 0:
+                     demand_out = max(demand_out - taken_from_stock_out, 0)
+-                    lines.append(self._prepare_report_line(taken_from_stock_out, move_out=out, read=read))
++                    lines.append(self._prepare_report_line(taken_from_stock_out, move_out=out, warehouse_id=warehouse_id, read=read))
++                    wh_with_lines.add(warehouse_id)
+ 
+                 if product.uom_id.is_zero(demand_out):
+                     continue
+ 
+                 # Reconcile with unreservable stock, quantities that are in stock but not in correct location to reserve from (in transit)
+-                unreservable_qty = min(demand_out, transit_stock)
++                unreservable_qty = min(demand_out, transit_stock[warehouse_id])
+                 if unreservable_qty > 0:
+                     demand_out -= unreservable_qty
+-                    transit_stock -= unreservable_qty
+-                    lines.append(self._prepare_report_line(unreservable_qty, move_out=out, in_transit=True, read=read))
++                    transit_stock[warehouse_id] -= unreservable_qty
++                    lines.append(self._prepare_report_line(unreservable_qty, move_out=out, warehouse_id=warehouse_id, in_transit=True, read=read))
++                    wh_with_lines.add(warehouse_id)
+ 
+                 if product.uom_id.is_zero(demand_out):
+                     continue
+@@ -465,25 +526,33 @@ class StockForecasted_Product_Product(models.AbstractModel):
+                 demand = _reconcile_out_with_ins(lines, out, ins_per_product[product.id], demand, product.uom_id, read=read)
+                 if not product.uom_id.is_zero(demand):
+                     # Not reconciled
+-                    lines.append(self._prepare_report_line(demand, move_out=out, replenishment_filled=False, read=read))
++                    warehouse_id = warehouse_by_location[out.location_id.id]
++                    lines.append(self._prepare_report_line(demand, move_out=out, warehouse_id=warehouse_id, replenishment_filled=False, read=read))
++                    wh_with_lines.add(warehouse_id)
+             # Stock in transit
+-            if not product.uom_id.is_zero(transit_stock):
+-                lines.append(self._prepare_report_line(transit_stock, product=product, in_transit=True, read=read))
+-
++            for warehouse_id, quantity in transit_stock.items():
++                if not product.uom_id.is_zero(quantity):
++                    lines.append(self._prepare_report_line(quantity, product=product, warehouse_id=warehouse_id, in_transit=True, read=read))
++                    wh_with_lines.add(warehouse_id)
+             # Unused remaining stock.
+-            if not product.uom_id.is_zero(free_stock) or lines_init_count == len(lines):
+-                lines += self._free_stock_lines(product, free_stock, moves_data, wh_location_ids, read)
++            lines += self._free_stock_lines(product, free_stock, moves_data, wh_location_ids, wh_with_lines, read)
+ 
+             # In moves not used.
+             for in_id in ins_per_product[product.id]:
+                 in_data = in_id_to_in_data[in_id]
+                 if product.uom_id.is_zero(in_data['qty']):
+                     continue
+-                lines.append(self._prepare_report_line(in_data['qty'], move_in=in_data['move'], read=read))
++                lines.append(self._prepare_report_line(in_data['qty'], move_in=in_data['move'], warehouse_id=in_data['warehouse_id'], read=read))
+         return lines
+ 
+-    def _free_stock_lines(self, product, free_stock, moves_data, wh_location_ids, read):
+-            return [self._prepare_report_line(free_stock, product=product, read=read)]
++    def _free_stock_lines(self, product, free_stock, moves_data, wh_location_ids, wh_with_lines, read):
++        return [
++            self._prepare_report_line(
++                free_stock_qty, product=product, warehouse_id=warehouse_id, read=read
++            )
++            for warehouse_id, free_stock_qty in free_stock.items()
++            if not product.uom_id.is_zero(free_stock_qty) or warehouse_id not in wh_with_lines
++        ]
+ 
+     @api.model
+     def action_reserve_linked_picks(self, move_id):
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_buttons.js b/addons/stock/static/src/stock_forecasted/forecasted_buttons.js
+index d4ccf7150303..9aea45f5ba6b 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_buttons.js
++++ b/addons/stock/static/src/stock_forecasted/forecasted_buttons.js
+@@ -1,6 +1,6 @@
+ import { _t } from "@web/core/l10n/translation";
+ import { useService } from "@web/core/utils/hooks";
+-import { Component, markup, t, useProps } from "@odoo/owl";
++import { Component, t, useProps } from "@odoo/owl";
+ 
+ export class ForecastedButtons extends Component {
+     static template = "stock.ForecastedButtons";
+@@ -13,9 +13,8 @@ export class ForecastedButtons extends Component {
+ 
+     setup() {
+         this.actionService = useService("action");
+-        this.orm = useService("orm");
+         this.context = this.props.action.context;
+-        this.productId = this.context.active_id;
++        this.productId = this.context.variant_id ? this.context.variant_id : this.context.active_id;
+         this.resModel = this.props.resModel || this.context.active_model || this.context.params?.active_model || 'product.template';
+     }
+ 
+@@ -47,15 +46,4 @@ export class ForecastedButtons extends Component {
+         };
+         return this.actionService.doAction(action, { onClose: this._onClose.bind(this) });
+     }
+-
+-    async _onClickUpdateQuantity() {
+-        const action = await this.orm.call(this.resModel, "action_open_quants", [[this.productId]]);
+-        if (action.res_model === "stock.quant") { // Quant view in inventory mode.
+-            action.views = [[false, "list"]];
+-        }
+-        if (action.help) {
+-            action.help = markup(action.help);
+-        }
+-        return this.actionService.doAction(action, { onClose: this._onClose.bind(this) });
+-    }
+ }
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_buttons.xml b/addons/stock/static/src/stock_forecasted/forecasted_buttons.xml
+index d612c4740b18..76c3cb72a821 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_buttons.xml
++++ b/addons/stock/static/src/stock_forecasted/forecasted_buttons.xml
+@@ -6,10 +6,6 @@
+             class="o_forecasted_replenish_btn btn btn-primary">
+             Replenish
+         </button>
+-        <button title="Update Quantity" t-on-click="this._onClickUpdateQuantity"
+-            class="o_forecasted_update_qty_btn btn btn-secondary">
+-            Update Quantity
+-        </button>
+     </t>
+ 
+ </templates>
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_details.js b/addons/stock/static/src/stock_forecasted/forecasted_details.js
+index 52f34f3ab605..4c55e35610af 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_details.js
++++ b/addons/stock/static/src/stock_forecasted/forecasted_details.js
+@@ -1,6 +1,6 @@
+ import { formatFloat } from "@web/views/fields/formatters";
+ import { useService } from "@web/core/utils/hooks";
+-import { Component, t, useProps } from "@odoo/owl";
++import { Component, proxy, t, useProps } from "@odoo/owl";
+ import { _t } from "@web/core/l10n/translation";
+ 
+ export class ForecastedDetails extends Component {
+@@ -20,6 +20,34 @@ export class ForecastedDetails extends Component {
+         this._mergeLines();
+ 
+         this._formatFloat = (num) => formatFloat(num, { digits: [0, this.props.docs.precision] });
++        this.state = proxy({
++            products: {},
++            warehouses: {},
++        });
++    }
++
++    _getGroupKey(line) {
++        return `${line.product.id}_${line.warehouse_id}`;
++    }
++
++    toggleProduct(productId) {
++        this.state.products[productId] = !this.state.products[productId];
++    }
++
++    toggleWarehouse(productId, warehouseId) {
++        const key = `${productId}_${warehouseId}`;
++        this.state.warehouses[key] = !this.state.warehouses[key];
++    }
++
++    isProductVisible(productId) {
++        return !this.state.products[productId];
++    }
++
++    isWarehouseVisible(productId, warehouseId) {
++        return (
++            this.isProductVisible(productId) &&
++            !this.state.warehouses[`${productId}_${warehouseId}`]
++        );
+     }
+ 
+     async _reserve(move_id){
+@@ -75,7 +103,7 @@ export class ForecastedDetails extends Component {
+     _groupLinesByProduct() {
+         this.LinesPerProduct = {};
+         for (const line of this.props.docs.lines) {
+-            const key = line.product.id;
++            const key = this._getGroupKey(line);
+             (this.LinesPerProduct[key] ??= []).push(line);
+         }
+     }
+@@ -84,7 +112,7 @@ export class ForecastedDetails extends Component {
+         this.OnHandLinesPerProduct = {};
+         for (const line of this.props.docs.lines) {
+             if (this._onHandCondition(line)) {
+-                const key = line.product.id;
++                const key = this._getGroupKey(line);
+                 (this.OnHandLinesPerProduct[key] ??= []).push(line);
+             }
+         }
+@@ -93,8 +121,8 @@ export class ForecastedDetails extends Component {
+     _groupReconciledLinesByProduct() {
+         this.ReconciledLinesPerProduct = {};
+         for (const line of this.props.docs.lines) {
+-            if (this._onHandCondition(line)) {
+-                const key = line.product.id;
++            if (this._reconciledCondition(line)) {
++                const key = this._getGroupKey(line);
+                 (this.ReconciledLinesPerProduct[key] ??= []).push(line);
+             }
+         }
+@@ -104,7 +132,7 @@ export class ForecastedDetails extends Component {
+         this.NotAvailableLinesPerProduct = {};
+         for (const line of this.props.docs.lines) {
+             if (this._notAvailableCondition(line)) {
+-                const key = line.product.id;
++                const key = this._getGroupKey(line);
+                 (this.NotAvailableLinesPerProduct[key] ??= []).push(line);
+             }
+         }
+@@ -114,16 +142,15 @@ export class ForecastedDetails extends Component {
+         this.FreeStockLinesPerProduct = {};
+         for (const line of this.props.docs.lines) {
+             if (this._freeStockCondition(line) && line?.removal_date !== -1) {
+-                const key = line.product.id;
++                const key = this._getGroupKey(line);
+                 (this.FreeStockLinesPerProduct[key] ??= []).push(line);
+             }
+         }
+     }
+ 
+-    _prepareLines(){
+-        if (this.multipleProducts) {
+-            this.props.docs.lines.sort((a, b) => (a.product.id || 0) - (b.product.id || 0));
+-        }
++    _prepareLines() {
++        this.props.docs.lines.sort((a, b) => (a.warehouse_id || 0) - (b.warehouse_id || 0));
++        this.props.docs.lines.sort((a, b) => (a.product.id || 0) - (b.product.id || 0));
+     }
+ 
+     _prepareData(){
+@@ -139,30 +166,34 @@ export class ForecastedDetails extends Component {
+                 lines.reduce((sum, line) => sum + (line.reservation ? 0 : line.quantity), 0),
+             ])
+         );
+-        for (const productId of this.productIds){
+-            if (!(productId in this.FreeStockLinesPerProduct) || !(productId in this.LinesPerProduct)){
++        for (const key of this.productIds){
++            if (!(key in this.FreeStockLinesPerProduct) || !(key in this.LinesPerProduct)){
+                 continue;
+             }
+-            const lines = this.FreeStockLinesPerProduct[productId]
+-            if (this.LinesPerProduct[productId].length > 1 && lines.length == 1 && lines[0]?.quantity === 0 ){
++            const lines = this.FreeStockLinesPerProduct[key]
++            if (this.LinesPerProduct[key].length > 1 && lines.length == 1 && lines[0]?.quantity === 0 ){
+                 const removeIndex = this.lines.indexOf(lines[0]);
+                 this.lines.splice(removeIndex,1);
+             }
+         }
+     }
+ 
+-    _mergeLines(){
+-        let lines = this.lines;
++    _mergeLines() {
++        const lines = this.lines;
+         this.mergesLinesData = {};
+         let lastIndex = 0;
+-        for(let i = 0; i < lines.length-1; i++){
++        for (let i = 0; i < lines.length - 1; i++) {
+             const line = lines[i];
+             const nextLine = lines[i + 1];
+-            if (line.product.id != nextLine.product.id || !this._sameLineRule(line, nextLine)) {
+-                lastIndex = i+1;
++            if (
++                line.product.id != nextLine.product.id ||
++                line.warehouse_id !== nextLine.warehouse_id ||
++                !this._sameLineRule(line, nextLine)
++            ) {
++                lastIndex = i + 1;
+                 continue;
+             }
+-            if (!this.mergesLinesData[lastIndex]){
++            if (!this.mergesLinesData[lastIndex]) {
+                 this.mergesLinesData[lastIndex] = {
+                     rowcount: 1,
+                     tot_qty: line.quantity,
+@@ -174,8 +205,8 @@ export class ForecastedDetails extends Component {
+     }
+ 
+     _sameLineRule(line, nextLine){
+-        const OnHand = this.OnHandLinesPerProduct[line.product.id] || [];
+-        const NotAvailable = this.NotAvailableLinesPerProduct[line.product.id] || [];
++        const OnHand = this.OnHandLinesPerProduct[this._getGroupKey(line)] || [];
++        const NotAvailable = this.NotAvailableLinesPerProduct[this._getGroupKey(line)] || [];
+         const sameReceiptDate = line.receipt_date === nextLine.receipt_date;
+         return (
+             (this.sameDocumentIn(line, nextLine) && sameReceiptDate) ||
+@@ -215,11 +246,11 @@ export class ForecastedDetails extends Component {
+         if(line_index - 1 >= 0){
+             const previousLine = this.lines[line_index - 1];
+             const sameProduct = line.product.id == previousLine.product.id;
+-            const isOnHandSplittedLine = this.OnHandLinesPerProduct[line.product.id] && this.OnHandLinesPerProduct[line.product.id].some(l => this.sameDocumentOut(l, line))
+-            const isReconciledSplittedLine = this.ReconciledLinesPerProduct[line.product.id] && !this.isReconciled(line) && this.ReconciledLinesPerProduct[line.product.id].some(l => this.sameDocumentOut(l, line))
++            const isOnHandSplittedLine = this.OnHandLinesPerProduct[this._getGroupKey(line)] && this.OnHandLinesPerProduct[this._getGroupKey(line)].some(l => this.sameDocumentOut(l, line))
++            const isReconciledSplittedLine = this.ReconciledLinesPerProduct[this._getGroupKey(line)] && !this.isReconciled(line) && this.ReconciledLinesPerProduct[this._getGroupKey(line)].some(l => this.sameDocumentOut(l, line))
+             splittedLine = sameProduct && (this.sameDocumentOut(line, previousLine) || isOnHandSplittedLine || isReconciledSplittedLine);
+         }
+-        const hasFreeStock = this.props.docs.product[line.product.id].free_qty > 0;
++        const hasFreeStock = this.props.docs.product[this._getGroupKey(line)].free_qty > 0;
+         return this.props.docs.user_can_edit_pickings && !line.in_transit && this.canReserveOperation(line) &&
+             (this.isOnHand(line, line_index) || (hasFreeStock && !splittedLine));
+     }
+@@ -229,7 +260,7 @@ export class ForecastedDetails extends Component {
+     }
+ 
+     futureVirtualAvailable(line) {
+-        const product = this.props.docs.product[line.product.id]
++        const product = this.props.docs.product[this._getGroupKey(line)];
+         return product.virtual_available + product.qty.in - product.qty.out;
+     }
+ 
+@@ -251,11 +282,11 @@ export class ForecastedDetails extends Component {
+     }
+ 
+     isOnHand(line, line_index){
+-        return this.OnHandLinesPerProduct[line.product.id] && this.OnHandLinesPerProduct[line.product.id].includes(this.lines[line_index]);
++        return this.OnHandLinesPerProduct[this._getGroupKey(line)] && this.OnHandLinesPerProduct[this._getGroupKey(line)].includes(this.lines[line_index]);
+     }
+ 
+     isReconciled(line){
+-        return this.ReconciledLinesPerProduct[line.product.id] && this.ReconciledLinesPerProduct[line.product.id].includes(this.lines[this.line_index]);
++        return this.ReconciledLinesPerProduct[this._getGroupKey(line)] && this.ReconciledLinesPerProduct[this._getGroupKey(line)].includes(this.lines[this.line_index]);
+     }
+ 
+     get freeStockLabel() {
+@@ -270,7 +301,17 @@ export class ForecastedDetails extends Component {
+         return this.props.docs.multiple_product;
+     }
+ 
++    get multipleWarehouses() {
++        return this.props.docs.multiple_warehouses;
++    }
++
+     get productIds(){
+-        return Object.keys(this.props.docs.product).map(Number);
++        return Object.keys(this.props.docs.product);
++    }
++
++    get warehouseMap() {
++        return Object.fromEntries(
++            this.props.docs.warehouses.map((warehouse) => [warehouse.id, warehouse])
++        );
+     }
+ }
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_details.xml b/addons/stock/static/src/stock_forecasted/forecasted_details.xml
+index b15e9537ea42..7a4bffa9bb6e 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_details.xml
++++ b/addons/stock/static/src/stock_forecasted/forecasted_details.xml
+@@ -16,23 +16,41 @@
+                 <t t-set="last_line_index" t-value="this.lines.length - 1"/>
+                 <t t-set="skip_row" t-value="0"/>
+                 <t t-foreach="this.lines" t-as="line" t-key="line_index">
+-                    <t t-set="currentProduct" t-value="this.props.docs.product[line.product.id]"/>
++                    <t t-set="currentProduct" t-value="this.props.docs.product[this._getGroupKey(line)]"/>
+                     <t t-if="this.multipleProducts and (line_index === 0 or line.product.id !== this.lines[line_index - 1].product.id)">
+                         <tr class="o_forecasted_product_header">
+                             <td class="border-0 p-0">
+                                 <button class="btn btn-sm border-0"
+-                                    data-bs-toggle="collapse"
+-                                    t-attf-data-bs-target=".collapseGroup_#{line.product.id}"
+-                                    aria-expanded="true" t-attf-aria-controls=".collapseGroup_#{line.product.id}">
+-                                    <i class="icon oi"/>
++                                    t-on-click="() => this.toggleProduct(line.product.id)">
++                                    <i class="oi oi-fw"
++                                        t-att-data-icon="this.state.products[line.product.id] ? 'keyboard_arrow_right' : 'keyboard_arrow_down'"/>
+                                 </button>
+                             </td>
+                             <td colspan="5" class="fw-bold text-uppercase border-0">
+-                                <span t-out="line.product.display_name"/>
++                                <span t-out="line.product.display_name" />
+                             </td>
+                         </tr>
+                     </t>
+-                    <tr t-attf-class="#{line.is_late and 'table-warning' or ''} #{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}" >
++                    <t t-if="this.multipleWarehouses and (
++                        line_index === 0 ||
++                        line.warehouse_id !== this.lines[line_index - 1].warehouse_id ||
++                        line.product.id !== this.lines[line_index - 1].product.id)
++                    ">
++                        <tr
++                            t-att-class="{'d-none': this.state.products[line.product.id]}">
++                            <td class="border-0 p-0">
++                                <button class="btn btn-sm border-0"
++                                    t-on-click="() => this.toggleWarehouse(line.product.id, line.warehouse_id)">
++                                    <i class="oi oi-fw"
++                                        t-att-data-icon="this.state.warehouses[this._getGroupKey(line)] ? 'keyboard_arrow_right' : 'keyboard_arrow_down'"/>
++                                </button>
++                            </td>
++                            <td colspan="5" class="text-uppercase">
++                                Warehouse: <span t-out="this.warehouseMap[line.warehouse_id].display_name"/>
++                            </td>
++                        </tr>
++                    </t>
++                    <tr t-att-class="{'table-warning': line.is_late, 'd-none': this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                         <t t-if="skip_row" t-set="skip_row" t-value="skip_row - 1"/>
+                         <t t-if="!skip_row">
+                             <t t-if="this.mergesLinesData[line_index]" t-set="skip_row" t-value="this.mergesLinesData[line_index]['rowcount']"/>
+@@ -58,7 +76,7 @@
+                                 </t>
+                                 <t t-elif="line.replenishment_filled">
+                                     <t name="onHand_cell" t-if="line.document_out">
+-                                        Stock To Reserve: <t t-out="this._formatFloat(this.OnHandTotalQty[line.product.id])"/> <t t-out="line.uom_id.display_name"/>
++                                        Stock To Reserve: <t t-out="this._formatFloat(this.OnHandTotalQty[this._getGroupKey(line)])"/> <t t-out="line.uom_id.display_name"/>
+                                     </t>
+                                     <t name="freeStock_cell" t-else="" t-out="this.freeStockLabel"/>
+                                 </t>
+@@ -87,13 +105,13 @@
+                                     t-on-click="() => this._unreserve(line.move_out.id)">
+                                     Unreserve
+                                 </a>
+-                                <button t-elif="line.replenishment_filled or this.AvailableOnHandTotalQty[line.product.id] &gt; 0"
++                                <button t-elif="line.replenishment_filled or this.AvailableOnHandTotalQty[this._getGroupKey(line)] &gt; 0"
+                                     class="btn btn-sm btn-secondary"
+                                     name="reserve_link"
+                                     t-on-click="() => this._reserve(line.move_out.id)">
+                                     Reserve
+-                                    <t t-if="this.AvailableOnHandTotalQty[line.product.id] &gt; 0 and !this.isOnHand(line)">
+-                                        (<t t-out="this._formatFloat(Math.min(this.AvailableOnHandTotalQty[line.product.id], line.quantity))"/> <t t-out="line.uom_id.display_name"/>)
++                                    <t t-if="this.AvailableOnHandTotalQty[this._getGroupKey(line)] &gt; 0 and !this.isOnHand(line)">
++                                        (<t t-out="this._formatFloat(Math.min(this.AvailableOnHandTotalQty[this._getGroupKey(line)], line.quantity))"/> <t t-out="line.uom_id.display_name"/>)
+                                     </t>
+                                 </button>
+                             </t>
+@@ -115,7 +133,7 @@
+                         <td t-out="line.delivery_date or ''"
+                             t-attf-class="#{line.delivery_late ? 'text-danger' : ''}"/>
+                     </tr>
+-                    <t t-if="line_index === last_line_index or line.product.id !== this.lines[line_index + 1].product.id">
++                    <t t-if="line_index === last_line_index or line.product.id !== this.lines[line_index + 1].product.id or line.warehouse_id !== this.lines[line_index + 1].warehouse_id">
+                         <!-- Check in progress with DALA
+                         <tr t-if="! multipleProducts and this.props.docs.qty_to_order" t-attf-class="#{multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
+                             <td/>
+@@ -125,8 +143,8 @@
+                                 <span ><t t-out="_formatFloat(this.props.docs.qty_to_order)"/> <t t-out="line.uom_id.display_name"/></span>
+                             </td>
+                         </tr> -->
+-                        <tr
+-                            class="o_forecasted_row fw-bold table-secondary" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++                        <tr class="o_forecasted_row fw-bold table-secondary"
++                            t-att-class="{'d-none': this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                             <td/>
+                             <td class="border-end-0">Forecasted Inventory</td>
+                             <td class="text-end border-start-0 border-end-0"
+@@ -135,21 +153,25 @@
+                             </td>
+                             <td class="border-start-0" colspan="3"/>
+                         </tr>
+-                        <tr t-if="currentProduct.draft_picking_qty.in" name="draft_picking_in" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++                        <tr
++                            t-if="currentProduct.draft_picking_qty and currentProduct.draft_picking_qty.in" name="draft_picking_in"
++                            t-att-class="{'d-none':this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                             <td/>
+                             <td>Incoming Draft Transfer</td>
+                             <td class="text-end">
+                                 <t t-out="this._formatFloat(currentProduct.draft_picking_qty.in)"/> <t t-out="line.uom_id.display_name"/>
+                             </td>
+                         </tr>
+-                        <tr t-if="currentProduct.draft_picking_qty.out" name="draft_picking_out" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++                        <tr t-if="currentProduct.draft_picking_qty and currentProduct.draft_picking_qty.out" name="draft_picking_out"
++                            t-att-class="{'d-none':this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                             <td/>
+                             <td>Outgoing Draft Transfer</td>
+                             <td class="text-end">
+                                 <t t-out="this._formatFloat(-currentProduct.draft_picking_qty.out)"/> <t t-out="line.uom_id.display_name"/>
+                             </td>
+                         </tr>
+-                        <tr class="o_forecasted_row fw-bold table-secondary" t-attf-class="#{this.multipleProducts and 'collapse show' or ''} collapseGroup_#{line.product.id}">
++                        <tr class="o_forecasted_row fw-bold table-secondary"
++                            t-att-class="{'d-none':this.state.products[line.product.id] || this.state.warehouses[this._getGroupKey(line)]}">
+                             <td/>
+                             <td class="border-end-0">Forecasted with Pending</td>
+                             <td class="text-end border-start-0 border-end-0" t-attf-class="#{this.futureVirtualAvailable(line) &lt;= 0 and 'text-danger' or 'text-success'}">
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_graph.xml b/addons/stock/static/src/stock_forecasted/forecasted_graph.xml
+index 3737cc96e33a..2c0091b8c6a3 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_graph.xml
++++ b/addons/stock/static/src/stock_forecasted/forecasted_graph.xml
+@@ -4,5 +4,8 @@
+         <xpath expr="//canvas[@t-ref='this.chart.ref']" position="attributes">
+             <attribute name="height">300</attribute>
+         </xpath>
++        <xpath expr="//t[@t-call='{{ this.props.buttonTemplate }}']" position="attributes">
++            <attribute name="t-if" add="!this.model.useSampleModel"/>
++        </xpath>
+     </t>
+ </templates>
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_header.js b/addons/stock/static/src/stock_forecasted/forecasted_header.js
+index b6f90a4706f5..1b9457c16413 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_header.js
++++ b/addons/stock/static/src/stock_forecasted/forecasted_header.js
+@@ -19,6 +19,26 @@ export class ForecastedHeader extends Component {
+     async _onClickInventory(){
+         const productIds = this.props.docs.product_variants_ids;
+         const action = await this.orm.call('product.product', 'action_open_quants', [productIds]);
++        action.domain = [
++            ...(action.domain || []),
++            ["warehouse_id", "in", this.props.docs.warehouse_ids],
++        ];
++        if (action.help) {
++            action.help = markup(action.help);
++        }
++        return this.action.doAction(action);
++    }
++
++    async _onClickTransfers(type) {
++        const action = await this.orm.call(
++            "stock.picking",
++            `get_action_picking_tree_${type === "incoming" ? "incoming" : "outgoing"}`
++        );
++        action.domain = [
++            ["product_id", "in", this.props.docs.product_variants_ids],
++            ["state", "not in", ["draft", "done", "cancel"]],
++            ["picking_type_id.warehouse_id", "in", this.props.docs.warehouse_ids],
++        ];
+         if (action.help) {
+             action.help = markup(action.help);
+         }
+@@ -26,7 +46,7 @@ export class ForecastedHeader extends Component {
+     }
+ 
+     get products() {
+-        return this.props.docs.product;
++        return this.props.docs.product; 
+     }
+ 
+     get leadTime() {
+@@ -58,7 +78,7 @@ export class ForecastedHeader extends Component {
+     }
+ 
+     get quantityOnHand() {
+-        return Object.values(this.products).reduce((sum, product) => sum + product.quantity_on_hand, 0);
++        return Object.values(this.products).reduce((sum, product) => sum + product.qty_available, 0);
+     }
+ 
+     get incomingQty() {
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_header.xml b/addons/stock/static/src/stock_forecasted/forecasted_header.xml
+index dff8278ec923..5df8d5ed294c 100644
+--- a/addons/stock/static/src/stock_forecasted/forecasted_header.xml
++++ b/addons/stock/static/src/stock_forecasted/forecasted_header.xml
+@@ -32,14 +32,16 @@
+                 <div class="h3 col-md-auto text-center">+</div>
+                 <div class="col-md-auto text-center">
+                     <div class="h3">
+-                        <t t-out="this._formatFloat(this.incomingQty)"/>
++                        <a href="#" t-on-click.prevent="() => this._onClickTransfers('incoming')"
++                            t-out="this._formatFloat(this.incomingQty)"/>
+                     </div>
+                     <div>Incoming</div>
+                 </div>
+                 <div class="h3 col-md-auto text-center">-</div>
+                 <div class="col-md-auto text-center">
+                     <div class="h3">
+-                        <t t-out="this._formatFloat(this.outgoingQty)"/>
++                        <a href="#" t-on-click.prevent="() => this._onClickTransfers('outgoing')"
++                            t-out="this._formatFloat(this.outgoingQty)"/>
+                     </div>
+                     <div>Outgoing</div>
+                 </div>
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.js b/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.js
+deleted file mode 100644
+index c6c1ed56bc75..000000000000
+--- a/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.js
++++ /dev/null
+@@ -1,41 +0,0 @@
+-import { Dropdown } from "@web/core/dropdown/dropdown";
+-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+-import { useService } from "@web/core/utils/hooks";
+-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+-
+-export class ForecastedWarehouseFilter extends Component {
+-    static template = "stock.ForecastedWarehouseFilter";
+-    static components = { Dropdown, DropdownItem };
+-    props = useProps({
+-        action: t.object(),
+-        setWarehouseInContext: t.function(),
+-        warehouses: t.array(),
+-    });
+-
+-    setup() {
+-        this.orm = useService("orm");
+-        this.context = this.props.action.context;
+-        this.warehouses = this.props.warehouses;
+-        onWillStart(this.onWillStart)
+-    }
+-
+-    async onWillStart() {
+-        this.displayWarehouseFilter = (this.warehouses.length > 1);
+-    }
+-
+-    _onSelected(id){
+-        this.props.setWarehouseInContext(Number(id));
+-    }
+-
+-    get activeWarehouse(){
+-        return this.context.warehouse_id ? this.warehouses.find((w) => w.id == this.context.warehouse_id) : this.warehouses[0];
+-    }
+-
+-    get warehousesItems() {
+-        return this.warehouses.map(warehouse => ({
+-            id: warehouse.id,
+-            label: warehouse.name,
+-            onSelected: () => this._onSelected(warehouse.id),
+-        }));
+-    }
+-}
+diff --git a/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.xml b/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.xml
+deleted file mode 100644
+index 863ffdab0f47..000000000000
+--- a/addons/stock/static/src/stock_forecasted/forecasted_warehouse_filter.xml
++++ /dev/null
+@@ -1,14 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8" ?>
+-<templates xml:space="preserve">
+-
+-    <t t-name="stock.ForecastedWarehouseFilter">
+-        <div t-if="this.displayWarehouseFilter" class="btn-group">
+-            <Dropdown items="this.warehousesItems">
+-                <button class="btn btn-secondary">
+-                    <span class="oi" data-icon="home"/> Warehouse: <t t-out="this.activeWarehouse.name"/>
+-                </button>
+-            </Dropdown>
+-        </div>
+-    </t>
+-
+-</templates>
+diff --git a/addons/stock/static/src/stock_forecasted/stock_forecasted.js b/addons/stock/static/src/stock_forecasted/stock_forecasted.js
+index d093b56078f7..19b9d95b0e00 100644
+--- a/addons/stock/static/src/stock_forecasted/stock_forecasted.js
++++ b/addons/stock/static/src/stock_forecasted/stock_forecasted.js
+@@ -3,20 +3,20 @@ import { _t } from "@web/core/l10n/translation";
+ import { registry } from "@web/core/registry";
+ import { View } from "@web/views/view";
+ import { ControlPanel } from "@web/search/control_panel/control_panel";
++import { Dropdown } from "@web/core/dropdown/dropdown";
+ 
+ import { ForecastedButtons } from "./forecasted_buttons";
+ import { ForecastedDetails } from "./forecasted_details";
+ import { ForecastedHeader } from "./forecasted_header";
+-import { ForecastedWarehouseFilter } from "./forecasted_warehouse_filter";
+-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
++import { Component, markup, onWillStart, proxy, useProps } from "@odoo/owl";
+ import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+ 
+ export class StockForecasted extends Component {
+     static template = "stock.Forecasted";
+     static components = {
+         ControlPanel,
++        Dropdown,
+         ForecastedButtons,
+-        ForecastedWarehouseFilter,
+         ForecastedHeader,
+         View,
+         ForecastedDetails,
+@@ -34,7 +34,6 @@ export class StockForecasted extends Component {
+             this.context.active_id = this.props.action.params.active_id;
+             this.reloadReport();
+         }
+-        this.warehouses = proxy([]);
+ 
+         onWillStart(this._getReportValues);
+     }
+@@ -43,11 +42,6 @@ export class StockForecasted extends Component {
+         await this._getResModel();
+         const isTemplate = !this.resModel || this.resModel === 'product.template';
+         this.reportModelName = `stock.forecasted_product_${isTemplate ? "template" : "product"}`;
+-        this.warehouses.splice(0, this.warehouses.length);
+-        this.warehouses.push(...await this.orm.searchRead('stock.warehouse', [],['id', 'name', 'code']));
+-        if (!this.context.warehouse_id) {
+-            this.updateWarehouse(this.warehouses[0].id);
+-        }
+         const reportValues = await this.orm.call(this.reportModelName, "get_report_values", [], {
+             context: this.context,
+             docids: [this.productId],
+@@ -61,7 +55,6 @@ export class StockForecasted extends Component {
+     }
+ 
+     async _getResModel(){
+-        this.resModel = this.context.active_model || this.context.params?.active_model;
+         //Following is used as a fallback when the forecast is not called by an action but through browser's history
+         if (!this.resModel) {
+             let resModel = this.props.action.res_model;
+@@ -84,12 +77,12 @@ export class StockForecasted extends Component {
+         }
+     }
+ 
+-    async updateWarehouse(id) {
+-        const hasPreviousValue = this.context.warehouse_id !== undefined;
+-        this.context.warehouse_id = id;
+-        if (hasPreviousValue) {
+-            await this.reloadReport();
+-        }
++    updateWarehouse(id) {
++        this.context.warehouse_id = id
++    }
++
++    updateVariant(id) {
++        this.context.variant_id = id;
+     }
+ 
+     async reloadReport() {
+@@ -104,21 +97,100 @@ export class StockForecasted extends Component {
+         return this.action.doAction(actionRequest, options);
+     }
+ 
++    get warehouseId() {
++        return this.context.warehouse_id || 0;
++    }
++
++    get variantId() {
++        return this.context.variant_id || 0;
++    }
++
++    get selectedWarehouseIds() {
++        return this.warehouseId === 0
++            ? this.docs.warehouses.map(({ id }) => id)
++            : [this.warehouseId];
++    }
++
++    get warehousesItems() {
++        return [
++            { id: 0, display_name: "All Warehouses" },
++            ...this.docs.warehouses,
++        ].map((warehouse) => ({
++            id: warehouse.id,
++            label: warehouse.display_name,
++            class: {selected: warehouse.id === this.warehouseId},
++            onSelected: () => this.updateWarehouse(warehouse.id),
++        }));
++    }
++
++    get variantItems() {
++        return [
++            { id: 0, display_name: _t("All Variants") },
++            ...this.docs.product_variants,
++        ].map((variant) => ({
++            id: variant.id,
++            label: variant.display_name,
++            class: {selected: variant.id === this.variantId},
++            onSelected: () => this.updateVariant(variant.id),
++        }));
++    }
++
++    get activeWarehouseName() {
++        return this.warehouseId === 0
++            ? _t("All Warehouses")
++            : this.docs.warehouses.find(
++                (warehouse) =>
++                    warehouse.id === this.warehouseId
++            )?.display_name;
++    }
++
++    get activeVariantName() {
++        return this.variantId === 0
++            ? _t("All Variants")
++            : this.docs.product_variants.find(
++                (variant) => variant.id === this.variantId
++            )?.display_name;
++    }
++
++    get filteredDocs() {
++        const { variant_id: variant, warehouse_id: warehouse } = this.context;
++
++        if (!variant && !warehouse) {
++            return this.docs;
++        }
++        const filteredDocs = {
++            ...this.docs,
++            lines: this.docs.lines.filter((l) => (!variant || l.product.id === variant) && (!warehouse || l.warehouse_id === warehouse)),
++            product: Object.fromEntries(
++                Object.entries(this.docs.product).filter(([key]) => {
++                    const[productId, warehouseId] = key.split("_").map(Number);
++                    return (
++                        (!variant || productId === variant) &&
++                        (!warehouse || warehouseId === warehouse)
++                    );
++                })
++            ),
++            multiple_product: !variant,
++            multiple_warehouses: !warehouse,
++            warehouse_ids: warehouse ? [warehouse] : this.docs.warehouse_ids,
++            product_variants_ids : variant ? [variant] : this.docs.product_variants_ids,
++        };
++        return filteredDocs;
++    }
++
+     get graphDomain() {
+         const domain = [
+             ["state", "=", "forecast"],
+-            ["warehouse_id", "=", this.context.warehouse_id],
++            ["warehouse_id", "in", this.filteredDocs.warehouse_ids],
++            ["product_id", "in", this.filteredDocs.product_variants_ids],
+         ];
+-        if (this.resModel === "product.template") {
+-            domain.push(["product_tmpl_id", "=", this.productId]);
+-        } else if (this.resModel === "product.product") {
+-            domain.push(["product_id", "=", this.productId]);
+-        }
+         return domain;
+     }
+ 
+     get graphInfo() {
+-        return { noContentHelp: _t("Try to add some incoming or outgoing transfers.") };
++        return {
++            noContentHelp: markup(`<span class="text-muted">${_t("No History Yet")}</span>`),
++        };
+     }
+ 
+     async openView(resModel, view, resId=false, domain = false) {
+diff --git a/addons/stock/static/src/stock_forecasted/stock_forecasted.xml b/addons/stock/static/src/stock_forecasted/stock_forecasted.xml
+index dcdb3e2a8d62..a85efecd67f7 100644
+--- a/addons/stock/static/src/stock_forecasted/stock_forecasted.xml
++++ b/addons/stock/static/src/stock_forecasted/stock_forecasted.xml
+@@ -5,26 +5,32 @@
+             <t t-set-slot="control-panel-buttons">
+                 <ForecastedButtons action="this.props.action" reloadReport.bind="this.reloadReport" resModel="this.resModel"/>
+             </t>
+-            <t t-set-slot="control-panel-actions">
+-                <div class="btn-group o_search_options position-static" role="search">
+-                    <ForecastedWarehouseFilter action="this.props.action" warehouses="this.warehouses" setWarehouseInContext.bind="this.updateWarehouse"/>
+-                </div>
++            <t t-set-slot="control-panel-navigation-additional">
++                <Dropdown t-if="this.docs.multiple_product" items="this.variantItems">
++                    <button class="btn btn-secondary text-truncate" style="max-width: 30ch">
++                        <span class="oi" data-icon="account_tree" /> Variant: <t
++                            t-out="this.activeVariantName" />
++                    </button>
++                </Dropdown>
++                <Dropdown t-if="this.docs.multiple_warehouses" items="this.warehousesItems">
++                    <button class="btn btn-secondary text-truncate" style="max-width: 30ch">
++                        <span class="oi" data-icon="home" /> Warehouse: <t t-out="this.activeWarehouseName"/>
++                    </button>
++                </Dropdown>
+             </t>
+         </ControlPanel>
+         <div class="o-content pt-3 container-fluid overflow-auto o_stock_forecasted_page">
+-            <ForecastedHeader docs="this.docs" openView.bind="this.openView"/>
+-            <t t-if="this.context.warehouse_id">
+-                <View type="'graph'"
++            <ForecastedHeader docs="this.filteredDocs" openView.bind="this.openView"/>
++            <View type="'graph'"
+                 viewId="this.stock_report_view_graph"
+                 resModel="'report.stock.quantity'"
+                 domain="this.graphDomain"
+                 display="{controlPanel: false}"
+                 context="{fill_temporal: false}"
+                 info="this.graphInfo"
+-                useSampleModel="true"
+-                />
+-            </t>
+-            <ForecastedDetails docs="this.docs" openView.bind="this.openView" reloadReport.bind="this.reloadReport"/>
++                useSampleModel="true"/>
++            <ForecastedDetails docs="this.filteredDocs" openView.bind="this.openView"
++                reloadReport.bind="this.reloadReport"/>
+         </div>
+     </div>
+ </templates>
+diff --git a/addons/stock/tests/test_report.py b/addons/stock/tests/test_report.py
+index 77daa6aae6f4..5bc9d5030f52 100644
+--- a/addons/stock/tests/test_report.py
++++ b/addons/stock/tests/test_report.py
+@@ -45,18 +45,31 @@ class TestReportsCommon(TransactionCase):
+         })
+         cls.allocation_report = cls.env['stock.allocation.report']
+ 
+-    def get_report_forecast(self, product_template_ids=False, product_variant_ids=False, context=False):
++    def get_report_forecast(self, product_template_ids=False, product_variant_ids=False, context={}):
+         if product_template_ids:
+             report = self.env['stock.forecasted_product_template']
+             product_ids = product_template_ids
+-        elif product_variant_ids:
++        else:
+             report = self.env['stock.forecasted_product_product']
+-            product_ids = product_template_ids
++            product_ids = product_variant_ids
+         if context:
+             report = report.with_context(context)
++        warehouse_id = context.get(
++            'warehouse_id',
++            self.env.ref('stock.warehouse0').id,
++        )
+         report_values = report.get_report_values(docids=product_ids)
+         docs = report_values['docs']
+-        lines = docs['lines']
++        lines = [
++            line for line in docs['lines']
++            if line['warehouse_id'] == warehouse_id
++        ]
++
++        docs['product'] = {
++            key: value
++            for key, value in docs['product'].items()
++            if int(key.rsplit('_', 1)[1]) == warehouse_id
++        }
+         return report_values, docs, lines
+ 
+     def sum_dicts(self, dicts, key):
+@@ -810,7 +823,8 @@ class TestReports(TestReportsCommon):
+         """ Create some transfer for two different warehouses and check the
+         report display the good moves according to the selected warehouse.
+         """
+-        # Warehouse config.
++        # Warehouses config.
++        wh_1 = self.picking_type_in.warehouse_id
+         wh_2 = self.wh_2
+         picking_type_out_2 = self.env['stock.picking.type'].search([
+             ('code', '=', 'outgoing'),
+@@ -827,7 +841,10 @@ class TestReports(TestReportsCommon):
+             move_line.product_uom_qty = 5
+         delivery = delivery_form.save()
+ 
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         draft_picking_qty = self.sum_dicts(docs['product'], 'draft_picking_qty')
+         self.assertEqual(len(lines), 1, "Must have 1 line.")
+         self.assertEqual(draft_picking_qty['out'], 5)
+@@ -842,7 +859,10 @@ class TestReports(TestReportsCommon):
+ 
+         # Confirm the delivery -> The report still have 1 line.
+         delivery.action_confirm()
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         draft_picking_qty = self.sum_dicts(docs['product'], 'draft_picking_qty')
+         self.assertEqual(len(lines), 1)
+         self.assertEqual(draft_picking_qty['out'], 0)
+@@ -867,7 +887,10 @@ class TestReports(TestReportsCommon):
+             move_line.product_uom_qty = 8
+         delivery_2 = delivery_form.save()
+ 
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         draft_picking_qty = self.sum_dicts(docs['product'], 'draft_picking_qty')
+         self.assertEqual(len(lines), 1)
+         self.assertEqual(draft_picking_qty['out'], 0)
+@@ -883,7 +906,10 @@ class TestReports(TestReportsCommon):
+         self.assertEqual(draft_picking_qty['out'], 8)
+         # Confirm the second delivery -> The report must now have 1 line.
+         delivery_2.action_confirm()
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         draft_picking_qty = self.sum_dicts(docs['product'], 'draft_picking_qty')
+         self.assertEqual(len(lines), 1)
+         self.assertEqual(draft_picking_qty['out'], 0)
+@@ -957,7 +983,8 @@ class TestReports(TestReportsCommon):
+         """ Create transfers for two different companies and check report
+         display the right transfers.
+         """
+-        # Configure second warehouse.
++        # Warehouses config.
++        wh_1 = self.picking_type_in.warehouse_id
+         company_2 = self.env['res.company'].create({'name': 'Aperture Science'})
+         wh_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)])
+         wh_2_picking_type_in = wh_2.in_type_id
+@@ -982,7 +1009,10 @@ class TestReports(TestReportsCommon):
+             move_line.product_uom_qty = 5
+         wh_2_receipt = receipt_form.save()
+ 
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         draft_picking_qty = self.sum_dicts(docs['product'], 'draft_picking_qty')
+         self.assertEqual(len(lines), 1, "Must have 1 line.")
+         self.assertEqual(draft_picking_qty['in'], 2)
+@@ -1001,7 +1031,10 @@ class TestReports(TestReportsCommon):
+         wh_1_receipt.action_confirm()
+         wh_2_receipt.action_confirm()
+ 
+-        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
++        report_values, docs, lines = self.get_report_forecast(
++            product_template_ids=self.product_template.ids,
++            context={'warehouse_id': wh_1.id},
++        )
+         self.assertEqual(len(lines), 2, "Must have 2 lines.")
+         self.assertEqual(lines[1]['document_in']['id'], wh_1_receipt.id)
+         self.assertEqual(lines[1]['quantity'], 2)
+diff --git a/addons/stock/wizard/product_replenish.py b/addons/stock/wizard/product_replenish.py
+index ef526687547c..20294365a822 100644
+--- a/addons/stock/wizard/product_replenish.py
++++ b/addons/stock/wizard/product_replenish.py
+@@ -70,9 +70,8 @@ class ProductReplenish(models.TransientModel):
+             res['uom_id'] = product_tmpl_id.uom_id.id
+         if 'company_id' in fields:
+             res['company_id'] = company.id
+-        if 'warehouse_id' in fields and 'warehouse_id' not in res:
+-            warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
+-            res['warehouse_id'] = warehouse.id
++        if 'warehouse_id' in fields and not res.get('warehouse_id'):
++            res['warehouse_id'] = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1).id
+         if 'route_id' in fields and 'route_id' not in res and product_tmpl_id:
+             res['route_id'] = self.env['stock.route'].search(self._get_route_domain(product_tmpl_id), limit=1).id
+             if not res['route_id'] and product_tmpl_id.route_ids:
+diff --git a/addons/stock/wizard/product_replenish_views.xml b/addons/stock/wizard/product_replenish_views.xml
+index 696950c58c8e..90cb68133e71 100644
+--- a/addons/stock/wizard/product_replenish_views.xml
++++ b/addons/stock/wizard/product_replenish_views.xml
+@@ -29,7 +29,8 @@
+                                 options="{'no_open': 1, 'no_create': 1, 'quantity_field': 'quantity'}"/>
+                         </div>
+                         <field name="warehouse_id"
+-                            groups="stock.group_stock_multi_warehouses"/>
++                            groups="stock.group_stock_multi_warehouses"
++                            readonly="context.get('default_warehouse_id')"/>
+                         <field name="route_id" domain="[('id', 'in', allowed_route_ids)]"/>
+                         <field name="date_planned"/>
+                     </group>
+diff --git a/addons/stock_account/models/stock_location.py b/addons/stock_account/models/stock_location.py
+index 36fd7cb284b7..627a0ba18319 100644
+--- a/addons/stock_account/models/stock_location.py
++++ b/addons/stock_account/models/stock_location.py
+@@ -32,4 +32,4 @@ class StockLocation(models.Model):
+         be considered when valuating the stock of a company.
+         """
+         self.ensure_one()
+-        return bool(self.company_id) and self.company_id == self.env.company and self.usage in ['internal', 'transit']
++        return bool(self.company_id) and self.company_id in self.env.companies and self.usage in ['internal', 'transit']
+diff --git a/addons/stock_account/report/stock_forecasted.py b/addons/stock_account/report/stock_forecasted.py
+index 0615c76e7e24..e0fbb07320dc 100644
+--- a/addons/stock_account/report/stock_forecasted.py
++++ b/addons/stock_account/report/stock_forecasted.py
+@@ -1,7 +1,8 @@
+ # -*- coding: utf-8 -*-
+ # Part of Odoo. See LICENSE file for full copyright and licensing details.
++from collections import defaultdict
+ 
+-from odoo import models
++from odoo import models, fields
+ from odoo.tools.float_utils import float_repr
+ 
+ 
+@@ -13,9 +14,10 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         res = super()._get_report_header(product_template_ids, product_ids, wh_location_ids)
+         if not self.env.user.has_group('stock.group_stock_manager') or not wh_location_ids:
+             return res
+-        company = self.env['stock.location'].browse(wh_location_ids[0]).company_id
++        locations = self.env['stock.location'].browse(wh_location_ids)
++        company = locations.company_id
+         domain_quants = [
+-            ('company_id', '=', company.id),
++            ('company_id', 'in', company.ids),
+             ('location_id', 'in', wh_location_ids)
+         ]
+         if product_template_ids:
+@@ -23,13 +25,42 @@ class StockForecasted_Product_Product(models.AbstractModel):
+         else:
+             domain_quants += [('product_id', 'in', product_ids)]
+         quants = self.env['stock.quant'].search(domain_quants)
++        warehouses = locations.warehouse_id
+ 
+         currency = self.env.company.currency_id
+-        value = sum(quants.mapped('value'))
+-        value = float_repr(value, precision_digits=currency.decimal_places)
+-        if currency.position == 'after':
+-            value = '%s %s' % (value, currency.symbol)
+-        else:
+-            value = '%s %s' % (currency.symbol, value)
+-        res['value'] = value
++        values_per_warehouse = defaultdict(float)
++        for quant in quants:
++            values_per_warehouse[quant.warehouse_id.id] += quant.value
++
++        def format_value(value, currency):
++            value = float_repr(value, precision_digits=currency.decimal_places)
++            return (
++                f"{value} {currency.symbol}"
++                if currency.position == "after"
++                else f"{currency.symbol} {value}"
++            )
++        total_value = 0.0
++        res['values_per_warehouse'] = {}
++
++        for warehouse in warehouses:
++            value = values_per_warehouse[warehouse.id]
++            warehouse_currency = warehouse.company_id.currency_id
++
++            res['values_per_warehouse'][warehouse.id] = format_value(
++                value,
++                warehouse_currency,
++            )
++
++            if warehouse_currency == currency:
++                total_value += value
++            else:
++                total_value += warehouse_currency._convert(
++                    value,
++                    currency,
++                    warehouse.company_id,
++                    fields.Date.context_today(self),
++                )
++
++                res['total_value'] = format_value(total_value, currency)
++
+         return res
+diff --git a/addons/stock_account/static/src/stock_account_forecasted/forecasted_header.xml b/addons/stock_account/static/src/stock_account_forecasted/forecasted_header.xml
+index a2e1fce7e5ab..1f202ddf2f94 100644
+--- a/addons/stock_account/static/src/stock_account_forecasted/forecasted_header.xml
++++ b/addons/stock_account/static/src/stock_account_forecasted/forecasted_header.xml
+@@ -5,8 +5,10 @@
+             <h6 t-if="() => this.env.user.has_group('stock.group_stock_manager')">
+                 Value On Hand:
+                 <a href="#"
+-                   t-out="this.props.docs.value"
+-                   t-on-click.prevent="this._onClickValuation"/>
++                    t-out="this.props.docs.warehouse_ids.length > 1
++                        ? this.props.docs.total_value
++                        : this.props.docs.values_per_warehouse[this.props.docs.warehouse_ids[0]]"
++                    t-on-click.prevent="this._onClickValuation" />
+             </h6>
+         </xpath>
+     </t>
+diff --git a/addons/stock_account/tests/test_stockvaluation.py b/addons/stock_account/tests/test_stockvaluation.py
+index 24c339e16747..01e3ee340a95 100644
+--- a/addons/stock_account/tests/test_stockvaluation.py
++++ b/addons/stock_account/tests/test_stockvaluation.py
+@@ -2368,9 +2368,10 @@ class TestStockValuation(TestStockValuationCommon):
+         report_for_company_1 = report.with_company(company_1).with_context(warehouse_id=warehouse_1.id)
+         report_for_company_2 = report.with_company(company_2).with_context(warehouse_id=warehouse_2.id)
+         report_value_1 = report_for_company_1.get_report_values(docids=product.ids)
++        self.env["stock.quant"].invalidate_model(["value"])
+         report_value_2 = report_for_company_2.get_report_values(docids=product.ids)
+-        self.assertEqual(report_value_1['docs']['value'], "U 50.00")
+-        self.assertEqual(report_value_2['docs']['value'], "48.00 DD")
++        self.assertEqual(report_value_1['docs']['values_per_warehouse'][warehouse_1.id], "U 50.00")
++        self.assertEqual(report_value_2['docs']['values_per_warehouse'][warehouse_2.id], "48.00 DD")
+ 
+     @freeze_time("2024-01-10 10:00:00")
+     def test_product_qty_and_value_correct_at_to_date_with_timezone(self):
