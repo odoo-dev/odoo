@@ -11,7 +11,7 @@ declare module "services" {
     import { fileUploadService } from "@web/core/file_upload/file_upload_service";
     import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
     import { localizationService } from "@web/core/l10n/localization_service";
-    import { nameService } from "@web/core/name_service";
+    import { nameService } from "@web/core/name_plugin";
     import { httpService } from "@web/core/network/http_service";
     import { notificationService } from "@web/core/notifications/notification_plugin";
     import { offlineService } from "@web/core/offline/offline_plugin";
