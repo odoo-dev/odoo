@@ -8,9 +8,12 @@ class L10nUsResCounty(models.Model):
     _description = 'US County'
     _order = 'state_id, name'
 
+    code = fields.Char(string='FIPS Code', required=True, index=True)
     name = fields.Char(required=True)
     state_id = fields.Many2one(
         comodel_name='res.country.state',
         required=True,
         domain="[('country_id.code', '=', 'US')]",
     )
+
+    _code_uniq = models.Constraint('unique (code)', 'The FIPS code of a county must be unique.')
