@@ -28,6 +28,9 @@ import { backgroundImageCssToParts, backgroundImagePartsToCss } from "@html_edit
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
+import { isEmpty } from "../../utils/dom_info";
+import { prepareUpdate } from "@html_editor/utils/dom_state";
+import { leftPos, rightPos } from "@html_editor/utils/position";
 
 const COLOR_COMBINATION_CLASSES = [1, 2, 3, 4, 5].map((i) => `o_cc${i}`);
 const COLOR_COMBINATION_SELECTOR = COLOR_COMBINATION_CLASSES.map((c) => `.${c}`).join(", ");
@@ -472,8 +475,9 @@ export class ColorPlugin extends Plugin {
         const anchorNode = selection.anchorNode;
         let element = closestElement(anchorNode);
         const cursor = this.dependencies.selection.preserveSelection();
+        let restore;
         while (
-            isZWS(element) &&
+            (isZWS(element) || isEmpty(element)) &&
             isPhrasingContent(element) &&
             !this.dependencies.delete.isUnremovable(element)
         ) {
@@ -491,6 +495,7 @@ export class ColorPlugin extends Plugin {
                 this.activeColorInfo.backgroundColor = bgColor.value;
                 this.colorElement(element, "", "backgroundColor");
             }
+            restore = prepareUpdate(...leftPos(element), ...rightPos(element));
             const nonZwsAttrs = element
                 .getAttributeNames()
                 .filter((attr) => attr !== "data-oe-zws-empty-inline");
@@ -500,16 +505,18 @@ export class ColorPlugin extends Plugin {
             }
             element = parent;
         }
-        if (
-            Object.keys(this.activeColorInfo).length &&
-            anchorNode.isConnected &&
-            anchorNode.nodeType === Node.TEXT_NODE &&
-            anchorNode.textContent === "\u200b"
-        ) {
-            cursor.update(callbacksForCursorUpdate.remove(anchorNode));
-            anchorNode.remove();
+        if (Object.keys(this.activeColorInfo).length) {
             this.skipNextColorClear = true;
+            if (
+                anchorNode.isConnected &&
+                anchorNode.nodeType === Node.TEXT_NODE &&
+                anchorNode.textContent === "\u200b"
+            ) {
+                cursor.update(callbacksForCursorUpdate.remove(anchorNode));
+                anchorNode.remove();
+            }
         }
+        restore?.();
         cursor.restore();
     }
 

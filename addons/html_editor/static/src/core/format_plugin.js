@@ -13,7 +13,6 @@ import {
     isContentEditable,
     isContentEditableAncestor,
     isElement,
-    isEmpty,
     isEmptyBlock,
     isItalic,
     isPhrasingContent,
@@ -308,18 +307,19 @@ export class FormatPlugin extends Plugin {
         }
         const cursor = this.dependencies.selection.preserveSelection();
         while (
-            (isZWS(element) || isEmpty(element)) &&
+            (isZWS(element) || element.textContent === "") &&
             isPhrasingContent(element) &&
             !this.dependencies.delete.isUnremovable(element)
         ) {
             const spec = this.formatSpecs.find(
                 (spec) => spec.isTag?.(element) || spec.hasStyle?.(element)
             );
-            if (!spec) {
-                break;
-            }
             const parent = element.parentElement;
-            const restore = prepareUpdate(...leftPos(anchorNode), ...rightPos(anchorNode));
+            if (!spec) {
+                element = parent;
+                continue;
+            }
+            const restore = prepareUpdate(...leftPos(element), ...rightPos(element));
             const formatProps = spec.getFormatProps?.(element);
             removeFormat(element, spec, cursor);
             this.activeFormats[spec.id] = { applyStyle: true, formatProps };
