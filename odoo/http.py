@@ -309,7 +309,7 @@ SESSION_LIFETIME = 60 * 60 * 24 * 7
 
 # The default duration (3h) before a session is rotated, changing the
 # session id (also on the cookie) but keeping the same content.
-SESSION_ROTATION_INTERVAL = 60 * 60 * 3
+SESSION_ROTATION_INTERVAL = 60
 
 # The header to pass in a request to skip the soft session rotation
 SESSION_ROTATION_INTERVAL_HEADER_SKIP = "X-Odoo-Skip-Session-Rotation-Interval"
@@ -324,7 +324,7 @@ SESSION_ROTATION_EXCLUDED_PATHS = (
 # After a session is rotated, the session should be kept for a couple of
 # seconds to account for network delay between multiple requests which are
 # made at the same time and all use the same old cookie.
-SESSION_DELETION_TIMER = 120
+SESSION_DELETION_TIMER = 60
 
 # The amount of bytes of the session that will remain static and can be used
 # for calculating the csrf token and be stored inside the database.
