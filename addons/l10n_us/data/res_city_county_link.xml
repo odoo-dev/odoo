@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <function model="res.city" name="_l10n_us_link_counties"/>
+</odoo>

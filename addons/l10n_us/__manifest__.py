@@ -14,9 +14,13 @@
         'security/ir.access.csv',
         'data/l10n_us.res.county.csv',
         'data/res.city.csv',
+        'data/res_city_county_link.xml',
         'data/res_company_data.xml',
         'views/res_city_views.xml',
         'views/res_partner_bank_views.xml'
+    ],
+    'other_files': [
+        'data/res.city.county.csv',
     ],
     'demo': [
         'demo/demo_company.xml',
