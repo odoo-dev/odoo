@@ -19,9 +19,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
             'company_id': False,
         })
         cls.env['res.currency.rate'].search([]).unlink()
-        cls.customer = cls.env['res.partner'].create({
-            'name': 'Customer',
-        })
+        cls.customer = cls.vendor
 
     #########
     # UTILS #
@@ -572,11 +570,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
             self._make_in_move(self.product_avco_auto, 2, 5)
             self.assertEqual(self.product_avco_auto.standard_price, 30, "standard_price for avco = (5 * 40 + 2 * 5) / (5 + 2) = 30: 1 delivered, 5 remaining + 2 added to stock")
             freeze.tick(delta=datetime.timedelta(seconds=2))
-            stock_return_picking_form = Form(self.env['stock.return.picking'].with_context(active_id=delivery.id, active_model='stock.picking'))
-            stock_return_picking = stock_return_picking_form.save()
-            stock_return_picking.product_return_moves.quantity = 3.0
-            stock_return_picking_action = stock_return_picking.action_create_returns()
-            return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
+            return_pick = self._make_return(move, 3).picking_id
             return_pick.button_validate()
             self.assertEqual(sol.product_uom_qty, 1)
             self.assertEqual(sol.qty_delivered, -2)
@@ -645,14 +639,10 @@ class TestSaleStockMargin(TestStockValuationCommon):
             'route_ids': [Command.link(dropship_route.id)]
         })
         # create and confirm SO and PO
-        so = self.env['sale.order'].create({
-            'partner_id': self.customer.id,
-            'order_line': [Command.create({
-                'product_id': self.product_fifo_auto.id,
-                'product_uom_qty': 1.0,
-            })],
-        })
+        so = self._create_sale_order()
+        sol = self._create_sale_order_line(so, self.product_fifo_auto, 1)
         so.action_confirm()
+
         po = self.env['purchase.order'].search([
             ('origin', '=', so.name),
             ('partner_id', '=', self.vendor.id),
@@ -661,9 +651,9 @@ class TestSaleStockMargin(TestStockValuationCommon):
 
         # untill dropship validation, purchase price of the sale order line is the product's standard price
         self.assertEqual(self.product_fifo_auto.standard_price, 10)
-        self.assertEqual(so.order_line.purchase_price, 10)
+        self.assertEqual(sol.purchase_price, 10)
 
         # after dropship validation, purchase price of the sale order line is the PO's unit cost
         so.picking_ids.button_validate()
         self.assertEqual(po.order_line.price_unit, 20)
-        self.assertEqual(so.order_line.purchase_price, 20)
+        self.assertEqual(sol.purchase_price, 20)
