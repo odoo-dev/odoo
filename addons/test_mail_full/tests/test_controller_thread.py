@@ -1,8 +1,10 @@
+from itertools import product
+
 from odoo.addons.mail.tests.common_controllers import MailControllerThreadCommon, MessagePostSubTestData
 from odoo.tests import tagged
 
 
-@tagged("-at_install", "post_install", "mail_controller")
+@tagged("mail_controller")
 class TestPortalThreadController(MailControllerThreadCommon):
 
     def test_message_post_portal_no_partner(self):
@@ -168,4 +170,59 @@ class TestPortalThreadController(MailControllerThreadCommon):
                 test_partners(self.user_employee, True, all_partners, route_kw=token),
                 test_partners(self.user_employee, True, all_partners, route_kw=sign),
             ),
+        )
+
+    def test_message_post_sanitizes_post_data(self):
+        """Post data is sanitized based on caller trust. Only internal users
+        with direct posting ACL can pass custom message_type/subtype_xmlid;
+        everyone else gets comment / mail.mt_comment."""
+        non_accessible_record = self.env["mail.test.portal.no.access"].create(
+            {"name": "Non accessible"}
+        )
+        token, _, sign, _, partner = self._get_sign_token_params(non_accessible_record)
+
+        def test_post_data(
+            user, exp_message_type, exp_subtype_xmlid, route_kw=None, exp_author=None
+        ):
+            return MessagePostSubTestData(
+                user,
+                True,
+                route_kw=route_kw,
+                message_type="notification",
+                subtype_xmlid="mail.mt_note",
+                exp_message_type=exp_message_type,
+                exp_subtype_xmlid=exp_subtype_xmlid,
+                exp_author=exp_author,
+            )
+
+        self._execute_message_post_subtests(
+            non_accessible_record,
+            [
+                test_post_data(
+                    user=user,
+                    exp_message_type="comment",
+                    exp_subtype_xmlid="mail.mt_comment",
+                    route_kw=route_kw,
+                    exp_author=partner if user == self.user_public and route_kw is sign else None,
+                )
+                for user, route_kw in product(
+                    (self.user_public, self.user_portal, self.user_employee),
+                    (token, sign),
+                )
+            ],
+        )
+        self._execute_message_post_subtests(
+            self.env["mail.test.rating.thread.read"].create({"name": "User accessible record"}),
+            [
+                test_post_data(
+                    user=self.user_employee,
+                    exp_message_type="notification",
+                    exp_subtype_xmlid="mail.mt_note",
+                ),
+                test_post_data(
+                    user=self.user_portal,
+                    exp_message_type="comment",
+                    exp_subtype_xmlid="mail.mt_comment",
+                ),
+            ],
         )
