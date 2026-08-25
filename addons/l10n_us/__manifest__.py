@@ -12,8 +12,6 @@
     'depends': ['base', 'base_address_extended'],
     'data': [
         'security/ir.access.csv',
-        'data/l10n_us.res.county.csv',
-        'data/res.city.csv',
         'data/res_company_data.xml',
         'views/res_city_views.xml',
         'views/res_partner_bank_views.xml'
@@ -21,6 +19,13 @@
     'demo': [
         'demo/demo_company.xml',
     ],
+    'other_files': [
+        # loaded by the post init hook
+        'data/l10n_us.res.county.csv',
+        'data/res.city.csv',
+    ],
+    'post_init_hook': 'post_init_hook',
+    'uninstall_hook': 'uninstall_hook',
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }
