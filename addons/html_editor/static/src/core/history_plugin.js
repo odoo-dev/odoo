@@ -50,7 +50,7 @@ import { _t } from "@web/core/l10n/translation";
  * @typedef { ((commit: HistoryCommit) => boolean | undefined)[] } has_history_commit_changes_predicates
  * @typedef { ((commit: HistoryCommit) => boolean | undefined)[] } is_history_commit_reversible_predicates
  *
- * @typedef { ((data: HistoryCommitData) => HistoryCommitData)[] } pending_history_commit_data_processors
+ * @typedef { ((data: HistoryCommitData, options: { skipNormalize: boolean }) => HistoryCommitData)[] } pending_history_commit_data_processors
  * @typedef { ((data: HistoryCommitData<"savePoint">) => HistoryCommitData<"savePoint">)[] } save_point_history_commit_data_processors
  * @typedef { ((data: HistoryCommitData<"standard"> & { authorTimestamp: number }) => HistoryCommitData<"standard">)[] } snapshot_history_commit_data_processors
  */
@@ -261,15 +261,20 @@ export class HistoryPlugin extends Plugin {
      *
      * @template { WritableHistoryCommitType } [T="standard"]
      * @param { HistoryCommitData<T> } [data = {}]
+     * @param { Object } [options = {}]
+     * @param { boolean } [options.skipNormalize = false] Whether DOM is already
+     * normalized, in which case the processors should not normalize it again.
      * @returns { HistoryCommitData<T> }
      */
-    processCommitData(data = {}) {
+    processCommitData(data = {}, { skipNormalize = false } = {}) {
         // Set the timestamp of the commit or keep the timestamp of the commit
         // it reverts:
         data.commitTimestamp ??= Date.now();
         data.authorTimestamp ??= this.authorTimestamp;
         data.previousCommitId = this.commits?.at(-1)?.id;
-        return this.processThrough("pending_history_commit_data_processors", data);
+        return this.processThrough("pending_history_commit_data_processors", data, {
+            skipNormalize,
+        });
     }
 
     /**
@@ -383,12 +388,19 @@ export class HistoryPlugin extends Plugin {
         for (reversedCommit of commitsToReverse) {
             this.revertCommit(reversedCommit, { ensureNewMutations: true });
             this.revertedCommits.add(reversedCommit.id);
+            // The state restored by reverting a commit is already normalized.
+            // Normalizing it again would only re-derive its content (typically
+            // the FEFFs around links) into this commit, which the next
+            // undo/redo would have to reverse in turn, growing every commit.
             /** @type { HistoryCommitData<T> } */
-            const commitData = this.processCommitData({
-                batchable: reversedCommit.data.batchable,
-                commitTimestamp: reversedCommit.data.commitTimestamp,
-                relatedCommit: reversedCommit,
-            });
+            const commitData = this.processCommitData(
+                {
+                    batchable: reversedCommit.data.batchable,
+                    commitTimestamp: reversedCommit.data.commitTimestamp,
+                    relatedCommit: reversedCommit,
+                },
+                { skipNormalize: true }
+            );
             this.appendCommit(
                 new HistoryCommit({
                     type,
