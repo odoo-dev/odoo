@@ -289,19 +289,51 @@ def create_model_table(cr: Cursor, tablename: str, comment: str | None = None, c
     _schema.debug("Table %r: created", tablename)
 
 
-def table_columns(cr: Cursor, tablename: str) -> dict[str, tuple[str, str, int, str]]:
+def table_columns(cr: Cursor, tablename: str) -> dict[str, dict[str, typing.Any]]:
     """ Return a dict mapping column names to their configuration. The latter is
-        a dict with the data from the table ``information_schema.columns``.
+        a dict with the keys ``column_name``, ``udt_name``,
+        ``character_maximum_length`` and ``is_nullable``.
+ 
+        This reads ``pg_catalog`` directly rather than
+        ``information_schema.columns``. The latter is a view over half a dozen
+        catalogs that also applies a per-row privilege check
+        (``pg_has_role`` / ``has_column_privilege``), which makes it
+        disproportionately expensive when called once per table while
+        installing modules.
+ 
+        The three values are computed exactly as the information_schema view
+        computes them, so the result is identical for ordinary tables and
+        views.
     """
-    # Do not select the field `character_octet_length` from `information_schema.columns`
-    # because specific access right restriction in the context of shared hosting (Heroku, OVH, ...)
-    # might prevent a postgres user to read this field.
-    cr.execute(SQL(
-        ''' SELECT column_name, udt_name, character_maximum_length, is_nullable
-            FROM information_schema.columns WHERE table_name=%s
-            AND table_schema = current_schema ''',
-        tablename,
-    ))
+    cr.execute(SQL('''
+        SELECT column_name,
+               udt_name,
+               CASE
+                   WHEN typmod = -1 THEN NULL
+                   WHEN typid IN (1042, 1043) THEN typmod - 4  -- char, varchar
+                   WHEN typid IN (1560, 1562) THEN typmod      -- bit, varbit
+               END AS character_maximum_length,
+               is_nullable
+          FROM (
+            SELECT a.attname AS column_name,
+                   coalesce(bt.typname, t.typname) AS udt_name,
+                   CASE
+                       WHEN a.attnotnull OR (t.typtype = 'd' AND t.typnotnull)
+                       THEN 'NO' ELSE 'YES'
+                   END AS is_nullable,
+                   CASE WHEN t.typtype = 'd' THEN t.typbasetype ELSE a.atttypid END AS typid,
+                   CASE WHEN t.typtype = 'd' THEN t.typtypmod ELSE a.atttypmod END AS typmod
+              FROM pg_attribute a
+              JOIN pg_class c ON c.oid = a.attrelid
+              JOIN pg_type t ON t.oid = a.atttypid
+              LEFT JOIN pg_type bt ON t.typtype = 'd' AND bt.oid = t.typbasetype
+             WHERE c.relname = %s
+               AND c.relnamespace = current_schema::regnamespace
+               AND c.relkind IN ('r', 'v', 'p', 'f')
+               AND a.attnum > 0
+               AND NOT a.attisdropped
+          ) cols
+    ''', tablename))
     return {row['column_name']: row for row in cr.dictfetchall()}
 
 
