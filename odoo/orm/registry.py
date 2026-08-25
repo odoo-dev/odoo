@@ -568,7 +568,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 self.field_depends_context[field] = tuple(depends_context)
 
         # clean the lazy_property again in case they are cached by another ongoing registry readonly request
-        reset_cached_properties(self)
+        if self.ready:
+            reset_cached_properties(self)
 
         # Reinstall registry hooks. Because of the condition, this only happens
         # on a fully loaded registry, and not on a registry being loaded.
