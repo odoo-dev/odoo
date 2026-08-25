@@ -102,9 +102,6 @@
             }
         }
     }
-    &.horizontal {
-        white-space: nowrap;
-    }
 
     @include media-breakpoint-down(lg) {
         .o_notebook_content .oe-toolbar {
