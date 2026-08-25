@@ -37,7 +37,28 @@ class AccountMoveSend(models.AbstractModel):
 
         for invoice, invoice_data in invoices_data.items():
             if 'sa_edi' in invoice_data['extra_edis'] or 'sa_edi_test' in invoice_data['extra_edis']:
-                invoice.l10n_sa_edi_document_id._l10n_sa_post_zatca_edi(len(invoices_data.keys()) == 1)
+                document = invoice.l10n_sa_edi_document_id
+                document._l10n_sa_post_zatca_edi(len(invoices_data.keys()) == 1)
+                if document.state not in ('accepted', 'warning'):
+                    invoice_data['error'] = {
+                        'error_title': "ZATCA Posting Failed",  # never shown - see _hook_if_errors override
+                        'l10n_sa_edi_blocking': True,
+                    }
+
+    @api.model
+    def _hook_if_errors(self, moves_data, allow_raising=True):
+        # EXTENDS 'account'
+        # ZATCA EDI errors are handled separately through the l10n_sa_edi.log and related
+        # notifications, rather than through Odoo's generic error/chatter flow. Here we
+        # only keep the blocking error to prevent PDF/email generation for moves whose
+        # ZATCA submission failed, while ignoring any other errors raised alongside it.
+        other_errors = {
+            move: move_data
+            for move, move_data in moves_data.items()
+            if not move_data['error'].get('l10n_sa_edi_blocking')
+        }
+        if other_errors:
+            super()._hook_if_errors(other_errors, allow_raising=allow_raising)
 
     def _hook_invoice_document_after_pdf_report_render(self, invoice, invoice_data):
         # EXTENDS account
