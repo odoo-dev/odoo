@@ -82,3 +82,70 @@ class TestProductAttributeValue(HttpCase, SaleCommon):
         )
         self.assertFalse(self.order_line.product_no_variant_attribute_value_ids.ptav_active)
         self.start_tour("/odoo", "delete_product_attribute_value_tour", login=self.env.user.login)
+
+    def test_sale_order_line_multiline_description_sequence(self):
+        """Test that sale order line multiline description respects attribute line sequence."""
+        attr_custom = self.env["product.attribute"].create({
+            "name": "Custom Engraving",
+            "create_variant": "no_variant",
+        })
+        val_custom = self.env["product.attribute.value"].create({
+            "name": "Engraving Text",
+            "attribute_id": attr_custom.id,
+            "is_custom": True,
+        })
+        attr_normal = self.env["product.attribute"].create({
+            "name": "Material",
+            "create_variant": "no_variant",
+        })
+        val_normal_1 = self.env["product.attribute.value"].create({
+            "name": "Steel",
+            "attribute_id": attr_normal.id,
+        })
+        val_normal_2 = self.env["product.attribute.value"].create({
+            "name": "Gold",
+            "attribute_id": attr_normal.id,
+        })
+
+        product = self.env["product.template"].create({
+            "name": "Customizable Product",
+            "attribute_line_ids": [
+                Command.create({
+                    "attribute_id": attr_custom.id,
+                    "value_ids": [Command.set([val_custom.id])],
+                    "sequence": 1,
+                }),
+                Command.create({
+                    "attribute_id": attr_normal.id,
+                    "value_ids": [Command.set([val_normal_1.id, val_normal_2.id])],
+                    "sequence": 2,
+                }),
+            ],
+        })
+
+        ptav_custom = product.attribute_line_ids[0].product_template_value_ids
+        ptav_normal = product.attribute_line_ids[1].product_template_value_ids.filtered(
+            lambda ptav: ptav.product_attribute_value_id == val_normal_1
+        )
+
+        so = self._create_so(
+            order_line=[
+                Command.create({
+                    "product_id": product.product_variant_id.id,
+                    "product_no_variant_attribute_value_ids": [
+                        Command.set([ptav_custom.id, ptav_normal.id])
+                    ],
+                    "product_custom_attribute_value_ids": [
+                        Command.create({
+                            "custom_product_template_attribute_value_id": ptav_custom.id,
+                            "custom_value": "My Engraving",
+                        })
+                    ],
+                })
+            ]
+        )
+        line = so.order_line
+        description = line._get_sale_order_line_multiline_description_variants()
+        self.assertEqual(
+            description, "\nCustom Engraving: Engraving Text: My Engraving\nMaterial: Steel"
+        )

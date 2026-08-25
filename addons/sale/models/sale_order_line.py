@@ -553,29 +553,37 @@ class SaleOrderLine(models.Model):
         custom_ptavs = (
             self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id
         )
-        multi_ptavs = no_variant_ptavs.filtered(lambda ptav: ptav.display_type == "multi").sorted()
+        multi_ptavs = no_variant_ptavs.filtered(lambda ptav: ptav.display_type == "multi")
 
-        # display the no_variant attributes, except those that are also
-        # displayed by a custom (avoid duplicate description)
-        for ptav in no_variant_ptavs - multi_ptavs - custom_ptavs:
-            name += "\n" + ptav.display_name
+        # Combine no_variant + custom PTAVs and iterate them in a single pass, ordered by
+        # their configured attribute line sequence, so the description respects the order
+        # defined in the product configuration instead of always pushing free-text/multi
+        # attributes to a fixed position.
+        all_ptavs = (no_variant_ptavs | custom_ptavs).sorted(
+            key=lambda ptav: ptav.attribute_line_id.sequence
+        )
 
-        # display the selected values per attribute on a single for a multi checkbox
-        for pta, ptavs in groupby(multi_ptavs, lambda ptav: ptav.attribute_id):
-            name += "\n" + self.env._(
-                "%(attribute)s: %(values)s",
-                attribute=pta.name,
-                values=", ".join(ptav.name for ptav in ptavs),
-            )
+        for pta_line, ptavs in groupby(all_ptavs, lambda ptav: ptav.attribute_line_id):
+            ptavs = list(ptavs)
+            multi = [ptav for ptav in ptavs if ptav in multi_ptavs]
 
-        # Sort the values according to _order settings, because it doesn't work for virtual records
-        # in onchange
-        sorted_custom_ptav = self.product_custom_attribute_value_ids.custom_product_template_attribute_value_id.sorted()  # noqa: E501
-        for patv in sorted_custom_ptav:
-            pacv = self.product_custom_attribute_value_ids.filtered(
-                lambda pcav: pcav.custom_product_template_attribute_value_id == patv
-            )
-            name += "\n" + pacv.display_name
+            if multi:
+                # display the selected values per attribute on a single line for a multi checkbox
+                name += "\n" + self.env._(
+                    "%(attribute)s: %(values)s",
+                    attribute=pta_line.attribute_id.name,
+                    values=", ".join(ptav.name for ptav in multi),
+                )
+                continue
+
+            for ptav in ptavs:
+                if ptav in custom_ptavs:
+                    pacv = self.product_custom_attribute_value_ids.filtered(
+                        lambda pcav: pcav.custom_product_template_attribute_value_id == ptav
+                    )
+                    name += "\n" + pacv.display_name
+                else:
+                    name += "\n" + ptav.display_name
 
         return name
 
