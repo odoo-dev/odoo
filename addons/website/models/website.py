@@ -11,6 +11,7 @@ import requests
 import types
 import unicodedata
 import werkzeug.routing
+import time
 
 from collections import defaultdict
 from lxml import etree, html
@@ -1137,6 +1138,7 @@ class Website(models.CachedModel):
                 generic_view.with_context(website_id=website.id).write({'arch_db': updated_view})
 
         # Configure the images
+        start_time = time.monotonic()
         names = self.env['ir.model.data'].search([
             ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
             ('module', '=', 'website'),
@@ -1167,6 +1169,7 @@ class Website(models.CachedModel):
                     'res_id': attachment.id,
                     'noupdate': True,
                 })
+        logger.info("RESULT :: Image block finished in %.2fs", time.monotonic() - start_time)
 
         def fallback_create_missing_industry_image(image_name, fallback_img_name):
             """ If an industry did not specify an image, this method allows that
