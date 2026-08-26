@@ -925,7 +925,12 @@ registry
                     ProductScreen.clickFastPaymentButton("Bank"),
                     Dialog.discard(),
                     FeedbackScreen.isShown(),
+<<<<<<< 6a9f394cd65a4d6066e895937c91323cad999220
                     Dialog.confirm(),
+||||||| 2ed26209f86a5262efed8f65babff519aa283fdc
+=======
+                    FeedbackScreen.clickScreen(),
+>>>>>>> 32757b4946f9aa841854a0ebc10b421b0672d697
                     FeedbackScreen.clickNextOrder(),
                     FloorScreen.isShown(),
                     FloorScreen.clickTable("2"),
@@ -948,6 +953,13 @@ registry
                     PaymentScreen.clickPaymentMethod("Bank"),
                     PaymentScreen.clickValidate(),
                     FeedbackScreen.isShown(),
+<<<<<<< 6a9f394cd65a4d6066e895937c91323cad999220
+||||||| 2ed26209f86a5262efed8f65babff519aa283fdc
+                    FeedbackScreen.clickNextOrder(),
+=======
+                    FeedbackScreen.clickScreen(),
+                    FeedbackScreen.clickNextOrder(),
+>>>>>>> 32757b4946f9aa841854a0ebc10b421b0672d697
                     Dialog.confirm(),
                     FeedbackScreen.clickNextOrder(),
                     FloorScreen.isShown(),

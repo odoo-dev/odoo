@@ -1158,7 +1158,12 @@ registry
                 ProductScreen.clickDisplayedProduct("Desk Organizer"),
                 ProductScreen.clickFastPaymentButton("Bank"),
                 FeedbackScreen.isShown(),
+<<<<<<< 6a9f394cd65a4d6066e895937c91323cad999220
                 Dialog.confirm(),
+||||||| 2ed26209f86a5262efed8f65babff519aa283fdc
+=======
+                FeedbackScreen.clickScreen(),
+>>>>>>> 32757b4946f9aa841854a0ebc10b421b0672d697
                 FeedbackScreen.clickNextOrder(),
                 ProductScreen.isShown(),
                 ProductScreen.clickDisplayedProduct("Desk Organizer"),
