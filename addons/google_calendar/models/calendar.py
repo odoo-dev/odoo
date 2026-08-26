@@ -184,18 +184,27 @@ class Meeting(models.Model):
     def _odoo_attendee_commands(self, google_event):
         attendee_commands = []
         partner_commands = []
-        google_attendees = google_event.attendees or []
-        if len(google_attendees) == 0 and google_event.organizer and google_event.organizer.get('self', False):
-            user = google_event.owner(self.env)
-            google_attendees += [{
-                'email': user.partner_id.email,
-                'responseStatus': 'accepted',
-            }]
-        emails = [a.get('email') for a in google_attendees]
+        google_attendees = list(google_event.attendees or [])
         existing_attendees = self.env['calendar.attendee']
-        if google_event.exists(self.env):
+        event_exists = google_event.exists(self.env)
+        if event_exists:
             event = google_event.get_odoo_event(self.env)
             existing_attendees = event.attendee_ids
+        if not event_exists and google_event.organizer and google_event.organizer.get('self', False):
+            # Google returns the organizer aside from the attendees: they are only
+            # listed among them when explicitly invited. Without this, an owned event
+            # having guests is imported without its owner, who then looks available.
+            user = google_event.owner(self.env)
+            owner_email = tools.email_normalize(user.partner_id.email)
+            if not any(
+                attendee.get('self') or (owner_email and tools.email_normalize(attendee.get('email')) == owner_email)
+                for attendee in google_attendees
+            ):
+                google_attendees += [{
+                    'email': user.partner_id.email,
+                    'responseStatus': 'accepted',
+                }]
+        emails = [a.get('email') for a in google_attendees]
         attendees_by_emails = {tools.email_normalize(a.email): a for a in existing_attendees}
         partners = self._get_sync_partner(emails)
         partners_by_email = {(p.email_normalized or p.email): p for p in partners}

@@ -156,6 +156,89 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual('needsAction', admin_attendee.state)
         self.assertGoogleAPINotCalled()
 
+    def _owned_google_event_values(self, attendees, organizer_self=True):
+        return {
+            'id': 'oj44nep1ldf8a3ll02uip0c9aa',
+            'description': 'Small mini desc',
+            'organizer': {'email': 'odoocalendarref@gmail.com', 'self': organizer_self},
+            'summary': 'Pricing new update',
+            'visibility': 'public',
+            'attendees': attendees,
+            'reminders': {'useDefault': True},
+            'start': {
+                'dateTime': '2020-01-13T16:55:00+01:00',
+                'timeZone': 'Europe/Brussels'
+            },
+            'end': {
+                'dateTime': '2020-01-13T19:55:00+01:00',
+                'timeZone': 'Europe/Brussels'
+            },
+        }
+
+    @patch_api
+    def test_owned_event_with_guest_keeps_owner_as_attendee(self):
+        """ Google lists the organizer aside from the guests, never inside them. """
+        values = self._owned_google_event_values([{
+            'email': self.public_partner.email,
+            'responseStatus': 'needsAction',
+        }])
+
+        event = self.env['calendar.event'].with_user(self.organizer_user)._sync_google2odoo(GoogleEvent([values]))
+
+        self.assertEqual(event.user_id, self.organizer_user)
+        self.assertIn(self.public_partner, event.partner_ids)
+        self.assertIn(self.organizer_user.partner_id, event.partner_ids, "The owner should attend their own event")
+        owner_attendee = event.attendee_ids.filtered(lambda attendee: attendee.partner_id == self.organizer_user.partner_id)
+        self.assertEqual(owner_attendee.state, 'accepted')
+        self.assertGoogleAPINotCalled()
+
+    @patch_api
+    def test_owned_event_does_not_duplicate_owner_attendee(self):
+        """ An explicitly invited owner keeps their own Google response status. """
+        values = self._owned_google_event_values([{
+            'email': self.organizer_user.partner_id.email,
+            'responseStatus': 'declined',
+            'self': True,
+        }, {
+            'email': self.public_partner.email,
+            'responseStatus': 'accepted',
+        }])
+
+        event = self.env['calendar.event'].with_user(self.organizer_user)._sync_google2odoo(GoogleEvent([values]))
+
+        owner_attendees = event.attendee_ids.filtered(lambda attendee: attendee.partner_id == self.organizer_user.partner_id)
+        self.assertEqual(len(owner_attendees), 1, "The owner should not be added twice")
+        self.assertEqual(owner_attendees.state, 'declined')
+        self.assertGoogleAPINotCalled()
+
+    @patch_api
+    def test_owned_event_matches_owner_attendee_on_email(self):
+        """ Google may omit the ``self`` flag on the organizer attendee. """
+        values = self._owned_google_event_values([{
+            'email': self.organizer_user.partner_id.email.upper(),
+            'responseStatus': 'declined',
+        }])
+
+        event = self.env['calendar.event'].with_user(self.organizer_user)._sync_google2odoo(GoogleEvent([values]))
+
+        owner_attendees = event.attendee_ids.filtered(lambda attendee: attendee.partner_id == self.organizer_user.partner_id)
+        self.assertEqual(len(owner_attendees), 1, "The owner should not be added twice")
+        self.assertEqual(owner_attendees.state, 'declined')
+        self.assertGoogleAPINotCalled()
+
+    @patch_api
+    def test_invitation_does_not_add_the_synchronizing_user(self):
+        """ An event owned by someone else should not gain the syncing user. """
+        values = self._owned_google_event_values([{
+            'email': self.public_partner.email,
+            'responseStatus': 'accepted',
+        }], organizer_self=False)
+
+        event = self.env['calendar.event'].with_user(self.organizer_user)._sync_google2odoo(GoogleEvent([values]))
+
+        self.assertEqual(event.partner_ids, self.public_partner)
+        self.assertGoogleAPINotCalled()
+
     @patch_api
     def test_invalid_owner_property(self):
         values = {
@@ -1662,7 +1745,9 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         }
         event = self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
         new_partner = self.env['res.partner'].search([('email', '=', 'test2@example.com')])
-        self.assertEqual(event.partner_ids.ids, [user2.partner_id.id, new_partner.id], "The internal user should be chosen")
+        self.assertEqual(event.partner_ids[:2].ids, [user2.partner_id.id, new_partner.id], "The internal user should be chosen")
+        # The event is owned by the synchronizing user, who therefore attends it too.
+        self.assertEqual(len(event.partner_ids), 3)
 
     @patch_api
     def test_event_with_meeting_url(self):
