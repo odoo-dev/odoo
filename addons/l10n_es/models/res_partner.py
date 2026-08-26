@@ -164,15 +164,15 @@ class ResPartner(models.Model):
         # no una copia. Usa {**...} para NO mutar la constante global.
         return {
             **super()._get_all_additional_identifiers_metadata(),
-            'ES_PASSPORT': {
+            'ES_FOREIGN_ID': {
                 'sequence': 100,
-                'label': 'Pasaporte',
+                'label': 'Doc. identificación país de residencia',
                 'category': 'CN',
                 'countries': False,
             },
-            'ES_FOREIGN_ID': {
+            'ES_PASSPORT': {
                 'sequence': 110,
-                'label': 'Doc. identificación país de residencia',
+                'label': 'Pasaporte',
                 'category': 'CN',
                 'countries': False,
             },

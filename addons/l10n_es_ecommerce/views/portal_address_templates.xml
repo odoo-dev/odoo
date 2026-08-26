@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="address_form_fields" inherit_id="portal.address_form_fields">
+        <xpath expr="//div[@id='div_vat']" position="attributes">
+            <attribute name="t-if">res_company.country_code != 'ES'</attribute>
+        </xpath>
+        <xpath expr="//div[@id='div_vat']" position="after">
+            <t t-if="res_company.country_code == 'ES'">
+                <t t-set="l10n_es_id_pair" t-value="(partner_sudo or current_partner)._l10n_es_get_checkout_identifier()"/>
+                <div id="div_l10n_es_id" class="col-lg-6 mb-2">
+                    <label class="col-form-label fw-normal label-optional" for="l10n_es_id_value">
+                        Tipo de documento
+                    </label>
+                    <div class="d-flex gap-2">
+                        <select id="l10n_es_id_type" class="form-select">
+                            <option value="vat" t-att-selected="l10n_es_id_pair[0] == 'vat'">NIF/VAT</option>
+                            <option value="es_foreign_id" t-att-selected="l10n_es_id_pair[0] == 'es_foreign_id'">ID</option>
+                            <option value="es_passport" t-att-selected="l10n_es_id_pair[0] == 'es_passport'">Pasaporte</option>
+                            <option value="es_res_cert" t-att-selected="l10n_es_id_pair[0] == 'es_res_cert'">Certificado de residencia</option>
+                            <option value="es_other_id" t-att-selected="l10n_es_id_pair[0] == 'es_other_id'">Otro documento probatorio</option>
+                        </select>
+                        <input
+                            id="l10n_es_id_value"
+                            type="text"
+                            class="form-control"
+                            t-att-name="l10n_es_id_pair[0]"
+                            t-att-value="l10n_es_id_pair[1]"
+                        />
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>
