@@ -39,6 +39,8 @@ const TRANSLATED_ATTRS = [
     "value",
     "data-oe-translate-src",
     "data-oe-translate-srcset",
+    "data-oe-translate-width",
+    "data-oe-translate-height",
 ];
 const TRANSLATION_ATTRIBUTES_SELECTOR = TRANSLATED_ATTRS.map(
     (att) => `[${att}*="data-oe-translation-source-sha="]`

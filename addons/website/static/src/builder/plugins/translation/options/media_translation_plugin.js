@@ -130,8 +130,8 @@ export class MediaTranslationPlugin extends Plugin {
             save:
                 mediaType === "documents"
                     ? null
-                    : (newMediaEl) => {
-                          this.savingMap[mediaType](mediaEl, newMediaEl);
+                    : (newMediaEl, selectedMedia) => {
+                          this.savingMap[mediaType](mediaEl, newMediaEl, selectedMedia);
                           mediaEl.classList.add("oe_translated");
                           this.trigger("on_media_replaced_handlers", { newMediaEl: mediaEl });
                           this.dependencies.history.commit(); // Needed for the dblclick
@@ -182,7 +182,8 @@ export class MediaTranslationPlugin extends Plugin {
         });
     }
 
-    saveImage(editingElement, newImgEl) {
+    saveImage(editingElement, newImgEl, selectedMedia) {
+        console.log(selectedMedia);
         // Replicate all attributes from the new image to the current element,
         // so that the translations are linked to the original element on save.
         const attributesToKeep = ["alt", "title"];
@@ -195,6 +196,15 @@ export class MediaTranslationPlugin extends Plugin {
             if (!attributesToKeep.includes(attr.name)) {
                 editingElement.setAttribute(attr.name, attr.value);
             }
+        }
+        const selectedImage = selectedMedia?.[0] || {};
+        const width = selectedImage.image_width;
+        const height = selectedImage.image_height;
+        if (width) {
+            editingElement.setAttribute("width", width);
+        }
+        if (height) {
+            editingElement.setAttribute("height", height);
         }
         const elTranslationInfo = this.dependencies.translation.getTranslationInfo(editingElement);
         const originalSrc = elTranslationInfo.src.translation;
@@ -211,6 +221,25 @@ export class MediaTranslationPlugin extends Plugin {
                 translatedSrc,
                 originalSrcset,
                 "srcset"
+            );
+        }
+        // Width and height are language-specific too: a different image per
+        // language can have different intrinsic dimensions, so persist them as
+        // translations rather than baking them into the view arch.
+        if (elTranslationInfo.width && width) {
+            this.handleTranslationMapHistory(
+                editingElement,
+                String(width),
+                elTranslationInfo.width.translation,
+                "width"
+            );
+        }
+        if (elTranslationInfo.height && height) {
+            this.handleTranslationMapHistory(
+                editingElement,
+                String(height),
+                elTranslationInfo.height.translation,
+                "height"
             );
         }
     }

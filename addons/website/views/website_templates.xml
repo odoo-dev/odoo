@@ -1679,10 +1679,10 @@
 
             This also allows to gain some page speed scoring.
             -->
-            <t t-set="base_options" t-value="{'widget': 'image'}"/>
+            <t t-set="base_options" t-value="{'widget': 'image', 'width': website.logo_width, 'height': website.logo_height, 'class': 'img-optimized'}"/>
             <span
                 t-field="website.logo"
-                t-options="base_options if editable else dict(base_options, width=95, height=40)"
+                t-options="base_options"
                 role="img"
                 t-att-aria-label="'Logo of %s' % website.name"
                 t-att-title="website.name"

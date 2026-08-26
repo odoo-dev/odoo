@@ -36,7 +36,7 @@ from odoo.http import request
 from odoo.models import Query
 from odoo.modules.module import get_manifest
 from odoo.tools import BinaryBytes, BinaryValue, file_open, lazy
-from odoo.tools.image import image_process
+from odoo.tools.image import binary_to_image, get_webp_size, image_process
 from odoo.tools.sql import SQL, escape_like_value
 from odoo.tools.translate import _
 
@@ -157,8 +157,53 @@ class Website(models.CachedModel):
             return BinaryBytes(f.read())
 
     logo = fields.Binary('Website Logo', default=_default_logo, help="Display this logo on the website.")
+    logo_width = fields.Integer(compute='_compute_logo_dimensions', store=True)
+    logo_height = fields.Integer(compute='_compute_logo_dimensions', store=True)
     social_default_image = fields.Binary(string="Default Social Share Image", help="If set, replaces the website logo as the default social share image.")
     has_social_default_image = fields.Boolean(compute='_compute_has_social_default_image', store=True)
+
+    @api.depends('logo')
+    def _compute_logo_dimensions(self):
+        def parse_dimension(value):
+            match = re.match(r'\s*([0-9]+(?:\.[0-9]+)?)', value or '')
+            return round(float(match.group(1))) if match else 0
+
+        for website in self:
+            source = website.logo.content if website.logo else b''
+            # Default dimensions
+            website.logo_width = 95
+            website.logo_height = 40
+            # SVG
+            if source.lstrip().startswith(b'<'):
+                try:
+                    svg = etree.fromstring(source)
+                    width = parse_dimension(svg.get('width'))
+                    height = parse_dimension(svg.get('height'))
+                    if not width or not height:
+                        view_box = [
+                            parse_dimension(value)
+                            for value in (svg.get('viewBox') or '').split()[2:]
+                        ]
+                        width = width or (view_box[0] if len(view_box) > 1 else 0)
+                        height = height or (view_box[1] if len(view_box) > 1 else 0)
+                    website.logo_width = width
+                    website.logo_height = height
+                except etree.XMLSyntaxError:
+                    return
+            # WebP
+            elif source[:4] == b'RIFF' and source[8:15] == b'WEBPVP8':
+                dimensions = get_webp_size(source)
+                if not dimensions:
+                    raise UserError(_('The WebP image dimensions could not be determined.'))
+                website.logo_width, website.logo_height = dimensions
+            # Other image formats
+            else:
+                try:
+                    image = binary_to_image(source)
+                    website.logo_width = image.width
+                    website.logo_height = image.height
+                except UserError:
+                    return
 
     google_analytics_key = fields.Char('Google Analytics Key')
     google_search_console = fields.Char(help='Google key, or Enable to access first reply')

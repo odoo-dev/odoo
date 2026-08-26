@@ -125,6 +125,9 @@ registerWebsitePreviewTour(
             name: "Text - Image",
             groupName: "Content",
         }),
+        // Logo is optimized on first save and it will be marked as dirty.
+        ...clickOnSave(),
+        ...clickOnEditAndWaitEditMode(),
         {
             // Ensure the test keeps testing what it should test (eg if we ever
             trigger: ':iframe img.o_lang_flag[loading="lazy"]',
