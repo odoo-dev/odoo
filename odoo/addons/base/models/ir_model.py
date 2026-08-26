@@ -867,6 +867,7 @@ class IrModelFields(models.Model):
 
     @api.onchange('ttype', 'model_id', 'relation')
     def _onchange_ttype(self):
+        self.model = self.model_id.model
         if self.ttype == 'many2many' and self.model_id and self.relation:
             if self.relation not in self.env:
                 return
