@@ -3,12 +3,13 @@
 import inspect
 import logging
 import io
+import json
 
 from PIL import Image
 from contextlib import contextmanager
 from unittest.mock import patch
 from unittest import skip
-from odoo import Command, api
+from odoo import Command, api, tools
 
 from odoo.tools import BinaryBytes, DEFAULT_SERVER_DATE_FORMAT
 from odoo.tests import tagged, loaded_demo_data
@@ -65,6 +66,13 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         session.close_session_from_ui({
             cash_pm.id: expected_cashbox_amount,
         })
+
+    def open_pos_session(self, opening=0, note=""):
+        self.main_pos_config.open_ui()
+        session = self.main_pos_config.current_session_id
+        session.set_opening_control(opening, note)
+        self.assertEqual(session.state, 'opened')
+        return session
 
     @classmethod
     def setUpClass(cls):
@@ -651,6 +659,10 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
 @tagged('post_install', '-at_install')
 class TestUi(TestPointOfSaleHttpCommon):
     _test_user_groups = None  # FIXME list needed groups
+
+    @tools.mute_logger('odoo.http')
+    def test_01_point_of_sale_tour(self):
+        self.start_tour('/odoo', 'point_of_sale_tour', login='pos_admin')
 
     def test_01_pos_basic_order(self):
         self.start_pos_tour('pos_pricelist')
@@ -2569,6 +2581,53 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_barcode_scan_preselect_always_variant', login="pos_user")
+
+    def test_baseline_between_frontend_and_backend(self):
+        self.main_pos_config.company_id.tax_calculation_rounding_method = 'round_globally'
+
+        only_categ = self.env['pos.category'].create({'name': 'Only Category'})
+        self.main_pos_config.write({
+            'limit_categories': True,
+            'iface_available_categ_ids': [(6, 0, [only_categ.id])],
+        })
+        tax_16 = self.env['account.tax'].create({'name': 'Tax 16%', 'amount': 16})
+        self.env['product.product'].create([{
+            'name': 'Test Product 1',
+            'list_price': 7051.73,
+            'pos_categ_ids': [(6, 0, [only_categ.id])],
+            'taxes_id': [(6, 0, [tax_16.id])],
+            'available_in_pos': True,
+        }, {
+            'name': 'Test Product 2',
+            'list_price': 352.59,
+            'pos_categ_ids': [(6, 0, [only_categ.id])],
+            'taxes_id': [(6, 0, [tax_16.id])],
+            'available_in_pos': True,
+        }])
+
+        def get_frontend_data(self, frontend_data):
+            frontend_data = json.loads(frontend_data)
+            base_lines = self.lines._prepare_base_lines_for_taxes_computation()
+            zipped = zip(frontend_data['baseLines'], base_lines)
+            for frontend_line, backend_line in zipped:
+                if frontend_line.get('is_refund', False) != backend_line['is_refund']:
+                    error = 'Refund status mismatch between frontend and backend'
+                    raise ValueError(error)
+
+                if frontend_line.get('quantity', 0) != backend_line['quantity']:
+                    error = 'Quantity mismatch between frontend and backend'
+                    raise ValueError(error)
+
+                if frontend_line.get('sign') != backend_line['sign']:
+                    error = 'Sign mismatch between frontend and backend'
+                    raise ValueError(error)
+
+        # Add function to model
+        order_model = self.env.registry.models['pos.order']
+        order_model.get_frontend_data = get_frontend_data
+
+        self.open_pos_session()
+        self.start_pos_tour('test_baseline_between_frontend_and_backend')
 
 
 # This class just runs the same tests as above but with mobile emulation

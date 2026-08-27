@@ -10,6 +10,7 @@ class TestPosMargin(TestPoSCommon):
     """
     _test_user_groups = None  # FIXME list needed groups
     # TODO-PARP: Move to test_point_of_sale_flow.py
+    # Touch only after making the common util file from CommonPosTest and TestPoSCommon
 
     def setUp(self):
         super(TestPosMargin, self).setUp()

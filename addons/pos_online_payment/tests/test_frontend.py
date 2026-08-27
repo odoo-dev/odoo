@@ -249,6 +249,7 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
         self.assertEqual(order.state, 'done', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
 
     # Code from addons/point_of_sale/tests/test_point_of_sale_flow.py
+    # TODO-PARP: Use it from `CommonPosTest`
     def compute_tax(self, product, price, qty=1, taxes=None):
         if not taxes:
             taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.company.id)

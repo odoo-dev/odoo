@@ -355,6 +355,15 @@ class CommonPosTest(AccountTestInvoicingCommon):
 
         return order, refund
 
+    def compute_tax(self, product, price, qty=1, taxes=None, pos_config=None):
+        config = pos_config or self.pos_config_usd
+        if not taxes:
+            taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.company.id)
+        currency = config.currency_id
+        res = taxes.compute_all(price, currency, qty, product=product)
+        untax = res['total_excluded']
+        return untax, sum(tax.get('amount', 0.0) for tax in res['taxes'])
+
 
 class TestPoSCommon(AccountTestInvoicingCommon):
     """ Set common values for different special test cases.

@@ -7,7 +7,10 @@ from odoo.tests import tagged
 class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     _test_user_groups = None  # FIXME list needed groups
-    # TODO-PARP: Move to test_point_of_sale_flow.py
+    # TODO-PARP: Move to test_frontend.py
+    # Total 5 tests:
+    #   First 4 are skip
+    #   Last one in breacking on running mobile mode (backend_utils.js Needs adaptation)
 
     @classmethod
     def setUpClass(cls):

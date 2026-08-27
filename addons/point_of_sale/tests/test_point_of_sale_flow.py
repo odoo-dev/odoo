@@ -1,40 +1,22 @@
 import copy
-import odoo
-
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from unittest.mock import patch
+
+import odoo
 from odoo import fields
 from odoo.fields import Command
-from datetime import datetime, timedelta
+from odoo.exceptions import UserError, ValidationError
+
+
 from odoo.addons.point_of_sale.tests.common import CommonPosTest
-from odoo.exceptions import ValidationError
+from odoo.addons.point_of_sale.models.pos_payment_method import PosPaymentMethod
 
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPointOfSaleFlow(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
-
-    # TODO-PARP: remove (no use)
-    def setup_tags(self):
-        tags = self.env['account.account.tag'].create([
-            {
-                'name': f"tag{i}",
-                'applicability': 'taxes',
-                'country_id': self.company_data['company'].country_id.id,
-            }
-            for i in range(1, 5)
-        ])
-        self.twenty_dollars_with_15_excl.taxes_id = [Command.set(self.tax_sale_a.ids)]
-        self.tax_sale_a.invoice_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'base').write({'tag_ids': tags[0].ids})
-        self.tax_sale_a.invoice_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'tax').write({'tag_ids': tags[1].ids})
-        self.tax_sale_a.refund_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'base').write({'tag_ids': tags[2].ids})
-        self.tax_sale_a.refund_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'tax').write({'tag_ids': tags[3].ids})
-
-        return tags
 
     def test_order_refund(self):
         self.pos_config_usd.open_ui()
@@ -361,6 +343,18 @@ class TestPointOfSaleFlow(CommonPosTest):
         loaded_data = self.pos_config_usd.current_session_id.load_data({'only_records': False})
 
         self.assertFalse(loaded_data['pos.config']['records'][0]['pricelist_id'], False)
+
+        # From test_point_of_sale.py
+        # make sure this doesn't pick a pricelist as default
+        new_config = self.env['pos.config'].create({
+            'name': 'usd config',
+            'available_pricelist_ids': [(6, 0, [pricelist.id])]
+        })
+        self.assertEqual(
+            new_config.pricelist_id,
+            self.env['product.pricelist'],
+            'POS config incorrectly has pricelist %s' % new_config.pricelist_id.display_name
+        )
 
     def test_refund_rounding_backend(self):
         self.account_cash_rounding_up.rounding = 5.0
@@ -1396,6 +1390,209 @@ class TestPointOfSaleFlow(CommonPosTest):
             f"Order name should contain 'POS-{current_year}', got: {order.name}")
         self.assertIn(f'-{current_month}', order.name,
             f"Order name should contain '-{current_month}', got: {order.name}")
+
+    def test_kpi_invoiced_pos_orders_counted(self):
+        context = {
+            'start_datetime': datetime.now() - relativedelta(days=1),
+            'end_datetime': datetime.now() + relativedelta(days=1),
+        }
+        digest = self.env['digest.digest'].with_context(context).create([{
+            'name': 'Digest 1',
+            'company_id': self.env.company.id,
+            'kpi_mail_message_total': True,
+            'kpi_res_users_connected': True,
+            'periodicity': 'daily',
+        }])
+        order_data = {
+            'line_data': [
+                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
+            ],
+            'payment_data': [
+                {'payment_method_id': self.bank_payment_method.id, 'amount': 10},
+            ],
+        }
+
+        self.pos_config_usd.open_ui()
+        current_session = self.pos_config_usd.current_session_id
+
+        self.create_backend_pos_order({**order_data, 'order_data': {'to_invoice': False, 'partner_id': False}})
+        self.create_backend_pos_order({**order_data, 'order_data': {'to_invoice': True, 'partner_id': self.partner.id}})
+        current_session.close_session_from_ui()
+
+        self.assertEqual(digest.kpi_pos_total_value, 20.0)
+
+    def test_onchange_payment_provider(self):
+        pm = self.env['pos.payment.method'].create({'name': 'Test PM', 'type': 'bank'})
+        with patch.object(PosPaymentMethod, '_get_terminal_provider_selection', return_value=[('terminal_1', 'Terminal 1'), ('terminal_2', 'Terminal 2')]), \
+             patch.object(PosPaymentMethod, '_get_external_qr_provider_selection', return_value=[('qr_1', 'QR Code 1'), ('qr_2', 'QR Code 2')]), \
+             patch.object(PosPaymentMethod, '_get_cash_machine_selection', return_value=[('cash_1', 'Cash Machine 1'), ('cash_2', 'Cash Machine 2')]):
+            # False --> terminal_1 = terminal
+            pm.payment_provider = 'terminal_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'terminal')
+            # terminal_1 --> terminal_2 = terminal
+            pm.payment_provider = 'terminal_2'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'terminal')
+            # terminal_2 --> qr_1 = external_qr
+            pm.payment_provider = 'qr_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'external_qr')
+            # qr_1 --> qr_2 = external_qr
+            pm.payment_provider = 'qr_2'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'external_qr')
+            # qr_2 --> False = external_qr
+            pm.payment_provider = False
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'external_qr')
+            # False --> qr_1 = external_qr
+            pm.payment_provider = 'qr_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'external_qr')
+            # qr_1 --> cash_1 = cash_machine
+            pm.payment_provider = 'cash_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'cash_machine')
+            # cash_1 --> terminal_1 = terminal
+            pm.payment_provider = 'terminal_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'terminal')
+            # terminal_1 --> False = terminal
+            pm.payment_provider = False
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'terminal')
+            # False --> cash_1 = cash_machine
+            pm.payment_provider = 'cash_1'
+            pm._onchange_payment_provider()
+            self.assertEqual(pm.payment_method_type, 'cash_machine')
+
+    def test_onchange_payment_method_type(self):
+        pm = self.env['pos.payment.method'].create({'name': 'Test PM', 'type': 'bank'})
+        with patch.object(PosPaymentMethod, '_get_terminal_provider_selection', return_value=[('terminal_1', 'Terminal 1'), ('terminal_2', 'Terminal 2')]), \
+             patch.object(PosPaymentMethod, '_get_external_qr_provider_selection', return_value=[('qr_1', 'QR Code 1'), ('qr_2', 'QR Code 2')]), \
+             patch.object(PosPaymentMethod, '_get_cash_machine_selection', return_value=[('cash_1', 'Cash Machine 1'), ('cash_2', 'Cash Machine 2')]):
+            # (False) none --> terminal = False
+            pm.payment_method_type = 'terminal'
+            pm._onchange_payment_method_type()
+            self.assertFalse(pm.payment_provider)
+            # (terminal_1) terminal --> external_qr = False
+            pm.payment_provider = 'terminal_1'
+            pm.payment_method_type = 'external_qr'
+            pm._onchange_payment_method_type()
+            self.assertFalse(pm.payment_provider)
+            # (qr_1) external_qr --> terminal = False
+            pm.payment_provider = 'qr_1'
+            pm.payment_method_type = 'terminal'
+            pm._onchange_payment_method_type()
+            self.assertFalse(pm.payment_provider)
+            # (terminal_1) terminal --> cash_machine = False
+            pm.payment_provider = 'terminal_1'
+            pm.payment_method_type = 'cash_machine'
+            pm._onchange_payment_method_type()
+            self.assertFalse(pm.payment_provider)
+            # (terminal_1) terminal --> none = False
+            pm.payment_provider = 'terminal_1'
+            pm.payment_method_type = 'none'
+            pm._onchange_payment_method_type()
+            self.assertFalse(pm.payment_provider)
+
+    def test_pos_bill_digits(self):
+        coin = self.env['pos.bill'].create({
+            'name': '0.005 not rounded',
+            'value': 0.005
+        })
+        self.assertEqual(coin.value, 0.005)
+
+    def test_session_filter_local_data(self):
+        product1, product2, product3 = self.env['product.template'].create([
+            {'name': 'product1'},
+            {'name': 'product2'},
+            {'name': 'product3'},
+        ])
+        config = self.env['pos.config'].create({'name': 'shop'})
+        session = self.env['pos.session'].create({'name': 'Test Session', 'config_id': config.id})
+
+        # Delete one product and archive another one
+        products_to_display = [product1.id, product2.id, product3.id]
+        product1.write({'active': False})
+        product2.unlink()
+        models_to_filter = {'product.template': products_to_display}
+        products_to_display = list(set(products_to_display) - set(session.filter_local_data(models_to_filter)['product.template']))
+        self.assertEqual(products_to_display, [product3.id])
+
+        # No change
+        product4 = self.env['product.template'].create({'name': 'product4'})
+        products_to_display = [product3.id, product4.id]
+        models_to_filter = {'product.template': products_to_display}
+        products_to_display = list(set(products_to_display) - set(session.filter_local_data(models_to_filter)['product.template']))
+        self.assertEqual(sorted(products_to_display), sorted([product3.id, product4.id]))
+
+        # Delete all products
+        products_to_display = [product3.id, product4.id]
+        product3.unlink()
+        product4.unlink()
+        models_to_filter = {'product.template': products_to_display}
+        products_to_display = list(set(products_to_display) - set(session.filter_local_data(models_to_filter)['product.template']))
+        self.assertEqual(products_to_display, [])
+
+        # Cannot archive config while session is active
+        with self.assertRaises(UserError):
+            config.write({'active': False})
+
+    def test_properly_set_pos_config_x2many_fields(self):
+        """Simulate what is done from the res.config.settings view when editing x2 many fields."""
+        self.env['account.tax'].search([
+            ('company_id', '=', self.env.company.id), ('tax_exigibility', '=', 'on_payment')
+        ]).unlink()
+        pos_config = self.env['pos.config'].create({
+            'name': 'Shop 1',
+            'module_pos_restaurant': False,
+            'payment_method_ids': [
+                Command.create({
+                    'name': 'Bank 1',
+                    'receivable_account_id': self.env.company.account_default_pos_receivable_account_id.id,
+                    'type': 'bank',
+                    'company_id': self.env.company.id,
+                }),
+                Command.create({
+                    'name': 'Bank 2',
+                    'receivable_account_id': self.env.company.account_default_pos_receivable_account_id.id,
+                    'type': 'bank',
+                    'company_id': self.env.company.id,
+                }),
+                Command.create({
+                    'name': 'Cash',
+                    'receivable_account_id': self.env.company.account_default_pos_receivable_account_id.id,
+                    'type': 'cash',
+                    'company_id': self.env.company.id,
+                })
+            ]
+        })
+        # Manually simulate the unlinking of the second record and then save the settings.
+        # It will be a set of link commands except the one we want to delete.
+        linked_ids = pos_config.payment_method_ids.ids
+        second_id = linked_ids[1]
+        commands = [Command.link(pm_id) for pm_id in linked_ids if pm_id != second_id]
+
+        pos_config.with_context(from_settings_view=True).write({
+            'payment_method_ids': commands
+        })
+        self.assertTrue(second_id not in pos_config.payment_method_ids.ids)
+        self.assertTrue(len(pos_config.payment_method_ids) == 2)
+
+    def test_write_default_and_available_presets_on_multiple_pos_configs(self):
+        preset = self.env['pos.preset'].create({'name': 'Preset 1'})
+        pos_configs = self.env['pos.config'].create([
+            {'name': 'Shop 1', 'module_pos_restaurant': False},
+            {'name': 'Shop 2', 'module_pos_restaurant': False},
+            {'name': 'Shop 3', 'module_pos_restaurant': False},
+        ])
+        pos_configs.write({
+            'use_presets': True,
+            'available_preset_ids': [(6, 0, [preset.id])],
+            'default_preset_id': preset.id,
+        })
 
     def test_order_edit_logs(self):
         order, _ = self.create_backend_pos_order({
