@@ -442,7 +442,11 @@ class PosSession(models.Model):
         perform all necessary checks and operations to close the session
         """
         self.ensure_one()
-        if any(order.state == 'draft' for order in self.get_session_orders()):
+        if any(
+            order.state == 'draft'
+            and (not order.preset_time or order.preset_time <= fields.Datetime.now())
+            for order in self.get_session_orders()
+        ):
             return {
                 'status': False,
                 'type': 'draft_orders',
