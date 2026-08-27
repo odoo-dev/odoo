@@ -27,7 +27,7 @@
     <xpath expr="//t[@id='snippet_specific_options']" position="after">
         <carousel_bottom_controllers_option
             selector="section"
-            applyTo=".s_carousel_intro, .s_quotes_carousel_compact"/>
+            applyTo=".s_carousel_intro, .s_quotes_carousel_compact, .s_carousel_multi_images"/>
     </xpath>
 </t>
 

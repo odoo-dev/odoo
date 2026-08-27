@@ -14,12 +14,12 @@ import { selectElements } from "@html_editor/utils/dom_traversal";
  */
 
 const carouselWrapperSelector =
-    ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper, .s_quotes_carousel_wrapper";
+    ".s_carousel_wrapper, .s_carousel_intro_wrapper, .s_carousel_cards_wrapper, .s_quotes_carousel_wrapper, .s_carousel_multi_images_wrapper";
 const carouselControlsSelector =
     ".carousel-control-prev, .carousel-control-next, .carousel-indicators, .o_carousel_pause";
 
 const carouselItemOptionSelector =
-    ".s_carousel .carousel-item, .s_quotes_carousel .carousel-item, .s_carousel_intro .carousel-item, .s_carousel_cards .carousel-item";
+    ".s_carousel .carousel-item, .s_quotes_carousel .carousel-item, .s_carousel_intro .carousel-item, .s_carousel_cards .carousel-item, .s_carousel_multi_images .carousel-item";
 
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";

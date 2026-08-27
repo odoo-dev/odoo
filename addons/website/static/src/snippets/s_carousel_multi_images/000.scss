@@ -1,0 +1,5 @@
+.s_carousel_multi_images_wrapper:not([data-vcss]) {
+    .s_carousel_multi_images {
+        @extend %s_carousel_variants;
+    }
+}

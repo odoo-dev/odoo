@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="s_carousel_multi_images" name="Carousel with multiple images">
+    <section class="s_carousel_multi_images_wrapper p-0">
+        <t t-set="uniq" t-value="datetime.datetime.now().microsecond"/>
+        <div t-attf-id="myCarouselIntro{{uniq}}"
+             class="s_carousel_multi_images s_carousel_default carousel slide carousel-dark"
+             data-bs-ride="true"
+             data-bs-interval="10000"
+             role="region"
+             aria-roledescription="carousel">
+            <!-- Controls and indicators are set before the content so that they
+                 are focused in priority when navigating the page with tab. -->
+            <div class="o_horizontal_controllers container position-absolute start-50 bottom-0 translate-middle-x w-100 mb-md-4 z-1 o_not_editable">
+                <div class="o_horizontal_controllers_row row gap-3 gap-lg-5 justify-content-between flex-nowrap flex-row-reverse mx-0">
+                    <!-- Controls -->
+                    <div class="o_arrows_wrapper gap-2 w-auto p-0">
+                        <button class="carousel-control-prev o_not_editable" contenteditable="false" t-attf-data-bs-target="#myCarouselIntro{{uniq}}" t-attf-aria-controls="myCarouselIntro{{uniq}}_inner" data-bs-slide="prev" aria-label="Previous slide" title="Previous slide">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"/>
+                            <span class="visually-hidden">Previous slide</span>
+                        </button>
+                        <button class="carousel-control-next o_not_editable" contenteditable="false" t-attf-data-bs-target="#myCarouselIntro{{uniq}}" t-attf-aria-controls="myCarouselIntro{{uniq}}_inner" data-bs-slide="next" aria-label="Next slide" title="Next slide">
+                            <span class="carousel-control-next-icon" aria-hidden="true"/>
+                            <span class="visually-hidden">Next slide</span>
+                        </button>
+                    </div>
+                    <!-- Indicators -->
+                    <div class="s_carousel_indicators_numbers carousel-indicators align-items-center flex-shrink-1 w-auto" role="tablist">
+                        <button type="button" t-attf-data-bs-target="#myCarouselIntro{{uniq}}" data-bs-slide-to="0" class="active" aria-label="Slide 1 of 3" role="tab" aria-selected="true" t-attf-aria-controls="myCarouselIntro{{uniq}}_1"/>
+                        <button type="button" t-attf-data-bs-target="#myCarouselIntro{{uniq}}" data-bs-slide-to="1" aria-label="Slide 2 of 3" role="tab" aria-selected="false" t-attf-aria-controls="myCarouselIntro{{uniq}}_2"/>
+                        <button type="button" t-attf-data-bs-target="#myCarouselIntro{{uniq}}" data-bs-slide-to="2" aria-label="Slide 3 of 3" role="tab" aria-selected="false" t-attf-aria-controls="myCarouselIntro{{uniq}}_3"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Content -->
+            <div class="carousel-inner" t-attf-id="myCarouselIntro{{uniq}}_inner" aria-live="off">
+
+                <!-- #01 -->
+                <div class="s_carousel_multi_images_item carousel-item px-0 pt80 pb80 active" data-name="Slide" t-attf-id="myCarouselIntro{{uniq}}_1" role="tabpanel" aria-roledescription="slide">
+                    <div class="container">
+                        <div class="row o_grid_mode" data-row-count="8">
+                            <!-- Text -->
+                            <div class="o_grid_item g-height-8 g-col-lg-4 col-lg-4" style="z-index: 1; grid-area: 1 / 1 / 9 / 5;" data-name="Block">
+                                <h2 class="display-3-fs">Driving innovation together</h2>
+                                <p class="lead">Empowering teams to collaborate and innovate, creating impactful solutions that drive business growth and deliver lasting value.</p>
+                                <a href="#" class="o_translate_inline btn btn-primary">More info</a>
+                            </div>
+                            <!-- Main image -->
+                            <div class="o_grid_item o_grid_item_image g-height-8 g-col-lg-5 col-lg-5 rounded" style="z-index: 3; grid-area: 1 / 7 / 9 / 12; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;" data-name="Block">
+                                <img src="/web/image/website.set_2_square_md_1" alt="" class="img img-fluid o_we_custom_image"/>
+                            </div>
+                            <!-- Secondary images -->
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-height-5 g-col-lg-2 col-lg-2 rounded" style="z-index: 4; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; grid-area: 2 / 6 / 7 / 8;">
+                                <img src="/web/image/website.set_2_square_md_2" class="img img-fluid o_we_custom_image shadow"/>
+                            </div>
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-col-lg-2 g-height-4 col-lg-2 rounded" style="z-index: 5; grid-area: 4 / 11 / 8 / 13; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px;">
+                                <img src="/web/image/website.set_2_square_md_3" class="img img-fluid o_we_custom_image shadow"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #02 -->
+                <div class="s_carousel_multi_images_item carousel-item px-0 pt80 pb80" data-name="Slide" t-attf-id="myCarouselIntro{{uniq}}_2" role="tabpanel" aria-roledescription="slide">
+                    <div class="container">
+                        <div class="row o_grid_mode" data-row-count="9">
+                            <!-- Text (right side) -->
+                            <div class="o_grid_item g-height-8 g-col-lg-4 col-lg-4" style="z-index: 1; grid-area: 1 / 9 / 9 / 13;" data-name="Block">
+                                <h2 class="display-3-fs">Innovating for business success</h2>
+                                <p class="lead">Creating solutions that drive growth and long-term value.</p>
+                                <a href="#" class="o_translate_inline btn btn-primary">More info</a>
+                            </div>
+                            <!-- Main image (left side) -->
+                            <div class="o_grid_item o_grid_item_image g-height-9 g-col-lg-5 col-lg-5 rounded" style="--grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px; z-index: 3; grid-area: 1 / 2 / 10 / 7;" data-name="Block">
+                                <img src="/web/image/website.set_2_square_md_4" alt="" class="img img-fluid o_we_custom_image"/>
+                            </div>
+                            <!-- Secondary images -->
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-col-lg-2 g-height-6 col-lg-2 rounded" style="z-index: 5; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px; grid-area: 2 / 1 / 8 / 3;">
+                                <img src="/web/image/website.set_2_square_md_5" class="img img-fluid shadow"/>
+                            </div>
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-col-lg-2 col-lg-2 g-height-5 rounded" style="z-index: 4; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px; grid-area: 3 / 6 / 8 / 8;">
+                                <img src="/web/image/website.set_2_square_md_6" class="img img-fluid shadow"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- #03 -->
+                <div class="s_carousel_multi_images_item carousel-item px-0 pt80 pb80" data-name="Slide" t-attf-id="myCarouselIntro{{uniq}}_3" role="tabpanel" aria-roledescription="slide">
+                    <div class="container">
+                        <div class="row o_grid_mode" data-row-count="8">
+                            <!-- Text -->
+                            <div class="o_grid_item g-height-8 g-col-lg-4 col-lg-4" style="z-index: 1; grid-area: 1 / 1 / 9 / 5;" data-name="Block">
+                                <h2 class="display-3-fs">Leading the future with strategy</h2>
+                                <p class="lead">We combine strategic insights and innovative solutions to drive business success, ensuring sustainable growth and competitive advantage in a dynamic market.</p>
+                                <a href="#" class="o_translate_inline btn btn-primary">More info</a>
+                            </div>
+                            <!-- Main image -->
+                            <div class="o_grid_item o_grid_item_image g-height-8 g-col-lg-5 col-lg-5 rounded" style="z-index: 3; grid-area: 1 / 7 / 9 / 12; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;" data-name="Block">
+                                <img src="/web/image/website.set_2_square_md_7" alt="" class="img img-fluid o_we_custom_image"/>
+                            </div>
+                            <!-- Secondary images -->
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-height-4 g-col-lg-2 col-lg-2 rounded" style="z-index: 4; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px; grid-area: 2 / 6 / 6 / 8;">
+                                <img src="/web/image/website.set_2_square_md_1" class="img img-fluid shadow"/>
+                            </div>
+                            <div class="o_grid_item o_grid_item_image o_colored_level d-none d-lg-block g-col-lg-2 g-height-6 col-lg-2 rounded" style="z-index: 5; grid-area: 2 / 11 / 8 / 13; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; --box-border-bottom-left-radius: 8px; --box-border-bottom-right-radius: 8px; --box-border-top-right-radius: 8px; --box-border-top-left-radius: 8px;">
+                                <img src="/web/image/website.set_2_square_md_2" class="img img-fluid shadow"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<asset id="website.s_carousel_multi_images_000_scss" name="Carousel Multi Images 000 SCSS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_carousel_multi_images/000.scss</path>
+</asset>
+
+</odoo>

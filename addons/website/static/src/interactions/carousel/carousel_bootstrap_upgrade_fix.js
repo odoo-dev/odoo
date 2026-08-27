@@ -19,6 +19,7 @@ export class CarouselBootstrapUpgradeFix extends Interaction {
         "[data-snippet='s_quotes_carousel'] .carousel",
         "[data-snippet='s_quotes_carousel_minimal'] .carousel",
         "[data-snippet='s_carousel_intro'] .carousel",
+        "[data-snippet='s_carousel_multi_images'] .carousel",
         "#o-carousel-product.carousel",
     ].join(", ");
     dynamicContent = {
