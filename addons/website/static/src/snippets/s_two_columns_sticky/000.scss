@@ -1,0 +1,14 @@
+.s_two_columns_sticky {
+    @include media-breakpoint-up(lg) {
+        .s_two_columns_sticky_sticky {
+            @include o-position-sticky($top: 0px);
+        }
+    }
+
+    .s_two_columns_sticky_container {
+        .s_card {
+            margin-top: 0;
+        }
+    }
+
+}

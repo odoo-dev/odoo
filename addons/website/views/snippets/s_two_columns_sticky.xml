@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="s_two_columns_sticky" name="Columns with Sticky">
+        <section class="s_two_columns_sticky o_cc o_cc1 pt32 pb32 align-self-start o_colored_level">
+            <div class="container">
+                <div class="row mx-0 w-100">
+                    <div class="col-6 ps-0 o-contenteditable-true" contenteditable="true">
+                        <h2>Our features</h2>
+                    </div>
+                    <div class="col-6 pe-0 o-contenteditable-true" contenteditable="true">
+                        <p style="text-align: end;">
+                            <a href="#" class="o_translate_inline btn btn-lg btn-primary">View all</a>
+                        </p>
+                    </div>
+                </div>
+                <div class="row s_nb_column_fixed pt-2">
+                    <div class="s_two_columns_sticky_sticky col-lg-6 col-xl-4 mb-3 align-self-start rounded oe_unremovable" style="--box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;">
+                        <div data-name="Card">
+                            <div class="s_card o_card_img_top card h-100 o_cc o_cc1 my-0" data-vxml="001" data-snippet="s_card" data-name="Card">
+                                <figure class="o_card_img_wrapper ratio ratio-1x1 mb-0">
+                                    <img class="o_card_img card-img-top" src="/web/image/website.set_catalog_square_md_6" alt=""/>
+                                </figure>
+                                <div class="card-body">
+                                    <h2 class="card-title h5-fs">Key Milestone</h2>
+                                    <p class="card-text lead">Reaching new heights</p>
+                                    <p class="card-text"><a href="#" class="o_translate_inline btn btn-primary">More info</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="s_two_columns_sticky_scrollable_column col-lg-6 col-xl-8 oe_unremovable">
+                        <div class="s_two_columns_sticky_container container row mx-auto">
+                            <div data-name="Card" class="col-xl-6">
+                                <div class="s_card o_card_img_top card o_cc o_cc1 rounded" data-vxml="001" data-snippet="s_card" data-name="Card" style="--box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;">
+                                    <figure class="o_card_img_wrapper ratio ratio-1x1 mb-0">
+                                        <img class="o_card_img card-img-top" src="/web/image/website.set_catalog_square_md_5" alt=""/>
+                                    </figure>
+                                    <div class="card-body">
+                                        <h2 class="card-title h5-fs">Greater Impact</h2>
+                                        <p class="card-text">Making a difference every day</p>
+                                        <p class="card-text"><a href="#" class="o_translate_inline btn btn-primary">More info</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-name="Card" class="col-xl-6">
+                                <div class="s_card o_card_img_top card o_cc o_cc1 rounded" data-vxml="001" data-snippet="s_card" data-name="Card" style="--box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;">
+                                    <figure class="o_card_img_wrapper ratio ratio-1x1 mb-0">
+                                        <img class="o_card_img card-img-top" src="/web/image/website.set_catalog_square_md_4" alt=""/>
+                                    </figure>
+                                    <div class="card-body">
+                                        <h2 class="card-title h5-fs">Innovation Hub</h2>
+                                        <p class="card-text">Where ideas come to life</p>
+                                        <p class="card-text"><a href="#" class="o_translate_inline btn btn-primary">More info</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-name="Card" class="col-xl-6">
+                                <div class="s_card o_card_img_top card o_cc o_cc1 rounded" data-vxml="001" data-snippet="s_card" data-name="Card" style="--box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;">
+                                    <figure class="o_card_img_wrapper ratio ratio-1x1 mb-0">
+                                        <img class="o_card_img card-img-top" src="/web/image/website.set_catalog_square_md_3" alt=""/>
+                                    </figure>
+                                    <div class="card-body">
+                                        <h2 class="card-title h5-fs">Community Focus</h2>
+                                        <p class="card-text">Building connections</p>
+                                        <p class="card-text"><a href="#" class="o_translate_inline btn btn-primary">More info</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div data-name="Card" class="col-xl-6">
+                                <div class="s_card o_card_img_top card o_cc o_cc1 rounded" data-vxml="001" data-snippet="s_card" data-name="Card" style="--box-border-bottom-left-radius: 16px; --box-border-bottom-right-radius: 16px; --box-border-top-right-radius: 16px; --box-border-top-left-radius: 16px;">
+                                    <figure class="o_card_img_wrapper ratio ratio-1x1 mb-0">
+                                        <img class="o_card_img card-img-top" src="/web/image/website.set_catalog_square_md_2" alt=""/>
+                                    </figure>
+                                    <div class="card-body">
+                                        <h2 class="card-title h5-fs">Local Partnerships</h2>
+                                        <p class="card-text">Collaborating for better outcomes</p>
+                                        <p class="card-text"><a href="#" class="o_translate_inline btn btn-primary">More info</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <asset id="website.s_two_columns_sticky_000_scss" name="Columns with Sticky 000 SCSS">
+        <bundle>web.assets_frontend</bundle>
+        <path>website/static/src/snippets/s_two_columns_sticky/000.scss</path>
+    </asset>
+
+</odoo>

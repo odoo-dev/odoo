@@ -60,6 +60,7 @@
         'views/snippets/s_features.xml',
         'views/snippets/s_features_wall.xml',
         'views/snippets/s_three_columns.xml',
+        'views/snippets/s_two_columns_sticky.xml',
         'views/snippets/s_key_benefits.xml',
         'views/snippets/s_picture.xml',
         'views/snippets/s_image_punchy.xml',
