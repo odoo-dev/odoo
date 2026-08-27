@@ -187,8 +187,8 @@ class PosConfig(models.Model):
     )
     company_has_template = fields.Boolean(string="Company has chart of accounts", compute="_compute_company_has_template")
     current_user_id = fields.Many2one('res.users', string='Current Session Responsible', compute='_compute_current_session_user')
-    other_devices = fields.Boolean(string="Other Devices", help="Connect printers to your PoS.")
-    preparation_devices = fields.Boolean(string="Preparation devices", help="Connect preparation printers to print to the bar, kitchen,...")
+    other_devices = fields.Boolean(string="Other Devices", compute="_compute_other_devices", store=True, help="Connect printers to your PoS.")
+    preparation_devices = fields.Boolean(string="Preparation devices", compute="_compute_preparation_devices", store=True, help="Connect preparation printers to print to the bar, kitchen,...")
     rounding_method = fields.Many2one('account.cash.rounding', string="Rounding Method")
     cash_rounding = fields.Boolean(string="Total Rounding")
     only_round_cash_method = fields.Boolean(string="Only apply rounding on cash")
@@ -232,6 +232,16 @@ class PosConfig(models.Model):
         string='Download Invoice',
         help="Automatically download the invoice PDF when an order is invoiced.",
     )
+
+    @api.depends('receipt_printer_ids')
+    def _compute_other_devices(self):
+        for config in self:
+            config.other_devices = bool(config.receipt_printer_ids)
+
+    @api.depends('preparation_printer_ids')
+    def _compute_preparation_devices(self):
+        for config in self:
+            config.preparation_devices = bool(config.preparation_printer_ids)
 
     def _get_next_order_refs(self, device_identifier='0'):
         next_number = self.order_backend_seq_id._next()
