@@ -440,7 +440,19 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
         """
             Override to include/update values specific to ZATCA's UBL 2.1 specs.
             In this case, we make sure the tax amounts are always absolute (no negative values)
+
+            We also merge taxes with the same category and rate but a different exemption
+            reason (like two 0% taxes, one for exports, one for medicines) into one
+            TaxSubtotal. Otherwise they show up as two rows with the same ID/Percent, which
+            looks like duplicate tax data.
         """
+        merged_tax_details = {}
+        for vals in taxes_vals['tax_details'].values():
+            key = (vals['_tax_category_vals_']['id'], vals['_tax_category_vals_']['percent'])
+            merged_vals = merged_tax_details.setdefault(key, {**vals, 'base_amount_currency': 0.0, 'tax_amount_currency': 0.0})
+            merged_vals['base_amount_currency'] += vals['base_amount_currency']
+            merged_vals['tax_amount_currency'] += vals['tax_amount_currency']
+
         res = [{
             'currency': invoice.currency_id,
             'currency_dp': invoice.currency_id.decimal_places,
@@ -452,7 +464,7 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
                 'tax_amount': abs(vals['tax_amount_currency']),
                 'percent': vals['_tax_category_vals_']['percent'],
                 'tax_category_vals': vals['_tax_category_vals_'],
-            } for vals in taxes_vals['tax_details'].values()],
+            } for vals in merged_tax_details.values()],
         }]
         return res
 

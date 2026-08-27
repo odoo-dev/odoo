@@ -204,6 +204,47 @@ class TestEdiZatca(TestSaEdiCommon):
             freeze_time_at=datetime(2022, 9, 5, 8, 20, 2, tzinfo=timezone('Etc/GMT-3'))
         )
 
+    def test_zero_rate_taxes_with_different_reasons_are_merged(self):
+        """ Two 0% taxes with the same category (both 'Z') but a different exemption reason
+        should end up as one TaxSubtotal, not two. """
+        export_goods_tax = self.env['account.tax'].search([
+            ('company_id', '=', self.company.id),
+            ('l10n_sa_exemption_reason_code', '=', 'VATEX-SA-32'),
+        ], limit=1)
+        export_services_tax = self.env['account.tax'].search([
+            ('company_id', '=', self.company.id),
+            ('l10n_sa_exemption_reason_code', '=', 'VATEX-SA-33'),
+        ], limit=1)
+
+        with freeze_time('2022-09-05'):
+            move = self._create_invoice(
+                name='INV/2022/00099',
+                invoice_date='2022-09-05',
+                invoice_date_due='2022-09-05',
+                partner_id=self.partner_sa,
+                invoice_line_ids=[
+                    {'product_id': self.product_a.id, 'price_unit': 100.0, 'tax_ids': export_goods_tax.ids},
+                    {'product_id': self.product_b.id, 'price_unit': 50.0, 'tax_ids': export_services_tax.ids},
+                ],
+            )
+            move.action_post()
+            move._l10n_sa_generate_unsigned_data()
+            generated_file = self.env['account.edi.format']._l10n_sa_generate_zatca_template(move)
+
+        namespaces = {
+            'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
+            'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+        }
+        root = etree.fromstring(generated_file)
+        document_tax_total = root.find('cac:TaxTotal', namespaces)
+        tax_subtotals = document_tax_total.findall('cac:TaxSubtotal', namespaces)
+
+        self.assertEqual(len(tax_subtotals), 1, "The two 0%-rate/Z-category taxes should be merged into a single TaxSubtotal")
+        self.assertEqual(tax_subtotals[0].find('cbc:TaxableAmount', namespaces).text, '150.00')
+        category_node = tax_subtotals[0].find('cac:TaxCategory', namespaces)
+        self.assertEqual(category_node.find('cbc:ID', namespaces).text, 'Z')
+        self.assertEqual(category_node.find('cbc:Percent', namespaces).text, '0.0')
+
     def testInvoiceWithDownpayment(self):
         """Test invoice generation with downpayment scenarios."""
         if 'sale' not in self.env["ir.module.module"]._installed():
