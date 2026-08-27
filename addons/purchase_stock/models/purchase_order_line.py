@@ -299,8 +299,8 @@ class PurchaseOrderLine(models.Model):
             qty += move.uom_id._compute_quantity(qty_to_compute, self.uom_id, rounding_method='HALF-UP')
         return qty
 
-    def _get_countable_rfq_lines(self):
-        return self
+    def _get_countable_rfq_groups(self, groups):
+        return groups
 
     def _check_orderpoint_picking_type(self):
         warehouse_loc = self.order_id.picking_type_id.warehouse_id.view_location_id
