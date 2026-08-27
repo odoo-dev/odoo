@@ -20,6 +20,7 @@ import pathlib
 import platform
 import pprint
 import re
+import select
 import shutil
 import signal
 import subprocess
@@ -84,12 +85,6 @@ from . import case, test_cursor
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable
-
-try:
-    import websocket
-except ImportError:
-    # chrome headless tests will be skipped
-    websocket = None
 
 _logger = logging.getLogger(__name__)
 if odoo.cli.COMMAND in ('server', 'start') and not config['test_enable']:
@@ -1518,6 +1513,50 @@ class TransactionCase(BaseCase):
 class ChromeBrowserException(Exception):
     pass
 
+
+class ChromeDevToolsPipe:
+    """Chrome DevTools Protocol transport over --remote-debugging-pipe."""
+
+    def __init__(self, read_fd, write_fd):
+        self._read_fd = read_fd
+        self._write_fd = write_fd
+        self._buffer = bytearray()
+        self._write_lock = threading.Lock()
+
+    @property
+    def connected(self):
+        return self._read_fd is not None and self._write_fd is not None
+
+    def recv(self):
+        while True:
+            if b'\0' in self._buffer:
+                message, _, self._buffer = self._buffer.partition(b'\0')
+                return message.decode()
+
+            ready, _, _ = select.select([self._read_fd], [], [], 0.01)
+            if not ready:
+                raise TimeoutError
+            data = os.read(self._read_fd, 4096)
+            if not data:
+                raise ConnectionError("Chrome DevTools pipe closed")
+            self._buffer.extend(data)
+
+    def send(self, message):
+        data = message.encode() + b'\0'
+        with self._write_lock:
+            while data:
+                written = os.write(self._write_fd, data)
+                if not written:
+                    raise ConnectionError("Chrome DevTools pipe closed")
+                data = data[written:]
+
+    def close(self):
+        for fd in (self._read_fd, self._write_fd):
+            if fd is not None:
+                os.close(fd)
+        self._read_fd = self._write_fd = None
+
+
 def run(gen_func):
     def done(f):
         try:
@@ -1565,7 +1604,6 @@ else:
 
 class ChromeBrowser:
     """ Helper object to control a Chrome headless process. """
-    remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
 
     def __init__(self, test_case: HttpCase, success_signal: str = DEFAULT_SUCCESS_SIGNAL, headless: bool = True, debug: bool = False):
         self.cleanup = ExitStack()
@@ -1573,9 +1611,6 @@ class ChromeBrowser:
         self._logger = test_case._logger
         self.test_case = test_case
         self.success_signal = success_signal
-        if websocket is None:
-            self._logger.warning("websocket-client module is not installed")
-            raise unittest.SkipTest("websocket-client module is not installed")
         self.user_data_dir = self.cleanup.enter_context(
             tempfile.TemporaryDirectory(
                 suffix='_chrome_odoo',
@@ -1608,13 +1643,13 @@ class ChromeBrowser:
 
         test_case.browser_size = test_case.browser_size.replace('x', ',')
 
-        self.chrome, self.devtools_port = self.cleanup.enter_context(self._chrome_start(
+        self.chrome, pipe_fds = self.cleanup.enter_context(self._chrome_start(
             user_data_dir=self.user_data_dir,
             touch_enabled=test_case.touch_enabled,
             headless=headless,
             debug=debug,
         ))
-        self.ws = self.cleanup.enter_context(self._open_websocket())
+        self.cdp = self.cleanup.enter_context(self._open_pipe(*pipe_fds))
         if scs := odoo.tools.config['screencasts']:
             self.screencaster = self.cleanup.enter_context(Screencaster(self, scs))
         else:
@@ -1641,16 +1676,17 @@ class ChromeBrowser:
             args=(get_db_name(),)
         )
         self._receiver.start()
+        self._attach_to_page()
         self._logger.info('Enable chrome headless console log notification')
-        self._websocket_send('Runtime.enable')
-        self._websocket_request('Fetch.enable')
+        self._cdp_send('Runtime.enable')
+        self._cdp_request('Fetch.enable')
         self._logger.info('Chrome headless enable page notifications')
-        self._websocket_send('Page.enable')
-        self._websocket_send('Page.setDownloadBehavior', params={
+        self._cdp_send('Page.enable')
+        self._cdp_send('Page.setDownloadBehavior', params={
             'behavior': 'deny',
             'eventsEnabled': False,
         })
-        self._websocket_send('Emulation.setFocusEmulationEnabled', params={'enabled': True})
+        self._cdp_send('Emulation.setFocusEmulationEnabled', params={'enabled': True})
         emulated_device = {
             'mobile': False,
             'width': None,
@@ -1658,13 +1694,13 @@ class ChromeBrowser:
             'deviceScaleFactor': 1,
         }
         emulated_device['width'], emulated_device['height'] = [int(size) for size in test_case.browser_size.split(",")]
-        self._websocket_request('Emulation.setDeviceMetricsOverride', params=emulated_device)
+        self._cdp_request('Emulation.setDeviceMetricsOverride', params=emulated_device)
         self.cleanup.callback(self._ws_winddown)
 
     def _ws_winddown(self):
         try:
-            self._websocket_request('Page.stopLoading')
-            self._websocket_request('Runtime.evaluate', params={'expression': """
+            self._cdp_request('Page.stopLoading')
+            self._cdp_request('Runtime.evaluate', params={'expression': """
             ('serviceWorker' in navigator) &&
                 navigator.serviceWorker.getRegistrations().then(
                     registrations => Promise.all(registrations.map(r => r.unregister()))
@@ -1675,7 +1711,7 @@ class ChromeBrowser:
             self._result.cancel()
 
             self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
-            self._websocket_request('Browser.close')
+            self._cdp_request('Browser.close')
         except ChromeBrowserException as e:
             _logger.runbot("WS error during browser shutdown: %s", e)
             self.chrome_log_level = logging.RUNBOT
@@ -1695,7 +1731,7 @@ class ChromeBrowser:
 
         assert 1 <= factor <= 50  # arbitrary upper limit
         self.throttling_factor = factor
-        self._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': factor})
+        self._cdp_request('Emulation.setCPUThrottlingRate', params={'rate': factor})
 
     def stop(self):
         self.cleanup.close()
@@ -1710,19 +1746,38 @@ class ChromeBrowser:
 
     def _spawn_chrome(self, cmd):
         # pylint: disable=subprocess-popen-preexec-fn
-        proc = subprocess.Popen(
-            cmd,
-            stderr=subprocess.DEVNULL,
-            preexec_fn=_preexec,
-            env={**os.environ, 'TMPDIR': self.user_data_dir},
-        )  # noqa: PLW1509
+        if os.name != 'posix':
+            raise unittest.SkipTest("Chrome DevTools pipe is only supported on POSIX")
 
-        port_file = pathlib.Path(self.user_data_dir, 'DevToolsActivePort')
+        chrome_read, parent_write = os.pipe()
+        parent_read, chrome_write = os.pipe()
+
+        def preexec():
+            if _preexec:
+                _preexec()
+            # Chrome expects to read CDP commands from fd 3 and write events to fd 4.
+            input_fd, output_fd = os.dup(chrome_read), os.dup(chrome_write)
+            os.dup2(input_fd, 3)
+            os.dup2(output_fd, 4)
+            for fd in {chrome_read, chrome_write, input_fd, output_fd} - {3, 4}:
+                os.close(fd)
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stderr=subprocess.DEVNULL,
+                preexec_fn=preexec,
+                pass_fds=(chrome_read, chrome_write, 3, 4),
+                env={**os.environ, 'TMPDIR': self.user_data_dir},
+            )  # noqa: PLW1509
+        finally:
+            os.close(chrome_read)
+            os.close(chrome_write)
+
         for _ in range(CHECK_BROWSER_ITERATIONS):
             time.sleep(CHECK_BROWSER_SLEEP)
-            if port_file.is_file() and port_file.stat().st_size >= 5:
-                with port_file.open('r', encoding='utf-8') as f:
-                    return proc, int(f.readline())
+            if proc.poll() is None:
+                return proc, (parent_read, parent_write)
 
         if proc.poll() is None:
             proc.terminate()
@@ -1735,14 +1790,11 @@ class ChromeBrowser:
             'Chrome headless failed to start:\n%s',
             self.read_log().decode(),
         )
-        if port_file.is_file():
-            content = port_file.read_text('utf-8')
-            _logger.warning('DevToolsActivePort content: %r', content)
-        else:
-            _logger.warning('DevToolsActivePort not found')
+        os.close(parent_read)
+        os.close(parent_write)
         self.stop()
 
-        raise unittest.SkipTest(f'Failed to detect chrome devtools port after {BROWSER_WAIT :.1f}s.')
+        raise unittest.SkipTest(f'Failed to start Chrome DevTools pipe after {BROWSER_WAIT :.1f}s.')
 
     @contextlib.contextmanager
     def _chrome_start(
@@ -1793,8 +1845,7 @@ class ChromeBrowser:
             '--no-first-run': '',  # Skip the welcome screen and first-run setup wizards
             '--proxy-server': '"direct://"',  # Force a direct connection, bypassing any system proxies
             '--proxy-bypass-list': '*',  # Bypass proxy for all domains (eliminates local resolution delays)
-            '--remote-debugging-address': HOST,
-            '--remote-debugging-port': str(self.remote_debugging_port),
+            '--remote-debugging-pipe': '',
             '--user-data-dir': user_data_dir,
             '--enable-logging': '',
             '--v': str(int(os.environ.get("ODOO_BROWSER_LOG_VERBOSITY", "0"))),
@@ -1822,13 +1873,13 @@ class ChromeBrowser:
         url = 'about:blank'
         cmd.append(url)
         try:
-            proc, devtools_port = self._spawn_chrome(cmd)
+            proc, pipe_fds = self._spawn_chrome(cmd)
         except OSError:
             raise unittest.SkipTest("%s not found" % cmd[0])
         self._logger.info('Chrome pid: %s', proc.pid)
         self._logger.info('Chrome headless temporary user profile dir: %s', self.user_data_dir)
         try:
-            yield proc, devtools_port
+            yield proc, pipe_fds
         finally:
             self._logger.info("Terminating chrome headless with pid %s", proc.pid)
             main = psutil.Process(proc.pid)
@@ -1853,89 +1904,28 @@ class ChromeBrowser:
         except FileNotFoundError:
             return b''
 
-    def _json_command(self, command, timeout=3):
-        """Queries browser state using JSON
-
-        Available commands:
-
-        ``''``
-            return list of tabs with their id
-        ``list`` (or ``json/``)
-            list tabs
-        ``new``
-            open a new tab
-        :samp:`activate/{id}`
-            activate a tab
-        :samp:`close/{id}`
-            close a tab
-        ``version``
-            get chrome and dev tools version
-        ``protocol``
-            get the full protocol
-        """
-        url = f'http://{HOST}:{self.devtools_port}/json/{command}'.rstrip('/')
-        self._logger.info("Issuing json command %s", url)
-        delay = 0.1
-        tries = 0
-        failure_info = None
-        message = None
-        while timeout > 0:
-            if self.chrome.poll() is not None:
-                message = 'Chrome crashed at startup'
-                break
-            try:
-                r = requests.get(url, timeout=3)
-                if r.ok:
-                    return r.json()
-            except requests.ConnectionError as e:
-                failure_info = str(e)
-                message = 'Connection Error while trying to connect to Chrome debugger'
-            except requests.exceptions.ReadTimeout as e:
-                failure_info = str(e)
-                message = 'Connection Timeout while trying to connect to Chrome debugger'
-                break
-
-            time.sleep(delay)
-            timeout -= delay
-            delay = delay * 1.5
-            tries += 1
-        self._logger.error("%s after %s tries" % (message, tries))
-        if failure_info:
-            self._logger.info(failure_info)
-        self.stop()
-        raise unittest.SkipTest("Error during Chrome headless connection")
-
     @contextlib.contextmanager
-    def _open_websocket(self):
-        version = self._json_command('version')
-        self._logger.info('Browser version: %s', version['Browser'])
-
-        start = time.time()
-        while (time.time() - start) < 5.0:
-            ws_url = next((
-                target['webSocketDebuggerUrl']
-                for target in self._json_command('')
-                if target['type'] == 'page'
-                if target['url'] == 'about:blank'
-            ), None)
-            if ws_url:
-                break
-
-            time.sleep(0.1)
-        else:
-            self.stop()
-            raise unittest.SkipTest("Error during Chrome connection: never found 'page' target")
-
-        self._logger.info('Websocket url found: %s', ws_url)
-        ws = websocket.create_connection(ws_url, enable_multithread=True, suppress_origin=True)
-        if ws.getstatus() != 101:
-            raise unittest.SkipTest("Cannot connect to chrome dev tools")
-        ws.settimeout(0.01)
+    def _open_pipe(self, read_fd, write_fd):
+        ws = ChromeDevToolsPipe(read_fd, write_fd)
         try:
             yield ws
         finally:
-            self._logger.info("Closing websocket connection")
+            self._logger.info("Closing Chrome DevTools pipe")
             ws.close()
+
+    def _attach_to_page(self):
+        try:
+            target = next(
+                target for target in self._cdp_request('Target.getTargets')['targetInfos']
+                if target['type'] == 'page' and target['url'] == 'about:blank'
+            )
+            self._session_id = self._cdp_request('Target.attachToTarget', params={
+                'targetId': target['targetId'],
+                'flatten': True,
+            })['sessionId']
+        except (ChromeBrowserException, ConnectionError, StopIteration, TimeoutError) as e:
+            self.stop()
+            raise unittest.SkipTest("Error during Chrome DevTools pipe connection") from e
 
     def _receive(self, dbname):
         threading.current_thread().dbname = dbname
@@ -1945,15 +1935,15 @@ class ChromeBrowser:
         # meaning request objects without an ``id``, but *coming from the server
         while True: # or maybe until `self._result` is `done()`?
             try:
-                msg = self.ws.recv()
+                msg = self.cdp.recv()
                 if not msg:
                     continue
                 self._logger.debug('\n<- %s', msg)
-            except websocket.WebSocketTimeoutException:
+            except TimeoutError:
                 continue
-            except websocket.WebSocketConnectionClosedException as e:
+            except ConnectionError as e:
                 if not self._result.done():
-                    del self.ws
+                    del self.cdp
                     self._result.set_exception(e)
                     while True:
                         try:
@@ -1968,7 +1958,7 @@ class ChromeBrowser:
                     return
                 # if the socket is still connected something bad happened,
                 # otherwise the client was just shut down
-                if self.ws.connected:
+                if self.cdp.connected:
                     self._result.set_exception(e)
                     raise
                 self._result.cancel()
@@ -1991,28 +1981,28 @@ class ChromeBrowser:
                     shorten(str(msg), 500, placeholder='...'),
                 )
 
-    def _websocket_request(self, method, *, params=None, timeout=10.0):
+    def _cdp_request(self, method, *, params=None, timeout=10.0):
         assert threading.get_ident() != self._receiver.ident,\
-            "_websocket_request must not be called from the consumer thread"
-        if not hasattr(self, 'ws'):
+            "_cdp_request must not be called from the consumer thread"
+        if not hasattr(self, 'cdp'):
             return None
         if DISABLE_TIMEOUTS:
             timeout = None
         else:
             timeout *= self.throttling_factor
 
-        f = self._websocket_send(method, params=params, with_future=True)
+        f = self._cdp_send(method, params=params, with_future=True)
         try:
             return f.result(timeout=timeout)
         except concurrent.futures.TimeoutError:
             raise TimeoutError(f'{method}({params or ""})')
 
-    def _websocket_send(self, method, *, params=None, with_future=False):
-        """send chrome devtools protocol commands through websocket
+    def _cdp_send(self, method, *, params=None, with_future=False):
+        """Send Chrome DevTools Protocol commands through the CDP transport.
 
         If ``with_future`` is set, returns a ``Future`` for the operation.
         """
-        if not hasattr(self, 'ws'):
+        if not hasattr(self, 'cdp'):
             return None
 
         result = None
@@ -2020,10 +2010,12 @@ class ChromeBrowser:
         if with_future:
             result = self._responses[request_id] = Future()
         payload = {'method': method, 'id': request_id}
+        if hasattr(self, '_session_id') and not method.startswith(('Browser.', 'Target.')):
+            payload['sessionId'] = self._session_id
         if params:
             payload['params'] = params
         self._logger.debug('\n-> %s', payload)
-        self.ws.send(json.dumps(payload))
+        self.cdp.send(json.dumps(payload))
         return result
 
     def _handle_request_paused(self, **params):
@@ -2035,12 +2027,12 @@ class ChromeBrowser:
             cmd = 'Fetch.fulfillRequest'
             response = self.test_case.fetch_proxy(url)
         try:
-            self._websocket_send(cmd, params={'requestId': params['requestId'], **response})
-        except websocket.WebSocketConnectionClosedException:
+            self._cdp_send(cmd, params={'requestId': params['requestId'], **response})
+        except ConnectionError:
             pass
         except (BrokenPipeError, ConnectionResetError, OSError):
             # this can happen if the browser is closed. Just ignore it.
-            _logger.info("Websocket error while handling request %s", params['request']['url'])
+            _logger.info("DevTools pipe error while handling request %s", params['request']['url'])
 
     def _handle_console(self, type, args=None, stackTrace=None, **kw): # pylint: disable=redefined-builtin
         # console formatting differs somewhat from Python's, if args[0] has
@@ -2091,8 +2083,8 @@ class ChromeBrowser:
         elif message == self.success_signal:
             @run
             def _get_heap():
-                yield self._websocket_send("HeapProfiler.collectGarbage", with_future=True)
-                r = yield self._websocket_send("Runtime.getHeapUsage", with_future=True)
+                yield self._cdp_send("HeapProfiler.collectGarbage", with_future=True)
+                r = yield self._cdp_send("Runtime.getHeapUsage", with_future=True)
                 _logger.info("heap %d (allocated %d)", r['usedSize'], r['totalSize'])
 
             @run
@@ -2100,8 +2092,8 @@ class ChromeBrowser:
                 node_id = 0
 
                 with contextlib.suppress(Exception):
-                    d = yield self._websocket_send('DOM.getDocument', params={'depth': 0}, with_future=True)
-                    form = yield self._websocket_send("DOM.querySelector", params={
+                    d = yield self._cdp_send('DOM.getDocument', params={'depth': 0}, with_future=True)
+                    form = yield self._cdp_send("DOM.querySelector", params={
                         'nodeId': d['root']['nodeId'],
                         'selector': '.o_form_dirty',
                     }, with_future=True)
@@ -2184,19 +2176,19 @@ which leads to stray network requests and inconsistencies."""
             save_test_file(self.test_case._testMethodName, decoded, prefix, logger=self._logger, directory='screenshots')
 
         self._logger.info('Asking for screenshot')
-        f = self._websocket_send('Page.captureScreenshot', with_future=True)
+        f = self._cdp_send('Page.captureScreenshot', with_future=True)
         if f:
             f.add_done_callback(handler)
         return f
 
     def set_cookie(self, name, value, path, domain):
         params = {'name': name, 'value': value, 'path': path, 'domain': domain}
-        self._websocket_request('Network.setCookie', params=params)
+        self._cdp_request('Network.setCookie', params=params)
 
     def delete_cookie(self, name, **kwargs):
         params = {k: v for k, v in kwargs.items() if k in ['url', 'domain', 'path']}
         params['name'] = name
-        self._websocket_request('Network.deleteCookies', params=params)
+        self._cdp_request('Network.deleteCookies', params=params)
 
     def _wait_ready(self, ready_code=None, timeout=60):
         if timeout:
@@ -2211,7 +2203,7 @@ which leads to stray network requests and inconsistencies."""
                 break
 
             try:
-                result = self._websocket_request('Runtime.evaluate', params={
+                result = self._cdp_request('Runtime.evaluate', params={
                     'expression': "try { %s } catch {}" % ready_code,
                     'awaitPromise': True,
                 }, timeout=timeout-taken)['result']
@@ -2240,7 +2232,7 @@ which leads to stray network requests and inconsistencies."""
         self.error_checker = error_checker
         self._logger.info('Evaluate test code "%s"', code)
         start = time.time()
-        res = self._websocket_request('Runtime.evaluate', params={
+        res = self._cdp_request('Runtime.evaluate', params={
             'expression': code,
             'awaitPromise': True,
         }, timeout=timeout)['result']
@@ -2274,7 +2266,7 @@ which leads to stray network requests and inconsistencies."""
     def navigate_to(self, url, wait_stop=False):
         self._logger.info('Navigating to: "%s"', url)
         timeout = 1e6 if DISABLE_TIMEOUTS else 20.0
-        nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=timeout)
+        nav_result = self._cdp_request('Page.navigate', params={'url': url}, timeout=timeout)
         self._logger.info("Navigation result: %s", nav_result)
         if wait_stop:
             frame_id = nav_result['frameId']
@@ -2388,10 +2380,10 @@ class Screencaster:
 
     def start(self):
         self._logger.info('Starting screencast')
-        self.browser._websocket_send('Page.startScreencast')
+        self.browser._cdp_send('Page.startScreencast')
 
     def __call__(self, sessionId, data, metadata):
-        self.browser._websocket_send('Page.screencastFrameAck', params={'sessionId': sessionId})
+        self.browser._cdp_send('Page.screencastFrameAck', params={'sessionId': sessionId})
         if self.stopped:
             # if already stopped, drop the frames as we might have removed the directory already
             return
@@ -2409,7 +2401,7 @@ class Screencaster:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.browser._websocket_send('Page.stopScreencast')
+        self.browser._cdp_send('Page.stopScreencast')
         self.stopped = True
         if self.frames_dir.is_dir():
             shutil.rmtree(self.frames_dir, ignore_errors=True)
@@ -2417,7 +2409,7 @@ class Screencaster:
     def save(self):
         if self.stopped:
             return
-        self.browser._websocket_send('Page.stopScreencast')
+        self.browser._cdp_send('Page.stopScreencast')
         # Wait for frames just in case, ideally we'd wait for the Browse.close
         # event or something but that doesn't exist.
         time.sleep(5)
