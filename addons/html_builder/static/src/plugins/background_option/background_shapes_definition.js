@@ -185,6 +185,19 @@ export const backgroundShapesDefinition = {
                     "html_builder/Wavy/31": { selectLabel: _t("Wavy 14") },
                 },
             },
+            clouds: {
+                label: _t("Clouds"),
+                shapes: {
+                    "html_builder/Clouds/01": { selectLabel: _t("Clouds 01") },
+                    "html_builder/Clouds/02": { selectLabel: _t("Clouds 02") },
+                    "html_builder/Clouds/03": { selectLabel: _t("Clouds 03") },
+                    "html_builder/Clouds/04": { selectLabel: _t("Clouds 04") },
+                    "html_builder/Clouds/05": { selectLabel: _t("Clouds 05") },
+                    "html_builder/Clouds/06": { selectLabel: _t("Clouds 06") },
+                    "html_builder/Clouds/07": { selectLabel: _t("Clouds 07") },
+                    "html_builder/Clouds/08": { selectLabel: _t("Clouds 08") },
+                },
+            },
             blockAndRainy: {
                 label: _t("Block & Rainy"),
                 shapes: {
