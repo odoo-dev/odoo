@@ -55,4 +55,7 @@ patch(PosOrderline.prototype, {
             return prices.total_excluded;
         }
     },
+    get countInLineNotSend() {
+        return !this.combo_parent_id;
+    },
 });
