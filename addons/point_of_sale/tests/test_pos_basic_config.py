@@ -1,13 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import odoo
-
-from odoo.addons.point_of_sale.tests.common import TestPoSCommon
-from odoo.exceptions import ValidationError, UserError
 from datetime import datetime, timedelta
 
+from odoo import Command, fields, tests, tools
+from odoo.exceptions import ValidationError, UserError
+from odoo.tests import Form
 
-@odoo.tests.tagged('post_install', '-at_install')
+from odoo.addons.point_of_sale.tests.common import TestPoSCommon
+
+
+@tests.tagged('post_install', '-at_install')
 class TestPoSBasicConfig(TestPoSCommon):
     """ Test PoS with basic configuration
 
@@ -15,19 +17,20 @@ class TestPoSBasicConfig(TestPoSCommon):
     More specialized cases are tested in other tests.
     """
     _test_user_groups = None  # FIXME list needed groups
-    # TODO-PARP: Move to test_point_of_sale_flow.py
 
-    def setUp(self):
-        super(TestPoSBasicConfig, self).setUp()
-        self.config = self.basic_config
-        self.product0 = self.create_product('Product 0', self.categ_basic, 0.0, 0.0)
-        self.product1 = self.create_product('Product 1', self.categ_basic, 10.0, 5)
-        self.product2 = self.create_product('Product 2', self.categ_basic, 20.0, 10)
-        self.product3 = self.create_product('Product 3', self.categ_basic, 30.0, 15)
-        self.product4 = self.create_product('Product_4', self.categ_basic, 9.96, 4.98)
-        self.product99 = self.create_product('Product_99', self.categ_basic, 99, 50)
-        self.product_multi_tax = self.create_product('Multi-tax product', self.categ_basic, 100, 100, (self.taxes['tax8'] | self.taxes['tax9']).ids)
-        self.company_data_2 = self.setup_other_company()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.config = cls.basic_config
+        cls.product0 = cls.create_product('Product 0', cls.categ_basic, 0.0, 0.0)
+        cls.product1 = cls.create_product('Product 1', cls.categ_basic, 10.0, 5)
+        cls.product2 = cls.create_product('Product 2', cls.categ_basic, 20.0, 10)
+        cls.product3 = cls.create_product('Product 3', cls.categ_basic, 30.0, 15)
+        cls.product4 = cls.create_product('Product_4', cls.categ_basic, 9.96, 4.98)
+        cls.product7 = cls.create_product('Product 7', cls.categ_basic, 7, 7, tax_ids=cls.taxes['tax7'].ids)
+
+        cls.products = cls.product0 | cls.product1 | cls.product2 | cls.product3 | cls.product4
+        cls.company_data_2 = cls.setup_other_company()
 
     def test_pos_session_name_sequencing(self):
         """ This test check if the session name is correctly set according to the sequence """
@@ -132,13 +135,9 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.open_new_session()
         # create orders
         orders = []
-        orders.append(self.create_ui_order_data(
-            [(self.product1, 2), (self.product4, 3)],
-            payments=[(self.bank_pm1, 49.88)]
-        ))
-        orders.append(self.create_ui_order_data(
-            [(self.product4, 1), (self.product2, 5)],
-            payments=[(self.bank_pm1, 109.96)]
+        orders.extend((
+            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm1, 49.88)]),
+            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm1, 109.96)])
         ))
 
         # sync orders
@@ -168,13 +167,9 @@ class TestPoSBasicConfig(TestPoSCommon):
     def test_multi_config_global_invoice(self):
         self.open_new_session()
         orders = []
-        orders.append(self.create_ui_order_data(
-            [(self.product1, 3), (self.product2, 10)],
-            payments=[(self.bank_pm1, 230)]
-        ))
-        orders.append(self.create_ui_order_data(
-            [(self.product1, 5), (self.product0, 10)],
-            payments=[(self.bank_pm1, 50)]
+        orders.extend((
+            self.create_ui_order_data([(self.product1, 3), (self.product2, 10)], payments=[(self.bank_pm1, 230)]),
+            self.create_ui_order_data([(self.product1, 5), (self.product0, 10)], payments=[(self.bank_pm1, 50)])
         ))
         self.env['pos.order'].sync_from_ui(orders)
         self.pos_session.close_session_from_ui()
@@ -182,13 +177,9 @@ class TestPoSBasicConfig(TestPoSCommon):
         # open new session & create orders
         self.open_new_session()
         orders2 = []
-        orders2.append(self.create_ui_order_data(
-            [(self.product1, 2), (self.product4, 3)],
-            payments=[(self.bank_pm1, 49.88)]
-        ))
-        orders2.append(self.create_ui_order_data(
-            [(self.product4, 1), (self.product2, 5)],
-            payments=[(self.bank_pm1, 109.96)]
+        orders2.extend((
+            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm1, 49.88)]),
+            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm1, 109.96)])
         ))
         self.env['pos.order'].sync_from_ui(orders2)
         self.pos_session.close_session_from_ui()
@@ -430,3 +421,486 @@ class TestPoSBasicConfig(TestPoSCommon):
 
         with self.assertRaisesRegex(UserError, "currently in use in a point of sale"):
             category1.unlink()
+
+    def test_basic_config_values(self):
+        config = self.basic_config
+        self.assertEqual(config.currency_id, self.company_currency)
+        self.assertEqual(config.pricelist_id.currency_id, self.company_currency)
+
+    def test_other_currency_config_values(self):
+        config = self.other_currency_config
+        self.assertEqual(config.currency_id, self.other_currency)
+        self.assertEqual(config.pricelist_id.currency_id, self.other_currency)
+
+    def test_product_price(self):
+        def get_price(pricelist, product):
+            return pricelist._get_product_price(product, 1)
+
+        # check usd pricelist
+        pricelist = self.basic_config.pricelist_id
+        for product in self.products:
+            self.assertAlmostEqual(get_price(pricelist, product), product.lst_price)
+
+        # check eur pricelist
+        # exchange rate to the other currency is set to 0.5, thus, lst_price
+        # is expected to have half its original value.
+        pricelist = self.other_currency_config.pricelist_id
+        for product in self.products:
+            self.assertAlmostEqual(get_price(pricelist, product), product.lst_price * 0.5)
+
+    def test_taxes(self):
+        tax7 = self.taxes['tax7']
+        self.assertEqual(tax7.name, 'Tax 7%')
+        self.assertAlmostEqual(tax7.amount, 7)
+        self.assertEqual(tax7.invoice_repartition_line_ids.mapped('account_id').id, self.tax_received_account.id)
+        tax10 = self.taxes['tax10']
+        self.assertEqual(tax10.name, 'Tax 10%')
+        self.assertAlmostEqual(tax10.amount, 10)
+        self.assertEqual(tax10.price_include, True)
+        self.assertEqual(tax10.invoice_repartition_line_ids.mapped('account_id').id, self.tax_received_account.id)
+        tax_group_7_10 = self.taxes['tax_group_7_10']
+        self.assertEqual(tax_group_7_10.name, 'Tax 7+10%')
+        self.assertEqual(tax_group_7_10.amount_type, 'group')
+        self.assertEqual(sorted(tax_group_7_10.children_tax_ids.ids), sorted((tax7 | tax10).ids))
+
+    def test_archive_used_journal(self):
+        journal = self.env['account.journal'].create({
+            'name': 'BANKOS',
+            'company_id': self.company.id,
+            'code': 'BANKOS',
+            'type': 'bank',
+            'invoice_reference_type': 'invoice',
+            'invoice_reference_model': 'odoo'
+        })
+        payment_method = self.env['pos.payment.method'].create({
+            'name': 'Lets Pay for Tests', 'journal_id': journal.id, 'type': 'bank'})
+        self.basic_config.write({'payment_method_ids': [payment_method.id]})
+        journal.write({'pos_payment_method_ids': [payment_method.id]})
+        session = self.env['pos.session'].create(
+            {
+                'name': 'lets sell some tests',
+                'config_id': self.basic_config.id,
+                'user_id': self.env.user.id,
+                'state': 'opened'
+            }
+        )
+        order = self.env['pos.order'].create(
+            {
+                'name': 'MIX',
+                'amount_tax': 0,
+                'amount_total': 0,
+                'amount_paid': 0,
+                'amount_return': 0,
+                'company_id': self.company.id,
+                'pricelist_id': self.currency_pricelist.id,
+                'session_id': session.id
+            }
+        )
+        self.env['pos.payment'].create(
+            {
+                'amount': 100,
+                'payment_date': '2025-01-01',
+                'payment_method_id': payment_method.id,
+                'pos_order_id': order.id
+            }
+        )
+        with self.assertRaises(ValidationError):
+            journal.action_archive()
+
+    def test_card_payment_method_initialization(self):
+        """Test that the 'Card' payment method created by default has an outstanding account."""
+        card_pm = self.env['pos.payment.method'].search([
+            ('name', '=', 'Card'), ('company_id', '=', self.env.company.id),
+        ], limit=1)
+        self.assertTrue(card_pm)
+        self.assertTrue(card_pm.outstanding_account_id)
+
+    def test_pos_loaded_product_taxes_on_branch(self):
+        """ Check loaded product taxes on branch company """
+        # create the following branch hierarchy:
+        #     Parent company
+        #         |----> Branch X
+        #                   |----> Branch XX
+        company = self.config.company_id
+        branch_x = self.env['res.company'].create({
+            'name': 'Parent Company',
+            'country_id': company.country_id.id,
+            'parent_id': company.id,
+        })
+        branch_xx = self.env['res.company'].create({
+            'name': 'Branch XX',
+            'country_id': company.country_id.id,
+            'parent_id': branch_x.id,
+        })
+        self.cr.precommit.run()  # load the CoA
+        # create taxes for the parent company and its branches
+        tax_groups = self.env['account.tax.group'].create([
+            {'name': 'Tax Group', 'company_id': company.id},
+            {'name': 'Tax Group X', 'company_id': branch_x.id},
+            {'name': 'Tax Group XX', 'company_id': branch_xx.id}
+        ])
+        tax_a = self.env['account.tax'].create({
+            'name': 'Tax A',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 10,
+            'tax_group_id': tax_groups[0].id,
+            'company_id': company.id,
+        })
+        tax_b = self.env['account.tax'].create({
+            'name': 'Tax B',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 15,
+            'tax_group_id': tax_groups[0].id,
+            'company_id': company.id,
+        })
+        tax_x = self.env['account.tax'].create({
+            'name': 'Tax X',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 20,
+            'tax_group_id': tax_groups[1].id,
+            'company_id': branch_x.id,
+        })
+        tax_xx = self.env['account.tax'].create({
+            'name': 'Tax XX',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 25,
+            'tax_group_id': tax_groups[2].id,
+            'company_id': branch_xx.id,
+        })
+        # create several products with different taxes combination
+        product_all_taxes = self.env['product.product'].create({
+            'name': 'Product all taxes',
+            'available_in_pos': True,
+            'taxes_id': [Command.set((tax_a + tax_b + tax_x + tax_xx).ids)],
+        })
+        product_no_xx_tax = self.env['product.product'].create({
+            'name': 'Product no tax from XX',
+            'available_in_pos': True,
+            'taxes_id': [Command.set((tax_a + tax_b + tax_x).ids)],
+        })
+        product_no_branch_tax = self.env['product.product'].create({
+            'name': 'Product no tax from branch',
+            'available_in_pos': True,
+            'taxes_id': [Command.set((tax_a + tax_b).ids)],
+        })
+        product_no_tax = self.env['product.product'].create({
+            'name': 'Product no tax',
+            'available_in_pos': True,
+            'taxes_id': [],
+        })
+        # configure a session on Branch XX
+        self.xx_bank_journal = self.env['account.journal'].with_company(branch_xx).create({
+            'name': 'Bank',
+            'type': 'bank',
+            'company_id': branch_xx.id,
+            'code': 'BNK',
+            'sequence': 15,
+        })
+        xx_config = self.env['pos.config'].with_company(branch_xx).create({
+            'name': 'Branch XX config',
+            'company_id': branch_xx.id,
+        })
+        xx_account_receivable = self.company_data['default_account_receivable'].copy({'company_ids': [Command.set(branch_xx.ids)]})
+        xx_cash_journal = self.company_data['default_journal_cash'].copy({'company_id': branch_xx.id})
+        xx_cash_payment_method = self.env['pos.payment.method'].create({
+            'name': 'XX Cash Payment',
+            'type': 'cash',
+            'receivable_account_id': xx_account_receivable.id,
+            'journal_id': xx_cash_journal.id,
+            'company_id': branch_xx.id,
+        })
+        xx_config.write({'payment_method_ids': [
+            Command.set(xx_cash_payment_method.ids),
+        ]})
+        self.config = xx_config
+        pos_session = self.open_new_session()
+        # load the session data from Branch XX:
+        # - Product all taxes           => tax from Branch XX should be set
+        # - Product no tax from XX      => tax from Branch X should be set
+        # - Product no tax from branch  => 2 taxes from parent company should be set
+        # - Product no tax              => no tax should be set
+        pos_data = pos_session.load_data()
+        self.assertEqual(
+            next(iter(filter(lambda p: p['id'] == product_all_taxes.product_tmpl_id.id, pos_data['product.template']['records'])))['taxes_id'],
+            tax_xx.ids
+        )
+        self.assertEqual(
+            next(iter(filter(lambda p: p['id'] == product_no_xx_tax.product_tmpl_id.id, pos_data['product.template']['records'])))['taxes_id'],
+            tax_x.ids
+        )
+        tax_data_no_branch = next(iter(filter(lambda p: p['id'] == product_no_branch_tax.product_tmpl_id.id, pos_data['product.template']['records'])))['taxes_id']
+        tax_data_no_branch.sort()
+        self.assertEqual(
+            tax_data_no_branch,
+            (tax_a + tax_b).ids
+        )
+        self.assertEqual(
+            next(iter(filter(lambda p: p['id'] == product_no_tax.product_tmpl_id.id, pos_data['product.template']['records'])))['taxes_id'],
+            []
+        )
+
+        pos_user = self.env['res.users'].create({
+            'name': 'Joe Odoo',
+            'login': 'pos_user',
+            'password': 'pos_user',
+            'group_ids': [
+                (4, self.env.ref('base.group_user').id),
+                (4, self.env.ref('point_of_sale.group_pos_user').id),
+            ],
+            'tz': 'America/New_York',
+            'company_id': branch_xx.id,
+            'company_ids': [Command.set([company.id, branch_x.id, branch_xx.id])],
+        })
+
+        def get_taxes_name_popup(product):
+            product = product.product_tmpl_id
+            # In order to simulate the state of the cache when we run this
+            # function over RPC, we need to fetch the below data first,
+            # invalidate our cache, and then enter `get_product_info_pos`
+            # with the arguments already loaded. This is necessary to test
+            # an access rights issue when trying to load product info.
+            branch_xx_id = branch_xx.id
+            xx_config_id = xx_config.id
+            product_all_taxes_lst_price = product_all_taxes.lst_price
+            self.env.invalidate_all()
+            return [tax['name'] for tax in product.with_user(pos_user).with_context(allowed_company_ids=[branch_xx_id]).get_product_info_pos(product_all_taxes_lst_price, 1, xx_config_id)['all_prices']['tax_details']]
+
+        self.assertEqual(get_taxes_name_popup(product_all_taxes), ["Tax XX"])
+        self.assertEqual(get_taxes_name_popup(product_no_xx_tax), ["Tax X"])
+        self.assertEqual(get_taxes_name_popup(product_no_branch_tax), ["Tax A", "Tax B"])
+        self.assertEqual(get_taxes_name_popup(product_no_tax), [])
+
+    def test_get_product_info_pos_with_fiscal_position(self):
+        tax_15 = self.env['account.tax'].create({
+            'name': 'tax_15',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 15.0,
+        })
+        tax_30 = self.env['account.tax'].create({
+            'name': 'tax_30',
+            'type_tax_use': 'sale',
+            'amount_type': 'percent',
+            'amount': 30.0,
+            'original_tax_ids': [Command.set(tax_15.ids)],
+        })
+        fp = self.env['account.fiscal.position'].create({
+            'name': 'Maps 15 to 30',
+            'tax_ids': [Command.set(tax_30.ids)],
+        })
+        product = self.create_product('Product FP', self.categ_basic, 100.0, tax_ids=tax_15.ids)
+        template = product.product_tmpl_id
+
+        def get_display_info(fp_id=False):
+            info = template.with_context(fiscal_position_id=fp_id).get_product_info_pos(100.0, 1, self.config.id)['all_prices']
+            return (info['price_with_tax'], [t['name'] for t in info['tax_details']])
+
+        self.assertEqual(get_display_info(), (115.0, ['tax_15']))
+        self.assertEqual(get_display_info(fp.id), (130.0, ['tax_30']))
+
+    def test_combo_product_variant_error(self):
+        """This tests make sure that product containing variants cannot change type to combo"""
+
+        size_attribute = self.env['product.attribute'].create({'name': 'Size'})
+        a1 = self.env['product.attribute.value'].create({'name': 'V0hFCg==', 'attribute_id': size_attribute.id})
+        self.variant_product = self.env["product.product"].create(
+            {
+                "name": "Test product",
+                "attribute_line_ids": [(0, 0, {
+                    "attribute_id": size_attribute.id,
+                    "value_ids": [(6, 0, [a1.id])]
+                })],
+            })
+        with self.assertRaises(UserError):
+            with Form(self.variant_product.product_tmpl_id) as product:
+                product.type = "combo"
+
+    def test_product_combo_variants(self):
+        # Create product and combo
+        product = self.env['product.product'].create({
+            'name': 'Test Product 1',
+            'list_price': 100,
+            'taxes_id': False,
+            'available_in_pos': True,
+        })
+
+        product_combo = self.env['product.combo'].create({
+            'name': 'Product combo',
+            'combo_item_ids': [
+                Command.create({
+                    'product_id': product.id,
+                    'extra_price': 0,
+                }),
+            ],
+        })
+        # Add attribute and values, simulating variant creation
+        size_attribute = self.env['product.attribute'].create({'name': 'Size'})
+        attribute_value_1 = self.env['product.attribute.value'].create({'name': 'Large', 'attribute_id': size_attribute.id})
+        attribute_value_2 = self.env['product.attribute.value'].create({'name': 'Small', 'attribute_id': size_attribute.id})
+        original_product_id = product.id
+        product.product_tmpl_id.with_context(create_product_product=True).write({
+            'attribute_line_ids': [(0, 0, {
+                'attribute_id': size_attribute.id,
+                'value_ids': [(6, 0, [attribute_value_1.id, attribute_value_2.id])],
+            })],
+        })
+        # Check that original product should not be in combo anymore (replace by variants)
+        self.assertNotIn(
+            original_product_id,
+            product_combo.combo_item_ids.mapped('product_id').ids,
+            'Original product should not be in combo'
+        )
+
+    def test_01_check_product_cost(self):
+        # Product price should be half of the original price because currency rate is 0.5.
+        # (see `self._create_other_currency_config` method)
+        # Except for product2 where the price is specified in the pricelist.
+
+        # change the price of product2 to 12.99 fixed. No need to convert.
+        pricelist_item = self.env['product.pricelist.item'].create({
+            'product_tmpl_id': self.product2.product_tmpl_id.id,
+            'fixed_price': 12.99,
+        })
+        self.other_currency_config.pricelist_id.write({'item_ids': [(6, 0, (self.other_currency_config.pricelist_id.item_ids | pricelist_item).ids)]})
+
+        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product1, 1), 5.00)
+        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product2, 1), 12.99)
+        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product3, 1), 15.00)
+        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product7, 1), 3.50)
+
+    def test_combo_prices_converted_to_pos_currency(self):
+        # A combo's `base_price` and its items' `extra_price` are stored in the
+        # company currency. When loaded in a PoS running another currency they
+        # must be converted, just like standalone product prices (rate 0.5).
+        combo = self.env['product.combo'].create({
+            'name': 'Combo choice',
+            'company_id': self.company.id,
+            'combo_item_ids': [
+                (0, 0, {'product_id': self.product1.product_variant_id.id, 'extra_price': 20.0}),
+                (0, 0, {'product_id': self.product3.product_variant_id.id, 'extra_price': 0.0}),
+            ],
+        })
+        # base_price is the min lst_price among the items, in company currency (product1 = 10.0).
+        self.assertAlmostEqual(combo.base_price, 10.0)
+
+        combo_read = self.env['product.combo']._load_pos_data_read(combo, self.other_currency_config)[0]
+        self.assertAlmostEqual(combo_read['base_price'], 5.0)
+
+        combo_item_read = self.env['product.combo.item']._load_pos_data_read(combo.combo_item_ids, self.other_currency_config)
+        extra_prices = {rec['product_id']: rec['extra_price'] for rec in combo_item_read}
+        self.assertAlmostEqual(extra_prices[self.product1.product_variant_id.id], 10.0)
+        self.assertAlmostEqual(extra_prices[self.product3.product_variant_id.id], 0.0)
+
+    def test_bank_journal_balance(self):
+        """Verify that debit and credit are balanced when adding a difference to the bank."""
+
+        # Make a sale paid by bank
+        self.other_currency_config.open_ui()
+        session_id = self.other_currency_config.current_session_id
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': session_id.id,
+            'partner_id': False,
+            'lines': [(0, 0, {
+                'name': 'OL/0001',
+                'product_id': self.product1.id,
+                'price_unit': 10.00,
+                'discount': 0,
+                'qty': 1,
+                'tax_ids': False,
+                'price_subtotal': 10.00,
+                'price_subtotal_incl': 10.00,
+            })],
+            'pricelist_id': self.other_currency_config.pricelist_id.id,
+            'amount_paid': 10.00,
+            'amount_total': 10.00,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+        })
+
+        # Make payment
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
+            'amount': order.amount_total,
+            'payment_method_id': self.bank_pm2.id
+        })
+        order_payment.with_context(**payment_context).check()
+
+        # Close session with counted +10 for bank compared with expected
+        session_id.close_session_from_ui()  # Real 20, expected 10, diff 10
+
+        # Check debit/credit session's balance
+        for move in session_id._get_related_account_moves():
+            debit = credit = 0.0
+            for line in move.line_ids:
+                debit += line.debit
+                credit += line.credit
+            self.assertEqual(tools.float_compare(debit, credit, precision_rounding=self.other_currency_config.currency_id.rounding), 0)  # debit and credit should be equal
+
+    def test_with_session_check_product_cost(self):
+        def find_by(list_of_dicts, key, value):
+            return next((d for d in list_of_dicts if d.get(key) == value), None)
+
+        self.other_currency_config.open_ui()
+        product = self.other_currency_config.current_session_id.load_data({'only_records': True})['product.product']
+
+        self.assertAlmostEqual(find_by(product, 'id', self.product1.id)['lst_price'], 5.00)
+        self.assertAlmostEqual(find_by(product, 'id', self.product2.id)['lst_price'], 10.00)
+        self.assertAlmostEqual(find_by(product, 'id', self.product3.id)['lst_price'], 15.00)
+        self.assertAlmostEqual(find_by(product, 'id', self.product7.id)['lst_price'], 3.50)
+
+    def test_pos_data_standard_price_converted(self):
+        self.other_currency_config.open_ui()
+        res = self.other_currency_config.current_session_id.load_data({'only_records': True})
+        product1_data = next(filter(lambda product: product['display_name'] == "Product 1", res['product.product']))
+        self.assertEqual(product1_data['standard_price'], 2.5)  # standard price should be converted
+
+    def test_pos_data_shared_product_cost_currency(self):
+        """ A product shared across companies (company_id = False) takes its sale-price
+        currency from the main company but its cost currency from the active company.
+        When the POS runs in a company whose currency differs from the main company, the
+        cost (standard_price) must be converted from cost_currency_id, not currency_id,
+        otherwise it gets wrongly multiplied by the exchange rate even though it is
+        already expressed in the POS currency.
+        """
+        main_company = self.env['res.company']._get_main_company()
+        self.assertNotEqual(main_company.currency_id, self.other_currency)
+
+        other_company = self.env['res.company'].create({
+            'name': 'Other Currency Company',
+            'currency_id': self.other_currency.id,
+        })
+        self.env.user.company_ids |= other_company
+
+        self.env['res.currency.rate'].create({
+            'name': fields.Date.today(),
+            'currency_id': main_company.currency_id.id,
+            'rate': 2.0,
+            'company_id': other_company.id,
+        })
+
+        shared_product = self.env['product.product'].create({
+            'name': 'Shared Product',
+            'available_in_pos': True,
+            'is_storable': True,
+            'taxes_id': [(5, 0, 0)],
+            'lst_price': 100.0,
+            'company_id': False,
+        }).with_company(other_company)
+        # standard_price is company-dependent: set it for the active company, where it
+        # is therefore expressed in that company's currency (the "other" currency).
+        shared_product.standard_price = 100.0
+
+        self.assertEqual(shared_product.currency_id, main_company.currency_id)
+        self.assertEqual(shared_product.cost_currency_id, self.other_currency)
+
+        self.assertEqual(self.other_currency_config.currency_id, self.other_currency)
+        [data] = shared_product._load_pos_data_read(shared_product, self.other_currency_config)
+
+        self.assertAlmostEqual(data['standard_price'], 100.0)
+        self.assertAlmostEqual(data['lst_price'], 50.0)

@@ -1257,6 +1257,17 @@ class TestPosStockFlow(CommonPosStockTest):
         self.assertIn(mapped_expense, used_accounts)
         self.assertNotIn(default_expense, used_accounts)
 
+    def test_pos_config_creates_warehouse(self):
+        self.env['pos.config'].search([('company_id', '=', self.env.company.id)]).unlink()
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)])
+        if warehouse:
+            warehouse.write({'active': False, 'name': 'Archived ' + warehouse[0].name})
+        pos_config = self.env['pos.config'].create({
+            'name': 'Shop',
+            'module_pos_restaurant': False,
+        })
+        self.assertEqual(pos_config.warehouse_id.code, 'Sho')
+
     def test_refund_ship_later_cancels_picking(self):
         self.pos_config_usd.write({
             'ship_later': True,
