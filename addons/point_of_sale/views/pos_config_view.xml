@@ -53,8 +53,8 @@
                                         </div>
                                     </setting>
                                     <setting id="other_devices" string="Receipt Printers" help="Connect printers to your PoS">
-                                        <field name="other_devices" />
-                                        <div class="content-group" invisible="not other_devices">
+                                        <!-- <field name="other_devices" />
+                                        <div class="content-group" invisible="not other_devices"> -->
                                             <div class="row mb-2">
                                                 <div class="col-lg-2 o_light_label">
                                                     <label string="Available" for="receipt_printer_ids"/>
@@ -63,18 +63,19 @@
                                                     <field name="receipt_printer_ids"
                                                         class="w-100 pt-1"
                                                         widget="many2many_tags"
+                                                        placeholder="None"
                                                         context="{'default_use_type': 'receipt'}"
                                                         options="{'no_quick_create': True}"/>
                                                 </div>
                                                 <div class="col-lg-5">
-                                                    <widget name="point_of_sale_test_epos"/>
+                                                    <widget name="point_of_sale_test_epos" options="{'printer_type': 'receipt_printer_ids'}"/>
                                                 </div>
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </setting>
                                     <setting id="preparation_devices" string="Preparation Printers" help="Connect preparation printers to your PoS">
-                                        <field name="preparation_devices"/>
-                                        <div class="content-group" invisible="not preparation_devices">
+                                        <!-- <field name="preparation_devices"/>
+                                        <div class="content-group" invisible="not preparation_devices"> -->
                                             <div class="row mb-2">
                                                 <div class="col-lg-2 o_light_label">
                                                     <label string="Available" for="preparation_printer_ids"/>
@@ -83,11 +84,15 @@
                                                     <field name="preparation_printer_ids"
                                                         class="w-100 pt-1"
                                                         widget="many2many_tags"
+                                                        placeholder="None"
                                                         context="{'default_use_type': 'preparation'}"
                                                         options="{'no_quick_create': True}"/>
                                                 </div>
+                                                <div class="col-lg-5">
+                                                    <widget name="point_of_sale_test_epos" options="{'printer_type': 'receipt_printer_ids'}"/>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <!-- </div> -->
                                     </setting>
                                     <setting>
                                         <field name="default_partner_id" />
