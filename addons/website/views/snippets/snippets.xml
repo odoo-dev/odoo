@@ -123,6 +123,9 @@
             <t t-snippet="website.s_intro_spotlight" string="Intro Spotlight" group="intro">
                 <keywords>spotlight, intro, hero, headline, header, grid, gallery, pictures, photos, media, showcase, feature, focus, center stage, reveal, collection, product, call to action, cta, button</keywords>
             </t>
+            <t t-snippet="website.s_gradient" string="Gradient Intro" group="intro">
+                <keywords>content, picture, photo, illustration, media, visual, article, story, combination, network, relationships, interactions, connectivity, collaborations, colors, gradient</keywords>
+            </t>
 
             <!-- Columns group -->
             <t t-snippet="website.s_three_columns" string="Columns" group="columns">

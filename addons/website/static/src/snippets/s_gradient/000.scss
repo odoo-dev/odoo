@@ -1,0 +1,3 @@
+.s_gradient:not([data-vcss]) {
+    background-image: linear-gradient(135deg, color-mix(in srgb, var(--o-color-1) 50%, transparent) 0%, color-mix(in srgb, var(--o-color-2) 50%, transparent) 100%);
+}

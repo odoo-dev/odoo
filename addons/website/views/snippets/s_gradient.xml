@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="s_gradient" name="Gradient">
+        <section class="s_gradient o_cc o_colored_level pt96 pb0">
+            <div class="container-fluid">
+                <div class="row o_grid_mode" data-row-count="11">
+                    <div class="o_grid_item o_grid_item_image col-4 g-col-lg-3 g-height-5 col-lg-3 mx-auto" style="z-index: 4; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; grid-area: 1 / 10 / 6 / 13;">
+                        <img 
+                            src="/html_editor/image_shape/website.set_2_square_md_1/html_builder/geometric_round/geo_round_bread.svg" 
+                            class="img img-fluid rounded"
+                            data-shape="html_builder/geometric_round/geo_round_bread"
+                            data-file-name="set_2_square_md_1.svg"
+                            data-format-mimetype="image/webp"
+                            data-aspect-ratio="1/1"/>
+                    </div>
+                    <div class="o_grid_item o_grid_item_image col-4 g-height-5 g-col-lg-3 col-lg-3 mx-auto" style="z-index: 2; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; grid-area: 1 / 1 / 6 / 4;">
+                        <img 
+                            src="/html_editor/image_shape/website.set_2_square_md_2/html_builder/geometric_round/geo_round_shuriken.svg" 
+                            class="img img-fluid rounded"
+                            data-shape="html_builder/geometric_round/geo_round_shuriken"
+                            data-file-name="set_2_square_md_2.svg"
+                            data-format-mimetype="image/webp"
+                            data-aspect-ratio="1/1"/>
+                    </div>
+                   <div class="o_colored_level o_grid_item g-col-lg-6 g-height-8 col-lg-6 o_draggable" style="z-index: 1; grid-area: 1 / 4 / 9 / 10; --grid-item-padding-x: 15px;">
+                        <p style="text-align: center;"></p>
+                        <h1 style="text-align: center;"><span class="display-1-fs"><strong>Discover our solutions</strong></span></h1>
+                        <p style="text-align: center;" class="lead"><br/></p><p style="text-align: center;" class="lead">
+                            Write one or two paragraphs describing your product,<br/>services or a specific feature.
+                        </p>
+                        <p style="text-align: center;" class="lead">
+                            To be successful your content needs to be useful to your readers.<br/><br/></p>
+                        <p class="lead" style="text-align: center;">
+                            <a href="#" class="o_translate_inline btn btn-lg rounded-circle btn-fill-primary">Discover more</a>
+                        </p>
+                    </div>
+                    <div class="o_grid_item o_grid_item_image col-4 g-col-lg-2 o_colored_level g-height-4 col-lg-2 mx-auto" style="z-index: 3; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; grid-area: 7 / 2 / 11 / 4;">
+                        <img 
+                            src="/html_editor/image_shape/website.set_2_square_md_4/html_builder/geometric_round/geo_round_door.svg" 
+                            class="img img-fluid rounded"
+                            data-shape="html_builder/geometric_round/geo_round_door"
+                            data-file-name="set_2_square_md_4.svg"
+                            data-format-mimetype="image/webp"
+                            data-aspect-ratio="1/1"/>
+                    </div>
+                    <div class="o_grid_item o_grid_item_image col-4 g-height-5 o_colored_level g-col-lg-2 col-lg-2 mx-auto" style="z-index: 5; --grid-item-padding-y: 0px; --grid-item-padding-x: 0px; grid-area: 7 / 10 / 12 / 12;">
+                        <img 
+                            src="/html_editor/image_shape/website.set_2_square_md_3/html_builder/geometric_round/geo_round_heptagon.svg" 
+                            class="img img-fluid rounded"
+                            data-shape="html_builder/geometric_round/geo_round_heptagon"
+                            data-file-name="set_2_square_md_3.svg"
+                            data-format-mimetype="image/webp"
+                            data-aspect-ratio="1/1"/>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+
+<asset id="website.s_gradient_000_scss" name="Gradient 000 SCSS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_gradient/000.scss</path>
+</asset>
+
+</odoo>
