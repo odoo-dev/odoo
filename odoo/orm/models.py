@@ -4870,7 +4870,7 @@ class BaseModel(metaclass=MetaModel):
 
         # security access domain
         if not sec_domain.is_true():
-            self_sudo = self.sudo().with_context(active_test=False, search_domain=domain)
+            self_sudo = self.sudo().with_context(active_test=False, user_search_domain=domain)
             sec_domain = sec_domain.optimize_full(self_sudo)
             if sec_domain.is_false():
                 return self.browse()._as_query()

@@ -724,7 +724,7 @@ class IrAttachment(models.Model):
         assert operation in ('read', 'write') and self.env.su
         if domain_operator != 'in':
             return NotImplemented
-        domain = self.env.context.get('search_domain')
+        domain = self.env.context.get('user_search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
         sec_domain = Domain.FALSE

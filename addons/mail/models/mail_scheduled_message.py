@@ -122,7 +122,7 @@ class MailScheduledMessage(models.Model):
         assert self.env.su
         if operator != 'in':
             return NotImplemented
-        domain = self.env.context.get('search_domain')
+        domain = self.env.context.get('user_search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
 

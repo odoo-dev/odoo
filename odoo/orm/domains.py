@@ -419,7 +419,7 @@ class Domain:
         """Validates that the current domain is correct or raises an exception"""
         # just execute the optimization code that goes through all the fields
         # the search domain is set to False to avoid performing searches
-        model = model.with_context(search_domain=Domain.FALSE)
+        model = model.with_context(user_search_domain=Domain.FALSE)
         self._optimize(model, OptimizationLevel.FULL)._to_sql(Query(model).table)
 
     def _as_predicate[M: BaseModel](self, records: M) -> Callable[[M], bool]:
@@ -1440,7 +1440,7 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
     except KeyError:
         condition._raise("Cannot determine the comodel relation")
 
-    if isinstance(search_domain := model.env.context.get('search_domain'), Domain):
+    if isinstance(search_domain := model.env.context.get('user_search_domain'), Domain):
         # model with search_domain like (field, 'any', comodel_domain)
         # => comodel with comodel_domain
         comodel_domain = Domain.OR(
@@ -1451,7 +1451,7 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
         if comodel_domain.is_false() and not search_domain.is_false():
             # we don't know the condition, accept all
             comodel_domain = Domain.TRUE
-        comodel = comodel.with_context(search_domain=comodel_domain)
+        comodel = comodel.with_context(user_search_domain=comodel_domain)
 
     domain = domain._optimize(comodel, level)
     # const if the domain is empty, the result is a constant
