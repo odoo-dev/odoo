@@ -44,11 +44,6 @@ class AccountTaxGroup(models.Model):
         domain="[('account_type', '=', 'asset_receivable'), ('non_trade', '=', True)]",
         string='Tax Receivable Account',
         help="Tax current account used as a counterpart to the Tax Closing Entry when in favor of the company.")
-    advance_tax_payment_account_id = fields.Many2one(
-        comodel_name='account.account',
-        check_company=True,
-        string='Tax Advance Account',
-        help="Downpayments posted on this account will be considered by the Tax Closing Entry.")
     country_id = fields.Many2one(
         string="Country",
         comodel_name='res.country',

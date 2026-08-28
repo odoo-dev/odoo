@@ -316,7 +316,6 @@
 
                     <field name="tax_payable_account_id"/>
                     <field name="tax_receivable_account_id"/>
-                    <field name="advance_tax_payment_account_id"/>
 
                     <field name="preceding_subtotal" optional="hide"/>
                 </list>
@@ -341,7 +340,6 @@
                             <group>
                                 <field name="tax_payable_account_id"/>
                                 <field name="tax_receivable_account_id"/>
-                                <field name="advance_tax_payment_account_id"/>
                                 <field name="preceding_subtotal"/>
                             </group>
                         </group>

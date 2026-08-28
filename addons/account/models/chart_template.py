@@ -1025,7 +1025,6 @@ class AccountChartTemplate(models.AbstractModel):
         field_and_names = (
             ('tax_payable_account_id', _("Foreign tax account payable (%s)", country.code)),
             ('tax_receivable_account_id', _("Foreign tax account receivable (%s)", country.code)),
-            ('advance_tax_payment_account_id', _("Foreign tax account advance payment (%s)", country.code)),
         )
         for field, account_name in field_and_names:
             for tax_group in tax_group_data.values():
