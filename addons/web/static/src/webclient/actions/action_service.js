@@ -899,7 +899,6 @@ export function makeActionManager(env, router = _router) {
      * @param {UpdateStackOptions} options
      * @param {boolean} [options.clearBreadcrumbs=false]
      * @param {number} [options.index]
-     * @param {boolean} [options.keepDialogs=false]
      * @returns {Promise<Number>}
      */
     async function _updateUI(controller, options = {}) {
@@ -986,7 +985,7 @@ export function makeActionManager(env, router = _router) {
                 onWillUnmount(this.onWillUnmount);
                 onError(this.onError);
             }
-            onError(error) {
+            async onError(error) {
                 if (controller.isMounted) {
                     // the error occurred on the controller which is
                     // already in the DOM, so simply show the error
@@ -1006,36 +1005,35 @@ export function makeActionManager(env, router = _router) {
                     Promise.reject(error);
                     return;
                 }
+                if (action.target === "new") {
+                    removeDialogFn?.();
+                } else {
+                    const index = controllerStack.findIndex((ct) => ct.jsId === controller.jsId);
+                    if (index > 0) {
+                        // The error occurred while rendering an existing controller,
+                        // so go back to the previous controller, of the current faulty one.
+                        // This occurs when clicking on a breadcrumbs.
+                        await restore(controllerStack[index - 1].jsId);
+                    } else if (index < 0) {
+                        // if index === 0: no previous controller to restore, so do nothing but
+                        // display the error
+                        const lastController = controllerStack.at(-1);
+                        if (lastController) {
+                            if (lastController.jsId !== controller.jsId) {
+                                // the error occurred while rendering a new controller,
+                                // so go back to the last non faulty controller
+                                // (the error will be shown anyway as the promise
+                                // has been rejected)
+                                await restore(lastController.jsId);
+                            }
+                        } else {
+                            env.bus.trigger("ACTION_MANAGER:UPDATE", {});
+                        }
+                    }
+                }
                 // forward the error to the _updateUI caller then restore the action container
                 // to an unbroken state
                 reject(error);
-                if (action.target === "new") {
-                    removeDialogFn?.();
-                    return;
-                }
-                const index = controllerStack.findIndex((ct) => ct.jsId === controller.jsId);
-                if (index > 0) {
-                    // The error occurred while rendering an existing controller,
-                    // so go back to the previous controller, of the current faulty one.
-                    // This occurs when clicking on a breadcrumbs.
-                    return restore(controllerStack[index - 1].jsId);
-                }
-                if (index === 0) {
-                    // No previous controller to restore, so do nothing but display the error
-                    return;
-                }
-                const lastController = controllerStack.at(-1);
-                if (lastController) {
-                    if (lastController.jsId !== controller.jsId) {
-                        // the error occurred while rendering a new controller,
-                        // so go back to the last non faulty controller
-                        // (the error will be shown anyway as the promise
-                        // has been rejected)
-                        return restore(lastController.jsId);
-                    }
-                } else {
-                    env.bus.trigger("ACTION_MANAGER:UPDATE", {});
-                }
             }
             onMounted() {
                 if (action.target === "new") {
@@ -1178,9 +1176,7 @@ export function makeActionManager(env, router = _router) {
             Component: ControllerComponent,
             componentProps: controller.props,
         };
-        if (!options.keepDialogs) {
-            dialogService.closeAll({ noReload: true });
-        }
+        dialogService.closeAll({ noReload: true });
         env.bus.trigger("ACTION_MANAGER:UPDATE", controller.__info__);
         await currentActionProm;
     }
@@ -1819,7 +1815,7 @@ export function makeActionManager(env, router = _router) {
             }
             Object.assign(controller, _getViewInfo(view, action, views, props));
         }
-        return _updateUI(controller, { index, keepDialogs: true });
+        return _updateUI(controller, { index });
     }
 
     /**
