@@ -491,11 +491,119 @@ class TestStockValuation(ValuationReconciliationTestCommon):
             {'credit': 0, 'debit': 10, 'account_id': stock_valuation_account.id},
         ])
 
-    def test_dropship_bill_standard_price_update(self):
-        """ Test that the price of the product is updated when the bill has a different
-        price than the Purchase order
+    def test_dropship_average_no_std_price_impact(self):
+        """ Test that a dropship move does not impact the avco computation of the
+        standard price
         """
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'average'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
+<<<<<<< f582f290ae4e775d0f4fe477ab9d5131f9e48598
         self._dropship_product1(bill_price=15)
         self.assertEqual(self.product1.standard_price, 15)
+||||||| b3806a1133f486098589193bee12f4ad48c927b0
+        self._dropship_product1(bill_price=15)
+        self.assertEqual(self.product1.standard_price, 15)
+
+    def test_dropship_return_to_internal_location_is_valued(self):
+        """Returning a dropshipped delivery into the company's own stock, instead
+        of back to the vendor, brings the goods into inventory. The outgoing
+        dropship never enters own stock and stays unvalued, but the returned move
+        lands in a stock location: it is a valued incoming move, so the stock
+        valuation account is debited when the period is closed.
+        """
+        self.env.user.group_ids |= self.env.ref('stock.group_stock_multi_locations')
+        self.env.company.anglo_saxon_accounting = True
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
+        self.product1.product_tmpl_id.standard_price = 10
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
+        self.product1.product_tmpl_id.invoice_policy = 'order'
+
+        self._dropship_product1()
+
+        # the outgoing dropship never enters the company's stock: unvalued
+        self.assertRecordValues(self.product1, [{'total_value': 0.0, 'qty_available': 0.0}])
+
+        # return the delivery into an internal stock location, not to the vendor
+        return_picking = self.sale_order1.picking_ids._create_return()
+        return_picking.move_ids.product_uom_qty = 1.0
+        return_picking.action_assign()
+        return_picking.location_dest_id = self.stock_location
+        return_picking.button_validate()
+
+        # landing in a stock location, the return is a valued incoming move
+        return_move = return_picking.move_ids
+        self.assertFalse(return_move._is_dropshipped_returned())
+        self.assertRecordValues(return_move, [{'is_in': True, 'is_valued': True}])
+        self.assertRecordValues(self.product1, [{'total_value': 10.0, 'qty_available': 1.0}])
+
+        # close the period to debit the stock valuation account for the goods
+        # brought back into inventory
+        closing_move = self.env['account.move'].browse(
+            self.env.company.action_close_stock_valuation(auto_post=True)['res_id'])
+        stock_valuation_account = self.company_data['default_account_stock_valuation']
+        valuation_aml = closing_move.line_ids.filtered(
+            lambda line: line.account_id == stock_valuation_account)
+        self.assertRecordValues(valuation_aml, [{'debit': 10.0, 'credit': 0.0}])
+=======
+        # in move @ 10
+        in_move = self.env['stock.move'].create({
+            'product_id': self.product1.id,
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'product_uom_qty': 1,
+            'value_manual': 10,
+        })
+        in_move._action_confirm()
+        in_move._action_assign()
+        in_move.move_line_ids.quantity = 1
+        in_move.picked = True
+        in_move._action_done()
+        self.assertEqual(self.product1.standard_price, 10)
+
+        # dropship @ 8
+        self._dropship_product1(bill_price=8)
+
+        # check that standard price is still 10
+        self.assertEqual(self.product1.standard_price, 10)
+
+    def test_dropship_return_to_internal_location_is_valued(self):
+        """Returning a dropshipped delivery into the company's own stock, instead
+        of back to the vendor, brings the goods into inventory. The outgoing
+        dropship never enters own stock and stays unvalued, but the returned move
+        lands in a stock location: it is a valued incoming move, so the stock
+        valuation account is debited when the period is closed.
+        """
+        self.env.user.group_ids |= self.env.ref('stock.group_stock_multi_locations')
+        self.env.company.anglo_saxon_accounting = True
+        self.product1.product_tmpl_id.categ_id.property_cost_method = 'standard'
+        self.product1.product_tmpl_id.standard_price = 10
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
+        self.product1.product_tmpl_id.invoice_policy = 'order'
+
+        self._dropship_product1()
+
+        # the outgoing dropship never enters the company's stock: unvalued
+        self.assertRecordValues(self.product1, [{'total_value': 0.0, 'qty_available': 0.0}])
+
+        # return the delivery into an internal stock location, not to the vendor
+        return_picking = self.sale_order1.picking_ids._create_return()
+        return_picking.move_ids.product_uom_qty = 1.0
+        return_picking.action_assign()
+        return_picking.location_dest_id = self.stock_location
+        return_picking.button_validate()
+
+        # landing in a stock location, the return is a valued incoming move
+        return_move = return_picking.move_ids
+        self.assertFalse(return_move._is_dropshipped_returned())
+        self.assertRecordValues(return_move, [{'is_in': True, 'is_valued': True}])
+        self.assertRecordValues(self.product1, [{'total_value': 10.0, 'qty_available': 1.0}])
+
+        # close the period to debit the stock valuation account for the goods
+        # brought back into inventory
+        closing_move = self.env['account.move'].browse(
+            self.env.company.action_close_stock_valuation(auto_post=True)['res_id'])
+        stock_valuation_account = self.company_data['default_account_stock_valuation']
+        valuation_aml = closing_move.line_ids.filtered(
+            lambda line: line.account_id == stock_valuation_account)
+        self.assertRecordValues(valuation_aml, [{'debit': 10.0, 'credit': 0.0}])
+>>>>>>> cea33b05c7451ed9f9f86ca2f22ac3b72fa77154
