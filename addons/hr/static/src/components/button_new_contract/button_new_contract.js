@@ -70,6 +70,7 @@ export class ButtonNewContractWidget extends Component {
 
 export const buttonNewContractWidget = {
     component: ButtonNewContractWidget,
+    fieldDependencies: [{ name: "contract_date_start", type: "date" }],
 };
 
 registry.category("view_widgets").add("button_new_contract", buttonNewContractWidget);
