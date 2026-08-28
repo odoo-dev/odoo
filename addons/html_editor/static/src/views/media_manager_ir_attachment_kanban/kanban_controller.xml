@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="ir.attachment.MediaManagerKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary">
+        <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="attributes">
+            <attribute name="baseResModel">this.props.baseResModel</attribute>
+            <attribute name="baseResId">this.props.baseResId</attribute>
+        </xpath>
+    </t>
+</templates>

@@ -11,7 +11,7 @@ import {
 } from "@html_editor/utils/dom_info";
 import { _t } from "@web/core/l10n/translation";
 // import { MediaDialog } from "./media_dialog/media_dialog";
-import { MediaManager } from "./media_manager/media_manager";
+// import { MediaManager } from "./media_manager/media_manager";
 import { TABS } from "./media_dialog/media_dialog_utils";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { boundariesOut, rightPos } from "@html_editor/utils/position";
@@ -20,6 +20,10 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { FORMATTABLE_TAGS } from "@html_editor/utils/formatting";
 import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
+import {
+    getMediaManagertDialogProps,
+    MediaManagerDialog,
+} from "@html_editor/main/media/media_manager/media_manager_dialog";
 
 export const ATTACHMENT_PENDING_RECORD_ID = "o_attachment_pending_record_id";
 
@@ -70,7 +74,7 @@ export class MediaPlugin extends Plugin {
                 description: this.config.allowVideo
                     ? _t("Insert image or video")
                     : _t("Insert image"),
-                icon: "fa-file-image-o",
+                icon: "image",
                 run: (params, context = {}) =>
                     this.openMediaDialog({
                         activeTab: this.getActiveDialogTab(context.searchTerm),
@@ -272,23 +276,29 @@ export class MediaPlugin extends Plugin {
 
     openMediaDialog(params = {}, editableEl = null) {
         console.warn("open media dialog ", params, editableEl);
-        const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
-        let imageToReplace = params.node || null;
+        const recordInfo = this.getRecordInfo(editableEl);
+        const { resModel, resId, field, type } = recordInfo;
+        // const imageToReplace = params.node || null;
         if (params.tempMediaManagerSwitch) {
-            return this.dependencies.dialog.addDialog(MediaManager, {
-                resModel,
-                resId,
-                multiUpload: true,
-                // field,
-                validateCallback: async (elements) => {
-                    // todo : make sure we reproduce the all the necessary old save behaviour
-                    const promises = [];
-                    for (const el of elements) {
-                        promises.push(this.onSaveMediaDialog(el, imageToReplace));
-                        imageToReplace = null;
-                    }
-                    await Promise.all(promises);
+            return this.dependencies.dialog.addDialog(MediaManagerDialog, {
+                ...getMediaManagertDialogProps(recordInfo),
+                onSelected: (resIds) => {
+                    console.warn("onSelected");
+                    console.log(resIds);
                 },
+                // resModel,
+                // resId,
+                // multiUpload: true,
+                // field,
+                // validateCallback: async (elements) => {
+                //     // todo : make sure we reproduce the all the necessary old save behaviour
+                //     const promises = [];
+                //     for (const el of elements) {
+                //         promises.push(this.onSaveMediaDialog(el, imageToReplace));
+                //         imageToReplace = null;
+                //     }
+                //     await Promise.all(promises);
+                // },
                 // useMediaLibrary: !!(
                 //     field &&
                 //     ((resModel === "ir.ui.view" && field === "arch") || type === "html")

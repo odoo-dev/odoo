@@ -41,7 +41,20 @@ import { QuickCreateState } from "./kanban_record_quick_create";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
-// -----------------------------------------------------------------------------
+export const kanbanControllerProps = {
+    ...standardViewProps,
+    editable: t.boolean().optional(),
+    forceGlobalClick: t.boolean().optional(false),
+    onSelectionChanged: t.function().optional(),
+    readonly: t.boolean().optional(),
+    Compiler: t.function(),
+    Model: t.function(),
+    Renderer: t.function(),
+    buttonTemplate: t.string(),
+    archInfo: t.object(),
+    createRecord: t.function().optional(() => () => {}),
+    selectRecord: t.function().optional(() => () => {}),
+};
 
 export class KanbanController extends Component {
     static template = `web.KanbanView`;
@@ -57,20 +70,7 @@ export class KanbanController extends Component {
         CogMenu: KanbanCogMenu,
         SelectionBox,
     };
-    props = useProps({
-        ...standardViewProps,
-        editable: t.boolean().optional(),
-        forceGlobalClick: t.boolean().optional(false),
-        onSelectionChanged: t.function().optional(),
-        readonly: t.boolean().optional(),
-        Compiler: t.function(),
-        Model: t.function(),
-        Renderer: t.function(),
-        buttonTemplate: t.string(),
-        archInfo: t.object(),
-        createRecord: t.function().optional(() => () => {}),
-        selectRecord: t.function().optional(() => () => {}),
-    });
+    props = useProps(kanbanControllerProps);
 
     rootRef = signal.ref();
 
@@ -81,6 +81,8 @@ export class KanbanController extends Component {
         this.offlinePlugin = usePlugin(OfflinePlugin);
         const { Model, archInfo } = this.props;
 
+        console.log("KanbanController::setup()", this);
+        console.log("  ==> props :", this.props);
         class KanbanSampleModel extends Model {
             /**
              * @override

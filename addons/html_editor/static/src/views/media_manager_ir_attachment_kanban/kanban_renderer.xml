@@ -1,0 +1,23 @@
+<templates>
+
+    <t t-name="ir.attachment.MediaManagerKanbanRenderer" t-inherit="web.KanbanRenderer" t-inherit-mode="primary">
+        <!-- Add sidebar and upload file zone -->
+        <xpath expr="//div[@t-ref='this.rootRef']" position="attributes">
+            <attribute name="t-on-dragenter.prevent">this.uploadDragEnter</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('o_kanban_renderer')]" position="before">
+            <div class="media-manager-drop-zone position-absolute"
+                 t-att-class="{ 'active': this.state.isDraggingFile}"
+                 t-on-dragleave="this.uploadDragLeave"
+                 t-on-dragover.prevent="() => {}"
+                 t-on-drop.prevent="this.uploadDrop">
+                <div>
+                    Drop files here<br/><br/>
+                    <span class="oi" data-icon="upload"></span>
+                </div>
+            </div>
+            <div class="media-manager-side-panel">SidePanel</div>
+        </xpath>
+    </t>
+
+</templates>

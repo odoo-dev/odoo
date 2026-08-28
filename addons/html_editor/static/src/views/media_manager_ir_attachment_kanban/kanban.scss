@@ -1,0 +1,75 @@
+.o_media_manager_kanban_view>main.o_content {
+    position: absolute;
+    bottom: 0;
+    top: 58px; /* search bar height */
+}
+
+.media-manager-side-panel {
+    position: absolute;
+    display: none;
+}
+
+/* Upload drop zone */
+.media-manager-drop-zone {
+    z-index: 100;
+    font-size: 50px;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: #3e3e3e;
+    background: rgba(255,255,255,0.85);
+    display: none;
+    &.active {
+        display: block;
+    }
+    >div {
+        pointer-events: none;
+        border: 4px solid #555;
+        border-radius: 30px;
+        margin: 30px;
+        position: absolute;
+        top: 30px;
+        bottom: 30px;
+        left: 30px;
+        right: 30px;
+        padding-top: 30px;
+    }
+}
+
+/* ir.attachment record */
+.o_kanban_record {
+    &.o_record_starred {
+        background-color: lighten($o-main-favorite-color, 50%);
+    }
+    &.o_record_selected {
+        background-color: var(--KanbanColumn__highlight-selected);
+    }
+}
+
+.o_kanban_attachment {
+    .o_record_interactive {
+        cursor: pointer;
+        background-color: white;
+
+    }
+    .o_record_box_select {
+        top: 4px;
+        right: 4px;
+        width: 20px;
+        height: 20px;
+    }
+    .o_record_box_star {
+        top: 4px;
+        left: 4px;
+        width: 20px;
+        height: 20px;
+    }
+    .o_record_box_delete {
+        top: 4px;
+        right: 24px;
+        width: 20px;
+        height: 20px;
+    }
+}

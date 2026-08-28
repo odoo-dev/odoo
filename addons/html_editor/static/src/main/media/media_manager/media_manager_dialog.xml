@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="html_editor.MediaManagerDialog"
+        t-inherit="web.SelectCreateDialog" t-inherit-mode="primary">
+
+<!--        <xpath expr="//t[@t-if='this.props.multiSelect']" position="replace"/>-->
+        <xpath expr="//Dialog" position="attributes">
+            <attribute name="size">"xl"</attribute>
+<!--            <attribute name="t-on-dragenter.prevent">this.uploadDragEnter</attribute>-->
+        </xpath>
+
+        <!-- Add sidebar and upload file zone -->
+<!--        <xpath expr="//View" position="before">-->
+<!--            <div class="media-manager-drop-zone position-absolute"-->
+<!--                 t-att-class="{ 'active': this.state.isDraggingFile}"-->
+<!--                 t-on-dragleave="this.uploadDragLeave"-->
+<!--                 t-on-dragover.prevent="() => {}"-->
+<!--                 t-on-drop.prevent="this.uploadDrop">-->
+<!--                <div>-->
+<!--                    Drop files here<br/><br/>-->
+<!--                    <span class="oi" data-icon="upload"></span>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="media-manager-side-panel">SidePanel</div>-->
+<!--        </xpath>-->
+
+        <!-- Add custom buttons in dialog footer -->
+<!--        <xpath expr="//button[hasclass('o_form_button_cancel')]" position="before">-->
+<!--&lt;!&ndash;            <t t-set="pluginArgs" t-value="this.isPlugin ? [this.props.close] : []"/>&ndash;&gt;-->
+<!--            <t t-if="this.state.resIds.length > 0">-->
+<!--                <button t-if="!this.isNewRecord" class="btn btn-secondary"-->
+<!--                    data-hotkey="a"-->
+<!--                    t-on-click="() => this.addDocumentsAttachmentMethod(this.state.resIds, ...pluginArgs)">-->
+<!--                    Add attachment-->
+<!--                </button>-->
+<!--            </t>-->
+<!--        </xpath>-->
+    </t>
+</templates>
