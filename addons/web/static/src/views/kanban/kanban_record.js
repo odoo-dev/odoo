@@ -86,6 +86,9 @@ export class KanbanRecord extends CardRenderer {
         this.longTouchTimer = null;
         this.touchStartMs = 0;
         this.showMenu = this.constructor.MENU_ATTRIBUTE in this.templates;
+        console.warn("base kanban record", this);
+        console.log(" => props", this.props.archInfo);
+        console.log(" => showmenu", this.showMenu);
     }
 
     get renderingContext() {
@@ -145,7 +148,11 @@ export class KanbanRecord extends CardRenderer {
         }
         if (cardColorField) {
             const value = record.data[cardColorField];
-            classes.push(`o_kanban_record_colored ${this.constructor.HIGHLIGHT_COLOR_PREFIX}${getColorIndex(value)}`);
+            classes.push(
+                `o_kanban_record_colored ${this.constructor.HIGHLIGHT_COLOR_PREFIX}${getColorIndex(
+                    value
+                )}`
+            );
         }
         if (!this.props.groupByField) {
             classes.push("flex-grow-1 flex-md-shrink-1 flex-shrink-0");

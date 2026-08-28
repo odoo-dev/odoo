@@ -24,6 +24,7 @@ import {
     getMediaManagertDialogProps,
     MediaManagerDialog,
 } from "@html_editor/main/media/media_manager/media_manager_dialog";
+import { loadImage } from "@html_editor/utils/image_processing";
 
 export const ATTACHMENT_PENDING_RECORD_ID = "o_attachment_pending_record_id";
 
@@ -278,13 +279,29 @@ export class MediaPlugin extends Plugin {
         console.warn("open media dialog ", params, editableEl);
         const recordInfo = this.getRecordInfo(editableEl);
         const { resModel, resId, field, type } = recordInfo;
-        // const imageToReplace = params.node || null;
+        let imageToReplace = params.node || null;
         if (params.tempMediaManagerSwitch) {
             return this.dependencies.dialog.addDialog(MediaManagerDialog, {
                 ...getMediaManagertDialogProps(recordInfo),
-                onSelected: (resIds) => {
+                onSelected: async (resIds, records) => {
                     console.warn("onSelected");
-                    console.log(resIds);
+                    console.log(resIds, records);
+                    if (!records.length) {
+                        return;
+                    }
+                    const elements = [];
+                    for (const record of records) {
+                        const imageEl = await loadImage(record.local_url);
+                        imageEl.alt = record.display_name ?? "";
+                        elements.push(imageEl);
+                    }
+
+                    const promises = [];
+                    for (const el of elements) {
+                        promises.push(this.onSaveMediaDialog(el, imageToReplace));
+                        imageToReplace = null;
+                    }
+                    await Promise.all(promises);
                 },
                 // resModel,
                 // resId,

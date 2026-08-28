@@ -29,6 +29,7 @@ export class MediaManagerDialog extends SelectCreateDialog {
         console.log("  => props", { ...this.props });
 
         super.setup();
+        this.state.records = [];
         // this.state = proxy({
         //     resIds: [],
         // });
@@ -37,9 +38,11 @@ export class MediaManagerDialog extends SelectCreateDialog {
         // const { thread = {}, model, resId } = this.props.chatterParams || this.props; // todo : I don't think we need this
 
         this.onSelectionChanged = (resIds, records) => {
-            console.log(JSON.parse(JSON.stringify(records)));
+            console.warn("onSelectionChanged", { ...arguments });
             console.log(JSON.parse(JSON.stringify(resIds)));
+            console.log(JSON.parse(JSON.stringify(records)));
             this.superOnSelectionChanged(resIds);
+            this.state.records = records;
         };
     }
 
@@ -62,10 +65,12 @@ export class MediaManagerDialog extends SelectCreateDialog {
         console.error("TODO");
         return this.props.chatterParams?.isNewRecord;
     }
+
     async select(resIds) {
-        console.warn("select");
+        console.warn("select", resIds);
+        const records = this.state.records.filter((rec) => resIds.includes(rec.id));
         if (this.props.onSelected) {
-            this.executeOnceAndClose(() => this.props.onSelected(resIds));
+            this.executeOnceAndClose(() => this.props.onSelected(resIds, records));
         }
     }
 
@@ -148,11 +153,11 @@ export class MediaManagerDialog extends SelectCreateDialog {
 export function getMediaManagertDialogProps(recordInfo) {
     console.warn("getMediaManagertDialogProps, recordInfo", recordInfo);
     return {
+        title: _t("Select a media"),
         resModel: "ir.attachment", // todo we probably don't need this
         baseResModel: recordInfo.resModel ?? "ir.attachment",
         baseResId: recordInfo.resId ?? -1,
-        title: _t("Select a media"),
-        noCreate: true,
+        // noCreate: true,
         domain: [
             ["mimetype", "in", IMAGE_MIMETYPES],
             ["type", "=", "binary"], // todo : this prevent webp url to be shown, should we change that ?
@@ -164,10 +169,7 @@ export function getMediaManagertDialogProps(recordInfo) {
             // ...queryHelper.imagesDomain,
         ],
         context: {
-            // for python ?
-            // list_view_ref: "documents.documents_view_list_add_documents_attachment",
-            // documents_search_panel_no_trash: true,
-            // documents_view_secondary: true,
+            kanban_view_ref: "html_editor.mediamanager_media_kanban",
         },
     };
 }

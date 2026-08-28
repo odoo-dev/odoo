@@ -18,6 +18,7 @@
             <div class="o_record_box_delete o_record_interactive position-absolute" t-on-click="this.deleteItem">
                 <span class="oi" data-icon="delete"></span>
             </div>
+            <t t-call="{{ this.constructor.menuTemplate }}"/>
         </article>
     </t>
 
