@@ -899,6 +899,7 @@ export function makeActionManager(env, router = _router) {
      * @param {UpdateStackOptions} options
      * @param {boolean} [options.clearBreadcrumbs=false]
      * @param {number} [options.index]
+     * @param {boolean} [options.keepDialogs=false]
      * @returns {Promise<Number>}
      */
     async function _updateUI(controller, options = {}) {
@@ -1177,7 +1178,9 @@ export function makeActionManager(env, router = _router) {
             Component: ControllerComponent,
             componentProps: controller.props,
         };
-        dialogService.closeAll({ noReload: true });
+        if (!options.keepDialogs) {
+            dialogService.closeAll({ noReload: true });
+        }
         env.bus.trigger("ACTION_MANAGER:UPDATE", controller.__info__);
         await currentActionProm;
     }
@@ -1816,7 +1819,7 @@ export function makeActionManager(env, router = _router) {
             }
             Object.assign(controller, _getViewInfo(view, action, views, props));
         }
-        return _updateUI(controller, { index });
+        return _updateUI(controller, { index, keepDialogs: true });
     }
 
     /**
