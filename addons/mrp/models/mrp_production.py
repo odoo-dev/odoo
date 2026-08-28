@@ -1092,10 +1092,15 @@ class MrpProduction(models.Model):
             to_update = self.filtered(lambda p: p.state == 'done')
             to_update._track_add({production.id: {'date_finished': production.date_finished} for production in to_update})
 
+        productions_done = self.filtered(lambda p: p.state == 'done')
+
         res = super(MrpProduction, self).write(vals)
 
         for production in self:
-            if 'date_start' in vals and not self.env.context.get('force_date', False):
+            # `production` was 'done' before this write (e.g. `action_reset_draft`): the
+            # date-management/unplan-guard logic below is for a user rescheduling a live
+            # order, not for a done order being reset, so skip it for those records.
+            if 'date_start' in vals and not self.env.context.get('force_date', False) and production not in productions_done:
                 if production.state in ['done', 'cancel']:
                     raise UserError(_('You cannot move a manufacturing order once it is cancelled or done.'))
                 if production.is_planned:
@@ -1972,6 +1977,46 @@ class MrpProduction(models.Model):
                 filtered_documents[(parent, responsible)] = rendering_context
             production._log_manufacture_exception(filtered_documents, cancel=True)
 
+        return True
+
+    def action_reset_draft(self):
+        """ Reset a 'done' or 'cancel' manufacturing order back to 'draft': resets its
+        workorders and its raw/finished moves, then lets the state settle back down
+        through `_compute_state` instead of forcing a specific target state (mirrors
+        what happens on the components/workorders: `state` is deliberately sticky on
+        'done'/'cancel', so it has to be flipped explicitly before recomputing).
+
+        Writing `state` back to 'draft' makes `_compute_move_finished_ids` delete and
+        recreate `move_finished_ids` from the BoM (its `state == 'draft'` branch), using
+        `production.date_finished` as the new move's `date`. That field isn't required, so
+        it must be given a value here rather than cleared, or the recreated move ends up
+        with a null `date`.
+
+        `state` is re-marked for recompute below rather than resettled with a direct
+        `_compute_state()` call: writing it explicitly to 'draft' cancels the recompute that
+        the move/workorder resets above had already queued, and calling the compute method
+        ourselves runs outside the ORM's protected recompute context, so any `state = ...`
+        assignment inside it becomes a real `write({'state': ...})` — with `write()`'s side
+        effects (e.g. auto-setting `date_start` when the derived state is 'progress', which
+        in turn calls `_unplan_workorders()` and can raise). `add_to_compute` instead lets it
+        recompute lazily through the normal, side-effect-free path.
+        """
+        if any(mo.state not in ('done', 'cancel') for mo in self):
+            raise UserError(_("Only done or cancelled manufacturing orders can be reset to draft."))
+
+        self.workorder_ids._action_reset_to_draft()
+        moves = (self.move_raw_ids | self.move_finished_ids).filtered(lambda m: m.state in ('done', 'cancel'))
+        moves._action_reset_to_draft()
+
+        for production in self:
+            production.write({
+                'state': 'draft',
+                'is_locked': False,
+                'date_finished': production.date_start or fields.Datetime.now(),
+                'qty_producing': 0,
+                'lot_producing_ids': [Command.clear()],
+            })
+        self.env.add_to_compute(self._fields['state'], self)
         return True
 
     def _get_document_iterate_key(self, move_raw_id):

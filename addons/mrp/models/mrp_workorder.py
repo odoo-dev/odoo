@@ -784,6 +784,20 @@ class MrpWorkorder(models.Model):
         self.end_all()
         return self.filtered(lambda wo: wo.state != 'cancel').write({'state': 'cancel'})
 
+    def _action_reset_to_draft(self):
+        """ Reset 'done'/'cancel' workorders so their production can be reset to draft.
+        The leave slotting the workcenter's calendar is unlinked rather than kept stale;
+        it'll be recreated when the workorder is planned again. Everything else (dates,
+        qty_produced, ...) is left untouched.
+        """
+        done_workorders = self.filtered(lambda wo: wo.state in ('done', 'cancel'))
+        if not done_workorders:
+            return True
+        done_workorders.leave_id.unlink()
+        done_workorders.write({'state': 'ready'})
+        done_workorders._compute_state()
+        return True
+
     def action_replan(self):
         """ Replans every planned work orders
         """

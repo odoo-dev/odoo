@@ -2287,6 +2287,31 @@ Please change the quantity done or the rounding precision in your settings.""",
     def _log_cancel_activity(self):
         return
 
+    def _action_reset_to_draft(self):
+        """ Reset a 'done' or 'cancel' move back to 'draft'.
+
+        Unlike `_action_cancel`, this deliberately keeps `move_orig_ids`/`move_dest_ids`
+        intact (so push-rule-generated chains stay linked) and restores the quants that
+        `_action_done` moved/reserved, instead of treating them as lost.
+        """
+        if not self:
+            return True
+        if any(move.state not in ('done', 'cancel') for move in self):
+            raise UserError(_("Only done or cancelled stock moves can be reset to draft."))
+        if any(move.move_dest_ids.filtered(lambda m: m.state == 'done') for move in self):
+            raise UserError(_(
+                "You cannot reset this move to draft: the products it produced have "
+                "already been moved further. Reset the destination move(s) first."))
+
+        done_moves = self.filtered(lambda m: m.state == 'done')
+        done_moves.move_line_ids._action_reset_to_draft()
+        done_moves.picked = False
+        done_moves.write({'state': 'cancel'})
+
+        self.write({'state': 'draft'})
+        self._recompute_state()
+        return True
+
     def _skip_push(self):
         return self.is_inventory or (
             self.move_dest_ids and any(
@@ -2360,6 +2385,13 @@ Please change the quantity done or the rounding precision in your settings.""",
         moves_to_push = moves_todo.filtered(lambda m: not m._skip_push())
         if moves_to_push:
             moves_to_push._push_apply()
+
+        # A move going back through `_action_reset_to_draft` keeps its move_dest_ids linked
+        # (push is skipped above since they already exist), so their demand is stale if the
+        # quantity changed since the reset. Resync it here.
+        for move in moves_todo.filtered('move_dest_ids'):
+            for move_dest in move.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel')):
+                move_dest.product_uom_qty = move.quantity
 
         for move in moves_todo:
             for move_dest in move.sudo().move_dest_ids:

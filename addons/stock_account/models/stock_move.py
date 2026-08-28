@@ -226,6 +226,22 @@ class StockMove(models.Model):
         (moves_in | moves_out).sudo()._create_analytic_move()
         return moves
 
+    def _action_reset_to_draft(self):
+        done_moves = self.filtered(lambda m: m.state == 'done')
+        # NB: `account_move_id` can be shared with other moves batched into the same journal
+        # entry (see `_create_account_move`); unlinking it here also drops their lines. Fine
+        # for this POC's target use case (one move/production per entry) but not general.
+        account_moves = done_moves.account_move_id
+        account_moves.sudo().button_draft()
+        account_moves.sudo().unlink()
+        done_moves.analytic_account_line_ids.sudo().unlink()
+        done_moves.write({
+            'value': 0,
+            'account_move_id': False,
+            'analytic_account_line_ids': [Command.clear()],
+        })
+        return super()._action_reset_to_draft()
+
     def _create_account_move(self):
         """ Create account move for specific location or analytic."""
         aml_vals_list = []

@@ -25,6 +25,18 @@ class MrpWorkorder(models.Model):
         (sudo_self.mo_analytic_account_line_ids | sudo_self.wc_analytic_account_line_ids).unlink()
         return super().action_cancel()
 
+    def _action_reset_to_draft(self):
+        sudo_self = self.sudo()
+        (sudo_self.mo_analytic_account_line_ids | sudo_self.wc_analytic_account_line_ids).unlink()
+        # NB: `_post_labour` creates one account.move per MO covering all its workorders'
+        # labour, so this drops the whole entry. Fine when the whole MO is reset at once
+        # (the normal case), not if only some of its workorders are.
+        account_moves = sudo_self.time_ids.account_move_line_id.move_id
+        account_moves.button_draft()
+        account_moves.unlink()
+        sudo_self.time_ids.account_move_line_id = False
+        return super()._action_reset_to_draft()
+
     def _prepare_analytic_line_values(self, account_field_values, amount, unit_amount):
         self.ensure_one()
         return {

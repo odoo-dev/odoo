@@ -703,6 +703,29 @@ class StockMoveLine(models.Model):
         if affected_pickings:
             affected_pickings._check_entire_pack()
 
+    def _action_reset_to_draft(self):
+        """ Undo the quant effects of `_action_done`: remove the quantity from
+        `location_dest_id`, restore it to `location_id` and re-reserve it there.
+        Used by `stock.move._action_reset_to_draft` to reset a 'done' move.
+        """
+        for ml in self:
+            if not ml.product_id.is_storable or ml.uom_id.is_zero(ml.quantity_product_uom):
+                continue
+            available_at_dest = self.env['stock.quant']._get_available_quantity(
+                ml.product_id, ml.location_dest_id, lot_id=ml.lot_id,
+                package_id=ml.result_package_id, owner_id=ml.owner_id, strict=True)
+            if ml.product_id.uom_id.compare(available_at_dest, ml.quantity_product_uom) < 0:
+                raise UserError(_(
+                    "Cannot reset %(product)s to draft: only %(avail)s available in "
+                    "%(location)s (need %(qty)s). It may have been moved or consumed already.",
+                    product=ml.product_id.display_name, avail=available_at_dest,
+                    location=ml.location_dest_id.display_name, qty=ml.quantity_product_uom))
+            # Undo: remove from destination, restore to source.
+            in_date = ml._synchronize_quant(-ml.quantity_product_uom, ml.location_dest_id, package=ml.result_package_id)[1]
+            ml._synchronize_quant(ml.quantity_product_uom, ml.location_id, in_date=in_date)
+            # Re-reserve at source.
+            ml._synchronize_quant(ml.quantity_product_uom, ml.location_id, action="reserved")
+
     def _synchronize_quant(self, quantity, location, action="available", in_date=False, **quants_value):
         """ quantity should be express in product's UoM"""
         lot = quants_value.get('lot', self.lot_id)
