@@ -12,6 +12,7 @@ This addon provides an extensible, maintainable editor.
     'depends': ['base', 'bus', 'web'],
     'data': [
         'security/ir.access.csv',
+        'views/media_manager_views.xml',
     ],
     'auto_install': True,
     'assets': {
@@ -36,6 +37,7 @@ This addon provides an extensible, maintainable editor.
             ('include', 'html_editor.assets_editor'),
             'html_editor/static/src/backend/**/*',
             'html_editor/static/src/fields/**/*',
+            'html_editor/static/src/views/**/*',
             'html_editor/static/lib/vkbeautify/**/*',
             'html_editor/static/src/scss/base_style.scss',
             'html_editor/static/src/scss/html_editor.common.scss',
@@ -69,7 +71,7 @@ This addon provides an extensible, maintainable editor.
             # Bundle to use the media dialog in the backend and the frontend
             'html_editor/static/src/components/switch/**/*',
             'html_editor/static/src/main/media/media_dialog/**/*',
-            'html_editor/static/src/main/media/media_manager/**/*',
+#             'html_editor/static/src/main/media/media_manager/**/*',
         ],
         'html_editor.assets_readonly': [
             'html_editor/static/src/components/html_viewer/**/*',

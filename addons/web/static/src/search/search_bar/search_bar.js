@@ -67,6 +67,9 @@ export class SearchBar extends Component {
     inputRef = useProps.static("inputRef", t.signal(t.ref()).optional(() => signal.ref()));
 
     setup() {
+        console.log("----------------------\nSEARCH BAR setup() \n----------------------");
+        console.log("props : ", { ...this.props });
+        console.log("this.env : ", this.env);
         this.dialogService = useService("dialog");
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.fields = this.env.searchModel.searchViewFields;

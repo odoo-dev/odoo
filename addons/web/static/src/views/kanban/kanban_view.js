@@ -17,6 +17,7 @@ export const kanbanView = {
     buttonTemplate: "web.KanbanView.Buttons",
 
     props: (genericProps, view) => {
+        console.warn("kanban views props:", genericProps, view);
         const { arch, relatedModels, resModel } = genericProps;
         const { ArchParser } = view;
         const archInfo = new ArchParser().parse(arch, relatedModels, resModel);

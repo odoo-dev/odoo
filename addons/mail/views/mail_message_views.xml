@@ -130,47 +130,48 @@
             <field name="search_view_id" ref="view_message_search"/>
         </record>
 
-        <record model="ir.ui.view" id="view_document_file_kanban">
-            <field name="name">ir.attachment kanban</field>
-            <field name="model">ir.attachment</field>
-            <field name="arch" type="xml">
-                <kanban edit="false" import="false" js_class="ir_attachment_kanban">
-                    <field name="id"/>
-                    <field name="mimetype"/>
-                    <field name="type"/>
-                    <templates>
-                        <t t-name="menu">
-                            <a t-attf-href="/web/content/#{record.id.raw_value}?download=true" download="" class="dropdown-item">Download</a>
-                            <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>
-                        </t>
-                        <t t-name="card" class="o_kanban_attachment flex-row">
-                            <aside class="o_kanban_image m-1">
-                                <div class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">
-                                    <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
-                                    <div t-if="record.type.raw_value == 'url'" class="oi oi-3x text-muted" data-icon="link" aria-label="Image is a link"/>
-                                    <img t-elif="webimage" t-attf-src="/web/image/#{record.id.raw_value}" width="100" height="100" alt="Document" class="o_attachment_image"/>
-                                    <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
-                                </div>
-                            </aside>
-                            <main class="ms-1">
-                                <div class="o_kanban_details_wrapper d-flex flex-column">
-                                    <field name="name" class="text-truncate fw-bold fs-5"/>
-                                    <div class="d-flex flex-grow-1 align-items-center">
-                                        <t t-if="record.type.raw_value == 'url'">
-                                            <i class="oi" data-icon="public" aria-label="Document url"/> <field name="url" widget="url"/>
-                                        </t>
-                                    </div>
-                                    <div class="d-flex">
-                                        <field name="create_date"/>
-                                        <field name="create_uid" widget="many2one_avatar_user" class="ms-auto"/>
-                                    </div>
-                                </div>
-                            </main>
-                        </t>
-                    </templates>
-                </kanban>
-            </field>
-        </record>
+<!--        TODO : should we delete this view and use the media_manager one instead ?-->
+<!--        <record model="ir.ui.view" id="view_document_file_kanban">-->
+<!--            <field name="name">ir.attachment kanban</field>-->
+<!--            <field name="model">ir.attachment</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <kanban edit="false" import="false" js_class="ir_attachment_kanban">-->
+<!--                    <field name="id"/>-->
+<!--                    <field name="mimetype"/>-->
+<!--                    <field name="type"/>-->
+<!--                    <templates>-->
+<!--                        <t t-name="menu">-->
+<!--                            <a t-attf-href="/web/content/#{record.id.raw_value}?download=true" download="" class="dropdown-item">Download</a>-->
+<!--                            <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">Delete</a>-->
+<!--                        </t>-->
+<!--                        <t t-name="card" class="o_kanban_attachment flex-row">-->
+<!--                            <aside class="o_kanban_image m-1">-->
+<!--                                <div class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">-->
+<!--                                    <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>-->
+<!--                                    <div t-if="record.type.raw_value == 'url'" class="oi oi-3x text-muted" data-icon="link" aria-label="Image is a link"/>-->
+<!--                                    <img t-elif="webimage" t-attf-src="/web/image/#{record.id.raw_value}" width="100" height="100" alt="Document" class="o_attachment_image"/>-->
+<!--                                    <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>-->
+<!--                                </div>-->
+<!--                            </aside>-->
+<!--                            <main class="ms-1">-->
+<!--                                <div class="o_kanban_details_wrapper d-flex flex-column">-->
+<!--                                    <field name="name" class="text-truncate fw-bold fs-5"/>-->
+<!--                                    <div class="d-flex flex-grow-1 align-items-center">-->
+<!--                                        <t t-if="record.type.raw_value == 'url'">-->
+<!--                                            <i class="oi" data-icon="public" aria-label="Document url"/> <field name="url" widget="url"/>-->
+<!--                                        </t>-->
+<!--                                    </div>-->
+<!--                                    <div class="d-flex">-->
+<!--                                        <field name="create_date"/>-->
+<!--                                        <field name="create_uid" widget="many2one_avatar_user" class="ms-auto"/>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </main>-->
+<!--                        </t>-->
+<!--                    </templates>-->
+<!--                </kanban>-->
+<!--            </field>-->
+<!--        </record>-->
         <record id="ir_attachment_view_list" model="ir.ui.view">
             <field name="name">ir.attachment.list.inherit.mail</field>
             <field name="model">ir.attachment</field>

@@ -1,0 +1,24 @@
+<templates>
+
+    <t t-name="ir.attachment.MediaManagerKanbanRecord">
+        <article
+            t-att-class="this.getCardClasses()"
+            t-att-data-id="this.props.canResequence and this.props.record.id"
+            t-att-tabindex="this.props.record.model.useSampleModel ? -1 : 0"
+            t-on-click="this.onGlobalClick"
+            t-ref="this.rootRef">
+            <t t-call="{{ this.templates[this.constructor.CARD_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
+            <div class="o_record_box_select o_record_interactive position-absolute" t-on-click="this.toggleSelected">
+                <input type="checkbox" t-att-checked="this.props.record.selected"/>
+            </div>
+            <div class="o_record_box_star o_record_interactive position-absolute" t-on-click="this.toggleStarred">
+                <span t-if="this.state.starred" class="oi" data-icon="star_filled"></span>
+                <span t-else="" class="oi" data-icon="star"></span>
+            </div>
+            <div class="o_record_box_delete o_record_interactive position-absolute" t-on-click="this.deleteItem">
+                <span class="oi" data-icon="delete"></span>
+            </div>
+        </article>
+    </t>
+
+</templates>

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="mediamanager_media_kanban">
+            <field name="name">ir.attachment.kanban</field>
+            <field name="model">ir.attachment</field>
+            <field name="arch" type="xml">
+                <kanban edit="false" import="false" js_class="media_manager_kanban">
+                    <field name="id"/>
+                    <field name="mimetype"/>
+                    <field name="type"/>
+                    <field name="public"/>
+                    <field name="file_size"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="local_url"/>
+                    <field name="url"/>
+                    <templates>
+<!--                        <t t-name="menu">-->
+<!--                            <a role="menuitem" type="delete" class="dropdown-item">Delete</a>-->
+<!--                        </t>-->
+                        <t t-name="card" class="o_kanban_attachment flex-row">
+                            <aside class="o_kanban_image m-1">
+                                <div class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">
+                                    <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
+                                    <div t-if="record.type.raw_value == 'url'" class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
+                                    <img t-elif="webimage" t-attf-src="#{record.local_url.raw_value}" width="100" height="100" alt="Image" class="o_attachment_image"/>
+                                    <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
+                                </div>
+                            </aside>
+                            <main class="ms-1">
+                                <div class="o_kanban_details_wrapper d-flex flex-column">
+                                    <field name="display_name" class="text-truncate fw-bold fs-5"/>
+                                    <small class="text-muted text-truncate fs-7">
+                                        <field name="name"/>
+                                    </small>
+                                    <p><field name="description"/></p>
+                                    <div class="d-flex flex-grow-1 align-items-center">
+                                        <t t-if="record.type.raw_value == 'url'">
+                                            <i class="fa fa-globe" aria-label="Document url"/> <field name="url" widget="url"/>
+                                        </t>
+                                    </div>
+                                    <div class="d-flex">
+                                        <field name="create_date"/>
+                                        <field name="create_uid" widget="many2one_avatar_user" class="ms-auto"/>
+                                    </div>
+                                </div>
+                            </main>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+    </data>
+</odoo>

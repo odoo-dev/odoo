@@ -6,6 +6,7 @@ import { processButton } from "@web/views/utils";
 
 export class KanbanArchParser {
     parse(xmlDoc, models, modelName) {
+        console.warn("KanbanArchParser.parse", { xmlDoc, models, modelName });
         const cardArchInfo = new CardArchParser().parse(xmlDoc, models, modelName);
 
         const action = xmlDoc.getAttribute("action");
