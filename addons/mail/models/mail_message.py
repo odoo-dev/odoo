@@ -483,7 +483,7 @@ class MailMessage(models.Model):
         assert self.env.su
         if domain_operator != 'in':
             return NotImplemented
-        domain = self.env.context.get('user_search_domain')
+        domain = Domain.context.get('user_search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
         # Non-employee see only messages with a subtype and not internal

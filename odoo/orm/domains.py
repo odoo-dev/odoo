@@ -184,6 +184,30 @@ class OptimizationLevel(enum.IntEnum):
 
 
 MAX_OPTIMIZE_ITERATIONS = 1000
+import contextlib
+import contextvars
+
+class DomainContext:
+    def __int__(self):
+        self._ctx = {}
+
+    def get(self, name):
+        return self._ctx.get(name)
+
+    @contextlib.contextmanager
+    def set(self, name, value):
+        obj = object()
+        old_value = self._ctx.get(name, obj)
+        try:
+            self._ctx[name] = value
+            yield
+        finally:
+            if old_value is obj:
+                self._ctx.pop(name, None)
+            else:
+                self._ctx[name] = old_value
+
+domain_context = contextvars.ContextVar('domain_context', default=DomainContext())
 
 
 # --------------------------------------------------
@@ -270,6 +294,8 @@ class Domain:
             return Domain.AND(reversed(stack))
         except IndexError:
             raise ValueError(f"Domain() malformed domain {arg!r}")
+
+    context = classproperty(domain_context.get)
 
     @classproperty
     def TRUE(cls) -> Domain:
@@ -468,9 +494,8 @@ class Domain:
         and non-stored fields (using their search method) to transform the
         conditions.
         """
-        if user_domain is not model.env.context.get('user_search_domain'):
-            model = model.with_context(user_search_domain=user_domain)
-        return self._optimize(model, OptimizationLevel.FULL)
+        with Domain.context.set('user_search_domain', user_domain):
+            return self._optimize(model, OptimizationLevel.FULL)
 
     @typing.final
     def _optimize(self, model: BaseModel, level: OptimizationLevel) -> Domain:
@@ -1441,7 +1466,8 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
     except KeyError:
         condition._raise("Cannot determine the comodel relation")
 
-    if isinstance(search_domain := model.env.context.get('user_search_domain'), Domain):
+    search_domain = Domain.context.get('user_search_domain')
+    if search_domain:
         # model with search_domain like (field, 'any', comodel_domain)
         # => comodel with comodel_domain
         comodel_domain = Domain.OR(
@@ -1452,9 +1478,9 @@ def _optimize_any_domain_at_level(level: OptimizationLevel, condition, model):
         if comodel_domain.is_false() and not search_domain.is_false():
             # we don't know the condition, accept all
             comodel_domain = Domain.TRUE
-        comodel = comodel.with_context(user_search_domain=comodel_domain)
 
-    domain = domain._optimize(comodel, level)
+    with Domain.context.set('user_search_domain', search_domain):
+        domain = domain._optimize(comodel, level)
     # const if the domain is empty, the result is a constant
     # if the domain is True, we keep it as is
     if domain.is_false():

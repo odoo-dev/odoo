@@ -457,7 +457,7 @@ class MailActivity(models.Model):
         assert self.env.su
         if domain_operator != 'in':
             return NotImplemented
-        domain = self.env.context.get('user_search_domain')
+        domain = Domain.context.get('user_search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
         self = self.sudo(False)  # noqa: PLW0642
