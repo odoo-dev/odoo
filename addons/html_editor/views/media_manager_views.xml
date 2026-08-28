@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="mediamanager_media_kanban">
-            <field name="name">ir.attachment.kanban</field>
+            <field name="name">ir.attachment.mediamanager.kanban</field>
             <field name="model">ir.attachment</field>
             <field name="arch" type="xml">
                 <kanban edit="false" import="false" js_class="media_manager_kanban">
@@ -16,9 +16,12 @@
                     <field name="local_url"/>
                     <field name="url"/>
                     <templates>
-<!--                        <t t-name="menu">-->
-<!--                            <a role="menuitem" type="delete" class="dropdown-item">Delete</a>-->
-<!--                        </t>-->
+                        <t t-name="menu">
+                            <a role="menuitem" type="object" name="record_open_preview" class="dropdown-item">Preview</a>
+                            <a role="menuitem" name="open_preview" class="dropdown-item">Preview</a>
+                            <hr />
+                            <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                        </t>
                         <t t-name="card" class="o_kanban_attachment flex-row">
                             <aside class="o_kanban_image m-1">
                                 <div class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">

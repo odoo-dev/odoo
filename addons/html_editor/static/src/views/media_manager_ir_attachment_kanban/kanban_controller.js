@@ -25,7 +25,7 @@ export class MediaManagerKanbanController extends KanbanController {
                 .filter((record) => resIds.includes(record.data.id))
                 .map((rec) => rec.data);
             console.log("records", JSON.parse(JSON.stringify(records)));
-            this.props.onSelectionChanged(records);
+            this.props.onSelectionChanged(resIds, records);
         }
     }
 }

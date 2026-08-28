@@ -1,8 +1,8 @@
-// import { KanbanDropdownMenuWrapper } from "@web/views/kanban/kanban_dropdown_menu_wrapper";
 import { KanbanRecord, kanbanRecordProps } from "@web/views/kanban/kanban_record";
+// import { KanbanDropdownMenuWrapper } from "@web/views/kanban/kanban_dropdown_menu_wrapper";
 import { useService } from "@web/core/utils/hooks";
 
-import { proxy, t, useProps } from "@odoo/owl";
+import { onMounted, proxy, t, useProps } from "@odoo/owl";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 
 // import {
@@ -32,21 +32,22 @@ export const MediaManagerkanbanRecordProps = {
 
 export class MediaManagerKanbanRecord extends KanbanRecord {
     static template = "ir.attachment.MediaManagerKanbanRecord";
+    static menuTemplate = "web.KanbanMenu";
     static components = {
         ...KanbanRecord.components,
-        // KanbanDropdownMenuWrapper: MediaManagerKanbanDropdownMenuWrapper,
+        //KanbanDropdownMenuWrapper: MediaManagerKanbanDropdownMenuWrapper,
     };
 
     props = useProps(MediaManagerkanbanRecordProps);
 
     setup() {
-        // console.groupCollapsed("new MediaManagerKanbanRecord");
-        // console.warn("setup() trace");
-        // console.log("this : ", this);
-        // console.log("props : ", this.props);
+        console.groupCollapsed("new MediaManagerKanbanRecord");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
         // console.log("record : ", { ...this.props.record });
-        // // console.log(this.constructor.menuTemplate);
-        // console.groupEnd();
+        console.log(this.constructor.menuTemplate);
+        console.groupEnd();
         this.state = proxy({
             starred: this.getLocalStorageStarredState(),
             selected: false,
@@ -54,6 +55,11 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
 
         this.fileViewer = useService("fileViewer")();
         super.setup();
+        onMounted(() => {
+            console.log("              ====>   this.rootRef()", this.rootRef());
+            const previewMenuItem = this.rootRef().querySelector("[name=open_preview]");
+            console.log("              ====>   previewMenuItem", previewMenuItem);
+        });
     }
 
     getCardClasses() {
