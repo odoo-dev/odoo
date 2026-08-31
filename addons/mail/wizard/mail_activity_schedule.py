@@ -101,6 +101,7 @@ class MailActivitySchedule(models.TransientModel):
     # logging a call (voip.call, discuss.call.history) in the chatter of a document
     activity_type_id_domain = fields.Char(
         compute='_compute_activity_type_id_domain', export_string_translation=False)
+    call_history_id = fields.Many2one('discuss.call.history', export_string_translation=False)
     contact_id = fields.Many2one(
         'res.partner', compute='_compute_contact_id',
         readonly=False, store=False)
@@ -346,22 +347,71 @@ class MailActivitySchedule(models.TransientModel):
                 domain &= Domain('category', '=', category)
             scheduler.activity_type_id_domain = domain
 
+    @api.depends('res_model_selection', 'contact_id_domain')
     @api.depends_context('log_contact_id')
     def _compute_contact_id(self):
-        self.contact_id = self.env.context.get('log_contact_id')
+        for scheduler in self:
+            if scheduler.contact_id or scheduler.res_model_selection != 'res.partner':
+                continue
+            domain = ast.literal_eval(scheduler.contact_id_domain or '[]')
+            scheduler.contact_id = self.env.context.get('log_contact_id') or self._get_log_default_record(
+                'res.partner', domain,
+            )
 
-    @api.depends_context('log_contact_id')
+    @api.depends_context('log_contact_id', 'log_channel_partner_ids')
     def _compute_contact_id_domain(self):
         # the call may be logged on any contact of the commercial entity of the
         # contact it was made with, not just on that contact itself
-        if contact := self.env['res.partner'].browse(self.env.context.get('log_contact_id')):
-            domain = [('id', 'in', contact._search_commercial_partners().ids)]
+        if contact := self._get_log_filter_contact():
+            domain = [('id', 'child_of', contact.commercial_partner_id.ids)]
         else:
             domain = []
         self.contact_id_domain = domain
 
+    @api.model
+    def _is_logging_call(self):
+        """ Whether a call is being logged on a document of the user's choice, as opposed
+        to an activity being scheduled on a record already known. """
+        context = self.env.context
+        return bool(context.get('log_contact_id')) or 'log_channel_partner_ids' in context
+
+    @api.model
+    def _get_log_filter_contact(self):
+        """ The contact whose records alone the wizard offers, when logging a call.
+
+        A call placed to a single known number (see `voip.call`) is about the contact
+        holding it: nothing else is worth offering. A call held in a channel is about
+        whoever was in it, which the wizard lists first rather than hiding everything
+        else (see `mail.activity.mixin.name_search`): a meeting can well be logged on a
+        record its attendees are not the customer of.
+
+        :return: a ``res.partner`` recordset, void when the lists are to be left whole"""
+        if 'log_channel_partner_ids' in self.env.context:
+            return self.env['res.partner']
+        return self.env['res.partner'].browse(self.env.context.get('log_contact_id'))
+
+    @api.model
+    def _get_log_default_record(self, model_name, domain):
+        """ The record the wizard offers by default for a model, when logging a call: the
+        first one its list offers (see `mail.activity.mixin.name_search`), skipping those
+        about the user logging the call, who knows they were in it.
+
+        Nothing is offered for a call held with nobody known, e.g. one placed to an
+        unknown number: its lists are filtered by no contact at all, so their first
+        record is a stranger, and marking the activity done would log the call on them.
+
+        :return: a recordset of ``model_name``, void when it offers nothing at all"""
+        model = self.env[model_name]
+        if not self._get_log_filter_contact() and 'log_channel_partner_ids' not in self.env.context:
+            return model
+        domain = Domain(domain or Domain.TRUE) & ~model._get_call_log_partner_domain(self.env.user.partner_id)
+        offered = model.name_search('', domain, limit=1)
+        return model.browse(offered[0][0]) if offered else model
+
+    @api.depends('call_history_id.end_dt')
     def _compute_is_call_ongoing(self):
-        self.is_call_ongoing = False
+        for scheduler in self:
+            scheduler.is_call_ongoing = bool(scheduler.call_history_id) and not scheduler.call_history_id.end_dt
 
     # Any writable fields that can change error computed field
     @api.constrains('res_model_id', 'res_ids',  # records (-> responsible)
@@ -497,7 +547,14 @@ class MailActivitySchedule(models.TransientModel):
         }
         if is_single_call:
             activity_values['phone'] = phone
-        return records.activity_schedule(**activity_values)
+        activities = records.activity_schedule(**activity_values)
+        # sudo: discuss.call.history: no one may write a call history, yet whoever attended
+        # the call may log it on a document of theirs.
+        call_history = self.call_history_id.sudo()
+        if call_history and not call_history.activity_id:
+            self.call_history_id.check_access('read')
+            call_history.activity_id = activities[:1]
+        return activities
 
     def _action_schedule_activities_personal(self):
         if not self.activity_user_id:
