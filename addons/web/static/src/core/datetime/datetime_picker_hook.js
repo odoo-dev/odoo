@@ -1,5 +1,5 @@
 import { untrack } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { DateTimePickerManager } from "./datetimepicker_service";
 
 /**
  * @param {import("./datetimepicker_service").DateTimePickerServiceParams} params
@@ -13,10 +13,9 @@ export function useDateTimePicker(params) {
     // `inputRefs`.
     const inputRefs = params.inputRefs ?? [];
 
-    return useService("datetime_picker").create(
+    return new DateTimePickerManager(
         // Need original object since 'pickerProps' (or any other param) can be defined
         // as getters
-        Object.assign(Object.create(params), { getInputs }),
-        { useOwlHooks: true }
+        Object.assign(Object.create(params), { getInputs })
     );
 }
