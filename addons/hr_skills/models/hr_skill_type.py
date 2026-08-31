@@ -17,6 +17,7 @@ class HrSkillType(models.Model):
     active = fields.Boolean('Active', default=True)
     sequence = fields.Integer("Sequence")
     name = fields.Char(required=True, translate=True)
+    company_id = fields.Many2one('res.company', string="Company", copy=True)
     skill_ids = fields.One2many('hr.skill', 'skill_type_id', string="Skills")
     skill_level_ids = fields.One2many('hr.skill.level', 'skill_type_id', string="Levels", copy=True)
     color = fields.Integer('Color', default=_get_default_color)
@@ -70,3 +71,44 @@ class HrSkillType(models.Model):
             }
             for skill_type, vals in zip(self, vals_list)
         ]
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'company_id' in vals:
+            skill_models = [
+                'hr.employee.skill',
+                'hr.job.skill',
+                'hr.applicant.skill',
+                'hr.appraisal.skill',
+                # 'hr.appraisal.goal.skill',
+                # TODO fix appraisal goal skill
+                # TODO fix job position matching for applicants
+                # TODO only show goals that have no expected skills or skills which skill types are in the company
+            ]
+            for skill_type in self:
+                for model in skill_models:
+                    if model not in self.env:
+                        continue
+                    skill_sudo = self.env[model].sudo()
+                    domain_unarchive = [
+                        ('skill_type_id', '=', skill_type.id),
+                        ('active', '=', False)
+                    ]
+                    if skill_type.company_id:
+                        domain_unarchive += [
+                            '|',
+                            ('company_id', '=', False),
+                            ('company_id', '=', skill_type.company_id.id)
+                        ]
+                        to_archive = skill_sudo.search([
+                            ('skill_type_id', '=', skill_type.id),
+                            ('company_id', '!=', False),
+                            ('company_id', '!=', skill_type.company_id.id)
+                        ])
+                        if to_archive:
+                            to_archive.write({'active': False})
+
+                    to_unarchive = skill_sudo.with_context(active_test=False).search(domain_unarchive)
+                    if to_unarchive:
+                        to_unarchive.write({'active': True})
+        return res

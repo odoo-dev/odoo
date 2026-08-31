@@ -16,6 +16,8 @@ class HrApplicantSkill(models.Model):
         index=True,
         ondelete="cascade",
     )
+    company_id = fields.Many2one(related='applicant_id.company_id')
+    active = fields.Boolean(default=True)
 
     def _linked_field_name(self):
         return "applicant_id"
