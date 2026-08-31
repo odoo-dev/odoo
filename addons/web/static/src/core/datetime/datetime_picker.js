@@ -302,6 +302,8 @@ export const dateTimePickerProps = {
     tz: t.string().optional(),
 };
 
+export const DateTimePickerPropsSchema = t.object(dateTimePickerProps);
+
 /** @extends {Component<DateTimePickerProps>} */
 export class DateTimePicker extends Component {
     props = useProps(dateTimePickerProps);

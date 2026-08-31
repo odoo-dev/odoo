@@ -1,31 +1,38 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
+import { useScope } from "@odoo/owl";
 
 import { rpc } from "@web/core/network/rpc";
 
 export class PurchaseDatetimePicker extends Interaction {
     static selector = ".o-purchase-datetimepicker";
 
+    setup() {
+        this.scope = useScope();
+    }
+
     start() {
-        this.registerCleanup(
-            this.services.datetime_picker
-                .create({
-                    target: this.el,
-                    onChange: (newDate) => {
-                        const { accessToken, orderId, lineId } = this.el.dataset;
-                        this.waitFor(
-                            rpc(`/my/purchase/${orderId}/update?access_token=${accessToken}`, {
-                                [lineId]: newDate.toISODate(),
-                            })
-                        );
-                    },
-                    pickerProps: {
-                        type: "date",
-                        value: luxon.DateTime.fromISO(this.el.dataset.value),
-                    },
-                })
-                .enable()
-        );
+        this.scope.run(() => {
+            this.registerCleanup(
+                this.services.datetime_picker
+                    .create({
+                        target: this.el,
+                        onChange: (newDate) => {
+                            const { accessToken, orderId, lineId } = this.el.dataset;
+                            this.waitFor(
+                                rpc(`/my/purchase/${orderId}/update?access_token=${accessToken}`, {
+                                    [lineId]: newDate.toISODate(),
+                                })
+                            );
+                        },
+                        pickerProps: {
+                            type: "date",
+                            value: luxon.DateTime.fromISO(this.el.dataset.value),
+                        },
+                    })
+                    .enable()
+            );
+        });
     }
 }
 

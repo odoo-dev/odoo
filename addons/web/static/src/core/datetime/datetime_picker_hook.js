@@ -1,12 +1,11 @@
-import { untrack } from "@odoo/owl";
 import { DateTimePickerManager } from "./datetimepicker_service";
 
 /**
- * @param {import("./datetimepicker_service").DateTimePickerServiceParams} params
+ * @param {import("./datetimepicker_service").DateTimePickerServiceParamsSchema} params
  */
 export function useDateTimePicker(params) {
     function getInputs() {
-        return inputRefs.map((ref) => untrack(ref));
+        return inputRefs.map((ref) => ref());
     }
 
     // Callers driving the picker from a `target` only (no date inputs) omit

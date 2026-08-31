@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { Popup } from "@website/interactions/popup/popup";
+import { useScope } from "@odoo/owl";
 
 const { DateTime } = luxon;
 
@@ -42,6 +43,7 @@ export class AgeVerificationPopup extends Popup {
         super.setup();
         this.inputError = false;
         this.showAlert = false;
+        this.scope = useScope();
     }
 
     start() {
@@ -77,16 +79,18 @@ export class AgeVerificationPopup extends Popup {
         if (!dateInputEl) {
             return;
         }
-        this.datePicker = this.services.datetime_picker.create({
-            target: dateInputEl,
-            pickerProps: {
-                type: "date",
-                minDate: DateTime.local(1900, 1, 1),
-                maxDate: DateTime.now(),
-            },
+        this.scope.run(() => {
+            this.datePicker = this.services.datetime_picker.create({
+                target: dateInputEl,
+                pickerProps: {
+                    type: "date",
+                    minDate: DateTime.local(1900, 1, 1),
+                    maxDate: DateTime.now(),
+                },
+            });
+            this.registerCleanup(this.datePicker.enable());
+            this.registerCleanup(this.datePicker.close);
         });
-        this.registerCleanup(this.datePicker.enable());
-        this.registerCleanup(this.datePicker.close);
     }
 
     /**

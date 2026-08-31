@@ -6,11 +6,13 @@ import {
 } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
+import { useScope } from "@odoo/owl";
 
 export class DatetimePicker extends Interaction {
     static selector = "[data-widget='datetime-picker']";
 
     setup() {
+        this.scope = useScope();
         this.minDate = this.el.dataset.minDate;
         this.maxDate = this.el.dataset.maxDate;
         this.type = this.el.dataset.widgetType || "datetime";
@@ -19,17 +21,19 @@ export class DatetimePicker extends Interaction {
     start() {
         const parseFunction = this.type === "date" ? parseDate : parseDateTime;
         const deserializeFunction = this.type === "date" ? deserializeDate : deserializeDateTime;
-        this.registerCleanup(
-            this.services["datetime_picker"].create({
-                target: this.el,
-                pickerProps: {
-                    type: this.type,
-                    minDate: this.minDate && deserializeFunction(this.minDate),
-                    maxDate: this.maxDate && deserializeFunction(this.maxDate),
-                    value: parseFunction(this.el.value),
-                },
-            }).destroy
-        );
+        this.scope.run(() => {
+            this.registerCleanup(
+                this.services["datetime_picker"].create({
+                    target: this.el,
+                    pickerProps: {
+                        type: this.type,
+                        minDate: this.minDate && deserializeFunction(this.minDate),
+                        maxDate: this.maxDate && deserializeFunction(this.maxDate),
+                        value: parseFunction(this.el.value),
+                    },
+                }).destroy
+            );
+        });
     }
 }
 

@@ -1,17 +1,16 @@
 import {
+    assertType,
     computed,
     getDefault,
     immediateEffect,
     markRaw,
-    onMounted,
-    onPatched,
     onWillDestroy,
     proxy,
-    untrack,
+    signal,
+    t,
     usePlugin,
 } from "@odoo/owl";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { onWillRender, useLayoutEffect } from "@web/owl2/utils";
 import { areDatesEqual, formatDate, formatDateTime, parseDate, parseDateTime } from "../l10n/dates";
 import { makePopover } from "../popover/popover_hook";
 import { PopoverPlugin } from "../popover/popover_plugin";
@@ -20,30 +19,28 @@ import { ensureArray, zip } from "../utils/arrays";
 import { shallowEqual } from "../utils/objects";
 import { BottomSheetPlugin } from "../bottom_sheet/bottom_sheet_plugin";
 import { UIPlugin } from "../ui/ui_plugin";
-import { dateTimePickerProps } from "./datetime_picker";
+import { dateTimePickerProps, DateTimePickerPropsSchema } from "./datetime_picker";
 import { DateTimePickerPopover } from "./datetime_picker_popover";
 
 /**
  * @typedef {luxon["DateTime"]["prototype"]} DateTime
  *
- * @typedef {import("./datetime_picker").DateTimePickerProps} DateTimePickerProps
- * @typedef {import("../popover/popover_hook").PopoverHookReturnType} PopoverHookReturnType
- * @typedef {import("../popover/popover_plugin").PopoverOptionSchema} PopoverServiceAddOptions
- * @typedef {import("@odoo/owl").Component} Component
- *
- * @typedef {{
- *  createPopover?: (component: Component, options: PopoverServiceAddOptions) => PopoverHookReturnType;
- *  format?: string;
- *  getInputs?: () => HTMLElement[];
- *  onApply?: (value: DateTimePickerProps["value"]) => any;
- *  onChange?: (value: DateTimePickerProps["value"]) => any;
- *  onClose?: () => any;
- *  pickerProps?: DateTimePickerProps;
- *  showSeconds?: boolean;
- *  target: HTMLElement | (() => HTMLElement | null) | { el?: HTMLElement };
- *  showResetButton?: boolean;
- * }} DateTimePickerServiceParams
+ * @typedef {import("./datetime_picker").DateTimePickerPropsSchema} DateTimePickerProps
  */
+
+export const DateTimePickerServiceParamsSchema = t.object({
+    createPopover: t.function().optional(),
+    format: t.string().optional(),
+    getInputs: t.function().optional(),
+    onApply: t.function().optional(),
+    onChange: t.function().optional(),
+    onClose: t.function().optional(),
+    onWillParseValues: t.function().optional(),
+    pickerProps: DateTimePickerPropsSchema,
+    showSeconds: t.boolean().optional(),
+    target: t.or([t.object(), t.function()]).optional(),
+    showResetButton: t.boolean().optional(),
+});
 
 /**
  * @param {Record<string, any>} props
@@ -116,16 +113,17 @@ export class DateTimePickerManager {
     /** @private @type {(() => void) | null} */
     restoreTargetMargin = null;
     /** @private */
-    shouldFocus = false;
+    shouldFocus = signal(false);
     /** @private @type {Partial<DateTimePickerProps>} */
     stringProps = {};
 
     isOpen = computed(() => this.popover.isOpen);
 
     /**
-     * @param {DateTimePickerServiceParams} params
+     * @param {DateTimePickerServiceParamsSchema} params
      */
     constructor(params) {
+        assertType(params, DateTimePickerServiceParamsSchema);
         this.params = params;
 
         // Part of the public API: consumers are expected to be able to hand
@@ -182,14 +180,21 @@ export class DateTimePickerManager {
             },
         });
 
-        onWillRender(() => this.computeBasePickerProps());
-        onMounted(() => this.setup());
+        // Note: these must run synchronously as soon as their reactive
+        // sources change (like the old `onWillRender`/`useLayoutEffect`
+        // did), not on a deferred microtask like a plain `useEffect`:
+        // `setup()`'s own `immediateEffect` (which syncs the DOM inputs)
+        // reads `pickerProps` and must always see it already up to date.
+        this.disposeEffects.push(immediateEffect(() => this.computeBasePickerProps()));
+        this.setup();
         onWillDestroy(() => this.destroy());
-        useLayoutEffect((...inputs) => this.initInputs(...inputs), this.getInputs);
 
-        // Note: this `onPatched` callback must be called after the `useLayoutEffect` since
-        // the effect may change input values that will be selected by the patch callback.
-        onPatched(() => this.focusIfNeeded());
+        this.disposeEffects.push(
+            immediateEffect(() => {
+                this.initInputs(...this.getInputs());
+                this.focusIfNeeded();
+            })
+        );
     }
 
     /** @deprecated use {@link destroy} directly */
@@ -275,7 +280,7 @@ export class DateTimePickerManager {
     focusActiveInput() {
         const inputEl = this.getInput(this.pickerProps.focusedDateIndex);
         if (!inputEl) {
-            this.shouldFocus = true;
+            this.shouldFocus.set(true);
             return;
         }
 
@@ -327,9 +332,10 @@ export class DateTimePickerManager {
     getTarget() {
         // `params.target` may be a raw HTMLElement or a ref (a
         // callable): resolve refs to their element, pass raw
-        // elements through.
+        // elements through. Called plain (not `untrack`ed) so a ref
+        // read here is trackable by the input-sync effect below.
         const target = this.params.target;
-        return typeof target === "function" ? untrack(target) : target;
+        return typeof target === "function" ? target() : target;
     }
 
     /** @private */
@@ -492,7 +498,7 @@ export class DateTimePickerManager {
 
         this.setFocusClass(inputEl);
 
-        this.shouldFocus = false;
+        this.shouldFocus.set(false);
     }
 
     /** @private */
@@ -542,7 +548,7 @@ export class DateTimePickerManager {
             }
         }
 
-        this.shouldFocus = true;
+        this.shouldFocus.set(true);
     }
 
     /**
@@ -641,7 +647,7 @@ export class DateTimePickerManager {
 
     /** @private */
     focusIfNeeded() {
-        if (this.shouldFocus && this.isOpen() && !this.useBottomSheet()) {
+        if (this.shouldFocus() && this.isOpen() && !this.useBottomSheet()) {
             this.focusActiveInput();
         }
     }

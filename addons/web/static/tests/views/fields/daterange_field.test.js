@@ -525,6 +525,7 @@ test("initial empty date with optional end date", async () => {
 
     // Add a start date
     await contains(".o_toggle_range").click();
+    await animationFrame();
 
     expect("button[data-field=datetime]").toHaveValue("03/12/2017 23:00:00");
     expect("input[data-field=datetime_end]").toHaveValue("03/13/2017 00:00:00");
