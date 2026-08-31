@@ -1,4 +1,5 @@
 import {
+    computed,
     getDefault,
     immediateEffect,
     markRaw,
@@ -119,6 +120,8 @@ export class DateTimePickerManager {
     /** @private @type {Partial<DateTimePickerProps>} */
     stringProps = {};
 
+    isOpen = computed(() => this.popover.isOpen);
+
     /**
      * @param {DateTimePickerServiceParams} params
      */
@@ -199,10 +202,6 @@ export class DateTimePickerManager {
         for (const dispose of this.disposeEffects) {
             dispose();
         }
-    }
-
-    isOpen() {
-        return this.popover.isOpen;
     }
 
     /**
