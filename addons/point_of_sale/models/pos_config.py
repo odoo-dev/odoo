@@ -160,6 +160,7 @@ class PosConfig(models.Model):
     module_pos_restaurant = fields.Boolean("Is a Bar/Restaurant")
     module_pos_avatax = fields.Boolean("AvaTax PoS Integration", help="Use automatic taxes mapping with Avatax in PoS")
     module_pos_discount = fields.Boolean("Global Discounts")
+    module_pos_deposit = fields.Boolean("Allow Deposits")
     module_pos_appointment = fields.Boolean("Online Booking")
     use_header_or_footer = fields.Boolean("Custom Header & Footer")
     module_pos_hr = fields.Boolean(help="Show employee login screen")
@@ -756,7 +757,7 @@ class PosConfig(models.Model):
 
     @api.depends('use_pricelist', 'pricelist_id', 'available_pricelist_ids', 'payment_method_ids', 'limit_categories',
         'iface_available_categ_ids', 'module_pos_hr', 'module_pos_discount', 'iface_tipproduct', 'default_preset_id',
-        'module_pos_appointment', 'set_tip_after_payment', 'cash_rounding', 'rounding_method', 'only_round_cash_method')
+        'module_pos_appointment', 'set_tip_after_payment', 'cash_rounding', 'rounding_method', 'only_round_cash_method', 'module_pos_deposit')
     def _compute_local_data_integrity(self):
         self.last_data_change = self.env.cr.now()
 

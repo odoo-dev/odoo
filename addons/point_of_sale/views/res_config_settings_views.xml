@@ -357,6 +357,9 @@
                                         </div>
                                     </div>
                                 </setting>
+                                <setting id="pos_global_deposit" help="Adds a deposit line for deposit enabled product">
+                                    <field name="pos_module_pos_deposit"/>
+                                </setting>
                                 <setting id="pos_pricer" string="Pricer" title="Pricer tags" help="Display and update your products information through electronic price tags">
                                     <field name="module_pos_pricer"/>
                                 </setting>
