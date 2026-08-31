@@ -53,6 +53,8 @@ class AccountMove(models.Model):
         Tolerates an empty recordset (e.g. the reversed entry of a move
         that is not a credit note), for which it returns ''.
         """
+        if self.l10n_latam_document_type_id:
+            return self.name or ''
         if self.l10n_latam_use_documents:
             return self.l10n_latam_document_number or ''
         return self.ref or ''
