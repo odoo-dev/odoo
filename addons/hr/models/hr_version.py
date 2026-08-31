@@ -119,6 +119,9 @@ class HrVersion(models.Model):
     spouse_birthdate = fields.Date(string="Spouse Birthdate", groups="hr.group_hr_user", tracking=1)
     children = fields.Integer(string='Dependent Children', groups="hr.group_hr_user", tracking=1)
 
+    certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level', groups="hr.group_hr_user", tracking=True)
+    study_field = fields.Char("Field of Study", groups="hr.group_hr_user", tracking=True)
+
     # Work Information
     department_id = fields.Many2one('hr.department', check_company=True, tracking=1, index=True)
     member_of_department = fields.Boolean("Member of department", compute='_compute_part_of_department', search='_search_part_of_department',
@@ -465,6 +468,16 @@ class HrVersion(models.Model):
         for version in self:
             version.is_fully_flexible = version._is_fully_flexible()
             version.is_flexible = version._is_fully_flexible() or (not version.resource_calendar_id and (version.hours_per_week or version.hours_per_day))
+
+    @api.model
+    def _get_certificate_selection(self):
+        return [
+            ('graduate', self.env._('Graduate')),
+            ('bachelor', self.env._('Bachelor')),
+            ('master', self.env._('Master')),
+            ('doctor', self.env._('Doctor')),
+            ('other', self.env._('Other')),
+        ]
 
     @api.model
     def _get_whitelist_fields_from_template(self):
