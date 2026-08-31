@@ -41,7 +41,7 @@
     </t>
 
     <t t-name="website.ThemePreviewFormController" t-inherit="web.FormView" t-inherit-mode="primary">
-        <xpath expr="//Layout" position="inside">
+        <xpath expr="//t[@t-component='this.layout']" position="inside">
             <t t-set-slot="control-panel-actions">
                 <ViewButton className="'btn btn-primary o_use_theme'"
                             clickParams="{type: 'object', name: 'button_choose_theme'}"

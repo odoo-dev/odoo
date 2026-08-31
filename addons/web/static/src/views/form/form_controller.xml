@@ -2,46 +2,42 @@
 <templates xml:space="preserve">
 
     <t t-name="web.FormView">
-        <div t-att-class="this.className" t-ref="this.rootRef">
-            <div class="o_form_view_container">
-                <Layout className="this.model.useSampleModel ? 'o_view_sample_data' : ''" display="this.display">
-                    <t t-set-slot="control-panel-buttons">
+        <t t-component="this.layout" cssClass="this.className" display="this.display" ref="this.rootRef" useSampleModel="this.model.useSampleModel">
+            <t t-set-slot="control-panel-buttons">
                         <t t-if="this.env.inDialog">
                             <t t-if="this.footerArchInfo">
-                                <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" archInfo="this.footerArchInfo">
-                                    <t t-set-slot="default_buttons">
+                    <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" archInfo="this.footerArchInfo">
+                        <t t-set-slot="default_buttons">
                                         <t t-call="{{ this.props.buttonDialogTemplate }}"/>
-                                    </t>
-                                </t>
+                        </t>
+                    </t>
                             </t>
                             <t t-else="" t-call="{{ this.props.buttonDialogTemplate }}"/>
-                        </t>
-                        <t t-else="" t-call="{{ this.props.buttonTemplate }}"/>
-                    </t>
+                </t>
+                <t t-else="" t-call="{{ this.props.buttonTemplate }}"/>
+            </t>
 
-                    <t t-set-slot="control-panel-actions">
-                        <t t-if="!this.ui.isSmall and this.buttonBoxTemplate">
-                            <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
-                        </t>
-                    </t>
+            <t t-set-slot="control-panel-actions">
+                <t t-if="!this.ui.isSmall and this.buttonBoxTemplate">
+                    <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                </t>
+            </t>
 
-                    <t t-set-slot="control-panel-additional-actions">
-                        <CogMenu t-props="this.cogMenuProps" />
-                        <t t-if="this.ui.isSmall and this.buttonBoxTemplate">
-                            <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
-                        </t>
-                    </t>
+            <t t-set-slot="control-panel-additional-actions">
+                <CogMenu t-props="this.cogMenuProps" />
+                <t t-if="this.ui.isSmall and this.buttonBoxTemplate">
+                    <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
+                </t>
+            </t>
 
-                    <t t-set-slot="control-panel-status-indicator">
-                        <t t-if="this.canEdit">
-                            <FormStatusIndicator t-props="this.statusIndicator.props()" />
-                        </t>
-                    </t>
+            <t t-set-slot="control-panel-status-indicator">
+                <t t-if="this.canEdit">
+                    <FormStatusIndicator t-props="this.statusIndicator.props()" />
+                </t>
+            </t>
 
-                    <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" readonly="(this.props.readonly or !this.canEdit)  and !this.model.root.isNew" archInfo="this.archInfo" translateAlert="this.translateAlert" onNotebookPageChange.bind="this.onNotebookPageChange" activeNotebookPages="this.props.state and this.props.state.activeNotebookPages"/>
-                </Layout>
-            </div>
-        </div>
+            <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" readonly="(this.props.readonly or !this.canEdit)  and !this.model.root.isNew" archInfo="this.archInfo" translateAlert="this.translateAlert" onNotebookPageChange.bind="this.onNotebookPageChange" activeNotebookPages="this.props.state and this.props.state.activeNotebookPages"/>
+        </t>
     </t>
 
     <t t-name="web.FormView.DialogButtons">

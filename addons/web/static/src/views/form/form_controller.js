@@ -51,6 +51,7 @@ import {
 } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { FetchRecordError } from "@web/model/relational_model/errors";
+import { useFormLayout } from "@web/views/form/form_layout";
 
 const viewRegistry = registry.category("views");
 
@@ -162,6 +163,7 @@ export class FormController extends Component {
     props = useProps(formControllerProps);
 
     rootRef = signal.ref();
+    layout = useFormLayout();
 
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;

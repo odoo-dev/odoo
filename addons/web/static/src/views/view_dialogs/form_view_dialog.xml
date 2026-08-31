@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-  <t t-name="web.FormViewDialog">
-    <Dialog size="this.props.size" title="this.props.title" withBodyPadding="false" modalRef="this.modalRef" onExpand="this.onExpandCallback">
-      <View t-props="this.viewProps"/>
+  <t t-name="web.FormDialogLayout">
+    <Dialog size="this.info.size" title="this.info.title" withBodyPadding="false" onExpand="this.info.onExpandCallback">
+      <div t-att-class="this.root.cssClass" t-ref="this.root.ref">
+        <div class="o_form_view_container">
+          <main class="o_content" t-attf-class="{{ this.info.cssClass }}">
+            <t t-call-slot="default"/>
+          </main>
+        </div>
+      </div>
       <t t-set-slot="footer">
-        <t t-if="this.props.preventEdit and this.props.preventCreate">
-          <button class="btn btn-primary" t-on-click="() => this.props.close()" data-available-offline="">Close</button>
-        </t>
-        <t t-else="">
-          <button class="btn btn-primary o-default-button" t-on-click="() => this.props.close()" data-available-offline="">Ok</button>
-        </t>
+        <t t-call-slot="control-panel-buttons"/>
       </t>
     </Dialog>
+  </t>
+
+  <t t-name="web.FormViewDialog">
+    <View t-props="this.viewProps"/>
   </t>
 
   <t t-name="web.FormViewDialog.ToMany.buttons" t-inherit="web.FormView.DialogButtons">

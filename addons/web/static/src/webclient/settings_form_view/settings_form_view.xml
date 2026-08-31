@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.SettingsFormView" t-inherit="web.FormView" t-inherit-mode="primary">
-        <xpath expr="./div[@t-ref='this.rootRef']" position="attributes">
-            <attribute name="class">o-settings-form-view o_field_highlight</attribute>
-        </xpath>
-        <xpath expr="//Layout/t[@t-set-slot='control-panel-actions']" position="replace">
+        <xpath expr="//t[@t-component='this.layout']/t[@t-set-slot='control-panel-actions']" position="replace">
             <t t-set-slot="control-panel-actions">
                 <t t-if="this.searchBarToggler.state.showSearchBar">
                     <div class="o_cp_searchview d-flex w-100" role="search">
@@ -21,21 +18,21 @@
                 <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
             </t>
         </xpath>
-        <xpath expr="//Layout/t[@t-set-slot='control-panel-buttons']" position="replace">
+        <xpath expr="//t[@t-component='this.layout']/t[@t-set-slot='control-panel-buttons']" position="replace">
             <t t-set-slot="control-panel-buttons">
                 <t t-call="{{ this.props.buttonDialogTemplate }}"/>
             </t>
         </xpath>
-        <xpath expr="//Layout/t[@t-set-slot='control-panel-status-indicator']" position="replace">
+        <xpath expr="//t[@t-component='this.layout']/t[@t-set-slot='control-panel-status-indicator']" position="replace">
             <t t-set-slot="control-panel-status-indicator">
                 <span t-if="this.model.root.dirty" class="text-muted ms-2 o_dirty_warning">Unsaved changes</span>
             </t>
         </xpath>
-        <xpath expr="//Layout/t[@t-set-slot='control-panel-additional-actions']" position="replace"/>
-        <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="attributes">
+        <xpath expr="//t[@t-component='this.layout']/t[@t-set-slot='control-panel-additional-actions']" position="replace"/>
+        <xpath expr="//t[@t-component='this.layout']/t[@t-component='this.props.Renderer']" position="attributes">
             <attribute name="initialApp">this.initialApp</attribute>
         </xpath>
-        <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="inside">
+        <xpath expr="//t[@t-component='this.layout']/t[@t-component='this.props.Renderer']" position="inside">
             <t t-set-slot="NoContentHelper" isVisible="this.state.displayNoContent">
                 <t t-call="web.NoContentHelper"
                     title.translate="No settings found"

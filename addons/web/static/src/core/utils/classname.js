@@ -1,3 +1,5 @@
+import { t } from "@odoo/owl";
+
 /**
  * Adds the given classes to an element, whether the classes
  * are strings or objects.
@@ -69,3 +71,5 @@ function toClassObj(classDefinition) {
         return {};
     }
 }
+
+export const CssClassType = t.or([t.string(), t.object(), t.array(t.string())]);

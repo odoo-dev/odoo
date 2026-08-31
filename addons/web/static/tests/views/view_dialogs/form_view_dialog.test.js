@@ -169,7 +169,12 @@ test("formviewdialog buttons in footer are not duplicated", async () => {
     await animationFrame();
 
     expect(".modal").toHaveCount(1);
-    expect(".modal button.my_button").toHaveCount(1, { message: "should have 1 buttons in modal" });
+    expect(".modal footer button").toHaveCount(1, {
+        message: "should have 1 buttons in modal footer",
+    });
+    expect(".modal button.my_button").toHaveCount(1, {
+        message: "button should be the custom one",
+    });
 
     await click(".o_field_x2many_list_row_add button");
     await animationFrame();
@@ -177,8 +182,11 @@ test("formviewdialog buttons in footer are not duplicated", async () => {
     await animationFrame();
 
     expect(".modal").toHaveCount(1);
-    expect(".modal button.btn-primary").toHaveCount(1, {
-        message: "should still have 1 buttons in modal",
+    expect(".modal footer button").toHaveCount(1, {
+        message: "should still have 1 buttons in modal footer",
+    });
+    expect(".modal button.my_button").toHaveCount(1, {
+        message: "button should still be the custom one",
     });
 });
 

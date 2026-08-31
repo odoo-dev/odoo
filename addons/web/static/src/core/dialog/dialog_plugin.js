@@ -22,7 +22,7 @@ class DialogWrapper extends Component {
         subEnv: t.any(),
     });
     setup() {
-        useSubEnv({ dialogData: this.props.subEnv });
+        useSubEnv({ inDialog: true, dialogData: this.props.subEnv });
     }
 }
 

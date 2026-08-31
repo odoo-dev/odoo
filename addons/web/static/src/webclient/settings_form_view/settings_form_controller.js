@@ -10,6 +10,7 @@ import { normalize } from "@web/core/l10n/utils";
 import { useDebounced } from "@web/core/utils/timing";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { useViewButtonHandler } from "@web/views/view_button/view_button_hook";
+import { mergeClasses } from "@web/core/utils/classname";
 
 export class SettingsFormController extends formView.Controller {
     static template = "web.SettingsFormView";
@@ -70,6 +71,10 @@ export class SettingsFormController extends formView.Controller {
             (value) => (this.searchState.value = normalize(value)),
             500
         );
+    }
+
+    get className() {
+        return mergeClasses(super.className, "o-settings-form-view o_field_highlight");
     }
 
     get modelParams() {

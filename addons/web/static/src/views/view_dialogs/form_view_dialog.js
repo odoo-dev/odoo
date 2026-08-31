@@ -1,9 +1,23 @@
+import { Component, t, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { CssClassType } from "@web/core/utils/classname";
 import { useService } from "@web/core/utils/hooks";
 import { CallbackRecorder } from "@web/search/action_hook";
+import { provideFormLayout, useFormLayoutInfo } from "@web/views/form/form_layout";
 import { View } from "@web/views/view";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+class FormDialogLayout extends Component {
+    static template = "web.FormDialogLayout";
+    static components = { Dialog };
+
+    info = useFormLayoutInfo();
+
+    layoutProps = useProps();
+    root = useProps({
+        cssClass: CssClassType.optional(""),
+        ref: t.signal(t.ref()),
+    });
+}
 
 export const formViewDialogProps = {
     close: t.function(),
@@ -30,7 +44,7 @@ export const formViewDialogProps = {
 
 export class FormViewDialog extends Component {
     static template = "web.FormViewDialog";
-    static components = { Dialog, View };
+    static components = { View };
     props = useProps(formViewDialogProps);
 
     setup() {
@@ -38,7 +52,6 @@ export class FormViewDialog extends Component {
 
         this.uiService = useService("ui");
         this.actionService = useService("action");
-        this.modalRef = signal.ref();
         this.env.dialogData.dismiss = () => this.discardRecord();
 
         const buttonDialogTemplate = this.props.isToMany
@@ -89,6 +102,13 @@ export class FormViewDialog extends Component {
                 this.props.close();
             };
         }
+
+        provideFormLayout(FormDialogLayout, {
+            size: this.props.size,
+            title: this.props.title,
+            onExpandCallback: this.onExpandCallback,
+            cssClass: this.props.className,
+        });
     }
 
     /**
