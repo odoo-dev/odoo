@@ -626,6 +626,9 @@ class ConnectionPool:
         self._maxconn = max(maxconn, 1)
         self._readonly = readonly
         self._lock = threading.Lock()
+        self._cursor_semaphore = None
+        if hasattr(odoo, 'evented') and odoo.evented:
+            self._cursor_semaphore = threading.Semaphore(self._maxconn)
 
     def __repr__(self):
         used = len(self._used_connections)
@@ -707,19 +710,23 @@ class ConnectionPool:
                 raise PoolError("Closing a free connection")
             raise PoolError('This connection does not belong to the pool')
 
-        if keep_in_pool and not connection.closed:
-            # Release the connection and record the last time used
-            self._debug('Put connection to %r in pool', connection.dsn)
-            try:
-                connection.reset()
-            except psycopg2.OperationalError as e:
-                self._debug('Cannot reset connection: %r (%s)', connection.dsn, e)
-            else:
-                connection._pool_last_used = time.time()
-                self._free_connections.append(connection)
-                return
-        self._debug('Forget connection to %r', connection.dsn)
-        connection.close()
+        try:
+            if keep_in_pool and not connection.closed:
+                # Release the connection and record the last time used
+                self._debug('Put connection to %r in pool', connection.dsn)
+                try:
+                    connection.reset()
+                except psycopg2.OperationalError as e:
+                    self._debug('Cannot reset connection: %r (%s)', connection.dsn, e)
+                else:
+                    connection._pool_last_used = time.time()
+                    self._free_connections.append(connection)
+                    return
+            self._debug('Forget connection to %r', connection.dsn)
+            connection.close()
+        finally:
+            if self._cursor_semaphore:
+                self._cursor_semaphore.release()
 
     @locked
     def close_all(self, dsn: dict | str | None = None):
@@ -770,14 +777,23 @@ class Connection:
 
     def cursor(self) -> Cursor:
         _logger.debug('create cursor to %r', self.dsn)
-        cnx = self.__pool.borrow(self.__dsn)
-        cnx.set_session(
-            # See the docstring of this class.
-            isolation_level=ISOLATION_LEVEL_REPEATABLE_READ,
-            readonly=self.__pool.readonly,
-            autocommit=False,
-        )
-        return Cursor(cnx, self.__dbname)
+        semaphore = self.__pool._cursor_semaphore
+        if semaphore and not semaphore.acquire(timeout=10):
+            err = 'Failed to acquire cursor within timeout'
+            raise PoolError(err)
+        try:
+            cnx = self.__pool.borrow(self.__dsn)
+            cnx.set_session(
+                # See the docstring of this class.
+                isolation_level=ISOLATION_LEVEL_REPEATABLE_READ,
+                readonly=self.__pool.readonly,
+                autocommit=False,
+            )
+            return Cursor(cnx, self.__dbname)
+        except Exception:
+            if semaphore:
+                semaphore.release()
+            raise
 
     def __bool__(self):
         raise NotImplementedError()
