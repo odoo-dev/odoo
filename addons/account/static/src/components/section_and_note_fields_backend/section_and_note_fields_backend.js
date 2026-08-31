@@ -444,9 +444,18 @@ export class SectionAndNoteListRenderer extends ListRenderer {
                 || col.name === this.titleField
                 || (this.isSection(record) && this.props.aggregatedFields.includes(col.name))
         );
-        return sectionCols.map((col) => {
+        return sectionCols.map((col, index) => {
             if (col.name === this.titleField) {
-                return { ...col, colspan: columns.length - sectionCols.length + 1 };
+                const titleIdx = columns.findIndex((c) => c.name === this.titleField);
+                let nextColspan;
+                if (index + 1 < sectionCols.length) {
+                    const nextCol = sectionCols[index + 1];
+                    const nextColIdx = columns.findIndex((c) => c.name === nextCol.name);
+                    nextColspan = nextColIdx - titleIdx;
+                } else {
+                    nextColspan = columns.length - titleIdx;
+                }
+                return { ...col, colspan: nextColspan };
             } else {
                 return { ...col };
             }
