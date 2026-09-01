@@ -1,5 +1,5 @@
 import { Registry } from "@odoo/o-spreadsheet";
-import { Component, computed, onWillStart, proxy, useEffect, useListener } from "@odoo/owl";
+import { Component, computed, onWillStart, proxy, signal, useEffect, useListener } from "@odoo/owl";
 import { SpreadsheetComponent } from "@spreadsheet/actions/spreadsheet_component";
 import { SpreadsheetShareButton } from "@spreadsheet/components/share_button/share_button";
 import { _t } from "@web/core/l10n/translation";
@@ -14,6 +14,8 @@ import { Status } from "./dashboard_loader_service";
 import { DashboardSearchBar } from "./dashboard_search_bar/dashboard_search_bar";
 import { MobileFigureContainer } from "./mobile_figure_container/mobile_figure_container";
 import { DashboardMobileSearchPanel } from "./mobile_search_panel/mobile_search_panel";
+
+const GRID_SCROLLBAR_SELECTOR = ".o-dashboard-grid > .o-scrollbar.vertical";
 
 export const dashboardActionRegistry = new Registry();
 
@@ -31,6 +33,8 @@ export class SpreadsheetDashboardAction extends Component {
     static props = { ...standardActionServiceProps };
     static displayName = _t("Dashboards");
 
+    rendererRef = signal.ref();
+
     activeDashboardId = computed(() => this.loader.activeDashboardId);
     dashboard = computed(() => {
         const id = this.activeDashboardId();
@@ -44,6 +48,8 @@ export class SpreadsheetDashboardAction extends Component {
         this.uiService = useService("ui");
         this.actionService = useService("action");
         this.loader = useService("spreadsheet_dashboard_loader");
+        /** @type {{ sidebarExpanded: boolean, isScrolled: boolean}} */
+        this.state = proxy({ sidebarExpanded: true, isScrolled: false });
         onWillStart(async () => {
             if (this.props.state && this.props.state.dashboardLoader) {
                 const state = this.props.state.dashboardLoader;
@@ -64,6 +70,19 @@ export class SpreadsheetDashboardAction extends Component {
                 return () => dashboard.model.off("update", this, onUpdate);
             }
         });
+        useEffect(() => {
+            const renderer = this.rendererRef();
+            if (!renderer) {
+                return;
+            }
+            const observer = new ResizeObserver(() => this.scheduleIsScrolledUpdate());
+            observer.observe(renderer);
+            return () => {
+                observer.disconnect();
+                this.cancelIsScrolledUpdate();
+            };
+        });
+        useListener(this.rendererRef, "scroll", this.onGridScroll.bind(this), { capture: true });
         useListener(window, "afterprint", this.logExport.bind(this));
 
         useSetupAction({
@@ -71,8 +90,6 @@ export class SpreadsheetDashboardAction extends Component {
                 dashboardLoader: this.loader.getState(),
             }),
         });
-        /** @type {{ sidebarExpanded: boolean}} */
-        this.state = proxy({ sidebarExpanded: true });
         this.searchBarToggler = useSearchBarToggler();
     }
 
@@ -109,6 +126,45 @@ export class SpreadsheetDashboardAction extends Component {
     openDashboard(dashboardId) {
         this.loader.activateDashboard(dashboardId);
         this.props.updateActionState({ dashboard_id: dashboardId });
+        this.cancelIsScrolledUpdate();
+        this.state.isScrolled = false;
+    }
+
+    /**
+     * Coalesce the scroll and resize notifications into a single measurement
+     * per animation frame. Measuring in the event handler itself would read
+     * `scrollTop` while the renders triggered by the spreadsheet model are
+     * still pending, forcing a synchronous layout on every scroll event.
+     */
+    scheduleIsScrolledUpdate() {
+        if (this.isScrolledFrame) {
+            return;
+        }
+        this.isScrolledFrame = requestAnimationFrame(() => {
+            this.isScrolledFrame = undefined;
+            this.updateIsScrolled();
+        });
+    }
+
+    cancelIsScrolledUpdate() {
+        if (this.isScrolledFrame) {
+            cancelAnimationFrame(this.isScrolledFrame);
+            this.isScrolledFrame = undefined;
+        }
+    }
+
+    updateIsScrolled() {
+        const scrollbar = this.rendererRef()?.querySelector(GRID_SCROLLBAR_SELECTOR);
+        this.state.isScrolled = !!scrollbar && scrollbar.scrollTop > 0;
+    }
+
+    /**
+     * @param {Event} ev
+     */
+    onGridScroll(ev) {
+        if (ev.target.matches?.(GRID_SCROLLBAR_SELECTOR)) {
+            this.scheduleIsScrolledUpdate();
+        }
     }
 
     /**
