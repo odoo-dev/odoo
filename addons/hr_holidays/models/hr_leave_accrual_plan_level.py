@@ -223,6 +223,12 @@ class HrLeaveAccrualLevel(models.Model):
             # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
             level[day_field] = str(min(monthrange(2020, int(level[month_field]))[1], int(level[day_field])))
 
+    @api.onchange("yearly_day")
+    def _onchange_yearly_day(self):
+        for level in self:
+            if level.yearly_day > str(monthrange(2020, int(level.yearly_month))[1]):
+                level.yearly_day = str(monthrange(2020, int(level.yearly_month))[1])
+
     @api.depends("first_month")
     def _compute_first_month_day(self):
         self._set_day("first_month_day", "first_month")
