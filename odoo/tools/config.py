@@ -41,6 +41,7 @@ DEFAULT_COLOR_SPEC = {
     'perf': 'auto',
     'cursor_mode': 'auto',
     'sql': 'auto',
+    'test_assert': 'auto',
 }
 
 

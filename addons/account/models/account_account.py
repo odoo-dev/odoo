@@ -660,6 +660,8 @@ class AccountAccount(models.Model):
             :param default_value: Default value to be assigned if no parent account is found.
         """
         assert field_name in self._fields
+        if not accounts_to_process:
+            return
 
         all_accounts = self.search_read(
             domain=[('code', '!=', False), *self._check_company_domain(self.env.company)],
@@ -904,7 +906,9 @@ class AccountAccount(models.Model):
 
     @api.onchange('code')
     def _onchange_code(self):
-        self.env.add_to_compute(self._fields['account_type'], self)
+        to_update = self.filtered(lambda a: not a.id or not a.account_type)
+        self.env.add_to_compute(self._fields['account_type'], to_update)
+        to_update.modified(['account_type'])
 
     @api.depends_context('company', 'formatted_display_name', 'from_bill')
     @api.depends('code')
