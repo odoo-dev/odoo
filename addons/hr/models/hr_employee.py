@@ -1788,6 +1788,19 @@ We can redirect you to the public employee list."""
 
     def _get_expected_attendances(self, date_from, date_to):
         self.ensure_one()
+        return self._get_expected_attendances_batch(date_from, date_to, compute_leaves=True)
+
+    def _get_expected_attendances_batch(self, date_from, date_to, compute_leaves=True):
+        """
+        Shared implementation for `_get_expected_attendances` (always called with `compute_leaves=True`,
+        keeping that method's behavior unchanged).
+        `compute_leaves=False` returns the raw expected attendance without netting out approved leave;
+        this is used by `hr_attendance_gantt` to compute a flexible calendar's expected hours, since for
+        flexible calendars leave is netted out separately there (per calendar day, capped at that day's
+        max hours) instead of through interval subtraction against the flexible calendar's synthetic
+        per-day attendance blocks, which are not tied to any particular day.
+        """
+        self.ensure_one()
         valid_versions = self.sudo()._get_versions_with_contract_overlap_with_period(date_from.date(), date_to.date())
         employee_tz = timezone(self.tz) if self.tz else None
         if not valid_versions:
@@ -1797,7 +1810,7 @@ We can redirect you to the public employee list."""
                 date_to,
                 tz=employee_tz,
                 resources=self.resource_id,
-                compute_leaves=True,
+                compute_leaves=compute_leaves,
                 domain=[('company_id', 'in', [False, self.company_id.id])])[self.resource_id.id]
             return calendar_intervals
         duration_data = Intervals()
@@ -1813,7 +1826,7 @@ We can redirect you to the public employee list."""
                                     min(date_to, version_end),
                                     tz=employee_tz,
                                     resources=self.resource_id,
-                                    compute_leaves=True,
+                                    compute_leaves=compute_leaves,
                                     domain=[('company_id', 'in', [False, self.company_id.id]), ('time_type', '=', 'leave')])[self.resource_id.id]
             duration_data = duration_data | version_intervals
         return duration_data
