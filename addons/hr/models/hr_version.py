@@ -187,6 +187,8 @@ class HrVersion(models.Model):
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     wage = fields.Monetary('Wage', tracking=1, help="Employee's monthly gross wage.", aggregator="avg",
                            groups="hr.group_hr_manager")
+    certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level', groups="hr.group_hr_user", tracking=True)
+
     # [XBO] TODO: remove me in master
     company_country_id = fields.Many2one('res.country', string="Company country",
                                          related='company_id.country_id', readonly=True)
@@ -680,6 +682,16 @@ class HrVersion(models.Model):
             ('cohabitant', self.env._('Legal Cohabitant')),
             ('widower', self.env._('Widower')),
             ('divorced', self.env._('Divorced')),
+        ]
+    
+    @api.model
+    def _get_certificate_selection(self):
+        return [
+            ('graduate', self.env._('Graduate')),
+            ('bachelor', self.env._('Bachelor')),
+            ('master', self.env._('Master')),
+            ('doctor', self.env._('Doctor')),
+            ('other', self.env._('Other')),
         ]
 
     @api.model
