@@ -753,7 +753,7 @@
                                     </span>
                                 </div>
                                 <footer t-if="!selection_mode" class="p-0">
-                                    <field name="activity_ids" widget="kanban_activity"/>
+                                    <field name="activity_ids" widget="kanban_activity" class="me-1"/>
                                     <t t-if="record.project_id.raw_value and record.subtask_count.raw_value">
                                         <widget name="subtask_counter" class="me-1"/>
                                     </t>
