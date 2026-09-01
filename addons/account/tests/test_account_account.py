@@ -1,10 +1,13 @@
-from odoo import Command
-from odoo.addons.account.tests.common import TestAccountMergeCommon
-from odoo.tests import Form, tagged, new_test_user
-from odoo.exceptions import UserError, ValidationError
-from odoo.tools import mute_logger
 import psycopg2
 from freezegun import freeze_time
+
+from odoo import Command
+from odoo.exceptions import UserError, ValidationError
+from odoo.tests import Form, new_test_user, tagged, warmup
+from odoo.tools import mute_logger
+
+from odoo.addons.account.tests.common import TestAccountMergeCommon
+
 
 @tagged('post_install', '-at_install')
 class TestAccountAccount(TestAccountMergeCommon):
@@ -1159,3 +1162,127 @@ class TestAccountAccount(TestAccountMergeCommon):
             1,
             "No extra journal should be created for an account already used as a journal default account.",
         )
+
+    def test_account_mass_edit_code_perf(self):
+        account1_1, account1_2 = self.env['account.account'].search([('company_ids', 'in', self.env.company.id)], limit=2)
+        account2_1, account2_2 = self.env['account.account'].search([('company_ids', 'in', self.company_data_2['company'].id)], limit=2)
+        all_accounts = account1_1 + account1_2 + account2_1 + account2_2
+
+        company1_name = self.env.company.name
+        company2_name = self.company_data_2['company'].name
+
+        def test_load(self):
+            with self.assertQueries([
+                """ SELECT ... FROM "res_company" ... WHERE 1=1 ORDER BY ... """,
+                """ SELECT "account_account_res_company_rel"."account_account_id", "account_account_res_company_rel"."res_company_id" FROM "res_company" JOIN "account_account_res_company_rel" ON ("account_account_res_company_rel"."res_company_id" = "res_company"."id") WHERE "account_account_res_company_rel"."account_account_id" IN %s ORDER BY "res_company"."sequence"  , "res_company"."name" """,
+                """ SAVEPOINT ... """,
+                """ SELECT ... FROM "res_users" WHERE "res_users"."id" IN %s """,
+                """ SELECT "account_account"."id" FROM "account_account" LEFT JOIN (
+                    SELECT child.id AS id,
+                           CASE
+                           WHEN COUNT((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar") = COUNT("ancestor"."id")
+                           THEN STRING_AGG((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar", ' / ' ORDER BY ord)
+                            END AS code_path,
+                           STRING_AGG("ancestor"."name"->>%s, ' / ' ORDER BY ord) AS name_path
+                      FROM account_account child
+        CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(RTRIM(child.parent_path, '/'), '/')) WITH ORDINALITY AS t(id, ord)
+                      JOIN account_account ancestor ON ancestor.id = t.id::int
+                  GROUP BY child.id
+                ) AS "account_account__path_table" ON ("account_account__path_table"."id" = "account_account"."id") WHERE ("account_account"."active" IS TRUE AND "account_account"."id" IN %s) AND EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN %s) ORDER BY "account_account__path_table"."code_path"  , array_position(%s::text[], "account_account"."account_type"::text)  , "account_account__path_table"."name_path" """,
+                """ SELECT "res_company"."id", "res_company"."name" FROM "res_company" WHERE ("res_company"."active" IS TRUE AND "res_company"."name" IN %s) ORDER BY "res_company"."sequence"  , "res_company"."name"   LIMIT 100 """,
+                """ SELECT "res_company"."id", "res_company"."name" FROM "res_company" WHERE ("res_company"."active" IS TRUE AND "res_company"."name" IN %s) ORDER BY "res_company"."sequence"  , "res_company"."name"   LIMIT 100 """,
+                """ SAVEPOINT ... """,
+                """ SELECT "res_company_users_rel"."user_id", "res_company_users_rel"."cid" FROM "res_company" JOIN "res_company_users_rel" ON ("res_company_users_rel"."cid" = "res_company"."id") WHERE "res_company_users_rel"."user_id" IN %s ORDER BY "res_company"."sequence"  , "res_company"."name" """,
+                """ SELECT "account_account_account_tag"."account_account_id", "account_account_account_tag"."account_account_tag_id" FROM "account_account_tag" JOIN "account_account_account_tag" ON ("account_account_account_tag"."account_account_tag_id" = "account_account_tag"."id") WHERE "account_account_account_tag"."account_account_id" IN %s ORDER BY "account_account_tag"."id" """,
+                """ SELECT ... FROM "res_company" ... WHERE 1=1 ORDER BY ... """,
+                """ SELECT ... FROM "res_users" WHERE "res_users"."id" IN %s """,
+                """ SELECT "account_account"."id", (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" FROM "account_account" WHERE "account_account"."id" IN %s """,
+                """ UPDATE "account_account"
+                    SET "code_store" = (SELECT jsonb_object_agg(d.key, d.value)
+                        FROM jsonb_each(COALESCE("account_account"."code_store", '{}'::jsonb) || "__tmp"."code_store"::"jsonb") d
+                        JOIN jsonb_each(%s) f
+                        ON d.key = f.key AND d.value != f.value), "write_date" = "__tmp"."write_date"::"timestamp", "write_uid" = "__tmp"."write_uid"::"int4"
+                    FROM (VALUES %s, %s, %s, %s) AS "__tmp"("id", "code_store", "write_date", "write_uid")
+                    WHERE "account_account"."id" = "__tmp"."id"
+                """,
+                """ SELECT "account_account"."id" FROM "account_account" WHERE ("account_account"."active" IS TRUE AND (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" NOT IN %s AND EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN %s)) ORDER BY (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" """,
+                """ SELECT "account_account_account_tag"."account_account_id", "account_account_account_tag"."account_account_tag_id" FROM "account_account_tag" JOIN "account_account_account_tag" ON ("account_account_account_tag"."account_account_tag_id" = "account_account_tag"."id") WHERE "account_account_account_tag"."account_account_id" IN %s ORDER BY "account_account_tag"."id" """,
+                """ SELECT "account_account"."id", (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" FROM "account_account" WHERE "account_account"."id" IN %s """,
+                """ SELECT "account_account_tag"."id", "account_account_tag"."name"->>%s, "account_account_tag"."applicability", "account_account_tag"."color", "account_account_tag"."active", "account_account_tag"."country_id", "account_account_tag"."create_uid", "account_account_tag"."create_date", "account_account_tag"."write_uid", "account_account_tag"."write_date" FROM "account_account_tag" WHERE "account_account_tag"."id" IN %s """,
+                """ SELECT "account_account"."id", "account_account"."name"->>%s, "account_account"."description"->>%s, "account_account"."currency_id", "account_account"."active", "account_account"."account_type", "account_account"."reconcile", "account_account"."note", "account_account"."parent_id", "account_account"."parent_path", "account_account"."non_trade", "account_account"."create_uid", "account_account"."create_date", "account_account"."is_deferred", "account_account"."deferred_account_id", "account_account"."fiscal_category_id" FROM "account_account" WHERE "account_account"."id" IN %s """,
+                """ SELECT "account_account"."id", "account_account"."account_type" FROM "account_account" WHERE ("account_account"."active" IS TRUE AND (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" NOT IN %s AND EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN %s)) ORDER BY (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" """,
+                """
+            SELECT journal.id
+              FROM account_journal journal
+              JOIN account_account account ON journal.default_account_id = account.id
+             WHERE account.account_type IN ('asset_receivable', 'liability_payable')
+               AND account.id IN %s
+             LIMIT 1; """,
+                """
+            SELECT account.id
+            FROM account_account account
+            JOIN account_journal journal ON journal.default_account_id = account.id
+            WHERE account.id IN %s
+            AND account.account_type IN ('asset_receivable', 'liability_payable')
+            AND journal.type IN ('sale', 'purchase')
+            LIMIT 1; """,
+                """ SELECT "account_account_res_company_rel"."account_account_id", "account_account_res_company_rel"."res_company_id" FROM "res_company" JOIN "account_account_res_company_rel" ON ("account_account_res_company_rel"."res_company_id" = "res_company"."id") WHERE "account_account_res_company_rel"."account_account_id" IN %s ORDER BY "res_company"."sequence"  , "res_company"."name" """,
+                """ SELECT COUNT(*) FROM (SELECT  FROM "account_move_line" WHERE ("account_move_line"."account_id" IN %s AND ("account_move_line"."company_id" IS NULL OR "account_move_line"."company_id" NOT IN (SELECT "res_company"."id" FROM "res_company" WHERE "res_company"."parent_path" LIKE %s))) LIMIT 1) t """,
+                """ SELECT COUNT(*) FROM (SELECT  FROM "account_move_line" WHERE ("account_move_line"."account_id" IN %s AND ("account_move_line"."company_id" IS NULL OR "account_move_line"."company_id" NOT IN (SELECT "res_company"."id" FROM "res_company" WHERE "res_company"."parent_path" LIKE %s))) LIMIT 1) t """,
+                """ SELECT ... FROM "res_partner" WHERE "res_partner"."id" IN %s """,
+                """ RELEASE SAVEPOINT ... """,
+                """ RELEASE SAVEPOINT ... """,
+                """ SELECT "account_account"."id", (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" FROM "account_account" LEFT JOIN (
+                    SELECT child.id AS id,
+                           CASE
+                           WHEN COUNT((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar") = COUNT("ancestor"."id")
+                           THEN STRING_AGG((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar", ' / ' ORDER BY ord)
+                            END AS code_path,
+                           STRING_AGG("ancestor"."name"->>%s, ' / ' ORDER BY ord) AS name_path
+                      FROM account_account child
+        CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(RTRIM(child.parent_path, '/'), '/')) WITH ORDINALITY AS t(id, ord)
+                      JOIN account_account ancestor ON ancestor.id = t.id::int
+                  GROUP BY child.id
+                ) AS "account_account__path_table" ON ("account_account__path_table"."id" = "account_account"."id") WHERE ((COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" IN %s AND "account_account"."id" NOT IN %s AND (EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN (SELECT "res_company"."id" FROM "res_company" WHERE "res_company"."parent_path" LIKE %s)) OR EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN %s))) ORDER BY "account_account__path_table"."code_path"  , array_position(%s::text[], "account_account"."account_type"::text)  , "account_account__path_table"."name_path" """,
+                """ SELECT "account_account"."id", (COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" FROM "account_account" LEFT JOIN (
+                    SELECT child.id AS id,
+                           CASE
+                           WHEN COUNT((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar") = COUNT("ancestor"."id")
+                           THEN STRING_AGG((COALESCE("ancestor"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar", ' / ' ORDER BY ord)
+                            END AS code_path,
+                           STRING_AGG("ancestor"."name"->>%s, ' / ' ORDER BY ord) AS name_path
+                      FROM account_account child
+        CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(RTRIM(child.parent_path, '/'), '/')) WITH ORDINALITY AS t(id, ord)
+                      JOIN account_account ancestor ON ancestor.id = t.id::int
+                  GROUP BY child.id
+                ) AS "account_account__path_table" ON ("account_account__path_table"."id" = "account_account"."id") WHERE ((COALESCE("account_account"."code_store"->(%s::"varchar"),to_jsonb(%s::"varchar"))->>0)::"varchar" IN %s AND "account_account"."id" NOT IN %s AND (EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN (SELECT "res_company"."id" FROM "res_company" WHERE "res_company"."parent_path" LIKE %s)) OR EXISTS (SELECT 1 FROM "account_account_res_company_rel" AS "account_account__company_ids" WHERE "account_account__company_ids"."account_account_id" = "account_account"."id" AND "account_account__company_ids"."res_company_id" IN %s))) ORDER BY "account_account__path_table"."code_path"  , array_position(%s::text[], "account_account"."account_type"::text)  , "account_account__path_table"."name_path"
+                """,
+            ]):
+                self.env['account.account'].with_context(tracking_disable=True).load(
+                    # ruff: noqa: E201, E241
+                    [            '.id', 'code_mapping_ids/code', 'code_mapping_ids/company_id'],
+                    [
+                        (account1_1.id,                '111111',                 company1_name),
+                        (           '',                '221111',                 company2_name),
+                        (account1_2.id,                '111122',                 company1_name),
+                        (           '',                '221122',                 company2_name),
+                        (account2_1.id,                '112211',                 company1_name),
+                        (           '',                '222211',                 company2_name),
+                        (account2_2.id,                '112222',                 company1_name),
+                        (           '',                '222222',                 company2_name),
+                    ],
+                )
+
+        warmup(test_load)(self)
+        self.assertRecordValues(all_accounts.with_company(self.env.company), [
+            {'code': '111111'},
+            {'code': '111122'},
+            {'code': '112211'},
+            {'code': '112222'},
+        ])
+        self.assertRecordValues(all_accounts.with_company(self.company_data_2['company']), [
+            {'code': '221111'},
+            {'code': '221122'},
+            {'code': '222211'},
+            {'code': '222222'},
+        ])

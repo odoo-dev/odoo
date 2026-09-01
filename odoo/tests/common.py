@@ -48,6 +48,7 @@ import psutil
 import requests
 from lxml import etree, html
 from passlib.context import CryptContext
+from psycopg2 import sql as psql
 from requests import PreparedRequest, Session
 from urllib3.util import parse_url
 from werkzeug.exceptions import BadRequest
@@ -64,14 +65,35 @@ from odoo.http.session import (
     DEFAULT_LANG,
     get_default_session,
     logout,
-    update_session_token,
     session_store,
+    update_session_token,
 )
 from odoo.http.session import Session as OdooHttpSession
-from odoo.orm.environments import CacheLayer
+from odoo.logging import (
+    BOLD_SEQ,
+    COLOR_PATTERN,
+    CYAN,
+    DEFAULT,
+    GREEN,
+    MAGENTA,
+    PID_COLORS,
+    RED,
+    RESET_SEQ,
+    TRUE_COLOR_PATTERN,
+    YELLOW,
+)
 from odoo.modules.registry import Registry
+from odoo.orm.environments import CacheLayer
 from odoo.sql_db import Cursor
-from odoo.tools import SQL, DotDict, config, file_open, float_compare, mute_logger, profiler
+from odoo.tools import (
+    SQL,
+    DotDict,
+    config,
+    file_open,
+    float_compare,
+    mute_logger,
+    profiler,
+)
 from odoo.tools.binary import BinaryBytes
 from odoo.tools.lru import LRU
 from odoo.tools.mail import single_email_re
@@ -864,13 +886,13 @@ class BaseCase(case.TestCase):
 
         # diff lists of queries 'expected' and 'actual_queries'
         queries1 = [QueryLike(query) for query in expected]
-        queries2 = [QueryLike(query) for query in actual_queries]
+        queries2 = [QueryLike(query.as_string(self.env.cr._obj) if isinstance(query, psql.Composable) else query) for query in actual_queries]
         if queries1 == queries2:
             return
 
         diff = "\n".join(
-            (f"--- {query1}" if query2 is None else
-             f"+++ {query2}" if query1 is None else
+            (COLOR_PATTERN % (30 + RED, 40 + DEFAULT, f"--- {query1}") if query2 is None else
+             COLOR_PATTERN % (30 + GREEN, 40 + DEFAULT, f"+++ {query2}") if query1 is None else
              f"=== {query2}")
             for query1, query2 in diff_zip(queries1, queries2)
         )

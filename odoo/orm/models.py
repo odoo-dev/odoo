@@ -949,6 +949,14 @@ class BaseModel(metaclass=MetaModel):
         # add current module in context for the conversion of xml ids
         self = self.with_context(_import_current_module=current_module)
 
+        for id_fname in ['id', '.id']:
+            if id_fname in fields:
+                id_index = fields.index(id_fname)
+                ids = [d[id_index] for d in data]
+                if id_fname == 'id':
+                    ids = [self.env['ir.model.data']._xmlid_to_res_id(id_, raise_if_not_found=False) for id_ in ids]
+                self.browse(filter(None, ids)).check_access('write')
+
         cr = self.env.cr
         savepoint = cr.savepoint()
 

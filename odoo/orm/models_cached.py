@@ -2,9 +2,10 @@
 
 from typing import Self
 
-from odoo.tools import frozendict
+from odoo.tools import frozendict, OrderedSet
 
-from .models import api, Model
+from .domains import Domain, DomainCondition
+from .models import Model, api
 
 
 class CachedModel(Model):
@@ -39,7 +40,7 @@ class CachedModel(Model):
             self._cached_data_domain, fnames, order='id')
 
         # each field is mapped to a tuple
-        result = {'id': records._ids}
+        result = {'id': OrderedSet(records._ids)}
         for fname in fnames:
             field_cache = self._fields[fname]._get_cache(records.env)
             result[fname] = tuple(map(field_cache.__getitem__, records.ids))
@@ -50,8 +51,7 @@ class CachedModel(Model):
             self.check_field_access(field, 'read')
             data = self._cached_data()
             field._insert_cache(self.browse(data['id']), data[field.name])
-            data_ids = set(data['id'])
-            if all(record_id in data_ids for record_id in self._ids):
+            if all(record_id in data['id'] for record_id in self._ids):
                 self.check_access('read')
                 return
         super()._fetch_field(field)
@@ -61,3 +61,11 @@ class CachedModel(Model):
     def get_all(self) -> Self:
         """Get all instances in cache."""
         return self.browse(self._cached_data()['id'])
+
+    def _search(self, domain, *args, **kwargs):
+        domain = Domain(domain).optimize(self)
+        match domain:
+            case DomainCondition(field_expr='id', operator='in', value=ids):
+                if set(ids) <= self._cached_data()['id']:
+                    return self.browse(ids)._as_query()
+        return super()._search(domain, *args, **kwargs)

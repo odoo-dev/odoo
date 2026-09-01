@@ -7,7 +7,7 @@ from datetime import datetime
 
 from odoo import _, api, fields, models
 from odoo.exceptions import MissingError
-from odoo.tools import babel_locale_parse, clean_context, format_datetime, format_date, format_amount, formatLang
+from odoo.tools import babel_locale_parse, clean_context, format_datetime, format_date, format_amount, formatLang, OrderedSet
 
 if typing.TYPE_CHECKING:
     from odoo.api import ValuesType
@@ -227,7 +227,7 @@ class MailTrackMixin(models.AbstractModel):
             and getattr(f, "tracking", None) is not False
         }
 
-        return model_fields and set(self.fields_get(model_fields, attributes=()))
+        return model_fields and OrderedSet(self.fields_get(model_fields, attributes=()))
 
     def _track_get_fields_info(self, tracked_fields: Iterable[str]) -> ValuesType:
         tracked_fields_get = self.fields_get(
@@ -366,7 +366,7 @@ class MailTrackMixin(models.AbstractModel):
         """
         if len(self) > 1:
             raise ValueError(f"Expected empty or single record: {self}")
-        updated = set()
+        updated = OrderedSet()
         end_values = self.env.cr.precommit.data.get(f'mail.tracking.end_values.{self._name}', {})
         tracking_values = []
 
