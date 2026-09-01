@@ -158,7 +158,7 @@ class AccountMove(models.Model):
         for move in self:
             move.l10n_id_coretax_efaktur_available = (
                 move.country_code == 'ID'
-                and move.move_type == 'out_invoice'
+                and move.move_type in ('out_invoice', 'out_refund')
                 and move.line_ids.tax_ids
             )
 
@@ -200,12 +200,12 @@ class AccountMove(models.Model):
             zero_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("l10n_id_tax_group_0", raise_if_not_found=False)
             exempt_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("l10n_id_tax_group_exempt", raise_if_not_found=False)
             stlg_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("l10n_id_tax_group_stlg", raise_if_not_found=False)
-            default_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("default_tax_group", raise_if_not_found=False)
+            not_collected_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("l10n_id_tax_group_not_collected", raise_if_not_found=False)
             vat_collector_group = self.env['account.chart.template'].with_company(move.company_id.id).ref("l10n_id_tax_group_vat_collector", raise_if_not_found=False)
             product_lines = move.line_ids.filtered(lambda line: line.display_type == 'product')
             all_taxes = product_lines.mapped('tax_ids')
             tax_groups = set(all_taxes.mapped('tax_group_id'))
-            ppn_groups = {non_luxury_group, luxury_group, zero_group, exempt_group, default_group, vat_collector_group}
+            ppn_groups = {non_luxury_group, luxury_group, zero_group, exempt_group, not_collected_group, vat_collector_group}
             ppn_groups.discard(False)
             ppn_tax_groups = [g for g in tax_groups if g in ppn_groups]
             stlg_tax_groups = [g for g in tax_groups if g == stlg_group]
@@ -224,18 +224,18 @@ class AccountMove(models.Model):
                     line_tax_groups = set(line.tax_ids.mapped('tax_group_id'))
                     if luxury_group and non_luxury_group and {luxury_group, non_luxury_group}.issubset(line_tax_groups):
                         err_messages.append(_(
-                            "Invoice %(inv)s: line '%(line)s' contains both Luxury-Goods and Non-Luxury-Goods taxes.",
+                            "Invoice %(inv)s: line '%(line)s' contains both a VAT Base and an Other Value VAT Base tax.",
                             inv=move.name or '', line=line.product_id.display_name or '')
                         )
                     if non_luxury_group and stlg_group and {non_luxury_group, stlg_group}.issubset(line_tax_groups):
                         err_messages.append(_(
-                            "Invoice %(inv)s: line '%(line)s' contains both Non-Luxury-Goods and STLG taxes.",
+                            "Invoice %(inv)s: line '%(line)s' contains both an Other Value VAT Base and an STLG tax.",
                             inv=move.name or '', line=line.product_id.display_name or '')
                         )
                     if stlg_group and stlg_group in line_tax_groups:
                         if not (luxury_group and luxury_group in line_tax_groups):
                             err_messages.append(_(
-                                "Invoice %(inv)s: line '%(line)s' has STLG tax but missing the required Luxury-Goods tax.",
+                                "Invoice %(inv)s: line '%(line)s' has an STLG tax but is missing the required VAT Base tax.",
                                 inv=move.name or '', line=line.product_id.display_name or '')
                             )
                     for tax in line.tax_ids:

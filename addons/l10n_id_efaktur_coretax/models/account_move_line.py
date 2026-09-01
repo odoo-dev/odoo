@@ -28,16 +28,18 @@ class AccountMoveLine(models.Model):
 
         # Separate tax into the regular and luxury component
         ChartTemplate = self.env['account.chart.template'].with_company(self.company_id)
-        default_tax_group = ChartTemplate.ref('default_tax_group', raise_if_not_found=False)
         non_luxury_tax_group = ChartTemplate.ref('l10n_id_tax_group_non_luxury_goods', raise_if_not_found=False)
         vat_collector_group = ChartTemplate.ref('l10n_id_tax_group_vat_collector', raise_if_not_found=False)
-        regular_tax_groups = {default_tax_group, non_luxury_tax_group, vat_collector_group}
+        regular_tax_groups = {non_luxury_tax_group, vat_collector_group}
         regular_tax_groups.discard(False)
         luxury_tax_group = ChartTemplate.ref('l10n_id_tax_group_luxury_goods', raise_if_not_found=False)
         stlg_tax_group = ChartTemplate.ref('l10n_id_tax_group_stlg', raise_if_not_found=False)
         zero_tax_group_0 = ChartTemplate.ref('l10n_id_tax_group_0', raise_if_not_found=False)
         zero_tax_group_exempt = ChartTemplate.ref('l10n_id_tax_group_exempt', raise_if_not_found=False)
-        zero_tax_groups = {zero_tax_group_0, zero_tax_group_exempt}
+        not_collected_tax_group = ChartTemplate.ref('l10n_id_tax_group_not_collected', raise_if_not_found=False)
+        # A "not collected" delivery still reports its notional 12% VAT on the
+        # e-Faktur, so the group counts as a PPN group here.
+        zero_tax_groups = {zero_tax_group_0, zero_tax_group_exempt, not_collected_tax_group}
         zero_tax_groups.discard(False)
         ppn_tax_groups = regular_tax_groups | {luxury_tax_group, stlg_tax_group} | zero_tax_groups
         ppn_tax_groups.discard(False)
