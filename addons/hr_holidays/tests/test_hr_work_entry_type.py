@@ -232,3 +232,40 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """Searching by virtual_remaining_leaves should not crash."""
+        leave_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Leave Virtual Remaining',
+            'code': 'Test Leave Virtual Remaining',
+            'requires_allocation': True,  # required to test the op call
+        })
+
+        # Should not raise
+        self.env['hr.work.entry.type'].search([
+            ('virtual_remaining_leaves', '>', 0),
+        ])
+
+        self.assertIn(
+            'Test Leave Virtual Remaining',
+            self.env['hr.work.entry.type'].search(
+                domain=[('virtual_remaining_leaves', '=', 0)]
+            ).mapped('name')
+        )
+
+        allocation = self.env['hr.leave.allocation'].create({
+            'name': 'Test Allocation',
+            'employee_id': self.employee_hruser_id,
+            'work_entry_type_id': leave_type.id,
+            'number_of_days': 5,
+            'state': 'confirm',
+        })
+
+        allocation.action_approve()
+
+        self.assertIn(
+            'Test Leave Virtual Remaining',
+            self.env['hr.work.entry.type'].with_context(employee_id=self.employee_hruser_id).search(
+                domain=[('virtual_remaining_leaves', '>', 0)]
+            ).mapped('name'),
+        )
