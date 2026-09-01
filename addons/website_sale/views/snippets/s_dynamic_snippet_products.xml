@@ -30,6 +30,10 @@
                 t-set="snippet_classes"
                 t-value="'oe_website_sale ' + default_design_classes"
             />
+            <t
+                t-set="snippet_style"
+                t-value="'--o-wsale-products-grid-gap: ' + (request and request.env['website'].get_current_website().shop_gap or '16px') + ';'"
+            />
             <t t-set="main_page_url" t-value="'/shop'"/>
             <t t-call="website_sale.s_dynamic_snippet_products_preview_data"/>
         </t>
