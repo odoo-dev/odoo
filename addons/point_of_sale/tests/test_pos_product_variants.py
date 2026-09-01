@@ -46,8 +46,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'product_template_attribute_value_ids': [(6, 0, [ptav_dyn2.id])],
             'pos_categ_ids': [Command.set(self.pos_desk_misc_test.ids)],
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_dynamic_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_dynamic_variant_price', login="pos_user")
 
     def test_integration_always_variant_price(self):
         """Tests the price of products with always variant when added to cart"""
@@ -67,8 +67,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
         })
 
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_always_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_always_variant_price', login="pos_user")
 
     def test_integration_never_variant_price(self):
         """Tests the price of products with no variant(never) variant when added to cart"""
@@ -88,8 +88,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'value_ids': [Command.set([self.no_variant_attribute_extra.id, self.no_variant_attribute_second.id])],
         })
 
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_never_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_never_variant_price', login="pos_user")
 
     def test_integration_dynamic_always_variant_price(self):
         """Tests the price of products with dynamic and always variants when added to cart"""
@@ -134,8 +134,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'product_template_attribute_value_ids': [(6, 0, (ptav_dyn2 + ptav_always1).ids)],
             'pos_categ_ids': [Command.set(self.pos_desk_misc_test.ids)],
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_dynamic_always_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_dynamic_always_variant_price', login="pos_user")
 
     def test_integration_dynamic_never_variant_price(self):
         """Tests the price of products with dynamic and never variants when added to cart"""
@@ -180,8 +180,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'product_template_attribute_value_ids': [(6, 0, (ptav_dyn2 + ptav_never1).ids)],
             'pos_categ_ids': [Command.set(self.pos_desk_misc_test.ids)],
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_dynamic_never_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_dynamic_never_variant_price', login="pos_user")
 
     def test_integration_always_never_variant_price(self):
         """Tests the price of products with always and never variants when added to cart"""
@@ -206,8 +206,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
         }])
 
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_always_never_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_always_never_variant_price', login="pos_user")
 
     def test_integration_dynamic_always_never_variant_price(self):
         """Tests the price of products with all types of variants when added to cart"""
@@ -256,8 +256,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'product_template_attribute_value_ids': [(6, 0, (ptav_dyn2 + ptav_always1 + ptav_never1).ids)],
             'pos_categ_ids': [Command.set(self.pos_desk_misc_test.ids)],
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_integration_dynamic_always_never_variant_price', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_integration_dynamic_always_never_variant_price', login="pos_user")
 
     def test_image_variants_displayed(self):
         """
@@ -289,8 +289,8 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'value_ids': [Command.set([images[0].id, images[1].id])],
         })
 
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_image_variants_displayed', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_image_variants_displayed', login="pos_user")
 
     def test_variants_merge_line_barcode(self):
         """Tests the price of products with always variant when added to cart"""
@@ -317,5 +317,5 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
         self.assertEqual(len(product_S_blue.product_template_attribute_value_ids), 2)  # Attributes: S, blue
         product_S_blue.barcode = "TEST123"
 
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_variants_merge_line_barcode', login="pos_user")
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_variants_merge_line_barcode', login="pos_user")

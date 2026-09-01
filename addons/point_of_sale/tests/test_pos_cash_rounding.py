@@ -43,7 +43,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     def test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method(self):
         self.skipTest('To re-introduce when feature is ready')
-        self.main_pos_config.write({
+        self.pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
             'only_round_cash_method': False,
@@ -74,7 +74,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     def test_cash_rounding_halfup_biggest_tax_not_only_round_cash_method_pay_by_bank_and_cash(self):
         self.skipTest('To re-introduce when feature is ready')
-        self.main_pos_config.write({
+        self.pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
             'only_round_cash_method': False,
@@ -105,7 +105,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     def test_cash_rounding_halfup_biggest_tax_only_round_cash_method(self):
         self.skipTest('To re-introduce when feature is ready')
-        self.main_pos_config.write({
+        self.pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
             'only_round_cash_method': True,
@@ -136,7 +136,7 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
 
     def test_cash_rounding_halfup_biggest_tax_only_round_cash_method_pay_by_bank_and_cash(self):
         self.skipTest('To re-introduce when feature is ready')
-        self.main_pos_config.write({
+        self.pos_config.write({
             'rounding_method': self.cash_rounding_biggest_tax.id,
             'cash_rounding': True,
             'only_round_cash_method': True,
@@ -183,9 +183,9 @@ class TestPosCashRounding(TestPointOfSaleHttpCommon):
             'available_in_pos': True,
             'list_price': 1,
         })
-        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.pos_config.with_user(self.pos_admin).open_ui()
         self.start_tour(
-            "/pos/ui?config_id=%d" % self.main_pos_config.id,
+            "/pos/ui?config_id=%d" % self.pos_config.id,
             "test_archived_product_removed_and_order_is_refunded",
             login="pos_admin",
         )

@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 
 
 @tagged('post_install', '-at_install')
-class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
+class TestPosOrderReceipt(TestPointOfSaleHttpCommon):
     _test_user_groups = None  # FIXME list needed groups
 
     @classmethod
@@ -58,7 +58,7 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             'email': 'example.partner@example.com',
         })
 
-        self.main_pos_config.write({
+        self.pos_config.write({
             'iface_available_categ_ids': [(6, 0, [self.category.id])],
             'limit_categories': True,
         })
@@ -201,12 +201,12 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             <rect width="180" height="180" style="fill: #FF5F1F;" />
             <text fill='#EEE' font-size='96' text-anchor='middle' x='90' y='125'>P</text>
         </svg>"""
-        self.main_pos_config.write({
+        self.pos_config.write({
             'receipt_header': 'This is a test header for receipt',
             'receipt_footer': 'This is a test footer for receipt',
             'logo': BinaryBytes(image.encode()),
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.with_user(self.pos_user).open_ui()
         data = {
             'frontend_data': None,
             'backend_data': None,
@@ -240,10 +240,10 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             'use_type': 'preparation',
             'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
         })
-        self.main_pos_config.write({
+        self.pos_config.write({
             'preparation_printer_ids': [(4, printer.id)],
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.with_user(self.pos_user).open_ui()
         data = {
             'frontend_data': None,
             'backend_data': None,
@@ -272,12 +272,12 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             'service_fee_amount': 0.1 if service_fee_type == 'percent' else 2,
             'service_fee_based_on': 'pre_discount',
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.with_user(self.pos_user).open_ui()
         product = self.example_simple_product.product_variant_id
         fee_product = preset.service_fee_product_id
         fee_amount = 0.58 if service_fee_type == 'percent' else 2
         order = self.env['pos.order'].create({
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'preset_id': preset.id,
             'amount_total': product.lst_price + fee_amount,
@@ -372,12 +372,12 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             'product_categories_ids': [Command.set(self.env['pos.category'].search([]).ids)],
             'is_split_per_product': True,
         })
-        self.main_pos_config.write({
+        self.pos_config.write({
             'preparation_printer_ids': [(4, printer.id)],
         })
 
         order, _ = self.create_backend_pos_order({
-            'pos_config': self.main_pos_config,
+            'pos_config': self.pos_config,
             'line_data': [
                 {'product_id': combo_product.id, 'qty': 2},
                 {'product_id': product_b.id, 'qty': 2},
@@ -435,9 +435,9 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon, CommonPosTest):
             'pos_categ_ids': [(4, self.category.id)],
             'company_id': self.env.company.id,
         })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.with_user(self.pos_user).open_ui()
         order, _ = self.create_backend_pos_order({
-            'pos_config': self.main_pos_config,
+            'pos_config': self.pos_config,
             'line_data': [
                 {'product_id': self.example_simple_product.product_variant_id.id, 'qty': 2, 'price_subtotal': 0.0, 'price_subtotal_incl': 0.0},
                 {'product_id': self.weighted_product.product_variant_id.id, 'qty': 2.5, 'price_subtotal': 0.0, 'price_subtotal_incl': 0.0},

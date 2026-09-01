@@ -40,5 +40,5 @@ class TestPosPerformance(TestPointOfSaleHttpCommon):
         if not self.__populate_model('product.template', 20000):
             _logger.warning("The product.template model must contain at least one record before it can be populated.")
             return
-        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('tourSessionOpenProductPerformance', timeout=2000)

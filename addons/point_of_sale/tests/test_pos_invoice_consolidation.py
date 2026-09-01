@@ -1,18 +1,18 @@
 from odoo import Command
-from odoo.addons.point_of_sale.tests.common import CommonPosTest, TestPoSCommon
+from odoo.addons.point_of_sale.tests.common import CommonPosTest
 from odoo.tests.common import tagged
 
 
 @tagged('post_install', '-at_install')
-class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
+class TestPosInvoiceConsolidation(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
     # TODO-PARP: Move to test_point_of_sale_flow.py
-    # Touch only after making the common util file from CommonPosTest and TestPoSCommon
+    # Touch only after making the common util file from CommonPosTest and CommonPosTest
 
     def setUp(cls):
         super().setUp()
-        cls.config = cls.basic_config
+        cls.config = cls.pos_config
         cls.user1 = cls.env.user
         cls.user2 = cls.simple_accountman
         cls.user2.group_ids = [Command.link(cls.env.ref('point_of_sale.group_pos_user').id)]
@@ -23,12 +23,12 @@ class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
         cash_payments = self.pos_session.order_ids.payment_ids.filtered(
             lambda p: p.payment_method_id.type == 'cash'
         )
-        self.pos_session.close_session_from_ui({self.cash_pm1.id: sum(cash_payments.mapped('amount'))})
+        self.pos_session.close_session_from_ui({self.cash_pm.id: sum(cash_payments.mapped('amount'))})
 
     def _refund_order(self, order):
         """ Refund `order` entirely and pay the refund back in cash, as the POS UI does. """
         refund = self.env['pos.order'].browse(order.refund()['res_id'])
-        self.make_payment(refund, self.cash_pm1, refund.amount_total)
+        self.make_payment(refund, self.cash_pm, refund.amount_total)
         return refund
 
     def _consolidate(self, orders):
@@ -237,7 +237,7 @@ class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
                     'pos_order_lines_ui_args': [(self.product2, 1)],
                     'customer': self.customer,
                     'is_invoiced': False,
-                    'payments': [(self.cash_pm1, 10)]},
+                    'payments': [(self.cash_pm, 10)]},
             ])
             orders = sum(orders.values(), self.env['pos.order'])
 
