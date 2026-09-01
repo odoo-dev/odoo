@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+        <record id="view_move_form_l10n_id" model="ir.ui.view">
+            <field name="name">account.move.form.l10n_id</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@id='other_tab_group']" position="inside">
+                    <!-- The SPT Masa PPN report splits vendor bills by transaction code, so the
+                         code has to be editable on the purchase side too. e-Faktur only covers
+                         customer invoices, which it adds separately. -->
+                    <group string="Electronic Tax" invisible="country_code != 'ID' or move_type not in ('in_invoice', 'in_refund')">
+                        <field name="l10n_id_kode_transaksi" readonly="state == 'posted'"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
         <record id="action_fetch_qris_status" model="ir.actions.server">
             <field name="name">Check QRIS Payment Status</field>
             <field name="group_ids" eval="[(4, ref('account.group_account_invoice'))]"/>
