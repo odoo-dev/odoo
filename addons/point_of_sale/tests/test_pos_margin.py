@@ -1,20 +1,20 @@
 import odoo
-from odoo.addons.point_of_sale.tests.common import TestPoSCommon
+from odoo.addons.point_of_sale.tests.common import CommonPosTest
 
 
 @odoo.tests.tagged('post_install', '-at_install')
-class TestPosMargin(TestPoSCommon):
+class TestPosMargin(CommonPosTest):
     """
     Test the margin computation on orders with basic configuration
     The tests contain the base scenarios.
     """
     _test_user_groups = None  # FIXME list needed groups
     # TODO-PARP: Move to test_point_of_sale_flow.py
-    # Touch only after making the common util file from CommonPosTest and TestPoSCommon
+    # Touch only after making the common util file from CommonPosTest and CommonPosTest
 
     def setUp(self):
         super(TestPosMargin, self).setUp()
-        self.config = self.basic_config
+        self.config = self.pos_config
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
 
@@ -156,7 +156,7 @@ class TestPosMargin(TestPoSCommon):
 
         # change the config
         current_config = self.config
-        self.config = self.other_currency_config
+        self.config = self.pos_config_foreign
 
         # same parameters as test_positive_margin
         product1 = self.create_product('Product 1', self.categ_basic, 10, 5)
@@ -199,7 +199,7 @@ class TestPosMargin(TestPoSCommon):
 
         # change the config
         current_config = self.config
-        self.config = self.other_currency_config
+        self.config = self.pos_config_foreign
 
         product1 = self.create_product('Product 1', self.categ_basic, 10, 5, self.taxes['tax7'].ids)
         product2 = self.create_product('Product 2', self.categ_basic, 55, 30, self.taxes['tax10'].ids)

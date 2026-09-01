@@ -26,10 +26,10 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'list_price': 10.0,
             'taxes_id': False,
         })
-        self.main_pos_config.open_ui()
+        self.pos_config.open_ui()
         self.pos_order = self.env['pos.order'].create({
             'company_id': self.env.company.id,
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'partner_id': self.new_partner.id,
             'access_token': '1234567890',
             'lines': [(0, 0, {
@@ -47,7 +47,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'amount_paid': 10.0,
             'amount_return': 10.0,
         })
-        self.main_pos_config.current_session_id.close_session_from_ui()
+        self.pos_config.current_session_id.close_session_from_ui()
         get_invoice_data = {
             'access_token': self.pos_order.access_token,
             'name': self.new_partner.name,
@@ -87,9 +87,9 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'list_price': 10.0,
             'taxes_id': False,
         })
-        self.main_pos_config.open_ui()
+        self.pos_config.open_ui()
         self.pos_order = self.env['pos.order'].create({
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'access_token': '1234567890',
             'lines': [(0, 0, {
@@ -107,7 +107,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'amount_paid': 10.0,
             'amount_return': 10.0,
         })
-        self.main_pos_config.current_session_id.close_session_from_ui()
+        self.pos_config.current_session_id.close_session_from_ui()
         res = self.url_open(f'/pos/ticket/validate?access_token={self.pos_order.access_token}', timeout=30000)
         self.assertTrue(self.pos_order.is_singly_invoiced, "The pos order should have an invoice")
         self.assertTrue("my/invoices" in res.url)
@@ -121,9 +121,9 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'list_price': 10.0,
             'taxes_id': False,
         })
-        self.main_pos_config.open_ui()
+        self.pos_config.open_ui()
         self.pos_order = self.env['pos.order'].create({
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'access_token': '1234567890',
             'lines': [(0, 0, {
@@ -145,11 +145,11 @@ class TestPoSController(TestPointOfSaleHttpCommon):
         context_make_payment = {"active_ids": [self.pos_order.id], "active_id": self.pos_order.id}
         self.pos_make_payment = self.env['pos.make.payment'].with_context(context_make_payment).create({
             'amount': 10.0,
-            'payment_method_id': self.main_pos_config.payment_method_ids[0].id,
+            'payment_method_id': self.pos_config.payment_method_ids[0].id,
         })
         context_payment = {'active_id': self.pos_order.id}
         self.pos_make_payment.with_context(context_payment).check()
-        self.main_pos_config.current_session_id.close_session_from_ui()
+        self.pos_config.current_session_id.close_session_from_ui()
         self.start_tour('/pos/ticket', 'invoicePoSOrderWithSelfInvocing', login=None)
         self.assertTrue(self.pos_order.account_move, "The pos order should have an invoice after self invoicing")
         self.assertNotEqual(self.pos_order.account_move, self.pos_order.session_id.move_ids)
@@ -175,9 +175,9 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'state_id': self.env.ref('base.state_in_gj').id,
             'country_id': self.env.ref('base.in').id,
         })
-        self.main_pos_config.open_ui()
+        self.pos_config.open_ui()
         self.pos_order = self.env['pos.order'].create({
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'partner_id': self.new_partner.id,
             'access_token': '1234567890',
@@ -200,11 +200,11 @@ class TestPoSController(TestPointOfSaleHttpCommon):
         context_make_payment = {"active_ids": [self.pos_order.id], "active_id": self.pos_order.id}
         self.pos_make_payment = self.env['pos.make.payment'].with_context(context_make_payment).create({
             'amount': 10.0,
-            'payment_method_id': self.main_pos_config.payment_method_ids[0].id,
+            'payment_method_id': self.pos_config.payment_method_ids[0].id,
         })
         context_payment = {'active_id': self.pos_order.id}
         self.pos_make_payment.with_context(context_payment).check()
-        self.main_pos_config.current_session_id.close_session_from_ui()
+        self.pos_config.current_session_id.close_session_from_ui()
         self.start_tour('/pos/ticket', 'invoicePoSOrderWithPartner', login=None)
         self.assertTrue(self.pos_order.account_move, "The pos order should have an invoice after self invoicing")
 
@@ -222,9 +222,9 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'list_price': 10.0,
             'taxes_id': False,
         })
-        self.main_pos_config.open_ui()
+        self.pos_config.open_ui()
         self.pos_order = self.env['pos.order'].create({
-            'session_id': self.main_pos_config.current_session_id.id,
+            'session_id': self.pos_config.current_session_id.id,
             'company_id': self.env.company.id,
             'partner_id': self.partner_1.id,
             'access_token': '1234567890',
@@ -243,7 +243,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
             'amount_paid': 10.0,
             'amount_return': 10.0,
         })
-        self.main_pos_config.current_session_id.close_session_from_ui()
+        self.pos_config.current_session_id.close_session_from_ui()
         get_invoice_data = {
             'access_token': self.pos_order.access_token,
             'name': 'New Name',

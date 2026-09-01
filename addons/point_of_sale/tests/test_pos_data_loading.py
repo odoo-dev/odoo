@@ -10,8 +10,8 @@ class TestPosDataLoading(CommonPosTest):
     # Tests for the POS data loading architecture.
 
     def _get_session(self):
-        self.pos_config_usd.open_ui()
-        return self.pos_config_usd.current_session_id
+        self.pos_config.open_ui()
+        return self.pos_config.current_session_id
 
     def test_load_data_response_structure(self):
         """load_data() must return fields, relations, dependencies and records for every model."""

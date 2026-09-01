@@ -31,11 +31,11 @@ class TestGenericLocalization(TestPointOfSaleHttpCommon):
         })
 
     def test_generic_localization(self):
-        self.main_pos_config.open_ui()
-        url = "/pos/ui?config_id=%d" % self.main_pos_config.id
-        url += "&company_name=%s" % self.main_pos_config.company_id.name
+        self.pos_config.open_ui()
+        url = "/pos/ui?config_id=%d" % self.pos_config.id
+        url += "&company_name=%s" % self.pos_config.company_id.name
         self.start_tour(url, "generic_localization_tour", login="accountman")
-        last_order = self.main_pos_config.current_session_id.order_ids[-1]
+        last_order = self.pos_config.current_session_id.order_ids[-1]
         html_data = last_order.order_receipt_generate_html()
         last_order.order_receipt_generate_image()  # verify if image generation works
         return last_order, html_data

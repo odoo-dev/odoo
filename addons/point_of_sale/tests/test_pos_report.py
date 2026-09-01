@@ -3,17 +3,17 @@
 from datetime import timedelta
 
 from odoo import Command, tests
-from odoo.addons.point_of_sale.tests.common import TestPoSCommon
+from odoo.addons.point_of_sale.tests.common import CommonPosTest
 
 
 @tests.tagged('post_install', '-at_install')
-class TestPoSReport(TestPoSCommon):
+class TestPoSReport(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
 
     def setUp(self):
         super().setUp()
-        self.config = self.basic_config
+        self.config = self.pos_config
 
     def test_report_session(self):
 
@@ -54,8 +54,8 @@ class TestPoSReport(TestPoSCommon):
             'to_invoice': False,
         })
 
-        self.make_payment(order, self.bank_split_pm1, 60)
-        self.make_payment(order, self.bank_pm1, 50)
+        self.make_payment(order, self.bank_split_pm, 60)
+        self.make_payment(order, self.bank_pm, 50)
 
         self.config.current_session_id.close_session_from_ui()
 
@@ -93,10 +93,10 @@ class TestPoSReport(TestPoSCommon):
                       }
 
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.bank_pm1, 100)
+        self.make_payment(order, self.bank_pm, 100)
 
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.cash_pm1, 100)
+        self.make_payment(order, self.cash_pm, 100)
 
         self.config.current_session_id.close_session_from_ui()
 
@@ -104,10 +104,10 @@ class TestPoSReport(TestPoSCommon):
         session_id_2 = self.config.current_session_id.id
         order_info['session_id'] = session_id_2
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.bank_pm1, 100)
+        self.make_payment(order, self.bank_pm, 100)
 
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.cash_pm1, 100)
+        self.make_payment(order, self.cash_pm, 100)
 
         self.config.current_session_id.close_session_from_ui()
 
@@ -220,10 +220,10 @@ class TestPoSReport(TestPoSCommon):
                 'to_invoice': False,
                 }
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.bank_pm1, 0)
+        self.make_payment(order, self.bank_pm, 0)
         order_info['lines'][0][2]['qty'] = 59.7
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.bank_pm1, 0)
+        self.make_payment(order, self.bank_pm, 0)
         self.config.current_session_id.close_session_from_ui()
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details()
         self.assertEqual(report['products'][0]['products'][0]['quantity'], 74.6, "Quantity of product should be 74.6, as we want the sum of the quantity of the two orders")
@@ -240,7 +240,7 @@ class TestPoSReport(TestPoSCommon):
         })
         self.product1 = self.create_product('Product A', self.categ_basic, 100, self.tax1.id)
 
-        self.bank_pm1.outstanding_account_id = self.outstanding_bank.id
+        self.bank_pm.outstanding_account_id = self.outstanding_bank.id
         self.config.open_ui()
 
         session1_id = self.config.current_session_id.id
@@ -266,14 +266,14 @@ class TestPoSReport(TestPoSCommon):
             'to_invoice': False,
         })
 
-        self.make_payment(order1, self.bank_pm1, 100)
+        self.make_payment(order1, self.bank_pm, 100)
 
         self.config.current_session_id.close_session_from_ui(
-            payment_method_closing={self.bank_pm1.id: 80})
+            payment_method_closing={self.bank_pm.id: 80})
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details(session_ids=[session1_id])
         self.assertEqual(report['payments'][1]['money_difference'], -20)
 
-        self.bank_pm1.outstanding_account_id = False
+        self.bank_pm.outstanding_account_id = False
         self.config.open_ui()
 
         session2_id = self.config.current_session_id.id
@@ -299,10 +299,10 @@ class TestPoSReport(TestPoSCommon):
             'to_invoice': False,
         })
 
-        self.make_payment(order2, self.bank_pm1, 100)
+        self.make_payment(order2, self.bank_pm, 100)
 
         self.config.current_session_id.close_session_from_ui(
-            payment_method_closing={self.bank_pm1.id: 80})
+            payment_method_closing={self.bank_pm.id: 80})
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details(session_ids=[session2_id])
         self.assertEqual(report['payments'][1]['money_difference'], -20)
 
@@ -344,7 +344,7 @@ class TestPoSReport(TestPoSCommon):
             'to_invoice': False,
         }
         order = self.env['pos.order'].create(order_info)
-        self.make_payment(order, self.bank_pm1, 156.25)
+        self.make_payment(order, self.bank_pm, 156.25)
         self.config.current_session_id.close_session_from_ui()
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details()
         self.assertEqual(report["taxes_info"]["base_amount"], 100, "Base amount should be equal to 100")
@@ -379,7 +379,7 @@ class TestPoSReport(TestPoSCommon):
 
         for order_data in order_info:
             order = self.env['pos.order'].create(order_data)
-            self.make_payment(order, self.bank_pm1, order.amount_total)
+            self.make_payment(order, self.bank_pm, order.amount_total)
 
         session = self.config.current_session_id
         session.close_session_from_ui()
@@ -432,7 +432,7 @@ class TestPoSReport(TestPoSCommon):
         }
         order = self.env['pos.order'].create(order_info)
         self.assertEqual(order.lines[0].tax_ids_after_fiscal_position.id, self.tax2.id)
-        self.make_payment(order, self.bank_pm1, 108.0)
+        self.make_payment(order, self.bank_pm, 108.0)
         session_id.close_session_from_ui()
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details()
         self.assertEqual(report["discount_amount"], 12.0, "Discount amount should be equal to 12.0")
@@ -465,7 +465,7 @@ class TestPoSReport(TestPoSCommon):
             'amount_return': 0.0,
             'to_invoice': False,
         })
-        self.make_payment(order, self.bank_pm1, 180.0)
+        self.make_payment(order, self.bank_pm, 180.0)
 
         # Fully refund the order: refund line has negative qty, positive subtotal.
         order.refund()
@@ -473,7 +473,7 @@ class TestPoSReport(TestPoSCommon):
         self.assertEqual(refund.lines[0].discount, 10)
         self.assertEqual(refund.lines[0].qty, -2)
         self.assertEqual(refund.lines[0].price_subtotal_incl, 180)
-        self.make_payment(refund, self.bank_pm1, -180.0)
+        self.make_payment(refund, self.bank_pm, -180.0)
 
         session.close_session_from_ui()
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details()
@@ -516,7 +516,7 @@ class TestPoSReport(TestPoSCommon):
         self.config.open_ui()
         session1 = self.config.current_session_id
         order1 = self.env['pos.order'].create({**order_vals, 'session_id': session1.id})
-        self.make_payment(order1, self.bank_pm1, 100)
+        self.make_payment(order1, self.bank_pm, 100)
         session1.close_session_from_ui()
 
         # Session 2: open, create an order, intentionally leave open.
@@ -524,7 +524,7 @@ class TestPoSReport(TestPoSCommon):
         session2 = self.config.current_session_id
         session2.set_opening_control(0, None)
         order2 = self.env['pos.order'].create({**order_vals, 'session_id': session2.id})
-        self.make_payment(order2, self.bank_pm1, 100)
+        self.make_payment(order2, self.bank_pm, 100)
 
         # Run the report via date range (config_ids only, no session_ids).
         # Both sessions' orders fall in the default date range (today).
@@ -597,7 +597,7 @@ class TestPoSReport(TestPoSCommon):
             'to_invoice': False,
         })
 
-        self.make_payment(order, self.cash_pm1, 10.40)
+        self.make_payment(order, self.cash_pm, 10.40)
         session = self.config.current_session_id
         session.close_session_from_ui()
 

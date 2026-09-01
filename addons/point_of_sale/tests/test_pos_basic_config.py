@@ -6,11 +6,11 @@ from odoo import Command, fields, tests, tools
 from odoo.exceptions import ValidationError, UserError
 from odoo.tests import Form
 
-from odoo.addons.point_of_sale.tests.common import TestPoSCommon
+from odoo.addons.point_of_sale.tests.common import CommonPosTest
 
 
 @tests.tagged('post_install', '-at_install')
-class TestPoSBasicConfig(TestPoSCommon):
+class TestPoSBasicConfig(CommonPosTest):
     """ Test PoS with basic configuration
 
     The tests contain base scenarios in using pos.
@@ -21,7 +21,7 @@ class TestPoSBasicConfig(TestPoSCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.config = cls.basic_config
+        cls.config = cls.pos_config
         cls.product0 = cls.create_product('Product 0', cls.categ_basic, 0.0, 0.0)
         cls.product1 = cls.create_product('Product 1', cls.categ_basic, 10.0, 5)
         cls.product2 = cls.create_product('Product 2', cls.categ_basic, 20.0, 10)
@@ -121,8 +121,8 @@ class TestPoSBasicConfig(TestPoSCommon):
             - Copy multiple payment methods
             - Check the duplicated cash payment method journal should be empty
         """
-        pm_1 = self.cash_pm1
-        pm_2 = self.bank_pm1
+        pm_1 = self.cash_pm
+        pm_2 = self.bank_pm
         pm_3, pm_4 = (pm_1 + pm_2).copy()
 
         self.assertTrue(pm_3)
@@ -136,8 +136,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         # create orders
         orders = []
         orders.extend((
-            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm1, 49.88)]),
-            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm1, 109.96)])
+            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm, 49.88)]),
+            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm, 109.96)])
         ))
 
         # sync orders
@@ -168,8 +168,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.open_new_session()
         orders = []
         orders.extend((
-            self.create_ui_order_data([(self.product1, 3), (self.product2, 10)], payments=[(self.bank_pm1, 230)]),
-            self.create_ui_order_data([(self.product1, 5), (self.product0, 10)], payments=[(self.bank_pm1, 50)])
+            self.create_ui_order_data([(self.product1, 3), (self.product2, 10)], payments=[(self.bank_pm, 230)]),
+            self.create_ui_order_data([(self.product1, 5), (self.product0, 10)], payments=[(self.bank_pm, 50)])
         ))
         self.env['pos.order'].sync_from_ui(orders)
         self.pos_session.close_session_from_ui()
@@ -178,8 +178,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.open_new_session()
         orders2 = []
         orders2.extend((
-            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm1, 49.88)]),
-            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm1, 109.96)])
+            self.create_ui_order_data([(self.product1, 2), (self.product4, 3)], payments=[(self.bank_pm, 49.88)]),
+            self.create_ui_order_data([(self.product4, 1), (self.product2, 5)], payments=[(self.bank_pm, 109.96)])
         ))
         self.env['pos.order'].sync_from_ui(orders2)
         self.pos_session.close_session_from_ui()
@@ -332,7 +332,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             'name': 'Test PM',
             'type': 'cash',
             'journal_id': test_journal.id,
-            'receivable_account_id': self.cash_pm1.receivable_account_id.id,
+            'receivable_account_id': self.cash_pm.receivable_account_id.id,
         })
 
         with self.assertRaises(ValidationError):
@@ -390,8 +390,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         product2.pos_categ_ids = [(6, 0, [category2.id])]
 
         # Open unrestricted session -> everything protected.
-        self.basic_config.open_ui()
-        self.basic_config.iface_available_categ_ids = []
+        self.pos_config.open_ui()
+        self.pos_config.iface_available_categ_ids = []
 
         with self.assertRaisesRegex(UserError, "active Point of Sale session"):
             product2.action_archive()
@@ -400,7 +400,7 @@ class TestPoSBasicConfig(TestPoSCommon):
             category2.unlink()
 
         # Open restricted session for category1 only.
-        self.basic_config.iface_available_categ_ids = [(6, 0, [category1.id])]
+        self.pos_config.iface_available_categ_ids = [(6, 0, [category1.id])]
 
         # category1/product1 still protected.
         with self.assertRaisesRegex(UserError, "active Point of Sale session"):
@@ -417,18 +417,18 @@ class TestPoSBasicConfig(TestPoSCommon):
         category2.unlink()
 
         # After session close, only config protection remains.
-        self.basic_config.current_session_id.state = 'closed'
+        self.pos_config.current_session_id.state = 'closed'
 
         with self.assertRaisesRegex(UserError, "currently in use in a point of sale"):
             category1.unlink()
 
     def test_basic_config_values(self):
-        config = self.basic_config
+        config = self.pos_config
         self.assertEqual(config.currency_id, self.company_currency)
         self.assertEqual(config.pricelist_id.currency_id, self.company_currency)
 
     def test_other_currency_config_values(self):
-        config = self.other_currency_config
+        config = self.pos_config_foreign
         self.assertEqual(config.currency_id, self.other_currency)
         self.assertEqual(config.pricelist_id.currency_id, self.other_currency)
 
@@ -437,14 +437,14 @@ class TestPoSBasicConfig(TestPoSCommon):
             return pricelist._get_product_price(product, 1)
 
         # check usd pricelist
-        pricelist = self.basic_config.pricelist_id
+        pricelist = self.pos_config.pricelist_id
         for product in self.products:
             self.assertAlmostEqual(get_price(pricelist, product), product.lst_price)
 
         # check eur pricelist
         # exchange rate to the other currency is set to 0.5, thus, lst_price
         # is expected to have half its original value.
-        pricelist = self.other_currency_config.pricelist_id
+        pricelist = self.pos_config_foreign.pricelist_id
         for product in self.products:
             self.assertAlmostEqual(get_price(pricelist, product), product.lst_price * 0.5)
 
@@ -474,12 +474,12 @@ class TestPoSBasicConfig(TestPoSCommon):
         })
         payment_method = self.env['pos.payment.method'].create({
             'name': 'Lets Pay for Tests', 'journal_id': journal.id, 'type': 'bank'})
-        self.basic_config.write({'payment_method_ids': [payment_method.id]})
+        self.pos_config.write({'payment_method_ids': [payment_method.id]})
         journal.write({'pos_payment_method_ids': [payment_method.id]})
         session = self.env['pos.session'].create(
             {
                 'name': 'lets sell some tests',
-                'config_id': self.basic_config.id,
+                'config_id': self.pos_config.id,
                 'user_id': self.env.user.id,
                 'state': 'opened'
             }
@@ -765,12 +765,12 @@ class TestPoSBasicConfig(TestPoSCommon):
             'product_tmpl_id': self.product2.product_tmpl_id.id,
             'fixed_price': 12.99,
         })
-        self.other_currency_config.pricelist_id.write({'item_ids': [(6, 0, (self.other_currency_config.pricelist_id.item_ids | pricelist_item).ids)]})
+        self.pos_config_foreign.pricelist_id.write({'item_ids': [(6, 0, (self.pos_config_foreign.pricelist_id.item_ids | pricelist_item).ids)]})
 
-        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product1, 1), 5.00)
-        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product2, 1), 12.99)
-        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product3, 1), 15.00)
-        self.assertAlmostEqual(self.other_currency_config.pricelist_id._get_product_price(self.product7, 1), 3.50)
+        self.assertAlmostEqual(self.pos_config_foreign.pricelist_id._get_product_price(self.product1, 1), 5.00)
+        self.assertAlmostEqual(self.pos_config_foreign.pricelist_id._get_product_price(self.product2, 1), 12.99)
+        self.assertAlmostEqual(self.pos_config_foreign.pricelist_id._get_product_price(self.product3, 1), 15.00)
+        self.assertAlmostEqual(self.pos_config_foreign.pricelist_id._get_product_price(self.product7, 1), 3.50)
 
     def test_combo_prices_converted_to_pos_currency(self):
         # A combo's `base_price` and its items' `extra_price` are stored in the
@@ -787,10 +787,10 @@ class TestPoSBasicConfig(TestPoSCommon):
         # base_price is the min lst_price among the items, in company currency (product1 = 10.0).
         self.assertAlmostEqual(combo.base_price, 10.0)
 
-        combo_read = self.env['product.combo']._load_pos_data_read(combo, self.other_currency_config)[0]
+        combo_read = self.env['product.combo']._load_pos_data_read(combo, self.pos_config_foreign)[0]
         self.assertAlmostEqual(combo_read['base_price'], 5.0)
 
-        combo_item_read = self.env['product.combo.item']._load_pos_data_read(combo.combo_item_ids, self.other_currency_config)
+        combo_item_read = self.env['product.combo.item']._load_pos_data_read(combo.combo_item_ids, self.pos_config_foreign)
         extra_prices = {rec['product_id']: rec['extra_price'] for rec in combo_item_read}
         self.assertAlmostEqual(extra_prices[self.product1.product_variant_id.id], 10.0)
         self.assertAlmostEqual(extra_prices[self.product3.product_variant_id.id], 0.0)
@@ -799,8 +799,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         """Verify that debit and credit are balanced when adding a difference to the bank."""
 
         # Make a sale paid by bank
-        self.other_currency_config.open_ui()
-        session_id = self.other_currency_config.current_session_id
+        self.pos_config_foreign.open_ui()
+        session_id = self.pos_config_foreign.current_session_id
         order = self.env['pos.order'].create({
             'company_id': self.env.company.id,
             'session_id': session_id.id,
@@ -815,7 +815,7 @@ class TestPoSBasicConfig(TestPoSCommon):
                 'price_subtotal': 10.00,
                 'price_subtotal_incl': 10.00,
             })],
-            'pricelist_id': self.other_currency_config.pricelist_id.id,
+            'pricelist_id': self.pos_config_foreign.pricelist_id.id,
             'amount_paid': 10.00,
             'amount_total': 10.00,
             'amount_tax': 0.0,
@@ -827,7 +827,7 @@ class TestPoSBasicConfig(TestPoSCommon):
         payment_context = {"active_ids": order.ids, "active_id": order.id}
         order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
             'amount': order.amount_total,
-            'payment_method_id': self.bank_pm2.id
+            'payment_method_id': self.bank_pm_foreign.id
         })
         order_payment.with_context(**payment_context).check()
 
@@ -840,14 +840,14 @@ class TestPoSBasicConfig(TestPoSCommon):
             for line in move.line_ids:
                 debit += line.debit
                 credit += line.credit
-            self.assertEqual(tools.float_compare(debit, credit, precision_rounding=self.other_currency_config.currency_id.rounding), 0)  # debit and credit should be equal
+            self.assertEqual(tools.float_compare(debit, credit, precision_rounding=self.pos_config_foreign.currency_id.rounding), 0)  # debit and credit should be equal
 
     def test_with_session_check_product_cost(self):
         def find_by(list_of_dicts, key, value):
             return next((d for d in list_of_dicts if d.get(key) == value), None)
 
-        self.other_currency_config.open_ui()
-        product = self.other_currency_config.current_session_id.load_data({'only_records': True})['product.product']
+        self.pos_config_foreign.open_ui()
+        product = self.pos_config_foreign.current_session_id.load_data({'only_records': True})['product.product']
 
         self.assertAlmostEqual(find_by(product, 'id', self.product1.id)['lst_price'], 5.00)
         self.assertAlmostEqual(find_by(product, 'id', self.product2.id)['lst_price'], 10.00)
@@ -855,8 +855,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertAlmostEqual(find_by(product, 'id', self.product7.id)['lst_price'], 3.50)
 
     def test_pos_data_standard_price_converted(self):
-        self.other_currency_config.open_ui()
-        res = self.other_currency_config.current_session_id.load_data({'only_records': True})
+        self.pos_config_foreign.open_ui()
+        res = self.pos_config_foreign.current_session_id.load_data({'only_records': True})
         product1_data = next(filter(lambda product: product['display_name'] == "Product 1", res['product.product']))
         self.assertEqual(product1_data['standard_price'], 2.5)  # standard price should be converted
 
@@ -899,8 +899,8 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertEqual(shared_product.currency_id, main_company.currency_id)
         self.assertEqual(shared_product.cost_currency_id, self.other_currency)
 
-        self.assertEqual(self.other_currency_config.currency_id, self.other_currency)
-        [data] = shared_product._load_pos_data_read(shared_product, self.other_currency_config)
+        self.assertEqual(self.pos_config_foreign.currency_id, self.other_currency)
+        [data] = shared_product._load_pos_data_read(shared_product, self.pos_config_foreign)
 
         self.assertAlmostEqual(data['standard_price'], 100.0)
         self.assertAlmostEqual(data['lst_price'], 50.0)
