@@ -21,18 +21,21 @@ class AccountMove(models.Model):
     l10n_id_qris_transaction_ids = fields.Many2many('l10n_id.qris.transaction', groups='account.group_account_invoice')
     l10n_id_kode_transaksi = fields.Selection(
         selection=TAX_TRANSACTION_CODE,
-        string='Kode Transaksi',
-        help="The first 2 digits of tax code",
+        string='Tax Transaction Code',
+        help="A mandatory section in a Tax Invoice containing information on the supply of Taxable Goods (BKP) and/or Taxable Services (JKP).",
         readonly=False,
         copy=False,
         compute="_compute_kode_transaksi",
         store=True,
     )
 
-    @api.depends('partner_id')
+    @api.depends('partner_id', 'reversed_entry_id')
     def _compute_kode_transaksi(self):
         for move in self:
-            move.l10n_id_kode_transaksi = move.commercial_partner_id.l10n_id_kode_transaksi
+            move.l10n_id_kode_transaksi = (
+                move.reversed_entry_id.l10n_id_kode_transaksi
+                or move.commercial_partner_id.l10n_id_kode_transaksi
+            )
 
     def _generate_qr_code(self, silent_errors=False):
         """

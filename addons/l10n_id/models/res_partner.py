@@ -10,7 +10,7 @@ class Partner(models.Model):
     l10n_id_kode_transaksi = fields.Selection(
         selection=TAX_TRANSACTION_CODE,
         string='Invoice Transaction Code',
-        help="The first 2 digits of tax code",
+        help="A mandatory section in a Tax Invoice containing information on the supply of Taxable Goods (BKP) and/or Taxable Services (JKP).",
         default='04',
         tracking=True,
     )
