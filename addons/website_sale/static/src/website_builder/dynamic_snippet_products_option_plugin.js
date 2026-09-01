@@ -32,7 +32,52 @@ export class DynamicSnippetProductsOptionPlugin extends Plugin {
                 this.modelNameFilter,
                 getContextualFilterDomain(this.editable)
             );
+            await this._syncShopDesign(snippetEl);
         }
+    }
+
+    /**
+     * Syncs the dropped snippet with the current /shop design settings.
+     * The snippet panel HTML is pre-rendered once when the builder loads, so
+     * if the user changed the shop design during the same session (without
+     * closing the editor), the cached snippet HTML is stale. We fix this by
+     * reading the live values from the website record and applying them.
+     */
+    async _syncShopDesign(snippetEl) {
+        const websiteId = this.services.website.currentWebsite.id;
+        const [websiteData] = await this.services.orm.read(
+            "website",
+            [websiteId],
+            ["shop_opt_products_design_classes", "shop_gap"],
+        );
+        if (!websiteData) {
+            return;
+        }
+
+        const designClasses = websiteData.shop_opt_products_design_classes || "";
+        const gap = websiteData.shop_gap || "16px";
+
+        // Only sync if the shop has a meaningful catalog layout set.
+        if (!designClasses.includes("o_wsale_products_opt_layout_catalog")) {
+            return;
+        }
+
+        // Replace all existing o_wsale_products_opt_* classes with the live shop ones.
+        const currentClasses = Array.from(snippetEl.classList);
+        for (const cls of currentClasses) {
+            if (cls.startsWith("o_wsale_products_opt_")) {
+                snippetEl.classList.remove(cls);
+            }
+        }
+        for (const cls of designClasses.trim().split(/\s+/)) {
+            if (cls) {
+                snippetEl.classList.add(cls);
+            }
+        }
+
+        // Apply the gap CSS variable so layout-dependent designs (e.g. Chips)
+        // compute their internal padding correctly.
+        snippetEl.style.setProperty("--o-wsale-products-grid-gap", gap);
     }
     getModelNameFilter() {
         return this.modelNameFilter;
