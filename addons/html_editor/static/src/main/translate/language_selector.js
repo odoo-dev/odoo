@@ -22,7 +22,7 @@ export class LanguageSelector extends Component {
             languages: [],
         });
         this.menuRef = signal.ref();
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
         onWillStart(() => {
             if (user.userId) {
                 const userLang = jsToPyLocale(user.lang);

@@ -24,7 +24,7 @@ export class ListSelector extends Component {
         this.menuRef = signal.ref();
         this.dropdown = useDropdownState();
         useToolbarDropdownFocus(this.dropdown, this.listSelector);
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
     }
     getActiveMode() {
         const { editableSelection: selection } = this.props.getSelection();

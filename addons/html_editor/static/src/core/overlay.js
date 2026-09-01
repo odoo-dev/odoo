@@ -1,12 +1,12 @@
+import { provideOverlayState } from "@html_editor/overlay_state";
 import {
     Component,
     onWillDestroy,
-    useProps,
-    proxy,
     signal,
     t,
     useListener,
     useOnChange,
+    useProps,
     xml,
 } from "@odoo/owl";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
@@ -14,7 +14,6 @@ import { usePosition } from "@web/core/position/position_hook";
 import { getIFrame } from "@web/core/position/utils";
 import { useActiveElement } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
-import { useSubEnv } from "@web/owl2/utils";
 import { useCrossDocumentListener } from "../utils/hooks";
 
 export class EditorOverlay extends Component {
@@ -118,8 +117,7 @@ export class EditorOverlay extends Component {
         };
         position = usePosition(this.rootRef, getTarget, positionOptions);
 
-        this.overlayState = proxy({ isOverlayVisible: true });
-        useSubEnv({ overlayState: this.overlayState });
+        this.overlayState = provideOverlayState();
     }
 
     getSelectionTarget() {
@@ -179,7 +177,7 @@ export class EditorOverlay extends Component {
             scrollContainer
         );
         overlayElement.style.visibility = shouldBeVisible ? "visible" : "hidden";
-        this.overlayState.isOverlayVisible = shouldBeVisible;
+        this.overlayState.isVisible.set(shouldBeVisible);
     }
 
     /**

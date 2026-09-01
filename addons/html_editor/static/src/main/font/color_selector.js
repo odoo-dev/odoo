@@ -81,7 +81,7 @@ export class ColorSelector extends Component {
                 ref: colorPickerRef,
             }
         );
-        useDropdownAutoVisibility(this.env.overlayState, colorPickerRef);
+        useDropdownAutoVisibility(colorPickerRef);
     }
 
     getCorrespondingColorTab(color) {

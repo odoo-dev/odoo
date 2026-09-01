@@ -26,7 +26,7 @@ export class FontFamilySelector extends Component {
         this.menuRef = signal.ref();
         this.dropdown = useDropdownState();
         useToolbarDropdownFocus(this.dropdown, this.fontFamilySelector);
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
     }
 
     onSelected(item) {

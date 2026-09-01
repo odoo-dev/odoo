@@ -1,13 +1,14 @@
-import { proxy, untrack, useEffect, useListener } from "@odoo/owl";
+import { useOverlayState } from "@html_editor/overlay_state";
+import { untrack, useEffect, useListener } from "@odoo/owl";
 
-export function useDropdownAutoVisibility(overlayState, popoverRef) {
-    if (!overlayState) {
+export function useDropdownAutoVisibility(popoverRef) {
+    const state = useOverlayState();
+    if (!state) {
         return;
     }
-    const state = proxy(overlayState);
     const getEl = () => untrack(popoverRef);
     useEffect(() => {
-        const isOverlayVisible = state.isOverlayVisible;
+        const isOverlayVisible = state.isVisible();
         const el = getEl();
         if (el) {
             if (!isOverlayVisible) {

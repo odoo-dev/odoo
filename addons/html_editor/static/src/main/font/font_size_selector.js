@@ -36,10 +36,13 @@ export class FontSizeSelector extends Component {
         this.state = proxy(this.props.getDisplay());
         this.dropdown = useDropdownState();
         this.menuRef = signal.ref();
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
         this.iframeContentRef = signal.ref();
         this.fontSizeInputRef = signal.ref();
-        this.debouncedCustomFontSizeInput = useDebounced(this.onCustomFontSizeInput.bind(this), 200);
+        this.debouncedCustomFontSizeInput = useDebounced(
+            this.onCustomFontSizeInput.bind(this),
+            200
+        );
         useToolbarDropdownFocus(this.dropdown, this.fontSizeSelector);
         const htmlStyle = getHtmlStyle(document);
         this.fontFamily = getCSSVariableValue("o-system-fonts", htmlStyle);

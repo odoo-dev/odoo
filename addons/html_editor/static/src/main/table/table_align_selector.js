@@ -27,7 +27,7 @@ export class TableAlignSelector extends Component {
         this.menuRef = signal.ref();
         this.dropdown = useDropdownState();
         useToolbarDropdownFocus(this.dropdown, this.tableAlignSelector);
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
     }
 
     onSelected(item) {

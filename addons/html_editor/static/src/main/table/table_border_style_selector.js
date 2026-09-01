@@ -18,7 +18,7 @@ export class TableBorderStyleSelector extends Component {
         this.items = this.props.getItems();
         this.state = proxy(this.props.getDisplay());
         this.menuRef = signal.ref();
-        useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
+        useDropdownAutoVisibility(this.menuRef);
     }
 
     onSelected(item) {
