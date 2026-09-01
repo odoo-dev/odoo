@@ -495,4 +495,21 @@ export class Field extends Component {
             .querySelector(`label[for=${this.fieldComponentProps.id}], ${formLabelSelector}`)
             ?.classList.toggle("o_label_active", isActive);
     }
+    onProutClicked(ev) {
+        const target = ev.target;
+        const selectors = [];
+        let parent = target;
+        while (parent) {
+            if (parent.classList.contains("o_field_widget")) {
+                const name = parent.getAttribute("name");
+                selectors.push(`.o_field_widget[name=${name}]`);
+            }
+            if (parent.classList.contains("o_notebook")) {
+                const page = parent.querySelector(".o_notebook_headers .nav-link.active");
+                selectors.push(`.o_notebook .nav-link[name=${page.getAttribute("name")}]`);
+            }
+            parent = parent.parentElement;
+        }
+        this.env.services.studio.open(null, null, { selectors: selectors.toReversed() });
+    }
 }
