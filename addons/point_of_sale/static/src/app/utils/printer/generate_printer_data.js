@@ -342,26 +342,11 @@ export class GeneratePrinterData {
         const order = this.order;
         const override = opts.orderChange;
         let orderChange = override || changesToOrder(this.order, categoryIdsSet, opts.cancelled);
-        let reprint = false;
 
-        if (
-            !orderChange.new.length &&
-            !orderChange.cancelled.length &&
-            !orderChange.noteUpdate.length &&
-            !orderChange.internal_note &&
-            !orderChange.general_customer_note &&
-            order.lastPrints.length
-        ) {
-            orderChange = [order.lastPrints.at(-1)];
-            reprint = true;
-        } else {
+        if (!order.uiState.isReprinting) {
             order.pushLastPrints(orderChange);
-            orderChange = [orderChange];
         }
-
-        if (reprint && opts.orderDone) {
-            return [];
-        }
+        orderChange = [orderChange];
 
         const receipts = [];
         const changes = orderChange.filter(Boolean);
@@ -390,7 +375,7 @@ export class GeneratePrinterData {
                     conditions: {
                         module_pos_restaurant: this.config.module_pos_restaurant,
                     },
-                    _rawChange: reprint ? null : changes[0],
+                    _rawChange: changes[0],
                 });
             }
         }
