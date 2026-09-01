@@ -187,7 +187,7 @@ class TestEfakturCoretax(AccountTestInvoicingCommon):
 
         with self.assertRaisesRegex(
             ValidationError,
-            r"can only have one PPN tax group \(excluding STLG\)[\s\S]*Luxury-Goods and Non-Luxury-Goods taxes"
+            r"can only have one PPN tax group \(excluding STLG\)[\s\S]*a VAT Base and an Other Value VAT Base tax"
         ):
             out_invoice_luxury_non_luxury.download_efaktur()
 
@@ -205,7 +205,7 @@ class TestEfakturCoretax(AccountTestInvoicingCommon):
 
         with self.assertRaisesRegex(
             ValidationError,
-            r"contains both Non-Luxury-Goods and STLG taxes.[\s\S]*has STLG tax but missing the required Luxury-Goods tax."
+            r"contains both an Other Value VAT Base and an STLG tax.[\s\S]*has an STLG tax but is missing the required VAT Base tax."
         ):
             out_invoice_stlg_non_luxury.download_efaktur()
 

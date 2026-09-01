@@ -29,10 +29,13 @@ class AccountMove(models.Model):
         store=True,
     )
 
-    @api.depends('partner_id')
+    @api.depends('partner_id', 'reversed_entry_id')
     def _compute_kode_transaksi(self):
         for move in self:
-            move.l10n_id_kode_transaksi = move.commercial_partner_id.l10n_id_kode_transaksi
+            move.l10n_id_kode_transaksi = (
+                move.reversed_entry_id.l10n_id_kode_transaksi
+                or move.commercial_partner_id.l10n_id_kode_transaksi
+            )
 
     def _generate_qr_code(self, silent_errors=False):
         """
