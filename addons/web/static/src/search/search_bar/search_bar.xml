@@ -128,7 +128,8 @@
                 bottomSheet="false"
                 popoverWillCloseOnClickAway="this.popoverWillCloseOnClickAway"
             >
-                <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 border-end-0 rounded-start-pill bg-view ps-3 pe-0"
+                <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 rounded-start-pill bg-view ps-3"
+                    t-att-class="this.env.searchModel.searchMenuTypes.size ? 'border-end-0 pe-0' : 'rounded-end-pill pe-3'"
                     role="search" aria-autocomplete="list">
                     <button class="d-print-none btn border-0 p-0"
                         aria-label="Search..."
