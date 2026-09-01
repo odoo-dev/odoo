@@ -2136,7 +2136,7 @@ class MrpProduction(models.Model):
         (self.move_raw_ids | self.move_finished_ids).filtered(lambda m: m.picked and not m.additional).move_line_ids.filtered(lambda ml: not ml.picked).unlink()
         for production in self:
             for move in production.move_raw_ids | production.move_finished_ids:
-                if move.additional:
+                if move.additional or move.has_source_move():
                     continue
                 move_to_backorder_moves[move] = self.env['stock.move']
                 unit_factor, additional_qty = move._get_production_move_qty_data(initial_qty_by_production[production])
