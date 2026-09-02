@@ -40,6 +40,22 @@
 .o_spreadsheet_dashboard_action {
     .o_renderer {
         height: 100%;
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 10px;
+            z-index: 2;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                $o-webclient-background-color 0%,
+                rgba($o-webclient-background-color, 0.65) 45%,
+                rgba($o-webclient-background-color, 0) 100%
+            );
+        }
 
         .o-spreadsheet {
             height: 100%;
