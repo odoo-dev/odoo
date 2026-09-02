@@ -157,7 +157,7 @@ export function getMediaManagertDialogProps(recordInfo) {
         resModel: "ir.attachment", // todo we probably don't need this
         baseResModel: recordInfo.resModel ?? "ir.attachment",
         baseResId: recordInfo.resId ?? -1,
-        // noCreate: true,
+        noCreate: true,
         domain: [
             ["mimetype", "in", IMAGE_MIMETYPES],
             ["type", "=", "binary"], // todo : this prevent webp url to be shown, should we change that ?

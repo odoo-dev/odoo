@@ -8,18 +8,23 @@
             t-on-click="this.onGlobalClick"
             t-ref="this.rootRef">
             <t t-call="{{ this.templates[this.constructor.CARD_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
-            <div class="o_record_box_select o_record_interactive position-absolute" t-on-click="this.toggleSelected">
-                <input type="checkbox" t-att-checked="this.props.record.selected"/>
-            </div>
             <div class="o_record_box_star o_record_interactive position-absolute" t-on-click="this.toggleStarred">
                 <span t-if="this.state.starred" class="oi" data-icon="star_filled"></span>
                 <span t-else="" class="oi" data-icon="star"></span>
             </div>
-            <div class="o_record_box_delete o_record_interactive position-absolute" t-on-click="this.deleteItem">
-                <span class="oi" data-icon="delete"></span>
+
+            <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                <Dropdown menuClass="'o-dropdown--kanban-record-menu'" position="'bottom-end'">
+                    <button class="btn btn-light o-no-caret px-1" title="Dropdown menu">
+                        <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                    <t t-set-slot="content">
+                        <DropdownItem onSelected="() => this.previewRecord()">Preview image</DropdownItem>
+                        <hr />
+                        <DropdownItem onSelected="() => this.deleteItem()"><span class="oi" data-icon="delete"></span> Delete</DropdownItem>
+                    </t>
+                </Dropdown>
             </div>
-            <t t-call="{{ this.constructor.menuTemplate }}"/>
         </article>
     </t>
-
 </templates>

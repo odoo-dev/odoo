@@ -2,6 +2,10 @@
     position: absolute;
     bottom: 0;
     top: 58px; /* search bar height */
+    .o_kanban_record {
+        --KanbanRecord-width : 50px;
+        --Card-min-width: 50px;
+    }
 }
 
 .media-manager-side-panel {
