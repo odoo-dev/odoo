@@ -1123,3 +1123,16 @@ class TestSalesTeam(SaleCommon):
 
         sale_order = self.env['sale.order'].with_user(user).create({'partner_id': self.partner.id})
         self.assertEqual(sale_order.team_id, self.sale_team)
+
+    def test_compute_product_uom_preserves_same_category_uom(self):
+        self._enable_uom()
+        order = self.env['sale.order'].create({'partner_id': self.partner.id})
+        line = self.env['sale.order.line'].create({
+            'order_id': order.id,
+            'product_id': self.consumable_product.id,
+            'product_uom_qty': 1.0,
+            'product_uom': self.uom_dozen.id,
+        })
+        # Simulate a variant change: write product_id (same product, triggers compute)
+        line.product_id = self.consumable_product
+        self.assertEqual(line.product_uom, self.uom_dozen)
