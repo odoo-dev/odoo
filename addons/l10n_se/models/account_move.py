@@ -9,6 +9,24 @@ from stdnum import luhn
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    def _post(self, soft=True):
+        # EXTENDS 'account'
+        posted = super()._post(soft)
+
+        for move in posted:
+            if move.country_code == 'SE' and move.is_sale_document() and not move.delivery_date:
+                move.delivery_date = move.invoice_date
+
+        return posted
+
+    @api.depends('country_code', 'move_type')
+    def _compute_show_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_show_delivery_date()
+        for move in self:
+            if move.country_code == 'SE':
+                move.show_delivery_date = move.is_sale_document()
+
     def _get_invoice_reference_se_ocr2(self, reference):
         self.ensure_one()
         return reference + luhn.calc_check_digit(reference)
