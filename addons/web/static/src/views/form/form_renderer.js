@@ -40,6 +40,7 @@ export const formRendererProps = {
     readonly: t.boolean().optional(),
     saveRecord: t.function().optional(),
     setFieldAsDirty: t.function().optional(),
+    slots: t.object().optional(),
 };
 
 export class FormRenderer extends Component {
@@ -60,6 +61,21 @@ export class FormRenderer extends Component {
 
     // Bound by the FormCompiler on the compiled view root.
     rootRef = signal.ref();
+
+    /**
+     * The slots the compiled arch gives to the status bar buttons. On small
+     * screens their menu is the single actions menu of the view, and what
+     * goes in it comes from the controller, through the `statusbar_actions`
+     * slot. Kept identical across renders so the status bar is not patched
+     * for nothing.
+     */
+    statusBarActionsSlots() {
+        const actions = this.props.slots?.statusbar_actions;
+        if (this.statusBarSlots?.actions !== actions) {
+            this.statusBarSlots = actions ? { actions } : {};
+        }
+        return this.statusBarSlots;
+    }
 
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;

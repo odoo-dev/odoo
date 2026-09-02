@@ -13,15 +13,39 @@
                 display: inline-block;
             }
         }
+
+        /*
+         * ...and show it whenever it is the single actions menu of the view,
+         * that is whenever the cog actions are inlined in it rather than in a
+         * menu of their own elsewhere.
+         */
+        &.o-control-panel-has-actions > .o-control-panel-adaptive-dropdown {
+            display: inline-block;
+        }
     }
 
     /* hide the main buttons if the dropdown is empty to not render the gap */
-    .o_control_panel_main_buttons:has(> .o-control-panel-adaptive-dropdown:only-child) {
+    .o_control_panel_main_buttons:has(> .o-control-panel-adaptive-dropdown:only-child):not(.o-control-panel-has-actions) {
         display: none !important;
     }
 
-    /* hide the first element in the ellipsis dropdown menu */
-    .o-control-panel-adaptive-dropdown.dropdown-menu > :nth-child(1 of :not(.d-none, .o_hidden)) {
-        display: none !important;
+    /* a section other modules appended may well be empty on a given view */
+    .o-control-panel-adaptive-dropdown.dropdown-menu > .dropdown-divider:last-child {
+        display: none;
+    }
+
+    .o-control-panel-adaptive-dropdown.dropdown-menu > .o-control-panel-adaptive-buttons {
+        /* hide the first button, it is the one kept visible outside the menu */
+        > :nth-child(1 of :not(.d-none, .o_hidden, .dropdown-divider)) {
+            display: none !important;
+        }
+
+        /* drop the separator when either of the two sections it splits is empty */
+        &:not(:has(> :nth-child(n + 2 of :not(.d-none, .o_hidden, .dropdown-divider)))),
+        &:last-child {
+            > .dropdown-divider {
+                display: none;
+            }
+        }
     }
 }

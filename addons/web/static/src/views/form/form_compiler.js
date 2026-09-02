@@ -475,6 +475,13 @@ export class FormCompiler extends ViewCompiler {
             append(slot, button);
             append(statusBarButtons, slot);
         }
+        // The actions menu of small screens is the one of the status bar, and
+        // the controller is what fills it. A slot cannot be forwarded from
+        // here: the compiled arch renders in a `t-call-context` of its own,
+        // with no component node for `t-call-slot` to resolve against. The
+        // renderer hands the slot over as a prop instead, which Owl merges
+        // with the button slots compiled above.
+        statusBarButtons.setAttribute("slots", "__comp__.statusBarActionsSlots()");
         append(statusBar, statusBarButtons);
         append(statusBar, others);
         return statusBar;

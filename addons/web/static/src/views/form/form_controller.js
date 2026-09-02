@@ -179,9 +179,17 @@ export class FormController extends Component {
         this.canEdit = edit && !this.props.preventEdit;
         this.duplicateId = false;
 
+        // Without a <header> there is no status bar, hence no menu on small
+        // screens to gather the actions in: the control panel keeps them.
+        this.hasStatusBar = Boolean(this.archInfo.xmlDoc.querySelector("header:not(field header)"));
+
         this.display = { ...this.props.display };
         if (this.env.inDialog) {
             this.display.controlPanel = false;
+        } else if (this.hasStatusBar && this.display.controlPanel) {
+            // the status bar is the one showing the actions menu of small
+            // screens, so the control panel has no ellipsis to show for it
+            this.display.controlPanel = { ...this.display.controlPanel, actionsMenu: false };
         }
 
         this.formInDialog = 0;

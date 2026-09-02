@@ -40,11 +40,18 @@ export class CogMenu extends ActionMenus {
     };
     static actionMenusProps = cogMenuProps;
 
+    // Views that fill the cog with items of their own keep those apart from
+    // the print ones.
+    printItemsSeparator = false;
+
     setup() {
         super.setup();
         this.uiService = useService("ui");
         this.registryItems = asyncComputed(async () => this._registryItems(), { initial: [] });
         onWillStart(() => this.registryItems.currentPromise());
+        // Inlined in an already open menu on small screens: there is no
+        // toggler left to load the print items on, so load them upfront.
+        onWillStart(() => this.uiService.isSmall && this.loadPrintItems());
     }
 
     get hasItems() {

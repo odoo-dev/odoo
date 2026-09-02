@@ -174,7 +174,7 @@ test("properly compile no sheet", () => {
         <t t-translation="off">
             <div class="o_form_renderer o_form_nosheet" t-att-class="__comp__.props.class" t-attf-class="{{__comp__.props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} d-block {{ __comp__.props.record.dirty ? 'o_form_dirty' : !__comp__.props.record.isNew ? 'o_form_saved' : '' }}" t-ref="__comp__.rootRef">
                 <div t-att-class="{ 'shadow-sm': __comp__.state.isStatusbarStickyPinned }" class="o_form_statusbar d-flex justify-content-between py-2">
-                    <StatusBarButtons/>
+                    <StatusBarButtons slots="__comp__.statusBarActionsSlots()"/>
                 </div>
                 <div>someDiv</div>
             </div>
@@ -198,7 +198,7 @@ test("properly compile sheet", () => {
         <t t-translation="off">
             <div class="o_form_renderer" t-att-class="__comp__.props.class" t-attf-class="{{__comp__.props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} d-flex d-print-block {{ __comp__.uiService.size &lt; 5 ? &quot;flex-column&quot; : &quot;flex-nowrap h-100&quot; }} {{ __comp__.props.record.dirty ? 'o_form_dirty' : !__comp__.props.record.isNew ? 'o_form_saved' : '' }}" t-ref="__comp__.rootRef">
                 <div t-on-scroll="__comp__.onScrollThrottled" class="o_form_sheet_bg">
-                    <div t-att-class="{ 'shadow-sm': __comp__.state.isStatusbarStickyPinned }" class="o_form_statusbar d-flex justify-content-between py-2"><StatusBarButtons/></div>
+                    <div t-att-class="{ 'shadow-sm': __comp__.state.isStatusbarStickyPinned }" class="o_form_statusbar d-flex justify-content-between py-2"><StatusBarButtons slots="__comp__.statusBarActionsSlots()"/></div>
                     <div>someDiv</div>
                     <div class="o_form_sheet position-relative">
                         <div>inside sheet</div>
@@ -293,7 +293,7 @@ test("properly compile status bar with content", () => {
         <t t-translation="off">
             <div class="o_form_renderer o_form_nosheet" t-att-class="__comp__.props.class" t-attf-class="{{__comp__.props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} d-block {{ __comp__.props.record.dirty ? 'o_form_dirty' : !__comp__.props.record.isNew ? 'o_form_saved' : '' }}" t-ref="__comp__.rootRef">
                 <div t-att-class="{ 'shadow-sm': __comp__.state.isStatusbarStickyPinned }" class="o_form_statusbar d-flex justify-content-between py-2">
-                    <StatusBarButtons>
+                    <StatusBarButtons slots="__comp__.statusBarActionsSlots()">
                         <t t-set-slot="button_0" isVisible="true">
                             <div>someDiv</div>
                         </t>
@@ -315,7 +315,7 @@ test("properly compile status bar without content", () => {
         <t t-translation="off">
             <div class="o_form_renderer o_form_nosheet" t-att-class="__comp__.props.class" t-attf-class="{{__comp__.props.record.isInEdition ? 'o_form_editable' : 'o_form_readonly'}} d-block {{ __comp__.props.record.dirty ? 'o_form_dirty' : !__comp__.props.record.isNew ? 'o_form_saved' : '' }}" t-ref="__comp__.rootRef">
                 <div t-att-class="{ 'shadow-sm': __comp__.state.isStatusbarStickyPinned }" class="o_form_statusbar d-flex justify-content-between py-2">
-                    <StatusBarButtons/>
+                    <StatusBarButtons slots="__comp__.statusBarActionsSlots()"/>
                 </div>
             </div>
         </t>

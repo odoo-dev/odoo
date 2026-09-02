@@ -20,16 +20,16 @@
                     </t>
 
                     <t t-set-slot="control-panel-actions">
-                        <t t-if="!this.ui.isSmall and this.buttonBoxTemplate">
-                            <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
-                        </t>
+                        <t t-if="!this.ui.isSmall" t-call="web.FormView.ButtonBox"/>
                     </t>
 
                     <t t-set-slot="control-panel-additional-actions">
-                        <CogMenu t-props="this.cogMenuProps" />
-                        <t t-if="this.ui.isSmall and this.buttonBoxTemplate">
-                            <t t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
-                        </t>
+                        <t t-call="web.FormView.CogMenu"/>
+                    </t>
+
+                    <!-- a button of its own, not an entry of the actions menu -->
+                    <t t-set-slot="control-panel-additional-buttons">
+                        <t t-if="this.ui.isSmall" t-call="web.FormView.ButtonBox"/>
                     </t>
 
                     <t t-set-slot="control-panel-status-indicator">
@@ -38,10 +38,27 @@
                         </t>
                     </t>
 
-                    <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" readonly="(this.props.readonly or !this.canEdit)  and !this.model.root.isNew" archInfo="this.archInfo" translateAlert="this.translateAlert" onNotebookPageChange.bind="this.onNotebookPageChange" activeNotebookPages="this.props.state and this.props.state.activeNotebookPages"/>
+                    <t t-component="this.props.Renderer" record="this.model.root" Compiler="this.props.Compiler" readonly="(this.props.readonly or !this.canEdit)  and !this.model.root.isNew" archInfo="this.archInfo" translateAlert="this.translateAlert" onNotebookPageChange.bind="this.onNotebookPageChange" activeNotebookPages="this.props.state and this.props.state.activeNotebookPages">
+                        <!--
+                            Small screens have one actions menu, the one of the
+                            status bar: the control panel gives it the cog
+                            rather than showing a second ellipsis of its own.
+                        -->
+                        <t t-set-slot="statusbar_actions">
+                            <t t-if="this.ui.isSmall" t-call="web.FormView.CogMenu"/>
+                        </t>
+                    </t>
                 </Layout>
             </div>
         </div>
+    </t>
+
+    <t t-name="web.FormView.CogMenu">
+        <CogMenu t-props="this.cogMenuProps"/>
+    </t>
+
+    <t t-name="web.FormView.ButtonBox">
+        <t t-if="this.buttonBoxTemplate" t-call="{{ this.buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
     </t>
 
     <t t-name="web.FormView.DialogButtons">

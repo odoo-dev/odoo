@@ -26,6 +26,9 @@ const STICKY_CLASS = "o_mobile_sticky";
 const DEFAULT_DISPLAY = {
     actions: true,
     buttons: true,
+    // whether this control panel is the one showing the actions menu of small
+    // screens: a form view has the menu of its status bar for that instead
+    actionsMenu: true,
 };
 
 export class ControlPanel extends Component {
@@ -184,11 +187,16 @@ export class ControlPanel extends Component {
     }
 
     dropdownifyButtons() {
-        const adaptiveMenu = document.querySelector(
-            ".o-control-panel-adaptive-dropdown.dropdown-menu"
+        // Only the buttons need to be turned into menu entries: they are the
+        // ones the control panel renders as buttons. The rest of the menu (the
+        // cog actions) already comes from a menu.
+        const buttons = document.querySelector(
+            ".o-control-panel-adaptive-dropdown.dropdown-menu .o-control-panel-adaptive-buttons"
         );
-        const meaningfulElements = this.getBoxedElements(adaptiveMenu.children);
-        for (const el of meaningfulElements) {
+        const buttonElements = [...buttons.children].filter(
+            (el) => !el.classList.contains("dropdown-divider")
+        );
+        for (const el of this.getBoxedElements(buttonElements)) {
             el.classList.add("dropdown-item");
             el.classList.remove("btn");
         }
