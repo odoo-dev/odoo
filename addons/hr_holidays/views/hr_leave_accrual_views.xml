@@ -35,18 +35,21 @@
                                     of the month
                                 </span>
                                 <span name="biyearly" invisible="frequency != 'biyearly'">
+                                    <field name="allowed_first_monthly_days" invisible="1"/>  <!-- used for widget `filterable_selection` -->
+                                    <field name="allowed_second_monthly_days" invisible="1"/>  <!-- used for widget `filterable_selection` -->
                                     on the
-                                    <field nolabel="1" name="first_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="first_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'" widget="filterable_selection" options="{'whitelist_fname': 'allowed_first_monthly_days'}"/>
                                     of
                                     <field name="first_month" class="o_hr_narrow_field-5" placeholder="select a month" required="frequency == 'biyearly'"/>
                                     and the
-                                    <field nolabel="1" name="second_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="second_month_day" class="o_hr_narrow_field-3" placeholder="select a day" required="frequency == 'biyearly'" widget="filterable_selection" options="{'whitelist_fname': 'allowed_second_monthly_days'}"/>
                                     of
                                     <field nolabel="1" name="second_month" class="o_hr_narrow_field-5" placeholder="select a month" required="frequency == 'biyearly'"/>
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
+                                    <field name="allowed_yearly_days" invisible="1"/>  <!-- used for widget `filterable_selection` -->
                                     on the
-                                    <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" required="frequency == 'yearly'" placeholder="select a day"/>
+                                    <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" required="frequency == 'yearly'" placeholder="select a day" widget="filterable_selection" options="{'whitelist_fname': 'allowed_yearly_days'}"/>
                                     of
                                     <field nolabel="1" name="yearly_month" class="o_hr_narrow_field-5" required="frequency == 'yearly'" placeholder="select a month"/>
                                 </span>

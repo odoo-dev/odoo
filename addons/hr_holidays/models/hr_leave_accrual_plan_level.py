@@ -10,6 +10,15 @@ def _get_selection_days(self):
     return [(str(i), str(i)) for i in range(1, 32)]
 
 
+def _get_contrained_selection_days(month):
+    """Obtain the list of days available for a given month."""
+    if month in ['2']:
+        return [str(i) for i in range(1, 29)]
+    if month in ['4', '6', '9', '11']:
+        return [str(i) for i in range(1, 31)]
+    return [str(i) for i in range(1, 32)]
+
+
 class HrLeaveAccrualLevel(models.Model):
     _name = 'hr.leave.accrual.level'
     _description = "Accrual Plan Level"
@@ -147,6 +156,10 @@ class HrLeaveAccrualLevel(models.Model):
         help="This field defines the unit of time after which the accrual ends.")
     yearly_gain = fields.Float(compute="_compute_yearly_gain")
 
+    allowed_yearly_days = fields.Json(compute="_compute_available_days")
+    allowed_first_monthly_days = fields.Json(compute="_compute_available_days")
+    allowed_second_monthly_days = fields.Json(compute="_compute_available_days")
+
     _start_count_check = models.Constraint(
         "CHECK((start_count > 0 AND milestone_date = 'after') OR (start_count = 0 AND milestone_date = 'creation'))",
         'You can not start an accrual in the past.',
@@ -195,6 +208,14 @@ class HrLeaveAccrualLevel(models.Model):
         }
         for level in self:
             level.sequence = level.start_count * start_type_multipliers[level.start_type]
+
+    @api.depends("yearly_month", "first_month", "second_month")
+    def _compute_available_days(self):
+        """Available days for the months selected in the accrual frequency level"""
+        for accrual_plan in self:
+            accrual_plan.allowed_first_monthly_days = _get_contrained_selection_days(month=accrual_plan.first_month)
+            accrual_plan.allowed_second_monthly_days = _get_contrained_selection_days(month=accrual_plan.second_month)
+            accrual_plan.allowed_yearly_days = _get_contrained_selection_days(month=accrual_plan.yearly_month)
 
     @api.depends('accrual_plan_id', 'accrual_plan_id.level_ids')
     def _compute_can_modify_value_type(self):
