@@ -10,6 +10,15 @@ def _get_selection_days(self):
     return [(str(i), str(i)) for i in range(1, 32)]
 
 
+def _get_contrained_selection_days(month):
+    """Obtain the list of days available for a given month."""
+    if month in ['2']:
+        return [str(i) for i in range(1, 29)]
+    if month in ['4', '6', '9', '11']:
+        return [str(i) for i in range(1, 31)]
+    return [str(i) for i in range(1, 32)]
+
+
 class HrLeaveAccrualLevel(models.Model):
     _name = 'hr.leave.accrual.level'
     _description = "Accrual Plan Level"
