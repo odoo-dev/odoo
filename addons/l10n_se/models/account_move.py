@@ -15,7 +15,7 @@ class AccountMove(models.Model):
 
         for move in posted:
             if move.country_code == 'SE' and move.is_sale_document() and not move.delivery_date:
-                move.delivery_date = move.invoice_date
+                move.delivery_date = move.invoice_date or fields.Date.context_today(move)
 
         return posted
 
