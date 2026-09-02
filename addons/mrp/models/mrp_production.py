@@ -2067,7 +2067,8 @@ class MrpProduction(models.Model):
         :param bool set_consumed_qty: whether to set quantity on move lines to the reserved quantity
         or the initial demand if no reservation, except for the remaining backorder.
         :param bool skip_workorder_quantity: Whether to skip updating the workorder quantity produced or not.
-        :return: mrp.production records in order of [orig_prod_1, backorder_prod_1,
+        :return: mrp.production records in order of
+        [orig_prod_1, backorder_prod_1,
         backorder_prod_2, orig_prod_2, backorder_prod_2, etc.]
         """
         def _default_amounts(production):
