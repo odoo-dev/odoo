@@ -3,7 +3,7 @@
 
     <t t-name="web.Field">
         <div t-att-name="this.props.name" class="d-flex flex-row" t-att-class="this.classNames" t-att-style="this.props.style" t-att-data-tooltip-template="this.tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="this.tooltip">
-            <button class="btn btn-light" style="max-height: 1.5em;"><i class="oi" data-icon="edit" t-on-click="this.onProutClicked"/></button>
+            <button t-if="this.canMetaEdit()" class="btn btn-light" style="max-height: 1.5em;"><i class="oi" data-icon="edit" t-on-click="this.onProutClicked"/></button>
             <t t-component="this.field.component" t-props="this.fieldComponentProps"/>
         </div>
     </t>

@@ -1,4 +1,4 @@
-import { Component, t, usePlugin, useProps, xml } from "@odoo/owl";
+import { Component, computed, Plugin, Registry, Resource, t, useConfig, usePlugin, useProps, xml } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Domain } from "@web/core/domain";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
@@ -9,6 +9,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { getFieldContext } from "@web/model/relational_model/utils";
 import { X2M_TYPES, getClassNameFromDecoration } from "@web/views/utils";
 import { getTooltipInfo } from "./field_tooltip";
+import { services } from "@web/core/services";
 
 const isSmall = utils.isSmall;
 
@@ -219,6 +220,13 @@ export class Field extends Component {
     // Field forwards arbitrary props to the underlying field component, so it
     // accepts any prop (fieldInfo among them).
     props = useProps();
+    fieldProut = usePlugin(FieldProut);
+    
+    canMetaEdit = computed(() => {
+        return this.props.record === this.props.record.model.root && this.fieldProut.get("metaEdition")?.();
+
+    });
+
     static parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         const name = node.getAttribute("name");
         const widget = node.getAttribute("widget");
@@ -513,3 +521,65 @@ export class Field extends Component {
         this.env.services.studio.open(null, null, { selectors: selectors.toReversed() });
     }
 }
+
+export class FieldResources extends Plugin {
+    static id = "field_resources"
+    resources = new Resource();
+}
+
+export class FieldProut extends Plugin {
+    static id = "field_prout";
+    fieldResources = usePlugin(FieldResources);
+    resources = computed(() => this.fieldResources.resources);
+
+    config = useConfig("field_config");
+
+    _extensions = computed(() => {
+        const extensions = [];
+        for (const resource of this.resources().items()) {
+                if (resource.active?.(this.config?.()) ?? true) {
+                   extensions.push(new resource())
+                } 
+        }
+        return extensions;
+    });
+
+    state = computed(() => {
+        const state = {};
+        for (const ext of this._extensions()) {
+            if (ext.state) {
+                Object.assign(state, ext.state);
+            }
+        }
+        return state;
+    });
+
+    get(stateKey) {
+        return this.state()[stateKey];
+    }
+
+    _callbacks = computed(() => {
+        const cbs = {};
+        for (const ext of this._extensions()) {
+            for (const name of Object.getOwnPropertyNames(ext)) {
+                const fn = ext[name];
+                if (fn instanceof Function) {
+                    cbs[fn.name] ??= [];
+                    cbs[fn.name].append(fn);
+                }
+            }
+        }
+        return cbs;
+    })
+
+    trigger(name, ...args) {
+        for (const fn of this._callbacks()[name] || []) {
+            const res = fn(...args);
+            if (res ?? false) {
+                return;
+            }
+        }
+    }
+}
+services.add(FieldResources);
+services.add(FieldProut);

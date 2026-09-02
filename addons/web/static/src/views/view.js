@@ -23,6 +23,11 @@ import {
     toRaw,
     t,
     applyDefaults,
+    Plugin,
+    Registry,
+    useConfig,
+    computed,
+    providePlugins,
 } from "@odoo/owl";
 import { session } from "@web/session";
 
@@ -242,7 +247,6 @@ export class View extends Component {
                 CALLBACK_RECORDER_NAMES.map((name) => [name, this.props[name] || null])
             ),
         });
-
         this.handleActionLinks = useActionLinks(resModel, () => render(this));
 
         onWillStart(() => this.loadView(this.props));

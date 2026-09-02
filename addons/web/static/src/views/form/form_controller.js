@@ -17,7 +17,7 @@ import { useSetupAction } from "@web/search/action_hook";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { Field } from "@web/views/fields/field";
+import { Field, FieldConf, FieldProut } from "@web/views/fields/field";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -43,9 +43,13 @@ import {
     onPatched,
     onWillDestroy,
     onWillUnmount,
+    Plugin,
+    providePlugins,
     proxy,
+    Registry,
     signal,
     t,
+    useConfig,
     usePlugin,
     useProps,
 } from "@odoo/owl";
@@ -147,6 +151,7 @@ export const formControllerProps = {
     updateActionState: t.function().optional(() => () => {}),
 };
 
+
 export class FormController extends Component {
     static template = `web.FormView`;
     static components = {
@@ -164,6 +169,9 @@ export class FormController extends Component {
     rootRef = signal.ref();
 
     setup() {
+        providePlugins([FieldProut], { field_config: () => this.env.config });
+        this.field_prout = usePlugin(FieldProut);
+
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
@@ -596,10 +604,11 @@ export class FormController extends Component {
                 isAvailable: () => activeActions.addPropertyFieldValue,
                 sequence: 10,
                 description: this.propertiesState.editable
-                    ? _t("Save Properties")
-                    : _t("Edit Properties"),
+                    ? _t("Save fields")
+                    : _t("Edit fields"),
                 icon: "settings_applications",
                 callback: () => {
+                    this.field_prout.trigger("setMetaEdit", true);
                     this.propertiesState.editable = !this.propertiesState.editable;
                     this.model.bus.trigger("PROPERTY_FIELD:EDIT", {
                         editable: this.propertiesState.editable,

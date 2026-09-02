@@ -1,6 +1,6 @@
 // @ts-check
 
-import { EventBus, markRaw, usePlugin, toRaw } from "@odoo/owl";
+import { EventBus, markRaw, usePlugin, toRaw, Registry } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
@@ -127,6 +127,7 @@ export class RelationalModel extends Model {
     static withCache = true;
 
     offlinePlugin = usePlugin(OfflinePlugin);
+    extensions = new Registry();
 
     /**
      * @param {RelationalModelParams} params
