@@ -8,7 +8,7 @@ import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { ProductConfiguratorDialog } from "./product_configurator_dialog/product_configurator_dialog";
 
-async function applyProduct(record, product) {
+async function applyProduct(record, product, productUOM=undefined) {
     // handle custom values & no variants
     const customAttributesCommands = [
         x2ManyCommands.set([]),  // Command.clear isn't supported in static_list/_applyCommands
@@ -31,12 +31,21 @@ async function applyProduct(record, product) {
         ptal => ptal.create_variant === "no_variant"
     ).flatMap(ptal => ptal.selected_attribute_value_ids);
 
-    await record.update({
+    const updateValues = {
         product_id: [product.id, product.display_name],
         product_uom_qty: product.quantity,
         product_no_variant_attribute_value_ids: [x2ManyCommands.set(noVariantPTAVIds)],
         product_custom_attribute_value_ids: customAttributesCommands,
-    });
+    };
+    // Preserve the user-selected UoM when one is explicitly provided (e.g. editing
+    // an existing line via the configurator).  Without this, _compute_product_uom
+    // fires on the product_id change and silently resets the UoM to the product's
+    // default, discarding whatever the user had already chosen on the SO line.
+    if (productUOM) {
+        updateValues.product_uom = productUOM;
+    }
+
+    await record.update(updateValues);
 };
 
 patch(SaleOrderLineProductField.prototype, {
@@ -157,7 +166,16 @@ patch(SaleOrderLineProductField.prototype, {
             soDate: serializeDateTime(saleOrderRecord.data.date_order),
             edit: edit,
             save: async (mainProduct, optionalProducts) => {
-                await applyProduct(this.props.record, mainProduct);
+                // When editing an existing line (variant change), preserve the UoM
+                // the user already selected.  Pass it explicitly so that the
+                // _compute_product_uom triggered by the product_id write does not
+                // silently reset it to the product's default UoM.
+                // For new lines (edit=false) we do NOT pass a UoM so the default
+                // is computed normally from the chosen product variant.
+                // Many2one values must be [id, display_name] tuples — a bare id
+                // is not iterable and will crash _preprocessMany2oneChanges.
+                const preservedUOM = edit ? this.props.record.data.product_uom : undefined;
+                await applyProduct(this.props.record, mainProduct, preservedUOM);
 
                 this._onProductUpdate();
                 saleOrderRecord.data.order_line.leaveEditMode();
