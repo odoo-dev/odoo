@@ -45,10 +45,15 @@
                                     <field nolabel="1" name="second_month" class="o_hr_narrow_field-5" placeholder="select a month" required="frequency == 'biyearly'"/>
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
-                                    on the
-                                    <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" widget="day_selection" month_field="yearly_month" required="frequency == 'yearly'" placeholder="select a day"/>
-                                    of
-                                    <field nolabel="1" name="yearly_month" class="o_hr_narrow_field-5" required="frequency == 'yearly'" placeholder="select a month"/>
+                                    <field nolabel="1" class="mt-1 ms-1" name="yearly_option"
+                                        widget="radio_followed_by_element"
+                                        options="{'links': {'date': 'yearly_date'}, 'observe': 'yearly_option'}"/>
+                                    <span id="yearly_date">
+                                        the
+                                        <field nolabel="1" name="yearly_day" class="o_hr_narrow_field-3" widget="day_selection" month_field="yearly_month" required="frequency == 'yearly'" placeholder="select a day"/>
+                                        of
+                                        <field nolabel="1" name="yearly_month" class="o_hr_narrow_field-5" required="frequency == 'yearly'" placeholder="select a month"/>
+                                    </span>
                                 </span>
                             </span>
                             <span name="yearly_gain" class="text-muted">
@@ -64,7 +69,7 @@
                             <span name="milestone_date">
                                 <field nolabel="1" class="ms-1" name="milestone_date"
                                        widget="radio_followed_by_element"
-                                       options="{'links': {'after': 'milestone_date_after'}, 'observe': 'milestone_date'}"/>
+                                       options="{'links': {'after': 'milestone_date_after', 'creation': 'milestone_date_creation'}, 'observe': 'milestone_date'}"/>
                                 <span id="milestone_date_after">
                                     <field nolabel="1" class="ms-1 me-1 o_hr_narrow_field-5 o_accrual_input" name="start_count"/>
                                     <field nolabel="1" class="me-1 o_hr_narrow_field-4" name="start_type"/>
