@@ -14,7 +14,7 @@ class PosPaymentMethod(models.Model):
             'amount': order.amount_total,
             'referenceId': f'{reference_prefix}/Order/{order.id}/{uuid.uuid4().hex}',
         }
-        return self.razorpay_make_payment_request(data)
+        return {**self.razorpay_make_payment_request(data), **data}
 
     @api.model
     def _load_pos_self_data_domain(self, data):

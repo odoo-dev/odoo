@@ -23,6 +23,7 @@ export class Razorpay {
     }
 
     handleRazorpayResponse(response) {
+        console.log("handleRazorpayResponse", response);
         if (response?.error) {
             this.payment_stopped
                 ? this.errorCallback(new RazorpayError("Transaction canceled due to inactivity"))
@@ -31,6 +32,7 @@ export class Razorpay {
             return false;
         }
         localStorage.setItem("p2pRequestId", response?.p2pRequestId);
+        localStorage.setItem("referenceId", response?.referenceId);
         return true;
     }
 
@@ -86,7 +88,10 @@ export class Razorpay {
      * calls every 10 sec until payment status not found.
      */
     async paymentPolling(order) {
-        const data = { p2pRequestId: localStorage.getItem("p2pRequestId") };
+        const data = {
+            p2pRequestId: localStorage.getItem("p2pRequestId"),
+            referenceId: localStorage.getItem("referenceId"),
+        };
         this.stopInactivePayment().then(() => (this.payment_stopped = true));
         const fetchPaymentStatus = async () => {
             try {

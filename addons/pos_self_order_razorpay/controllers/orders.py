@@ -17,6 +17,9 @@ class PosSelfOrderControllerRazorpay(PosSelfOrderController):
         payment_method = pos_config.env['pos.payment.method'].browse(payment_method_id)
         razorpay_status_response = payment_method.razorpay_fetch_payment_status(payment_data)
         payment_status = razorpay_status_response.get('status')
+        if payment_status == "AUTHORIZED" and razorpay_status_response.get('externalRefNumber') != payment_data.get('referenceId'):
+            raise Unauthorized()
+
         if payment_status == "AUTHORIZED":
             order.add_payment({
                 'amount': order.amount_total,
