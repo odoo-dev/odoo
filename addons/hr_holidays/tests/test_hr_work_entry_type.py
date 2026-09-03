@@ -232,3 +232,46 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+
+        work_entry_types = self.env['hr.work.entry.type'].with_context(
+            employee_id=employee.id
+        ).search([('virtual_remaining_leaves', '>', 0)])
+
+        # Verify the search is valid for entry types that don't require allocation
+        self.assertIsNotNone(work_entry_types)
+
+        # Verify also for entry types that require allocation
+        work_entry_type_with_allocation = self.env['hr.work.entry.type'].create({
+            'name': 'Paid Time Off',
+            'code': 'Paid Time Off',
+            'requires_allocation': True,
+            'employee_requests': False,
+            'allocation_validation_type': 'hr',
+            'leave_validation_type': 'both',
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        allocation = self.env['hr.leave.allocation'].create({
+            'name': 'Paid Time off',
+            'work_entry_type_id': work_entry_type_with_allocation.id,
+            'number_of_days': 20,
+            'employee_id': employee.id,
+            'state': 'confirm',
+            'date_from': '2021-01-01'
+        })
+
+        allocation.action_approve()
+
+        res_after = self.env['hr.work.entry.type'].with_context(
+            employee_id=employee.id
+        ).search([('virtual_remaining_leaves', '>', 0)])
+
+        self.assertIn(
+            work_entry_type_with_allocation,
+            res_after,
+            "Work entry type should be returned by the search after granting positive remaining leaves."
+        )
