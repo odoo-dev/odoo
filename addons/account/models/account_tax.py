@@ -32,19 +32,6 @@ class AccountTaxGroup(models.Model):
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer(default=10)
     company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
-    # TODO: remove after all l10n migrations
-    tax_payable_account_id = fields.Many2one(
-        comodel_name='account.account',
-        check_company=True,
-        domain="[('account_type', '=', 'liability_payable'), ('non_trade', '=', True)]",
-        string='Tax Payable Account',
-        help="Tax current account used as a counterpart to the Tax Closing Entry when in favor of the authorities.")
-    tax_receivable_account_id = fields.Many2one(
-        comodel_name='account.account',
-        check_company=True,
-        domain="[('account_type', '=', 'asset_receivable'), ('non_trade', '=', True)]",
-        string='Tax Receivable Account',
-        help="Tax current account used as a counterpart to the Tax Closing Entry when in favor of the company.")
     country_id = fields.Many2one(
         string="Country",
         comodel_name='res.country',
