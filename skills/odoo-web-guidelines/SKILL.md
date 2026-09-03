@@ -22,5 +22,7 @@ instead of loading all of them.
 | Guideline | Read it when |
 | --- | --- |
 | [0001 Organize files by feature](guidelines/0001_organize_files_by_feature.md) | creating a file, or deciding where new code lives |
+| [0002 SCSS & CSS](guidelines/0002_scss.md) | touching `*.scss` |
+| [0003 Assets](guidelines/0003_assets.md) | adding an image, font, or library |
 
 To add a guideline, follow [AUTHORING.md](AUTHORING.md).
