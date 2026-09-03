@@ -174,6 +174,6 @@ export function makeStore(env, { localRegistry } = {}) {
         store[Model.getName()] = Model;
     }
     Object.assign(store, { Models, storeReady: true });
-    onWillDestroy(() => store._runDisposeFns());
+    onWillDestroy(() => store._.scope?.destroy());
     return store._proxy;
 }

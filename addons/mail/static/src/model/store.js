@@ -131,7 +131,7 @@ export class Store extends Record {
                         }
                         recordList._.data().length = 0;
                     }
-                    record._runDisposeFns();
+                    record._.scope?.destroy();
                 }
             }
             this._.UPDATE--;

@@ -56,7 +56,6 @@ async function start() {
     await start2();
     /** @type {Store} */
     const store = getService("store");
-    after(() => store._runDisposeFns());
     return store;
 }
 
@@ -1637,6 +1636,20 @@ test("computed field first read by a component outlives that component", async (
     await animationFrame();
     channel.count = 5;
     expect.verifySteps(["multiplicity:many"]);
+});
+
+test("an onUpdate observer stops when its record is deleted", async () => {
+    (class Thread extends Record {
+        static id = "name";
+        name;
+        title = fields.Attr(undefined, { onUpdate: () => expect.step("TITLE_UPDATED") });
+    }).register(localRegistry);
+    const store = await start();
+    const general = store.Thread.insert({ name: "General", title: "general" });
+    await expect.waitForSteps(["TITLE_UPDATED"]);
+    general.delete();
+    general.title = "deleted";
+    await expect.waitForSteps([]);
 });
 
 test("a record is its proxy in a field declaration and in setup", async () => {
