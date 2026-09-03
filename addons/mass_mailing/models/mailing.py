@@ -238,7 +238,7 @@ class MailingMailing(models.Model):
     )
     _email_from = models.Constraint(
         "CHECK(is_template = true OR email_from IS NOT NULL OR mailing_type != 'mail')",
-        "email from is required for non-template 'mail' mailings"
+        "email from is required for non-template 'mail' mailings",
     )
 
     @api.constrains('is_template', 'mailing_type')
