@@ -17,7 +17,7 @@ import { useSetupAction } from "@web/search/action_hook";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { Field, FieldConf, FieldProut } from "@web/views/fields/field";
+import { Field, FieldConf, FieldProut, FieldResources } from "@web/views/fields/field";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -37,6 +37,7 @@ import {
 
 import {
     Component,
+    computed,
     effect,
     onError,
     onMounted,
@@ -169,9 +170,8 @@ export class FormController extends Component {
     rootRef = signal.ref();
 
     setup() {
-        providePlugins([FieldProut], { field_config: () => this.env.config });
-        this.field_prout = usePlugin(FieldProut);
-
+        this.fieldEditionEnabled = signal(false);
+        providePlugins([FieldResources], { field_edition: { enabled: this.fieldEditionEnabled }});
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
@@ -608,8 +608,8 @@ export class FormController extends Component {
                     : _t("Edit fields"),
                 icon: "settings_applications",
                 callback: () => {
-                    this.field_prout.trigger("setMetaEdit", true);
                     this.propertiesState.editable = !this.propertiesState.editable;
+                    this.fieldEditionEnabled.set(this.propertiesState.editable);
                     this.model.bus.trigger("PROPERTY_FIELD:EDIT", {
                         editable: this.propertiesState.editable,
                     });

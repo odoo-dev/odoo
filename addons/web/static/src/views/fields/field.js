@@ -1,4 +1,4 @@
-import { Component, computed, Plugin, Registry, Resource, t, useConfig, usePlugin, useProps, xml } from "@odoo/owl";
+import { Component, computed, Plugin, providePlugins, Registry, Resource, t, useConfig, usePlugin, useProps, xml, signal, useEffect } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Domain } from "@web/core/domain";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
@@ -220,11 +220,15 @@ export class Field extends Component {
     // Field forwards arbitrary props to the underlying field component, so it
     // accepts any prop (fieldInfo among them).
     props = useProps();
-    fieldProut = usePlugin(FieldProut);
-    
+    rootRef = signal.ref();
+    fieldResources = usePlugin(FieldResources);
+    fieldDefinition = computed(() => this.props.record.fields[this.props.name]);
     canMetaEdit = computed(() => {
-        return this.props.record === this.props.record.model.root && this.fieldProut.get("metaEdition")?.();
-
+        debugger;
+        if (this.props.record !== this.props.record.model.root) {
+            return false;
+        }
+        return this.fieldResources.canEdit({ fieldDefinition: this.fieldDefinition, node: this.rootRef });
     });
 
     static parseFieldNode = function (node, models, modelName, viewType, jsClass) {
@@ -504,82 +508,60 @@ export class Field extends Component {
             ?.classList.toggle("o_label_active", isActive);
     }
     onProutClicked(ev) {
-        const target = ev.target;
-        const selectors = [];
-        let parent = target;
-        while (parent) {
-            if (parent.classList.contains("o_field_widget")) {
-                const name = parent.getAttribute("name");
-                selectors.push(`.o_field_widget[name=${name}]`);
-            }
-            if (parent.classList.contains("o_notebook")) {
-                const page = parent.querySelector(".o_notebook_headers .nav-link.active");
-                selectors.push(`.o_notebook .nav-link[name=${page.getAttribute("name")}]`);
-            }
-            parent = parent.parentElement;
-        }
-        this.env.services.studio.open(null, null, { selectors: selectors.toReversed() });
+        return this.fieldResources.edit({ fieldDefinition: this.fieldDefinition, node: this.rootRef })
     }
 }
 
+export const fieldResourcesRegistry = new Registry();
 export class FieldResources extends Plugin {
-    static id = "field_resources"
-    resources = new Resource();
-}
+    static id = "field_edition"
+    resources = fieldResourcesRegistry;
 
-export class FieldProut extends Plugin {
-    static id = "field_prout";
-    fieldResources = usePlugin(FieldResources);
-    resources = computed(() => this.fieldResources.resources);
+    state = useConfig("field_edition");
+    enabled = computed(() => this.state?.enabled?.())
 
-    config = useConfig("field_config");
-
-    _extensions = computed(() => {
-        const extensions = [];
-        for (const resource of this.resources().items()) {
-                if (resource.active?.(this.config?.()) ?? true) {
-                   extensions.push(new resource())
-                } 
-        }
-        return extensions;
-    });
-
-    state = computed(() => {
-        const state = {};
-        for (const ext of this._extensions()) {
-            if (ext.state) {
-                Object.assign(state, ext.state);
+    _resources = computed(() => {
+        const resources = [];
+        for (const res of this.resources.items()) {
+            const instance = res(this);
+            if (instance) {
+                resources.push(instance);
             }
         }
-        return state;
-    });
+        return resources;
+    })
 
-    get(stateKey) {
-        return this.state()[stateKey];
-    }
-
-    _callbacks = computed(() => {
+    handlers = computed(() => {
         const cbs = {};
-        for (const ext of this._extensions()) {
-            for (const name of Object.getOwnPropertyNames(ext)) {
-                const fn = ext[name];
-                if (fn instanceof Function) {
-                    cbs[fn.name] ??= [];
-                    cbs[fn.name].append(fn);
-                }
+        for (const res of this._resources()) {
+            for (const [name, fn] of Object.entries(res.handlers || {})) {
+                cbs[name] ??= [];
+                cbs[name].push(fn) 
             }
         }
         return cbs;
-    })
+    });
 
-    trigger(name, ...args) {
-        for (const fn of this._callbacks()[name] || []) {
-            const res = fn(...args);
-            if (res ?? false) {
-                return;
-            }
+    canEdit({ fieldDefinition, node }) {
+        if (!this.enabled()) {
+            return false;
         }
+        const results = [];
+        for (const cb of this.handlers()["canEdit"] || []) {
+            results.push(cb({ fieldDefinition, node }) ?? true)
+        }
+        return results.length && results.every(Boolean);
+    }
+
+    edit({ fieldDefinition, node }) {
+        if (!this.enabled()) {
+            return false;
+        }
+        for (const cb of this.handlers()["edit"] || []) {
+           cb({ fieldDefinition, node })
+        }
+        return true;
     }
 }
+
 services.add(FieldResources);
-services.add(FieldProut);
