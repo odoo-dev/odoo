@@ -40,9 +40,7 @@ class TestSeller(TransactionCase):
 
     def test_20_sellers_company(self):
         company_a = self.env.company
-        company_b = self.env['res.company'].create({
-            'name': 'Saucisson Inc.',
-        })
+        company_b = self.env.ref('base.test_company')
         self.product_consu.write({'seller_ids': [
             (0, 0, {'partner_id': self.asustec.id, 'product_code': 'A', 'company_id': company_a.id}),
             (0, 0, {'partner_id': self.asustec.id, 'product_code': 'B', 'company_id': company_b.id}),

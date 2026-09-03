@@ -4,6 +4,8 @@ from unittest import SkipTest
 from odoo.fields import Domain
 from odoo.tests import TransactionCase
 
+from odoo.addons.account.tests.common import TEST_COMPANY_XMLID_BY_COUNTRY_CODE
+
 _logger = logging.getLogger(__name__)
 
 
@@ -21,13 +23,26 @@ class TestL10n(TransactionCase):
         ]
         if not matching_country_templates:
             raise SkipTest("No template found")
-        cls.companies = companies = cls.env['res.company'].create([
-            {
+        companies = cls.env['res.company']
+        company_xmlid = TEST_COMPANY_XMLID_BY_COUNTRY_CODE.get(cls.country_code)
+        for index, (template_code, template) in enumerate(matching_country_templates):
+            company_values = {
                 'name': f'company_coa_{template_code}',
                 'country_id': template['country_id'],
             }
-            for template_code, template in matching_country_templates
-        ])
+            if index == 0 and company_xmlid:
+                shared_company = cls.env.ref(company_xmlid)
+                # This test reloads the chart below. Do not replace accounting data on a
+                # shared company, as downstream modules may already reference its journals.
+                if shared_company.chart_template:
+                    company = cls.env['res.company'].create(company_values)
+                else:
+                    company = shared_company
+                    company.write(company_values)
+            else:
+                company = cls.env['res.company'].create(company_values)
+            companies |= company
+        cls.companies = companies
         for (template_code, template), company in zip(matching_country_templates, companies):
             cls.env['account.chart.template'].with_context(l10n_check_fields_complete=True).try_loading(template_code, company, install_demo=False)
 

@@ -138,8 +138,10 @@ class TestAccessRights(TestCommonSalePurchaseNoChart):
             })]
         })
         # This PO belongs to a different company, it should not be shown
+        different_company = self.env.ref('base.test_company')
+        self.env.user.company_ids |= different_company
         different_company_po = self.env['purchase.order'].create({
-            'company_id': self.env['res.company'].create({'name': 'Different Company'}).id,
+            'company_id': different_company.id,
             'partner_id': self.partner_a.id,
             'order_line': [Command.create({
                 'name': 'test',

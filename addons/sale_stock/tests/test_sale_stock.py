@@ -2097,9 +2097,9 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         Check that the correct warnings are raised when you try to confirm
         a SO for a storable product without warehouse.
         """
-        new_company = self.env['res.company'].create({'name': 'Company 2'})
-        # Warhouses are created for new companies in test mode but not IRL
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', new_company.id)], limit=1)
+        new_company = self.env.ref('base.test_company')
+        self.env.user.company_ids |= new_company
+        warehouse = self.env.ref('stock.test_warehouse')
         warehouse.active = False
         storable_product = self.env['product.product'].create({
             'name': 'Lovely Product',
@@ -2116,7 +2116,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             ],
         })
         # Since you dont have any warehouse for your company  you should raise a RedirectWarning
-        error_message = "Please create a warehouse for company Company 2."
+        error_message = f"Please create a warehouse for company {new_company.name}."
         with self.assertRaisesRegex(RedirectWarning, error_message):
             so.with_company(new_company).action_confirm()
         warehouse.active = True
@@ -2328,8 +2328,8 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
     def test_multicompany_transit_with_one_company_for_user(self):
         """ Check that the inter-company transit location is created when
         user has only one allowed company. """
-        company_a = self.env['res.company'].create({'name': 'Company A'})
-        company_b = self.env['res.company'].create({'name': 'Company B'})
+        company_a = self.env.ref('base.test_company_with_branch')
+        company_b = self.env.ref('base.test_company')
         user_a = self.env['res.users'].create({
             'name': 'user only in company a',
             'login': 'user a',

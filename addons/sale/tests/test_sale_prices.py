@@ -411,10 +411,7 @@ class TestSalePrices(SaleCommon):
         current_curr = self.env.company.currency_id  # USD
         other_curr = self._enable_currency("EUR")
         # main_company.currency_id = other_curr # product.currency_id when no company_id set
-        other_company = self.env["res.company"].sudo().create({
-            "name": "Test",
-            "currency_id": other_curr.id,
-        })
+        other_company = self.env.ref("base.test_company_eur")
         user_in_other_company = self.env["res.users"].sudo().create({
             "company_id": other_company.id,
             "company_ids": [Command.set([other_company.id])],
@@ -443,8 +440,8 @@ class TestSalePrices(SaleCommon):
         self.assertEqual(product_1.cost_currency_id, current_curr)
         self.assertEqual(product_2.cost_currency_id, current_curr)
 
-        product_1_ctxt = product_1.with_user(user_in_other_company)
-        product_2_ctxt = product_2.with_user(user_in_other_company)
+        product_1_ctxt = product_1.with_user(user_in_other_company).with_company(other_company)
+        product_2_ctxt = product_2.with_user(user_in_other_company).with_company(other_company)
         self.assertEqual(product_1_ctxt.currency_id, main_curr)
         self.assertEqual(product_2_ctxt.currency_id, main_curr)
         self.assertEqual(product_1_ctxt.cost_currency_id, other_curr)
@@ -890,11 +887,7 @@ class TestSalePrices(SaleCommon):
             "original_tax_ids": tax_include.ids,
         })
         self.product.write({"list_price": 110.0, "taxes_id": tax_include.ids})
-        branch_company = self.env["res.company"].sudo().create({
-            "name": "Branch Co.",
-            "parent_id": self.env.company.id,
-            "account_fiscal_country_id": self.env.company.account_fiscal_country_id.id,
-        })
+        branch_company = self.env.ref("base.test_company_main_branch")
         self.env.user.company_ids += branch_company
         order = self._create_so(
             company_id=branch_company.id, fiscal_position_id=fpos.id, user_id=False, team_id=False

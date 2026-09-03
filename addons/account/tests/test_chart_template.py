@@ -829,7 +829,8 @@ class TestChartTemplate(AccountTestInvoicingCommon):
 
     def test_branch(self):
         # Test the auto-installation of a chart template (including demo data) on a branch
-        company = self.company
+        # install_demo is ignored when reloading a chart, so this scenario needs an empty company.
+        company = self.env['res.company'].create([{'name': 'Chart Demo Test Company'}])
         branch = self.env['res.company'].create([{
             'name': 'Test Branch',
             'parent_id': company.id,

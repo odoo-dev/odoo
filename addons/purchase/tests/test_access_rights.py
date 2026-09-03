@@ -143,11 +143,7 @@ class TestPurchaseInvoice(AccountTestInvoicingCommon):
 
     def test_prepare_purchase_order_line_from_branch_company(self):
         """Check that a purchase order line can be created from a nested branch company."""
-        self.env.company.child_ids = [Command.create({
-            'name': "Test Branch",
-            'child_ids': [Command.create({'name': "Nested Branch"})],
-        })]
-        nested_branch = self.env.company.child_ids.child_ids
+        nested_branch = self.env.ref('base.test_company_branch_a_child')
         self.purchase_user.write({
             'company_ids': [Command.set(nested_branch.ids)],
             'company_id': nested_branch.id,

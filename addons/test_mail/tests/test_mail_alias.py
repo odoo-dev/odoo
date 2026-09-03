@@ -24,10 +24,9 @@ class TestMailAliasCommon(MailCommon):
             'alias_name': 'test.alias',
         })
 
-        cls.company_no_alias = cls.env['res.company'].create({
+        cls.company_no_alias = cls.env.ref('base.test_company')
+        cls.company_no_alias.write({
             'alias_domain_id': False,
-            'country_id': cls.env.ref('base.be').id,
-            'currency_id': cls.env.ref('base.EUR').id,
             'email': 'company_no_alias@test.example.com',
             'name': 'No Alias Company',
         })
@@ -442,12 +441,12 @@ class TestAliasCompany(TestMailAliasCommon):
         archived company"""
 
         # add archived company to multi company setup
-        self.company_archived = self.env['res.company'].create({
-                'country_id': self.env.ref('base.be').id,
-                'currency_id': self.env.ref('base.EUR').id,
-                'email': 'company_archived@test.example.com',
-                'name': 'Company Archived Test',
-            })
+        self.company_archived = self.env.ref('base.test_company_eur')
+        self.company_archived.write({
+            'country_id': self.env.ref('base.be').id,
+            'email': 'company_archived@test.example.com',
+            'name': 'Company Archived Test',
+        })
         self.company_archived.action_archive()
 
         # create record inheriting from mail.thread to be used as owner/target thread

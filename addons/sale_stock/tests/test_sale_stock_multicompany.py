@@ -14,7 +14,11 @@ class TestSaleStockMultiCompany(TestSaleCommon, ValuationReconciliationTestCommo
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company_data_2 = cls.setup_other_company()
+        other_company = cls.env.ref('stock_account.test_company_other')
+        cls.env.user.company_ids |= other_company
+        cls.company_data_2 = cls.setup_other_company(
+            company=other_company,
+        )
 
         cls.warehouse_A = cls.company_data['default_warehouse']
         cls.warehouse_A2 = cls.env['stock.warehouse'].create({
@@ -88,13 +92,12 @@ class TestSaleStockMultiCompany(TestSaleCommon, ValuationReconciliationTestCommo
         Check that a product from a company can be sold by a branch
         and that the resulting move can be created.
         """
-        parent_company = self.env.company
-        branch_company = self.env['res.company'].create({
-            'name': 'Branch Company',
-            'parent_id': parent_company.id,
-        })
+        parent_company = self.add_company('base.test_company_with_branch')
+        branch_company = self.env.ref('base.test_company_branch_a')
 
         self.product_a.company_id = parent_company
+        self.assertEqual(branch_company.parent_id, parent_company)
+        self.assertEqual(self.product_a.company_id, parent_company)
 
         sale_order = self.env['sale.order'].with_company(branch_company).create({
             'partner_id': self.partner_a.id,

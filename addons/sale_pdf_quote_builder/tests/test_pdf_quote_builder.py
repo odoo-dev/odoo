@@ -59,7 +59,8 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
         cls.internal_user = cls._create_new_internal_user(
             login="internal.user@test.odoo.com", groups="sales_team.group_sale_salesman"
         )
-        cls.alt_company = cls.env["res.company"].create({"name": "Backup Company"})
+        cls.alt_company = cls.env.ref("base.test_company")
+        cls.env.user.company_ids |= cls.alt_company
 
     def _create_so_form(self, **values):
         SaleOrder = self.env["sale.order"].with_context(default_partner_id=self.partner.id)

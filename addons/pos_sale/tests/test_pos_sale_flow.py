@@ -1245,11 +1245,8 @@ class TestPoSSale(PoSSaleSyncCommon, TestPointOfSaleHttpCommon):
         if self.env['ir.module.module']._get('pos_hr').state != 'installed':
             self.skipTest("pos_hr module is required for this test")
 
-        branch = self.env['res.company'].create({
-            'name': 'Branch 1',
-            'parent_id': self.env.company.id,
-            'chart_template': self.env.company.chart_template,
-        })
+        self.add_company('base.test_company_with_branch')
+        branch = self.env.ref('base.test_company_branch_a')
         self.env["pos.config"].with_company(branch).create({
             "name": "Branch Point of Sale"
         })

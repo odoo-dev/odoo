@@ -16,7 +16,9 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref('base.test_company_without_branch'),
+        )
 
         # create a generic Sale Order with 2 classical products and a purchase service
         SaleOrder = cls.env['sale.order']

@@ -2384,7 +2384,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
                     'tax_ids': False,
                 })],
         })
-        company2 = self.env['res.company'].create({'name': 'company 2'})
+        company2 = self.env.ref('base.test_company')
+        self.env.user.company_ids |= company2
         so_2 = self.env['sale.order'].with_company(company2).create({
             'partner_id': self.partner_a.id,
             'order_line': [Command.create({

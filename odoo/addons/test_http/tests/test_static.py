@@ -499,13 +499,13 @@ class TestHttpStaticLogo(TestHttpStaticCommon):
             'Content-Disposition': 'inline; filename=nologo.png'
         }
         super_user = cls.env['res.users'].browse([api.SUPERUSER_ID])
-        companies = ResCompany.browse([super_user.company_id.id]) | ResCompany.create(
-            {
-                'name': 'Company 2',
-                'email': 'company.2@test.example.com',
-                'country_id': cls.env.ref('base.fr').id,
-            }
-        )
+        company2 = cls.env.ref('base.test_company')
+        company2.write({
+            'name': 'Company 2',
+            'email': 'company.2@test.example.com',
+            'country_id': cls.env.ref('base.fr').id,
+        })
+        companies = ResCompany.browse([super_user.company_id.id]) | company2
         cls.company_of_superuser, cls.company2 = companies
         cls.password = 'Pl1bhD@2!kXZ'
         cls.user_of_company_of_superuser, cls.user_company2 = [

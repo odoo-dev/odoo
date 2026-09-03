@@ -266,10 +266,11 @@ class TestSaleStockMargin(TestStockValuationCommon):
             {'currency_id': new_company_currency.id, 'rate': 3, 'name': date, 'company_id': False},
         ])
 
-        new_company = self.env['res.company'].sudo().create({
-            'name': 'Super Company',
-            'currency_id': new_company_currency.id,
-        })
+        new_company = self.env.ref(
+            'base.test_company_eur'
+            if new_company_currency == self.env.ref('base.EUR')
+            else 'base.test_company'
+        )
         self.env.user.sudo().company_ids += new_company
         self.env.user.sudo().company_id = new_company.id
         self.env = self.env.user.with_company(new_company.id).env

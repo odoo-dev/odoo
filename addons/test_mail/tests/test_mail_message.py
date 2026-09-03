@@ -241,7 +241,7 @@ class TestMessageValues(MailCommon):
         User that doesn't have access to a record should still be able to fetch
         the record_name inside message.
         """
-        company_2 = self.env['res.company'].create({'name': 'Second Test Company'})
+        company_2 = self.company_2
         record1 = self.env['mail.test.multi.company'].create({
             'name': 'Test1',
             'company_id': company_2.id,
@@ -474,4 +474,3 @@ class TestMessageValues(MailCommon):
         """ Test various values on mail.message, notably default values """
         msg = self.env['mail.message'].create({'model': self.alias_record._name, 'res_id': self.alias_record.id})
         self.assertEqual(msg.message_type, 'comment', 'Message should be comments by default')
-

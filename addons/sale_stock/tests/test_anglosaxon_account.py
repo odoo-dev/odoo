@@ -16,7 +16,7 @@ class TestAngloSaxonAccounting(TestValuationReconciliationCommon):
         # Conflict between account common and stock common file. We should remove the depends on account common.
         self.env.user.company_id = self.company
         company_a_data = self.company
-        company_b_data = self._create_company()
+        company_b_data = self.other_company
         companies_with_b_first = company_b_data + company_a_data
         self.env.user.company_ids = companies_with_b_first
         product = self.product_standard_auto

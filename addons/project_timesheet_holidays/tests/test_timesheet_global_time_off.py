@@ -17,9 +17,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         # Creates 1 test company and a calendar for employees that
         # work part time. Then creates an employee per calendar (one
         # for the standard calendar and one for the one we created)
-        self.test_company = self.env['res.company'].create({
-            'name': 'My Test Company',
-        })
+        self.test_company = self.env.ref('base.test_company')
 
         attendance_ids = [
             (0, 0, {'dayofweek': '0', 'hour_from': 9, 'hour_to': 12}),
@@ -66,9 +64,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         ])
 
         # Create a 2nd company
-        self.test_company_2 = self.env['res.company'].create({
-            'name': 'My Test Company 2',
-        })
+        self.test_company_2 = self.env.ref('base.test_company_be')
 
     def _get_timesheets_by_employee(self, leave_task):
         timesheets_by_read_dict = self.env['account.analytic.line']._read_group([('task_id', '=', leave_task.id)], ['employee_id'], ['__count'])
@@ -294,9 +290,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0)  # This is a friday
 
-        new_company = self.env['res.company'].create({
-            'name': 'Winterfell',
-        })
+        new_company = self.env.ref('base.test_company_with_branch')
 
         self.env['resource.calendar.leaves'].with_company(new_company).create({
             'name': 'Test',

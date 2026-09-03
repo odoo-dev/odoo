@@ -55,7 +55,9 @@ class TestSelfOrderOnlinePayment(TestUi):
             self.skipTest("The 'website' module is required for this test.")
 
         # Setup another company and related POS configuration
-        company_b_data = self.setup_other_company(name='Company B')
+        company_b_data = self.setup_other_company(
+            company=self.env.ref('base.test_company_without_branch'),
+        )
         company_b = company_b_data['company']
 
         provider_b = self.env['payment.provider'].create(

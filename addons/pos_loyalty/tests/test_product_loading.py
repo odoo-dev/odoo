@@ -69,14 +69,11 @@ class TestPOSLoyaltyProductLoading(TestPointOfSaleHttpCommon):
 
         # _get_program_ids() has no explicit company filter; it relies on standard
         # multi-company record rules to keep it scoped to companies the acting user has
-        # access to. The (shared) test user has broad access, so it can still see the
-        # standard loyalty.gift_card_program (owned by whatever company was active at
-        # module-install time) from company_b below; restrict to this test's own company
-        # to match the original single-company test assumption.
-        self.env.user.company_ids = self.env.company
-
+        # access to. The shared test user can access unrelated fixture companies and see
+        # their loyalty programs, so retain only the two companies involved in this test.
         company_b_data = self.setup_other_company(name='Company B')
         company_b = company_b_data['company']
+        self.env.user.company_ids = self.env.company | company_b
         payment_method = self.env['pos.payment.method'].create({
             'name': 'Cash',
             'type': 'cash',
@@ -92,7 +89,10 @@ class TestPOSLoyaltyProductLoading(TestPointOfSaleHttpCommon):
         })
         pos_config.open_ui()
         current_session = pos_config.current_session_id
-        data = current_session.with_company(company_b).load_data(['pos.config', 'product.template'])
+        company_b_session = current_session.with_context(
+            allowed_company_ids=company_b.ids,
+        ).with_company(company_b)
+        data = company_b_session.load_data(['pos.config', 'product.template'])
         self.assertTrue(len(data['product.template']) > 0)
         self.assertNotIn(gift_card.product_tmpl_id.id, [product['id'] for product in data['product.template']],
                         "Product should be loaded in the PoS session, even if Gift card is not available in the PoS.")

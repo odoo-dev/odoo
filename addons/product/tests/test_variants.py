@@ -305,7 +305,7 @@ class TestVariants(ProductVariantsCommon):
         self.assertEqual(one_variant_product.product_variant_count, 1)
 
         company_a = self.env.company
-        company_b = self.env['res.company'].sudo().create({'name': 'CB', 'currency_id': self.env.ref('base.VEF').id})
+        company_b = self.env.ref('base.test_company_be')
         self.env.user.company_ids += company_b
 
         self.assertEqual(one_variant_product.cost_currency_id, company_a.currency_id)

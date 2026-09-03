@@ -303,7 +303,7 @@ class TestPricelist(ProductVariantsCommon):
         })
         self.assertEqual(self.partner.property_product_pricelist, self.sale_pricelist_id)
 
-        company_2 = self.env.company.sudo().create({'name': "Company Two"})
+        company_2 = self.env.ref('base.test_company')
         self.env.user.company_ids += company_2
         company_1_b2b_pl, company_2_b2b_pl = self.sale_pricelist_id.create([{
             'name': f"B2B ({company.name})",

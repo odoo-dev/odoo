@@ -294,7 +294,7 @@ class TestMailNotifyAPI(TestMessagePostCommon):
         """
         current_user = self.env.user
         main_company = current_user.company_id
-        other_company = self.env['res.company'].with_user(self.user_admin).create({'name': 'Company B'})
+        other_company = self.company_2.with_user(self.user_admin)
         current_user.sudo().write({'company_ids': [(4, other_company.id)]})
         test_record = self.env['mail.test.multi.company'].with_user(self.user_admin).create({
             'name': 'Multi Company Record',

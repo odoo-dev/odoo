@@ -1190,14 +1190,8 @@ class TestReorderingRule(TransactionCase):
         Test that the parent company tax is correctly set in the purchase order line
         when the scheduler is triggered and the branch company is used."
         """
-        self.env.company.write({
-            'child_ids': [Command.create({
-                'name': 'Branch A',
-                'zip': '85120',
-            })],
-        })
-        self.cr.precommit.run()  # load the CoA
-        branch = self.env.company.child_ids
+        self.add_company('base.test_company_with_branch')
+        branch = self.env.ref('base.test_company_branch_a')
         product = self.env['product.product'].with_company(branch).create({
             'name': 'Storable Product',
             'is_storable': True,
@@ -1360,10 +1354,8 @@ class TestReorderingRule(TransactionCase):
 
         Check that the purchase order is created in COMP2, using its set of supplier.
         """
-        company_a, company_b = self.env['res.company'].create([
-            {'name': 'Company A'},
-            {'name': 'Company B'},
-        ])
+        company_a = self.env.ref('stock_account.test_company')
+        company_b = self.env.ref('stock_account.test_company_other')
         warehouse_a, warehouse_b = self.env['stock.warehouse'].search([('company_id', 'in', [company_a.id, company_b.id])], limit=2).sorted('company_id')
         route_resupply_from_intercomp = self.env['stock.route'].create([
             {

@@ -21,7 +21,9 @@ class TestPurchase(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref('base.test_company_without_branch'),
+        )
 
     def test_date_planned(self):
         """Set a date planned on 2 PO lines. Check that the PO date_planned is the earliest PO line date
@@ -640,17 +642,9 @@ class TestPurchase(AccountTestInvoicingCommon):
         #     Parent company
         #         |----> Branch X
         #                   |----> Branch XX
-        company = self.env.company
-        branch_x = self.env['res.company'].create({
-            'name': 'Branch X',
-            'country_id': company.country_id.id,
-            'parent_id': company.id,
-        })
-        branch_xx = self.env['res.company'].create({
-            'name': 'Branch XX',
-            'country_id': company.country_id.id,
-            'parent_id': branch_x.id,
-        })
+        company = self.add_company('base.test_company_with_branch')
+        branch_x = self.add_company('base.test_company_branch_a')
+        branch_xx = self.env.ref('base.test_company_branch_a_child')
         # create taxes for the parent company and its branches
         tax_groups = self.env['account.tax.group'].create([{
             'name': 'Tax Group',
@@ -841,7 +835,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         the price of chosen is the one of the company specified in the purchase order
         """
         company_a = self.env.company
-        company_b = self.env['res.company'].create({'name': 'Saucisson Inc.'})
+        company_b = self.env.ref('base.test_company')
         self.env = company_a.with_company(company_a).env
 
         self.product_a.write({

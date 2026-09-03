@@ -564,7 +564,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
             )
 
         # Change the user's company (will also update the user's partner)
-        other_company = self.env["res.company"].sudo().create({"name": "Other Company"})
+        other_company = self.env.ref("base.test_company_without_branch")
         internal_user.sudo().company_ids = [Command.link(other_company.id)]
         internal_user.sudo().company_id = other_company
         self.assertEqual(internal_user.partner_id.company_id, other_company)

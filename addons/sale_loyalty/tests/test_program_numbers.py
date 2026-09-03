@@ -2347,10 +2347,8 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
 
     def test_rounding_program_application(self):
         """Check that the loyalty program is applied with the currency settings of the order."""
-        JPY_company = self.env["res.company"].create({
-            "name": "Test",
-            "currency_id": self.env.ref("base.JPY").id,
-        })
+        JPY_company = self.env.ref("base.test_company_jp")
+        self.env.user.company_ids |= JPY_company
         USD_pricelist = self.env["product.pricelist"].create({
             "name": "USD pricelist",
             "company_id": JPY_company.id,

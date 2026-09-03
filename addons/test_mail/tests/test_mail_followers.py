@@ -239,7 +239,8 @@ class BaseFollowersTest(MailCommon):
     @users('employee')
     def test_followers_private_address(self):
         """ Test standard API does subscribe IDs the user can't read """
-        other_company = self.env['res.company'].sudo().create({'name': 'Other Company'})
+        other_company = self.company_2.sudo()
+        self.env.user.write({'company_ids': [(4, other_company.id)]})
         private_address = self.env['res.partner'].create({
             'name': 'Private Address',
             'company_id': other_company.id,
@@ -728,11 +729,7 @@ class RecipientsNotificationTest(MailCommon):
     def test_notification_user_choice(self):
         """ Check fetching user information when notifying someone with multiple
         users (more complex use case). """
-        company_other = self.env['res.company'].sudo().create({
-            'currency_id': self.env.ref('base.CAD').id,
-            'email': 'company_other@test.example.com',
-            'name': 'Company Other',
-        })
+        company_other = self.company_2.sudo()
         shared_partner = self.env['res.partner'].sudo().create({
             'email': 'common.partner@test.customer.com',
             'name': 'Common Partner',

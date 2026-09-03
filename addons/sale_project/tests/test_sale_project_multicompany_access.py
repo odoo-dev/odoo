@@ -4,10 +4,8 @@ from odoo.tests import Form, TransactionCase
 
 class TestSaleOrderAccess(TransactionCase):
     def test_user_with_company_1_access_can_open_sale_order(self):
-        company_1, company_2 = self.env['res.company'].create([
-            {"name": "Company 1 Sale Order"},
-            {"name": "Company 2 Project"},
-        ])
+        company_1 = self.env.ref('base.test_company_with_branch')
+        company_2 = self.env.ref('base.test_company')
         user_company_1 = self.env['res.users'].create({
             'name': 'User 1',
             'login': 'user1',

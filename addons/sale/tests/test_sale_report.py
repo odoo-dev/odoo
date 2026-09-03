@@ -18,19 +18,6 @@ class TestSaleReportCurrencyRate(SaleCommon):
 
     _test_user_name = 'Test Sales & Product Manager'
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.usd_cmp = cls.env["res.company"].sudo().create({
-            "name": "USD Company",
-            "currency_id": cls.env.ref("base.USD").id,
-        })
-        cls.eur_cmp = cls.env["res.company"].sudo().create({
-            "name": "EUR Company",
-            "currency_id": cls.env.ref("base.EUR").id,
-        })
-
     def test_sale_report_with_downpayment(self):
         """Check that downpayment lines are used in the calculation of amounts invoiced and to
         invoice."""

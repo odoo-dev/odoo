@@ -531,9 +531,7 @@ class TestSaleOrder(SaleCommon):
 
     def test_so_company_empty(self):
         """Check emptying company on SO form."""
-        self.env["res.company"].sudo().create({  # activate multi company for the form view
-            "name": "Company 2"
-        })
+        self.env.user.company_ids |= self.env.ref("base.test_company")
         so_form = Form(self.env["sale.order"])
         with self.assertRaises(ValidationError):
             so_form.company_id = self.env["res.company"]
@@ -599,16 +597,8 @@ class TestSaleOrder(SaleCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
-        branch_x = self.env["res.company"].sudo().create({
-            "name": "Branch X",
-            "country_id": company.country_id.id,
-            "parent_id": company.id,
-        })
-        branch_xx = self.env["res.company"].sudo().create({
-            "name": "Branch XX",
-            "country_id": company.country_id.id,
-            "parent_id": branch_x.id,
-        })
+        branch_x = self.env.ref("base.test_company_main_branch")
+        branch_xx = self.env.ref("base.test_company_main_branch_child")
         self.env.user.company_ids += branch_x + branch_xx
         # create taxes for the parent company and its branches
         tax_groups = self.env["account.tax.group"].sudo().create([
@@ -1135,18 +1125,20 @@ class TestSalesTeam(SaleCommon):
 
     def test_cannot_assign_tax_of_mismatch_company(self):
         """Test that sol cannot have assigned tax belonging to a different company."""
-        company_a = self.env["res.company"].sudo().create({"name": "A"})
-        company_b = self.env["res.company"].sudo().create({"name": "B"})
+        company_a = self.env.ref("base.test_company_with_branch")
+        company_b = self.env.ref("base.test_company")
         self.env.user.company_ids += company_a + company_b
+        country = self.env["res.country"].search([], limit=1)
         tax_group_a = self.env["account.tax.group"].sudo().create({
             "name": "A",
             "company_id": company_a.id,
+            "country_id": country.id,
         })
         tax_group_b = self.env["account.tax.group"].sudo().create({
             "name": "B",
             "company_id": company_b.id,
+            "country_id": country.id,
         })
-        country = self.env["res.country"].search([], limit=1)
 
         tax_a = self.env["account.tax"].sudo().create({
             "name": "A",
@@ -1186,13 +1178,7 @@ class TestSalesTeam(SaleCommon):
             sol.tax_ids = tax_b
 
     def test_assign_tax_multi_company(self):
-        root_company = self.env["res.company"].sudo().create({"name": "B0 company"})
-        root_company.write({
-            "child_ids": [
-                Command.create({"name": "B1 company"}),
-                Command.create({"name": "B2 company"}),
-            ]
-        })
+        root_company = self.env.ref("base.test_company_with_branch").sudo()
         self.env.user.company_ids += root_company + root_company.child_ids
 
         country = self.env["res.country"].search([], limit=1)

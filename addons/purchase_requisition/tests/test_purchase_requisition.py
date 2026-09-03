@@ -147,7 +147,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         self.assertEqual(new_si.purchase_requisition_id, requisition_blanket, 'the blanket order is not linked to the supplier info')
 
     def test_08_purchase_requisition_sequence(self):
-        new_company = self.env['res.company'].create({'name': 'Company 2'})
+        new_company = self.env.ref('base.test_company')
         self.env['ir.sequence'].create({
             'code': 'purchase.requisition.blanket.order',
             'prefix': 'REQ_',
@@ -217,10 +217,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         """
         Ensure that the taxes of the parent company are applied to the PO generated from purchase agreement in the child company.
         """
-        child_company = self.env['res.company'].create({
-            'name': 'My Branch',
-            'parent_id': self.env.company.id,
-        })
+        child_company = self.env.ref('base.test_company_main_branch')
         # Ensure all the tax on the product are from the parent company
         self.product_09.supplier_taxes_id = self.env['account.tax'].create({
             'name': 'Test Tax 10%',

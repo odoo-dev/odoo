@@ -20,10 +20,8 @@ class TestSaleOrderTemplate(SaleManagementCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.branch_company, cls.other_company = cls.env["res.company"].sudo().create([
-            {"name": "Branch company", "parent_id": cls.company.id},
-            {"name": "Other Company"},
-        ])
+        cls.branch_company = cls.env.ref("base.test_company_main_branch")
+        cls.other_company = cls.env.ref("base.test_company")
         cls._test_user.sudo().company_ids += (cls.branch_company | cls.other_company)
         (cls.parent_company_product, cls.branch_company_product, cls.other_company_product) = (
             cls.env["product.product"].create([

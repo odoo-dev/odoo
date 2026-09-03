@@ -30,7 +30,9 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
             "currency_id": buck_currency.id,
         })
 
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref("base.test_company_without_branch"),
+        )
 
         cls.sales_user = cls.company_data["default_user_salesman"]
         cls.sales_user.write({"login": "notaccountman", "email": "bad@accounting.com"})

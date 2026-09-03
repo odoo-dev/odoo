@@ -13,12 +13,8 @@ class TestSaleOrderProductCatalog(HttpCase):
         })
         self.env["res.partner"].create({"name": "Test Partner"})
         admin = self.env.ref("base.user_admin")
-        branch = (
-            self
-            .env["res.company"]
-            .with_user(admin)
-            .create({"name": "Branch Company", "parent_id": self.env.company.id})
-        )
+        branch = self.env.ref("base.test_company_main_branch")
+        admin.company_ids |= branch
         admin.company_id = branch
         self.env["product.template"].create({
             "name": "AAA Product",

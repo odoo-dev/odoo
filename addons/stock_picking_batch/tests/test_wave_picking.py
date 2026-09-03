@@ -379,7 +379,7 @@ class TestBatchPicking(TransactionCase):
 
         with self.assertRaises(UserError):
             self.picking_client_1.company_id = self.env.company
-            self.picking_client_2.company_id = self.env['res.company'].create({'name': 'Company 2'})
+            self.picking_client_2.company_id = self.env.ref('base.test_company')
             lines = (self.picking_client_1 | self.picking_client_2).move_line_ids
             res_dict = lines.action_open_add_to_wave()
             res_dict['context'] = {'active_model': 'stock.move.line', 'active_ids': lines.ids}

@@ -545,7 +545,7 @@ class TestDropshipPostInstall(common.TransactionCase):
         self.assertEqual(dropship_picking.state, 'done')
 
     def test_return_dropship_vendor_is_other_company(self):
-        other_company = self.env['res.company'].create({'name': 'company vendor'})
+        other_company = self.env.ref('base.test_company')
         product = self.dropship_product
         product.seller_ids.partner_id = other_company.partner_id.id
         sale_order = self.env['sale.order'].create({

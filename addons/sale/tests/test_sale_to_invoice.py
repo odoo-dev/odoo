@@ -18,7 +18,9 @@ class TestSaleToInvoice(TestSaleCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref("base.test_company_without_branch"),
+        )
 
         # Create the SO with four order lines
         cls.sale_order = cls.env["sale.order"].create({
