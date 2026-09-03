@@ -82,10 +82,10 @@ class ProductProduct(models.Model):
             if product.suggested_qty <= 0:
                 continue
             # Get lowest price pricelist for suggested_qty or lowest min_qty pricelist
-            seller = product._select_seller(quantity=product.suggested_qty, **seller_args) or \
-                     product._select_seller(quantity=None, ordered_by="min_qty", **seller_args)
+            seller_info = product._select_seller(quantity=product.suggested_qty, **seller_args) or \
+                          product._select_seller(quantity=None, ordered_by="min_qty", **seller_args)
 
-            price = seller.price_discounted if seller else product.standard_price
+            price = seller_info['price_discounted'] if seller_info else product.standard_price
             product.suggest_estimated_price = price * product.suggested_qty
 
     @api.depends_context('suggest_days', 'suggest_based_on', 'warehouse_id')
@@ -294,8 +294,15 @@ class ProductSupplierinfo(models.Model):
             super()._compute_display_name()
         else:
             for supplier in self:
-                price_str = formatLang(self.env, supplier.price, currency_obj=supplier.currency_id)
-                supplier.display_name = f'{supplier.partner_id.display_name} ({supplier.min_qty} {supplier.uom_id.name} - {price_str})'
+                supplier.display_name = self._get_seller_info_display_name(supplier._get_seller_info())
+
+    @api.model
+    def _get_seller_info_display_name(self, seller_info):
+        # seller information may have no record to display, e.g. when it comes from the purchase history
+        if not seller_info:
+            return ''
+        price_str = formatLang(self.env, seller_info['price'], currency_obj=seller_info['currency_id'])
+        return f"{seller_info['partner_id'].display_name} ({seller_info['min_qty']} {seller_info['uom_id'].name} - {price_str})"
 
     def action_set_supplier(self):
         self.ensure_one()
