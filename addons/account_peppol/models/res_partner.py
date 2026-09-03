@@ -231,12 +231,24 @@ class ResPartner(models.Model):
             res._update_peppol_state_per_company()
         return res
 
+    def _partners_to_recompute(self):
+        registered_partners = self.env['res.company'].sudo().search([
+            ('partner_id', 'in', self._origin.ids),
+            ('account_peppol_proxy_state', 'not in', ('not_registered', 'rejected')),
+        ]).partner_id
+
+        return [
+            partner.id for partner in self
+            if partner._origin not in registered_partners
+        ]
+
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+partners_not_to_recompute = self._get_partners_to_skip_peppol_computation()
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in partners_not_to_recompute])
         super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        partners_to_recompute = self.browse(self._partners_to_recompute())
         super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
