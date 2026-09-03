@@ -157,7 +157,6 @@ function execute(op, source, target) {
         nextGroupNumber,
         searchItems,
         searchPanelInfo,
-        sections,
         _appliedSearch,
     } = source;
 
@@ -180,17 +179,6 @@ function execute(op, source, target) {
     }
 
     target.searchPanelInfo = searchPanelInfo;
-
-    target.sections = op(sections);
-    for (const [, section] of target.sections) {
-        section.values = op(section.values);
-        if (section.groups) {
-            section.groups = op(section.groups);
-            for (const [, group] of section.groups) {
-                group.values = op(group.values);
-            }
-        }
-    }
 }
 
 //--------------------------------------------------------------------------
@@ -736,6 +724,24 @@ export class SearchModel extends EventBus {
     exportState() {
         const state = { query: [], searchItems: {} };
         execute(mapToArray, this, state);
+        // only the selection is exported, values are re-fetched on import
+        state.sections = [...this.sections].map(([id, section]) => {
+            const { values, groups, ...config } = section;
+            delete config.errorMsg;
+            delete config.loaded;
+            if (section.type === "filter") {
+                config.checkedValueIds = [...values.values()]
+                    .filter((value) => value.checked)
+                    .map((value) => value.id);
+                if (groups) {
+                    config.groupStates = [...groups].map(([groupId, group]) => [
+                        groupId,
+                        group.state,
+                    ]);
+                }
+            }
+            return [id, config];
+        });
         return state;
     }
 
@@ -1571,6 +1577,7 @@ export class SearchModel extends EventBus {
         // Set active value from context
         const valueIds = [false, ...values.map((val) => val.id)];
         this._ensureCategoryValue(category, valueIds);
+        category.loaded = true;
     }
 
     /**
@@ -1586,10 +1593,13 @@ export class SearchModel extends EventBus {
             values = [];
         }
 
-        // restore checked property
+        // restore checked property, falling back to the imported selection
+        const importedCheckedValueIds = filter._importedCheckedValueIds;
         values.forEach((value) => {
             const oldValue = filter.values.get(value.id);
-            value.checked = oldValue ? oldValue.checked : false;
+            value.checked = oldValue
+                ? oldValue.checked
+                : Boolean(importedCheckedValueIds?.includes(value.id));
         });
 
         filter.values = new Map();
@@ -1610,9 +1620,12 @@ export class SearchModel extends EventBus {
                         sequence: value.group_sequence,
                         color_index: value.color_index,
                     });
-                    // restore former checked state
+                    // restore former checked state, falling back to the imported selection
                     const oldGroup = filter.groups && filter.groups.get(groupId);
-                    groups.get(groupId).state = (oldGroup && oldGroup.state) || false;
+                    groups.get(groupId).state =
+                        (oldGroup && oldGroup.state) ||
+                        filter._importedGroupStates?.get(groupId) ||
+                        false;
                 }
                 groups.get(groupId).values.set(value.id, value);
             }
@@ -1631,6 +1644,9 @@ export class SearchModel extends EventBus {
                 filter.values.set(value.id, value);
             }
         }
+        delete filter._importedCheckedValueIds;
+        delete filter._importedGroupStates;
+        filter.loaded = true;
     }
 
     /**
@@ -1821,10 +1837,11 @@ export class SearchModel extends EventBus {
         const categoriesLoadId = ++this.categoriesLoadId;
         await Promise.all(
             categories.map(async (category) => {
+                // reuse the ORM cache instead of a real RPC on first fetch after import
                 const result = await this.orm
                     .cache({
                         type: "disk",
-                        update: "always",
+                        update: category.loaded ? "always" : "once",
                         callback: (result, hasChanged) => {
                             if (!hasChanged || categoriesLoadId !== this.categoriesLoadId) {
                                 return;
@@ -1865,10 +1882,11 @@ export class SearchModel extends EventBus {
         const filtersLoadId = ++this.filtersLoadId;
         await Promise.all(
             filters.map(async (filter) => {
+                // reuse the ORM cache instead of a real RPC on first fetch after import
                 const result = await this.orm
                     .cache({
                         type: "disk",
-                        update: "always",
+                        update: filter.loaded ? "always" : "once",
                         callback: (result, hasChanged) => {
                             if (!hasChanged || filtersLoadId !== this.filtersLoadId) {
                                 return;
@@ -2622,6 +2640,20 @@ export class SearchModel extends EventBus {
      */
     _importState(state) {
         execute(arraytoMap, state, this);
+        // sections are marked as not loaded, forcing _reloadSections to refetch them
+        this.sections = new Map(
+            (state.sections || []).map(([id, config]) => {
+                const { checkedValueIds, groupStates, ...rest } = config;
+                const section = { ...rest, loaded: false, values: new Map() };
+                if (checkedValueIds) {
+                    section._importedCheckedValueIds = checkedValueIds;
+                }
+                if (groupStates) {
+                    section._importedGroupStates = new Map(groupStates);
+                }
+                return [id, section];
+            })
+        );
     }
 
     /**
@@ -2747,7 +2779,7 @@ export class SearchModel extends EventBus {
 
         // Check whether categories/filters will force a reload of the sections
         const toFetch = (section) =>
-            section.enableCounters || (searchDomainChanged && !section.expand);
+            !section.loaded || section.enableCounters || (searchDomainChanged && !section.expand);
         const categoriesToFetch = this.categories.filter(toFetch);
         const filtersToFetch = this.filters.filter(toFetch);
 
