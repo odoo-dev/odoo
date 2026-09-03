@@ -232,3 +232,20 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """
+        Test searching on the computed field 'virtual_remaining_leaves'
+        does not throw a TypeError missing the 'value' argument.
+        """
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        result = self.env["hr.work.entry.type"].with_context(employee_id=employee.id).search(
+            [
+                ("virtual_remaining_leaves", ">", 0),
+            ],
+        )
+
+        self.assertTrue(
+            isinstance(result, type(self.env["hr.work.entry.type"])),
+            "The search should return a valid recordset without crashing.",
+        )
