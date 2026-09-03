@@ -26,6 +26,16 @@ from unittest.mock import patch, ANY
 _logger = logging.getLogger(__name__)
 
 
+TEST_COMPANY_XMLID_BY_COUNTRY_CODE = {
+    'BE': 'base.test_company_be',
+    'CA': 'base.test_company_ca',
+    'ID': 'base.test_company_id',
+    'IN': 'base.test_company_in',
+    'JP': 'base.test_company_jp',
+    'US': 'base.test_company',
+}
+
+
 def skip_unless_external(func):
     """
     Skip a test unless the test is run in external mode.
@@ -230,9 +240,10 @@ class AccountTestInvoicingCommon(ProductCommon):
             )
 
     @classmethod
-    def setup_other_company(cls, name='company_2', **kwargs):
-        company = None
-        if not kwargs:
+    def setup_other_company(cls, name='company_2', company=None, **kwargs):
+        if company:
+            cls.env.user.company_ids += company
+        elif not kwargs:
             for test_company_xmlid in 'base.test_company', 'base.test_company_with_branch', 'base.test_company_be':
                 # we may check it a specific country or chart template was requested before returning an existing company
                 candidate_company = cls.env.ref(test_company_xmlid)
@@ -255,11 +266,19 @@ class AccountTestInvoicingCommon(ProductCommon):
 
     @classmethod
     def setup_independent_company(cls):
-        if cls.country_code or cls.chart_template:
-            # if cls.country_code.lower() == "be":
-            #    # already loaded with generic_coa by base.test_company_be's test_data fixture
-            #    company = cls.env.ref('base.test_company_be')
-            # else:
+        if company_xmlid := TEST_COMPANY_XMLID_BY_COUNTRY_CODE.get(cls.country_code):
+            company = cls.env.ref(company_xmlid)
+            company.country_id = cls.env['res.country'].search([('code', '=', cls.country_code)])
+            chart_template = (
+                cls.chart_template
+                or cls.env['account.chart.template']._guess_chart_template(company.country_id)
+            )
+            if company.chart_template and company.chart_template != chart_template:
+                # Replacing a chart may delete journals already linked to an installed payment provider.
+                company = cls._create_company()
+            elif not company.chart_template:
+                cls._use_chart_template(company, cls.chart_template)
+        elif cls.country_code or cls.chart_template:
             # A specific country/chart was requested: it needs a dedicated company created from
             # scratch, not the shared base.test_company (already loaded with generic_coa, with
             # payment providers linked to its journals). Reusing/mutating one shared company

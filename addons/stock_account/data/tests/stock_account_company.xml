@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="test_company" model="res.company">
+        <field name="name">Inventory Test Company</field>
+    </record>
+    <record id="test_company_other" model="res.company">
+        <field name="name">Other Company</field>
+    </record>
+    <record id="test_company_branch" model="res.company">
+        <field name="name">Inventory Test Branch Company</field>
+        <field name="parent_id" ref="test_company"/>
+    </record>
+    <record id="test_warehouse" model="stock.warehouse">
+        <field name="company_id" ref="test_company"/>
+    </record>
+    <record id="test_warehouse_other" model="stock.warehouse">
+        <field name="company_id" ref="test_company_other"/>
+    </record>
+    <record id="test_warehouse_branch" model="stock.warehouse">
+        <field name="company_id" ref="test_company_branch"/>
+    </record>
+
+    <function model="account.chart.template" name="_load" eval="(False, 'generic_coa', obj().env['res.company'].browse(ref('stock_account.test_company')), False)"/>
+    <function model="account.chart.template" name="_load" eval="(False, 'generic_coa', obj().env['res.company'].browse(ref('stock_account.test_company_other')), False)"/>
+    <function model="account.chart.template" name="_load" eval="(False, 'generic_coa', obj().env['res.company'].browse(ref('stock_account.test_company_branch')), False)"/>
+</data>

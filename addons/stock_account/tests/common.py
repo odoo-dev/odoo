@@ -352,18 +352,18 @@ class TestStockValuationCommon(BaseCommon):
         # To move to stock common later
         cls.route_mto = cls.env.ref('stock.route_warehouse0_mto')
         cls.route_mto.product_selectable = True
-        cls.company = cls.env['res.company'].create({'name': 'Inventory Test Company'})
-        cls.env["account.chart.template"]._load(
-            "generic_coa", cls.company, install_demo=False
-        )
+        cls.company = cls.env.ref('stock_account.test_company')
+        # The fixture predates the current test user, unlike a company created
+        # here, so grant access before making it the only allowed company.
+        cls.user_admin = cls.env.ref('base.user_admin')
+        cls.user_admin.write({
+            'company_id': cls.company.id,
+            'company_ids': [Command.set(cls.company.ids)],
+        })
         cls.company = cls.company.with_company(cls.company.id)
         cls.env = cls.env(context=dict(cls.env.context, allowed_company_ids=[cls.company.id]))
         # We use the admin on tour.
         cls.user_admin = cls.env.ref('base.user_admin')
-        cls.user_admin.write({
-            'company_id': cls.company.id,
-            'company_ids': cls.company.ids,
-        })
         # The restricted test_user (see BaseCommon) is only a member of the main
         # company; the tests here run in cls.company, so grant it access too.
         if cls._test_user:
@@ -395,8 +395,8 @@ class TestStockValuationCommon(BaseCommon):
             'name': 'Test Vendor',
             'company_id': cls.company.id,
         })
-        cls.other_company = cls._create_company(name="Other Company")
-        cls.branch = cls._create_company(name="Branch Company", parent_id=cls.company.id)
+        cls.other_company = cls.env.ref('stock_account.test_company_other')
+        cls.branch = cls.env.ref('stock_account.test_company_branch')
         # Several tests operate cross-company (other_company / branch); grant the
         # restricted test_user access to those companies too, otherwise the ORM
         # raises "Access to unauthorized or invalid companies."

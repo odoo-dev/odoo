@@ -5,8 +5,12 @@
         <field name="partner_id" ref="test_company_partner"/>
         <field name="currency_id" ref="base.USD"/>
     </record>
-    <record id="test_company_with_branch" model="res.company">
+    <record id="test_company_without_branch" model="res.company">
         <field name="name">Test Company Without Branches</field>
+        <field name="currency_id" ref="base.USD"/>
+    </record>
+    <record id="test_company_with_branch" model="res.company">
+        <field name="name">Test Company With Branches</field>
         <field name="currency_id" ref="base.USD"/>
     </record>
     <record id="test_company_branch_a" model="res.company">
@@ -17,10 +21,46 @@
         <field name="name">Test Company Branch B</field>
         <field name="parent_id" ref="test_company_with_branch"/>
     </record>
+    <record id="test_company_branch_a_child" model="res.company">
+        <field name="name">Test Company Branch A Child</field>
+        <field name="parent_id" ref="test_company_branch_a"/>
+    </record>
+    <record id="test_company_main_branch" model="res.company">
+        <field name="name">Test Main Company Branch</field>
+        <field name="parent_id" ref="base.main_company"/>
+    </record>
+    <record id="test_company_main_branch_child" model="res.company">
+        <field name="name">Test Main Company Branch Child</field>
+        <field name="parent_id" ref="test_company_main_branch"/>
+    </record>
+    <record id="test_company_eur" model="res.company">
+        <field name="name">Test Company EUR</field>
+        <field name="currency_id" ref="base.EUR"/>
+    </record>
     <record id="test_company_be" model="res.company">
         <field name="name">Test Company BE</field>
         <field name="currency_id" ref="base.EUR"/>
         <field name="country_id" ref="base.be"/>
+    </record>
+    <record id="test_company_ca" model="res.company">
+        <field name="name">Test Company CA</field>
+        <field name="currency_id" ref="base.CAD"/>
+        <field name="country_id" ref="base.ca"/>
+    </record>
+    <record id="test_company_jp" model="res.company">
+        <field name="name">Test Company JP</field>
+        <field name="currency_id" ref="base.JPY"/>
+        <field name="country_id" ref="base.jp"/>
+    </record>
+    <record id="test_company_in" model="res.company">
+        <field name="name">Test Company IN</field>
+        <field name="currency_id" ref="base.INR"/>
+        <field name="country_id" ref="base.in"/>
+    </record>
+    <record id="test_company_id" model="res.company">
+        <field name="name">Test Company ID</field>
+        <field name="currency_id" ref="base.IDR"/>
+        <field name="country_id" ref="base.id"/>
     </record>
 
 </data>

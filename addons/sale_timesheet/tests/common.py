@@ -13,7 +13,9 @@ class TestCommonSaleTimesheet(TestSaleProjectCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.env.user.group_ids |= cls.env.ref('hr.group_hr_user')
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref('base.test_company_without_branch'),
+        )
 
         cls.user_employee_company_B = mail_new_test_user(
             cls.env,

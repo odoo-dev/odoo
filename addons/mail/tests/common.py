@@ -2014,15 +2014,13 @@ class MailCommon(MailCase):
         cls._mc_enabled = True
 
         # new companies
-        cls.company_2 = cls.env['res.company'].create({
-            'country_id': cls.env.ref('base.ca').id,
-            'currency_id': cls.env.ref('base.CAD').id,
+        cls.company_2 = cls.env.ref('base.test_company_ca')
+        cls.company_2.write({
             'email': 'company_2@test.example.com',
             'name': 'Company 2',
         })
-        cls.company_3 = cls.env['res.company'].create({
-            'country_id': cls.env.ref('base.be').id,
-            'currency_id': cls.env.ref('base.EUR').id,
+        cls.company_3 = cls.env.ref('base.test_company_be')
+        cls.company_3.write({
             'email': 'company_3@test.example.com',
             'name': 'Company 3',
         })

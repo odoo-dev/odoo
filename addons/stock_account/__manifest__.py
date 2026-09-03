@@ -39,6 +39,9 @@ Dashboard / Reports for Warehouse Management includes:
         'report/stock_valuation_report.xml',
         'security/ir.access.csv',
     ],
+    'test_data': [
+        'data/tests/stock_account_company.xml',
+    ],
     'auto_install': True,
     'post_init_hook': '_post_init_hook',
     'assets': {

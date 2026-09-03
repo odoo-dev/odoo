@@ -17,7 +17,9 @@ class TestExpenseCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.company_data_2 = cls.setup_other_company()
+        cls.company_data_2 = cls.setup_other_company(
+            company=cls.env.ref('base.test_company_without_branch'),
+        )
         cls.other_currency = cls.setup_other_currency('HRK')
 
         group_expense_manager = cls.env.ref('hr_expense.group_hr_expense_manager')
