@@ -242,7 +242,7 @@ class MailingMailing(models.Model):
     )
     _email_from = models.Constraint(
         "CHECK(email_from IS NOT NULL OR mailing_type != 'mail')",
-        "email from is required for mailing"
+        "email from is required for mailing",
     )
 
     def _order_field_to_sql(self, table, field_expr, direction, nulls):
