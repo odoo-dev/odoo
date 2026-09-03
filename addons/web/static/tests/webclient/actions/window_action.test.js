@@ -2297,11 +2297,11 @@ test("Call twice clearUncommittedChanges in a row does not save twice", async ()
     expect(".o_form_view .o_form_editable").toHaveCount(1);
 
     await contains(".o_field_widget[name=foo] input").edit("val");
-    clearUncommittedChanges(getMockEnv());
+    clearUncommittedChanges(getMockEnv().bus);
 
     await animationFrame();
     expect(".modal").toHaveCount(0);
-    clearUncommittedChanges(getMockEnv());
+    clearUncommittedChanges(getMockEnv().bus);
 
     await animationFrame();
     expect(".modal").toHaveCount(0);
