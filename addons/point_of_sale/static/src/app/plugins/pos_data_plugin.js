@@ -344,7 +344,7 @@ export class PosDataPlugin extends Plugin {
     async getCachedServerDataFromIndexedDB() {
         // Used to load models that have not yet been loaded into related_models.
         // These models have been sent to the indexedDB directly after the RPC load_data.
-        const data = await this.indexedDB.readAll();
+        const data = await this.indexedDB.readAllExceptStores(Object.keys(this.opts.databaseTable));
         const results = {};
 
         for (const name in data) {
@@ -356,7 +356,9 @@ export class PosDataPlugin extends Plugin {
 
     async getCachedServerIdsFromIndexedDB(models = []) {
         const allModels = this.indexedDB.dbStores.map((store) => store[1]);
-        const modelsToIgnore = allModels.filter((model) => !models.includes(model));
+        const modelsToIgnore = models.length
+            ? allModels.filter((model) => !models.includes(model))
+            : Object.keys(this.opts.databaseTable);
         const data = await this.indexedDB.readAllExceptStores(modelsToIgnore);
         const results = {};
 

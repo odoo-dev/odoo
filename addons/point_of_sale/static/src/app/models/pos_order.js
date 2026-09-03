@@ -918,7 +918,7 @@ export class PosOrder extends PosOrderAccounting {
                     this.models["pos.prep.line"].create({
                         prep_order_id: order,
                         pos_order_line_id: line,
-                        product_id: line.getProduct().id,
+                        product_id: line.getProduct()?.id,
                         quantity: data.quantity,
                         cancelled: 0,
                         attribute_value_ids: line.attribute_value_ids,
