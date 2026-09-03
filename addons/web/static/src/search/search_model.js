@@ -726,6 +726,9 @@ export class SearchModel extends EventBus {
         execute(mapToArray, this, state);
         // let _reloadSections run on import, see _importState for why
         state.searchPanelInfo = { ...this.searchPanelInfo, loaded: false };
+        // so _reloadSections can tell the domain didn't actually change
+        // across the import, and skip re-fetching categories for nothing
+        state.searchDomain = this.searchDomain;
         // categories (esp. hierarchical trees) need their already fetched
         // values to render immediately on import: only filters, which are
         // flat and can hold a lot more values (e.g. all tags), are trimmed
@@ -2649,17 +2652,28 @@ export class SearchModel extends EventBus {
      */
     _importState(state) {
         execute(arraytoMap, state, this);
+        // restored so _reloadSections can tell whether the domain actually
+        // changed since the last fetch, instead of assuming it always did
+        this.searchDomain = state.searchDomain;
         // categories come back with their full values already, ready to use;
         // filters are marked as not loaded, forcing _reloadSections to refetch them
         this.sections = new Map(
             (state.sections || []).map(([id, config]) => {
                 if (config.type === "category") {
-                    return [id, { ...config, values: new Map(config.values || []), loaded: true }];
+                    // keep whatever `loaded` truthfully was: a category
+                    // coming from a view where the search panel was never
+                    // shown may never have been actually fetched
+                    return [id, { ...config, values: new Map(config.values || []) }];
                 }
                 const { checkedValueIds, groupStates, ...rest } = config;
                 const section = { ...rest, loaded: false, _imported: true, values: new Map() };
                 if (checkedValueIds) {
                     section._importedCheckedValueIds = checkedValueIds;
+                    // placeholder so the checked selection contributes to the
+                    // search domain right away, before the real fetch resolves
+                    for (const valueId of checkedValueIds) {
+                        section.values.set(valueId, { id: valueId, checked: true });
+                    }
                 }
                 if (groupStates) {
                     section._importedGroupStates = new Map(groupStates);
