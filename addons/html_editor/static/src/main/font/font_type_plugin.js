@@ -4,7 +4,6 @@ import { isBlock, closestBlock } from "@html_editor/utils/blocks";
 import { unwrapContents } from "@html_editor/utils/dom";
 import {
     isParagraphRelatedElement,
-    isRedundantElement,
     isEmptyBlock,
     isVisibleTextNode,
     isStylable,
@@ -27,6 +26,7 @@ import {
 import { READ, withSequence } from "@html_editor/utils/resource";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { weakMemoize } from "@html_editor/utils/functions";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 /** @typedef {import("plugins").LazyTranslatedString} LazyTranslatedString */
 
@@ -267,14 +267,21 @@ export class FontTypePlugin extends Plugin {
     }
 
     normalize(root) {
-        for (const el of selectElements(
-            root,
-            "strong, b, span[style*='font-weight: bolder'], small"
-        )) {
-            if (isRedundantElement(el)) {
-                unwrapContents(el);
-            }
+        // Check all elements first, then unwrap. Unwrapping changes the DOM,
+        // so checking after each unwrap would make the browser recompute the
+        // styles every time.
+        const redundantElements = [
+            ...selectElements(root, "strong, b, span[style*='font-weight: bolder'], small"),
+        ].filter((el) => this.dependencies.format.isRedundantElement(el));
+        if (!redundantElements.length) {
+            return root;
         }
+        const cursors = this.dependencies.selection.preserveSelection();
+        for (const el of redundantElements) {
+            cursors.update(callbacksForCursorUpdate.unwrap(el));
+            unwrapContents(el);
+        }
+        cursors.restore();
         return root;
     }
 

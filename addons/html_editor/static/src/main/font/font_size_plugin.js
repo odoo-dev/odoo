@@ -1,7 +1,7 @@
 import { proxy } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { removeClass, unwrapContents } from "@html_editor/utils/dom";
-import { headingTags, isRedundantElement } from "@html_editor/utils/dom_info";
+import { headingTags } from "@html_editor/utils/dom_info";
 import {
     closestElement,
     closestPath,
@@ -24,6 +24,7 @@ import { READ, withSequence } from "@html_editor/utils/resource";
 import { FontSizeSelector, MAX_FONT_SIZE } from "./font_size_selector";
 import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { removeFormat } from "@html_editor/core/format_plugin";
+import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
 
 /** @typedef {import("plugins").LazyTranslatedString} LazyTranslatedString */
 
@@ -245,11 +246,21 @@ export class FontSizePlugin extends Plugin {
     }
 
     normalize(root) {
-        for (const el of selectElements(root, "small")) {
-            if (isRedundantElement(el)) {
-                unwrapContents(el);
-            }
+        // Check all elements first, then unwrap. Unwrapping changes the DOM,
+        // so checking after each unwrap would make the browser recompute the
+        // styles every time.
+        const redundantElements = [...selectElements(root, "small")].filter((el) =>
+            this.dependencies.format.isRedundantElement(el)
+        );
+        if (!redundantElements.length) {
+            return root;
         }
+        const cursors = this.dependencies.selection.preserveSelection();
+        for (const el of redundantElements) {
+            cursors.update(callbacksForCursorUpdate.unwrap(el));
+            unwrapContents(el);
+        }
+        cursors.restore();
         return root;
     }
 
