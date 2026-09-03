@@ -3,6 +3,41 @@ import { closestBlock, isBlock } from "./blocks";
 import { childNodes, closestElement, firstLeaf, lastLeaf } from "./dom_traversal";
 import { childNodeIndex, DIRECTIONS, nodeSize } from "./position";
 
+const styleCache = new WeakMap();
+
+/**
+ * Returns the computed style property of a node, caching the underlying
+ * CSSStyleDeclaration object to prevent synchronous layout recalculations
+ * on subsequent calls for the same node.
+ *
+ * @param {Element} node
+ * @param {string} property
+ * @returns {string}
+ */
+export function getCachedStyleProperty(node, property) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return "";
+    }
+
+    let nodeCache = styleCache.get(node);
+
+    if (!nodeCache) {
+        nodeCache = {
+            computedStyleObject: (node.ownerDocument.defaultView ?? window).getComputedStyle(node),
+            cachedPropertyValues: {},
+        };
+        styleCache.set(node, nodeCache);
+    }
+
+    if (!(property in nodeCache.cachedPropertyValues)) {
+        nodeCache.cachedPropertyValues[property] = property.includes("-")
+            ? nodeCache.computedStyleObject.getPropertyValue(property)
+            : nodeCache.computedStyleObject[property];
+    }
+
+    return nodeCache.cachedPropertyValues[property];
+}
+
 export function isEmpty(el) {
     if (isProtecting(el) || isProtected(el)) {
         return false;
@@ -55,16 +90,17 @@ export function isBold(node) {
     } else if (element.closest("h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6")) {
         regularFontWeightVariable = "--headings-font-weight";
     }
-    const style = getComputedStyle(element);
-    const fontWeight = +style.fontWeight;
-    const regularFontWeight = +style.getPropertyValue(regularFontWeightVariable) || 500;
+
+    const fontWeight = +getCachedStyleProperty(element, "fontWeight");
+    const regularFontWeight = +getCachedStyleProperty(element, regularFontWeightVariable) || 500;
+
     const referenceElement = closestElement(
         node,
-        (el) => isBlock(el) || +getComputedStyle(el).fontWeight !== fontWeight
+        (el) => isBlock(el) || +getCachedStyleProperty(el, "fontWeight") !== fontWeight
     );
     return (
         fontWeight > regularFontWeight ||
-        fontWeight > +getComputedStyle(referenceElement).fontWeight
+        fontWeight > +getCachedStyleProperty(referenceElement, "fontWeight")
     );
 }
 
@@ -75,7 +111,7 @@ export function isBold(node) {
  * @returns {boolean}
  */
 export function isItalic(node) {
-    return getComputedStyle(closestElement(node)).fontStyle === "italic";
+    return getCachedStyleProperty(closestElement(node), "fontStyle") === "italic";
 }
 
 /**
@@ -87,7 +123,7 @@ export function isItalic(node) {
 export function isUnderline(node) {
     let parent = closestElement(node);
     while (parent) {
-        if (getComputedStyle(parent).textDecorationLine.includes("underline")) {
+        if (getCachedStyleProperty(parent, "textDecorationLine").includes("underline")) {
             return true;
         }
         parent = parent.parentElement;
@@ -106,7 +142,7 @@ export function isStrikeThrough(node) {
     while (parent) {
         if (
             !parent.classList.contains("o_checked") &&
-            getComputedStyle(parent).textDecorationLine.includes("line-through")
+            getCachedStyleProperty(parent, "textDecorationLine").includes("line-through")
         ) {
             return true;
         }
@@ -991,44 +1027,102 @@ function hasStylesSubset(node, node2) {
  * @returns {boolean} True if the node is redundant, false otherwise.
  */
 export function isRedundantElement(node) {
-    // Check for valid element node and existence of a parent.
     if (!node || node.nodeType !== Node.ELEMENT_NODE || !node.parentElement) {
         return false;
     }
 
-    // Find the closest element with the same tag name.
-    const closestEl = closestElement(node.parentElement, node.tagName);
-    if (!closestEl) {
-        return false;
+    const isGenericStyleTag = ["SPAN", "FONT"].includes(node.tagName);
+
+    // Case 1: Pure Formatting Tags
+    // Drops simple style tags if their visual formatting is already provided by an ancestor.
+    // Example: <span style="font-weight: bold"><b>redundant</b></span>
+    const checkIfParentHasFormat = {
+        B: isBold,
+        STRONG: isBold,
+        I: isItalic,
+        EM: isItalic,
+        U: isUnderline,
+        S: isStrikeThrough,
+        STRIKE: isStrikeThrough,
+    };
+    if (checkIfParentHasFormat[node.tagName] && node.attributes.length === 0) {
+        return checkIfParentHasFormat[node.tagName](node.parentElement);
+    }
+    const allowedTypographyStyles = [
+        "font-weight",
+        "font-style",
+        "text-decoration-line",
+        "font-size",
+        "color",
+        "background-color",
+        "background-image",
+        "font-family",
+    ];
+
+    // Case 2: Computed-style Fallback
+    // Drops span/font tags if all their inline styles are already visually applied by an ancestor.
+    // Example: <b><span style="font-weight: bold">redundant</span></b>
+    if (
+        isGenericStyleTag &&
+        node.attributes.length === 1 &&
+        node.hasAttribute("style") &&
+        [...node.style].every(
+            (styleKey) =>
+                allowedTypographyStyles.includes(styleKey) &&
+                getCachedStyleProperty(node, styleKey) ===
+                    getCachedStyleProperty(node.parentElement, styleKey)
+        )
+    ) {
+        return true;
     }
 
-    // Check each attribute from node.
-    for (const { name: attrName, value: nodeAttrVal } of node.attributes) {
-        const closestElAttrVal = closestEl.getAttribute(attrName);
+    // Case 3: Identical Wrapper Search
+    // Drops any tag if an ancestor perfectly matches all of its attributes (classes, styles, etc).
+    // Example: <span class="text-danger"><span class="text-danger">redundant</span></span>
+    const blockBoundary = closestBlock(node);
+    const nodeInlineStyleKeys = node.hasAttribute("style") ? [...node.style] : [];
+    let ancestorElement = node.parentElement;
 
-        if (!closestElAttrVal) {
-            return false; // Attribute missing in closest element.
+    while (ancestorElement && ancestorElement !== blockBoundary) {
+        // Check if we found a matching tag (or interchangeable SPAN/FONT)
+        const isTagMatching =
+            node.tagName === ancestorElement.tagName ||
+            (isGenericStyleTag && ["SPAN", "FONT"].includes(ancestorElement.tagName));
+
+        // If tags match, check if the ancestor has a superset of our node's attributes
+        if (isTagMatching) {
+            const isAncestorAttributeSuperset = [...node.attributes].every(
+                ({ name: attributeName, value: nodeAttributeValue }) => {
+                    const ancestorAttributeValue = ancestorElement.getAttribute(attributeName);
+                    if (ancestorAttributeValue === null) {
+                        return false;
+                    }
+                    return attributeName === "class"
+                        ? hasClassesSubset(nodeAttributeValue, ancestorAttributeValue)
+                        : attributeName === "style"
+                        ? hasStylesSubset(nodeAttributeValue, ancestorAttributeValue)
+                        : nodeAttributeValue === ancestorAttributeValue;
+                }
+            );
+            if (isAncestorAttributeSuperset) {
+                return true;
+            }
         }
 
-        if (attrName === "class") {
-            // All classes on the node must exist in closest element.
-            if (!hasClassesSubset(nodeAttrVal, closestElAttrVal)) {
-                return false;
-            }
-        } else if (attrName === "style") {
-            // All inline styles on the node must exist in closest element.
-            if (!hasStylesSubset(nodeAttrVal, closestElAttrVal)) {
-                return false;
-            }
-        } else {
-            // For other attributes, values must match exactly.
-            if (nodeAttrVal !== closestElAttrVal) {
-                return false;
-            }
+        // Stop Condition: Inline Style Override
+        // If an intermediate ancestor has any of the same inline styles as our node, our node is actively overriding it and is NOT redundant.
+        // Example: <span style="color: blue"><span style="color: red">NOT redundant</span></span>
+        if (
+            nodeInlineStyleKeys.some(
+                (styleKey) => ancestorElement.style.getPropertyValue(styleKey) !== ""
+            )
+        ) {
+            return false;
         }
+
+        ancestorElement = ancestorElement.parentElement;
     }
-
-    return true;
+    return false;
 }
 
 /**
