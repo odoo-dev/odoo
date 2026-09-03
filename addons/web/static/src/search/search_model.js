@@ -724,29 +724,30 @@ export class SearchModel extends EventBus {
     exportState() {
         const state = { query: [], searchItems: {} };
         execute(mapToArray, this, state);
-        // force a fresh fetch of the sections on import, see _importState
+        // let _reloadSections run on import, see _importState for why
         state.searchPanelInfo = { ...this.searchPanelInfo, loaded: false };
-        // only the selection is exported, values are re-fetched on import
+        // categories (esp. hierarchical trees) need their already fetched
+        // values to render immediately on import: only filters, which are
+        // flat and can hold a lot more values (e.g. all tags), are trimmed
+        // down to the current selection, re-fetched on import.
         state.sections = [...this.sections].map(([id, section]) => {
+            if (section.type === "category") {
+                return [id, { ...section, values: [...section.values] }];
+            }
             const { values, groups, _importedCheckedValueIds, _importedGroupStates, ...config } =
                 section;
             delete config.errorMsg;
             delete config.loaded;
             delete config._imported;
-            if (section.type === "filter") {
-                // fall back to the not-yet-applied import selection, in case
-                // this section is re-exported before its own fetch resolved
-                config.checkedValueIds = values.size
-                    ? [...values.values()].filter((value) => value.checked).map((v) => v.id)
-                    : _importedCheckedValueIds || [];
-                if (groups) {
-                    config.groupStates = [...groups].map(([groupId, group]) => [
-                        groupId,
-                        group.state,
-                    ]);
-                } else if (_importedGroupStates) {
-                    config.groupStates = [..._importedGroupStates];
-                }
+            // fall back to the not-yet-applied import selection, in case
+            // this section is re-exported before its own fetch resolved
+            config.checkedValueIds = values.size
+                ? [...values.values()].filter((value) => value.checked).map((v) => v.id)
+                : _importedCheckedValueIds || [];
+            if (groups) {
+                config.groupStates = [...groups].map(([groupId, group]) => [groupId, group.state]);
+            } else if (_importedGroupStates) {
+                config.groupStates = [..._importedGroupStates];
             }
             return [id, config];
         });
@@ -1551,7 +1552,6 @@ export class SearchModel extends EventBus {
     _createCategoryTree(sectionId, result) {
         const category = this.sections.get(sectionId);
         delete category.errorMsg;
-        category.values = new Map();
         let { error_msg, parent_field: parentField, values } = result;
         if (error_msg) {
             category.errorMsg = error_msg;
@@ -1587,7 +1587,6 @@ export class SearchModel extends EventBus {
         const valueIds = [false, ...values.map((val) => val.id)];
         this._ensureCategoryValue(category, valueIds);
         category.loaded = true;
-        delete category._imported;
     }
 
     /**
@@ -1848,11 +1847,10 @@ export class SearchModel extends EventBus {
         const categoriesLoadId = ++this.categoriesLoadId;
         await Promise.all(
             categories.map(async (category) => {
-                // reuse the ORM cache instead of a real RPC on first fetch after import
                 const result = await this.orm
                     .cache({
                         type: "disk",
-                        update: category._imported ? "once" : "always",
+                        update: "always",
                         callback: (result, hasChanged) => {
                             if (!hasChanged || categoriesLoadId !== this.categoriesLoadId) {
                                 return;
@@ -2651,9 +2649,13 @@ export class SearchModel extends EventBus {
      */
     _importState(state) {
         execute(arraytoMap, state, this);
-        // sections are marked as not loaded, forcing _reloadSections to refetch them
+        // categories come back with their full values already, ready to use;
+        // filters are marked as not loaded, forcing _reloadSections to refetch them
         this.sections = new Map(
             (state.sections || []).map(([id, config]) => {
+                if (config.type === "category") {
+                    return [id, { ...config, values: new Map(config.values || []), loaded: true }];
+                }
                 const { checkedValueIds, groupStates, ...rest } = config;
                 const section = { ...rest, loaded: false, _imported: true, values: new Map() };
                 if (checkedValueIds) {
