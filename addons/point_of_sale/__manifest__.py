@@ -61,6 +61,9 @@
         'receipt/pos_cash_move_receipt.xml',  # needed in the backend and frontend
         'receipt/pos_sale_details_receipt.xml',  # needed in the backend and frontend
         'data/ir_cron_data.xml',
+        'data/pos_report_data.xml',
+        'data/pos_report_actions.xml',
+        'data/pos_report_pdf_templates.xml',
         'security/ir.access.csv',
     ],
     'demo': [
@@ -106,6 +109,12 @@
             'point_of_sale/static/src/app/utils/init_lna.js',
             'point_of_sale/static/src/app/utils/scale/*.js',
             'point_of_sale/static/src/backend/pos_open_ui_button/*',
+            'point_of_sale/static/src/pos_reports/**/*',
+            ('remove', 'point_of_sale/static/src/pos_reports/scss/pos_report_pdf_export.scss'),
+        ],
+        'point_of_sale.assets_pdf_export': [
+            ('include', 'web.report_assets_common'),
+            'point_of_sale/static/src/pos_reports/scss/pos_report_pdf_export.scss',
         ],
         'web.assets_backend_lazy': [
             'point_of_sale/static/src/backend/views/pivot/*',

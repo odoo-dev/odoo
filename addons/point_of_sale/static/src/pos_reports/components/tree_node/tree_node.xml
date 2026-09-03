@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="pos_reports.TreeNode">
+        <div class="o_report_row d-grid" t-att-class="this.lineClasses">
+            <div class="o_report_name_cell d-flex align-items-center gap-1 overflow-hidden"
+                t-att-style="'padding-left: ' + (this.currentLine.level * 20) + 'px'"
+                t-att-class="{ 'o_report_foldable': this.isFoldable }"
+                t-on-click="this.toggleFold">
+
+                <i t-if="this.isFoldable"
+                    class="btn o_report_toggle oi"
+                    t-att-data-icon="this.currentLine.foldability === 'expanded' ? 'arrow_drop_down' : 'arrow_right'"
+                />
+                <span t-else="" class="o_report_toggle o_report_toggle_empty flex-shrink-0"/>
+
+                <span class="o_report_line_name text-truncate" t-out="this.currentLine.name" />
+            </div>
+
+            <t t-foreach="this.props.columns || []" t-as="col" t-key="col.id">
+                <div class="o_report_cell d-flex align-items-center" t-att-class="'justify-content-' + (col.align === 'right' ? 'end' : 'start')">
+                    <span t-out="this.getFormattedValue(col)" />
+                </div>
+            </t>
+        </div>
+
+        <t t-if="this.currentLine.foldability === 'expanded' and this.currentLine.lines">
+            <t t-foreach="this.currentLine.lines" t-as="child" t-key="child.record_id">
+                <t t-component="this.props.getComponent('TreeNode')"
+                    line="child"
+                    columns="this.props.columns"
+                    currency="this.props.currency"
+                    getComponent="this.props.getComponent"
+                />
+            </t>
+        </t>
+    </t>
+</templates>
