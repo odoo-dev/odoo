@@ -883,7 +883,10 @@ class ProductTemplate(models.Model):
         :rtype: dict
         """
         pricelist = pricelist.with_context(self.env.context)
-        currency = website.currency_id.with_context(self.env.context)
+        # The displayed currency follows the pricelist used to compute the prices (they normally
+        # share the website's currency, but e.g. the GMC feed may localize prices with a specific
+        # pricelist). Fall back on the website currency when pricelists are disabled.
+        currency = (pricelist.currency_id or website.currency_id).with_context(self.env.context)
 
         # Pricelist price doesn't have to be converted
         pricelist_price, pricelist_rule_id = pricelist._get_product_price_rule(
@@ -977,7 +980,7 @@ class ProductTemplate(models.Model):
 
         if product_or_template.minimum_quantity and product_or_template.is_product_variant:
             product_sudo = product_or_template.sudo()
-            minimum_quantity = request.cart._get_remaining_minimum_qty(product_sudo, uom=uom)
+            minimum_quantity = self.env.website.cart.sudo()._get_remaining_minimum_qty(product_sudo, uom=uom)
             if minimum_quantity > 1:
                 combination_info.update({
                     "minimum_qty": minimum_quantity,
@@ -994,7 +997,7 @@ class ProductTemplate(models.Model):
             max_quantities = [
                 max_quantity
                 for combo in product_or_template.sudo().combo_ids
-                if (max_quantity := combo._get_max_quantity(website, self.env.website.cart)) is not None
+                if (max_quantity := combo._get_max_quantity(website, self.env.website.cart.sudo())) is not None
             ]
             if max_quantities:
                 # No uom conversion: combo are not supposed to be sold with other uoms.
@@ -1030,7 +1033,7 @@ class ProductTemplate(models.Model):
             cart_quantity = 0.0
             if not product_sudo.allow_out_of_stock_order:
                 cart_quantity = product_sudo.uom_id._compute_quantity(
-                    self.env.website.cart._get_cart_qty(product_sudo.id), to_unit=uom
+                    self.env.website.cart.sudo()._get_cart_qty(product_sudo.id), to_unit=uom
                 )
 
             digits = self.env["decimal.precision"].precision_get("Product Unit")
@@ -1593,7 +1596,7 @@ class ProductTemplate(models.Model):
                 or None
             )
             variants = self.product_variant_ids[:limit] if limit else self.product_variant_ids
-            prices = request.pricelist._get_products_price(
+            prices = website.pricelist._get_products_price(
                 variants, quantity=1, currency=website.currency_id
             )
             vals = {
@@ -1820,7 +1823,7 @@ class ProductTemplate(models.Model):
         )
 
         if (website := self.env.website) and product_or_template.is_product_variant:
-            max_quantity = product_or_template._get_max_quantity(website, self.env.website.cart, **kwargs)
+            max_quantity = product_or_template._get_max_quantity(website, self.env.website.cart.sudo(), **kwargs)
             if max_quantity is not None:
                 if uom:
                     max_quantity = product_or_template.uom_id._compute_quantity(

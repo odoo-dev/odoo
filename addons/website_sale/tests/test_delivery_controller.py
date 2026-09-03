@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.http import request
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.tests import tagged
@@ -7,7 +8,6 @@ from odoo.tests import tagged
 from odoo.addons.payment.tests.common import PaymentCommon
 from odoo.addons.website_sale.controllers.delivery import Delivery
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
-from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
 
 
 @tagged("post_install", "-at_install")
@@ -32,7 +32,12 @@ class TestWebsiteSaleDeliveryController(PaymentCommon, WebsiteSaleCommon):
             self.mock_request(sale_order_id=self.empty_cart.id) as request,
             self.assertRaises(UserError),
         ):
-            request.update_context(**{CART_SESSION_CACHE_KEY: self.empty_cart.id})
+            # Force the contextual cart to the order under test. The normal cart
+            # resolution discards a cart that has a pending transaction, which
+            # would prevent the controller's guard from ever being reached
+            # (this is the equivalent of the former ``request.cart = ...``).
+            website = request.env.website
+            request.env.cache.set(website, website._fields["cart"], self.empty_cart.id)
             self.Controller.shop_set_delivery_method(dm_id=self.free_delivery.id)
 
     # test that changing the delivery method while there is a draft transaction is successful
@@ -123,7 +128,7 @@ class TestWebsiteSaleDeliveryController(PaymentCommon, WebsiteSaleCommon):
         ]
         order.partner_id.write(self.dummy_partner_address_values)
         with self.mock_request(sale_order_id=order.id) as request:
-            order = request.cart
+            order = request.env.website.cart.sudo()
             order._set_delivery_method(carrier)
             self.assertEqual(order.amount_delivery, 0.0)
 

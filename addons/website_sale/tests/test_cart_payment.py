@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 
+from odoo.http import request
 from odoo.fields import Command
 from odoo.tests.common import JsonRpcException, tagged
 from odoo.tools import mute_logger
@@ -37,7 +38,7 @@ class WebsiteSaleCartPayment(PaymentHttpCommon, WebsiteSaleCommon):
             self._update_transaction(self.tx, state=unpaid_order_tx_state)
             with self.mock_request(sale_order_id=self.cart.id) as request:
                 self.assertEqual(
-                    self.env.website.cart,
+                    request.env.website.cart,
                     self.cart,
                     msg=f"The transaction state '{unpaid_order_tx_state}' should not prevent "
                     f"retrieving the linked order.",
@@ -52,7 +53,7 @@ class WebsiteSaleCartPayment(PaymentHttpCommon, WebsiteSaleCommon):
             self._update_transaction(self.tx, state=paid_order_tx_state)
             with self.mock_request(sale_order_id=self.cart.id) as request:
                 self.assertFalse(
-                    self.env.website.cart,
+                    request.env.website.cart,
                     msg=f"The transaction state '{paid_order_tx_state}' should prevent retrieving "
                     f"the linked order.",
                 )

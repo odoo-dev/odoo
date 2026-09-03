@@ -331,7 +331,7 @@ class Website(models.Model):
     def _compute_currency_id(self):
         for website in self:
             website.currency_id = (
-                request and hasattr(request, "pricelist") and self.env.website.pricelist.currency_id
+                request and self.env.website.pricelist.currency_id
             ) or website.company_id.sudo().currency_id
 
     def _compute_sql_currency_id(self, table):  # noqa: ARG002
@@ -679,6 +679,17 @@ class Website(models.Model):
         # The order was created with SUPERUSER_ID, revert back to request user.
         sale_order_sudo = sale_order_sudo.with_user(self.env.user).sudo()
 
+        if request:
+            # Persist the new cart in the session and the context so that any
+            # later access to `self.env.website.cart` in the same request
+            # resolves to the freshly created cart.
+            request.session[CART_SESSION_CACHE_KEY] = sale_order_sudo.id
+            request.session[CART_QUANTITY_SESSION_CACHE_KEY] = sale_order_sudo.cart_quantity
+            request.update_context(**{
+                CART_SESSION_CACHE_KEY: sale_order_sudo.id,
+                CART_QUANTITY_SESSION_CACHE_KEY: sale_order_sudo.cart_quantity,
+            })
+
         return sale_order_sudo.with_context(**{
             CART_SESSION_CACHE_KEY: sale_order_sudo.id,
             CART_QUANTITY_SESSION_CACHE_KEY: sale_order_sudo.cart_quantity,
@@ -696,7 +707,7 @@ class Website(models.Model):
             "website_id": self.id,
         }
 
-    @api.depends_context(PRICELIST_SESSION_CACHE_KEY)
+    @api.depends_context("uid", PRICELIST_SESSION_CACHE_KEY)
     def _compute_pricelist(self):
         """Retrieve and cache the current pricelist for the session.
 
@@ -726,7 +737,7 @@ class Website(models.Model):
                 self.pricelist = pricelist_sudo.sudo()
                 return None
 
-        if cart_sudo := self.env.website.cart:
+        if cart_sudo := self.env.website.cart.sudo():
             if not self.env.cr.readonly:
                 # If there is a cart, recompute on the cart and take it from there
                 cart_sudo._compute_pricelist_id()
@@ -741,7 +752,7 @@ class Website(models.Model):
 
         self.pricelist = pricelist_sudo.with_context(**{PRICELIST_SESSION_CACHE_KEY: pricelist_sudo.id})
 
-    @api.depends_context(FISCAL_POSITION_SESSION_CACHE_KEY)
+    @api.depends_context("uid", FISCAL_POSITION_SESSION_CACHE_KEY)
     def _compute_fiscal_position(self):
         """Retrieve and cache the current fiscal position for the session.
 
@@ -779,7 +790,7 @@ class Website(models.Model):
 
         self.fiscal_position = fpos_sudo.with_context(**{FISCAL_POSITION_SESSION_CACHE_KEY: fpos_sudo.id})
 
-    @api.depends_context(CART_SESSION_CACHE_KEY)
+    @api.depends_context("uid", CART_SESSION_CACHE_KEY)
     def _compute_cart(self):
         """Retrieve and cache the current cart for the session.
 

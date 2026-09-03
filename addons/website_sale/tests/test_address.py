@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from werkzeug.exceptions import Forbidden
 
+from odoo.http import request
 from odoo.fields import Command
 from odoo.tests import tagged
 
@@ -252,8 +253,8 @@ class TestCheckoutAddress(WebsiteSaleCommon):
         with self.mock_request(
             sale_order_id=so.id, website_sale_current_pl=so.pricelist_id.id
         ) as request:
-            self.assertEqual(self.env.website.pricelist, self.pricelist)
-            order = self.env.website.cart
+            self.assertEqual(request.env.website.pricelist, self.pricelist)
+            order = request.env.website.cart
             self.assertEqual(order, so)
             self.assertEqual(order.pricelist_id, self.pricelist)
 
@@ -358,7 +359,7 @@ class TestCheckoutAddress(WebsiteSaleCommon):
         # No cart session key set => the cart is retrieved through the abandoned-cart branch,
         # which re-runs the customer sync on the order.
         with self.mock_request(user=user) as request:
-            cart = request.env.website._get_and_cache_current_cart()
+            cart = request.env.website.cart
 
             self.assertEqual(cart, so)
             self.assertEqual(

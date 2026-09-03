@@ -6,6 +6,10 @@ from odoo.tests import tagged
 from odoo.addons.http_routing.tests.common import MockRequest as HttpRoutingMockRequest
 from odoo.addons.product.tests.common import ProductVariantsCommon
 from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.website_sale.models.website import (
+    FISCAL_POSITION_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
+)
 from odoo.addons.website_sale.tests.common import MockRequest
 
 
@@ -165,15 +169,20 @@ class TestFuzzy(ProductVariantsCommon):
 
         result_count, results, _ = website.with_context(website_id=website.id)._search_with_fuzzy('product_template', 'Some tag', 0, 5, 'name asc', options)
         self.assertEqual(result_count, 1)
-        # Needed because `_get_additionnal_combination_info` uses request.pricelist & request.fiscal_position
+        # Needed because `_get_additionnal_combination_info` uses the contextual
+        # pricelist & fiscal position (`self.env.website.pricelist`/`.fiscal_position`).
         with HttpRoutingMockRequest(self.env, website=website) as request:
-            request.pricelist = self.env['product.pricelist'].create({
+            pricelist = self.env['product.pricelist'].create({
                 'name': 'Some pricelist',
             })
-            request.fiscal_position = self.env['account.fiscal.position'].sudo().create({
+            fiscal_position = self.env['account.fiscal.position'].sudo().create({
                 'name': 'Some fiscal postion'
             })
-            results = website._search_render_results(results, 5)
+            request.update_context(**{
+                PRICELIST_SESSION_CACHE_KEY: pricelist.id,
+                FISCAL_POSITION_SESSION_CACHE_KEY: fiscal_position.id,
+            })
+            results = website.with_env(request.env)._search_render_results(results, 5)
             result_tags = results[0]['results_data'][0]['product_tag_ids']
             self.assertEqual(len(result_tags), 1)
             self.assertEqual(result_tags[0]['name'], 'Some tag1')

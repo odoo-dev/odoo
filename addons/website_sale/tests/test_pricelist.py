@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from freezegun import freeze_time
 
+from odoo.http import request
 from odoo.fields import Command
 from odoo.tests import tagged
 from odoo.tools import SQL
@@ -340,9 +341,9 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         })
         self.assertEqual(product_template.standard_price, 5)
         with self.mock_request(website_sale_current_pl=pricelist.id) as request:
-            self.assertEqual(self.env.website.pricelist, pricelist)
+            self.assertEqual(request.env.website.pricelist, pricelist)
             price = product_template._get_sales_prices(
-                self.env.website.pricelist, self.env.website.fiscal_position, self.website
+                request.env.website.pricelist, request.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             msg = "Template has no variants, the price should be computed based on the template's"
             " cost."
@@ -359,7 +360,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             self.assertEqual(product_template.product_variant_ids[0].standard_price, 0)
 
             price = product_template._get_sales_prices(
-                self.env.website.pricelist, self.env.website.fiscal_position, self.website
+                request.env.website.pricelist, request.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             msg = "Template has variants, the price should be computed based on the 1st variant's"
             " cost."
@@ -368,7 +369,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             product_template.product_variant_ids[0].standard_price = 20
 
             price = product_template._get_sales_prices(
-                self.env.website.pricelist, self.env.website.fiscal_position, self.website
+                request.env.website.pricelist, request.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             self.assertEqual(price, 18, msg)
 
@@ -404,9 +405,9 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             ]
         })
         with self.mock_request(website_sale_current_pl=self.pricelist.id) as request:
-            self.assertEqual(self.env.website.pricelist, self.pricelist)
+            self.assertEqual(request.env.website.pricelist, self.pricelist)
             res = product_tmpl._get_sales_prices(
-                self.env.website.pricelist, self.env.website.fiscal_position, self.website
+                request.env.website.pricelist, request.env.website.fiscal_position, self.website
             )
             self.assertEqual(res[product_tmpl.id]["base_price"], 75)
 
@@ -770,9 +771,9 @@ class TestWebsitePriceListAvailableGeoIP(TestWebsitePriceListAvailable):
                 "odoo.addons.website_sale.models.website.Website._get_geoip_country_code",
                 return_value=self.BE.code,
             ),
-            self.mock_request(website_sale_current_pl=current_pl.id),
+            self.mock_request(website_sale_current_pl=current_pl.id) as request,
         ):
-            pls = self.website.get_pricelist_available(show_visible=True)
+            pls = request.env.website.get_pricelist_available(show_visible=True)
         self.assertEqual(
             pls,
             pls_to_return + current_pl,

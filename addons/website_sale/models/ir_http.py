@@ -25,13 +25,13 @@ class IrHttp(models.AbstractModel):
         super()._frontend_pre_dispatch()
 
         if CART_SESSION_CACHE_KEY in request.session:
-            request.update_context(CART_SESSION_CACHE_KEY=request.session[CART_SESSION_CACHE_KEY])
+            request.update_context(**{CART_SESSION_CACHE_KEY: request.session[CART_SESSION_CACHE_KEY]})
         if FISCAL_POSITION_SESSION_CACHE_KEY in request.session:
-            request.update_context(FISCAL_POSITION_SESSION_CACHE_KEY=request.session[FISCAL_POSITION_SESSION_CACHE_KEY])
+            request.update_context(**{FISCAL_POSITION_SESSION_CACHE_KEY: request.session[FISCAL_POSITION_SESSION_CACHE_KEY]})
         if PRICELIST_SESSION_CACHE_KEY in request.session:
-            request.update_context(PRICELIST_SESSION_CACHE_KEY=request.session[PRICELIST_SESSION_CACHE_KEY])
+            request.update_context(**{PRICELIST_SESSION_CACHE_KEY: request.session[PRICELIST_SESSION_CACHE_KEY]})
         if PRICELIST_SELECTED_SESSION_CACHE_KEY in request.session:
-            request.update_context(PRICELIST_SELECTED_SESSION_CACHE_KEY=request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY])
+            request.update_context(**{PRICELIST_SELECTED_SESSION_CACHE_KEY: request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY]})
 
     @classmethod
     def _slug(cls, value: models.BaseModel | tuple[int, str]) -> str:

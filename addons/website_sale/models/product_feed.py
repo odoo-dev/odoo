@@ -149,10 +149,6 @@ class ProductFeed(models.Model):
         # Ensures all links, product names, descriptions, etc., are localized.
         self = self.with_context(lang=self.lang_id.code)  # noqa: PLW0642
 
-        # Override the pricelist of the request to localize the currency and prices, otherwise, uses
-        # the website default pricelist.
-        if self.pricelist_id:
-            self.env.website.pricelist = self.pricelist_id
 
         homepage_url = self.website_id.homepage_url or "/"
         website_homepage = self.website_id._get_website_pages(
@@ -297,7 +293,11 @@ class ProductFeed(models.Model):
             quantity=1.0,
             uom=product.uom_id,
             website=self.website_id,
-            pricelist=self.env.website.pricelist,
+            # Use the feed's own pricelist to localize prices, falling back on the website's
+            # contextual pricelist. NB: the displayed currency still comes from
+            # `website.currency_id`, which is not (yet) sensitive to the contextual pricelist; the
+            # GMC feed currency localization therefore needs a deeper fix (see _compute_currency_id).
+            pricelist=self.pricelist_id or self.env.website.pricelist,
             fiscal_position=self.env.website.fiscal_position,
         )
         if combination_info["prevent_sale"]:

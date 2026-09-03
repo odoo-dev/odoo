@@ -97,7 +97,7 @@ class Website(main.Website):
 
     @route()
     def change_lang(self, lang, **kwargs):
-        if cart := self.env.website.cart:
+        if cart := self.env.website.cart.sudo():
             self.env.add_to_compute(
                 cart.order_line._fields["name"], cart.order_line.with_context(lang=lang)
             )

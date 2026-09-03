@@ -42,7 +42,7 @@ class ProductWishlist(Controller):
         if website.google_analytics_key and wishes:
             products = wishes.product_id.product_tmpl_id
             products_prices = products._get_sales_prices(
-                request.pricelist, request.fiscal_position, website
+                website.pricelist, website.fiscal_position, website
             )
             values["product_tracking_infos"] = products._get_google_analytics_list_data_batch(
                 products_prices, website, "Wishlist"

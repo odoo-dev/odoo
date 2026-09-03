@@ -1177,7 +1177,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         request.session[PRICELIST_SESSION_CACHE_KEY] = pricelist.id
         request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY] = pricelist.id
-        self.env.website.pricelist = pricelist.sudo()
+        request.update_context(**{PRICELIST_SESSION_CACHE_KEY: pricelist.id})
 
         if order_sudo := self.env.website.cart.sudo():
             order_sudo.pricelist_id = pricelist
@@ -1209,7 +1209,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: str
         """
         try_skip_step = str2bool(try_skip_step or "false")
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
 
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/checkout", order_sudo
@@ -1282,7 +1282,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: str
         """
         use_delivery_as_billing = str2bool(use_delivery_as_billing or "false")
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
 
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/address", order_sudo
@@ -1389,7 +1389,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :return: A JSON-encoded feedback, with either the success URL or an error message.
         :rtype: str
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         redirect_dict = {}
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/address", order_sudo
@@ -1552,7 +1552,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :param dict kwargs: Optional data. This parameter is not used here.
         :return int: The order's partner id.
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
 
         # Update the partner with all the information
         self._include_country_and_state_in_address(billing_address)
@@ -1709,7 +1709,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         list_as_website_content=system_page_extra_info,
     )
     def extra_info(self, **post):
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         extra_step = self.env.website.viewref("website_sale.extra_info")
         if not extra_step.active or not self.env.website._cart_has_extra_step_category(order_sudo):
             return request.redirect(
@@ -1797,7 +1797,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         - UDPATE ME.
         """
         if sale_order_id is None:
-            order_sudo = self.env.website.cart
+            order_sudo = self.env.website.cart.sudo().sudo()
             if not order_sudo and "sale_last_order_id" in request.session:
                 # Retrieve the last known order from the session if the session key `sale_order_id`
                 # was prematurely cleared. This is done to prevent the user from updating their cart

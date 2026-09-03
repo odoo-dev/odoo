@@ -29,6 +29,13 @@ def MockRequest(  # noqa: N802
     **kwargs,
 ):
     with websiteMockRequest(*args, **kwargs) as request:
+        # The contextual cart/pricelist/fiscal position are computed fields that only depend on
+        # their session cache key. Within a single test transaction their compute may also rely on
+        # data that changed since a previous mocked request (e.g. the partner country for the fiscal
+        # position), which would not invalidate their cache. Clear it on each mocked request to
+        # mimic the fresh environment of a real HTTP request.
+        request.env["website"].invalidate_model(["cart", "pricelist", "fiscal_position"])
+
         if sale_order_id is not None:
             request.update_context(**{CART_SESSION_CACHE_KEY: sale_order_id})
 
@@ -156,4 +163,5 @@ class WebsiteSaleCommon(DeliveryCommon):
 
         with MockRequest(request_env, website=website, **kwargs) as request:
             request.make_json_response = make_json_response
+
             yield request

@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import partial
 from unittest.mock import patch
 
+from odoo.http import request
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.tests import HttpCase, JsonRpcException, tagged
@@ -132,7 +133,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
         ):
             request.env.website._create_cart()
             # service_tracking 'no' should not raise error
-            self.env.website.cart._cart_add(product_id=product_service.id, quantity=1)
+            request.env.website.cart.sudo()._cart_add(product_id=product_service.id, quantity=1)
 
     def test_add_to_cart_zero_price_product_with_no_variant_extra(self):
         """Ensure that a zero-priced product with a no-variant attribute
@@ -157,8 +158,9 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 no_variant_attribute_value_ids=ptav.ids,
                 quantity=1,
             )
+            order_sudo = request.env.website.cart.sudo()
 
-        self.assertEqual(request.cart.order_line.product_no_variant_attribute_value_ids, ptav)
+        self.assertEqual(order_sudo.order_line.product_no_variant_attribute_value_ids, ptav)
 
     def test_zero_price_after_pricelist_recompute_blocks_payment(self):
         """
@@ -217,7 +219,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            sale_order = self.env.website.cart
+            sale_order = request.env.website.cart.sudo()
             sale_order.access_token = "test_token"
             old_amount = sale_order.amount_total
             self.WebsiteSaleCartController.add_to_cart(
@@ -265,7 +267,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            sale_order = self.env.website.cart
+            sale_order = request.env.website.cart
             self.assertEqual(sale_order.amount_untaxed, 1000.0)
 
             # remove the product from the cart
@@ -298,14 +300,14 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
         })
 
         with self.mock_request(country_code="BE") as request:
-            self.assertEqual(self.env.website.fiscal_position, fpos_be)
+            self.assertEqual(request.env.website.fiscal_position, fpos_be)
             self.WebsiteSaleCartController.add_to_cart(
                 product_template_id=self.product.product_tmpl_id,
                 product_id=self.product.id,
                 quantity=1,
             )
             self.assertEqual(
-                self.env.website.cart.fiscal_position_id,
+                request.env.website.cart.fiscal_position_id,
                 fpos_be,
                 "Fiscal position should be determined from GEOIP country for public users.",
             )
@@ -505,7 +507,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            cart = self.env.website.cart
+            cart = request.env.website.cart.sudo()
             self.assertEqual(cart.pricelist_id, pricelist_not_eu)
             cart.partner_id = self.partner.sudo().create({"name": "New Partner"})
             self.assertEqual(cart.pricelist_id, pricelist_not_eu)
@@ -524,7 +526,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
             self.WebsiteSaleCartController.add_to_cart(
                 product_template_id=product.product_tmpl_id, product_id=product.id, quantity=1
             )
-            order = self.env.website.cart
+            order = request.env.website.cart
 
             # pre-condition: the order contains an active product
             self.assertRecordValues(order.order_line, [{"product_id": product.id}])

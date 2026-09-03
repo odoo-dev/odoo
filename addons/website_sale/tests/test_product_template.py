@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+from odoo.http import request
 from odoo.fields import Command, Date
 from odoo.tests import tagged
 
@@ -140,8 +141,8 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
                 1.0,
                 self.product.uom_id,
                 self.website,
-                self.env.website.pricelist,
-                self.env.website.fiscal_position,
+                request.env.website.pricelist,
+                request.env.website.fiscal_position,
             )
         # Expected converted price
         expected_price = company_currency._convert(

@@ -38,6 +38,6 @@ class LocationSelector(Delivery):
         :return: The order summary values.
         :rtype: dict
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         order_sudo.set_pickup_location(pickup_location_data)
         return self._order_summary_values(order_sudo)

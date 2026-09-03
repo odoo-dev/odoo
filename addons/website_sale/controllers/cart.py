@@ -30,7 +30,7 @@ class Cart(PaymentPortal):
         if not self.env.website.has_ecommerce_access():
             return request.redirect("/web/login")
 
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
 
         values = {}
         if id and access_token:
@@ -112,7 +112,7 @@ class Cart(PaymentPortal):
         :return: The values
         :rtype: dict
         """
-        order_sudo = self.env.website.cart or self.env.website._create_cart()
+        order_sudo = self.env.website.cart.sudo() or self.env.website._create_cart()
         # Do not allow float values in ecommerce by default
         quantity = (quantity and int(quantity)) or 1
 
@@ -252,7 +252,7 @@ class Cart(PaymentPortal):
     def quick_add(self, product_template_id, product_id, quantity=1.0, **kwargs):
         values = self.add_to_cart(product_template_id, product_id, quantity=quantity, **kwargs)
 
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         values.update(self._get_updated_cart_page_values(order_sudo))
         # If the cart was empty, no cart summary was rendered on the page. However, we just
         # added a product, so render it now.
@@ -319,7 +319,7 @@ class Cart(PaymentPortal):
             is falsy
         :params dict kwargs: additional parameters given to _cart_update_line_quantity calls.
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         quantity = int(quantity)  # Do not allow float values in ecommerce by default
 
         # This method must be only called from the cart page BUT in some advanced logic
@@ -415,7 +415,8 @@ class Cart(PaymentPortal):
 
         # Prepare the order history.
         SaleOrderLineSudo = self.env["sale.order.line"].sudo()
-        cart_lines_sudo = self.env.website.cart.order_line if self.env.website.cart else SaleOrderLineSudo
+        cart_sudo = self.env.website.cart.sudo()
+        cart_lines_sudo = cart_sudo.order_line if cart_sudo else SaleOrderLineSudo
         seen_lines_sudo = SaleOrderLineSudo
         lines_per_order_date = {}
         for line_sudo in previous_orders_lines_sudo:

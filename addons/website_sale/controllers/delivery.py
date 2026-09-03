@@ -17,7 +17,7 @@ class Delivery(WebsiteSale):
         :return: The rendered delivery form.
         :rtype: str
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         values = {
             "delivery_methods": order_sudo._get_delivery_methods(),
             "selected_dm_id": order_sudo.carrier_id.id,
@@ -300,5 +300,5 @@ class Delivery(WebsiteSale):
         :param str delivery_date: The selected delivery date.
         :return: None
         """
-        order_sudo = self.env.website.cart
+        order_sudo = self.env.website.cart.sudo()
         order_sudo.commitment_date = delivery_date

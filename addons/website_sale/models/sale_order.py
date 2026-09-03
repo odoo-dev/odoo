@@ -485,7 +485,7 @@ class SaleOrder(models.Model):
 
             new_fpos = self.fiscal_position_id
             request.session[FISCAL_POSITION_SESSION_CACHE_KEY] = new_fpos.id
-            request.fiscal_position = new_fpos
+            request.update_context(**{FISCAL_POSITION_SESSION_CACHE_KEY: new_fpos.id})
 
         # If user explicitely selected a valid pricelist, we don't want to change it
         if selected_pricelist_id := request.session.get(PRICELIST_SELECTED_SESSION_CACHE_KEY):
@@ -508,7 +508,7 @@ class SaleOrder(models.Model):
 
             new_pricelist = self.pricelist_id
             request.session[PRICELIST_SESSION_CACHE_KEY] = new_pricelist.id
-            request.pricelist = new_pricelist
+            request.update_context(**{PRICELIST_SESSION_CACHE_KEY: new_pricelist.id})
 
         if self.carrier_id and "partner_shipping_id" in fnames and self._has_deliverable_products():
             # Update the delivery method on shipping address change.

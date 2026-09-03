@@ -244,7 +244,7 @@ class WebsiteSnippetFilter(models.Model):
         products = self.env["product.product"]
         visitor = self.env["ir.http"]._get_visitor_from_request()
         if visitor:
-            excluded_products = self.env.website.cart.order_line.product_id.ids
+            excluded_products = self.env.website.cart.sudo().order_line.product_id.ids
             tracked_products = (
                 self
                 .env["website.track"]
@@ -310,7 +310,7 @@ class WebsiteSnippetFilter(models.Model):
                 )
             )
             if sale_orders:
-                cart_products = self.env.website.cart.order_line.product_id
+                cart_products = self.env.website.cart.sudo().order_line.product_id
                 excluded_products = cart_products.product_tmpl_id.product_variant_ids
                 excluded_products |= current_template.product_variant_ids
                 included_products = sale_orders.order_line.product_id
@@ -337,7 +337,7 @@ class WebsiteSnippetFilter(models.Model):
             .exists()
         )
         if current_template:
-            cart_products = self.env.website.cart.order_line.product_id
+            cart_products = self.env.website.cart.sudo().order_line.product_id
             excluded_products = cart_products.product_tmpl_id.product_variant_ids
             excluded_products |= current_template.product_variant_ids
             included_products = current_template._get_website_accessory_product()
@@ -364,7 +364,7 @@ class WebsiteSnippetFilter(models.Model):
             .exists()
         )
         if current_template:
-            cart_products = self.env.website.cart.order_line.product_id
+            cart_products = self.env.website.cart.sudo().order_line.product_id
             excluded_products = cart_products.product_tmpl_id.product_variant_ids
             excluded_products |= current_template.product_variant_ids
             alternative_products = current_template._get_website_alternative_product()
