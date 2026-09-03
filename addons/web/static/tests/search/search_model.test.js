@@ -481,6 +481,7 @@ test("parsing a searchpanel field select one", async () => {
             iconClass: "oi-filled",
             id: 1,
             limit: 200,
+            loaded: true,
             parentField: "parent_id",
             rootIds: [false, 3, 5],
             type: "category",
@@ -552,6 +553,7 @@ test("parsing a searchpanel field select multi", async () => {
             iconClass: "oi-filled",
             id: 1,
             limit: 200,
+            loaded: true,
             type: "filter",
             values: [
                 [

@@ -724,20 +724,28 @@ export class SearchModel extends EventBus {
     exportState() {
         const state = { query: [], searchItems: {} };
         execute(mapToArray, this, state);
+        // force a fresh fetch of the sections on import, see _importState
+        state.searchPanelInfo = { ...this.searchPanelInfo, loaded: false };
         // only the selection is exported, values are re-fetched on import
         state.sections = [...this.sections].map(([id, section]) => {
-            const { values, groups, ...config } = section;
+            const { values, groups, _importedCheckedValueIds, _importedGroupStates, ...config } =
+                section;
             delete config.errorMsg;
             delete config.loaded;
+            delete config._imported;
             if (section.type === "filter") {
-                config.checkedValueIds = [...values.values()]
-                    .filter((value) => value.checked)
-                    .map((value) => value.id);
+                // fall back to the not-yet-applied import selection, in case
+                // this section is re-exported before its own fetch resolved
+                config.checkedValueIds = values.size
+                    ? [...values.values()].filter((value) => value.checked).map((v) => v.id)
+                    : _importedCheckedValueIds || [];
                 if (groups) {
                     config.groupStates = [...groups].map(([groupId, group]) => [
                         groupId,
                         group.state,
                     ]);
+                } else if (_importedGroupStates) {
+                    config.groupStates = [..._importedGroupStates];
                 }
             }
             return [id, config];
@@ -1543,6 +1551,7 @@ export class SearchModel extends EventBus {
     _createCategoryTree(sectionId, result) {
         const category = this.sections.get(sectionId);
         delete category.errorMsg;
+        category.values = new Map();
         let { error_msg, parent_field: parentField, values } = result;
         if (error_msg) {
             category.errorMsg = error_msg;
@@ -1578,6 +1587,7 @@ export class SearchModel extends EventBus {
         const valueIds = [false, ...values.map((val) => val.id)];
         this._ensureCategoryValue(category, valueIds);
         category.loaded = true;
+        delete category._imported;
     }
 
     /**
@@ -1647,6 +1657,7 @@ export class SearchModel extends EventBus {
         delete filter._importedCheckedValueIds;
         delete filter._importedGroupStates;
         filter.loaded = true;
+        delete filter._imported;
     }
 
     /**
@@ -1841,7 +1852,7 @@ export class SearchModel extends EventBus {
                 const result = await this.orm
                     .cache({
                         type: "disk",
-                        update: category.loaded ? "always" : "once",
+                        update: category._imported ? "once" : "always",
                         callback: (result, hasChanged) => {
                             if (!hasChanged || categoriesLoadId !== this.categoriesLoadId) {
                                 return;
@@ -1886,7 +1897,7 @@ export class SearchModel extends EventBus {
                 const result = await this.orm
                     .cache({
                         type: "disk",
-                        update: filter.loaded ? "always" : "once",
+                        update: filter._imported ? "once" : "always",
                         callback: (result, hasChanged) => {
                             if (!hasChanged || filtersLoadId !== this.filtersLoadId) {
                                 return;
@@ -2644,7 +2655,7 @@ export class SearchModel extends EventBus {
         this.sections = new Map(
             (state.sections || []).map(([id, config]) => {
                 const { checkedValueIds, groupStates, ...rest } = config;
-                const section = { ...rest, loaded: false, values: new Map() };
+                const section = { ...rest, loaded: false, _imported: true, values: new Map() };
                 if (checkedValueIds) {
                     section._importedCheckedValueIds = checkedValueIds;
                 }
