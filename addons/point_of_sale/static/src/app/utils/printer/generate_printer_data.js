@@ -361,27 +361,12 @@ export class GeneratePrinterData {
         const order = this.order;
         const override = opts.orderChange;
         let orderChange = override || order.getChanges({ cancelled: opts.cancelled });
-        let reprint = false;
 
         if (!opts.prepOrderLines) {
-            if (
-                !orderChange.addedQuantity.length &&
-                !orderChange.removedQuantity.length &&
-                !orderChange.noteUpdate.length &&
-                !orderChange.internal_note &&
-                !orderChange.general_customer_note &&
-                order.lastPrints.length
-            ) {
-                orderChange = [order.lastPrints.at(-1)];
-                reprint = true;
-            } else {
+            if (!order.uiState.isReprinting) {
                 order.pushLastPrints(orderChange);
-                orderChange = [orderChange];
             }
-        }
-
-        if (reprint && opts.orderDone) {
-            return [];
+            orderChange = [orderChange];
         }
 
         const receipts = [];
@@ -401,7 +386,7 @@ export class GeneratePrinterData {
                         ...this.commonExtraData,
                         prefix: _t("Order"),
                         order_label: order.floating_order_name || false,
-                        reprint: Boolean(reprint),
+                        reprint: order.uiState.isReprinting,
                         time: DateTime.now().toFormat("HH:mm"),
                         internal_note: getStrNotes(change.internal_note) || false,
                         general_customer_note: change.general_customer_note || false,
@@ -413,7 +398,7 @@ export class GeneratePrinterData {
                     conditions: {
                         module_pos_restaurant: this.config.module_pos_restaurant,
                     },
-                    _rawChange: reprint ? null : changes[0],
+                    _rawChange: changes[0],
                 });
             }
         }

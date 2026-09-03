@@ -2051,7 +2051,9 @@ export class PosStore extends WithLazyGetterTrap {
                     );
                 }
             }
-            order.updateLastOrderChange(opts);
+            if (!order.uiState.isReprinting) {
+                order.updateLastOrderChange(opts);
+            }
         } finally {
             this.syncingOrders.delete(order.uuid);
         }
