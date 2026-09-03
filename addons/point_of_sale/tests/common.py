@@ -5,7 +5,6 @@ from random import randint
 from datetime import date, datetime, timedelta
 from odoo import fields, tools
 from odoo.fields import Command
-from odoo.tests import Form
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -65,7 +64,10 @@ class CommonPosTest(AccountTestInvoicingCommon):
         cls.company_currency = cls.company.currency_id
         # other_currency is a currency different from the company_currency
         # sometimes company_currency is different from USD, so handle appropriately.
-        cls.other_currency = cls.setup_other_currency("EUR", rounding=0.001)
+        # Keep the standard rounding: `account`'s tax tests resolve the very
+        # same EUR record through `setup_other_currency('EUR')`, and a 0.001
+        # rounding here would stop their totals from rounding to cents.
+        cls.other_currency = cls.setup_other_currency("EUR")
 
         cls.currency_pricelist = cls.env['product.pricelist'].create({
             'name': 'Public Pricelist',
@@ -514,9 +516,8 @@ class CommonPosTest(AccountTestInvoicingCommon):
         one_week_from_now = today + timedelta(weeks=1)
         two_weeks_from_now = today + timedelta(weeks=2)
 
-        public_pricelist = env['product.pricelist'].create({
-            'name': 'Public Pricelist',
-        })
+        # The base already owns the company-currency public pricelist.
+        public_pricelist = cls.currency_pricelist
 
         env['product.pricelist'].create({
             'name': 'Dates',
@@ -590,8 +591,11 @@ class CommonPosTest(AccountTestInvoicingCommon):
                                                 'type': 'sale',
                                                 'company_id': main_company.id})
 
+        # `pos_config_foreign` runs in another currency on purpose: leave its
+        # pricelist alone, `_check_currencies` rejects the config otherwise.
+        kept_pricelists = excluded_pricelist | cls.pos_config_foreign.pricelist_id
         all_pricelists = env['product.pricelist'].search([
-            ('id', '!=', excluded_pricelist.id),
+            ('id', 'not in', kept_pricelists.ids),
             '|', ('company_id', '=', main_company.id), ('company_id', '=', False)
         ])
         all_pricelists.write(dict(currency_id=main_company.currency_id.id))
@@ -712,7 +716,11 @@ class CommonPosTest(AccountTestInvoicingCommon):
         cls.env['res.currency.rate'].create({
             'rate': 0.5,
             'currency_id': cls.other_currency.id,
-            'name': fields.Date.subtract(datetime.today().date(), days=1),
+            # Not yesterday: rates are unique per currency/company/day and this
+            # base is now shared with modules that set their own rate for the
+            # previous day (l10n_ke_edi_oscu for one). An earlier date is just
+            # as effective and leaves that day free.
+            'name': fields.Date.subtract(datetime.today().date(), days=2),
         })
         other_cash_journal = cls.env['account.journal'].create({
             'name': 'Cash Other',
@@ -856,13 +864,15 @@ class CommonPosTest(AccountTestInvoicingCommon):
         tax10 = create_tax(10, price_include_override='tax_included')
         tax21 = create_tax(21, price_include_override='tax_included')
 
-
+        # Built with `write` rather than a `Form`: this base is shared with the
+        # localization tests, and a Form enforces the extra required tax fields
+        # some charts of accounts add (l10n_co_edi_type, l10n_gt_edi_short_name).
         tax_group_7_10 = tax7.copy()
-        with Form(tax_group_7_10) as tax:
-            tax.name = 'Tax 7+10%'
-            tax.amount_type = 'group'
-            tax.children_tax_ids.add(tax7)
-            tax.children_tax_ids.add(tax10)
+        tax_group_7_10.write({
+            'name': 'Tax 7+10%',
+            'amount_type': 'group',
+            'children_tax_ids': [Command.set((tax7 | tax10).ids)],
+        })
 
         return {
             'tax7': tax7,

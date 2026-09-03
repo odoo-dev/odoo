@@ -176,10 +176,12 @@ class TestPosStockProductsWithTax(TestPosStockCommon):
             []
         )
 
+        # `pos_user` is already taken by the common setup; this is a second,
+        # branch-scoped user.
         pos_user = self.env['res.users'].create({
             'name': 'Joe Odoo',
-            'login': 'pos_user',
-            'password': 'pos_user',
+            'login': 'pos_user_branch',
+            'password': 'pos_user_branch',
             'group_ids': [
                 (4, self.env.ref('base.group_user').id),
                 (4, self.env.ref('point_of_sale.group_pos_user').id),

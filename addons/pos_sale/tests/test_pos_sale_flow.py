@@ -809,7 +809,9 @@ class TestPoSSale(PoSSaleSyncCommon, TestPointOfSaleHttpCommon):
         })
 
         tax = self.env['account.tax'].create({
-            'name': 'Tax 10%',
+            # 'Tax 10%' is already created by the common setup and tax names
+            # are unique per company.
+            'name': 'Tax 10% (pos_sale)',
             'amount': 10,
             'amount_type': 'percent',
             'type_tax_use': 'sale',
