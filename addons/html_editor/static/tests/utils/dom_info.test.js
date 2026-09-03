@@ -1,4 +1,5 @@
 import {
+    getCachedStyleProperty,
     getDeepestEditablePosition,
     getDeepestPosition,
     isEmptyBlock,
@@ -650,5 +651,69 @@ describe("isBlock on display none elements", () => {
         const [span] = insertTestHtml(`<span style="display: none"></span>`);
         const result = isBlock(span);
         expect(result).toBe(false);
+    });
+});
+
+describe("getCachedStyleProperty", () => {
+    test("should return correct computed style value for element node", () => {
+        const [spanElement] = insertTestHtml(`<span style="color: red;">text</span>`);
+        const computedColor = getCachedStyleProperty(spanElement, "color");
+        expect(computedColor).toBe("rgb(255, 0, 0)");
+    });
+
+    test("should update cached computed style property when inline style is mutated", () => {
+        const [spanElement] = insertTestHtml(`<span style="color: red;">text</span>`);
+
+        const initialColor = getCachedStyleProperty(spanElement, "color");
+        expect(initialColor).toBe("rgb(255, 0, 0)");
+
+        spanElement.style.color = "blue";
+
+        const liveColor = getComputedStyle(spanElement).color;
+        const updatedColor = getCachedStyleProperty(spanElement, "color");
+
+        expect(updatedColor).toBe(liveColor);
+        expect(updatedColor).toBe("rgb(0, 0, 255)");
+    });
+
+    test("should reflect updated computed style on child element when parent element style is mutated", () => {
+        const [parentElement] = insertTestHtml(
+            `<div style="color: blue;"><span style="color: green;">child text</span></div>`
+        );
+        const childElement = parentElement.firstChild;
+
+        const initialChildColor = getCachedStyleProperty(childElement, "color");
+        const initialParentColor = getCachedStyleProperty(parentElement, "color");
+        expect(initialChildColor).toBe("rgb(0, 128, 0)");
+        expect(initialParentColor).toBe("rgb(0, 0, 255)");
+
+        parentElement.style.color = "green";
+
+        const updatedParentColor = getCachedStyleProperty(parentElement, "color");
+        expect(updatedParentColor).toBe("rgb(0, 128, 0)");
+    });
+
+    test("should support both camelCase and kebab-case style property names", () => {
+        const [spanElement] = insertTestHtml(
+            `<span style="font-size: 16px; text-decoration-line: underline;">text</span>`
+        );
+        const camelCaseFontSize = getCachedStyleProperty(spanElement, "fontSize");
+        const kebabCaseFontSize = getCachedStyleProperty(spanElement, "font-size");
+        const textDecorationLine = getCachedStyleProperty(spanElement, "text-decoration-line");
+
+        expect(camelCaseFontSize).toBe("16px");
+        expect(kebabCaseFontSize).toBe("16px");
+        expect(textDecorationLine).toBe("underline");
+    });
+
+    test("should return empty string for null, undefined, or non-element nodes", () => {
+        const [spanElement] = insertTestHtml(`<span>text content</span>`);
+        const textNode = spanElement.firstChild;
+        const commentNode = document.createComment("comment");
+
+        expect(getCachedStyleProperty(null, "color")).toBe("");
+        expect(getCachedStyleProperty(undefined, "color")).toBe("");
+        expect(getCachedStyleProperty(textNode, "color")).toBe("");
+        expect(getCachedStyleProperty(commentNode, "color")).toBe("");
     });
 });

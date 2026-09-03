@@ -1,6 +1,5 @@
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { isColorGradient } from "@web/core/utils/colors";
-import { isElement } from "./dom_info";
 
 export const COLOR_PALETTE_COMPATIBILITY_COLOR_NAMES = [
     "primary",
@@ -99,7 +98,7 @@ export const COLOR_COMBINATION_CLASSES_REGEX = /\bo_cc[0-9]+\b/g;
  * @returns {boolean}
  */
 export function hasTextColorClass(element, mode) {
-    if (!element || !isElement(element)) {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
         return false;
     }
     const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;

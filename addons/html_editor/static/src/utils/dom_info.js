@@ -1,7 +1,35 @@
 import { baseContainerGlobalSelector } from "./base_container";
 import { closestBlock, isBlock } from "./blocks";
+import { BG_CLASSES_REGEX, COLOR_COMBINATION_CLASSES_REGEX, TEXT_CLASSES_REGEX } from "./color";
 import { childNodes, closestElement, firstLeaf, lastLeaf } from "./dom_traversal";
 import { childNodeIndex, DIRECTIONS, nodeSize } from "./position";
+
+const styleCache = new WeakMap();
+
+/**
+ * Returns the computed style property of a node, caching the underlying
+ * CSSStyleDeclaration object to prevent synchronous layout recalculations
+ * on subsequent calls for the same node.
+ *
+ * @param {Element} node
+ * @param {string} property
+ * @returns {string}
+ */
+export function getCachedStyleProperty(node, property) {
+    if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return "";
+    }
+
+    let computedStyle = styleCache.get(node);
+    if (!computedStyle) {
+        computedStyle = (node.ownerDocument.defaultView ?? window).getComputedStyle(node);
+        styleCache.set(node, computedStyle);
+    }
+
+    return property.includes("-")
+        ? computedStyle.getPropertyValue(property)
+        : computedStyle[property];
+}
 
 export function isEmpty(el) {
     if (isProtecting(el) || isProtected(el)) {
@@ -55,16 +83,17 @@ export function isBold(node) {
     } else if (element.closest("h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6")) {
         regularFontWeightVariable = "--headings-font-weight";
     }
-    const style = getComputedStyle(element);
-    const fontWeight = +style.fontWeight;
-    const regularFontWeight = +style.getPropertyValue(regularFontWeightVariable) || 500;
+
+    const fontWeight = +getCachedStyleProperty(element, "fontWeight");
+    const regularFontWeight = +getCachedStyleProperty(element, regularFontWeightVariable) || 500;
+
     const referenceElement = closestElement(
         node,
-        (el) => isBlock(el) || +getComputedStyle(el).fontWeight !== fontWeight
+        (el) => isBlock(el) || +getCachedStyleProperty(el, "fontWeight") !== fontWeight
     );
     return (
         fontWeight > regularFontWeight ||
-        fontWeight > +getComputedStyle(referenceElement).fontWeight
+        fontWeight > +getCachedStyleProperty(referenceElement, "fontWeight")
     );
 }
 
@@ -75,7 +104,7 @@ export function isBold(node) {
  * @returns {boolean}
  */
 export function isItalic(node) {
-    return getComputedStyle(closestElement(node)).fontStyle === "italic";
+    return getCachedStyleProperty(closestElement(node), "fontStyle") === "italic";
 }
 
 /**
@@ -87,7 +116,7 @@ export function isItalic(node) {
 export function isUnderline(node) {
     let parent = closestElement(node);
     while (parent) {
-        if (getComputedStyle(parent).textDecorationLine.includes("underline")) {
+        if (getCachedStyleProperty(parent, "textDecorationLine").includes("underline")) {
             return true;
         }
         parent = parent.parentElement;
@@ -106,7 +135,7 @@ export function isStrikeThrough(node) {
     while (parent) {
         if (
             !parent.classList.contains("o_checked") &&
-            getComputedStyle(parent).textDecorationLine.includes("line-through")
+            getCachedStyleProperty(parent, "textDecorationLine").includes("line-through")
         ) {
             return true;
         }
@@ -966,15 +995,15 @@ function hasClassesSubset(node, node2) {
 /**
  * Checks if all styles in node are present in node2 (subset check)
  */
-function hasStylesSubset(node, node2) {
-    const getNodeStyles = (n) =>
-        (n || "")
-            .split(";")
-            .map((s) => s.trim())
-            .filter(Boolean);
-    const [nodeStyles, node2Styles] = [node, node2].map(getNodeStyles);
-    return nodeStyles.every((style) => node2Styles.includes(style));
-}
+// function hasStylesSubset(node, node2) {
+//     const getNodeStyles = (n) =>
+//         (n || "")
+//             .split(";")
+//             .map((s) => s.trim())
+//             .filter(Boolean);
+//     const [nodeStyles, node2Styles] = [node, node2].map(getNodeStyles);
+//     return nodeStyles.every((style) => node2Styles.includes(style));
+// }
 
 /**
  * Checks if a node is redundant based on its closest element with same tag.
@@ -991,44 +1020,81 @@ function hasStylesSubset(node, node2) {
  * @returns {boolean} True if the node is redundant, false otherwise.
  */
 export function isRedundantElement(node) {
-    // Check for valid element node and existence of a parent.
     if (!node || node.nodeType !== Node.ELEMENT_NODE || !node.parentElement) {
         return false;
     }
 
-    // Find the closest element with the same tag name.
-    const closestEl = closestElement(node.parentElement, node.tagName);
-    if (!closestEl) {
+    // Case 1: Semantic formatting tags (e.g. <b>, <strong>) without attributes whose
+    // visual formatting is already inherited from their parent.
+    const checkIfParentHasFormat = {
+        B: isBold,
+        STRONG: isBold,
+        I: isItalic,
+        EM: isItalic,
+        U: isUnderline,
+        S: isStrikeThrough,
+        STRIKE: isStrikeThrough,
+    };
+    if (checkIfParentHasFormat[node.tagName] && node.attributes.length === 0) {
+        return checkIfParentHasFormat[node.tagName](node.parentElement);
+    }
+
+    // Case 2 & Case 3 apply only to single-attribute generic style tags (SPAN, FONT)
+    const tagName = node.tagName;
+    if ((tagName !== "SPAN" && tagName !== "FONT") || node.attributes.length !== 1) {
         return false;
     }
 
-    // Check each attribute from node.
-    for (const { name: attrName, value: nodeAttrVal } of node.attributes) {
-        const closestElAttrVal = closestEl.getAttribute(attrName);
-
-        if (!closestElAttrVal) {
-            return false; // Attribute missing in closest element.
-        }
-
-        if (attrName === "class") {
-            // All classes on the node must exist in closest element.
-            if (!hasClassesSubset(nodeAttrVal, closestElAttrVal)) {
-                return false;
-            }
-        } else if (attrName === "style") {
-            // All inline styles on the node must exist in closest element.
-            if (!hasStylesSubset(nodeAttrVal, closestElAttrVal)) {
-                return false;
-            }
-        } else {
-            // For other attributes, values must match exactly.
-            if (nodeAttrVal !== closestElAttrVal) {
-                return false;
-            }
-        }
+    // Case 2: Generic style tags (SPAN, FONT) with only a style attribute whose
+    // inline styles match the parent's computed styles.
+    if (node.hasAttribute("style")) {
+        return [...node.style].every(
+            (styleKey) =>
+                getCachedStyleProperty(node, styleKey) ===
+                getCachedStyleProperty(node.parentElement, styleKey)
+        );
     }
 
-    return true;
+    // Case 3: Generic style tags (SPAN, FONT) with only color classes whose
+    // classes are already provided by an ancestor up to closestBlock.
+    if (node.hasAttribute("class")) {
+        const COLOR_CLASS_REGEXES = [
+            TEXT_CLASSES_REGEX,
+            BG_CLASSES_REGEX,
+            COLOR_COMBINATION_CLASSES_REGEX,
+        ];
+        const nodeClasses = [...node.classList];
+        if (!nodeClasses.every((cls) => COLOR_CLASS_REGEXES.some((regex) => regex.test(cls)))) {
+            return false;
+        }
+        const blockBoundary = closestBlock(node);
+        let ancestorElement = node.parentElement;
+        while (ancestorElement && ancestorElement !== blockBoundary) {
+            const ancestorTag = ancestorElement.tagName;
+            if (ancestorTag === "SPAN" || ancestorTag === "FONT") {
+                const ancestorClasses = [...ancestorElement.classList];
+                // Same color type present on ancestor with a different value = node overrides it.
+                const isColorOverriddenByAncestor = nodeClasses.some((cls) => {
+                    const sameTypeRegex = COLOR_CLASS_REGEXES.find((regex) => regex.test(cls));
+                    return ancestorClasses.some(
+                        (ancestorCls) => ancestorCls !== cls && sameTypeRegex.test(ancestorCls)
+                    );
+                });
+                if (isColorOverriddenByAncestor) {
+                    return false;
+                } else if (
+                    hasClassesSubset(
+                        node.getAttribute("class"),
+                        ancestorElement.getAttribute("class")
+                    )
+                ) {
+                    return true;
+                }
+            }
+            ancestorElement = ancestorElement.parentElement;
+        }
+    }
+    return false;
 }
 
 /**
