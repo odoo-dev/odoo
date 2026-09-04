@@ -37,6 +37,51 @@ export class Thread extends Record {
             () => this.composerDisabledonUpdate(),
             { immediate: true, initialRun: false }
         );
+        this.onChange(
+            () => [this.close_chat_window],
+            function onChangeCloseChatWindow(close_chat_window) {
+                if (close_chat_window) {
+                    this.close_chat_window = undefined;
+                    this.closeChatWindow();
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this.isFocusedByThread],
+            function onChangeIsFocusedByThread(isFocusedByThread) {
+                if (isFocusedByThread) {
+                    this.isFocusedCounter++;
+                } else {
+                    this.isFocusedCounter--;
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this.isFocusedCounter],
+            function onChangeIsFocusedCounter(isFocusedCounter) {
+                if (isFocusedCounter < 0) {
+                    this.isFocusedCounter = 0;
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this.isLoaded],
+            function onChangeIsLoaded(isLoaded) {
+                if (isLoaded) {
+                    this._resolveIsLoaded();
+                } else {
+                    const { promise, resolve } = Promise.withResolvers();
+                    this.isLoadedPromise = promise;
+                    // chain the current resolve before overwriting it
+                    this.isLoadedPromise.then(this._resolveIsLoaded);
+                    this._resolveIsLoaded = resolve;
+                }
+            },
+            { initialRun: false }
+        );
     }
 
     /**
@@ -107,15 +152,8 @@ export class Thread extends Record {
         },
     });
     can_react = true;
-    close_chat_window = fields.Attr(undefined, {
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            if (this.close_chat_window) {
-                this.close_chat_window = undefined;
-                this.closeChatWindow();
-            }
-        },
-    });
+    /** @type {boolean|undefined} */
+    close_chat_window;
     composer = fields.One("Composer", {
         compute: () => ({}),
         inverse: "thread",
@@ -150,38 +188,11 @@ export class Thread extends Record {
     get isFocused() {
         return this.isFocusedCounter !== 0;
     }
-    isFocusedByThread = fields.Attr(false, {
-        onUpdate() {
-            if (this.isFocusedByThread) {
-                this.isFocusedCounter++;
-            } else {
-                this.isFocusedCounter--;
-            }
-        },
-    });
-    isFocusedCounter = fields.Attr(0, {
-        onUpdate() {
-            if (this.isFocusedCounter < 0) {
-                this.isFocusedCounter = 0;
-            }
-        },
-    });
+    isFocusedByThread = false;
+    isFocusedCounter = 0;
     isLoadingAttachments = false;
     isLoadedPromise = new Promise((resolve) => (this._resolveIsLoaded = resolve));
-    isLoaded = fields.Attr(false, {
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            if (this.isLoaded) {
-                this._resolveIsLoaded();
-            } else {
-                const { promise, resolve } = Promise.withResolvers();
-                this.isLoadedPromise = promise;
-                // chain the current resolve before overwriting it
-                this.isLoadedPromise.then(this._resolveIsLoaded);
-                this._resolveIsLoaded = resolve;
-            }
-        },
-    });
+    isLoaded = false;
     /** @type {Boolean|undefined} */
     has_mail_thread;
     message_main_attachment_id = fields.One("ir.attachment");

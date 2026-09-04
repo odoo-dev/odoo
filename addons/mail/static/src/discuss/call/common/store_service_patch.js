@@ -1,5 +1,6 @@
 import { fields } from "@mail/model/export";
 import { Store } from "@mail/core/common/store_service";
+import { computed } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
 
 import { patch } from "@web/core/utils/patch";
@@ -37,10 +38,12 @@ const StorePatch = {
                 return {};
             },
         });
-        this.ringingChannels = fields.Many("discuss.channel", {
-            /** @this {import("models").Store} */
-            onUpdate() {
-                if (this.ringingChannels.length > 0) {
+        this.ringingChannels = fields.Many("discuss.channel");
+        const hasRingingChannels = computed(() => this.ringingChannels.length > 0);
+        this.onChange(
+            () => [hasRingingChannels()],
+            function onChangeRingingChannels(hasRingingChannels) {
+                if (hasRingingChannels) {
                     this.env.services["mail.sound_effects"].play("call-invitation", {
                         loop: true,
                     });
@@ -48,21 +51,26 @@ const StorePatch = {
                     this.env.services["mail.sound_effects"].stop("call-invitation");
                 }
             },
-        });
+            { initialRun: false }
+        );
         this.nextTalkingTime = 1;
         this.fullscreenChannel = fields.One("discuss.channel");
         this._hasFullscreenUrl = fields.Attr(false, {
             compute() {
                 return this.discuss?.thread?.channel?.eq(this.fullscreenChannel);
             },
-            onUpdate() {
+            eager: true,
+        });
+        this.onChange(
+            () => [this._hasFullscreenUrl],
+            function onChangeHasFullscreenUrl() {
                 if (!this.discuss?.hasRestoredThread) {
                     return;
                 }
                 this._hasFullscreenUrlOnUpdate();
             },
-            eager: true,
-        });
+            { initialRun: false }
+        );
         /**
          * Shareable link of the full-screen call, mirrored in the address bar while its meeting
          * view is open (and `undefined` otherwise). Depending on both the call and the full-screen
@@ -82,12 +90,16 @@ const StorePatch = {
                 }
                 return this.rtc.isFullscreen ? this.rtc.localChannel?.invitationLink : undefined;
             },
-            onUpdate() {
-                callShareUrl = this._shareUrl;
-                router.replaceState({ fullscreen: this._hasFullscreenUrl ? true : undefined });
-            },
             eager: true,
         });
+        this.onChange(
+            () => [this._shareUrl],
+            function onChangeShareUrl(shareUrl) {
+                callShareUrl = shareUrl;
+                router.replaceState({ fullscreen: this._hasFullscreenUrl ? true : undefined });
+            },
+            { initialRun: false }
+        );
         this.meetingViewOpened = false;
     },
     _hasFullscreenUrlOnUpdate() {

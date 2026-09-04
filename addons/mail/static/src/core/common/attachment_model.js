@@ -1,5 +1,6 @@
 import { fields, Record } from "@mail/model/export";
 import { assignDefined } from "@mail/utils/common/misc";
+import { computed } from "@odoo/owl";
 import { generatePdfThumbnail } from "@web/core/utils/pdfjs";
 
 import { FileModelMixin } from "@web/core/file_viewer/file_model";
@@ -20,6 +21,24 @@ export class Attachment extends FileModelMixin(Record) {
             },
             { immediate: true }
         );
+        const shouldSetThumbnail = computed(() =>
+            Boolean(
+                (this.isPdf || this.isVideo) &&
+                    !this.has_thumbnail &&
+                    (this.ownership_token ||
+                        // If related to a record, must have write access to it
+                        ((!this.thread || this.thread.hasWriteAccess) &&
+                            this.store.self_user?.share === false))
+            )
+        );
+        this.onChange(
+            () => [shouldSetThumbnail()],
+            function onChangeShouldSetThumbnail(shouldSetThumbnail) {
+                if (shouldSetThumbnail) {
+                    this.setThumbnail();
+                }
+            }
+        );
     }
 
     composer = fields.One("Composer", { inverse: "attachments" });
@@ -37,20 +56,8 @@ export class Attachment extends FileModelMixin(Record) {
     /** @type {string} */
     ownership_token;
     create_date = fields.Datetime();
-    has_thumbnail = fields.Attr(undefined, {
-        onUpdate() {
-            if (
-                (this.isPdf || this.isVideo) &&
-                !this.has_thumbnail &&
-                (this.ownership_token ||
-                    // If related to a record, must have write access to it
-                    ((!this.thread || this.thread.hasWriteAccess) &&
-                        this.store.self_user?.share === false))
-            ) {
-                this.setThumbnail();
-            }
-        },
-    });
+    /** @type {boolean} */
+    has_thumbnail;
     get thumbnailUrl() {
         const params = assignDefined(
             {},

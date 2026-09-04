@@ -43,8 +43,11 @@ const discussChannelPatch = {
                         !this.channel.livechat_end_dt
                 );
             },
-            onUpdate() {
-                const shouldToggle = this._toggleChatbot;
+            eager: true,
+        });
+        this.onChange(
+            () => [this._toggleChatbot],
+            function onChangeToggleChatbot(shouldToggle) {
                 this.isLoadedPromise.then(() => {
                     if (shouldToggle) {
                         this.channel.chatbot.start();
@@ -53,8 +56,8 @@ const discussChannelPatch = {
                     }
                 });
             },
-            eager: true,
-        });
+            { initialRun: false }
+        );
     },
     get avatarUrl() {
         if (this.channel_type !== "livechat") {

@@ -6,6 +6,25 @@ import { router } from "@web/core/browser/router";
 const SIDEBAR_WIDTH = 400;
 
 export class DiscussApp extends Record {
+    setup() {
+        super.setup(...arguments);
+        this.onChange(
+            () => [this.thread],
+            function onChangeThread(thread) {
+                this.lastActiveId = this.store["mail.thread"].localIdToActiveId(thread?.localId);
+                if (thread) {
+                    const menu = this.store.messagingMenu;
+                    if (this.sidebarState.activeTab?.notEq(menu.bookmarkTab)) {
+                        const fallback = this.store.inPublicPage ? menu.channelTab : menu.chatTab;
+                        this.sidebarState.activeTab =
+                            thread.channel?.primaryMessagingMenuTab ?? fallback;
+                    }
+                }
+            },
+            { initialRun: false }
+        );
+    }
+
     static singleton = true;
 
     INSPECTOR_WIDTH = 300;
@@ -20,21 +39,7 @@ export class DiscussApp extends Record {
     isActive = false;
     isMemberPanelOpenByDefault = this.localStorage(true);
     lastActiveId = this.localStorage(undefined);
-    thread = fields.One("mail.thread", {
-        inverse: "discussAppAsThread",
-        /** @this {import("models").DiscussApp} */
-        onUpdate() {
-            this.lastActiveId = this.store["mail.thread"].localIdToActiveId(this.thread?.localId);
-            if (this.thread) {
-                const menu = this.store.messagingMenu;
-                if (this.sidebarState.activeTab?.notEq(menu.bookmarkTab)) {
-                    const fallback = this.store.inPublicPage ? menu.channelTab : menu.chatTab;
-                    this.sidebarState.activeTab =
-                        this.thread.channel?.primaryMessagingMenuTab ?? fallback;
-                }
-            }
-        },
-    });
+    thread = fields.One("mail.thread", { inverse: "discussAppAsThread" });
     hasRestoredThread = false;
     sidebarWidth = this.localStorage(SIDEBAR_WIDTH);
 

@@ -13,20 +13,20 @@ const StorePatch = {
             inverse: "storeAsActiveVisitorLivechats",
         });
         expirableStorage.onChange(GUEST_TOKEN_STORAGE_KEY, (value) => (this.guest_token = value));
-        this.guest_token = fields.Attr(expirableStorage.getItem(GUEST_TOKEN_STORAGE_KEY), {
-            onUpdate() {
-                if (this.guest_token) {
-                    expirableStorage.setItem(GUEST_TOKEN_STORAGE_KEY, this.guest_token);
-                    this.store.env.services.bus_service.addChannel(
-                        `mail.guest_${this.guest_token}`
-                    );
+        this.guest_token = expirableStorage.getItem(GUEST_TOKEN_STORAGE_KEY);
+        this.onChange(
+            () => [this.guest_token],
+            function onChangeGuestToken(guestToken) {
+                if (guestToken) {
+                    expirableStorage.setItem(GUEST_TOKEN_STORAGE_KEY, guestToken);
+                    this.store.env.services.bus_service.addChannel(`mail.guest_${guestToken}`);
                     return;
                 }
                 expirableStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
-                this.store.env.services.bus_service.deleteChannel(`mail.guest_${this.guest_token}`);
+                this.store.env.services.bus_service.deleteChannel(`mail.guest_${guestToken}`);
             },
-            eager: true,
-        });
+            { initialRun: false }
+        );
         this.livechat_rule = fields.One("im_livechat.channel.rule");
         this.livechat_available = false;
     },

@@ -38,6 +38,37 @@ export class DiscussChannel extends Record {
                 }
             }
         );
+        this.onChange(
+            () => [this.memberBusSubscription],
+            function onChangeMemberBusSubscription(memberBusSubscription) {
+                if (memberBusSubscription !== "member_before_start") {
+                    this.store.updateBusSubscription();
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this.isDisplayed],
+            function onChangeIsDisplayed(isDisplayed) {
+                if (!this.self_member_id || isDisplayed) {
+                    return;
+                }
+                this.self_member_id.new_message_separator_ui =
+                    this.self_member_id.new_message_separator;
+                this.markedAsUnread = false;
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this.open_chat_window],
+            function onChangeOpenChatWindow(openChatWindow) {
+                if (openChatWindow) {
+                    this.open_chat_window = undefined;
+                    this.openChatWindow({ focus: true, highlight: this.chatWindow?.isOpen });
+                }
+            },
+            { initialRun: false }
+        );
     }
 
     /**
@@ -379,16 +410,6 @@ export class DiscussChannel extends Record {
         compute() {
             return this.computeIsDisplayed();
         },
-        onUpdate() {
-            if (!this.self_member_id) {
-                return;
-            }
-            if (!this.isDisplayed) {
-                this.self_member_id.new_message_separator_ui =
-                    this.self_member_id.new_message_separator;
-                this.markedAsUnread = false;
-            }
-        },
     });
     lastMessageSeenByAllId = this.computed(() => {
         if (!this.hasSeenFeature) {
@@ -468,15 +489,7 @@ export class DiscussChannel extends Record {
         },
     });
     /** @type {true|undefined} */
-    open_chat_window = fields.Attr(undefined, {
-        /** @this {import("models").Thread} */
-        onUpdate() {
-            if (this.open_chat_window) {
-                this.open_chat_window = undefined;
-                this.openChatWindow({ focus: true, highlight: this.chatWindow?.isOpen });
-            }
-        },
-    });
+    open_chat_window;
     parent_channel_id = fields.One("discuss.channel", {
         inverse: "sub_channel_ids",
         onDelete() {
@@ -549,11 +562,6 @@ export class DiscussChannel extends Record {
             return this.self_member_id.memberSince >= this.store.env.services.bus_service.startedAt
                 ? "member_after_start"
                 : "member_before_start";
-        },
-        onUpdate() {
-            if (this.memberBusSubscription !== "member_before_start") {
-                this.store.updateBusSubscription();
-            }
         },
     });
 

@@ -2,6 +2,25 @@ import { fields } from "@mail/model/misc";
 import { Record } from "@mail/model/record";
 
 export class MessagingMenuUIState extends Record {
+    setup() {
+        super.setup(...arguments);
+        this.onChange(
+            () => [this.activeTab],
+            function onChangeActiveTab(activeTab) {
+                // No tab to show while the menu is still being filled up.
+                this.selectedFilter = activeTab?.defaultFilter;
+            },
+            { initialRun: false }
+        );
+        this.onChange(
+            () => [this._initialLoadTrigger],
+            function onChangeInitialLoadTrigger() {
+                this._ensureTabOrFilterInitialLoad();
+            },
+            { initialRun: false }
+        );
+    }
+
     static id = "id";
 
     activeTab = fields.One("MessagingMenuTab", {
@@ -12,10 +31,6 @@ export class MessagingMenuUIState extends Record {
             return this.store.messagingMenu?.sortedVisibleTabs[0];
         },
         eager: true,
-        onUpdate() {
-            // No tab to show while the menu is still being filled up.
-            this.selectedFilter = this.activeTab?.defaultFilter;
-        },
     });
     /** @type {?import("@mail/core/public_web/messaging_menu/messaging_menu_tab_model").MessagingMenuTabFilter} */
     selectedFilter;
@@ -33,17 +48,14 @@ export class MessagingMenuUIState extends Record {
             return `${this.activeTab.id}::${this.selectedFilter?.id ?? ""}`;
         },
         eager: true,
-        onUpdate() {
-            this._ensureTabOrFilterInitialLoad();
-        },
     });
 
     /**
      * Handles an explicit tab selection by the user.
      *
      * Unlike setting `activeTab` programmatically, selecting a tab clears the selected
-     * thread. This is separate from `activeTab.onUpdate` to avoid clearing threads during
-     * programmatic thread-to-tab synchronization.
+     * thread. This is separate from the `activeTab` observer to avoid clearing threads
+     * during programmatic thread-to-tab synchronization.
      *
      * @param {import("models").MessagingMenuTab} tab
      */
