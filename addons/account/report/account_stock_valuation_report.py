@@ -75,8 +75,7 @@ class StockValuationReport(models.AbstractModel):
         for vals in stock_valuation_account_vals:
             account_ids.add(vals['account_id'])
             stock_variation['value'] += vals['balance']
-            lines_by_account_id[vals['account_id']]['debit'] += vals['balance'] if vals['balance'] > 0 else 0
-            lines_by_account_id[vals['account_id']]['credit'] -= vals['balance'] if vals['balance'] < 0 else 0
+            lines_by_account_id[vals['account_id']] += vals['balance']
         stock_variation['lines'] = [{
             'account_id': account_id,
             'debit': balance if balance > 0 else 0,
