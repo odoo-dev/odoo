@@ -462,6 +462,20 @@ class AccountEdiCii(models.AbstractModel):
             },
         }
 
+    def _cii_get_global_gln(self, vals, partner, prefer_invoice_shipping_partner=False):
+        if 'global_location_number' not in partner._fields:
+            # global_location_number module isn't installed
+            return None
+        if prefer_invoice_shipping_partner and vals['partner_shipping'] in (partner | partner.child_ids):
+            partner_shipping = vals['partner_shipping']
+        else:
+            partner_shipping = partner.browse(partner.address_get(['delivery']).get('delivery'))
+        # Restricted to Germany: MARKANT, the validator requiring ram:GlobalID, is mainly
+        # German, and we don't want to change behavior for other countries without reason.
+        if partner_shipping.country_code != 'DE':
+            return None
+        return partner_shipping.global_location_number
+
     def _cii_get_seller_trade_party_node(self, vals):
         invoice = vals['invoice']
         supplier = vals['supplier']
@@ -474,6 +488,7 @@ class AccountEdiCii(models.AbstractModel):
         supplier_vat = invoice.fiscal_position_id.foreign_vat or commercial_partner.vat
         return self._cii_get_partner_trade_party_node(vals, {
             'gln': False,
+            'global_gln': self._cii_get_global_gln(vals, supplier),
             'name': supplier.name,
             'partner_specified_legal_organization': legal_organization_val,
             'partner_specified_legal_organization_scheme': scheme_id,
@@ -500,6 +515,10 @@ class AccountEdiCii(models.AbstractModel):
                 'schemeID': '0088',
                 '_text': partner_values['gln'],
             } if partner_values['gln'] else None,
+            'ram:GlobalID': {
+                'schemeID': '0088',
+                '_text': partner_values['global_gln'],
+            } if partner_values.get('global_gln') else None,
             'ram:Name': {'_text': partner_values['name']},
             'ram:SpecifiedLegalOrganization': {
                 'ram:ID': {
@@ -555,6 +574,7 @@ class AccountEdiCii(models.AbstractModel):
             legal_organization_val = legal_organization_val[:9]
         return self._cii_get_partner_trade_party_node(vals, {
             'gln': False,
+            'global_gln': self._cii_get_global_gln(vals, customer, prefer_invoice_shipping_partner=True),
             'name': customer.name,
             'partner_specified_legal_organization': legal_organization_val,
             'partner_specified_legal_organization_scheme': scheme_id,
@@ -588,6 +608,7 @@ class AccountEdiCii(models.AbstractModel):
         partner_shipping = vals['partner_shipping']
         return self._cii_get_partner_trade_party_node(vals, {
             'gln': 'global_location_number' in invoice.partner_shipping_id._fields and invoice.partner_shipping_id.global_location_number,
+            'global_gln': self._cii_get_global_gln(vals, invoice.partner_shipping_id),
             'name': partner_shipping.name,
             'partner_specified_legal_organization': False,
             'partner_specified_legal_organization_scheme': None,
