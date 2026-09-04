@@ -1,7 +1,7 @@
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { AUTOCLOSE_DELAY } from "@html_editor/main/media/media_dialog/upload_progress_toast/upload_service";
+import { AUTOCLOSE_DELAY } from "@html_editor/main/media/media_dialog/upload_progress_toast/upload_plugin";
 
 export const unsplashService = {
     dependencies: ["upload"],

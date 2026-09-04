@@ -1,5 +1,6 @@
 import { animationFrame, expect, test } from "@odoo/hoot";
 import { delay, click, queryOne } from "@odoo/hoot-dom";
+import { UploadPlugin } from "@html_editor/main/media/media_dialog/upload_progress_toast/upload_plugin";
 import {
     defineModels,
     fields,
@@ -38,7 +39,7 @@ test("should be able to cancel a file upload", async () => {
             </form>`,
     });
 
-    const fileUploadService = await getService("upload");
+    const fileUploadService = getService(UploadPlugin);
     let xhr;
     const waitForRequest = new Promise((res) => {
         patchWithCleanup(XMLHttpRequest.prototype, {
@@ -100,7 +101,7 @@ test("should be able to cancel a file when uploading multiple files", async () =
             </form>`,
     });
 
-    const fileUploadService = await getService("upload");
+    const fileUploadService = getService(UploadPlugin);
     const files = [
         new File(["test1"], "fake_file1.txt", { type: "text/plain", size: 100 }),
         new File(["test2"], "fake_file2.txt", { type: "text/plain", size: 200 }),

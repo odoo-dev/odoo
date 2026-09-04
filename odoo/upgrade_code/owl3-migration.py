@@ -1118,6 +1118,7 @@ SERVICES_MAPPING = {
     "currency": ['CurrencyPlugin', '@web/webclient/currency_plugin'],
     "discuss.upgrade": ['DiscussUpgradePlugin', '@mail/core/common/upgrade/upgrade_plugin'],
     "effect": ['EffectPlugin', '@web/core/effects/effect_plugin'],
+    "file_upload": ['FileUploadPlugin', '@web/core/file_upload/file_upload_plugin'],
     "frequent_emoji": ['FrequentEmojiPlugin', '@web/core/emoji_picker/frequent_emoji_plugin'],
     "hotkey": ['HotkeyPlugin', '@web/core/hotkeys/hotkey_plugin'],
     "notification": ['NotificationPlugin', '@web/core/notifications/notification_plugin'],
@@ -1128,6 +1129,10 @@ SERVICES_MAPPING = {
     "sortable": ['SortablePlugin', '@web/core/util/sortable_plugin'],
     "simple_notification": ['SimpleNotificationPlugin', '@bus/simple_notification_plugin'],
     "ui": ['UIPlugin', '@web/core/ui/ui_plugin'],
+    "upload": [
+        'UploadPlugin',
+        '@html_editor/main/media/media_dialog/upload_progress_toast/upload_plugin',
+    ],
     "worker_service": ['WorkerPlugin', '@bus/services/worker_plugin'],
 }
 
