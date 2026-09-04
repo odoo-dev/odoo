@@ -1,3 +1,4 @@
+<<<<<<< 0164b2ba0eabfba25b563c130b4ed10c0848342a
 import { getSectionRecords } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 import { onWillStart, onWillUpdateProps } from "@odoo/owl";
 import {
@@ -174,12 +175,35 @@ patch(SaleOrderLineOne2Many.prototype, {
 patch(SaleOrderLineListRenderer, {
     rowsTemplate: "sale_management.ListRenderer.Rows",
 });
+||||||| 7bbce824a1897a912441a7f0511ffec505cbe1d5
+import { getSectionRecords } from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
+import { SaleOrderLineListRenderer } from '@sale/js/sale_order_line_field/sale_order_line_field';
+import { makeContext } from '@web/core/context';
+import { x2ManyCommands } from '@web/core/orm_service';
+import { patch } from '@web/core/utils/patch';
+=======
+import { getSectionRecords } from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
+import { SaleOrderLineListRenderer } from '@sale/js/sale_order_line_field/sale_order_line_field';
+import { makeContext } from '@web/core/context';
+import { x2ManyCommands } from '@web/core/orm_service';
+import { useBus } from "@web/core/utils/hooks";
+import { patch } from '@web/core/utils/patch';
+>>>>>>> affad6ece78f7c73d02b99077b2845603797ee85
 
 patch(SaleOrderLineListRenderer.prototype, {
     setup() {
         super.setup();
         this.copyFields.push('is_optional');
+<<<<<<< 0164b2ba0eabfba25b563c130b4ed10c0848342a
         this.user = user;
+||||||| 7bbce824a1897a912441a7f0511ffec505cbe1d5
+=======
+        this.sortDropProm = Promise.resolve();
+        // Ensure save waits for any pending sortDrop operation to complete.
+        useBus(this.props.list.model.bus, "NEED_LOCAL_CHANGES", ({ detail }) => {
+            detail.proms.push(this.sortDropProm);
+        });
+>>>>>>> affad6ece78f7c73d02b99077b2845603797ee85
     },
 
     /**
@@ -343,15 +367,23 @@ patch(SaleOrderLineListRenderer.prototype, {
      * - Non-product lines (`display_type` set) are ignored.
      */
     async sortDrop(dataRowId, dataGroupId, { element, previous }) {
-        const record = this.props.list.records.find(r => r.id === dataRowId);
-        // Prevent the record from being abandoned when leaveEditMode or sortDrop is called
-        record.dirty = true;
-        await this.props.list.leaveEditMode();
-        const recordMap = this._getRecordsToRecompute(record, previous ? previous.dataset.id : null);
+        // Keep the promise on the component so save() can wait for it to resolve.
+        // Otherwise, the record could be saved before the quantity adjustment is applied,
+        // resulting in inconsistent record values.
+        this.sortDropProm = (async () => {
+            const record = this.props.list.records.find(r => r.id === dataRowId);
 
-        await super.sortDrop(dataRowId, dataGroupId, { element, previous });
-
-        await this._handleQuantityAdjustment(recordMap);
+            // Prevent the record from being abandoned when leaveEditMode or sortDrop is called
+            record.dirty = true;
+            await this.props.list.leaveEditMode();
+            const recordMap = this._getRecordsToRecompute(
+                record,
+                previous ? previous.dataset.id : null
+            );
+            await super.sortDrop(dataRowId, dataGroupId, { element, previous });
+            await this._handleQuantityAdjustment(recordMap);
+        })();
+        await this.sortDropProm;
     },
 
     /**
