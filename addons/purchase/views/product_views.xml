@@ -90,6 +90,12 @@
                 <div name="forecasted_qty_no_stock" position="attributes">
                     <attribute name="invisible">type != 'consu' or not is_storable</attribute>
                 </div>
+                <label id="free_qty_no_stock" position="attributes">
+                    <attribute name="invisible">type != 'consu' or not is_storable</attribute>
+                </label>
+                <div name="free_qty_no_stock" position="attributes">
+                    <attribute name="invisible">type != 'consu' or not is_storable</attribute>
+                </div>
                 <field name="virtual_available" position="attributes">
                     <attribute name="help">Quantity on hand minus outgoing quantity from Sales Orders plus incoming quantity from Purchase Orders</attribute>
                 </field>

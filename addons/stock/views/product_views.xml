@@ -197,6 +197,10 @@
         <record id="product_template_form_view_stock" model="ir.ui.view">
             <field name="name">product.template.stock.property.form.inherit</field>
             <field name="model">product.template</field>
+            <!-- Must apply after any view that sets attributes on free_qty_no_stock (e.g. sale, purchase):
+                 this view deletes that node outright, and view combination order otherwise depends on
+                 module load depth, not on which module actually needs to run first. -->
+            <field name="priority">99</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//label[@for='is_storable']" position="attributes">
