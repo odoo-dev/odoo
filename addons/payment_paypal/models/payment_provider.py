@@ -9,7 +9,6 @@ from odoo.tools import urls
 
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_paypal import const
-from odoo.addons.payment_paypal.controllers.main import PaypalController
 
 _logger = get_payment_logger(__name__)
 
@@ -168,7 +167,7 @@ class PaymentProvider(models.Model):
             + const.MERCHANT_WEBHOOK_EVENTS
         )
         data = {
-            "url": urls.urljoin(base_url, PaypalController._webhook_url),
+            "url": urls.urljoin(base_url, const.WEBHOOK_ROUTE),
             "event_types": [{"name": event_type} for event_type in webhook_events],
         }
         webhook_data = self._send_api_request("POST", "/v1/notifications/webhooks", json=data)

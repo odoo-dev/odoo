@@ -8,6 +8,7 @@ from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 from odoo.addons.payment.tests.http_common import PaymentHttpCommon
+from odoo.addons.payment_paypal import const
 from odoo.addons.payment_paypal.controllers.main import PaypalController
 from odoo.addons.payment_paypal.tests.common import PaypalCommon
 
@@ -88,7 +89,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     def test_webhook_notification_confirms_transaction(self):
         """Test the processing of a webhook notification."""
         tx = self._create_transaction("direct")
-        url = self._build_url(PaypalController._webhook_url)
+        url = self._build_url(const.WEBHOOK_ROUTE)
         with patch(
             "odoo.addons.payment_paypal.controllers.main.PaypalController"
             "._verify_notification_origin"
@@ -101,7 +102,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     def test_order_declined_webhook_errors_transaction(self):
         """Test that a `CHECKOUT.ORDER.DECLINED` webhook notification errors the transaction."""
         tx = self._create_transaction("redirect")
-        url = self._build_url(PaypalController._webhook_url)
+        url = self._build_url(const.WEBHOOK_ROUTE)
         with patch(
             "odoo.addons.payment_paypal.controllers.main.PaypalController"
             "._verify_notification_origin"
@@ -129,7 +130,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
                 "supplementary_data": {"related_ids": {"order_id": self.order_id}},
             },
         }
-        url = self._build_url(PaypalController._webhook_url)
+        url = self._build_url(const.WEBHOOK_ROUTE)
         with patch(
             "odoo.addons.payment_paypal.controllers.main.PaypalController"
             "._verify_notification_origin"
@@ -142,7 +143,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     def test_webhook_notification_triggers_origin_check(self):
         """Test that receiving a webhook notification triggers an origin check."""
         self._create_transaction("direct")
-        url = self._build_url(PaypalController._webhook_url)
+        url = self._build_url(const.WEBHOOK_ROUTE)
         with patch(
             "odoo.addons.payment_paypal.controllers.main.PaypalController"
             "._verify_notification_origin"
@@ -154,7 +155,7 @@ class PaypalTest(PaypalCommon, PaymentHttpCommon):
     def test_webhook_notification_skips_processing_for_errored_txs(self):
         self._create_transaction("direct")
         PaymentTransaction = self.env.registry["payment.transaction"]
-        url = self._build_url(PaypalController._webhook_url)
+        url = self._build_url(const.WEBHOOK_ROUTE)
         with (
             patch.object(
                 PaymentTransaction, "_send_api_request", side_effect=ValidationError("Test error")

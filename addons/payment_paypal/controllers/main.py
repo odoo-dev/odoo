@@ -16,12 +16,7 @@ _logger = get_payment_logger(__name__)
 
 
 class PaypalController(http.Controller):
-    _complete_url = "/payment/paypal/complete_order"
-    _return_url = "/payment/paypal/return"
-    _cancel_url = "/payment/paypal/cancel"
-    _webhook_url = "/payment/paypal/webhook/"
-
-    @http.route(_complete_url, type="jsonrpc", auth="public", methods=["POST"])
+    @http.route(const.PAYMENT_COMPLETE_ORDER_ROUTE, type="jsonrpc", auth="public", methods=["POST"])
     def paypal_complete_order(self, order_id, reference):
         """Make a capture request and process the payment data.
 
@@ -39,7 +34,9 @@ class PaypalController(http.Controller):
         if tx_sudo:
             self._paypal_capture_order(tx_sudo, order_id)
 
-    @http.route(_return_url, type="http", auth="public", methods=["GET"], save_session=False)
+    @http.route(
+        const.PAYMENT_RETURN_ROUTE, type="http", auth="public", methods=["GET"], save_session=False
+    )
     def paypal_return_from_checkout(self, **data):
         """Process the payment data sent by PayPal after redirection from an alternative payment
         method checkout.
@@ -59,14 +56,14 @@ class PaypalController(http.Controller):
             if tx_sudo.payment_method_code in {"paypal", "card"}:
                 self._paypal_capture_order(tx_sudo, order_id)
             else:
-                order_details = tx_sudo._send_api_request(
-                    "GET", f"/v2/checkout/orders/{order_id}"
-                )
+                order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")
                 normalized_data = self._normalize_paypal_data(order_details)
                 tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
-    @http.route(_cancel_url, type="http", auth="public", methods=["GET"], save_session=False)
+    @http.route(
+        const.PAYMENT_CANCEL_ROUTE, type="http", auth="public", methods=["GET"], save_session=False
+    )
     def paypal_cancel_payment(self, **data):
         """Process the payment cancellation initated by the customer sent by PayPal after
         redirection from an alternative payment method checkout.
@@ -86,15 +83,13 @@ class PaypalController(http.Controller):
             if tx_sudo.payment_method_code in {"paypal", "card"}:
                 self._paypal_capture_order(tx_sudo, order_id)
             else:
-                order_details = tx_sudo._send_api_request(
-                    "GET", f"/v2/checkout/orders/{order_id}"
-                )
+                order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")
                 normalized_data = self._normalize_paypal_data(order_details)
                 normalized_data["status"] = "CANCELED"
                 tx_sudo._record(normalized_data)
         return request.redirect("/payment/status")
 
-    @http.route(_webhook_url, type="http", auth="public", methods=["POST"], csrf=False)
+    @http.route(const.WEBHOOK_ROUTE, type="http", auth="public", methods=["POST"], csrf=False)
     def paypal_webhook(self):
         """Process the webhook notification sent by PayPal to the webhook.
 
@@ -161,7 +156,7 @@ class PaypalController(http.Controller):
         if not tx_sudo:
             return
         try:
-            self._verify_notification_origin(data, tx_sudo=tx_sudo)
+            self._verify_notification_origin(data, tx_sudo.provider_id)
         except ValidationError:
             tx_sudo.with_context(
                 # The verification request is idempotent; the handler is safe to replay.
@@ -219,9 +214,14 @@ class PaypalController(http.Controller):
             "purchase_units": data.get("purchase_units"),
         }
         if not is_capture_request:
-            result.update({**purchase_unit, "id": data.get("id"), "status": data.get("status")})
+            result.update({
+                **purchase_unit,
+                "txn_type": data.get("intent"),
+                "id": data.get("id"),
+                "status": data.get("status"),
+            })
         elif captured := purchase_unit.get("payments", {}).get("captures"):
-            result.update(captured[0])
+            result.update({**captured[0], "txn_type": "CAPTURE"})
         else:
             _logger.warning("Invalid PayPal response format, can't normalize.")
         return result

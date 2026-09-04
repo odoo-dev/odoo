@@ -8,9 +8,8 @@ from odoo.tools import urls
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
+from odoo.addons.payment_paypal import const
 from odoo.addons.payment_paypal import utils as paypal_utils
-from odoo.addons.payment_paypal.const import PAYMENT_STATUS_MAPPING
-from odoo.addons.payment_paypal.controllers.main import PaypalController
 
 _logger = get_payment_logger(__name__)
 
@@ -232,13 +231,13 @@ class PaymentTransaction(models.Model):
         # Update the payment state.
         payment_status = payment_data.get("status")
 
-        if payment_status in PAYMENT_STATUS_MAPPING["pending"]:
+        if payment_status in const.PAYMENT_STATUS_MAPPING["pending"]:
             self._set_pending(state_message=payment_data.get("pending_reason"))
-        elif payment_status in PAYMENT_STATUS_MAPPING["done"]:
+        elif payment_status in const.PAYMENT_STATUS_MAPPING["done"]:
             self._set_done()
-        elif payment_status in PAYMENT_STATUS_MAPPING["cancel"]:
+        elif payment_status in const.PAYMENT_STATUS_MAPPING["cancel"]:
             self._set_canceled()
-        elif payment_status in PAYMENT_STATUS_MAPPING["error"]:
+        elif payment_status in const.PAYMENT_STATUS_MAPPING["error"]:
             self._set_error(
                 payment_data.get("state_message")
                 or self.env._("The payment was declined by PayPal.")
@@ -264,8 +263,8 @@ class PaymentTransaction(models.Model):
         return {"amount": float(amount), "currency_code": currency_code}
 
     def _paypal_get_return_urls(self, ref):
-        base_url = self.provider_id._paypal_get_base_url()
+        base_url = self.get_base_url()
         params = urlencode({"reference": ref})
-        return_url = f"{urls.urljoin(base_url, PaypalController._return_url)}?{params}"
-        cancel_url = f"{urls.urljoin(base_url, PaypalController._cancel_url)}?{params}"
+        return_url = f"{urls.urljoin(base_url, const.PAYMENT_RETURN_ROUTE)}?{params}"
+        cancel_url = f"{urls.urljoin(base_url, const.PAYMENT_CANCEL_ROUTE)}?{params}"
         return return_url, cancel_url

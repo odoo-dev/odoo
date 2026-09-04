@@ -1,5 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+PAYMENT_COMPLETE_ORDER_ROUTE = "/payment/paypal/complete_order"
+PAYMENT_RETURN_ROUTE = "/payment/paypal/return"
+PAYMENT_CANCEL_ROUTE = "/payment/paypal/cancel"
+WEBHOOK_ROUTE = "/payment/paypal/webhook/"
+
+
 OAUTH_INIT_ROUTE = "/payment/paypal/oauth/init"
 OAUTH_FINALIZE_ROUTE = "/payment/paypal/oauth/finalize"
 
