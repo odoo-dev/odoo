@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import time
 
 from datetime import date, datetime
 from freezegun import freeze_time
@@ -232,3 +233,32 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_calculation_remaining_leaves(self):
+        """Test calculation of remaining leaves for work entry types when using search function"""
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Leave',
+            'code': 'Test Leave',
+            'requires_allocation': True,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        with freeze_time('2024-01-01'):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Test Allocation',
+                'employee_id': employee.id,
+                'work_entry_type_id': work_entry_type.id,
+                'number_of_days': 10,
+                'state': 'confirm',
+                'date_from': time.strftime('%Y-01-01'),
+                'date_to': time.strftime('%Y-12-31'),
+            })
+            allocation.action_approve()
+
+            work_entries = self.env['hr.work.entry.type'].with_context(employee_id=employee.id).search([('virtual_remaining_leaves', '>', 0)])
+            work_entry_searched = work_entries.filtered(lambda w: w.id == work_entry_type.id)
+
+            self.assertTrue(work_entry_searched, "Work entry type with available leaves should be found in search results")
+            self.assertEqual(work_entry_searched.virtual_remaining_leaves, 10.0, "Remaining leaves should be 10 after allocation when searched")
