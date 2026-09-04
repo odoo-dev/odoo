@@ -6,11 +6,11 @@ import requests
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.translate import mark_as_copy
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.const import REPORT_REASONS_MAPPING, SENSITIVE_KEYS
 from odoo.addons.payment.logging import get_payment_logger
-from odoo.tools.translate import mark_as_copy
 
 # Pass the possibly empty set of sensitive keys to the logger in case a provider module extends it.
 _logger = get_payment_logger(__name__, sensitive_keys=SENSITIVE_KEYS)
@@ -555,7 +555,7 @@ class PaymentProvider(models.Model):
         vals_list = super().copy_data(default=default)
         if "name" not in default and "company_id" not in default:
             for provider, vals in zip(self, vals_list):
-                vals["name"] = mark_as_copy('name')(provider)
+                vals["name"] = mark_as_copy("name")(provider)
         return vals_list
 
     @api.ondelete(at_uninstall=False)
@@ -809,13 +809,11 @@ class PaymentProvider(models.Model):
         force_tokenization=False,
         is_express_checkout=False,
         report=None,
-        amount=0.0,  # noqa: ARG002
         **_kwargs,
     ):
         """Find the providers' payment methods available for the given payment context.
 
         :param int partner_id: The partner making the payment, as a `res.partner` id
-        :param float amount: The amount to pay (`0` for validation transactions)
         :param int currency_id: The payment currency, as a `res.currency` id
         :param bool force_tokenization: Whether payment methods must support tokenization
         :param bool is_express_checkout: Whether payment methods must support express checkout

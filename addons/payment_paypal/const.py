@@ -36,26 +36,7 @@ SUPPORTED_CURRENCIES = (
 )
 
 # The codes of the default primary payment methods to activate
-DEFAULT_PAYMENT_METHOD_CODES = {"paypal"}
-
-# Mapping of Odoo's local payment method codes to the payment source keys returned by PayPal's
-# `find-eligible-methods` endpoint. Local codes that have no entry in this mapping are not
-# affected by the eligibility check, e.g., because PayPal doesn't assess their eligibility.
-# See https://docs.paypal.ai/api-reference/payments_payment_v2/find-eligible-methods.
-PAYMENT_METHODS_MAPPING = {
-    "paypal": "paypal",
-    "venmo": "venmo",
-    "paypal_paylater": "paypal_pay_later",
-    "ideal": "ideal",
-    "card": "advanced_cards",  # The `card` payment method is processed through ACDC.
-    "blik": "blik",
-    "p24": "p24",
-    "eps": "eps",
-    "bancontact": "bancontact",
-    "trustly": "trustly",
-    "mybank": "mybank",
-    "mulitbanco": "multibanco",
-}
+DEFAULT_PAYMENT_METHOD_CODES = {"paypal", "card"}
 
 # Mapping of transaction states to PayPal payment statuses.
 # See https://developer.paypal.com/docs/api/orders/v2/#definition-capture_status.

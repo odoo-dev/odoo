@@ -7,7 +7,6 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import urls
 
-from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_paypal import const
 from odoo.addons.payment_paypal.controllers.main import PaypalController
@@ -207,107 +206,6 @@ class PaymentProvider(models.Model):
 
         return response_content
 
-    def _find_available_payment_methods(
-        self,
-        partner_id,
-        *,
-        currency_id=None,
-        force_tokenization=False,
-        is_express_checkout=False,
-        report=None,
-        amount=0.0,
-        **kwargs,
-    ):
-        """Override of `payment` to filter out payment methods that PayPal deems ineligible.
-
-        PayPal's own eligibility rules (based on the customer's country, the seller account, etc.)
-        are not necessarily reflected in the local configuration of the payment methods. The
-        `find-eligible-methods` endpoint is called to refine the availability of PayPal's payment
-        methods for the given payment context.
-
-        :param float amount: The amount to pay (`0` for validation transactions)
-
-        """
-        payment_methods = super()._find_available_payment_methods(
-            partner_id,
-            currency_id=currency_id,
-            force_tokenization=force_tokenization,
-            is_express_checkout=is_express_checkout,
-            report=report,
-            amount=amount,
-            **kwargs,
-        )
-        for provider in self.filtered(lambda p: p.code == "paypal"):
-            if not provider.paypal_client_id or not provider.paypal_client_secret:
-                continue
-            eligible_method_keys = provider._paypal_get_eligible_payment_method_keys(
-                partner_id,
-                amount,
-                currency_id=currency_id,
-                user_agent=kwargs.get("paypal_customer_user_agent"),
-            )
-            if eligible_method_keys is None:
-                continue
-            ineligible_pms = payment_methods.filtered(
-                lambda pm: (
-                    pm.code in const.PAYMENT_METHODS_MAPPING
-                    and const.PAYMENT_METHODS_MAPPING[pm.code] not in eligible_method_keys
-                )
-            )
-            payment_utils.add_to_report(
-                report,
-                ineligible_pms,
-                available=False,
-                reason=self.env._("Not eligible according to PayPal"),
-            )
-            payment_methods -= ineligible_pms
-        return payment_methods
-
-    def _paypal_get_eligible_payment_method_keys(
-        self, partner_id, amount, currency_id=None, user_agent=None
-    ):
-        """Return the PayPal payment source keys that are eligible for the given context.
-
-        Note: `self.ensure_one()`
-
-        :param int partner_id: The partner making the payment, as a `res.partner` id.
-        :param float amount: The amount to pay (`0` for validation transactions)
-        :param int currency_id: The payment currency, as a `res.currency` id.
-        :param str user_agent: The customer's browser user agent string, forwarded to PayPal to
-                               derive the browser, OS, and device type for eligibility assessment.
-        :return: The eligible PayPal payment source keys (e.g., `{'paypal', 'venmo'}`), or `None`
-                 if the eligibility could not be determined.
-        :rtype: set|None
-        """
-        self.ensure_one()
-
-        partner = self.env["res.partner"].browse(partner_id)
-        currency = self.env["res.currency"].browse(currency_id)
-        payload = {
-            "customer": {"country_code": partner.country_code, "email": partner.email},
-            "purchase_units": [
-                {
-                    "amount": {"currency_code": currency.name, "value": amount},
-                    "payee": {
-                        "email_address": self.paypal_email_account,
-                        "merchant_id": self.paypal_account_id,
-                    },
-                }
-            ],
-            "preferences": {"intent": "CAPTURE"},
-        }
-        try:
-            response_content = self._send_api_request(
-                "POST",
-                "/v2/payments/find-eligible-methods",
-                json=payload,
-                paypal_customer_user_agent=user_agent,
-            )
-        except ValidationError:
-            _logger.warning("Could not fetch eligible payment methods from PayPal.")
-            return None
-        return set(response_content.get("eligible_methods", {}))
-
     def _paypal_get_inline_form_values(self, currency=None, partner_id=None):
         """Return a serialized JSON of the required values to render the inline form.
 
@@ -356,12 +254,18 @@ class PaymentProvider(models.Model):
         is_refresh_token_request=False,
         paypal_onboarding_shared_id=None,
         paypal_onboarding_access_token=None,
-        paypal_customer_user_agent=None,
         **kwargs,
     ):
         """Override of `payment` to build the request headers."""
         if self.code != "paypal":
-            return super()._build_request_headers(*args, idempotency_key=idempotency_key, **kwargs)
+            return super()._build_request_headers(
+                *args,
+                idempotency_key=idempotency_key,
+                is_refresh_token_request=False,
+                paypal_onboarding_shared_id=None,
+                paypal_onboarding_access_token=None,
+                **kwargs,
+            )
         is_onboarding_request = paypal_onboarding_shared_id or paypal_onboarding_access_token
         headers = {
             # PayPal requires a reference specific to Odoo to be able to track Odoo customers.
@@ -379,9 +283,6 @@ class PaymentProvider(models.Model):
 
         if idempotency_key:
             headers["PayPal-Request-Id"] = idempotency_key
-
-        if paypal_customer_user_agent:
-            headers["User-Agent"] = paypal_customer_user_agent
 
         return headers
 
