@@ -492,3 +492,35 @@ class TestAccountBillPartialDeductibility(AccountTestInvoicingCommon):
             ],
             {}
         )
+
+    def test_simple_receipt_partial_deductibility(self):
+        receipt = self.env['account.move'].create({
+            'move_type': 'in_receipt',
+            'partner_id': self.partner_a.id,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'Partial item',
+                    'price_unit': 100,
+                    'quantity': 1,
+                    'deductible_amount': 75.00,
+                    'tax_ids': [Command.set(self.tax_purchase_a.ids)],
+                })
+            ]
+        })
+
+        self.assertInvoiceValues(
+            receipt,
+            [
+                {'display_type': 'product',                      'name': 'Partial item',         'balance': 100.0,  'tax_ids': [self.tax_purchase_a.id]},  # noqa: E241
+                {'display_type': 'non_deductible_product',       'name': 'Partial item',         'balance': -25.0,  'tax_ids': [self.tax_purchase_a.id]},  # noqa: E241
+                {'display_type': 'non_deductible_product_total', 'name': 'private part',         'balance': 25.0,   'tax_ids': []},  # noqa: E241
+                {'display_type': 'non_deductible_tax',           'name': 'private part (taxes)', 'balance': 3.75,   'tax_ids': []},  # noqa: E241
+                {'display_type': 'tax',                          'name': '15%',                  'balance': 11.25,  'tax_ids': []},  # noqa: E241
+                {'display_type': 'payment_term',                 'name': False,                  'balance': -115.0, 'tax_ids': []},  # noqa: E241
+            ],
+            {}
+        )
+
+        receipt.action_post()
+        self.assertEqual(receipt.state, 'posted')
