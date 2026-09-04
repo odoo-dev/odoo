@@ -2,7 +2,7 @@
 
 from urllib.parse import urlencode
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import urls
 
@@ -17,6 +17,10 @@ _logger = get_payment_logger(__name__)
 
 class PaymentTransaction(models.Model):
     _inherit = "payment.transaction"
+
+    # See https://developer.paypal.com/docs/api-basics/notifications/ipn/IPNandPDTVariables/
+    # this field has no use in Odoo except for debugging
+    paypal_type = fields.Char(string="PayPal Transaction Type")
 
     def _get_specific_processing_values(self, processing_values):
         """Override of `payment` to return the Paypal-specific processing values.
@@ -206,15 +210,23 @@ class PaymentTransaction(models.Model):
 
         # Update the provider reference.
         txn_id = payment_data.get("id")
-        if not all(txn_id):
-            self._set_error(self.env._("Missing value for txn_id (%(txn_id)s).", txn_id=txn_id))
+        txn_type = payment_data.get("txn_type")
+        if not all((txn_id, txn_type)):
+            self._set_error(
+                self.env._(
+                    "Missing value for txn_id (%(txn_id)s) or txn_type (%(txn_type)s).",
+                    txn_id=txn_id,
+                    txn_type=txn_type,
+                )
+            )
             return
 
         self.provider_reference = txn_id
+        self.paypal_type = txn_type
 
         # Force PayPal as the payment method if it exists.
-        self.payment_method_id = (
-            self.payment_method_id or self.provider_id._get_pm_from_code("paypal")
+        self.payment_method_id = self.payment_method_id or self.provider_id._get_pm_from_code(
+            "paypal"
         )
 
         # Update the payment state.

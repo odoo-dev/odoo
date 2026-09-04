@@ -6,6 +6,7 @@
     <record id="payment_method_paypal" model="payment.method">
         <field name="name">PayPal</field>
         <field name="code">paypal</field>
+        <field name="sequence">10</field>
         <field name="provider_id" ref="payment.payment_provider_paypal"/>
         <field name="image" type="bytes" file="payment/static/img/paypal.png"/>
     </record>
@@ -31,6 +32,7 @@
     <record id="payment_method_card" model="payment.method">
         <field name="name">Card</field>
         <field name="code">card</field>
+        <field name="sequence">20</field>
         <field name="provider_id" ref="payment.payment_provider_paypal"/>
         <field name="image" type="bytes" file="payment/static/img/card.png"/>
         <field name="support_tokenization">True</field>

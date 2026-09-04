@@ -1,9 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.payment.logging import get_payment_logger
-
-_logger = get_payment_logger(__name__)
-
 
 def format_partner_address(partner):
     """Format the partner address values to PayPal address values. When provided, PayPal requires
