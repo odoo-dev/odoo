@@ -323,7 +323,11 @@ export class SearchModel extends EventBus {
             this.display = this._getDisplay(config.display);
             this._reconciliateFavorites();
             if (!this.searchPanelInfo.loaded) {
-                return this._reloadSections();
+                // fetch only the sections that are genuinely new to this
+                // instance (typically filters): unlike a real interactive
+                // reload, a bare view switch changes neither the domain nor
+                // any section's counters, so those must not be re-triggered
+                return this._reloadSections(true);
             }
             return;
         }
@@ -2792,9 +2796,13 @@ export class SearchModel extends EventBus {
      * search panel was not displayed (and thus not reloaded) and the reload
      * should occur as soon as the search panel is visible again.
      * @private
+     * @param {boolean} [forceFetchOnly=false] only fetch sections that were
+     *  never loaded in this model instance, ignoring counters/domain checks:
+     *  used right after a state import, where a section already marked as
+     *  loaded needs no reload just because the view changed.
      * @returns {Promise<void>}
      */
-    async _reloadSections() {
+    async _reloadSections(forceFetchOnly = false) {
         this.blockNotification = true;
 
         // Check whether the search domain changed
@@ -2805,8 +2813,12 @@ export class SearchModel extends EventBus {
         this.searchDomain = searchDomain;
 
         // Check whether categories/filters will force a reload of the sections
-        const toFetch = (section) =>
-            !section.loaded || section.enableCounters || (searchDomainChanged && !section.expand);
+        const toFetch = forceFetchOnly
+            ? (section) => !section.loaded
+            : (section) =>
+                  !section.loaded ||
+                  section.enableCounters ||
+                  (searchDomainChanged && !section.expand);
         const categoriesToFetch = this.categories.filter(toFetch);
         const filtersToFetch = this.filters.filter(toFetch);
 
