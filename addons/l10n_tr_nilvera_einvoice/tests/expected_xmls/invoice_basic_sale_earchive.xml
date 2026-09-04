@@ -106,6 +106,7 @@
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="TRY">132.00</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="TRY">26.40</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
       <cbc:Percent>20.0</cbc:Percent>
       <cac:TaxCategory>
         <cac:TaxScheme>
@@ -136,6 +137,7 @@
       <cac:TaxSubtotal>
         <cbc:TaxableAmount currencyID="TRY">132.00</cbc:TaxableAmount>
         <cbc:TaxAmount currencyID="TRY">26.40</cbc:TaxAmount>
+        <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
         <cbc:Percent>20.0</cbc:Percent>
         <cac:TaxCategory>
           <cac:TaxScheme>

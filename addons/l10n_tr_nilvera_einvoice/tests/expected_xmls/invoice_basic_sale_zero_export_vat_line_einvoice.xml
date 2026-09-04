@@ -102,6 +102,7 @@
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="TRY">132.00</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
       <cbc:Percent>0.0</cbc:Percent>
       <cac:TaxCategory>
         <cbc:TaxExemptionReasonCode>351</cbc:TaxExemptionReasonCode>
@@ -115,6 +116,7 @@
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="TRY">270.00</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="TRY">54.00</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>2</cbc:CalculationSequenceNumeric>
       <cbc:Percent>20.0</cbc:Percent>
       <cac:TaxCategory>
         <cac:TaxScheme>
@@ -145,6 +147,7 @@
       <cac:TaxSubtotal>
         <cbc:TaxableAmount currencyID="TRY">132.00</cbc:TaxableAmount>
         <cbc:TaxAmount currencyID="TRY">0.00</cbc:TaxAmount>
+        <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
         <cbc:Percent>0.0</cbc:Percent>
         <cac:TaxCategory>
           <cac:TaxScheme>
@@ -176,6 +179,7 @@
       <cac:TaxSubtotal>
         <cbc:TaxableAmount currencyID="TRY">270.00</cbc:TaxableAmount>
         <cbc:TaxAmount currencyID="TRY">54.00</cbc:TaxAmount>
+        <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
         <cbc:Percent>20.0</cbc:Percent>
         <cac:TaxCategory>
           <cac:TaxScheme>

@@ -552,13 +552,15 @@ class AccountEdiXmlUblTr(models.AbstractModel):
                         },
                     },
                 )
-            tax_totals.append({
+            tax_total_node = {
                 "cbc:TaxAmount": {
                     '_text': self.format_float(tax_amount, precision),
                     'currencyID': currency_name,
                 },
                 "cac:TaxSubtotal": tax_subtotals,
-            })
+            }
+            self._l10n_tr_add_tax_subtotal_calculation_sequence(tax_total_node)
+            tax_totals.append(tax_total_node)
 
         document_node["cac:TaxTotal"] = tax_totals
 
@@ -628,43 +630,43 @@ class AccountEdiXmlUblTr(models.AbstractModel):
 
         taxes_data = base_line.get("tax_details", {}).get("taxes_data", [])
         total_taxed_amount = sum(tax_line["tax_amount"] for tax_line in taxes_data)
-        line_node["cac:TaxTotal"] = [
-            {
-                "cbc:TaxAmount": {
-                    "_text": self.format_float(total_taxed_amount, precision),
+        tax_total_node = {
+            "cbc:TaxAmount": {
+                "_text": self.format_float(total_taxed_amount, precision),
+                "currencyID": currency_name,
+            },
+            "cac:TaxSubtotal": {
+                "cbc:TaxableAmount": {
+                    "_text": self.format_float(
+                        line.l10n_tr_original_tax_without_withholding,
+                        precision,
+                    ),
                     "currencyID": currency_name,
                 },
-                "cac:TaxSubtotal": {
-                    "cbc:TaxableAmount": {
-                        "_text": self.format_float(
-                            line.l10n_tr_original_tax_without_withholding,
-                            precision,
-                        ),
-                        "currencyID": currency_name,
-                    },
-                    "cbc:TaxAmount": {
-                        "_text": self.format_float(
-                            total_taxed_amount,
-                            precision,
-                        ),
-                        "currencyID": currency_name,
-                    },
-                    "cbc:Percent": {
-                        "_text": percent_return,
-                    },
-                    "cac:TaxCategory": {
-                        "cac:TaxScheme": {
-                            "cbc:Name": {
-                                "_text": "Gerçek Usulde KDV",
-                            },
-                            "cbc:TaxTypeCode": {
-                                "_text": "0015",
-                            },
+                "cbc:TaxAmount": {
+                    "_text": self.format_float(
+                        total_taxed_amount,
+                        precision,
+                    ),
+                    "currencyID": currency_name,
+                },
+                "cbc:Percent": {
+                    "_text": percent_return,
+                },
+                "cac:TaxCategory": {
+                    "cac:TaxScheme": {
+                        "cbc:Name": {
+                            "_text": "Gerçek Usulde KDV",
+                        },
+                        "cbc:TaxTypeCode": {
+                            "_text": "0015",
                         },
                     },
                 },
             },
-        ]
+        }
+        self._l10n_tr_add_tax_subtotal_calculation_sequence(tax_total_node)
+        line_node["cac:TaxTotal"] = [tax_total_node]
 
     def _get_address_node(self, vals):
         partner = vals['partner']
@@ -892,6 +894,27 @@ class AccountEdiXmlUblTr(models.AbstractModel):
         tax_subtotal_node['cac:TaxCategory']['cbc:Percent'] = None
         return tax_subtotal_node
 
+    def _get_tax_total_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_21
+        tax_total_node = super()._get_tax_total_node(vals)
+        self._l10n_tr_add_tax_subtotal_calculation_sequence(tax_total_node)
+        return tax_total_node
+
+    def _l10n_tr_add_tax_subtotal_calculation_sequence(self, tax_total_node):
+        """Number the TaxSubtotal nodes of a TaxTotal in the order their taxes are applied.
+
+        UBL-TR needs the sequence once a base carries more than one tax type (stamp duty
+        1047 alongside KDV 0015). It restarts at 1 in every TaxTotal, so a line numbers its
+        own subtotals independently of the document.
+
+        :param dict tax_total_node: TaxTotal or WithholdingTaxTotal node, mutated in place.
+        """
+        tax_subtotal_nodes = tax_total_node.get('cac:TaxSubtotal') or []
+        if isinstance(tax_subtotal_nodes, dict):
+            tax_subtotal_nodes = [tax_subtotal_nodes]
+        for sequence, tax_subtotal_node in enumerate(tax_subtotal_nodes, start=1):
+            tax_subtotal_node['cbc:CalculationSequenceNumeric'] = {'_text': sequence}
+
     @api.model
     def _get_tr_profile_id(self, invoice):
         """Determine the TR profile ID for the given invoice.
@@ -946,7 +969,7 @@ class AccountEdiXmlUblTr(models.AbstractModel):
             """Compute the total taxable amount depending on whether it is withholding."""
             return details['tr_total_taxed_amount'] if is_withholding else details.get(f'base_amount{currency_suffix}', 0)
 
-        return {
+        tax_total_node = {
             'cbc:TaxAmount': {
                 '_text': self.format_float(sign * get_tax_amount_total(), precision),
                 'currencyID': currency_name,
@@ -971,6 +994,8 @@ class AccountEdiXmlUblTr(models.AbstractModel):
                 if grouping_key
             ],
         }
+        self._l10n_tr_add_tax_subtotal_calculation_sequence(tax_total_node)
+        return tax_total_node
 
     def _add_invoice_monetary_total_nodes(self, document_node, vals):
         # EXTENDS account.edi.xml.ubl_21
