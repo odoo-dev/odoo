@@ -35,26 +35,23 @@ const discussChannelPatch = {
             },
             inverse: "activeVisitorLivechats",
         });
-        this._toggleChatbot = fields.Attr(false, {
-            compute() {
-                return Boolean(
+        this.onChange(
+            () => [
+                Boolean(
                     this.channel?.chatbot &&
                         !this.channel.chatbot.completed &&
                         !this.channel.livechat_end_dt
-                );
+                ),
+            ],
+            function onChangeToggleChatbot(shouldToggle) {
+                if (!shouldToggle) {
+                    return;
+                }
+                this.isLoadedPromise.then(() => this.channel.chatbot.start());
+                return () => this.isLoadedPromise.then(() => this.channel?.chatbot?.stop());
             },
-            onUpdate() {
-                const shouldToggle = this._toggleChatbot;
-                this.isLoadedPromise.then(() => {
-                    if (shouldToggle) {
-                        this.channel.chatbot.start();
-                    } else {
-                        this.channel?.chatbot?.stop();
-                    }
-                });
-            },
-            eager: true,
-        });
+            { immediate: true }
+        );
     },
     get avatarUrl() {
         if (this.channel_type !== "livechat") {
