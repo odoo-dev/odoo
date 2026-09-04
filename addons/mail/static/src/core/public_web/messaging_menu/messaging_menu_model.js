@@ -92,8 +92,6 @@ export class MessagingMenu extends Record {
         },
         eager: true,
     });
-    allTabs = fields.Many("MessagingMenuTab", { inverse: "messagingMenuAsTab" });
-    visibleTabs = fields.Many("MessagingMenuTab", { inverse: "messagingMenuAsVisibleTabs" });
     sortedVisibleTabs = fields.Many("MessagingMenuTab", {
         compute() {
             return [...this.visibleTabs].sort(
@@ -101,6 +99,14 @@ export class MessagingMenu extends Record {
             );
         },
     });
+
+    get allTabs() {
+        return [...this.store.MessagingMenuTab.records.values()];
+    }
+
+    get visibleTabs() {
+        return this.allTabs.filter((tab) => tab.isShown);
+    }
 
     _computeGlobalCounter() {
         return this.visibleTabs.reduce((sum, t) => sum + (t.important ? t.counter ?? 0 : 0), 0);

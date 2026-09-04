@@ -132,23 +132,6 @@ export class MessagingMenuTab extends Record {
     loadStatusByFilterId = fields.Attr({}, { asProxy: true });
     /** IDs of already loaded records, used to exclude them from `loadMore` requests. */
     loadMoreExcludeIds = this.computed(() => this._computeLoadMoreExcludeIds());
-    messagingMenuAsTab = fields.One("MessagingMenu", {
-        inverse: "allTabs",
-        compute() {
-            return this.store.messagingMenu;
-        },
-        eager: true,
-    });
-    messagingMenuAsVisibleTabs = fields.One("MessagingMenu", {
-        inverse: "visibleTabs",
-        compute() {
-            if (!this.isShown) {
-                return;
-            }
-            return this.store.messagingMenu;
-        },
-        eager: true,
-    });
     messages = fields.Many("mail.message", { inverse: "messagingMenuTabsAsMessages" });
     sortedMessages = fields.Many("mail.message", {
         compute() {
