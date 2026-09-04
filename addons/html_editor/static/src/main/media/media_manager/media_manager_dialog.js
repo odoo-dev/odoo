@@ -14,6 +14,7 @@ export const mediaManagerDialogProps = {
     resModel: t.string(),
     baseResModel: t.string(),
     baseResId: t.number(),
+    filters: t.array().optional(),
     domain: t.array().optional(),
     context: t.object().optional(),
 };
@@ -24,10 +25,11 @@ export class MediaManagerDialog extends SelectCreateDialog {
     document = document;
 
     setup() {
-        console.warn("MediaManagerDialog setup", { ...this.props });
-        console.log("  => this", this);
-        console.log("  => props", { ...this.props });
-
+        console.groupCollapsed("%c MediaManagerDialog :: setup()", "background: #f9f;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         super.setup();
         this.state.records = [];
         // this.state = proxy({
@@ -38,11 +40,11 @@ export class MediaManagerDialog extends SelectCreateDialog {
         // const { thread = {}, model, resId } = this.props.chatterParams || this.props; // todo : I don't think we need this
 
         this.onSelectionChanged = (resIds, records) => {
-            console.warn("onSelectionChanged", { ...arguments });
-            console.log(JSON.parse(JSON.stringify(resIds)));
-            console.log(JSON.parse(JSON.stringify(records)));
             this.superOnSelectionChanged(resIds);
             this.state.records = records;
+            if (resIds.length && !this.props.multiSelect) {
+                this.select(resIds);
+            }
         };
     }
 
@@ -55,6 +57,7 @@ export class MediaManagerDialog extends SelectCreateDialog {
             allowSelectors: true,
             baseResModel: this.props.baseResModel,
             baseResId: this.props.baseResId,
+            filters: this.props.filters,
             onSelectionChanged: this.onSelectionChanged,
         };
         console.warn("get viewProps", { ...props });
@@ -151,12 +154,15 @@ export class MediaManagerDialog extends SelectCreateDialog {
 }
 
 export function getMediaManagertDialogProps(recordInfo) {
-    console.warn("getMediaManagertDialogProps, recordInfo", recordInfo);
     return {
         title: _t("Select a media"),
         resModel: "ir.attachment", // todo we probably don't need this
         baseResModel: recordInfo.resModel ?? "ir.attachment",
         baseResId: recordInfo.resId ?? -1,
+        filters: [
+            { label: "uploaded last week", domain: [] },
+            { label: "uploaded by me", domain: [] },
+        ],
         noCreate: true,
         domain: [
             ["mimetype", "in", IMAGE_MIMETYPES],

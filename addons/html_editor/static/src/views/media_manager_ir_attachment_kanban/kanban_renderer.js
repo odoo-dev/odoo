@@ -8,6 +8,7 @@ export const MediaManagerKanbanRendererProps = {
     ...kanbanRendererProps,
     baseResModel: t.string(),
     baseResId: t.number().optional(),
+    filters: t.array().optional(),
 };
 
 export class MediaManagerKanbanRenderer extends KanbanRenderer {
@@ -19,14 +20,27 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     props = useProps(MediaManagerKanbanRendererProps);
 
     setup() {
-        console.warn("MediaManagerKanbanRenderer::setup()", this);
-        console.log("  ==> props", this.props);
+        console.groupCollapsed("%c MediaManagerKanbanRenderer :: setup()", "background: #9f9;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         super.setup();
         this.uploadService = useService("upload");
         this.state.isDraggingFile = false;
     }
 
-    // ----------------------------------
+    // ----------------
+    // Filter records :
+    // ----------------
+
+    filterRecords(domain) {
+        console.warn("filterRecords", domain);
+        console.log("this.env.model : ", this.env.model);
+        this.env.model.load();
+    }
+
+    // --------------
     // Upload files :
     // --------------
 

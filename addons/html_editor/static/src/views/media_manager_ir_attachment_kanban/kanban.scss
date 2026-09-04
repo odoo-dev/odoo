@@ -1,16 +1,16 @@
 .o_media_manager_kanban_view>main.o_content {
-    position: absolute;
-    bottom: 0;
-    top: 58px; /* search bar height */
+    padding-top: 16px;
     .o_kanban_record {
-        --KanbanRecord-width : 50px;
-        --Card-min-width: 50px;
+        --Card-min-width: 86px;
+        --KanbanRecord-width : --Card-min-width;
     }
 }
 
 .media-manager-side-panel {
-    position: absolute;
-    display: none;
+    width: 220px;
+    max-height: 100%;
+    overflow: auto;
+    float: left;
 }
 
 /* Upload drop zone */
@@ -43,37 +43,43 @@
 }
 
 /* ir.attachment record */
-.o_kanban_record {
-    &.o_record_starred {
-        background-color: lighten($o-main-favorite-color, 50%);
+.o_kanban_record.o_kanban_attachment {
+    .o_record_box_star, .o_record_box_star_bg {
+        font-size: 14px;
+        top: 5px;
+        left: 5px;
+        display: none;
     }
-    &.o_record_selected {
-        background-color: var(--KanbanColumn__highlight-selected);
-    }
-}
-
-.o_kanban_attachment {
-    .o_record_interactive {
-        cursor: pointer;
-        background-color: white;
-
-    }
-    .o_record_box_select {
-        top: 4px;
-        right: 4px;
-        width: 20px;
-        height: 20px;
+    &:hover{
+        .o_record_box_star, .o_record_box_star_bg {
+            display: block;
+        }
     }
     .o_record_box_star {
-        top: 4px;
-        left: 4px;
+        z-index: 100;
+        cursor: pointer;
         width: 20px;
         height: 20px;
+        color: desaturate($o-main-favorite-color, 80%);
+        opacity: 0.8;
+        &:hover{
+            color : $o-main-favorite-color;
+            opacity: 1;
+        }
     }
-    .o_record_box_delete {
-        top: 4px;
-        right: 24px;
-        width: 20px;
-        height: 20px;
+    .o_record_box_star_bg {
+        color: rgba(255,255,255,0.8);
     }
+    &.o_record_starred:not(.o_record_selected) {
+        background-color: lighten($o-main-favorite-color, 30%);
+        border-color: $o-main-favorite-color;
+
+        .o_record_box_star{
+            color: desaturate($o-main-favorite-color, 35%);
+        }
+    }
+    //&.o_record_selected {
+    //    background-color: var(--KanbanColumn__highlight-selected);
+    //}
+
 }

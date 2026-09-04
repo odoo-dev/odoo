@@ -8,6 +8,9 @@
             t-on-click="this.onGlobalClick"
             t-ref="this.rootRef">
             <t t-call="{{ this.templates[this.constructor.CARD_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
+            <div class="o_record_box_star_bg o_record_interactive position-absolute">
+                <span class="oi" data-icon="star_filled"></span>
+            </div>
             <div class="o_record_box_star o_record_interactive position-absolute" t-on-click="this.toggleStarred">
                 <span t-if="this.state.starred" class="oi" data-icon="star_filled"></span>
                 <span t-else="" class="oi" data-icon="star"></span>

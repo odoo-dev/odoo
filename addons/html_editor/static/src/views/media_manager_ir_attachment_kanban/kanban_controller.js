@@ -5,26 +5,27 @@ export const MediaManagerKanbanControllerProps = {
     ...kanbanControllerProps,
     baseResModel: t.string(),
     baseResId: t.number().optional(),
+    filters: t.array().optional(),
 };
 export class MediaManagerKanbanController extends KanbanController {
     static template = "ir.attachment.MediaManagerKanbanView";
     props = useProps(MediaManagerKanbanControllerProps);
 
     setup() {
-        console.warn("MediaManagerKanbanController :: setup()");
-        console.log("this", this);
-        console.log("props", this.props);
+        console.groupCollapsed("%c MediaManagerKanbanController :: setup()", "background: #99f;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         super.setup();
     }
 
     async onSelectionChanged() {
         if (this.props.onSelectionChanged) {
             const resIds = await this.model.root.getResIds(true);
-            console.log("resIds", resIds);
             const records = this.model.root.records
                 .filter((record) => resIds.includes(record.data.id))
                 .map((rec) => rec.data);
-            console.log("records", JSON.parse(JSON.stringify(records)));
             this.props.onSelectionChanged(resIds, records);
         }
     }
