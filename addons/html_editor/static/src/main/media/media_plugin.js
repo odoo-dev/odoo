@@ -305,7 +305,7 @@ export class MediaPlugin extends Plugin {
                 },
                 // resModel,
                 // resId,
-                // multiUpload: true,
+                multiSelect: !imageToReplace,
                 // field,
                 // validateCallback: async (elements) => {
                 //     // todo : make sure we reproduce the all the necessary old save behaviour

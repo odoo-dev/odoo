@@ -86,9 +86,6 @@ export class KanbanRecord extends CardRenderer {
         this.longTouchTimer = null;
         this.touchStartMs = 0;
         this.showMenu = this.constructor.MENU_ATTRIBUTE in this.templates;
-        console.warn("base kanban record", this);
-        console.log(" => props", this.props.archInfo);
-        console.log(" => showmenu", this.showMenu);
     }
 
     get renderingContext() {

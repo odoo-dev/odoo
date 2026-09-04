@@ -81,8 +81,6 @@ export class KanbanController extends Component {
         this.offlinePlugin = usePlugin(OfflinePlugin);
         const { Model, archInfo } = this.props;
 
-        console.log("KanbanController::setup()", this);
-        console.log("  ==> props :", this.props);
         class KanbanSampleModel extends Model {
             /**
              * @override

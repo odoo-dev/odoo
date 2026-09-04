@@ -64,12 +64,17 @@ export class SearchBar extends Component {
     facetContainerRef = signal.ref();
     // The input element is either owned by the parent (`inputRef` prop, e.g. so it can
     // focus it itself once mounted) or local, like `Dropdown.menuRef`.
-    inputRef = useProps.static("inputRef", t.signal(t.ref()).optional(() => signal.ref()));
+    inputRef = useProps.static(
+        "inputRef",
+        t.signal(t.ref()).optional(() => signal.ref())
+    );
 
     setup() {
-        console.log("----------------------\nSEARCH BAR setup() \n----------------------");
-        console.log("props : ", { ...this.props });
-        console.log("this.env : ", this.env);
+        console.groupCollapsed("%c SearchBar :: setup()", "background: #9ff;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         this.dialogService = useService("dialog");
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.fields = this.env.searchModel.searchViewFields;

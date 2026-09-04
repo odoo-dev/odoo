@@ -16,7 +16,20 @@
                     <span class="oi" data-icon="upload"></span>
                 </div>
             </div>
-            <div class="media-manager-side-panel">SidePanel</div>
+            <div class="media-manager-side-panel">
+                <div class="media-manager-side-panel-buttons">
+                    <a class="btn btn-secondary">upload</a>
+                    <a class="btn btn-secondary">upload url</a>
+                    <a class="btn btn-secondary">AI generate image</a>
+                </div>
+
+                <div class="media-manager-side-panel-filters" t-if="this.props.filters">
+                    <a href="#" t-on-click="() => this.filterRecords()">All</a>
+                    <t t-foreach="this.props.filters" t-as="filter" t-key="filter.label">
+                        <br/><a href="#" t-on-click.prevent="() => this.filterRecords(filter.domain)"><t t-out="filter.label"/></a>
+                    </t>
+                </div>
+            </div>
         </xpath>
     </t>
 

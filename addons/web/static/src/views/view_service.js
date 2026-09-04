@@ -66,7 +66,6 @@ export const viewService = {
          * @returns {Promise<ViewDescriptions>}
          */
         async function loadViews(params, options = {}) {
-            console.warn("loadViews", params, options);
             const { context, resModel, views } = params;
             const loadViewsOptions = {
                 action_id: options.actionId || false,
@@ -105,7 +104,6 @@ export const viewService = {
                 views,
                 options: loadViewsOptions,
             });
-            console.log("views", result);
             const viewDescriptions = {
                 fields: result.models[resModel].fields,
                 relatedModels: result.models,
