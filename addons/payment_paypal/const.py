@@ -1,5 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+PAYMENT_COMPLETE_ORDER_ROUTE = "/payment/paypal/complete_order"
+PAYMENT_RETURN_ROUTE = "/payment/paypal/return"
+PAYMENT_CANCEL_ROUTE = "/payment/paypal/cancel"
+WEBHOOK_ROUTE = "/payment/paypal/webhook/"
+
+
 OAUTH_INIT_ROUTE = "/payment/paypal/oauth/init"
 OAUTH_FINALIZE_ROUTE = "/payment/paypal/oauth/finalize"
 
@@ -36,7 +42,7 @@ SUPPORTED_CURRENCIES = (
 )
 
 # The codes of the default primary payment methods to activate
-DEFAULT_PAYMENT_METHOD_CODES = {"paypal"}
+DEFAULT_PAYMENT_METHOD_CODES = {"paypal", "card"}
 
 # Mapping of transaction states to PayPal payment statuses.
 # See https://developer.paypal.com/docs/api/orders/v2/#definition-capture_status.
@@ -46,10 +52,11 @@ PAYMENT_STATUS_MAPPING = {
         "PENDING",
         "CREATED",
         "APPROVED",  # The buyer approved a checkout order.
+        "PAYER_ACTION_REQUIRED",
     ),
     "done": ("COMPLETED", "CAPTURED"),
-    "cancel": ("DECLINED", "DENIED", "VOIDED"),
-    "error": ("FAILED",),
+    "cancel": ("CANCELED", "VOIDED"),
+    "error": ("FAILED", "DECLINED"),
 }
 
 # Events which are handled by the webhook.
@@ -57,8 +64,10 @@ PAYMENT_STATUS_MAPPING = {
 CHECKOUT_WEBHOOK_EVENTS = [
     "CHECKOUT.ORDER.COMPLETED",
     "CHECKOUT.ORDER.APPROVED",
+    "CHECKOUT.ORDER.DECLINED",
     "CHECKOUT.PAYMENT-APPROVAL.REVERSED",
 ]
+CAPTURE_WEBHOOK_EVENTS = ["PAYMENT.CAPTURE.COMPLETED", "PAYMENT.CAPTURE.DENIED"]
 MERCHANT_WEBHOOK_EVENTS = ["CUSTOMER.MERCHANT-INTEGRATION.SELLER-EMAIL-CONFIRMED"]
 
 # Odoo's public identifiers as a PayPal Partner for OAuth
