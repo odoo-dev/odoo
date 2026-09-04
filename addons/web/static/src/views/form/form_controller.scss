@@ -1040,6 +1040,10 @@
 }
 
 .o_form_view.o_xxs_form_view {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
     .o_group {
         .o_form_label {
             font-size: $o-label-font-size-factor * $o-font-size-base-touch;
