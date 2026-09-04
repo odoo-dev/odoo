@@ -388,3 +388,28 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_do_not_reset_peppol_endpoint(self):
+        company = self.env.company
+        partner = company.partner_id
+        company.write({
+            'country_id': self.env.ref('base.be').id,
+            'vat': 'BE0477472701',
+            'account_peppol_proxy_state': 'not_registered',
+        })
+        company.vat = 'BE0475646428'
+        self.assertRecordValues(partner, [{
+            'peppol_eas': '0208',
+            'peppol_endpoint': '0475646428',
+        }])
+
+        partner.write({
+            'peppol_eas': '0088',
+            'peppol_endpoint': '88888888888',
+        })
+        company.account_peppol_proxy_state = 'sender'
+        company.vat = 'BE0477472701'
+        self.assertRecordValues(partner, [{
+            'peppol_eas': '0088',
+            'peppol_endpoint': '88888888888',
+        }])
