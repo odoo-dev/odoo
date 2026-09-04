@@ -1,7 +1,14 @@
-import { onMounted, onPatched, untrack, useListener, useProps } from "@odoo/owl";
+import {
+    onMounted,
+    onPatched,
+    untrack,
+    useEffect,
+    useListener,
+    useProps,
+    useScope,
+} from "@odoo/owl";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { useBus } from "@web/core/utils/hooks";
-import { onWillRender } from "@web/owl2/utils";
 
 /**
  * This hook is meant to be used by field components that use an input or
@@ -20,6 +27,7 @@ import { onWillRender } from "@web/owl2/utils";
  */
 export function useInputField(params) {
     const inputRef = params.ref;
+    const scope = useScope();
     const getEl = () => (inputRef ? untrack(inputRef) : null);
     const props = useProps();
     const fieldName = params.fieldName || props.name;
@@ -109,11 +117,6 @@ export function useInputField(params) {
     useListener(inputRef, "change", onChange);
     useListener(inputRef, "keydown", onKeydown);
 
-    // We need to call getValue to always observe
-    // the corresponding value in the record. Otherwise, in some cases,
-    // if the value in the record change the component isn't patched.
-    onWillRender(() => params.getValue());
-
     /**
      * Sometimes, a patch can happen with possible a new value for the field
      * If the user was typing a new value (isDirty) or the field is still invalid,
@@ -136,6 +139,32 @@ export function useInputField(params) {
     };
     onMounted(syncInputWithRecord);
     onPatched(syncInputWithRecord);
+
+    // The input is uncontrolled: templates never render `getValue()`, it is only
+    // ever written to the DOM by `syncInputWithRecord`. Nothing therefore
+    // subscribes the component to the value, and a change coming from the model
+    // (typically an onchange) would leave the input untouched. Owl 2 worked around
+    // this by reading the value from within the render itself (`onWillRender`), so
+    // that any change re-rendered the field and the `onPatched` above wrote the new
+    // value into the input. Owl 3 lets us depend on the value directly. When it
+    // changes, request a render so the input is synchronized by `onPatched`, after
+    // Owl has updated conditional DOM and refs.
+    // The element is read first, and tracked, on purpose: the effect runs a first
+    // time during `setup`, when the input isn't there yet, and returning early
+    // keeps `getValue` out of that run. Some fields build the state it reads after
+    // installing this hook, and the effect subscribes to it on its next run anyway,
+    // once the input is mounted.
+    let isValueObserved = false;
+    useEffect(() => {
+        if (inputRef?.()) {
+            params.getValue();
+            if (isValueObserved) {
+                scope.render();
+            } else {
+                isValueObserved = true;
+            }
+        }
+    });
 
     const { model } = props.record;
     useBus(model.bus, "WILL_SAVE_URGENTLY", () => commitChanges(true));
