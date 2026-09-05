@@ -130,11 +130,14 @@ class Date(BaseDate[date]):
     _column_type = ('date', 'date')
 
     @staticmethod
-    def today(*args) -> date:
+    def today(record=None, /) -> date:
         """Return the current day in the format expected by the ORM.
 
         .. note:: This function may be used to compute default values.
         """
+        if record is not None:
+            return record.env.cr.now().date()
+        _logger.warning("give today a record", stack_info=True)
         return date.today()
 
     @staticmethod
@@ -149,7 +152,7 @@ class Date(BaseDate[date]):
             the current date and time (must be a datetime, regular dates
             can't be converted between timezones).
         """
-        today = timestamp or datetime.now()
+        today = timestamp or Datetime.now(record)
         tz = record.env.tz
         today_utc = today.replace(tzinfo=UTC)
         today = today_utc.astimezone(tz)
@@ -215,18 +218,21 @@ class Datetime(BaseDate[datetime]):
     _column_type = ('timestamp', 'timestamp')
 
     @staticmethod
-    def now(*args) -> datetime:
+    def now(record=None, /) -> datetime:
         """Return the current day and time in the format expected by the ORM.
 
         .. note:: This function may be used to compute default values.
         """
-        # microseconds must be annihilated as they don't comply with the server datetime format
+        # microseconds must be annihilated as they don't comply with the server datetime forma
+        if record is not None:
+            return record.env.cr.now().replace(microsecond=0)
+        _logger.warning("give now a record", stack_info=True)
         return datetime.now().replace(microsecond=0)
 
     @staticmethod
-    def today(*args) -> datetime:
+    def today(record=None, /) -> datetime:
         """Return the current day, at midnight (00:00:00)."""
-        return Datetime.now().replace(hour=0, minute=0, second=0)
+        return Datetime.now(record).replace(hour=0, minute=0, second=0)
 
     @staticmethod
     def context_timestamp(record: BaseModel, timestamp: datetime) -> datetime:
