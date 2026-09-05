@@ -1466,7 +1466,7 @@ class TransactionCase(BaseCase):
         issues. """
         mock_dt = fields.Datetime.to_datetime(mock_dt)
         with freeze_time(mock_dt) as frozen_datetime_mock, \
-             patch.object(cls.env.cr, 'now', lambda: mock_dt):
+             patch.object(cls.env.cr, 'now', lambda: frozen_datetime_mock.time_to_freeze):
             cls.frozen_datetime_mock = frozen_datetime_mock
             yield
 

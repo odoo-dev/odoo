@@ -79,6 +79,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         super().setUpClass()
 
         cls.enterClassContext(cls.mock_datetime_and_now(cls.cr.now()))
+        cls.frozen_datetime = cls.frozen_datetime_mock  # alias
 
         cls.cron = cls.env['ir.cron'].create(cls._get_cron_data(cls.env))
         cls.partner = cls.env['res.partner'].create(cls._get_partner_data(cls.env))
