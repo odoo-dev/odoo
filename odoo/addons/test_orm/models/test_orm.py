@@ -2390,7 +2390,7 @@ class CalendarTest(models.Model):
     x_date_end = fields.Date()
 
     def _compute_date(self):
-        self.date_start = self.date_end = fields.Date.today()
+        self.date_start = self.date_end = fields.Date.today(self)
 
 
 class ResCompanyDefaultFor(models.Model):

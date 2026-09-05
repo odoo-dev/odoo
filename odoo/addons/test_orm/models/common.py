@@ -87,7 +87,7 @@ class TestOrmMixedComputes(models.Model):
 
     def _compute_without_dependency(self):
         for record in self:
-            record.compute_without_dependency = fields.Datetime.now()
+            record.compute_without_dependency = fields.Datetime.now(self)
 
 
 class TestOrmPartnerCategory(models.Model):

@@ -172,7 +172,7 @@ def parse_date(value: str, env: Environment) -> date | datetime:
     # Find the starting point
     from odoo.orm.fields_temporal import Date, Datetime  # noqa: PLC0415
 
-    dt: datetime | date = Datetime.now()
+    dt: datetime | date = Datetime.now(env['bases'])
     term = terms.pop(0) if terms[0] in ('today', 'now') else 'now'
     if term == 'today':
         dt = Date.context_today(env['base'], dt)
