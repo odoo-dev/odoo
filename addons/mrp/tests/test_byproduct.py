@@ -408,19 +408,18 @@ class TestMrpByProduct(common.TransactionCase):
 
         # Update byproduct has cost share > 100%
         with self.assertRaises(ValidationError):
-            byproduct_1.cost_share = 120
-            mo.write({'move_byproduct_ids': [(4, byproduct_1.id)]})
+            mo.write({'move_byproduct_ids': [Command.update(byproduct_1.id, {'cost_share': 120})]})
 
         # Update byproduct has cost share < 0%
         with self.assertRaises(ValidationError):
-            byproduct_1.cost_share = -10
-            mo.write({'move_byproduct_ids': [(4, byproduct_1.id)]})
+            mo.write({'move_byproduct_ids': [Command.update(byproduct_1.id, {'cost_share': -10})]})
 
         # Update byproducts have total cost share > 100%
         with self.assertRaises(ValidationError):
-            byproduct_1.cost_share = 60
-            byproduct_2.cost_share = 70
-            mo.write({'move_byproduct_ids': [(6, 0, [byproduct_1.id, byproduct_2.id])]})
+            mo.write({'move_byproduct_ids': [
+                Command.update(byproduct_1.id, {'cost_share': 60}),
+                Command.update(byproduct_2.id, {'cost_share': 70}),
+            ]})
 
     def test_check_byproducts_cost_share_02(self):
         """
