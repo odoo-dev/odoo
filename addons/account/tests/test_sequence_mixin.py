@@ -58,6 +58,7 @@ class TestSequenceMixin(TestSequenceMixinCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.ref('base.user_root').company_id = cls.env.company
         cls.env.ref('base.partner_root').company_id = cls.env.company
 
     def assertNameAtDate(self, date, name):
