@@ -3509,8 +3509,8 @@ class MailThread(models.AbstractModel):
                 self.env["res.partner"]
                 .browse(pid for pid, _uid in inbox_pids_uids)
                 .sudo()
-                .with_context(active_test=True)
                 .user_ids
+                .filtered('active')
             )
             followers = Store.LazyValue(
                 lambda: (
@@ -5250,7 +5250,7 @@ class MailThread(models.AbstractModel):
             res.many(
                 "activities",
                 "_store_activity_fields",
-                value=lambda t: t.with_context(active_test=True).activity_ids,
+                value=lambda t: t.activity_ids.filtered('active'),
             )
         if "attachments" in request_list:
             res.many(

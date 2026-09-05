@@ -117,7 +117,7 @@ class DiscussChannelMember(models.Model):
     @api.constrains('partner_id')
     def _contrains_no_public_member(self):
         for member in self:
-            if any(user._is_public() for user in member.partner_id.user_ids):
+            if any(user._is_public() for user in member.partner_id.user_ids.filtered('active')):
                 raise ValidationError(_("Channel members cannot include public users."))
 
     @api.constrains("channel_role", "channel_id")

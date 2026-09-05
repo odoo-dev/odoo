@@ -367,7 +367,8 @@ class DiscussChannel(models.Model):
     @api.depends('channel_member_ids.partner_id')
     def _compute_channel_partner_ids(self):
         for channel in self:
-            channel.channel_partner_ids = channel.channel_member_ids.partner_id
+            # TODO is this ok to filter active partners only?
+            channel.channel_partner_ids = channel.channel_member_ids.partner_id.filtered('active')
 
     def _inverse_channel_partner_ids(self):
         new_members = []
@@ -1774,7 +1775,7 @@ class DiscussChannel(models.Model):
         except psycopg2.errors.UniqueViolation:
             # the chat was created concurrently, join it rather than failing on its unique index
             return self._get_or_create_chat(partners_to)
-        channel._broadcast(partners.with_context(active_test=True).user_ids)
+        channel._broadcast(partners.user_ids.filtered('active'))
         return channel
 
     def _allow_invite_by_email(self):
