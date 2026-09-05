@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 
 
 class SaleOrderLine(models.Model):
@@ -165,7 +166,7 @@ class SaleOrderLine(models.Model):
         return res
 
     def _sellable_lines_domain(self):
-        return super()._sellable_lines_domain() + [("reward_id", "=", False)]
+        return super()._sellable_lines_domain() & Domain("reward_id", "=", False)
 
     # === TOOLING ===#
 

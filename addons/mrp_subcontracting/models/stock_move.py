@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError
-from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.fields import Domain
 from odoo.tools.misc import OrderedSet
 
 
@@ -308,5 +308,5 @@ class StockMove(models.Model):
 
     def _get_production_assignation_domain(self):
         if self.move_dest_ids.raw_material_production_id.subcontractor_id:
-            return []
+            return Domain.TRUE
         return super()._get_production_assignation_domain()

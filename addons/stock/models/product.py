@@ -155,7 +155,8 @@ class ProductProduct(models.Model):
 
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
         domain_quant_loc, domain_move_in_loc, domain_move_out_loc, domain_move_in_loc_done, domain_move_out_loc_done = self._get_domain_locations()
-        domain_quant = [('product_id', 'in', self.ids)] + domain_quant_loc
+        domain_product = Domain('product_id', 'in', self.ids)
+        domain_quant = domain_product & domain_quant_loc
         dates_in_the_past = False
         # only to_date as to_date will correspond to qty_available
         original_value = to_date
@@ -167,71 +168,71 @@ class ProductProduct(models.Model):
         if to_date and to_date < fields.Datetime.now():
             dates_in_the_past = True
 
-        domain_move_in = [('product_id', 'in', self.ids)] + domain_move_in_loc
-        domain_move_out = [('product_id', 'in', self.ids)] + domain_move_out_loc
+        domain_move_in = domain_product & domain_move_in_loc
+        domain_move_out = domain_product & domain_move_out_loc
         if lot_id is not None:
-            domain_quant += [('lot_id', '=', lot_id)]
-            domain_move_in += [('move_line_ids.lot_id', '=', lot_id)]
-            domain_move_out += [('move_line_ids.lot_id', '=', lot_id)]
+            domain_quant &= Domain('lot_id', '=', lot_id)
+            domain_move_in &= Domain('move_line_ids.lot_id', '=', lot_id)
+            domain_move_out &= Domain('move_line_ids.lot_id', '=', lot_id)
         if owner_id is not None:
-            domain_quant += [('owner_id', '=', owner_id)]
-            domain_move_in += [('restrict_partner_id', '=', owner_id)]
-            domain_move_out += [('restrict_partner_id', '=', owner_id)]
+            domain_quant &= Domain('owner_id', '=', owner_id)
+            domain_move_in &= Domain('restrict_partner_id', '=', owner_id)
+            domain_move_out &= Domain('restrict_partner_id', '=', owner_id)
         if 'owners' in self.env.context:
             owners = self.env.context['owners']
             if owners:
-                domain_quant += [('owner_id', 'in', self.env.context['owners'])]
-                domain_move_in += [('move_line_ids.owner_id', 'in', owners)]
-                domain_move_out += [('move_line_ids.owner_id', 'in', owners)]
+                domain_quant &= Domain('owner_id', 'in', self.env.context['owners'])
+                domain_move_in &= Domain('move_line_ids.owner_id', 'in', owners)
+                domain_move_out &= Domain('move_line_ids.owner_id', 'in', owners)
             else:
-                domain_quant += [('owner_id', '=', False)]
-                domain_move_in += [('move_line_ids.owner_id', '=', False)]
-                domain_move_out += [('move_line_ids.owner_id', '=', False)]
+                domain_quant &= Domain('owner_id', '=', False)
+                domain_move_in &= Domain('move_line_ids.owner_id', '=', False)
+                domain_move_out &= Domain('move_line_ids.owner_id', '=', False)
         if package_id is not None:
-            domain_quant += [('package_id', '=', package_id)]
+            domain_quant &= Domain('package_id', '=', package_id)
         if dates_in_the_past:
             # Use the done location domains (simple location_dest_id) for move lines
-            domain_move_in_done = [('product_id', 'in', self.ids)] + domain_move_in_loc_done
-            domain_move_out_done = [('product_id', 'in', self.ids)] + domain_move_out_loc_done
+            domain_move_in_done = domain_product & domain_move_in_loc_done
+            domain_move_out_done = domain_product & domain_move_out_loc_done
             if owner_id is not None:
-                domain_move_in_done += [('owner_id', '=', owner_id)]
-                domain_move_out_done += [('owner_id', '=', owner_id)]
+                domain_move_in_done &= Domain('owner_id', '=', owner_id)
+                domain_move_out_done &= Domain('owner_id', '=', owner_id)
             if 'owners' in self.env.context:
                 owners = self.env.context['owners']
                 if owners:
-                    domain_move_in_done += [('owner_id', 'in', owners)]
-                    domain_move_out_done += [('owner_id', 'in', owners)]
+                    domain_move_in_done &= Domain('owner_id', 'in', owners)
+                    domain_move_out_done &= Domain('owner_id', 'in', owners)
                 else:
-                    domain_move_in_done += [('owner_id', '=', False)]
-                    domain_move_out_done += [('owner_id', '=', False)]
+                    domain_move_in_done &= Domain('owner_id', '=', False)
+                    domain_move_out_done &= Domain('owner_id', '=', False)
 
         if from_date:
-            date_date_expected_domain_from = [('date', '>=', from_date)]
-            domain_move_in += date_date_expected_domain_from
-            domain_move_out += date_date_expected_domain_from
+            date_date_expected_domain_from = Domain('date', '>=', from_date)
+            domain_move_in &= date_date_expected_domain_from
+            domain_move_out &= date_date_expected_domain_from
         if to_date:
-            date_date_expected_domain_to = [('date', '<=', to_date)]
-            domain_move_in += date_date_expected_domain_to
-            domain_move_out += date_date_expected_domain_to
+            date_date_expected_domain_to = Domain('date', '<=', to_date)
+            domain_move_in &= date_date_expected_domain_to
+            domain_move_out &= date_date_expected_domain_to
         Move = self.env['stock.move'].with_context(active_test=False)
         MoveLine = self.env['stock.move.line']
         Quant = self.env['stock.quant'].with_context(active_test=False)
-        domain_move_in_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_in
-        domain_move_out_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_out
+        domain_move_in_todo = Domain('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available')) & domain_move_in
+        domain_move_out_todo = Domain('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available')) & domain_move_out
         moves_in_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_in_todo, ['product_id'], ['product_qty:sum'])}
         moves_out_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_out_todo, ['product_id'], ['product_qty:sum'])}
         quants_res = {product.id: (quantity, reserved_quantity) for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
         expired_unreserved_quants_res = {}
         if self.env.context.get('with_expiration'):
             max_date = self.env.context['to_date'] if self.env.context.get('to_date') and self.env.context.get('fresh_qty_forecast') else self.env.context['with_expiration']
-            domain_quant += [('removal_date', '<=', max_date)]
+            domain_quant &= Domain('removal_date', '<=', max_date)
             expired_unreserved_quants_res = {product.id: quantity - reserved_quantity for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
         moves_in_res_past = defaultdict(float)
         moves_out_res_past = defaultdict(float)
         if dates_in_the_past:
             # Calculate the moves that were done before now to calculate back in time (as most questions will be recent ones)
-            domain_move_in_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_in_done
-            domain_move_out_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_out_done
+            domain_move_in_done = Domain('state', '=', 'done') & Domain('date', '>', to_date) & domain_move_in_done
+            domain_move_out_done = Domain('state', '=', 'done') & Domain('date', '>', to_date) & domain_move_out_done
 
             for product, quantity in MoveLine._read_group(domain_move_in_done, ['product_id'], ['quantity_product_uom:sum']):
                 moves_in_res_past[product.id] += quantity

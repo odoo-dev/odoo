@@ -345,7 +345,7 @@ class Domain:
         Concatenate as lists.
         If we have two domains, equivalent to '&'.
         """
-        # TODO deprecate this possibility so that users combine domains correctly
+        warnings.warn("Since 21.0, combine domains using & and |", DeprecationWarning, stacklevel=1)
         if isinstance(other, Domain):
             return self & other
         if not isinstance(other, list):
@@ -354,7 +354,7 @@ class Domain:
 
     def __radd__(self, other):
         """Commutative definition of *+*"""
-        # TODO deprecate this possibility so that users combine domains correctly
+        warnings.warn("Since 21.0, combine domains using & and |", DeprecationWarning, stacklevel=1)
         # we are pre-pending, return a list
         # because the result may not be normalized
         return other + list(self)

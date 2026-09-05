@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from odoo import _, api, Command, fields, models
+from odoo.fields import Domain
 from odoo.tools import OrderedSet, float_is_zero
 from odoo.exceptions import ValidationError
 
@@ -659,11 +660,11 @@ class StockMove(models.Model):
 
     def _search_picking_for_assignation_domain(self):
         domain = super()._search_picking_for_assignation_domain()
-        domain += self._get_production_assignation_domain()
+        domain &= self._get_production_assignation_domain()
         return domain
 
     def _get_production_assignation_domain(self):
-        return [('production_group_id', '=', self.production_group_id.id)]
+        return Domain('production_group_id', '=', self.production_group_id.id)
 
     def action_open_reference(self):
         res = super().action_open_reference()
