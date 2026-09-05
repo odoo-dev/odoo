@@ -354,7 +354,8 @@ class DiscussChannel(models.Model):
     @api.depends('channel_member_ids.partner_id')
     def _compute_channel_partner_ids(self):
         for channel in self:
-            channel.channel_partner_ids = channel.channel_member_ids.partner_id
+            # TODO is this ok to filter active partners only?
+            channel.channel_partner_ids = channel.channel_member_ids.partner_id.filtered('active')
 
     def _inverse_channel_partner_ids(self):
         new_members = []
