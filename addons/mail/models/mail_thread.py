@@ -3548,7 +3548,7 @@ class MailThread(models.AbstractModel):
             ]
             # sudo: mail.notification - creating notifications is the purpose of notify methods
             self.env["mail.notification"].sudo().create(notif_create_values)
-            users = self.env["res.users"].browse(uid for _pid, uids in inbox_pids_uids for uid in uids)
+            users = self.env["res.users"].browse(uid for _pid, uids in inbox_pids_uids for uid in uids).filtered(lambda u: u.sudo().active)
             followers = Store.LazyValue(
                 lambda: (
                     self.env["mail.followers"]
@@ -5290,7 +5290,7 @@ class MailThread(models.AbstractModel):
             res.many(
                 "activities",
                 "_store_activity_fields",
-                value=lambda t: t.with_context(active_test=True).activity_ids,
+                value=lambda t: t.activity_ids.filtered('active'),
             )
         if "attachments" in request_list:
             res.many(
