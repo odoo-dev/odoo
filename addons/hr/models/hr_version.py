@@ -344,7 +344,7 @@ class HrVersion(models.Model):
 
         multiple_versions = self
         if vals.get("contract_date_start"):
-            unique_versions = multiple_versions.filtered(lambda v: len(v.employee_id.version_ids) == 1)
+            unique_versions = multiple_versions.filtered(lambda v: len(v.employee_id.version_ids.filtered('active')) == 1)
             multiple_versions -= unique_versions
             if len(unique_versions):
                 unique_versions.with_context(sync_contract_dates=True).write({
