@@ -281,8 +281,227 @@ patch(PosStore.prototype, {
                         label: product.display_name,
                     })),
                 });
+<<<<<<< 0e7d18cb59b30ae1be8d8b22248cc341711bef11
                 if (!reward_product_id) {
                     return "";
+||||||| a58784becefc20527fbcb4122082889f6b15c3fb
+
+                reward.delete();
+            }
+        }
+    },
+    async initServerData() {
+        await super.initServerData(...arguments);
+        if (this.selectedOrderUuid) {
+            this.updateRewards();
+        }
+    },
+    /**
+     * Fetches `loyalty.card` records from the server and adds/updates them in our cache.
+     *
+     * @param {domain} domain For the search
+     * @param {int} limit Default to 1
+     */
+    async fetchCoupons(domain, limit = 1) {
+        return await this.data.searchRead(
+            "loyalty.card",
+            domain,
+            this.data.fields["loyalty.card"],
+            { limit }
+        );
+    },
+    /**
+     * Fetches a loyalty card for the given program and partner, put in cache afterwards
+     *  if a matching card is found in the cache, that one is used instead.
+     * If no card is found a local only card will be created until the order is validated.
+     *
+     * @param {int} programId
+     * @param {int} partnerId
+     */
+    async fetchLoyaltyCard(programId, partnerId) {
+        const coupon = this.models["loyalty.card"].find(
+            (c) => c.partner_id?.id === partnerId && c.program_id?.id === programId
+        );
+        if (coupon) {
+            return coupon;
+        }
+        const fetchedCoupons = await this.fetchCoupons([
+            ["partner_id", "=", partnerId],
+            ["program_id", "=", programId],
+        ]);
+        let dbCoupon = fetchedCoupons.length > 0 ? fetchedCoupons[0] : null;
+        if (!dbCoupon) {
+            dbCoupon = await this.models["loyalty.card"].create({
+                id: loyaltyIdsGenerator(),
+                code: null,
+                program_id: this.models["loyalty.program"].get(programId),
+                partner_id: this.models["res.partner"].get(partnerId),
+                points: 0,
+                expiration_date: null,
+            });
+        }
+        return dbCoupon;
+    },
+    getLoyaltyCards(partner) {
+        const loyaltyCards = [];
+        if (this.partnerId2CouponIds[partner.id]) {
+            this.partnerId2CouponIds[partner.id].forEach((couponId) =>
+                loyaltyCards.push(this.models["loyalty.card"].get(couponId))
+            );
+        }
+        return loyaltyCards;
+    },
+    /**
+     * IMPROVEMENT: It would be better to update the local order object instead of creating a new one.
+     *   - This way, we don't need to remember the lines linked to negative coupon ids and relink them after pushing the order.
+     */
+    async preSyncAllOrders(orders) {
+        const result = await super.preSyncAllOrders(orders);
+
+        for (const order of orders) {
+            Object.assign(
+                this.couponByLineUuidCache,
+                order.lines.reduce((agg, line) => {
+                    if (line.coupon_id && line.coupon_id.id < 0) {
+                        return { ...agg, [line.uuid]: line.coupon_id.id };
+                    } else {
+                        return agg;
+                    }
+                }, {})
+            );
+            Object.assign(
+                this.rewardProductByLineUuidCache,
+                order.lines.reduce((agg, line) => {
+                    if (line._reward_product_id) {
+                        return { ...agg, [line.uuid]: line._reward_product_id.id };
+                    } else {
+                        return agg;
+                    }
+                }, {})
+            );
+        }
+        return result;
+    },
+    async postSyncAllOrders(orders) {
+        super.postSyncAllOrders(orders);
+
+        for (const order of orders) {
+            for (const line of order.lines) {
+                if (line.uuid in this.couponByLineUuidCache) {
+                    line.coupon_id = this.models["loyalty.card"].get(
+                        this.couponByLineUuidCache[line.uuid]
+                    );
+=======
+
+                reward.delete();
+            }
+        }
+    },
+    async initServerData() {
+        await super.initServerData(...arguments);
+        if (this.selectedOrderUuid) {
+            this.updateRewards();
+        }
+    },
+    /**
+     * Fetches `loyalty.card` records from the server and adds/updates them in our cache.
+     *
+     * @param {domain} domain For the search
+     * @param {int} limit Default to 1
+     */
+    async fetchCoupons(domain, limit = 1) {
+        return await this.data.searchRead(
+            "loyalty.card",
+            domain,
+            this.data.fields["loyalty.card"],
+            { limit }
+        );
+    },
+    /**
+     * Fetches a loyalty card for the given program and partner, put in cache afterwards
+     *  if a matching card is found in the cache, that one is used instead.
+     * If no card is found a local only card will be created until the order is validated.
+     *
+     * @param {int} programId
+     * @param {int} partnerId
+     */
+    async fetchLoyaltyCard(programId, partnerId) {
+        const coupon = this.models["loyalty.card"].find(
+            (c) => c.partner_id?.id === partnerId && c.program_id?.id === programId
+        );
+        if (coupon) {
+            return coupon;
+        }
+        const fetchedCoupons = await this.fetchCoupons([
+            ["partner_id", "=", partnerId],
+            ["program_id", "=", programId],
+        ]);
+        let dbCoupon = fetchedCoupons.length > 0 ? fetchedCoupons[0] : null;
+        if (!dbCoupon) {
+            dbCoupon = await this.models["loyalty.card"].create({
+                id: loyaltyIdsGenerator(),
+                code: null,
+                program_id: this.models["loyalty.program"].get(programId),
+                partner_id: this.models["res.partner"].get(partnerId),
+                points: 0,
+                expiration_date: null,
+            });
+        }
+        return dbCoupon;
+    },
+    getLoyaltyCards(partner) {
+        const loyaltyCards = [];
+        if (this.partnerId2CouponIds[partner.id]) {
+            this.partnerId2CouponIds[partner.id].forEach((couponId) => {
+                const loyaltyCard = this.models["loyalty.card"].get(couponId);
+                if (loyaltyCard) {
+                    loyaltyCards.push(loyaltyCard);
+                }
+            });
+        }
+        return loyaltyCards;
+    },
+    /**
+     * IMPROVEMENT: It would be better to update the local order object instead of creating a new one.
+     *   - This way, we don't need to remember the lines linked to negative coupon ids and relink them after pushing the order.
+     */
+    async preSyncAllOrders(orders) {
+        const result = await super.preSyncAllOrders(orders);
+
+        for (const order of orders) {
+            Object.assign(
+                this.couponByLineUuidCache,
+                order.lines.reduce((agg, line) => {
+                    if (line.coupon_id && line.coupon_id.id < 0) {
+                        return { ...agg, [line.uuid]: line.coupon_id.id };
+                    } else {
+                        return agg;
+                    }
+                }, {})
+            );
+            Object.assign(
+                this.rewardProductByLineUuidCache,
+                order.lines.reduce((agg, line) => {
+                    if (line._reward_product_id) {
+                        return { ...agg, [line.uuid]: line._reward_product_id.id };
+                    } else {
+                        return agg;
+                    }
+                }, {})
+            );
+        }
+        return result;
+    },
+    async postSyncAllOrders(orders) {
+        super.postSyncAllOrders(orders);
+
+        for (const order of orders) {
+            for (const line of order.lines) {
+                if (line.uuid in this.couponByLineUuidCache) {
+                    line.coupon_id = this.models["loyalty.card"].get(
+                        this.couponByLineUuidCache[line.uuid]
+                    );
+>>>>>>> 2b4d05fcc3bc3617eba91ed21e8da99339890c53
                 }
                 rewardEntry.reward_product_id = reward_product_id;
             }
