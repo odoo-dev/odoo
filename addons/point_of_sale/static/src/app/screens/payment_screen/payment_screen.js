@@ -66,14 +66,17 @@ export class PaymentScreen extends Component {
         }
 
         //Activate the invoice option for refund orders if the original order was invoiced.
-        if (
-            this.currentOrder.isRefund &&
-            this.currentOrder.lines[0].refunded_orderline_id?.order_id?.isToInvoice()
-        ) {
-            this.currentOrder.setToInvoice(true);
+        const currentOrder = this.currentOrder;
+        if (currentOrder.isRefund) {
+            return this.pos.ensureRefundedOrderLoaded(currentOrder).then(() => {
+                if (this.shouldInvoiceRefund(currentOrder)) {
+                    currentOrder.setToInvoice(true);
+                }
+            });
         }
     }
 
+<<<<<<< 5b37d26d680f550ad0b78a3dec6440e6b17d6a93
     get validationOptions() {
         const opts = {
             pos: this.pos,
@@ -96,6 +99,13 @@ export class PaymentScreen extends Component {
         return opts;
     }
 
+||||||| b7870dbe99359d64900e00de13e0976d31b9d9df
+=======
+    shouldInvoiceRefund(order) {
+        return Boolean(order.refunded_order_id?.isToInvoice());
+    }
+
+>>>>>>> b4d61ad6683900b48fcd963f13b33fdb7e5df4ff
     getNumpadButtons() {
         const colorClassMap = {
             [this.env.services.localization.decimalPoint]: "o_colorlist_item_numpad_color_6",

@@ -205,8 +205,31 @@ registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickInvoiceButton(),
             PaymentScreen.clickValidate(),
+<<<<<<< 5b37d26d680f550ad0b78a3dec6440e6b17d6a93
             // Edit payment button shouldn't be available for posted orders
             negateStep({ trigger: ".feedback-screen .edit-order-payment:contains(Edit Payment)" }),
+||||||| b7870dbe99359d64900e00de13e0976d31b9d9df
+=======
+            Chrome.clickOrders(),
+            TicketScreen.selectFilter("Paid"),
+            TicketScreen.selectOrder("001"),
+            inLeftSide([
+                ...Order.hasLine({ productName: "Product Test", withClass: ".selected" }),
+                Numpad.click("1"),
+            ]),
+            TicketScreen.confirmRefund(),
+            PaymentScreen.isShown(),
+            {
+                content: "invoice button is disabled for refund of an invoiced order",
+                trigger: ".js_invoice[disabled]",
+            },
+            refresh(),
+            PaymentScreen.isShown(),
+            {
+                content: "invoice button is still disabled after refresh",
+                trigger: ".js_invoice[disabled]",
+            },
+>>>>>>> b4d61ad6683900b48fcd963f13b33fdb7e5df4ff
         ].flat(),
 });
 
