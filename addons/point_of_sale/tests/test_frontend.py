@@ -20,6 +20,13 @@ class TestPointOfSaleHttpCommon(CommonPosTest, AccountTestInvoicingHttpCommon):
 
     _test_user_groups = None  # FIXME list needed groups
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # The catalogue the tours run against; it replaces the products the
+        # base class builds for the python tests.
+        cls._setup_frontend_fixtures()
+
     def _get_url(self, pos_config=None):
         pos_config = pos_config or self.main_pos_config
         return f"/pos/ui/{pos_config.id}"
@@ -1037,7 +1044,12 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.pos_config.id, 'test_zero_decimal_places_currency', login="pos_user")
         order = self.env['pos.order'].search([], limit=1)
-        self.assertEqual(order.payment_ids[0].payment_method_id.name, "Bank")
+        # The tour validates without picking a method, so the first one of the
+        # config is the one that must have been used.
+        self.assertEqual(
+            order.payment_ids[0].payment_method_id,
+            self.pos_config.payment_method_ids[0],
+        )
 
     def test_barcode_search_attributes_preset(self):
         product = self.env['product.template'].create({

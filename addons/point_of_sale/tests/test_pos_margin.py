@@ -17,7 +17,6 @@ class TestPosMargin(CommonPosTest):
         self.config = self.pos_config
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
-
     def test_positive_margin(self):
         """
         Test margin where it should be more than zero

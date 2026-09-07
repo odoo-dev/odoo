@@ -5,7 +5,6 @@ from random import randint
 from datetime import date, datetime, timedelta
 from odoo import fields, tools
 from odoo.fields import Command
-from odoo.tests import Form
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -65,7 +64,10 @@ class CommonPosTest(AccountTestInvoicingCommon):
         cls.company_currency = cls.company.currency_id
         # other_currency is a currency different from the company_currency
         # sometimes company_currency is different from USD, so handle appropriately.
-        cls.other_currency = cls.setup_other_currency("EUR", rounding=0.001)
+        # Keep the standard rounding: `account`'s tax tests resolve the very
+        # same EUR record through `setup_other_currency('EUR')`, and a 0.001
+        # rounding here would stop their totals from rounding to cents.
+        cls.other_currency = cls.setup_other_currency("EUR")
 
         cls.currency_pricelist = cls.env['product.pricelist'].create({
             'name': 'Public Pricelist',
@@ -76,6 +78,7 @@ class CommonPosTest(AccountTestInvoicingCommon):
         #   - derived from 'point_of_sale.pos_config_main' with added journal_id and credit payment method.
         # other_currency_config
         #   - pos.config set to have currency different from company currency.
+        cls._setup_pos_users()
         cls.pos_config = cls._create_basic_config()
         cls.pos_config_foreign = cls._create_other_currency_config()
 
@@ -112,7 +115,6 @@ class CommonPosTest(AccountTestInvoicingCommon):
         cls.create_product_templates()
         cls.pos_config.write({'payment_method_ids': [(4, cls.pay_later_pm.id)]})
         cls._setup_legacy_aliases()
-        cls._setup_frontend_fixtures()
 
     #####################
     ## private methods ##
@@ -123,26 +125,13 @@ class CommonPosTest(AccountTestInvoicingCommon):
         return cls.company_data['company']
 
     @classmethod
-    def _setup_frontend_fixtures(cls):
-        """ Products, pricelists, attributes and partners the tours rely on.
+    def _setup_pos_users(cls):
+        """ The POS cashier and manager.
 
-        Built on the base class so that a python test and a tour test see the
-        same records under the same names.
+        Created before the configs: `pos_hr` gives the first `group_pos_manager`
+        user an employee the first time a pos.config is written, so these have
+        to exist by then.
         """
-
-        env = cls.env
-        journal_obj = env['account.journal']
-        main_company = cls._get_main_company()
-
-        # The POS receivable account is already set up on the base class.
-        cls.account_receivable = cls.pos_receivable_account
-        env['ir.default'].set('res.partner', 'property_account_receivable_id', cls.account_receivable.id, company_id=main_company.id)
-        # Pricelists are set below, do not take demo data into account
-        env['res.partner'].sudo().invalidate_model(['property_product_pricelist', 'specific_property_product_pricelist'])
-        # remove the all specific values for all companies only for test
-        env.cr.execute('UPDATE res_partner SET specific_property_product_pricelist = NULL')
-
-        # Create user.
         cls.pos_user = cls.env['res.users'].create({
             'name': 'A simple PoS man!',
             'login': 'pos_user',
@@ -163,9 +152,31 @@ class CommonPosTest(AccountTestInvoicingCommon):
             ],
             'tz': 'America/New_York',
         })
-
         cls.pos_user.partner_id.email = 'pos_user@test.com'
         cls.pos_admin.partner_id.email = 'pos_admin@test.com'
+
+    @classmethod
+    def _setup_frontend_fixtures(cls):
+        """ Products, pricelists, attributes and partners the tours rely on.
+
+        Called by `TestPointOfSaleHttpCommon`, not by this class: these records
+        only exist for the tour tests, which run against a controlled catalogue.
+
+        Built on the base class so that a python test and a tour test see the
+        same records under the same names.
+        """
+
+        env = cls.env
+        journal_obj = env['account.journal']
+        main_company = cls._get_main_company()
+
+        # The POS receivable account is already set up on the base class.
+        cls.account_receivable = cls.pos_receivable_account
+        env['ir.default'].set('res.partner', 'property_account_receivable_id', cls.account_receivable.id, company_id=main_company.id)
+        # Pricelists are set below, do not take demo data into account
+        env['res.partner'].sudo().invalidate_model(['property_product_pricelist', 'specific_property_product_pricelist'])
+        # remove the all specific values for all companies only for test
+        env.cr.execute('UPDATE res_partner SET specific_property_product_pricelist = NULL')
 
         # `bank_journal` / `bank_payment_method` and the shop itself come from
         # the base class; the tours configure that one config further below.
@@ -177,6 +188,10 @@ class CommonPosTest(AccountTestInvoicingCommon):
 
         if 'enforce_cities' in cls.env['res.country']._fields:
             cls.env.company.country_id.enforce_cities = False
+
+        # The tours expect their own catalogue only, without the products the
+        # base class builds for the python tests.
+        archive_products(env)
 
         cls.pos_desk_misc_test = env['pos.category'].create({
             'name': 'Misc test',
@@ -514,9 +529,8 @@ class CommonPosTest(AccountTestInvoicingCommon):
         one_week_from_now = today + timedelta(weeks=1)
         two_weeks_from_now = today + timedelta(weeks=2)
 
-        public_pricelist = env['product.pricelist'].create({
-            'name': 'Public Pricelist',
-        })
+        # The base already owns the company-currency public pricelist.
+        public_pricelist = cls.currency_pricelist
 
         env['product.pricelist'].create({
             'name': 'Dates',
@@ -590,8 +604,11 @@ class CommonPosTest(AccountTestInvoicingCommon):
                                                 'type': 'sale',
                                                 'company_id': main_company.id})
 
+        # `pos_config_foreign` runs in another currency on purpose: leave its
+        # pricelist alone, `_check_currencies` rejects the config otherwise.
+        kept_pricelists = excluded_pricelist | cls.pos_config_foreign.pricelist_id
         all_pricelists = env['product.pricelist'].search([
-            ('id', '!=', excluded_pricelist.id),
+            ('id', 'not in', kept_pricelists.ids),
             '|', ('company_id', '=', main_company.id), ('company_id', '=', False)
         ])
         all_pricelists.write(dict(currency_id=main_company.currency_id.id))
@@ -612,6 +629,7 @@ class CommonPosTest(AccountTestInvoicingCommon):
 
         cash_pm = cls.cash_pm
         cls.main_pos_config.write({
+            'name': 'Shop',
             'tax_regime_selection': True,
             'fiscal_position_ids': FP_POS_2M,
             'journal_id': test_sale_journal.id,
@@ -674,7 +692,9 @@ class CommonPosTest(AccountTestInvoicingCommon):
     @classmethod
     def _create_basic_config(cls):
         config = cls.env['pos.config'].create({
-            'name': 'Shop',
+            # The tours rename this to "Shop"; keep the historical name for the
+            # python tests that assert on order/invoice references.
+            'name': 'PoS Shop Test',
             'journal_id': cls.invoice_journal.id,
             'available_pricelist_ids': cls.currency_pricelist.ids,
             'pricelist_id': cls.currency_pricelist.id,
@@ -712,7 +732,11 @@ class CommonPosTest(AccountTestInvoicingCommon):
         cls.env['res.currency.rate'].create({
             'rate': 0.5,
             'currency_id': cls.other_currency.id,
-            'name': fields.Date.subtract(datetime.today().date(), days=1),
+            # Not yesterday: rates are unique per currency/company/day and this
+            # base is now shared with modules that set their own rate for the
+            # previous day (l10n_ke_edi_oscu for one). An earlier date is just
+            # as effective and leaves that day free.
+            'name': fields.Date.subtract(datetime.today().date(), days=2),
         })
         other_cash_journal = cls.env['account.journal'].create({
             'name': 'Cash Other',
@@ -856,13 +880,15 @@ class CommonPosTest(AccountTestInvoicingCommon):
         tax10 = create_tax(10, price_include_override='tax_included')
         tax21 = create_tax(21, price_include_override='tax_included')
 
-
+        # Built with `write` rather than a `Form`: this base is shared with the
+        # localization tests, and a Form enforces the extra required tax fields
+        # some charts of accounts add (l10n_co_edi_type, l10n_gt_edi_short_name).
         tax_group_7_10 = tax7.copy()
-        with Form(tax_group_7_10) as tax:
-            tax.name = 'Tax 7+10%'
-            tax.amount_type = 'group'
-            tax.children_tax_ids.add(tax7)
-            tax.children_tax_ids.add(tax10)
+        tax_group_7_10.write({
+            'name': 'Tax 7+10%',
+            'amount_type': 'group',
+            'children_tax_ids': [Command.set((tax7 | tax10).ids)],
+        })
 
         return {
             'tax7': tax7,

@@ -28,6 +28,10 @@ class ProductPricelist(models.Model):
         # Bypass the item_ids field: its dotted active domain forces a slow
         # ir.rule subquery. Search pricelist_id directly instead (indexed, no join).
         fields_to_read = [name for name in self._load_pos_data_fields(config) if name != 'item_ids']
+        if 'write_date' not in fields_to_read:
+            # `_load_pos_data_read` is overridden here, so the write_date that
+            # `pos.load.mixin` appends has to be added back by hand.
+            fields_to_read.append('write_date')
         read_records = records._filtered_access("read").read(fields_to_read, load=False)
 
         items = self.env['product.pricelist.item'].search([('pricelist_id', 'in', records.ids)])
