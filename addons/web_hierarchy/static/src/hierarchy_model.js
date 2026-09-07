@@ -109,10 +109,7 @@ export class HierarchyNode {
     }
 
     /**
-     * Get child node res ids
-     *
-     * Always reflects the TOTAL number of children (loaded + not-yet-fetched), regardless of
-     * how many are currently materialized as HierarchyNode children (see @see loadMoreChildren).
+     * Get child node res ids currently known (loaded and/or not-yet-fetched).
      *
      * @returns {Number[]}
      */
@@ -123,6 +120,20 @@ export class HierarchyNode {
         return this._nodes.length
             ? this._nodes.map((node) => node.resId)
             : this.data[this.childFieldName]?.map((d) => (typeof d === "number" ? d : d.id)) || [];
+    }
+
+    /**
+     * Get the total number of children (loaded + not-yet-fetched).
+     *
+     * Unlike childResIds, this stays correct even right after a collapse: collapsing clears
+     * _nodes (and, once every child has been loaded, _remainingChildResIds is also empty), so
+     * childResIds would momentarily read as empty even though the total is known and unchanged.
+     * Use this getter for display purposes (e.g. the "X Unfold/Fold" label).
+     *
+     * @returns {Number}
+     */
+    get childrenCount() {
+        return this._childrenTotalCount ?? this.childResIds.length;
     }
 
     /**
@@ -781,6 +792,11 @@ export class HierarchyModel extends Model {
         if (!idsToFetch.length) {
             return;
         }
+        // Only the initial expand should auto-collapse a sibling/other tree that was already
+        // expanded (accordion behavior). On a subsequent "load more" batch, node itself is
+        // already the expanded branch (node._nodes.length > 0), so _searchNodeToCollapse would
+        // wrongly match node itself and collapse (hide) the batches already loaded.
+        const isFirstBatch = node._nodes.length === 0;
         const nodesToUpdate = [];
         const allNodeResIds = this.root.resIds;
         let existingChildResIds = idsToFetch.filter((childResId) => allNodeResIds.includes(childResId));
@@ -807,9 +823,11 @@ export class HierarchyModel extends Model {
         node._remainingChildResIds = node._remainingChildResIds.filter(
             (resId) => !idsToFetch.includes(resId)
         );
-        const nodeToCollapse = this._searchNodeToCollapse(node);
-        if (nodeToCollapse && !nodesToUpdate.includes(nodeToCollapse)) {
-            nodeToCollapse.collapseChildNodes(true);
+        if (isFirstBatch) {
+            const nodeToCollapse = this._searchNodeToCollapse(node);
+            if (nodeToCollapse && !nodesToUpdate.includes(nodeToCollapse)) {
+                nodeToCollapse.collapseChildNodes(true);
+            }
         }
         if (subordinates.length) {
             node.createChildNodes(subordinates);
