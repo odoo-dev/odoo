@@ -309,27 +309,6 @@ export class HierarchyNode {
     }
 
     /**
-     * Fetch child nodes
-     */
-    async showChildNodes() {
-        if (this.hasChildren) {
-            if (this._nodes.length) {
-                const nodeToCollapse = this.model._searchNodeToCollapse(this);
-                if (nodeToCollapse) {
-                    nodeToCollapse.collapseChildNodes(true);
-                }
-                this.getDescendantNodes(true).map((n) => {
-                    n.hidden = false;
-                    this.tree.addNode(n);
-                });
-                this.model.notify();
-            } else {
-                await this.model.fetchSubordinates(this);
-            }
-        }
-    }
-
-    /**
      * Collapse child nodes
      *
      * Removes the descendant nodes of the current one and stores
@@ -577,6 +556,12 @@ export class HierarchyModel extends Model {
         // when the current query isn't paginated).
         this._rootsOffset = 0;
         this._rootsTotalCount = null;
+        // The single node currently "focused" (drilled into): only its children are rendered,
+        // replacing everything else. null means the top-level (unfocused) view.
+        this.focusedNode = null;
+        // Stack of previously-focused nodes (null included for "top-level view"), popped by
+        // goBack() to support multi-level drill-down/back navigation.
+        this._breadcrumb = [];
     }
 
     /**
@@ -670,6 +655,8 @@ export class HierarchyModel extends Model {
         nodeId = forestId = treeId = 0;
         this._rootsOffset = 0;
         this._rootsTotalCount = null;
+        this.focusedNode = null;
+        this._breadcrumb = [];
         const { resIds, ...config } = this._getNextConfig(this.config, params);
         const data = await this.keepLast.add(this._loadData({ ...config, resIds }));
         this.root = this._createRoot(config, data);
@@ -682,9 +669,43 @@ export class HierarchyModel extends Model {
      */
     async reload() {
         nodeId = forestId = treeId = 0;
+        // this.root is rebuilt from scratch below, so any focused-node reference would dangle.
+        this.focusedNode = null;
+        this._breadcrumb = [];
         const data = await this.keepLast.add(this._loadData(this.config, true));
         this.root = this._createRoot(this.config, data);
         this.notify({ scrollTarget: "none" });
+    }
+
+    /**
+     * Focus a node: only its children will be rendered, replacing everything else currently
+     * shown. Pushes the current focus onto the breadcrumb so goBack() can undo it.
+     *
+     * @param {HierarchyNode} node node to focus
+     */
+    async focusNode(node) {
+        this._breadcrumb.push(this.focusedNode);
+        this.focusedNode = node;
+        if (!node._nodes.length) {
+            // Never visited before (or was collapsed via drag-and-drop's cache): fetch its first
+            // page. Already-visited nodes keep their previously-loaded children in memory and
+            // don't need a new RPC.
+            await this.fetchSubordinates(node);
+        } else {
+            this.notify();
+        }
+    }
+
+    /**
+     * Undo the last focusNode() call, restoring whichever node (or the top-level view, if none)
+     * was focused before it.
+     */
+    goBack() {
+        if (!this._breadcrumb.length) {
+            return;
+        }
+        this.focusedNode = this._breadcrumb.pop();
+        this.notify();
     }
 
     /**
@@ -723,6 +744,9 @@ export class HierarchyModel extends Model {
             };
             const data = await this._loadData(config);
             this.root = this._createRoot(config, data);
+            // this.root was just rebuilt from scratch: any focused-node reference would dangle.
+            this.focusedNode = null;
+            this._breadcrumb = [];
             this.notify();
             return;
         }
@@ -742,6 +766,11 @@ export class HierarchyModel extends Model {
             // pagination here) -- _nodes is the authoritative, complete set of children.
             parentNode._childrenTotalCount = parentNode._nodes.length;
             parentNode._remainingChildResIds = [];
+            // node (or an ancestor of it) may currently be focused; the point of fetching a
+            // manager is to reveal the broader picture, so land back on the top-level view
+            // rather than staying zoomed into what's now a sub-branch of the new tree.
+            this.focusedNode = null;
+            this._breadcrumb = [];
             this.notify({ scrollTarget: "up" });
         }
     }
@@ -758,12 +787,8 @@ export class HierarchyModel extends Model {
             return;
         }
         if (children[0] instanceof Object) {
-            // Children already cached as full objects (re-expand after a non-hiding collapse):
-            // no RPC needed, just rebuild _nodes from the cached data.
-            const nodeToCollapse = this._searchNodeToCollapse(node);
-            if (nodeToCollapse) {
-                nodeToCollapse.collapseChildNodes(true);
-            }
+            // Children already cached as full objects (e.g. re-expand after a drag-and-drop
+            // reparent collapsed this node): no RPC needed, just rebuild _nodes from the cache.
             node.populateChildNodes();
             this.notify();
             return;
@@ -792,11 +817,6 @@ export class HierarchyModel extends Model {
         if (!idsToFetch.length) {
             return;
         }
-        // Only the initial expand should auto-collapse a sibling/other tree that was already
-        // expanded (accordion behavior). On a subsequent "load more" batch, node itself is
-        // already the expanded branch (node._nodes.length > 0), so _searchNodeToCollapse would
-        // wrongly match node itself and collapse (hide) the batches already loaded.
-        const isFirstBatch = node._nodes.length === 0;
         const nodesToUpdate = [];
         const allNodeResIds = this.root.resIds;
         let existingChildResIds = idsToFetch.filter((childResId) => allNodeResIds.includes(childResId));
@@ -823,12 +843,6 @@ export class HierarchyModel extends Model {
         node._remainingChildResIds = node._remainingChildResIds.filter(
             (resId) => !idsToFetch.includes(resId)
         );
-        if (isFirstBatch) {
-            const nodeToCollapse = this._searchNodeToCollapse(node);
-            if (nodeToCollapse && !nodesToUpdate.includes(nodeToCollapse)) {
-                nodeToCollapse.collapseChildNodes(true);
-            }
-        }
         if (subordinates.length) {
             node.createChildNodes(subordinates);
         }
@@ -836,26 +850,6 @@ export class HierarchyModel extends Model {
             n.setParentNode(node);
         }
         this.notify();
-    }
-
-    /**
-     * Search node to collapse to be able to show the child nodes of node given in parameter
-     *
-     * @param {HierarchyNode} node node to show its child nodes.
-     * @returns {HierarchyNode | null} node found to collapse
-     */
-    _searchNodeToCollapse(node) {
-        const parentNode = node.parentNode;
-        let nodeToCollapse = null;
-        if (parentNode) {
-            nodeToCollapse = parentNode.nodes.find((n) => n.nodes.length);
-        } else {
-            const treeExpanded = this._findTreeExpanded();
-            if (treeExpanded) {
-                nodeToCollapse = treeExpanded.root;
-            }
-        }
-        return nodeToCollapse;
     }
 
     _findTreeExpanded() {

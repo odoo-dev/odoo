@@ -32,10 +32,14 @@ export class HierarchyCard extends Component {
 
     get classNames() {
         const classNames = [this.props.classNames];
-        if (this.props.node.nodes.length) {
+        if (this.isFocused) {
             classNames.push("o_hierarchy_node_unfolded");
         }
         return classNames.join(" ");
+    }
+
+    get isFocused() {
+        return this.props.node.model.focusedNode === this.props.node;
     }
 
     getRenderingContext(data) {
@@ -62,10 +66,11 @@ export class HierarchyCard extends Component {
     }
 
     onClickArrowDown(ev) {
-        if (this.props.node.nodes.length) {
-            this.props.node.collapseChildNodes();
+        const { node } = this.props;
+        if (this.isFocused) {
+            node.model.goBack();
         } else {
-            this.props.node.showChildNodes();
+            node.model.focusNode(node);
         }
     }
 }

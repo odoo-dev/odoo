@@ -30,10 +30,10 @@
                 <button t-if="this.props.node.nodes.length or this.props.node.canShowChildNodes"
                         name="hierarchy_search_subsidiaries"
                         class="o_hierarchy_node_button btn btn-secondary d-grid m-2 mt-0"
-                        t-att-title="!this.props.node.nodes.length ? 'Unfold' : 'Fold'"
+                        t-att-title="!this.isFocused ? 'Unfold' : 'Fold'"
                         t-on-click.synthetic="this.onClickArrowDown"
                 >
-                    <t t-if="!this.props.node.nodes.length">
+                    <t t-if="!this.isFocused">
                         <span style="grid-column: 2;">
                             <i class="oi oi-fw" data-icon="arrow_right"/>
                             <t t-out="this.props.node.childrenCount + ' ' + (this.props.archInfo.label || 'Unfold')"/>
