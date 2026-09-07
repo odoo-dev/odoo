@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="l10n_in_report_invoice_document_inherit" inherit_id="account.report_invoice_document" primary="True">
+        <xpath expr="//t[@t-set='layout_document_title']" position="before">
+            <t t-set="custom_in_footer">
+                <t t-if="o.company_id.account_fiscal_country_id.code == 'IN' and o.move_type in ['out_invoice', 'out_refund', 'out_receipt']
+                and o.company_id.l10n_in_is_gst_registered and o.company_id.l10n_in_gst_registration_type == 'composition'">
+                    <div class="mx-1">
+                        Composition Taxable Person – Not Eligible to Collect Tax on Supplies
+                    </div>
+                </t>
+            </t>
+        </xpath>
         <xpath expr="//div[@name='shipping_address_block']" position="inside">
             <div t-if="o.company_id.account_fiscal_country_id.code == 'IN' and o.company_id.l10n_in_is_gst_registered and o.partner_shipping_id.has_vat">
                 GSTIN: <span t-field="o.partner_shipping_id.vat"/>
@@ -216,11 +226,8 @@
     </template>
 
     <template id="external_layout_footer_content" inherit_id="web.external_layout_footer_content">
-        <xpath expr="//div[contains(@t-attf-class, 'o_footer_content')]" position="inside">
-            <div t-if="doc_model == 'account.move' and o.company_id.account_fiscal_country_id.code == 'IN'
-            and o.company_id.l10n_in_gst_registration_type == 'composition' and o.move_type in ['out_invoice', 'out_refund', 'out_receipt']">
-                Composition Taxable Person – Not Eligible to Collect Tax on Supplies
-            </div>
+        <xpath expr="//div[hasclass('o_footer_pager_pdf')]" position="before">
+            <span t-if="report_type == 'pdf' and custom_in_footer" t-out="custom_in_footer"/>
         </xpath>
     </template>
 </odoo>
