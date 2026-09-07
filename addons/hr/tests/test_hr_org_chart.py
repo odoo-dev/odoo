@@ -110,13 +110,13 @@ class TestHrOrgChart(TestHrCommon, HttpCase):
                     and {'id': employee.parent_id.id, 'display_name': employee.parent_id.display_name},
             }
 
-        result = HrEmployee.hierarchy_read([('id', 'in', employees.ids)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', 'in', employees.ids)], specification, 'parent_id')['records']
         for emp in employees:
             self.assertIn(get_expected_dict(emp), result)
 
         self.employee_georges.parent_id = self.employee_paul
         self.employee_pierre.parent_id = self.employee_paul
-        result = HrEmployee.hierarchy_read([('id', 'in', employees.ids)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', 'in', employees.ids)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 3)
         for emp in employees:
             emp_dict = get_expected_dict(emp)
@@ -125,7 +125,7 @@ class TestHrOrgChart(TestHrCommon, HttpCase):
             self.assertIn(emp_dict, result)
 
         employee_count = HrEmployee.search_count([('id', 'not in', employees.ids), ('parent_id', '=', False)])
-        result = HrEmployee.hierarchy_read([('parent_id', '=', False)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('parent_id', '=', False)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 1 + employee_count)
         for employee_dict in result:
             self.assertFalse(employee_dict['parent_id'], "Each employee in the result should not have any parent set.")
@@ -135,27 +135,46 @@ class TestHrOrgChart(TestHrCommon, HttpCase):
             result
         )
 
-        result = HrEmployee.hierarchy_read([('id', '=', self.employee_paul.id)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', '=', self.employee_paul.id)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 3)
 
         for emp in employees:
             self.assertIn(get_expected_dict(emp), result)
 
-        result = HrEmployee.hierarchy_read([('id', '=', self.employee_georges.id)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', '=', self.employee_georges.id)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 3)
         for emp in employees:
             self.assertIn(get_expected_dict(emp), result)
 
         self.employee_pierre.parent_id = self.employee_georges
-        result = HrEmployee.hierarchy_read([('id', '=', self.employee_georges.id)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', '=', self.employee_georges.id)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 3)
         for emp in employees:
             self.assertIn(get_expected_dict(emp), result)
 
-        result = HrEmployee.hierarchy_read([('id', '=', self.employee_pierre.id)], specification, 'parent_id')
+        result = HrEmployee.hierarchy_read([('id', '=', self.employee_pierre.id)], specification, 'parent_id')['records']
         self.assertEqual(len(result), 2)
         self.assertIn(get_expected_dict(self.employee_pierre), result)
         self.assertIn(get_expected_dict(self.employee_georges), result)
+
+    def test_hierarchy_read_pagination(self):
+        HrEmployee = self.env['hr.employee']
+        specification = {'id': {}}
+        existing_root_count = HrEmployee.search_count([('parent_id', '=', False)])
+        new_employees = HrEmployee.create([{'name': f'Employee {i}'} for i in range(45)])
+        total_roots = existing_root_count + 45
+
+        result = HrEmployee.hierarchy_read([('parent_id', '=', False)], specification, 'parent_id', limit=40, offset=0)
+        self.assertEqual(result['length'], total_roots)
+        self.assertEqual(len(result['records']), 40)
+
+        result = HrEmployee.hierarchy_read([('parent_id', '=', False)], specification, 'parent_id', limit=40, offset=40)
+        self.assertEqual(result['length'], total_roots)
+        self.assertEqual(len(result['records']), total_roots - 40)
+
+        result = HrEmployee.hierarchy_read([('id', 'in', new_employees.ids)], specification, 'parent_id')
+        self.assertEqual(result['length'], 45)
+        self.assertEqual(len(result['records']), 45)
 
     def test_cycles_hierarchy_read(self):
         HrEmployee = self.env['hr.employee']

@@ -10,6 +10,10 @@ let nodeId = 0;
 let forestId = 0;
 let treeId = 0;
 
+// Keep in sync with LOAD_LIMIT in
+// addons/web_hierarchy/models/models.py
+const LOAD_LIMIT = 4;
+
 /**
  * Get the id of the given many2one field value
  *
@@ -39,6 +43,11 @@ export class HierarchyNode {
         this.model = model;
         this._config = config;
         this.hidden = false;
+        // Total number of children this node has, independent of how many are currently
+        // materialized as HierarchyNode children (see populateChildNodes/createChildNodes).
+        this._childrenTotalCount = null;
+        // Child resIds known but not yet fetched/materialized as HierarchyNode children.
+        this._remainingChildResIds = [];
         tree.addNode(this);
         if (populateChildNodes) {
             this.populateChildNodes();
@@ -102,9 +111,15 @@ export class HierarchyNode {
     /**
      * Get child node res ids
      *
+     * Always reflects the TOTAL number of children (loaded + not-yet-fetched), regardless of
+     * how many are currently materialized as HierarchyNode children (see @see loadMoreChildren).
+     *
      * @returns {Number[]}
      */
     get childResIds() {
+        if (this._childrenTotalCount != null) {
+            return [...this._nodes.map((node) => node.resId), ...this._remainingChildResIds];
+        }
         return this._nodes.length
             ? this._nodes.map((node) => node.resId)
             : this.data[this.childFieldName]?.map((d) => (typeof d === "number" ? d : d.id)) || [];
@@ -125,7 +140,19 @@ export class HierarchyNode {
      * @returns {Boolean}
      */
     get hasChildren() {
+        if (this._childrenTotalCount != null) {
+            return this._childrenTotalCount > 0;
+        }
         return this._nodes.length > 0 || this.data[this.childFieldName]?.length > 0;
+    }
+
+    /**
+     * Are there more children to fetch (beyond what's currently loaded)?
+     *
+     * @returns {Boolean}
+     */
+    get hasMoreChildren() {
+        return this._remainingChildResIds.length > 0;
     }
 
     /**
@@ -224,18 +251,37 @@ export class HierarchyNode {
             this.tree.forest.resIds.filter((resId) => resId === this.resId).length === 1
         ) {
             this.createChildNodes(children);
+        } else if (children.length && typeof children[0] === "number") {
+            // Raw (not-yet-fetched) child ids. Only set on first encounter: this method can be
+            // called again later (re-expand from cache) and must not reset already-tracked
+            // pagination state (see loadMoreChildren).
+            if (this._childrenTotalCount == null) {
+                this._childrenTotalCount = children.length;
+                this._remainingChildResIds = [...children];
+            }
+        } else if (this._childrenTotalCount == null) {
+            this._childrenTotalCount = 0;
+            this._remainingChildResIds = [];
         }
     }
 
     /**
      * create child nodes
      *
+     * Appends to the currently materialized child nodes (does not replace them), so it can be
+     * called once per fetched page (see @see HierarchyModel.loadMoreChildren).
+     *
      * @param {Object[]} childNodesData data of child nodes to generate
      */
     createChildNodes(childNodesData) {
-        this._nodes = (childNodesData || this.data[this.childFieldName]).map(
+        const newNodes = (childNodesData || this.data[this.childFieldName]).map(
             (childData) => new HierarchyNode(this.model, this._config, childData, this.tree, this)
         );
+        this._nodes = [...this._nodes, ...newNodes];
+        if (this._childrenTotalCount == null) {
+            this._childrenTotalCount = this._nodes.length;
+            this._remainingChildResIds = [];
+        }
     }
 
     removeParentNode() {
@@ -515,6 +561,11 @@ export class HierarchyModel extends Model {
             ...params.config,
             isRoot: true,
         };
+        // Root-level ("forest") pagination state: how many root trees have been fetched so far,
+        // and the total number of root trees matching the current domain (null = unknown, e.g.
+        // when the current query isn't paginated).
+        this._rootsOffset = 0;
+        this._rootsTotalCount = null;
     }
 
     /**
@@ -533,6 +584,15 @@ export class HierarchyModel extends Model {
      */
     get resIds() {
         return this.root?.resIds || [];
+    }
+
+    /**
+     * Are there more root trees to fetch (beyond what's currently loaded)?
+     *
+     * @returns {Boolean}
+     */
+    get hasMoreRoots() {
+        return this._rootsTotalCount != null && this._rootsOffset < this._rootsTotalCount;
     }
 
     /**
@@ -597,6 +657,8 @@ export class HierarchyModel extends Model {
      */
     async load(params = {}) {
         nodeId = forestId = treeId = 0;
+        this._rootsOffset = 0;
+        this._rootsTotalCount = null;
         const { resIds, ...config } = this._getNextConfig(this.config, params);
         const data = await this.keepLast.add(this._loadData({ ...config, resIds }));
         this.root = this._createRoot(config, data);
@@ -665,58 +727,97 @@ export class HierarchyModel extends Model {
             );
             parentNode.createChildNodes();
             node.setParentNode(parentNode);
+            // The manager and all its siblings are always fetched in full (unbounded, no
+            // pagination here) -- _nodes is the authoritative, complete set of children.
+            parentNode._childrenTotalCount = parentNode._nodes.length;
+            parentNode._remainingChildResIds = [];
             this.notify({ scrollTarget: "up" });
         }
     }
 
     /**
-     * Fetch child nodes of given node
+     * Fetch the first page of child nodes of given node (expand/"Unfold").
      *
      * @param {HierarchyNode} node node to fetch its child nodes
      */
     async fetchSubordinates(node) {
         const childFieldName = this.childFieldName || this.defaultChildFieldName;
         const children = node.data[childFieldName];
-        if (children.length) {
-            const nodesToUpdate = [];
-            if (!(children[0] instanceof Object)) {
-                const allNodeResIds = this.root.resIds;
-                let existingChildResIds = children.filter((childResId) => allNodeResIds.includes(childResId));
-                if (existingChildResIds.length) {
-                    // special case with result found with the search view
-                    for (const tree of this.root.trees) {
-                        if (
-                            existingChildResIds.includes(tree.root.resId) &&
-                            tree.root.id !== node.id
-                        ) {
-                            // don't re-root if both nodes are in the same tree
-                            if (node.tree.id === tree.id) {
-                                existingChildResIds = existingChildResIds.filter(
-                                    (resId) => resId !== tree.root.resId
-                                );
-                                continue;
-                            }
-                            nodesToUpdate.push(tree.root);
-                        }
-                    }
-                }
-                const subordinates = await this.keepLast.add(
-                    this._fetchSubordinates(node, existingChildResIds)
-                );
-                if (subordinates.length) {
-                    node.data[childFieldName] = subordinates;
-                }
-            }
+        if (!children?.length) {
+            return;
+        }
+        if (children[0] instanceof Object) {
+            // Children already cached as full objects (re-expand after a non-hiding collapse):
+            // no RPC needed, just rebuild _nodes from the cached data.
             const nodeToCollapse = this._searchNodeToCollapse(node);
-            if (nodeToCollapse && !nodesToUpdate.includes(nodeToCollapse)) {
+            if (nodeToCollapse) {
                 nodeToCollapse.collapseChildNodes(true);
             }
             node.populateChildNodes();
-            for (const n of nodesToUpdate) {
-                n.setParentNode(node);
-            }
             this.notify();
+            return;
         }
+        await this._loadChildrenBatch(node);
+    }
+
+    /**
+     * Fetch and append the next page of child nodes of given node ("Load more").
+     *
+     * @param {HierarchyNode} node node to fetch more child nodes of
+     */
+    async loadMoreChildren(node) {
+        await this._loadChildrenBatch(node);
+    }
+
+    /**
+     * Shared implementation for @see fetchSubordinates (first page) and
+     * @see loadMoreChildren (subsequent pages): consumes up to LOAD_LIMIT ids from
+     * node._remainingChildResIds, fetches them, and appends them as HierarchyNode children.
+     *
+     * @param {HierarchyNode} node node to fetch a batch of child nodes for
+     */
+    async _loadChildrenBatch(node) {
+        const idsToFetch = node._remainingChildResIds.slice(0, LOAD_LIMIT);
+        if (!idsToFetch.length) {
+            return;
+        }
+        const nodesToUpdate = [];
+        const allNodeResIds = this.root.resIds;
+        let existingChildResIds = idsToFetch.filter((childResId) => allNodeResIds.includes(childResId));
+        if (existingChildResIds.length) {
+            // special case with result found with the search view
+            for (const tree of this.root.trees) {
+                if (existingChildResIds.includes(tree.root.resId) && tree.root.id !== node.id) {
+                    // don't re-root if both nodes are in the same tree
+                    if (node.tree.id === tree.id) {
+                        existingChildResIds = existingChildResIds.filter(
+                            (resId) => resId !== tree.root.resId
+                        );
+                        continue;
+                    }
+                    nodesToUpdate.push(tree.root);
+                }
+            }
+        }
+        const subordinates = await this.keepLast.add(
+            this._fetchSubordinates(idsToFetch, existingChildResIds)
+        );
+        // Every id in idsToFetch is now accounted for, either freshly fetched (subordinates) or
+        // re-rooted from elsewhere in the forest (nodesToUpdate) -- remove them from the queue.
+        node._remainingChildResIds = node._remainingChildResIds.filter(
+            (resId) => !idsToFetch.includes(resId)
+        );
+        const nodeToCollapse = this._searchNodeToCollapse(node);
+        if (nodeToCollapse && !nodesToUpdate.includes(nodeToCollapse)) {
+            nodeToCollapse.collapseChildNodes(true);
+        }
+        if (subordinates.length) {
+            node.createChildNodes(subordinates);
+        }
+        for (const n of nodesToUpdate) {
+            n.setParentNode(node);
+        }
+        this.notify();
     }
 
     /**
@@ -825,6 +926,7 @@ export class HierarchyModel extends Model {
         let onlyRoots = false;
         let domain = config.domain;
         const resIds = reload ? this.resIds : config.resIds;
+        let paginate = false;
         if (resIds?.length > 0) {
             domain = [["id", "in", resIds]];
         } else if (this.isSearchDefaultOrEmpty()) {
@@ -833,12 +935,16 @@ export class HierarchyModel extends Model {
             // additional constraint is added to only display "root"
             // records (without a parent).
             onlyRoots = true;
-            domain = !domain.length
-                ? this.defaultDomain
-                : Domain.and([this.defaultDomain, domain]).toList({});
+            paginate = true;
+            domain = this._computeRootsDomain(config);
         }
         const fieldsSpec = this._getFieldsSpec(config.context);
-        const hierarchyRead = async () => {
+        const hierarchyRead = async (offset = 0) => {
+            const kwargs = { context: this.context };
+            if (paginate) {
+                kwargs.limit = LOAD_LIMIT;
+                kwargs.offset = offset;
+            }
             return await this.orm.call(
                 this.resModel,
                 "hierarchy_read",
@@ -849,15 +955,69 @@ export class HierarchyModel extends Model {
                     this.childFieldName,
                     orderByToString(config.orderBy),
                 ],
-                { context: this.context }
+                kwargs
             );
         };
-        let result = await hierarchyRead();
-        if (!result.length && onlyRoots) {
-            domain = config.domain;
-            result = await hierarchyRead();
+        let { records, length } = await hierarchyRead(0);
+        if (paginate) {
+            this._rootsTotalCount = length;
+            this._rootsOffset = records.length;
+        } else {
+            this._rootsTotalCount = null;
         }
-        return this._formatData(result);
+        if (!records.length && onlyRoots) {
+            domain = config.domain;
+            paginate = false;
+            this._rootsTotalCount = null;
+            ({ records } = await hierarchyRead(0));
+        }
+        return this._formatData(records);
+    }
+
+    /**
+     * Compute the domain used to fetch the top-level ("root") trees, i.e. records without a
+     * parent, combined with the given config's domain. Shared by @see _loadData and
+     * @see loadMoreRoots so both fetch the exact same set of root records.
+     *
+     * @param {Object} config model config to use
+     * @returns {import("@web/src/core/domain").DomainListRepr}
+     */
+    _computeRootsDomain(config) {
+        return !config.domain.length
+            ? this.defaultDomain
+            : Domain.and([this.defaultDomain, config.domain]).toList({});
+    }
+
+    /**
+     * Fetch and append the next page of root nodes ("Load more" at the forest level).
+     */
+    async loadMoreRoots() {
+        if (!this.hasMoreRoots) {
+            return;
+        }
+        const config = this.config;
+        const domain = this._computeRootsDomain(config);
+        const fieldsSpec = this._getFieldsSpec(config.context);
+        const { records, length } = await this.orm.call(
+            this.resModel,
+            "hierarchy_read",
+            [
+                domain,
+                fieldsSpec,
+                this.parentFieldName,
+                this.childFieldName,
+                orderByToString(config.orderBy),
+            ],
+            { context: this.context, limit: LOAD_LIMIT, offset: this._rootsOffset }
+        );
+        this._rootsTotalCount = length;
+        this._rootsOffset += records.length;
+        const newRootsData = this._formatData(records);
+        for (const data of newRootsData) {
+            const tree = new HierarchyTree(this, config, data, this.root);
+            this.root._trees.push(tree);
+        }
+        this.notify({ scrollTarget: "bottom" });
     }
 
     _formatData(data) {
@@ -948,25 +1108,23 @@ export class HierarchyModel extends Model {
     }
 
     /**
-     * Fetch children nodes data for a given node
+     * Fetch children nodes data for a given list of child ids (one page)
      *
-     * @param {HierarchyNode} node node to fetch its children nodes
+     * @param {Number[]} childrenResIds ids to fetch (already sliced to one page)
      * @param {Array<number> | null} excludeResIds list of ids to exclude (because the nodes already exist)
      * @returns {Object[]} list of child node data
      */
-    async _fetchSubordinates(node, excludeResIds = null) {
-        let childrenResIds = node.data[this.childFieldName || this.defaultChildFieldName];
+    async _fetchSubordinates(childrenResIds, excludeResIds = null) {
+        let idsToRead = childrenResIds;
         if (excludeResIds) {
-            childrenResIds = childrenResIds.filter(
-                (childResId) => !excludeResIds.includes(childResId)
-            );
+            idsToRead = idsToRead.filter((childResId) => !excludeResIds.includes(childResId));
         }
-        if (!childrenResIds.length) {
+        if (!idsToRead.length) {
             return [];
         }
         const { records } = await this.orm.webSearchRead(
             this.resModel,
-            [["id", "in", childrenResIds]],
+            [["id", "in", idsToRead]],
             {
                 specification: this._getFieldsSpec(),
                 context: this.context,
@@ -1139,6 +1297,11 @@ export class HierarchyModel extends Model {
         } else {
             // Update parentNode data.
             parentNode.data[this.childFieldName || this.defaultChildFieldName] = formattedData;
+            // formattedData is the complete, authoritative current children set for parentNode
+            // (unbounded, no pagination here) -- discard any stale pagination bookkeeping so it
+            // gets recomputed from scratch by populateChildNodes().
+            parentNode._childrenTotalCount = null;
+            parentNode._remainingChildResIds = [];
             parentNode.populateChildNodes();
         }
         const newNodeId = Object.keys(this.root.nodePerNodeId).find((key) => {

@@ -317,6 +317,106 @@ test("Add a custom domain leaf on default state of the view with a globalDomain 
     });
 });
 
+test("root nodes are paginated with a load more button", async () => {
+    Employee._records = Array.from({ length: 45 }, (_, i) => ({
+        id: i + 1,
+        name: `Employee ${i}`,
+        parent_id: false,
+        child_ids: [],
+    }));
+    await mountView({
+        type: "hierarchy",
+        resModel: "hr.employee",
+    });
+
+    expect(".o_hierarchy_node_container").toHaveCount(40);
+    expect(".o_hierarchy_load_more").toHaveCount(1);
+    await contains(".o_hierarchy_load_more button").click();
+    expect(".o_hierarchy_node_container").toHaveCount(45);
+    expect(".o_hierarchy_load_more").toHaveCount(0);
+});
+
+test("child nodes are paginated with a load more button", async () => {
+    Employee._records = [
+        { id: 1, name: "Albert", parent_id: false, child_ids: [] },
+        ...Array.from({ length: 45 }, (_, i) => ({
+            id: i + 2,
+            name: `Employee ${i}`,
+            parent_id: 1,
+            child_ids: [],
+        })),
+    ];
+    await mountView({
+        type: "hierarchy",
+        resModel: "hr.employee",
+    });
+
+    expect(".o_hierarchy_node_button[title='Unfold']").toHaveText("45 Unfold");
+    await contains(".o_hierarchy_node_button[title='Unfold']").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(40);
+    expect(".o_hierarchy_load_more").toHaveCount(1);
+    await contains(".o_hierarchy_load_more button").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(45);
+    expect(".o_hierarchy_load_more").toHaveCount(0);
+    expect(".o_hierarchy_node_button[title='Fold']").toHaveText("45 Fold");
+});
+
+test("collapsing and re-expanding a partially loaded node keeps the remaining ids", async () => {
+    Employee._records = [
+        { id: 1, name: "Albert", parent_id: false, child_ids: [] },
+        ...Array.from({ length: 45 }, (_, i) => ({
+            id: i + 2,
+            name: `Employee ${i}`,
+            parent_id: 1,
+            child_ids: [],
+        })),
+    ];
+    await mountView({
+        type: "hierarchy",
+        resModel: "hr.employee",
+    });
+
+    await contains(".o_hierarchy_node_button[title='Unfold']").click();
+    await contains(".o_hierarchy_load_more button").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(40);
+
+    await contains(".o_hierarchy_node_button[title='Fold']").click();
+    expect(".o_hierarchy_row").toHaveCount(1);
+
+    await contains(".o_hierarchy_node_button[title='Unfold']").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(40);
+    expect(".o_hierarchy_load_more").toHaveCount(1);
+    await contains(".o_hierarchy_load_more button").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(45);
+    expect(".o_hierarchy_load_more").toHaveCount(0);
+});
+
+test("pagination works for grandchildren nodes too", async () => {
+    Employee._records = [
+        { id: 1, name: "Albert", parent_id: false, child_ids: [] },
+        { id: 2, name: "Georges", parent_id: 1, child_ids: [] },
+        ...Array.from({ length: 45 }, (_, i) => ({
+            id: i + 3,
+            name: `Employee ${i}`,
+            parent_id: 2,
+            child_ids: [],
+        })),
+    ];
+    await mountView({
+        type: "hierarchy",
+        resModel: "hr.employee",
+    });
+
+    await contains(".o_hierarchy_node_button[title='Unfold']").click();
+    expect(".o_hierarchy_row:eq(1) .o_hierarchy_node_container").toHaveCount(1);
+    await contains(".o_hierarchy_row:eq(1) .o_hierarchy_node_button[title='Unfold']").click();
+    expect(".o_hierarchy_row:eq(2) .o_hierarchy_node_container").toHaveCount(40);
+    expect(".o_hierarchy_load_more").toHaveCount(1);
+    await contains(".o_hierarchy_load_more button").click();
+    expect(".o_hierarchy_row:eq(2) .o_hierarchy_node_container").toHaveCount(45);
+    expect(".o_hierarchy_load_more").toHaveCount(0);
+});
+
 test("search record in hierarchy view", async () => {
     await mountView({
         type: "hierarchy",

@@ -32,6 +32,9 @@
                             />
                         </t>
                     </div>
+                    <div t-if="row.hasMoreChildren" class="o_hierarchy_load_more d-flex justify-content-center my-2">
+                        <button class="btn btn-outline-primary" t-on-click="() => this.onLoadMore(row)">Load more...</button>
+                    </div>
                 </t>
             </div>
         </div>

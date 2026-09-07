@@ -103,11 +103,11 @@ export class HierarchyRenderer extends Component {
 
     get rows() {
         const rootNodes = this.props.model.root.rootNodes;
-        const rows = [{ nodes: rootNodes }];
+        const rows = [{ nodes: rootNodes, hasMoreChildren: this.props.model.hasMoreRoots }];
         const processNode = (node, rootNode) => {
             const subNodes = node.nodes;
             if (subNodes.length && !subNodes.includes(rootNode)) {
-                rows.push({ parentNode: node, nodes: subNodes });
+                rows.push({ parentNode: node, nodes: subNodes, hasMoreChildren: node.hasMoreChildren });
                 for (const subNode of subNodes) {
                     processNode(subNode, rootNode);
                 }
@@ -119,6 +119,14 @@ export class HierarchyRenderer extends Component {
         }
 
         return rows;
+    }
+
+    async onLoadMore(row) {
+        if (row.parentNode) {
+            await this.props.model.loadMoreChildren(row.parentNode);
+        } else {
+            await this.props.model.loadMoreRoots();
+        }
     }
 
     async nodeDrop({ element, row, nextRow, newParentNode }) {
