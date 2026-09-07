@@ -60,7 +60,7 @@ class CronMixinCase:
             'active': True,
             'interval_number': 1,
             'interval_type': 'days',
-            'nextcall': fields.Datetime.now() + timedelta(hours=1),
+            'nextcall': self.env.now + timedelta(hours=1),
             'lastcall': False,
             'priority': priority,
         }
@@ -112,7 +112,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
             self.cron.method_direct_trigger()
             self.assertEqual(cursor_method.call_count, 1, "Should create a new transaction for direct trigger")
 
-        self.assertEqual(self.cron.lastcall, fields.Datetime.now())
+        self.assertEqual(self.cron.lastcall, self.env.now)
         self.assertEqual(self.partner.name, 'You have been CRONWNED')
 
     def test_cron_direct_trigger_exception(self):
@@ -131,14 +131,14 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.assertEqual(list(action_params['data']), ['name', 'message', 'arguments', 'timestamp', 'context', 'debug'])
 
     def test_cron_no_job_ready(self):
-        self.cron.nextcall = fields.Datetime.now() + timedelta(days=1)
+        self.cron.nextcall = self.env.now + timedelta(days=1)
         self.cron.flush_recordset()
 
         ready_jobs = self.registry['ir.cron']._get_all_ready_jobs(self.cr)
         self.assertNotIn(self.cron.id, [job['id'] for job in ready_jobs])
 
     def test_cron_ready_by_nextcall(self):
-        self.cron.nextcall = fields.Datetime.now()
+        self.cron.nextcall = self.env.now
         self.cron.flush_recordset()
 
         ready_jobs = self.registry['ir.cron']._get_all_ready_jobs(self.cr)
@@ -153,7 +153,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
 
     def test_cron_unactive_never_ready(self):
         self.cron.active = False
-        self.cron.nextcall = fields.Datetime.now()
+        self.cron.nextcall = self.env.now
         self.env.flush_all()
 
         ready_jobs = self.registry['ir.cron']._get_all_ready_jobs(self.cr)
@@ -170,7 +170,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         cron_low.priority = 10  # lowest priority
 
         crons = cron_high | cron_avg | cron_low  # order is important
-        crons.write({'nextcall': fields.Datetime.now()})
+        crons.write({'nextcall': self.env.now})
         crons.flush_recordset()
         ready_jobs = self.registry['ir.cron']._get_all_ready_jobs(self.cr)
 
@@ -185,7 +185,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         # the trigger should not be stored.
 
         self.cron.active = False
-        self.cron.nextcall = fields.Datetime.now() + timedelta(days=2)
+        self.cron.nextcall = self.env.now + timedelta(days=2)
         self.cron.flush_recordset()
         with self.capture_triggers() as capture:
             self.cron._trigger()
@@ -206,12 +206,12 @@ class TestIrCron(TransactionCase, CronMixinCase):
 
         # admin disable the cron
         self.cron.active = False
-        self.cron.nextcall = fields.Datetime.now() + timedelta(days=10)
+        self.cron.nextcall = self.env.now + timedelta(days=10)
         self.cron.flush_recordset()
 
         # user triggers the cron to run *tomorrow of yesterday (=today)
         with self.capture_triggers() as capture:
-            self.cron._trigger(at=fields.Datetime.now() + timedelta(days=1))
+            self.cron._trigger(at=self.env.now + timedelta(days=1))
 
         # admin re-enable the cron
         self.cron.active = True
@@ -227,7 +227,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
     def test_cron_process_job(self):
         Progress = self.env['ir.cron.progress']
         default_progress_values = {'done': 0, 'remaining': 0, 'timed_out_counter': 0}
-        ten_days_ago = fields.Datetime.now() - MIN_DELTA_BEFORE_DEACTIVATION - timedelta(days=2)
+        ten_days_ago = self.env.now - MIN_DELTA_BEFORE_DEACTIVATION - timedelta(days=2)
         almost_failed = MIN_FAILURE_COUNT_BEFORE_DEACTIVATION - 1
         frozen_datetime = self.frozen_datetime
 
@@ -488,7 +488,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.assertFalse(notify.called)
 
         self.cron.failure_count = 3
-        self.cron.first_failure_date = fields.Datetime.now() - timedelta(days=10)
+        self.cron.first_failure_date = self.env.now - timedelta(days=10)
 
         self.cron._trigger()
         self.env.flush_all()
@@ -510,7 +510,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.assertTrue(notify.called, 'Warning notification should be sent')
 
         self.cron.failure_count = 9  # next is 10 (see throttling)
-        self.cron.first_failure_date = fields.Datetime.now() - timedelta(days=5)
+        self.cron.first_failure_date = self.env.now - timedelta(days=5)
 
         self.cron._trigger()
         self.env.flush_all()
@@ -532,7 +532,7 @@ class TestIrCron(TransactionCase, CronMixinCase):
         self.assertTrue(notify.called, 'Warning notification should be sent')
 
         self.cron.failure_count = 4
-        self.cron.first_failure_date = fields.Datetime.now() - timedelta(days=8)
+        self.cron.first_failure_date = self.env.now - timedelta(days=8)
 
         self.cron._trigger()
         self.env.flush_all()

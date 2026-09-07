@@ -131,7 +131,7 @@ class TestPurchaseStockValuation(PurchaseTestCommon):
         po = self._create_purchase(self.product_avco, 10, 10, currency_id=self.other_currency.id)
         self._create_bill(purchase_order=po, quantity=10)
 
-        with freeze_time(fields.Date.today() + relativedelta(days=1)):
+        with freeze_time(self.env.now.date() + relativedelta(days=1)):
             self._receive(po)
 
         self.assertEqual(self.product_avco.total_value, 100)

@@ -109,10 +109,10 @@ class TestSurveyInternals(common.TestSurveyCommon, MailCase):
                 question_answer = self._add_answer_line(question, user_input, 7)
                 self.assertEqual(question_answer.display_name, '7.0')
             elif question.question_type == 'date':
-                question_answer = self._add_answer_line(question, user_input, fields.Datetime.now())
+                question_answer = self._add_answer_line(question, user_input, self.env.now)
                 self.assertEqual(question_answer.display_name, '2020-02-15')
             elif question.question_type == 'datetime':
-                question_answer = self._add_answer_line(question, user_input, fields.Datetime.now())
+                question_answer = self._add_answer_line(question, user_input, self.env.now)
                 self.assertEqual(question_answer.display_name, '2020-02-15 19:00:00')
             elif question.question_type == 'simple_choice':
                 question_answer = self._add_answer_line(question, user_input, question.suggested_answer_ids[0].id)

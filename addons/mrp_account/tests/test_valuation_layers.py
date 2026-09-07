@@ -371,7 +371,7 @@ class TestMrpValuationStandard(TestBomPriceCommon):
         self.table_head.action_bom_cost()
         self.assertRecordValues(self.table_head, [{'standard_price': 468.75, 'total_value': 0}])
         self.assertEqual(old_stock_value, sum(self.env.company.stock_value().values()))
-        products = self.table_head.with_context(to_date=fields.Datetime.now())
+        products = self.table_head.with_context(to_date=self.env.now)
         self.assertRecordValues(
             products & self.table_head,
             [{

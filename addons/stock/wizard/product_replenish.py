@@ -80,7 +80,7 @@ class ProductReplenish(models.TransientModel):
         return res
 
     def _get_date_planned(self, route_id, **kwargs):
-        now = fields.Datetime.now()
+        now = self.env.now
         delay = 0
         if route_id:
             delay = sum([rule.delay for rule in route_id.rule_ids])

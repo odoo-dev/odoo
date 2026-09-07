@@ -537,7 +537,7 @@ class CrmLead(models.Model):
 
     @api.depends('calendar_event_ids', 'calendar_event_ids.start')
     def _compute_meeting_display(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         meeting_data = self.env['calendar.event'].sudo()._read_group([
             ('opportunity_id', 'in', self.ids),
         ], ['opportunity_id'], ['start:array_agg', 'start:max'])
@@ -734,7 +734,7 @@ class CrmLead(models.Model):
 
         # handling a date_closed value if the lead is directly created in the won stage
         won_to_set = leads.filtered(lambda l: not l.date_closed and l.stage_id.is_won)
-        won_to_set.write({'date_closed': fields.Datetime.now()})
+        won_to_set.write({'date_closed': self.env.now})
 
         leads._handle_won_lost({}, {
             lead.id: {
@@ -785,7 +785,7 @@ class CrmLead(models.Model):
 
         # stage change with new stage: update probability and date_closed
         if vals.get('probability', 0) >= 100 or not vals.get('active', True):
-            vals['date_closed'] = fields.Datetime.now()
+            vals['date_closed'] = self.env.now
         elif vals.get('probability', 0) > 0:
             vals['date_closed'] = False
         elif stage_updated and not stage_is_won and not 'probability' in vals:
@@ -1121,7 +1121,7 @@ class CrmLead(models.Model):
         team_condition = SQL('team_id = %s', self.team_id.id) if self.team_id else SQL('team_id IS NULL')
         source_case = SQL('source_id = %s AND %s', self.source_id.id, team_condition) if self.source_id else SQL('FALSE')
         country_case = SQL('country_id = %s AND %s', self.country_id.id, team_condition) if self.country_id else SQL('FALSE')
-        tz_midnight = fields.Datetime.now().astimezone(ZoneInfo(self.env.user.tz or self.user_id.tz or 'UTC')).replace(hour=0, minute=0, second=0)
+        tz_midnight = self.env.now.astimezone(ZoneInfo(self.env.user.tz or self.user_id.tz or 'UTC')).replace(hour=0, minute=0, second=0)
         tz_midnight_in_utc = tz_midnight.astimezone(UTC).replace(tzinfo=None)
         query = SQL("""
         SELECT

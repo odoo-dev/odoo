@@ -28,7 +28,7 @@ class UtmCampaign(models.Model):
                                           copy=False, readonly=True, store=True)
     ab_testing_winner_mailing_id = fields.Many2one("mailing.mailing", "A/B Campaign Winner Mailing", copy=False)
     ab_testing_schedule_datetime = fields.Datetime('Send Final On',
-        default=lambda self: fields.Datetime.now() + relativedelta(days=1),
+        default=lambda self: self.env.now + relativedelta(days=1),
         help="Date that will be used to know when to determine and send the winner mailing")
     ab_testing_winner_selection = fields.Selection([
         ('manual', 'Manual'),
@@ -140,7 +140,7 @@ class UtmCampaign(models.Model):
         In case there is no mailing sent for an A/B testing campaign we ignore this campaign
         """
         ab_testing_campaign = self.search([
-            ('ab_testing_schedule_datetime', '<=', fields.Datetime.now()),
+            ('ab_testing_schedule_datetime', '<=', self.env.now),
             ('ab_testing_winner_selection', '!=', 'manual'),
             ('ab_testing_completed', '=', False),
         ])

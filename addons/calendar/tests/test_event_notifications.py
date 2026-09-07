@@ -167,8 +167,8 @@ class TestEventNotifications(CalendarMailCommon):
             self.env['calendar.event'].with_context(mail_create_nolog=True).create([{
                 'name': 'Meeting',
                 'allday': True,
-                'start_date': fields.Date.today() + relativedelta(days=7),
-                'stop_date': fields.Date.today() + relativedelta(days=8),
+                'start_date': self.env.now.date() + relativedelta(days=7),
+                'stop_date': self.env.now.date() + relativedelta(days=8),
                 'partner_ids': [(4, self.partner.id)],
             }])
 
@@ -215,7 +215,7 @@ class TestEventNotifications(CalendarMailCommon):
             'message_type': 'user_notification',
             'subtype': 'mail.mt_note',
         }):
-            self.event.start = fields.Datetime.now() + relativedelta(days=1)
+            self.event.start = self.env.now + relativedelta(days=1)
 
     @freeze_time('2018')  # class event has hardcoded dates
     def test_message_datetime_changed_with_activity(self):
@@ -231,13 +231,13 @@ class TestEventNotifications(CalendarMailCommon):
             'message_type': 'user_notification',
             'subtype': 'mail.mt_note',
         }):
-            self.event.start = fields.Datetime.now() + relativedelta(days=1)
+            self.event.start = self.env.now + relativedelta(days=1)
 
     def test_message_date_changed(self):
         self.event.write({
             'allday': True,
-            'start_date': fields.Date.today() + relativedelta(days=7),
-            'stop_date': fields.Date.today() + relativedelta(days=8),
+            'start_date': self.env.now.date() + relativedelta(days=7),
+            'stop_date': self.env.now.date() + relativedelta(days=8),
         })
         self.event.partner_ids = self.partner
         with self.assertSinglePostNotifications([{'partner': self.partner, 'type': 'inbox'}], {
@@ -249,8 +249,8 @@ class TestEventNotifications(CalendarMailCommon):
     def test_message_date_changed_past(self):
         self.event.write({
             'allday': True,
-            'start_date': fields.Date.today(),
-            'stop_date': fields.Date.today() + relativedelta(days=1),
+            'start_date': self.env.now.date(),
+            'stop_date': self.env.now.date() + relativedelta(days=1),
         })
         self.event.partner_ids = self.partner
         with self.assertNoNotifications():
@@ -299,7 +299,7 @@ class TestEventNotifications(CalendarMailCommon):
             'interval': 'minutes',
             'duration': 30,
         })
-        now = fields.Datetime.now()
+        now = self.env.now
 
         def notifications():
             return [
@@ -336,7 +336,7 @@ class TestEventNotifications(CalendarMailCommon):
             'interval': "minutes",
             'duration': 30,
         })
-        now = fields.Datetime.now()
+        now = self.env.now
         admin_partner = self.user_admin.partner_id
         event = self.env['calendar.event'].with_user(self.user_admin).with_context(no_mail_to_attendees=True).create({
             'name': "Admin Meeting",
@@ -372,7 +372,7 @@ class TestEventNotifications(CalendarMailCommon):
                 })
 
     def test_email_alarm(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             alarm = self.env['calendar.alarm'].with_user(self.user).create({
                 'name': 'Alarm',
@@ -412,7 +412,7 @@ class TestEventNotifications(CalendarMailCommon):
         cron.lastcall = False
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             with freeze_time('2022-04-13 10:00+0000'):
-                now = fields.Datetime.now()
+                now = self.env.now
                 self.env['calendar.event'].create({
                     'name': "Single Doom's day",
                     'start': now + relativedelta(minutes=15),
@@ -449,7 +449,7 @@ class TestEventNotifications(CalendarMailCommon):
 
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             with freeze_time('2022-04-13 10:00+0000'):
-                now = fields.Datetime.now()
+                now = self.env.now
                 self.env['calendar.event'].create({
                     'name': "Single Doom's day",
                     'start_date': now.date(),
@@ -462,7 +462,7 @@ class TestEventNotifications(CalendarMailCommon):
 
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             with freeze_time('2022-04-13 10:00+0000'):
-                now = fields.Datetime.now()
+                now = self.env.now
                 self.env['calendar.event'].create({
                     'name': "Single Doom's day",
                     'start_date': now.date(),
@@ -489,7 +489,7 @@ class TestEventNotifications(CalendarMailCommon):
             # Create monthly recurrence, ensure the next alarm is set to the first event
             # and then one month later must be set one hour before to the last event.
             with freeze_time('2024-04-16 10:00+0000'):
-                now = fields.Datetime.now()
+                now = self.env.now
                 self.env['calendar.event'].create({
                     'name': "Single Doom's day",
                     'start': now + relativedelta(hours=2),
@@ -526,7 +526,7 @@ class TestEventNotifications(CalendarMailCommon):
         cron.lastcall = False
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             with freeze_time('2022-04-13 10:00+0000'):
-                now = fields.Datetime.now()
+                now = self.env.now
                 self.env['calendar.event'].create({
                     'name': "Recurring Event",
                     'start': now + relativedelta(minutes=15),
@@ -651,7 +651,7 @@ class TestEventNotifications(CalendarMailCommon):
             'count': 2,
         })
 
-        now = fields.Datetime.now()
+        now = self.env.now
 
         def notifications():
             return [
@@ -727,7 +727,7 @@ class TestEventNotifications(CalendarMailCommon):
         """
             Test that the next potential limit alarm is correctly computed for notification alarms.
         """
-        now = fields.Datetime.now()
+        now = self.env.now
         start = now - relativedelta(days=1)
         while start.weekday() > 4:
             start -= relativedelta(days=1)

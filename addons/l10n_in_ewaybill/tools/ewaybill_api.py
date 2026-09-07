@@ -100,7 +100,7 @@ class EWayBillApi:
         )
         if response and response.get("status_cd") == "1":
             self.company.sudo().l10n_in_ewaybill_auth_validity = (
-                fields.Datetime.now()
+                self.env.now
                 + timedelta(hours=6, minutes=00, seconds=00)
             )
 

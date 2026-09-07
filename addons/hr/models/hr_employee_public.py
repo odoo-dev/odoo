@@ -209,7 +209,7 @@ class HrEmployeePublic(models.Model):
             return NotImplemented
         new_hire_field = self.env['hr.employee']._get_new_hire_field()
         new_hires = self.env['hr.employee'].sudo().search([
-            (new_hire_field, '>', fields.Datetime.now() - timedelta(days=90))
+            (new_hire_field, '>', self.env.now - timedelta(days=90))
         ])
         return [('id', operator, new_hires.ids)]
 

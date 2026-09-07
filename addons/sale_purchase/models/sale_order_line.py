@@ -113,7 +113,7 @@ class SaleOrderLine(models.Model):
 
     def _purchase_get_date_order(self, seller_info):
         """ return the ordered date for the purchase order, computed as : SO commitment date - supplier delay """
-        commitment_date = fields.Datetime.from_string(self.order_id.commitment_date or fields.Datetime.now())
+        commitment_date = fields.Datetime.from_string(self.order_id.commitment_date or self.env.now)
         return commitment_date - relativedelta(days=int(seller_info.get('delay', 0)))
 
     def _purchase_service_get_company(self):

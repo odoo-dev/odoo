@@ -18,7 +18,7 @@ class TestProjectUpdate(TestProjectCommon):
     def test_project_update_form(self):
         with Form(self.env['project.milestone'].with_context({'default_project_id': self.project_pigs.id})) as milestone_form:
             milestone_form.name = "Test 1"
-            milestone_form.deadline = fields.Date.today()
+            milestone_form.deadline = self.env.now.date()
 
         try:
             with Form(self.env['project.update'].with_context({'default_project_id': self.project_pigs.id})) as update_form:
@@ -41,13 +41,13 @@ class TestProjectUpdate(TestProjectCommon):
     def test_project_update_description(self):
         with Form(self.env['project.milestone'].with_context({'default_project_id': self.project_pigs.id})) as milestone_form:
             milestone_form.name = "Test 1"
-            milestone_form.deadline = fields.Date.today()
+            milestone_form.deadline = self.env.now.date()
         with Form(self.env['project.milestone'].with_context({'default_project_id': self.project_pigs.id})) as milestone_form:
             milestone_form.name = "Test 2"
-            milestone_form.deadline = fields.Date.today()
+            milestone_form.deadline = self.env.now.date()
         with Form(self.env['project.milestone'].with_context({'default_project_id': self.project_pigs.id})) as milestone_form:
             milestone_form.name = "Test 3"
-            milestone_form.deadline = fields.Date.today() + relativedelta(years=2)
+            milestone_form.deadline = self.env.now.date() + relativedelta(years=2)
 
         template_values = self.env['project.update']._get_template_values(self.project_pigs)
 

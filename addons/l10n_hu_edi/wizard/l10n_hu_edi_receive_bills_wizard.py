@@ -10,8 +10,8 @@ class L10nHuEdiReceiveBillsWizard(models.TransientModel):
     _name = 'l10n_hu_edi.receive.bills.wizard'
     _description = "Receive Bills Wizard"
 
-    datetime_from = fields.Datetime(default=lambda self: fields.Datetime.now() - timedelta(weeks=1))
-    datetime_to = fields.Datetime(default=lambda self: fields.Datetime.now())
+    datetime_from = fields.Datetime(default=lambda self: self.env.now - timedelta(weeks=1))
+    datetime_to = fields.Datetime(default=lambda self: self.env.now)
 
     def action_receive_bills(self):
         self.ensure_one()

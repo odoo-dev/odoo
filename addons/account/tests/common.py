@@ -729,7 +729,7 @@ class AccountTestInvoicingCommon(ProductCommon):
             elif date and not invoice_date:
                 invoice_date = date
             elif not date and not invoice_date:
-                invoice_date = fields.Date.today()
+                invoice_date = self.env.now.date()
 
         invoice_args |= {'date': date, 'invoice_date': invoice_date}
 

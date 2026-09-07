@@ -95,7 +95,7 @@ class TestHrFleetDriver(common.TransactionCase):
         only if vehicle has no driver and today is within assignation period.
         """
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         yesterday = today - timedelta(days=1)
         tomorrow = today + timedelta(days=1)
 
@@ -145,7 +145,7 @@ class TestHrFleetDriver(common.TransactionCase):
     def test_assignation_overlap_validation(self):
         """Overlapping assignation logs for the same vehicle should raise a ValidationError."""
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         vehicle = self.car
 
         # Base assignation: yesterday → tomorrow

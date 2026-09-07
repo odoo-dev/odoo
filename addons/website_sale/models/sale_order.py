@@ -169,7 +169,7 @@ class SaleOrder(models.Model):
                         "date_order",
                         "<=",
                         fields.Datetime.to_string(
-                            fields.Datetime.now()
+                            self.env.now
                             - relativedelta(hours=website_id["cart_abandoned_delay"] or 1.0)
                         ),
                     ),
@@ -403,7 +403,7 @@ class SaleOrder(models.Model):
                     ("partner_id", "=", self.partner_id.id),
                     ("state", "=", "sale"),
                     ("id", "!=", self.id),
-                    ("date_order", ">=", fields.Datetime.now() - relativedelta(days=540)),
+                    ("date_order", ">=", self.env.now - relativedelta(days=540)),
                 ],
                 limit=1,
             )
@@ -1200,7 +1200,7 @@ class SaleOrder(models.Model):
     @api.model
     def _cron_send_order_rating_emails(self):
         """Send rating request emails to customers a few days after order."""
-        today = fields.Date.today()
+        today = self.env.now.date()
         # Find websites with rating emails enabled and email template configured.
         websites = self.env["website"].search([
             ("send_order_rating_emails", "=", True),

@@ -1122,7 +1122,7 @@ class MyInvoisDocument(models.Model):
             for record, status in results['statuses'].items():
                 # For valid documents, we always want to update the try time; it's pointless to fetch too often.
                 if record.myinvois_state == 'valid' or status['status'] == 'valid':
-                    record.myinvois_retry_at = fields.Datetime.now() + datetime.timedelta(hours=1)
+                    record.myinvois_retry_at = self.env.now + datetime.timedelta(hours=1)
 
                 # If the status did not change, we do not need to do anything more.
                 if record.myinvois_state == status['status']:

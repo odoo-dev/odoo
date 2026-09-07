@@ -56,7 +56,7 @@ class TestPoSSaleStockReport(TestPoSSaleReport, TestPosStockCommon, TestPosStock
         orders = []
 
         orders.append(self.create_ui_order_data([(self.product0, 5, 100), (self.product0, 3)], {}, self.partner_1))
-        orders[0]['shipping_date'] = fields.Date.to_string(fields.Date.today())
+        orders[0]['shipping_date'] = fields.Date.to_string(self.env.now.date())
 
         order = self.env['pos.order'].sync_from_ui(orders)
         order = self.env['pos.order'].browse(order['pos.order'][0]['id'])

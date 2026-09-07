@@ -11,7 +11,7 @@ class TestInvoicedLotValues(TestSaleStockCommon):
 
     def test_lot_expiration(self):
         """ Checks if lot expiration date is included in `_get_invoiced_lot_values()` """
-        expiration_date = fields.Datetime.today() + relativedelta(days=3)
+        expiration_date = self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=3)
         lot = self.env['stock.lot'].create({
             'name': 'lot_product_a_0001',
             'product_id': self.product_a.id,

@@ -298,7 +298,7 @@ class Survey(http.Controller):
 
         if not answer_sudo.is_session_answer and survey_sudo.is_time_limited and answer_sudo.start_datetime:
             data.update({
-                'server_time': fields.Datetime.now(),
+                'server_time': self.env.now,
                 'timer_start': answer_sudo.start_datetime.isoformat(),
                 'time_limit_minutes': survey_sudo.time_limit
             })
@@ -561,7 +561,7 @@ class Survey(http.Controller):
             else:
                 time_limit = answer_sudo.start_datetime + timedelta(minutes=survey_sudo.time_limit)
                 time_limit += timedelta(seconds=10)
-            if fields.Datetime.now() > time_limit:
+            if self.env.now > time_limit:
                 # prevent cheating with users blocking the JS timer and taking all their time to answer
                 return {}, {'error': 'unauthorized'}
 

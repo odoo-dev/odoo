@@ -48,7 +48,7 @@ class RatingRating(models.Model):
         if values.get('publisher_comment'):
             self._check_synchronize_publisher_values()
             if not values.get('publisher_datetime'):
-                values['publisher_datetime'] = fields.Datetime.now()
+                values['publisher_datetime'] = self.env.now
             if not values.get('publisher_id'):
                 values['publisher_id'] = self.env.user.partner_id.id
         return values

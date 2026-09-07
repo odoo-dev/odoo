@@ -23,7 +23,7 @@ class IrWebsocket(models.AbstractModel):
             domain = [
                 ("create_uid", "=", self.env.user.id),
                 ("ip", "=", ip_address),
-                ("create_date", ">=", fields.Date.today()),
+                ("create_date", ">=", self.env.now.date()),
             ]
             if not self.env["res.users.log"].sudo().search_count(domain, limit=1):
                 with Registry(self.env.cr.dbname).cursor() as cr:

@@ -48,7 +48,7 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
 
         action = po.action_create_invoice()
         invoice = self.env['account.move'].browse(action['res_id'])
-        invoice.invoice_date = Date.today()
+        invoice.invoice_date = self.env.now.date()
         invoice.action_post()
 
         svls = po.order_line.move_ids.stock_valuation_layer_ids
@@ -185,11 +185,11 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
         usd = self.env.ref('base.USD')
         eur = self.env.ref('base.EUR')
         self.env['res.currency.rate'].create({
-            'name': Date.subtract(Date.today(), days=1),
+            'name': Date.subtract(self.env.now.date(), days=1),
             'currency_id': usd.id,
             'rate': 1})
         self.env['res.currency.rate'].create({
-            'name': Date.subtract(Date.today(), days=1),
+            'name': Date.subtract(self.env.now.date(), days=1),
             'currency_id': eur.id,
             'rate': 2})
 
@@ -553,7 +553,7 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
         move_form.partner_id = purchase_orders[0].partner_id
         with mute_logger('odoo.tests.form.onchange'):  # Mute "x PO lines added to the bill" notification
             move_form.purchase_vendor_bill_id = self.env['purchase.bill.union'].browse(-purchase_orders[0].id)
-        move_form.invoice_date = Date.today()
+        move_form.invoice_date = self.env.now.date()
         move = move_form.save()
         move.action_post()
         self.assertRecordValues(receipts.move_ids.sorted(lambda m: (m.picking_id, m.product_id.id, m.cost_share)), expected_values)

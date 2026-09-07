@@ -111,7 +111,7 @@ class AccountPayment(models.Model):
                     )
 
                 for check in rec.l10n_latam_move_check_ids:
-                    date = rec.date or fields.Datetime.now()
+                    date = rec.date or self.env.now
 
                     last_operation = check._get_last_operation()
                     if last_operation and last_operation[0].date > date:

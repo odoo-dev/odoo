@@ -229,8 +229,8 @@ class ResourceCalendarLeaves(models.Model):
     def _cron_generate_public_holidays(self):
         if config['test_enable'] or modules.module.current_test:
             return
-        start_date = fields.Date.today()
-        end_date = fields.Date.add(fields.Date.today(), years=1)
+        start_date = self.env.now.date()
+        end_date = fields.Date.add(self.env.now.date(), years=1)
         prepared_public_holidays = self._prepare_public_holidays_data(start_date, end_date)['prepared_public_holidays']
         if prepared_public_holidays:
             create_values = [

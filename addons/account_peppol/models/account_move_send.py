@@ -338,7 +338,7 @@ class AccountMoveSend(models.AbstractModel):
                             'res_model': new_message._name,
                             'res_id': new_message.id,
                         })
-                self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
+                self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(at=self.env.now + timedelta(minutes=5))
 
     def _get_peppol_attachments_linked_message(self, edi_user):
         return _("The invoice has been sent to the Peppol Access Point. The following attachments were sent with the XML:")

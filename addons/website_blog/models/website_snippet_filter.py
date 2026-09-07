@@ -16,37 +16,37 @@ class WebsiteSnippetFilter(models.Model):
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_3.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Homeworking'),
                 'subtitle': _('How to stay productive'),
-                'published_date': fields.Date.today() - timedelta(days=1),
+                'published_date': self.env.now.date() - timedelta(days=1),
                 'website_url': "",
             }, {
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_2.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Smart Homes'),
                 'subtitle': _('The control in your hands'),
-                'published_date': fields.Date.today() - timedelta(days=2),
+                'published_date': self.env.now.date() - timedelta(days=2),
                 'website_url': "",
             }, {
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_6.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Asia'),
                 'subtitle': _('Underrated destinations'),
-                'published_date': fields.Date.today() - timedelta(days=3),
+                'published_date': self.env.now.date() - timedelta(days=3),
                 'website_url': "",
             }, {
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_5.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Decoration'),
                 'subtitle': _('Stay minimalist'),
-                'published_date': fields.Date.today() - timedelta(days=4),
+                'published_date': self.env.now.date() - timedelta(days=4),
                 'website_url': "",
             }, {
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_4.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Technology'),
                 'subtitle': _('Improve your everyday life'),
-                'published_date': fields.Date.today() - timedelta(days=5),
+                'published_date': self.env.now.date() - timedelta(days=5),
                 'website_url': "",
             }, {
                 'cover_properties': '{"background-image": "url(\'/website_blog/static/src/img/cover_7.webp\')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}',
                 'name': _('Meetings'),
                 'subtitle': _('How to make them relevant'),
-                'published_date': fields.Date.today() - timedelta(days=6),
+                'published_date': self.env.now.date() - timedelta(days=6),
                 'website_url': "",
             }]
             merged = []

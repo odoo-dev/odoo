@@ -480,7 +480,7 @@ class TestLivechatChatbotUI(TestLivechatChatbotUICommon):
             cookies={guest._cookie_name: guest._format_auth_cookie()},
         )["channel_id"]
         closed_channel = self.env["discuss.channel"].browse(closed_channel_id)
-        closed_channel.livechat_end_dt = fields.Datetime.now()
+        closed_channel.livechat_end_dt = self.env.now
         guest_member = closed_channel.channel_member_ids.filtered(lambda m: m.guest_id == guest)
         self.start_tour(
             "/",

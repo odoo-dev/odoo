@@ -27,7 +27,7 @@ class StockPicking(models.Model):
 
     def _compute_date_order(self):
         for picking in self:
-            picking.delay_pass = picking.purchase_id.date_order if picking.purchase_id else fields.Datetime.now()
+            picking.delay_pass = picking.purchase_id.date_order if picking.purchase_id else self.env.now
 
     @api.model
     def _search_days_to_arrive(self, operator, value):
@@ -340,11 +340,11 @@ class StockWarehouseOrderpoint(models.Model):
         global_horizon_days = self.get_horizon_days()
         if global_horizon_days:
             planned_date -= relativedelta.relativedelta(days=int(global_horizon_days))
-        date_deadline = planned_date or fields.Date.today()
+        date_deadline = planned_date or self.env.now.date()
         dates_info = self.product_id._get_dates_info(date_deadline, self.location_id, route_ids=self.route_id)
         seller_info = self.supplier_id._get_seller_info() or self.product_id.with_company(self.company_id)._select_seller(
             quantity=qty_to_order,
-            date=max(dates_info['date_order'].date(), fields.Date.today()),
+            date=max(dates_info['date_order'].date(), self.env.now.date()),
             uom_id=self.uom_id
         )
         return seller_info.get('uom_id')

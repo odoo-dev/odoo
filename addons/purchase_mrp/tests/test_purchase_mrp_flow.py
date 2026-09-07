@@ -551,7 +551,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # Create a PO with one unit of the kit product
         self.po = self.env['purchase.order'].create({
             'partner_id': self.partner.id,
-            'order_line': [(0, 0, {'name': self.kit_1.name, 'product_id': self.kit_1.id, 'product_qty': 1, 'uom_id': self.kit_1.uom_id.id, 'price_unit': 60.0, 'date_planned': fields.Datetime.now()})],
+            'order_line': [(0, 0, {'name': self.kit_1.name, 'product_id': self.kit_1.id, 'product_qty': 1, 'uom_id': self.kit_1.uom_id.id, 'price_unit': 60.0, 'date_planned': self.env.now})],
         })
         # Validate the PO
         self.po.button_confirm()
@@ -727,11 +727,11 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'route_id': self.env.ref('mrp.route_warehouse0_manufacture').id,
         })
         # lead_horizon_date should be today + product manufacturing lead time
-        self.assertEqual(orderpoint.lead_horizon_date, (fields.Date.today() + timedelta(days=1)))
+        self.assertEqual(orderpoint.lead_horizon_date, (self.env.now.date() + timedelta(days=1)))
         orderpoint.action_replenish()
         mo = self.env['mrp.production'].search([('product_id', '=', product.id)])
         self.assertEqual(mo.product_uom_qty, 5)
-        self.assertEqual(mo.date_start.date(), fields.Date.today())
+        self.assertEqual(mo.date_start.date(), self.env.now.date())
 
     def test_mo_overview(self):
         component = self.env['product.product'].create({
@@ -825,8 +825,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             return f.save()
         partner = self.env['res.partner'].create({'name': 'My Test Partner'})
         # Create and confirm two POs with 3 component_product at different date
-        po_today = create_order(component_product, partner, fields.Datetime.now())
-        po_5days = create_order(component_product, partner, fields.Datetime.now() + timedelta(days=5))
+        po_today = create_order(component_product, partner, self.env.now)
+        po_5days = create_order(component_product, partner, self.env.now + timedelta(days=5))
 
         po_today.button_confirm()
         po_5days.button_confirm()
@@ -864,7 +864,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # Create and confirm one PO with 6 component_products.
         f = Form(self.env['purchase.order'])
         f.partner_id = partner
-        f.date_order = fields.Datetime.now()
+        f.date_order = self.env.now
         with f.order_line.new() as line:
             line.product_id = component_product
             line.product_qty = 6.0
@@ -1421,7 +1421,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         purchase_order.button_confirm()
         purchase_order.action_create_invoice()
         bill = purchase_order.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         receipt = purchase_order.picking_ids
         # would fail due to attempted re-reconciliation prior to this commit

@@ -52,15 +52,15 @@ class TestWebsiteEventSaleCommon(WebsiteSaleCommon):
 
         cls.event, cls.event_2 = cls.env['event.event'].create([
             {
-                'date_begin': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
-                'date_end': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
+                'date_begin': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
+                'date_end': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
                 'name': 'Pycon',
                 'user_id': cls.env.ref('base.user_admin').id,
                 'website_published': True,
             },
             {
-                'date_begin': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
-                'date_end': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
+                'date_begin': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
+                'date_end': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
                 'name': 'Conference for Architects TEST',
                 'user_id': cls.env.ref('base.user_admin').id,
                 'website_published': True,

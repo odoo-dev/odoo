@@ -432,7 +432,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_return': -50,
             'amount_tax': 0,
             'amount_total': 450,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'pricelist_id': self.pos_config_usd.pricelist_id.id,
             'lines': [Command.create({
@@ -451,7 +451,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'sequence_number': 2,
             'payment_ids': [Command.create({
                 'amount': 500,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.bank_payment_method.id
             })],
             'uuid': '12346-123-1234',
@@ -487,7 +487,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_return': -50,
             'amount_tax': 0,
             'amount_total': 450,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'pricelist_id': self.pos_config_usd.pricelist_id.id,
             'lines': [[0, 0, {
@@ -506,7 +506,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'session_id': pos_session.id,
             'payment_ids': [[0, 0, {
                 'amount': 500,
-                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'name': fields.Datetime.to_string(self.env.now),
                 'payment_method_id': self.bank_payment_method.id,
                 'uuid': 'pay-bank-12346-123-1234',
             }]],
@@ -541,7 +541,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_return': 0,
             'amount_tax': 0,
             'amount_total': 450,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'pricelist_id': self.pos_config_usd.pricelist_id.id,
             'lines': [[0, 0, {
@@ -560,7 +560,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'session_id': pos_session.id,
             'payment_ids': [[0, 0, {
                 'amount': 450,
-                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'name': fields.Datetime.to_string(self.env.now),
                 'payment_method_id': self.cash_payment_method.id,
                 'uuid': 'pay-cash-22346-123-1234',
             }]],
@@ -578,7 +578,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             [2, cash_payment.id],
             [0, 0, {
                 'amount': 450,
-                'name': fields.Datetime.to_string(fields.Datetime.now()),
+                'name': fields.Datetime.to_string(self.env.now),
                 'payment_method_id': self.bank_payment_method.id,
                 'uuid': 'pay-bank-22346-123-1234',
             }],
@@ -617,7 +617,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_return': 0,
             'amount_tax': 0,
             'amount_total': 100,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'lines': [(0, 0, {
                 'discount': 0,
@@ -634,7 +634,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'sequence_number': 2,
             'payment_ids': [(0, 0, {
                 'amount': 100,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             })],
             'uuid': '12345-123-1234',
@@ -695,7 +695,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_return': 0.0,
             'to_invoice': False,
             'preset_id': preset_takeaway.id,
-            'preset_time': fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=-2)),
+            'preset_time': fields.Datetime.to_string(self.env.now + timedelta(days=-2)),
         })
         order.cancel_order_from_pos()
         self.assertEqual(order.state, 'cancel')
@@ -790,7 +790,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_tax': 0,
             'amount_return': 0,  # Is computed by sync_from_ui
             'amount_total': 149.99,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'lines': [[0, 0, {
                 'discount': 0,
@@ -807,11 +807,11 @@ class TestPointOfSaleFlow(CommonPosTest):
             'sequence_number': 2,
             'payment_ids': [[0, 0, {
                 'amount': 100,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             }], [0, 0, {
                 'amount': 50,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.bank_payment_method.id
             }]],
             'uuid': '12345-123-1234',
@@ -1047,7 +1047,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_tax': 0,
             'amount_return': 0,
             'amount_total': 750,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'lines': [[0, 0, {
                 'price_unit': 750.0,
                 'product_id': self.product.id,
@@ -1061,7 +1061,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'session_id': current_session.id,
             'payment_ids': [[0, 0, {
                 'amount': 750,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.bank_payment_method.id
             }]],
             'uuid': '12345-123-1234',
@@ -1093,7 +1093,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         order, _ = self.create_backend_pos_order({**order_data})
         sync_from_ui_values = {
             "access_token": order.access_token,
-            "date_order": fields.Datetime.to_string(fields.Datetime.now()),
+            "date_order": fields.Datetime.to_string(self.env.now),
             "session_id": self.pos_config_usd.current_session_id.id,
             "company_id": self.env.company.id,
             "amount_tax": 0.0,
@@ -1213,7 +1213,7 @@ class TestPointOfSaleFlow(CommonPosTest):
                 'amount_tax': 0,
                 'amount_return': 0,
                 'amount_total': amount,
-                'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+                'date_order': fields.Datetime.to_string(self.env.now),
                 'lines': [[0, 0, {
                     'price_unit': 100.0,
                     'product_id': self.product.id,
@@ -1293,7 +1293,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.pos_config_usd.open_ui()
         session = self.pos_config_usd.current_session_id
 
-        now = fields.Datetime.now()
+        now = self.env.now
         item_data = {'pricelist_id': pricelist.id, 'compute_price': 'fixed', 'fixed_price': 10}
 
         item_no_dates = self.env['product.pricelist.item'].create(item_data)
@@ -1362,7 +1362,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'amount_tax': 0,
             'amount_return': 0,
             'amount_total': 750,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'lines': [[0, 0, {
                 'price_unit': 750.0,
                 'product_id': self.product.id,
@@ -1376,7 +1376,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'session_id': current_session.id,
             'payment_ids': [[0, 0, {
                 'amount': 750,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.bank_payment_method.id
             }]],
             'uuid': '12345-123-1234',
@@ -1388,8 +1388,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         order = self.env['pos.order'].search([])
 
         # Verify order name contains interpolated year and month with static parts
-        current_year = fields.Datetime.now().year
-        current_month = fields.Datetime.now().strftime('%m')
+        current_year = self.env.now.year
+        current_month = self.env.now.strftime('%m')
 
         self.assertIn(f'POS-{current_year}', order.name,
             f"Order name should contain 'POS-{current_year}', got: {order.name}")

@@ -93,4 +93,4 @@ class MailTestRottingMixin(models.Model):
 
     @api.depends('stage_id')
     def _compute_date_last_stage_update(self):
-        self.date_last_stage_update = fields.Datetime.now()
+        self.date_last_stage_update = self.env.now

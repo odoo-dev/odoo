@@ -332,8 +332,8 @@ class TestChannelInternals(MailCommon, HttpCase):
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_channel_chat_message_post_should_update_last_interest_dt(self):
         chat = self.env['discuss.channel'].with_user(self.user_admin)._get_or_create_chat((self.partner_employee | self.user_admin.partner_id).ids)
-        post_time = fields.Datetime.now()
-        # Mocks the return value of field.Datetime.now(),
+        post_time = self.env.now
+        # Mocks the return value of field.self.env.now,
         # so we can see if the `last_interest_dt` is updated correctly
         with self.mock_datetime_and_now(post_time):
             chat.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')

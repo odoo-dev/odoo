@@ -993,7 +993,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
             issuer = self.env['l10n_es_edi_verifactu.issuer']._get_or_create(company, obligado_partner)
             next_batch_time = issuer.next_batch_time
-            if not next_batch_time or fields.Datetime.now() >= next_batch_time:
+            if not next_batch_time or self.env.now >= next_batch_time:
                 next_batch.with_company(company)._send_as_batch()
             else:
                 # Since we have a `next_batch_time` the `next_trigger_time` will be set to a datetime
@@ -1007,7 +1007,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
             if unsent_documents:
                 issuer = self.env['l10n_es_edi_verifactu.issuer']._get_or_create(company, obligado_partner)
                 next_batch_time = issuer.next_batch_time
-                in_60_seconds = fields.Datetime.now() + timedelta(seconds=60)
+                in_60_seconds = self.env.now + timedelta(seconds=60)
                 issuer_next_trigger_time = max(in_60_seconds, next_batch_time or datetime.min)
                 next_trigger_time = min(next_trigger_time or datetime.max, issuer_next_trigger_time)
 
@@ -1146,7 +1146,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         # See error with code 2004:
         #   El valor del campo FechaHoraHusoGenRegistro debe ser la fecha actual del sistema de la AEAT,
         #   admitiéndose un margen de error de: 240 segundos.
-        incident = any(document.create_date > fields.Datetime.now() + timedelta(seconds=240) for document in self)
+        incident = any(document.create_date > self.env.now + timedelta(seconds=240) for document in self)
 
         document_dict_list = [document._get_document_dict() for document in self]
         obligado_partner = self[0].obligado_partner_id
@@ -1220,7 +1220,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
         waiting_time_seconds = info.get('waiting_time_seconds')
         if waiting_time_seconds:
-            now = fields.Datetime.to_datetime(fields.Datetime.now())
+            now = fields.Datetime.to_datetime(self.env.now)
             next_batch_time = now + timedelta(seconds=waiting_time_seconds)
             issuer = self.env['l10n_es_edi_verifactu.issuer']._get_or_create(
                 self.env.company, self[0].obligado_partner_id

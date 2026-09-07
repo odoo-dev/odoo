@@ -310,7 +310,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
         purchase_order.picking_ids.button_validate()
         purchase_order.action_create_invoice()
         bill = purchase_order.invoice_ids
-        bill.invoice_date = Date.today()
+        bill.invoice_date = self.env.now.date()
         with Form(bill) as bill_form:
             with bill_form.invoice_line_ids.new() as inv_line:
                 inv_line.product_id = self.landed_cost

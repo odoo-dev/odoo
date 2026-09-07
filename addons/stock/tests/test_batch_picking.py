@@ -802,7 +802,7 @@ class TestBatchPicking(TestStockBatchCommon):
         with self.assertRaises(UserError):
             batch_1.action_merge()
 
-        early_date = fields.Datetime.now() - timedelta(days=1)
+        early_date = self.env.now - timedelta(days=1)
         batch_2.scheduled_date = early_date
 
         # Ensure that merging works correctly even when one of the batches has no scheduled_date.

@@ -36,7 +36,7 @@ class TestAccountMoveImport(AccountTestInvoicingCommon):
 
         cls.purchase_order = cls.env['purchase.order'].create({
             'partner_id': cls.partner_open_wood.id,
-            'date_order': fields.Date.today(),
+            'date_order': self.env.now.date(),
             'order_line': [Command.create({
                 'product_id': cls.product.id,
                 'name': cls.product.name,
@@ -143,7 +143,7 @@ class TestAccountMoveImport(AccountTestInvoicingCommon):
         # Finally, create a PO with the child as partner -> should find the child
         po_child = self.env['purchase.order'].create({
             'partner_id': child.id,
-            'date_order': fields.Date.today(),
+            'date_order': self.env.now.date(),
             'order_line': [Command.create({
                 'product_id': self.product.id,
                 'name': self.product.name,

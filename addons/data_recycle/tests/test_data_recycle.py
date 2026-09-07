@@ -28,12 +28,12 @@ class TestDataRecycle(TransactionCase):
 
         cls.old_servers = cls.env['fetchmail.server'].create([{
             'name': 'Old Server %s' % (i),
-            'date': Date.today() - relativedelta(years=2),
+            'date': self.env.now.date() - relativedelta(years=2),
         } for i in range(5)])
 
         cls.new_servers = cls.env['fetchmail.server'].create([{
             'name': 'New Server %s' % (i),
-            'date': Date.today(),
+            'date': self.env.now.date(),
         } for i in range(5)])
 
     def test_recycle_flow(self):
@@ -90,7 +90,7 @@ class TestDataRecycle(TransactionCase):
         self.recycle_model._recycle_records()
         self.assertEqual(len(self.recycle_model.recycle_record_ids), 5)
         # Modify one old server so it no longer matches the time rule (date <= today - 1 year).
-        self.old_servers[0].date = Date.today()
+        self.old_servers[0].date = self.env.now.date()
         self.recycle_model._recycle_records()
         self.assertEqual(len(self.recycle_model.recycle_record_ids), 4, "Expected 4 recycle records after one record no longer matching any rule.")
         current_recycle_record_ids = set(self.recycle_model.recycle_record_ids.mapped('res_id'))

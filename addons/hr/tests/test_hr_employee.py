@@ -565,7 +565,7 @@ class TestHrEmployee(TestHrCommon):
         old_version.date_version = old_version.date_version - relativedelta(days=1)
         self.employee.resource_calendar_id = calendar
         self.assertEqual(self.employee.resource_id.calendar_id, calendar)
-        version = self.employee.create_version({'resource_calendar_id': old_calendar.id, 'date_version': fields.Date.today()})
+        version = self.employee.create_version({'resource_calendar_id': old_calendar.id, 'date_version': self.env.now.date()})
         self.assertEqual(self.employee.current_version_id, version)
         self.assertNotEqual(self.employee.current_version_id, old_version)
         self.assertEqual(self.employee.resource_calendar_id, old_calendar)

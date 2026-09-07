@@ -42,7 +42,7 @@ class HrEmployee(models.Model):
                 employee_ips = self.env['res.users.log'].sudo().search([
                     ('create_uid', '=', employee.user_id.id),
                     ('ip', '!=', False),
-                    ('create_date', '>=', Datetime.to_string(Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)))]
+                    ('create_date', '>=', Datetime.to_string(self.env.now.replace(hour=0, minute=0, second=0, microsecond=0)))]
                 ).mapped('ip')
                 if any(ip in ip_list for ip in employee_ips):
                     ip_employees |= employee
@@ -56,14 +56,14 @@ class HrEmployee(models.Model):
             for employee in employees:
                 sent_emails = self.env['mail.message'].search_count([
                     ('author_id', '=', employee.user_id.partner_id.id),
-                    ('date', '>=', Datetime.to_string(Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))),
-                    ('date', '<=', Datetime.to_string(Datetime.now()))])
+                    ('date', '>=', Datetime.to_string(self.env.now.replace(hour=0, minute=0, second=0, microsecond=0))),
+                    ('date', '<=', Datetime.to_string(self.env.now))])
                 if sent_emails >= threshold:
                     email_employees |= employee
             email_employees.write({'email_sent': True})
             employees = employees - email_employees
 
-        company.sudo().hr_presence_last_compute_date = Datetime.now()
+        company.sudo().hr_presence_last_compute_date = self.env.now
 
     def get_presence_server_action_data(self):
         server_action_xmlids = [
@@ -151,7 +151,7 @@ Thank you for your prompt attention to this matter.""")
             if not employee.company_id.hr_presence_control_email and not employee.company_id.hr_presence_control_ip:
                 continue
             if company.hr_presence_last_compute_date and employee.id in working_now_list and \
-                    company.hr_presence_last_compute_date.day == fields.Datetime.now().day and \
+                    company.hr_presence_last_compute_date.day == self.env.now.day and \
                     (employee.email_sent or employee.ip_connected or employee.manually_set_present):
                 employee.hr_presence_state = 'present'
             elif employee.id in working_now_list and employee.is_absent and \

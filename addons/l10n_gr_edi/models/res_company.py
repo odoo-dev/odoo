@@ -37,8 +37,8 @@ class ResCompany(models.Model):
         bill_create_list_values = []
 
         for gr_company in gr_companies:
-            date_90_days_ago = (fields.Datetime.now() - timedelta(days=90)).strftime("%d/%m/%Y")
-            date_today = fields.Datetime.now().strftime("%d/%m/%Y")
+            date_90_days_ago = (self.env.now - timedelta(days=90)).strftime("%d/%m/%Y")
+            date_today = self.env.now.strftime("%d/%m/%Y")
 
             try:
                 response = session.get(

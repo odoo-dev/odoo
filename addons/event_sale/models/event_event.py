@@ -27,7 +27,7 @@ class EventEvent(models.Model):
         at the time of the related sale.order would mean thousands of extra requests as we would
         have to do one conversion per sale.order (and a sale.order is created every time
         we sell a single event ticket). """
-        date_now = fields.Datetime.now()
+        date_now = self.env.now
         event_subtotals = self.env['sale.order.line']._read_group(
             [('event_id', 'in', self.ids), ('price_total', '!=', 0), ('state', '=', 'sale')],
             ['event_id', 'currency_id'],

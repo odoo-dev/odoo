@@ -77,7 +77,7 @@ class ResConfigSettings(models.TransientModel):
     )
 
     def _compute_fail_counter(self):
-        previous_date = fields.Datetime.now() - datetime.timedelta(days=30)
+        previous_date = self.env.now - datetime.timedelta(days=30)
 
         self.fail_counter = self.env['mail.mail'].sudo().search_count([
             ('date', '>=', previous_date),

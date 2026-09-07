@@ -210,8 +210,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             'unit_of_measure': 'day',
         })
         self.leaves = self.env['hr.leave'].with_context(leave_fast_create=True).create([{
-            'request_date_from': fields.Datetime.today() + relativedelta(days=-2),
-            'request_date_to': fields.Datetime.today() + relativedelta(days=2),
+            'request_date_from': self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=-2),
+            'request_date_to': self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=2),
             'employee_id': employee.id,
             'work_entry_type_id': self.work_entry_type.id,
         } for employee in self.employees])

@@ -737,7 +737,7 @@ class ForumPost(models.Model):
             post.write({
                 'state': 'offensive',
                 'moderator_id': self.env.user.id,
-                'closed_date': fields.Datetime.now(),
+                'closed_date': self.env.now,
                 'closed_reason_id': reason_id,
                 'active': False,
             })
@@ -814,7 +814,7 @@ class ForumPost(models.Model):
 
     def _update_last_activity(self):
         self.ensure_one()
-        return self.sudo().write({'last_activity_date': fields.Datetime.now()})
+        return self.sudo().write({'last_activity_date': self.env.now})
 
     # ----------------------------------------------------------------------
     # WEBSITE

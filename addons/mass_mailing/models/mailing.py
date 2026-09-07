@@ -56,7 +56,7 @@ class MailingMailing(models.Model):
         # we use it to setup the scheduled date of the created mailing.mailing
         default_calendar_date = self.env.context.get('default_calendar_date')
         if default_calendar_date and ('schedule_type' in fields and 'schedule_date' in fields) \
-           and Datetime.to_datetime(default_calendar_date) > Datetime.now():
+           and Datetime.to_datetime(default_calendar_date) > self.env.now:
             vals.update({
                 'schedule_type': 'scheduled',
                 'schedule_date': default_calendar_date
@@ -199,7 +199,7 @@ class MailingMailing(models.Model):
         help='Percentage of the contacts that will be mailed. Recipients will be chosen randomly.')
     ab_testing_schedule_datetime = fields.Datetime(
         related="campaign_id.ab_testing_schedule_datetime", readonly=False,
-        default=lambda self: fields.Datetime.now() + relativedelta(days=1))
+        default=lambda self: self.env.now + relativedelta(days=1))
     ab_testing_version_name = fields.Char('A/B Testing Version', copy=False)
     ab_testing_winner_selection = fields.Selection(
         related="campaign_id.ab_testing_winner_selection", readonly=False,
@@ -302,7 +302,7 @@ class MailingMailing(models.Model):
     def _compute_favorite_date(self):
         favorited = self.filtered('favorite')
         (self - favorited).favorite_date = False
-        favorited.filtered(lambda mailing: not mailing.favorite_date).favorite_date = fields.Datetime.now()
+        favorited.filtered(lambda mailing: not mailing.favorite_date).favorite_date = self.env.now
 
     def _compute_total(self):
         for mass_mailing in self:
@@ -385,11 +385,11 @@ class MailingMailing(models.Model):
         for mass_mailing in self:
             if mass_mailing.schedule_date:
                 # max in case the user schedules a date in the past
-                mass_mailing.next_departure = max(mass_mailing.schedule_date, fields.Datetime.now())
+                mass_mailing.next_departure = max(mass_mailing.schedule_date, self.env.now)
             else:
-                mass_mailing.next_departure = fields.Datetime.now()
+                mass_mailing.next_departure = self.env.now
         past = self.filtered(
-            lambda mailing: mailing.state == 'in_queue' and mailing.next_departure < fields.Datetime.now()
+            lambda mailing: mailing.state == 'in_queue' and mailing.next_departure < self.env.now
         )
         past.next_departure_is_past = True
         (self - past).next_departure_is_past = False
@@ -503,7 +503,7 @@ class MailingMailing(models.Model):
             elif mailing.state == 'in_queue':
                 mailing.calendar_date = mailing.next_departure
             elif mailing.state == 'sending':
-                mailing.calendar_date = fields.Datetime.now()
+                mailing.calendar_date = self.env.now
             else:
                 mailing.calendar_date = False
 
@@ -685,7 +685,7 @@ class MailingMailing(models.Model):
 
     def action_schedule(self):
         self.ensure_one()
-        if self.schedule_date and self.schedule_date > fields.Datetime.now():
+        if self.schedule_date and self.schedule_date > self.env.now:
             return self.action_put_in_queue()
         action = self.env["ir.actions.actions"]._for_xml_id("mass_mailing.mailing_mailing_schedule_date_action")
         action['context'] = dict(self.env.context, default_mass_mailing_id=self.id, dialog_size='medium')
@@ -695,7 +695,7 @@ class MailingMailing(models.Model):
         self.write({'state': 'in_queue'})
         cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue')
         cron._trigger(
-            schedule_date or fields.Datetime.now()
+            schedule_date or self.env.now
             for schedule_date in self.mapped('schedule_date')
         )
 
@@ -923,7 +923,7 @@ class MailingMailing(models.Model):
             'ab_testing_schedule_datetime': values.get('ab_testing_schedule_datetime') or self.ab_testing_schedule_datetime,
             'ab_testing_winner_selection': values.get('ab_testing_winner_selection') or self.ab_testing_winner_selection,
             'mailing_mail_ids': self.ids if self.mailing_type == 'mail' else [],
-            'name': _('A/B Test: %s', values.get('subject') or self.subject or fields.Datetime.now()),
+            'name': _('A/B Test: %s', values.get('subject') or self.subject or self.env.now),
             'user_id': values.get('user_id') or self.user_id.id or self.env.user.id,
         }
 
@@ -1129,7 +1129,7 @@ class MailingMailing(models.Model):
 
             mailing.write({
                 'state': 'done',
-                'sent_date': fields.Datetime.now(),
+                'sent_date': self.env.now,
                 # send the KPI mail only if it's the first sending
                 'kpi_mail_required': not mailing.sent_date,
             })
@@ -1163,7 +1163,7 @@ class MailingMailing(models.Model):
 
     @api.model
     def _process_mass_mailing_queue(self):
-        mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
+        mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', self.env.now), ('schedule_date', '=', False)])
         self.env['ir.cron']._commit_progress(remaining=len(mass_mailings))
         for mass_mailing in mass_mailings:
             context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
@@ -1176,7 +1176,7 @@ class MailingMailing(models.Model):
             else:
                 mass_mailing.write({
                     'state': 'done',
-                    'sent_date': fields.Datetime.now(),
+                    'sent_date': self.env.now,
                     # send the KPI mail only if it's the first sending
                     'kpi_mail_required': not mass_mailing.sent_date,
                 })
@@ -1186,8 +1186,8 @@ class MailingMailing(models.Model):
             mailings = self.env['mailing.mailing'].search([
                 ('kpi_mail_required', '=', True),
                 ('state', '=', 'done'),
-                ('sent_date', '<=', fields.Datetime.now() - relativedelta(days=1)),
-                ('sent_date', '>=', fields.Datetime.now() - relativedelta(days=5)),
+                ('sent_date', '<=', self.env.now - relativedelta(days=1)),
+                ('sent_date', '>=', self.env.now - relativedelta(days=5)),
             ])
             if mailings:
                 mailings._action_send_statistics()

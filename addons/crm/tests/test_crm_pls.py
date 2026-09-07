@@ -120,7 +120,7 @@ class TestConfig(CrmPlsCommon):
 
     def test_settings_pls_start_date(self):
         """ Test various use cases of 'crm.pls_start_date' """
-        str_date_8_days_ago = Date.to_string(Date.today() - timedelta(days=8))
+        str_date_8_days_ago = Date.to_string(self.env.now.date() - timedelta(days=8))
 
         for value, expected in [
             ("2021-10-10", "2021-10-10"),

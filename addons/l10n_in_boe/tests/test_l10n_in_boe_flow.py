@@ -48,7 +48,7 @@ class TestL10nInBoeWizard(L10nInTestInvoicingCommon):
 
         po.action_create_invoice()
         bill = po.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         return picking, bill
 
     def test_boe_wizard_landed_cost_flow_and_lines(self):
@@ -57,7 +57,7 @@ class TestL10nInBoeWizard(L10nInTestInvoicingCommon):
 
         wizard = self.env['l10n_in.boe.wizard'].with_context(default_move_ids=bill.ids).create({
             'l10n_in_shipping_bill_number': 'BOE12345',
-            'l10n_in_shipping_bill_date': fields.Date.today(),
+            'l10n_in_shipping_bill_date': self.env.now.date(),
             'l10n_in_shipping_port_code_id': self.port_code.id,
         })
 

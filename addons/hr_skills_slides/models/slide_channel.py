@@ -42,7 +42,7 @@ class SlideChannelPartner(models.Model):
                     lines_to_create.append({
                         'employee_id': employee.id,
                         'name': channel.name,
-                        'date_start': fields.Date.today(),
+                        'date_start': self.env.now.date(),
                         'description': html2plaintext(channel.description),
                         'line_type_id': line_type_id,
                         'course_type': 'elearning',

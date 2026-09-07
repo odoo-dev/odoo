@@ -29,8 +29,8 @@ class TestLivechatHrHolidays(HttpCase, MailCommon):
             {
                 "employee_id": employee.id,
                 "work_entry_type_id": work_entry_type.id,
-                "request_date_from": fields.Datetime.today() + relativedelta(days=-2),
-                "request_date_to": fields.Datetime.today() + relativedelta(days=2),
+                "request_date_from": self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=-2),
+                "request_date_to": self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=2),
                 "state": "validate",
             }
         )

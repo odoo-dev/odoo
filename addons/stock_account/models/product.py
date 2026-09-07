@@ -297,7 +297,7 @@ class ProductProduct(models.Model):
     def _change_standard_price(self, old_price, valuation_date=None):
         product_values = []
         product_ids_lot_valuated = set()
-        date = valuation_date or fields.Datetime.now()
+        date = valuation_date or self.env.now
         for product in self:
             if product.cost_method == 'fifo' or product.standard_price == old_price.get(product):
                 continue

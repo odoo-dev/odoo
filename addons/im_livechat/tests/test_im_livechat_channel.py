@@ -113,5 +113,5 @@ class TestImLivechatChannel(TestImLivechatCommon, TestGetOperator):
         )
         channel = self.env["discuss.channel"].browse(data["channel_id"])
         self.assertEqual(livechat_channel.ongoing_session_count, 1)
-        channel.livechat_end_dt = Datetime.now() - timedelta(minutes=2)
+        channel.livechat_end_dt = self.env.now - timedelta(minutes=2)
         self.assertEqual(livechat_channel.ongoing_session_count, 0)

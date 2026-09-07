@@ -596,7 +596,7 @@ class MrpWorkcenterProductivity(models.Model):
         underperformance_timers = self.env['mrp.workcenter.productivity']
         for timer in self:
             wo = timer.workorder_id
-            timer.write({'date_end': fields.Datetime.now()})
+            timer.write({'date_end': self.env.now})
             if wo.duration > wo.duration_expected:
                 productive_date_end = timer.date_end - relativedelta.relativedelta(minutes=wo.duration - wo.duration_expected)
                 if productive_date_end <= timer.date_start:

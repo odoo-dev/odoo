@@ -42,7 +42,7 @@ class TestUi(HttpCaseWithUserDemo, TestWebsiteEventSaleCommon):
             'name': 'VIP',
             'event_id': cls.event_2.id,
             'product_id': cls.env.ref('event_product.product_product_event').id,
-            'end_sale_datetime': (Datetime.today() + timedelta(90)).strftime('%Y-%m-%d'),
+            'end_sale_datetime': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(90)).strftime('%Y-%m-%d'),
             'price': 1500.0,
             'seats_max': 12,
             'limit_max_per_order': 11,
@@ -51,8 +51,8 @@ class TestUi(HttpCaseWithUserDemo, TestWebsiteEventSaleCommon):
         cls.event_3 = cls.env['event.event'].create({
             'name': 'Last ticket test',
             'user_id': cls.env.ref('base.user_admin').id,
-            'date_begin': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
-            'date_end': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
+            'date_begin': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
+            'date_end': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
             'website_published': True,
         })
 
@@ -60,7 +60,7 @@ class TestUi(HttpCaseWithUserDemo, TestWebsiteEventSaleCommon):
             'name': 'VIP',
             'event_id': cls.event_3.id,
             'product_id': cls.env.ref('event_product.product_product_event').id,
-            'end_sale_datetime': (Datetime.today() + timedelta(90)).strftime('%Y-%m-%d'),
+            'end_sale_datetime': (self.env.now.replace(hour=0, minute=0, second=0) + timedelta(90)).strftime('%Y-%m-%d'),
             'price': 1500.0,
             'seats_max': 2,
         }])

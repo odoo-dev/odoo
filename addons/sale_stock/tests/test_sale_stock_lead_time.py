@@ -257,6 +257,6 @@ class TestSaleStockLeadTime(TestSaleStockCommon, ValuationReconciliationTestComm
         })
         order.action_confirm()
         self.assertRecordValues(order.picking_ids.move_ids, [
-            {'product_id': self.product_a.id, 'date_deadline': fields.Datetime.today() + timedelta(days=5)},
-            {'product_id': self.product_b.id, 'date_deadline': fields.Datetime.today() + timedelta(days=10)},
+            {'product_id': self.product_a.id, 'date_deadline': self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=5)},
+            {'product_id': self.product_b.id, 'date_deadline': self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=10)},
         ])

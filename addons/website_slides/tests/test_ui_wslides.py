@@ -41,7 +41,7 @@ class TestUICommon(HttpCaseGamification, HttpCaseWithUserPortal):
             'promote_strategy': 'most_voted',
             'is_published': True,
             'description': 'Learn the basics of gardening !',
-            'create_date': Datetime.now() - relativedelta(days=8),
+            'create_date': self.env.now - relativedelta(days=8),
             'slide_ids': [
                 (0, 0, {
                     'name': 'Gardening: The Know-How',
@@ -359,7 +359,7 @@ class TestUiMemberInvited(TestUICommon):
             'channel_id': self.channel.id,
             'partner_id': self.user_portal.partner_id.id,
             'member_status': 'invited',
-            'last_invitation_date': Datetime.now(),
+            'last_invitation_date': self.env.now,
         })
         self.portal_invite_url = self.channel_partner_portal.invitation_link
 

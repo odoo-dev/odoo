@@ -20,7 +20,7 @@ class TestMailCallArtifact(MailCommon):
         })
         cls.call = cls.env["discuss.call.history"].create({
             "channel_id": cls.channel.id,
-            "start_dt": fields.Datetime.now(),
+            "start_dt": self.env.now,
         })
         cls.artifact = cls.env["mail.call.artifact"].create({
             "discuss_call_history_id": cls.call.id,

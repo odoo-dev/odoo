@@ -77,7 +77,7 @@ class L10n_InBoeWizard(models.TransientModel):
                 from_currency=wizard.company_currency_id,
                 to_currency=wizard.currency_id,
                 company=wizard.move_ids.company_id,
-                date=wizard.l10n_in_shipping_bill_date or fields.Date.today(),
+                date=wizard.l10n_in_shipping_bill_date or self.env.now.date(),
             )
 
     @api.depends('line_ids.custom_duty', 'line_ids.tax_amount')

@@ -71,7 +71,7 @@ class TestHrAttendance(HttpCase, TransactionCase):
         self.assertIn(self.employee_kiosk.id, grouped_employee_ids)
 
         # Specific to gantt view.
-        context['gantt_start_date'] = fields.Datetime.now()
+        context['gantt_start_date'] = self.env.now
         context['allowed_company_ids'] = [self.env.company.id]
 
         groups = self.env['hr.attendance'].with_context(**context).web_read_group(
@@ -126,7 +126,7 @@ class TestHrAttendance(HttpCase, TransactionCase):
 
         with freeze_time("2024-01-01 16:00:00"):
             self.test_employee.action_archive()
-            self.assertEqual(test_attendance.check_out, fields.Datetime.now())
+            self.assertEqual(test_attendance.check_out, self.env.now)
             self.assertEqual(test_attendance.worked_hours, 8.0)
 
     def test_break_duration_updates_worked_hours(self):
@@ -176,7 +176,7 @@ class TestHrAttendance(HttpCase, TransactionCase):
 
     @freeze_time("2024-01-02 12:00:00")
     def test_user_attendance_details_are_opt_in(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         self.env['hr.attendance'].create({
             'employee_id': self.test_employee.id,
             'check_in': datetime(2024, 1, 1, 22),
@@ -262,7 +262,7 @@ class TestHrAttendance(HttpCase, TransactionCase):
         with freeze_time("2024-01-15 17:00:00"):
             self.test_employee.with_user(self.hr_user).action_archive()
             self.assertTrue(not self.test_employee.active, "Employee should be archived successfully with sudo()")
-            self.assertEqual(test_attendance.check_out, fields.Datetime.now(), "Attendance should be checked out at the time of archiving")
+            self.assertEqual(test_attendance.check_out, self.env.now, "Attendance should be checked out at the time of archiving")
 
     def test_attendance_multicompany(self):
         """Test that the attendance is for the currently selected company, not default company of user"""

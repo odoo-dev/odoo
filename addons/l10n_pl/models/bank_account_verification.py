@@ -299,7 +299,7 @@ class BankAccountVerification(models.Model):
         create_vals = []
         default_vals = {
             'verification_status': status,
-            'verification_timestamp': timestamp or fields.Datetime.now(),
+            'verification_timestamp': timestamp or self.env.now,
             'verification_request_id': request_id,
         }
 

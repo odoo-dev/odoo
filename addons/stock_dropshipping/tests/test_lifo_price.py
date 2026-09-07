@@ -98,7 +98,7 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
             move.product_id = product_lifo_icecream
             move.quantity = 20.0
             move.picked = True
-            move.date = fields.Datetime.now()
+            move.date = self.env.now
         outgoing_lifo_shipment = out_form.save()
 
         # I assign this outgoing shipment

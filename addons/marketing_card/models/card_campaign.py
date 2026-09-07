@@ -230,7 +230,7 @@ class CardCampaign(models.Model):
                 'url': vals.get('target_url') or self.env['card.campaign'].get_base_url(),
                 'title': vals['name'],  # not having this will trigger a request in the create
                 'source_id': utm_source.id if utm_source else None,
-                'label': f"marketing_card_campaign_{vals.get('name', '')}_{fields.Datetime.now()}",
+                'label': f"marketing_card_campaign_{vals.get('name', '')}_{self.env.now}",
             }
             for vals in vals_list
         ])

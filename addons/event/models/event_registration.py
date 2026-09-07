@@ -309,7 +309,7 @@ class EventRegistration(models.Model):
             to_confirm._update_mail_schedulers()
 
         if vals.get('state') == 'done':
-            message = _("Attended on %(attended_date)s", attended_date=format_date(env=self.env, value=fields.Datetime.now(), date_format='short'))
+            message = _("Attended on %(attended_date)s", attended_date=format_date(env=self.env, value=self.env.now, date_format='short'))
             self._message_log_batch(bodies={registration.id: message for registration in self})
 
         return ret
@@ -508,7 +508,7 @@ class EventRegistration(models.Model):
         is_date_closed_today = False
         if self.date_closed:
             event_tz = ZoneInfo(self.event_id.date_tz)
-            now = fields.Datetime.now().replace(tzinfo=UTC).astimezone(event_tz)
+            now = self.env.now.replace(tzinfo=UTC).astimezone(event_tz)
             closed_date = self.date_closed.astimezone(event_tz)
             is_date_closed_today = now.date() == closed_date.date()
 

@@ -12,7 +12,7 @@ class TestLoadMessages(HttpCase):
         self.env["mail.message"].create([{
             "body": str(n),
             "model": "discuss.channel",
-            "pinned_at": odoo.fields.Datetime.now() if n == 1 else None,
+            "pinned_at": odoo.self.env.now if n == 1 else None,
             "res_id": channel.id,
             "author_id": admin.partner_id.id,
             "message_type": "comment",

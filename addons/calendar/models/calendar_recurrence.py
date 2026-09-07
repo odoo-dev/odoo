@@ -287,7 +287,7 @@ class CalendarRecurrence(models.Model):
         :param recurrence_update: boolean: if true, update all recurrences in self, else only the recurrences
                without trigger
         """
-        now = self.env.context.get('date') or fields.Datetime.now()
+        now = self.env.context.get('date') or self.env.now
         # get next events
         self.env['calendar.event'].flush_model(fnames=['recurrence_id', 'start'])
         if not self.calendar_event_ids.ids:
@@ -636,7 +636,7 @@ class CalendarRecurrence(models.Model):
         if not self.calendar_event_ids:
             return False
 
-        now = fields.Datetime.now()
+        now = self.env.now
         today = fields.Date.context_today(self)
 
         return all(

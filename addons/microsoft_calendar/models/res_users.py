@@ -36,7 +36,7 @@ class ResUsers(models.Model):
         return self.sudo().microsoft_calendar_token
 
     def _is_microsoft_calendar_valid(self):
-        return self.sudo().microsoft_calendar_token_validity and self.sudo().microsoft_calendar_token_validity >= (fields.Datetime.now() + timedelta(minutes=1))
+        return self.sudo().microsoft_calendar_token_validity and self.sudo().microsoft_calendar_token_validity >= (self.env.now + timedelta(minutes=1))
 
     def _refresh_microsoft_calendar_token(self, service='calendar'):
         self.ensure_one()
@@ -44,7 +44,7 @@ class ResUsers(models.Model):
             access_token, ttl, new_rtoken = self.env['microsoft.service']._refresh_microsoft_token('calendar', self.sudo().microsoft_calendar_rtoken)
             vals = {
                 'microsoft_calendar_token': access_token,
-                'microsoft_calendar_token_validity': fields.Datetime.now() + timedelta(seconds=ttl),
+                'microsoft_calendar_token_validity': self.env.now + timedelta(seconds=ttl),
             }
             if new_rtoken:
                 vals['microsoft_calendar_rtoken'] = new_rtoken
@@ -87,7 +87,7 @@ class ResUsers(models.Model):
 
         # Set the first synchronization date as an ICP parameter before writing the variable
         # 'microsoft_calendar_sync_token' below, so we identify the first synchronization.
-        self._set_ICP_first_synchronization_date(fields.Datetime.now())
+        self._set_ICP_first_synchronization_date(self.env.now)
 
         calendar_service = self.env["calendar.event"]._get_microsoft_service()
         full_sync = not bool(self.sudo().microsoft_calendar_sync_token)

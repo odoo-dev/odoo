@@ -444,7 +444,7 @@ class TestAllocations(TestHrHolidaysCommon):
                 allocation_form.date_from = False
 
         with Form(allocation, allocation_view) as allocation_form:
-            date_from = Date.today()
+            date_from = self.env.now.date()
             allocation_form.work_entry_type_id = self.work_entry_type
             allocation_form.date_from = date_from
 

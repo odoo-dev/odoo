@@ -40,7 +40,7 @@ class TestWorkEntryBase(TransactionCase):
             'wage': 5000.0,
             'date_version': Date.to_date('2018-01-01'),
             'contract_date_start': Date.to_date('2018-01-01'),
-            'contract_date_end': Date.today() + relativedelta(years=2),
+            'contract_date_end': self.env.now.date() + relativedelta(years=2),
         })
 
         cls.work_entry_type = cls.env['hr.work.entry.type'].create({

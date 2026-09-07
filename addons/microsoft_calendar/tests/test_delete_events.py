@@ -334,7 +334,7 @@ class TestDeleteEvents(TestCommon):
     def test_delete_recurrence_previously_synced(self, mock_delete):
         # Arrange: select recurrent event and update token validity to simulate an active sync environment.
         idx = 0
-        self.organizer_user.microsoft_calendar_token_validity = fields.Datetime.now() + timedelta(hours=1)
+        self.organizer_user.microsoft_calendar_token_validity = self.env.now + timedelta(hours=1)
 
         # Act: try to delete a recurrent event that was already synced.
         with self.assertRaises(UserError):

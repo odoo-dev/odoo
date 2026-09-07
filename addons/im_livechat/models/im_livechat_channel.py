@@ -335,7 +335,7 @@ class Im_LivechatChannel(models.Model):
     # --------------------------
     def _get_livechat_discuss_channel_vals(self, /, *, chatbot_script=None, agent=None, operator_partner, operator_model, **kwargs):
         # use the same "now" in the whole function to ensure unpin_dt > last_interest_dt
-        now = fields.Datetime.now()
+        now = self.env.now
         last_interest_dt = now - timedelta(seconds=1)
         members_to_add = [Command.create(self._get_agent_member_vals(
             last_interest_dt=last_interest_dt, now=now,
@@ -557,7 +557,7 @@ class Im_LivechatChannel(models.Model):
                         (
                             "create_date",
                             ">",
-                            fields.Datetime.now() - timedelta(seconds=BUFFER_TIME),
+                            self.env.now - timedelta(seconds=BUFFER_TIME),
                         ),
                     ],
                     groupby=["partner_id"],

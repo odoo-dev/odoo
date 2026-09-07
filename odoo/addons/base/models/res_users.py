@@ -1824,7 +1824,7 @@ class ResUsersApikeysDescription(models.TransientModel):
             duration = int(record.duration)
             if duration >= 0:
                 record.expiration_date = (
-                    fields.Date.today() + datetime.timedelta(days=duration)
+                    self.env.now.date() + datetime.timedelta(days=duration)
                     if int(record.duration)
                     else None
                 )

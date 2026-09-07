@@ -1105,7 +1105,7 @@ class StockQuant(models.Model):
         if incoming_dates:
             in_date = min(incoming_dates)
         else:
-            in_date = fields.Datetime.now()
+            in_date = self.env.now
 
         quant = None
         if quants:

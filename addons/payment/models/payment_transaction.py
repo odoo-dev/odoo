@@ -1234,7 +1234,7 @@ class PaymentTransaction(models.Model):
         txs_to_process.write({
             "state": target_state,
             "state_message": state_message,
-            "last_state_change": fields.Datetime.now(),
+            "last_state_change": self.env.now,
             "is_post_processed": False,  # Reset to allow post-processing again for other states.
         })
         return txs_to_process

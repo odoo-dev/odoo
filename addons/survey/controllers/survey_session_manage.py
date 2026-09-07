@@ -110,7 +110,7 @@ class UserInputSession(http.Controller):
             survey.write({
                 'session_question_can_answer': True,
                 'session_question_id': next_question.id,
-                'session_question_start_time': fields.Datetime.now() + relativedelta(seconds=1)
+                'session_question_start_time': self.env.now + relativedelta(seconds=1)
             })
             request.env['bus.bus']._sendone(survey.access_token, 'next_question', {
                 'question_start': now.timestamp()

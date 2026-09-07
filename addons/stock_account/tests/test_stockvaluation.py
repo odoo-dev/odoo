@@ -310,7 +310,7 @@ class TestStockValuation(TestStockValuationCommon):
         self._make_in_move(product, 5, 10)
         self._make_in_move(product, 5, 20)
 
-        now = Datetime.now()
+        now = self.env.now
 
         def _create_out_move(quantity, move_date):
             move = self.env['stock.move'].create({
@@ -343,7 +343,7 @@ class TestStockValuation(TestStockValuationCommon):
 
         # We expect the user to set manually set a standard price to its products if its first
         # transfer is sending products that he doesn't have.
-        with freeze_time(Datetime.now() - timedelta(seconds=1)):
+        with freeze_time(self.env.now - timedelta(seconds=1)):
             product.product_tmpl_id.standard_price = 8.0
 
         # ---------------------------------------------------------------------
@@ -827,7 +827,7 @@ class TestStockValuation(TestStockValuationCommon):
         ).env
 
         product = self.product_fifo
-        today = Datetime.now()
+        today = self.env.now
         with freeze_time(today - timedelta(days=4)):
             move = self._make_in_move(product, 1, 10, create_picking=True, owner=self.env.company.partner_id)
         with freeze_time(today - timedelta(days=2)):
@@ -868,9 +868,9 @@ class TestStockValuation(TestStockValuationCommon):
         move1.value_manual = 8.0
         self.assertEqual(product.qty_available, 8.0)
         self.assertEqual(product.total_value, 8.0)
-        move1.date = Date.today() - timedelta(days=7)
+        move1.date = self.env.now.date() - timedelta(days=7)
         # Just to retrigger the total_value computation without influenting it
-        future_date = Date.today() + timedelta(days=1)
+        future_date = self.env.now.date() + timedelta(days=1)
         self.assertEqual(product.with_context(to_date=future_date).total_value, 8.0)
 
     def test_average_perpetual_1(self):
@@ -1398,7 +1398,7 @@ class TestStockValuation(TestStockValuationCommon):
         product = self.product_avco_auto
 
         # set a standard price
-        with freeze_time(Datetime.now() - timedelta(days=10)):
+        with freeze_time(self.env.now - timedelta(days=10)):
             product.standard_price = 99
 
         # Receives 10 products at 10
@@ -1957,7 +1957,7 @@ class TestStockValuation(TestStockValuationCommon):
     def test_at_date_standard_1(self):
         product = self.product_standard
 
-        now = Datetime.now()
+        now = self.env.now
         date1 = now - timedelta(days=8)
         date2 = now - timedelta(days=7)
         date3 = now - timedelta(days=6)
@@ -2045,7 +2045,7 @@ class TestStockValuation(TestStockValuationCommon):
         """
         product = self.product_fifo
 
-        now = Datetime.now()
+        now = self.env.now
         date1 = now - timedelta(days=8)
         date2 = now - timedelta(days=7)
         date3 = now - timedelta(days=6)
@@ -2122,7 +2122,7 @@ class TestStockValuation(TestStockValuationCommon):
         is used as the historical fallback rather than the current
         standard_price.
         """
-        now = Datetime.now()
+        now = self.env.now
         date1 = now - timedelta(days=2)
         date2 = now - timedelta(days=1)
 
@@ -2210,7 +2210,7 @@ class TestStockValuation(TestStockValuationCommon):
         """ Set a company on the inventory loss, take items from there then put items there, check
         the values and quantities at date.
         """
-        now = Datetime.now()
+        now = self.env.now
         date1 = now - timedelta(days=8)
         date2 = now - timedelta(days=7)
 
@@ -2258,7 +2258,7 @@ class TestStockValuation(TestStockValuationCommon):
         date wizard are consistent.
         """
 
-        now = Datetime.now()
+        now = self.env.now
         date1 = now - timedelta(days=3)
         date2 = now - timedelta(days=2)
         date3 = now - timedelta(days=1)
@@ -2508,7 +2508,7 @@ class TestStockValuation(TestStockValuationCommon):
 
         # Add 30 x LOT3 so that product_qty is null but the lot should still be valued in each warehouse with stock
         self._make_in_move(product=product, quantity=30.0, location_dest_id=warehouse_2.lot_stock_id.id, lot_ids=lots[2])
-        with freeze_time(Datetime.now() + timedelta(seconds=1)):
+        with freeze_time(self.env.now + timedelta(seconds=1)):
             product.standard_price = 10.0
         self.assertRecordValues(product, [{'avg_cost': 10.0, 'total_value': 300.0, 'qty_available': 30}])
         self.assertRecordValues(product.with_context(warehouse_id=warehouse_1.id), [{'avg_cost': 10.0, 'total_value': 150, 'qty_available': 15.0}])
@@ -2636,16 +2636,16 @@ class TestStockValuation(TestStockValuationCommon):
         res = self.env['stock.quant']._read_group([('product_id', '=', product.id)], aggregates=['value:sum'])
         self.assertEqual(res[0][0], 5 * 5 + 2 * 6)
         # Avoid inderterminism since product.value and stock.move could have the same datetime in _run_avco
-        with freeze_time(Datetime.now() + timedelta(minutes=1)):
+        with freeze_time(self.env.now + timedelta(minutes=1)):
             product.standard_price = 7
         self.assertEqual(product.total_value, 49)
 
-        with freeze_time(Datetime.now() + timedelta(minutes=2)):
+        with freeze_time(self.env.now + timedelta(minutes=2)):
             move = self._make_in_move(product, 5, unit_cost=5)
             # We force the sequence here to simulate moves that are not ordered by date
             move.sequence = -1
 
-        with freeze_time(Datetime.now() + timedelta(minutes=3)):
+        with freeze_time(self.env.now + timedelta(minutes=3)):
             self.assertEqual(product.total_value, 74)  # 49 + (5 * 5) = 74
 
     def test_average_manual_revaluation(self):
@@ -2933,18 +2933,18 @@ class TestStockValuation(TestStockValuationCommon):
         product_2 = self.product_avco.copy()
         self.env['product.value'].search([('product_id', 'in', (product_1.id, product_2.id))]).unlink()
 
-        with freeze_time(Datetime.now() - timedelta(days=5)):
+        with freeze_time(self.env.now - timedelta(days=5)):
             self._make_in_move(product_1, 10, unit_cost=10)
             self._make_in_move(product_2, 10, unit_cost=10)
 
-        with freeze_time(Datetime.now() - timedelta(days=4)):
+        with freeze_time(self.env.now - timedelta(days=4)):
             product_1.standard_price = 20
 
-        with freeze_time(Datetime.now() - timedelta(days=3)):
+        with freeze_time(self.env.now - timedelta(days=3)):
             self._make_in_move(product_1, 10, unit_cost=20)
             self._make_in_move(product_2, 10, unit_cost=20)
 
-        valuation_date = Datetime.now() - timedelta(days=2)
+        valuation_date = self.env.now - timedelta(days=2)
         # Check both value in the same assert since it should be computed together.
         self.assertEqual((product_1 | product_2).with_context(to_date=valuation_date).mapped('total_value'), [400, 300])
 
@@ -2992,7 +2992,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(sum(moves_in.mapped('remaining_value')), 60)
 
         # Avoid conflict with moves in and product.value at same date
-        with freeze_time(Datetime.now() + timedelta(seconds=1)):
+        with freeze_time(self.env.now + timedelta(seconds=1)):
             product.standard_price = 4
 
         # Check standard price change
@@ -3072,7 +3072,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(product.qty_available, 10000)
 
         # Second Move
-        with freeze_time(Datetime.now() + timedelta(seconds=1)):
+        with freeze_time(self.env.now + timedelta(seconds=1)):
             product.write({'standard_price': 0.053})
 
         self.assertEqual(product.standard_price, 0.05)
@@ -3093,7 +3093,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.env.company.currency_id.sudo().rounding = 0.00001
 
         # First Move
-        with freeze_time(Datetime.now() - timedelta(seconds=1)):
+        with freeze_time(self.env.now - timedelta(seconds=1)):
             product.write({'standard_price': 0.00875})
         move1 = self._make_in_move(product, 10000)
 
@@ -3103,7 +3103,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(product.total_value, 87.5)
 
         # Second Move
-        with freeze_time(Datetime.now() + timedelta(seconds=1)):
+        with freeze_time(self.env.now + timedelta(seconds=1)):
             product.standard_price = 0.00975
 
         self.assertEqual(product.standard_price, 0.00975)
@@ -3164,7 +3164,7 @@ class TestStockValuation(TestStockValuationCommon):
         """
         product = self.product_standard_auto
         self._use_inventory_location_accounting()
-        past_accounting_date = Date.today() - timedelta(days=7)
+        past_accounting_date = self.env.now.date() - timedelta(days=7)
         inventory_quants = self.env['stock.quant'].create([
             {
                 'location_id': self.stock_location.id,
@@ -3457,8 +3457,8 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertFalse(m2.is_in or m2.is_out)
         self.assertTrue(m3.is_out)
 
-        date_1 = Date.today() + timedelta(days=1)
-        date_2 = Date.today() + timedelta(days=2)
+        date_1 = self.env.now.date() + timedelta(days=1)
+        date_2 = self.env.now.date() + timedelta(days=2)
         with freeze_time(date_2):
             # Check current values 2 days later
             self.assertEqual(self.product_avco.total_value, 10)

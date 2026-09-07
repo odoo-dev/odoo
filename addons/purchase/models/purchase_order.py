@@ -248,7 +248,7 @@ class PurchaseOrder(models.Model):
                 from_currency=order.company_id.currency_id,
                 to_currency=order.currency_id,
                 company=order.company_id,
-                date=(order.date_order or fields.Datetime.now()).date(),
+                date=(order.date_order or self.env.now).date(),
             )
 
     @api.depends('amount_total', 'currency_rate')
@@ -449,7 +449,7 @@ class PurchaseOrder(models.Model):
             return Domain('order_line', 'any', purchase_lines_on_time)
 
     def _get_domain_is_late(self, operator, value):
-        return Domain([('state', '=', 'purchase'), ('date_planned', '<=', fields.Datetime.now())])
+        return Domain([('state', '=', 'purchase'), ('date_planned', '<=', self.env.now)])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -697,7 +697,7 @@ class PurchaseOrder(models.Model):
 
     def button_approve(self, force=False):
         self = self.filtered(lambda order: order._approval_allowed())
-        self.write({'state': 'purchase', 'date_approve': fields.Datetime.now()})
+        self.write({'state': 'purchase', 'date_approve': self.env.now})
         self.filtered(lambda p: p.lock_confirmed_po == 'lock').write({'locked': True})
         return {}
 
@@ -739,7 +739,7 @@ class PurchaseOrder(models.Model):
     def button_reset_date_order(self):
         self.ensure_one()
         previous_date_order = self.date_order
-        self.date_order = fields.Datetime.now()
+        self.date_order = self.env.now
         for line in self.order_line:
             # If there's no seller i.e no lead time, we keep the same difference with the new deadline
             if not line.selected_seller_id and line.date_planned:
@@ -1083,7 +1083,7 @@ class PurchaseOrder(models.Model):
         rfq_sent_group = self.env['purchase.order']._read_group(rfq_sent_domain, groupby, aggregate)
         _update('sent', result, rfq_sent_group)
 
-        rfq_late_domain = [('state', 'in', ['draft', 'sent', 'to approve']), ('date_order', '<', fields.Datetime.now())]
+        rfq_late_domain = [('state', 'in', ['draft', 'sent', 'to approve']), ('date_order', '<', self.env.now)]
         rfq_late_group = self.env['purchase.order']._read_group(rfq_late_domain, groupby, aggregate)
         _update('late', result, rfq_late_group)
 
@@ -1095,7 +1095,7 @@ class PurchaseOrder(models.Model):
         rfq_late_receipt_group = self.env['purchase.order']._read_group(rfq_late_receipt, groupby, aggregate)
         _update('late_receipt', result, rfq_late_receipt_group)
 
-        three_months_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(months=3))
+        three_months_ago = fields.Datetime.to_string(self.env.now - relativedelta(months=3))
 
         purchases = self.env['purchase.order'].search_fetch(
             [('state', '=', 'purchase'), ('create_date', '>=', three_months_ago), ('date_approve', '!=', False)],

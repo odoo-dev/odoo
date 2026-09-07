@@ -3069,7 +3069,7 @@ class MailThread(models.AbstractModel):
         # want pin/unpin a message to change the write_date.
         self.env.cr.execute(
             "UPDATE mail_message SET pinned_at=%(pinned_at)s WHERE id=%(id)s",
-            {"pinned_at": fields.Datetime.now() if pinned else None, "id": message.id},
+            {"pinned_at": self.env.now if pinned else None, "id": message.id},
         )
         Store(bus_channel=message).add(message, ["pinned_at"])
         return True
@@ -5130,14 +5130,14 @@ class MailThread(models.AbstractModel):
                         children[target_index] if children[target_index].tag in ["div", "p"] else tree
                     )
                     last_div_element.text = (last_div_element.text or '') + (' ' if last_div_element.text else '')
-                    etree.SubElement(last_div_element, "span", attrib={"class": "o-mail-Message-edited", "data-o-datetime": fields.Datetime.to_string(fields.Datetime.now())})
+                    etree.SubElement(last_div_element, "span", attrib={"class": "o-mail-Message-edited", "data-o-datetime": fields.Datetime.to_string(self.env.now)})
                     msg_values["body"] = (
                         # markup: it is considered safe, as coming from html.fragment_fromstring
                         (tree.text or "") + Markup("".join(etree.tostring(child, encoding="unicode") for child in tree))
                     )
                 else:  # body is plain text
                     # keep html if already Markup, otherwise escape
-                    msg_values["body"] = escape(body) + Markup("<span class='o-mail-Message-edited' data-o-datetime='%s'/>") % fields.Datetime.to_string(fields.Datetime.now())
+                    msg_values["body"] = escape(body) + Markup("<span class='o-mail-Message-edited' data-o-datetime='%s'/>") % fields.Datetime.to_string(self.env.now)
             else:
                 msg_values["body"] = ""
         if attachment_ids is not None:  # None means "no update"

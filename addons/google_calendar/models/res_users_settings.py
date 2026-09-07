@@ -43,7 +43,7 @@ class ResUsersSettings(models.Model):
         self.sudo().write({
             'google_calendar_rtoken': refresh_token,
             'google_calendar_token': access_token,
-            'google_calendar_token_validity': fields.Datetime.now() + timedelta(seconds=ttl) if ttl else False,
+            'google_calendar_token_validity': self.env.now + timedelta(seconds=ttl) if ttl else False,
             'google_account_email': self._get_email_from_google(access_token) if access_token else False,
         })
 
@@ -53,7 +53,7 @@ class ResUsersSettings(models.Model):
 
     def _is_google_calendar_valid(self):
         self.ensure_one()
-        return self.sudo().google_calendar_token_validity and self.sudo().google_calendar_token_validity >= (fields.Datetime.now() + timedelta(minutes=1))
+        return self.sudo().google_calendar_token_validity and self.sudo().google_calendar_token_validity >= (self.env.now + timedelta(minutes=1))
 
     def _refresh_google_calendar_token(self):
         self.ensure_one()
@@ -62,7 +62,7 @@ class ResUsersSettings(models.Model):
             access_token, ttl = self.env['google.service']._refresh_google_token('calendar', self.sudo().google_calendar_rtoken)
             self.sudo().write({
                 'google_calendar_token': access_token,
-                'google_calendar_token_validity': fields.Datetime.now() + timedelta(seconds=ttl),
+                'google_calendar_token_validity': self.env.now + timedelta(seconds=ttl),
             })
         except requests.HTTPError as error:
             if error.response.status_code in (400, 401):  # invalid grant or invalid client

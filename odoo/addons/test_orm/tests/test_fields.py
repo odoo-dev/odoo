@@ -1182,7 +1182,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def test_21_datetime(self):
         """ test datetime fields """
         for _i in range(0, 10):
-            self.assertEqual(fields.Datetime.now().microsecond, 0)
+            self.assertEqual(self.env.now.microsecond, 0)
 
         record = self.env['test_orm.mixed'].create({})
 
@@ -1219,7 +1219,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertTrue(record.filtered_domain([('moment', '=', False)]))
 
     def test_21_date_dynamic(self):
-        record = self.env['test_orm.mixed'].create({'moment': fields.Datetime.now()})
+        record = self.env['test_orm.mixed'].create({'moment': self.env.now})
         self.assertEqual(record, self._search(record, [('moment', '<', 'now +1d')], [('id', 'in', record.ids)]))
         self.assertFalse(self._search(record, [('moment', '<', 'today')], [('id', 'in', record.ids)]))
         self.assertEqual(record, self._search(record, [('moment', '>', '-1H')], [('id', 'in', record.ids)]))

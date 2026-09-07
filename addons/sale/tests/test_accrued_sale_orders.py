@@ -70,12 +70,12 @@ class TestAccruedSaleOrders(TestSaleCommon):
             cls
             .env["account.accrued.orders.wizard"]
             .with_context({"active_model": "sale.order", "active_ids": cls.sale_order.ids})
-            .create({"account_id": cls.account_expense.id, "date": fields.Date.today()})
+            .create({"account_id": cls.account_expense.id, "date": self.env.now.date()})
         )
 
     def test_accrued_order(self):
-        # self.wizard = self.wizard.with_context(accrual_entry_date=fields.Date.today())
-        self.wizard.date = fields.Date.today()
+        # self.wizard = self.wizard.with_context(accrual_entry_date=self.env.now.date())
+        self.wizard.date = self.env.now.date()
         # nothing to invoice : no entries to be created
         with self.assertRaises(UserError):
             self.wizard.create_entries()

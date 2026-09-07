@@ -398,7 +398,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
                 'sale_order_line_id': sale_order.order_line[0].id,
                 'sale_order_origin_id': sale_order.id,
             },
-        }], partner=self.partner_test, shipping_date=fields.Date.today())
+        }], partner=self.partner_test, shipping_date=self.env.now.date())
         order = self.env['pos.order'].browse(order_id)
 
         self.assertEqual(order.state, 'paid')
@@ -469,7 +469,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
                 'sale_order_line_id': sale_order_single.order_line[0].id,
                 'sale_order_origin_id': sale_order_single.id,
             },
-        }], partner=partner_test, shipping_date=fields.Date.today())
+        }], partner=partner_test, shipping_date=self.env.now.date())
         self._sync_paid_pos_order([{
             'product': product_a,
             'qty': 1,
@@ -486,7 +486,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
                 'sale_order_line_id': sale_order_multi.order_line[1].id,
                 'sale_order_origin_id': sale_order_multi.id,
             },
-        }], partner=partner_test, shipping_date=fields.Date.today())
+        }], partner=partner_test, shipping_date=self.env.now.date())
 
         self.assertEqual(len(sale_order_single.picking_ids), 1)
         self.assertEqual(sale_order_single.picking_ids.state, "cancel")

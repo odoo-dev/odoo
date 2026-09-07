@@ -31,8 +31,8 @@ class WebsiteLivechatChatbotScriptController(http.Controller):
                         "partner_id": chatbot_script.operator_partner_id.id,
                         # making sure the unpin_dt is always later than the last_interest_dt
                         # so that the channel is unpinned
-                        "unpin_dt": fields.Datetime.now(),
-                        "last_interest_dt": fields.Datetime.now() - timedelta(seconds=30),
+                        "unpin_dt": self.env.now,
+                        "last_interest_dt": self.env.now - timedelta(seconds=30),
                         "livechat_member_type": "bot",
                     },
                 ),

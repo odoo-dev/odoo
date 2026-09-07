@@ -78,7 +78,7 @@ class SlideChannelInvite(models.TransientModel):
             raise_on_access=True
         )
         if not self.enroll_mode:
-            (attendees_to_reinvite | channel_partners).last_invitation_date = fields.Datetime.now()
+            (attendees_to_reinvite | channel_partners).last_invitation_date = self.env.now
 
         for channel_partner in (attendees_to_reinvite | channel_partners):
             mail_values.append(self._prepare_mail_values(channel_partner))

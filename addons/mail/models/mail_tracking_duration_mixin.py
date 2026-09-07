@@ -116,7 +116,7 @@ class MailTrackingDurationMixin(models.AbstractModel):
         others = self - rot_enabled
         for stage, records in rot_enabled.grouped(self._track_duration_field).items():
             rotting = records.filtered(lambda record:
-                (record.date_last_stage_update or record.create_date or fields.Datetime.now())
+                (record.date_last_stage_update or record.create_date or self.env.now)
                 + timedelta(days=stage.rotting_threshold_days) < now
             )
             for record in rotting:

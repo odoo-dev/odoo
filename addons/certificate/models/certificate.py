@@ -148,7 +148,7 @@ class CertificateCertificate(models.Model):
                     # is not matched as its own issuer
                     ('id', '!=', cert.id),
                 # Prefer the candidate with the furthest expiration date (most recent renewal)
-                ]).sorted(key=lambda p: p.date_end or fields.Datetime.now(), reverse=True)
+                ]).sorted(key=lambda p: p.date_end or self.env.now, reverse=True)
 
                 # A candidate whose key cryptographically signed this certificate.
                 issuer = candidates.filtered(
@@ -255,7 +255,7 @@ class CertificateCertificate(models.Model):
     def _compute_is_valid(self):
         # Certificate dates and Odoo datetimes are UTC timezoned
         # https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate.not_valid_after
-        now = fields.Datetime.now()
+        now = self.env.now
         for certificate in self:
             if not certificate.date_start or not certificate.date_end or certificate.loading_error:
                 certificate.is_valid = False
@@ -267,7 +267,7 @@ class CertificateCertificate(models.Model):
     def _search_is_valid(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        now = fields.Datetime.now()
+        now = self.env.now
         return [
             ('pem_certificate', '!=', False),
             ('date_start', '<=', now),

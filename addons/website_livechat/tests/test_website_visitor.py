@@ -32,7 +32,7 @@ class WebsiteVisitorTestsLivechat(WebsiteVisitorTestsCommon):
             {
                 "partner_id": test_partner.id,
                 "discuss_channel_ids": [
-                    Command.create({"name": "Conversation 1", "livechat_end_dt": fields.Datetime.now()}),
+                    Command.create({"name": "Conversation 1", "livechat_end_dt": self.env.now}),
                 ],
             }
         )
@@ -43,7 +43,7 @@ class WebsiteVisitorTestsLivechat(WebsiteVisitorTestsCommon):
         values.update(
             {
                 "discuss_channel_ids": [
-                    Command.create({"name": "Conversation 2", "livechat_end_dt": fields.Datetime.now()}),
+                    Command.create({"name": "Conversation 2", "livechat_end_dt": self.env.now}),
                 ],
             }
         )

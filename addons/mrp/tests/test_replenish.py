@@ -217,7 +217,7 @@ class TestMrpReplenish(TestMrpCommon):
         repl_info = self.env[r['res_model']].browse(r['res_id'])
         lead_horizon_date = datetime.strptime(
             loads(repl_info.json_lead_days)['lead_horizon_date'], '%m/%d/%Y').date()
-        self.assertEqual(lead_horizon_date, fields.Date.today() + timedelta(days=365))
+        self.assertEqual(lead_horizon_date, self.env.now.date() + timedelta(days=365))
 
     def test_orderpoint_onchange_reordering_rule(self):
         """ Ensure onchange logic works properly when editing a reordering rule
@@ -239,7 +239,7 @@ class TestMrpReplenish(TestMrpCommon):
 
         prod = self.env['mrp.production'].search([('origin', '=', orderpoint.name)])
         # Error is triggered for date_start <= lead_horizon_date < date_finished
-        prod.date_start = fields.Date.today() + timedelta(days=1)
+        prod.date_start = self.env.now.date() + timedelta(days=1)
 
         with Form(orderpoint, view='stock.view_warehouse_orderpoint_tree_editable') as form:
             form.product_min_qty = 3

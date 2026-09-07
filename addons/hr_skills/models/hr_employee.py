@@ -60,7 +60,7 @@ class HrEmployee(models.Model):
 
     @api.model
     def _add_certification_activity_to_employees(self):
-        today = fields.Date.today()
+        today = self.env.now.date()
         three_months_later = today + relativedelta(months=3)
         return_val = self.env["mail.activity"]
 

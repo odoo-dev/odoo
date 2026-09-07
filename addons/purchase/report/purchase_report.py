@@ -52,7 +52,7 @@ class PurchaseReport(models.Model):
 
     @property
     def _table_sql(self) -> SQL:
-        today = fields.Date.today()
+        today = self.env.now.date()
         query = self.env['purchase.order.line'].sudo().with_context(date_to=today)._search([('display_type', '=', False)])
         query.groupby = SQL(", ").join(self._groupby_list(query.table))
         return query.subselect(*self._select_list(query.table))

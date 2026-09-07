@@ -87,13 +87,13 @@ class TestWebsiteEventSale(HttpCaseWithUserPortal, TestWebsiteEventSaleCommon):
             'name': 'Free Pass',
             'product_id': self.product_event.id,
             'price': 0,
-            'end_sale_datetime': Datetime.now() - timedelta(days=1),
+            'end_sale_datetime': self.env.now - timedelta(days=1),
         }, {
             'event_id': self.event.id,
             'name': 'Early Bird',
             'product_id': self.product_event.id,
             'price': 10,
-            'end_sale_datetime': Datetime.now() - timedelta(days=1),
+            'end_sale_datetime': self.env.now - timedelta(days=1),
         }])
         event_questions = self.event.question_ids
         name_question = event_questions.filtered(lambda q: q.question_type == 'name')

@@ -82,7 +82,7 @@ class BusBus(models.Model):
         gc_retention_seconds = self.env["ir.config_parameter"].sudo().get_int(
             "bus.gc_retention_seconds", DEFAULT_GC_RETENTION_SECONDS
         )
-        timeout_ago = fields.Datetime.now() - datetime.timedelta(seconds=gc_retention_seconds)
+        timeout_ago = self.env.now - datetime.timedelta(seconds=gc_retention_seconds)
         # Direct SQL to avoid ORM overhead; this way we can delete millions of rows quickly.
         # This is a low-level table with no expected references, and doing this avoids
         # the need to split or reschedule this GC job.

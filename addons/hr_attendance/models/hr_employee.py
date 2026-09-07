@@ -112,7 +112,7 @@ class HrEmployee(models.Model):
         ])
         if open_attendances:
             open_attendances.write({
-                'check_out': fields.Datetime.now(),
+                'check_out': self.env.now,
             })
         return res
 
@@ -153,7 +153,7 @@ class HrEmployee(models.Model):
         """
         Compute hours and overtime hours in the current month, if we are the 15th of october, will compute from 1 oct to 15 oct
         """
-        now = fields.Datetime.now()
+        now = self.env.now
         now_utc = now.replace(tzinfo=datetime.UTC)
         for timezone, employees in self.grouped('tz').items():
             tz = ZoneInfo(timezone or 'UTC')
@@ -178,7 +178,7 @@ class HrEmployee(models.Model):
 
     @api.depends('attendance_ids', 'attendance_ids.check_in', 'attendance_ids.check_out', 'attendance_ids.break_duration')
     def _compute_hours_today(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         now_utc = now.replace(tzinfo=datetime.UTC)
         for timezone, employees in self.grouped('tz').items():
             # start of day in the employee's timezone might be the previous day in utc
@@ -222,7 +222,7 @@ class HrEmployee(models.Model):
 
     @api.depends('attendance_ids')
     def _compute_last_attendance_id(self):
-        current_datetime = fields.Datetime.now()
+        current_datetime = self.env.now
         for employee in self:
             employee.last_attendance_id = self.env['hr.attendance'].search([
                 ('employee_id', 'in', employee.ids),
@@ -250,7 +250,7 @@ class HrEmployee(models.Model):
             Check Out: modify check_out field of appropriate attendance record
         """
         self.ensure_one()
-        action_date = fields.Datetime.now()
+        action_date = self.env.now
         notification = False
 
         if self.attendance_state != 'checked_in':

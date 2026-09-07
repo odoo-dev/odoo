@@ -414,7 +414,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(self.product.virtual_available, 25)  # Makes sure no PO or SO impacting forecasted
         sale_order_1, sale_order_2 = self.env['sale.order'].create([{
             'partner_id': self.partner_a.id,
-            'commitment_date': fields.Datetime.now() + timedelta(days=2),
+            'commitment_date': self.env.now + timedelta(days=2),
             'order_line': [
                 Command.create({
                     'product_id': self.product.id,
@@ -422,7 +422,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
                 })
             ]}, {
             'partner_id': self.partner_a.id,
-                'commitment_date': fields.Datetime.now() + timedelta(days=12),  # After PO below
+                'commitment_date': self.env.now + timedelta(days=12),  # After PO below
                 'order_line': [
                     Command.create({
                         'product_id': self.product.id,
@@ -437,7 +437,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
                 'name': self.product_a.name,
                 'product_id': self.product.id,
                 'product_qty': 50,
-                'date_planned': fields.Datetime.now() + timedelta(days=10)
+                'date_planned': self.env.now + timedelta(days=10)
             })],
         })
 

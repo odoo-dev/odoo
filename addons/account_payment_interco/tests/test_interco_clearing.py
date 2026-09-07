@@ -69,7 +69,7 @@ class TestIntercoClearing(AccountTestInvoicingCommon):
                 'company_id': company.id,
             })
             cls.env['res.currency.rate'].create({
-                'name': fields.Date.today(),
+                'name': self.env.now.date(),
                 'rate': rate,
                 'currency_id': currency.id,
                 'company_id': company.id,
@@ -103,7 +103,7 @@ class TestIntercoClearing(AccountTestInvoicingCommon):
             order.amount_total,
             self.env.company.currency_id,
             self.company_ke,
-            fields.Date.today(),
+            self.env.now.date(),
         )
         self.payment_be = self.env['account.payment'].create({
             'memo': order.name,
@@ -253,7 +253,7 @@ class TestIntercoClearingPurchase(TestIntercoClearing):
 
                 bill_data = purchase_order_ke.action_create_invoice()
                 self.bill = self.env['account.move'].browse(bill_data['res_id'])
-                self.bill.invoice_date = fields.Date.today()
+                self.bill.invoice_date = self.env.now.date()
 
                 self._create_payment(purchase_order_ke)
                 self._create_payment_transaction(purchase_order_ke, {

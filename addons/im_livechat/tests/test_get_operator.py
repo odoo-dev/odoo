@@ -113,7 +113,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             self._create_conversation(livechat_channel, first_operator)
             self._create_conversation(livechat_channel, first_operator)
             # Previous operator is not in a call so it should be available, even if
@@ -136,7 +136,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             self._create_conversation(livechat_channel, first_operator)
             self._create_conversation(livechat_channel, second_operator)
             self._create_conversation(livechat_channel, second_operator)
@@ -164,7 +164,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             self._create_conversation(livechat_channel, first_operator, in_call=True)
             self._create_conversation(livechat_channel, second_operator)
             self._create_conversation(livechat_channel, second_operator)
@@ -179,7 +179,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             self._create_conversation(livechat_channel, first_operator, in_call=True)
             self._create_conversation(livechat_channel, first_operator)
             self._create_conversation(livechat_channel, second_operator, in_call=True)
@@ -278,7 +278,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
             "block_assignment_during_call": True,
         }
         livechat_channel = self.env["im_livechat.channel"].sudo().create(livechat_channel_data)
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             self._create_conversation(livechat_channel, operator, in_call=True)
             self.assertFalse(livechat_channel.available_operator_ids)
 
@@ -340,11 +340,11 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
             "channel_type": "livechat",
             "livechat_channel_id": livechat_channel.id,
             "channel_member_ids": [Command.create({"partner_id": operator.partner_id.id})],
-            "last_interest_dt": fields.Datetime.now() - timedelta(minutes=4),
+            "last_interest_dt": self.env.now - timedelta(minutes=4),
         }
         channel = self.env["discuss.channel"].create(channel_data)
         self.assertFalse(livechat_channel.available_operator_ids)
-        channel.write({"last_interest_dt": fields.Datetime.now() - timedelta(minutes=20)})
+        channel.write({"last_interest_dt": self.env.now - timedelta(minutes=20)})
         self.assertEqual(livechat_channel.available_operator_ids, operator)
 
     @users("employee")
@@ -421,7 +421,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        now = fields.Datetime.now()
+        now = self.env.now
         with self.mock_datetime_and_now(now + timedelta(minutes=-3)):
             self._create_conversation(livechat_channel, second_operator)
         with self.mock_datetime_and_now(now):
@@ -439,7 +439,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
                 "user_ids": [first_operator.id, second_operator.id],
             }
         )
-        now = fields.Datetime.now()
+        now = self.env.now
         with self.mock_datetime_and_now(now):
             self._create_conversation(livechat_channel, first_operator)
             self._create_conversation(livechat_channel, second_operator)
@@ -457,7 +457,7 @@ class TestGetOperator(MailCommon, TestGetOperatorCommon):
         self.assertEqual(first_operator, livechat_channel._get_operator())
         chat = self._create_conversation(livechat_channel, first_operator)
         self.assertEqual(second_operator, livechat_channel._get_operator())
-        chat.livechat_end_dt = fields.Datetime.now()
+        chat.livechat_end_dt = self.env.now
         chat.flush_recordset(["livechat_end_dt"])
         self.assertEqual(first_operator, livechat_channel._get_operator())
 

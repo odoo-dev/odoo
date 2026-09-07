@@ -11,7 +11,7 @@ from odoo.tools import float_compare, float_repr, float_round, format_date
 from odoo.addons.mrp.tests.common import TestMrpCommon
 
 
-@freeze_time(fields.Date.today())
+@freeze_time(self.env.now.date())
 class TestBoM(TestMrpCommon):
 
     _test_user_groups = (
@@ -891,13 +891,13 @@ class TestBoM(TestMrpCommon):
         # Limit the planning to two fortnights, and fill it almost completely while keeping
         # 15 minutes available, so that we can still plan a single operation.
         self.env['ir.config_parameter'].sudo().set_int('mrp.workcenter_max_planning_iterations', 2)
-        date_start = fields.Datetime.today() + timedelta(days=14 * 2 - 1)
+        date_start = self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=14 * 2 - 1)
         end_of_day = date_start + timedelta(days=1)
 
         # Populate the workcenter's planning
         self.env['resource.calendar.leaves'].create({
             'name': 'Game update',
-            'date_from': fields.Date.today(),
+            'date_from': self.env.now.date(),
             'date_to': end_of_day - timedelta(minutes=15),
             'resource_id': workcenter.resource_id.id,
             'count_as': 'working_time',
@@ -2795,13 +2795,13 @@ class TestBoM(TestMrpCommon):
             'product_id': self.productA.id,
             'product_qty': 1.0,
             'bom_id': main_bom.id,
-            'date_start': fields.Datetime.now() + timedelta(days=10)
+            'date_start': self.env.now + timedelta(days=10)
         }).action_confirm()
         self.env['mrp.production'].create({'product_id': self.productB.id, 'product_qty': 2.0}).action_confirm()
 
         comp_line = self._get_component_line(main_bom, self.productB)
         self.assertEqual(comp_line['availability_state'], 'expected')
-        expected_date = f"Expected {format_date(self.env, fields.Date.today() + timedelta(days=comp_line['availability_delay']))}"
+        expected_date = f"Expected {format_date(self.env, self.env.now.date() + timedelta(days=comp_line['availability_delay']))}"
         self.assertEqual(comp_line.get('status'), expected_date)  # Status = "Expected" + today's date + delay
 
         comp_line = self._get_component_line(main_bom, self.productB, qty=2)

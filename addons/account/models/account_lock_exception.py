@@ -234,7 +234,7 @@ class AccountLock_Exception(models.Model):
             if record.state == 'active':
                 record_sudo = record.sudo()
                 record_sudo.active = False
-                record_sudo.end_datetime = fields.Datetime.now()
+                record_sudo.end_datetime = self.env.now
                 record._invalidate_affected_user_lock_dates()
 
     @api.model

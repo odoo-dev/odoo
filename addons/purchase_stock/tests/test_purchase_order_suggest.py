@@ -105,7 +105,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         """ Checks the suggest wizard adds right products with right quantities.
         Also checks some values, like the products' quantity demand or the
         suggest expected price, are rigthly computed too."""
-        today = fields.Datetime.now()
+        today = self.env.now
         # Create some products.
         product_2, product_3, product_4, product_5, product_6 = self.env['product.product'].create([{
             'name': f'Product {i + 1}',
@@ -252,21 +252,21 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         )
 
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=2),
+            'to_date': self.env.now + relativedelta(days=2),
         }
         self.assertEqual(product_4.with_context(context).virtual_available, 1)
         self.assertEqual(product_5.with_context(context).virtual_available, 2)
         self.assertEqual(product_6.with_context(context).virtual_available, 0)
 
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=4),
+            'to_date': self.env.now + relativedelta(days=4),
         }
         self.assertEqual(product_4.with_context(context).virtual_available, -5)
         self.assertEqual(product_5.with_context(context).virtual_available, 2)
         self.assertEqual(product_6.with_context(context).virtual_available, 0)
 
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=8),
+            'to_date': self.env.now + relativedelta(days=8),
         }
         self.assertEqual(product_4.with_context(context).virtual_available, -5)
         self.assertEqual(product_5.with_context(context).virtual_available, -8)
@@ -306,7 +306,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
 
     def test_purchase_order_suggest_quantities_for_consu(self):
         """ Checks the suggest wizard works also with consumable products."""
-        today = fields.Datetime.now()
+        today = self.env.now
         # Create a consumable product.
         consu = self.env['product.product'].create({
             'name': 'Product Consu',
@@ -380,7 +380,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
 
     def test_purchase_order_suggest_quantities_deduce_forecast_quantity(self):
         """ Ensures that when the forecast quantity is deduced from the suggested quantity"""
-        today = fields.Datetime.now()
+        today = self.env.now
         self.env['stock.quant']._update_available_quantity(self.product_1, self.stock_location, 12)
         # Do a delivery in the past.
         self._create_and_process_delivery_at_date([(self.product_1, 12)], date=today - relativedelta(days=10))
@@ -468,7 +468,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
 
     def test_purchase_order_suggest_quantities_multiwarehouse(self):
         """ Ensure the product's qty demand is correctly computed for the right warehouse."""
-        date = fields.Datetime.now() - relativedelta(days=15)
+        date = self.env.now - relativedelta(days=15)
         self.env['stock.quant']._update_available_quantity(self.product_1, self.warehouse.lot_stock_id, 5)
         self.env['stock.quant']._update_available_quantity(self.product_1, self.other_warehouse.lot_stock_id, 10)
         # Make a delivery in each warehouse.
@@ -523,7 +523,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         self.env['stock.quant']._update_available_quantity(product_ad, self.warehouse.lot_stock_id, 7)
         self.env['stock.quant']._update_available_quantity(product_ad, self.other_warehouse.lot_stock_id, 5)
 
-        today = fields.Datetime.now()
+        today = self.env.now
         delivery_1 = self._create_and_process_delivery_at_date(
             [(product_ad, 10)], today, to_validate=False, warehouse=self.warehouse
         )
@@ -535,16 +535,16 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         delivery_2.scheduled_date = today + relativedelta(days=5)
 
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=6),
+            'to_date': self.env.now + relativedelta(days=6),
         }
         self.assertEqual(product_ad.with_context(context).virtual_available, -7)
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=6),
+            'to_date': self.env.now + relativedelta(days=6),
             'warehouse_id': self.warehouse.id,
         }
         self.assertEqual(product_ad.with_context(context).virtual_available, -3)
         context = {
-            'to_date': fields.Datetime.now() + relativedelta(days=6),
+            'to_date': self.env.now + relativedelta(days=6),
             'warehouse_id': self.other_warehouse.id,
         }
         self.assertEqual(product_ad.with_context(context).virtual_available, -4)
@@ -582,7 +582,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
                 2 - Least qty pricelist if no price match
                 3 - Product standard price
         """
-        today = fields.Datetime.now()
+        today = self.env.now
         po = self.env['purchase.order'].create({'partner_id': self.vendor.id})
         product = self.env['product.product'].create({
             'name': 'Product 7',
@@ -618,7 +618,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         - Suggest record interactions: Monthly demand & forecast, Add button
         - Suggest kanban interactions: Add All Filter, and kanban ordering
         """
-        today = fields.Datetime.now()
+        today = self.env.now
         test_category = self.env['product.category'].create({
             'name': "Test Category",
         })
@@ -641,11 +641,11 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         # Create and confirm a move yesterday (used to check monthly_demand/suggest)
         self.env['stock.quant']._update_available_quantity(test_product, self.stock_location, 24)
         self._create_and_process_delivery_at_date(
-            [(test_product, 12)], date=fields.Datetime.now() - relativedelta(days=1)
+            [(test_product, 12)], date=self.env.now - relativedelta(days=1)
         )
         # Create and confirm 10 days ago (used to check monthly_demand/suggest with 7 days)
         self._create_and_process_delivery_at_date(
-            [(test_product, 12)], date=fields.Datetime.now() - relativedelta(days=10)
+            [(test_product, 12)], date=self.env.now - relativedelta(days=10)
         )
         self.assertEqual(test_product.monthly_demand, 24)
 
@@ -694,7 +694,7 @@ class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
         '''
         Ensure action_purchase_order_suggest uses the uom specified on the supplier info.
         '''
-        today = fields.Datetime.now()
+        today = self.env.now
         # Update supplier info.
         self.product_1.seller_ids.uom_id = self.uom_pack_of_6
         self.env['stock.quant']._update_available_quantity(self.product_1, self.stock_location, 18)

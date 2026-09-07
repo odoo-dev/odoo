@@ -47,7 +47,7 @@ class AccountMoveSend(models.AbstractModel):
 
         if any(m.state not in final_states for m in invoices_pending):
             # Trigger cron again in 10 minutes.
-            self.env.ref('l10n_hu_edi.ir_cron_update_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=10))
+            self.env.ref('l10n_hu_edi.ir_cron_update_status')._trigger(at=self.env.now + timedelta(minutes=10))
 
     def _call_web_service_before_invoice_pdf_render(self, invoices_data):
         # EXTENDS 'account'
@@ -90,7 +90,7 @@ class AccountMoveSend(models.AbstractModel):
 
         # STEP 3: Schedule update status of pending invoices in 10 minutes.
         if any(m.l10n_hu_edi_state not in [False, 'confirmed', 'confirmed_warning', 'rejected'] for m in invoices_hu):
-            self.env.ref('l10n_hu_edi.ir_cron_update_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=10))
+            self.env.ref('l10n_hu_edi.ir_cron_update_status')._trigger(at=self.env.now + timedelta(minutes=10))
 
         # STEP 4: Error / success handling.
         for invoice in invoices_hu:

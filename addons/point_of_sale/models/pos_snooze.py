@@ -30,7 +30,7 @@ class PosSnooze(models.Model):
         return params
 
     def _cron_clean_records(self):
-        now = Datetime.now()
+        now = self.env.now
         expired_snoozes = self.search([('end_time', '!=', False), ('end_time', '<', now)])
         expired_snoozes.unlink()
 

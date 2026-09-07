@@ -260,7 +260,7 @@ class DigestDigest(models.Model):
 
     @api.model
     def _cron_send_digest_email(self):
-        digests = self.search([('next_run_date', '<=', fields.Date.today()), ('state', '=', 'activated')])
+        digests = self.search([('next_run_date', '<=', self.env.now.date()), ('state', '=', 'activated')])
         for digest in digests:
             try:
                 digest.action_send()

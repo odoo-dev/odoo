@@ -25,7 +25,7 @@ class TestUnityRead(TransactionCase):
         })
         cls.lesson_day1 = cls.env['test_orm.lesson'].create({
             'name': 'first day',
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
             'course_id': cls.course.id,
             'teacher_id': cls.teacher.id,
             'attendee_ids': [Command.create({'name': '123'}),
@@ -34,7 +34,7 @@ class TestUnityRead(TransactionCase):
         })
         cls.lesson_day2 = cls.env['test_orm.lesson'].create({
             'name': 'second day',
-            'date': fields.Date.today() + relativedelta(days=1),
+            'date': self.env.now.date() + relativedelta(days=1),
             'course_id': cls.course.id,
             'teacher_id': cls.teacher.id,
         })

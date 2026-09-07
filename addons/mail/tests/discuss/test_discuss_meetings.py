@@ -20,7 +20,7 @@ class TestDiscussMeetings(MailCommon):
 
     def _start_meeting(self, name):
         """`create_date` comes from the database clock, which `freeze_time` does not reach."""
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             return self.env["discuss.channel"]._create_group(
                 self.host, default_display_mode="video_full_screen", name=name,
             )
@@ -61,11 +61,11 @@ class TestDiscussMeetings(MailCommon):
         idle = self._start_meeting("Ended Call")
         # the call history is written by the RTC machinery, never by the user
         self.env["discuss.call.history"].sudo().create([
-            {"channel_id": calling.id, "start_dt": fields.Datetime.now()},
+            {"channel_id": calling.id, "start_dt": self.env.now},
             {
                 "channel_id": idle.id,
-                "start_dt": fields.Datetime.now(),
-                "end_dt": fields.Datetime.now(),
+                "start_dt": self.env.now,
+                "end_dt": self.env.now,
             },
         ])
         self.assertEqual(

@@ -17,7 +17,7 @@ class KpiTest(HttpCase):
 
         cls.kpi_user = new_test_user(cls.env, 'kpi_user@domain.tld')
         cls.kpi_user_api_key = cls.env['res.users.apikeys'].with_user(cls.kpi_user)._generate(
-            scope='rpc', name='test', expiration_date=fields.Datetime.now() + timedelta(days=0.5))
+            scope='rpc', name='test', expiration_date=self.env.now + timedelta(days=0.5))
 
         # Make db_connect return the current cursor, so that it sees the prepared transaction without needing a commit
         cls.startClassPatcher(patch('odoo.addons.base_setup.controllers.kpi.db_connect',

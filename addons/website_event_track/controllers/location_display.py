@@ -10,7 +10,7 @@ from odoo.http import request
 class EventTrackLocationDisplayController(http.Controller):
 
     def _get_event_time_data(self, event):
-        now = fields.Datetime.now()
+        now = self.env.now
         event_tz = event.date_tz or 'UTC'
         event_zone = ZoneInfo(event_tz)
         local_now = now.replace(tzinfo=UTC).astimezone(event_zone)

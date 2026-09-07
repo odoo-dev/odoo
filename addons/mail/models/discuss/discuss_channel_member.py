@@ -64,7 +64,7 @@ class DiscussChannelMember(models.Model):
     unpin_dt = fields.Datetime("Unpin date", index=True, help="Contains the date and time when the channel was unpinned by the user.")
     last_interest_dt = fields.Datetime(
         "Last Activity",
-        default=lambda self: fields.Datetime.now() - timedelta(seconds=1),
+        default=lambda self: self.env.now - timedelta(seconds=1),
         index=True,
         help="Contains the date and time of the last interesting event that happened in this channel for this user. This includes: creating, joining, pinning",
     )
@@ -78,7 +78,7 @@ class DiscussChannelMember(models.Model):
 
     @api.autovacuum
     def _gc_unpin_outdated_sub_channels(self):
-        outdated_dt = fields.Datetime.now() - timedelta(days=2)
+        outdated_dt = self.env.now - timedelta(days=2)
         self.env["discuss.channel"].flush_model()
         self.env["discuss.channel.member"].flush_model()
         self.env["mail.message"].flush_model()
@@ -110,7 +110,7 @@ class DiscussChannelMember(models.Model):
         members = self.env["discuss.channel.member"].search(
             [("id", "in", [row[0] for row in self.env.cr.fetchall()])],
         )
-        members.unpin_dt = fields.Datetime.now()
+        members.unpin_dt = self.env.now
         for member, store in members._get_member_store_list():
             store.add(member.channel_id, {"close_chat_window": True})
 
@@ -402,7 +402,7 @@ class DiscussChannelMember(models.Model):
                 lambda res: (
                     res.from_method("_store_member_fields"),
                     res.attr("isTyping", is_typing),
-                    res.attr("is_typing_dt", fields.Datetime.now()),
+                    res.attr("is_typing_dt", self.env.now),
                 ),
             )
 
@@ -416,7 +416,7 @@ class DiscussChannelMember(models.Model):
         """
         Cron job for cleanup expired unmute by resetting mute_until_dt
         """
-        members = self.search([("mute_until_dt", "<=", fields.Datetime.now())])
+        members = self.search([("mute_until_dt", "<=", self.env.now)])
         members.write({"mute_until_dt": False})
 
     def _get_member_store_list(self):
@@ -736,7 +736,7 @@ class DiscussChannelMember(models.Model):
         if self.seen_message_id.id < message.id:
             self.write({
                 "seen_message_id": message.id,
-                "last_seen_dt": fields.Datetime.now(),
+                "last_seen_dt": self.env.now,
             })
             if self.channel_id.channel_type in self.channel_id._types_allowing_seen_infos():
                 bus_channels = self.channel_id

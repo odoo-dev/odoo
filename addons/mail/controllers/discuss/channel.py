@@ -133,7 +133,7 @@ class DiscussChannelWebclientController(WebclientController):
         if member := request.env["discuss.channel.member"].search_fetch(
             [("channel_id", "=", channel_id), ("is_self", "=", True)],
         ):
-            member.unpin_dt = False if pinned else fields.Datetime.now()
+            member.unpin_dt = False if pinned else self.env.now
         self.store_has_hidden_channels(store)
 
     @store_handler("/discuss/get_or_create_chat", audience="everyone", readonly=False)

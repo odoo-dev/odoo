@@ -64,20 +64,20 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
         self.assertEqual(resume_line.description, Markup('<p>Description</p>'))
         self.assertEqual(resume_line.line_type_id, self.env.ref('hr_skills_survey.resume_type_certification'))
         self.assertEqual(resume_line.survey_id, self.certification)
-        self.assertEqual(resume_line.date_start, fields.Date.today())
-        self.assertEqual(resume_line.date_end, fields.Date.today() + relativedelta(months=3))
+        self.assertEqual(resume_line.date_start, self.env.now.date())
+        self.assertEqual(resume_line.date_end, self.env.now.date() + relativedelta(months=3))
         # When redoing the same certification, the resume line is updated
         self.certification.description = False
         for (validity_months, expected_date_end) in (
-                (1, fields.Date.today() + relativedelta(months=1)),
-                (6, fields.Date.today() + relativedelta(months=6)),
+                (1, self.env.now.date() + relativedelta(months=1)),
+                (6, self.env.now.date() + relativedelta(months=6)),
                 (False, False),
         ):
             self.certification.certification_validity_months = validity_months
             self.env['survey.user_input'].create(user_input_vals)._mark_done()
             resume_line = ResumeLine.search([('survey_id', '=', self.certification.id)], order='id DESC')
             self.assertEqual(len(resume_line), 1)
-            self.assertEqual(resume_line.date_start, fields.Date.today())
+            self.assertEqual(resume_line.date_start, self.env.now.date())
             self.assertEqual(resume_line.date_end, expected_date_end)
         self.assertEqual(resume_line.description, '')
         # Mark as done in batch 2 certifications for the same employee
@@ -102,7 +102,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
         self.assertEqual(cert_1_resume_line.description, Markup('<p>Description 1</p>'))
         self.assertFalse(cert_1_resume_line.date_end)
         self.assertEqual(cert_2_resume_line.description, Markup('<p>Description 2</p>'))
-        self.assertEqual(cert_2_resume_line.date_end, fields.Date.today() + relativedelta(months=9))
+        self.assertEqual(cert_2_resume_line.date_end, self.env.now.date() + relativedelta(months=9))
 
     @freeze_time('2024-03-21')
     def test_resume_line_creation_employee_without_user(self):
@@ -124,5 +124,5 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
         self.assertEqual(resume_line.description, Markup('<p>Description</p>'))
         self.assertEqual(resume_line.line_type_id, self.env.ref('hr_skills_survey.resume_type_certification'))
         self.assertEqual(resume_line.survey_id, self.certification)
-        self.assertEqual(resume_line.date_start, fields.Date.today())
-        self.assertEqual(resume_line.date_end, fields.Date.today() + relativedelta(months=3))
+        self.assertEqual(resume_line.date_start, self.env.now.date())
+        self.assertEqual(resume_line.date_end, self.env.now.date() + relativedelta(months=3))

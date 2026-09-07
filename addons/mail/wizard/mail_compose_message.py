@@ -773,7 +773,7 @@ class MailComposeMessage(models.TransientModel):
                 created on-the-fly by the templates)
             - unused since at least one day (create_date and write_date)
         """
-        limit_date = fields.Datetime.subtract(fields.Datetime.now(), days=1)
+        limit_date = fields.Datetime.subtract(self.env.now, days=1)
         self.env['ir.attachment'].search([
             ('res_model', '=', self._name),
             ('res_id', '=', 0),

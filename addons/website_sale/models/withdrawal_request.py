@@ -140,4 +140,4 @@ class WithdrawalRequest(models.Model):
     @api.autovacuum
     def _gc_withdrawal_requests(self):
         """Delete withdrawal requests older than 1 hour."""
-        self.search([("create_date", "<=", fields.Datetime.now() - timedelta(hours=1))]).unlink()
+        self.search([("create_date", "<=", self.env.now - timedelta(hours=1))]).unlink()

@@ -2123,7 +2123,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         self.invoice.action_post()
 
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=self.invoice.ids).create({
-            'date': fields.Date.today() + timedelta(days=7),
+            'date': self.env.now.date() + timedelta(days=7),
             'reason': 'no reason',
             'journal_id': self.invoice.journal_id.id,
         })
@@ -2323,7 +2323,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
     def test_out_invoice_post_1(self):
         ''' Check the invoice_date will be set automatically at the post date. '''
-        frozen_today = fields.Date.today()
+        frozen_today = self.env.now.date()
         with self.mock_datetime_and_now(frozen_today):
             # Create an invoice with rate 1/3.
             move = self.env['account.move'].create({

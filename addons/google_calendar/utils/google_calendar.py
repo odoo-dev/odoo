@@ -41,8 +41,8 @@ class GoogleCalendarService():
             ICP = self.google_service.env['ir.config_parameter'].sudo()
             day_range = ICP.get_int('google_calendar.sync.range_days') or 365
             _logger.info("Full cal sync, restricting to %s days range", day_range)
-            lower_bound = fields.Datetime.subtract(fields.Datetime.now(), days=day_range)
-            upper_bound = fields.Datetime.add(fields.Datetime.now(), days=day_range)
+            lower_bound = fields.Datetime.subtract(self.env.now, days=day_range)
+            upper_bound = fields.Datetime.add(self.env.now, days=day_range)
             params['timeMin'] = lower_bound.isoformat() + 'Z'  # Z = UTC (RFC3339)
             params['timeMax'] = upper_bound.isoformat() + 'Z'  # Z = UTC (RFC3339)
         if search_params:

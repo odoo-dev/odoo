@@ -43,7 +43,7 @@ class TestWebsiteSaleMail(HttpCaseWithUserPortal):
         for w in other_websites:
             w.domain = f"domain-not-used-{w.id}.fr"
         with patch.object(MailMail, "unlink", lambda _self: None):
-            start_time = fields.Datetime.now()
+            start_time = self.env.now
             self.start_tour(test_product.website_url, "website_sale.so_mail", login="admin")
             new_mail = self.env["mail.mail"].search(
                 [

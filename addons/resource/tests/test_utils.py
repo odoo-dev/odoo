@@ -36,11 +36,11 @@ class TestExpression(TransactionCase):
         with self.assertRaises(AssertionError):
             with Form(self.env['resource.calendar.leaves']) as res:
                 res.date_from = False
-                res.date_to = Datetime.now()
+                res.date_to = self.env.now
 
         with Form(self.env['resource.calendar.leaves']) as res:
-            date_from = Datetime.now()
-            date_to = Datetime.now() + relativedelta(hours=24)
+            date_from = self.env.now
+            date_to = self.env.now + relativedelta(hours=24)
             res.date_from = date_from
             res.date_to = date_to
 

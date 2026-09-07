@@ -770,7 +770,7 @@ class IrCron(models.Model):
         :return: the created triggers records
         """
         if at is None:
-            at_list = [fields.Datetime.now()]
+            at_list = [self.env.now]
         elif isinstance(at, datetime):
             at_list = [at]
         else:
@@ -795,7 +795,7 @@ class IrCron(models.Model):
         :return: the created triggers records
         """
         self.ensure_one()
-        now = fields.Datetime.now()
+        now = self.env.now
 
         if not self.sudo().active:
             # skip triggers that would be ignored

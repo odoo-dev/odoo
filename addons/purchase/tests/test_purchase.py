@@ -80,7 +80,7 @@ class TestPurchase(AccountTestInvoicingCommon):
             })],
         })
         with Form(po) as po_form:
-            po_form.date_planned = fields.Datetime.now() + timedelta(days=1)
+            po_form.date_planned = self.env.now + timedelta(days=1)
         self.assertEqual(po.order_line.date_planned, po.date_planned)
 
         with Form(po) as po_form:
@@ -135,7 +135,7 @@ class TestPurchase(AccountTestInvoicingCommon):
             po_line.product_qty = 10
             po_line.price_unit = 200
         # set to send reminder today
-        date_planned = fields.Datetime.now().replace(hour=23, minute=0) + timedelta(days=2)
+        date_planned = self.env.now.replace(hour=23, minute=0) + timedelta(days=2)
         po.date_planned = date_planned
         po = po.save()
         po.button_confirm()
@@ -190,7 +190,7 @@ class TestPurchase(AccountTestInvoicingCommon):
             po_line.product_qty = 10
             po_line.price_unit = 200
         # set to send reminder tomorrow
-        po.date_planned = fields.Datetime.now() + timedelta(days=2)
+        po.date_planned = self.env.now + timedelta(days=2)
         po = po.save()
         self.partner_a.receipt_reminder_email = True
         self.partner_a.reminder_date_before_receipt = 1
@@ -222,8 +222,8 @@ class TestPurchase(AccountTestInvoicingCommon):
         po.button_confirm()
 
         # update first line
-        po._update_date_planned_for_lines([(po.order_line[0], fields.Datetime.today())])
-        self.assertEqual(po.order_line[0].date_planned, fields.Datetime.today())
+        po._update_date_planned_for_lines([(po.order_line[0], self.env.now.replace(hour=0, minute=0, second=0))])
+        self.assertEqual(po.order_line[0].date_planned, self.env.now.replace(hour=0, minute=0, second=0))
         activity = self.env['mail.activity'].search([
             ('summary', '=', 'Date Updated'),
             ('res_model_id', '=', 'purchase.order'),
@@ -232,17 +232,17 @@ class TestPurchase(AccountTestInvoicingCommon):
         self.assertTrue(activity)
         self.assertIn(
             '<p>partner_a modified receipt dates for the following products:</p>\n'
-            '<p> - product_a from 2020-06-06 to %s</p>' % fields.Date.today(),
+            '<p> - product_a from 2020-06-06 to %s</p>' % self.env.now.date(),
             activity.note,
         )
 
         # update second line
-        po._update_date_planned_for_lines([(po.order_line[1], fields.Datetime.today())])
-        self.assertEqual(po.order_line[1].date_planned, fields.Datetime.today())
+        po._update_date_planned_for_lines([(po.order_line[1], self.env.now.replace(hour=0, minute=0, second=0))])
+        self.assertEqual(po.order_line[1].date_planned, self.env.now.replace(hour=0, minute=0, second=0))
         self.assertIn(
             '<p>partner_a modified receipt dates for the following products:</p>\n'
             '<p> - product_a from 2020-06-06 to %(today)s</p>\n'
-            '<p> - product_b from 2020-06-06 to %(today)s</p>' % {'today': fields.Date.today()},
+            '<p> - product_b from 2020-06-06 to %(today)s</p>' % {'today': self.env.now.date()},
             activity.note,
         )
 
@@ -633,7 +633,7 @@ class TestPurchase(AccountTestInvoicingCommon):
                     'product_id': self.product_a.id,
                     'product_qty': 1,
                     'price_unit': price,
-                    'date_planned': fields.Datetime.now() + timedelta(days=days),
+                    'date_planned': self.env.now + timedelta(days=days),
                 })],
             })
             po.button_confirm()
@@ -840,12 +840,12 @@ class TestPurchase(AccountTestInvoicingCommon):
         self.assertEqual(po.order_line.price_unit, 5)
         self.assertEqual(po.order_line.name, '[Vendor A] product_a')
         self.assertEqual(po.order_line.product_qty, 10)
-        self.assertEqual(po.order_line.date_planned, fields.Datetime.now() + timedelta(days=5))
+        self.assertEqual(po.order_line.date_planned, self.env.now + timedelta(days=5))
         po.partner_id = self.partner_b
         self.assertEqual(po.order_line.price_unit, 10)
         self.assertEqual(po.order_line.name, '[Vendor B] product_a')
         self.assertEqual(po.order_line.product_qty, 10)
-        self.assertEqual(po.order_line.date_planned, fields.Datetime.now() + timedelta(days=6))
+        self.assertEqual(po.order_line.date_planned, self.env.now + timedelta(days=6))
 
     def test_merge_purchase_order(self):
         PurchaseOrder = self.env['purchase.order']
@@ -1059,8 +1059,8 @@ class TestPurchase(AccountTestInvoicingCommon):
                 'product_id': self.product_a.id,
                 'min_qty': 1,
                 'price': 50,
-                'date_start': fields.Date.today() - timedelta(days=5),
-                'date_end': fields.Date.today() - timedelta(days=3),
+                'date_start': self.env.now.date() - timedelta(days=5),
+                'date_end': self.env.now.date() - timedelta(days=3),
                 'product_code': 'product_code_1',
             },
             {
@@ -1068,8 +1068,8 @@ class TestPurchase(AccountTestInvoicingCommon):
                 'product_id': self.product_a.id,
                 'min_qty': 10,
                 'price': 100,
-                'date_start': fields.Date.today() - timedelta(days=5),
-                'date_end': fields.Date.today() + timedelta(days=3),
+                'date_start': self.env.now.date() - timedelta(days=5),
+                'date_end': self.env.now.date() + timedelta(days=3),
                 'product_code': 'HHH',
             },
             {
@@ -1077,8 +1077,8 @@ class TestPurchase(AccountTestInvoicingCommon):
                 'product_id': self.product_a.id,
                 'min_qty': 20,
                 'price': 80,
-                'date_start': fields.Date.today() - timedelta(days=5),
-                'date_end': fields.Date.today() + timedelta(days=3),
+                'date_start': self.env.now.date() - timedelta(days=5),
+                'date_end': self.env.now.date() + timedelta(days=3),
                 'product_code': 'HHH-min_qty_20',
             },
         ])
@@ -1477,7 +1477,7 @@ class TestPurchase(AccountTestInvoicingCommon):
             with po_form.order_line.new() as line:
                 line.product_id = variant
                 line.price_unit = 100 + i * 10
-                line.date_planned = fields.Datetime.now() + timedelta(days=i + 1)
+                line.date_planned = self.env.now + timedelta(days=i + 1)
         po = po_form.save()
         po.button_confirm()
 

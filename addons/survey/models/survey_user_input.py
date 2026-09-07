@@ -102,7 +102,7 @@ class SurveyUser_Input(models.Model):
                 start_time = user_input.start_datetime
                 time_limit = user_input.survey_id.time_limit
                 user_input.survey_time_limit_reached = user_input.survey_id.is_time_limited and \
-                    fields.Datetime.now() >= start_time + relativedelta(minutes=time_limit)
+                    self.env.now >= start_time + relativedelta(minutes=time_limit)
             else:
                 user_input.survey_time_limit_reached = False
 
@@ -118,7 +118,7 @@ class SurveyUser_Input(models.Model):
                 start_time = user_input.survey_id.session_question_start_time
                 time_limit = user_input.survey_id.session_question_id.time_limit
                 user_input.question_time_limit_reached = user_input.survey_id.session_question_id.is_time_limited and \
-                    fields.Datetime.now() >= start_time + relativedelta(seconds=time_limit)
+                    self.env.now >= start_time + relativedelta(seconds=time_limit)
             else:
                 user_input.question_time_limit_reached = False
 
@@ -230,7 +230,7 @@ class SurveyUser_Input(models.Model):
     def _mark_in_progress(self):
         """ marks the state as 'in_progress' and updates the start_datetime accordingly. """
         self.write({
-            'start_datetime': fields.Datetime.now(),
+            'start_datetime': self.env.now,
             'state': 'in_progress'
         })
 
@@ -244,7 +244,7 @@ class SurveyUser_Input(models.Model):
         3. Notify survey subtype subscribers of the newly completed input
         Will also run challenge Cron to give the certification badge if any."""
         self.write({
-            'end_datetime': fields.Datetime.now(),
+            'end_datetime': self.env.now,
             'state': 'done',
         })
 
@@ -831,7 +831,7 @@ class SurveyUser_InputLine(models.Model):
             ):
                 max_score_delay = 2
                 time_limit = line.question_id.time_limit
-                now = fields.Datetime.now()
+                now = self.env.now
                 seconds_to_answer = (now - line.user_input_id.survey_id.session_question_start_time).total_seconds()
                 question_remaining_time = time_limit - seconds_to_answer
                 # if answered within the max_score_delay => leave score as is

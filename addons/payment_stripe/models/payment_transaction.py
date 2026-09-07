@@ -193,7 +193,7 @@ class PaymentTransaction(models.Model):
                 arbitrary_decimal_number=const.CURRENCY_DECIMALS.get(self.currency_id.name),
             ),  # Use the specified amount, if any, or define the maximum amount of 15.000 INR.
             f"{OPTION_PATH_PREFIX}[start_date]": round(
-                (mandate_values.get("start_datetime") or fields.Datetime.now()).timestamp()
+                (mandate_values.get("start_datetime") or self.env.now).timestamp()
             ),
             f"{OPTION_PATH_PREFIX}[interval]": "sporadic",
             f"{OPTION_PATH_PREFIX}[supported_types][]": "india",

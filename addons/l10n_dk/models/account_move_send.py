@@ -129,7 +129,7 @@ class AccountMoveSend(models.AbstractModel):
                     invoices |= invoice
                 log_message = _('The document has been sent to the Nemhandel Access Point for processing')
                 invoices._message_log_batch(bodies={invoice.id: log_message for invoice in invoices})
-                self.env.ref('l10n_dk.ir_cron_nemhandel_get_message_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
+                self.env.ref('l10n_dk.ir_cron_nemhandel_get_message_status')._trigger(at=self.env.now + timedelta(minutes=5))
 
         if self._can_commit():
             self.env.cr.commit()

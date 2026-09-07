@@ -769,7 +769,7 @@ class IrQwebFieldRelative(models.AbstractModel):
         if isinstance(value, str):
             value = fields.Datetime.from_string(value)
 
-        # value should be a naive datetime in UTC. So is fields.Datetime.now()
+        # value should be a naive datetime in UTC. So is self.env.now
         reference = fields.Datetime.from_string(options['now'])
 
         return babel.dates.format_timedelta(value - reference, add_direction=True, locale=locale)

@@ -33,7 +33,7 @@ class ResCompany(models.Model):
 
     def _l10n_in_edi_token_is_valid(self):
         self.ensure_one()
-        return self.l10n_in_edi_token and self.l10n_in_edi_token_validity > fields.Datetime.now()
+        return self.l10n_in_edi_token and self.l10n_in_edi_token_validity > self.env.now
 
     def _l10n_in_edi_get_token(self):
         self_sudo = self.sudo()

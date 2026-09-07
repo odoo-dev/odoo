@@ -205,7 +205,7 @@ class ImLivechatChannelMemberHistory(models.Model):
         }
         for history in self:
             end = history.channel_id.livechat_end_dt or last_msg_dt_by_channel_id.get(
-                history.channel_id.id, fields.Datetime.now()
+                history.channel_id.id, self.env.now
             )
             history.session_duration_hour = max((end - history.create_date).total_seconds() / 3600, 0)
 

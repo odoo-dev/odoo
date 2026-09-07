@@ -4666,7 +4666,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
     @freeze_time("2026-01-26")
     def test_get_future_leaves_on(self):
-        today = fields.Date.today()
+        today = self.env.now.date()
         future_date = today + relativedelta(months=1, day=15)
 
         allocation_day = self.env['hr.leave.allocation'].create({

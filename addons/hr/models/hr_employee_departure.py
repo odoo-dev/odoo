@@ -116,7 +116,7 @@ class HrEmployeeDeparture(models.Model):
         return res
 
     def _cron_apply_departure(self):
-        today = fields.Date.today()
+        today = self.env.now.date()
         departures = self.search([
             ('apply_date', '=', False),
             '|',
@@ -162,8 +162,8 @@ class HrEmployeeDeparture(models.Model):
         emp_to_archive = self.env['hr.employee']
         for departure in departures_to_archive:
             employee = departure.employee_id
-            apply_date = departure.action_date or departure.departure_date + relativedelta(days=1) or fields.Date.today()
-            if apply_date > fields.Date.today():
+            apply_date = departure.action_date or departure.departure_date + relativedelta(days=1) or self.env.now.date()
+            if apply_date > self.env.now.date():
                 raise ValidationError(self.env._(
                     "The apply date isn't reached yet for the departure of %(emp)s.",
                     emp=departure.employee_id.name))

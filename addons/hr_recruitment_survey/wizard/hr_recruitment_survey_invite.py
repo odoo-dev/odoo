@@ -202,7 +202,7 @@ class HrRecruitmentSurveyInvite(models.TransientModel):
         if answer.applicant_id:
             sanitized_html = html_sanitize(mail.body_html)
             answer.applicant_id.message_post(body=sanitized_html)
-            if not self.scheduled_date or self.scheduled_date < fields.Datetime.now():
+            if not self.scheduled_date or self.scheduled_date < self.env.now:
                 mail.send()
         return mail
 

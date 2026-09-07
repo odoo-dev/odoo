@@ -772,7 +772,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         euro = self.env.ref('base.EUR')
         euro.active = True
         self.env['res.currency.rate'].create({
-            'name': fields.Date.today() - timedelta(days=1),
+            'name': self.env.now.date() - timedelta(days=1),
             'company_rate': 1.10,
             'currency_id': euro.id,
             'company_id': self.env.company.id,
@@ -1031,7 +1031,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
     def test_retrieve_purchase_stock_dashboard(self):
         """Tests that the OTD for the purchase order dashboard is based on the date without the time"""
-        now = fields.Datetime.now()
+        now = self.env.now
         create_vals = [{
             'partner_id': self.partner.id,
             'order_line': [Command.create({
@@ -1093,7 +1093,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         for line in bill.invoice_line_ids:
             if line.product_id == self.product_a:
                 line.price_unit = 20
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
 
         cogs_lines = bill.line_ids.filtered(lambda l: l.display_type == 'cogs')
@@ -1107,7 +1107,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
                 Command.create({
                     'product_id': self.product.id,
                     'product_qty': 5.0,
-                    'date_planned': fields.Datetime.now() - timedelta(days=1),
+                    'date_planned': self.env.now - timedelta(days=1),
                 }),
             ],
         })

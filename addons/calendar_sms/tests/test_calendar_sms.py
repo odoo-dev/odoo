@@ -15,7 +15,7 @@ class TestCalendarSms(SMSCommon):
     def setUpClass(cls):
         super(TestCalendarSms, cls).setUpClass()
 
-        now = fields.Datetime.now()
+        now = self.env.now
 
         cls.partner_phone = cls.env['res.partner'].create({
             'name': 'Partner With Phone Number',
@@ -112,7 +112,7 @@ class TestCalendarSms(SMSCommon):
          with each SMS template correctly matching its corresponding alarm duration and the event.
         """
         with self.mockSMSGateway():
-            lastcall = fields.Datetime.now() - timedelta(hours=1)
+            lastcall = self.env.now - timedelta(hours=1)
             self.env['calendar.alarm_manager'].with_context(lastcall=lastcall)._send_reminder()
 
         self.assertEqual(len(self._sms), 3)

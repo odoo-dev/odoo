@@ -189,7 +189,7 @@ class ProductPricelist(models.Model):
 
         if not date:
             # Used to fetch pricelist rules and currency rates
-            date = fields.Datetime.now()
+            date = self.env.now
 
         # Fetch all rules potentially matching specified products/templates/categories/uom and date
         rules = self._get_applicable_rules(products, quantity, date=date, uom=uom, **kwargs)
@@ -508,7 +508,7 @@ class ProductPricelist(models.Model):
         :return: UoMs defined on matching pricelist items.
         :rtype: uom.uom
         """
-        domain = self._get_applicable_rules_domain(product, date=fields.Datetime.now())
+        domain = self._get_applicable_rules_domain(product, date=self.env.now)
         # filter out pricelist items without UoM
         domain += [('uom_id', '!=', False)]
         return self.env['product.pricelist.item'].search_fetch(domain, ['uom_id']).uom_id

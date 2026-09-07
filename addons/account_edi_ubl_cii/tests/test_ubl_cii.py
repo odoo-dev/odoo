@@ -514,7 +514,7 @@ comment-->1000.0</TaxExclusiveAmount></xpath>"""
                 'name': 'mandate ' + (self.partner_a.name or ''),
                 'partner_bank_id': partner_bank.id,
                 'one_off': True,
-                'start_date': fields.Date.today(),
+                'start_date': self.env.now.date(),
                 'partner_id': self.partner_a.id,
                 'company_id': company.id,
             })

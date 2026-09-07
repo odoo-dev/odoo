@@ -237,7 +237,7 @@ class WebsiteProfile(http.Controller):
             position_domain = [('karma', '>', 1), ('website_published', '=', True)]
 
             if group_by:
-                to_date = fields.Date.today()
+                to_date = self.env.now.date()
                 if group_by == 'week':
                     from_date = to_date - relativedelta(weeks=1)
                 elif group_by == 'month':
@@ -303,7 +303,7 @@ class WebsiteProfile(http.Controller):
     def _get_user_tracking_karma_gain_position(self, domain, user_ids, group_by):
         """ Helper method computing boundaries to give to _get_tracking_karma_gain_position.
         See that method for more details. """
-        to_date = fields.Date.today()
+        to_date = self.env.now.date()
         if group_by == 'week':
             from_date = to_date - relativedelta(weeks=1)
         elif group_by == 'month':

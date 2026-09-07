@@ -43,7 +43,7 @@ class TestPurchaseDashboard(AccountTestInvoicingCommon, MailCase):
             'partner_id': self.partner_a.id,
             'company_id': self.user_a.company_id.id,
             'currency_id': self.user_a.company_id.currency_id.id,
-            'date_order': fields.Date.today(),
+            'date_order': self.env.now.date(),
         } for i in range(3)])
         for rfq, qty in zip(rfqs, [1, 2, 3]):
             rfq_form = Form(rfq)
@@ -60,7 +60,7 @@ class TestPurchaseDashboard(AccountTestInvoicingCommon, MailCase):
             'partner_id': self.partner_a.id,
             'company_id': self.user_a.company_id.id,
             'currency_id': self.user_a.company_id.currency_id.id,
-            'date_order': fields.Date.today() - timedelta(days=7)
+            'date_order': self.env.now.date() - timedelta(days=7)
         }])
 
         # Create 1 draft RFQ for user A.

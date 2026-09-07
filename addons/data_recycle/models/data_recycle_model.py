@@ -130,9 +130,9 @@ class Data_RecycleModel(models.Model):
             rule_domain = Domain(ast.literal_eval(recycle_model.domain)) if recycle_model.domain and recycle_model.domain != '[]' else Domain.TRUE
             if recycle_model.time_field_id and recycle_model.time_field_delta and recycle_model.time_field_delta_unit:
                 if recycle_model.time_field_id.ttype == 'date':
-                    now = fields.Date.today()
+                    now = self.env.now.date()
                 else:
-                    now = fields.Datetime.now()
+                    now = self.env.now
                 delta = relativedelta(**{recycle_model.time_field_delta_unit: recycle_model.time_field_delta})
                 rule_domain &= Domain(recycle_model.time_field_id.name, '<=', now - delta)
             model = self.env[recycle_model.res_model_name]
@@ -194,13 +194,13 @@ class Data_RecycleModel(models.Model):
                 delta = relativedelta(months=recycle.notify_frequency)
 
             if not recycle.last_notification or\
-                    (recycle.last_notification + delta) < fields.Datetime.now():
-                recycle.last_notification = fields.Datetime.now()
+                    (recycle.last_notification + delta) < self.env.now:
+                recycle.last_notification = self.env.now
                 recycle._send_notification(delta)
 
     def _send_notification(self, delta):
         self.ensure_one()
-        last_date = fields.Date.today() - delta
+        last_date = self.env.now.date() - delta
         records_count = self.env['data_recycle.record'].search_count([
             ('recycle_model_id', '=', self.id),
             ('create_date', '>=', last_date)

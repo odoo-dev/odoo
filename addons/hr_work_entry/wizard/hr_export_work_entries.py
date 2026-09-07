@@ -13,7 +13,7 @@ class HrExportWorkEntries(models.TransientModel):
     _description = 'Export Work Entries'
 
     reference_year = fields.Integer(
-        string='Year', required=True, default=lambda self: fields.Date.today().year)
+        string='Year', required=True, default=lambda self: self.env.now.date().year)
     reference_month = fields.Selection([
         ('1', 'January'),
         ('2', 'February'),
@@ -27,7 +27,7 @@ class HrExportWorkEntries(models.TransientModel):
         ('10', 'October'),
         ('11', 'November'),
         ('12', 'December'),
-    ], string='Month', required=True, default=lambda self: str((fields.Date.today()).month))
+    ], string='Month', required=True, default=lambda self: str((self.env.now.date()).month))
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True)
     eligible_employee_line_ids = fields.One2many(
         'hr.export.work.entries.employee', 'export_id',
@@ -49,8 +49,8 @@ class HrExportWorkEntries(models.TransientModel):
         return res
 
     def _get_default_period_dates(self, default_values):
-        reference_year = default_values.get('reference_year') or fields.Date.today().year
-        reference_month = int(default_values.get('reference_month') or fields.Date.today().month)
+        reference_year = default_values.get('reference_year') or self.env.now.date().year
+        reference_month = int(default_values.get('reference_month') or self.env.now.date().month)
         period_start = datetime(reference_year, int(reference_month), 1).date()
         period_stop = period_start.replace(
             day=monthrange(reference_year, int(reference_month))[1])

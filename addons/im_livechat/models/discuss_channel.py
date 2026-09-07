@@ -272,8 +272,8 @@ class DiscussChannel(models.Model):
     @api.depends("livechat_end_dt")
     def _compute_duration(self):
         for record in self:
-            end = record.livechat_end_dt or fields.Datetime.now()
-            start = record.create_date or fields.Datetime.now()
+            end = record.livechat_end_dt or self.env.now
+            start = record.create_date or self.env.now
             record.duration = (end - start).total_seconds() / 3600
 
     @api.depends("livechat_end_dt")
@@ -484,7 +484,7 @@ class DiscussChannel(models.Model):
     def _compute_livechat_looking_for_help_since_dt(self):
         for channel in self:
             channel.livechat_looking_for_help_since_dt = (
-                fields.Datetime.now() if channel.livechat_status == "need_help" else None
+                self.env.now if channel.livechat_status == "need_help" else None
             )
 
     def _sync_field_names(self, res):
@@ -586,7 +586,7 @@ class DiscussChannel(models.Model):
             ("last_interest_dt", "<=", "-1d"),
             ("livechat_agent_partner_ids", "=", False),
         ])
-        stale_sessions.livechat_end_dt = fields.Datetime.now()
+        stale_sessions.livechat_end_dt = self.env.now
 
     def execute_command_history(self, **kwargs):
         self._bus_send(
@@ -612,7 +612,7 @@ class DiscussChannel(models.Model):
                 # sudo: discuss.channel.rtc.session - member of current user can leave call
                 self.self_member_id.sudo()._rtc_leave_call()
             # sudo: discuss.channel - visitor left the conversation, state must be updated
-            self.sudo().livechat_end_dt = fields.Datetime.now()
+            self.sudo().livechat_end_dt = self.env.now
             # avoid useless notification if the channel is empty
             if not self.message_ids:
                 return
@@ -948,7 +948,7 @@ class DiscussChannel(models.Model):
                 author_history.message_count += 1
         if author_history.livechat_member_type == "agent" and not author_history.response_time_hour:
             author_history.response_time_hour = (
-                fields.Datetime.now() - author_history.create_date
+                self.env.now - author_history.create_date
             ).total_seconds() / 3600
         if (
             not self.livechat_end_dt
@@ -1054,7 +1054,7 @@ class DiscussChannel(models.Model):
             )
             channel_sudo._add_next_step_message_to_store(chatbot_script_step)
             channel_sudo._broadcast(human_operator)
-            self.self_member_id.last_interest_dt = fields.Datetime.now()
+            self.self_member_id.last_interest_dt = self.env.now
         else:
             # sudo: discuss.channel - visitor tried getting operator, outcome must be updated
             self.sudo().livechat_failure = "no_agent"

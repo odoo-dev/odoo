@@ -101,7 +101,7 @@ class TestUblExportBis3SelfInvoiceBE(TestUblBis3Common, TestUblCiiBECommon):
         self._create_sdd_mandate(
             partner=self.partner_be,
             account_number='BE68539007547034',
-            end_date=fields.Date.add(fields.Date.today(), days=5),
+            end_date=fields.Date.add(self.env.now.date(), days=5),
         )
         tax_21 = self.percent_tax(21.0, type_tax_use='purchase')
         product = self._create_product(standard_price=100.0, supplier_taxes_id=tax_21.ids)
@@ -122,8 +122,8 @@ class TestUblExportBis3SelfInvoiceBE(TestUblBis3Common, TestUblCiiBECommon):
         self._create_sdd_mandate(
             partner=self.partner_be,
             account_number='BE68539007547034',
-            start_date=fields.Date.subtract(fields.Date.today(), days=3),
-            end_date=fields.Date.subtract(fields.Date.today(), days=1),
+            start_date=fields.Date.subtract(self.env.now.date(), days=3),
+            end_date=fields.Date.subtract(self.env.now.date(), days=1),
         )
         tax_21 = self.percent_tax(21.0, type_tax_use='purchase')
         product = self._create_product(standard_price=100.0, supplier_taxes_id=tax_21.ids)

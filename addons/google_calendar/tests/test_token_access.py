@@ -24,7 +24,7 @@ class TestTokenAccess(TransactionCase):
             user.res_users_settings_id.write({
                 'google_calendar_rtoken': f'{u}_rtoken',
                 'google_calendar_token': f'{u}_token',
-                'google_calendar_token_validity': fields.Datetime.today(),
+                'google_calendar_token_validity': self.env.now.replace(hour=0, minute=0, second=0),
                 'google_calendar_sync_token': f'{u}_sync_token',
             })
             cls.users += [user]

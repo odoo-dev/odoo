@@ -26,8 +26,8 @@ class TestUi(HttpCase):
 
         event = self.env['event.event'].create({
             'name': 'Design Fair Los Angeles',
-            'date_begin': Datetime.now() + timedelta(days=1),
-            'date_end': Datetime.now() + timedelta(days=5),
+            'date_begin': self.env.now + timedelta(days=1),
+            'date_end': self.env.now + timedelta(days=5),
         })
 
         self.env['event.event.ticket'].create([{

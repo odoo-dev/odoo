@@ -452,7 +452,7 @@ class MaintenanceRequest(models.Model):
         # the stage (stage_id) of the Maintenance Request changes.
         if vals and 'state' not in vals and 'stage_id' in vals:
             self.filtered(lambda request: request.state in ['changes_requested', 'approved']).state = 'normal'
-        now = fields.Datetime.now()
+        now = self.env.now
         if vals.get('state') == 'done':
             for request in self:
                 if request.maintenance_type != 'preventive' or not request.recurring_maintenance:

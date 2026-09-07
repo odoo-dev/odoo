@@ -22,12 +22,12 @@ class RestaurantOrderCourse(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('fired') and not vals.get('fired_date'):
-                vals['fired_date'] = fields.Datetime.now()
+                vals['fired_date'] = self.env.now
         return super().create(vals_list)
 
     def write(self, vals):
         if vals.get('fired') and not self.fired_date:
-            vals['fired_date'] = fields.Datetime.now()
+            vals['fired_date'] = self.env.now
         return super().write(vals)
 
     @api.model

@@ -27,7 +27,7 @@ class AccountChartTemplate(models.AbstractModel):
             ('type', '=', 'purchase'),
         ]).l10n_latam_use_documents = False
 
-        today = fields.Date.today()
+        today = self.env.now.date()
 
         # Create currency rates
         usd_rate_value = 1 / 980.0

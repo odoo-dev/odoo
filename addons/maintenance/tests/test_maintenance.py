@@ -161,7 +161,7 @@ class TestEquipmentPostInstall(TestEquipmentCommon):
         maintenance.close_date = False
         form = Form(equipment)
 
-        maintenance.close_date = fields.Date.today()
+        maintenance.close_date = self.env.now.date()
         form = Form(equipment)
 
         maintenance.close_date = False
@@ -177,13 +177,13 @@ class TestEquipmentPostInstall(TestEquipmentCommon):
         form.name = "brain"
         equipment = form.save()
 
-        before = fields.Datetime.now()
+        before = self.env.now
         form = Form(self.env['maintenance.request'].with_user(self.manager))
         form.name = "improve efficiency"
         form.equipment_id = equipment
         form.maintenance_type = 'corrective'
         maintenance = form.save()
-        after = fields.Datetime.now()
+        after = self.env.now
 
         self.assertTrue(maintenance.schedule_date)
         self.assertTrue(maintenance.schedule_end)

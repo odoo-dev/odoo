@@ -84,7 +84,7 @@ class TestPurchaseToInvoiceCommon(AccountTestInvoicingCommon):
 
     @classmethod
     def init_purchase(cls, partner=None, confirm=False, products=None, taxes=None, company=False):
-        date_planned = fields.Datetime.now() - timedelta(days=1)
+        date_planned = self.env.now - timedelta(days=1)
         po_form = Form(cls.env['purchase.order'] \
                     .with_company(company or cls.env.company))
         po_form.partner_id = partner or cls.partner_a
@@ -846,7 +846,7 @@ class TestPurchaseToInvoice(TestPurchaseToInvoiceCommon):
         purchase_order.order_line.qty_received = 1
 
         bill = self.env['account.move'].browse(purchase_order.action_create_invoice()['res_id'])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
 
         self.assertEqual(analytic_account.purchase_order_count, 1)

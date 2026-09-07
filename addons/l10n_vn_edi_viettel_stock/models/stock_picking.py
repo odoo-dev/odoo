@@ -194,7 +194,7 @@ class StockPicking(models.Model):
     def _l10n_vn_edi_generate_transfer_note_json(self, template_field_lines=None):
         """Return the dict of data that will be sent to the API to create the transfer note."""
         self.ensure_one()
-        self.l10n_vn_edi_issue_date = fields.Datetime.now()
+        self.l10n_vn_edi_issue_date = self.env.now
         json_values = {}
         self._l10n_vn_edi_add_general_info(json_values)
         self._l10n_vn_edi_add_buyer_info(json_values)

@@ -52,7 +52,7 @@ class SlideChannelPartner(models.Model):
             completed = record.member_status == 'completed'
             if not record.completion_date:
                 if completed:
-                    record.completion_date = fields.Datetime.now()
+                    record.completion_date = self.env.now
             elif not completed:
                 record.completion_date = None
 
@@ -265,7 +265,7 @@ class SlideChannelPartner(models.Model):
     def _gc_slide_channel_partner(self):
         ''' The invitations of 'invited' attendees are only valid for 3 months. Remove outdated invitations
         with no completion. A missing last_invitation_date is also considered as expired.'''
-        limit_dt = fields.Datetime.subtract(fields.Datetime.now(), months=3)
+        limit_dt = fields.Datetime.subtract(self.env.now, months=3)
         expired_invitations = self.env['slide.channel.partner'].with_context(active_test=False).search([
             ('member_status', '=', 'invited'),
             ('completion', '=', 0),

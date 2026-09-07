@@ -150,7 +150,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         self.variant_2 = self.product_template._get_variant_for_combination(self.pt_attr1_v2)
 
         def create_simple_bom_for_product(product, name, price):
-            with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+            with freeze_time(self.env.now - timedelta(seconds=10)):
                 component = self.env['product.product'].create({
                     'name': 'Component ' + name,
                     'is_storable': True,
@@ -191,7 +191,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
                 })],
                 'company_id': self.company_data['company'].id,
             }
-            with freeze_time(fields.Datetime.now()):
+            with freeze_time(self.env.now):
                 so = self.env['sale.order'].create(so_vals)
                 so.action_confirm()
                 pick = so.picking_ids

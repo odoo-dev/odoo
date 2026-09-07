@@ -125,7 +125,7 @@ class StockWarehouse(models.Model):
         :rtype: list[dict]
         """
         self.ensure_one()
-        now_utc = fields.Datetime.now()
+        now_utc = self.env.now
         limit_utc = now_utc + timedelta(days=const.OPENING_HOURS_LOOKUP_DAYS)
         leaves = self.opening_hours.global_leave_ids.filtered(
             lambda leave: (

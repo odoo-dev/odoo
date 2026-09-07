@@ -616,7 +616,7 @@ class HrApplicant(models.Model):
     def _compute_date_closed(self):
         for applicant in self:
             if applicant.stage_id and applicant.stage_id.hired_stage and not applicant.date_closed:
-                applicant.date_closed = fields.Datetime.now()
+                applicant.date_closed = self.env.now
             if not applicant.stage_id.hired_stage:
                 applicant.date_closed = False
 
@@ -635,7 +635,7 @@ class HrApplicant(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('recruiter_id'):
-                vals['date_open'] = fields.Datetime.now()
+                vals['date_open'] = self.env.now
             if vals.get('email_from'):
                 vals['email_from'] = vals['email_from'].strip()
             if vals.get('job_id'):
@@ -673,11 +673,11 @@ class HrApplicant(models.Model):
     def write(self, vals):
         # recruiter change: update date_open
         if vals.get('recruiter_id'):
-            vals['date_open'] = fields.Datetime.now()
+            vals['date_open'] = self.env.now
         old_interviewers = self.interviewer_ids
         # stage_id: track last stage before update
         if 'stage_id' in vals:
-            vals['date_last_stage_update'] = fields.Datetime.now()
+            vals['date_last_stage_update'] = self.env.now
             if 'kanban_state' not in vals:
                 vals['kanban_state'] = 'normal'
             for applicant in self:
@@ -690,7 +690,7 @@ class HrApplicant(models.Model):
                     applicant.job_id.no_of_recruitment += 1
         # kanban_state: also set date_last_stage_update
         if 'kanban_state' in vals:
-            vals['date_last_stage_update'] = fields.Datetime.now()
+            vals['date_last_stage_update'] = self.env.now
         res = super().write(vals)
 
         if not self.env.context.get('fields_synced', False):
@@ -996,7 +996,7 @@ class HrApplicant(models.Model):
                 lambda partner: partner.email == self.email_from or (email_normalized and partner.email_normalized == email_normalized)
             )
             if new_partner:
-                if new_partner[0].create_date.date() == fields.Date.today():
+                if new_partner[0].create_date.date() == self.env.now.date():
                     new_partner[0].write({
                         'name': self.partner_name or self.email_from,
                     })

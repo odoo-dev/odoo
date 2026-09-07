@@ -2921,7 +2921,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         })
         so.action_confirm()
 
-        so.commitment_date = fields.Date.today() + datetime.timedelta(days=1)
+        so.commitment_date = self.env.now.date() + datetime.timedelta(days=1)
         production = so.stock_reference_ids.production_ids
         self.assertEqual(production.date_deadline, so.commitment_date)
         # Increase SO qty to 2; MTO triggers change_production_qty on the existing MO.

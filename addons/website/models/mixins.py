@@ -550,7 +550,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         next_trigger = cron_trigger_env.search(
             [
                 ('cron_id', '=', scheduled_action.id),
-                ('call_at', '>=', fields.Datetime.now()),
+                ('call_at', '>=', self.env.now),
             ],
             order='call_at asc',
             limit=1,
@@ -572,7 +572,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         if not scheduled_datetimes:
             cron_trigger_env.search([
                 ('cron_id', '=', scheduled_action.id),
-                ('call_at', '>=', fields.Datetime.now()),
+                ('call_at', '>=', self.env.now),
             ]).unlink()
             return False
 
@@ -582,7 +582,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         if not next_trigger_datetime or earliest_datetime < next_trigger_datetime:
             cron_trigger_env.search([
                 ('cron_id', '=', scheduled_action.id),
-                ('call_at', '>=', fields.Datetime.now()),
+                ('call_at', '>=', self.env.now),
             ]).unlink()
             scheduled_action._trigger(earliest_datetime)
 
@@ -769,7 +769,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         # ----------------------------------------------------------------------
         # The context flag prevents re-entering this method during this write.
         records.with_context(skip_publish_post_process=True).write({
-            'published_date': fields.Datetime.now(),
+            'published_date': self.env.now,
             'publish_on': False,
         })
 

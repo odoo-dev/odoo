@@ -705,7 +705,7 @@ class AccountMove(models.Model):
         self.write({
             "l10n_tw_edi_ecpay_invoice_id": invoice_number,
             # The date return from Ecpay API used "+" instead of " "
-            "l10n_tw_edi_invoice_create_date": fields.Datetime.now() if self.l10n_tw_edi_is_b2b else transfer_time(
+            "l10n_tw_edi_invoice_create_date": self.env.now if self.l10n_tw_edi_is_b2b else transfer_time(
                 response_data.get("InvoiceDate").replace("+", " ")),
             "l10n_tw_edi_state": "invoiced",
         })

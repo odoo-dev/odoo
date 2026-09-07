@@ -78,7 +78,7 @@ class ResPartnerBank(models.Model):
             # amount in apps like PoS.
             max_reuse_seconds = self.env.context.get('qris_max_reuse_seconds', 1500)
             if qris_trx and qris_trx.qris_amount == int(amount):
-                now = fields.Datetime.now()
+                now = self.env.now
                 latest_qr_date = qris_trx.qris_creation_datetime
 
                 if (now - latest_qr_date).total_seconds() < max_reuse_seconds:

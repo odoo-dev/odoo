@@ -70,7 +70,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         usd = self.env.ref('base.USD')
         self.company_currency = self.env.company.currency_id
         self.other_currency = self.env.ref('base.EUR') if self.company_currency == usd else usd
-        date = fields.Date.subtract(fields.Date.today(), days=1)
+        date = fields.Date.subtract(self.env.now.date(), days=1)
         self.env['res.currency.rate'].sudo().create([
             {'currency_id': self.company_currency.id, 'rate': 1, 'name': date},
             {'currency_id': self.other_currency.id, 'rate': 2, 'name': date},
@@ -260,7 +260,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         main_company_currency = main_company.currency_id
         new_company_currency = self.env.ref('base.EUR') if main_company_currency == self.env.ref('base.USD') else self.env.ref('base.USD')
 
-        date = fields.Date.subtract(fields.Date.today(), days=1)
+        date = fields.Date.subtract(self.env.now.date(), days=1)
         self.env['res.currency.rate'].sudo().create([
             {'currency_id': main_company_currency.id, 'rate': 1, 'name': date, 'company_id': False},
             {'currency_id': new_company_currency.id, 'rate': 3, 'name': date, 'company_id': False},

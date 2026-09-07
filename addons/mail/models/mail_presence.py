@@ -26,8 +26,8 @@ class MailPresence(models.Model):
 
     user_id = fields.Many2one("res.users", "Users", ondelete="cascade")
     guest_id = fields.Many2one("mail.guest", "Guest", ondelete="cascade")
-    last_poll = fields.Datetime("Last Poll", default=lambda self: fields.Datetime.now())
-    last_presence = fields.Datetime("Last Presence", default=lambda self: fields.Datetime.now())
+    last_poll = fields.Datetime("Last Poll", default=lambda self: self.env.now)
+    last_presence = fields.Datetime("Last Presence", default=lambda self: self.env.now)
     status = fields.Selection(
         [("online", "Online"), ("away", "Away"), ("offline", "Offline")],
         "IM Status",
@@ -80,8 +80,8 @@ class MailPresence(models.Model):
     @api.model
     def _update_presence(self, user_or_guest, inactivity_period=0):
         values = {
-            "last_poll": fields.Datetime.now(),
-            "last_presence": fields.Datetime.now() - timedelta(milliseconds=inactivity_period),
+            "last_poll": self.env.now,
+            "last_presence": self.env.now - timedelta(milliseconds=inactivity_period),
             "status": "away" if inactivity_period > AWAY_TIMER * 1000 else "online",
         }
         # sudo: res.users/mail.guest can update presence of accessible user/guest
@@ -113,5 +113,5 @@ class MailPresence(models.Model):
     @api.autovacuum
     def _gc_bus_presence(self):
         self.search(
-            [("last_poll", "<", fields.Datetime.now() - timedelta(seconds=PRESENCE_OUTDATED_TIMER))]
+            [("last_poll", "<", self.env.now - timedelta(seconds=PRESENCE_OUTDATED_TIMER))]
         ).unlink()

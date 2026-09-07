@@ -92,7 +92,7 @@ class ResCompany(models.Model):
             return {
                 'result': report_dict or 'None',
                 'msg_alert': msg_alert or 'None',
-                'printing_date': format_date(self.env,  Date.to_string( Date.today())),
+                'printing_date': format_date(self.env,  Date.to_string( self.env.now.date())),
                 'corrupted_orders': corrupted_orders or 'None'
             }
         else:

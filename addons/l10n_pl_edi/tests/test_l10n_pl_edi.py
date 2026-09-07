@@ -98,7 +98,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         cls.standard_invoice = cls.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': cls.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'product_id': cls.product_a.id,
@@ -186,7 +186,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [Command.create({'product_id': self.product_a.id, 'price_unit': 1000.0})],
         })
         invoice.action_post()
@@ -208,7 +208,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         K_12_tax = self.env['account.chart.template'].ref('vs_dostu')
         K_31_tax = self.env['account.chart.template'].ref('vs_stal')
         invoice = self._create_invoice(
-            invoice_date=fields.Date.today(),
+            invoice_date=self.env.now.date(),
             partner_id=self.partner_pl,
             invoice_line_ids=[
                 Command.create({'product_id': self.product_a.id, 'quantity': 1, 'price_unit': 1000.0, 'tax_ids': K_12_tax.ids}),
@@ -230,7 +230,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'currency_id': self.env.ref('base.PLN').id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
@@ -243,14 +243,14 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         self.env['account.payment.register'].create({
             'amount': 300.0,
             'journal_id': self.cash_journal.id,
-            'payment_date': fields.Date.today(),
+            'payment_date': self.env.now.date(),
             'line_ids': invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term'),
         })._create_payments()
 
         self.env['account.payment.register'].create({
             'amount': 400.0,
             'journal_id': self.cash_journal.id,
-            'payment_date': fields.Date.today(),
+            'payment_date': self.env.now.date(),
             'line_ids': invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term'),
         })._create_payments()
 
@@ -269,7 +269,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [Command.create({'product_id': self.product_a.id, 'price_unit': 100.0})],
         })
         invoice.action_post()
@@ -300,7 +300,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'currency_id': self.env.ref('base.PLN').id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
@@ -315,7 +315,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         self.env['account.payment.register'].create({
             'amount': 400.0,
             'journal_id': self.cash_journal.id,
-            'payment_date': fields.Date.today(),
+            'payment_date': self.env.now.date(),
             'line_ids': invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term'),
         })._create_payments()
         self.assertEqual(invoice.payment_state, 'partial')
@@ -324,7 +324,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         self.env['account.payment.register'].create({
             'amount': 600.0,
             'journal_id': self.cash_journal.id,
-            'payment_date': fields.Date.today(),
+            'payment_date': self.env.now.date(),
             'line_ids': invoice.line_ids.filtered(lambda line: line.display_type == 'payment_term'),
         })._create_payments()
         self.assertEqual(invoice.payment_state, 'paid')
@@ -363,7 +363,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'partner_bank_id': bank_acc.id,
             'invoice_line_ids': [Command.create({'product_id': self.product_a.id, 'price_unit': 100.0})],
         })
@@ -412,7 +412,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_payment_term_id': pay_term.id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
@@ -458,7 +458,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'currency_id': self.env.ref('base.EUR').id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
@@ -482,7 +482,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
             {
                 'move_type': 'out_invoice',
                 'partner_id': self.partner_pl.id,
-                'invoice_date': fields.Date.today(),
+                'invoice_date': self.env.now.date(),
                 'invoice_line_ids': [Command.create({
                     'product_id': self.product_a.id,
                     'price_unit': 100.0,
@@ -536,7 +536,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_pl.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'currency_id': self.env.ref('base.PLN').id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
@@ -742,7 +742,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
                     return {'xml_content': file.read()}
             return {'error': {'retry_after': 120, 'message': 'Too Many Requests'}}
 
-        start = fields.Datetime.now()
+        start = self.env.now
         with (
             patch.object(KsefApiService, 'query_invoice_metadata', side_effect=query_invoice_metadata),
             patch.object(KsefApiService, 'get_invoice_by_ksef_number', side_effect=get_invoice_by_ksef_number),

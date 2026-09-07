@@ -407,11 +407,11 @@ class PosSession(models.Model):
     def get_session_orders(self):
         return self.env['pos.order'].search([
             ('session_id', '=', self.id),
-            '|', ('preset_time', '=', False), ('preset_time', '<=', fields.Datetime.now())
+            '|', ('preset_time', '=', False), ('preset_time', '<=', self.env.now)
         ])
 
     def get_order_count_by_preset(self):
-        orders = self.order_ids.filtered(lambda o: o.state != 'cancel' and o.preset_id and o.preset_time and o.preset_time > fields.Datetime.now())
+        orders = self.order_ids.filtered(lambda o: o.state != 'cancel' and o.preset_id and o.preset_time and o.preset_time > self.env.now)
         orders_by_preset = {}
         for order in orders:
             if order.preset_id.id not in orders_by_preset:
@@ -446,7 +446,7 @@ class PosSession(models.Model):
         configured closing hour falls within the (now - 10min, now]
         window, so each session is processed at most once per day.
         """
-        now = fields.Datetime.now()
+        now = self.env.now
         window_start_dt = now - timedelta(minutes=10)
 
         # float hours, 21:30 => 21.5
@@ -495,7 +495,7 @@ class PosSession(models.Model):
         self.config_id.close_session_snoozes()
         future_orders = self.order_ids.filtered_domain([
             ('preset_time', '!=', False),
-            ('preset_time', '>', fields.Datetime.now()),
+            ('preset_time', '>', self.env.now),
             ('state', '=', 'draft'),
         ])
         future_orders.session_id = False
@@ -523,7 +523,7 @@ class PosSession(models.Model):
 
         self.write({
             'state': 'closed',
-            'stop_at': self.stop_at or fields.Datetime.now(),
+            'stop_at': self.stop_at or self.env.now,
         })
         self._get_closed_orders().write({'state': 'done'})
         self.env.flush_all()  # ensure sale.report is up to date
@@ -670,7 +670,7 @@ class PosSession(models.Model):
         Inherit this method to add custom logic before the sequence is assigned.
         """
         self.state = 'opened'
-        self.start_at = fields.Datetime.now()
+        self.start_at = self.env.now
         cash_pm = self.config_id._get_cash_payment_method()
         self._handle_cash_statement_entries({
             cash_pm.id: cashbox_value,
@@ -723,7 +723,7 @@ class PosSession(models.Model):
     def _alert_old_session(self):
         # If the session is open for more then one week,
         # log a next activity to close the session.
-        sessions = self.sudo().search([('start_at', '<=', (fields.Datetime.now() - timedelta(days=7))), ('state', '!=', 'closed')])
+        sessions = self.sudo().search([('start_at', '<=', (self.env.now - timedelta(days=7))), ('state', '!=', 'closed')])
         for session in sessions:
             if self.env['mail.activity'].search_count([('res_id', '=', session.id), ('res_model', '=', 'pos.session')]) == 0:
                 session.activity_schedule(
@@ -1229,7 +1229,7 @@ class PosSession(models.Model):
 
         return move_ctx.create({
             'invoice_cash_rounding_id': invoice_to_reverse.invoice_cash_rounding_id.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
             'reversed_pos_order_id': order.id,
             'ref': self.env._("Convert POS Order to Invoice"),
             'line_ids': reverse_move_lines,

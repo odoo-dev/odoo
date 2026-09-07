@@ -70,7 +70,7 @@ class UomUom(models.Model):
 
     @api.onchange('relative_factor')
     def _onchange_critical_fields(self):
-        if self._filter_protected_uoms() and self.create_date < (fields.Datetime.now() - timedelta(days=1)):
+        if self._filter_protected_uoms() and self.create_date < (self.env.now - timedelta(days=1)):
             return {
                 'warning': {
                     'title': _("Warning for %s", self.name),

@@ -17,7 +17,7 @@ class TestLiveChatDigest(TestDigestCommon):
         super().setUpClass()
         other_user = new_test_user(cls.env, "Other User")
         cls.env["discuss.channel"].search([("channel_type", "=", "livechat")]).unlink()
-        dt = fields.Datetime.now() - datetime.timedelta(days=10)
+        dt = self.env.now - datetime.timedelta(days=10)
         with cls.mock_datetime_and_now(dt):
             # this channel is created out of the date range of the digest
             # so it should be ignored in the computation of the KPI

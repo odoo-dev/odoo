@@ -79,7 +79,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # Create auto-posted (but not recurring) entry
         nb_invoices = self.env['account.move'].search_count(domain=[])
         self.test_move.auto_post = 'at_date'
-        self.test_move.date = fields.Date.today()
+        self.test_move.date = self.env.now.date()
         with freeze_time(self.test_move.date - relativedelta(days=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
             self.assertEqual(self.test_move.state, 'draft')  # can't be posted before its date
@@ -90,7 +90,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
     def test_posting_future_invoice_fails(self):
         # Create auto-posted, recurring entry, attempt manually posting it
-        self.test_move.date = fields.Date.today() + relativedelta(days=1)
+        self.test_move.date = self.env.now.date() + relativedelta(days=1)
         self.test_move.auto_post = 'quarterly'
         self.test_move._post()  # default soft=True parameter filters out future moves
         self.assertEqual(self.test_move.state, 'draft')
@@ -1150,7 +1150,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
     def test_validate_move_wizard_with_auto_post_entry(self):
         """ Test that the wizard to validate a move with auto_post is working fine. """
-        self.test_move.date = fields.Date.today() + relativedelta(months=3)
+        self.test_move.date = self.env.now.date() + relativedelta(months=3)
         self.test_move.auto_post = 'at_date'
         wizard = self.env['validate.account.move'].with_context(active_model='account.move', active_ids=self.test_move.ids).create({})
         wizard.force_post = True

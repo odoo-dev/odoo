@@ -364,7 +364,7 @@ class MassMailController(http.Controller):
             (not last_action and (not mailing_sudo or mailing_sudo.mailing_on_mailing_list))):
             contacts = self._fetch_contacts(email_found)
             contacts.subscription_ids.filtered(
-                lambda sub: sub.opt_out and sub.opt_out_datetime >= (fields.Datetime.now() - timedelta(minutes=10))
+                lambda sub: sub.opt_out and sub.opt_out_datetime >= (self.env.now - timedelta(minutes=10))
             ).opt_out_reason_id = opt_out_reason_id
             if message:
                 documents_for_post = contacts

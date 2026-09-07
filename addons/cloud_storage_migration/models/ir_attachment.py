@@ -139,7 +139,7 @@ class CloudStorageAttachmentMigration(models.Model):
             max_file_size=max_file_size,
             # ignore attachments uploaded recently in case their binaries are unfortunately used by business
             # codes which may block important business operations
-            create_date=fields.Datetime.now() - timedelta(days=7),
+            create_date=self.env.now - timedelta(days=7),
             # ignore if attachment is used by documents.document
             check_documents=check_documents,
         )

@@ -363,7 +363,7 @@ class PurchaseRequisitionLine(models.Model):
             }
         if self.product_description_variants:
             name += '\n' + self.product_description_variants
-        date_planned = fields.Datetime.now()
+        date_planned = self.env.now
         if self.requisition_id.date_start:
             date_planned = max(date_planned, fields.Datetime.to_datetime(self.requisition_id.date_start))
         return {

@@ -99,7 +99,7 @@ class TestSalePrices(SaleCommon):
 
     def test_pricelist_dates(self):
         """Verify the order date is correctly provided to the pricelist API."""
-        today = fields.Datetime.today()
+        today = self.env.now.replace(hour=0, minute=0, second=0)
         tomorrow = today + timedelta(days=1)
 
         pricelist_rule = self._create_discount_pricelist_rule(
@@ -219,7 +219,7 @@ class TestSalePrices(SaleCommon):
         })
         with freeze_time("2022-08-19"):
             self.env["res.currency.rate"].sudo().create({
-                "name": fields.Date.today() - timedelta(days=1),
+                "name": self.env.now.date() - timedelta(days=1),
                 "rate": 2.0,
                 "currency_id": other_currency.id,
                 "company_id": self.env.company.id,

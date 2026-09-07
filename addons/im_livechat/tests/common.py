@@ -66,7 +66,7 @@ class TestGetOperatorCommon(HttpCase):
                 "channel_type": "livechat",
                 "livechat_channel_id": livechat.id,
                 "channel_member_ids": [Command.create({"partner_id": operator.partner_id.id})],
-                "last_interest_dt": fields.Datetime.now(),
+                "last_interest_dt": self.env.now,
             }
         )
         channel.with_user(operator).message_post(body="Hello, how can I help you?")

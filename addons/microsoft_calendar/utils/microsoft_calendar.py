@@ -67,8 +67,8 @@ class MicrosoftCalendarService():
             # Can be modified by microsoft_calendar.sync.range_days system parameter.
             day_range = self.microsoft_service.env['ir.config_parameter'].sudo().get_int('microsoft_calendar.sync.range_days') or 365
             params = {
-                'startDateTime': fields.Datetime.subtract(fields.Datetime.now(), days=day_range).strftime("%Y-%m-%dT00:00:00Z"),
-                'endDateTime': fields.Datetime.add(fields.Datetime.now(), days=day_range * 2).strftime("%Y-%m-%dT00:00:00Z"),
+                'startDateTime': fields.Datetime.subtract(self.env.now, days=day_range).strftime("%Y-%m-%dT00:00:00Z"),
+                'endDateTime': fields.Datetime.add(self.env.now, days=day_range * 2).strftime("%Y-%m-%dT00:00:00Z"),
             }
 
         # get the first page of events

@@ -43,7 +43,7 @@ class TestLivechatMemberHistory(TestGetOperatorCommon, chatbot_common.ChatbotCas
             ).livechat_member_type,
             "agent",
         )
-        channel.livechat_end_dt = fields.Datetime.now()
+        channel.livechat_end_dt = self.env.now
         channel._add_members(users=michel)
         self.assertEqual(len(channel.channel_member_ids.livechat_member_history_ids), 3)
 

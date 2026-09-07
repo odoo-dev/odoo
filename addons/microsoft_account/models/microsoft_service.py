@@ -152,7 +152,7 @@ class MicrosoftService(models.AbstractModel):
 
         _logger.debug("Uri: %s - Type : %s - Headers: %s - Params : %s !" % (uri, method, headers, params))
 
-        ask_time = fields.Datetime.now()
+        ask_time = self.env.now
         try:
             if method.upper() in ('GET', 'DELETE'):
                 res = requests.request(method.lower(), preuri + uri, headers=headers, params=params, timeout=timeout)

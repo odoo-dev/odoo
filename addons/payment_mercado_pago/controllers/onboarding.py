@@ -66,7 +66,7 @@ class MercadoPagoOnboardingController(Controller):
         # Backdate the access token expiry to refresh it before it expires, since the refresh token
         # would become unusable at that time (according to Mercado Pago's dev team).
         expires_in = (
-            fields.Datetime.now()
+            self.env.now
             + timedelta(seconds=int(response_content["expires_in"]))
             - timedelta(days=31)
         )

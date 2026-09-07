@@ -266,7 +266,7 @@ class AccountMove(models.Model):
 
         return {
             'invoice': self,
-            'DataWytworzeniaFa': fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'DataWytworzeniaFa': self.env.now.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'seller': self.company_id,
             'seller_address': get_address(self.company_id.partner_id),
             'buyer': self.commercial_partner_id,
@@ -688,7 +688,7 @@ class AccountMove(models.Model):
             raise UserError(error.get('message'))
 
         cron = self.env.ref('l10n_pl_edi.cron_l10n_pl_edi_ksef_download_bills')
-        cron._trigger(at=fields.Datetime.now() + relativedelta(seconds=delay))
+        cron._trigger(at=self.env.now + relativedelta(seconds=delay))
         return True
 
     def _fetch_bills_metadata(self, service):
@@ -705,7 +705,7 @@ class AccountMove(models.Model):
         else:
             date_from = fields.Datetime.from_string("2026-01-31 00:00:00")  # The date it became mandatory
 
-        tomorrow = fields.Datetime.now() + relativedelta(days=1)
+        tomorrow = self.env.now + relativedelta(days=1)
         date_to = min(date_from + relativedelta(months=2), tomorrow)
 
         query = {

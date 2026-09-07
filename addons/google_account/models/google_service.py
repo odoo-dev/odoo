@@ -132,7 +132,7 @@ class GoogleService(models.AbstractModel):
 
         _logger.debug("Uri: %s - Type : %s - Headers: %s - Params : %s!", uri, method, headers, _log_params)
 
-        ask_time = fields.Datetime.now()
+        ask_time = self.env.now
         try:
             if method.upper() in ('GET', 'DELETE'):
                 res = requests.request(method.lower(), preuri + uri, params=params, timeout=timeout)

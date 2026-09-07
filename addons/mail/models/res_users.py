@@ -368,7 +368,7 @@ class ResUsers(models.Model):
         values = {
             'browser': False,
             'content': content,
-            'event_datetime': fields.Datetime.now(),
+            'event_datetime': self.env.now,
             'ip_address': False,
             'location_address': False,
             'suggest_password_reset': kwargs.get('suggest_password_reset', True) and reset_password_enabled,

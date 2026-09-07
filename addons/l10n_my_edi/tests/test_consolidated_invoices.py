@@ -36,7 +36,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         Create three invoices for the period and consolidate them; then validate the xml file of a consolidated invoice.
         """
         for _ in range(3):
-            self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -97,8 +97,8 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         Create two invoices of different currencies for the period, then ensure that these are correctly separated in two
         different consolidated invoices.
         """
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today(), currency=self.other_currency)
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date(), currency=self.other_currency)
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -118,9 +118,9 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         one for the other journal.
         """
         journal2 = self.company_data['default_journal_sale'].copy()
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today(), currency=self.other_currency)
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today(), journal=journal2)
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date(), currency=self.other_currency)
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date(), journal=journal2)
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -140,7 +140,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         """
         invoices = self.env['account.move']
         for _ in range(3):
-            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
 
         for invoice in invoices[:2]:
             action = invoice.action_reverse()
@@ -148,7 +148,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
                 active_ids=invoice.ids,
                 active_model='account.move',
                 default_journal_id=invoice.journal_id.id,
-                date=fields.Date.today(),
+                date=self.env.now.date(),
             ).create({})
             action = reversal_wizard.reverse_moves()
             credit_note = self.env['account.move'].browse(action['res_id'])
@@ -208,7 +208,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
 
         invoices = self.env['account.move']
         for _ in range(3):
-            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
 
         for invoice in invoices[:2]:
             action = invoice.action_debit_note()
@@ -216,7 +216,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
                 active_ids=invoice.ids,
                 active_model='account.move',
                 default_journal_id=invoice.journal_id.id,
-                date=fields.Date.today(),
+                date=self.env.now.date(),
             ).create({
                 'copy_lines': True,
             })
@@ -258,7 +258,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         """
         invoices = self.env['account.move']
         for _ in range(3):
-            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            invoices |= self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
         self.env["account.payment.register"].with_context(
             active_model="account.move", active_ids=invoices.ids
         ).create({})._create_payments()
@@ -269,7 +269,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
                 active_ids=invoice.ids,
                 active_model='account.move',
                 default_journal_id=invoice.journal_id.id,
-                date=fields.Date.today(),
+                date=self.env.now.date(),
             ).create({})
             action = reversal_wizard.reverse_moves()
             credit_note = self.env['account.move'].browse(action['res_id'])
@@ -320,7 +320,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         base_invoice_data = {
             'partner_id': self.partner_a.id,
             'move_type': 'out_invoice',
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,
@@ -377,7 +377,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
             active_ids=invoices_to_credit.ids,
             active_model='account.move',
             default_journal_id=self.company_data['default_journal_sale'].id,
-            date=fields.Date.today(),
+            date=self.env.now.date(),
         ).create({})
         action = reversal_wizard.reverse_moves()
         credit_notes = self.env['account.move'].browse(action['domain'][0][2])
@@ -386,7 +386,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
             active_ids=invoices_to_refund.ids,
             active_model='account.move',
             default_journal_id=self.company_data['default_journal_sale'].id,
-            date=fields.Date.today(),
+            date=self.env.now.date(),
         ).create({})
         action = reversal_wizard.reverse_moves()
         refunds = self.env['account.move'].browse(action['domain'][0][2])
@@ -395,7 +395,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
             active_ids=invoices_to_debit.ids,
             active_model='account.move',
             default_journal_id=self.company_data['default_journal_sale'].id,
-            date=fields.Date.today(),
+            date=self.env.now.date(),
         ).create({
             'copy_lines': True,
         })
@@ -433,9 +433,9 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         Ensure that when a regular commercial partner is set on an invoice (one that has vat and id information set) we
         do not pick that invoice for consolidation.
         """
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today(), partner=self.partner_b)
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date(), partner=self.partner_b)
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -453,7 +453,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         Create three self billed invoices for the period and consolidate them; then validate the xml file of a consolidated invoice.
         """
         for _ in range(3):
-            self.init_invoice('in_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            self.init_invoice('in_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -513,7 +513,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         """
         Ensure that a single invoice linked to a MyInvois Document is considered a consolidated invoice if it makes sense.
         """
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
 
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
@@ -578,7 +578,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         proxy_user = self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_data['company'], 'l10n_my_edi', 'demo')
         proxy_user.edi_mode = 'test'
 
-        invoice = self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+        invoice = self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
         with self.assertRaises(UserError):  # We expect an error that would happen due to missing ID info on the partner, but wouldn't happen in consolidated invoice generation
             invoice.action_l10n_my_edi_send_invoice()
 
@@ -589,12 +589,12 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         The consolidated invoice should have its name properly computed, and shouldn't pick the regular invoice as reference.
         """
         # Create and 'send' an invoice, the document should share the same name.
-        invoice = self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today(), partner=self.partner_b)
+        invoice = self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date(), partner=self.partner_b)
         invoice._create_myinvois_document()
         self.assertEqual(invoice.l10n_my_edi_document_ids.name, 'INV/2025/00001')
 
         # When making a consolidated invoice, it should not pick up the INV and should instead start a new sequence.
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
             'date_to': '2025-07-31',
@@ -610,7 +610,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         self.assertEqual(myinvois_document.name, 'CINV/2025/00001')
 
         # And adding another one should continue the sequence
-        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+        self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
         myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
             'date_from': '2025-07-01',
             'date_to': '2025-07-31',
@@ -637,7 +637,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         base_invoice_data = {
             'partner_id': self.partner_a.id,
             'move_type': 'out_invoice',
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,

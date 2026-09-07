@@ -347,7 +347,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
                 ('state', '=', 'forecast'),
                 ('warehouse_id', '=', wh.id),
                 ('product_tmpl_id', '=', product.product_tmpl_id.id),
-                ('date', '=', fields.Date.today() - timedelta(days=20)),
+                ('date', '=', self.env.now.date() - timedelta(days=20)),
             ],
             aggregates=['product_qty:sum'],
             groupby=['date:day', 'product_id'],
@@ -582,7 +582,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
         Test monthly demand is counted once in a multi-step delivery flow.
         """
         self.warehouse.delivery_steps = 'pick_pack_ship'
-        with freeze_time(fields.Datetime.now() - relativedelta(days=1)):
+        with freeze_time(self.env.now - relativedelta(days=1)):
             so = self.env['sale.order'].create({
                 'partner_id': self.customer.id,
                 'warehouse_id': self.warehouse.id,

@@ -273,7 +273,7 @@ class PurchaseOrder(models.Model):
     @api.model
     def retrieve_dashboard(self):
         result = super().retrieve_dashboard()
-        three_months_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(months=3))
+        three_months_ago = fields.Datetime.to_string(self.env.now - relativedelta(months=3))
 
         purchases = self.env['purchase.order'].search_fetch(
             [('state', '=', 'purchase'), ('date_promised', '>=', three_months_ago)],

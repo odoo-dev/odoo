@@ -51,7 +51,7 @@ class ProductPricelistItem(models.Model):
         product_ids = data['product.product'].ids
         product_categ = data['product.category'].ids
 
-        now = fields.Datetime.now()
+        now = self.env.now
         return [
             ('pricelist_id', 'in', pricelist_ids),
             '|', ('product_tmpl_id', '=', False), ('product_tmpl_id', 'in', product_tmpl_ids),

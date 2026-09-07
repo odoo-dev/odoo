@@ -53,7 +53,7 @@ class ResourceCalendar(models.Model):
             Transfered leaves linked to `resources` (or all if `resources` is None) and starting
             after 'from_date' (or today if None).
         """
-        from_date = from_date or fields.Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        from_date = from_date or self.env.now.replace(hour=0, minute=0, second=0, microsecond=0)
         domain = [
             ('calendar_id', 'in', self.ids),
             ('date_from', '>=', from_date),

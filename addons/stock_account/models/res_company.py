@@ -97,7 +97,7 @@ class ResCompany(models.Model):
         moves_vals = {
             'journal_id': self.account_stock_journal_id.id,
             'date': at_date or fields.Date.context_today(self),
-            'closing_datetime': datetime.combine(at_date, time.max) if at_date else fields.Datetime.now(),
+            'closing_datetime': datetime.combine(at_date, time.max) if at_date else self.env.now,
             'ref': _('Stock Closing'),
             'inventory_closing': True,
             'line_ids': [Command.create(aml_vals) for aml_vals in aml_vals_list],
@@ -166,7 +166,7 @@ class ResCompany(models.Model):
     @api.model
     def _cron_post_stock_valuation(self):
         periods = ['daily']
-        if fields.Date.today() == fields.Date.today() + relativedelta(day=31):
+        if self.env.now.date() == self.env.now.date() + relativedelta(day=31):
             periods.append('monthly')
         domain = Domain([
             ('inventory_period', 'in', periods),

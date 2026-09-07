@@ -12,8 +12,8 @@ class EventEventTicket(models.Model):
             ('event_id.is_finished', '=', False),
             ('event_id.company_id', '=', data['pos.config'].company_id.id),
             ('product_id', 'in', data['product.product'].ids),
-            '|', ('end_sale_datetime', '>=', fields.Datetime.now()), ('end_sale_datetime', '=', False),
-            '|', ('start_sale_datetime', '<=', fields.Datetime.now()), ('start_sale_datetime', '=', False)
+            '|', ('end_sale_datetime', '>=', self.env.now), ('end_sale_datetime', '=', False),
+            '|', ('start_sale_datetime', '<=', self.env.now), ('start_sale_datetime', '=', False)
         ]
 
     @api.model

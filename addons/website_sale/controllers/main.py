@@ -423,7 +423,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if filter_by_price_enabled:
             company_currency = website.company_id.sudo().currency_id
             conversion_rate = self.env["res.currency"]._get_conversion_rate(
-                company_currency, website.currency_id, website.company_id, fields.Date.today()
+                company_currency, website.currency_id, website.company_id, self.env.now.date()
             )
         else:
             conversion_rate = 1

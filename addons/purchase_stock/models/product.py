@@ -95,7 +95,7 @@ class ProductProduct(models.Model):
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
         if self.env.context.get("suggest_based_on") and "suggest_days" in self.env.context:
             # Override to compute actual demand suggestion and update forecast on Kanban card
-            to_date = fields.Datetime.now() + relativedelta(days=self.env.context.get("suggest_days"))
+            to_date = self.env.now + relativedelta(days=self.env.context.get("suggest_days"))
         return super()._compute_quantities_dict(
             lot_id=lot_id,
             owner_id=owner_id,

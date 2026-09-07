@@ -55,8 +55,8 @@ class HrEmployee(models.Model):
 
         holidays = self.env['hr.leave'].sudo().search([
             ('employee_id', 'in', self.ids),
-            ('date_from', '<=', fields.Datetime.now()),
-            ('date_to', '>=', fields.Datetime.now()),
+            ('date_from', '<=', self.env.now),
+            ('date_to', '>=', self.env.now),
             ('state', '=', 'validate'),
         ])
         for holiday in holidays:
@@ -196,7 +196,7 @@ class HrEmployee(models.Model):
 
     def _compute_leave_status(self):
         # Used SUPERUSER_ID to forcefully get status of other user's leave, to bypass record rule
-        now = fields.Datetime.now()
+        now = self.env.now
         holidays = self.env['hr.leave'].sudo().search([
             ('employee_id', 'in', self.ids),
             ('date_from', '<=', now),
@@ -352,7 +352,7 @@ class HrEmployee(models.Model):
                 leaves = self.env['hr.leave'].search([
                     ('employee_id', 'in', self.ids),
                     ('resource_calendar_id', '!=', int(values['resource_calendar_id'])),
-                    ('date_from', '>', fields.Datetime.now())])
+                    ('date_from', '>', self.env.now)])
                 leaves.write({'resource_calendar_id': values['resource_calendar_id']})
                 non_hourly_leaves = leaves.filtered(lambda l: l.leave_type_request_unit != 'hour')
                 non_hourly_leaves.with_context(leave_skip_date_check=True, leave_skip_state_check=True)._compute_date_from_to()
@@ -363,7 +363,7 @@ class HrEmployee(models.Model):
                                         "review this employee's leaves and adjust their allocation accordingly."))
 
         if 'parent_id' in values or 'department_id' in values:
-            today_date = fields.Datetime.now()
+            today_date = self.env.now
             hr_vals = {}
             if values.get('department_id') is not None:
                 hr_vals['department_id'] = values['department_id']
@@ -549,7 +549,7 @@ class HrEmployee(models.Model):
             leaves_domain.append(('id', 'not in', self.env.context.get('ignored_leave_ids')))
 
         if not target_date:
-            target_date = fields.Date.today()
+            target_date = self.env.now.date()
         if ignore_future:
             leaves_domain.append(('date_from', '<=', target_date))
         leaves = self.env['hr.leave'].search(leaves_domain)

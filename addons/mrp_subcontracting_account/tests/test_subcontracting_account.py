@@ -345,7 +345,7 @@ class TestSubcontractingBOMCost(TestBomPriceCommon):
             'rounding': 0.01,
             'currency_unit_label': 'Zenny',
             'rate_ids': [Command.create({
-                'name': fields.Date.subtract(fields.Date.today(), days=1),
+                'name': fields.Date.subtract(self.env.now.date(), days=1),
                 'company_rate': 0.5,
             })],
         })

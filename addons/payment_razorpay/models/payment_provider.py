@@ -254,7 +254,7 @@ class PaymentProvider(models.Model):
             "POST", "2/refresh_access_token", json=proxy_payload, is_proxy_request=True
         )
         if response_content.get("access_token"):
-            expiry = fields.Datetime.now() + timedelta(seconds=int(response_content["expires_in"]))
+            expiry = self.env.now + timedelta(seconds=int(response_content["expires_in"]))
             self.write({
                 "razorpay_public_token": response_content["public_token"],
                 "razorpay_refresh_token": response_content["refresh_token"],
@@ -281,7 +281,7 @@ class PaymentProvider(models.Model):
 
         headers = None
         if not is_proxy_request and self.razorpay_access_token and not self.razorpay_key_id:
-            if self.razorpay_access_token_expiry < fields.Datetime.now():
+            if self.razorpay_access_token_expiry < self.env.now:
                 self._razorpay_refresh_access_token()
             headers = {"Authorization": f"Bearer {self.razorpay_access_token}"}
         return headers

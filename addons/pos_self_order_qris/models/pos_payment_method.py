@@ -106,7 +106,7 @@ class PosPaymentMethod(models.Model):
         transactions = self._kiosk_qr_transactions(order)
         if not transactions:
             return KIOSK_QRIS_TIMEOUT
-        age = (fields.Datetime.now() - transactions[0].qris_creation_datetime).total_seconds()
+        age = (self.env.now - transactions[0].qris_creation_datetime).total_seconds()
         return max(0, KIOSK_QRIS_TIMEOUT - int(age))
 
     def _kiosk_qr_fetch_status(self, order):
@@ -128,7 +128,7 @@ class PosPaymentMethod(models.Model):
         if transactions._l10n_id_get_qris_qr_statuses()["paid"]:
             return "paid"
 
-        age = fields.Datetime.now() - transactions[0].qris_creation_datetime
+        age = self.env.now - transactions[0].qris_creation_datetime
         if age > timedelta(seconds=KIOSK_QRIS_TIMEOUT):
             return "expired"
         return "pending"
@@ -216,7 +216,7 @@ class PosPaymentMethod(models.Model):
         if order.state == "draft":
             order.add_payment({
                 "amount": order.amount_total,
-                "payment_date": fields.Datetime.now(),
+                "payment_date": self.env.now,
                 "payment_method_id": self.id,
                 "pos_order_id": order.id,
             })

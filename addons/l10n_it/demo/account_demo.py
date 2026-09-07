@@ -105,7 +105,7 @@ class AccountChartTemplate(models.AbstractModel):
             ]
 
         company_id = self.env.company.id
-        today = fields.Date.today()
+        today = self.env.now.date()
 
         return {
             'demo_inv_sale_multi_01': {

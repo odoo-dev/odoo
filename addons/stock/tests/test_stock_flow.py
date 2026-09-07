@@ -2007,18 +2007,18 @@ class TestStockFlow(TestStockCommon):
         with f.move_ids.new() as move:
             move.product_id = product
             move.product_uom_qty = 5
-        f.scheduled_date = fields.Datetime.now()
+        f.scheduled_date = self.env.now
         picking = f.save()
 
         f = Form(picking, view='stock.view_picking_form')
-        f.scheduled_date = fields.Datetime.now()
+        f.scheduled_date = self.env.now
         picking = f.save()
 
         self.assertEqual(f.state, 'draft')
         picking.action_confirm()
 
         f = Form(picking, view='stock.view_picking_form')
-        f.scheduled_date = fields.Datetime.now()
+        f.scheduled_date = self.env.now
         picking = f.save()
 
         self.assertEqual(f.state, 'confirmed')
@@ -2189,8 +2189,8 @@ class TestStockFlow(TestStockCommon):
                 })
             self.MoveObj.create({
                 'sequence': sequence,
-                'date': fields.Datetime.add(fields.Datetime.now(), second=delay),
-                'reservation_date': fields.Date.today(),
+                'date': fields.Datetime.add(self.env.now, second=delay),
+                'reservation_date': self.env.now.date(),
                 'product_id': self.productA.id,
                 'product_uom_qty': 1,
                 'uom_id': self.productA.uom_id.id,
@@ -2470,7 +2470,7 @@ class TestStockFlow(TestStockCommon):
             'uom_id': self.productA.uom_id.id,
             'product_uom_qty': 1,
             'picking_type_id': self.picking_type_out.id,
-            'reservation_date': fields.Date.today(),
+            'reservation_date': self.env.now.date(),
         })
         out_move._action_confirm()
 

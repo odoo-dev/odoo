@@ -454,7 +454,7 @@ class TestFrontend(TestFrontendCommon):
             'amount_total': 10.0,
             'amount_paid': 0.0,
             'amount_return': 0.0,
-            'preset_time': fields.Datetime.now() + timedelta(hours=4),
+            'preset_time': self.env.now + timedelta(hours=4),
         })
 
         session.close_session_from_ui()

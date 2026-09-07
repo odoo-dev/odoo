@@ -13,8 +13,8 @@ class TestEventCrmFlow(TestEventCrmCommon):
         self.test_rule_order.event_registration_filter = False
         event_1 = self.env['event.event'].create({
             'name': 'TestEvent 1',
-            'date_begin': fields.Datetime.to_string(fields.Datetime.today() + timedelta(days=1)),
-            'date_end': fields.Datetime.to_string(fields.Datetime.today() + timedelta(days=15)),
+            'date_begin': fields.Datetime.to_string(self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=1)),
+            'date_end': fields.Datetime.to_string(self.env.now.replace(hour=0, minute=0, second=0) + timedelta(days=15)),
             'date_tz': 'Europe/Brussels',
         })
         event_product = self.env['product.product'].create({

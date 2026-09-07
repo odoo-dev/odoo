@@ -160,7 +160,7 @@ class PaymentProvider(models.Model):
         :rtype: str
         :raise ValidationError: If the access token can not be fetched.
         """
-        if fields.Datetime.now() > self.paypal_access_token_expiry - timedelta(minutes=5):
+        if self.env.now > self.paypal_access_token_expiry - timedelta(minutes=5):
             response_content = self._send_api_request(
                 "POST",
                 "/v1/oauth2/token",
@@ -172,7 +172,7 @@ class PaymentProvider(models.Model):
                 raise ValidationError(self.env._("Could not generate a new access token."))
             self.write({
                 "paypal_access_token": access_token,
-                "paypal_access_token_expiry": fields.Datetime.now()
+                "paypal_access_token_expiry": self.env.now
                 + timedelta(seconds=response_content["expires_in"]),
             })
         return self.paypal_access_token

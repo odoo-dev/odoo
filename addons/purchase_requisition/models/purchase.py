@@ -39,9 +39,9 @@ class PurchaseOrder(models.Model):
                 self.origin = requisition.name
         self.note = requisition.description
         if requisition.date_start:
-            self.date_order = max(fields.Datetime.now(), fields.Datetime.to_datetime(requisition.date_start))
+            self.date_order = max(self.env.now, fields.Datetime.to_datetime(requisition.date_start))
         else:
-            self.date_order = fields.Datetime.now()
+            self.date_order = self.env.now
 
         # Create PO lines if necessary
         # Do not clobber existing lines if the PO is already confirmed

@@ -104,7 +104,7 @@ class TestUi(AccountTestInvoicingHttpCommon):
         move = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': partner.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'line_ids': [Command.create({'name': "T-shirt", 'deductible_percentage': 0.5})],
         })
         move.action_post()

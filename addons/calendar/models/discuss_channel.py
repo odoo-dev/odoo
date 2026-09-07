@@ -36,7 +36,7 @@ class DiscussChannel(models.Model):
 
     def _get_meeting_ongoing_domain(self):
         """A meeting still to come, or taking place right now, is not over (see `super`)."""
-        still_to_come = Domain("stop", ">=", fields.Datetime.now())
+        still_to_come = Domain("stop", ">=", self.env.now)
         return Domain("id", "in", self._videocall_channel_ids(still_to_come)) | super()._get_meeting_ongoing_domain()
 
     @api.depends("calendar_event_ids.start", "calendar_event_ids.stop")
@@ -45,7 +45,7 @@ class DiscussChannel(models.Model):
         coming next, as a recurrence shares a single channel between its occurrences. Once they
         are all over, the last one keeps standing for the channel."""
         super()._compute_meeting_dt()
-        now = fields.Datetime.now()
+        now = self.env.now
         # sudo: calendar.event: when the meeting of an accessible channel takes place is not private
         meetings = (self | self.parent_channel_id).sudo().calendar_event_ids.sorted("start")
         meetings_by_channel = meetings.grouped("videocall_channel_id")
@@ -67,7 +67,7 @@ class DiscussChannel(models.Model):
 
         Meetings that are over keep the creation day, like any other channel."""
         # sudo: calendar.event: whether an accessible channel backs a meeting is not private
-        if self.sudo().calendar_event_ids and self.meeting_stop_dt >= fields.Datetime.now():
+        if self.sudo().calendar_event_ids and self.meeting_stop_dt >= self.env.now:
             local_start = fields.Datetime.context_timestamp(self, self.meeting_start_dt)
             return generate_text_avatar_svg(str(local_start.day), str(self.id))
         return super()._generate_avatar()
@@ -87,7 +87,7 @@ class DiscussChannel(models.Model):
         # meeting the user was allowed to delete, and counting the meetings it has left.
         channels = self.sudo().with_context(active_test=False)
         channels = channels.filtered(lambda channel: not channel.calendar_event_ids)
-        channels.filtered(lambda channel: channel.message_count).channel_member_ids.unpin_dt = fields.Datetime.now()
+        channels.filtered(lambda channel: channel.message_count).channel_member_ids.unpin_dt = self.env.now
         if orphans := channels.filtered(lambda channel: not channel.message_count):
             self.env.cr.flush()
             orphans.unlink()

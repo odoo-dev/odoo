@@ -168,7 +168,7 @@ class ResConfigSettings(models.TransientModel):
             return False
         if run_interval == 'manual':
             return run_datetime if run_datetime else False
-        return fields.Datetime.now() + relativedelta(**{run_interval: run_interval_number})
+        return self.env.now + relativedelta(**{run_interval: run_interval_number})
 
     def action_crm_assign_leads(self):
         self.ensure_one()

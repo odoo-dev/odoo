@@ -262,7 +262,7 @@ class TestMrpAccount(TestBomPriceCommon, TestMrpCommon):
         self.assertEqual(extra_comp['summary']['unit_cost'], extra_product.standard_price)
 
     def test_stock_valuation_report_cost_of_production_past_date(self):
-        date_before = fields.Datetime.now() - timedelta(days=1)
+        date_before = self.env.now - timedelta(days=1)
 
         mo = self._create_mo(self.bom_1, 1)
         mo.button_mark_done()
@@ -273,7 +273,7 @@ class TestMrpAccount(TestBomPriceCommon, TestMrpCommon):
         cost_before = report_data_before.get('cost_of_production', {}).get('value', 0)
         self.assertEqual(cost_before, 0)
 
-        report_data_after = report._get_report_data(date=fields.Datetime.now())
+        report_data_after = report._get_report_data(date=self.env.now)
         cost_after = report_data_after.get('cost_of_production', {}).get('value', 0)
         self.assertNotEqual(cost_after, 0)
 
@@ -408,7 +408,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         mo_form = Form(mo)
         mo_form.qty_producing = mo.product_qty
         mo = mo_form.save()
-        now = fields.Datetime.now()
+        now = self.env.now
         workorder = mo.workorder_ids[0]
         self.env['mrp.workcenter.productivity'].create({
             'workcenter_id': self.workcenter.id,

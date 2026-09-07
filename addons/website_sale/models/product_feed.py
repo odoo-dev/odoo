@@ -105,7 +105,7 @@ class ProductFeed(models.Model):
                 )
 
     def action_invalidate_cache(self):
-        self.cache_expiry = fields.Datetime.now() - relativedelta(days=1)
+        self.cache_expiry = self.env.now - relativedelta(days=1)
 
         return {
             "type": "ir.actions.client",
@@ -125,13 +125,13 @@ class ProductFeed(models.Model):
         """
         self.ensure_one()
 
-        if not self.feed_cache or self.cache_expiry < fields.Datetime.now():
+        if not self.feed_cache or self.cache_expiry < self.env.now:
             # Lock the record to prevent concurrent rendering
             self.lock_for_update()
             gmc_xml = self._render_gmc_feed()
             compressed_gmc_xml = gzip.compress(gmc_xml.encode())
             self.feed_cache = BinaryBytes(compressed_gmc_xml)
-            self.cache_expiry = fields.Datetime.today() + relativedelta(days=1)
+            self.cache_expiry = self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=1)
             return compressed_gmc_xml  # Avoid encoding and directly decoding
 
         return self.feed_cache.content

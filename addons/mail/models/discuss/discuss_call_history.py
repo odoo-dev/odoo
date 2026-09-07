@@ -34,5 +34,5 @@ class DiscussCallHistory(models.Model):
     @api.depends("start_dt", "end_dt")
     def _compute_duration_hour(self):
         for record in self:
-            end_dt = record.end_dt or fields.Datetime.now()
+            end_dt = record.end_dt or self.env.now
             record.duration_hour = (end_dt - record.start_dt).total_seconds() / 3600

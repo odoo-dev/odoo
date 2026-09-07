@@ -264,7 +264,7 @@ class PurchaseOrderLine(models.Model):
     def _get_stock_move_price_unit(self, at_date=False):
         self.ensure_one()
         if not at_date:
-            at_date = fields.Date.today()
+            at_date = self.env.now.date()
         order = self.order_id
         price_unit = self.price_unit_discounted
         price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')

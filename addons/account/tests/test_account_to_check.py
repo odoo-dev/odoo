@@ -65,7 +65,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(invoice_invoicing_1.review_state, 'no_review')
 
     def test_post_move_auto_check_with_auto_post_at_date_accountant(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.auto_post = 'at_date'
         self.assertEqual(invoice.review_state, 'no_review')
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
@@ -73,7 +73,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(invoice.review_state, 'no_review')
 
     def test_post_move_auto_check_with_auto_post_at_date_sales(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.with_user(self.simple_accountman).auto_post = 'at_date'
         self.assertEqual(invoice.review_state, 'todo')
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
@@ -81,7 +81,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(invoice.review_state, 'todo')
 
     def test_post_move_auto_check_with_auto_post_at_date_sales_prereviewed(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.with_user(self.simple_accountman).auto_post = 'at_date'
         self.assertEqual(invoice.review_state, 'todo')
         invoice.review_state = 'reviewed'
@@ -90,7 +90,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(invoice.review_state, 'reviewed')
 
     def test_post_move_auto_check_with_auto_post_monthly_accountant(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.auto_post = 'monthly'
         self.assertEqual(invoice.review_state, 'no_review')
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
@@ -100,7 +100,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(last_recurring.review_state, 'no_review')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.with_user(self.simple_accountman).auto_post = 'monthly'
         self.assertEqual(invoice.review_state, 'todo')
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
@@ -110,7 +110,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(last_recurring.review_state, 'todo')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales_prereviewed(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.with_user(self.simple_accountman).auto_post = 'monthly'
         self.assertEqual(invoice.review_state, 'todo')
         invoice.review_state = 'reviewed'
@@ -121,7 +121,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         self.assertEqual(last_recurring.review_state, 'reviewed')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales_postreviewed(self):
-        invoice = self._create_invoice(date=fields.Date.today())
+        invoice = self._create_invoice(date=self.env.now.date())
         invoice.with_user(self.simple_accountman).auto_post = 'monthly'
         self.assertEqual(invoice.review_state, 'todo')
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
@@ -164,5 +164,5 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         """ Test that an Administrator user with only invoicing installed can still auto post invoice"""
         # By default, invoicing users don't have group_account_user
         self.env.user.write({'group_ids': [Command.unlink(self.env.ref('account.group_account_user').id)]})
-        invoice = self._create_invoice(date=fields.Date.today(), auto_post='monthly')
+        invoice = self._create_invoice(date=self.env.now.date(), auto_post='monthly')
         invoice.action_post()

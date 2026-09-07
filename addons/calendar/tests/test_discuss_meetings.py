@@ -38,7 +38,7 @@ class TestDiscussMeetings(TransactionCase):
         """The channel a "Start Now" meeting opens: a video call backing no meeting.
 
         `create_date` comes from the database clock, which `freeze_time` alone does not reach."""
-        with self.mock_datetime_and_now(fields.Datetime.now()):
+        with self.mock_datetime_and_now(self.env.now):
             return self.env["discuss.channel"]._create_group(
                 self.organizer, default_display_mode="video_full_screen", name=name,
             )

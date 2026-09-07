@@ -566,7 +566,7 @@ class SurveySurvey(models.Model):
                 # if the session is already in progress, the answer skips the 'new' state
                 answer_vals.update({
                     'state': 'in_progress',
-                    'start_datetime': fields.Datetime.now(),
+                    'start_datetime': self.env.now,
                 })
             if user and not user._is_public():
                 answer_vals['partner_id'] = user.partner_id.id
@@ -1160,7 +1160,7 @@ class SurveySurvey(models.Model):
         self.ensure_one()
         self.sudo().write({
             'questions_layout': 'page_per_question',
-            'session_start_time': fields.Datetime.now(),
+            'session_start_time': self.env.now,
             'session_question_id': None,
             'session_state': 'ready'
         })

@@ -132,8 +132,8 @@ class L10nHuEdiTestInvoiceXml(L10nHuEdiTestCommon):
             invoice.action_post()
 
             tax_audit_export = self.env['l10n_hu_edi.tax_audit_export'].create({
-                'date_from': fields.Date.today(),
-                'date_to': fields.Date.today(),
+                'date_from': self.env.now.date(),
+                'date_to': self.env.now.date(),
             })
             tax_audit_export.action_export()
 

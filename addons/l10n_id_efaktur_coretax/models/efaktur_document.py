@@ -62,7 +62,7 @@ class EfakturDocument(models.Model):
         if not self.attachment_id:
             attachment = self.env['ir.attachment'].create({
                 'raw': raw_data,
-                'name': 'efaktur_%s.xml' % (fields.Datetime.to_string(fields.Datetime.now()).replace(" ", "_")),
+                'name': 'efaktur_%s.xml' % (fields.Datetime.to_string(self.env.now).replace(" ", "_")),
                 'type': 'binary',
                 'res_model': 'l10n_id_efaktur_coretax.document',
                 'res_id': self.id,
@@ -72,7 +72,7 @@ class EfakturDocument(models.Model):
             attachment = self.attachment_id
             self.attachment_id.write({
                 'raw': raw_data,
-                'name': 'efaktur_%s.xml' % (fields.Datetime.to_string(fields.Datetime.now()).replace(" ", "_")),
+                'name': 'efaktur_%s.xml' % (fields.Datetime.to_string(self.env.now).replace(" ", "_")),
             })
 
         if not regenerate:

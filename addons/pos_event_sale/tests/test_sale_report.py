@@ -21,7 +21,7 @@ class TestPoSEventSaleReport(TestUi):
             "amount_tax": 0,
             "amount_return": 0,
             "amount_total": 100,
-            "date_order": fields.Datetime.to_string(fields.Datetime.now()),
+            "date_order": fields.Datetime.to_string(self.env.now),
             "fiscal_position_id": False,
             "lines": [
                 Command.create({
@@ -51,7 +51,7 @@ class TestPoSEventSaleReport(TestUi):
             "payment_ids": [
                     Command.create({
                         "amount": 100,
-                        "name": fields.Datetime.now(),
+                        "name": self.env.now,
                         "payment_method_id": self.bank_payment_method.id,
                     }),
             ],

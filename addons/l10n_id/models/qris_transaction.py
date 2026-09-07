@@ -78,6 +78,6 @@ class L10n_IdQrisTransaction(models.Model):
         """ Removes unpaid transactions that have been for more than 35 minutes.
         These can no longer be paid and status will no longer change
         """
-        time_limit = fields.Datetime.now() - timedelta(seconds=2100)
+        time_limit = self.env.now - timedelta(seconds=2100)
         transactions = self.env['l10n_id.qris.transaction'].search([('qris_creation_datetime', '<=', time_limit), ('paid', '=', False)])
         transactions.unlink()

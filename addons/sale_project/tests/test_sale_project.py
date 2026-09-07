@@ -2090,7 +2090,7 @@ class TestSaleProject(TestSaleProjectCommon):
 
         vendor_bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [Command.create({
                 'quantity': 1,

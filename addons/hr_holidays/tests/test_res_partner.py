@@ -15,7 +15,7 @@ class TestPartner(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         # use a single value for today throughout the tests to avoid weird scenarios around midnight
-        cls.today = fields.Date.today()
+        cls.today = self.env.now.date()
         baseUser = cls.env['res.users'].create({
             'email': 'e.e@example.com',
             'group_ids': [Command.link(cls.env.ref('base.group_user').id)],

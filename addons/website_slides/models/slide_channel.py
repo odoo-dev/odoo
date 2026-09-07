@@ -411,7 +411,7 @@ class SlideChannel(models.Model):
     def _compute_partner_has_new_content(self):
         new_published_slides = self.env['slide.slide'].sudo().search([
             ('is_published', '=', True),
-            ('published_date', '>', fields.Datetime.now() - relativedelta(days=7)),
+            ('published_date', '>', self.env.now - relativedelta(days=7)),
             ('channel_id', 'in', self.ids),
             ('is_category', '=', False)
         ])

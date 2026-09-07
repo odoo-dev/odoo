@@ -71,7 +71,7 @@ class RecruitmentSurveyCommon(HttpCase):
         user_input = self.env['survey.user_input'].search(
             [
                 ('partner_id', '=', self.test_applicant.partner_id.id),
-                ('deadline', '>', fields.Datetime.now()),
+                ('deadline', '>', self.env.now),
             ],
             order='id desc',
             limit=1,

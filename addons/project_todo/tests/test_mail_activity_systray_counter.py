@@ -27,7 +27,7 @@ class TestActivitySystrayCounter(TransactionCase):
         :param bool is_todo: If True, creates tasks without a project_id (To-Dos).
                              If False, creates tasks with a project_id.
         """
-        today = fields.Date.today()
+        today = self.env.now.date()
         yesterday = today - datetime.timedelta(days=1)
         tomorrow = today + datetime.timedelta(days=1)
 

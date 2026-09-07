@@ -179,7 +179,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         ):
             # If a public/portal user accesses the order which is in draft or sent state with the
             # access token. Log a note on the chatter.
-            today = fields.Date.today().isoformat()
+            today = self.env.now.date().isoformat()
             session_obj_date = request.session.get("view_quote_%s" % order_sudo.id)
             if session_obj_date != today:
                 # store the date as a string in the session to allow serialization
@@ -341,7 +341,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         try:
             order_sudo.write({
                 "signed_by": name,
-                "signed_on": fields.Datetime.now(),
+                "signed_on": self.env.now,
                 "signature": signature,
             })
             # flush now to make signature data available to PDF render request

@@ -79,7 +79,7 @@ class ProjectTaskType(models.Model):
     def _compute_rating_request_deadline(self):
         periods = {'daily': 1, 'weekly': 7, 'bimonthly': 15, 'monthly': 30, 'quarterly': 90, 'yearly': 365}
         for stage in self:
-            stage.rating_request_deadline = fields.Datetime.now() + timedelta(days=periods.get(stage.rating_status_period, 0))
+            stage.rating_request_deadline = self.env.now + timedelta(days=periods.get(stage.rating_status_period, 0))
 
     def unlink_wizard(self, stage_view=False):
         self = self.with_context(active_test=False)
@@ -231,7 +231,7 @@ class ProjectTaskType(models.Model):
         stages = self.search([
             ('rating_active', '=', True),
             ('rating_status', '=', 'periodic'),
-            ('rating_request_deadline', '<=', fields.Datetime.now())
+            ('rating_request_deadline', '<=', self.env.now)
         ])
         for stage in stages:
             stage.project_ids.task_ids._send_task_rating_mail()

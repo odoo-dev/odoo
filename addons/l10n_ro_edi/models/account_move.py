@@ -274,7 +274,7 @@ class AccountMove(models.Model):
         for invoice in non_indexed_invoices:
             sent_document = invoice.l10n_ro_edi_document_ids.filtered(lambda d: d.state == 'invoice_sent')
 
-            if (fields.Datetime.today() - sent_document.create_date).days > HOLDING_DAYS:
+            if (self.env.now.replace(hour=0, minute=0, second=0) - sent_document.create_date).days > HOLDING_DAYS:
                 document_ids_to_delete += sent_document.ids
 
                 error_message = _(

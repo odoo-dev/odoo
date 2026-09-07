@@ -12,7 +12,7 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
 
     def test_overlap_leave_and_public_holiday(self):
         emp = self.employee_emp
-        today = fields.Date.today()
+        today = self.env.now.date()
         monday = today - timedelta(days=today.weekday() + 7 * 8)
         tuesday = monday + timedelta(days=1)
         wednesday = monday + timedelta(days=2)
@@ -69,7 +69,7 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         calendar = emp.resource_calendar_id
         Report = self.env['hr.leave.attendance.report']
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         # Monday eight weeks before this week: comfortably inside the report's
         # ~13-month window and clear of both its edges.
         monday = today - timedelta(days=today.weekday() + 7 * 8)
@@ -207,7 +207,7 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         calendar_a = emp.resource_calendar_id
         Report = self.env['hr.leave.attendance.report']
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         monday = today - timedelta(days=today.weekday() + 7 * 8)
 
         def day(week, weekday=0):
@@ -265,7 +265,7 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
         """ A closure covering one Brussels-local day must exclude that day
             only, not the previous UTC day its start timestamp falls on. """
         emp = self.employee_emp
-        today = fields.Date.today()
+        today = self.env.now.date()
         monday = today - timedelta(days=today.weekday() + 7 * 8)
         tuesday = monday + timedelta(days=1)
 
@@ -305,7 +305,7 @@ class TestLeaveAttendanceReport(TestHrHolidaysCommon):
             the holiday is dropped from the leave's pro-rated working-day
             count (exercises the holiday anti-join in `leave_day`). """
         emp = self.employee_emp
-        today = fields.Date.today()
+        today = self.env.now.date()
         monday = today - timedelta(days=today.weekday() + 7 * 8)
         tuesday = monday + timedelta(days=1)
         wednesday = monday + timedelta(days=2)

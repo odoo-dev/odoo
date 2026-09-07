@@ -354,7 +354,7 @@ class TestUblBis3Common(TestUblCiiCommon):
             'name': f'mandate_{partner.name}_{account_number[-4:]}',
             'partner_id': partner.id,
             'partner_bank_id': partner_bank.id,
-            'start_date': start_date or fields.Date.today(),
+            'start_date': start_date or self.env.now.date(),
             'end_date': end_date,
             'company_id': self.env.company.id,
         })

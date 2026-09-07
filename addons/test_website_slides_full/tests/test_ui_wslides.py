@@ -121,7 +121,7 @@ class TestUi(TestUICommon):
             'promote_strategy': 'most_voted',
             'is_published': True,
             'description': 'So much amazing certification.',
-            'create_date': Datetime.now() - relativedelta(days=2),
+            'create_date': self.env.now - relativedelta(days=2),
             'slide_ids': [
                 (0, 0, {
                     'name': 'DIY Furniture Certification',

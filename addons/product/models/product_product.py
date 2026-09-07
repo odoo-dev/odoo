@@ -1322,7 +1322,7 @@ class ProductProduct(models.Model):
             self.lst_price,
             pricelist.currency_id,
             self.env.company,
-            fields.Datetime.now(),
+            self.env.now,
             round=False
         )
         if lst_price:

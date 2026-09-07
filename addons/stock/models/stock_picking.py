@@ -378,9 +378,9 @@ class StockPicking(models.Model):
                 continue
             moves_dates = picking.move_ids.filtered(lambda move: move.state not in ('done', 'cancel')).mapped('date')
             if picking.move_type == 'direct':
-                picking.scheduled_date = min(moves_dates, default=picking.scheduled_date or fields.Datetime.now())
+                picking.scheduled_date = min(moves_dates, default=picking.scheduled_date or self.env.now)
             else:
-                picking.scheduled_date = max(moves_dates, default=picking.scheduled_date or fields.Datetime.now())
+                picking.scheduled_date = max(moves_dates, default=picking.scheduled_date or self.env.now)
 
     @api.depends('move_line_ids', 'move_line_ids.result_package_id', 'move_line_ids.uom_id', 'move_line_ids.quantity')
     def _compute_bulk_weight(self):
@@ -925,7 +925,7 @@ class StockPicking(models.Model):
             'uom_id': move_id.uom_id.id or move_id.product_id.uom_id.id,
             'picking_id': self.id,
             'state': 'draft',
-            'date': fields.Datetime.now(),
+            'date': self.env.now,
             'location_id': self.location_id.id or move_id.location_dest_id.id,
             'location_dest_id': self.location_dest_id.id or move_id.location_id.id,
             'forecasted_location_id': False,
@@ -996,7 +996,7 @@ class StockPicking(models.Model):
                 picking.move_ids.write({'restrict_partner_id': picking.owner_id.id})
                 picking.move_line_ids.write({'owner_id': picking.owner_id.id})
         todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))
-        self.write({'date_done': fields.Datetime.now(), 'priority': '0'})
+        self.write({'date_done': self.env.now, 'priority': '0'})
 
         # notify followers when no backorder was created but quantities are incomplete
         if self.env.context.get('cancel_backorder'):
@@ -1627,7 +1627,7 @@ class StockPicking(models.Model):
         in UTC. If the datetime is falsy, this function returns "".
         """
         start_today = fields.Datetime.context_timestamp(
-            self.env.user, fields.Datetime.now()
+            self.env.user, self.env.now
         ).replace(hour=0, minute=0, second=0, microsecond=0)
 
         start_yesterday = start_today + timedelta(days=-1)
@@ -1678,7 +1678,7 @@ class StockPicking(models.Model):
                 If an incorrect date category is passed, this method returns None.
         """
         start_today = fields.Datetime.context_timestamp(
-            self.env.user, fields.Datetime.now()
+            self.env.user, self.env.now
         ).replace(hour=0, minute=0, second=0, microsecond=0)
 
         start_today = start_today.astimezone(UTC).replace(tzinfo=None)

@@ -272,7 +272,7 @@ class PosOrder(models.Model):
         result = {
             'id': order.get('id'),
             'customer_count': order.get('customer_count'),
-            'date_order': str(fields.Datetime.now()),
+            'date_order': str(self.env.now),
             'amount_difference': order.get('amount_difference'),
             'amount_tax': order.get('amount_tax'),
             'amount_total': order.get('amount_total'),

@@ -475,7 +475,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         self.assertEqual(self.product1.standard_price, 1)
         self.assertEqual(product2.standard_price, 3)
 
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         with Form(bill) as bill_form:
             with bill_form.invoice_line_ids.new() as inv_line:
                 inv_line.product_id = self.landed_cost
@@ -558,7 +558,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         })
         # Post the bill
         bill.landed_costs_ids = [(6, 0, lc.id)]
-        bill.invoice_date = Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.with_user(user)._post()
 
         landed_cost_aml = bill.invoice_line_ids.filtered(lambda l: l.product_id == self.landed_cost)
@@ -616,7 +616,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         purchase_order.action_create_invoice()
         bill2 = purchase_order.invoice_ids.filtered(lambda b: b.state == 'draft')
         bill2.invoice_line_ids[0].quantity = 27000
-        bill2.invoice_date = Date.today()
+        bill2.invoice_date = self.env.now.date()
         bill2._post()
         receipt2 = purchase_order.picking_ids.filtered(lambda p: p.state == 'assigned')
         receipt2.move_ids[0].quantity = 27000
@@ -720,7 +720,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         picking.button_validate()
         po.action_create_invoice()
         bill = po.invoice_ids[0]
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         action = bill.button_create_landed_costs()
         lc_form = Form(self.env[action['res_model']].browse(action['res_id']))
@@ -731,12 +731,12 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         self.assertEqual(lc.stock_valuation_layer_ids.value, 20)
         reverse_wizard = self.env['account.move.reversal'].with_context(active_model='account.move', active_ids=bill.ids).create({
             'reason': 'Refund for landed cost',
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
             'journal_id': bill.journal_id.id,
         })
         reversal = reverse_wizard.reverse_moves()
         reversed_move = self.env['account.move'].browse(reversal['res_id'])
-        reversed_move.invoice_date = fields.Date.today()
+        reversed_move.invoice_date = self.env.now.date()
         reversed_move.action_post()
         action = reversed_move.button_create_landed_costs()
         lc_form = Form(self.env[action['res_model']].browse(action['res_id']))
@@ -794,7 +794,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         self.assertTrue(backorder_picking, "Backorder picking was not created or not found.")
 
         bill = self.env["account.move"].browse(purchase_order.action_create_invoice()["res_id"])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.invoice_line_ids.quantity = 70
         bill.action_post()
 
@@ -825,7 +825,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
 
         # Create a draft bill for the remaining 120 units
         bill2 = self.env["account.move"].browse(purchase_order.action_create_invoice()["res_id"])
-        bill2.invoice_date = fields.Date.today()
+        bill2.invoice_date = self.env.now.date()
         self.assertAlmostEqual(bill2.invoice_line_ids[0].quantity, 120, msg="Bill 2 should be for the remaining 120 units.")
         self.assertAlmostEqual(bill2.invoice_line_ids[0].price_unit, 110, msg="Bill 2 unit price should match PO price.")
         self.assertAlmostEqual(purchase_order.order_line[0].qty_invoiced, 190, msg="Total 190 units should be invoiced on PO line.")
@@ -914,7 +914,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         # bill the product and the landed cost
         po.action_create_invoice()
         bill = po.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
 
         # create and validate the landed cost

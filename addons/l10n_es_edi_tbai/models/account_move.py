@@ -274,7 +274,7 @@ class AccountMove(models.Model):
             'is_sale': self.is_sale_document(),
             'partner': self.commercial_partner_id,
             'is_simplified': self.l10n_es_is_simplified,
-            'delivery_date': self.delivery_date if self.delivery_date != fields.Datetime.today() else None,
+            'delivery_date': self.delivery_date if self.delivery_date != self.env.now.replace(hour=0, minute=0, second=0) else None,
             **self._l10n_es_tbai_get_attachment_values(cancel),
         }
         if values['is_sale']:

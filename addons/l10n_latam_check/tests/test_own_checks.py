@@ -22,13 +22,13 @@ class TestOwnChecks(L10nLatamCheckTest):
             payment_form.memo = 'Deferred check'
             with payment_form.l10n_latam_new_check_ids.new() as check1:
                 check1.name = '00000001'
-                check1.payment_date = fields.Date.add(fields.Date.today(), months=1)
+                check1.payment_date = fields.Date.add(self.env.now.date(), months=1)
                 check1.issuer_vat = '30714295698'
                 check1.amount = 25
 
             with payment_form.l10n_latam_new_check_ids.new() as check2:
                 check2.name = '00000002'
-                check2.payment_date = fields.Date.add(fields.Date.today(), months=1)
+                check2.payment_date = fields.Date.add(self.env.now.date(), months=1)
                 check2.issuer_vat = '30714295698'
                 check2.amount = 25
 
@@ -55,7 +55,7 @@ class TestOwnChecks(L10nLatamCheckTest):
             payment_form.memo = 'Deferred check'
             with payment_form.l10n_latam_new_check_ids.new() as check1:
                 check1.name = '00000003'
-                check1.payment_date = fields.Date.add(fields.Date.today(), months=1)
+                check1.payment_date = fields.Date.add(self.env.now.date(), months=1)
                 check1.issuer_vat = '30714295698'
                 check1.amount = 50
 
@@ -80,15 +80,15 @@ class TestOwnChecks(L10nLatamCheckTest):
             'payment_method_line_id': payment_method_line.id,
             'l10n_latam_new_check_ids': [
                 Command.create({
-                    'payment_date': fields.Date.today(),
+                    'payment_date': self.env.now.date(),
                     'amount': '20',
                 }),
                 Command.create({
-                    'payment_date': fields.Date.today(),
+                    'payment_date': self.env.now.date(),
                     'amount': '30',
                 }),
                 Command.create({
-                    'payment_date': fields.Date.today(),
+                    'payment_date': self.env.now.date(),
                     'amount': '70',
                 }),
             ]
@@ -118,7 +118,7 @@ class TestOwnChecks(L10nLatamCheckTest):
             'l10n_latam_new_check_ids': [
                 Command.create({
                     'name': '0000001',
-                    'payment_date': fields.Date.today(),
+                    'payment_date': self.env.now.date(),
                     'amount': invoice.amount_total,
                 })
             ],

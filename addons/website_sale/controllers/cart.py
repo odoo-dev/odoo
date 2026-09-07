@@ -366,7 +366,7 @@ class Cart(PaymentPortal):
                 "website_sale.cart_lines",
                 {
                     "website_sale_order": order_sudo,
-                    "date": fields.Date.today(),
+                    "date": self.env.now.date(),
                     "suggested_products": order_sudo._cart_accessories(),
                 },
             ),

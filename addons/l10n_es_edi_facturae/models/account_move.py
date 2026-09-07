@@ -874,7 +874,7 @@ class AccountMove(models.Model):
             'x509_certificate': certificate_sudo._get_der_certificate_bytes(formatting='encodebytes').decode(),
             'public_modulus': n.decode(),
             'public_exponent': e.decode(),
-            'iso_now': fields.Datetime.now().isoformat(),
+            'iso_now': self.env.now.isoformat(),
             'keyinfo_id': keyinfo_id,
             'signature_id': signature_id,
             'sigproperties_id': sigproperties_id,

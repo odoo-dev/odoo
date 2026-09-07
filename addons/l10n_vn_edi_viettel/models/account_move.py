@@ -426,7 +426,7 @@ class AccountMove(models.Model):
         # We leave the summarized information computation to SInvoice.
         self.ensure_one()
         # This MUST match chronologically with the sequence they generate on their system, which is why it is set to now.
-        self.l10n_vn_edi_issue_date = fields.Datetime.now()
+        self.l10n_vn_edi_issue_date = self.env.now
         json_values = {}
         self._l10n_vn_edi_add_general_invoice_information(json_values)
         self._l10n_vn_edi_add_buyer_information(json_values)

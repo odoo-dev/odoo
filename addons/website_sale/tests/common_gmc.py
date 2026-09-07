@@ -60,7 +60,7 @@ class WebsiteSaleGMCCommon(ProductVariantsCommon, WebsiteSaleCommon):
             "active": True,
             "rate_ids": [
                 Command.clear(),
-                Command.create({"name": Date.subtract(Date.today(), days=1), "rate": 1.1}),
+                Command.create({"name": Date.subtract(self.env.now.date(), days=1), "rate": 1.1}),
             ],
         })
         cls.eur_pricelist = cls._create_pricelist(

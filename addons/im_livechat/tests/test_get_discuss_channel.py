@@ -406,7 +406,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
         )
         message = self.env["discuss.channel"].browse(data["channel_id"]).message_post(body="cc", message_type="comment")
         member_of_operator._mark_as_read(message.id)
-        with freeze_time(fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=1))):
+        with freeze_time(fields.Datetime.to_string(self.env.now + timedelta(days=1))):
             member_of_operator._gc_unpin_livechat_sessions()
         self.assertFalse(member_of_operator.is_pinned, "read channel should be unpinned after one day")
         self.assertTrue(member_of_operator.channel_id.livechat_end_dt)
@@ -422,7 +422,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             ]
         )
         self.env["discuss.channel"].browse(data["channel_id"]).message_post(body="cc", message_type="comment")
-        with freeze_time(fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=1))):
+        with freeze_time(fields.Datetime.to_string(self.env.now + timedelta(days=1))):
             member_of_operator._gc_unpin_livechat_sessions()
         self.assertTrue(member_of_operator.is_pinned, "unread channel should not be unpinned after autovacuum")
         self.assertFalse(member_of_operator.channel_id.livechat_end_dt)

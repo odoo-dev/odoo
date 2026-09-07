@@ -194,7 +194,7 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
             'state': 'draft',
             'amount_tax': atax,
             'amount_total': untax + atax,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'lines': [[0, 0, {
                 'product_id': product.id,
@@ -312,7 +312,7 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
                 "payment_ids": [
                     Command.create({
                         "amount": 1180,
-                        "name": fields.Datetime.now(),
+                        "name": self.env.now,
                         "payment_method_id": self.online_payment_method.id,
                     }),
                 ],
@@ -396,7 +396,7 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
             'state': 'draft',
             'amount_tax': 0,
             'amount_total': 15.28,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': False,
             'lines': [[0, 0, {
                 'product_id': product.id,

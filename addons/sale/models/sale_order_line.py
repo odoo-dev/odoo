@@ -1890,7 +1890,7 @@ class SaleOrderLine(models.Model):
         if self.state == "sale" and self.order_id.date_order:
             order_date = self.order_id.date_order
         else:
-            order_date = fields.Datetime.now()
+            order_date = self.env.now
         return order_date + timedelta(days=self.customer_lead or 0.0)
 
     def compute_uom_qty(self, new_qty, stock_move, rounding=True):

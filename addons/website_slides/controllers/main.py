@@ -733,7 +733,7 @@ class WebsiteSlides(WebsiteProfile):
 
         if channel_partner_sudo.member_status == 'invited':
             if not channel_partner_sudo.last_invitation_date or \
-               channel_partner_sudo.last_invitation_date + relativedelta(months=3) < fields.Datetime.now():
+               channel_partner_sudo.last_invitation_date + relativedelta(months=3) < self.env.now:
                 return {'invite_error': 'expired'}
 
         return {

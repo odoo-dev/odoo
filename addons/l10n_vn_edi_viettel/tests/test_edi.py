@@ -227,7 +227,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
         )
         invoice.write({  # Would be set by sending it to the edi
             'l10n_vn_edi_invoice_number': 'K24TUT01',
-            'l10n_vn_edi_issue_date': fields.Datetime.now(),
+            'l10n_vn_edi_issue_date': self.env.now,
             'l10n_vn_edi_invoice_state': 'sent',
         })
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice.ids).create({
@@ -235,7 +235,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
             'journal_id': invoice.journal_id.id,
             'l10n_vn_edi_adjustment_type': '1',
             'l10n_vn_edi_agreement_document_name': 'N/A',
-            'l10n_vn_edi_agreement_document_date': fields.Datetime.now(),
+            'l10n_vn_edi_agreement_document_date': self.env.now,
         })
         reversal = move_reversal.reverse_moves()
         reverse_move = self.env['account.move'].browse(reversal['res_id'])
@@ -279,7 +279,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
         )
         invoice.write({  # Would be set by sending it to the edi
             'l10n_vn_edi_invoice_number': 'K24TUT01',
-            'l10n_vn_edi_issue_date': fields.Datetime.now(),
+            'l10n_vn_edi_issue_date': self.env.now,
             'l10n_vn_edi_invoice_state': 'sent',
         })
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice.ids).create({
@@ -287,7 +287,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
             'journal_id': invoice.journal_id.id,
             'l10n_vn_edi_adjustment_type': '1',
             'l10n_vn_edi_agreement_document_name': 'N/A',
-            'l10n_vn_edi_agreement_document_date': fields.Datetime.now(),
+            'l10n_vn_edi_agreement_document_date': self.env.now,
         })
         reversal = move_reversal.reverse_moves(is_modify=True)
         reverse_move = self.env['account.move'].browse(reversal['res_id'])

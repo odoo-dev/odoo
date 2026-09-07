@@ -65,7 +65,7 @@ class TestCommon(HttpCase):
 
         # Add token validity with one hour of time window for properly checking the sync status.
         for user in [self.organizer_user, self.attendee_user]:
-            user.microsoft_calendar_token_validity = fields.Datetime.now() + timedelta(hours=1)
+            user.microsoft_calendar_token_validity = self.env.now + timedelta(hours=1)
 
         # -----------------------------------------------------------------------------------------
         # To create Odoo events

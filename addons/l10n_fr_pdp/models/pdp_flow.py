@@ -568,7 +568,7 @@ class PdpFlow(models.Model):
                 _logger.exception('Failed to handle PDP flows for company %s', company.id)
 
     def _cron_process_company(self, company):
-        today = fields.Date.today()
+        today = self.env.now.date()
         sudo_ready_flows = self.sudo().search([
             ('company_id', '=', company.id),
             ('state', '=', 'ready'),

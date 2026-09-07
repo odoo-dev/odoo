@@ -224,7 +224,7 @@ class TestSaleOrder(SaleCommon):
         with freeze_time("2020-05-02"):
             sale_order = self._create_sale_order()
 
-            self.assertEqual(sale_order.validity_date, fields.Date.today() + timedelta(days=5))
+            self.assertEqual(sale_order.validity_date, self.env.now.date() + timedelta(days=5))
         self.env.company.sudo().quotation_validity_days = 0
         sale_order = self._create_sale_order()
         self.assertFalse(
@@ -508,7 +508,7 @@ class TestSaleOrder(SaleCommon):
             )
             .new({
                 "body": "<h1>Your Sales Order</h1>",
-                "scheduled_date": fields.Datetime.now() + timedelta(days=1),
+                "scheduled_date": self.env.now + timedelta(days=1),
             })
         )
         composer.action_schedule_message()

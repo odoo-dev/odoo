@@ -761,7 +761,7 @@ class AccountMove(models.Model):
             endpoint = f"/{invoice_channel}/{quote(document_category)}"
             last_fetched_date_field_name = f"l10n_tr_{invoice_channel}_{journal_type}_last_fetched_date"
             start_date = self.env.company[last_fetched_date_field_name]
-            end_date = fields.Datetime.context_timestamp(self.with_context(tz='Europe/Istanbul'), fields.Datetime.now()).strftime("%Y-%m-%dT%H:%M:%S")
+            end_date = fields.Datetime.context_timestamp(self.with_context(tz='Europe/Istanbul'), self.env.now).strftime("%Y-%m-%dT%H:%M:%S")
             page = 1
 
             # We filter documents by their CreatedDate on Nilvera, which represents when the document was created on
@@ -1326,7 +1326,7 @@ class AccountMove(models.Model):
         # This cron is run with commit. So on rerun our processed data still remain in the domain
         # As current processed data will have l10n_tr_ticarifatura_last_checked_at as now
         # With timedelta we are avoiding those
-        now_minus_2_hours = fields.Datetime.now() - timedelta(hours=2)
+        now_minus_2_hours = self.env.now - timedelta(hours=2)
         domain = UNSYNCED_COMMERCIAL_MOVE_DOMAIN + [
             "|",
             ("l10n_tr_ticarifatura_last_checked_at", "=", False),
@@ -1355,7 +1355,7 @@ class AccountMove(models.Model):
                 )
 
             # Always update checked date, to avoid checking the same record on the same cron
-            move.write({"l10n_tr_ticarifatura_last_checked_at": fields.Datetime.now()})
+            move.write({"l10n_tr_ticarifatura_last_checked_at": self.env.now})
         remaining = (
             0
             if len(move_ids_to_process) < limit

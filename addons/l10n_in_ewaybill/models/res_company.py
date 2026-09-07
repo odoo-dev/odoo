@@ -15,5 +15,5 @@ class ResCompany(models.Model):
         self.ensure_one()
         return (
             self.l10n_in_ewaybill_auth_validity
-            and self.l10n_in_ewaybill_auth_validity > fields.Datetime.now()
+            and self.l10n_in_ewaybill_auth_validity > self.env.now
         )

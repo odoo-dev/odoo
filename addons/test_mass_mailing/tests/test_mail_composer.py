@@ -32,6 +32,6 @@ class TestMailComposerMassMailing(TestMailComposer, common.TestMassMailCommon):
             self.assertEqual(mailing.body_html, '<p>Body</p>')
             self.assertEqual(mailing.mailing_domain, f"[('id', 'in', {self.test_records.ids})]")
             self.assertEqual(mailing.mailing_model_name, self.test_record._name)
-            self.assertEqual(mailing.sent_date, fields.Datetime.now())
+            self.assertEqual(mailing.sent_date, self.env.now)
             self.assertEqual(mailing.state, 'done')
             self.assertEqual(mailing.use_exclusion_list, use_exclusion_list)

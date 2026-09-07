@@ -359,7 +359,7 @@ class TestProjectMilestone(TestProjectCommon):
             'milestone_id': self.milestone_pigs.id,
             'state': '1_done',
         })
-        self.milestone_goats.write({'deadline': fields.Date.today() + relativedelta(days=-1)})
+        self.milestone_goats.write({'deadline': self.env.now.date() + relativedelta(days=-1)})
 
         (self.project_pigs | self.project_goats)._compute_next_milestone_id()
 

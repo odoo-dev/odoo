@@ -41,7 +41,7 @@ class HrAttendance(http.Controller):
                     'in_location',
                     'out_location',
                 ]
-                now_utc = fields.Datetime.now().replace(tzinfo=UTC)
+                now_utc = self.env.now.replace(tzinfo=UTC)
                 tz = ZoneInfo(employee.tz or 'UTC')
                 now_local = now_utc.astimezone(tz).replace(tzinfo=None)
                 today_start = fields.Datetime.start_of(now_local, 'day')

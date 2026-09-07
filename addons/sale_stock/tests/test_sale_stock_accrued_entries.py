@@ -227,7 +227,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': [sale_order_1.id],
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -265,7 +265,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': [sale_order_2.id],
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -346,7 +346,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': sale_order.order_line.ids,
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -429,7 +429,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': sale_order.order_line.ids,
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -458,7 +458,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
         })
         account_variation = product_category.property_stock_valuation_account_id.account_stock_variation_id
         # Set the product in the past so its `product.value` won't be considered as the most recent one.
-        with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+        with freeze_time(self.env.now - timedelta(seconds=10)):
             avco_product = self.env['product.product'].create({
                 'name': "AVCO Product",
                 'categ_id': product_category.id,
@@ -501,7 +501,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': [sale_order_1.id],
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -568,7 +568,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': [sale_order_1.id],
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -595,7 +595,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': [sale_order_1.id],
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_move = self.env['account.move'].search(account_move_domain)
@@ -642,7 +642,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             active_ids=sale_order.ids,
         ).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
 
         res = wizard.create_entries()
@@ -709,7 +709,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'active_ids': (sale_order_1 | sale_order_2).ids,
         }).create({
             'account_id': self.account_expense.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
 
         account_move_domain = wizard.create_entries()['domain']

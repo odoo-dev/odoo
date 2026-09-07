@@ -348,7 +348,7 @@ class TestCreateEvents(TestCommon):
         is restarted and the event is updated (this way, syncing it with Outlook Calendar).
         """
         # Set last synchronization date for allowing synchronizing events created after this date.
-        self.organizer_user._set_ICP_first_synchronization_date(fields.Datetime.now())
+        self.organizer_user._set_ICP_first_synchronization_date(self.env.now)
 
         # Stop the synchronization for clearing the last_sync_date.
         self.organizer_user.with_user(self.organizer_user).sudo().stop_microsoft_synchronization()

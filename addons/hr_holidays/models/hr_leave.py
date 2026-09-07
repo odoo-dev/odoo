@@ -1437,7 +1437,7 @@ class HrLeave(models.Model):
         values = vals
         is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
         if not is_officer and values.keys() - {'attachment_ids', 'supported_attachment_ids', 'message_main_attachment_id'}:
-            if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user
+            if any(hol.date_from.date() < self.env.now.date() and hol.employee_id.leave_manager_id != self.env.user
                    and hol.state not in ('confirm', 'draft') for hol in self):
                 raise UserError(_('You must have manager rights to modify/validate a time off that already begun'))
             if any(leave.state == 'cancel' for leave in self):
@@ -1480,7 +1480,7 @@ class HrLeave(models.Model):
     def _unlink_if_correct_states(self):
         error_message = self.env._('Oops! %(state)s Time-Off requests can only be deleted by Administrators.')
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
-        now = fields.Datetime.now().date()
+        now = self.env.now.date()
 
         if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
             for hol in self:

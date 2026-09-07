@@ -383,7 +383,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             'non_deductible_account_id': False,
         })
         self.env.invalidate_all()
-        self.env.cr._now = fields.Datetime.now()
+        self.env.cr._now = self.env.now
         self.env.cr.execute("UPDATE account_journal SET write_date = %s WHERE id = %s", [self.env.cr.now(), purchase_journal.id])
 
         def local_get_data(self, template_code, demo=False):

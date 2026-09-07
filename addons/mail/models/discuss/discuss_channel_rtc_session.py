@@ -42,7 +42,7 @@ class DiscussChannelRtcSession(models.Model):
         stores = Store.Stores()
         rtc_sessions = super().create(vals_list)
         for channel in rtc_sessions.channel_id.filtered(lambda c: len(c.rtc_session_ids) == 1):
-            now = fields.Datetime.now()
+            now = self.env.now
             # sudo - discuss.channel: can bump channel interest on call start.
             channel.sudo().last_interest_dt = now
             body = Markup(
@@ -93,7 +93,7 @@ class DiscussChannelRtcSession(models.Model):
         # after it ends is allowed.
         domain = [("channel_id", "in", call_ended_channels.ids), ("end_dt", "=", False)]
         for history in self.env["discuss.call.history"].sudo().search(domain):
-            history.end_dt = fields.Datetime.now()
+            history.end_dt = self.env.now
             stores[history.channel_id].add(history, ["duration_hour", "end_dt"])
         return super().unlink()
 
@@ -170,4 +170,4 @@ class DiscussChannelRtcSession(models.Model):
 
     @api.model
     def _inactive_rtc_session_domain(self):
-        return [('write_date', '<', fields.Datetime.now() - relativedelta(minutes=1, seconds=15))]
+        return [('write_date', '<', self.env.now - relativedelta(minutes=1, seconds=15))]

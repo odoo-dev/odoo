@@ -213,7 +213,7 @@ class PaymentTransaction(models.Model):
                 ("token_id", "=", self.token_id.id),
                 ("operation", "in", ["online_token", "offline"]),
                 ("reference", "=like", f"{reference_prefix}%"),
-                ("create_date", ">=", fields.Datetime.now() - relativedelta(hours=36)),
+                ("create_date", ">=", self.env.now - relativedelta(hours=36)),
                 ("id", "!=", self.id),
             ],
             limit=1,

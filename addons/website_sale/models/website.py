@@ -337,7 +337,7 @@ class Website(models.Model):
     def _compute_send_abandoned_cart_email_activation_time(self):
         for website in self:
             if website.send_abandoned_cart_followup and website.cart_recovery_mail_template_id:
-                website.send_abandoned_cart_email_activation_time = fields.Datetime.now()
+                website.send_abandoned_cart_email_activation_time = self.env.now
 
     @api.depends("company_id.account_fiscal_country_id")
     def _compute_show_line_subtotals_tax_selection(self):

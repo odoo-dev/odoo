@@ -33,14 +33,14 @@ class TestFleet(common.TransactionCase):
         Log = self.env['fleet.vehicle.log.contract']
         Log.create({
             'vehicle_id': car_2.id,
-            'expiration_date': fields.Date.add(fields.Date.today(), days=10)
+            'expiration_date': fields.Date.add(self.env.now.date(), days=10)
         })
         res = self.env["fleet.vehicle"].search([('contract_renewal_due_soon', '=', True), ('id', '=', car_2.id)])
         self.assertEqual(res, car_2)
 
         Log.create({
             'vehicle_id': car_1.id,
-            'expiration_date': fields.Date.add(fields.Date.today(), days=-10)
+            'expiration_date': fields.Date.add(self.env.now.date(), days=-10)
         })
         res = self.env["fleet.vehicle"].search([('contract_renewal_overdue', '=', True), ('id', '=', car_1.id)])
         self.assertEqual(res, car_1)
@@ -67,11 +67,11 @@ class TestFleet(common.TransactionCase):
         Log = self.env['fleet.vehicle.log.contract']
         Log.create({
             'vehicle_id': car_1.id,
-            'expiration_date': fields.Date.add(fields.Date.today(), days=-2)
+            'expiration_date': fields.Date.add(self.env.now.date(), days=-2)
         })
         Log.create({
             'vehicle_id': car_1.id,
-            'expiration_date': fields.Date.add(fields.Date.today(), days=365)
+            'expiration_date': fields.Date.add(self.env.now.date(), days=365)
         })
 
         res = self.env["fleet.vehicle"].search([('contract_renewal_overdue', '=', True), ('id', '=', car_1.id)])
@@ -90,7 +90,7 @@ class TestFleet(common.TransactionCase):
         # The contract ended 10 days ago, so the car should ask for an action.
         contract = self.env['fleet.vehicle.log.contract'].create({
             'vehicle_id': car_1.id,
-            'expiration_date': fields.Date.add(fields.Date.today(), days=-10)
+            'expiration_date': fields.Date.add(self.env.now.date(), days=-10)
         })
         res = self.env["fleet.vehicle"].search([('contract_renewal_overdue', '=', True), ('id', '=', car_1.id)])
         self.assertEqual(res, car_1, "The expired contract should make the car overdue.")

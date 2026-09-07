@@ -334,7 +334,7 @@ class TestLoyalty(TransactionCase):
             "partner_id": partner.id,
             "points": 10,
         })
-        past_date = fields.Date.today() - timedelta(days=1)
+        past_date = self.env.now.date() - timedelta(days=1)
         with self.assertRaises(ValidationError):
             card.write({"expiration_date": past_date})
 

@@ -138,7 +138,7 @@ class TestHrHolidaysCommon(common.TransactionCase):
     def assert_remaining_leaves_equal(self, work_entry_type, value, employee, date=None, digits=None):
         allocation_data = work_entry_type.get_allocation_data(employee, date)
         if not date:
-            date = fields.Date.today()
+            date = self.env.now.date()
         if digits:
             self.assertAlmostEqual(allocation_data[employee][0][1]['remaining_leaves'], value,
                 digits, f"Remaining leaves for date '{date}' are incorrect.")
@@ -272,6 +272,6 @@ class TestHolidayContract(TransactionCase):
             'name': name or 'Holiday!!!',
             'employee_id': employee_id or cls.richard_emp.id,
             'work_entry_type_id': cls.work_entry_type.id,
-            'request_date_to': date_to or Datetime.today(),
-            'request_date_from': date_from or Datetime.today(),
+            'request_date_to': date_to or self.env.now.replace(hour=0, minute=0, second=0),
+            'request_date_from': date_from or self.env.now.replace(hour=0, minute=0, second=0),
         })

@@ -144,12 +144,12 @@ class CalendarEvent(models.Model):
 
     @api.model
     def _default_start(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         return now + (datetime.min - now) % timedelta(minutes=30)
 
     @api.model
     def _default_stop(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         duration_hours = self.get_default_duration()
         start = now + (datetime.min - now) % timedelta(minutes=30)
         return start + timedelta(hours=duration_hours)
@@ -1027,7 +1027,7 @@ class CalendarEvent(models.Model):
         if not skip_attendee_notification and not self.env.context.get('is_calendar_event_new') and 'start' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
-            if start_date and start_date >= fields.Datetime.now():
+            if start_date and start_date >= self.env.now:
                 (current_attendees & previous_attendees).with_context(
                     calendar_template_ignore_recurrence=not update_recurrence
                 )._notify_attendees(
@@ -1255,7 +1255,7 @@ class CalendarEvent(models.Model):
         # only gets its own access token once `videocall_location` is recomputed: force that
         # before reading it, otherwise the copied value would be frozen for good.
         events.flush_recordset(['videocall_location'])
-        now = fields.Datetime.now()
+        now = self.env.now
         for event in events:
             if event.videocall_channel_id or event.videocall_source != 'discuss':
                 continue
@@ -1346,7 +1346,7 @@ class CalendarEvent(models.Model):
         :return: True if the event is over, False otherwise
         """
         self.ensure_one()
-        now = fields.Datetime.now()
+        now = self.env.now
         today = fields.Date.context_today(self)
 
         # For all-day events
@@ -1529,14 +1529,14 @@ class CalendarEvent(models.Model):
                     triggers_by_events[event.id] = trigger.id
             if any(alarm.alarm_type == 'notification' for alarm in event.alarm_ids):
                 # filter events before notifying attendees through calendar_alarm_manager
-                events_to_notify |= event.filtered(lambda ev: ev.alarm_ids and ev.stop >= fields.Datetime.now())
+                events_to_notify |= event.filtered(lambda ev: ev.alarm_ids and ev.stop >= self.env.now)
         if events_to_notify:
             self.env['calendar.alarm_manager']._notify_next_alarm(events_to_notify.partner_ids.ids)
         return triggers_by_events
 
     def get_next_alarm_date(self, events_by_alarm):
         self.ensure_one()
-        now = fields.Datetime.now()
+        now = self.env.now
         sorted_alarms = self.alarm_ids.sorted("duration_minutes")
         triggered_alarms = sorted_alarms.filtered(lambda alarm: alarm.id in events_by_alarm)[0]
         event_has_future_alarms = sorted_alarms[0] != triggered_alarms
@@ -1856,7 +1856,7 @@ class CalendarEvent(models.Model):
 
             if not meeting.start or not meeting.stop:
                 raise UserError(_("First you have to specify the date of the invitation."))
-            event.add('created').value = ics_datetime(fields.Datetime.now())
+            event.add('created').value = ics_datetime(self.env.now)
             event.add('dtstart').value = ics_datetime(meeting.start, meeting.allday)
             event.add('dtend').value = ics_datetime(meeting.stop, meeting.allday)
             event.add('summary').value = meeting._get_customer_summary()

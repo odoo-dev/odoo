@@ -89,7 +89,7 @@ class PosOrder(models.Model):
 
         if self.env.context.get('current_order_uuid') and order['uuid'] == self.env.context['current_order_uuid']:
             # Prioritize the server date for the order that is currently being processed
-            order['date_order'] = fields.Datetime.now()
+            order['date_order'] = self.env.now
 
         pos_order = False
         record_uuid_mapping = order.pop('relations_uuid_mapping', {})
@@ -236,7 +236,7 @@ class PosOrder(models.Model):
                 'name': _('return'),
                 'pos_order_id': order.id,
                 'amount': pos_order['amount_return'],
-                'payment_date': fields.Datetime.now(),
+                'payment_date': self.env.now,
                 'payment_method_id': cash_payment_method.id,
                 'is_change': True,
             }
@@ -843,7 +843,7 @@ class PosOrder(models.Model):
                 raise UserError(_('This order has already been paid. You cannot set it back to draft or edit it.'))
 
         if draft_orders:
-            draft_orders.write({'state': 'cancel', 'date_order': fields.Datetime.now()})
+            draft_orders.write({'state': 'cancel', 'date_order': self.env.now})
             author_id = self.session_id._get_message_author().id
             draft_orders._post_cancel_message(author_id=author_id)
             for config in draft_orders.mapped('config_id'):
@@ -855,7 +855,7 @@ class PosOrder(models.Model):
 
     def action_pos_order_cancel(self):
         orders = self.browse(self.env.context.get('active_ids'))
-        orders.write({'state': 'cancel', 'date_order': fields.Datetime.now()})
+        orders.write({'state': 'cancel', 'date_order': self.env.now})
         orders._post_cancel_message()
         for config in orders.config_id:
             config.notify_synchronisation(config.current_session_id.id, 0)
@@ -966,7 +966,7 @@ class PosOrder(models.Model):
         return {
             'name': _('%(name)s REFUND', name=self.name),
             'session_id': current_session.id,
-            'date_order': fields.Datetime.now(),
+            'date_order': self.env.now,
             'pos_reference': pos_reference,
             'lines': False,
             'amount_paid': 0,

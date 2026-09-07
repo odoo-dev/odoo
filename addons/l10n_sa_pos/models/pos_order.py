@@ -27,7 +27,7 @@ class PosOrder(models.Model):
                     "You cannot create a consolidated invoice for POS orders with different"
                     " ZATCA refund reasons.",
                 ))
-            confirmation_datetime = self.date_order if len(self) == 1 else fields.Datetime.now()
+            confirmation_datetime = self.date_order if len(self) == 1 else self.env.now
             vals.update({
                 'l10n_sa_confirmation_datetime': confirmation_datetime,
                 'l10n_sa_reason': mapped_reasons[0] if mapped_reasons else False,

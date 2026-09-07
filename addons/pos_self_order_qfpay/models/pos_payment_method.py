@@ -18,7 +18,7 @@ class PosPaymentMethod(models.Model):
             if order:
                 order.add_payment({
                     'amount': order.amount_total,
-                    'payment_date': fields.Datetime.now(),
+                    'payment_date': self.env.now,
                     'payment_method_id': self.id,
                     'payment_ref_no': data['chnlsn'],
                     'transaction_id': data['syssn'],

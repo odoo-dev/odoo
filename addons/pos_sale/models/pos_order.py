@@ -25,7 +25,7 @@ class PosOrder(models.Model):
     @api.depends('date_order', 'company_id')
     def _compute_currency_rate(self):
         for order in self:
-            date_order = order.date_order or fields.Datetime.now()
+            date_order = order.date_order or self.env.now
             order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, date_order.date())
 
     def _prepare_invoice_vals(self):

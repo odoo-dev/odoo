@@ -41,4 +41,4 @@ class TestProjectTaskMailTrackingDuration(MailTrackingDurationMixinCase):
         final_tracking = task.duration_tracking
         self.assertEqual(initial_tracking[str(self.stage_1.id)], final_tracking[str(self.stage_1.id)])
         dt = Datetime.from_string(final_tracking['d'])
-        self.assertLess(abs((dt - Datetime.now()).total_seconds()) / 60, 1)
+        self.assertLess(abs((dt - self.env.now).total_seconds()) / 60, 1)

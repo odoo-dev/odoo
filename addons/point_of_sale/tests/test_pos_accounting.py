@@ -213,7 +213,7 @@ class TestPosAccounting(AccountTestInvoicingCommon):
             'amount_tax': 0,
             'amount_return': 0,
             'state': 'draft',
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'company_id': self.env.company.id,
             'session_id': self.get_pos_session().id,
             'lines': [Command.create({

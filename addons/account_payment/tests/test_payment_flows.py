@@ -252,7 +252,7 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
                 }),
             ],
         })
-        invoice_date = fields.Date.today() - timedelta(days=1)
+        invoice_date = self.env.now.date() - timedelta(days=1)
         invoice = self.init_invoice(
             'out_invoice', partner=self.partner, invoice_date=invoice_date, amounts=[1000.0]
         )

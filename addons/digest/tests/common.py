@@ -57,7 +57,7 @@ class TestDigestCommon(mail_test.MailCommon):
         messages = cls.env['mail.message']
         counter = itertools.count()
 
-        now = fields.Datetime.now()
+        now = self.env.now
         for count, (low, high) in [
             (3, (0 * 24, 1 * 24)),
             (5, (1 * 24, 7 * 24)),

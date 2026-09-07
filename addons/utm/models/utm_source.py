@@ -31,7 +31,7 @@ class UtmSource(models.Model):
         if len(content) >= 24:
             content = f'{content[:20]}...'
 
-        create_date = record.create_date or fields.Datetime.today()
+        create_date = record.create_date or self.env.now.replace(hour=0, minute=0, second=0)
         model_description = self.env['ir.model']._get(record._name).name
         return _(
             '%(content)s (%(model_description)s created on %(create_date)s)',

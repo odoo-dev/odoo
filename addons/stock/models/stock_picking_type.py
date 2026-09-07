@@ -313,7 +313,7 @@ class StockPickingType(models.Model):
             'count_picking_late': Domain([
                 ('state', 'in', active_picking_states),
                 '|',
-                ('scheduled_date', '<', fields.Date.today()),
+                ('scheduled_date', '<', self.env.now.date()),
                 ('has_deadline_issue', '=', True),
             ]),
             'count_picking_backorders': Domain([

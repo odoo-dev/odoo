@@ -215,7 +215,7 @@ class EventEvent(models.Model):
     def _compute_time_data(self):
         """ Compute start and remaining time. Do everything in UTC as we compute only
         time deltas here. """
-        now_utc = fields.Datetime.now().replace(microsecond=0, tzinfo=UTC)
+        now_utc = self.env.now.replace(microsecond=0, tzinfo=UTC)
         for event in self:
             date_begin_utc = event.date_begin.replace(tzinfo=UTC)
             date_end_utc = event.date_end.replace(tzinfo=UTC)
@@ -542,12 +542,12 @@ class EventEvent(models.Model):
 
     @api.model
     def _search_build_dates(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         # To fetch the remaining events of the user's current day, the end of the user's day must
         # be localized and then converted in UTC, as it is the timezone used to record dates and
         # times in db.
         tz = self.env.tz
-        localized_today_begin = fields.Datetime.today().replace(tzinfo=tz)
+        localized_today_begin = self.env.now.replace(hour=0, minute=0, second=0).replace(tzinfo=tz)
         utc_today_end = localized_today_begin.replace(hour=23, minute=59, second=59).astimezone(UTC)
 
         def sd(date):

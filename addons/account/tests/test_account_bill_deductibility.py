@@ -12,7 +12,7 @@ class TestAccountBillPartialDeductibility(AccountTestInvoicingCommon):
         bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': self.partner_a.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'name': 'Partial item',
@@ -469,7 +469,7 @@ class TestAccountBillPartialDeductibility(AccountTestInvoicingCommon):
         bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': self.partner_a.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'name': 'RC Partial Item',
@@ -499,7 +499,7 @@ class TestAccountBillPartialDeductibility(AccountTestInvoicingCommon):
         bill = self.env['account.move'].create({
             'move_type': 'in_receipt',
             'partner_id': self.partner_a.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'name': 'Partial item',

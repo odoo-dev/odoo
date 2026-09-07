@@ -652,7 +652,7 @@ class SaleOrder(models.Model):
                 from_currency=order.company_id.currency_id,
                 to_currency=order.currency_id,
                 company=order.company_id,
-                date=(order.date_order or fields.Datetime.now()).date(),
+                date=(order.date_order or self.env.now).date(),
             )
 
     @api.depends("company_id")
@@ -1640,7 +1640,7 @@ class SaleOrder(models.Model):
         :return: Sales Order confirmation values
         :rtype: dict
         """
-        return {"state": "sale", "date_order": fields.Datetime.now()}
+        return {"state": "sale", "date_order": self.env.now}
 
     def _action_confirm(self):
         """Provide a hook method between confirmation and lock/confirmation mail generation."""

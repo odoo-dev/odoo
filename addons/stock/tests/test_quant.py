@@ -332,7 +332,7 @@ class TestStockQuant(TestStockCommon):
         """
         self.env.user.group_ids += self.env.ref('stock.group_tracking_owner')
 
-        today = fields.Datetime.now()
+        today = self.env.now
         yesterday = today - timedelta(days=1)
 
         # Create Incoming Consignment Move (10 units)
@@ -667,7 +667,7 @@ class TestStockQuant(TestStockCommon):
         })
 
         from odoo.fields import Datetime
-        in_date1 = Datetime.now()
+        in_date1 = self.env.now
         self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 1.0, lot_id=lot1, in_date=in_date1)
 
         quant = self.env['stock.quant'].search([
@@ -679,7 +679,7 @@ class TestStockQuant(TestStockCommon):
         self.assertEqual(quant.lot_id.id, lot1.id)
         self.assertEqual(quant.in_date, in_date1)
 
-        in_date2 = Datetime.now() - timedelta(days=5)
+        in_date2 = self.env.now - timedelta(days=5)
         self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 1.0, lot_id=lot1, in_date=in_date2)
 
         quant = self.env['stock.quant'].search([
@@ -793,7 +793,7 @@ class TestStockQuant(TestStockCommon):
         move.picked = True
         move._action_done()
 
-        tomorrow = fields.Datetime.now() + timedelta(days=1)
+        tomorrow = self.env.now + timedelta(days=1)
         with self.mock_datetime_and_now(tomorrow):
             move = self.env['stock.move'].create({
                 'product_id': self.productA.id,

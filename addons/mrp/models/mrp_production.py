@@ -64,13 +64,13 @@ class MrpProduction(models.Model):
             date_finished = fields.Datetime.to_datetime(self.env.context.get('default_date_deadline'))
             date_start = date_finished - relativedelta(hours=1)
             return date_start
-        return fields.Datetime.now()
+        return self.env.now
 
     @api.model
     def _get_default_date_finished(self):
         if self.env.context.get('default_date_deadline'):
             return fields.Datetime.to_datetime(self.env.context.get('default_date_deadline'))
-        date_start = fields.Datetime.now()
+        date_start = self.env.now
         date_finished = date_start + relativedelta(hours=1)
         return date_finished
 
@@ -927,7 +927,7 @@ class MrpProduction(models.Model):
                 Domain.custom(
                     to_sql=lambda table: SQL("%s < %s", table.date_deadline, table.date_finished),
                 )
-                | Domain('date_deadline', '<', fields.Datetime.now())
+                | Domain('date_deadline', '<', self.env.now)
             )
         )
         return [('id', operator, delayed_productions)]
@@ -1018,7 +1018,7 @@ class MrpProduction(models.Model):
     @api.onchange('state')
     def _onchange_date_start(self):
         if self.state == 'progress' and self._origin.state == 'confirmed':
-            self.date_start = fields.Datetime.now()
+            self.date_start = self.env.now
 
     def _can_produce_serial_numbers(self, sns=None):
         self.ensure_one()
@@ -1096,7 +1096,7 @@ class MrpProduction(models.Model):
                     moves_to_reassign |= production.move_raw_ids
 
         if vals.get('state') == 'progress' and 'date_start' not in vals:
-            vals['date_start'] = fields.Datetime.now()
+            vals['date_start'] = self.env.now
 
         if 'date_finished' in vals and 'state' not in vals:
             to_update = self.filtered(lambda p: p.state == 'done')
@@ -1820,7 +1820,7 @@ class MrpProduction(models.Model):
                 skip_orders_count += 1
                 continue
             if as_soon_as_possible:
-                order.date_start = fields.Datetime.now()
+                order.date_start = self.env.now
             order._plan_workorders()
             order.message_post(body=self.env._("The manufacturing order has been planned."), subtype_id=self.env.ref('mrp.mt_mo_state').id)
         if skip_orders_count == len(self):
@@ -2384,7 +2384,7 @@ class MrpProduction(models.Model):
         # Moves without quantity done are not posted => set them as done instead of canceling. In
         # case the user edits the MO later on and sets some consumed quantity on those, we do not
         # want the move lines to be canceled.
-        now = fields.Datetime.now()
+        now = self.env.now
         (productions_not_to_backorder.move_raw_ids | productions_not_to_backorder.move_finished_ids).filtered(lambda x: x.state not in ('done', 'cancel')).write({
             'date': now,
             'state': 'done',

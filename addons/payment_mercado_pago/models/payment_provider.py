@@ -292,7 +292,7 @@ class PaymentProvider(models.Model):
 
         if self.mercado_pago_access_token and (
             not self.mercado_pago_access_token_expiry  # Legacy access token
-            or self.mercado_pago_access_token_expiry >= fields.Datetime.now()
+            or self.mercado_pago_access_token_expiry >= self.env.now
         ):
             return self.mercado_pago_access_token
 
@@ -308,7 +308,7 @@ class PaymentProvider(models.Model):
             is_refresh_token_request=True,
         )
         expires_in = (
-            fields.Datetime.now()
+            self.env.now
             + timedelta(seconds=int(response_content["expires_in"]))
             - timedelta(days=31)
         )

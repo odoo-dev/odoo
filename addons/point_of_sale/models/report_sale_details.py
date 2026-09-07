@@ -97,7 +97,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
         for o in orders:
             pricelist_currency = o.pricelist_id.currency_id
             total += pricelist_currency._convert(
-                o.amount_total, currency_id, o.company_id, o.date_order or fields.Date.today()
+                o.amount_total, currency_id, o.company_id, o.date_order or self.env.now.date()
             ) if pricelist_currency != currency_id else o.amount_total
 
         PosOrderLine = self.env['pos.order.line']
@@ -155,7 +155,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
             if currency_id != order_currency:
                 cash_rounding_total += order_currency._convert(
                     rounding_diff, currency_id, order.company_id,
-                    order.date_order or fields.Date.today())
+                    order.date_order or self.env.now.date())
             else:
                 cash_rounding_total += rounding_diff
         cash_rounding_total = currency_id.round(cash_rounding_total)

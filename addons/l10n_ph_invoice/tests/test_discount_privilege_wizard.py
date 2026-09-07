@@ -500,7 +500,7 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         # rate 2.0 means 1 EUR = 0.5 company currency (PHP).
         currency = self.setup_other_currency(
             "EUR",
-            rates=[(Date.today().isoformat(), 2.0)],
+            rates=[(self.env.now.date().isoformat(), 2.0)],
         )
         invoice = self._create_invoice_with_lines(
             ("Line A", self.product_a, 100.0),

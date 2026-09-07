@@ -173,7 +173,7 @@ class TestAccountMove(TestStockValuationCommon):
         for company in (self.company | self.other_company):
             bill_form = Form(self.env['account.move'].with_company(company.id).with_context(default_move_type='in_invoice'))
             bill_form.partner_id = self.partner
-            bill_form.invoice_date = fields.Date.today()
+            bill_form.invoice_date = self.env.now.date()
             with bill_form.invoice_line_ids.new() as line:
                 line.product_id = self.product_standard
                 line.price_unit = 100
@@ -286,7 +286,7 @@ class TestAccountMove(TestStockValuationCommon):
 
         bill = self.env['account.move'].with_company(branch.id).with_context(default_move_type='in_invoice').create({
             'partner_id': self.partner.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'company_id': branch.id,
             'invoice_line_ids': [
                 Command.create({

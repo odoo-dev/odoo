@@ -28,9 +28,9 @@ class StockLot(models.Model):
         for lot in self:
             if lot.env.context.get('formatted_display_name') and lot.use_expiration_date and lot.expiration_date:
                 name = f"{lot.name}"
-                if fields.Datetime.now() >= lot.expiration_date:
+                if self.env.now >= lot.expiration_date:
                     name += self.env._("\t--Expired--")
-                elif lot.alert_date and fields.Datetime.now() >= lot.alert_date:
+                elif lot.alert_date and self.env.now >= lot.alert_date:
                     name += self.env._("\t--Expire on %(date)s--", date=fields.Datetime.to_string(lot.expiration_date))
                 lot.display_name = name
             else:
@@ -40,7 +40,7 @@ class StockLot(models.Model):
 
     @api.depends('expiration_date')
     def _compute_product_expiry_alert(self):
-        current_date = fields.Datetime.now()
+        current_date = self.env.now
         for lot in self:
             if lot.expiration_date:
                 lot.product_expiry_alert = lot.expiration_date <= current_date
@@ -86,7 +86,7 @@ class StockLot(models.Model):
         has already been reached (even if the alert_date is changed).
         """
         alert_lots = self.env['stock.lot'].search([
-            ('alert_date', '<=', fields.Date.today()),
+            ('alert_date', '<=', self.env.now.date()),
             ('product_expiry_reminded', '=', False)])
 
         lot_stock_quants = self.env['stock.quant'].search([

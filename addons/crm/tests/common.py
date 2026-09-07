@@ -646,7 +646,7 @@ class TestLeadConvertCommon(TestCrmCommon):
         member_leads = self.env['crm.lead'].search([
             ('user_id', '=', member.user_id.id),
             ('team_id', '=', member.crm_team_id.id),
-            ('date_open', '>=', Datetime.now() - timedelta(hours=24)),
+            ('date_open', '>=', self.env.now - timedelta(hours=24)),
         ])
         self.assertEqual(len(member_leads), count)
         if member.assignment_domain:

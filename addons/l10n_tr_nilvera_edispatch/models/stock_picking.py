@@ -787,7 +787,7 @@ class StockPicking(models.Model):
             start_date = self.env.company[last_fetched_date_field_name]
             # Force check Istanbul time when requesting from nilvera
             self_tz = self.with_context(tz="Europe/Istanbul")
-            end_date = fields.Datetime.context_timestamp(self_tz, fields.Datetime.now()).strftime("%Y-%m-%dT%H:%M:%S")
+            end_date = fields.Datetime.context_timestamp(self_tz, self.env.now).strftime("%Y-%m-%dT%H:%M:%S")
             page = 1
             # We filter documents by their CreatedDate on Nilvera, which represents when the document was created on
             # their platform. This ensures we always fetch the most recently uploaded documents, regardless of their

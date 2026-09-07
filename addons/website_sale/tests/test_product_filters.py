@@ -159,7 +159,7 @@ class TestWebsiteSaleProductFilters(WebsiteSaleCommon, TestProductAttributeValue
             self.assertTrue(result.get("error"))
 
     def test_latest_sold_filter_returns_latest_sold_product(self):
-        base_time = fields.Datetime.now()
+        base_time = self.env.now
         computer = self.computer.product_variant_id
         so_computer = self._create_so(
             date_order=base_time,

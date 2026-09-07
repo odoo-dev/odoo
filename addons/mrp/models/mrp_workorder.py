@@ -363,7 +363,7 @@ class MrpWorkorder(models.Model):
             if delta_duration > 0:
                 if order.state not in ('progress', 'done', 'cancel'):
                     order.state = 'progress'
-                date_end = fields.Datetime.now()
+                date_end = self.env.now
                 date_start = date_end - timedelta(minutes=delta_duration)
                 # If existing entries would overlap with the new one, push the new entry
                 # to start exactly where the latest existing entry ends.
@@ -693,16 +693,16 @@ class MrpWorkorder(models.Model):
 
             if wo._should_start_timer():
                 self.env['mrp.workcenter.productivity'].create(
-                    wo._prepare_timeline_vals(wo.duration, fields.Datetime.now())
+                    wo._prepare_timeline_vals(wo.duration, self.env.now)
                 )
 
             if wo.production_id.state != 'progress':
                 wo.production_id.write({
-                    'date_start': fields.Datetime.now()
+                    'date_start': self.env.now
                 })
             if wo.state == 'progress':
                 continue
-            date_start = fields.Datetime.now()
+            date_start = self.env.now
             vals = {
                 'state': 'progress',
                 'date_start': date_start,
@@ -724,7 +724,7 @@ class MrpWorkorder(models.Model):
                 wo.with_context(bypass_duration_calculation=True).write(vals)
 
     def button_finish(self):
-        date_finished = fields.Datetime.now()
+        date_finished = self.env.now
         all_vals_dict = defaultdict(lambda: self.env['mrp.workorder'])
         workorders_to_end = self.filtered(lambda workorder: workorder.state not in ('done', 'cancel'))
         operations = workorders_to_end.operation_id
@@ -1006,7 +1006,7 @@ class MrpWorkorder(models.Model):
 
     def _compute_decoration_dates(self):
         self.decoration_dates = ''
-        now = fields.Datetime.now()
+        now = self.env.now
         today = fields.Date.context_today(self)
         for wo in self:
             if wo.state in ['done', 'cancel']:

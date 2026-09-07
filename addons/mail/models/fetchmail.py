@@ -319,9 +319,9 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                 result_exception = e
                 _logger.info("General failure when trying to fetch mail from %s server %s.", *server_type_and_name, exc_info=True)
                 if not server.error_date:
-                    server.error_date = fields.Datetime.now()
+                    server.error_date = self.env.now
                     server.error_message = exception_to_unicode(e)
-                elif server.error_date < fields.Datetime.now() - MAIL_SERVER_DEACTIVATE_TIME:
+                elif server.error_date < self.env.now - MAIL_SERVER_DEACTIVATE_TIME:
                     message = "Deactivating fetchmail %s server %s (too many failures)" % server_type_and_name
                     server.set_draft()
                     server.env['ir.cron']._notify_admin(message)
@@ -334,7 +334,7 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
                 except (OSError, IMAP4.abort):
                     _logger.warning('Failed to properly finish %s connection: %s.', *server_type_and_name, exc_info=True)
             _logger.info("Fetched %d email(s) on %s server %s; %d succeeded, %d failed.", count, *server_type_and_name, (count - failed), failed)
-            server.write({'date': fields.Datetime.now()})
+            server.write({'date': self.env.now})
             # Commit before updating the progress because progress may be
             # updated for messages using another transaction. Without a commit
             # before updating the progress, we would have a serialization error.

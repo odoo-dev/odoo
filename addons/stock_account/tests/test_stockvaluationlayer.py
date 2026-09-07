@@ -258,7 +258,7 @@ class TestStockValuationStandard(TestStockValuationCommon):
     def test_replay_backdate_in_the_past(self):
         """Backdating a delivery before a standard price change replays the period:
         its COGS is re-priced at the standard price effective on the new date."""
-        now = fields.Datetime.now()
+        now = self.env.now
         with freeze_time(now - timedelta(days=10)):
             self._make_in_move(self.product, 10, unit_cost=10)
         with freeze_time(now - timedelta(days=6)):
@@ -423,7 +423,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
 
         self._make_return(move2, 1)
         move2.quantity = 0
-        self.assertEqual(self.product.with_context(to_date=fields.Datetime.now() + timedelta(days=1)).total_value, 30.0)
+        self.assertEqual(self.product.with_context(to_date=self.env.now + timedelta(days=1)).total_value, 30.0)
 
     def test_return_delivery_1(self):
         self._make_in_move(self.product, 1, unit_cost=10)
@@ -582,7 +582,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
     def test_replay_backdate_in_the_past(self):
         """Backdating an in move to the oldest position replays the period: the AVCO
         out moves are re-priced with the new chronological average."""
-        now = fields.Datetime.now()
+        now = self.env.now
         self._make_in_move(self.product, 10, unit_cost=10)
         move_out = self._make_out_move(self.product, 8)
         move_in_2 = self._make_in_move(self.product, 10, unit_cost=20)
@@ -869,7 +869,7 @@ class TestStockValuationFIFO(TestStockValuationCommon):
     def test_replay_backdate_in_the_past(self):
         """Backdating an in move to the oldest position replays the period: the FIFO
         out moves consume from the re-ordered stack."""
-        now = fields.Datetime.now()
+        now = self.env.now
         self._make_in_move(self.product, 10, unit_cost=10)
         move_out = self._make_out_move(self.product, 8)
         move_in_2 = self._make_in_move(self.product, 10, unit_cost=20)

@@ -187,7 +187,7 @@ class SlideSlide(models.Model):
     @api.depends('published_date', 'is_published')
     def _compute_is_new_slide(self):
         for slide in self:
-            slide.is_new_slide = slide.published_date > fields.Datetime.now() - relativedelta(days=7) if slide.is_published else False
+            slide.is_new_slide = slide.published_date > self.env.now - relativedelta(days=7) if slide.is_published else False
 
     def _get_placeholder_filename(self, field):
         return self.channel_id._get_placeholder_filename(field)

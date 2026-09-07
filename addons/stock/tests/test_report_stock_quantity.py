@@ -15,7 +15,7 @@ class TestReportStockQuantity(tests.TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         # freeze time to avoid test errors due to the class being initialized before 00:00:00 and the test run after
-        cls.fake_today = fields.Date.today()
+        cls.fake_today = self.env.now.date()
         cls.startClassPatcher(freeze_time(cls.fake_today))
         cls.product1 = cls.env['product.product'].create({
             'name': 'Mellohi',
@@ -40,7 +40,7 @@ class TestReportStockQuantity(tests.TransactionCase):
             'product_uom_qty': 100.0,
             'quantity': 100.0,
             'state': 'done',
-            'date': fields.Datetime.now(),
+            'date': self.env.now,
         })
         # ship
         cls.move2 = cls.env['stock.move'].create({
@@ -50,13 +50,13 @@ class TestReportStockQuantity(tests.TransactionCase):
             'uom_id': cls.uom_unit.id,
             'product_uom_qty': 120.0,
             'state': 'partially_available',
-            'date': fields.Datetime.add(fields.Datetime.now(), days=3),
-            'date_deadline': fields.Datetime.add(fields.Datetime.now(), days=3),
+            'date': fields.Datetime.add(self.env.now, days=3),
+            'date_deadline': fields.Datetime.add(self.env.now, days=3),
         })
 
     def test_report_stock_quantity(self):
-        from_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=-1))
-        to_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=4))
+        from_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=-1))
+        to_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=4))
         report = self.env['report.stock.quantity']._read_group(
             [('date', '>=', from_date), ('date', '<=', to_date), ('product_id', '=', self.product1.id)],
             ['date:day', 'product_id', 'state'],
@@ -75,8 +75,8 @@ class TestReportStockQuantity(tests.TransactionCase):
             'uom_id': self.uom_unit.id,
             'product_uom_qty': 25.0,
             'state': 'assigned',
-            'date': fields.Datetime.now(),
-            'date_deadline': fields.Datetime.now(),
+            'date': self.env.now,
+            'date_deadline': self.env.now,
         })
         self.move_transit_in = self.env['stock.move'].create({
             'location_id': transit_loc.id,
@@ -85,13 +85,13 @@ class TestReportStockQuantity(tests.TransactionCase):
             'uom_id': self.uom_unit.id,
             'product_uom_qty': 25.0,
             'state': 'waiting',
-            'date': fields.Datetime.now(),
-            'date_deadline': fields.Datetime.now(),
+            'date': self.env.now,
+            'date_deadline': self.env.now,
         })
 
         self.env.flush_all()
         report = self.env['report.stock.quantity']._read_group(
-            [('date', '>=', fields.Date.today()), ('date', '<=', fields.Date.today()), ('product_id', '=', self.product1.id)],
+            [('date', '>=', self.env.now.date()), ('date', '<=', self.env.now.date()), ('product_id', '=', self.product1.id)],
             ['date:day', 'product_id', 'state'],
             ['product_qty:sum'])
 
@@ -101,8 +101,8 @@ class TestReportStockQuantity(tests.TransactionCase):
         self.assertEqual(forecast_out_report, [-25])
 
     def test_report_stock_quantity_with_product_qty_filter(self):
-        from_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=-1))
-        to_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=4))
+        from_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=-1))
+        to_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=4))
         report = self.env['report.stock.quantity']._read_group(
             [('product_qty', '<', 0), ('date', '>=', from_date), ('date', '<=', to_date), ('product_id', '=', self.product1.id)],
             ['date:day', 'product_id', 'state'],
@@ -160,7 +160,7 @@ class TestReportStockQuantity(tests.TransactionCase):
             ('location_dest_id', '=', self.wh.lot_stock_id.id)
         ])
         # Simulate a supplier delay
-        move.date = fields.Datetime.now() + timedelta(days=1)
+        move.date = self.env.now + timedelta(days=1)
         orderpoint = self.env['stock.warehouse.orderpoint'].search([
             ('product_id', '=', self.product_replenished.id)
         ])
@@ -251,7 +251,7 @@ class TestReportStockQuantity(tests.TransactionCase):
         })
         warehouse.resupply_route_ids.rule_ids.filtered(lambda r: r.location_src_id == transit_loc).action = 'push'
         product = self.env['product.product'].create({'name': 'Test', 'is_storable': True})
-        today = fields.Date.today()
+        today = self.env.now.date()
         with freeze_time(today - timedelta(days=8)):
             move_transit = self.env['stock.move'].create({
                 'warehouse_id': warehouse.id,
@@ -349,7 +349,7 @@ class TestReportStockQuantity(tests.TransactionCase):
             'uom_id': uom_kg.id,
             'product_uom_qty': 10,
             'quantity': 10,
-            'date': fields.Datetime.now(),
+            'date': self.env.now,
         } for _ in range(2)])
         receipt_kg_01._action_confirm()
         receipt_kg_01.write({'quantity': 10, 'picked': True})
@@ -363,14 +363,14 @@ class TestReportStockQuantity(tests.TransactionCase):
             'uom_id': uom_g.id,
             'product_uom_qty': 500,
             'quantity': 500,
-            'date': fields.Datetime.now(),
+            'date': self.env.now,
         })
         delivery_g._action_confirm()
         delivery_g.write({'quantity': 500, 'picked': True})
         delivery_g._action_done()
 
-        from_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=-1))
-        to_date = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=0))
+        from_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=-1))
+        to_date = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=0))
         report = self.env['report.stock.quantity']._read_group(
             [
                 ('date', '>=', from_date), ('date', '<=', to_date),
@@ -500,7 +500,7 @@ class TestReportStockQuantity(tests.TransactionCase):
         # Forecast before today should use the converted qty (50), not the done qty (2)
         # Expected: 0
         # Bug case: -48
-        yesterday = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=-1))
+        yesterday = fields.Date.to_string(fields.Date.add(self.env.now.date(), days=-1))
         report = self.env['report.stock.quantity']._read_group(
             [('state', '=', 'forecast'), ('product_id', '=', product.id), ('warehouse_id', '=', wh1.id),
              ('date', '=', yesterday)],

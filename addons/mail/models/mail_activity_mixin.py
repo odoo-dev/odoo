@@ -190,7 +190,7 @@ class MailActivityMixin(models.AbstractModel):
             )::INT AS activity_state
             """,
             activity_t.date_deadline,
-            fields.Datetime.now().astimezone(UTC),
+            self.env.now.astimezone(UTC),
             activity_t.user_tz,
         ))
 

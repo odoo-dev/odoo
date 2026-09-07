@@ -127,14 +127,14 @@ class RatingRating(models.Model):
             if values.get('res_model_id') and values.get('res_id'):
                 values.update(self._find_parent_data(values))
             if 'rating' in values or 'feedback' in values:
-                values['rated_on'] = fields.Datetime.now()
+                values['rated_on'] = self.env.now
         return super().create(vals_list)
 
     def write(self, vals):
         if vals.get('res_model_id') and vals.get('res_id'):
             vals.update(self._find_parent_data(vals))
         if 'rating' in vals or 'feedback' in vals:
-            vals['rated_on'] = fields.Datetime.now()
+            vals['rated_on'] = self.env.now
         return super().write(vals)
 
     def unlink(self):

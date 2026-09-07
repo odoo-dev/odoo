@@ -21,7 +21,7 @@ class StockMove(models.Model):
         product = self.env['product.product'].browse(context_data.get('default_product_id'))
         picking = self.env['stock.picking'].browse(context_data.get('default_picking_id'))
         if product.use_expiration_date:
-            from_date = picking.scheduled_date or fields.Datetime.today()
+            from_date = picking.scheduled_date or self.env.now.replace(hour=0, minute=0, second=0)
             expiration_date = from_date + datetime.timedelta(days=product.expiration_time)
             for vals in vals_list:
                 vals['expiration_date'] = vals.get('expiration_date') or expiration_date
@@ -31,7 +31,7 @@ class StockMove(models.Model):
         """Override to add a default `expiration_date` into the move lines values."""
         move_lines_commands = super()._generate_serial_move_line_commands(field_data, location_dest_id, origin_move_line)
         if self.product_id.use_expiration_date:
-            date = fields.Datetime.today() + datetime.timedelta(days=self.product_id.expiration_time)
+            date = self.env.now.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=self.product_id.expiration_time)
             for move_line_command in move_lines_commands:
                 move_line_vals = move_line_command[2]
                 if 'expiration_date' not in move_line_vals:

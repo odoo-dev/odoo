@@ -55,7 +55,7 @@ def _mock_pdp_register_receiver(func, self):
     if self.proxy_type != 'pdp':
         return
     self.company_id.account_peppol_proxy_state = 'receiver'
-    self.sudo().company_id.l10n_fr_pdp_annuaire_start_date = fields.Date.to_date(fields.Datetime.now())
+    self.sudo().company_id.l10n_fr_pdp_annuaire_start_date = fields.Date.to_date(self.env.now)
 
 
 def _mock_pdp_annuaire_lookup_participant(func, self, edi_identification):

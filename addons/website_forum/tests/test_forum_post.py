@@ -20,7 +20,7 @@ class TestForumPost(TestForumCommon):
                     'forum_id': self.forum.id,
                     'name': 'Post...',
                     'tag_ids': forum_tags[:i],
-                    'last_activity_date': fields.Datetime.subtract(fields.Datetime.now(), days=i)
+                    'last_activity_date': fields.Datetime.subtract(self.env.now, days=i)
                 }
                 for i in range(len(forum_tags) + 1)  # 11 posts with 0 to 10 tags
             ])

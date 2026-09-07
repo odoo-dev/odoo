@@ -185,7 +185,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
 
         # throughout the registration process, we need to check the status more frequently
         if self.search_count([('company_id.account_peppol_proxy_state', '=', 'smp_registration')], limit=1):
-            self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=fields.Datetime.now() + timedelta(hours=1))
+            self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=self.env.now + timedelta(hours=1))
 
     def _cron_peppol_webhook_keepalive(self):
         edi_users = self.search([('company_id.account_peppol_proxy_state', 'in', ['sender', 'receiver'])])
@@ -555,7 +555,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 )
         if need_retrigger:
             self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(
-                fields.Datetime.add(fields.Datetime.now(), minutes=5),
+                fields.Datetime.add(self.env.now, minutes=5),
             )
 
     def _peppol_get_documents_for_status(self, batch_size):
@@ -778,7 +778,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         company.account_peppol_proxy_state = 'smp_registration'
         company.peppol_external_provider = None
 
-        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=fields.Datetime.now() + timedelta(hours=1))
+        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=self.env.now + timedelta(hours=1))
 
     @handle_demo
     def _peppol_deregister_participant(self):

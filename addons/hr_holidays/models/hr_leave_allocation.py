@@ -707,11 +707,11 @@ class HrLeaveAllocation(models.Model):
         Method called by the cron task in order to increment the number_of_days when
         necessary.
         """
-        today = datetime.combine(fields.Date.today(), time(0, 0, 0))
+        today = datetime.combine(self.env.now.date(), time(0, 0, 0))
         allocations = self.search([
             ('state', '=', 'validate'),
             ('accrual_plan_id', '!=', False), ('employee_id', '!=', False),
-            '|', ('date_to', '=', False), ('date_to', '>', fields.Datetime.now()),
+            '|', ('date_to', '=', False), ('date_to', '>', self.env.now),
             '|', ('nextcall', '=', False), ('nextcall', '<=', today)])
         allocations._process_accrual_plans()
 

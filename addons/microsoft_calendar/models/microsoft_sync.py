@@ -367,7 +367,7 @@ class MicrosoftCalendarSync(models.AbstractModel):
         """
         # Event can be updated locally if its stop date is bigger than lower bound and the update time difference is reasonable (1 hour).
         # For recurrences, if any of the occurrences surpass the lower bound range, we update the recurrence.
-        lower_bound = fields.Datetime.subtract(fields.Datetime.now(), days=lower_bound_day_range)
+        lower_bound = fields.Datetime.subtract(self.env.now, days=lower_bound_day_range)
         stop_date_condition = True
         if self._name == 'calendar.event':
             stop_date_condition = self.stop >= lower_bound

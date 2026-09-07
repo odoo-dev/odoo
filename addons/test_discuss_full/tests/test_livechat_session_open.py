@@ -15,7 +15,7 @@ class TestImLivechatSessions(TestImLivechatCommon):
             login="operator",
             groups="base.group_user,im_livechat.im_livechat_group_manager",
         )
-        target_date = fields.Datetime.now() - timedelta(days=15)
+        target_date = self.env.now - timedelta(days=15)
         with freeze_time(target_date):  # Freeze time to make sure record appears with default filter
             self.make_jsonrpc_request(
                 "/im_livechat/get_session", {"channel_id": self.livechat_channel.id}

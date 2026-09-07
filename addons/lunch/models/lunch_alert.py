@@ -89,13 +89,13 @@ class LunchAlert(models.Model):
                 and (not alert.until or fields.Date.context_today(alert) <= alert.until)
             )
 
-            sendat_tz = datetime.combine(fields.Date.context_today(alert, fields.Datetime.now()), float_to_time(alert.notification_time), tzinfo=ZoneInfo(alert.tz))
+            sendat_tz = datetime.combine(fields.Date.context_today(alert, self.env.now), float_to_time(alert.notification_time), tzinfo=ZoneInfo(alert.tz))
             cron = alert.cron_id.sudo()
             lc = cron.lastcall
             if ((
                 lc and sendat_tz.date() <= fields.Datetime.context_timestamp(alert, lc).date()
             ) or (
-                not lc and sendat_tz <= fields.Datetime.context_timestamp(alert, fields.Datetime.now())
+                not lc and sendat_tz <= fields.Datetime.context_timestamp(alert, self.env.now)
             )):
                 sendat_tz += timedelta(days=1)
             sendat_utc = sendat_tz.astimezone(UTC).replace(tzinfo=None)
@@ -172,7 +172,7 @@ class LunchAlert(models.Model):
             order_domain &= Domain('user_id.last_lunch_location_id', 'in', self.location_ids.ids)
 
         if self.recipients != 'everyone':
-            weeksago = fields.Date.today() - timedelta(weeks=(
+            weeksago = self.env.now.date() - timedelta(weeks=(
                 1 if self.recipients == 'last_week' else
                 4 if self.recipients == 'last_month' else
                 52  # if self.recipients == 'last_year'

@@ -56,7 +56,7 @@ class ResCompany(models.Model):
     )
     l10n_hu_edi_last_transaction_recovery = fields.Datetime(
         string='Last transaction recovery (in production mode)',
-        default=lambda self: fields.Datetime.now(),
+        default=lambda self: self.env.now,
     )
 
     def _l10n_hu_edi_configure_company(self):
@@ -124,7 +124,7 @@ class ResCompany(models.Model):
             # We use the l10n_hu_edi_last_transaction_recovery time only in production mode
             # to indicate which transactions to request.
             # In test mode (where we expect far fewer invoices), we just take the last 24 hours.
-            recovery_end_time = fields.Datetime.now()
+            recovery_end_time = self.env.now
             if company.l10n_hu_edi_server_mode == 'production':
                 recovery_start_time = company.l10n_hu_edi_last_transaction_recovery
             else:

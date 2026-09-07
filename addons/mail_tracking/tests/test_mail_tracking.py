@@ -110,9 +110,9 @@ class TestMailTracking(MailCommon):
             'x_currency_id': self.env.company.currency_id.id,
         })
         self.flush_tracking()
-        today = fields.Date.today()
+        today = self.env.now.date()
         today_dt = fields.Datetime.to_datetime(today)
-        now = fields.Datetime.now()
+        now = self.env.now
 
         with self.mock_mail_gateway(), self.mock_mail_app():
             test_record.with_user(self.user_admin).sudo().write({

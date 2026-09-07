@@ -118,7 +118,7 @@ class LunchSupplier(models.Model):
             if ((
                 lc and sendat_tz.date() <= fields.Datetime.context_timestamp(supplier, lc).date()
             ) or (
-                not lc and sendat_tz <= fields.Datetime.context_timestamp(supplier, fields.Datetime.now())
+                not lc and sendat_tz <= fields.Datetime.context_timestamp(supplier, self.env.now)
             )):
                 sendat_tz += timedelta(days=1)
             sendat_utc = sendat_tz.astimezone(UTC).replace(tzinfo=None)
@@ -277,7 +277,7 @@ class LunchSupplier(models.Model):
 
     @api.depends('recurrency_end_date', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')
     def _compute_available_today(self):
-        now = fields.Datetime.now().replace(tzinfo=UTC)
+        now = self.env.now.replace(tzinfo=UTC)
 
         for supplier in self:
             supplier_date = now.astimezone(ZoneInfo(supplier.tz))
@@ -292,7 +292,7 @@ class LunchSupplier(models.Model):
 
     @api.depends('available_today', 'automatic_email_time', 'send_by')
     def _compute_order_deadline_passed(self):
-        now = fields.Datetime.now().replace(tzinfo=UTC)
+        now = self.env.now.replace(tzinfo=UTC)
 
         for supplier in self:
             if supplier.send_by == 'mail':

@@ -35,7 +35,7 @@ class DeliveryCarrier(models.Model):
         self.ensure_one()
         if self.enable_delivery_estimate:
             # `_attendance_intervals_batch` requires the datetime to be timezoned
-            current_date = localized(fields.Datetime.now())
+            current_date = localized(self.env.now)
             max_range_days = self.delivery_estimate_lead_days + self.delivery_estimate_range_days
             # Add 30 days as a buffer to account for unavailable days.
             availabilities = self.delivery_calendar_id._work_intervals_batch(

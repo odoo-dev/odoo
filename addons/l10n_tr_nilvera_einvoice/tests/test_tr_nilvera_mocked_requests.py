@@ -370,7 +370,7 @@ class TestTRNilveraMockedRequests(TestUBLTRCommon):
                     '/einvoice/Purchase',
                     params={
                         'StatusCode': ['succeed'],
-                        'StartDate': fields.Datetime.now() - relativedelta(months=1),
+                        'StartDate': self.env.now - relativedelta(months=1),
                         'EndDate': '2025-03-05T03:00:00',
                         'DateFilterType': 'CreatedDate',
                         'SortColumn': 'CreationDateTime',
@@ -385,7 +385,7 @@ class TestTRNilveraMockedRequests(TestUBLTRCommon):
                     '/einvoice/Purchase',
                     params={
                         'StatusCode': ['succeed'],
-                        'StartDate': fields.Datetime.now(),
+                        'StartDate': self.env.now,
                         'EndDate': '2025-03-05T03:00:00',
                         'DateFilterType': 'CreatedDate',
                         'SortColumn': 'CreationDateTime',

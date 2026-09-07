@@ -20,8 +20,8 @@ class TestThirdChecks(L10nLatamCheckTest):
             'payment_type': 'inbound',
             'journal_id': journal.id,
             'l10n_latam_new_check_ids': [
-                Command.create({'name': check_numbers[0], 'payment_date': fields.Date.add(fields.Date.today(), months=1), 'amount': 1}),
-                Command.create({'name': check_numbers[1], 'payment_date': fields.Date.add(fields.Date.today(), months=1), 'amount': 1}),
+                Command.create({'name': check_numbers[0], 'payment_date': fields.Date.add(self.env.now.date(), months=1), 'amount': 1}),
+                Command.create({'name': check_numbers[1], 'payment_date': fields.Date.add(self.env.now.date(), months=1), 'amount': 1}),
             ],
             'payment_method_line_id': journal._get_available_payment_method_lines('inbound').filtered(lambda x: x.code == 'new_third_party_checks').id,
         }
@@ -39,7 +39,7 @@ class TestThirdChecks(L10nLatamCheckTest):
                 lambda x: x.code == 'own_checks')[0].id,
             'l10n_latam_new_check_ids': [Command.create({
                 'name': '00000003',
-                'payment_date': fields.Date.add(fields.Date.today(), months=1),
+                'payment_date': fields.Date.add(self.env.now.date(), months=1),
                 'amount': 1,
             })],
         })
@@ -531,7 +531,7 @@ class TestThirdChecks(L10nLatamCheckTest):
                 Command.create({
                     'name': check.name,
                     'amount': 1,
-                    'payment_date': fields.Date.add(fields.Date.today(), months=1),
+                    'payment_date': fields.Date.add(self.env.now.date(), months=1),
                 }),
             ],
         })

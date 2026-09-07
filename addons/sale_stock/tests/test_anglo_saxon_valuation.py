@@ -74,7 +74,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         self.product_standard_auto.invoice_policy = 'order'
         self.product_standard_auto.standard_price = 10.0
 
-        with freeze_time(fields.Datetime.now()) as frozen:
+        with freeze_time(self.env.now) as frozen:
             sale_order = self._so_deliver(self.product_standard_auto, 2, 12, picking=False)
 
             frozen.tick(timedelta(seconds=1))
@@ -964,7 +964,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         Form(self.env[result['res_model']].with_context(result['context'])).save().process()
 
         invoice_1 = sale_order._create_invoices()
-        invoice_1.invoice_date = fields.Date.today()
+        invoice_1.invoice_date = self.env.now.date()
         invoice_1.action_post()
         self.assertRecordValues(invoice_1.line_ids.filtered(lambda line: line.display_type == 'cogs'), [
             {'account_id': self.account_stock_valuation.id, 'debit': 0, 'credit': 8},
@@ -977,7 +977,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         second_delivery.button_validate()
 
         invoice_2 = sale_order._create_invoices()
-        invoice_2.invoice_date = fields.Date.today()
+        invoice_2.invoice_date = self.env.now.date()
         invoice_2.action_post()
         self.assertRecordValues(invoice_2.line_ids.filtered(lambda line: line.display_type == 'cogs'), [
             {'account_id': self.account_stock_valuation.id, 'debit': 0, 'credit': 10},
@@ -1586,14 +1586,14 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         invoice = sale_order.invoice_ids
         qty_ten_invoice_line = invoice.invoice_line_ids.filtered(lambda l: l.quantity == 10)
         qty_ten_invoice_line.quantity = 5
-        invoice.invoice_date = fields.Date.today()
+        invoice.invoice_date = self.env.now.date()
         invoice.action_post()
         self.product_fifo_autostandard_price = 50
         self.env['sale.advance.payment.inv'].with_context(
             active_ids=sale_order.ids,
         ).sudo().create({}).create_invoices()
         invoice2 = sale_order.invoice_ids.filtered(lambda i: i.state != 'posted')
-        invoice2.invoice_date = fields.Date.today()
+        invoice2.invoice_date = self.env.now.date()
         invoice2.action_post()
         invoice2_cogs_lines = invoice2.line_ids.filtered(lambda l: l.display_type == 'cogs')
         self.assertRecordValues(

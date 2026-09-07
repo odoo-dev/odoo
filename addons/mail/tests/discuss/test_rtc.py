@@ -343,7 +343,7 @@ class TestChannelRTC(MailCommon, HttpCase):
             ]
 
         with self.assertBus(notifications):
-            now = fields.Datetime.now()
+            now = self.env.now
             with patch.object(fields.Datetime, "now", lambda: now + relativedelta(seconds=5)):
                 self.member_of_employee_in_chat.sudo()._rtc_join_call()
 
@@ -518,7 +518,7 @@ class TestChannelRTC(MailCommon, HttpCase):
             ]
 
         with self.assertBus(notifications):
-            now = fields.Datetime.now()
+            now = self.env.now
             with patch.object(fields.Datetime, "now", lambda: now + relativedelta(seconds=5)):
                 self.member_of_employee_in_group_a.sudo()._rtc_join_call()
 
@@ -905,7 +905,7 @@ class TestChannelRTC(MailCommon, HttpCase):
     @mute_logger("odoo.models.unlink")
     @freeze_time("2023-03-15 12:34:56")
     def test_30_add_members_while_in_call_should_invite_new_members_to_call(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         with patch.object(fields.Datetime, "now", lambda: now + relativedelta(seconds=5)):
             self.member_of_employee_in_group_b.sudo()._rtc_join_call()
 
@@ -1059,7 +1059,7 @@ class TestChannelRTC(MailCommon, HttpCase):
                 ),
             ],
         ):
-            now = fields.Datetime.now()
+            now = self.env.now
             with patch.object(fields.Datetime, "now", lambda: now + relativedelta(hours=1)):
                 self.member_of_employee_in_group_b.sudo()._rtc_leave_call()
 
@@ -1070,7 +1070,7 @@ class TestChannelRTC(MailCommon, HttpCase):
         self.member_of_employee_in_group_b.sudo()._rtc_join_call()
         self.env["discuss.channel.rtc.session"].flush_model()
         self.member_of_employee_in_group_b.sudo().rtc_session_ids._write(
-            {"write_date": fields.Datetime.now() - relativedelta(days=2)},
+            {"write_date": self.env.now - relativedelta(days=2)},
         )
         last_rtc_session = self.member_of_employee_in_group_b.sudo().rtc_session_ids
         with self.assertBus(
@@ -1154,7 +1154,7 @@ class TestChannelRTC(MailCommon, HttpCase):
             .create({"channel_member_id": self.member_of_guest_in_group_a.id})
         )
         test_session.flush_model()
-        test_session._write({"write_date": fields.Datetime.now() - relativedelta(days=2)})
+        test_session._write({"write_date": self.env.now - relativedelta(days=2)})
         unused_ids = [9998, 9999]
         with self.assertBus(
             [

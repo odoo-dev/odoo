@@ -88,7 +88,7 @@ class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, CommonPosEsEdiTest):
                 "payment_ids": [
                     Command.create({
                         "amount": 121.0,
-                        "name": fields.Datetime.now(),
+                        "name": self.env.now,
                         "payment_method_id": self.pos_config_usd.payment_method_ids[0].id,
                     }),
                 ],
@@ -272,7 +272,7 @@ class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, CommonPosEsEdiTest):
             "payment_ids": [
                 Command.create({
                         "amount": 1.21 * (product_price + discount + loyalty_price),
-                        "name": fields.Datetime.now(),
+                        "name": self.env.now,
                         "payment_method_id": self.pos_config_usd.payment_method_ids[0].id,
                 }),
             ],

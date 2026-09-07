@@ -107,7 +107,7 @@ class TestSelfOrderFakePaymentMail(MailCase, TestSelfOrderMobile):
             'amount_paid': 0,
             'amount_tax': 0,
             'amount_return': 0,
-            'date_order': fields.Datetime.now(),
+            'date_order': self.env.now,
             'company_id': self.env.company.id,
             'session_id': self.pos_config.current_session_id.id,
             'source': 'mobile',

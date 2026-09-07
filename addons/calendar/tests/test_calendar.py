@@ -328,7 +328,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             Create an event for someone else in another company as sudo
             Should not failed for acces right check
         """
-        now = fields.Datetime.context_timestamp(self.partner_demo, fields.Datetime.now())
+        now = fields.Datetime.context_timestamp(self.partner_demo, self.env.now)
 
         web_company = self.env['res.company'].sudo().create({'name': "Website Company"})
         web_user = self.env['res.users'].with_company(web_company).sudo().create({

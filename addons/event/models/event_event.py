@@ -42,7 +42,7 @@ class EventEvent(models.Model):
     def default_get(self, fields):
         result = super().default_get(fields)
         if 'date_begin' in fields and 'date_begin' not in result:
-            now = Datetime.now()
+            now = self.env.now
             # Round the datetime to the nearest half hour (e.g. 08:17 => 08:30 and 08:37 => 09:00)
             result['date_begin'] = now.replace(second=0, microsecond=0) + timedelta(minutes=-now.minute % 30)
         if 'date_end' in fields and 'date_end' not in result and result.get('date_begin'):
@@ -289,7 +289,7 @@ class EventEvent(models.Model):
         for event in self:
             event = event._set_tz_context()
             if event.start_sale_datetime:
-                current_datetime = fields.Datetime.context_timestamp(event, fields.Datetime.now())
+                current_datetime = fields.Datetime.context_timestamp(event, self.env.now)
                 start_sale_datetime = fields.Datetime.context_timestamp(event, event.start_sale_datetime)
                 event.event_registrations_started = (current_datetime >= start_sale_datetime)
             else:
@@ -309,7 +309,7 @@ class EventEvent(models.Model):
         """
         for event in self:
             event = event._set_tz_context()
-            current_datetime = fields.Datetime.context_timestamp(event, fields.Datetime.now())
+            current_datetime = fields.Datetime.context_timestamp(event, self.env.now)
             date_end_tz = event.date_end.astimezone(ZoneInfo(event.date_tz or 'UTC')) if event.date_end else False
             event.event_registrations_open = event.kanban_state != 'cancel' and \
                 event.event_registrations_started and \
@@ -371,14 +371,14 @@ class EventEvent(models.Model):
 
     @api.depends('date_begin', 'date_end')
     def _compute_is_ongoing(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         for event in self:
             event.is_ongoing = event.date_begin <= now < event.date_end
 
     def _search_is_ongoing(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        now = fields.Datetime.now()
+        now = self.env.now
         return [('date_begin', '<=', now), ('date_end', '>', now)]
 
     @api.depends('date_begin', 'date_end', 'date_tz')
@@ -398,14 +398,14 @@ class EventEvent(models.Model):
                 event.is_finished = False
                 continue
             event = event._set_tz_context()
-            current_datetime = fields.Datetime.context_timestamp(event, fields.Datetime.now())
+            current_datetime = fields.Datetime.context_timestamp(event, self.env.now)
             datetime_end = fields.Datetime.context_timestamp(event, event.date_end)
             event.is_finished = datetime_end <= current_datetime
 
     def _search_is_finished(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        return [('date_end', '<=', fields.Datetime.now())]
+        return [('date_end', '<=', self.env.now)]
 
     @api.depends('event_type_id')
     def _compute_date_tz(self):
@@ -788,7 +788,7 @@ class EventEvent(models.Model):
     def _get_date_range_str(self, start_datetime=False, lang_code=False):
         self.ensure_one()
         datetime = start_datetime or self.date_begin
-        today_tz = fields.Datetime.now().replace(tzinfo=UTC).astimezone(ZoneInfo(self.date_tz))
+        today_tz = self.env.now.replace(tzinfo=UTC).astimezone(ZoneInfo(self.date_tz))
         event_date_tz = datetime.replace(tzinfo=UTC).astimezone(ZoneInfo(self.date_tz))
         diff = (event_date_tz.date() - today_tz.date())
         if diff.days <= 0:
@@ -841,7 +841,7 @@ class EventEvent(models.Model):
             # vobject does *not* like datetime.UTC (this was fixed by
             # py-vobject/vobject#88 which isn't even in 0.9.9, current release
             # as of now)
-            cal_event.add('created').value = fields.Datetime.now().replace(tzinfo=ZoneInfo("UTC"))
+            cal_event.add('created').value = self.env.now.replace(tzinfo=ZoneInfo("UTC"))
             cal_event.add('dtstart').value = start.astimezone(ZoneInfo(event.date_tz))
             cal_event.add('dtend').value = end.astimezone(ZoneInfo(event.date_tz))
             cal_event.add('summary').value = event.name
@@ -867,7 +867,7 @@ class EventEvent(models.Model):
     def _gc_mark_events_done(self):
         """ move every ended events in the next 'ended stage' """
         ended_events = self.env['event.event'].search([
-            ('date_end', '<', fields.Datetime.now()),
+            ('date_end', '<', self.env.now),
             ('stage_id.pipe_end', '=', False),
         ])
         if ended_events:

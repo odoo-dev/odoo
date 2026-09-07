@@ -37,7 +37,7 @@ class TestHrAttendanceKiosk(HttpCase):
 
     def _create_checked_out_attendance(self, employee=None):
         employee = employee or self.employee_A
-        now = fields.Datetime.now()
+        now = self.env.now
         return self.env['hr.attendance'].create({
             'employee_id': employee.id,
             'check_in': now - timedelta(hours=2),
@@ -117,7 +117,7 @@ class TestHrAttendanceKiosk(HttpCase):
 
     def test_update_break_duration_only_updates_last_closed_attendance(self):
         previous_attendance = self._create_checked_out_attendance()
-        now = fields.Datetime.now()
+        now = self.env.now
         latest_attendance = self.env['hr.attendance'].create({
             'employee_id': self.employee_A.id,
             'check_in': now - timedelta(minutes=30),

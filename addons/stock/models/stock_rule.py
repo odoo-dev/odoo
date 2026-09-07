@@ -432,7 +432,7 @@ class StockRule(models.Model):
         for procurement in procurements:
             procurement.values.setdefault('company_id', procurement.location_id.company_id)
             procurement.values.setdefault('priority', '0')
-            procurement.values.setdefault('date_planned', procurement.values.get('date_planned', False) or fields.Datetime.now())
+            procurement.values.setdefault('date_planned', procurement.values.get('date_planned', False) or self.env.now)
             if self._skip_procurement(procurement):
                 continue
             rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)
@@ -648,7 +648,7 @@ class StockRule(models.Model):
             ('state', 'in', ['confirmed', 'partially_available']),
             ('product_uom_qty', '!=', 0.0),
             '|',
-                ('reservation_date', '<=', fields.Date.today()),
+                ('reservation_date', '<=', self.env.now.date()),
                 ('picking_type_id.reservation_method', '=', 'at_confirm'),
         ])
 

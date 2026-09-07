@@ -662,7 +662,7 @@ class TestArCommon(AccountTestInvoicingCommon):
 
     def _set_today_rate(self, currency, value):
         rate_obj = self.env['res.currency.rate']
-        rate = rate_obj.search([('currency_id', '=', currency.id), ('name', '=', fields.Date.to_string(fields.Date.today())),
+        rate = rate_obj.search([('currency_id', '=', currency.id), ('name', '=', fields.Date.to_string(self.env.now.date())),
                                 ('company_id', '=', self.env.company.id)])
         if rate:
             rate.rate = value

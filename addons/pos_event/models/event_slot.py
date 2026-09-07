@@ -12,7 +12,7 @@ class EventSlot(models.Model):
             ('event_id.is_finished', '=', False),
             ('event_id.company_id', '=', data['pos.config'].company_id.id),
             ('event_id', 'in', data['event.event'].ids),
-            ('start_datetime', '>=', fields.Datetime.now()),
+            ('start_datetime', '>=', self.env.now),
         ]
 
     @api.model

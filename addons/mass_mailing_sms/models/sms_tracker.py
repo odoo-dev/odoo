@@ -81,6 +81,6 @@ class SmsTracker(models.Model):
             for mailing in mailings_to_mark_done:
                 mailing.write({
                     'state': 'done',
-                    'sent_date': fields.Datetime.now(),
+                    'sent_date': self.env.now,
                     'kpi_mail_required': not mailing.sent_date
                 })

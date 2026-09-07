@@ -85,7 +85,7 @@ class PaymentProvider(models.Model):
             )
 
         content_type = "application/json; charset=utf-8" if method == "POST" else ""
-        dt = format_date_time(Datetime.now().timestamp())  # Datetime in locale-independent RFC1123
+        dt = format_date_time(self.env.now.timestamp())  # Datetime in locale-independent RFC1123
         signature = self._worldline_calculate_signature(
             method, endpoint, content_type, dt, idempotency_key=idempotency_key
         )

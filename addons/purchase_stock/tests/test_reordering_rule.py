@@ -1238,7 +1238,7 @@ class TestReorderingRule(TransactionCase):
                 'product_id': product.id,
                 'product_min_qty': 0,
                 'product_max_qty': 5,
-                'snoozed_until': add(Date.today(), days=1),
+                'snoozed_until': add(self.env.now.date(), days=1),
             })
 
         # check that you can not snooze an existing one
@@ -1250,7 +1250,7 @@ class TestReorderingRule(TransactionCase):
             'product_max_qty': 5,
         })
         with self.assertRaises(UserError):
-            orderpoint.snoozed_until = add(Date.today(), days=1)
+            orderpoint.snoozed_until = add(self.env.now.date(), days=1)
 
     def test_supplierinfo_last_purchase_date(self):
         """
@@ -1503,7 +1503,7 @@ class TestReorderingRule(TransactionCase):
         }])
 
         # Expire the seller
-        self.product_01.seller_ids.date_end = Date.today() - td(days=1)
+        self.product_01.seller_ids.date_end = self.env.now.date() - td(days=1)
         # Second replenishment with expired seller using the same orderpoint
         orderpoint.qty_to_order = 1.0
         orderpoint.action_replenish()

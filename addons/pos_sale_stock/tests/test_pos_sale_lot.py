@@ -53,7 +53,7 @@ class TestPointOfSaleFlow(CommonPosStockTest):
         order, _ = self.create_backend_pos_order({
             'order_data': {
                 'partner_id': self.partner_stva.id,
-                'shipping_date': fields.Date.today(),
+                'shipping_date': self.env.now.date(),
             },
             'line_data': [{
                 'product_id': self.twenty_dollars_no_tax.product_variant_id.id,

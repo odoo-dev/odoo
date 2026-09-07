@@ -30,7 +30,7 @@ class StockQuant(models.Model):
     @api.depends('removal_date')
     def _compute_available_quantity(self):
         super()._compute_available_quantity()
-        current_date = fields.Datetime.now()
+        current_date = self.env.now
         for quant in self:
             if quant.use_expiration_date and quant.removal_date and quant.removal_date <= current_date:
                 quant.available_quantity = 0

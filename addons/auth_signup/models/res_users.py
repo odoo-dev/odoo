@@ -270,7 +270,7 @@ class ResUsers(models.Model):
             _logger.warning("Template 'auth_signup.mail_template_data_unregistered_users' was not found. Cannot send reminder notifications.")
             self.env['ir.cron']._commit_progress(deactivate=True)
             return
-        datetime_min = fields.Datetime.today() - relativedelta(days=after_days)
+        datetime_min = self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=after_days)
         datetime_max = datetime_min + relativedelta(days=1)
 
         invited_by_users = self.search_fetch([

@@ -533,7 +533,7 @@ class AccountMove(models.Model):
             for invoice in self
         ]
 
-        self.write({'l10n_hu_edi_send_time': fields.Datetime.now()})
+        self.write({'l10n_hu_edi_send_time': self.env.now})
 
         try:
             transaction_code = connection.do_manage_invoice(
@@ -766,7 +766,7 @@ class AccountMove(models.Model):
                 },
             })
 
-        self.write({'l10n_hu_edi_send_time': fields.Datetime.now()})
+        self.write({'l10n_hu_edi_send_time': self.env.now})
 
         try:
             transaction_code = connection.do_manage_annulment(

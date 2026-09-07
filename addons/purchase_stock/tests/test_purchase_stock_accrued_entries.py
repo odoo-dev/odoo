@@ -248,7 +248,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'active_ids': [purchase_order.id],
         }).create({
             'account_id': account_receivable.id,
-            'date': fields.Date.today() - relativedelta(days=7),
+            'date': self.env.now.date() - relativedelta(days=7),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_moves = self.env['account.move'].search(account_move_domain)
@@ -273,7 +273,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'active_ids': [purchase_order.id],
         }).create({
             'account_id': account_receivable.id,
-            'date': fields.Date.today() - relativedelta(days=1),
+            'date': self.env.now.date() - relativedelta(days=1),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_moves = self.env['account.move'].search(account_move_domain)
@@ -298,7 +298,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'active_ids': [purchase_order.id],
         }).create({
             'account_id': account_receivable.id,
-            'date': fields.Date.today(),
+            'date': self.env.now.date(),
         })
         account_move_domain = wizard.create_entries()['domain']
         account_moves = self.env['account.move'].search(account_move_domain)

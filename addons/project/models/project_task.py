@@ -1183,7 +1183,7 @@ class ProjectTask(models.Model):
             project_id = vals.get('project_id') or default_project_id
 
             if vals.get('user_ids'):
-                additional_vals['date_assign'] = fields.Datetime.now()
+                additional_vals['date_assign'] = self.env.now
                 if not (vals.get('parent_id') or project_id):
                     user_ids = self_ctx._fields['user_ids'].convert_to_cache(vals.get('user_ids', []), self_ctx.env['project.task'])
                     if self_ctx.env.user.id not in list(user_ids) + [SUPERUSER_ID]:
@@ -1216,7 +1216,7 @@ class ProjectTask(models.Model):
             # Stage change: Update date_end if folded stage and date_last_stage_update
             if vals.get('stage_id'):
                 additional_vals.update(self_ctx.update_date_end(vals['stage_id']))
-                additional_vals['date_last_stage_update'] = fields.Datetime.now()
+                additional_vals['date_last_stage_update'] = self.env.now
             # recurrence
             rec_fields = vals.keys() & self_ctx._get_recurrence_fields()
             if rec_fields and vals.get('recurring_task') is True:
@@ -1310,7 +1310,7 @@ class ProjectTask(models.Model):
             raise UserError(_("Sorry. You can't set a task as its parent task."))
 
         # stage change: update date_last_stage_update
-        now = fields.Datetime.now()
+        now = self.env.now
         if 'stage_id' in vals:
             if not 'project_id' in vals and self.filtered(lambda t: not t.project_id):
                 raise UserError(_('You can only set a personal stage on a private task.'))
@@ -1460,7 +1460,7 @@ class ProjectTask(models.Model):
     def update_date_end(self, stage_id):
         project_task_type = self.env['project.task.type'].browse(stage_id)
         if project_task_type.fold:
-            return {'date_end': fields.Datetime.now()}
+            return {'date_end': self.env.now}
         return {'date_end': False}
 
     # ---------------------------------------------------

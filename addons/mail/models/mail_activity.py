@@ -162,7 +162,7 @@ class MailActivity(models.Model):
         unarchived.date_done = False
         # keep earliest archive date if multi archive
         toupdate = (self - unarchived).filtered(lambda act: not act.date_done)
-        toupdate.date_done = fields.Datetime.now()
+        toupdate.date_done = self.env.now
 
     @api.depends('res_model', 'res_id')
     def _compute_res_name(self):
@@ -402,7 +402,7 @@ class MailActivity(models.Model):
         return res
 
     def unlink(self):
-        todo_activities = self.filtered(lambda act: act.active and act.date_deadline <= fields.Date.today() and act.user_id)
+        todo_activities = self.filtered(lambda act: act.active and act.date_deadline <= self.env.now.date() and act.user_id)
         if todo_activities:
             for user, user_activities in todo_activities.grouped('user_id').items():
                 user._bus_send("mail.activity/updated", {"activity_deleted": True, "count_diff": -len(user_activities)})

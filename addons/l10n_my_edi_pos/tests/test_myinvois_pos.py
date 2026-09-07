@@ -690,7 +690,7 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
         We expect the sequences to correctly go from CINV/xxx/00001 to CINV/xxx/00004
         """
         def _make_accounting_conso_invoice():
-            self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=fields.Date.today())
+            self.init_invoice('out_invoice', taxes=self.company_data['default_tax_sale'], products=self.product_a, post=True, invoice_date=self.env.now.date())
             myinvois_document_action = self.env['myinvois.consolidate.invoice.wizard'].create({
                 'date_from': '2025-01-01',
                 'date_to': '2025-01-31',

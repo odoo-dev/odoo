@@ -40,7 +40,7 @@ class TestL10nTHWTHPayment(AccountTestInvoicingCommon):
         invoice = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': self.partner_a.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [Command.create({
                 'product_id': self.product_a.id,
                 'price_unit': 1000.0,

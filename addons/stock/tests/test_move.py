@@ -2065,7 +2065,7 @@ class TestStockMove(TestStockCommon):
             "location_id": self.stock_location.id,
             "inventory_quantity": 15.0,
         }).action_apply_inventory()
-        product_in_past = self.productA.with_context(to_date=fields.Date.add(fields.Date.today(), days=-7))
+        product_in_past = self.productA.with_context(to_date=fields.Date.add(self.env.now.date(), days=-7))
         self.assertAlmostEqual(self.productA.qty_available, 15.0)
         self.assertAlmostEqual(product_in_past.qty_available, 0)
 
@@ -2112,7 +2112,7 @@ class TestStockMove(TestStockCommon):
         """
         Test the quantity is correct when looking in the past in strict mode.
         """
-        today = fields.Date.today()
+        today = self.env.now.date()
         self.product.is_storable = True
         self.env["stock.quant"]._update_available_quantity(self.product, self.stock_location, 10.0)
         moves = self.env['stock.move'].create([
@@ -5091,7 +5091,7 @@ class TestStockMove(TestStockCommon):
         ])
         from odoo.fields import Datetime
         from datetime import timedelta
-        initial_in_date_lot1 = Datetime.now() - timedelta(days=5)
+        initial_in_date_lot1 = self.env.now - timedelta(days=5)
         quant_lot1.in_date = initial_in_date_lot1
 
         # Move one quant to pack location
@@ -5200,7 +5200,7 @@ class TestStockMove(TestStockCommon):
         ])
         from odoo.fields import Datetime
         from datetime import timedelta
-        initial_in_date_lot1 = Datetime.now() - timedelta(days=5)
+        initial_in_date_lot1 = self.env.now - timedelta(days=5)
         quant_lot1.in_date = initial_in_date_lot1
 
         # Move one quant to pack location
@@ -6240,7 +6240,7 @@ class TestStockMove(TestStockCommon):
                         'The delivery should be assigned since the receipt destination is a child location of the delivery source location.')
 
     def test_scheduled_date_after_backorder(self):
-        today = fields.Datetime.today()
+        today = self.env.now.replace(hour=0, minute=0, second=0)
         with Form(self.env['stock.picking']) as picking_form:
             picking_form.picking_type_id = self.picking_type_out
             with picking_form.move_ids.new() as move:
@@ -6474,7 +6474,7 @@ class TestStockMove(TestStockCommon):
         """
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5)
         # Create two moves using the all available quantity and reserve them
-        with freeze_time(fields.Datetime.now()):
+        with freeze_time(self.env.now):
             move_1, move_2 = self.env['stock.move'].create([{
                 'product_id': self.productA.id,
                 'product_uom_qty': qty,
@@ -6975,7 +6975,7 @@ class TestStockMove(TestStockCommon):
 
     def test_picking_deadline_excludes_cancelled_move(self):
         """ Picking deadline must recompute on move cancellation and must not include cancelled moves. """
-        today = fields.Datetime.now()
+        today = self.env.now
         company_ids = [self.env.user.sudo().company_id.id, self.stock_location.sudo().company_id.id]
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=company_ids))
 

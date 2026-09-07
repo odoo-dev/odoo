@@ -362,7 +362,7 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
 
         # No user logged, 'invited' and archived
         self.channel_partner_emp.member_status = 'invited'
-        self.channel_partner_emp.last_invitation_date = fields.Datetime.now()
+        self.channel_partner_emp.last_invitation_date = self.env.now
         res = self.url_open(invite_url_emp)
         self.assertEqual(res.status_code, 200)
         self.assertURLEqual(res.url, '/slides?invite_error=expired',
@@ -371,7 +371,7 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
     def test_direct_invite_link_public_visibility(self):
         ''' Check that 'invited' attendees will be redirected to the course with public visibility'''
         self.channel_partner_emp.member_status = 'invited'
-        self.channel_partner_emp.last_invitation_date = fields.Datetime.now()
+        self.channel_partner_emp.last_invitation_date = self.env.now
         invite_url_emp = self.channel_partner_emp.invitation_link
 
         # No user logged.
@@ -384,7 +384,7 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
     def test_direct_invite_link_not_public_visibility(self):
         ''' Check that 'invited' attendees are redirected to courses with 'members' and 'connected' visibilities.'''
         self.channel_partner_emp.member_status = 'invited'
-        self.channel_partner_emp.last_invitation_date = fields.Datetime.now()
+        self.channel_partner_emp.last_invitation_date = self.env.now
         invite_url_emp = self.channel_partner_emp.invitation_link
 
         # No user logged, but access granted via parameters in url.
@@ -533,7 +533,7 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
         # Logged user_emp has been reinvited more than three months ago and link should be expired
         self.channel_partner_emp.write({
             'member_status': 'invited',
-            'last_invitation_date': fields.Datetime.subtract(fields.Datetime.now(), months=3, days=5)
+            'last_invitation_date': fields.Datetime.subtract(self.env.now, months=3, days=5)
         })
         self.channel.visibility = 'members'
         res = self.url_open(self.channel_partner_emp.invitation_link)
@@ -546,7 +546,7 @@ class TestAttendeeCase(HttpCaseWithUserPortal):
             'channel_id': self.channel.id,
             'partner_id': self.user_portal.partner_id.id,
             'member_status': 'invited',
-            'last_invitation_date': fields.Datetime.subtract(fields.Datetime.now(), months=3, days=5)
+            'last_invitation_date': fields.Datetime.subtract(self.env.now, months=3, days=5)
         }
         channel_partner_portal = self.env['slide.channel.partner'].create(outdated_portal_membership_values)
 

@@ -245,8 +245,8 @@ been taken for this time off type. Changing it now would affect existing employe
     @api.depends('requires_allocation', 'max_leaves', 'virtual_remaining_leaves')
     def _compute_valid(self):
         self.has_valid_allocation = False
-        date_from = self.env.context.get('default_date_from', self.env.context.get('date_from', fields.Datetime.today()))
-        date_to = self.env.context.get('default_date_to', self.env.context.get('date_to', fields.Datetime.today()))
+        date_from = self.env.context.get('default_date_from', self.env.context.get('date_from', self.env.now.replace(hour=0, minute=0, second=0)))
+        date_to = self.env.context.get('default_date_to', self.env.context.get('date_to', self.env.now.replace(hour=0, minute=0, second=0)))
         employee_id = self.env.context.get('default_employee_id', self.env.context.get('employee_id', self.env.user.employee_id.id))
         valid_types = self.get_work_entry_types_with_valid_allocations(date_from, date_to, employee_id)
         valid_types.has_valid_allocation = True

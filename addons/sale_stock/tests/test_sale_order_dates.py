@@ -58,14 +58,14 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
 
         # if Shipping Policy is set to `direct`(when SO is in draft state) then expected date should be
         # current date + shortest lead time from all of it's order lines
-        expected_date = fields.Datetime.now() + timedelta(days=5)
+        expected_date = self.env.now + timedelta(days=5)
         self.assertAlmostEqual(expected_date, sale_order.expected_date,
             msg="Wrong expected date on sale order!", delta=timedelta(seconds=1))
 
         # if Shipping Policy is set to `one`(when SO is in draft state) then expected date should be
         # current date + longest lead time from all of it's order lines
         sale_order.write({'picking_policy': 'one'})
-        expected_date = fields.Datetime.now() + timedelta(days=15)
+        expected_date = self.env.now + timedelta(days=15)
         self.assertAlmostEqual(expected_date, sale_order.expected_date,
             msg="Wrong expected date on sale order!", delta=timedelta(seconds=1))
 
@@ -73,7 +73,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
 
         # Setting confirmation date of SO to 5 days from today so that the expected/effective date could be checked
         # against real confirmation date
-        confirm_date = fields.Datetime.now() + timedelta(days=5)
+        confirm_date = self.env.now + timedelta(days=5)
         sale_order.write({'date_order': confirm_date})
 
         # if Shipping Policy is set to `one`(when SO is confirmed) then expected date should be
@@ -94,7 +94,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
         picking.move_ids.picked = True
         picking._action_done()
         self.assertEqual(picking.state, 'done', "Picking not processed correctly!")
-        self.assertEqual(fields.Date.today(), sale_order.effective_date.date(), "Wrong effective date on sale order!")
+        self.assertEqual(self.env.now.date(), sale_order.effective_date.date(), "Wrong effective date on sale order!")
 
     def test_sale_order_commitment_date(self):
 
@@ -140,7 +140,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
         })
 
         # Ensure that expected date is correctly computed based on the consu product's sale delay.
-        self.assertEqual(sale_order.expected_date, fields.Datetime.now() + timedelta(days=sale_delay))
+        self.assertEqual(sale_order.expected_date, self.env.now + timedelta(days=sale_delay))
 
         # Add a service product and ensure the expected date remains unchanged.
         sale_order.write({
@@ -149,7 +149,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
                 'product_uom_qty': 1000,
             })],
         })
-        self.assertEqual(sale_order.expected_date, fields.Datetime.now() + timedelta(days=sale_delay))
+        self.assertEqual(sale_order.expected_date, self.env.now + timedelta(days=sale_delay))
 
     def test_invoice_delivery_date(self):
         """Check correct computation of the invoice delivery date. This value should get derived
@@ -187,7 +187,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
             25.0,
         )
         with freeze_time(effective_date + timedelta(days=3)):
-            custom_delivery_date = fields.Date.today()
+            custom_delivery_date = self.env.now.date()
             picking_2 = (order.picking_ids - picking_1).ensure_one()
             picking_2.move_ids.write({'quantity': 25.0, 'picked': True})
             picking_2._action_done()
@@ -277,7 +277,7 @@ class TestSaleExpectedDate(ValuationReconciliationTestCommon):
         })]})
         picking_2 = (order.picking_ids - picking_1).ensure_one()
         picking_2.move_ids.write({'quantity': 5.0, 'picked': True})
-        with freeze_time(fields.Date.today() - timedelta(days=3)):
+        with freeze_time(self.env.now.date() - timedelta(days=3)):
             picking_2._action_done()
         self.assertEqual(
             invoice.delivery_date, delivery_date_before,

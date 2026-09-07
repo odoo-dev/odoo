@@ -48,7 +48,7 @@ class SaleOrderLine(models.Model):
         if self.order_id.website_id and self.state == "draft":
             # cart prices must always be computed based on the current time, not on the order
             # creation date.
-            return fields.Datetime.now()
+            return self.env.now
         return super()._get_order_date()
 
     def _get_displayed_unit_price(self):

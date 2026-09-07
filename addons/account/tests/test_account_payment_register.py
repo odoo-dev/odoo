@@ -24,7 +24,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingWithBanksCommon, PaymentCom
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.current_year = fields.Date.today().year
+        cls.current_year = self.env.now.date().year
 
         cls.other_currency = cls.setup_other_currency('EUR')
         cls.other_currency_2 = cls.setup_other_currency('CAD', rates=[('2015-12-31', 3.0), ('2016-12-31', 0.01)])
@@ -120,16 +120,16 @@ class TestAccountPaymentRegister(AccountTestInvoicingWithBanksCommon, PaymentCom
         })
         cls.in_invoice_epd_applied = cls.env['account.move'].create({
             'move_type': 'in_invoice',
-            'date': fields.Date.today(),
-            'invoice_date': fields.Date.today(),
+            'date': self.env.now.date(),
+            'invoice_date': self.env.now.date(),
             'partner_id': cls.partner_b.id,
             'invoice_payment_term_id': cls.invoice_payment_term_1.id,
             'invoice_line_ids': [Command.create({'product_id': cls.product_a.id, 'price_unit': 25.0, 'tax_ids': []})],
         })
         cls.in_invoice_epd_not_applied = cls.env['account.move'].create({
             'move_type': 'in_invoice',
-            'date': fields.Date.today() - relativedelta(days=11),
-            'invoice_date': fields.Date.today() - relativedelta(days=11),
+            'date': self.env.now.date() - relativedelta(days=11),
+            'invoice_date': self.env.now.date() - relativedelta(days=11),
             'partner_id': cls.partner_b.id,
             'invoice_payment_term_id': cls.invoice_payment_term_1.id,
             'invoice_line_ids': [Command.create({'product_id': cls.product_a.id, 'price_unit': 25.0, 'tax_ids': []})],
@@ -146,8 +146,8 @@ class TestAccountPaymentRegister(AccountTestInvoicingWithBanksCommon, PaymentCom
         })
         cls.in_refund_2 = cls.env['account.move'].create({
             'move_type': 'in_refund',
-            'date': fields.Date.today(),
-            'invoice_date': fields.Date.today(),
+            'date': self.env.now.date(),
+            'invoice_date': self.env.now.date(),
             'partner_id': cls.partner_b.id,
             'invoice_line_ids': [Command.create({'product_id': cls.product_a.id, 'price_unit': 10.0, 'tax_ids': []})],
         })

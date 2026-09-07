@@ -176,8 +176,8 @@ class TestEventNotifications(TransactionCase):
             'name': "Doom's day",
             'attendee_ids': [Command.create({'partner_id': attendee.id})],
             'allday': True,
-            'start_date': fields.Date.today(),
-            'stop_date': fields.Date.today(),
+            'start_date': self.env.now.date(),
+            'stop_date': self.env.now.date(),
         })
         initial_start = event.start
         with Form(event) as event_form:

@@ -25,7 +25,7 @@ class PollController(ThreadController):
         message = thread.message_post(
             body="", message_type="comment", subtype_xmlid="mail.mt_comment",
         )
-        end_dt = fields.Datetime.now() + timedelta(minutes=duration)
+        end_dt = self.env.now + timedelta(minutes=duration)
         poll_values = {
             "allow_multiple_options": allow_multiple_options,
             "option_ids": [

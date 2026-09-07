@@ -63,7 +63,7 @@ class TestPurchaseOrderInvoice(PurchaseTestCommon):
     def test_invoice_standard_auto_with_pdiff_and_multi_currencies(self):
         self._use_price_diff()
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         tomorrow = today + relativedelta(days=1)
         other_currency = self._use_multi_currencies([
             (fields.Date.to_string(today - relativedelta(days=1)), 2.0),

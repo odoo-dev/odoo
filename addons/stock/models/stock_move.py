@@ -541,7 +541,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         product_moves = (self - not_product_moves)
 
         outgoing_unreserved_moves_per_warehouse = defaultdict(set)
-        now = fields.Datetime.now()
+        now = self.env.now
 
         def key_virtual_available(move, incoming=False):
             warehouse_id = move.location_dest_id.warehouse_id.id if incoming else move.location_id.warehouse_id.id
@@ -2372,7 +2372,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if any(ml.package_id and ml.package_id == ml.result_package_id for ml in moves_todo.move_line_ids):
             self.env['stock.quant']._unlink_zero_quants()
         picking = moves_todo.mapped('picking_id')
-        moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
+        moves_todo.write({'state': 'done', 'date': self.env.now})
 
         move_dests_per_company = defaultdict(lambda: self.env['stock.move'])
 

@@ -45,7 +45,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             })
 
     def test_mrp_plan_and_unplan_reset_date_start(self):
-        past_date = fields.Datetime.now() - timedelta(days=1)
+        past_date = self.env.now - timedelta(days=1)
         mo = self.env['mrp.production'].create({
             'product_id': self.bom_4.product_id.id,
             'product_uom_qty': 1.0,
@@ -101,7 +101,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             'inventory_quantity': 500
         }).action_apply_inventory()
 
-        date_start = fields.Datetime.now() - timedelta(days=1)
+        date_start = self.env.now - timedelta(days=1)
         test_quantity = 3.0
         man_order_form = Form(self.env['mrp.production'].with_user(self.user_mrp_user))
         man_order_form.product_id = self.product_4
@@ -1786,7 +1786,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             self.assertNotIn(mo, MO.search([('components_availability_state', '!=', state)]))
 
         self.bom_2.unlink()  # remove the kit bom of product_5
-        now = fields.Datetime.now()
+        now = self.env.now
         mo_form = Form(self.env['mrp.production'])
         mo_form.bom_id = self.bom_3  # product_5 (2), product_4 (8), product_2 (12)
         mo_form.date_start = now
@@ -1795,8 +1795,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo.action_confirm()
         self.assertEqual(mo.components_availability, 'Not Available')
 
-        tommorrow = fields.Datetime.now() + timedelta(days=1)
-        after_tommorrow = fields.Datetime.now() + timedelta(days=2)
+        tommorrow = self.env.now + timedelta(days=1)
+        after_tommorrow = self.env.now + timedelta(days=2)
         move1 = self._create_move(
             self.product_5, self.supplier_location, self.stock_location,
             product_uom_qty=2, date=tommorrow
@@ -2189,7 +2189,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         })
 
         # Next Monday at 6:00 am UTC
-        date_start = (fields.Datetime.now() + timedelta(days=7 - fields.Datetime.now().weekday())).replace(hour=6, minute=0, second=0)
+        date_start = (self.env.now + timedelta(days=7 - self.env.now.weekday())).replace(hour=6, minute=0, second=0)
         mo_form = Form(self.env['mrp.production'])
         mo_form.bom_id = bom
         mo_form.date_start = date_start
@@ -4866,20 +4866,20 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         production.action_confirm()
         production.button_plan()
 
-        self.assertEqual(fields.Datetime.now(), production.workorder_ids.date_start)
-        self.assertEqual(fields.Datetime.now() + timedelta(hours=7), production.workorder_ids.date_finished, "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
+        self.assertEqual(self.env.now, production.workorder_ids.date_start)
+        self.assertEqual(self.env.now + timedelta(hours=7), production.workorder_ids.date_finished, "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
 
         production.workorder_ids.workcenter_id = workcenter_5
-        self.assertEqual(fields.Datetime.now(), production.workorder_ids.date_start)
-        self.assertEqual(fields.Datetime.now() + timedelta(hours=6), production.workorder_ids.date_finished, "The time difference should be 6 hours: 6 for the shift and 0 for the lunch pause")
+        self.assertEqual(self.env.now, production.workorder_ids.date_start)
+        self.assertEqual(self.env.now + timedelta(hours=6), production.workorder_ids.date_finished, "The time difference should be 6 hours: 6 for the shift and 0 for the lunch pause")
 
         production.workorder_ids.workcenter_id = self.workcenter_2.id
         workcenter_5.time_efficiency = 50
-        self.assertEqual(production.workorder_ids.date_finished, fields.Datetime.now() + timedelta(hours=7), "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
+        self.assertEqual(production.workorder_ids.date_finished, self.env.now + timedelta(hours=7), "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
         production.workorder_ids.workcenter_id = workcenter_5
-        self.assertEqual(production.workorder_ids.date_finished, fields.Datetime.now() + timedelta(hours=12), "The time difference should be 12 hours: 6 / 0.5 for the shift and 0 for the lunch pause")
+        self.assertEqual(production.workorder_ids.date_finished, self.env.now + timedelta(hours=12), "The time difference should be 12 hours: 6 / 0.5 for the shift and 0 for the lunch pause")
         production.workorder_ids.workcenter_id = self.workcenter_2.id
-        self.assertEqual(production.workorder_ids.date_finished, fields.Datetime.now() + timedelta(hours=7), "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
+        self.assertEqual(production.workorder_ids.date_finished, self.env.now + timedelta(hours=7), "The time difference should be 7 hours: 6 for the shift and 1 for the lunch pause")
 
     def test_compute_tracked_time_3(self):
         """
@@ -5135,7 +5135,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo.action_confirm()
         original_start_date = mo.date_start
         with Form(mo) as production_form:
-            production_form.date_start = fields.Date.today() - timedelta(days=10)
+            production_form.date_start = self.env.now.date() - timedelta(days=10)
         self.assertEqual(mo.date_start.date(), original_start_date.date() - timedelta(days=10))
         with Form(mo) as production_form:
             production_form.date_start = original_start_date
@@ -5159,8 +5159,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         bom.operation_ids[-1].blocked_by_operation_ids = bom.operation_ids[:2]
         mo = self.env['mrp.production'].create({'bom_id': bom.id})
         mo.action_confirm()
-        date_start = fields.Date.today()
-        date_finished = fields.Date.today() + timedelta(days=5)
+        date_start = self.env.now.date()
+        date_finished = self.env.now.date() + timedelta(days=5)
         wos_to_set = mo.workorder_ids - mo.workorder_ids[1]
         wos_to_set.write({ 'date_start': date_start, 'date_finished': date_finished })
         self.assertTrue(mo.workorder_ids[-1].has_conflicts)

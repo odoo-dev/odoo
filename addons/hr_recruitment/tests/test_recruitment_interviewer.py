@@ -156,7 +156,7 @@ class TestRecruitmentInterviewer(MailCase):
         hired_application = Application.create({
             'job_id': self.job.id,
             'recruiter_id': self.manager_employee.id,
-            'date_closed': fields.Datetime.now(),
+            'date_closed': self.env.now,
             'application_status': 'hired',
         })
         self.job.write({'recruiter_id': new_manager_employee.id})

@@ -51,7 +51,7 @@ class IrProfile(models.Model):
     @api.autovacuum
     def _gc_profile(self):
         # remove profiles older than 30 days
-        domain = [('create_date', '<', fields.Datetime.now() - datetime.timedelta(days=30))]
+        domain = [('create_date', '<', self.env.now - datetime.timedelta(days=30))]
         records = self.sudo().search(domain, limit=GC_UNLINK_LIMIT)
         records.unlink()
         return len(records), len(records) == GC_UNLINK_LIMIT  # done, remaining
@@ -168,7 +168,7 @@ class IrProfile(models.Model):
         Otherwise return ``None``.
         """
         limit = self.env['ir.config_parameter'].sudo().get_str('base.profiling_enabled_until')
-        return limit if str(fields.Datetime.now()) < limit else None
+        return limit if str(self.env.now) < limit else None
 
     @api.model
     def set_profiling(self, profile=None, collectors=None, params=None):
@@ -243,7 +243,7 @@ class BaseEnableProfilingWizard(models.TransientModel):
     def _compute_expiration(self):
         for record in self:
             unit, quantity = (record.duration or 'days_0').split('_')
-            record.expiration = fields.Datetime.now() + relativedelta(**{unit: int(quantity)})
+            record.expiration = self.env.now + relativedelta(**{unit: int(quantity)})
 
     def submit(self):
         self.env['ir.config_parameter'].set_str('base.profiling_enabled_until', self.expiration)

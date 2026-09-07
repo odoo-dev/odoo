@@ -741,7 +741,7 @@ class ProjectProject(models.Model):
                 del vals['date']
 
         if 'stage_id' in vals:
-            vals['date_last_stage_update'] = fields.Datetime.now()
+            vals['date_last_stage_update'] = self.env.now
 
         res = super().write(vals) if vals else True
 

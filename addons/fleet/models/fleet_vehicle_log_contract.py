@@ -160,7 +160,7 @@ class FleetVehicleLogContract(models.Model):
         # It manages the state of a contract, possibly by posting a message on the vehicle concerned and updating its status
         params = self.env['ir.config_parameter'].sudo()
         delay_alert_contract = params.get_int('hr_fleet.delay_alert_contract', 30)
-        date_today = fields.Date.from_string(fields.Date.today())
+        date_today = fields.Date.from_string(self.env.now.date())
         outdated_days = fields.Date.to_string(date_today + relativedelta(days=+delay_alert_contract))
         reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew')
         nearly_expired_contracts = self.search([

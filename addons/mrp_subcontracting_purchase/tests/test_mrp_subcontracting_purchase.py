@@ -307,7 +307,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         aml = self.env['account.move.line'].search([('purchase_line_id', '=', po.order_line.id)])
         # add 50 per unit ( 50 x 1 ) = 50 extra valuation
         aml.price_unit = 60
-        aml.move_id.invoice_date = Date.today()
+        aml.move_id.invoice_date = self.env.now.date()
         aml.move_id.action_post()
         bill_amls = self.env['account.move.line'].search([
             ('product_id', 'in', (self.comp1 | self.comp2 | self.finished).ids)
@@ -421,7 +421,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
 
         action = po.action_create_invoice()
         invoice = self.env['account.move'].browse(action['res_id'])
-        invoice.invoice_date = Date.today()
+        invoice.invoice_date = self.env.now.date()
         invoice.invoice_line_ids.quantity = 1
         invoice.action_post()
 
@@ -486,7 +486,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
 
         action = po.action_create_invoice()
         invoice = self.env['account.move'].browse(action['res_id'])
-        invoice.invoice_date = Date.today()
+        invoice.invoice_date = self.env.now.date()
         invoice.invoice_line_ids.quantity = 1
         invoice.action_post()
 
@@ -522,7 +522,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         aml = self.env['account.move.line'].search([('purchase_line_id', '=', purchase.order_line.id)])
         # add 50 per unit ( 50 x 1 ) = 50 extra valuation
         aml.price_unit = 150
-        aml.move_id.invoice_date = Date.today()
+        aml.move_id.invoice_date = self.env.now.date()
         aml.move_id.action_post()
         # Total value of subcontracted product should be updated by the invoice
         self.assertEqual(self.finished.total_value, 180)
@@ -1052,7 +1052,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         repl_info = self.env[r['res_model']].browse(r['res_id'])
         lead_horizon_date = datetime.strptime(
             loads(repl_info.with_context(global_horizon_days=365).json_lead_days)['lead_horizon_date'], '%m/%d/%Y').date()
-        self.assertEqual(lead_horizon_date, Date.today() + timedelta(days=365))
+        self.assertEqual(lead_horizon_date, self.env.now.date() + timedelta(days=365))
 
         orderpoint.action_replenish()
         purchase_order = self.env['purchase.order'].search([
@@ -1060,7 +1060,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
                 ('product_id', '=', self.finished.id),
             ]),
         ], limit=1)
-        self.assertEqual(purchase_order.date_planned.date(), Date.today())
+        self.assertEqual(purchase_order.date_planned.date(), self.env.now.date())
 
     @freeze_time('2000-05-01')
     def test_mrp_subcontract_modify_date(self):

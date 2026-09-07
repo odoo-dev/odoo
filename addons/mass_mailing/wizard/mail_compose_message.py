@@ -118,7 +118,7 @@ class MailComposeMessage(models.TransientModel):
         return trace_values_all
 
     def _prepare_mailing_values(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         return {
             'attachment_ids': [(6, 0, self.attachment_ids.ids)],
             'body_html': self.body,

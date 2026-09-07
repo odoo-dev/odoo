@@ -42,7 +42,7 @@ class ResPartner(models.Model):
         date_order_days_delta = self.env['ir.config_parameter'].sudo().get_int('purchase_stock.on_time_delivery_days') or 365
         order_lines = self.env['purchase.order.line'].search([
             ('partner_id', 'in', self.ids),
-            ('date_order', '>', fields.Date.today() - timedelta(date_order_days_delta)),
+            ('date_order', '>', self.env.now.date() - timedelta(date_order_days_delta)),
             ('qty_received', '!=', 0),
             ('order_id.state', '=', 'purchase'),
             ('date_promised', '!=', False),

@@ -70,7 +70,7 @@ class CalendarAlarm_Manager(models.AbstractModel):
                 FROM ( %s ) AS ALL_EVENTS
             WHERE ALL_EVENTS.first_alarm < %s
                 AND ALL_EVENTS.last_alarm > (%s at time zone 'utc')
-        """, delta_request, base_request, first_alarm_max_value, fields.Datetime.now()))
+        """, delta_request, base_request, first_alarm_max_value, self.env.now))
 
         for event_id, first_alarm, last_alarm, first_meeting, last_meeting, min_duration, max_duration in self.env.cr.fetchall():
             result[event_id] = {
@@ -105,7 +105,7 @@ class CalendarAlarm_Manager(models.AbstractModel):
         result = []
         # TODO: remove event_maxdelta and if using it
         past = one_date - timedelta(minutes=(missing * event_maxdelta))
-        future = fields.Datetime.now() + timedelta(seconds=in_the_next_X_seconds)
+        future = self.env.now + timedelta(seconds=in_the_next_X_seconds)
         if future <= past:
             return result
         for alarm in event.alarm_ids:
@@ -141,9 +141,9 @@ class CalendarAlarm_Manager(models.AbstractModel):
         design. The attendees receive an invitation for any new event
         already.
         """
-        lastcall = self.env.context.get('lastcall', False) or fields.Date.today() - timedelta(weeks=1)
+        lastcall = self.env.context.get('lastcall', False) or self.env.now.date() - timedelta(weeks=1)
         extra_conditions = self._get_notify_alert_extra_conditions(alarm_type)
-        now = fields.Datetime.now()
+        now = self.env.now
         self.env.cr.execute(SQL("""
             SELECT alarm.id, event.id
               FROM calendar_event AS event
@@ -180,7 +180,7 @@ class CalendarAlarm_Manager(models.AbstractModel):
 
         event_ids = list(set(event_id for event_ids in events_by_alarm.values() for event_id in event_ids))
         events = self.env['calendar.event'].browse(event_ids)
-        now = fields.Datetime.now()
+        now = self.env.now
         attendees = events.filtered(lambda e: e.stop > now).attendee_ids.filtered(lambda a: a.state != 'declined')
         alarms = self.env['calendar.alarm'].browse(events_by_alarm.keys())
         for alarm in alarms:
@@ -223,7 +223,7 @@ class CalendarAlarm_Manager(models.AbstractModel):
             if alarm.body:
                 message += '<p>%s</p>' % plaintext2html(alarm.body)
 
-            delta = alert['notify_at'] - fields.Datetime.now()
+            delta = alert['notify_at'] - self.env.now
             delta = delta.seconds + delta.days * 3600 * 24
 
             return {

@@ -99,7 +99,7 @@ class TestImLivechatReport(TestImLivechatCommon):
     @classmethod
     def _create_message(cls, channel, author, date):
         with cls.mock_datetime_and_now(date):
-            date = fields.Datetime.now()
+            date = self.env.now
             return channel.message_post(author_id=author.id, body=f'Message {date}')
 
     def test_redirect_to_form_from_pivot(self):

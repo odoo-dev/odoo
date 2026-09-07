@@ -157,10 +157,10 @@ class DiscussChannelMember(models.Model):
             ('channel_id.channel_type', '=', 'livechat'),
         ])
         sessions_to_be_unpinned = members.filtered(lambda m: m.message_unread_counter == 0)
-        sessions_to_be_unpinned.channel_id.livechat_end_dt = fields.Datetime.now()
+        sessions_to_be_unpinned.channel_id.livechat_end_dt = self.env.now
         for member, store in sessions_to_be_unpinned._get_member_store_list():
             store.add(member.channel_id, {"close_chat_window": True})
-        sessions_to_be_unpinned.unpin_dt = fields.Datetime.now()
+        sessions_to_be_unpinned.unpin_dt = self.env.now
 
     def _store_member_fields(self, res: Store.FieldList):
         super()._store_member_fields(res)
@@ -220,4 +220,4 @@ class DiscussChannelMember(models.Model):
                 and not channel.livechat_end_dt
                 and channel.member_count - len(members) == 1
             ):
-                channel.sudo().livechat_end_dt = fields.Datetime.now()
+                channel.sudo().livechat_end_dt = self.env.now

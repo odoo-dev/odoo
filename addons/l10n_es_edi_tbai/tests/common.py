@@ -74,7 +74,7 @@ class TestEsEdiTbaiCommon(TestAccountMoveSendCommon):
         })
 
         # Prevent certificate expiration in tests
-        cls.certificate.date_end = fields.Datetime.now() + relativedelta(days=2)
+        cls.certificate.date_end = self.env.now + relativedelta(days=2)
         cls.company_data['company'].write({
             'l10n_es_tbai_tax_agency': agency,
             'l10n_es_tbai_certificate_id': cls.certificate.id,

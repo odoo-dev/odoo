@@ -94,7 +94,7 @@ class StockLot(models.Model):
                 'lot_id': lot.id,
                 'value': lot.standard_price,
                 'company_id': product.company_id.id or self.env.company.id,
-                'date': fields.Datetime.now(),
+                'date': self.env.now,
                 'description': _('%(lot)s price update from %(old_price)s to %(new_price)s by %(user)s',
                     lot=lot.name, old_price=old_price, new_price=lot.standard_price, user=self.env.user.name)
             })

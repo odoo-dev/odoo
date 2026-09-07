@@ -28,7 +28,7 @@ class TestUiWebsiteSaleSlides(test_ui_wslides.TestUICommon):
             'channel_id': self.channel.id,
             'partner_id': self.user_portal.partner_id.id,
             'member_status': 'invited',
-            'last_invitation_date': fields.Datetime.now(),
+            'last_invitation_date': self.env.now,
         })
         self.portal_invite_url = self.channel_partner_portal.invitation_link
 

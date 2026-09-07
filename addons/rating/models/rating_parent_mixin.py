@@ -33,7 +33,7 @@ class RatingParentMixin(models.AbstractModel):
         # build domain and fetch data
         domain = [('parent_res_model', '=', self._name), ('parent_res_id', 'in', self.ids), ('rating', '>=', rating_data.RATING_LIMIT_MIN), ('consumed', '=', True)]
         if self._rating_satisfaction_days:
-            domain += [('write_date', '>=', fields.Datetime.to_string(fields.Datetime.now() - timedelta(days=self._rating_satisfaction_days)))]
+            domain += [('write_date', '>=', fields.Datetime.to_string(self.env.now - timedelta(days=self._rating_satisfaction_days)))]
         data = self.env['rating.rating']._read_group(domain, ['parent_res_id', 'rating'], ['__count'])
 
         # get repartition of grades per parent id
@@ -60,7 +60,7 @@ class RatingParentMixin(models.AbstractModel):
             return NotImplemented
         domain = Domain([('parent_res_model', '=', self._name), ('consumed', '=', True), ('rating', '>=', rating_data.RATING_LIMIT_MIN)])
         if self._rating_satisfaction_days:
-            min_date = fields.Datetime.now() - timedelta(days=self._rating_satisfaction_days)
+            min_date = self.env.now - timedelta(days=self._rating_satisfaction_days)
             domain &= Domain('write_date', '>=', fields.Datetime.to_string(min_date))
         rating_read_group = self.env['rating.rating'].sudo()._read_group(domain, ['parent_res_id'], ['rating:avg'])
         parent_res_ids = [

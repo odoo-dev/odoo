@@ -118,7 +118,7 @@ class TestPoSOtherCurrencyConfig(TestPoSCommon):
         self.env.user.company_ids |= other_company
 
         self.env['res.currency.rate'].create({
-            'name': fields.Date.today(),
+            'name': self.env.now.date(),
             'currency_id': main_company.currency_id.id,
             'rate': 2.0,
             'company_id': other_company.id,

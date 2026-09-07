@@ -19,7 +19,7 @@ class PurchaseTestCommon(TestStockValuationCommon):
             return super()._create_bill(product=product, quantity=quantity, price_unit=price_unit, **kwargs)
         po = kwargs.pop('purchase_order')
         bill = self.env['account.move'].browse(po.action_create_invoice()['res_id'])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         if quantity:
             bill.invoice_line_ids.quantity = quantity
         if price_unit:
@@ -70,7 +70,7 @@ class PurchaseTestCommon(TestStockValuationCommon):
             **procurement_values,
             'warehouse_id': self.warehouse,
             'action': 'pull_push',
-            'date_planned': date_planned or fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=10))  # 10 days added to current date of procurement to get future schedule date and order date of purchase order.
+            'date_planned': date_planned or fields.Datetime.to_string(self.env.now + timedelta(days=10))  # 10 days added to current date of procurement to get future schedule date and order date of purchase order.
         }
         return self.env['stock.rule'].run([self.env['stock.rule'].Procurement(
             product, product_qty, self.uom, self.stock_location,

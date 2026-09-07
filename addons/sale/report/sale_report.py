@@ -119,7 +119,7 @@ class SaleReport(models.Model):
 
     @property
     def _table_sql(self) -> SQL:
-        today = fields.Date.today()
+        today = self.env.now.date()
         query = self.env['sale.order.line'].sudo().with_context(date_to=today)._search(self._order_line_domain())
         query.groupby = SQL(", ").join(self._groupby_list(query.table))
         return query.subselect(*self._select_dict_to_list(self._select_dict(query.table)))

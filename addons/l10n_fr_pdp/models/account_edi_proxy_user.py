@@ -191,7 +191,7 @@ class AccountEdiProxyClientUser(models.Model):
         )
         self.company_id.account_peppol_proxy_state = 'smp_registration'
 
-        datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
+        datetime_in_1_hour = fields.Datetime.add(self.env.now, hours=1)
         self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
 
     def _peppol_process_participant_status(self, proxy_user):
@@ -335,7 +335,7 @@ class AccountEdiProxyClientUser(models.Model):
             raise UserError(self.env._("Unsupported response status: '%s'.", status))
 
         try:
-            issue_time = fields.Datetime.now()
+            issue_time = self.env.now
             issue_time_string = fields.Datetime.to_string(issue_time)
             for move in reference_moves:
                 additional_info.setdefault(move.peppol_message_uuid, {})['issue_datetime'] = issue_time_string

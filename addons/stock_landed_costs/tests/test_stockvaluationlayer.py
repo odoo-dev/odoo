@@ -713,7 +713,7 @@ class TestAccountInvoicingWithCOA(TestStockValuationLCCommon):
 
     def create_rate(self, inv_rate):
         return self.env['res.currency.rate'].create({
-            'name': fields.Date.subtract(fields.Date.today(), days=1),
+            'name': fields.Date.subtract(self.env.now.date(), days=1),
             'inverse_company_rate': inv_rate,
             'currency_id': self.eur.id,
             'company_id': self.env.company.id,
@@ -722,7 +722,7 @@ class TestAccountInvoicingWithCOA(TestStockValuationLCCommon):
     def _bill(self, po, qty=None, price=None):
         action = po.action_create_invoice()
         bill = self.env["account.move"].browse(action["res_id"])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         if qty is not None:
             bill.invoice_line_ids.quantity = qty
         if price is not None:

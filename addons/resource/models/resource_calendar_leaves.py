@@ -20,7 +20,7 @@ class ResourceCalendarLeaves(models.Model):
         res = super().default_get(fields)
         if 'date_from' in fields and 'date_to' in fields and not res.get('date_from') and not res.get('date_to'):
             # Then we give the current day and we search the begin and end hours for this day in resource.calendar of the current company
-            today = Datetime.now()
+            today = self.env.now
             tz = ZoneInfo(self.env.company.tz or 'UTC')
             date_from = datetime.combine(today, time.min, tzinfo=tz)
             date_to = datetime.combine(today, time.max, tzinfo=tz)

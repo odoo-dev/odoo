@@ -70,7 +70,7 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
 
         # Create 5th bill with changes, should NOT show popup on posting
         move = self.import_facturx().with_context(skip_is_manually_modified=False)
-        move.invoice_date_due = fields.Date.today()
+        move.invoice_date_due = self.env.now.date()
         autopost_bills_wizard = move.action_post()
         self.assertFalse(autopost_bills_wizard)
         self.assertTrue(move.is_manually_modified)

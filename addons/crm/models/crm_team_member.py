@@ -57,7 +57,7 @@ class CrmTeamMember(models.Model):
 
     @api.depends('user_id', 'crm_team_id')
     def _compute_lead_day_count(self):
-        day_date = fields.Datetime.now() - datetime.timedelta(hours=24)
+        day_date = self.env.now - datetime.timedelta(hours=24)
         daily_leads_counts = self._get_lead_from_date(day_date)
 
         for member in self:
@@ -65,7 +65,7 @@ class CrmTeamMember(models.Model):
 
     @api.depends('user_id', 'crm_team_id')
     def _compute_lead_month_count(self):
-        month_date = fields.Datetime.now() - datetime.timedelta(days=30)
+        month_date = self.env.now - datetime.timedelta(days=30)
         monthly_leads_counts = self._get_lead_from_date(month_date)
 
         for member in self:

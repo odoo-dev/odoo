@@ -47,7 +47,7 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
             'Id': {'_text': flow._get_tracking_id()},
             'IssueDateTime': {
                 'DateTimeString': {
-                    '_text': fields.Datetime.now().strftime('%Y%m%d%H%M%S'),
+                    '_text': self.env.now.strftime('%Y%m%d%H%M%S'),
                 },
             },
             'TypeCode': {'_text': 'RE' if flow.transmission_type == 'rectificative' else 'IN'},
@@ -536,7 +536,7 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
                             continue
                         refs.append((previous_move.name, previous_move.date))
                 if refs:
-                    ref_id, ref_date = sorted(refs, key=lambda vals: (vals[1] or fields.Date.today(), vals[0]))[0]
+                    ref_id, ref_date = sorted(refs, key=lambda vals: (vals[1] or self.env.now.date(), vals[0]))[0]
                     res['ReferencedDocument'] = {
                         'ID': {'_text': ref_id},
                         'IssueDate': {'_text': self._format_date(ref_date)},

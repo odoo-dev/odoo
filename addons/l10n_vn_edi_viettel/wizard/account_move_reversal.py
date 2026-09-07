@@ -32,7 +32,7 @@ class AccountMoveReversal(models.TransientModel):
         if move._l10n_vn_edi_is_sent():
             values.update({
                 'l10n_vn_edi_agreement_document_name': self.l10n_vn_edi_agreement_document_name or 'NA',
-                'l10n_vn_edi_agreement_document_date': self.l10n_vn_edi_agreement_document_date or fields.Datetime.now(),
+                'l10n_vn_edi_agreement_document_date': self.l10n_vn_edi_agreement_document_date or self.env.now,
                 'l10n_vn_edi_adjustment_type': self.l10n_vn_edi_adjustment_type,
             })
         return values
@@ -44,7 +44,7 @@ class AccountMoveReversal(models.TransientModel):
         if origin_move.l10n_vn_edi_invoice_state not in {False, 'ready_to_send'}:
             values.update({
                 'l10n_vn_edi_agreement_document_name': self.l10n_vn_edi_agreement_document_name or 'NA',
-                'l10n_vn_edi_agreement_document_date': self.l10n_vn_edi_agreement_document_date or fields.Datetime.now(),
+                'l10n_vn_edi_agreement_document_date': self.l10n_vn_edi_agreement_document_date or self.env.now,
                 'l10n_vn_edi_adjustment_type': self.l10n_vn_edi_adjustment_type,
                 'l10n_vn_edi_replacement_origin_id': origin_move.id,
             })

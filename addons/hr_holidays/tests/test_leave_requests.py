@@ -1123,7 +1123,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         self.employee_emp.resource_calendar_id = calendar
         # Take a time off on the next tuesday (when the employee is not
         # supposed to work) Previously this would raise a ValidationError.
-        next_tuesday = date_utils.start_of(fields.Date.today() + relativedelta(days=7), 'week') + relativedelta(days=1)
+        next_tuesday = date_utils.start_of(self.env.now.date() + relativedelta(days=7), 'week') + relativedelta(days=1)
         time_off = self.env['hr.leave'].with_context(leave_fast_create=True).create({
             'name': 'Holiday Request',
             'employee_id': self.employee_emp_id,

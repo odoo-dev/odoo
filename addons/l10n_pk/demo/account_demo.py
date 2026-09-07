@@ -56,7 +56,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'l10n_pk.res_partner_punjab',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=1),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=1),
                     'journal_id': 'sale',
                     'invoice_line_ids': [
                         Command.create({
@@ -91,7 +91,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'l10n_pk.res_partner_punjab',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=2),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=2),
                     'journal_id': 'sale',
                     'invoice_line_ids': [
                         Command.create({
@@ -117,7 +117,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'base.res_partner_3',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=3),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=3),
                     'journal_id': 'sale',
                     'invoice_line_ids': [
                         Command.create({
@@ -131,8 +131,8 @@ class AccountChartTemplate(models.AbstractModel):
                 self.company_xmlid('l10n_pk_demo_reconcile_1'): {
                     'move_type': 'out_refund',
                     'partner_id': 'l10n_pk.res_partner_punjab',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=1),
-                    'delivery_date': fields.Datetime.today() - relativedelta(days=1),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=1),
+                    'delivery_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=1),
                     'invoice_line_ids': [
                         Command.create({
                             'product_id': 'product.product_product_8',
@@ -164,8 +164,8 @@ class AccountChartTemplate(models.AbstractModel):
                 self.company_xmlid('l10n_pk_demo_reconcile_2'): {
                     'move_type': 'out_refund',
                     'partner_id': 'base.res_partner_3',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=2),
-                    'delivery_date': fields.Datetime.today() - relativedelta(days=2),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=2),
+                    'delivery_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=2),
                     'invoice_line_ids': [
                         Command.create({
                             'product_id': 'product.product_product_4',
@@ -181,7 +181,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'l10n_pk.res_partner_islamabad',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=1),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=1),
                     'invoice_line_ids': [
                         Command.create({
                             'product_id': 'product.consu_delivery_01',
@@ -208,7 +208,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'l10n_pk.res_partner_islamabad',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=2),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=2),
                     'invoice_line_ids': [
                         Command.create({
                             'product_id': 'product.product_product_8',
@@ -234,7 +234,7 @@ class AccountChartTemplate(models.AbstractModel):
                     'partner_id': 'l10n_pk.res_partner_islamabad',
                     'invoice_user_id': 'base.user_demo',
                     'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                    'invoice_date': fields.Datetime.today() - relativedelta(days=3),
+                    'invoice_date': self.env.now.replace(hour=0, minute=0, second=0) - relativedelta(days=3),
                     'invoice_line_ids': [
                         Command.create({
                             'product_id': 'product.product_product_9',

@@ -78,7 +78,7 @@ class ValuationReconciliationTestCommon(AccountTestInvoicingCommon):
             pickings._action_done()
 
         if not date:
-            date = fields.Date.today()
+            date = self.env.now.date()
             do_picking()
             return
         with freeze_time(date):

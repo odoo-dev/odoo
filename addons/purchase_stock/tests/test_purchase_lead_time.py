@@ -19,7 +19,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             and company's Purchase Lead Time."""
         self._use_route_buy(self.product)
         # Make procurement request from product_1's form view, create procurement and check it's state
-        date_planned = fields.Datetime.now() + timedelta(days=10)
+        date_planned = self.env.now + timedelta(days=10)
         self._make_procurement(self.product, 15.00, date_planned=date_planned)
         purchase = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
 
@@ -49,12 +49,12 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         self.product_2 = self.product.copy()
         self._use_route_buy(self.product_2)
         # Make procurement request from product_1's form view, create procurement and check it's state
-        date_planned1 = fields.Datetime.now() + timedelta(days=5)
+        date_planned1 = self.env.now + timedelta(days=5)
         self._make_procurement(self.product, 10.00, date_planned=date_planned1)
         purchase1 = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Make procurement request from product_2's form view, create procurement and check it's state
-        date_planned2 = fields.Datetime.now() + timedelta(days=10)
+        date_planned2 = self.env.now + timedelta(days=10)
         self._make_procurement(self.product_2, 5.00, date_planned=date_planned2)
         purchase2 = self.env['purchase.order.line'].search([('product_id', '=', self.product_2.id)], limit=1).order_id
 
@@ -100,7 +100,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
         self.vendor.group_rfq = 'day'
         # Make procurement request from product_1's form view, create procurement and check it's state
-        date_planned = fields.Datetime.now()
+        date_planned = self.env.now
         ref1, ref2 = self.env['stock.reference'].create([
             {'name': 'SO001'},
             {'name': 'SO002'},
@@ -152,7 +152,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         self.vendor.group_rfq = 'week'
         self.vendor.group_on = '2'  # Tuesday
         # Make procurement request from product_1's form view, create procurement and check it's state
-        date_planned = fields.Datetime.now() + timedelta(days=2)
+        date_planned = self.env.now + timedelta(days=2)
         ref1, ref2 = self.env['stock.reference'].create([
             {'name': 'SO001'},
             {'name': 'SO002'},
@@ -161,7 +161,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         purchase1 = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Make procurement request from product_2's form view, create procurement and check it's state
-        date_planned = fields.Datetime.now() + timedelta(days=3)
+        date_planned = self.env.now + timedelta(days=3)
         self._make_procurement(self.product_2, 5.00, date_planned=date_planned, procurement_values={'reference_ids': ref2})
         purchase2 = self.env['purchase.order.line'].search([('product_id', '=', self.product_2.id)], limit=1).order_id
 
@@ -250,7 +250,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         procurement_values = {
             'warehouse_id': self.warehouse,
             'rule_id': self.warehouse.buy_pull_id,
-            'date_planned': fields.Datetime.now() + timedelta(days=10),
+            'date_planned': self.env.now + timedelta(days=10),
             'group_id': False,
             'route_ids': [],
         }
@@ -408,13 +408,13 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
         self.env['stock.rule'].run_scheduler()
         po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
-        expected_date_order = fields.Date.today() + timedelta(days=2)
+        expected_date_order = self.env.now.date() + timedelta(days=2)
         self.assertEqual(fields.Date.to_date(po_line.order_id.date_order), expected_date_order)
         self.assertEqual(len(po_line), 1)
         self.assertEqual(po_line.product_uom_qty, 25.0)
         self.assertEqual(len(po_line.order_id), 1)
 
-        self.mock_date.today.return_value = fields.Date.today() + timedelta(days=2)
+        self.mock_date.today.return_value = self.env.now.date() + timedelta(days=2)
         self.env.invalidate_all()
         self.env['stock.rule'].run_scheduler()
         po_line02 = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
@@ -443,7 +443,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         self.env['stock.rule'].run_scheduler()
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)])
 
-        today = datetime.combine(fields.Datetime.now(), time(12))
+        today = datetime.combine(self.env.now, time(12))
         self.assertEqual(purchase_order.date_order, today)
         self.assertEqual(purchase_order.date_planned, today + timedelta(days=7))
 

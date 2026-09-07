@@ -18,7 +18,7 @@ class TestImLivechatSessionViews(TestImLivechatCommon):
         self.livechat_channel.user_ids |= operator
         self.authenticate(None, None)
         # Freeze time to get around the last 30 days default filter hidding messages in tours
-        with self.mock_datetime_and_now(fields.Datetime.now() - timedelta(days=15)):
+        with self.mock_datetime_and_now(self.env.now - timedelta(days=15)):
             self.env["mail.presence"]._update_presence(operator)
             data = self.make_jsonrpc_request("/im_livechat/get_session", {
                 "channel_id": self.livechat_channel.id,
@@ -43,7 +43,7 @@ class TestImLivechatSessionViews(TestImLivechatCommon):
         )
         [user_1, user_2] = self.env["res.partner"].create([{"name": "test 1"}, {"name": "test 2"}])
         # Freeze time to get around the last 30 days default filter hidding messages in tours
-        with self.mock_datetime_and_now(fields.Datetime.now() - timedelta(days=15)):
+        with self.mock_datetime_and_now(self.env.now - timedelta(days=15)):
             [channel1, channel2] = self.env["discuss.channel"].create(
                 [
                     {

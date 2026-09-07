@@ -156,7 +156,7 @@ class StockWarehouseOrderpoint(models.Model):
         the deadline date. """
         self.fetch(['qty_on_hand'])
         critical_orderpoints = self.filtered(lambda o: o.qty_on_hand < o.product_min_qty)
-        critical_orderpoints.deadline_date = fields.Date.today()
+        critical_orderpoints.deadline_date = self.env.now.date()
         orderpoints_to_compute = self - critical_orderpoints
         if not orderpoints_to_compute:
             return
@@ -164,7 +164,7 @@ class StockWarehouseOrderpoint(models.Model):
         # We have to filter by company here in case of multi-company and because horizon_days is a company setting
         for company in orderpoints_to_compute.company_id:
             company_orderpoints = orderpoints_to_compute.filtered(lambda c: c.company_id == company)
-            horizon_date = fields.Date.today() + relativedelta(days=company_orderpoints.get_horizon_days())
+            horizon_date = self.env.now.date() + relativedelta(days=company_orderpoints.get_horizon_days())
             _, domain_move_in, domain_move_out, __, __ = company_orderpoints.product_id._get_domain_locations()
             domain_move_in = Domain.AND([
                 [('product_id', 'in', company_orderpoints.product_id.ids)],
@@ -209,7 +209,7 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in orderpoints_to_compute:
             values = orderpoint._get_lead_days_values()
             lead_days, _ = orderpoint.rule_ids._get_lead_days(orderpoint.product_id, bypass_delay_description=True, **values)
-            orderpoint.lead_horizon_date = fields.Date.today() + relativedelta(days=lead_days['total_delay'] + lead_days['horizon_time'])
+            orderpoint.lead_horizon_date = self.env.now.date() + relativedelta(days=lead_days['total_delay'] + lead_days['horizon_time'])
             orderpoint.lead_days = lead_days['total_delay']
         (self - orderpoints_to_compute).lead_horizon_date = False
         (self - orderpoints_to_compute).lead_days = 0
@@ -598,7 +598,7 @@ class StockWarehouseOrderpoint(models.Model):
                     ploc_per_day[lead_days['total_delay'] + lead_days['horizon_time'], loc].add(product.id)
 
         # recompute virtual_available with lead days
-        today = fields.Datetime.now().replace(hour=23, minute=59, second=59)
+        today = self.env.now.replace(hour=23, minute=59, second=59)
         product_ids = set()
         location_ids = set()
         for (days, loc), prod_ids in ploc_per_day.items():
@@ -730,7 +730,7 @@ class StockWarehouseOrderpoint(models.Model):
         comming from an orderpoint. This method could be override in order to add other custom key that could
         be used in move/po creation.
         """
-        date_deadline = date or fields.Date.today()
+        date_deadline = date or self.env.now.date()
         dates_info = self.product_id._get_dates_info(date_deadline, self.location_id, route_ids=self.route_id)
         values = {
             'route_ids': self.route_id,
@@ -861,7 +861,7 @@ class StockWarehouseOrderpoint(models.Model):
         self.ensure_one()
         if not period:
             period = self.min_max_based_on
-        today = fields.Datetime.now()
+        today = self.env.now
         start_date = limit_date = today
         if period == 'one_week':
             start_date = start_date - relativedelta(weeks=1)

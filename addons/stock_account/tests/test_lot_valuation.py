@@ -330,8 +330,8 @@ class TestLotValuation(TestStockValuationCommon):
             'location_id': self.stock_location.id,
             'company_id': self.company.id,
         })
-        date_in = fields.Datetime.now() - timedelta(days=2)
-        date_out = fields.Datetime.now() - timedelta(days=1)
+        date_in = self.env.now - timedelta(days=2)
+        date_out = self.env.now - timedelta(days=1)
         after_in = fields.Datetime.to_string(date_in + timedelta(seconds=1))
         after_out = fields.Datetime.to_string(date_out + timedelta(seconds=1))
 
@@ -443,7 +443,7 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_lot_average_vacuum(self):
         """ Test lot AVCO with negative stock fill """
-        with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+        with freeze_time(self.env.now - timedelta(seconds=10)):
             self.product.standard_price = 9
         self._make_out_move(self.product, 2, lot_ids=[self.lot1])
         self._make_out_move(self.product, 3, lot_ids=[self.lot2])
@@ -455,7 +455,7 @@ class TestLotValuation(TestStockValuationCommon):
         self.assertEqual(self.lot3.standard_price, 7)
 
     def test_return_lot_valuated(self):
-        with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+        with freeze_time(self.env.now - timedelta(seconds=10)):
             self.product.standard_price = 9
         move = self._make_out_move(self.product, 3, create_picking=True, lot_ids=[self.lot1, self.lot2, self.lot3])
         self.assertEqual(self.product.total_value, -27)
@@ -659,7 +659,7 @@ class TestLotValuation(TestStockValuationCommon):
         Stock report at date should show correct value for lot valuated
         AVCO products even if the lot has been fully consumed.
         """
-        now = fields.Datetime.now()
+        now = self.env.now
         date_1 = now + timedelta(days=1)
         date_2 = now + timedelta(days=2)
 
@@ -712,7 +712,7 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_avco_lot_replay_single(self):
         """Backdating an in move re-prices the AVCO out move of the same lot."""
-        now = fields.Datetime.now()
+        now = self.env.now
         product = self.product
         lot1 = self.lot1
 
@@ -731,7 +731,7 @@ class TestLotValuation(TestStockValuationCommon):
     def test_avco_lot_replay_multi(self):
         """Backdating a lot2 receipt must re-price the lot2 delivery with the lot2
         average, not the product-wide average (lot1 is much cheaper)."""
-        now = fields.Datetime.now()
+        now = self.env.now
         product = self.product
         lot1, lot2 = self.lot1, self.lot2
 
@@ -780,7 +780,7 @@ class TestLotValuation(TestStockValuationCommon):
     def test_fifo_lot_replay_single(self):
         """Backdating a cheaper receipt reshuffles the FIFO layers of the lot and
         re-prices the delivery accordingly."""
-        now = fields.Datetime.now()
+        now = self.env.now
         product = self.product
         product.categ_id = self.category_fifo
         lot1 = self.lot1
@@ -800,7 +800,7 @@ class TestLotValuation(TestStockValuationCommon):
         """A replay triggered on a lot-valuated FIFO product must keep each lot's
         delivery priced from its own layers, not the product-wide FIFO stack
         (lot1 is older and much cheaper than the delivered lot2)."""
-        now = fields.Datetime.now()
+        now = self.env.now
         product = self.product
         product.categ_id = self.category_fifo
         lot1, lot2 = self.lot1, self.lot2

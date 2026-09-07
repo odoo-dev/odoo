@@ -307,13 +307,13 @@ class CalendarEvent(models.Model):
         # in case of full sync, limit to a range of 1y in past and 1y in the future by default
         ICP = self.env['ir.config_parameter'].sudo()
         day_range = ICP.get_int('microsoft_calendar.sync.range_days') or 365
-        lower_bound = fields.Datetime.subtract(fields.Datetime.now(), days=day_range)
-        upper_bound = fields.Datetime.add(fields.Datetime.now(), days=day_range)
+        lower_bound = fields.Datetime.subtract(self.env.now, days=day_range)
+        upper_bound = fields.Datetime.add(self.env.now, days=day_range)
 
         # Define 'custom_lower_bound_range' param for limiting old events updates in Odoo and avoid spam on Microsoft.
         custom_lower_bound_range = ICP.get_int('microsoft_calendar.sync.lower_bound_range')
         if custom_lower_bound_range:
-            lower_bound = fields.Datetime.subtract(fields.Datetime.now(), days=custom_lower_bound_range)
+            lower_bound = fields.Datetime.subtract(self.env.now, days=custom_lower_bound_range)
         domain = Domain([
             ('partner_ids.user_ids', 'in', [self.env.user.id]),
             ('stop', '>', lower_bound),
@@ -636,9 +636,9 @@ class CalendarEvent(models.Model):
                 pattern['index'] = byday_selection[recurrence.byday]
 
             if recurrence.rrule_type == 'yearly':
-                pattern['month'] = (recurrence.dtstart or recurrence.create_date or fields.Datetime.now()).month
+                pattern['month'] = (recurrence.dtstart or recurrence.create_date or self.env.now).month
 
-            dtstart = recurrence.dtstart or fields.Datetime.now()
+            dtstart = recurrence.dtstart or self.env.now
             rule_range = {
                 'startDate': (dtstart.date()).isoformat()
             }

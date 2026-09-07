@@ -567,7 +567,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         # Post vendor bill at $10 instead of the PO's $5
         po.action_create_invoice()
         bill = po.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.invoice_line_ids.price_unit = 10.0
         bill.action_post()
         # The AVCO cost must be updated to bill price + component cost = $10 + $2 = $12.

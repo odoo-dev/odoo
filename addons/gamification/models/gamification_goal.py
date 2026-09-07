@@ -125,7 +125,7 @@ class GamificationGoal(models.Model):
             # success, do no set closed as can still change
             result['state'] = 'reached'
 
-        elif self.end_date and fields.Date.today() > self.end_date:
+        elif self.end_date and self.env.now.date() > self.end_date:
             # check goal failure
             result['state'] = 'failed'
             result['closed'] = True

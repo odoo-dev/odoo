@@ -104,7 +104,7 @@ class PosPreset(models.Model):
             ('session_id.state', '!=', 'closed'),
             ('preset_time', '!=', False),
             ('state', 'in', ['draft', 'paid']),
-            ('create_date', '>=', fields.Datetime.now() - timedelta(days=1)),
+            ('create_date', '>=', self.env.now - timedelta(days=1)),
         ])
         for order in orders:
             sql_datetime_str = order.preset_time.strftime("%Y-%m-%d %H:%M:%S")

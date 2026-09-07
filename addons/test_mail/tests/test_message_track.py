@@ -941,9 +941,9 @@ class TestTrackingInternals(TestTrackingCommon):
         self.flush_tracking()
         self.assertEqual(test_record.currency_id, self.env.ref('base.USD'))
         messages = test_record.message_ids
-        today = fields.Date.today()
+        today = self.env.now.date()
         today_dt = fields.Datetime.to_datetime(today)
-        now = fields.Datetime.now()
+        now = self.env.now
 
         test_record.write({
             'boolean_field': True,

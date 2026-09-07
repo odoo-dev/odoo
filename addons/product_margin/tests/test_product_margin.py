@@ -133,7 +133,7 @@ class TestProductMargin(AccountTestInvoicingCommon):
         vendor_bill = self.env['account.move'].create([{
             'move_type': 'in_invoice',
             'partner_id': self.supplier.id,
-            'invoice_date': fields.Date.today(),
+            'invoice_date': self.env.now.date(),
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.ipad.id,
@@ -214,7 +214,7 @@ class TestProductMargin(AccountTestInvoicingCommon):
                 ],
             },
         ])
-        invoices.invoice_date = fields.Date.today()
+        invoices.invoice_date = self.env.now.date()
         invoices.action_post()
 
         # Expected Values

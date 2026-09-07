@@ -819,7 +819,7 @@ class TestAccountPayment(AccountTestInvoicingWithBanksCommon, MailCommon):
 
         payment.action_post()
 
-        year = fields.Date.today().year
+        year = self.env.now.date().year
         wizard = self.env['account.resequence.wizard'].with_context({
             'active_ids': payment.move_id.ids,
             'active_model': 'account.move',

@@ -164,7 +164,7 @@ class ProductProduct(models.Model):
             (isinstance(original_value, str) and len(original_value) == 10):
             to_date = datetime.combine(to_date.date(), time.max)
 
-        if to_date and to_date < fields.Datetime.now():
+        if to_date and to_date < self.env.now:
             dates_in_the_past = True
 
         domain_move_in = [('product_id', 'in', self.ids)] + domain_move_in_loc
@@ -303,14 +303,14 @@ class ProductProduct(models.Model):
                 ('state', '=', 'done'),
                 ('location_id.warehouse_id', '=', False),
                 ('location_dest_id.warehouse_id', '!=', False),
-                ('date', '>=', fields.Datetime.now() - relativedelta(years=1))
+                ('date', '>=', self.env.now - relativedelta(years=1))
             ], ['product_id'], ['__count'])
         outgoing_moves = self.env['stock.move.line']._read_group([
                 ('product_id', 'in', self.ids),
                 ('state', '=', 'done'),
                 ('location_id.warehouse_id', '!=', False),
                 ('location_dest_id.warehouse_id', '=', False),
-                ('date', '>=', fields.Datetime.now() - relativedelta(years=1))
+                ('date', '>=', self.env.now - relativedelta(years=1))
             ], ['product_id'], ['__count'])
         res_incoming = {product.id: count for product, count in incoming_moves}
         res_outgoing = {product.id: count for product, count in outgoing_moves}
@@ -940,14 +940,14 @@ class ProductTemplate(models.Model):
                 ('state', '=', 'done'),
                 ('location_id.warehouse_id', '=', False),
                 ('location_dest_id.warehouse_id', '!=', False),
-                ('date', '>=', fields.Datetime.now() - relativedelta(years=1))
+                ('date', '>=', self.env.now - relativedelta(years=1))
             ], ['product_id'], ['__count'])
         outgoing_moves = self.env['stock.move.line']._read_group([
                 ('product_id.product_tmpl_id', 'in', self.ids),
                 ('state', '=', 'done'),
                 ('location_id.warehouse_id', '!=', False),
                 ('location_dest_id.warehouse_id', '=', False),
-                ('date', '>=', fields.Datetime.now() - relativedelta(years=1))
+                ('date', '>=', self.env.now - relativedelta(years=1))
             ], ['product_id'], ['__count'])
         for product, count in incoming_moves:
             product_tmpl_id = product.product_tmpl_id.id

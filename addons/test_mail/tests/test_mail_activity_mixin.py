@@ -608,7 +608,7 @@ class TestActivityMixin(TestActivityCommon):
         }])
 
         # Attach two activities with two distinct plans to record_with_plan
-        today = fields.Date.today()
+        today = self.env.now.date()
         self.env['mail.activity'].create([{
             'activity_type_id': todo_activity_type.id,
             'res_id': record_with_plan.id,

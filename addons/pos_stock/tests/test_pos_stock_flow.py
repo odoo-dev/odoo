@@ -229,7 +229,7 @@ class TestPosStockFlow(CommonPosStockTest):
         self.pos_config_usd.current_session_id.update_stock_at_closing = False
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'shipping_date': fields.Date.today(),
+                'shipping_date': self.env.now.date(),
                 'partner_id': self.partner_mobt.id,
                 'pricelist_id': self.partner_mobt.property_product_pricelist.id,
             },
@@ -346,7 +346,7 @@ class TestPosStockFlow(CommonPosStockTest):
             'order_data': {
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
                 'partner_id': self.partner_adgu.id,
-                'shipping_date': fields.Date.today(),
+                'shipping_date': self.env.now.date(),
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_15_incl.product_variant_id.id},
@@ -574,7 +574,7 @@ class TestPosStockFlow(CommonPosStockTest):
             }]],
             'payment_ids': [(0, 0, {
                 'amount': 40,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             })],
             'amount_paid': 40.0,
@@ -617,14 +617,14 @@ class TestPosStockFlow(CommonPosStockTest):
                 'refunded_orderline_id': order.lines[1].id,
                 'price_type': 'automatic',
             }]],
-            'shipping_date': fields.Date.today(),
+            'shipping_date': self.env.now.date(),
             'sequence_number': 2,
             'to_invoice': True,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'uuid': '12345-123-1234',
             'payment_ids': [[0, 0, {
                 'amount': -40,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             }]],
             'is_refund': True,
@@ -658,7 +658,7 @@ class TestPosStockFlow(CommonPosStockTest):
             'company_id': self.env.company.id,
             'session_id': current_session.id,
             'partner_id': self.partner.id,
-            'shipping_date': fields.Date.today(),
+            'shipping_date': self.env.now.date(),
             'lines': [[0, 0, {
                 'name': "OL/0001",
                 'product_id': product.id,
@@ -671,7 +671,7 @@ class TestPosStockFlow(CommonPosStockTest):
             }]],
             'payment_ids': [(0, 0, {
                 'amount': 30,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id,
             })],
             'amount_paid': 30.0,
@@ -1077,14 +1077,14 @@ class TestPosStockFlow(CommonPosStockTest):
                     }]],
             'payment_ids': [(0, 0, {
                 'amount': 40.0,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             })],
             "amount_paid": 40.0,
             "amount_total": 40.0,
             "amount_tax": 0.0,
             "amount_return": 0.0,
-            "shipping_date": fields.Date.today(),
+            "shipping_date": self.env.now.date(),
             "to_invoice": True,
         }
         self.env["pos.order"].sync_from_ui([order_data])
@@ -1172,14 +1172,14 @@ class TestPosStockFlow(CommonPosStockTest):
             })],
             'payment_ids': [Command.create({
                 'amount': 10,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': self.cash_payment_method.id
             })],
             'amount_paid': 10.0,
             'amount_total': 10.0,
             'amount_tax': 0.0,
             'amount_return': 0.0,
-            'shipping_date': fields.Date.today(),
+            'shipping_date': self.env.now.date(),
         }
         self.env["pos.order"].sync_from_ui([order])
         moves = self.pos_config_usd.current_session_id.order_ids[0].picking_ids.move_ids
@@ -1265,7 +1265,7 @@ class TestPosStockFlow(CommonPosStockTest):
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
 
-        shipping_date = fields.Date.today() + relativedelta(days=1)
+        shipping_date = self.env.now.date() + relativedelta(days=1)
         order = self.env['pos.order'].create({
             'company_id': self.env.company.id,
             'session_id': current_session.id,
@@ -1326,7 +1326,7 @@ class TestPosStockFlow(CommonPosStockTest):
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
 
-        shipping_date = fields.Date.today() + relativedelta(days=1)
+        shipping_date = self.env.now.date() + relativedelta(days=1)
         # product1: 2 * $10 = $20, product2: 3 * $20 = $60, product3: 2 * $30 = $60
         order = self.env['pos.order'].create({
             'company_id': self.env.company.id,
@@ -1449,7 +1449,7 @@ class TestPosStockFlow(CommonPosStockTest):
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
 
-        shipping_date = fields.Date.today() + relativedelta(days=1)
+        shipping_date = self.env.now.date() + relativedelta(days=1)
         # product1=A: 2 * $10 = $20, product2=B: 1 * $20 = $20, product3=C: 1 * $30 = $30
         order = self.env['pos.order'].create({
             'company_id': self.env.company.id,

@@ -271,7 +271,7 @@ class MailScheduledMessage(models.Model):
     def _post_messages_cron(self, limit=50):
         """ Posts past-due scheduled messages.
         """
-        domain = [('scheduled_date', '<=', fields.Datetime.now())]
+        domain = [('scheduled_date', '<=', self.env.now)]
         messages_to_post = self.search(domain, limit=limit)
         _logger.info("Posting %s scheduled messages", len(messages_to_post))
         messages_to_post.with_context(mail_notify_force_send=True)._post_message(raise_exception=False)

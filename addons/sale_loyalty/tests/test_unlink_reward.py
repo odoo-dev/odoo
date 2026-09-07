@@ -71,7 +71,7 @@ class TestUnlinkReward(TestSaleCouponCommon):
         coupon = coupon_program.coupon_ids
         self._apply_promo_code(order, coupon.code)
         self.assertTrue(order.order_line.coupon_id)
-        with freeze_time(Date.today() - timedelta(days=1)):
-            coupon.expiration_date = Date.today()
+        with freeze_time(self.env.now.date() - timedelta(days=1)):
+            coupon.expiration_date = self.env.now.date()
         order._update_programs_and_rewards()
         self.assertFalse(order.order_line.coupon_id)

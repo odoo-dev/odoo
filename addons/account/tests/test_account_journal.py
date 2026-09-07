@@ -444,7 +444,7 @@ class TestAccountJournalAlias(AccountTestInvoicingCommon, MailCommon):
         invoice_non_latin = self.init_invoice(
             move_type='out_invoice',
             partner=self.partner_a,
-            invoice_date=fields.Date.today(),
+            invoice_date=self.env.now.date(),
             post=True,
             products=[self.product_a],
             journal=journal_non_latin,
@@ -452,7 +452,7 @@ class TestAccountJournalAlias(AccountTestInvoicingCommon, MailCommon):
         invoice_latin = self.init_invoice(
             move_type='out_invoice',
             partner=self.partner_a,
-            invoice_date=fields.Date.today(),
+            invoice_date=self.env.now.date(),
             post=True,
             products=[self.product_a],
             journal=journal_latin,

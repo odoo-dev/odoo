@@ -570,7 +570,7 @@ class TestLeadAssign(TestLeadAssignCommon):
         member_leads = self.env['crm.lead'].search([
             ('user_id', '=', test_sales_team_m1.user_id.id),
             ('team_id', '=', test_sales_team_m1.crm_team_id.id),
-            ('date_open', '>=', Datetime.now() - timedelta(hours=24)),
+            ('date_open', '>=', self.env.now - timedelta(hours=24)),
         ])
         self.assertEqual(
                 member_leads.filtered_domain(literal_eval(test_sales_team_m1.assignment_domain_preferred)),
@@ -624,7 +624,7 @@ class TestLeadAssign(TestLeadAssignCommon):
         member_leads = self.env['crm.lead'].search([
             ('user_id', '=', test_sales_team_m1.user_id.id),
             ('team_id', '=', test_sales_team_m1.crm_team_id.id),
-            ('date_open', '>=', Datetime.now() - timedelta(hours=24)),
+            ('date_open', '>=', self.env.now - timedelta(hours=24)),
         ])
         self.assertEqual(
                 len(member_leads.filtered_domain(literal_eval(test_sales_team_m1.assignment_domain_preferred))),

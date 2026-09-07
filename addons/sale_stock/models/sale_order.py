@@ -258,7 +258,7 @@ class SaleOrder(models.Model):
             and self.state == "sale"
             and self.effective_date
             and self.effective_date >= (
-                fields.Datetime.now() - timedelta(days=self.company_id.return_validity_days)
+                self.env.now - timedelta(days=self.company_id.return_validity_days)
             )
         )
 

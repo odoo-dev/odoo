@@ -240,7 +240,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
             push_rule.delay = 2
 
         rule_delay = sum(warehouse.reception_route_id.rule_ids.mapped('delay'))
-        date_planned = fields.Datetime.now() + timedelta(days=10)
+        date_planned = self.env.now + timedelta(days=10)
         # Create procurement order of product_1
         self.env['stock.rule'].run([self.env['stock.rule'].Procurement(
             self.product, 5.000, self.uom, warehouse.lot_stock_id, 'Test scheduler for RFQ', '/', self.env.company,

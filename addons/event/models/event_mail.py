@@ -108,7 +108,7 @@ class EventMail(models.Model):
         self.notification_type = 'mail'
 
     def execute(self):
-        now = fields.Datetime.now()
+        now = self.env.now
         for scheduler in self._filter_template_ref():
             if scheduler.interval_type == 'after_sub':
                 scheduler._execute_attendee_based()
@@ -196,7 +196,7 @@ class EventMail(models.Model):
             ]})
 
         # filter slots to contact
-        now = fields.Datetime.now()
+        now = self.env.now
         for mail_slot in self.mail_slot_ids:
             # before or after event -> one shot communication, once done skip
             if mail_slot.mail_done:
@@ -467,7 +467,7 @@ class EventMail(models.Model):
             # skip if event is cancelled
             ('event_id.kanban_state', '!=', 'cancel'),
             # scheduled
-            ('scheduled_date', '<=', fields.Datetime.now()),
+            ('scheduled_date', '<=', self.env.now),
             # event-based: todo / attendee-based: running until event is not done
             ('mail_done', '=', False),
             '|', ('interval_type', '!=', 'after_sub'), ('event_id.date_end', '>', self.env.cr.now()),

@@ -396,7 +396,7 @@ class EventTrack(models.Model):
     def _compute_track_time_data(self):
         """ Compute start and remaining time for track itself. Do everything in
         UTC as we compute only time deltas here. """
-        now_utc = fields.Datetime.now().replace(microsecond=0, tzinfo=UTC)
+        now_utc = self.env.now.replace(microsecond=0, tzinfo=UTC)
         for track in self:
             if not (track.date or track.date_end):
                 track.is_track_live = track.is_track_soon = track.is_track_today = track.is_track_upcoming = track.is_track_done = False
@@ -420,7 +420,7 @@ class EventTrack(models.Model):
     def _compute_cta_time_data(self):
         """ Compute start and remaining time for track itself. Do everything in
         UTC as we compute only time deltas here. """
-        now_utc = fields.Datetime.now().replace(microsecond=0, tzinfo=UTC)
+        now_utc = self.env.now.replace(microsecond=0, tzinfo=UTC)
         for track in self:
             if not track.website_cta:
                 track.is_website_cta_live = track.website_cta_start_remaining = False
@@ -645,7 +645,7 @@ class EventTrack(models.Model):
 
             date_tz = track.event_id.date_tz
             reminder_dates = track._get_track_calendar_reminder_dates()
-            cal_track.add('created').value = fields.Datetime.now().replace(tzinfo=ZoneInfo('UTC'))
+            cal_track.add('created').value = self.env.now.replace(tzinfo=ZoneInfo('UTC'))
             cal_track.add('dtstart').value = reminder_dates['date_begin'].astimezone(ZoneInfo(date_tz))
             cal_track.add('dtend').value = reminder_dates['date_end'].astimezone(ZoneInfo(date_tz))
             cal_track.add('summary').value = track.name

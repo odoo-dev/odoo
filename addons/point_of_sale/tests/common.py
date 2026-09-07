@@ -308,7 +308,7 @@ class CommonPosTest(AccountTestInvoicingCommon):
             'amount_paid': 0,
             'amount_tax': 0,
             'amount_return': 0,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'company_id': pos_config.company_id.id,
             'session_id': pos_config.current_session_id.id,
             'lines': [
@@ -718,7 +718,7 @@ class TestPoSCommon(AccountTestInvoicingCommon):
         def create_payment(payment_method, amount):
             return (0, 0, {
                 'amount': amount,
-                'name': fields.Datetime.now(),
+                'name': self.env.now,
                 'payment_method_id': payment_method.id,
             })
 
@@ -757,7 +757,7 @@ class TestPoSCommon(AccountTestInvoicingCommon):
             'amount_return': 0,
             'amount_tax': total_amount_incl - total_amount_base,
             'amount_total': total_amount_incl,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'fiscal_position_id': fiscal_position.id,
             'pricelist_id': self.config.pricelist_id.id,
             'name': 'Order %s' % uuid,

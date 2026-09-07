@@ -328,7 +328,7 @@ class TestPosMrp(CommonPosMrpTest):
                 'amount_return': 0,
                 'amount_tax': 0,
                 'amount_total': 200,
-                'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+                'date_order': fields.Datetime.to_string(self.env.now),
                 'fiscal_position_id': False,
                 'lines': [
                     Command.create({
@@ -361,7 +361,7 @@ class TestPosMrp(CommonPosMrpTest):
                 'payment_ids': [
                     Command.create({
                         'amount': 200,
-                        'name': fields.Datetime.now(),
+                        'name': self.env.now,
                         'payment_method_id': self.cash_payment_method.id
                     })
                 ],

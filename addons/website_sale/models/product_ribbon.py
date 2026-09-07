@@ -126,7 +126,7 @@ class ProductRibbon(models.Model):
         if (  # noqa: SIM103
             self.assign == "new"
             and (pub_date := product.publish_date)
-            and self.new_period >= (fields.Datetime.today() - pub_date).days
+            and self.new_period >= (self.env.now.replace(hour=0, minute=0, second=0) - pub_date).days
         ):
             return True
         # Check if the product is out of stock

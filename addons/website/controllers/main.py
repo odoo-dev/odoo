@@ -1810,7 +1810,7 @@ class Website(Home):
             ('name', '=', 'googleFontMetadata'),
             ('public', '=', True),
         ], limit=1)
-        yesterday = fields.Datetime.add(fields.Datetime.now(), days=-1)
+        yesterday = fields.Datetime.add(self.env.now, days=-1)
         if not metadata or metadata.write_date < yesterday:
             req = requests.get('https://fonts.google.com/metadata/fonts', timeout=5)
             if req.status_code != requests.codes.ok:

@@ -38,7 +38,7 @@ class PosMakePayment(models.TransientModel):
     amount = fields.Float(digits=0, required=True, default=_default_amount)
     payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True, default=_default_payment_method)
     payment_name = fields.Char(string='Payment Reference')
-    payment_date = fields.Datetime(string='Payment Date', required=True, default=lambda self: fields.Datetime.now())
+    payment_date = fields.Datetime(string='Payment Date', required=True, default=lambda self: self.env.now)
 
     def check(self):
         """Check the order:
@@ -69,7 +69,7 @@ class PosMakePayment(models.TransientModel):
         if order.state == 'draft' and order._is_pos_order_paid():
             order._process_saved_order(False)
             if order.state in {'paid', 'done'}:
-                order.write({'date_order': fields.Datetime.now()})
+                order.write({'date_order': self.env.now})
                 order._send_order()
                 order.config_id.notify_synchronisation(order.config_id.current_session_id.id, 0)
             return {'type': 'ir.actions.act_window_close'}

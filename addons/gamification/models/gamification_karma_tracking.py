@@ -70,7 +70,7 @@ class GamificationKarmaTracking(models.Model):
     @api.model
     def _consolidate_cron(self):
         """Consolidate the trackings 2 months ago. Used by a cron to cleanup tracking records."""
-        from_date = date_utils.start_of(fields.Datetime.today(), 'month') - relativedelta(months=2)
+        from_date = date_utils.start_of(self.env.now.replace(hour=0, minute=0, second=0), 'month') - relativedelta(months=2)
         return self._process_consolidate(from_date)
 
     def _process_consolidate(self, from_date, end_date=None):

@@ -216,7 +216,7 @@ class ProductProduct(models.Model):
         return action
 
     def _compute_mrp_product_qty(self):
-        date_from = fields.Datetime.to_string(fields.Datetime.now() - timedelta(days=365))
+        date_from = fields.Datetime.to_string(self.env.now - timedelta(days=365))
         domain = [
             ('production_id.state', '=', 'done'),
             ('product_id', 'in', self.ids),

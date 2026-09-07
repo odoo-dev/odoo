@@ -35,7 +35,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
                 'partner_id': cls.vendor.id,
                 'min_qty': 1,
                 'price': 10,
-                'date_start': fields.Date.today() - timedelta(days=1),
+                'date_start': self.env.now.date() - timedelta(days=1),
             })],
             'route_ids': [Command.set((cls.mto_route + cls.buy_route).ids)],
         })
@@ -116,7 +116,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
                 'product_id': product.id,
                 'product_uom_qty': 10,
             })],
-            'commitment_date': fields.Date.today() + timedelta(days=10),
+            'commitment_date': self.env.now.date() + timedelta(days=10),
         })
         sale_order.action_confirm()
         orderpoint = self.env['stock.warehouse.orderpoint'].create({

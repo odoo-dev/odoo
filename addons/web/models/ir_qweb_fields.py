@@ -34,7 +34,7 @@ class IrQwebFieldImage(models.AbstractModel):
             if max_width or max_height:
                 max_size = '%sx%s' % (max_width, max_height)
 
-        sha = hashlib.sha512(str(getattr(record, 'write_date', fields.Datetime.now())).encode('utf-8')).hexdigest()[:7]
+        sha = hashlib.sha512(str(getattr(record, 'write_date', self.env.now)).encode('utf-8')).hexdigest()[:7]
         max_size = '' if max_size is None else '/%s' % max_size
 
         if options.get('filename-field') and options['filename-field'] in record and record[options['filename-field']]:

@@ -111,7 +111,7 @@ class RestaurantFloor(models.Model):
             ('res_model', '=', 'restaurant.floor'),
             ('res_field', '=', False),
             ('res_id', '=', 0),
-            ('write_date', '<', fields.Datetime.now() - relativedelta(days=1))
+            ('write_date', '<', self.env.now - relativedelta(days=1))
         ]).unlink()
 
 

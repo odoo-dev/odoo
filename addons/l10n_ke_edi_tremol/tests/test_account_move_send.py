@@ -23,7 +23,7 @@ class TestKEAccountMoveSend(TestAccountMoveSendCommon):
             'l10n_ke_cu_invoice_number': 'test_ke_invoice_number',
             'l10n_ke_cu_serial_number': 'test_ke_serial_number',
             'l10n_ke_cu_qrcode': 'test_ke_qrcode',
-            'l10n_ke_cu_datetime': fields.Datetime.now() - timedelta(days=1),
+            'l10n_ke_cu_datetime': self.env.now - timedelta(days=1),
         })
 
         wizard = self.create_send_and_print(invoice)

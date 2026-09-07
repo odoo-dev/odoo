@@ -1243,7 +1243,7 @@ class HrExpense(models.Model):
                 aggregates=['id:recordset', 'last_notification_date:max'],
             )
         }
-        recent_threshold = fields.Datetime.now() - timedelta(hours=12)
+        recent_threshold = self.env.now - timedelta(hours=12)
         for company, expenses_submitted_per_company in self.grouped('company_id').items():
             parent_company_mails = company.parent_ids[::-1].mapped('email_formatted')
             mail_from = (
@@ -1300,7 +1300,7 @@ class HrExpense(models.Model):
                     'email_to': manager.employee_id.work_email or manager.email,
                     'subject': _("New expenses waiting for your approval"),
                 })
-                all_submitted_expenses.last_notification_date = fields.Datetime.now()
+                all_submitted_expenses.last_notification_date = self.env.now
         if new_mails:
             self.env['mail.mail'].sudo().create(new_mails).send()
 

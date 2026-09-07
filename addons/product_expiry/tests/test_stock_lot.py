@@ -530,8 +530,8 @@ class TestStockLot(TestStockCommon):
         })
         self.assertFalse(lot_without_expiration.expiration_date)
         self.apple_product.use_expiration_date = True
-        exp_date = fields.Datetime.today() + relativedelta(days=15)
-        sml_exp_date = fields.Datetime.today() + relativedelta(days=10)
+        exp_date = self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=15)
+        sml_exp_date = self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=10)
 
         lot = self.env['stock.lot'].create({
             'name': 'Lot 1',

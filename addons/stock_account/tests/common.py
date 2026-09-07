@@ -31,7 +31,7 @@ class TestStockValuationCommon(BaseCommon):
         invoice_vals = {
             "partner_id": self.vendor.id,
             "move_type": move_type,
-            "invoice_date": kwargs.get('invoice_date', fields.Date.today()),
+            "invoice_date": kwargs.get('invoice_date', self.env.now.date()),
             "invoice_line_ids": [],
         }
         if kwargs.get('reversed_entry_id'):
@@ -95,7 +95,7 @@ class TestStockValuationCommon(BaseCommon):
         return product
 
     def _use_multi_currencies(self, rates=None):
-        date_1 = fields.Date.today()
+        date_1 = self.env.now.date()
         date_2 = date_1 + relativedelta(days=1)
         date_3 = date_2 + relativedelta(days=1)
         rates = rates or [
@@ -447,7 +447,7 @@ class TestStockValuationCommon(BaseCommon):
                     "uom_id": cls.uom.id,
                     "is_storable": True,
                     }
-        with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+        with freeze_time(self.env.now - timedelta(seconds=10)):
             cls.product = cls.env['product.product'].create(
                 {**cls.product_common_vals, 'name': 'Storable Product'}).with_context(clean_context(cls.env.context))
             cls.product_standard = cls.env['product.product'].create({

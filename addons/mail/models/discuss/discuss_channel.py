@@ -146,7 +146,7 @@ class DiscussChannel(models.Model):
     message_count = fields.Integer("# Messages", readonly=True, compute="_compute_message_count")
     last_interest_dt = fields.Datetime(
         "Last Activity",
-        default=lambda self: fields.Datetime.now() - timedelta(seconds=1),
+        default=lambda self: self.env.now - timedelta(seconds=1),
         index=True,
         help="Contains the date and time of the last interesting event that happened in this channel. This updates itself when new message posted.",
     )
@@ -678,7 +678,7 @@ class DiscussChannel(models.Model):
         Tests and module install/upgrade keep writing synchronously (see below). Reads and sorting keep
         using the indexed channel column.
         """
-        date = date or fields.Datetime.now()
+        date = date or self.env.now
         # Postcommit hooks are skipped by TestCursor.commit() in tests, and the separate transaction
         # below is unsafe while the registry is still loading (module install/upgrade); in both cases
         # nothing drains the queue, so write synchronously to avoid stale reads.
@@ -697,7 +697,7 @@ class DiscussChannel(models.Model):
             dbname = cr.dbname
             # sudo: ir.cron - the poster may be a public/guest visitor with no access to the cron.
             trigger = self.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt").sudo()._trigger(
-                at=fields.Datetime.now() + timedelta(minutes=1)
+                at=self.env.now + timedelta(minutes=1)
             )
 
             @cr.postcommit.add
@@ -776,7 +776,7 @@ class DiscussChannel(models.Model):
             cron._trigger()  # progress made and a reachable row remains: drain it right away
         elif locked_ids or drainable:
             # only locked channels left, or no progress this run: retry after a delay to let locks release
-            cron._trigger(at=fields.Datetime.now() + timedelta(minutes=1))
+            cron._trigger(at=self.env.now + timedelta(minutes=1))
 
     # ------------------------------------------------------------
     # MEMBERS MANAGEMENT
@@ -823,7 +823,7 @@ class DiscussChannel(models.Model):
                         {"close_chat_window": True, "isLocallyPinned": False},
                     )
         else:
-            self.self_member_id.unpin_dt = fields.Datetime.now()
+            self.self_member_id.unpin_dt = self.env.now
 
     def _add_members(
         self,
@@ -1055,7 +1055,7 @@ class DiscussChannel(models.Model):
             # sudo: mail.guest - internal users only have read access on guests, and the
             # invited addresses back no contact to invite under their own identity.
             guests |= self.env["mail.guest"].sudo().create(guests_to_create).sudo(False)
-        invitation_sent_dt = fields.Datetime.now()
+        invitation_sent_dt = self.env.now
         create_member_params = {"invitation_sent_dt": invitation_sent_dt}
         new_members = self._add_members(
             guests=guests, create_member_params=create_member_params, post_joined_message=False
@@ -1714,7 +1714,7 @@ class DiscussChannel(models.Model):
         )
         result = self.env.cr.dictfetchall()
         # use the same "now" in the whole function to ensure unpin_dt > last_interest_dt
-        now = fields.Datetime.now()
+        now = self.env.now
         last_interest_dt = now - timedelta(seconds=1)
         if result:
             # get the existing channel between the given partners
@@ -1783,7 +1783,7 @@ class DiscussChannel(models.Model):
     def channel_join(self):
         """Shortcut to add the current user as member of self channels.
         If the user is already a member, updates the last_interest_dt."""
-        self.self_member_id.last_interest_dt = fields.Datetime.now()
+        self.self_member_id.last_interest_dt = self.env.now
         (self - self.self_member_id.channel_id)._add_members(users=self.env.user)
 
     def open_chat_window_action(self):

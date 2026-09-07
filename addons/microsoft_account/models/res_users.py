@@ -18,5 +18,5 @@ class ResUsers(models.Model):
         self.write({
             'microsoft_calendar_rtoken': refresh_token,
             'microsoft_calendar_token': access_token,
-            'microsoft_calendar_token_validity': fields.Datetime.now() + timedelta(seconds=ttl) if ttl else False,
+            'microsoft_calendar_token_validity': self.env.now + timedelta(seconds=ttl) if ttl else False,
         })

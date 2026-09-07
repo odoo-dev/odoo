@@ -337,7 +337,7 @@ class TestLivechatBasicFlowHttpCase(HttpCase, TestLivechatCommon):
         channel = self._common_basic_flow()
         guest = self.env["mail.guest"].search([], order="id desc", limit=1)
         guest_member = channel.channel_member_ids.filtered(lambda m: m.guest_id == guest)
-        agent_left_dt = fields.Datetime.now()
+        agent_left_dt = self.env.now
         with freeze_time(agent_left_dt):
             channel.with_user(self.operator).action_unfollow()
         self._reset_bus()

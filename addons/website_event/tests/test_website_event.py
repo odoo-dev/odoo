@@ -59,8 +59,8 @@ class TestUi(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
     def test_website_event_tour_admin(self):
         self.upcoming_event = self.env['event.event'].create({
             'name': 'Upcoming Event',
-            'date_begin': fields.Datetime.now() + relativedelta(days=10),
-            'date_end': fields.Datetime.now() + relativedelta(days=13),
+            'date_begin': self.env.now + relativedelta(days=10),
+            'date_end': self.env.now + relativedelta(days=13),
             'website_published': True,
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'website_event_tour', login='admin')
@@ -86,15 +86,15 @@ class TestUi(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
 
         self.design_fair_event = self.env['event.event'].create({
             'name': 'Design Fair New York',
-            'date_begin': fields.Datetime.now() - relativedelta(days=15),
-            'date_end': fields.Datetime.now() + relativedelta(days=15),
+            'date_begin': self.env.now - relativedelta(days=15),
+            'date_end': self.env.now + relativedelta(days=15),
             'event_ticket_ids': [(0, 0, {
                 'name': 'Free',
-                'start_sale_datetime': fields.Datetime.now() - relativedelta(days=15),
+                'start_sale_datetime': self.env.now - relativedelta(days=15),
                 'limit_max_per_order': 22,
             }), (0, 0, {
                 'name': 'Other',
-                'start_sale_datetime': fields.Datetime.now() - relativedelta(days=15)
+                'start_sale_datetime': self.env.now - relativedelta(days=15)
             })],
             'seats_limited': True,
             'seats_max': 28,

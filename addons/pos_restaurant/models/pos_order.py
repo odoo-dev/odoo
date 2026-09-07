@@ -11,7 +11,7 @@ class PosOrder(models.Model):
     duration = fields.Char(string='Duration', compute='_compute_duration', help="Shows how long the table has been occupied.")
 
     def _compute_duration(self):
-        current_time = fields.Datetime.now()
+        current_time = self.env.now
         for order in self:
             if not order.table_id:
                 order.duration = ""

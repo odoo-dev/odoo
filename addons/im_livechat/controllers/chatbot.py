@@ -75,7 +75,7 @@ class LivechatChatbotScriptController(http.Controller):
                 next_step = chatbot.script_step_ids[:1]
         if not next_step:
             # sudo - discuss.channel: marking the channel as closed as part of the chat bot flow
-            discuss_channel.sudo().livechat_end_dt = fields.Datetime.now()
+            discuss_channel.sudo().livechat_end_dt = self.env.now
             step_message = next((
                 # sudo - chatbot.message.id: visitor can access chat bot messages.
                 m.mail_message_id for m in discuss_channel.sudo().chatbot_message_ids

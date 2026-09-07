@@ -79,21 +79,21 @@ class MailNotification(models.Model):
         messages.check_access('read')
         for vals in vals_list:
             if vals.get('is_read'):
-                vals['read_date'] = fields.Datetime.now()
+                vals['read_date'] = self.env.now
         return super().create(vals_list)
 
     def write(self, vals):
         if ('mail_message_id' in vals or 'res_partner_id' in vals) and not self.env.is_admin():
             raise AccessError(_("Can not update the message or recipient of a notification."))
         if vals.get('is_read'):
-            vals['read_date'] = fields.Datetime.now()
+            vals['read_date'] = self.env.now
         return super().write(vals)
 
     @api.model
     def _gc_notifications(self, max_age_days=180):
         domain = [
             ('is_read', '=', True),
-            ('read_date', '<', fields.Datetime.now() - relativedelta(days=max_age_days)),
+            ('read_date', '<', self.env.now - relativedelta(days=max_age_days)),
             ('res_partner_id.partner_share', '=', False),
             ('notification_status', 'in', ('sent', 'canceled'))
         ]

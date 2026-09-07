@@ -60,7 +60,7 @@ class RazorpayController(Controller):
                 "payment_razorpay.authorization_error",
                 qcontext={"error_message": str(e), "provider_url": redirect_url},
             )
-        expires_in = fields.Datetime.now() + timedelta(seconds=int(response_content["expires_in"]))
+        expires_in = self.env.now + timedelta(seconds=int(response_content["expires_in"]))
         provider.write({
             # Reset the classical API key fields.
             "razorpay_key_id": None,

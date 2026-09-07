@@ -72,7 +72,7 @@ class TestProductPricelist(ProductCommon):
         cls.new_currency = cls.env['res.currency'].create({
             'name': 'Wonderful Currency',
             'symbol': ':)',
-            'rate_ids': [Command.create({'rate': 10, 'name': Date.subtract(Date.today(), days=1)})],
+            'rate_ids': [Command.create({'rate': 10, 'name': Date.subtract(self.env.now.date(), days=1)})],
         })
 
         cls.ipad_retina_display.write({'uom_id': cls.uom_unit.id, 'categ_id': cls.category_5_id})

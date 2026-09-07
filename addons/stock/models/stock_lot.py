@@ -221,7 +221,7 @@ class StockLot(models.Model):
         owner_id = self.env.context.get('owner_id')
         package_id = self.env.context.get('package_id')
         to_date = fields.Datetime.to_datetime(self.env.context.get('to_date'))
-        dates_in_the_past = to_date and to_date < fields.Datetime.now()
+        dates_in_the_past = to_date and to_date < self.env.now
         domain_quant = Domain([('lot_id', 'in', self.ids)]) & domain_quant_loc
         if owner_id is not None:
             domain_quant &= Domain([('owner_id', '=', owner_id)])

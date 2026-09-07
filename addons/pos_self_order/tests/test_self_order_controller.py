@@ -490,7 +490,7 @@ class TestSelfOrderController(SelfOrderCommonTest):
             'amount_paid': 0,
             'amount_tax': 0,
             'amount_return': 0,
-            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'date_order': fields.Datetime.to_string(self.env.now),
             'company_id': self.env.company.id,
             'session_id': self.pos_config.current_session_id.id,
             'lines': [Command.create({

@@ -110,7 +110,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
     @users('survey_manager')
     def test_survey_invite(self):
         Answer = self.env['survey.user_input']
-        deadline = fields.Datetime.now() + relativedelta(months=1)
+        deadline = self.env.now + relativedelta(months=1)
 
         self.survey.write({'access_mode': 'public', 'users_login_required': False})
         invite_form = Form.from_action(self.env, self.survey.action_send_survey())

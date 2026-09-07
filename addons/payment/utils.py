@@ -140,7 +140,7 @@ def singularize_reference_prefix(prefix="tx", separator="-", max_length=None):
         DATETIME_LENGTH = 14
         assert max_length >= 1 + len(separator) + DATETIME_LENGTH  # 1 char + separator + datetime
         prefix = prefix[: max_length - len(separator) - DATETIME_LENGTH]
-    return f"{prefix}{separator}{fields.Datetime.now().strftime('%Y%m%d%H%M%S')}"
+    return f"{prefix}{separator}{self.env.now.strftime('%Y%m%d%H%M%S')}"
 
 
 def to_major_currency_units(minor_amount, currency, arbitrary_decimal_number=None):

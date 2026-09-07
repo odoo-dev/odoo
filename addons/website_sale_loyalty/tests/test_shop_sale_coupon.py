@@ -353,7 +353,7 @@ class TestWebsiteSaleCoupon(HttpCase, WebsiteSaleCommon):
             SQL(
                 "UPDATE %s SET write_date = %s WHERE id = %s",
                 SQL.identifier(order._table),
-                fields.Datetime.to_string(fields.Datetime.now() - timedelta(days=4, hours=2)),
+                fields.Datetime.to_string(self.env.now - timedelta(days=4, hours=2)),
                 order.id,
             )
         )

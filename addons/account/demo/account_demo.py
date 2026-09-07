@@ -130,7 +130,7 @@ class AccountChartTemplate(models.AbstractModel):
 
     @template(model='account.move', demo=True)
     def _get_demo_data_move(self, template_code):
-        one_month_ago = fields.Date.today() + relativedelta(months=-1)
+        one_month_ago = self.env.now.date() + relativedelta(months=-1)
         default_receivable = self.env.company.partner_id.property_account_receivable_id
         income_account = self.env['account.account'].search([
             *self.env['account.account']._check_company_domain(self.env.company),
@@ -154,8 +154,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'move_type': 'out_invoice',
                 'partner_id': 'base.res_partner_2',
                 'invoice_user_id': False,
-                'invoice_date': (fields.Date.today() + timedelta(days=-2)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-2)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-2)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-2)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_03', 'quantity': 5}),
                     Command.create({'product_id': 'product.consu_delivery_01', 'quantity': 20}),
@@ -165,8 +165,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'move_type': 'out_invoice',
                 'partner_id': 'base.res_partner_2',
                 'invoice_user_id': 'base.user_demo',
-                'invoice_date': (fields.Date.today() + timedelta(days=-3)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-3)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-3)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-3)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_01', 'quantity': 5}),
                     Command.create({'product_id': 'product.consu_delivery_03', 'quantity': 5}),
@@ -177,8 +177,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'partner_id': 'base.res_partner_2',
                 'invoice_user_id': 'base.user_admin',
                 'invoice_payment_term_id': 'account.account_payment_term_immediate',
-                'invoice_date': (fields.Date.today() + timedelta(days=-15)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-15)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-15)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-15)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_02', 'quantity': 5}),
                     Command.create({'product_id': 'product.consu_delivery_03', 'quantity': 5}),
@@ -189,8 +189,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'partner_id': 'base.res_partner_5',
                 'invoice_user_id': 'base.user_admin',
                 'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                'invoice_date': (fields.Date.today() + timedelta(days=-40)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-40)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-40)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-40)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.product_order_01', 'price_unit': 200, 'quantity': 10}),
                 ],
@@ -200,8 +200,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'partner_id': 'base.res_partner_5',
                 'invoice_user_id': 'base.user_admin',
                 'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                'invoice_date': (fields.Date.today() + timedelta(days=-35)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-35)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-35)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-35)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.product_order_01', 'price_unit': 100.0, 'quantity': 10}),
                 ],
@@ -211,8 +211,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'partner_id': 'base.res_partner_5',
                 'invoice_user_id': 'base.user_admin',
                 'invoice_payment_term_id': 'account.account_payment_term_end_following_month',
-                'invoice_date': (fields.Date.today() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.product_order_01', 'price_unit': 275, 'quantity': 1}),
                 ],
@@ -231,11 +231,11 @@ class AccountChartTemplate(models.AbstractModel):
             },
             self.company_xmlid('demo_invoice_equipment_purchase'): {
                 'move_type': 'in_invoice',
-                'ref': f'INV/{(fields.Date.today() + timedelta(days=-20)).year}/0057',
+                'ref': f'INV/{(self.env.now.date() + timedelta(days=-20)).year}/0057',
                 'partner_id': 'base.res_partner_3',
                 'invoice_user_id': False,
-                'invoice_date': (fields.Date.today() + timedelta(days=-20)).strftime("%Y-%m-%d"),
-                'delivery_date': (fields.Date.today() + timedelta(days=-20)).strftime("%Y-%m-%d"),
+                'invoice_date': (self.env.now.date() + timedelta(days=-20)).strftime("%Y-%m-%d"),
+                'delivery_date': (self.env.now.date() + timedelta(days=-20)).strftime("%Y-%m-%d"),
                 'invoice_line_ids': [
                     Command.create({'name': 'Redeem Reference Number: PO02529', 'quantity': 1, 'price_unit': 622.27}),
                 ],
@@ -255,8 +255,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'move_type': 'out_invoice',
                 'partner_id': 'base.res_partner_5',
                 'invoice_user_id': False,
-                'invoice_date': (fields.Date.today() + timedelta(days=-5)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-5)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-5)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-5)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_03', 'price_unit': 1799, 'quantity': 1}),
                 ],
@@ -293,8 +293,8 @@ class AccountChartTemplate(models.AbstractModel):
             self.company_xmlid('demo_move_auto_reconcile_4'): {
                 'move_type': 'out_refund',
                 'partner_id': 'base.res_partner_2',
-                'invoice_date': (fields.Date.today() + timedelta(days=-10)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-10)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-10)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-10)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_02', 'quantity': 5}),
                     Command.create({'product_id': 'product.consu_delivery_03', 'quantity': 5}),
@@ -303,8 +303,8 @@ class AccountChartTemplate(models.AbstractModel):
             self.company_xmlid('demo_move_auto_reconcile_5'): {
                 'move_type': 'out_refund',
                 'partner_id': 'base.res_partner_2',
-                'invoice_date': (fields.Date.today() + timedelta(days=-2)).strftime('%Y-%m-%d'),
-                'delivery_date': (fields.Date.today() + timedelta(days=-2)).strftime('%Y-%m-%d'),
+                'invoice_date': (self.env.now.date() + timedelta(days=-2)).strftime('%Y-%m-%d'),
+                'delivery_date': (self.env.now.date() + timedelta(days=-2)).strftime('%Y-%m-%d'),
                 'invoice_line_ids': [
                     Command.create({'product_id': 'product.consu_delivery_01', 'quantity': 5}),
                     Command.create({'product_id': 'product.consu_delivery_03', 'quantity': 5}),
@@ -313,7 +313,7 @@ class AccountChartTemplate(models.AbstractModel):
             self.company_xmlid('demo_move_auto_reconcile_6'): {
                 'move_type': 'entry',
                 'partner_id': 'base.res_partner_2',
-                'date': (fields.Date.today() + timedelta(days=-20)).strftime('%Y-%m-%d'),
+                'date': (self.env.now.date() + timedelta(days=-20)).strftime('%Y-%m-%d'),
                 'journal_id': 'general',
                 'line_ids': [
                     Command.create({'debit': 0.0, 'credit': 2500.0, 'account_id': default_receivable.id}),
@@ -323,7 +323,7 @@ class AccountChartTemplate(models.AbstractModel):
             self.company_xmlid('demo_move_auto_reconcile_7'): {
                 'move_type': 'entry',
                 'partner_id': 'base.res_partner_2',
-                'date': (fields.Date.today() + timedelta(days=-20)).strftime('%Y-%m-%d'),
+                'date': (self.env.now.date() + timedelta(days=-20)).strftime('%Y-%m-%d'),
                 'journal_id': 'general',
                 'line_ids': [
                     Command.create({'debit': 2500.0, 'credit': 0.0, 'account_id': default_receivable.id}),
@@ -343,7 +343,7 @@ class AccountChartTemplate(models.AbstractModel):
         )
         return {
             'demo_bank_statement_1': {
-                'name': f'{bnk_journal.name} - {(fields.Date.today() + relativedelta(months=-1)).strftime("%Y-%m-%d")}',
+                'name': f'{bnk_journal.name} - {(self.env.now.date() + relativedelta(months=-1)).strftime("%Y-%m-%d")}',
                 'balance_end_real': 6678.0,
                 'balance_start': 4253.0,
                 'attachment_ids': [Command.set(['ir_attachment_bank_statement_1'])],
@@ -352,20 +352,20 @@ class AccountChartTemplate(models.AbstractModel):
                         'journal_id': bnk_journal.id,
                         'payment_ref': 'Office rent',
                         'amount': -850.0,
-                        'date': (fields.Date.today() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
+                        'date': (self.env.now.date() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
                     }),
                     Command.create({
                         'journal_id': bnk_journal.id,
                         'payment_ref': time.strftime('INV/%Y/00006 and INV/%Y/00007'),
                         'amount': 1275.0,
-                        'date': (fields.Date.today() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
+                        'date': (self.env.now.date() + relativedelta(months=-1)).strftime('%Y-%m-%d'),
                         'partner_name': 'Open Wood Inc.',
                     }),
                     Command.create({
                         'journal_id': bnk_journal.id,
                         'payment_ref': 'Payment of your invoice #5',
                         'amount': 2000.0,
-                        'date': (fields.Date.today() + timedelta(days=-40)).strftime('%Y-%m-%d'),
+                        'date': (self.env.now.date() + timedelta(days=-40)).strftime('%Y-%m-%d'),
                         'partner_name': 'Open Wood Inc.',
                     }),
                 ],
@@ -527,7 +527,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'res_id': 'demo_invoice_3',
                 'res_model_id': 'account.model_account_move',
                 'activity_type_id': 'mail.mail_activity_data_todo',
-                'date_deadline': (fields.Datetime.today() + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
+                'date_deadline': (self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
                 'summary': 'Follow-up on payment',
                 'create_uid': 'base.user_admin',
                 'user_id': 'base.user_admin',
@@ -536,7 +536,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'res_id': 'demo_invoice_2',
                 'res_model_id': 'account.model_account_move',
                 'activity_type_id': 'mail.mail_activity_data_call',
-                'date_deadline': fields.Datetime.today().strftime('%Y-%m-%d %H:%M'),
+                'date_deadline': self.env.now.replace(hour=0, minute=0, second=0).strftime('%Y-%m-%d %H:%M'),
                 'summary': 'Follow up on missed call',
                 'create_uid': 'base.user_admin',
                 'user_id': 'base.user_admin',
@@ -545,7 +545,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'res_id': 'demo_invoice_1',
                 'res_model_id': 'account.model_account_move',
                 'activity_type_id': 'mail.mail_activity_data_todo',
-                'date_deadline': (fields.Datetime.today() + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
+                'date_deadline': (self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
                 'summary': 'Include upsell',
                 'create_uid': 'base.user_admin',
                 'user_id': 'base.user_admin',
@@ -554,7 +554,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'res_id': 'demo_invoice_8',
                 'res_model_id': 'account.model_account_move',
                 'activity_type_id': 'mail.mail_activity_data_todo',
-                'date_deadline': (fields.Datetime.today() + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
+                'date_deadline': (self.env.now.replace(hour=0, minute=0, second=0) + relativedelta(days=5)).strftime('%Y-%m-%d %H:%M'),
                 'summary': 'Update address',
                 'create_uid': 'base.user_admin',
                 'user_id': 'base.user_admin',

@@ -135,7 +135,7 @@ class MailThread(models.AbstractModel):
             feedback = tools.plaintext2html(feedback or '', with_paragraph=False)
 
             scheduled_datetime = (
-                fields.Datetime.now() + datetime.timedelta(hours=2)
+                self.env.now + datetime.timedelta(hours=2)
                 if notify_delay_send else None
             )
             rating_body = (

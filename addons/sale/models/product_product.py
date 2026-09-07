@@ -21,7 +21,7 @@ class ProductProduct(models.Model):
         self.sales_count = 0
         if not self.env.user.has_group("sales_team.group_sale_salesman"):
             return r
-        date_from = fields.Date.today() - timedelta(days=365)
+        date_from = self.env.now.date() - timedelta(days=365)
 
         done_states = self.env["sale.report"]._get_done_states()
 

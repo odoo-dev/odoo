@@ -621,7 +621,7 @@ class HrAttendance(models.Model):
 
                 employee_timezone = ZoneInfo(att.employee_id._get_tz(att.date))
                 check_in_datetime = check_in_tz(att)
-                now_datetime = fields.Datetime.now().astimezone(employee_timezone)
+                now_datetime = self.env.now.astimezone(employee_timezone)
                 current_attendance_duration = (now_datetime - check_in_datetime).total_seconds() / 3600
                 previous_attendances_duration = mapped_previous_duration[att.employee_id][check_in_datetime.date()]
 
@@ -661,7 +661,7 @@ class HrAttendance(models.Model):
             ('id', 'not in', checked_in_employees.ids),
             ('company_id', 'in', companies.ids),
             ('resource_calendar_id', '!=', False),
-            ('current_version_id.contract_date_start', '<=', fields.Date.today() - relativedelta(days=1))
+            ('current_version_id.contract_date_start', '<=', self.env.now.date() - relativedelta(days=1))
         ])
 
         for emp in absent_employees:
@@ -689,7 +689,7 @@ class HrAttendance(models.Model):
         Automatically check-out all employees still checked in
         when company is in 'specific_time' mode.
         """
-        current_utc_dt = fields.Datetime.now()
+        current_utc_dt = self.env.now
         utc_tz = ZoneInfo('UTC')
         all_open_attendances = self.search([
             ('check_out', '=', False),

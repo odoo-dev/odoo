@@ -930,7 +930,7 @@ class TestRepair(TestRepairCommon):
         """
         repair_order = self.env['repair.order'].create({
             'partner_id': self.res_partner_1.id,
-            'schedule_date': fields.Datetime.now(),
+            'schedule_date': self.env.now,
             'picking_type_id': self.stock_warehouse.repair_type_id.id,
         })
         repair_order.action_validate()

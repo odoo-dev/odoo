@@ -66,7 +66,7 @@ class StockPickingType(models.Model):
                 ('picking_type_id', 'in', repair_picking_types.ids),
                 ('state', '=', 'confirmed'),
                 '|',
-                ('schedule_date', '<', fields.Date.today()),
+                ('schedule_date', '<', self.env.now.date()),
                 ('is_parts_late', '=', True),
             ],
             groupby=['picking_type_id'],

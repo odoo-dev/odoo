@@ -560,7 +560,7 @@ class HrEmployee(models.Model):
 
     def _compute_newly_hired(self):
         new_hire_field = self._get_new_hire_field()
-        new_hire_date = fields.Datetime.now() - timedelta(days=90)
+        new_hire_date = self.env.now - timedelta(days=90)
         for employee in self:
             if not employee[new_hire_field]:
                 employee.newly_hired = False
@@ -789,7 +789,7 @@ class HrEmployee(models.Model):
         # (could be a CASE WHEN with the version_id from the content for the current user)
         return table.current_version_id
 
-    def _get_version(self, date=fields.Date.today()):
+    def _get_version(self, date=self.env.now.date()):
         """
         Return the version that should be used for the given date.
         If no valid version is found, we return the very first version of the employee.
@@ -1030,7 +1030,7 @@ class HrEmployee(models.Model):
             return NotImplemented
         new_hire_field = self._get_new_hire_field()
         new_hires = self.env['hr.employee'].sudo().search([
-            (new_hire_field, '>', fields.Datetime.now() - timedelta(days=90))
+            (new_hire_field, '>', self.env.now - timedelta(days=90))
         ])
         return [('id', operator, new_hires.ids)]
 
@@ -1103,7 +1103,7 @@ class HrEmployee(models.Model):
         for tz_info, employee_ids in self.filtered('resource_calendar_id').grouped('tz').items():
             calendar_by_employee = employee_ids.grouped('resource_calendar_id')
             tz = ZoneInfo(tz_info or 'UTC')
-            from_datetime = fields.Datetime.now().replace(tzinfo=UTC).astimezone(tz)
+            from_datetime = self.env.now.replace(tzinfo=UTC).astimezone(tz)
             to_datetime = from_datetime + timedelta(hours=1)
             for calendar_id, res_employee_ids in calendar_by_employee.items():
                 # Getting work interval of the first is working. Functions called on resource_calendar_id
@@ -1872,7 +1872,7 @@ class HrEmployee(models.Model):
             new_version = self.env['hr.version'].browse(vals.get('current_version_id'))
             self.resource_id.calendar_id = new_version.resource_calendar_id
         if version_vals:
-            version_vals['last_modified_date'] = fields.Datetime.now()
+            version_vals['last_modified_date'] = self.env.now
             version_vals['last_modified_uid'] = self.env.uid
             self.version_id.write(version_vals)
 

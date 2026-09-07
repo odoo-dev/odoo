@@ -22,7 +22,7 @@ def _create_product_value(env):
             {
                 'product_id': product.id,
                 'value': product.standard_price,
-                'date': fields.Date.today(),
+                'date': self.env.now.date(),
                 'company_id': company.id,
                 'description': 'Initial cost',
             }

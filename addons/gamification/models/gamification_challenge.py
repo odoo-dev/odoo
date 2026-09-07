@@ -244,7 +244,7 @@ class GamificationChallenge(models.Model):
         # start scheduled challenges
         planned_challenges = self.search([
             ('state', '=', 'draft'),
-            ('start_date', '<=', fields.Date.today())
+            ('start_date', '<=', self.env.now.date())
         ])
         if planned_challenges:
             planned_challenges.write({'state': 'inprogress'})
@@ -252,7 +252,7 @@ class GamificationChallenge(models.Model):
         # close scheduled challenges
         scheduled_challenges = self.search([
             ('state', '=', 'inprogress'),
-            ('end_date', '<', fields.Date.today())
+            ('end_date', '<', self.env.now.date())
         ])
         if scheduled_challenges:
             scheduled_challenges.write({'state': 'done'})
@@ -296,8 +296,8 @@ class GamificationChallenge(models.Model):
         self._generate_goals_from_challenge()
 
         for challenge in self:
-            if challenge.last_report_date != fields.Date.today():
-                if challenge.next_report_date and fields.Date.today() >= challenge.next_report_date:
+            if challenge.last_report_date != self.env.now.date():
+                if challenge.next_report_date and self.env.now.date() >= challenge.next_report_date:
                     challenge.report_progress()
                 else:
                     # goals closed but still opened at the last report date
@@ -634,7 +634,7 @@ class GamificationChallenge(models.Model):
                         subtype_xmlid='mail.mt_comment',
                         email_layout_xmlid='mail.mail_notification_light',
                     )
-        return challenge.write({'last_report_date': fields.Date.today()})
+        return challenge.write({'last_report_date': self.env.now.date()})
 
     ##### Challenges #####
     def accept_challenge(self):

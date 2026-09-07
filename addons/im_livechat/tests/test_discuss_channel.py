@@ -328,9 +328,9 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
             },
         )
         channel = self.env["discuss.channel"].browse(data["channel_id"])
-        with freeze_time(fields.Datetime.to_string(fields.Datetime.now() + timedelta(hours=23))):
+        with freeze_time(fields.Datetime.to_string(self.env.now + timedelta(hours=23))):
             self.assertFalse(channel.livechat_end_dt)
-        with freeze_time(fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=1))):
+        with freeze_time(fields.Datetime.to_string(self.env.now + timedelta(days=1))):
             channel._gc_bot_only_ongoing_sessions()
         self.assertTrue(channel.livechat_end_dt)
 
@@ -408,5 +408,5 @@ class TestDiscussChannel(TestImLivechatCommon, TestGetOperatorCommon, MailCase):
             {"channel_id": channel.id, "livechat_status": "need_help"},
         )
         self.assertTrue(channel.livechat_looking_for_help_since_dt)
-        channel.livechat_end_dt = fields.Datetime.now()
+        channel.livechat_end_dt = self.env.now
         self.assertFalse(channel.livechat_looking_for_help_since_dt)

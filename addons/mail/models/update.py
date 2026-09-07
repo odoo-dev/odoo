@@ -28,7 +28,7 @@ class Publisher_WarrantyContract(AbstractModel):
 
         dbuuid = IrParamSudo.get_str('database.uuid')
         db_create_date = IrParamSudo.get_str('database.create_date')
-        limit_date = fields.Datetime.now() - datetime.timedelta(15)
+        limit_date = self.env.now - datetime.timedelta(15)
         nbr_users = Users.search_count([('active', '=', True)])
         nbr_active_users = Users.search_count([("login_date", ">=", limit_date), ('active', '=', True)])
         nbr_share_users = 0

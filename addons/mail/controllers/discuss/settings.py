@@ -24,7 +24,7 @@ class DiscussSettingsController(Controller):
         if minutes == -1:
             member.mute_until_dt = datetime.max
         elif minutes:
-            member.mute_until_dt = fields.Datetime.now() + relativedelta(minutes=minutes)
+            member.mute_until_dt = self.env.now + relativedelta(minutes=minutes)
         else:
             member.mute_until_dt = False
         member._set_cron_for_unmute()

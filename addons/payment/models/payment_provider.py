@@ -290,7 +290,7 @@ class PaymentProvider(models.Model):
             currency_total_by_provider[provider].append((currency, subtotal))
 
         # Convert per-currency amounts and sum them
-        today = fields.Date.today()
+        today = self.env.now.date()
         for provider in self:
             processed_amount = 0
             for currency, currency_total in currency_total_by_provider[provider]:

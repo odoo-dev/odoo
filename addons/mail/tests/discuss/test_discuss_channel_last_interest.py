@@ -21,7 +21,7 @@ class TestChannelLastInterestDt(MailCommon):
         super().setUpClass()
         cls.LastInterestUpdate = cls.env["discuss.channel.last.interest.update"]
         cls.sync_cron = cls.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt")
-        now = fields.Datetime.now()
+        now = self.env.now
         cls.dt_early = now + timedelta(minutes=10)
         cls.dt_mid = now + timedelta(minutes=20)
         cls.dt_late = now + timedelta(minutes=30)
@@ -95,7 +95,7 @@ class TestChannelLastInterestDt(MailCommon):
             "only one batch is drained per cron run")
         triggers = self._triggers()
         self.assertEqual(len(triggers), 1, "leftover drainable backlog retriggers the cron exactly once")
-        self.assertLessEqual(triggers.call_at, fields.Datetime.now(),
+        self.assertLessEqual(triggers.call_at, self.env.now,
             "progress plus a drainable row retriggers immediately")
         # a second run clears the rest and does not retrigger again
         self.env["discuss.channel"]._cron_sync_last_interest_dt(batch_size=1)
@@ -132,7 +132,7 @@ class TestChannelLastInterestDt(MailCommon):
         self.assertTrue(self._pending(channel), "a fully locked batch drains nothing")
         triggers = self._triggers()
         self.assertEqual(len(triggers), 1, "it retriggers to retry the locked rows later")
-        self.assertGreater(triggers.call_at, fields.Datetime.now(),
+        self.assertGreater(triggers.call_at, self.env.now,
             "a batch with no progress backs off instead of hot-looping")
 
     def test_cron_backs_off_when_only_locked_rows_remain(self):
@@ -148,7 +148,7 @@ class TestChannelLastInterestDt(MailCommon):
         self.assertTrue(self._pending(channel_b), "the held channel stays queued")
         triggers = self._triggers()
         self.assertEqual(len(triggers), 1, "it retriggers to retry the held channel")
-        self.assertGreater(triggers.call_at, fields.Datetime.now(),
+        self.assertGreater(triggers.call_at, self.env.now,
             "progress was made but only locked rows remain, so it backs off instead of looping")
 
     def test_cron_no_immediate_retrigger_when_whole_batch_locked_despite_backlog(self):
@@ -162,7 +162,7 @@ class TestChannelLastInterestDt(MailCommon):
             self.env["discuss.channel"]._cron_sync_last_interest_dt(batch_size=1)
         triggers = self._triggers()
         self.assertEqual(len(triggers), 1, "it retriggers to retry later")
-        self.assertGreater(triggers.call_at, fields.Datetime.now(),
+        self.assertGreater(triggers.call_at, self.env.now,
             "a batch with no progress backs off even when unlocked rows sit beyond it")
 
     def test_update_enqueues_and_schedules_postcommit(self):

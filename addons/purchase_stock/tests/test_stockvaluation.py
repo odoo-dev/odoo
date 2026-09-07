@@ -221,7 +221,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         eur_curr = self.env.ref('base.EUR')
         self.env['res.currency.rate'].create({
-            'name': fields.Date.today() - timedelta(days=1),
+            'name': self.env.now.date() - timedelta(days=1),
             'company_id': self.env.company.id,
             'currency_id': eur_curr.id,
             'rate': 2,
@@ -697,7 +697,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         })
         res_id = credit_note_wizard.modify_moves()['res_id']
         bill03 = self.env['account.move'].browse(res_id)
-        bill03.invoice_date = fields.Date.today()
+        bill03.invoice_date = self.env.now.date()
         bill03.invoice_line_ids.price_unit = 10.0
         bill03.action_post()
         # Impact of the refund (bill03 should not impact the SVLs since the unit price is the one of the POL)
@@ -887,7 +887,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         action = po.action_create_invoice()
         bill02 = self.env["account.move"].browse(action["res_id"])
-        bill02.invoice_date = fields.Date.today()
+        bill02.invoice_date = self.env.now.date()
         bill02.invoice_line_ids.quantity = 1.0
         bill02.invoice_line_ids.price_unit = 12
 
@@ -921,7 +921,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         action = po.action_create_invoice()
         bill = self.env["account.move"].browse(action["res_id"])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         label01, label02 = bill.invoice_line_ids.mapped('name')
         self.assertTrue(label01)
         self.assertTrue(label02)
@@ -993,7 +993,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         usd_currency = self.env.ref('base.USD')
         eur_currency = self.env.ref('base.EUR')
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         one_day_ago = today - timedelta(days=1)
         two_days_ago = today - timedelta(days=2)
 
@@ -1111,7 +1111,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         action = po.action_create_invoice()
         bill = self.env["account.move"].browse(action["res_id"])
         bill.line_ids.price_unit = 150
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         for lot in lots:
             self.assertEqual(lot.standard_price, 150)
@@ -1190,7 +1190,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.product1.purchase_method = 'purchase'
 
         price_unit_EUR = 100
-        price_unit_USD = self.env.ref('base.EUR')._convert(price_unit_EUR, usd_currency, self.env.company, fields.Date.today(), round=False)
+        price_unit_USD = self.env.ref('base.EUR')._convert(price_unit_EUR, usd_currency, self.env.company, self.env.now.date(), round=False)
         po = self.env['purchase.order'].create({
             'partner_id': self.partner_id.id,
             'currency_id': self.env.ref('base.EUR').id,
@@ -1236,7 +1236,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.product1.purchase_method = 'purchase'
 
         price_unit_EUR = 100
-        price_unit_USD = self.env.ref('base.EUR')._convert(price_unit_EUR, usd_currency, self.env.company, fields.Date.today(), round=False)
+        price_unit_USD = self.env.ref('base.EUR')._convert(price_unit_EUR, usd_currency, self.env.company, self.env.now.date(), round=False)
         po = self.env['purchase.order'].create({
             'partner_id': self.partner_id.id,
             'currency_id': self.env.ref('base.EUR').id,
@@ -1315,7 +1315,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         po_date = '2023-10-01'
         bill_date = '2023-11-01'
-        today = fields.Date.today()
+        today = self.env.now.date()
 
         po_rate = 2.0
         bill_rate = 3.0
@@ -1601,7 +1601,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         customer_location = self.env.ref('stock.stock_location_customers')
         stock_location = warehouse.lot_stock_id
 
-        today = fields.Date.today()
+        today = self.env.now.date()
         yesterday = today - timedelta(days=1)
 
         self.env.company.currency_id = usd_currency.id
@@ -1700,7 +1700,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         action = po.action_create_invoice()
         bill01 = self.env["account.move"].browse(action["res_id"])
-        bill01.invoice_date = fields.Date.today()
+        bill01.invoice_date = self.env.now.date()
         bill01.invoice_line_ids.filtered(lambda l: l.product_id == product2).quantity = 0
         bill01.action_post()
 
@@ -1975,7 +1975,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         pre_bill_cost = avco_prod.standard_price
         purchase_order.action_create_invoice()
         bill = purchase_order.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         self.assertEqual(avco_prod.standard_price, pre_bill_cost)
 
@@ -2012,7 +2012,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         purchase_order.action_create_invoice()
         bill = purchase_order.invoice_ids
         bill.invoice_line_ids.price_unit = 120
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         expense_account, tax_paid_account, account_payable_account = (
             self.company_data['default_account_expense'],
@@ -2044,7 +2044,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         receipt.button_validate()
         purchase_order.action_create_invoice()
         bill = purchase_order.invoice_ids
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         bill.action_post()
         svls = self.env['stock.valuation.layer'].search([])
         self.assertRecordValues(svls, [{'value': 0, 'quantity': 2}])
@@ -2124,7 +2124,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
 
         action = po.action_create_invoice()
         bill = self.env["account.move"].browse(action["res_id"])
-        bill.invoice_date = fields.Date.today()
+        bill.invoice_date = self.env.now.date()
         with Form(bill) as move_form:
             move_form.invoice_currency_rate = 4
         bill.action_post()

@@ -36,7 +36,7 @@ class EventEventConfigurator(models.TransientModel):
     def _compute_has_available_tickets(self):
         product_ticket_data = self.env['event.event.ticket']._read_group([
             ('product_id', 'in', self.product_id.ids),
-            ('event_id.date_end', '>=', fields.Date.today())],
+            ('event_id.date_end', '>=', self.env.now.date())],
             ['product_id'],
             ['__count'])
         mapped_data = {product: ticket_count for product, ticket_count in product_ticket_data}

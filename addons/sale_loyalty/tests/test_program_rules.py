@@ -437,7 +437,7 @@ class TestProgramRules(TestSaleCouponCommon, PaymentCommon):
         """Test that the validity dates are checked according to the company's time zone."""
         self.env.company.partner_id.tz = "Europe/London"
         self.partner.tz = "America/Los_Angeles"
-        midnight = Datetime.today()
+        midnight = self.env.now.replace(hour=0, minute=0, second=0)
         yesterday = (midnight - timedelta(days=1)).date()
         self.immediate_promotion_program.update({
             "date_to": yesterday,
@@ -478,7 +478,7 @@ class TestProgramRules(TestSaleCouponCommon, PaymentCommon):
 
     def test_program_rules_validity_date_transactions(self):
         """Test that the validity dates are checked according to the time of transaction."""
-        today = Datetime.today()
+        today = self.env.now.replace(hour=0, minute=0, second=0)
         tomorrow = today + timedelta(days=1)
         self.immediate_promotion_program.update({
             "date_to": today,
