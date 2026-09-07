@@ -28,7 +28,6 @@ def create_automation(self, **kwargs):
         [
             {
                 'name': 'Action',
-                'base_automation_id': automation_id.id,
                 'model_id': automation_id.model_id.id,
                 'usage': 'base_automation',
                 **action,
