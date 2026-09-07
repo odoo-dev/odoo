@@ -14,16 +14,39 @@ export class WishlistPageOptionPlugin extends Plugin {
         product_design_list_to_save: {
             selector: ".o_wishlist_table",
             getData(el) {
-                const productOptClasses = Array.from(el.classList).filter((className) =>
-                    className.startsWith("o_wsale_products_opt_")
-                );
-                return {
+                const data = {
                     wishlist_grid_columns: parseInt(el.dataset.wishlistGridColumns) || 5,
                     wishlist_mobile_columns: parseInt(el.dataset.wishlistMobileColumns) || 2,
-                    wishlist_gap:
-                        el.style.getPropertyValue("--o-wsale-wishlist-grid-gap") || "16px",
-                    wishlist_opt_products_design_classes: productOptClasses.join(" "),
                 };
+
+                // The wishlist takes the shop's design classes and gap whenever its own fields
+                // are empty. Only persist wishlist-specific values once they actually deviate
+                // from the shop's baseline, so unrelated edits (e.g. changing grid columns)
+                // don't accidentally freeze the shop's current classes/gap into the wishlist.
+                const currentClasses = Array.from(el.classList).filter((className) =>
+                    className.startsWith("o_wsale_products_opt_")
+                );
+                const defaultClasses = (el.dataset.wishlistDefaultClasses || "")
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean);
+                const matchesDefault =
+                    currentClasses.length === defaultClasses.length &&
+                    defaultClasses.every((className) => currentClasses.includes(className));
+                if (!matchesDefault) {
+                    data.wishlist_opt_products_design_classes = currentClasses.join(" ");
+                }
+
+                // The gap is only persisted when the user explicitly changed it in the builder
+                // (tracked via `data-gap-to-save`, same pattern as the shop) and it differs
+                // from the shop's gap. Otherwise the wishlist keeps following the shop's gap.
+                const gapToSave = el.dataset.gapToSave;
+                const defaultGap = el.dataset.wishlistDefaultGap || "";
+                if (gapToSave !== undefined && gapToSave !== defaultGap) {
+                    data.wishlist_gap = gapToSave;
+                }
+
+                return data;
             },
         },
     };
@@ -70,6 +93,9 @@ export class WishlistSetGapAction extends BuilderAction {
 
     apply({ editingElement, value }) {
         editingElement.style.setProperty("--o-wsale-wishlist-grid-gap", value);
+        // Track explicit gap changes (same pattern as the shop's SetGapAction) so the
+        // gap is only persisted when the user actually changed it in the builder.
+        editingElement.dataset.gapToSave = value;
     }
 }
 

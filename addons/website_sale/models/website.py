@@ -216,15 +216,10 @@ class Website(models.Model):
 
     wishlist_opt_products_design_classes = fields.Char(
         string="Wishlist Page Design Class",
-        help="CSS class for wishlist page design",
-        default=(
-            "o_wsale_products_opt_layout_catalog o_wsale_products_opt_design_thumbs "
-            "o_wsale_products_opt_name_color_regular "
-            "o_wsale_products_opt_thumb_cover o_wsale_products_opt_img_secondary_show "
-            "o_wsale_products_opt_img_hover_zoom_out_light o_wsale_products_opt_has_cta "
-            "o_wsale_products_opt_actions_inline o_wsale_products_opt_has_description "
-            "o_wsale_products_opt_actions_promote o_wsale_products_opt_cc1 "
-        ),
+        help="CSS class for wishlist page design. When empty, the shop design classes are used.",
+        # Empty by default so the wishlist follows the shop's layout, but it can still be
+        # customized per-page through the Website Builder (overrides the shop style then).
+        default="",
     )
 
     wishlist_grid_columns = fields.Integer(
@@ -240,7 +235,11 @@ class Website(models.Model):
     )
 
     wishlist_gap = fields.Char(
-        string="Wishlist Grid Gap", help="Gap between products on the wishlist page", default="16px"
+        string="Wishlist Grid Gap",
+        help="Gap between products on the wishlist page. When empty, the shop gap is used.",
+        # Empty by default so the wishlist uses the shop's grid gap, but it can still be
+        # customized per-page through the Website Builder (overrides the shop gap then).
+        default="",
     )
 
     prevent_sale = fields.Boolean(string="Hide Add To Cart")
