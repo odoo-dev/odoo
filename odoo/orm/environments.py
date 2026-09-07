@@ -30,7 +30,7 @@ from .utils import SUPERUSER_ID
 
 if typing.TYPE_CHECKING:
     from collections.abc import Collection, Iterable, Iterator
-    from datetime import tzinfo
+    from datetime import datetime, tzinfo
     from weakref import ReferenceType
     from .identifiers import IdType
     from .types import BaseModel, Field
@@ -193,6 +193,10 @@ class Environment(Mapping[str, "BaseModel"]):
     def registry(self) -> Registry:
         """Return the registry associated with the transaction."""
         return self.transaction.registry
+
+    @property
+    def now(self) -> datetime:
+        return self.cr.now().replace(microsecond=0)
 
     @functools.cached_property
     def _protected(self):
