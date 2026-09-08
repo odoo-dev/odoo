@@ -35,11 +35,29 @@ _logger = logging.getLogger(__name__)
 
 
 class Orientation(Enum):
-    """xrandr/wlr-randr screen orientation for kiosk mode"""
+    """wlr-randr screen orientation for kiosk mode"""
     NORMAL = 'normal'
     INVERTED = '180'
     LEFT = '90'
     RIGHT = '270'
+
+    @property
+    def calibration_matrix(self):
+        """libinput calibration matrix rotating the touch input to match the display.
+
+        labwc doesn't rotate touch events along with the output it maps them to, so the
+        touchscreen coordinates have to be transformed by the matching matrix, otherwise
+        touches land on the wrong part of a rotated screen.
+
+        :return: the six floats of the libinput calibration matrix, space separated
+        :rtype: str
+        """
+        return {
+            'NORMAL': '1 0 0 0 1 0',
+            'LEFT': '0 -1 1 1 0 0',
+            'INVERTED': '-1 0 1 0 -1 1',
+            'RIGHT': '0 1 0 -1 0 1',
+        }[self.name]
 
 
 def toggleable(function):

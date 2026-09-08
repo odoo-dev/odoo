@@ -7,6 +7,7 @@ import requests
 import subprocess
 import time
 import werkzeug
+import xml.etree.ElementTree as ET
 
 from odoo import http
 from odoo.addons.iot_drivers.iot_handlers.interfaces.display_interface_L import DisplayInterface
@@ -18,6 +19,8 @@ from odoo.addons.iot_drivers.tools.helpers import Orientation
 from odoo.addons.iot_drivers.tools.system import IOT_IDENTIFIER
 
 _logger = logging.getLogger(__name__)
+
+LABWC_CONFIG_PATH = '/home/odoo/.config/labwc/rc.xml'
 
 
 class DisplayDriver(Driver):
@@ -34,7 +37,10 @@ class DisplayDriver(Driver):
         self._x_screen = device.get('x_screen', '0')
         self.url = saved_url or self.get_url_from_db() or 'http://localhost:8069/status/'
         self.browser = Browser(self.url, self._x_screen, os.environ.copy())
-        self.set_orientation(self.orientation)
+        if self.orientation is not Orientation.NORMAL:
+            # Restore the saved rotation. Doing this unconditionally would make every
+            # display remap the touchscreen to itself at startup (last one wins).
+            self.set_orientation(self.orientation)
 
         self._actions.update({
             'update_url': self._action_update_url,
@@ -128,14 +134,51 @@ class DisplayDriver(Driver):
             raise TypeError("orientation must be of type Orientation")
 
         subprocess.run(['wlr-randr', '--output', self.device_identifier, '--transform', orientation.value], check=True)
-        # Update touchscreen mapping to this display
-        subprocess.run(
-            ['sed', '-i', f's/HDMI-A-[12]/{self.device_identifier}/', '/home/odoo/.config/labwc/rc.xml'],
-            check=False,
-        )
+        self._configure_touchscreen(orientation)
+        helpers.save_browser_state(orientation=orientation)
+
+    def _configure_touchscreen(self, orientation):
+        """Map the touchscreen to this display and rotate its input coordinates.
+
+        ``mapToOutput`` only restricts touch events to the area of the output, labwc
+        doesn't rotate them along with it, so the libinput calibration matrix has to be
+        updated as well (see labwc-config(5)).
+
+        :param orientation: the orientation applied to the display
+        :type orientation: Orientation
+        """
+        try:
+            tree = ET.parse(LABWC_CONFIG_PATH)
+        except (OSError, ET.ParseError):
+            _logger.exception("Unable to read labwc configuration %s", LABWC_CONFIG_PATH)
+            return
+
+        root = tree.getroot()
+
+        touch = root.find('touch')
+        if touch is None:
+            touch = ET.SubElement(root, 'touch', {'deviceName': '', 'mouseEmulation': 'no'})
+        touch.set('mapToOutput', self.device_identifier)
+
+        libinput = root.find('libinput')
+        if libinput is None:
+            libinput = ET.SubElement(root, 'libinput')
+        device = libinput.find("device[@category='touch']")
+        if device is None:
+            device = ET.SubElement(libinput, 'device', {'category': 'touch'})
+        matrix = device.find('calibrationMatrix')
+        if matrix is None:
+            matrix = ET.SubElement(device, 'calibrationMatrix')
+        matrix.text = orientation.calibration_matrix
+
+        try:
+            tree.write(LABWC_CONFIG_PATH, encoding='UTF-8', xml_declaration=True)
+        except OSError:
+            _logger.exception("Unable to write labwc configuration %s", LABWC_CONFIG_PATH)
+            return
+
         # Tell labwc to reload its configuration
         subprocess.run(['pkill', '-HUP', 'labwc'], check=False)
-        helpers.save_browser_state(orientation=orientation)
 
 
 # TODO: Remove when v19 is deprecated

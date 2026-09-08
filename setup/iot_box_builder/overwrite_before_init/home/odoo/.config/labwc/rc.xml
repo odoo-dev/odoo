@@ -2,6 +2,11 @@
 <labwc_config>
 
 <touch deviceName="" mapToOutput="HDMI-A-1" mouseEmulation="no"/>
+<libinput>
+  <device category="touch">
+    <calibrationMatrix>1 0 0 0 1 0</calibrationMatrix>
+  </device>
+</libinput>
 <keyboard>
   <keybind key="A-W-h">
     <action name="HideCursor" />
