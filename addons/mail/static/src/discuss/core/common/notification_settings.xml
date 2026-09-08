@@ -13,7 +13,7 @@
                     </button>
                 </t>
                 <div class="d-flex">
-                    <Dropdown position="ui.isSmall ? 'bottom-end' : 'right-start'" menuClass="'o-mail-NotificationSettings-submenu my-0 ' + store.discussDropdownMenuClass(this)">
+                    <Dropdown navigationOptions="{ onUpdated: () => {} }" position="ui.isSmall ? 'bottom-end' : 'right-start'" menuClass="'o-mail-NotificationSettings-submenu my-0 ' + store.discussDropdownMenuClass(this)">
                         <button class="btn w-100 d-flex p-1 opacity-75 border-0">
                             <div class="d-flex flex-grow-1 align-items-center px-0 py-1 w-100 rounded">
                                 <span class="text-wrap text-start text-break">Mute Conversation</span>
