@@ -290,6 +290,296 @@ export class TourService {
             ]);
         }
 
+        // HOOKS FOR DEBUGGING
+        (() => {
+            console.log("[DEBUG_OWL] Initializing non-interactive OWL overwrite monitor...");
+
+            /**
+             * Traverses window.__OWL_DEVTOOLS__ to locate the component instance
+             * whose inputRef matches the target HTMLInputElement.
+             */
+            function findComponentByElement(targetEl) {
+                if (!window.__OWL_DEVTOOLS__ || !window.__OWL_DEVTOOLS__.apps) {
+                    console.error("[DEBUG_OWL] window.__OWL_DEVTOOLS__.apps is not available.");
+                    return null;
+                }
+
+                const visited = new Set();
+
+                function search(node) {
+                    if (!node || typeof node !== "object" || visited.has(node)) return null;
+                    visited.add(node);
+
+                    // Extract component instance (whether node is a Fiber or Component)
+                    const comp = node.component || node;
+
+                    // Match target input element against inputRef or component refs
+                    if (comp.inputRef?.el === targetEl || comp.inputRef?.current === targetEl || comp.el === targetEl) {
+                        return comp;
+                    }
+
+                    // Check if any registered ref points to targetEl
+                    for (const key in comp) {
+                        try {
+                            const prop = comp[key];
+                            if (prop && typeof prop === "object" && (prop.el === targetEl || prop.current === targetEl)) {
+                                return comp;
+                            }
+                        } catch (e) {}
+                    }
+
+                    // Collect child nodes from component / __owl__ / fiber structures
+                    const children = [];
+                    if (comp.children) {
+                        if (Array.isArray(comp.children)) children.push(...comp.children);
+                        else if (typeof comp.children === "object") children.push(...Object.values(comp.children));
+                    }
+                    if (comp.__owl__?.children) {
+                        children.push(...Object.values(comp.__owl__.children));
+                    }
+                    if (node.children) {
+                        if (Array.isArray(node.children)) children.push(...node.children);
+                        else if (typeof node.children === "object") children.push(...Object.values(node.children));
+                    }
+
+                    for (const child of children) {
+                        const match = search(child);
+                        if (match) return match;
+                    }
+
+                    return null;
+                }
+
+                for (const app of window.__OWL_DEVTOOLS__.apps) {
+                    if (app.root) {
+                        const match = search(app.root);
+                        if (match) return match;
+                    }
+                }
+
+                return null;
+            }
+
+            // Helper to format DOM element selectors for log clarity
+            function getSelector(el) {
+                if (!el || el === window || el === document) return "window / document";
+                if (el.nodeType !== 1) return el.nodeName;
+                let selector = el.tagName.toLowerCase();
+                if (el.id) selector += `#${el.id}`;
+                if (el.className && typeof el.className === "string") {
+                    selector += `.${el.className.trim().replace(/\s+/g, ".")}`;
+                }
+                return selector;
+            }
+
+            // Capture ALL native DOM scroll events (useCapture = true is required)
+            window.addEventListener(
+                "scroll",
+                (event) => {
+                    const target = event.target;
+                    const now = performance.now().toFixed(2);
+                    const targetName = getSelector(target);
+                    const scrollTop = target === window || target === document ? window.scrollY : target.scrollTop;
+                    const scrollLeft = target === window || target === document ? window.scrollX : target.scrollLeft;
+
+                    console.warn(`[DEBUG_NATIVE_SCROLL_EVENT][${now}ms] Scroll fired on: <${targetName}>`);
+                    console.log(`[DEBUG_SCROLL] Target Element:`, target);
+                    console.log(`[DEBUG_SCROLL] Offsets -> scrollTop: ${scrollTop}, scrollLeft: ${scrollLeft}`);
+                },
+                true // CRITICAL: scroll events do not bubble, must use capture phase
+            );
+
+            // Intercept programmatic .scrollIntoView() calls (e.g. from Tour runner or OWL focus)
+            const origScrollIntoView = Element.prototype.scrollIntoView;
+            Element.prototype.scrollIntoView = function (...args) {
+                const now = performance.now().toFixed(2);
+                console.warn(`[DEBUG_PROGRAMMATIC_SCROLL][${now}ms] scrollIntoView() called on: <${getSelector(this)}>`);
+                console.log(`[DEBUG_SCROLL] Target Element:`, this);
+                console.log(`[DEBUG_SCROLL] Stack Trace:\n` + new Error().stack);
+                return origScrollIntoView.apply(this, args);
+            };
+
+            // Intercept direct scrollTop assignments
+            const origScrollTopSetter = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop").set;
+            Object.defineProperty(Element.prototype, "scrollTop", {
+                set: function (val) {
+                    const prev = this.scrollTop;
+                    if (prev !== val) {
+                        const now = performance.now().toFixed(2);
+                        console.warn(`[DEBUG_PROGRAMMATIC_SCROLL][${now}ms] scrollTop changed (${prev}px -> ${val}px) on: <${getSelector(this)}>`);
+                        console.log(`[DEBUG_SCROLL] Target Element:`, this);
+                        console.log(`[DEBUG_SCROLL] Stack Trace:\n` + new Error().stack);
+                    }
+                    return origScrollTopSetter.call(this, val);
+                },
+                configurable: true,
+            });
+
+            // Log WebFont loading and layout reflow triggers
+            if (document.fonts) {
+                document.fonts.addEventListener("loadingdone", (e) => {
+                    const fonts = e.fontfaces.map((f) => f.family).join(", ");
+                    console.log(`[DEBUG_OWL][${performance.now().toFixed(2)}ms] Font loaded/reflow: ${fonts}`);
+                });
+            }
+
+            // Intercept native value setter on HTMLInputElement
+            const nativeValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+
+            Object.defineProperty(HTMLInputElement.prototype, "value", {
+                set: function (val) {
+                    const prevVal = this.value;
+                    const isTargetInput = this.matches(".o-autocomplete input");
+
+                    if (isTargetInput) {
+                        // Check if the value was wiped back to empty
+                        if (prevVal !== "" && val === "") {
+                            console.warn(`[DEBUG_OWL_RESET_DETECTED][${performance.now().toFixed(2)}ms] Input wiped: "${prevVal}" -> "${val}"`);
+                            console.log(`[DEBUG_OWL] Font status: ${document.fonts ? document.fonts.status : "N/A"}`);
+                            console.log(`[DEBUG_OWL] Active element:`, document.activeElement);
+
+                            // Retrieve component state via DevTools traversal
+                            const comp = findComponentByElement(this);
+                            if (comp) {
+                                console.log(`[DEBUG_OWL] Component Name:`, comp.constructor.name);
+                                console.log(`[DEBUG_OWL] Component Reactive State:`, JSON.parse(JSON.stringify(comp.state || {})));
+                                console.log(`[DEBUG_OWL] Component Props:`, JSON.parse(JSON.stringify(comp.props || {})));
+                            } else {
+                                console.warn(`[DEBUG_OWL] Could not match target input to an OWL component instance via DevTools.`);
+                            }
+
+                            // Print call stack to identify if OWL patch() triggered this write
+                            console.log("[DEBUG_OWL] Stack trace of reset:\n" + new Error().stack);
+                        } else {
+                            console.log(`[DEBUG_OWL][${performance.now().toFixed(2)}ms] Input updated: "${prevVal}" -> "${val}"`);
+                            console.log("[DEBUG_OWL] Stack trace of update:\n" + new Error().stack);
+                        }
+                    }
+
+                    return nativeValueSetter.call(this, val);
+                },
+                configurable: true,
+            });
+
+            // Observe if OWL completely replaces or destroys the input DOM node
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    for (const removedNode of mutation.removedNodes) {
+                        if (removedNode.nodeType === 1) {
+                            const wasInput = removedNode.matches?.(".o-autocomplete input") || 
+                                            removedNode.querySelector?.(".o-autocomplete input");
+                            if (wasInput) {
+                                console.warn(`[DEBUG_OWL_NODE_REMOVED][${performance.now().toFixed(2)}ms] Target input DOM element detached by OWL patch!`);
+                                console.log("[DEBUG_OWL] Detach stack trace:\n" + new Error().stack);
+                            }
+                        }
+                    }
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            const startTime = performance.now();
+            const getTime = () => (performance.now() - startTime).toFixed(2);
+
+            const log = (category, details) => {
+                console.warn(`[TIMELINE][${getTime()}ms][${category}]`, details);
+            };
+
+            // Style & Structure Mutations (Style / DOM changes)
+            const mutationObserver = new MutationObserver((mutations) => {
+                for (const m of mutations) {
+                    log("MUTATION", {
+                        type: m.type,
+                        target: m.target,
+                        attr: m.attributeName,
+                        added: m.addedNodes.length,
+                        removed: m.removedNodes.length,
+                    });
+                }
+            });
+            mutationObserver.observe(document.documentElement, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ["style", "class", "hidden"],
+            });
+
+            // Geometry & Resizes (Layout changes)
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    log("RESIZE", {
+                        target: entry.target,
+                        width: entry.contentRect.width,
+                        height: entry.contentRect.height,
+                    });
+                }
+            });
+            resizeObserver.observe(document.documentElement);
+            resizeObserver.observe(document.body);
+            const modal = document.querySelector(".modal-content");
+            if (modal) {
+                resizeObserver.observe(modal);
+            }
+
+            // Browser-detected Layout Shifts (PerformanceObserver)
+            try {
+                const perfObserver = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        if (entry.entryType === "layout-shift") {
+                            log("LAYOUT_SHIFT", {
+                                value: entry.value,
+                                hadRecentInput: entry.hadRecentInput,
+                                sources: entry.sources?.map((s) => ({
+                                    node: s.node,
+                                    previousRect: s.previousRect,
+                                    currentRect: s.currentRect,
+                                })),
+                            });
+                        }
+                    }
+                });
+                perfObserver.observe({ type: "layout-shift", buffered: true });
+            } catch (e) {
+                /* Layout Instability API unsupported */
+            }
+
+            // Native Event Capture (Scroll, Focus, Selection)
+            const trackedEvents = [
+                "scroll",
+                "scrollend",
+                "focusin",
+                "focusout",
+                "selectionchange",
+                "input",
+                "keydown",
+            ];
+            for (const evtType of trackedEvents) {
+                window.addEventListener(
+                    evtType,
+                    (e) => {
+                        log(`EVENT:${evtType.toUpperCase()}`, {
+                            target: e.target,
+                            isTrusted: e.isTrusted,
+                            scrollTop: document.scrollingElement?.scrollTop ?? 0,
+                            scrollLeft: document.scrollingElement?.scrollLeft ?? 0,
+                        });
+                    },
+                    { capture: true }
+                );
+            }
+
+            // Paint / Composite Boundaries (rAF Ticks) - bad idea
+            // let frame = 0;
+            // function tick() {
+            //     frame++;
+            //     log("FRAME_RENDER", `rAF tick #${frame}`);
+            //     requestAnimationFrame(tick);
+            // }
+            // requestAnimationFrame(tick);
+        })();
+        // END HOOKS FOR DEBUGGING
+
         const tourConfig = {
             delayToCheckUndeterminisms: 0,
             stepDelay: 0,

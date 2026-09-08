@@ -1603,6 +1603,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.pricelist_id.write({'item_ids': [(6, 0, pricelist_item.ids)]})
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'limitedProductPricelistLoading', login="pos_user")
+        # self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'limitedProductPricelistLoading', login="pos_user", debug=True, watch=True)
 
     def test_restricted_categories_combo_product(self):
         """

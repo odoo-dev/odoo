@@ -186,6 +186,8 @@ export class AutoComplete extends Component {
     }
 
     cancel() {
+        console.warn("Input current value:", this.inputRef.el.value);
+        console.warn("Next value (props value):", this.props.value);
         if (this.inputRef.el.value.length) {
             if (this.props.autoSelect) {
                 this.inputRef.el.value = this.props.value;
@@ -222,7 +224,7 @@ export class AutoComplete extends Component {
 
         await Promise.all(proms);
         this.navigate(0);
-        this.scroll();
+        // this.scroll(); // DEBUG
     }
     get displayOptions() {
         return !this.props.dropdown || (this.isOpened && this.hasOptions);
