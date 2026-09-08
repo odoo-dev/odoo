@@ -8,6 +8,7 @@ from odoo import fields
 from odoo.fields import Command
 from odoo.tests import Form, tagged
 from odoo.addons.stock_landed_costs.tests.common import TestStockLandedCostsCommon
+from odoo.addons.purchase_stock.tests.common import PurchaseTestCommon
 from freezegun import freeze_time
 
 
@@ -157,7 +158,7 @@ class TestStockValuationLCCommon(TestStockLandedCostsCommon):
         self.assertEqual(self.product1.standard_price, 10)
 
 @tagged('-at_install', 'post_install')
-class TestStockValuationLCFIFO(TestStockValuationLCCommon):
+class TestStockValuationLCFIFO(TestStockValuationLCCommon, PurchaseTestCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
