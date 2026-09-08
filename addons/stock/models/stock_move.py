@@ -733,13 +733,29 @@ Please change the quantity done or the rounding precision in your settings.""",
                     new_ml_quantity = product.uom_id._compute_quantity(quantity_to_reserve, move_line.uom_id)
                     move_lines_commands.append(Command.create(move_line.copy_data({'quantity': new_ml_quantity, 'picked': move_line.picked})[0]))
                     extra_uom_qty -= quantity_to_reserve
+            existing_move_lines = move.move_line_ids
             move.write({'move_line_ids': move_lines_commands})
+<<<<<<< 6a9f394cd65a4d6066e895937c91323cad999220
             # When `quantity` is written in the same call as `lot_ids`, the
             # user-set value is kept and the recompute triggered by this
             # inverse rewriting `move_line_ids` does not override it. Force
             # the recompute to keep `quantity` in sync with the move lines
             if any(command[0] == Command.DELETE for command in move_lines_commands):
                 self.env.add_to_compute(move._fields['quantity'], move)
+||||||| 6be72e62f4569d06e0e21b75713991a6f7e8d72d
+        # When `quantity` is written in the same call as `lot_ids`, the
+        # user-set value is kept and the recompute triggered by this
+        # inverse rewriting `move_line_ids` does not override it. Force
+        # the recompute to keep `quantity` in sync with the move lines
+        self.env.add_to_compute(move._fields['quantity'], move)
+=======
+            (move.move_line_ids - existing_move_lines)._apply_putaway_strategy()
+        # When `quantity` is written in the same call as `lot_ids`, the
+        # user-set value is kept and the recompute triggered by this
+        # inverse rewriting `move_line_ids` does not override it. Force
+        # the recompute to keep `quantity` in sync with the move lines
+        self.env.add_to_compute(move._fields['quantity'], move)
+>>>>>>> 78e17cb1473376ebc57a7fdd0080e4eb63fa82a5
 
     @api.depends('picking_type_id', 'date', 'priority', 'state')
     def _compute_reservation_date(self):
