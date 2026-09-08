@@ -307,10 +307,10 @@ test("properties: no access to parent", async () => {
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
     await toggleActionMenu();
-    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
-        message: "The 'Edit Properties' btn should be in the cog menu",
+    expect(".o-dropdown--menu span:contains(Edit fields)").toHaveCount(1, {
+        message: "The 'Edit fields' btn should be in the cog menu",
     });
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     expect(".o_field_properties:first-child .o_field_property_open_popover").toHaveCount(0, {
         message: "The edit definition button must not be in the view",
     });
@@ -345,10 +345,10 @@ test("properties: access to parent", async () => {
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
     await toggleActionMenu();
-    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
-        message: "Show 'Edit Properties' btn in cog menu",
+    expect(".o-dropdown--menu span:contains(Edit fields)").toHaveCount(1, {
+        message: "Show 'Edit fields' btn in cog menu",
     });
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     expect(".o_field_properties:first-child .o_field_property_open_popover").not.toBeEmpty({
         message: "The edit definition button must be in the view",
@@ -439,10 +439,10 @@ test("properties: add a new property", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
-        message: "The 'Edit Properties' btn should be in the cog menu",
+    expect(".o-dropdown--menu span:contains(Edit fields)").toHaveCount(1, {
+        message: "The 'Edit fields' btn should be in the cog menu",
     });
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // Create a new property
     await click(".o_field_property_add button");
@@ -494,7 +494,7 @@ test("properties: selection", async () => {
     expect(".o_property_field:nth-child(2) select").toHaveValue("b");
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     // Edit the selection property
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -620,7 +620,7 @@ test("properties: selection option keys are generated from labels and handle dup
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
 
@@ -674,7 +674,7 @@ test("properties: float and integer", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // change type to float
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
@@ -790,7 +790,7 @@ test("properties: tags", async () => {
     };
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -927,7 +927,7 @@ test("properties: many2one", async () => {
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await waitFor(".o_property_field_popover");
@@ -1003,7 +1003,7 @@ test("properties: a relational property with an unevaluable domain shows no reco
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     for (const propertyType of ["many2one", "many2many"]) {
         await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
@@ -1076,7 +1076,7 @@ test("properties: many2many", async () => {
     const getSelectedUsers = () => queryAllTexts(".o_property_field_value .o_tag_badge_text");
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -1232,7 +1232,7 @@ test("properties: many2one 'Search more...' +  internal link save keeps data", a
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // Opening the popover
     await click('[property-name="many_2_one"] .o_field_property_open_popover');
@@ -1410,7 +1410,7 @@ test("properties: name reset", async () => {
     expect('.o_property_field[property-name="property_2"]').toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // open the definition popover
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
@@ -1825,7 +1825,7 @@ test("properties: default value", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // add a new property field
     await click(".o_field_property_add button");
@@ -1889,7 +1889,7 @@ test("properties: default value date", async () => {
     expect(".o_field_properties").toHaveCount(1, { message: "The field must be in the view" });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // add a new date property
     await click(".o_field_property_add button");
@@ -1913,7 +1913,7 @@ test("properties: default value date", async () => {
     await click(".o_form_button_save");
     await animationFrame();
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     await click(".o_property_field:nth-last-child(2) .o_field_property_open_popover");
     await animationFrame();
     expect(".o_property_field_popover .o_field_property_definition_value input").toHaveValue(
@@ -1943,7 +1943,7 @@ test("properties: suffix", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await click(".o_field_property_add button");
     await waitFor(".o_property_field_popover");
@@ -1981,7 +1981,7 @@ test("properties: close property popover once clicked on delete icon", async () 
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // We open the property popover
     await click(".o_property_field:first-child .o_field_property_open_popover");
@@ -2024,7 +2024,7 @@ test("properties: form view and falsy domain, properties are not empty", async (
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     expect(".o_test_properties_not_empty").toHaveCount(1);
 
@@ -2088,7 +2088,7 @@ test("properties: form view and falsy domain, properties are empty", async () =>
 
     // create the first property
     await toggleActionMenu();
-    await click(".o-dropdown--menu span:contains(Edit Properties)");
+    await click(".o-dropdown--menu span:contains(Edit fields)");
     await animationFrame();
     expect(".o_test_properties_not_empty").toHaveCount(1);
 });
@@ -2120,7 +2120,7 @@ test.tags("desktop");
 test("properties: separators layout", async () => {
     await makePropertiesGroupView([false, false, false, false]);
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     await toggleSeparator("property_1", true);
     expect(getGroups()).toEqual([
         [
@@ -2347,7 +2347,7 @@ test("properties: separators drag and drop", async () => {
         queryFirst(`*[property-name='${propertyName}'] [data-icon='drag_indicator']`);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // if we move properties inside the same column, do not generate the group
     await contains(getPropertyHandleElement("property_1")).dragAndDrop(
@@ -2494,7 +2494,7 @@ test("properties: no add properties action in cogmenu if no properties field", a
         actionMenus: {},
     });
     await toggleActionMenu();
-    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(0);
+    expect(".o-dropdown--menu span:contains(Edit fields)").toHaveCount(0);
 });
 
 test.tags("desktop");
@@ -2571,7 +2571,7 @@ test("new property, change record, change property type", async () => {
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     await animationFrame();
     await contains(".o_field_property_definition_add").click();
@@ -2579,7 +2579,7 @@ test("new property, change record, change property type", async () => {
     await contains(".o_property_field .o_property_field_value input").edit("aze");
     await contains(".o_pager_next").click();
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     expect(".o_property_field .o_property_field_value input").toHaveValue("");
     // Change second record's property type
     await contains(".o_property_field .o_field_property_open_popover").click();
@@ -2646,7 +2646,7 @@ test("property many2one, change property type from many2one to integer", async (
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
 
     // Change the record's property type
     await contains(".o_property_field .o_field_property_open_popover").click();
@@ -2661,7 +2661,7 @@ test.tags("desktop");
 test("properties: moving single property to 2nd group in auto split mode", async () => {
     await makePropertiesGroupView([false]);
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     const { moveTo, drop } = await contains(getPropertyHandleElement("property_1")).drag();
     const secondGroup = queryFirst(".o_property_group:last-of-type");
     await moveTo(secondGroup, "bottom");
@@ -2679,7 +2679,7 @@ test.tags("desktop");
 test("properties: moving single property to 1st group", async () => {
     await makePropertiesGroupView([true, true, false]);
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_1")
     );
@@ -2696,7 +2696,7 @@ test.tags("desktop");
 test("properties: split, moving property from 2nd group to 1st", async () => {
     await makePropertiesGroupView([true, false, false]);
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_2"),
         "top"
@@ -2715,7 +2715,7 @@ test.tags("desktop");
 test("properties: split, moving property from 1st group to 2nd", async () => {
     await makePropertiesGroupView([true, false, false, false, false, false]);
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties"); // Start the edition mode
+    await toggleMenuItem("Edit fields"); // Start the edition mode
     await contains(getPropertyHandleElement("property_3")).dragAndDrop(
         getPropertyHandleElement("property_6"),
         "top"
@@ -2814,7 +2814,7 @@ test("properties: monetary without currency_field", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -2853,7 +2853,7 @@ test("properties: monetary with currency_id", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -2905,7 +2905,7 @@ test("properties: monetary with multiple currency field", async () => {
     expect(".o_field_properties").toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
@@ -2957,7 +2957,7 @@ test("properties: signature", async () => {
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await contains(".o_property_field:first-child .o_field_property_open_popover").click();
     expect(".o_field_property_definition").toHaveCount(1);
@@ -3033,7 +3033,7 @@ test("properties definition: default value should not add value key", async () =
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     await click(".o_field_property_add button");
     await waitFor(".o_property_field_popover");
@@ -3078,7 +3078,7 @@ test("properties definition: test display and edit", async () => {
 
     // Edit an existing definition
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     expect(".o_field_property_open_popover").toHaveCount(4, {
         message: "4 popover buttons should be present : 1 for each definition.",
     });
@@ -3186,11 +3186,11 @@ test("properties: no parent document set", async () => {
 
     await toggleActionMenu();
 
-    expect(".o-dropdown--menu span:contains(Edit Properties)").toHaveCount(1, {
-        message: "Show Edit Properties btn in cog menu",
+    expect(".o-dropdown--menu span:contains(Edit fields)").toHaveCount(1, {
+        message: "Show Edit fields btn in cog menu",
     });
 
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     expect.verifySteps(["notification"]);
 
@@ -3232,7 +3232,7 @@ test("add button visible in edit mode and during notebook switch", async () => {
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
 
     expect(".o_field_property_add button").toHaveCount(1, {
         message: "Add Property button should be visible in edit mode",
@@ -3282,7 +3282,7 @@ test("properties: Create a property with an onchange methods", async () => {
         actionMenus: {},
     });
     await toggleActionMenu();
-    await contains(".o_popover span:contains(Edit Properties)").click();
+    await contains(".o_popover span:contains(Edit fields)").click();
     await runAllTimers();
     await addPropertyDefinition();
     expect.verifySteps([
@@ -3315,7 +3315,7 @@ test("properties: discard recent changes after add", async () => {
     expect('.o_property_field[property-name="property_2"]').toHaveCount(1);
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
     await changeType("text");
@@ -3361,7 +3361,7 @@ test("properties: discard recent changes on click away", async () => {
     });
 
     await toggleActionMenu();
-    await toggleMenuItem("Edit Properties");
+    await toggleMenuItem("Edit fields");
     await click(".o_property_field:nth-child(2) .o_field_property_open_popover");
     await animationFrame();
 

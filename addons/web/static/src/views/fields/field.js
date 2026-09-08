@@ -1,4 +1,15 @@
-import { Component, t, usePlugin, useProps, xml } from "@odoo/owl";
+import {
+    Component,
+    computed,
+    Plugin,
+    Registry,
+    t,
+    useConfig,
+    usePlugin,
+    useProps,
+    xml,
+    signal,
+} from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Domain } from "@web/core/domain";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
@@ -9,6 +20,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { getFieldContext } from "@web/model/relational_model/utils";
 import { X2M_TYPES, getClassNameFromDecoration } from "@web/views/utils";
 import { getTooltipInfo } from "./field_tooltip";
+import { services } from "@web/core/services";
 
 const isSmall = utils.isSmall;
 
@@ -219,6 +231,19 @@ export class Field extends Component {
     // Field forwards arbitrary props to the underlying field component, so it
     // accepts any prop (fieldInfo among them).
     props = useProps();
+    rootRef = signal.ref();
+    fieldResources = usePlugin(FieldEditionPlugin);
+    fieldDefinition = computed(() => this.props.record.fields[this.props.name]);
+    canMetaEdit = computed(() => {
+        if (this.props.record !== this.props.record.model.root) {
+            return false;
+        }
+        return this.fieldResources.canEdit({
+            fieldDefinition: this.fieldDefinition,
+            node: this.rootRef,
+        });
+    });
+
     static parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         const name = node.getAttribute("name");
         const widget = node.getAttribute("widget");
@@ -365,6 +390,8 @@ export class Field extends Component {
         }
     }
 
+    computedClassNames = computed(() => this.classNames);
+
     get classNames() {
         const { class: _class, fieldInfo, name, record } = this.props;
         const { readonly, required, invalid, empty } = fieldVisualFeedback(
@@ -381,6 +408,7 @@ export class Field extends Component {
             o_field_empty: empty,
             [`o_field_${this.type}`]: true,
             [_class]: Boolean(_class),
+            "position-relative": this.canMetaEdit(),
         };
         if (this.field.additionalClasses) {
             for (const cls of this.field.additionalClasses) {
@@ -495,4 +523,71 @@ export class Field extends Component {
             .querySelector(`label[for=${this.fieldComponentProps.id}], ${formLabelSelector}`)
             ?.classList.toggle("o_label_active", isActive);
     }
+    onButtonEditClicked(ev) {
+        return this.fieldResources.edit({
+            fieldDefinition: this.fieldDefinition,
+            node: this.rootRef,
+        });
+    }
 }
+
+class GlobalFiedResources extends Plugin {
+    static id = "global_field_resources";
+    edition = new Registry();
+}
+
+export class FieldEditionPlugin extends Plugin {
+    static id = "field_edition";
+    registry = usePlugin(GlobalFiedResources).edition;
+
+    state = useConfig("field_edition");
+    editMode = computed(() => this.state?.editMode?.());
+
+    setEdit(bool) {
+        if (this.state?.editMode) {
+            this.state.editMode.set(bool);
+        }
+    }
+
+    _resources = computed(() => {
+        const resources = [];
+        for (const res of this.registry.items()) {
+            const instance = res(this);
+            if (instance) {
+                resources.push(instance);
+            }
+        }
+        return resources;
+    });
+
+    canEdit({ fieldDefinition, node }) {
+        return (
+            this.editMode() &&
+            this._resources()
+                .map((res) => res?.canEdit?.({ fieldDefinition, node }) ?? false)
+                .some(Boolean)
+        );
+    }
+
+    edit({ fieldDefinition, node }) {
+        if (!this.editMode()) {
+            return false;
+        }
+        for (const res of this._resources()) {
+            if (res?.canEdit?.({ fieldDefinition, node }) ?? false) {
+                if (res.edit({ fieldDefinition, node }) ?? false) {
+                    return;
+                }
+            }
+        }
+        return true;
+    }
+
+    isEnabled = computed(() =>
+        this._resources()
+            .map((res) => res?.enabled?.() ?? false)
+            .some(Boolean)
+    );
+}
+
+services.add(FieldEditionPlugin);

@@ -17,7 +17,7 @@ import { useSetupAction } from "@web/search/action_hook";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
-import { Field } from "@web/views/fields/field";
+import { Field, FieldEditionPlugin } from "@web/views/fields/field";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { isX2Many } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
@@ -43,6 +43,7 @@ import {
     onPatched,
     onWillDestroy,
     onWillUnmount,
+    providePlugins,
     proxy,
     signal,
     t,
@@ -164,6 +165,10 @@ export class FormController extends Component {
     rootRef = signal.ref();
 
     setup() {
+        providePlugins([FieldEditionPlugin], {
+            field_edition: { editMode: signal(false) },
+        });
+        this.fieldEditionPlugin = usePlugin(FieldEditionPlugin);
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
@@ -593,14 +598,14 @@ export class FormController extends Component {
         const { activeActions } = this.archInfo;
         return {
             addPropertyFieldValue: {
-                isAvailable: () => activeActions.addPropertyFieldValue,
+                isAvailable: () =>
+                    activeActions.addPropertyFieldValue || this.fieldEditionPlugin.isEnabled(),
                 sequence: 10,
-                description: this.propertiesState.editable
-                    ? _t("Save Properties")
-                    : _t("Edit Properties"),
+                description: this.propertiesState.editable ? _t("Save fields") : _t("Edit fields"),
                 icon: "settings_applications",
                 callback: () => {
                     this.propertiesState.editable = !this.propertiesState.editable;
+                    this.fieldEditionPlugin.setEdit(this.propertiesState.editable);
                     this.model.bus.trigger("PROPERTY_FIELD:EDIT", {
                         editable: this.propertiesState.editable,
                     });
