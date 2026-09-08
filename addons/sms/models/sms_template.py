@@ -23,7 +23,7 @@ class SmsTemplate(models.Model):
         'ir.model', string='Applies to', required=True,
         domain=['&', ('is_mail_thread_sms', '=', True), ('transient', '=', False)],
         help="The type of document this template can be used with", ondelete='cascade')
-    model = fields.Char('Related Document Model', related='model_id.model', index=True, store=True, readonly=True)
+    model = fields.Char('Related Document Model', related='model_id.model', related_sudo=True, index=True, store=True, readonly=True)
     body = fields.Char('Body', translate=True, required=True)
     # Use to create contextual action (same as for email template)
     sidebar_action_id = fields.Many2one('ir.actions.act_window', 'Sidebar action', readonly=True, copy=False,

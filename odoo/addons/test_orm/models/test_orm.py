@@ -127,7 +127,7 @@ class TestOrmMessage(models.Model):
     display_name = fields.Char(string='Abstract')
     size = fields.Integer(compute='_compute_size', search='_search_size')
     double_size = fields.Integer(compute='_compute_double_size')
-    discussion_name = fields.Char(related='discussion.name', string="Discussion Name", readonly=False)
+    discussion_name = fields.Char(related='discussion.name', related_sudo=True, string="Discussion Name", readonly=False)
     author_partner = fields.Many2one(
         'res.partner', compute='_compute_author_partner',
         search='_search_author_partner')
@@ -1620,9 +1620,11 @@ class TestOrmComputeMember(models.Model):
     )
     container_context_name = fields.Char(
         related='container_context_id.name', string='Container Context Name',
+        related_sudo=True,
     )
     container_context_name_translated = fields.Char(
         related='container_context_id.name_translated', string='Container Context Name Translated',
+        related_sudo=True,
     )
 
     @api.depends('name')

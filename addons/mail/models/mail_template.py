@@ -45,7 +45,7 @@ class MailTemplate(models.Model):
          ('custom_template', 'Custom Template')],
          compute="_compute_template_category", search="_search_template_category")
     model_id = fields.Many2one('ir.model', 'Applies to', ondelete='cascade', domain=_get_non_abstract_models_domain)
-    model = fields.Char('Related Document Model', related='model_id.model', index=True, store=True, readonly=True)
+    model = fields.Char('Related Document Model', related='model_id.model', related_sudo=True, index=True, store=True, readonly=True)
     subject = fields.Char('Subject', translate=True, prefetch=True, help="Subject (placeholders may be used here)")
     email_from = fields.Char('Send From',
                              help="Sender address (placeholders may be used here). If not set, the default "
