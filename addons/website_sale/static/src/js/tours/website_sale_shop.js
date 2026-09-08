@@ -43,7 +43,6 @@ registerWebsitePreviewTour("website_sale.onboarding_tour", {}, () => [
         content: _t("Edit the price of this product by clicking on the amount."),
         tooltipPosition: "bottom",
         run: "editor 1.99",
-        timeout: 30000,
     },
     {
         trigger: ":iframe .product_price .o_dirty .oe_currency_value:not(:text(1.00))",
@@ -55,7 +54,6 @@ registerWebsitePreviewTour("website_sale.onboarding_tour", {}, () => [
         run: "dblclick",
     },
     {
-        isActive: ["auto"],
         trigger: ".o_select_media_dialog .o_upload_media_button",
         content: _t("Upload a file from your local library."),
         tooltipPosition: "bottom",

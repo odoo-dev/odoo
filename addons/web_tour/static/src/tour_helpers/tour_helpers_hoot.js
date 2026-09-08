@@ -1,5 +1,7 @@
 import * as hoot from "@odoo/hoot-dom";
+import { setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 import { patch } from "@web/core/utils/patch";
+import { tourState } from "@web_tour/tour_state";
 import { TourHelpers } from "./tour_helpers";
 
 patch(TourHelpers.prototype, {
@@ -231,6 +233,35 @@ patch(TourHelpers.prototype, {
         const element = this._get_action_element(selector);
         await hoot.click(element);
         await hoot.setInputFiles(files, options);
+    },
+
+    /**
+     * Clicks the given file-input **{@link Selector}**, exactly like {@link click}.
+     * Under the robot-driven interactive engine there is no real user to pick a
+     * file from the native OS dialog the click opens, so a single placeholder
+     * file is input on it instead, the same way {@link inputFiles} would.
+     * @param {string} selector
+     * @example
+     *  run: "clickFileInput input[type=file]",
+     */
+    async clickFileInput(selector) {
+        if (tourState.getCurrentConfig().robot) {
+            setupEventActions(window);
+            const element = this._get_action_element(selector);
+            const wasHidden = element.classList.contains("o_hidden");
+            element.classList.remove("o_hidden");
+            try {
+                await this.inputFiles(element, [
+                    new File(["Odoo"], "document.txt", { type: "text/plain" }),
+                ]);
+            } finally {
+                if (wasHidden) {
+                    element.classList.add("o_hidden");
+                }
+            }
+        } else {
+            await this.click(selector);
+        }
     },
 
     /**

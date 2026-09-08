@@ -17,6 +17,7 @@ class TestOnboardingTours(HttpCase):
         'sale_subscription_tour', 'project_tour', 'helpdesk_tour',
         'rental_tour', 'web_studio_new_app_tour', 'question_tour',
         'crm_tour', 'account_tour', 'point_of_sale_tour',
+        'website_sale.onboarding_tour', 'blog', 'documents_tour',
     ]
 
     @classmethod
@@ -44,8 +45,16 @@ class TestOnboardingTours(HttpCase):
             self.skipTest("None of the onboarding tours were found: are the modules that define them installed?")
         return tours
 
+    # Tours whose JS is only bundled inside the website builder's "preview" client
+    # action, not on the plain frontend page their `url` field points to.
+    _website_preview_tour_names = {'website_sale.onboarding_tour', 'blog'}
+
     def test_onboarding_tours(self):
         for tour in self._get_tours():
             with self.subTest(tour_name=tour.name), contextlib.closing(self.env.cr.savepoint()):
                 code = f"odoo.startTour({tour.name!r}, {{'mode': 'manual', 'robot': true}})"
-                self.start_tour(tour.url or '/odoo', tour.name, code=code, login="admin")
+                if tour.name in self._website_preview_tour_names:
+                    url = self.env['website'].get_client_action_url(tour.url)
+                else:
+                    url = tour.url or '/odoo'
+                self.start_tour(url, tour.name, code=code, login="admin")

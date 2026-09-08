@@ -271,6 +271,9 @@ export function clickOnSnippet(snippet, position = "bottom") {
     ];
 }
 export function clickOnSave(timeout = 50000, withContains = true) {
+    const saveButtonTrigger = withContains
+        ? "button[data-action=save]:enabled:contains(save)"
+        : "button[data-action=save]:enabled";
     return [
         {
             trigger: ".o-snippets-menu:not(:has(.o_we_ongoing_insertion))",
@@ -279,16 +282,26 @@ export function clickOnSave(timeout = 50000, withContains = true) {
             trigger: "body:not(:has(.o_dialog))",
         },
         {
-            trigger: withContains
-                ? "button[data-action=save]:enabled:contains(save)"
-                : "button[data-action=save]:enabled",
+            isActive: ["auto"],
+            trigger: saveButtonTrigger,
             content: "Good job! It's time to save your work.",
             run: "click",
             timeout,
         },
         {
+            isActive: ["manual"],
+            trigger: saveButtonTrigger,
+            content: "Good job! It's time to save your work.",
+            run: "click",
+        },
+        {
+            isActive: ["auto"],
             trigger: "body:not(.o_builder_open)",
             timeout,
+        },
+        {
+            isActive: ["manual"],
+            trigger: "body:not(.o_builder_open)",
         },
         {
             content: "Wait until the iframe is ready",
@@ -484,7 +497,13 @@ export function registerWebsitePreviewTour(name, options, steps) {
             if (options.edition) {
                 tourSteps.unshift(waitForEditMode);
             } else {
-                tourSteps[0].timeout = 20000;
+                const [firstStep] = tourSteps;
+                tourSteps.splice(
+                    0,
+                    1,
+                    { ...firstStep, isActive: ["auto"], timeout: 20000 },
+                    { ...omit(firstStep, "expectUnloadPage", "timeout"), isActive: ["manual"] }
+                );
             }
             return tourSteps;
         },

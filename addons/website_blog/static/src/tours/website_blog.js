@@ -63,14 +63,9 @@ registerWebsitePreviewTour("blog", {}, () => [
     },
     {
         trigger: ".o_select_media_dialog .o_we_search",
-        content: _t('Search for an image. (eg: type "business")'),
+        content: _t("Search for an image, or close this dialog to keep the default cover."),
         tooltipPosition: "top",
-    },
-    {
-        trigger: ".o_select_media_dialog .o_existing_attachment_cell:first .o_button_area",
-        content: _t("Choose an image from the library."),
-        tooltipPosition: "top",
-        run: "click",
+        run: "click .modal-footer .btn-secondary",
     },
     {
         trigger: ":iframe #o_wblog_post_content p",
