@@ -6,7 +6,7 @@ from odoo import fields, models
 class HrEmployeePublic(models.Model):
     _inherit = 'hr.employee.public'
 
-    has_timesheet = fields.Boolean(related='employee_id.has_timesheet')
+    has_timesheet = fields.Boolean(related='employee_id.has_timesheet', related_sudo=True)
 
     def action_timesheet_from_employee(self):
         self.ensure_one()

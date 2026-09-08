@@ -9,6 +9,6 @@ class HrEmployeePublic(models.Model):
     resume_line_ids = fields.One2many('hr.resume.line', 'employee_id', string="Resume lines")
     employee_skill_ids = fields.One2many('hr.employee.skill', 'employee_id', string="Skills",
         domain=[('skill_type_id.active', '=', True)])
-    current_employee_skill_ids = fields.One2many('hr.employee.skill', related='employee_id.current_employee_skill_ids')
-    certification_ids = fields.One2many('hr.employee.skill', related='employee_id.certification_ids')
-    display_certification_page = fields.Boolean(related="employee_id.display_certification_page")
+    current_employee_skill_ids = fields.One2many('hr.employee.skill', related='employee_id.current_employee_skill_ids', related_sudo=True)
+    certification_ids = fields.One2many('hr.employee.skill', related='employee_id.certification_ids', related_sudo=True)
+    display_certification_page = fields.Boolean(related="employee_id.display_certification_page", related_sudo=True)

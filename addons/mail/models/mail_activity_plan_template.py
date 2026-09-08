@@ -16,8 +16,8 @@ class MailActivityPlanTemplate(models.Model):
     plan_id = fields.Many2one(
         'mail.activity.plan', string="Plan",
         ondelete='cascade', required=True, index=True)
-    res_model = fields.Selection(related="plan_id.res_model")
-    company_id = fields.Many2one(related='plan_id.company_id')
+    res_model = fields.Selection(related="plan_id.res_model", related_sudo=True)
+    company_id = fields.Many2one(related='plan_id.company_id', related_sudo=True)
     sequence = fields.Integer(default=10)
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Activity Type',

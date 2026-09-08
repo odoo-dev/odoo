@@ -21,11 +21,11 @@ class ResourceResource(models.Model):
 
     job_title = fields.Char(compute='_compute_job_title', compute_sudo=True)
     department_id = fields.Many2one('hr.department', compute='_compute_department_id', compute_sudo=True)
-    work_location_id = fields.Many2one(related='employee_id.work_location_id')
-    work_email = fields.Char(related='employee_id.work_email')
-    work_phone = fields.Char(related='employee_id.work_phone')
-    show_hr_icon_display = fields.Boolean(related='employee_id.show_hr_icon_display')
-    hr_icon_display = fields.Selection(related='employee_id.hr_icon_display')
+    work_location_id = fields.Many2one(related='employee_id.work_location_id', related_sudo=True)
+    work_email = fields.Char(related='employee_id.work_email', related_sudo=True)
+    work_phone = fields.Char(related='employee_id.work_phone', related_sudo=True)
+    show_hr_icon_display = fields.Boolean(related='employee_id.show_hr_icon_display', related_sudo=True)
+    hr_icon_display = fields.Selection(related='employee_id.hr_icon_display', related_sudo=True)
     calendar_id = fields.Many2one(inverse='_inverse_calendar_id')
 
     @api.depends('employee_id.current_version_id.tz')

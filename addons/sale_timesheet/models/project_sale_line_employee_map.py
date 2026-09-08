@@ -37,7 +37,7 @@ class ProjectSaleLineEmployeeMap(models.Model):
     cost = fields.Monetary(currency_field='cost_currency_id', compute='_compute_cost', store=True, readonly=False,
                            help="This cost overrides the employee's default employee hourly wage in employee's HR Settings")
     display_cost = fields.Monetary(currency_field='cost_currency_id', compute="_compute_display_cost", inverse="_inverse_display_cost", string="Hourly Cost", groups="project.group_project_manager,hr.group_hr_user")
-    cost_currency_id = fields.Many2one('res.currency', string="Cost Currency", related='employee_id.currency_id', readonly=True, export_string_translation=False)
+    cost_currency_id = fields.Many2one('res.currency', string="Cost Currency", related='employee_id.currency_id', related_sudo=True, readonly=True, export_string_translation=False)
     is_cost_changed = fields.Boolean('Is Cost Manually Changed', compute='_compute_is_cost_changed', store=True, export_string_translation=False)
 
     _uniqueness_employee = models.Constraint(

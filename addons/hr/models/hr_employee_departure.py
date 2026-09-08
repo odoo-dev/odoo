@@ -25,7 +25,7 @@ class HrEmployeeDeparture(models.Model):
         index=True,
         ondelete="cascade",
     )
-    country_code = fields.Char(related="employee_id.company_id.partner_id.country_id.code")
+    country_code = fields.Char(related="employee_id.company_id.partner_id.country_id.code", related_sudo=True)
     departure_reason_id = fields.Many2one(
         "hr.departure.reason",
         string="End Reason",

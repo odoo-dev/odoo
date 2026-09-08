@@ -34,11 +34,11 @@ class HrAttendance(models.Model):
 
     employee_id = fields.Many2one('hr.employee', string="Employee", default=_default_employee, required=True,
         ondelete='cascade', index=True)
-    department_id = fields.Many2one('hr.department', string="Department", related="employee_id.department_id",
+    department_id = fields.Many2one('hr.department', string="Department", related="employee_id.department_id", related_sudo=True,
         readonly=True)
-    manager_id = fields.Many2one(comodel_name='hr.employee', related="employee_id.parent_id", readonly=True,
+    manager_id = fields.Many2one(comodel_name='hr.employee', related="employee_id.parent_id", related_sudo=True, readonly=True,
         export_string_translation=False)
-    attendance_manager_id = fields.Many2one('res.users', related="employee_id.attendance_manager_id",
+    attendance_manager_id = fields.Many2one('res.users', related="employee_id.attendance_manager_id", related_sudo=True,
         export_string_translation=False)
     is_manager = fields.Boolean(compute="_compute_is_manager")
     is_own = fields.Boolean(compute="_compute_is_manager")
@@ -79,7 +79,7 @@ class HrAttendance(models.Model):
                                 readonly=True,
                                 default='manual')
     expected_hours = fields.Float(string="Regular Hours", compute="_compute_expected_hours", store=True, aggregator="sum")
-    device_tracking_enabled = fields.Boolean(related="employee_id.company_id.attendance_device_tracking")
+    device_tracking_enabled = fields.Boolean(related="employee_id.company_id.attendance_device_tracking", related_sudo=True)
     linked_overtime_ids = fields.One2many('hr.attendance.overtime.line', 'attendance_id', readonly=False)
     day_of_date = fields.Selection(
         compute='_compute_day_of_date',
@@ -88,7 +88,7 @@ class HrAttendance(models.Model):
         index=True,
         selection=[('0', "Monday"), ('1', "Tuesday"), ('2', "Wednesday"), ('3', "Thursday"), ('4', "Friday"), ('5', "Saturday"), ('6', "Sunday")],
     )
-    resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', string="Working Schedule")
+    resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', related_sudo=True, string="Working Schedule")
     break_duration = fields.Float(string="Break Duration", tracking=True, help="Extra unpaid break duration (hours)")
 
     @api.depends('date')

@@ -94,8 +94,8 @@ class HrLeaveAllocation(models.Model):
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', default=lambda self: self.env.user.employee_id,
         index=True, ondelete="restrict", required=True, tracking=True, domain=_domain_employee_id)
-    employee_company_id = fields.Many2one(related='employee_id.company_id', readonly=True, store=True)
-    active_employee = fields.Boolean('Active Employee', related='employee_id.active', readonly=True)
+    employee_company_id = fields.Many2one(related='employee_id.company_id', related_sudo=True, readonly=True, store=True)
+    active_employee = fields.Boolean('Active Employee', related='employee_id.active', related_sudo=True, readonly=True)
     manager_id = fields.Many2one('hr.employee', compute='_compute_manager_id', store=True, string='Manager')
     notes = fields.Text('Reasons', readonly=False)
     # duration

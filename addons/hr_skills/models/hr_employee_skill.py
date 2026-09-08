@@ -10,7 +10,7 @@ class HrEmployeeSkill(models.Model):
     _rec_name = "skill_id"
 
     employee_id = fields.Many2one('hr.employee', required=True, index=True, ondelete='cascade')
-    company_id = fields.Many2one(related='employee_id.company_id')
+    company_id = fields.Many2one(related='employee_id.company_id', related_sudo=True)
 
     def _linked_field_name(self):
         return 'employee_id'

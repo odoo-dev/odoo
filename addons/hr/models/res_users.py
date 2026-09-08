@@ -96,7 +96,7 @@ class ResUsers(models.Model):
     employee_public_ids = fields.One2many('hr.employee.public', 'user_id', string='Related employee (public)', domain=_employee_ids_domain, readonly=True)
     employee_id = fields.Many2one('hr.employee', string="Company employee",
         compute='_compute_company_employee', search='_search_company_employee', readonly=True)
-    department_id = fields.Many2one(related='employee_id.department_id', string='Department')
+    department_id = fields.Many2one(related='employee_id.department_id', related_sudo=True, string='Department')
 
     job_title = fields.Char(**related_employee_field('job_title'), user_writeable=True)
     work_phone = fields.Char(**related_employee_field('work_phone'), user_writeable=True)
@@ -105,8 +105,8 @@ class ResUsers(models.Model):
     category_ids = fields.Many2many('hr.employee.category', **related_employee_field('category_ids', string="Employee Tags"), user_writeable=True)
     work_contact_id = fields.Many2one('res.partner', **related_employee_field('work_contact_id'))
     work_location_id = fields.Many2one('hr.work.location', **related_employee_field('work_location_id'), user_writeable=True)
-    work_location_name = fields.Char(related="employee_id.work_location_name")
-    work_location_type = fields.Selection(related="employee_id.work_location_type")
+    work_location_name = fields.Char(related="employee_id.work_location_name", related_sudo=True)
+    work_location_type = fields.Selection(related="employee_id.work_location_type", related_sudo=True)
     private_street = fields.Char(**related_employee_field('private_street'), user_writeable=True)
     private_street2 = fields.Char(**related_employee_field('private_street2'), user_writeable=True)
     private_city = fields.Char(**related_employee_field('private_city'), user_writeable=True)
@@ -135,7 +135,7 @@ class ResUsers(models.Model):
     barcode = fields.Char(**related_employee_field('barcode'), user_writeable=True)
     pin = fields.Char(**related_employee_field('pin'), user_writeable=True)
     employee_count = fields.Integer(compute='_compute_employee_count')
-    employee_resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', string="Employee's Working Hours", readonly=True)
+    employee_resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', related_sudo=True, string="Employee's Working Hours", readonly=True)
     bank_account_ids = fields.Many2many('res.partner.bank', **related_employee_field('bank_account_ids'))
     birthday = fields.Date(**related_employee_field('birthday'), user_writeable=True)
     birthday_public_display = fields.Boolean(**related_employee_field('birthday_public_display'), user_writeable=True)

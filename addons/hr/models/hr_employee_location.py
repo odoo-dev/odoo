@@ -14,7 +14,7 @@ class HrEmployeeLocation(models.Model):
     work_location_name = fields.Char(related='work_location_id.name', string="Location name")
     work_location_type = fields.Selection(related="work_location_id.location_type")
     employee_id = fields.Many2one('hr.employee', default=lambda self: self.env.user.employee_id, required=True, ondelete="cascade")
-    employee_name = fields.Char(related="employee_id.name")
+    employee_name = fields.Char(related="employee_id.name", related_sudo=True)
     date = fields.Date(string="Date")
     day_week_string = fields.Char(compute="_compute_day_week_string")
 

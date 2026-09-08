@@ -165,9 +165,9 @@ class HrLeave(models.Model):
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', index=True, ondelete="restrict", required=True,
         tracking=True, domain=lambda self: self._get_employee_domain(), default=lambda self: self.env.user.employee_id)
-    employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True)
+    employee_company_id = fields.Many2one(related='employee_id.company_id', related_sudo=True, string="Employee Company", store=True)
     company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True, index=True)
-    active_employee = fields.Boolean(related='employee_id.active', string='Employee Active')
+    active_employee = fields.Boolean(related='employee_id.active', related_sudo=True, string='Employee Active')
     tz_mismatch = fields.Boolean(compute='_compute_tz_mismatch')
     tz = fields.Selection(_tz_get, compute='_compute_tz')
     department_id = fields.Many2one(

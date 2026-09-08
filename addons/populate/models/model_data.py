@@ -11,12 +11,12 @@ class ModelData(models.Model):
     _description = 'Reference to Populated Records.'
     _log_access = False
 
-    res_model = fields.Char('Model', related='job_id.model_name')
+    res_model = fields.Char('Model', related='job_id.model_name', related_sudo=True)
     res_id = fields.Many2oneReference('Record', model_field='res_model', required=True)
 
     job_id = fields.Many2one('populate.job', required=True, ondelete='cascade')
-    ref = fields.Char(related='job_id.ref')
-    session_id = fields.Many2one(related='job_id.session_id')
-    blueprint_id = fields.Many2one(related='job_id.blueprint_id')
+    ref = fields.Char(related='job_id.ref', related_sudo=True)
+    session_id = fields.Many2one(related='job_id.session_id', related_sudo=True)
+    blueprint_id = fields.Many2one(related='job_id.blueprint_id', related_sudo=True)
 
     _job_records_idx = models.UniqueIndex('(job_id, res_id)')

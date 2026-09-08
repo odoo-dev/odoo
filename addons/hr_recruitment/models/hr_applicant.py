@@ -84,8 +84,8 @@ class HrApplicant(models.Model):
     availability = fields.Date("Availability", help="The date at which the applicant will be available to start working", tracking=True)
     color = fields.Integer("Color Index", default=0)
     employee_id = fields.Many2one('hr.employee', string="Employee", help="Employee linked to the applicant.", copy=False, index='btree_not_null')
-    emp_is_active = fields.Boolean(string="Employee Active", related='employee_id.active')
-    employee_name = fields.Char(related='employee_id.name', string="Employee Name", readonly=False, tracking=False)
+    emp_is_active = fields.Boolean(string="Employee Active", related='employee_id.active', related_sudo=True)
+    employee_name = fields.Char(related='employee_id.name', related_sudo=True, string="Employee Name", readonly=False, tracking=False)
 
     probability = fields.Float("Probability")
     create_date = fields.Datetime("Applied on", readonly=True)

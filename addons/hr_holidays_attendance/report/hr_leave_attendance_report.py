@@ -17,9 +17,9 @@ class HrLeaveAttendanceReport(models.Model):
 
     date = fields.Date("Date")
     employee_id = fields.Many2one("hr.employee", string="Employee")
-    active = fields.Boolean(related="employee_id.active")
-    department_id = fields.Many2one(related="employee_id.department_id", string="Department")
-    job_id = fields.Many2one(related="employee_id.job_id", string="Job Position")
+    active = fields.Boolean(related="employee_id.active", related_sudo=True)
+    department_id = fields.Many2one(related="employee_id.department_id", related_sudo=True, string="Department")
+    job_id = fields.Many2one(related="employee_id.job_id", related_sudo=True, string="Job Position")
     schedule_id = fields.Many2one("resource.calendar", string="Working Schedule")
     expected_hours = fields.Float("Expected Hours")
     worked_hours = fields.Float("Worked Hours")

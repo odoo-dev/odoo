@@ -11,8 +11,8 @@ class ResPartnerBank(models.Model):
     employee_id = fields.Many2many('hr.employee', 'Employee', compute="_compute_employee_id", search="_search_employee_id")
     employee_salary_amount = fields.Float(string='Salary Allocation', compute='_compute_salary_amount', digits=(16, 4), readonly=True, store=False)
     employee_salary_amount_is_percentage = fields.Boolean(compute='_compute_salary_amount', readonly=True, store=False)
-    currency_symbol = fields.Char(related='employee_id.currency_id.symbol')
-    employee_has_multiple_bank_accounts = fields.Boolean(related="employee_id.has_multiple_bank_accounts")
+    currency_symbol = fields.Char(related='employee_id.currency_id.symbol', related_sudo=True)
+    employee_has_multiple_bank_accounts = fields.Boolean(related="employee_id.has_multiple_bank_accounts", related_sudo=True)
 
     @api.depends('employee_id.salary_distribution')
     def _compute_salary_amount(self):

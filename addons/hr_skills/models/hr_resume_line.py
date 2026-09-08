@@ -11,16 +11,16 @@ class HrResumeLine(models.Model):
     _order = "line_type_id, date_end desc, date_start desc"
 
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, ondelete='cascade', index=True)
-    avatar_128 = fields.Image(related='employee_id.avatar_128')
-    company_id = fields.Many2one(related='employee_id.company_id')
-    department_id = fields.Many2one(related='employee_id.department_id')
+    avatar_128 = fields.Image(related='employee_id.avatar_128', related_sudo=True)
+    company_id = fields.Many2one(related='employee_id.company_id', related_sudo=True)
+    department_id = fields.Many2one(related='employee_id.department_id', related_sudo=True)
     name = fields.Char(required=True, translate=True)
     date_start = fields.Date(required=True, default=fields.Date.context_today)
     date_end = fields.Date()
     duration = fields.Integer(string="Duration")
     description = fields.Html(string="Description", translate=True)
     line_type_id = fields.Many2one('hr.resume.line.type', string="Type", index=True)
-    is_course = fields.Boolean(related='line_type_id.is_course')
+    is_course = fields.Boolean(related='line_type_id.is_course', related_sudo=True)
     course_type = fields.Selection(
         string="Course Type",
         selection=[('external', 'External')],

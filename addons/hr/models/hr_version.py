@@ -179,7 +179,7 @@ class HrVersion(models.Model):
     structure_type_id = fields.Many2one('hr.payroll.structure.type', string="Salary Structure Type",
                                         compute="_compute_structure_type_id", readonly=False, store=True, index='btree_not_null', tracking=1,
                                         groups="hr.group_hr_manager", default=_default_salary_structure)
-    active_employee = fields.Boolean(related="employee_id.active", string="Active Employee", groups="hr.group_hr_user")
+    active_employee = fields.Boolean(related="employee_id.active", related_sudo=True, string="Active Employee", groups="hr.group_hr_user")
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     wage = fields.Monetary('Wage', tracking=1, help="Employee's monthly gross wage.", aggregator="avg",
                            groups="hr.group_hr_manager")

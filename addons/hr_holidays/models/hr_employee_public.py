@@ -18,7 +18,7 @@ class HrEmployeePublic(models.Model):
     show_leaves = fields.Boolean('Able to see Remaining Time Off', compute='_compute_show_leaves')
     is_absent = fields.Boolean('Absent Today', compute='_compute_leave_status', search='_search_absent_employee')
     allocation_display = fields.Char(compute='_compute_allocation_display')
-    allocation_remaining_display = fields.Char(related='employee_id.allocation_remaining_display')
+    allocation_remaining_display = fields.Char(related='employee_id.allocation_remaining_display', related_sudo=True)
 
     def _compute_show_leaves(self):
         self._compute_from_employee('show_leaves')
