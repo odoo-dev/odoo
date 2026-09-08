@@ -1427,6 +1427,38 @@ class TestCompute(common.TransactionCase):
             'remaining_hours': 95,
         }])
 
+    def test_no_activity_created_on_transient_state(self):
+        """
+        `immediate` and `delayed` are both meant to end up equal, but
+        `delayed` is only resynced by write() after reading `immediate`.
+        That read wakes up an automation watching `delayed` before the resync
+        happens, so it can see a stale `delayed` while `immediate` is already
+        up to date. The automation must not act on that transient mismatch.
+        """
+        model = self.env['ir.model']._get('base_automation.transient.test')
+        create_automation(
+            self,
+            model_id=model.id,
+            trigger='on_create_or_write',
+            filter_domain="[('immediate', '!=', 0), ('delayed', '=', 0)]",
+            _actions={
+                'state': 'next_activity',
+                'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+            },
+        )
+
+        record = self.env['base_automation.transient.test'].create({'immediate_setter': 0})
+        self.assertFalse(record.activity_ids)
+
+        record.write({'immediate_setter': 1})
+
+        self.assertEqual(record.immediate, 1)
+        self.assertEqual(record.delayed, 1, "delayed should have caught up with immediate")
+        self.assertFalse(
+            record.activity_ids,
+            "no activity should have been created: the final state doesn't match the automation's condition",
+        )
+
     def test_recursion(self):
         project = self.env['test_base_automation.project'].create({})
 
