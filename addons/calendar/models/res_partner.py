@@ -117,11 +117,10 @@ class ResPartner(models.Model):
 
     def action_schedule_meeting(self):
         self.ensure_one()
-        partner_ids = self.ids
-        partner_ids.append(self.env.user.partner_id.id)
+        partners = (self | self.env.user.partner_id).filtered('active')
         action = self.env["ir.actions.actions"]._for_xml_id("calendar.action_calendar_event")
         action['context'] = {
-            'default_partner_ids': partner_ids,
+            'default_partner_ids': partners.ids,
             'calendar_include_user_events': True,
         }
         if not self.meeting_next_date and self.meeting_count:

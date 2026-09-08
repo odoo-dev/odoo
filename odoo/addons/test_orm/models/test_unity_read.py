@@ -64,7 +64,7 @@ class TestOrmEmployer(models.Model):
     _description = 'the employer of a person'
 
     name = fields.Char('Name')
-    employee_ids = fields.One2many('test_orm.person', 'employer_id')
+    employee_ids = fields.One2many('test_orm.person', 'employer_id', domain=[('active', '=', True)])
     all_employee_ids = fields.One2many('test_orm.person', 'employer_id', domain=[])
 
 

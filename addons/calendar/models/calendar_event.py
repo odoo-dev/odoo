@@ -136,7 +136,7 @@ class CalendarEvent(models.Model):
     @api.model
     def _default_partners(self):
         """ When active_model is res.partner, the current partners should be attendees """
-        partners = self.env.user.partner_id
+        partners = self.env.user.partner_id.filtered('active')
         active_id = self.env.context.get('active_id')
         if self.env.context.get('active_model') == 'res.partner' and active_id and active_id not in partners.ids:
             partners |= self.env['res.partner'].browse(active_id)
@@ -245,6 +245,7 @@ class CalendarEvent(models.Model):
     should_show_status = fields.Boolean(compute="_compute_should_show_status")
     partner_ids = fields.Many2many(
         'res.partner', 'calendar_event_res_partner_rel',
+        domain=Domain('active', '=', True),
         string='Attendees', default=_default_partners)
     invalid_email_partner_ids = fields.Many2many('res.partner', compute='_compute_invalid_email_partner_ids')
     unavailable_partner_ids = fields.Many2many('res.partner', string="Unavailable Attendees", compute='_compute_unavailable_partner_ids')
@@ -1220,6 +1221,8 @@ class CalendarEvent(models.Model):
             elif op in (4, Command.link):
                 added_partner_ids += [command[1]] if command[1] not in self.partner_ids.ids else []
             # commands 0 and 1 not supported
+        # keep only active partners
+        added_partner_ids = self.env['res.partner'].browse(added_partner_ids).filtered('active').ids
 
         if not self:
             attendees_to_unlink = self.env['calendar.attendee']
