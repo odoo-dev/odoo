@@ -393,7 +393,7 @@ class TestReplenishWizard(PurchaseTestCommon):
         self.assertEqual(last_po_id.order_line.price_unit, 0)
 
     def test_correct_supplier(self):
-        self.env['stock.warehouse'].search([], limit=1).reception_steps = 'two_steps'
+        self.warehouse.reception_steps = 'two_steps'
         product = self.env['product.product'].create({
             'name': 'Product',
             'route_ids': [Command.set([self.route_buy.id])],
@@ -425,6 +425,7 @@ class TestReplenishWizard(PurchaseTestCommon):
             'route_id': self.route_buy.id,
             'supplier_id': product.seller_ids[2].id  # partner_b price 100$
         })
+        self.assertEqual(replenish_wizard._prepare_run_values()['partner_id'], partner_b.id)
         replenish_wizard.launch_replenishment()
         po = self.env['purchase.order'].search([
             ('partner_id', '=', partner_b.id)

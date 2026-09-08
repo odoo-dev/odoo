@@ -43,7 +43,7 @@ class ProductReplenish(models.TransientModel):
         res = super()._prepare_run_values()
         if self.supplier_id:
             res['supplierinfo_id'] = self.supplier_id
-            # res['partner_id'] = self.supplier_id.partner_id
+            res['partner_id'] = self.supplier_id.partner_id.id
         return res
 
     def action_stock_replenishment_info(self):
