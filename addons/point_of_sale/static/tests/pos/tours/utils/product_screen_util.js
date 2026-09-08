@@ -498,6 +498,14 @@ export function enterLotNumber(number, tracking = "serial", click = false) {
                 ".o-autocomplete--dropdown-item a:contains('No existing Lot/Serial number found...')",
         },
         {
+            content: "Reset scroll drift",
+            trigger: ".o-autocomplete input",
+            async run() {
+                // DEBUG
+                await window.scrollTo(0, 0);
+            },
+        },
+        {
             content: "enter lot number",
             trigger: ".o-autocomplete input",
             run: "edit " + number,
