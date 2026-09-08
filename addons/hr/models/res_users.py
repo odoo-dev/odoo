@@ -77,7 +77,7 @@ class ResUsers(models.Model):
     def _employee_ids_domain(self):
         # employee_ids is considered a safe field and as such will be fetched as sudo.
         # So try to enforce the security rules on the field to make sure we do not load employees outside of active companies
-        return [('company_id', 'in', self.env.companies.ids)]
+        return [('company_id', 'in', self.env.companies.ids), ('active', '=', True)]
 
     def _post_model_setup__(self):  # noqa: PLW3201
         for field in self._fields.values():

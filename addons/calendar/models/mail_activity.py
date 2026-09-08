@@ -42,6 +42,7 @@ class MailActivity(models.Model):
             record = self.env[self.res_model].browse(self.res_id).exists()
             if record and record.has_access('read'):
                 default_partners |= record._mail_get_customer()
+        default_partners = default_partners.filtered('active')
         action['context'] = {
             'default_activity_type_id': self.activity_type_id.id,
             'default_res_id': self.env.context.get('default_res_id'),

@@ -8,7 +8,7 @@ from markupsafe import Markup
 from odoo import fields
 from odoo.tools import format_time
 from odoo.tests import Form, tagged
-from odoo.tests.common import new_test_user
+from odoo.tests.common import new_test_user, users
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.bus.tests.common import BusResult
 from odoo.addons.mail.tests.common import MailCase
@@ -381,6 +381,11 @@ class TestEventNotifications(CalendarMailCommon):
 
     def test_email_alarm(self):
         now = fields.Datetime.now()
+        event = self.event.with_user(self.user_employee_2).create({
+            'name': "Doom's day 2",
+            'start': datetime(2019, 10, 25, 8, 0),
+            'stop': datetime(2019, 10, 27, 18, 0),
+        })
         with self.capture_triggers('calendar.ir_cron_scheduler_alarm') as capt:
             alarm = self.env['calendar.alarm'].with_user(self.user).create({
                 'name': 'Alarm',
@@ -388,7 +393,7 @@ class TestEventNotifications(CalendarMailCommon):
                 'interval': 'minutes',
                 'duration': 20,
             })
-            self.event.with_user(self.user).write({
+            event.with_user(self.user).write({
                 'name': 'test event',
                 'start': now + relativedelta(minutes=15),
                 'stop': now + relativedelta(minutes=18),
@@ -402,8 +407,8 @@ class TestEventNotifications(CalendarMailCommon):
         with self.mock_datetime_and_now(now):
             self.env['calendar.alarm_manager'].with_context(lastcall=now - relativedelta(minutes=25))._send_reminder()
             self.env.flush_all()
-            new_messages = self.env['mail.message'].search([('model', '=', 'calendar.event'), ('res_id', '=', self.event.id), ('subject', '=', 'test event - Reminder')])
-            user_message = new_messages.filtered(lambda x: self.event.user_id.partner_id in x.partner_ids)
+            new_messages = self.env['mail.message'].search([('model', '=', 'calendar.event'), ('res_id', '=', event.id), ('subject', '=', 'test event - Reminder')])
+            user_message = new_messages.filtered(lambda x: event.user_id.partner_id in x.partner_ids)
             self.assertTrue(user_message, "Organizer must receive a reminder")
 
     def test_email_alarm_recurrence(self):
@@ -559,6 +564,7 @@ class TestEventNotifications(CalendarMailCommon):
                 self.assertEqual(len(capt.records), 1, "1 trigger should have been created for the whole recurrence (2)")
                 self.assertEqual(capt.records.call_at, datetime(2022, 4, 15, 10, 10))
 
+    @users('xav')
     def test_notification_event_timezone(self):
         """
             Check the domain that decides when calendar events should be notified to the user.
