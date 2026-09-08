@@ -356,25 +356,53 @@ export class TablePlugin extends Plugin {
     normalizeTable(root) {
         const tables = root.querySelectorAll("table");
         for (const table of tables) {
-            const firstRow = table.rows[0];
-            let colgroup;
-            for (const cell of firstRow?.children || []) {
-                const width = cell.style.width;
-                if (!width) {
-                    continue;
+            const cells = Array.from(table.rows[0]?.children ?? []);
+            let colgroup = table.querySelector(":scope > colgroup");
+            if (colgroup || cells.some((cell) => cell.style.width)) {
+                colgroup = colgroup || this.document.createElement("colgroup");
+                const existingCols = [...colgroup.children];
+                let colIndex = 0;
+                for (const cell of cells) {
+                    const span = cell.colSpan || 1;
+                    const spanStart = colIndex;
+                    const totalWidth =
+                        parseFloat(cell.style.width || getComputedStyle(cell).width) || 0;
+
+                    // Existing col widths take priority; only the leftover
+                    // width is divided across columns in this span that
+                    // don't already have one.
+                    let reservedWidth = 0;
+                    let unresolvedCount = 0;
+                    for (let i = spanStart; i < spanStart + span; i++) {
+                        const width = existingCols[i]?.style.width;
+
+                        if (width) {
+                            reservedWidth += parseFloat(width) || 0;
+                        } else {
+                            unresolvedCount++;
+                        }
+                    }
+
+                    const perColWidth = unresolvedCount
+                        ? `${Math.max(totalWidth - reservedWidth, 0) / unresolvedCount}px`
+                        : null;
+
+                    for (colIndex = spanStart; colIndex < spanStart + span; colIndex++) {
+                        const existingCol = existingCols[colIndex];
+                        if (existingCol?.style.width) {
+                            continue;
+                        }
+                        const col = existingCol || this.document.createElement("col");
+                        col.style.width = perColWidth;
+                        if (!existingCol) {
+                            colgroup.appendChild(col);
+                        }
+                    }
+                    cell.style.removeProperty("width");
                 }
-                if (!colgroup) {
-                    colgroup = this.document.createElement("colgroup");
+                if (!colgroup.isConnected) {
+                    table.prepend(colgroup);
                 }
-                // Apply width to col
-                const col = this.document.createElement("col");
-                col.style.width = width;
-                colgroup.appendChild(col);
-                // Remove the inline width from the cell
-                cell.style.removeProperty("width");
-            }
-            if (colgroup) {
-                table.prepend(colgroup);
             }
 
             // --- Normalize table colors ---
