@@ -361,9 +361,10 @@ class TestCalendar(SavepointCaseWithUserDemo):
             'start': datetime(2020, 12, 13, 17),
             'stop': datetime(2020, 12, 13, 22),
         })
-        self.assertEqual(len(event.attendee_ids), 2)
-        self.assertTrue(self.partner_demo in event.attendee_ids.mapped('partner_id'))
-        self.assertTrue(self.env.user.partner_id in event.attendee_ids.mapped('partner_id'))
+        # current user partner is archived, so they are not an attendee
+        self.assertFalse(self.env.user.partner_id.active)
+        self.assertEqual(len(event.attendee_ids), 1)
+        self.assertTrue(self.partner_demo in event.attendee_ids.partner_id)
 
     @freezegun.freeze_time('2011-04-29 10:00:00')
     def test_discuss_videocall(self):

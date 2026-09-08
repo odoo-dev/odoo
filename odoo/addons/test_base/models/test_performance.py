@@ -106,7 +106,7 @@ class Test_PerformanceSimpleMinded(models.Model):
     active = fields.Boolean(default=True)
     parent_id = fields.Many2one('test_performance.simple.minded')
 
-    child_ids = fields.One2many('test_performance.simple.minded', 'parent_id')
+    child_ids = fields.One2many('test_performance.simple.minded', 'parent_id', domain=[('active', '=', True)])
     all_child_ids = fields.One2many('test_performance.simple.minded', 'parent_id', domain=[])
 
     def simple_loop(self):
