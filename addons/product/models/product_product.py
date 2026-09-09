@@ -402,7 +402,7 @@ class ProductProduct(models.Model):
     def _inverse_product_lst_price(self):
         for product in self:
             template = product.product_tmpl_id
-            if len(template.with_context(active_test=False).product_variant_ids) == 1 and not template.has_configurable_attributes:
+            if len(template.all_product_variant_ids) == 1 and not template.has_configurable_attributes:
                 template.list_price = product.lst_price
 
     @api.depends_context('partner_id')
