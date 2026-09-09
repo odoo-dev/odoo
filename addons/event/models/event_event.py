@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+# This is a demo branch for Masterclass
 
 import logging
 import textwrap
