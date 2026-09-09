@@ -160,7 +160,7 @@ class TestProductConfiguratorData(HttpCaseWithUserDemo, ProductVariantsCommon, S
         ).value_ids = [Command.unlink(self.color_attribute_red.id)]
         self.assertEqual(len(product_template.product_variant_ids), 2)
         archived_variants = (
-            product_template.with_context(active_test=False).product_variant_ids
+            product_template.all_product_variant_ids
             - product_template.product_variant_ids
         )
         self.assertEqual(len(archived_variants), 2)

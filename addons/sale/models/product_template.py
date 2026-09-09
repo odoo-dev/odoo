@@ -123,7 +123,7 @@ class ProductTemplate(models.Model):
             product.sales_count = product.uom_id.round(
                 sum(
                     p.sales_count
-                    for p in product.with_context(active_test=False).product_variant_ids
+                    for p in product.all_product_variant_ids
                 )
             )
 

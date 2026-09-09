@@ -459,7 +459,7 @@ class ProductTemplate(models.Model):
                     archived_variants[fname] = template[fname]
 
     @api.depends_context('company')
-    @api.depends('product_variant_ids.standard_price')
+    @api.depends('all_product_variant_ids.standard_price')
     def _compute_standard_price(self):
         # Depends on force_company context because standard_price is company_dependent
         # on the product_product
@@ -520,14 +520,14 @@ class ProductTemplate(models.Model):
         product_variant_query = self.env['product.product']._search(domain)
         return [('product_variant_ids', 'in', product_variant_query)]
 
-    @api.depends('product_variant_ids.volume')
+    @api.depends('all_product_variant_ids.volume')
     def _compute_volume(self):
         self._compute_template_field_from_variant_field('volume', multi_variant=True)
 
     def _set_volume(self):
         self._set_product_variant_field('volume', update_all_variants=True)
 
-    @api.depends('product_variant_ids.weight')
+    @api.depends('all_product_variant_ids.weight')
     def _compute_weight(self):
         self._compute_template_field_from_variant_field('weight', multi_variant=True)
 
@@ -637,7 +637,7 @@ class ProductTemplate(models.Model):
                 'message': _("The Internal Reference '%s' already exists.", self.default_code),
             }}
 
-    @api.depends('product_variant_ids.default_code')
+    @api.depends('all_product_variant_ids.default_code')
     def _compute_default_code(self):
         for template in self.filtered(lambda template: len(template.product_variant_ids) == 1):
             template.default_code = template.product_variant_ids.default_code
