@@ -47,7 +47,7 @@ class ProductTemplate(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("purchase.action_purchase_history")
         action['domain'] = ['&',
             ('state', '=', 'purchase'),
-            ('product_id', 'in', self.with_context(active_test=False).product_variant_ids.ids)
+            ('product_id', 'in', self.all_product_variant_ids.ids)
         ]
         action['display_name'] = _("Purchase History for %s", self.display_name)
         return action
