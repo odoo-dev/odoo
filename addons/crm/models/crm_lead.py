@@ -178,7 +178,7 @@ class CrmLead(models.Model):
     function = fields.Char('Job Position', compute='_compute_function', readonly=False, store=True, tracking=55)
     email_from = fields.Char(
         'Email', tracking=40, index='trigram',
-        compute='_compute_email_from', inverse='_inverse_email_from', readonly=False, store=True)
+        compute='_compute_email_from', inverse='_inverse_email_from', force_inverse=True, readonly=False, store=True)
     email_normalized = fields.Char(index='trigram')  # inherited via mail.thread.blacklist
     email_domain_criterion = fields.Char(
         string='Email Domain Criterion',
@@ -188,7 +188,7 @@ class CrmLead(models.Model):
     )
     phone = fields.Char(
         'Phone', tracking=50,
-        compute='_compute_phone', inverse='_inverse_phone', readonly=False, store=True)
+        compute='_compute_phone', inverse='_inverse_phone', force_inverse=True, readonly=False, store=True)
     phone_sanitized = fields.Char(index='btree_not_null')  # inherited via mail.thread.phone
     phone_state = fields.Selection([
         ('correct', 'Correct'),
