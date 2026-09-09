@@ -362,7 +362,7 @@ class DiscussChannel(models.Model):
     def _compute_livechat_agent_partner_ids(self):
         for channel in self:
             channel.livechat_agent_partner_ids = (
-                channel.livechat_agent_history_ids.partner_id
+                channel.livechat_agent_history_ids.partner_id.filtered('active')
             )
 
     def _search_livechat_agent_history_ids(self, operator, value):
@@ -395,14 +395,14 @@ class DiscussChannel(models.Model):
     def _compute_livechat_bot_partner_ids(self):
         for channel in self:
             channel.livechat_bot_partner_ids = (
-                channel.livechat_bot_history_ids.partner_id
+                channel.livechat_bot_history_ids.partner_id.filtered('active')
             )
 
     @api.depends("livechat_customer_history_ids.partner_id")
     def _compute_livechat_customer_partner_ids(self):
         for channel in self:
             channel.livechat_customer_partner_ids = (
-                channel.livechat_customer_history_ids.partner_id
+                channel.livechat_customer_history_ids.partner_id.filtered('active')
             )
 
     # @api.depends("livechat_customer_history_ids.guest_id")

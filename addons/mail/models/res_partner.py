@@ -232,7 +232,7 @@ class ResPartner(models.Model):
 
     def _store_im_status_fields(self, res: Store.FieldList):
         # sudo: res.users - can access IM status of accessible partners
-        res.many("user_ids", "_store_im_status_fields", sudo=True)
+        res.many("user_ids", "_store_im_status_fields", sudo=True, predicate=lambda u: u.active)
 
     def _store_mention_fields(self, res: Store.FieldList):
         res.attr("mention_token", lambda p: p._get_mention_token())
