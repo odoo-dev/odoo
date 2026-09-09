@@ -906,10 +906,9 @@ class ProjectTask(models.Model):
                 whitelisted_fields = self._get_template_default_context_whitelist() if self.env.context.get('copy_from_template') else []
                 default = {key: value for key, value in default.items() if key in whitelisted_fields}
                 default['parent_id'] = False
-                current_task = task
+                child_ids = task.child_ids
                 if copy_from_template:
-                    current_task = current_task.with_context(active_test=True)
-                child_ids = current_task.child_ids
+                    child_ids = child_ids.with_context(active_test=True)
                 vals['child_ids'] = [Command.create(child_id.copy_data(default)[0]) for child_id in child_ids.filtered(lambda c: c.active)]
             if not has_default_users and vals['user_ids']:
                 task_active_users = task.user_ids & active_users
