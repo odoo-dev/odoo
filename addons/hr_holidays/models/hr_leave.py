@@ -1728,7 +1728,7 @@ class HrLeave(models.Model):
                 'res_id': holiday.id,
             }
             # Add the partner_id (if exist) as an attendee
-            partner_id = (user and user.partner_id) or (holiday.employee_id and holiday.employee_id.work_contact_id)
+            partner_id = (user.partner_id or holiday.employee_id.work_contact_id).filtered('active')
             if partner_id:
                 meeting_values['partner_ids'] = [(4, partner_id.id)]
             result[user.id].append(meeting_values)
