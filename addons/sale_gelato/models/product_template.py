@@ -34,7 +34,7 @@ class ProductTemplate(models.Model):
 
     # === COMPUTE METHODS === #
 
-    @api.depends("product_variant_ids.gelato_product_uid")
+    @api.depends("all_product_variant_ids.gelato_product_uid")
     def _compute_gelato_product_uid(self):
         self._compute_template_field_from_variant_field("gelato_product_uid")
 
