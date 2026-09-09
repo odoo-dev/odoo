@@ -24,7 +24,6 @@ class TestJoEdiPrecision(JoEdiCommon):
                 first_tuple = (label, value)
             else:
                 if not equals(value, first_tuple[1]):
-                    breakpoint()
                     error_message += f"{label} ({value}) != {first_tuple[0]} ({first_tuple[1]})\n"
         return error_message
 

@@ -459,7 +459,7 @@ class TestTaxesComputation(TestTaxCommon):
         tax1 = self.fixed_tax(1, include_base_amount=True)
         tax2 = self.percent_tax(21)
 
-        default_expected_values = {
+        default_expected_values_base_affected = {
             'expected_base_lines_tax_details': [
                 {
                     'total_excluded_currency': 99.0,
@@ -469,11 +469,13 @@ class TestTaxesComputation(TestTaxCommon):
                             'tax_id': tax1.id,
                             'base_amount_currency': 99.0,
                             'tax_amount_currency': 1.0,
+                            'tax_ids': [tax2.id],
                         },
                         {
                             'tax_id': tax2.id,
                             'base_amount_currency': 100.0,
                             'tax_amount_currency': 21.0,
+                            'tax_ids': [],
                         },
                     ],
                 },
@@ -482,16 +484,45 @@ class TestTaxesComputation(TestTaxCommon):
             'expected_tax_amount': 22.0,
             'expected_total_amount': 121.0,
         }
+        default_expected_values_not_base_affected = {
+            'expected_base_lines_tax_details': [
+                {
+                    'total_excluded_currency': 99.0,
+                    'delta_total_excluded_currency': 0.0,
+                    'taxes_data': [
+                        {
+                            'tax_id': tax1.id,
+                            'base_amount_currency': 99.0,
+                            'tax_amount_currency': 1.0,
+                            'tax_ids': [],
+                        },
+                        {
+                            'tax_id': tax2.id,
+                            'base_amount_currency': 99.0,
+                            'tax_amount_currency': 20.79,
+                            'tax_ids': [],
+                        },
+                    ],
+                },
+            ],
+            'expected_base_amount': 99.0,
+            'expected_tax_amount': 21.79,
+            'expected_total_amount': 120.79,
+        }
 
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1                      T                   T
+        # tax2                                          T
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 99.0, 'tax_ids': tax1 + tax2}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
 
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 121.0, 'tax_ids': tax1 + tax2, 'special_mode': 'total_included'}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
 
         # tax       price_incl      incl_base_amount    is_base_affected
         # ----------------------------------------------------------------
@@ -502,7 +533,7 @@ class TestTaxesComputation(TestTaxCommon):
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 99.0, 'tax_ids': tax1 + tax2}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_not_base_affected)
 
         # tax       price_incl      incl_base_amount    is_base_affected
         # ----------------------------------------------------------------
@@ -516,7 +547,7 @@ class TestTaxesComputation(TestTaxCommon):
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 121.0, 'tax_ids': tax1 + tax2}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
 
         # tax       price_incl      incl_base_amount    is_base_affected
         # ----------------------------------------------------------------
@@ -527,12 +558,12 @@ class TestTaxesComputation(TestTaxCommon):
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 121.0, 'tax_ids': tax1 + tax2}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
 
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 99.0, 'tax_ids': tax1 + tax2, 'special_mode': 'total_excluded'}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
 
         # tax       price_incl      incl_base_amount    is_base_affected
         # ----------------------------------------------------------------
@@ -543,7 +574,18 @@ class TestTaxesComputation(TestTaxCommon):
         document = self.populate_document(self.init_document(
             lines=[{'price_unit': 121.0, 'tax_ids': tax1 + tax2}],
         ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+        self.assert_base_lines_tax_details(document, **default_expected_values_base_affected)
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1      T               T                   T
+        # tax2
+        tax2.price_include_override = 'tax_excluded'
+
+        document = self.populate_document(self.init_document(
+            lines=[{'price_unit': 100.0, 'tax_ids': tax1 + tax2}],
+        ))
+        self.assert_base_lines_tax_details(document, **default_expected_values_not_base_affected)
 
         self._run_js_tests()
 
@@ -561,11 +603,13 @@ class TestTaxesComputation(TestTaxCommon):
                             'tax_id': tax1.id,
                             'base_amount_currency': 83.34,
                             'tax_amount_currency': 8.33,
+                            'tax_ids': [],
                         },
                         {
                             'tax_id': tax2.id,
                             'base_amount_currency': 83.34,
                             'tax_amount_currency': 8.33,
+                            'tax_ids': [],
                         },
                     ],
                 },
@@ -584,11 +628,13 @@ class TestTaxesComputation(TestTaxCommon):
                             'tax_id': tax1.id,
                             'base_amount_currency': 82.65,
                             'tax_amount_currency': 8.26,
+                            'tax_ids': [tax2.id],
                         },
                         {
                             'tax_id': tax2.id,
                             'base_amount_currency': 90.91,
                             'tax_amount_currency': 9.09,
+                            'tax_ids': [],
                         },
                     ],
                 },
@@ -661,8 +707,53 @@ class TestTaxesComputation(TestTaxCommon):
         tax1 = self.percent_tax(10, include_base_amount=False, price_include_override='tax_excluded')
         tax2 = self.percent_tax(10, include_base_amount=False, price_include_override='tax_included')
 
-        default_expected_values = {
-            'expected_base_lines_tax_details': [
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1                                          T
+        # tax2      T                                   T
+        document = self.populate_document(self.init_document(
+            lines=[{'price_unit': 100.0, 'tax_ids': tax1 + tax2}],
+        ))
+        self.assert_base_lines_tax_details(
+            document,
+            expected_base_lines_tax_details=[
+                {
+                    'total_excluded_currency': 90.91,
+                    'delta_total_excluded_currency': 0.0,
+                    'taxes_data': [
+                        {
+                            'tax_id': tax2.id,
+                            'base_amount_currency': 90.91,
+                            'tax_amount_currency': 9.09,
+                            'tax_ids': [],
+                        },
+                        {
+                            'tax_id': tax1.id,
+                            'base_amount_currency': 90.91,
+                            'tax_amount_currency': 9.09,
+                            'tax_ids': [],
+                        },
+                    ],
+                },
+            ],
+            expected_base_amount=90.91,
+            expected_tax_amount=18.18,
+            expected_total_amount=109.09,
+        )
+
+        # tax       price_incl      incl_base_amount    is_base_affected
+        # ----------------------------------------------------------------
+        # tax1                      T                   T
+        # tax2      T               T                   T
+        tax1.include_base_amount = True
+        tax2.include_base_amount = True
+
+        document = self.populate_document(self.init_document(
+            lines=[{'price_unit': 100.0, 'tax_ids': tax1 + tax2}],
+        ))
+        self.assert_base_lines_tax_details(
+            document,
+            expected_base_lines_tax_details=[
                 {
                     'total_excluded_currency': 90.91,
                     'delta_total_excluded_currency': 0.0,
@@ -682,31 +773,10 @@ class TestTaxesComputation(TestTaxCommon):
                     ],
                 },
             ],
-            'expected_base_amount': 90.91,
-            'expected_tax_amount': 19.09,
-            'expected_total_amount': 110.0,
-        }
-
-        # tax       price_incl      incl_base_amount    is_base_affected
-        # ----------------------------------------------------------------
-        # tax1                                          T
-        # tax2      T                                   T
-        document = self.populate_document(self.init_document(
-            lines=[{'price_unit': 100.0, 'tax_ids': tax1 + tax2}],
-        ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
-
-        # tax       price_incl      incl_base_amount    is_base_affected
-        # ----------------------------------------------------------------
-        # tax1                      T                   T
-        # tax2      T               T                   T
-        tax1.include_base_amount = True
-        tax2.include_base_amount = True
-
-        document = self.populate_document(self.init_document(
-            lines=[{'price_unit': 100.0, 'tax_ids': tax1 + tax2}],
-        ))
-        self.assert_base_lines_tax_details(document, **default_expected_values)
+            expected_base_amount=90.91,
+            expected_tax_amount=19.09,
+            expected_total_amount=110.0,
+        )
 
         self._run_js_tests()
 

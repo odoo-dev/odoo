@@ -430,48 +430,53 @@ class AccountTestInvoicingCommon(ProductCommon):
     # Helper: Generation of Tax / Invoice / Sale Order / etc.
     # -------------------------------------------------------------------------
 
-    def group_of_taxes(self, taxes, **kwargs):
-        self.tax_number += 1
-        return self.env['account.tax'].create({
-            'name': f"group_({self.tax_number})",
+    @classmethod
+    def group_of_taxes(cls, taxes, **kwargs):
+        cls.tax_number += 1
+        return cls.env['account.tax'].create({
+            'name': f"group_({cls.tax_number})",
             **kwargs,
             'amount_type': 'group',
             'children_tax_ids': [Command.set(taxes.ids)],
         })
 
-    def percent_tax(self, amount, **kwargs):
-        self.tax_number += 1
-        return self.env['account.tax'].create({
-            'name': f"percent_{amount}_({self.tax_number})",
+    @classmethod
+    def percent_tax(cls, amount, **kwargs):
+        cls.tax_number += 1
+        return cls.env['account.tax'].create({
+            'name': f"percent_{amount}_({cls.tax_number})",
             **kwargs,
             'amount_type': 'percent',
             'amount': amount,
         })
 
-    def division_tax(self, amount, **kwargs):
-        self.tax_number += 1
-        return self.env['account.tax'].create({
-            'name': f"division_{amount}_({self.tax_number})",
+    @classmethod
+    def division_tax(cls, amount, **kwargs):
+        cls.tax_number += 1
+        return cls.env['account.tax'].create({
+            'name': f"division_{amount}_({cls.tax_number})",
             **kwargs,
             'amount_type': 'division',
             'amount': amount,
         })
 
-    def fixed_tax(self, amount, **kwargs):
-        self.tax_number += 1
-        return self.env['account.tax'].create({
-            'name': f"fixed_{amount}_({self.tax_number})",
+    @classmethod
+    def fixed_tax(cls, amount, **kwargs):
+        cls.tax_number += 1
+        return cls.env['account.tax'].create({
+            'name': f"fixed_{amount}_({cls.tax_number})",
             **kwargs,
             'amount_type': 'fixed',
             'amount': amount,
         })
 
-    def python_tax(self, formula, **kwargs):
-        self.ensure_installed('account_tax_python')
+    @classmethod
+    def python_tax(cls, formula, **kwargs):
+        cls.ensure_installed('account_tax_python')
 
-        self.tax_number += 1
-        return self.env['account.tax'].create({
-            'name': f"code_({self.tax_number})",
+        cls.tax_number += 1
+        return cls.env['account.tax'].create({
+            'name': f"code_({cls.tax_number})",
             **kwargs,
             'amount_type': 'code',
             'amount': 0.0,

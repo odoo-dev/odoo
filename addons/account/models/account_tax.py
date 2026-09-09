@@ -1006,23 +1006,20 @@ class AccountTax(models.Model):
         def get_tax_config(tax_data):
             tax = tax_data['tax']
 
-            tax_config = {
+            return {
                 'amount_type': tax.amount_type,
                 'price_include': tax_data['price_include'],
                 'include_base_amount': tax.include_base_amount,
+                'is_base_affected': tax.is_base_affected,
             }
 
-            # Suppose 2 taxes 10% price-included: t1 & t2.
-            # t1 is include_base_amount but not t2
-            # t2 is not is_base_affected.
-            # t2 needs to be computed on the same base as t1 since it's not affected.
-            # To get the base, we need to compute t1 first.
-            # But t1 needs to be computed after t2 since the tax amount of t2 has to be
-            # subtracted from the price.
-            if tax_config['price_include'] and not tax_config['include_base_amount']:
-                tax_config['include_base_amount'] = True
+        def add_dependency(batch, dep_batch, factor):
+            batch['dependencies'].append((factor, dep_batch))
+            dep_batch['reverse_dependencies'].append((-factor, batch))
 
-            return tax_config
+        def add_affect_base_taxes(batch, affect_batch):
+            for tax_data in affect_batch['taxes_data']:
+                batch['affect_base_taxes'] |= tax_data['tax']
 
         taxes_data = base_line['tax_details']['taxes_data']
         batches = []
@@ -1037,6 +1034,7 @@ class AccountTax(models.Model):
             batch.update(get_tax_config(tax_data))
             batch['dependencies'] = []
             batch['reverse_dependencies'] = []
+            batch['affect_base_taxes'] = self.env['account.tax']
 
             # Search for taxes that belong to the same batch.
             for sub_index, next_tax_data in enumerate(taxes_data[index:]):
@@ -1080,17 +1078,31 @@ class AccountTax(models.Model):
 
                 break
 
-            def add_dependency(from_batch, to_batch, factor):
-                from_batch['dependencies'].append((factor, to_batch))
-                to_batch['reverse_dependencies'].append((-factor, from_batch))
-
             for previous_batch in batches:
-                if previous_batch['price_include'] != batch['price_include']:
-                    continue
-                if batch['price_include']:
+                if (
+                    not batch['price_include']
+                    and previous_batch['price_include']
+                ):
+                    if previous_batch['include_base_amount']:
+                        if batch['is_base_affected']:
+                            add_affect_base_taxes(previous_batch, batch)
+                        else:
+                            add_dependency(batch, previous_batch, -1)
+                    elif batch['is_base_affected']:
+                        add_dependency(batch, previous_batch, -1)
+                elif (
+                    not batch['price_include']
+                    and not previous_batch['price_include']
+                ):
+                    if previous_batch['include_base_amount'] and batch['is_base_affected']:
+                        add_dependency(batch, previous_batch, 1)
+                        add_affect_base_taxes(previous_batch, batch)
+                elif (
+                    batch['price_include']
+                    and previous_batch['price_include']
+                ):
                     add_dependency(previous_batch, batch, -1)
-                elif previous_batch['include_base_amount']:
-                    add_dependency(batch, previous_batch, 1)
+                    add_affect_base_taxes(previous_batch, batch)
 
             batches.append(batch)
 
@@ -1214,7 +1226,6 @@ class AccountTax(models.Model):
             sign * dep_tax_data[field].value()
             for sign, dep_batch in batch['dependencies']
             for dep_tax_data in dep_batch['taxes_data']
-            if (sign < 0 if batch['price_include'] else sign > 0)
         )
 
     @api.model
@@ -2425,13 +2436,6 @@ class AccountTax(models.Model):
             taxes_data = tax_details['taxes_data'] = []
             for i, batch in enumerate(batches):
 
-                subsequent_taxes = self.env['account.tax']
-                if batch['include_base_amount']:
-                    for other_batch in batches[i + 1:]:
-                        for other_tax_data in other_batch['taxes_data']:
-                            if not other_tax_data.get('skip'):
-                                subsequent_taxes |= other_tax_data['tax']
-
                 for old_tax_data in batch['taxes_data']:
                     if old_tax_data.get('skip'):
                         continue
@@ -2443,7 +2447,7 @@ class AccountTax(models.Model):
                     for k in {'tax', 'group', 'price_include', 'original_price_include', 'is_reverse_charge'}:
                         tax_data[k] = old_tax_data[k]
 
-                    tax_data['taxes'] = subsequent_taxes
+                    tax_data['taxes'] = batch['affect_base_taxes']
 
                     taxes_data.append(tax_data)
 
