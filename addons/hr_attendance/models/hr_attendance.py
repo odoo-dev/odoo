@@ -62,7 +62,8 @@ class HrAttendance(models.Model):
                                selection=[('kiosk', "Kiosk"),
                                           ('systray', "Systray"),
                                           ('manual', "Manual"),
-                                          ('technical', 'Technical')],
+                                          ('technical', 'Technical'),
+                                          ('wifi', 'Wi-Fi')],
                                readonly=True,
                                default='manual')
     in_image = fields.Binary(string="Check-In Image")
@@ -75,7 +76,8 @@ class HrAttendance(models.Model):
                                            ('systray', "Systray"),
                                            ('manual', "Manual"),
                                            ('technical', 'Technical'),
-                                           ('auto_check_out', 'Automatic Check-Out')],
+                                           ('auto_check_out', 'Automatic Check-Out'),
+                                           ('wifi', 'Wi-Fi')],
                                 readonly=True,
                                 default='manual')
     expected_hours = fields.Float(string="Regular Hours", compute="_compute_expected_hours", store=True, aggregator="sum")

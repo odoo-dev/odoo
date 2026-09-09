@@ -2,8 +2,9 @@
 
 import base64
 import binascii
+import logging
 import re
-from datetime import UTC
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from requests.exceptions import RequestException
@@ -19,6 +20,8 @@ from odoo.tools import SQL, float_round, py_to_js_locale
 from odoo.tools.image import image_data_uri
 
 IMAGE_HEADER_PATTERN = re.compile(r"^data:(image/(?:jpeg|webp));base64$")
+_logger = logging.getLogger(__name__)
+WIFI_ATTENDANCE_VALID_EVENTS = ('bound', 'unbound', 'renewed', 'released', 'expired', 'seen')
 
 
 class HrAttendance(http.Controller):
@@ -438,3 +441,72 @@ class HrAttendance(http.Controller):
         company = self._get_company(token)
         if company:
             request.env.user.company_id.attendance_kiosk_mode = mode
+
+    # -- Wi-Fi DHCP-lease attendance webhook --------------------------------
+
+    @http.route('/wifi_attendance/dhcp_lease', type='http', auth='public',
+                methods=['POST'], csrf=False, save_session=False)
+    def wifi_attendance_dhcp_lease(self, **kwargs):
+        token = request.httprequest.headers.get('X-Wifi-Attendance-Token')
+        expected_token = request.env['ir.config_parameter'].sudo().search(
+            [('key', '=', 'hr_attendance_wifi.token')], limit=1
+        ).value
+        if not expected_token or token != expected_token:
+            return request.make_json_response(
+                {'status': 'error', 'message': 'invalid token'}, status=401)
+
+        try:
+            payload = request.get_json_data()
+        except ValueError:
+            return request.make_json_response(
+                {'status': 'error', 'message': 'invalid json'}, status=400)
+
+        event_type = (payload.get('event') or '').strip().lower()
+        mac = request.env['wifi.attendance.device']._normalize_mac(payload.get('mac'))
+        event_time = self._wifi_attendance_parse_time(payload.get('time'))
+
+        log_vals = {
+            'event_type': event_type if event_type in WIFI_ATTENDANCE_VALID_EVENTS else False,
+            'event_time': event_time,
+            'mac_address': mac or False,
+            'ip_address': payload.get('ip'),
+            'hostname': payload.get('hostname'),
+            'ssid': payload.get('ssid'),
+            'access_point': payload.get('access_point'),
+            'raw_payload': request.httprequest.get_data(as_text=True),
+            'state': 'ignored',
+        }
+
+        if not log_vals['event_type'] or not mac or not event_time:
+            log_vals['state'] = 'error'
+            log_vals['error_message'] = "Missing or invalid required field (event/mac/time)."
+            log = request.env['wifi.attendance.log'].sudo().create(log_vals)
+            return request.make_json_response(
+                {'status': 'error', 'log_id': log.id}, status=400)
+
+        log = request.env['wifi.attendance.log'].sudo().create(log_vals)
+        try:
+            log._process_attendance_event()
+        except Exception as exc:  # noqa: BLE001 — never let this 500 silently
+            _logger.exception("Wi-Fi attendance processing failed")
+            log.write({'state': 'error', 'error_message': str(exc)})
+
+        return request.make_json_response({'status': 'ok', 'log_id': log.id})
+
+    @staticmethod
+    def _wifi_attendance_parse_time(value):
+        """Parse the router's ISO-8601 timestamp (with offset, e.g.
+        2026-09-07T09:15:00+05:30) into a naive UTC datetime for Odoo."""
+        if not value:
+            return False
+        try:
+            dt = datetime.fromisoformat(value)
+        except ValueError:
+            return False
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(UTC).replace(tzinfo=None)
+        return dt
+
+# It will give json data to odoo from router/access point (It will pretending as a router request, bound-unbound)
+# curl -X POST http://localhost:8069/wifi_attendance/dhcp_lease -H "Content-Type: application/json" -H "X-Wifi-Attendance-Token: my-test-token" -d '{"event":"bound","mac":"AA:BB:CC:DD:EE:FF","ip":"192.168.1.42","hostname":"Demo-Laptop","ssid":"Company-WiFi","access_point":"Office-AP-1","time":"2026-09-08T06:15:00+00:00"}'
+# curl -X POST http://localhost:8069/wifi_attendance/dhcp_lease -H "Content-Type: application/json" -H "X-Wifi-Attendance-Token: my-test-token" -d '{"event":"unbound","mac":"AA:BB:CC:DD:EE:FF","ip":"192.168.1.42","hostname":"Demo-Laptop","ssid":"Company-WiFi","access_point":"Office-AP-1","time":"2026-09-08T06:30:00+00:00"}'

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_wifi_attendance_log_list" model="ir.ui.view">
+        <field name="name">wifi.attendance.log.list</field>
+        <field name="model">wifi.attendance.log</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="event_time"/>
+                <field name="employee_id"/>
+                <field name="mac_address"/>
+                <field name="event_type"/>
+                <field name="ip_address"/>
+                <field name="ssid"/>
+                <field name="state" decoration-danger="state == 'error'"
+                       decoration-muted="state == 'ignored'"
+                       decoration-success="state == 'processed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wifi_attendance_log_form" model="ir.ui.view">
+        <field name="name">wifi.attendance.log.form</field>
+        <field name="model">wifi.attendance.log</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="event_time"/>
+                            <field name="event_type"/>
+                            <field name="employee_id"/>
+                            <field name="device_id"/>
+                            <field name="attendance_id"/>
+                        </group>
+                        <group>
+                            <field name="mac_address"/>
+                            <field name="ip_address"/>
+                            <field name="hostname"/>
+                            <field name="ssid"/>
+                            <field name="access_point"/>
+                            <field name="state"/>
+                            <field name="error_message" invisible="state != 'error'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Raw Payload">
+                            <field name="raw_payload" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- <record id="view_wifi_attendance_log_search" model="ir.ui.view">
+        <field name="name">wifi.attendance.log.search</field>
+        <field name="model">wifi.attendance.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <field name="mac_address"/>
+                <field name="ip_address"/>
+                <field name="ssid"/>
+                <field name="attendance_id"/>
+                <filter string="Processed" name="processed" domain="[('state', '=', 'processed')]"/>
+                <filter string="Ignored" name="ignored" domain="[('state', '=', 'ignored')]"/>
+                <filter string="Error" name="error" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <filter string="Today" name="today"
+                        domain="[('event_time', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Event Type" name="group_event_type" context="{'group_by': 'event_type'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record> -->
+
+    <record id="action_wifi_attendance_log" model="ir.actions.act_window">
+        <field name="name">Wi-Fi Connection Logs</field>
+        <field name="res_model">wifi.attendance.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+</odoo>

@@ -102,6 +102,17 @@
                             <field name="attendance_overtime_validation" widget="radio"/>
                         </setting>
                     </block>
+                    <block title="Wi-Fi Attendance" name="wifi_attendance_settings">
+                        <setting string="Webhook Token"
+                                 help="Shared secret the router's DHCP lease script must send in the X-Wifi-Attendance-Token header.">
+                            <field name="wifi_attendance_token" password="True"/>
+                        </setting>
+                        <setting string="Checkout Grace Period"
+                                 help="Minutes of Wi-Fi silence before an employee is automatically checked out.">
+                            <field name="wifi_attendance_checkout_grace_minutes"/>
+                            <span> minutes</span>
+                        </setting>
+                    </block>
                 </app>
             </xpath>
         </field>

@@ -29,6 +29,14 @@ class ResConfigSettings(models.TransientModel):
     attendance_device_tracking = fields.Boolean(related="company_id.attendance_device_tracking", readonly=False)
     attendance_capture_check_in = fields.Boolean(related="company_id.attendance_capture_check_in", readonly=False)
     attendance_break_management = fields.Boolean(related="company_id.attendance_break_management", readonly=False)
+    wifi_attendance_token = fields.Char(
+        string="Wi-Fi Attendance Webhook Token",
+        config_parameter='hr_attendance_wifi.token',
+        help="Shared secret the router's DHCP lease script must send in the X-Wifi-Attendance-Token header.")
+    wifi_attendance_checkout_grace_minutes = fields.Integer(
+        string="Wi-Fi Checkout Grace Period (minutes)",
+        config_parameter='hr_attendance_wifi.checkout_grace_minutes',
+        default=30)
 
     @api.model
     def get_values(self):

@@ -12,3 +12,5 @@ from . import ir_websocket
 from . import res_company
 from . import res_groups
 from . import res_users
+from . import wifi_attendance_device
+from . import wifi_attendance_log

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_wifi_attendance_device_list" model="ir.ui.view">
+        <field name="name">wifi.attendance.device.list</field>
+        <field name="model">wifi.attendance.device</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="employee_id"/>
+                <field name="mac_address"/>
+                <field name="hostname"/>
+                <field name="last_seen"/>
+                <field name="last_event_type"/>
+                <field name="open_attendance_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_wifi_attendance_device_form" model="ir.ui.view">
+        <field name="name">wifi.attendance.device.form</field>
+        <field name="model">wifi.attendance.device</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Device">
+                            <field name="employee_id"/>
+                            <field name="mac_address" placeholder="AA:BB:CC:DD:EE:FF"/>
+                            <field name="device_name"/>
+                            <field name="hostname"/>
+                            <field name="ssid"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Status">
+                            <field name="last_seen"/>
+                            <field name="last_event_type"/>
+                            <field name="last_ip_address"/>
+                            <field name="open_attendance_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_wifi_attendance_device" model="ir.actions.act_window">
+        <field name="name">Wi-Fi Devices</field>
+        <field name="res_model">wifi.attendance.device</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register the first device
+            </p>
+            <p>
+                Map an employee's phone or laptop MAC address here so Odoo
+                can recognize it on the office Wi-Fi.
+            </p>
+        </field>
+    </record>
+</odoo>

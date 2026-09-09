@@ -654,4 +654,8 @@
 
     <menuitem id="menu_hr_attendance_onboarding" name="Onboarding" action="action_try_kiosk" parent="menu_hr_attendance_configuration" sequence="100" groups="hr.group_hr_user"/>
 
+    <menuitem id="menu_wifi_attendance_device" name="Wi-Fi Devices" parent="menu_hr_attendance_configuration" action="action_wifi_attendance_device" groups="hr_attendance.group_hr_attendance_manager" sequence="20"/>
+
+    <menuitem id="menu_wifi_attendance_log" name="Wi-Fi Connection Logs" parent="menu_hr_attendance_configuration" action="action_wifi_attendance_log" groups="hr_attendance.group_hr_attendance_manager" sequence="21"/>
+
 </odoo>
