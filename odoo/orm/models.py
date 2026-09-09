@@ -3908,7 +3908,7 @@ class BaseModel(metaclass=MetaModel):
                 field_updates[field] = value
                 if field.name not in ignore_magic:
                     ids_to_update.update(ids)
-            if field.inverse:
+            if ids and field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
                     # on the field's current value. Because the field is
@@ -3977,20 +3977,19 @@ class BaseModel(metaclass=MetaModel):
                 real_recs._validate_fields(updated_fnames, inverse_fnames)
 
             # group inverse fields by inverse method, and apply on all records
-            real_self = self.filtered('id')
             for _method, fields_ in groupby(field_inverses, lambda field: field.inverse):
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields_:
                     if (
                         not field.store
                         and not (field.inherited and field.type in ('one2many', 'many2many'))
-                        and any(field._cache_missing_ids(real_self))
+                        and any(field._cache_missing_ids(real_recs))
                     ):
-                        field.write(real_self, field_inverses[field])
+                        field.write(real_recs, field_inverses[field])
 
                 # inverse records that are not being computed
                 try:
-                    fields_[0].determine_inverse(real_self)
+                    fields_[0].determine_inverse(real_recs)
                 except AccessError as e:
                     if fields_[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
