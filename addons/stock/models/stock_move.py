@@ -82,7 +82,8 @@ class StockMove(models.Model):
     location_dest_id = fields.Many2one(
         'stock.location', 'Intermediate Location', required=True,
         help='The operations brings product to this location', readonly=False,
-        index=True, store=True, compute='_compute_location_dest_id', precompute=True, inverse='_set_location_dest_id')
+        index=True, store=True, compute='_compute_location_dest_id', precompute=True,
+        inverse='_set_location_dest_id', force_inverse=True)
     forecasted_location_id = fields.Many2one(
         'stock.location', 'Forecasted Location',
         readonly=False, store=True,
@@ -169,7 +170,7 @@ class StockMove(models.Model):
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
     has_lines_without_result_package = fields.Boolean(compute="_compute_has_lines_without_result_package")
     quantity = fields.Float(
-        'Quantity', compute='_compute_quantity', digits='Product Unit', inverse='_set_quantity', store=True,
+        'Quantity', compute='_compute_quantity', digits='Product Unit', inverse='_set_quantity', force_inverse=True, store=True,
         write_sequence=25,  # ensure that the lot_ids changed is processed before processing the quantity change,
                             # to avoid unexpected lot_ids that will be re-added later in the process.
     )

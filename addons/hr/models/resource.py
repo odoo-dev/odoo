@@ -15,7 +15,7 @@ class ResourceResource(models.Model):
 
     user_id = fields.Many2one(copy=False)
     employee_id = fields.One2many('hr.employee', 'resource_id', check_company=True, context={'active_test': False})
-    tz = fields.Selection(compute='_compute_tz', inverse='_inverse_tz', store=True, readonly=False)
+    tz = fields.Selection(compute='_compute_tz', inverse='_inverse_tz', force_inverse=True, store=True, readonly=False)
 
     job_title = fields.Char(compute='_compute_job_title', compute_sudo=True)
     department_id = fields.Many2one('hr.department', compute='_compute_department_id', compute_sudo=True)
