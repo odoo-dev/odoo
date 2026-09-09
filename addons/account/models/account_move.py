@@ -608,6 +608,7 @@ class AccountMove(models.Model):
         string="Invoice Totals",
         compute='_compute_tax_totals',
         inverse='_inverse_tax_totals',
+        force_inverse=True,
         help='Edit Tax amounts if you encounter rounding issues.',
         exportable=False,
     )
