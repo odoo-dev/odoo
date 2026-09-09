@@ -461,7 +461,7 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
             ("always", True, True),
         ]
         for condition, operator_available, expected_result in cases:
-            self.livechat_channel.user_ids.unlink()
+            self.livechat_channel.user_ids.filtered('active').unlink()
             if operator_available:
                 operator_user = new_test_user(
                     self.env,
