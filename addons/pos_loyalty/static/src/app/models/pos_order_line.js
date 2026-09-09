@@ -78,11 +78,11 @@ patch(PosOrderline.prototype, {
     /**
      * Override the setUnitPrice method to recompute auto rewards whenever the order changes
      */
-    setUnitPrice(price) {
+    setUnitPrice(price, round = true) {
         if (this.payment_program_id && price < 0) {
             price = -price;
         }
-        super.setUnitPrice(price);
+        super.setUnitPrice(price, round);
         this.order_id?.recomputeRewards();
     },
     /**

@@ -208,6 +208,21 @@ export class PosOrderlineAccounting extends Base {
         return this.displayPriceUnit ? price / this.order_id.orderSign / this.displayPriceUnit : 0;
     }
 
+    getDisplayPriceFromUnitPrice(unitPrice) {
+        if (this.config.iface_tax_included !== "total") {
+            return unitPrice;
+        }
+        const baseLine = this.getBaseLine({ quantity: 1, price_unit: unitPrice });
+        const taxesComputation = accountTaxHelpers.get_tax_details(baseLine.tax_ids, unitPrice, 1, {
+            precision_rounding: baseLine.currency_id.rounding,
+            rounding_method: "round_globally",
+            product: baseLine.product_id,
+            product_uom: baseLine.product_uom_id,
+            filter_tax_function: baseLine.filter_tax_function,
+        });
+        return this.currency.round(taxesComputation.total_included * this.order_id.orderSign);
+    }
+
     /**
      * Prepare extra values for the base line used in taxes computation.
      */

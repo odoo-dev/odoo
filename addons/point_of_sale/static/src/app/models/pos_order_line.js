@@ -283,8 +283,8 @@ export class PosOrderline extends PosOrderlineAccounting {
         this.setQuantity(this.getQuantity() + orderline.getQuantity());
     }
 
-    setUnitPrice(price) {
-        const ProductPrice = this.models["decimal.precision"].find(
+    setUnitPrice(price, round = true) {
+        const pricePrecision = this.models["decimal.precision"].find(
             (dp) => dp.name === "Product Price"
         );
         const parsed_price = !isNaN(price)
@@ -292,7 +292,7 @@ export class PosOrderline extends PosOrderlineAccounting {
             : isNaN(parseFloat(price))
             ? 0
             : parseFloat("" + price);
-        this.price_unit = ProductPrice.round(parsed_price || 0);
+        this.price_unit = round ? pricePrecision.round(parsed_price || 0) : parsed_price || 0;
     }
 
     displayDiscountPolicy() {

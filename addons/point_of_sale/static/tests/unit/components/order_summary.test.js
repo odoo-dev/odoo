@@ -66,3 +66,34 @@ test("setLinePrice: input is per-unit tax-included price, discount is preserved"
     expect(singleTaxLine.price_unit).toBe(88);
     expect(singleTaxLine.displayPrice).toBe(99);
 });
+
+test("setLinePrice: tax-excluded tax preserves exact target displayPrice without rounding loss", async () => {
+    const store = await setupPosEnv();
+    const order = await getFilledOrderForPriceCheck(store);
+    const orderSummary = await mountWithCleanup(OrderSummary, {});
+
+    order.config.iface_tax_included = "total";
+
+    const singleTaxLine = order.lines[0];
+    const tax21 = store.models["account.tax"].create({
+        name: "21%",
+        amount: 21,
+        amount_type: "percent",
+        price_include: false,
+        tax_group_id: 1,
+    });
+    singleTaxLine.tax_ids = [tax21];
+
+    await orderSummary.setLinePrice(singleTaxLine, 10);
+    expect(singleTaxLine.displayPrice).toBe(10);
+
+    await orderSummary.setLinePrice(singleTaxLine, 100);
+    expect(singleTaxLine.displayPrice).toBe(100);
+
+    const noTaxLine = order.lines[1];
+    noTaxLine.tax_ids = [];
+    noTaxLine.setQuantity(10);
+    await orderSummary.setLinePrice(noTaxLine, 10.129);
+    expect(noTaxLine.price_unit).toBe(10.13);
+    expect(noTaxLine.displayPrice).toBe(101.3);
+});

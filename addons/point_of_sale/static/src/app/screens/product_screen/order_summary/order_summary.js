@@ -262,14 +262,23 @@ export class OrderSummary extends Component {
 
     async setLinePrice(line, price) {
         line.price_type = "manual";
-        const parsedPrice = typeof price === "number" ? price : parseFloat(price);
+        const pricePrecision = this.pos.models["decimal.precision"].find(
+            (dp) => dp.name === "Product Price"
+        );
+        const rawPrice = typeof price === "number" ? price : parseFloat(price);
+        const parsedPrice =
+            this.pos.config.iface_tax_included === "total"
+                ? line.currency.round(rawPrice || 0)
+                : pricePrecision.round(rawPrice || 0);
 
         if (line.product_id.to_weight) {
             const val = line.getQuantityFromDisplayPrice(parsedPrice);
             line.setQuantity(val, false);
         } else {
             price = line.getUnitPriceFromDisplayPrice(parsedPrice);
-            line.setUnitPrice(price);
+            const roundedPrice = pricePrecision.round(price);
+            const isLossless = line.getDisplayPriceFromUnitPrice(roundedPrice) === parsedPrice;
+            line.setUnitPrice(isLossless ? roundedPrice : price, false);
         }
     }
 
