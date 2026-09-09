@@ -1,4 +1,5 @@
 import { AvatarStack } from "@mail/discuss/core/common/avatar_stack";
+import { searchHighlight } from "@mail/core/common/message_search_hook";
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 import { propComputed } from "@mail/utils/common/hooks";
 
@@ -23,6 +24,7 @@ export class SubChannelPreview extends Component {
         this.store = useService("mail.store");
         this.channel = propComputed("channel", t.instanceOf(this.store["discuss.channel"]));
         this.class = propComputed("class", t.string().optional());
+        this.searchTerm = propComputed("searchTerm", t.string().optional());
         this.onClick = useProps.static(
             "onClick",
             subChannelPreviewOnClickType(this.store).optional()
@@ -31,6 +33,10 @@ export class SubChannelPreview extends Component {
 
     bodyText(message) {
         return htmlToTextContentInline(message.body);
+    }
+
+    get highlightedThreadName() {
+        return searchHighlight(this.searchTerm(), this.channel().displayName);
     }
 
     get messageCountText() {
