@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import api, fields, models, _
 from odoo.fields import Domain
-from odoo.tools.float_utils import float_round
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 
@@ -29,15 +27,15 @@ class ProductTemplate(models.Model):
                 product.purchase_method = default_purchase_method
 
     def _compute_purchased_product_qty(self):
-        for template in self.with_context(active_test=False):
-            template.purchased_product_qty = template.uom_id.round(sum(p.purchased_product_qty for p in template.product_variant_ids))
+        for template in self:
+            template.purchased_product_qty = template.uom_id.round(sum(p.purchased_product_qty for p in template.all_product_variant_ids))
 
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
 
     @api.model
     def get_import_templates(self):
-        res = super(ProductTemplate, self).get_import_templates()
+        res = super().get_import_templates()
         if self.env.context.get('purchase_product_template'):
             return [{
                 'label': _('Template for Products'),
