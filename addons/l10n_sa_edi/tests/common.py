@@ -3,7 +3,7 @@ from base64 import b64decode, b64encode
 
 from odoo import Command
 from odoo.tests import tagged
-from odoo.tools import BinaryBytes
+from odoo.tools import BinaryBytes, misc
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
@@ -111,6 +111,7 @@ class TestSaEdiCommon(AccountTestInvoicingCommon):
         """Create a Saudi individual partner for simplified invoices."""
         return cls.env['res.partner'].create({
             'name': 'Mohammed Ali',
+            'email': 'mohammed.ali@example.com',
             'ref': 'Mohammed Ali',
             'lang': 'en_US',
             'country_id': cls.saudi_arabia.id,
@@ -361,11 +362,11 @@ class TestSaEdiCommon(AccountTestInvoicingCommon):
 
         return self.env['account.move'].browse(reversal['res_id'])
 
-    def _get_invoice_document(self):
+    def _get_invoice_document(self, simplified=False):
         invoice = self._create_test_invoice(
             invoice_date='2025-01-15',
             invoice_date_due='2025-01-15',
-            partner_id=self.partner_sa_simplified,
+            partner_id=self.partner_sa_simplified if simplified else self.partner_sa,
             invoice_line_ids=[{
                 'product_id': self.product_burger.id,
                 'price_unit': self.product_burger.standard_price,
@@ -387,3 +388,13 @@ class TestSaEdiCommon(AccountTestInvoicingCommon):
                 data.setdefault('clearedInvoice', b64encode(signed_xml).decode())
             return data
         return _mock_submit
+
+    def _get_sample_clearance_data(self):
+        """
+        Returns the base64 clearedInvoice string from the captured real (sandbox) ZATCA
+        clearance response fixture.
+        """
+        sample_clearance = json.loads(
+            misc.file_open("l10n_sa_edi/tests/test_files/zatca_sample_clearance_response.json").read(),
+        )
+        return sample_clearance["clearedInvoice"]

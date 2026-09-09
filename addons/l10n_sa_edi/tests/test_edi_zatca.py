@@ -15,8 +15,13 @@ from odoo.tests import tagged
 from odoo.tools import misc
 from odoo.addons.l10n_sa_edi.tests.common import TestSaEdiCommon
 
+ZATCA_SUCCESS_STATES = ('accepted', 'warning')
 ZATCA_RESPONSES = {
         'accepted': {'status_code': 200},
+        'warning': {
+            'status_code': 200,
+            'validationResults': {'warningMessages': [{'code': 'W1', 'message': 'Minor issue'}]},
+        },
         'rejected': {'error': "Invalid VAT number", 'rejected': True},
         'unknown': {'error': "Timeout waiting for ZATCA", 'excepted': True},
     }
@@ -775,28 +780,63 @@ class TestEdiZatca(TestSaEdiCommon):
             r"Please make sure the following fields are shorter than 64 bytes.*Company Name",
         )
 
-    def test_post_zatca_edi(self):
-        """Test the ZATCA EDI posting functionality."""
-        for expected_state, response in ZATCA_RESPONSES.items():
-            with self.subTest(expected_state=expected_state):
-                document = self._get_invoice_document()
-                with patch.object(self.env.registry['l10n_sa_edi.document'], '_l10n_sa_submit_einvoice', self._mock_submit_response(response)):
-                    document._l10n_sa_post_zatca_edi(True)
-                self.assertEqual(document.state, expected_state)
+    def _get_zatca_response(self, simplified, expected_state):
+        """
+        Returns a _l10n_sa_submit_einvoice-shaped response based on the expected state
+        and whether the invoice is simplified or standard.
+        """
+        response = dict(ZATCA_RESPONSES[expected_state])
+        if not simplified and expected_state in ZATCA_SUCCESS_STATES:
+            response["clearedInvoice"] = self._get_sample_clearance_data()
+        return response
 
-    def test_zatca_retry_after_failed_attempt(self):
-        """Test if a failed ZATCA submission can be retried successfully."""
-        for prior_state in ('rejected', 'unknown'):
-            with self.subTest(prior_state=prior_state):
-                document = self._get_invoice_document()
+    def _retrying_failed_submission(self, document, simplified):
+        """
+        Retries a failed submission to ZATCA, which should succeed and produce a PDF/QR/email.
+        """
+        invoice = document.resource
+        response = self._get_zatca_response(simplified, 'accepted')
+        with patch.object(
+            self.env.registry["l10n_sa_edi.document"], "_l10n_sa_submit_einvoice",
+            self._mock_submit_response(response),
+        ):
+            self.env['account.move.send']._generate_and_send_invoices(
+                invoice, sending_methods={'email'}, allow_raising=False,
+            )
 
-                with patch.object(self.env.registry['l10n_sa_edi.document'], '_l10n_sa_submit_einvoice', self._mock_submit_response(ZATCA_RESPONSES[prior_state])):
-                    document._l10n_sa_post_zatca_edi(True)
-                self.assertEqual(document.state, prior_state)
+    def test_sending_invoice_to_zatca(self):
+        """
+        Tests state transitions (accepted/warning/rejected/unknown), retry-after-
+        failure, and PDF/QR/email correctness, for both simplified (B2C) and
+        standard (B2B) invoice submissions to ZATCA.
+        """
+        for simplified in (False, True):
+            for expected_state, base_response in ZATCA_RESPONSES:
+                with self.subTest(simplified=simplified, expected_state=expected_state):
+                    document = self._get_invoice_document(simplified=simplified)
+                    invoice = document.resource
+                    response = dict(base_response)
+                    if not simplified and expected_state in ZATCA_SUCCESS_STATES:
+                        response["clearedInvoice"] = self._get_sample_clearance_data()
+                    response = self._get_zatca_response(simplified, expected_state)
 
-                with patch.object(self.env.registry['l10n_sa_edi.document'], '_l10n_sa_submit_einvoice', self._mock_submit_response(ZATCA_RESPONSES['accepted'])):
-                    document._l10n_sa_post_zatca_edi(True)
-                self.assertEqual(document.state, 'accepted')
+                    with patch.object(
+                        self.env.registry["l10n_sa_edi.document"],
+                        "_l10n_sa_submit_einvoice",
+                        self._mock_submit_response(response),
+                    ):
+                        self.env['account.move.send']._generate_and_send_invoices(
+                            invoice, sending_methods={'email'}, allow_raising=False,
+                        )
+                    self.assertEqual(document.state, expected_state)
+                    if expected_state not in ZATCA_SUCCESS_STATES:
+                        self.assertFalse(document.attachment_id)
+                        self._retrying_failed_submission(document, simplified)
+
+                    self.assertTrue(document.attachment_id)
+                    self.assertTrue(invoice.l10n_sa_qr_code_str)
+                    self.assertTrue(invoice.invoice_pdf_report_id)
+                    self.assertTrue(invoice.message_ids.notification_ids.notification_type == 'email')
 
     def test_zatca_submission_not_resent_when_user_lacks_journal_write(self):
         """If a user with only Invoicing rights (read-only on journals) successfully submits
