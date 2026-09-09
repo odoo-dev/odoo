@@ -475,8 +475,8 @@ class TestProjectSubtasks(TestProjectCommon):
         self.assertFalse(all((parent_task + child_1._get_all_subtasks() + child_2).mapped('active')),
             "Parent, `child 1` task (with its descendant tasks) and `Child 2` task should be archived")
         self.assertTrue(all(child_3._get_all_subtasks().mapped('active')), "`child 3` task and its descendant tasks should be unarchived")
-        self.assertEqual(2, len(parent_task.child_ids), "Should have 2 direct non archived subtasks")
-        self.assertEqual(parent_task.child_ids, child_3 + child_4, "Should have 2 direct non archived subtasks")
+        self.assertEqual(2, len(parent_task.child_ids.filtered('active')), "Should have 2 direct non archived subtasks")
+        self.assertEqual(parent_task.child_ids.filtered('active'), child_3 + child_4, "Should have 2 direct non archived subtasks")
         self.assertEqual(4, len(parent_task._get_all_subtasks().filtered('active')), "Should have 4 non archived subtasks")
 
     def test_display_in_project_unset_parent(self):
