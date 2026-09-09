@@ -220,10 +220,14 @@ test("Search update keeps embedded code block rendering in Discuss", async () =>
     await click("button[title='Search Messages']");
     await contains(".o-mail-SearchMessageInput");
     await insertText(".o-mail-SearchInput input", "prefix");
-    await contains(`.o-mail-SearchMessagesPanel .o-mail-Message span.${HIGHLIGHT_CLASS}:text('prefix')`);
+    await contains(
+        `.o-mail-SearchMessagesPanel .o-mail-Message span.${HIGHLIGHT_CLASS}:text('prefix')`
+    );
     await contains(".o-mail-SearchMessagesPanel pre[data-embedded='readonlySyntaxHighlighting']");
     await insertText(".o-mail-SearchInput input", " suffix");
-    await contains(`.o-mail-SearchMessagesPanel .o-mail-Message span.${HIGHLIGHT_CLASS}:text('suffix')`);
+    await contains(
+        `.o-mail-SearchMessagesPanel .o-mail-Message span.${HIGHLIGHT_CLASS}:text('suffix')`
+    );
     await contains(".o-mail-SearchMessagesPanel pre[data-embedded='readonlySyntaxHighlighting']");
 });
 
@@ -245,4 +249,15 @@ test("Display highlighted with escaped character must ignore them", async () => 
         count: 2,
     });
     await contains(`.o-mail-Message-body:has(:text("<strong>test</strong> hello"))`);
+});
+
+test("Display highlighted search in threads panel", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    pyEnv["discuss.channel"].create({ name: "Design review", parent_channel_id: channelId });
+    await start();
+    await openDiscuss(channelId);
+    await click("button[title='Threads']");
+    await insertText(".o-mail-ActionPanel input[placeholder='Search by name']", "review");
+    await contains(`.o-mail-SubChannelPreview-name span.${HIGHLIGHT_CLASS}:text('review')`);
 });
