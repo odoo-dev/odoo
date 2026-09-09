@@ -502,7 +502,8 @@ class HrEmployee(models.Model):
         for (employee, version_id, vals) in zip(result, versions, data_list):
             version = self.env['hr.version'].browse(version_id)
             version.employee_id = employee.id
-            version.write({**vals.get('inherited', {})['hr.version'], 'employee_id': employee.id})
+            # resource calendar must be synchronized with current version's calendar
+            employee.resource_id.calendar_id = version.resource_calendar_id
         return result
 
     def _has_field_access(self, field, operation):
