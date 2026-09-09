@@ -9,6 +9,7 @@ import random
 import re
 import socket
 import time
+import uuid
 import email.utils
 from email.utils import getaddresses as orig_getaddresses
 from urllib.parse import urlparse
@@ -266,6 +267,46 @@ def tag_quote(el):
         el.set('data-o-mail-quote', '1')
 
 
+# lxml stops filling its input buffer at about 10 million characters and then
+# returns a truncated document without raising, which cuts an inline image in
+# half. Only individually large values count towards that budget, so swapping
+# the base64 payloads for short placeholders keeps the parsed document small.
+INLINE_IMAGE_PAYLOAD_RE = re.compile(r"""(data:image/[A-Za-z]+;base64,)([^"'\s<>)]+)""")
+INLINE_IMAGE_PLACEHOLDER_RE = re.compile(r"o-inline-image-[0-9a-f]{32}-\d+")
+
+
+def stash_inline_images(src):
+    """ Replace the base64 payload of every inline image by a short placeholder.
+
+    :param src: html string
+    :return: the html string with placeholders, and the payloads by placeholder
+    :rtype: tuple(str, dict)
+    """
+    payloads = {}
+    prefix = f"o-inline-image-{uuid.uuid4().hex}-"
+
+    def stash(match):
+        placeholder = f"{prefix}{len(payloads)}"
+        payloads[placeholder] = match[2]
+        return f"{match[1]}{placeholder}"
+
+    return INLINE_IMAGE_PAYLOAD_RE.sub(stash, src), payloads
+
+
+def restore_inline_images(src, payloads):
+    """ Put back the payloads stashed by :func:`stash_inline_images`.
+
+    Placeholders left by another call are kept as they are.
+
+    :param src: html string holding placeholders
+    :param payloads: the payloads by placeholder
+    :rtype: str
+    """
+    if not payloads:
+        return src
+    return INLINE_IMAGE_PLACEHOLDER_RE.sub(lambda match: payloads.get(match[0], match[0]), src)
+
+
 def html_normalize(src, filter_callback=None, output_method="html"):
     """ Normalize `src` for storage as an html field value.
 
@@ -284,6 +325,8 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     """
     if not src:
         return src
+
+    src, inline_images = stash_inline_images(src)
 
     # html: remove encoding attribute inside tags
     src = re.sub(r'(<[^>]*\s)(encoding=(["\'][^"\']*?["\']|[^\s\n\r>]+)(\s[^>]*|/)?>)', "", src, flags=re.IGNORECASE | re.DOTALL)
@@ -322,7 +365,7 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     # html considerations so real html content match database value
     src = src.replace(u'\xa0', u'&nbsp;')
 
-    return src
+    return restore_inline_images(src, inline_images)
 
 
 def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=False, sanitize_style=False, sanitize_form=True, sanitize_conditional_comments=True, strip_style=False, strip_classes=False, output_method="html"):
