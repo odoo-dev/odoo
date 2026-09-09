@@ -1,14 +1,12 @@
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, proxy, useProps, signal } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 export class PosPaymentProviderCards extends Component {
-    static template = "point_of_sale.PosPaymentProviderCards";
+    static template = "pos_payment_method.PosPaymentProviderCards";
     static components = {};
     props = useProps(standardWidgetProps);
-
-    cardsContainerRef = signal.ref();
 
     setup() {
         super.setup();
@@ -21,32 +19,23 @@ export class PosPaymentProviderCards extends Component {
 
         onWillStart(async () => {
             this.state.allProviders = await this.orm.call(
-                "pos.payment.method",
+                "pos.electronic.payment",
                 "get_provider_status"
             );
         });
     }
 
     get providers() {
-        return this.state.allProviders.filter(
-            (p) => p.type === this.props.record.data.payment_method_type
-        );
-    }
-
-    get config_ids() {
-        return this.props.record.evalContext.context.config_ids;
+        return Object.entries(this.state.allProviders)
+            .map(([provider, data]) => ({ provider, ...data }))
+            .filter((p) => p.type === this.props.record.data.integration_type);
     }
 
     async installModule(moduleId) {
-        const recordSave = await this.props.record.save();
-        if (!recordSave) {
-            return;
-        }
         this.state.disabled = true;
         await this.orm
             .call("ir.module.module", "button_immediate_install", [moduleId])
             .then((result) => {
-                this.state.disabled = false;
                 if (result) {
                     window.location.reload();
                 }
@@ -56,7 +45,7 @@ export class PosPaymentProviderCards extends Component {
             });
     }
 
-    async setupProvider(provider) {
+    setupProvider(provider) {
         this.props.record.update({
             payment_provider: provider.provider,
             name: provider.name,

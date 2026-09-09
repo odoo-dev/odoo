@@ -288,7 +288,6 @@ class PosPaymentMethod(models.Model):
             'x-api-key': self.sudo().adyen_api_key,
         }
         req = requests.post(endpoint, json=data, headers=headers, timeout=TIMEOUT)
-
         # Authentication error doesn't return JSON
         if req.status_code in [401, 403]:
             return {

@@ -10,6 +10,5 @@ PosPaymentMethod._records = [
         sequence: 1,
         payment_method_type: "terminal",
         payment_provider: "mollie",
-        default_qr: false,
     },
 ];

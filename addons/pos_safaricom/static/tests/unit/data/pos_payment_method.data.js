@@ -25,7 +25,6 @@ PosPaymentMethod._records = [
         image: false,
         sequence: 3,
         payment_method_type: "none",
-        default_qr: false,
         safaricom_payment_type: "mpesa_express",
     },
     {
@@ -36,7 +35,6 @@ PosPaymentMethod._records = [
         image: false,
         sequence: 4,
         payment_method_type: "none",
-        default_qr: false,
         safaricom_payment_type: "lipa_na_mpesa",
     },
 ];

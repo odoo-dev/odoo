@@ -10,7 +10,6 @@ PosPaymentMethod._records = [
         sequence: 1,
         payment_method_type: "terminal",
         payment_provider: "sumup",
-        default_qr: false,
         currency_ids: [1],
         write_date: "2025-01-01 10:00:00",
     },

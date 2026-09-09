@@ -10,11 +10,7 @@ export class PosPaymentMethod extends Base {
     }
 
     get useQr() {
-        return this.payment_method_type === "external_qr";
-    }
-
-    get useBankQrCode() {
-        return this.payment_method_type === "bank_qr_code";
+        return this.payment_method_type === "qr";
     }
 
     get config() {

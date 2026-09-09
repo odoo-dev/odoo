@@ -400,6 +400,8 @@ voip/static/lib/**/*
 !addons/pos_online_payment_self_order/**/*
 !addons/pos_partner_autocomplete
 !addons/pos_partner_autocomplete/**/*
+!addons/pos_payment_method*
+!addons/pos_payment_method*/**/*
 !addons/pos_pine_labs
 !addons/pos_pine_labs/**/*
 !addons/pos_qfpay
@@ -442,8 +444,6 @@ voip/static/lib/**/*
 !addons/pos_stock/**/*
 !addons/pos_stripe
 !addons/pos_stripe/**/*
-!addons/pos_viva_com
-!addons/pos_viva_com/**/*
 !addons/spreadsheet_dashboard_pos_hr
 !addons/spreadsheet_dashboard_pos_hr/**/*
 !addons/pos_cashmatic

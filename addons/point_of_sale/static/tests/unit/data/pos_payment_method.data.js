@@ -12,7 +12,6 @@ export class PosPaymentMethod extends models.ServerModel {
             "image",
             "sequence",
             "payment_method_type",
-            "default_qr",
             "currency_ids",
         ];
     }
@@ -49,7 +48,6 @@ export class PosPaymentMethod extends models.ServerModel {
             image: false,
             sequence: 1,
             payment_method_type: "none",
-            default_qr: false,
             currency_ids: [1],
             write_date: "2025-01-01 10:00:00",
         },
@@ -61,7 +59,6 @@ export class PosPaymentMethod extends models.ServerModel {
             image: false,
             sequence: 2,
             payment_method_type: "none",
-            default_qr: false,
             currency_ids: [],
             write_date: "2025-01-01 10:00:00",
         },
@@ -73,7 +70,6 @@ export class PosPaymentMethod extends models.ServerModel {
             image: false,
             sequence: 0,
             payment_method_type: "none",
-            default_qr: false,
             currency_ids: [125],
             write_date: "2025-01-01 10:00:00",
         },
