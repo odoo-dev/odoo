@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="pos_reports.SaleDetailsLine" t-inherit="pos_reports.TreeNode">
+        <xpath expr="//span[hasclass('o_report_line_name')]" position="replace">
+            <span class="o_report_line_name d-flex align-items-center w-100 text-truncate">
+                <span t-out="this.props.line.name"/>
+
+                <t t-if="this.props.line.values.combo_label">
+                    <small class="text-muted ms-2" t-out="this.props.line.values.combo_label"/>
+                </t>
+
+                <t t-if="this.props.line.values.barcode">
+                    <img class="o_sale_details_barcode ms-auto"
+                        t-att-src="'/report/barcode/Code128/' + this.props.line.values.barcode"
+                        alt="Barcode"
+                        style="height: 1.5rem;"/>
+                </t>
+            </span>
+        </xpath>
+    </t>
+</templates>
