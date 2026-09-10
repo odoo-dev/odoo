@@ -159,7 +159,7 @@
                                         options='{"no_open": True, "no_create": True}'/>
                                 </div>
                             </div>
-                            <div name="identifiers" class="o_wrap_label">
+                            <div name="identifiers">
                                 <label for="vat"/>
                                 <div id="vat_div" class="o_row d-flex">
                                     <field name="vat" nolabel="1" placeholder="e.g. BE0477472701"/>
@@ -231,7 +231,7 @@
                                     <sheet>
                                         <field name="parent_id" invisible="1"/>  <!-- Used for partner_autocomplete -->
                                         <field name="type" required="1" widget="badges_selection" class="mb-2 oi-filled"
-                                            options="{ 
+                                            options="{
                                                 'icon_mapping': {
                                                     'contact': 'group',
                                                     'invoice': 'description',
