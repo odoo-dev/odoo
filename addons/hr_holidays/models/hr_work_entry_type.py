@@ -66,19 +66,43 @@ class HrWorkEntryType(models.Model):
                                  domain=lambda self: [('id', 'in', self.env.companies.country_id.ids)])
     country_code = fields.Char(related='country_id.code', depends=['country_id'], readonly=True)
     leave_validation_type = fields.Selection([
+<<<<<<< 4dbcc72ecf4ddfdc481714c6471b962c9612b4c5
         ('no_validation', 'None'),
         ('hr', 'By Time Off Officer'),
         ('manager', "By Employee's Approver"),
         ('both', "By Employee's Approver and Time Off Officer")], default='hr', string='Time Off Validation')
+||||||| dbed91769c48768f58b6a66bff0ed6d90394de38
+        ('no_validation', 'None needed'),
+        ('hr', 'By Time Off Officer'),
+        ('manager', "By Employee's Approver"),
+        ('both', "By Employee's Approver and Time Off Officer")], default='hr', string='Time Off Validation')
+=======
+        ('no_validation', 'None needed'),
+        ('hr', 'By HR Responsible'),
+        ('manager', "By Time Off Approver"),
+        ('both', "By HR Responsible and Time Off Approver")], default='hr', string='Time Off Validation')
+>>>>>>> d17d4a9483290bcf54ef23206a70b9a28a87420c
     requires_allocation = fields.Boolean(default=True, required=True, string='Requires Allocation')
     employee_requests = fields.Boolean(default=False, required=True, string="Allow Employee Requests",
         help="""Extra Days Requests Allowed: User can request an allocation for himself.\n
         Not Allowed: User cannot request an allocation.""")
     allocation_validation_type = fields.Selection([
+<<<<<<< 4dbcc72ecf4ddfdc481714c6471b962c9612b4c5
         ('no_validation', 'None'),
         ('hr', 'By Time Off Officer'),
         ('manager', "By Employee's Approver"),
         ('both', "By Employee's Approver and Time Off Officer")], default='hr', string='Approval',
+||||||| dbed91769c48768f58b6a66bff0ed6d90394de38
+        ('no_validation', 'None needed'),
+        ('hr', 'By Time Off Officer'),
+        ('manager', "By Employee's Approver"),
+        ('both', "By Employee's Approver and Time Off Officer")], default='hr', string='Approval',
+=======
+        ('no_validation', 'None needed'),
+        ('hr', 'By HR Responsible'),
+        ('manager', "By Time Off Approver"),
+        ('both', "By HR Responsible and Time Off Approver")], default='hr', string='Approval',
+>>>>>>> d17d4a9483290bcf54ef23206a70b9a28a87420c
         help="""Select the level of approval needed in case of request by employee
             #     - No validation needed: The employee's request is automatically approved.
             #     - Approved by Time Off Officer: The employee's request need to be manually approved
