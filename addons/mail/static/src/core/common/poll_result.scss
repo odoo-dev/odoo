@@ -1,6 +1,7 @@
 .o-mail-PollResult {
     max-width: 500px;
     background-color: var(--mail-Poll-bgColor, $o-view-background-color);
+    border-color: map-get($poll-color-map, "secondary");
 }
 
 .o-mail-PollResult-emojiWrapper {
