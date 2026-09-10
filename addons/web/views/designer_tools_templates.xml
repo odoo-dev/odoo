@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      Before/after test page for the gray shades, in light and dark mode.
+
+      Rendered by the /designer_tools route. Both compiled bundles are pulled
+      through /web/assets/debug/…, and switching schemes is a matter of
+      enabling one of the two sheets: no reload, and the color_scheme cookie is
+      left alone.
+
+      "debug" and not "any": the `any` wildcard resolves to whichever generated
+      bundle happens to match the name first, which can be one compiled from an
+      older state of the SCSS. It was caught serving a gray-900 of #212529
+      while the source said #E4E4E5. `debug` regenerates from source, costs
+      about 0.8s per load, and is the only form that can be trusted to answer
+      "what do these variables currently amount to". Note it only serves the
+      unminified name.
+
+      Three modes, on the same URL. With no parameter it is the shell: the
+      value editor and two columns. `?panel=1` is only the measured content,
+      and that is what both iframes load, so the content is written once.
+      `?preview=1` is a static kanban view wearing the values, opened in its
+      own tab, and it reads them from the URL hash.
+
+      Every value shown is read off the effective stylesheet, never copied
+      over: edit an $o-gray-N and reload.
+
+      Development tool. Not linked from anywhere but the systray entry, which
+      only shows in debug mode.
+    -->
+    <template id="designer_tools" name="Designer tools">&lt;!DOCTYPE html&gt;<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Designer tools</title>
+    <link id="css-light" rel="stylesheet" href="/web/assets/debug/web.assets_web.css"/>
+    <script><![CDATA[
+        // Decided before the first paint, otherwise the shell and the panel
+        // flash on top of each other.
+        const params = new URLSearchParams(location.search);
+        document.documentElement.dataset.mode =
+            params.has("panel") ? "panel" : params.has("preview") ? "preview" : "shell";
+    
+]]></script>
+    <!-- The rewritten copy of the bundle is injected right here, between the
+         sheets under test and the page's own chrome: it has to beat the
+         original by source order without letting Bootstrap take the layout
+         back. -->
+    <meta id="chrome-anchor"/>
+    <t t-call-assets="web.assets_designer_tools" t-js="false"/>
+</head>
+<body class="o_designer_tools">
+
+<div id="shell">
+
+    <header>
+        <h1>Designer tools</h1>
+        <p class="hint"><kbd>Enter</kbd> apply</p>
+    </header>
+
+    <section id="editor">
+        <div class="grid">
+            <div>
+                <!-- A real .o_switcher again, same control as the scheme one. -->
+                <div class="o_switcher d-inline-flex" role="group" style="margin-bottom:.5rem">
+                    <button class="btn" data-editor="rows">Fields</button>
+                    <button class="btn" data-editor="text">Text</button>
+                </div>
+                <div id="rows" role="group" aria-label="Values to test"/>
+                <textarea id="text" spellcheck="false" aria-label="Values to test" placeholder="token: #hex — one per line, Ctrl+Enter to apply"/>
+                <div class="bar" style="margin-top:.5rem">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary btn-sm" id="apply">Apply</button>
+                        <button class="btn btn-secondary btn-sm" id="reset">Reset</button>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" id="copy" aria-label="Copy values" title="Copy every line to the clipboard, ready to paste back here or into SCSS">
+                        <i class="oi" data-icon="content_copy" role="img"/>
+                    </button>
+                    <!-- Real .dropdown-menu markup: the control is itself one of
+                         the surfaces under review. Bootstrap's JS is not loaded
+                         here, so the toggle is ours. -->
+                    <div class="dropdown ms-auto">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" id="preview"
+                                title="Open these values on a static screen, in a new tab">Preview</button>
+                        <div class="dropdown-menu" id="preview-menu">
+                            <a t-foreach="screens" t-as="entry"
+                               class="dropdown-item" href="#" t-att-data-screen="entry[0]"
+                               t-out="entry[1]"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p style="margin-bottom:.5rem">
+                    One line per value, <code>token: #hex</code>. A leading
+                    <code>$o-</code> and a trailing semicolon are accepted, so a
+                    block pasted from <code>primary_variables.dark.scss</code>
+                    works as-is. Any variable defined on <code>:root</code> is
+                    fair game, not only the grays —
+                    <code>body-bg</code>, <code>border-color</code>…
+                </p>
+                <p style="margin-bottom:.5rem">
+                    <b>Preview</b> opens a new tab showing these values on a
+                    static kanban view, built from the real webclient classes.
+                    The values travel in the URL, so that tab can be reloaded,
+                    bookmarked or sent to someone else as-is.
+                </p>
+                <p style="margin-bottom:0">
+                    The <b>After</b> column gets these values by rewriting the
+                    text of the compiled bundle, because Bootstrap freezes most
+                    of its surfaces into literal hex rather than
+                    <code>var()</code>. So it is a <b>textual</b> substitution:
+                    it reaches everything that is rendered, but also occurrences
+                    of the same color that do not come from the token —
+                    replacing <code>white</code> or <code>black</code> in dark
+                    mode casts a wide net. The occurrence count below tells you
+                    how wide.
+                </p>
+                <div id="status"/>
+            </div>
+        </div>
+    </section>
+
+    <div class="cols">
+        <div class="col">
+            <div class="col-head"><b>Before</b><span><span id="scheme-label">light</span> bundle</span></div>
+            <iframe id="before" title="Before"/>
+        </div>
+        <div class="col">
+            <div class="col-head"><b>After</b><span id="after-label">your values</span></div>
+            <iframe id="after" title="After"/>
+        </div>
+    </div>
+
+</div>
+
+
+<t t-if="preview">
+    <div id="mockup">
+        <div class="mockup-bar">
+            <b>Preview</b>
+            <nav id="mockup-nav">
+                <a t-foreach="screens" t-as="entry" href="#"
+                   t-att-data-screen="entry[0]" t-out="entry[1]"/>
+            </nav>
+            <!-- Out of the way until asked for: the bar sits on top of the
+                 screen being judged, and the details are only needed to check
+                 what is applied. Real .popover markup, so it is itself one of
+                 the surfaces under review. -->
+            <div id="mockup-info" tabindex="0">
+                <i class="oi" data-icon="info" role="img"/>
+                <span>Info</span>
+                <div class="popover" id="mockup-info-popup" role="tooltip">
+                    <div class="popover-body">
+                        <div id="mockup-scheme">dark</div>
+                        <div id="mockup-values"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Every screen wears the navbar, and only its own view differs. -->
+        <div class="o_web_client">
+            <t t-call="web.designer_tools_mockup_navbar"/>
+            <t t-call="web.designer_tools_mockup_{{ screen }}"/>
+        </div>
+    </div>
+</t>
+
+<main id="panel">
+
+<h2>Gray palette</h2>
+<div class="strip-scroll"><div class="strip" id="strip"/></div>
+<p>
+    <code>L*</code> is lightness as the eye perceives it, from 0 (black) to
+    100 (white): two colors can have very different hex values and the same
+    <code>L*</code>. <code>ΔL*</code> is the lightness gap with the row above —
+    the height of the step, and therefore the column that tells you whether the
+    ramp is even. It turns red below 4 (the step stops being visible) and orange
+    below 7 (weak step); both thresholds are working rules of thumb, not a
+    standard.
+</p>
+<table id="ramp-table">
+    <thead><tr><th/><th>Token</th><th>Value</th><th class="num">L*</th><th class="num">ΔL*</th><th class="num">Contrast</th></tr></thead>
+    <tbody/>
+</table>
+
+<h2>Root variables</h2>
+<p>
+    The grays that carry a name, with the value the loaded bundle actually
+    gives them — nothing is copied into this page. The last column is their
+    contrast against the page background: below 1.5 a border becomes invisible,
+    below 4.5 body text fails WCAG level AA.
+</p>
+<table id="named-table">
+    <thead><tr><th/><th>Variable</th><th>Value</th><th class="num">L*</th><th class="num">/ body-bg</th></tr></thead>
+    <tbody/>
+</table>
+
+<h2>Components</h2>
+<p>
+    Measured on real elements rather than on variables, because some tokens
+    only exist inside their own component: <code>--dropdown-bg</code> is only
+    defined on <code>.dropdown-menu</code> and falls back to the page background
+    everywhere else, so reading it as a variable would give a wrong number. For
+    each component: its actual background, its border and text colors, and how
+    those two contrast against that background. A dash means the element has no
+    border.
+</p>
+<table id="parts-table">
+    <thead><tr><th/><th>Element</th><th>Background</th><th class="num">L*</th><th>Border</th><th class="num">/ bg</th><th>Text</th><th class="num">/ bg</th></tr></thead>
+    <tbody/>
+</table>
+
+<h2>Real stack</h2>
+<p>
+    The four surfaces the interface really stacks, from the window background
+    down to the dropdown, using the real classes. This is the closest thing to
+    actual use: every boundary has to be visible without effort.
+</p>
+<div class="stack">
+    <span class="tag">body-bg</span>
+    <div class="in">
+        <span class="tag">secondary-bg</span>
+        <div class="card">
+            <div class="card-header">card-header</div>
+            <div class="card-body">
+                <p class="mb-2">Text in <code>--body-color</code>, <span class="text-muted">then <code>text-muted</code></span>.</p>
+                <div class="dropdown-menu d-block position-static">
+                    <h6 class="dropdown-header">dropdown-header</h6>
+                    <a class="dropdown-item" href="#">dropdown-item</a>
+                    <a class="dropdown-item active" href="#">.active</a>
+                    <div class="dropdown-divider"/>
+                    <a class="dropdown-item" href="#">another item</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Rendering</h2>
+<p>A few real components, to judge by eye rather than by numbers.</p>
+<div class="bar" style="margin-bottom:.75rem">
+    <button class="btn btn-primary">primary</button>
+    <button class="btn btn-secondary">secondary</button>
+    <button class="btn btn-light">light</button>
+    <button class="btn btn-secondary" disabled="disabled">disabled</button>
+    <input type="text" class="form-control" style="width:12rem" placeholder="placeholder"/>
+    <div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="cb"/><label class="form-check-label" for="cb">visible border?</label></div>
+    <kbd>Ctrl</kbd><kbd>K</kbd>
+</div>
+<table class="table table-striped table-hover" style="max-width:24rem">
+    <thead><tr><th>header</th><th>header</th></tr></thead>
+    <tbody>
+        <tr><td>even row</td><td>cell</td></tr>
+        <tr><td>odd row</td><td>cell</td></tr>
+        <tr class="table-active"><td>.table-active</td><td>cell</td></tr>
+    </tbody>
+</table>
+
+</main>
+
+<script type="text/javascript" src="/web/static/src/webclient/designer_tools/designer_tools.js"/>
+
+</body>
+</html></template>
+
+</odoo>

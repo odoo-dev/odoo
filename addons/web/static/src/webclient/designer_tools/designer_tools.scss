@@ -1,0 +1,124 @@
+///
+/// Page chrome for /designer_tools.
+///
+/// Everything is scoped under `body.o_designer_tools`. The file sits under
+/// `static/src/webclient/`, which a glob pulls into `web.assets_backend`; the
+/// manifest excludes it, but bare `p`, `table` or `header` rules restyling the
+/// whole webclient is not a mistake worth being able to make twice.
+///
+/// Written against CSS custom properties rather than SCSS variables on
+/// purpose: the page enables one compiled bundle or the other at runtime, so
+/// anything resolved at compile time here would freeze on one palette and lie
+/// about the other.
+///
+
+body.o_designer_tools {
+    margin: 0;
+    padding: 0 1.5rem 4rem;
+    background: var(--body-bg);
+    color: var(--body-color);
+
+    h1 { font-size: 1.1rem; margin: 0; }
+    h2 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--secondary-color); margin: 2.5rem 0 .75rem; }
+    p  { max-width: 64ch; margin: 0 0 1rem; color: var(--secondary-color); }
+
+    header { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: .75rem 0; position: sticky; top: 0; background: var(--body-bg); border-bottom: 1px solid var(--border-color); z-index: 2; }
+    header .hint { margin: 0 0 0 auto; font-size: .8rem; }
+
+    // Contiguous strip: a step that blends into its neighbour shows up here,
+    // not in a grid with gutters.
+    .strip-scroll { overflow-x: auto; margin-bottom: 1rem; }
+    .strip { display: flex; height: 7rem; min-width: min-content; border-radius: .5rem; overflow: hidden; }
+    // min-width + nowrap: without them the names wrap onto two lines and the
+    // last cells are cut off silently. Worst case, it scrolls.
+    .strip > div { flex: 1 1 0; min-width: 4rem; display: flex; flex-direction: column; justify-content: flex-end; gap: .1rem; padding: .5rem; font-size: .7rem; line-height: 1.3; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .strip b { font-weight: 600; }
+
+    table { border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+    th, td { padding: .35rem .6rem; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    thead th { font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--secondary-color); }
+    .num { text-align: right; }
+    .chip { display: inline-block; width: 3.5rem; height: 1.5rem; vertical-align: middle; border-radius: .2rem; border: 1px solid var(--border-color); }
+    .bad  { color: var(--danger-text-emphasis, #dc3545); font-weight: 600; }
+    .warn { color: var(--warning-text-emphasis, #ffc107); }
+
+    // Real stack: the surfaces the eye has to tell apart unaided.
+    .stack { max-width: 32rem; padding: 1.75rem 1.25rem 1.25rem; border: 1px solid var(--border-color); border-radius: .5rem; position: relative; background: var(--body-bg); }
+    .stack .in { padding: 1.75rem 1.25rem 1.25rem; border-radius: .5rem; position: relative; background: var(--secondary-bg); border: 1px solid var(--border-color); }
+    .tag { position: absolute; top: .5rem; left: .75rem; font-size: .65rem; text-transform: uppercase; letter-spacing: .06em; color: var(--secondary-color); }
+    .bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+    // == Editor ==========================================================
+
+    #editor { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); }
+    #editor .grid { display: grid; grid-template-columns: minmax(14rem, 22rem) 1fr; gap: 1rem 1.5rem; align-items: start; }
+    #rows { display: grid; gap: .25rem; }
+    // `hidden` alone loses against an explicit display.
+    #rows[hidden], #text[hidden] { display: none; }
+    #text { width: 100%; height: 15.5rem; padding: .5rem .6rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; line-height: 1.6; resize: vertical; color: var(--body-color); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: .4rem; }
+    // Not "row": Bootstrap owns that class and forces its children to width:100%.
+    .row-line { display: grid; grid-template-columns: 2rem 1fr; gap: .4rem; align-items: center; }
+    .row-line input { color: var(--body-color); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: .25rem; }
+    .row-line input[type="color"] { width: 2rem; height: 1.75rem; padding: 0; background: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
+    .row-line input[type="color"]:disabled { cursor: default; opacity: .35; }
+    .row-line input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+    .row-line input[type="color"]::-webkit-color-swatch { border: 0; border-radius: .15rem; }
+    .row-line input[type="text"] { width: 100%; padding: .22rem .45rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; }
+
+    .sheet-failure { padding: .6rem 1rem; font-size: .82rem; color: #fff; background: #b02a2a; }
+    .sheet-failure a { color: #fff; }
+    #status { font-size: .78rem; }
+    #status table { margin-top: .5rem; }
+    #status td:first-child { font-family: ui-monospace, monospace; }
+
+    // == Two columns =====================================================
+
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-color); }
+    .col { background: var(--body-bg); min-width: 0; }
+    .col-head { position: sticky; top: var(--head-h, 3.5rem); z-index: 1; display: flex; align-items: baseline; gap: .5rem; padding: .5rem 1.25rem; background: var(--secondary-bg); border-bottom: 1px solid var(--border-color); }
+    .col-head b { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+    .col-head span { font-family: ui-monospace, monospace; font-size: .72rem; color: var(--secondary-color); }
+    .col iframe { display: block; width: 100%; border: 0; }
+
+    // == Preview mockup ==================================================
+
+    // It borrows the webclient's own structure, so the real classes do the
+    // work -- see .o_kanban_renderer & co.
+    #mockup { display: flex; flex-direction: column; height: 100vh; }
+    // .o_web_client carries Odoo's own layout rules (webclient_layout.scss);
+    // it just needs to be given the room.
+    #mockup .o_web_client { flex: 1; min-height: 0; }
+    // o_menu_toggle_back pins the arrow instead of revealing it on hover. Its
+    // transform also flips the whole anchor, which mirrors the brand label
+    // sitting inside it -- upstream uses the class on a toggle with no label.
+    // Unflipped, the glyph already points left, which is what a back arrow
+    // should do.
+    #mockup .o_menu_toggle_back { transform: none; }
+    .mockup-bar { display: flex; align-items: center; gap: .75rem; padding: .4rem 1rem; font-size: .78rem; background: var(--secondary-bg); border-bottom: 1px solid var(--border-color); }
+    .mockup-bar b { text-transform: uppercase; letter-spacing: .08em; font-size: .7rem; }
+    .mockup-bar span { font-family: ui-monospace, monospace; color: var(--secondary-color); }
+    #mockup-info { position: relative; margin-left: auto; display: flex; align-items: center; gap: .3rem; cursor: default; color: var(--secondary-color); }
+    #mockup-info:hover, #mockup-info:focus-within { color: var(--body-color); }
+    #mockup-info-popup { display: none; position: absolute; top: calc(100% + .35rem); left: auto; right: 0; z-index: 3; width: max-content; max-width: 28rem; }
+    #mockup-info:hover #mockup-info-popup,
+    #mockup-info:focus-within #mockup-info-popup { display: block; }
+    #mockup-info-popup .popover-body { font-family: ui-monospace, monospace; font-size: .72rem; white-space: normal; }
+    #mockup-scheme { color: var(--secondary-color); }
+
+    #mockup-nav { display: flex; gap: .75rem; }
+    #mockup-nav a { color: var(--secondary-color); text-decoration: none; }
+    #mockup-nav a:hover { color: var(--body-color); }
+    #mockup-nav a.active { color: var(--body-color); font-weight: 600; text-decoration: underline; text-underline-offset: .2rem; }
+
+    // == Which mode is showing ===========================================
+
+    html[data-mode="shell"] & { padding: 0; }
+    html[data-mode="shell"] & header { padding-left: 1.5rem; padding-right: 1.5rem; }
+    html[data-mode="shell"] & #panel { display: none; }
+    html[data-mode="panel"] & { padding: 0 1.25rem 1.5rem; }
+    html[data-mode="panel"] & #shell { display: none; }
+    html[data-mode="preview"] & { padding: 0; height: 100vh; overflow: hidden; }
+    html[data-mode="preview"] & #shell,
+    html[data-mode="preview"] & #panel { display: none; }
+    html:not([data-mode="preview"]) & #mockup { display: none; }
+}

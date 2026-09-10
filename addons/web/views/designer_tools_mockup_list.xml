@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      The list view that /designer_tools?preview=1&amp;screen=list dresses
+      with the values being tried.
+
+      Lifted from a real product list and trimmed by the same rules as the other
+      mockups: no href navigates, images become an inline SVG so the page stays
+      self-contained, overlay containers and session-bound attributes dropped.
+    -->
+    <template id="designer_tools_mockup_list" name="Designer tools mockup: List">
+<div class="o_action_manager">
+          <div class="o_list_view o_view_controller o_action">
+            <div class="o_control_panel d-flex flex-column gap-3 px-3 pt-2 pb-3">
+              <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-2 gap-lg-3 flex-grow-1">
+                <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100">
+                  <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none text-nowrap pe-1">
+                    <button type="button" class="btn btn-primary o_list_button_add"> New </button>
+                  </div>
+                  <div class="o_breadcrumb d-flex gap-1 text-truncate">
+                    <div class="o_last_breadcrumb_item active d-flex fs-4 min-w-0 align-items-center">
+                      <span class="min-w-0 fw-medium text-truncate">Products</span>
+                    </div>
+                    <div class="o_control_panel_breadcrumbs_actions d-inline-flex d-print-none">
+                      <div class="o_cp_action_menus d-flex align-items-center gap-1">
+                        <div class="lh-1">
+                          <button class="o_btn_circle d-print-none btn btn-light p-1 m-0 ms-1 o-dropdown dropdown-toggle dropdown" data-tooltip="Actions" aria-label="Actions menu">
+                            <i class="oi" data-icon="more_vert" aria-hidden="true"/>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="me-auto"/>
+                </div>
+                <div class="o_control_panel_actions d-empty-none d-flex align-items-center justify-content-start justify-content-lg-around order-2 order-lg-1 w-100 mw-100 w-lg-auto gap-1 h-lg-100">
+                  <div class="o_cp_searchview d-flex input-group rounded-pill h-lg-100" role="search">
+                    <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 bg-view" role="search" aria-autocomplete="list">
+                      <button class="d-print-none btn border-0 p-0" aria-label="Search..." title="Search...">
+                        <i class="o_searchview_icon oi me-2" data-icon="search" role="img"/>
+                      </button>
+                      <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1 align-items-center mw-100">
+                        <div class="o_searchview_facet position-relative d-inline-flex rounded-2 bg-100 border border-transparent text-nowrap opacity-trigger-hover mw-100 o_facet_with_domain" role="listitem" aria-label="search" aria-selected="false">
+                          <div class="o_searchview_facet_label d-flex align-items-center position-relative rounded-2 p-1 small bg-primary-subtle text-primary" role="button">
+                            <i class="oi oi-fw oi-filled" role="image" data-icon="filter_alt"/>
+                            <span class="o_facet_overlay position-absolute start-0 top-0 bottom-0 end-0 d-flex p-1 w-100 align-items-center justify-content-center opacity-0 opacity-100-hover rounded-2 text-bg-primary">
+                              <i class="oi oi-fw oi-filled" data-icon="edit"/>
+                            </span>
+                          </div>
+                          <div class="o_facet_values position-relative d-flex flex-wrap align-items-center ps-2 rounded-end-2 text-wrap overflow-hidden cursor-pointer">
+                            <small class="o_facet_value text-truncate" title="Sales">Sales</small>
+                            <button class="o_facet_remove oi btn btn-link d-flex align-items-center px-1 py-0 text-danger d-print-none fs-5" data-icon="close_small" aria-label="Remove" title="Remove"/>
+                          </div>
+                        </div>
+                        <input type="text" class="o_searchview_input o_input d-print-none flex-grow-1 w-auto border-0 focus" placeholder="Search..." role="searchbox" aria-selected="true"/>
+                      </div>
+                    </div>
+                    <button class="o_searchview_dropdown_toggler d-print-none btn btn-outline-secondary o-dropdown-caret bg-view o-dropdown dropdown-toggle dropdown" title="Toggle Search Panel"/>
+                  </div>
+                </div>
+                <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap justify-content-end gap-1 gap-xl-3 order-1 order-lg-2 flex-grow-1 align-items-lg-center">
+                  <div class="o_cp_pager text-nowrap align-self-stretch" role="search">
+                    <nav class="o_pager d-flex gap-2 h-100" aria-label="Pager">
+                      <span class="o_pager_counter align-self-center small fw-medium">
+                        <span class="o_pager_value d-inline-block border-bottom border-transparent mb-n1">1-7</span>
+                        <span> / </span>
+                        <span class="o_pager_limit">7</span>
+                      </span>
+                      <span class="btn-group d-print-none" aria-atomic="true">
+                        <button type="button" class="btn btn-secondary o_pager_previous" aria-label="Previous" data-tooltip="Previous" disabled="">
+                          <i class="oi" data-icon="arrow_back_ios_new"/>
+                        </button>
+                        <button type="button" class="btn btn-secondary o_pager_next" aria-label="Next" data-tooltip="Next" disabled="">
+                          <i class="oi" data-icon="arrow_forward_ios"/>
+                        </button>
+                      </span>
+                    </nav>
+                  </div>
+                  <nav class="o_cp_switch_buttons d-print-none d-inline-flex btn-group o_switcher" style="--SwitchButtons-activeIndex: 1; --SwitchButtons-count: 2; --SwitchButtons-slideFrom: 0;">
+                    <button class="btn btn-secondary o_switch_view o_kanban" data-tooltip="Kanban" aria-label="Kanban View">
+                      <i class="oi oi-fw" data-icon="oi_view-kanban"/>
+                    </button>
+                    <button class="btn btn-secondary o_switch_view active o_list" data-tooltip="List" aria-label="List View" title="">
+                      <i class="oi oi-fw" data-icon="reorder"/>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            <main class="o_content">
+              <div class="o_list_renderer o_renderer table-responsive">
+                <table class="o_list_table table table-sm table-hover position-relative mb-0 o_list_table_ungrouped null" style="table-layout: fixed;">
+                  <thead>
+                    <tr>
+                      <th class="o_list_record_selector o_list_controller align-middle pe-1 cursor-pointer" style="width: 40px;">
+                        <div class="o-checkbox form-check d-flex m-0">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-1"/>
+                          <label class="form-check-label" for="checkbox-comp-1"/>
+                        </div>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="is_favorite" class="align-middle cursor-default o_boolean_favorite_cell opacity-trigger-hover w-print-auto" style="width: 29px;"/>
+                      <th data-tooltip-delay="1000" data-name="name" class="align-middle o_column_sortable position-relative cursor-pointer opacity-trigger-hover w-print-auto" style="width: 325px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;name&quot;,&quot;label&quot;:&quot;Name&quot;,&quot;type&quot;:&quot;char&quot;,&quot;widget&quot;:null,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:null,&quot;required&quot;:&quot;True&quot;,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1">Product Name</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon oi opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="default_code" class="align-middle o_column_sortable position-relative cursor-pointer opacity-trigger-hover w-print-auto" style="width: 327px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;default_code&quot;,&quot;label&quot;:&quot;Internal Reference&quot;,&quot;type&quot;:&quot;char&quot;,&quot;widget&quot;:null,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:null,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1">Internal Reference</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon oi opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="list_price" class="align-middle o_column_sortable position-relative cursor-pointer o_list_number_th o_monetary_cell opacity-trigger-hover w-print-auto" style="width: 114px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;list_price&quot;,&quot;label&quot;:&quot;Sales Price&quot;,&quot;help&quot;:&quot;Price at which the product is sold to customers.&quot;,&quot;type&quot;:&quot;float&quot;,&quot;widget&quot;:&quot;monetary&quot;,&quot;widgetDescription&quot;:&quot;Monetary&quot;,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:null,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1 o_list_number_th">Sales Price</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon oi opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="standard_price" class="align-middle cursor-default o_list_number_th o_monetary_cell opacity-trigger-hover w-print-auto" style="width: 114px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;standard_price&quot;,&quot;label&quot;:&quot;Cost&quot;,&quot;help&quot;:&quot;Value of the product (automatically computed in AVCO).\n        Used to value the product when the purchase cost is not known (e.g. inventory adjustment).\n        Used to compute margins on sale orders.&quot;,&quot;type&quot;:&quot;float&quot;,&quot;widget&quot;:&quot;monetary&quot;,&quot;widgetDescription&quot;:&quot;Monetary&quot;,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:&quot;1&quot;,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1 o_list_number_th">Cost</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon d-none opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="qty_available" class="align-middle cursor-default o_list_number_th opacity-trigger-hover w-print-auto" style="width: 102px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;qty_available&quot;,&quot;label&quot;:&quot;Quantity On Hand&quot;,&quot;type&quot;:&quot;float&quot;,&quot;widget&quot;:null,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:&quot;1&quot;,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1 o_list_number_th">On Hand</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon d-none opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="free_qty" class="align-middle cursor-default o_list_number_th opacity-trigger-hover w-print-auto" style="width: 102px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;free_qty&quot;,&quot;label&quot;:&quot;Free To Use&quot;,&quot;help&quot;:&quot;Quantity on hand minus outgoing quantity.&quot;,&quot;type&quot;:&quot;float&quot;,&quot;widget&quot;:null,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:&quot;not is_storable&quot;,&quot;column_invisible&quot;:null,&quot;readonly&quot;:&quot;1&quot;,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1 o_list_number_th">Free To Use</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon d-none opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="virtual_available" class="align-middle cursor-default o_list_number_th opacity-trigger-hover w-print-auto" style="width: 102px;">
+                        <div class="d-flex align-items-center" data-tooltip-template="web.ListHeaderTooltip" data-tooltip-info="{&quot;viewMode&quot;:&quot;list&quot;,&quot;resModel&quot;:&quot;product.template&quot;,&quot;debug&quot;:false,&quot;field&quot;:{&quot;name&quot;:&quot;virtual_available&quot;,&quot;label&quot;:&quot;Forecasted Quantity&quot;,&quot;type&quot;:&quot;float&quot;,&quot;widget&quot;:null,&quot;context&quot;:&quot;{}&quot;,&quot;invisible&quot;:null,&quot;column_invisible&quot;:null,&quot;readonly&quot;:&quot;1&quot;,&quot;required&quot;:null,&quot;changeDefault&quot;:false}}">
+                          <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1 o_list_number_th">Forecasted</span>
+                          <div class="o_list_header_label_spacer"/>
+                          <i class="o_list_sortable_icon d-none opacity-0 opacity-100-hover" data-icon="swap_vert"/>
+                        </div>
+                        <span class="o_resize position-absolute top-0 end-0 bottom-0 ps-1 bg-black-25 opacity-0 opacity-50-hover z-1"/>
+                      </th>
+                      <th data-tooltip-delay="1000" data-name="activity_exception_decoration" class="align-middle cursor-default o_activity_exception_cell opacity-trigger-hover w-print-auto" style="width: 147px;"/>
+                      <th class="o_list_controller o_list_actions_header w-print-0 p-print-0 position-sticky end-0 z-2" style="width: 32px;">
+                        <div class="o_optional_columns d-print-none text-center border-top-0">
+                          <button class="btn p-0 o-dropdown dropdown-toggle dropdown">
+                            <i class="o_optional_columns_dropdown_toggle oi oi-fw" data-icon="tune"/>
+                          </button>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="ui-sortable">
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-2"/>
+                          <label class="form-check-label" for="checkbox-comp-2"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 1</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-1</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 10.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-3"/>
+                          <label class="form-check-label" for="checkbox-comp-3"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 2</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-2</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 20.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-4"/>
+                          <label class="form-check-label" for="checkbox-comp-4"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 3</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-3</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 30.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-5"/>
+                          <label class="form-check-label" for="checkbox-comp-5"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 4</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-4</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 40.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-6"/>
+                          <label class="form-check-label" for="checkbox-comp-6"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 5</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-5</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 50.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                    <tr class="o_data_row o_row_draggable">
+                      <td class="o_list_record_selector user-select-none">
+                        <div class="o-checkbox form-check">
+                          <input type="checkbox" class="form-check-input" id="checkbox-comp-7"/>
+                          <label class="form-check-label" for="checkbox-comp-7"/>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_boolean_favorite_cell" name="is_favorite" data-column-id="column_4">
+                        <div name="is_favorite" class="o_field_widget o_field_boolean_favorite">
+                          <button class="o_favorite btn btn-link btn-link-inline">
+                            <i class="oi" data-icon="star" role="img" title="Add to Favorites" aria-label="Add to Favorites"/>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char o_required_modifier" name="name" data-column-id="column_5">Demo Product 6</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_char" name="default_code" data-column-id="column_6">REF-6</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell" name="list_price" data-column-id="column_9">
+                        <div name="list_price" class="o_field_widget o_field_monetary">
+                          <span>$ 60.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_monetary_cell o_readonly_modifier" name="standard_price" data-column-id="column_10">
+                        <div name="standard_price" class="o_field_widget o_readonly_modifier o_field_monetary">
+                          <span>$ 0.00</span>
+                        </div>
+                      </td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="qty_available" data-column-id="column_11">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier" name="free_qty" data-column-id="column_12"/>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_list_number o_readonly_modifier fw-bold" name="virtual_available" data-column-id="column_13">0.00</td>
+                      <td class="o_data_cell cursor-pointer o_field_cell o_activity_exception_cell o_readonly_modifier" name="activity_exception_decoration" data-column-id="column_17">
+                        <div name="activity_exception_decoration" class="o_field_widget o_readonly_modifier o_field_empty o_field_activity_exception"/>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                  </tbody>
+                  <tfoot class="o_list_footer cursor-default">
+                    <tr>
+                      <td colspan="6"/>
+                      <td class="o_list_number">
+                        <span data-tooltip="Total On Hand">0.00</span>
+                      </td>
+                      <td class="o_list_number">
+                        <span data-tooltip="Total Free To Use">0.00</span>
+                      </td>
+                      <td class="o_list_number">
+                        <span data-tooltip="Total Forecasted">0.00</span>
+                      </td>
+                      <td class="w-print-0 p-print-0"/>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </main>
+          </div>
+        </div>
+    </template>
+
+</odoo>

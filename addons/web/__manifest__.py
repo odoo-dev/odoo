@@ -13,6 +13,12 @@ This module provides the core of the Odoo Web Client.
     'auto_install': True,
     'data': [
         'views/webclient_templates.xml',
+        'views/designer_tools_templates.xml',
+        'views/designer_tools_mockup_navbar.xml',
+        'views/designer_tools_mockup_kanban.xml',
+        'views/designer_tools_mockup_list.xml',
+        'views/designer_tools_mockup_form.xml',
+        'views/designer_tools_mockup_settings.xml',
         'views/report_templates.xml',
         'views/base_document_layout_views.xml',
         'views/partner_view.xml',
@@ -104,6 +110,12 @@ This module provides the core of the Odoo Web Client.
             ('remove', 'web/static/src/views/pivot/**'),
 
             'web/static/src/webclient/**/*',
+            # The /designer_tools page brings its own script and stylesheet,
+            # loaded by its template. Neither belongs in the webclient: the
+            # script drags the module loader down, and the stylesheet would
+            # restyle every view.
+            ('remove', 'web/static/src/webclient/designer_tools/designer_tools.js'),
+            ('remove', 'web/static/src/webclient/designer_tools/designer_tools.scss'),
             ('remove', 'web/static/src/webclient/clickbot/clickbot.js'), # lazy loaded
             ('remove', 'web/static/src/views/form/button_box/*.scss'),
 
@@ -540,6 +552,12 @@ This module provides the core of the Odoo Web Client.
         'web.odoo_ui_icons': [
             '/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff2',
             '/web/static/lib/odoo_ui_icons/odoo_ui_icons.css',
+        ],
+        # Chrome of the /designer_tools page. Its own bundle rather than
+        # assets_backend: the page is standalone, and these rules have no
+        # business loading in the webclient.
+        'web.assets_designer_tools': [
+            'web/static/src/webclient/designer_tools/designer_tools.scss',
         ],
         'web.icons_fonts': [
             ('include', 'web.material_symbols_outlined'),
