@@ -2262,12 +2262,16 @@ class Base(models.AbstractModel):
                 lines = self[field_name].browse(line_ids)
                 lines.fetch(sub_fields_spec.keys())
                 # copy the cache of lines to their corresponding new records;
-                # this avoids computing computed stored fields on new_lines
+                # this avoids computing computed stored fields on new_lines;
+                # copy all fields that are in the cache
                 new_lines = lines.browse(map(NewId, line_ids))
-                for field_name in sub_fields_spec:
-                    field = lines._fields[field_name]
-                    for new_line, line in zip(new_lines, lines):
-                        line_value = field.convert_to_cache(line[field_name], new_line, validate=False)
+                for field in lines._fields.values():
+                    field_cache = field._get_cache(env)
+                    if not field_cache:
+                        continue
+                    for new_line, line_id in zip(new_lines, lines._ids):
+                        value = field_cache.get(line_id)
+                        line_value = field.convert_to_cache(value, new_line, validate=False)
                         field._update_cache(new_line, line_value)
 
         # Isolate changed values, to handle inconsistent data sent from the
