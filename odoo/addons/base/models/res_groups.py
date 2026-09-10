@@ -5,7 +5,7 @@ from collections import defaultdict
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import SetDefinitions
+from odoo.tools import SetDefinitions, SQL
 
 
 REGULAR_VALUE = object()
@@ -445,8 +445,46 @@ class ResGroups(models.Model):
         # save
 
         group_user_regular = self.browse(group_user_regular_id)
-        if set(ids) != set(group_user_regular.implied_by_ids.ids):
-            group_user_regular.with_context(apply_regular_group=REGULAR_VALUE).implied_by_ids = [Command.set(ids)]
+        current_ids = set(group_user_regular.implied_by_ids.ids)
+        if set(ids) == current_ids:
+            return
+
+        # ``group_user_regular`` is a pure bookkeeping marker: nothing derives
+        # real permissions from it, but it lives in the same ``implied_ids``
+        # relation as actual privilege groups. Going through the regular ORM
+        # write here would make `modified()` fetch every user of every one of
+        # the (possibly hundreds of) regular groups just to re-validate
+        # unrelated stored fields (e.g. `res.users.share`) that this change
+        # can never actually affect - which is what blows up memory on large
+        # databases. Update the relation table directly instead, and only
+        # invalidate the res.groups side (a small table) so subsequent reads
+        # (incl. later calls to `_get_group_definitions`/
+        # `_get_view_group_hierarchy` in this same recompute) stay correct.
+        to_add = set(ids) - current_ids
+        to_remove = current_ids - set(ids)
+        implied_by_field = self._fields['implied_by_ids']
+        if to_add:
+            self.env.cr.execute(SQL(
+                "INSERT INTO %s (%s, %s) SELECT * FROM UNNEST(%s, %s) ON CONFLICT DO NOTHING",
+                SQL.identifier(implied_by_field.relation),
+                SQL.identifier(implied_by_field.column1),
+                SQL.identifier(implied_by_field.column2),
+                [group_user_regular_id] * len(to_add), list(to_add),
+            ))
+        if to_remove:
+            self.env.cr.execute(SQL(
+                "DELETE FROM %s WHERE (%s, %s) IN (SELECT * FROM UNNEST(%s, %s))",
+                SQL.identifier(implied_by_field.relation),
+                SQL.identifier(implied_by_field.column1),
+                SQL.identifier(implied_by_field.column2),
+                [group_user_regular_id] * len(to_remove), list(to_remove),
+            ))
+
+        self.env['res.groups'].invalidate_model(['implied_ids', 'implied_by_ids', 'all_implied_ids', 'all_implied_by_ids'])
+        self.env['ir.access']._clear_caches()
+        # also invalidates the ``groups`` ormcache used by
+        # `_get_group_definitions`/`_get_view_group_hierarchy`
+        group_user_regular._check_disjoint_groups()
 
     def _is_light_groups(self):
         """Check if the set of groups provided is light or not"""
