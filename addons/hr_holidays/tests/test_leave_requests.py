@@ -2824,4 +2824,120 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'employee_ids': (self.employee_emp + self.employee_hruser).ids,
         })
 
+<<<<<<< 85505570406f8ccb6a0d60008ce5c69b04152b84
         self.assertFalse(wizard.valid_work_entry_type_ids)
+||||||| 882f604746c8c4a01d62a20f322d1513337a6700
+        # Create a leave for the whole month
+        employee_leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+            'name': 'Employee Full Month Leave',
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': self.holidays_type_4.id,
+            'request_date_from': '2026-03-01',
+            'request_date_to': '2026-03-31',
+        })
+        employee_leave.with_user(self.user_hrmanager_id).action_approve()
+
+        # Assert the leave is for the full month
+        self.assertEqual(employee_leave.number_of_days, 22, "Employee Full Month Leave should be 22 days")
+        self.assertEqual(employee_leave.date_from.date(), date(2026, 3, 1), "Employee leave start date should initially match the expected start date")
+        self.assertEqual(employee_leave.date_to.date(), date(2026, 3, 31), "Employee leave end date should initially match the expected end date")
+
+        # Verify the resource calendar leave was created and matches the employee leave dates
+        resource_leave = self.env['resource.calendar.leaves'].search([
+            ('holiday_id', '=', employee_leave.id),
+        ])
+        self.assertTrue(resource_leave)
+        self.assertEqual(resource_leave.date_to.date(), employee_leave.date_to.date(), "Employee leave end date should initially match the expected end date")
+        self.assertEqual(resource_leave.date_from.date(), employee_leave.date_from.date(), "Resource calendar leave start date should initially match the expected start date")
+
+        # Register employee departure in the middle of the month
+        departure_date = date(2026, 3, 15)
+        departure = self.env['hr.employee.departure'].create({
+            'employee_id': self.employee_emp_id,
+            'dismissal_date': departure_date,
+            'departure_reason_id': self.env.ref('hr.departure_fired').id,
+            'departure_description': "Didn't bring coffee",
+        })
+        departure.action_register()
+
+        # The leave should be cut at the departure time, but still validated
+        self.assertEqual(employee_leave.state, 'validate', "Employee leave should still be validated after departure")
+        self.assertEqual(employee_leave.date_from.date(), date(2026, 3, 1), "Employee leave start date should remain unchanged after departure")
+        self.assertEqual(employee_leave.date_to.date(), departure_date, "Employee leave end date should be updated to the departure date")
+
+        # resource.calendar.leaves entry should still exist but the dates should be amended to match the updated leave dates
+        self.assertTrue(resource_leave.exists(), "Resource calendar leave should still exist after employee departure")
+        self.assertEqual(resource_leave.date_from.date(), date(2026, 3, 1), "Resource calendar leave start date should match the updated leave start date")
+        self.assertEqual(resource_leave.date_to.date(), departure_date, "Resource calendar leave end date should match the updated leave end date")
+=======
+        # Create a leave for the whole month
+        employee_leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+            'name': 'Employee Full Month Leave',
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': self.holidays_type_4.id,
+            'request_date_from': '2026-03-01',
+            'request_date_to': '2026-03-31',
+        })
+        employee_leave.with_user(self.user_hrmanager_id).action_approve()
+
+        # Assert the leave is for the full month
+        self.assertEqual(employee_leave.number_of_days, 22, "Employee Full Month Leave should be 22 days")
+        self.assertEqual(employee_leave.date_from.date(), date(2026, 3, 1), "Employee leave start date should initially match the expected start date")
+        self.assertEqual(employee_leave.date_to.date(), date(2026, 3, 31), "Employee leave end date should initially match the expected end date")
+
+        # Verify the resource calendar leave was created and matches the employee leave dates
+        resource_leave = self.env['resource.calendar.leaves'].search([
+            ('holiday_id', '=', employee_leave.id),
+        ])
+        self.assertTrue(resource_leave)
+        self.assertEqual(resource_leave.date_to.date(), employee_leave.date_to.date(), "Employee leave end date should initially match the expected end date")
+        self.assertEqual(resource_leave.date_from.date(), employee_leave.date_from.date(), "Resource calendar leave start date should initially match the expected start date")
+
+        # Register employee departure in the middle of the month
+        departure_date = date(2026, 3, 15)
+        departure = self.env['hr.employee.departure'].create({
+            'employee_id': self.employee_emp_id,
+            'dismissal_date': departure_date,
+            'departure_reason_id': self.env.ref('hr.departure_fired').id,
+            'departure_description': "Didn't bring coffee",
+        })
+        departure.action_register()
+
+        # The leave should be cut at the departure time, but still validated
+        self.assertEqual(employee_leave.state, 'validate', "Employee leave should still be validated after departure")
+        self.assertEqual(employee_leave.date_from.date(), date(2026, 3, 1), "Employee leave start date should remain unchanged after departure")
+        self.assertEqual(employee_leave.date_to.date(), departure_date, "Employee leave end date should be updated to the departure date")
+
+        # resource.calendar.leaves entry should still exist but the dates should be amended to match the updated leave dates
+        self.assertTrue(resource_leave.exists(), "Resource calendar leave should still exist after employee departure")
+        self.assertEqual(resource_leave.date_from.date(), date(2026, 3, 1), "Resource calendar leave start date should match the updated leave start date")
+        self.assertEqual(resource_leave.date_to.date(), departure_date, "Resource calendar leave end date should match the updated leave end date")
+
+    def test_holiday_type_allocation_future_leave(self):
+        """A validated future leave should already reduce the allocation's virtual_remaining_leaves."""
+        with freeze_time('2026-09-10'):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Allocation',
+                'employee_id': self.employee_emp_id,
+                'work_entry_type_id': self.holidays_type_2.id,
+                'number_of_days': 10,
+                'state': 'confirm',
+                'date_from': '2026-01-01',
+                'date_to': '2026-12-31',
+            })
+            allocation.action_approve()
+
+            leave = self.env['hr.leave'].with_user(self.user_employee_id).create({
+                'name': 'Holiday Request',
+                'employee_id': self.employee_emp_id,
+                'work_entry_type_id': self.holidays_type_2.id,
+                'request_date_from': '2026-11-02',
+                'request_date_to': '2026-11-06',
+            })
+            leave.with_user(self.user_hrmanager_id).action_approve()
+
+            self.assertEqual(leave.state, 'validate')
+            self.assertEqual(leave.number_of_days, 5)
+            self.assertEqual(allocation.virtual_remaining_leaves, 5,
+                'A validated future leave should already reduce the allocation remaining balance')
+>>>>>>> 06c27b94d71512f9aa9c52236c546837f89ba233

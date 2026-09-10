@@ -213,8 +213,16 @@ class HrLeaveAllocation(models.Model):
 
     @api.depends('employee_id', 'work_entry_type_id')
     def _compute_leaves(self):
+<<<<<<< 85505570406f8ccb6a0d60008ce5c69b04152b84
         date_from = fields.Date.context_today(self)
         employee_days_per_allocation = self.employee_id._get_consumed_leaves(self.work_entry_type_id, date_from, ignore_future=True)[0]
+||||||| 882f604746c8c4a01d62a20f322d1513337a6700
+        date_from = fields.Date.today()
+        employee_days_per_allocation = self.employee_id._get_consumed_leaves(self.work_entry_type_id, date_from, ignore_future=True)[0]
+=======
+        date_from = fields.Date.today()
+        employee_days_per_allocation = self.employee_id._get_consumed_leaves(self.work_entry_type_id, date_from)[0]
+>>>>>>> 06c27b94d71512f9aa9c52236c546837f89ba233
         for allocation in self:
             origin = allocation._origin
             virtual_leave = employee_days_per_allocation[origin.employee_id][origin.work_entry_type_id][origin]
