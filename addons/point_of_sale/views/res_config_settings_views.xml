@@ -240,6 +240,14 @@
                                         </div>
                                     </div>
                                 </setting>
+                                <setting help="Adds a deposit line for deposit enabled product">
+                                    <field name="pos_module_pos_deposit_management" string="Deposit Management" />
+                                    <div class="content-group" id="pos_deposit_management" invisible="not pos_module_pos_deposit_management">
+                                        <div class="text-warning mt16 mb4" id="warning_text_pos_deposit_manangement">
+                                            Save this page and come back here to set up the feature.
+                                        </div>
+                                    </div>
+                                </setting>
                             </block>
                             <block title="Accounting" id="pos_accounting_section">
                                 <setting id="pos_accounting" title="Accounting" help="Accounting settings for PoS">
