@@ -30,6 +30,7 @@ from pathlib import Path
 from tokenize import generate_tokens, STRING, NEWLINE, INDENT, DEDENT
 
 from babel.messages import extract
+from html import unescape as unescape_html_entities
 from lxml import etree, html
 from markupsafe import escape, Markup
 from psycopg2.extras import Json
@@ -311,11 +312,21 @@ def translate_xml_node(node, callback, parse, serialize):
                     (key == 'value' and is_translatable_attrib_value(node)) or
                     (key == 'text' and is_translatable_attrib_text(node))
                 ):
+                    # Always XML-serialize the dummy attribute so the term is
+                    # <div t="..."/> (double-quoted, &quot;). serialize_html may
+                    # switch to t='...' and leave " unescaped.
+                    el = etree.Element('div')
+                    el.set('t', val.strip())
+                    term = etree.tostring(el, method='xml', encoding='unicode')[len('<div t="'):-len('"/>')]
                     if key.startswith('t-'):
-                        value = translate_format_string_expression(val.strip(), callback)
+                        value = translate_format_string_expression(term, callback)
                     else:
-                        value = callback(val.strip())
-                    node.set(key, value or val)
+                        value = callback(term)
+                    # callback / wrap return the serialized attribute term.
+                    # lxml attrib is decoded; tostring() re-escapes. Decode
+                    # here or &amp; becomes &amp;amp;. parse() cannot be used:
+                    # wrap is a <span> stored as attribute text, not a child.
+                    node.set(key, unescape_html_entities(value) if value else val)
 
     process(node)
 

@@ -336,18 +336,18 @@ class TranslationToolsTestCase(BaseCase):
             'attr should be translated and escaped',
         )
 
-        # {legal(not escaped attr): legal}
-        self.assertEqual(
-            xml_translate({attr: 'X'}.get, make_xml(escaped_attr)),
-            make_xml('X'),
-            'attrs should be translated by using unescaped old terms',
-        )
-
-        # {illegal(escaped attr): legal}
+        # {legal(XML-attribute escaped term): legal}
         self.assertEqual(
             xml_translate({escaped_attr: 'X'}.get, make_xml(escaped_attr)),
+            make_xml('X'),
+            'attrs should be translated by using XML-attribute escaped old terms',
+        )
+
+        # {illegal(unescaped attr): legal}
+        self.assertEqual(
+            xml_translate({attr: 'X'}.get, make_xml(escaped_attr)),
             make_xml(escaped_attr),
-            'attrs cannot be translated by using escaped old terms',
+            'attrs cannot be translated by using unescaped old terms',
         )
 
         # text and elements
@@ -388,6 +388,23 @@ class TranslationToolsTestCase(BaseCase):
             xml_translate({term: invalid}.get, make_xml(term)),
             make_xml(term),
             f'translation {invalid!r} has non-translatable elements(elements not in TRANSLATED_ELEMENTS)',
+        )
+
+    def test_translate_attribute_entities(self):
+        """Attribute terms are XML-escaped; identity must not double-escape."""
+        xml_src = '<form string="A &amp; B &quot;"/>'
+        terms = []
+        self.assertEqual(xml_translate(terms.append, xml_src), xml_src)
+        self.assertEqual(terms, ['A &amp; B &quot;'])
+        self.assertEqual(xml_translate(lambda term: term, xml_src), xml_src)
+
+        html_src = '<p title="A &amp; B &quot;">x</p>'
+        terms = []
+        html_translate(terms.append, html_src)
+        self.assertItemsEqual(terms, ['A &amp; B &quot;', 'x'])
+        self.assertEqual(
+            html_translate({'A &amp; B &quot;': 'C &amp; D &quot;'}.get, html_src),
+            '<p title=\'C &amp; D "\'>x</p>',
         )
 
     def test_translate_xml_fstring(self):
@@ -1578,6 +1595,15 @@ class TestXMLTranslation(TransactionCase):
         })
         self.assertEqual(view.with_context(lang='en_US').arch_db, '<form string="X">Bread and cheese<div>Fork3</div></form>')
         self.assertEqual(view.with_context(lang='es_ES').arch_db, '<form string="X">Bread and cheese<div>Tenedor3</div></form>')
+
+    def test_update_field_translations_attribute_entities(self):
+        archf = '<form string="%s"><div>x</div></form>'
+        view = self.create_view(archf, ('A&amp;B',))
+        view.update_field_translations('arch_db', {'fr_FR': {'A&amp;B': 'C&amp;D'}})
+        self.assertEqual(view.with_context(lang='fr_FR').arch_db, archf % 'C&amp;D')
+        wrapped = view.with_context(lang='fr_FR', edit_translations=True).arch_db
+        self.assertIn('C&amp;D', wrapped)
+        self.assertNotIn('C&amp;amp;D', wrapped)
 
     def test_delay_translations(self):
         archf = '<form string="%s"><div>%s</div><div>%s</div></form>'

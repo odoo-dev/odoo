@@ -70,7 +70,7 @@ const attributeTemplate = xml`
         <t t-call="${translateNodeTemplate}" node="attrToNode"/>
     </t>
     <t t-else="">
-        "<span class="o-att-value" t-out="attribute[1]"/>"
+        "<span class="o-att-value" t-out="this.escapeXmlAttr(attribute[1])"/>"
     </t>
 </span>
 `;
@@ -159,12 +159,12 @@ export class TranslateXml extends Component {
             const attributes = Object.fromEntries(
                 node.getAttributeNames().map((attName) => [attName, node.getAttribute(attName)])
             );
-            attributes["data-width"] = this.computeInputWidth(node.innerHTML || node.innerText);
+            const term = node.translationTerm ?? (node.innerHTML || node.innerText);
+            attributes["data-width"] = this.computeInputWidth(term);
             parsed.attributes = attributes;
             const translationKey = this.model.getTranslationKey(attributes);
             attributes["data-translation-key"] = translationKey;
-            parsed.value = (lang) =>
-                this.getHashChange(lang, translationKey) ?? (node.innerHTML || node.innerText);
+            parsed.value = (lang) => this.getHashChange(lang, translationKey) ?? term;
         }
         return parsed;
     }
@@ -174,6 +174,13 @@ export class TranslateXml extends Component {
         // But we don't want to trigger a render at each input
         // This is why we untrack the underlying reactive
         return untrack(() => this.model.getHashChange(lang, key));
+    }
+
+    escapeXmlAttr(value) {
+        const doc = document.implementation.createDocument(null, "t", null);
+        doc.documentElement.setAttribute("a", value ?? "");
+        const xml = new XMLSerializer().serializeToString(doc.documentElement);
+        return xml.match(/\sa="([^"]*)"/)?.[1] ?? "";
     }
 
     computeInputWidth(value) {
@@ -192,16 +199,15 @@ export class TranslateXml extends Component {
         }
     }
 
-    static translatableAttrRe = /(<span.*>)(.*)(<\/span>)/;
+    static translatableAttrRe = /(<span[^>]*>)(.*)(<\/span>)/;
     parseAttrXML(string) {
         string = string?.trim();
         if (string?.startsWith("<span data-oe-model=")) {
             const matched = string.match(this.constructor.translatableAttrRe);
             if (matched) {
-                const text = matched[2];
                 const dummy = this.parseXML(matched[1] + matched[3], "text/html").firstElementChild
                     .firstElementChild;
-                dummy.innerText = text;
+                dummy.translationTerm = this.escapeXmlAttr(matched[2]);
                 return dummy;
             }
         }
