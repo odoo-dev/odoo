@@ -390,8 +390,8 @@ class AccountReport(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_if_no_variant(self):
-        if self.variant_report_ids:
-            raise UserError(_("You can't delete a report that has variants."))
+        if self.variant_report_ids.filtered('active'):
+            raise UserError(_("You can't delete a report that has active variants."))
 
     @api.depends('name', 'country_id')
     def _compute_display_name(self):
