@@ -8,6 +8,8 @@ class StockMove(models.Model):
         domain = [('move_id', 'in', self.ids), ('cost_id.state', '=', 'done')]
         if at_date:
             domain.append(('cost_id.date', '<=', at_date))
+        if include_costs := self.env.context.get('include_costs'):
+            domain.append(('cost_id', 'in', include_costs.ids))
         landed_cost_group = self.env['stock.valuation.adjustment.lines']._read_group(domain, ['move_id'], ['id:recordset'])
         return dict(landed_cost_group)
 
