@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      The Bootstrap gallery that /designer_tools?preview=1&amp;screen=bootstrap
+      dresses with the values being tried.
+
+      Modelled on the BS Debug page of website (website.bs_debug_page_view),
+      which cannot be reused: it lives in that addon's demo data, wears
+      website.layout and is built on the website palette (o-color-1…5). This
+      one is the backend equivalent — same intent, backend classes only, and no
+      dependency outside web.
+
+      Where the other mockups show one real screen, this one shows the
+      surfaces themselves, so that a value can be judged on the component it
+      will land on rather than on whichever screen happens to use it.
+
+      Nothing here is interactive: the preview loads no Bootstrap JS, so the
+      dropdown, the tabs and the modal are rendered in their open state with
+      the markup and the classes the JS would have set.
+    -->
+    <template id="designer_tools_mockup_bootstrap" name="Designer tools mockup: Bootstrap">
+<div class="o_action_manager">
+  <div class="o_content overflow-auto p-4" style="height:100%">
+
+    <t t-set="theme" t-value="[
+        ['primary', 'Primary'], ['secondary', 'Secondary'], ['success', 'Success'],
+        ['info', 'Info'], ['warning', 'Warning'], ['danger', 'Danger'],
+        ['light', 'Light'], ['dark', 'Dark']]"/>
+    <t t-set="grays" t-value="[
+        ['white', 'white'], ['100', '100'], ['200', '200'], ['300', '300'],
+        ['400', '400'], ['500', '500'], ['600', '600'], ['700', '700'],
+        ['800', '800'], ['900', '900'], ['black', 'black']]"/>
+
+    <!-- == Grays ====================================================== -->
+    <h4 class="mb-1">Grays</h4>
+    <p class="text-muted small mb-2">The ramp the tool is about, on the surfaces it ends up on.</p>
+    <div class="d-flex flex-wrap mb-4 border rounded overflow-hidden">
+      <t t-foreach="grays" t-as="g">
+        <div t-attf-class="bg-#{g[0]} flex-grow-1 p-2 small font-monospace"
+             style="min-width:5rem">
+          <span t-attf-class="text-#{'dark' if g_index &lt; 6 else 'light'}" t-out="g[1]"/>
+        </div>
+      </t>
+    </div>
+
+    <!-- == Subtle triad =============================================== -->
+    <h4 class="mb-1">Subtle backgrounds</h4>
+    <p class="text-muted small mb-2">
+      <code>bg-*-subtle</code> with its matching <code>border-*-subtle</code> and
+      <code>text-*-emphasis</code> — the three are meant to be read together.
+    </p>
+    <div class="row g-2 mb-4">
+      <t t-foreach="theme" t-as="c">
+        <div class="col">
+          <div t-attf-class="bg-#{c[0]}-subtle border border-#{c[0]}-subtle rounded p-3 h-100">
+            <div t-attf-class="text-#{c[0]}-emphasis fw-bold" t-out="c[1]"/>
+            <small t-attf-class="text-#{c[0]}-emphasis">emphasis text</small>
+          </div>
+        </div>
+      </t>
+    </div>
+
+    <!-- == Buttons ==================================================== -->
+    <h4 class="mb-2">Buttons</h4>
+    <div class="mb-2">
+      <t t-foreach="theme" t-as="c">
+        <button type="button" t-attf-class="btn btn-#{c[0]} me-1 mb-1" t-out="c[1]"/>
+      </t>
+    </div>
+    <div class="mb-2">
+      <t t-foreach="theme" t-as="c">
+        <button type="button" t-attf-class="btn btn-outline-#{c[0]} me-1 mb-1" t-out="c[1]"/>
+      </t>
+    </div>
+    <div class="mb-2">
+      <button type="button" class="btn btn-primary btn-sm me-1">Small</button>
+      <button type="button" class="btn btn-primary me-1">Default</button>
+      <button type="button" class="btn btn-primary btn-lg me-1">Large</button>
+      <button type="button" class="btn btn-primary active me-1">Active</button>
+      <button type="button" class="btn btn-primary me-1" disabled="disabled">Disabled</button>
+      <button type="button" class="btn btn-link me-1">Link</button>
+      <div class="btn-group btn-group-sm ms-2" role="group">
+        <button type="button" class="btn btn-secondary active">Left</button>
+        <button type="button" class="btn btn-secondary">Middle</button>
+        <button type="button" class="btn btn-secondary">Right</button>
+      </div>
+    </div>
+
+    <!-- == Badges ===================================================== -->
+    <h4 class="mt-4 mb-2">Badges</h4>
+    <div class="mb-2">
+      <t t-foreach="theme" t-as="c">
+        <span t-attf-class="badge text-bg-#{c[0]} me-1 mb-1" t-out="c[1]"/>
+      </t>
+    </div>
+
+    <!-- == Alerts ===================================================== -->
+    <h4 class="mt-4 mb-2">Alerts</h4>
+    <div class="row g-2 mb-2">
+      <t t-foreach="theme" t-as="c">
+        <div class="col-6 col-xl-3">
+          <div t-attf-class="alert alert-#{c[0]} mb-0 py-2" role="alert">
+            <b t-out="c[1]"/> — with an <a href="#" class="alert-link">alert link</a>.
+          </div>
+        </div>
+      </t>
+    </div>
+
+    <div class="row g-3 mt-2">
+
+      <!-- == Cards, list group ====================================== -->
+      <div class="col-lg-4">
+        <h4 class="mb-2">Card</h4>
+        <div class="card mb-3">
+          <div class="card-header">Card header</div>
+          <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <p class="card-text text-muted small mb-2">
+              Body text on the card surface, with the muted variant under it.
+            </p>
+            <button type="button" class="btn btn-primary btn-sm">Action</button>
+          </div>
+          <div class="card-footer text-muted small">Card footer</div>
+        </div>
+
+        <h4 class="mb-2">List group</h4>
+        <div class="list-group">
+          <a href="#" class="list-group-item list-group-item-action active">Active item</a>
+          <a href="#" class="list-group-item list-group-item-action">Default item</a>
+          <a href="#" class="list-group-item list-group-item-action disabled">Disabled item</a>
+          <t t-foreach="theme" t-as="c">
+            <t t-if="c_index &lt; 4">
+              <span t-attf-class="list-group-item list-group-item-#{c[0]}" t-out="c[1]"/>
+            </t>
+          </t>
+        </div>
+      </div>
+
+      <!-- == Forms ================================================== -->
+      <div class="col-lg-4">
+        <h4 class="mb-2">Form</h4>
+        <div class="mb-2">
+          <label class="form-label" for="mk_text">Text input</label>
+          <input id="mk_text" type="text" class="form-control" placeholder="Placeholder"/>
+          <div class="form-text">Helper text under the field.</div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label" for="mk_select">Select</label>
+          <select id="mk_select" class="form-select">
+            <option>Option one</option>
+            <option>Option two</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <input type="text" class="form-control is-valid mb-1" value="Valid value"/>
+          <input type="text" class="form-control is-invalid" value="Invalid value"/>
+          <div class="invalid-feedback d-block">Invalid feedback message.</div>
+        </div>
+        <div class="mb-2">
+          <input id="mk_disabled" type="text" class="form-control" value="Disabled" disabled="disabled"/>
+        </div>
+        <div class="form-check">
+          <input id="mk_check" class="form-check-input" type="checkbox" checked="checked"/>
+          <label class="form-check-label" for="mk_check">Checked checkbox</label>
+        </div>
+        <div class="form-check">
+          <input id="mk_radio" class="form-check-input" type="radio" checked="checked"/>
+          <label class="form-check-label" for="mk_radio">Selected radio</label>
+        </div>
+        <div class="form-check form-switch">
+          <input id="mk_switch" class="form-check-input" type="checkbox" checked="checked"/>
+          <label class="form-check-label" for="mk_switch">Switch</label>
+        </div>
+        <label class="form-label mt-2" for="mk_range">Range</label>
+        <input id="mk_range" type="range" class="form-range" value="40"/>
+      </div>
+
+      <!-- == Navigation, overlays =================================== -->
+      <div class="col-lg-4">
+        <h4 class="mb-2">Nav and tabs</h4>
+        <ul class="nav nav-tabs mb-2">
+          <li class="nav-item"><a class="nav-link active" href="#">Active</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Link</a></li>
+          <li class="nav-item"><a class="nav-link disabled" href="#">Disabled</a></li>
+        </ul>
+        <ul class="nav nav-pills mb-3">
+          <li class="nav-item"><a class="nav-link active" href="#">Active</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Link</a></li>
+        </ul>
+
+        <h4 class="mb-2">Dropdown</h4>
+        <!-- Rendered open: the preview loads no Bootstrap JS. -->
+        <div class="dropdown mb-3">
+          <button class="btn btn-secondary dropdown-toggle" type="button">Dropdown</button>
+          <div class="dropdown-menu show position-static d-block mt-1">
+            <h6 class="dropdown-header">Header</h6>
+            <a class="dropdown-item active" href="#">Active item</a>
+            <a class="dropdown-item" href="#">Default item</a>
+            <div class="dropdown-divider"/>
+            <a class="dropdown-item disabled" href="#">Disabled item</a>
+          </div>
+        </div>
+
+        <h4 class="mb-2">Breadcrumb and pagination</h4>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Library</a></li>
+            <li class="breadcrumb-item active">Data</li>
+          </ol>
+        </nav>
+        <nav>
+          <ul class="pagination pagination-sm">
+            <li class="page-item disabled"><a class="page-link" href="#">Prev</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- == Tables ===================================================== -->
+    <h4 class="mt-4 mb-2">Table</h4>
+    <table class="table table-hover">
+      <thead>
+        <tr><th>Header</th><th>Header</th><th class="text-end">Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Default row</td><td>Some text</td><td class="text-end">10.00</td></tr>
+        <tr class="table-active"><td>Active row</td><td>Some text</td><td class="text-end">20.00</td></tr>
+        <t t-foreach="theme" t-as="c">
+          <t t-if="c_index &lt; 6">
+            <tr t-attf-class="table-#{c[0]}">
+              <td t-out="'table-' + c[0]"/><td>Some text</td><td class="text-end">30.00</td>
+            </tr>
+          </t>
+        </t>
+      </tbody>
+    </table>
+
+    <!-- == Progress, spinners, tooltip, modal ========================= -->
+    <div class="row g-3 mt-1">
+      <div class="col-lg-6">
+        <h4 class="mb-2">Progress and spinners</h4>
+        <t t-foreach="theme" t-as="c">
+          <t t-if="c_index &lt; 4">
+            <div class="progress mb-1" role="progressbar" style="height:.6rem">
+              <div t-attf-class="progress-bar bg-#{c[0]}" t-attf-style="width:#{25 * (c_index + 1)}%"/>
+            </div>
+          </t>
+        </t>
+        <div class="mt-2">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"/>
+          <div class="spinner-grow spinner-grow-sm text-secondary me-2" role="status"/>
+          <span class="badge rounded-pill text-bg-secondary">pill</span>
+          <kbd class="ms-2">Ctrl</kbd> <kbd>K</kbd>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <h4 class="mb-2">Overlays</h4>
+        <!-- Real popover and tooltip markup, positioned statically. -->
+        <div class="popover d-block position-static mb-2" role="tooltip">
+          <div class="popover-arrow d-none"/>
+          <h3 class="popover-header">Popover header</h3>
+          <div class="popover-body">Popover body, on the popover surface.</div>
+        </div>
+        <div class="tooltip d-block position-static show" role="tooltip">
+          <div class="tooltip-inner">Tooltip text</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- == Typography ================================================= -->
+    <h4 class="mt-4 mb-2">Typography</h4>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <h1>Heading 1</h1>
+        <h3>Heading 3</h3>
+        <h5>Heading 5</h5>
+        <p class="mb-1">
+          Body text with a <a href="#">link</a>, some <b>bold</b>, some
+          <i>italic</i>, a <code>code span</code> and a <mark>mark</mark>.
+        </p>
+        <p class="text-muted mb-1">Muted paragraph.</p>
+        <blockquote class="blockquote fs-6 border-start ps-2">
+          A blockquote on the page surface.
+        </blockquote>
+      </div>
+      <div class="col-lg-6">
+        <t t-foreach="theme" t-as="c">
+          <div t-attf-class="text-#{c[0]}" t-out="'text-' + c[0]"/>
+        </t>
+        <div class="text-muted">text-muted</div>
+        <hr/>
+        <div class="p-2 bg-body-secondary rounded mb-1">bg-body-secondary</div>
+        <div class="p-2 bg-body-tertiary rounded">bg-body-tertiary</div>
+      </div>
+    </div>
+
+    <div class="py-4"/>
+  </div>
+</div>
+    </template>
+
+</odoo>

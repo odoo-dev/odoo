@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      The kanban view that /designer_tools?preview=1&amp;screen=kanban dresses
+      with the values being tried. Lifted from a real Project kanban and
+      trimmed by the same rules as the other mockups.
+    -->
+    <template id="designer_tools_mockup_kanban" name="Designer tools mockup: Kanban">
+        <div class="o_action_manager">
+          <div class="o_kanban_view o_project_project_kanban_view o_project_kanban o_view_controller o_action o_kanban_selection_available">
+            <div class="o_control_panel d-flex flex-column gap-3 px-3 pt-2 pb-3" data-command-category="actions">
+              <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-2 gap-lg-3 flex-grow-1">
+                <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100">
+                  <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none text-nowrap pe-1">
+                    <button class="btn btn-primary o-kanban-button-new o-dropdown-caret o-dropdown dropdown-toggle dropdown" aria-expanded="false"> New </button>
+                  </div>
+                  <div class="o_breadcrumb d-flex gap-1 text-truncate">
+                    <div class="o_last_breadcrumb_item active d-flex fs-4 min-w-0 align-items-center">
+                      <span class="min-w-0 fw-medium text-truncate">Projects</span>
+                    </div>
+                    <div class="o_control_panel_breadcrumbs_actions d-inline-flex d-print-none">
+                      <div class="o_cp_action_menus d-flex align-items-center gap-1">
+                        <div class="lh-1">
+                          <button class="o_btn_circle d-print-none btn btn-light p-1 m-0 ms-1 o-dropdown dropdown-toggle dropdown" data-tooltip="Actions" aria-label="Actions menu" aria-expanded="false">
+                            <i class="oi" data-icon="more_vert" aria-hidden="true"/>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="me-auto"/>
+                </div>
+                <div class="o_control_panel_actions d-empty-none d-flex align-items-center justify-content-start justify-content-lg-around order-2 order-lg-1 w-100 mw-100 w-lg-auto gap-1 h-lg-100">
+                  <div class="o_cp_searchview d-flex input-group rounded-pill h-lg-100" role="search">
+                    <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 bg-view" role="search">
+                      <button class="d-print-none btn border-0 p-0" aria-label="Search..." title="Search...">
+                        <i class="o_searchview_icon oi me-2" data-icon="search" role="img"/>
+                      </button>
+                      <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1 align-items-center mw-100">
+                        <input type="text" class="o_searchview_input o_input d-print-none flex-grow-1 w-auto border-0" placeholder="Search..." role="searchbox"/>
+                      </div>
+                    </div>
+                    <button class="o_searchview_dropdown_toggler d-print-none btn btn-outline-secondary o-dropdown-caret bg-view o-dropdown dropdown-toggle dropdown" title="Toggle Search Panel" aria-expanded="false"/>
+                  </div>
+                </div>
+                <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap justify-content-end gap-1 gap-xl-3 order-1 order-lg-2 flex-grow-1 align-items-lg-center">
+                  <div class="o_cp_pager text-nowrap align-self-stretch" role="search">
+                    <nav class="o_pager d-flex gap-2 h-100" aria-label="Pager">
+                      <span class="o_pager_counter align-self-center small fw-medium">
+                        <span class="o_pager_value d-inline-block border-bottom border-transparent mb-n1">1-5</span>
+                        <span> / </span>
+                        <span class="o_pager_limit">5</span>
+                      </span>
+                      <span class="btn-group d-print-none">
+                        <button type="button" class="btn btn-secondary o_pager_previous" aria-label="Previous" tabindex="-1" data-tooltip="Previous" disabled="">
+                          <i class="oi" data-icon="arrow_back_ios_new"/>
+                        </button>
+                        <button type="button" class="btn btn-secondary o_pager_next" aria-label="Next" tabindex="-1" data-tooltip="Next" disabled="">
+                          <i class="oi" data-icon="arrow_forward_ios"/>
+                        </button>
+                      </span>
+                    </nav>
+                  </div>
+                  <nav class="o_cp_switch_buttons d-print-none d-inline-flex btn-group o_switcher" style="--SwitchButtons-activeIndex: 0; --SwitchButtons-count: 2; --SwitchButtons-slideFrom: 0;">
+                    <button class="btn btn-secondary o_switch_view active o_kanban" data-tooltip="Kanban" aria-label="Kanban View">
+                      <i class="oi oi-fw" data-icon="oi_view-kanban"/>
+                    </button>
+                    <button class="btn btn-secondary o_switch_view o_list" data-tooltip="List" aria-label="List View">
+                      <i class="oi oi-fw" data-icon="reorder"/>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            <main class="o_content">
+              <div class="o_kanban_renderer o_renderer d-flex user-select-none o_kanban_ungrouped align-content-start flex-wrap justify-content-start">
+                <article role="link" class="o_card_record d-flex o_kanban_record cursor-pointer o_kanban_record_colored o_kanban_color_5 flex-grow-1 flex-md-shrink-1 flex-shrink-0" tabindex="0">
+                  <div class="o_project_kanban_main o_record_main">
+                    <div class="d-flex align-items-baseline gap-1">
+                      <div class="o_field_widget o_field_project_is_favorite">
+                        <button class="o_favorite btn btn-link btn-link-inline">
+                          <i class="oi oi-filled" data-icon="star" role="img" aria-label="Favorite"/>
+                        </button>
+                      </div>
+                      <span class="text-truncate d-block fs-4 fw-bold" title="Home Construction">
+                        <span>Home Construction</span>
+                      </span>
+                    </div>
+                    <div class="o_project_kanban_body min-w-0 pb-4 me-2">
+                      <span class="text-muted d-flex align-items-baseline">
+                        <span class="oi oi-filled me-2" data-icon="person" aria-label="Partner" title="Partner"/>
+                        <span class="text-truncate">Acme Corporation</span>
+                      </span>
+                      <div class="text-muted d-flex align-items-baseline">
+                        <span class="oi me-2" data-icon="schedule" title="Dates"/>
+                        <div class="o_field_widget o_field_daterange">
+                          <div class="d-flex gap-2 align-items-center">
+                            <span class="text-truncate">Jul 9</span>
+                            <i class="oi" data-icon="east" aria-label="Arrow icon" title="Arrow"/>
+                            <span class="text-truncate">Sep 4</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1">
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_3 cursor-pointer" tabindex="-1" data-color="3" aria-label="Architecture">
+                            <div class="o_tag_badge_text o_badge_text">Architecture</div>
+                          </span>
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_8 cursor-pointer" tabindex="-1" data-color="8" aria-label="Construction">
+                            <div class="o_tag_badge_text o_badge_text">Construction</div>
+                          </span>
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_9 cursor-pointer" tabindex="-1" data-color="9" aria-label="Design">
+                            <div class="o_tag_badge_text o_badge_text">Design</div>
+                          </span>
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_9 cursor-pointer" tabindex="-1" data-color="9" aria-label="Interior">
+                            <div class="o_tag_badge_text o_badge_text">Interior</div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="mt-auto pt-0">
+                    <div class="d-flex align-items-center">
+                      <div class="o_project_kanban_boxes d-flex align-items-baseline">
+                        <a class="o_project_kanban_box me-1 oe_kanban_action">
+                          <div>
+                            <span class="o_value">4</span>
+                            <span class="ms-1">Tasks</span>
+                          </div>
+                        </a>
+                        <a role="button" class="oe_kanban_action d-inline-block small me-1 text-danger"><span class="oi oi-filled me-1" data-icon="flag"/><span>1</span>/<span>3</span></a>
+                      </div>
+                      <div class="o_field_widget o_field_kanban_activity ms-2">
+                        <button class="o-mail-ActivityButton btn btn-link btn-link-inline" aria-label="Show activities" title="Show activities">
+                          <i class="oi oi-fw oi-lg btn-link text-dark" role="img" data-icon="schedule"/>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="d-flex ms-auto align-items-center">
+                      <div class="o_field_widget o_field_many2one_avatar_user me-1 o_field_many2one_avatar">
+                        <div>
+                          <div class="o-mail-Avatar o_avatar d-flex align-items-center p-0 o_m2o_avatar">
+                            <img class="rounded" width="24" height="24" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_required_modifier o_field_project_state_selection">
+                        <button class="btn btn-link d-flex p-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                          <div class="d-flex align-items-center" title="On Track">
+                            <span class="o_status o_status_bubble mx-0 o_color_bubble_20"/>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                  <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                    <button class="btn btn-light o-no-caret px-1 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
+                      <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                  </div>
+                </article>
+                <article role="link" class="o_card_record d-flex o_kanban_record cursor-pointer o_kanban_record_colored o_kanban_color_3 flex-grow-1 flex-md-shrink-1 flex-shrink-0" tabindex="0">
+                  <div class="o_project_kanban_main o_record_main">
+                    <div class="d-flex align-items-baseline gap-1">
+                      <div class="o_field_widget o_field_project_is_favorite">
+                        <button class="o_favorite btn btn-link btn-link-inline">
+                          <i class="oi oi-filled" data-icon="star" role="img" aria-label="Favorite"/>
+                        </button>
+                      </div>
+                      <span class="text-truncate d-block fs-4 fw-bold" title="Office Design">
+                        <span>Office Design</span>
+                      </span>
+                    </div>
+                    <div class="o_project_kanban_body min-w-0 pb-4 me-2">
+                      <span class="text-muted d-flex align-items-baseline">
+                        <span class="oi oi-filled me-2" data-icon="person" aria-label="Partner" title="Partner"/>
+                        <span class="text-truncate">Joel Willis</span>
+                      </span>
+                      <div class="text-muted d-flex align-items-baseline">
+                        <span class="oi me-2" data-icon="schedule" title="Dates"/>
+                        <div class="o_field_widget o_field_daterange">
+                          <div class="d-flex gap-2 align-items-center">
+                            <span class="text-truncate">Jul 8</span>
+                            <i class="oi" data-icon="east" aria-label="Arrow icon" title="Arrow"/>
+                            <span class="text-truncate">Sep 18</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1">
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_11 cursor-pointer" tabindex="-1" data-color="11" aria-label="External">
+                            <div class="o_tag_badge_text o_badge_text">External</div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="mt-auto pt-0">
+                    <div class="d-flex align-items-center">
+                      <div class="o_project_kanban_boxes d-flex align-items-baseline">
+                        <a class="o_project_kanban_box me-1 oe_kanban_action">
+                          <div>
+                            <span class="o_value">17</span>
+                            <span class="ms-1">Tasks</span>
+                          </div>
+                        </a>
+                        <a role="button" class="oe_kanban_action d-inline-block small me-1 text-muted"><span class="oi oi-filled me-1" data-icon="flag"/><span>1</span>/<span>3</span></a>
+                      </div>
+                      <div class="o_field_widget o_field_kanban_activity ms-2">
+                        <button class="o-mail-ActivityButton btn btn-link btn-link-inline" aria-label="Show activities" title="Show activities">
+                          <i class="oi oi-fw oi-lg btn-link text-dark" role="img" data-icon="schedule"/>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="d-flex ms-auto align-items-center">
+                      <div class="o_field_widget o_field_many2one_avatar_user me-1 o_field_many2one_avatar">
+                        <div>
+                          <div class="o-mail-Avatar o_avatar d-flex align-items-center p-0 o_m2o_avatar">
+                            <img class="rounded" width="24" height="24" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_required_modifier o_field_project_state_selection">
+                        <button class="btn btn-link d-flex p-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                          <div class="d-flex align-items-center" title="At Risk">
+                            <span class="o_status o_status_bubble mx-0 o_color_bubble_22"/>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                  <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                    <button class="btn btn-light o-no-caret px-1 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
+                      <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                  </div>
+                </article>
+                <article role="link" class="o_card_record d-flex o_kanban_record cursor-pointer o_kanban_record_colored o_kanban_color_4 flex-grow-1 flex-md-shrink-1 flex-shrink-0" tabindex="0">
+                  <div class="o_project_kanban_main o_record_main">
+                    <div class="d-flex align-items-baseline gap-1">
+                      <div class="o_field_widget o_field_project_is_favorite">
+                        <button class="o_favorite btn btn-link btn-link-inline">
+                          <i class="oi oi-filled" data-icon="star" role="img" aria-label="Favorite"/>
+                        </button>
+                      </div>
+                      <span class="text-truncate d-block fs-4 fw-bold" title="Renovations">
+                        <span>Renovations</span>
+                      </span>
+                    </div>
+                    <div class="o_project_kanban_body min-w-0 pb-4 me-2">
+                      <div class="text-muted d-flex align-items-baseline">
+                        <span class="oi me-2" data-icon="schedule" title="Dates"/>
+                        <div class="o_field_widget o_field_daterange">
+                          <div class="d-flex gap-2 align-items-center">
+                            <span class="text-truncate">Jul 9</span>
+                            <i class="oi" data-icon="east" aria-label="Arrow icon" title="Arrow"/>
+                            <span class="text-truncate">Sep 4</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1">
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_7 cursor-pointer" tabindex="-1" data-color="7" aria-label="Experiment">
+                            <div class="o_tag_badge_text o_badge_text">Experiment</div>
+                          </span>
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_9 cursor-pointer" tabindex="-1" data-color="9" aria-label="Internal">
+                            <div class="o_tag_badge_text o_badge_text">Internal</div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="mt-auto pt-0">
+                    <div class="d-flex align-items-center">
+                      <div class="o_project_kanban_boxes d-flex align-items-baseline">
+                        <a class="o_project_kanban_box me-1 oe_kanban_action">
+                          <div>
+                            <span class="o_value">3</span>
+                            <span class="ms-1">Tasks</span>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="o_field_widget o_field_kanban_activity ms-2">
+                        <button class="o-mail-ActivityButton btn btn-link btn-link-inline" aria-label="Show activities" title="Show activities">
+                          <i class="oi oi-fw oi-lg btn-link text-dark" role="img" data-icon="schedule"/>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="d-flex ms-auto align-items-center">
+                      <div class="o_field_widget o_field_many2one_avatar_user me-1 o_field_many2one_avatar">
+                        <div>
+                          <div class="o-mail-Avatar o_avatar d-flex align-items-center p-0 o_m2o_avatar">
+                            <img class="rounded" width="24" height="24" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_required_modifier o_field_project_state_selection">
+                        <button class="btn btn-link d-flex p-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                          <div class="d-flex align-items-center" title="Complete">
+                            <span class="o_status o_status_bubble mx-0 o_color_bubble_24"/>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                  <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                    <button class="btn btn-light o-no-caret px-1 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
+                      <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                  </div>
+                </article>
+                <article role="link" class="o_card_record d-flex o_kanban_record cursor-pointer o_kanban_record_colored o_kanban_color_0 flex-grow-1 flex-md-shrink-1 flex-shrink-0" tabindex="0">
+                  <div class="o_project_kanban_main o_record_main">
+                    <div class="d-flex align-items-baseline gap-1">
+                      <div class="o_field_widget o_field_project_is_favorite">
+                        <button class="o_favorite btn btn-link btn-link-inline">
+                          <i class="oi oi-filled" data-icon="star" role="img" aria-label="Favorite"/>
+                        </button>
+                      </div>
+                      <span class="text-truncate d-block fs-4 fw-bold" title="Research &amp; Development">
+                        <span>Research &amp; Development</span>
+                      </span>
+                    </div>
+                    <div class="o_project_kanban_body min-w-0 pb-4 me-2">
+                      <div class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1">
+                          <span class="o_tag position-relative d-inline-flex align-items-center user-select-none mw-100 o_badge badge rounded-pill o_tag_color_9 cursor-pointer" tabindex="-1" data-color="9" aria-label="Internal">
+                            <div class="o_tag_badge_text o_badge_text">Internal</div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="mt-auto pt-0">
+                    <div class="d-flex align-items-center">
+                      <div class="o_project_kanban_boxes d-flex align-items-baseline">
+                        <a class="o_project_kanban_box me-1 oe_kanban_action">
+                          <div>
+                            <span class="o_value">6</span>
+                            <span class="ms-1">Tasks</span>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="o_field_widget o_field_kanban_activity ms-2">
+                        <button class="o-mail-ActivityButton btn btn-link btn-link-inline" aria-label="Show activities" title="Show activities">
+                          <i class="oi oi-fw oi-lg btn-link text-dark" role="img" data-icon="schedule"/>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="d-flex ms-auto align-items-center">
+                      <div class="o_field_widget o_field_many2one_avatar_user me-1 o_field_many2one_avatar">
+                        <div>
+                          <div class="o-mail-Avatar o_avatar d-flex align-items-center p-0 o_m2o_avatar">
+                            <img class="rounded" width="24" height="24" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_required_modifier o_field_project_state_selection">
+                        <button class="btn btn-link d-flex p-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                          <div class="d-flex align-items-center" title="At Risk">
+                            <span class="o_status o_status_bubble mx-0 o_color_bubble_22"/>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                  <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                    <button class="btn btn-light o-no-caret px-1 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
+                      <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                  </div>
+                </article>
+                <article role="link" class="o_card_record d-flex o_kanban_record cursor-pointer o_kanban_record_colored o_kanban_color_0 flex-grow-1 flex-md-shrink-1 flex-shrink-0" tabindex="0">
+                  <div class="o_project_kanban_main o_record_main">
+                    <div class="d-flex align-items-baseline gap-1">
+                      <div class="o_field_widget o_field_project_is_favorite">
+                        <button class="o_favorite btn btn-link btn-link-inline">
+                          <i class="oi " data-icon="star" role="img" aria-label="Favorite"/>
+                        </button>
+                      </div>
+                      <span class="text-truncate d-block fs-4 fw-bold" title="Initiatives">
+                        <span>Initiatives</span>
+                      </span>
+                    </div>
+                    <div class="o_project_kanban_body min-w-0 pb-4 me-2">
+                      <div class="o_field_widget o_field_many2many_tags">
+                        <div class="d-flex flex-wrap gap-1"/>
+                      </div>
+                    </div>
+                  </div>
+                  <footer class="mt-auto pt-0">
+                    <div class="d-flex align-items-center">
+                      <div class="o_project_kanban_boxes d-flex align-items-baseline">
+                        <a class="o_project_kanban_box me-1 oe_kanban_action">
+                          <div>
+                            <span class="o_value">6</span>
+                            <span class="ms-1">Tasks</span>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="o_field_widget o_field_kanban_activity ms-2">
+                        <button class="o-mail-ActivityButton btn btn-link btn-link-inline" aria-label="Show activities" title="Show activities">
+                          <i class="oi oi-fw oi-lg btn-link text-dark" role="img" data-icon="schedule"/>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="d-flex ms-auto align-items-center">
+                      <div class="o_field_widget o_field_many2one_avatar_user me-1 o_field_many2one_avatar">
+                        <div>
+                          <div class="o-mail-Avatar o_avatar d-flex align-items-center p-0 o_m2o_avatar">
+                            <img class="rounded" width="24" height="24" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="o_field_widget o_required_modifier o_field_project_state_selection">
+                        <button class="btn btn-link d-flex p-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                          <div class="d-flex align-items-center" title="to_define">
+                            <span class="o_status o_status_bubble mx-0 "/>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </footer>
+                  <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                    <button class="btn btn-light o-no-caret px-1 o-dropdown dropdown-toggle dropdown" title="Dropdown menu" aria-expanded="false">
+                      <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                  </div>
+                </article>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+                <div class="o_kanban_record o_kanban_ghost flex-grow-1 flex-md-shrink-1 flex-shrink-0 my-0"/>
+              </div>
+            </main>
+          </div>
+        </div>
+    </template>
+
+</odoo>

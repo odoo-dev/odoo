@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      Material Symbols browser, rendered by the /designer_tools/icons route.
+
+      Search, outline/filled, size, copy. Nothing is listed here: the icons
+      come from /html_editor/icons_search, which matches the search tags
+      server-side (they never ship to the browser), and the size classes are
+      read off the compiled bundle rather than repeated — $icon-sizes in
+      web/static/src/webclient/icons.scss stays the only source of truth.
+
+      The font is Odoo's own compiled subset, not the full Google one. A
+      browser that renders every Material Symbol would show icons this build
+      does not ship, and would render a filled variant where the shipped font
+      has none — the two questions a designer opens this page to answer.
+
+      Chrome borrowed from /designer_tools through web.assets_designer_tools:
+      the two pages are one tool, so they share a body class and a header.
+
+      Development tool. Not linked from anywhere but the systray entry, and
+      the route 404s out of debug mode.
+    -->
+    <template id="designer_icons" name="Designer tools: icons">&lt;!DOCTYPE html&gt;<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Designer tools — icons</title>
+    <link id="css-light" rel="stylesheet" href="/web/assets/debug/web.assets_web.css"/>
+    <t t-call-assets="web.assets_designer_tools" t-js="false"/>
+</head>
+<body class="o_designer_tools o_designer_icons">
+
+<div id="shell">
+
+    <header>
+        <h1>Icons <span class="count" id="count"/></h1>
+
+        <div class="btn-group btn-group-sm" role="group" aria-label="Fill">
+            <button type="button" class="btn btn-secondary active" data-fill="0">Outline</button>
+            <button type="button" class="btn btn-secondary" data-fill="1">Filled</button>
+        </div>
+
+        <!-- A stepper rather than a select: the sizes are an ordered ramp, and
+             stepping through them shows the glyph actually grow. -->
+        <div class="btn-group btn-group-sm size-stepper" role="group" aria-label="Size">
+            <button type="button" class="btn btn-secondary" id="size-down" aria-label="Smaller">−</button>
+            <span class="btn btn-secondary disabled size-value" id="size-value">default</span>
+            <button type="button" class="btn btn-secondary" id="size-up" aria-label="Larger">+</button>
+        </div>
+
+        <button type="button" class="btn btn-secondary btn-sm" id="regenerate"
+                title="Drop the compiled asset bundles and reload, so the font and the list come from the current sources">
+            <i class="oi" data-icon="refresh" role="img"/> Regenerate
+        </button>
+
+        <p class="hint"><kbd>/</kbd> search · <kbd>Esc</kbd> clear</p>
+    </header>
+
+    <section id="controls">
+        <input id="search" type="search" class="form-control" autocomplete="off"
+               spellcheck="false" placeholder="Search by name or meaning — “cart”, “warning”, “shopping cart”…"
+               aria-label="Search icons"/>
+        <p class="note">
+            An icon is drawn by a ligature: the font renders a glyph for the text in
+            <code>data-icon</code>. Click a tile to copy its markup; hover one to copy or
+            download the SVG. The list is this database's compiled font, so what you see
+            here is what Odoo ships — a name absent from
+            <code>web/tooling/icons/icons_wishlist.txt</code> is not in it, and
+            <b>Filled</b> only changes the tiles whose glyph really differs.
+        </p>
+        <p id="status" aria-live="polite"/>
+    </section>
+
+    <!-- Filled once the first search answers; empty until then. -->
+    <div id="grid" role="list"/>
+
+</div>
+
+<div id="toast" role="status" aria-live="polite"/>
+
+<script type="text/javascript" src="/html_editor/static/src/designer/designer_icons.js"/>
+
+</body>
+</html>
+    </template>
+
+</odoo>

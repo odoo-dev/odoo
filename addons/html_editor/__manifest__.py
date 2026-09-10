@@ -12,6 +12,7 @@ This addon provides an extensible, maintainable editor.
     'depends': ['base', 'bus', 'web'],
     'data': [
         'security/ir.access.csv',
+        'views/designer_icons_templates.xml',
     ],
     'auto_install': True,
     'assets': {
@@ -32,7 +33,14 @@ This addon provides an extensible, maintainable editor.
             'html_editor/static/src/scss/base_style.scss',
             'html_editor/static/src/main/selection_placeholder_plugin.scss',
         ],
+        # Only the registry entry: the page script of /designer_tools/icons is
+        # loaded by URL from its template, and its stylesheet joins the
+        # designer tools bundle below.
+        'web.assets_designer_tools': [
+            'html_editor/static/src/designer/designer_icons.scss',
+        ],
         'web.assets_backend': [
+            'html_editor/static/src/designer/designer_items.js',
             ('include', 'html_editor.assets_editor'),
             'html_editor/static/src/backend/**/*',
             'html_editor/static/src/fields/**/*',

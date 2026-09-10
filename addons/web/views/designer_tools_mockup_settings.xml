@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      The settings screen that /designer_tools?preview=1&amp;screen=settings
+      dresses with the values being tried.
+
+      Lifted from a real Settings page and trimmed by the same rules as the other
+      mockups: no href navigates, images become an inline SVG so the page stays
+      self-contained, overlay containers and session-bound attributes dropped.
+    -->
+    <template id="designer_tools_mockup_settings" name="Designer tools mockup: Settings">
+<div class="o_action_manager">
+          <div class="o-settings-form-view o_field_highlight o_xxl_form_view h-100 o_form_view o_base_settings_view oe_form_configuration o_view_controller o_action">
+            <div class="o_form_view_container">
+              <div class="o_control_panel d-flex flex-column gap-3 px-3 pt-2 pb-3">
+                <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-2 gap-lg-3 flex-grow-1">
+                  <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100">
+                    <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none text-nowrap pe-1">
+                      <button type="button" class="btn btn-primary o_form_button_save"> Save </button>
+                      <button type="button" class="btn btn-secondary o_form_button_cancel"> Discard </button>
+                    </div>
+                    <div class="o_breadcrumb d-flex gap-1 text-truncate">
+                      <div class="o_last_breadcrumb_item active d-flex fs-4 min-w-0 align-items-center">
+                        <span class="min-w-0 fw-medium text-truncate">Settings</span>
+                      </div>
+                      <div class="o_control_panel_breadcrumbs_actions d-inline-flex d-print-none"/>
+                    </div>
+                    <div class="me-auto"/>
+                  </div>
+                  <div class="o_control_panel_actions d-empty-none d-flex align-items-center justify-content-start justify-content-lg-around order-2 order-lg-1 w-100 mw-100 w-lg-auto gap-1 h-lg-100">
+                    <div class="o_cp_searchview d-flex w-100" role="search">
+                      <div class="o_searchview form-control d-flex align-items-center py-1" role="search" aria-autocomplete="list">
+                        <i class="o_searchview_icon oi me-2" data-icon="search" role="img" aria-label="Search..." title="Search..."/>
+                        <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1">
+                          <input type="text" class="o_searchview_input o_input flex-grow-1 w-auto border-0" placeholder="Search..." role="searchbox"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap justify-content-end gap-1 gap-xl-3 order-1 order-lg-2 flex-grow-1 align-items-lg-center"/>
+                </div>
+              </div>
+              <main class="o_content">
+                <div class="o_form_renderer o_form_editable d-block">
+                  <div class="o_setting_container">
+                    <div class="position-sticky top-0 flex-grow-0 z-1">
+                      <div class="settings_tab h-100">
+                        <a class="tab rounded-end-3 selected" role="tab" data-key="general_settings"><span class="icon d-none d-md-block" style="background: none center center / contain no-repeat;"/> <span class="app_name">General Settings</span></a>
+                        <a class="tab rounded-end-3" role="tab" data-key="event"><span class="icon d-none d-md-block" style="background: none center center / contain no-repeat;"/> <span class="app_name">Events</span></a>
+                        <a class="tab rounded-end-3" role="tab" data-key="sale_management"><span class="icon d-none d-md-block" style="background: none center center / contain no-repeat;"/> <span class="app_name">Sales</span></a>
+                        <a class="tab rounded-end-3" role="tab" data-key="account"><span class="icon d-none d-md-block" style="background: none center center / contain no-repeat;"/> <span class="app_name">Invoicing</span></a>
+                        <a class="tab rounded-end-3" role="tab" data-key="hr"><span class="icon d-none d-md-block" style="background: none center center / contain no-repeat;"/> <span class="app_name">Employees</span></a>
+                      </div>
+                    </div>
+                    <div class="settings border border-bottom-0 rounded-4 rounded-bottom-0 mx-3">
+                      <div class="app_settings_block" string="General Settings" data-key="general_settings">
+                        <div id="invite_users">
+                          <h2>
+                            <span>Users</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container">
+                            <div class="o_setting_box col-12 col-lg-6" id="invite_users_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <div class="mt16">
+                                  <div class="o_widget o_widget_res_config_invite_users">
+                                    <div xml:space="preserve">
+                                      <p class="o_form_label">Invite New Users</p>
+                                      <div class="d-flex">
+                                        <input class="o_user_emails o_input mt8 text-truncate" type="text" placeholder="Enter an email"/>
+                                        <button class="btn btn-primary o_web_settings_invite flex-shrink-0">
+                                          <strong>Invite</strong>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="o_setting_box col-12 col-lg-6" id="active_user_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <div class="mt16">
+                                  <span class="oi oi-lg oi-filled" data-icon="group" aria-label="Number of active users"/>
+                                  <div name="active_user_count" class="o_field_widget o_readonly_modifier o_field_integer w-auto ps-3 fw-bold">
+                                    <span>1</span>
+                                  </div>
+                                  <span class="o_form_label"> Active User </span>
+                                  <div class="o_widget o_widget_documentation_link d-inline">
+                                    <a title="Documentation" target="_blank" class="o_doc_link me-2">
+                                      <i class="oi pe-1" data-icon="help"/>
+                                      <span/>
+                                    </a>
+                                  </div>
+                                  <br/>
+                                  <button class="btn btn-link o_web_settings_access_rights" name="67" type="action">
+                                    <i class="o_button_icon oi me-1" data-icon="east"/>
+                                    <span>Manage Users</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div id="languages">
+                          <h2>
+                            <span>Languages</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container">
+                            <div class="o_setting_box col-12 col-lg-6" id="languages_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <div class="mt16">
+                                  <div class="w-50">
+                                    <div name="language_count" class="o_field_widget o_readonly_modifier o_field_integer w-auto ps-1 fw-bold">
+                                      <span>1</span>
+                                    </div>
+                                    <span class="o_form_label"> Language </span>
+                                  </div>
+                                  <div class="mt8">
+                                    <button class="btn btn-link" name="41" type="action">
+                                      <i class="o_button_icon oi me-1" data-icon="east"/>
+                                      <span>Add Languages</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div id="companies">
+                          <h2>
+                            <span>Companies</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container">
+                            <div class="o_setting_box col-12 col-lg-6 o_searchable_setting" id="company_details_settings">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <div class="mt16">
+                                  <div name="company_name" class="o_field_widget o_readonly_modifier o_field_char fw-bold">
+                                    <span>My Company</span>
+                                  </div>
+                                  <br/>
+                                  <div name="company_informations" class="o_field_widget o_readonly_modifier o_field_text text-muted" style="width: 90%;">
+                                    <span>United States</span>
+                                  </div>
+                                  <br/>
+                                  <button class="btn btn-link" name="open_company" type="object">
+                                    <i class="o_button_icon oi me-1" data-icon="east"/>
+                                    <span>Update Info</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="o_setting_box col-12 col-lg-6 o_searchable_setting" id="companies_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <div class="mt16">
+                                  <div name="company_count" class="o_field_widget o_readonly_modifier o_field_integer w-auto ps-1 fw-bold">
+                                    <span>1</span>
+                                  </div>
+                                  <span class="o_form_label"> Company </span>
+                                  <br/>
+                                  <div class="mt8">
+                                    <button class="btn btn-link" name="51" type="action">
+                                      <i class="o_button_icon oi me-1" data-icon="east"/>
+                                      <span>Manage Companies</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="o_setting_box col-12 col-lg-6 o_searchable_setting" id="document_layout_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <span class="o_form_label">
+                                  <span>Document Layout</span>
+                                </span>
+                                <div class="text-muted">
+                                  <span>Choose the layout of your documents</span>
+                                </div>
+                                <div class="mt16">
+                                  <div class="content-group">
+                                    <button class="btn btn-link" name="311" type="action">
+                                      <i class="o_button_icon oi me-1" data-icon="east"/>
+                                      <span>Configure Document Layout</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="o_setting_box col-12 col-lg-6 o_searchable_setting" id="mail_templates_setting">
+                              <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                              <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                                <span class="o_form_label">
+                                  <span>Email Templates</span>
+                                </span>
+                                <div class="text-muted">
+                                  <span>Customize the look and feel of automated emails</span>
+                                </div>
+                                <div class="mt16">
+                                  <div class="w-50 row">
+                                    <span class="d-block w-75 py-2">Button Text</span>
+                                    <div name="email_primary_color" class="o_field_widget o_field_color d-block w-25 p-0 m-0">
+                                      <div class="o_field_color d-flex" style="background: rgb(255, 255, 255);">
+                                        <input class="w-100 h-100 opacity-0" type="color" value="#ffffff"/>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="w-50 row mt-1">
+                                    <span class="d-block w-75 py-2">Button Color</span>
+                                    <div name="email_secondary_color" class="o_field_widget o_field_color d-block w-25 p-0 m-0">
+                                      <div class="o_field_color d-flex" style="background: rgb(135, 90, 123);">
+                                        <input class="w-100 h-100 opacity-0" type="color" value="#875a7b"/>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button class="btn btn-link" name="open_mail_templates" type="object">
+                                    <i class="o_button_icon oi me-1" data-icon="east"/>
+                                    <span>Review All Templates</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <h2>
+                          <span>Units of Measure</span>
+                        </h2>
+                        <div class="row mt16 o_settings_container">
+                          <div class="o_setting_box col-12 col-lg-6 o_searchable_setting" id="weight_uom_setting">
+                            <div class="o_setting_left_pane" data-tooltip-delay="800" data-tooltip=""/>
+                            <div class="o_setting_right_pane" data-tooltip-delay="800" data-tooltip="">
+                              <label class="o_form_label" for="product_weight_in_lbs_0">
+                                <span>Weight</span>
+                              </label>
+                              <div class="text-muted">
+                                <span>Define your weight unit of measure</span>
+                              </div>
+                              <div class="mt16">
+                                <div name="product_weight_in_lbs" class="o_field_widget o_field_radio o_light_label">
+                                  <div role="radiogroup" class="o_vertical" aria-label="Weight unit of measure">
+                                    <div aria-atomic="true" class="form-check o_radio_item">
+                                      <input type="radio" class="form-check-input o_radio_input" name="radio_field_0" data-value="0" data-index="0" id="radio_field_0_0" checked="checked"/>
+                                      <label class="form-check-label o_form_label" for="radio_field_0_0">Kilograms (kg)</label>
+                                    </div>
+                                    <div aria-atomic="true" class="form-check o_radio_item">
+                                      <input type="radio" class="form-check-input o_radio_input" name="radio_field_0" data-value="1" data-index="1" id="radio_field_0_1"/>
+                                      <label class="form-check-label o_form_label" for="radio_field_0_1">Pounds (lb)</label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <h2>
+                          <span>Emails</span>
+                        </h2>
+                        <div class="row mt16 o_settings_container"/>
+                        <div id="discuss_setting">
+                          <h2>
+                            <span>Discuss</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container"/>
+                        </div>
+                        <div id="contacts_settings">
+                          <h2>
+                            <span>Contacts</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container"/>
+                          <div id="iap_portal">
+                            <div class="row mt16 o_settings_container iap_portal"/>
+                          </div>
+                        </div>
+                        <h2>
+                          <span>Permissions</span>
+                        </h2>
+                        <div class="row mt16 o_settings_container"/>
+                        <h2>
+                          <span>Integrations</span>
+                        </h2>
+                        <div class="row mt16 o_settings_container"/>
+                        <div class="o_widget o_widget_res_config_dev_tool">
+                          <div xml:space="preserve">
+                            <div id="developer_tool">
+                              <h2>
+                                <span>Developer Tools</span>
+                              </h2>
+                              <div class="row mt16 o_settings_container"/>
+                            </div>
+                          </div>
+                        </div>
+                        <div id="about">
+                          <h2>
+                            <span>About</span>
+                          </h2>
+                          <div class="row mt16 o_settings_container">
+                            <div class="o_widget o_widget_res_config_edition">
+                              <div xml:space="preserve"/>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+    </template>
+
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+      The navbar every mockup wears. Lifted from a real Project screen and
+      trimmed like the rest: nothing navigates except the toggle at the top
+      left, which goes back to the tool.
+    -->
+    <template id="designer_tools_mockup_navbar" name="Designer tools mockup: navbar">
+        <header class="o_navbar p-0 border-0">
+          <nav class="o_main_navbar d-print-none w-100" data-command-category="disabled">
+            <a class="o_menu_toggle o_menu_toggle_back border-0" href="/designer_tools" title="Back to designer tools" aria-label="Back to designer tools">
+              <svg xmlns="http://www.w3.org/2000/svg" class="o_menu_toggle_icon pe-none" width="14px" height="14px" viewbox="0 0 14 14">
+                <g fill="currentColor" id="o_menu_toggle_row_0">
+                  <rect width="3" height="3" x="0" y="0"/>
+                  <rect width="3" height="3" x="5" y="0"/>
+                  <rect width="3" height="3" x="10" y="0"/>
+                </g>
+                <g fill="currentColor" id="o_menu_toggle_row_1">
+                  <rect width="3" height="3" x="0" y="5"/>
+                  <rect width="3" height="3" x="5" y="5"/>
+                  <rect width="3" height="3" x="10" y="5"/>
+                </g>
+                <g fill="currentColor" id="o_menu_toggle_row_2">
+                  <rect width="3" height="3" x="0" y="10"/>
+                  <rect width="3" height="3" x="5" y="10"/>
+                  <rect width="3" height="3" x="10" y="10"/>
+                </g>
+              </svg>
+              <span class="o_menu_brand d-flex ms-1 pe-0">Project</span>
+            </a>
+            <div class="o_navbar_breadcrumbs d-contents"/>
+            <div class="o_menu_sections d-flex flex-grow-1 flex-shrink-1" role="menu">
+              <a class="o-dropdown-item dropdown-item o-navigable o_nav_entry" role="menuitem" tabindex="0" data-section="125">Projects</a>
+              <button class="fw-normal o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                <span data-section="127">Tasks</span>
+              </button>
+              <button class="fw-normal o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                <span data-section="130">Reporting</span>
+              </button>
+              <button class="fw-normal o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                <span data-section="133">Configuration</span>
+              </button>
+            </div>
+            <div class="o_menu_systray d-flex flex-shrink-0 ms-auto bg-inherit" role="menu">
+              <button class="o-mail-DiscussSystray-class o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                <i class="oi" data-icon="forum" role="img" aria-label="Messages"/>
+                <span class="o-mail-MessagingMenuInDropdown-counter badge rounded-pill">8</span>
+              </button>
+              <button aria-expanded="false" class="o-dropdown dropdown-toggle dropdown">
+                <i class="oi" data-icon="schedule" role="img" aria-label="Activities"/>
+                <span class="o-mail-ActivityMenu-counter badge rounded-pill">7</span>
+              </button>
+              <button title="Odoo Studio" aria-label="Odoo Studio" class="o_nav_entry d-none d-md-flex">
+                <i class="oi" data-icon="oi_studio" role="img"/>
+              </button>
+              <button class="o_switch_company_menu d-none d-md-flex o-dropdown dropdown-toggle dropdown" title="YourCompany" aria-expanded="false">
+                <i class="oi d-lg-none" data-icon="business"/>
+                <span class="oe_topbar_name d-none d-lg-block text-truncate">YourCompany</span>
+              </button>
+              <button class="o_user_menu d-none d-md-flex py-1 py-lg-0 o-dropdown dropdown-toggle dropdown" aria-expanded="false">
+                <img class="rounded" width="26" height="26" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3CclipPath id='a'%3E%3Ccircle cx='16' cy='16' r='16'/%3E%3C/clipPath%3E%3Ccircle cx='16' cy='16' r='16' fill='%23808080'/%3E%3Cg clip-path='url(%23a)' fill='%23c8c8c8'%3E%3Ccircle cx='16' cy='12' r='5'/%3E%3Cpath d='M4 32a12 12 0 0 1 24 0z'/%3E%3C/g%3E%3C/svg%3E"/>
+                <small class="oe_topbar_name d-none ms-2 text-start smaller lh-1 text-truncate" style="max-width: 200px">Mitchell Admin<mark class="d-block font-monospace text-truncate"><i class="oi oi-sm me-1" data-icon="database"/>masterDB3</mark></small>
+              </button>
+            </div>
+          </nav>
+        </header>
+    </template>
+
+</odoo>

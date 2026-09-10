@@ -1,0 +1,119 @@
+///
+/// Page chrome for /designer_tools/icons, on top of the shared chrome of
+/// web/static/src/webclient/designer_tools/designer_tools.scss.
+///
+/// Scoped under `body.o_designer_icons` for the same reason the other file is
+/// scoped: it joins web.assets_designer_tools, and bare `button` or `header`
+/// rules leaking out of a dev page is not a mistake worth being able to make.
+///
+/// Custom properties rather than SCSS variables, so the page follows whichever
+/// compiled bundle it has enabled instead of freezing on the palette this file
+/// was compiled against.
+///
+
+body.o_designer_icons {
+    header .count { font-size: .7rem; font-weight: 600; padding: .1rem .5rem; border-radius: 999px; color: var(--primary); background: var(--primary-bg-subtle); vertical-align: middle; }
+    header .btn-group { flex: 0 0 auto; }
+    // The value reads as a label, not as a third button.
+    .size-stepper .size-value { min-width: 5.5rem; font-variant-numeric: tabular-nums; pointer-events: none; opacity: 1; }
+
+    #controls { padding: 1rem 0 .5rem; background: var(--body-bg); }
+    #search { max-width: 34rem; color: var(--body-color); background: var(--secondary-bg); border-color: var(--border-color); }
+    .note { max-width: 78ch; margin: .75rem 0 0; font-size: .78rem; line-height: 1.55; }
+    .note code { background: var(--secondary-bg); border: 1px solid var(--border-color); padding: 0 .25rem; border-radius: .2rem; }
+    #status { margin: .5rem 0 0; font-size: .78rem; min-height: 1.2em; }
+    // A disagreement between the list and the font is a state to act on, not
+    // a note to skim past.
+    #status.stale { color: var(--danger-text-emphasis); font-weight: 600; }
+
+    header #regenerate { flex: 0 0 auto; display: inline-flex; align-items: center; gap: .3rem; }
+
+    // Listed by the server, absent from the font: the tile draws the name as
+    // letters instead of a glyph, so it is marked rather than left to look
+    // like a wide icon.
+    .cell.unresolved { outline: 1px dashed var(--danger); outline-offset: -1px; }
+    // The glyph draws nothing at all, so the tile would otherwise be an empty
+    // box: a warning sign takes its place.
+    .cell.unresolved .glyph::before { content: "warning"; font-family: var(--icon-font-family); color: var(--danger); }
+    .cell.unresolved .name { color: var(--danger-text-emphasis); }
+
+    // --cell-min follows the selected size class: at oi-10x a 7.5rem cell
+    // would clip the glyph it exists to show.
+    #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell-min, 6rem), 1fr)); gap: .25rem; padding-bottom: 3rem; }
+
+    .cell {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .6rem;
+        min-height: var(--cell-min, 6rem);
+        padding: .9rem .4rem .6rem;
+        border: 1px solid transparent;
+        border-radius: .4rem;
+        background: none;
+        color: var(--body-color);
+        cursor: pointer;
+        overflow: hidden;
+    }
+    .cell:hover, .cell:focus-visible { background: var(--secondary-bg); border-color: var(--border-color); }
+    .cell .name { font-size: .68rem; line-height: 1.3; text-align: center; color: var(--secondary-color); overflow-wrap: anywhere; }
+
+    // Asked for filled, has no filled shape in the font. Dimmed rather than
+    // hidden: it is still the icon you were looking for, just outline-only.
+    .cell.no-fill { opacity: .55; }
+    .cell.no-fill .name { font-style: italic; }
+    .cell.copied { border-color: var(--success); background: var(--success-bg-subtle); }
+
+    // Revealed on hover, but always present for keyboard and touch: a control
+    // that only exists under a pointer is a control some people never get.
+    .cell-action {
+        position: absolute;
+        bottom: .3rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        background: var(--body-bg);
+        color: var(--secondary-color);
+        opacity: 0;
+        transition: opacity .12s ease, color .12s ease, border-color .12s ease;
+    }
+    .cell-action.copy-svg { left: .3rem; }
+    .cell-action.download-svg { right: .3rem; }
+    .cell-action .oi { font-size: .8rem; }
+    .cell:hover .cell-action, .cell-action:focus-visible { opacity: 1; }
+    .cell-action:hover, .cell-action:focus-visible { color: var(--primary); border-color: var(--primary); }
+    @media (hover: none) {
+        .cell-action { opacity: 1; }
+    }
+
+    #toast {
+        position: fixed;
+        left: 50%;
+        bottom: 1.5rem;
+        transform: translateX(-50%) translateY(.75rem);
+        // unquote(): this Sass evaluates min() itself, whatever is inside,
+        // and refuses to compare rem with vw. Passing the whole thing as a
+        // string is what leaves the comparison to CSS.
+        max-width: unquote("min(46rem, 92vw)");
+        padding: .5rem 1rem;
+        border-radius: .4rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .78rem;
+        color: var(--body-bg);
+        background: var(--body-color);
+        opacity: 0;
+        pointer-events: none;
+        overflow-wrap: anywhere;
+        transition: opacity .15s ease, transform .15s ease;
+        z-index: 10;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.failed { color: #fff; background: var(--danger); }
+}
