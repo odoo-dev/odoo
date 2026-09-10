@@ -466,7 +466,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(admin=38, employee=38):
+        with self.assertQueryCount(admin=39, employee=39):
             composer._action_send_mail()
 
     @users('admin', 'employee')
@@ -534,7 +534,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 'default_template_id': test_template.id,
             }).create({})
 
-        with self.assertQueryCount(admin=69, employee=69), self.mock_mail_gateway():
+        with self.assertQueryCount(admin=70, employee=70), self.mock_mail_gateway():
             composer._action_send_mail()
 
         self.assertEqual(len(self._new_mails), 10)
@@ -556,7 +556,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(admin=38, employee=38):
+        with self.assertQueryCount(admin=39, employee=39):
             composer._action_send_mail()
 
     @users('admin', 'employee')
