@@ -238,3 +238,40 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
 
         self.assertEqual(avco_product.standard_price, 0)
         self.assertEqual(avco_product_2.standard_price, 0)
+
+    def test_resupply_dropship_bill_stock_valuation_anglosaxon(self):
+        """
+        Verify that the vendor bill for a resupply purchase of a dropshipped
+        component uses the stock valuation account on its invoice line.
+        """
+        self.product_b.write({
+            'route_ids': [Command.link(self.dropship_route.id)],
+            'categ_id': self.categ_avco_auto,
+            'seller_ids': [Command.create({
+                'partner_id': self.partner_b.id,
+                'price': 100,
+            })],
+        })
+        self.product_a.seller_ids = [Command.create({'partner_id': self.partner_a.id})]
+        self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': self.product_a.id,
+                'product_qty': 1.0,
+                'price_unit': 100,
+            })],
+        }).button_confirm()
+        resupply_po = self.env['purchase.order'].search([
+            ('product_id', '=', self.product_b.id),
+            ('partner_id', '=', self.partner_b.id),
+            ('dest_address_id', '=', self.partner_a.id),
+        ], limit=1)
+        resupply_po.button_confirm()
+        resupply_po.picking_ids.button_validate()
+        resupply_po.action_create_invoice()
+        self.assertRecordValues(resupply_po.invoice_ids.line_ids, [
+            {'account_name': 'Stock Valuation', 'debit': 100.0, 'credit': 0.0},
+            {'account_name': 'Tax Paid', 'debit': 15.0, 'credit': 0.0},
+            {'account_name': 'Account Payable (copy)', 'debit': 0.0, 'credit': 34.5},
+            {'account_name': 'Account Payable (copy)', 'debit': 0.0, 'credit': 80.5},
+        ])
