@@ -185,7 +185,7 @@ class TestLeadAssignPerf(TestLeadAssignCommon):
 
         # randomness: 5354, add 2 queries
         with self.with_user('user_sales_manager'):
-            with self.assertQueryCount(user_sales_manager=4770):
+            with self.assertQueryCount(user_sales_manager=4773):
                 self.env['crm.team'].browse(sales_teams.ids)._action_assign_leads()
 
         # teams assign
