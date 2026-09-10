@@ -379,7 +379,7 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
             'event_tz': 'UTC',
             'allday': True,
         }).recurrence_id
-        events = recurrence.calendar_event_ids
+        events = recurrence.calendar_event_ids.sorted('start_date')
         self.assertEqual(events[0].start_date, date(2019, 10, 22), "The first event has the initial start date")
         self.assertEqual(events[1].start_date, date(2019, 10, 29), "The start date of the second event is one week later")
 
