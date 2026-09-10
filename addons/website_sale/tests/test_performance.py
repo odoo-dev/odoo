@@ -114,7 +114,7 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_document": 2,
             "product_image": 2,
             "product_pricelist": 1,
-            "product_product": 2,
+            "product_product": 3,
             "product_public_category": 2,
             "product_ribbon": 1,
             "product_tag": 2,

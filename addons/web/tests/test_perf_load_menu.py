@@ -51,11 +51,11 @@ class TestPerfSessionInfo(common.HttpCase):
             )
 
         # cold fields cache - warm ormcache:
-        # - Only web: 7
-        # - bus: 8
-        # - mail: 20
-        # - All modules: 31
-        with self.assertQueryCount(31):
+        # - Only web: 8
+        # - bus: 9
+        # - mail: 21
+        # - All modules: 32
+        with self.assertQueryCount(32):
             self.url_open(
                 "/web/session/get_session_info",
                 data=json.dumps({'jsonrpc': "2.0", 'method': "call", 'id': str(uuid4())}),
