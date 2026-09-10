@@ -704,7 +704,7 @@ class MailingMailing(models.Model):
         batch_size = 1000
         base_domain = [
             ('mailing_id', 'in', self.ids),
-            ('state', '=', 'exception')
+            ('state', '=', 'exception'),
         ]
         domain = Domain(base_domain) & Domain(extra_domain or Domain.TRUE)
         failed_emails = self.env['mail.mail'].sudo().with_context(prefetch_fields=False).search(domain, limit=batch_size)
