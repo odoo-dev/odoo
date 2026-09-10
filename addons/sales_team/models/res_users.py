@@ -10,7 +10,10 @@ class ResUsers(models.Model):
         'crm.team', 'crm_team_member', 'user_id', 'crm_team_id', string='Sales Teams',
         check_company=True, copy=False, readonly=True,
         compute='_compute_crm_team_ids', search='_search_crm_team_ids')
-    crm_team_member_ids = fields.One2many('crm.team.member', 'user_id', string='Sales Team Members')
+    crm_team_member_ids = fields.One2many(
+        'crm.team.member', 'user_id', string='Sales Team Members',
+        domain=[('active', '=', True)],
+    )
     sale_team_id = fields.Many2one(
         'crm.team', string='User Sales Team', compute='_compute_sale_team_id',
         readonly=True, store=True,
