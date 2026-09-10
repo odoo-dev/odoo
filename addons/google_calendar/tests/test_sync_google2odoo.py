@@ -252,6 +252,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(event.user_id, user)
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_cancelled(self):
         """ Cancel event when the current user is the organizer """
@@ -303,6 +304,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(user_attendee.state, 'declined')
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_cancelled_with_portal_attendee(self):
         """Cancel an event with a portal attendee.
@@ -338,6 +340,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertFalse(one.exists())
         self.assertTrue(two.exists())
 
+    @users('organizer_user')
     @patch_api
     def test_private_extended_properties(self):
         google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
@@ -363,7 +366,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'summary': 'coucou',
             'start': {'date': str(event.start_date), 'dateTime': None},
             'end': {'date': str(event.stop_date + relativedelta(days=1)), 'dateTime': None},
-            'attendees': [{'email': 'odoobot@example.com', 'responseStatus': 'declined'}],
+            'attendees': [{'email': 'o.o@example.com', 'responseStatus': 'declined'}],
             'extendedProperties': {'private': {'%s_odoo_id' % self.env.cr.dbname: event.id}},
             'reminders': {'overrides': [{'method': 'popup', 'minutes': 20}], 'useDefault': False},
         })
@@ -450,6 +453,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertNotEqual(events.partner_ids, user.partner_id)
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_new_attendee_and_date_change_does_not_patch_deleted_events(self):
         """
@@ -957,6 +961,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(recurrence.event_tz, 'Pacific/Auckland', "The Google event Timezone should be saved on the recurrency")
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_recurrence_no_duplicate(self):
         values = [
@@ -1495,6 +1500,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(event.attendee_ids.state, 'declined')
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_attendees_same_event_both_share(self):
         google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
@@ -1523,8 +1529,10 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'location': '',
             'guestsCanModify': True,
             'organizer': {'email': 'c.c@example.com', 'self': False},
-            'attendees': [{'email': 'c.c@example.com', 'responseStatus': 'needsAction'},
-                          {'email': 'o.o@example.com', 'responseStatus': 'needsAction'}],
+            'attendees': [
+                {'email': 'c.c@example.com', 'responseStatus': 'needsAction'},
+                {'email': 'o.o@example.com', 'responseStatus': 'needsAction'},
+            ],
             'extendedProperties': {'shared': {'%s_odoo_id' % self.env.cr.dbname: event.id,
                                               '%s_owner_id' % self.env.cr.dbname: other_user.id}},
             'reminders': {'overrides': [{'method': 'popup', 'minutes': 20}], 'useDefault': False},
@@ -1653,25 +1661,27 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(attendee, ['declined', 'declined', 'declined'], "All events should be declined")
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_several_attendee_have_the_same_mail(self):
         """
         In google, One mail = One attendee but on Odoo, some partners could share the same mail
         This test checks that the deletion of such attendee has no harm: all attendee but the given mail are deleted.
         """
-        partner1 = self.env['res.partner'].create({
+        Partner = self.env['res.partner'].sudo()
+        partner1 = Partner.create({
             'name': 'joe',
             'email': 'dalton@example.com',
         })
-        partner2 = self.env['res.partner'].create({
+        partner2 = Partner.create({
             'name': 'william',
             'email': 'dalton@example.com',
         })
-        partner3 = self.env['res.partner'].create({
+        partner3 = Partner.create({
             'name': 'jack',
             'email': 'dalton@example.com',
         })
-        partner4 = self.env['res.partner'].create({
+        partner4 = Partner.create({
             'name': 'averell',
             'email': 'dalton@example.com',
         })
@@ -1697,12 +1707,12 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         recurrence._apply_recurrence()
         recurrence.calendar_event_ids.attendee_ids.state = 'accepted'
         mails = sorted(set(event.attendee_ids.mapped('email')))
-        self.assertEqual(mails, ['dalton@example.com', 'odoobot@example.com'])
+        self.assertEqual(mails, ['dalton@example.com', 'o.o@example.com'])
         gevent = GoogleEvent([{
             'id': google_id,
             'description': 'coucou',
             "updated": self.now,
-            'organizer': {'email': 'odoobot@example.com', 'self': True},
+            'organizer': {'email': 'o.o@example.com', 'self': True},
             'summary': False,
             'visibility': 'public',
             'attendees': [],
@@ -1723,7 +1733,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.sync(gevent)
         # User attendee removed but gevent owner might be added after synch.
         mails = event.attendee_ids.mapped('email')
-        self.assertEqual(mails, ['odoobot@example.com'])
+        self.assertEqual(mails, ['o.o@example.com'])
 
         self.assertGoogleAPINotCalled()
 
@@ -1800,6 +1810,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertEqual(event.videocall_location, 'https://meet.google.com/odoo-random-test')
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_event_with_local_videocall(self):
         """This makes sure local video call is not discarded if google's meeting url is False"""
@@ -1951,10 +1962,11 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.assertTrue(all([a.partner_id.type != 'private' for a in private_attendees]))
         self.assertGoogleAPINotCalled()
 
+    @users('organizer_user')
     @patch_api
     def test_alias_email_sync_recurrence(self):
-        alias_model = self.env['ir.model'].search([('model', '=', 'calendar.event')])
-        mail_alias = self.env['mail.alias'].create({'alias_name': 'sale', 'alias_model_id': alias_model.id})
+        alias_model = self.env['ir.model'].sudo().search([('model', '=', 'calendar.event')])
+        mail_alias = self.env['mail.alias'].sudo().create({'alias_name': 'sale', 'alias_model_id': alias_model.id})
 
         google_id = 'oj44nep1ldf8a3ll02uip0c9aa'
         base_event = self.env['calendar.event'].create({
@@ -1992,8 +2004,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 2)
         # Only the event organizer must remain as attendee.
-        self.assertEqual(len(events.mapped('attendee_ids')), 1)
-        self.assertEqual(events.mapped('attendee_ids')[0].partner_id, self.env.user.partner_id)
+        attendees = events.attendee_ids.partner_id
+        self.assertEqual(attendees, self.env.user.partner_id)
         self.assertGoogleAPINotCalled()
 
     @patch_api

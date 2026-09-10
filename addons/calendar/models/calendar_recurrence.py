@@ -98,7 +98,7 @@ class CalendarRecurrence(models.Model):
     base_event_id = fields.Many2one(
         'calendar.event', ondelete='set null', index='btree', copy=False)  # store=False ?
     calendar_event_ids = fields.One2many('calendar.event', 'recurrence_id')
-    calendar_id = fields.Many2one(related='base_event_id.calendar_id', string='Calendar')
+    calendar_id = fields.Many2one(related='base_event_id.calendar_id', string='Calendar', domain=[('active', '=', True)])
     event_tz = fields.Selection(
         _tz_get, string='Timezone',
         default=lambda self: self.env.context.get('tz') or self.env.user.tz)
@@ -468,10 +468,8 @@ class CalendarRecurrence(models.Model):
         return start
 
     def _get_first_event(self, include_outliers=False):
-        if not self.calendar_event_ids:
-            return self.env['calendar.event']
         events = self.calendar_event_ids.sorted('start')
-        if not include_outliers:
+        if events and not include_outliers:
             events -= self._get_outliers()
         return events[:1]
 
