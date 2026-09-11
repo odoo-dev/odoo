@@ -442,6 +442,7 @@ class HrLeave(models.Model):
         check_warning_leaves = self.filtered_domain([
             ('state', 'not in', ('refuse', 'cancel')),
             ('work_entry_type_id.allow_request_on_top', '=', False),
+            ('work_entry_type_id.time_off_selectable', '=', True),
         ])
         (self - check_warning_leaves).dashboard_warning_message = False
         if not check_warning_leaves:
