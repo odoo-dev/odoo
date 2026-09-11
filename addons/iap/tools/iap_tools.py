@@ -5,9 +5,11 @@ import logging
 import requests
 import uuid
 
-from odoo import modules, _
+from odoo import modules, _, release, tools
 from odoo.exceptions import UserError
 from odoo.tools import email_normalize, exception_to_unicode
+from odoo.tools.misc import get_lang
+from odoo.tools.urls import urljoin
 
 _logger = logging.getLogger(__name__)
 
@@ -162,3 +164,91 @@ def _iap_jsonrpc(url, method, params, timeout):
     except requests.RequestException as e:
         _logger.warning("iap jsonrpc %s failed, %s: %s", url, e.__class__.__name__, exception_to_unicode(e))
         raise
+
+def iap_request(env, endpoint, route, method=None, json=None, params=None, auth=None, headers=None, timeout=None):
+    if tools.config['test_enable'] or modules.module.current_test:
+        raise UserError(env._("Unavailable during tests."))
+
+    full_url = urljoin(endpoint, route)
+    method = (method or 'post').lower()
+    timeout = timeout or (2, 30)
+    json = json or {}
+    payload = {
+        "dbuuid": env['ir.config_parameter'].sudo().get_str('database.uuid'),
+        "db_version": release.version,
+        "lang": get_lang(env).code,
+        "request_uuid": uuid.uuid4().hex,
+        **json,
+    }
+
+    request_kwargs = {
+        'method': method,
+        'url': full_url,
+        'auth': auth,
+        'headers': headers,
+        'timeout': timeout,
+    }
+    if method == 'get':
+        request_kwargs['params'] = {**payload, **(params or {})}
+    else:
+        request_kwargs['json'] = payload
+        request_kwargs['params'] = params
+
+    try:
+        response = requests.request(**request_kwargs)
+        response.raise_for_status()
+    except requests.Timeout:
+        _logger.exception("IAP request timed out: %s", full_url)
+        raise UserError(env._("IAP request timed out"))
+    except requests.ConnectionError:
+        _logger.exception("IAP failed to respond: %s", full_url)
+        raise UserError(env._("IAP failed to respond"))
+    except requests.HTTPError as e:
+        _logger.exception(
+            "IAP request failed. Code: %s, Body: %s",
+            e.response.status_code, e.response.text[:1000],
+        )
+        if e.response.status_code == 400:
+            raise UserError(env._("Bad Request."))
+        elif e.response.status_code in (401, 403):
+            raise UserError(env._("Unauthorized"))
+        elif e.response.status_code == 404:
+            raise UserError(env._("Not Found"))
+        raise UserError(env._("IAP returned an error"))
+    except requests.RequestException:
+        _logger.exception("IAP request failed: %s", full_url)
+        raise UserError(env._("IAP failed to respond"))
+
+    try:
+        response_json = response.json()
+    except requests.exceptions.JSONDecodeError:
+        _logger.exception("IAP returned invalid JSON: %s", full_url)
+        raise UserError(env._("IAP failed to respond"))
+
+    deprecated = response_json.get('deprecated')
+    if deprecated == "soft":
+        _logger.info("IAP: route soft deprecated: %s", full_url)
+        env['bus.bus']._sendone(
+            env.user,
+            'simple_notification',
+            {
+                'type': 'warning',
+                'message': env._("This service will be deprecated soon. Please update Odoo as soon as possible."),
+            },
+        )
+    elif deprecated == "hard":
+        _logger.warning("IAP: route hard deprecated: %s", full_url)
+        env['bus.bus']._sendone(
+            env.user,
+            'simple_notification',
+            {
+                'type': 'danger',
+                'message': env._("This service is deprecated. Please update Odoo as soon as possible."),
+                'sticky': True,
+            },
+        )
+
+    if error := response_json.get("error"):
+        raise UserError(error)  # Translated by IAP
+
+    return response_json

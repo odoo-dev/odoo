@@ -32,9 +32,7 @@ class IapAccount(models.Model):
     service_locked = fields.Boolean(default=False)  # If True, the service can't be edited anymore
     description = fields.Char(related='service_id.description')
     account_token = fields.Char(
-        default=lambda s: uuid.uuid4().hex,
         help="Account token is your authentication key for this service. Do not share it.",
-        size=43,
         copy=False,
         groups="base.group_system",
     )
@@ -197,6 +195,13 @@ class IapAccount(models.Model):
                 # During testing, we don't want to commit the creation of a new IAP account to the database
                 return self.sudo().create({'service_id': service.id})
 
+            result = iap_tools.iap_request(
+                env=self.env,
+                endpoint=iap_tools.iap_get_endpoint(self.env),
+                route='/iap/2/create-account',
+                json={"service_name": service_name}
+            )
+
             with self.pool.cursor() as cr:
                 # Since the account did not exist yet, we will encounter a NoCreditError,
                 # which is going to rollback the database and undo the account creation,
@@ -209,7 +214,10 @@ class IapAccount(models.Model):
                 if not account:
                     if not force_create:
                         return account
-                    account = IapAccount.create({'service_id': service.id})
+                    account = IapAccount.create({
+                        'service_id': service.id,
+                        'account_token': f"{result.get('identifier')}+{result.get('secret')}"
+                    })
                 # fetch 'account_token' into cache with this cursor,
                 # as self's cursor cannot see this account
                 account_token = account.sudo().account_token
