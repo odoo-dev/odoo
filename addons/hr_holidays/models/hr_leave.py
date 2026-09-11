@@ -2306,6 +2306,7 @@ class HrLeave(models.Model):
         employee = self.env['hr.employee'].browse(employee_id) if employee_id else self.env.user.employee_id
         return employee.sudo(False)._get_unusual_days(date_from, date_to)
 
+    @api.model
     def _to_utc(self, date, hour, resource):
         # float_to_time carries the rounded minutes itself, but stops at 24h
         holiday_tz = ZoneInfo(resource.tz) if resource.tz else self.env.tz
