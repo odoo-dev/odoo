@@ -6,8 +6,25 @@
         z-index: var(--mail-ChatWindow-mobileZindex, $zindex-sticky - 2) !important;
     }
     &:not(.o-mobile) {
-        --border-opacity: var(--mail-ChatWindow-desktopBorderOpacity, .15);
-        height: Min(95vh, $o-mail-ChatWindow-width * 15 / 9)
+        height: Min(95vh, $o-mail-ChatWindow-width * 15 / 9);
+
+        // Adaptative border using backdrop-filter: this way, the contrast is good on
+        // whatever background (e.g. embedded live chat).
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            padding: 1px;
+            border-radius: $border-radius-xl;
+            box-sizing: border-box;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            // Blur first to avoid picking up insignifican details.
+            backdrop-filter: blur(6px) grayscale(1) invert(65%);
+            opacity: .3;
+            pointer-events: none;
+        }
     }
     outline: none;
 
@@ -44,7 +61,24 @@
 
 .o-mail-ChatWindow-header {
     --o-btn-circle-height: 0;
-    --border-opacity: var(--mail-ChatWindow-headerBorderOpacity, .15);
+    position: relative;
+
+    // Same adaptive-border logic as the window's own ring (see
+    // .o-mail-ChatWindow::after above): a fixed border-color can vanish or
+    // clash depending on what the header's background ends up being, so
+    // this samples what's actually behind the header and leans it toward
+    // the opposite end of the lightness scale instead.
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        backdrop-filter: blur(6px) grayscale(1) invert(65%);
+        opacity: .3;
+        pointer-events: none;
+    }
 
     .o-mail-ActionList-group {
         gap: map-get($spacers, 3);

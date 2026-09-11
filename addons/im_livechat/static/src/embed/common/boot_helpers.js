@@ -1,4 +1,17 @@
+import { lightenColor } from "@web/core/colors/colors";
 import { url } from "@web/core/utils/urls";
+import { session } from "@web/session";
+
+import {
+    getContrastColor,
+    getNormalizedColor,
+    getReadableColor,
+} from "@im_livechat/embed/common/color_utils";
+
+// Must match livechat_theme_colors.scss's --o-bubble-bg-ratio: the bubble background is
+// diluted toward white by this much, so the text color picked against it needs to be
+// computed against that same color.
+const BUBBLE_BG_DILUTION = 0.65;
 
 async function loadFont(name, url, targetDocument) {
     await targetDocument.fonts.ready;
@@ -55,6 +68,43 @@ export function makeRoot(target) {
     root.style.zIndex = "calc(9e999)";
     root.style.position = "relative";
     root.style.display = "block";
+    const options = session.livechatData?.options ?? {};
+    for (const [name, value] of [
+        ["--o-mail-livechat-primary", options.primary_color],
+        ["--o-mail-livechat-primary-text", options.primary_text_color],
+        ["--o-mail-livechat-secondary", options.secondary_color],
+        ["--o-mail-livechat-secondary-text", options.secondary_text_color],
+        [
+            "--o-mail-livechat-primary-bubble-text",
+            options.primary_color &&
+                getContrastColor(lightenColor(options.primary_color, BUBBLE_BG_DILUTION)),
+        ],
+        [
+            "--o-mail-livechat-secondary-bubble-text",
+            options.secondary_color &&
+                getContrastColor(lightenColor(options.secondary_color, BUBBLE_BG_DILUTION)),
+        ],
+        [
+            "--o-mail-livechat-primary-readable",
+            options.primary_color && getReadableColor(options.primary_color),
+        ],
+        [
+            "--o-mail-livechat-secondary-readable",
+            options.secondary_color && getReadableColor(options.secondary_color),
+        ],
+        [
+            "--o-mail-livechat-primary-border",
+            options.primary_color && getNormalizedColor(options.primary_color, 0.7),
+        ],
+        [
+            "--o-mail-livechat-secondary-border",
+            options.secondary_color && getNormalizedColor(options.secondary_color, 0.7),
+        ],
+    ]) {
+        if (value) {
+            root.style.setProperty(name, value);
+        }
+    }
     target.appendChild(root);
     return root;
 }

@@ -1,0 +1,87 @@
+// Every override that makes the embed's UI follow the livechat channel's configured
+// colors (see `im_livechat.channel`'s primary/secondary color fields) lives here.
+// Components use standard Bootstrap variant classes (btn-primary, btn-outline-
+// secondary, ...) to opt into this - nothing here needs to know they exist.
+
+// Any standard Bootstrap button variant, filled or outline, follows the
+// channel's primary or secondary color - a new component doesn't need a
+// selector added here, it just needs to use one of these classes like
+// anywhere else in Odoo.
+@mixin o-livechat-filled-btn-colors($role) {
+    --btn-color: var(--o-mail-livechat-#{$role}-text, var(--btn-color));
+    --btn-bg: var(--o-mail-livechat-#{$role}, var(--btn-bg));
+    --btn-border-color: var(--o-mail-livechat-#{$role}, var(--btn-border-color));
+    --btn-hover-bg: var(--o-mail-livechat-#{$role}, var(--btn-hover-bg));
+    --btn-hover-border-color: var(--o-mail-livechat-#{$role}, var(--btn-hover-border-color));
+    --btn-active-bg: var(--o-mail-livechat-#{$role}, var(--btn-active-bg));
+    --btn-active-border-color: var(--o-mail-livechat-#{$role}, var(--btn-active-border-color));
+}
+
+@mixin o-livechat-outline-btn-colors($role) {
+    // Text/border on a plain surface, not paired with a fill, so it uses the
+    // -readable variant (darkened if the configured color is too light to
+    // read on white) rather than the raw color used for filled buttons.
+    --btn-color: var(--o-mail-livechat-#{$role}-readable, var(--btn-color));
+    --btn-border-color: var(--o-mail-livechat-#{$role}-readable, var(--btn-border-color));
+    --btn-hover-color: var(--o-mail-livechat-#{$role}-text, var(--btn-hover-color));
+    --btn-hover-bg: var(--o-mail-livechat-#{$role}, var(--btn-hover-bg));
+    --btn-hover-border-color: var(--o-mail-livechat-#{$role}, var(--btn-hover-border-color));
+    --btn-active-color: var(--o-mail-livechat-#{$role}-text, var(--btn-active-color));
+    --btn-active-bg: var(--o-mail-livechat-#{$role}, var(--btn-active-bg));
+    --btn-active-border-color: var(--o-mail-livechat-#{$role}, var(--btn-active-border-color));
+}
+
+@each $variant in (primary, secondary) {
+    .btn-#{$variant} {
+        @include o-livechat-filled-btn-colors($variant);
+    }
+
+    .btn-outline-#{$variant} {
+        @include o-livechat-outline-btn-colors($variant);
+    }
+}
+
+// btn-link has no fill/border by design, so it needs its text color set
+// explicitly - it isn't covered by the variant rules above. Deduced from the
+// primary color, same as the rest of the "call to action" surfaces.
+.btn-link {
+    color: var(--o-mail-livechat-primary-readable, inherit);
+}
+
+@each $class, $variant in (o-green: primary, o-blue: secondary) {
+
+    .o-mail-Message-bubble.#{$class},
+    .o-mail-Message-bubbleTail.#{$class} {
+        --o-bubble-color-base: var(--o-mail-livechat-#{$variant}, var(--o-bubble-color-base));
+        --o-bubble-bg-ratio: 65%;
+        // -border is normalized (boot_helpers.js) to a fixed luminance
+        // regardless of the base color, unlike a plain dilution ratio which
+        // stays too dark for an already-dark base or too pale for a light one.
+        --o-bubble-border-color: var(--o-mail-livechat-#{$variant}-border, var(--o-bubble-border-color));
+    }
+
+    // Explicit, not just "let it inherit": the bubble sits inside a chat
+    // window whose header is already colored (light text on a dark bg), so
+    // without an explicit override that context can leak in here too.
+    // -bubble-text is computed (boot_helpers.js) against the diluted
+    // background above, not *-text-color which is tuned for the raw
+    // saturated color instead - falls back to the page's normal dark text.
+    .o-discuss-text-body:has(> .o-mail-Message-bubble.#{$class}) {
+        color: var(--o-mail-livechat-#{$variant}-bubble-text, #{$body-color}) !important;
+    }
+}
+
+// @mentions
+a.o-discuss-mention,
+a.o_mail_redirect,
+a.o_channel_redirect,
+a.o_message_redirect_transformed {
+    color: var(--o-mail-livechat-primary-readable, inherit) !important;
+    background-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 15%, transparent);
+    outline-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 25%, transparent);
+
+    &:hover,
+    &:active {
+        background-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 25%, transparent);
+    }
+}

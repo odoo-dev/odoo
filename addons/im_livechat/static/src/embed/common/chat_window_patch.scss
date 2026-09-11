@@ -4,11 +4,14 @@
     }
 }
 
-.o-mail-ChatWindow-header .o-mail-ActionList {
-    button {
-        --btn-color: var(--o-mail-livechat-btn-color);
-        --btn-hover-color: var(--o-mail-livechat-btn-color);
-        --btn-active-color: var(--o-mail-livechat-btn-color);
+.o-mail-ChatWindow-header {
+    color: var(--o-mail-livechat-primary-text, inherit);
+    background-color: var(--o-mail-livechat-primary, inherit) !important;
+
+    .o-mail-ActionList button {
+        --btn-color: var(--o-mail-livechat-primary-text);
+        --btn-hover-color: var(--o-mail-livechat-primary-text);
+        --btn-active-color: var(--o-mail-livechat-primary-text);
 
         &:not(:hover, &:focus-visible, &:active) {
             --o-mail-ActionList-Button-opacity: 1;

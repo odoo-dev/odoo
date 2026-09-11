@@ -55,17 +55,31 @@ $o-bubble-colors: (
 // Sets the CSS custom properties of bubbleColor. These are consumed by
 // specific component that wants the bubbleColor tint with the color
 // registered for $type in $o-bubble-colors.
+//
+// --o-bubble-bg/--o-bubble-border-color are derived from --o-bubble-color-base
+// at runtime (via color-mix(), not baked in at compile time) so any consumer
+// can retint a bubble by overriding just that one variable, on top of getting
+// this mixin's tint/darken treatment for free - see im_livechat's
+// livechat_theme_colors.scss for an example.
 @mixin o-bubble-color-vars($type) {
     $_color: map-get($o-bubble-colors, $type);
-    $_border-base: mix($_color, $body-color, 75%);
     // The orange bubble marks an important message: given it more tint/contrast
     // than the other colors makes it stand out in the conversation at a glance.
     $_bg-ratio: if($type == 'o-orange', 80%, 90%);
     $_border-ratio: if($type == 'o-orange', 65%, 80%);
-    --o-bubble-bg: #{mix($o-view-background-color, $_color, $_bg-ratio)};
-    --o-bubble-bg-muted: #{$o-view-background-color};
-    --o-bubble-border-color: #{mix($o-view-background-color, $_border-base, $_border-ratio)};
     --o-bubble-color-base: #{$_color};
+    // How much of the background tint is view-background vs. the base color -
+    // exposed as its own variable (not just baked into --o-bubble-bg) so a
+    // consumer overriding --o-bubble-color-base with an arbitrary color can
+    // also adjust how strongly it should show through.
+    --o-bubble-bg-ratio: #{$_bg-ratio};
+    --o-bubble-bg-muted: #{$o-view-background-color};
+    --o-bubble-bg: color-mix(in srgb, #{$o-view-background-color} var(--o-bubble-bg-ratio), var(--o-bubble-color-base));
+    --o-bubble-border-color: color-mix(
+        in srgb,
+        #{$o-view-background-color} #{$_border-ratio},
+        color-mix(in srgb, var(--o-bubble-color-base) 75%, #{$body-color})
+    );
 }
 
 .o-discuss-dropdownMenu {

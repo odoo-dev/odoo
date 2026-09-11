@@ -14,6 +14,10 @@ from odoo.addons.mail.tools.discuss import Store
 BUFFER_TIME = 120  # Time in seconds between two sessions assigned to the same operator. Not enforced if the operator is the best suited.
 
 
+def _default_color(color_name):
+    return lambda self: self._get_default_colors()[color_name]
+
+
 class Im_LivechatChannel(models.Model):
     """ Livechat Channel
         Define a communication channel, which can be accessed with 'script_external' (script tag to put on
@@ -38,10 +42,14 @@ class Im_LivechatChannel(models.Model):
     button_text = fields.Char('Text of the Button', default=_default_button_text, translate=True)
     default_message = fields.Char('Welcome Message', default=_default_default_message,
         help="This is an automated 'welcome' message that your visitor will see when they initiate a new conversation.", translate=True)
-    header_background_color = fields.Char(default="#875A7B", help="Default background color of the channel header once open")
-    title_color = fields.Char(default="#FFFFFF", help="Default title color of the channel once open")
-    button_background_color = fields.Char(default="#875A7B", help="Default background color of the Livechat button")
-    button_text_color = fields.Char(default="#FFFFFF", help="Default text color of the Livechat button")
+    primary_color = fields.Char(default=_default_color('primary_color'),
+        help="Main brand color: window header, agent message bubbles, and the Livechat button.")
+    primary_text_color = fields.Char(default=_default_color('primary_text_color'),
+        help="Text color to use on top of the primary color.")
+    secondary_color = fields.Char(default=_default_color('secondary_color'),
+        help="Color of the visitor's message bubbles.")
+    secondary_text_color = fields.Char(default=_default_color('secondary_text_color'),
+        help="Text color to use on top of the secondary color.")
     max_sessions_mode = fields.Selection(
         [("unlimited", "Unlimited"), ("limited", "Limited")],
         default="unlimited",
@@ -600,14 +608,25 @@ class Im_LivechatChannel(models.Model):
                 return self._get_less_active_operator(operator_statuses, operators)
         return self._get_less_active_operator(operator_statuses, users)
 
+    def _get_default_colors(self):
+        return {
+            'primary_color': '#71639E',
+            'primary_text_color': '#FFFFFF',
+            'secondary_color': '#4EA7F2',
+            'secondary_text_color': '#495057',
+        }
+
+    def action_reset_colors(self):
+        self.write(self._get_default_colors())
+
     def _get_channel_infos(self):
         self.ensure_one()
 
         return {
-            'header_background_color': self.header_background_color,
-            'button_background_color': self.button_background_color,
-            'title_color': self.title_color,
-            'button_text_color': self.button_text_color,
+            'primary_color': self.primary_color,
+            'primary_text_color': self.primary_text_color,
+            'secondary_color': self.secondary_color,
+            'secondary_text_color': self.secondary_text_color,
             'button_text': self.button_text,
             'default_message': self.default_message,
             "channel_name": self.name,

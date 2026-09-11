@@ -3,12 +3,14 @@ import { Message } from "@mail/core/common/message";
 import { useProps, t } from "@odoo/owl";
 
 import { patch } from "@web/core/utils/patch";
+import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 
 patch(Message.prototype, {
     setup() {
         super.setup();
         this.livechatProps = useProps({ isTypingMessage: t.boolean().optional() });
+        this.livechatService = useService("im_livechat.livechat");
         this.url = url;
     },
 

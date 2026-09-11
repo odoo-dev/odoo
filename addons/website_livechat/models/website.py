@@ -10,6 +10,14 @@ class Website(models.Model):
 
     channel_id = fields.Many2one('im_livechat.channel', string='Website Live Chat Channel')
 
+    def write(self, vals):
+        result = super().write(vals)
+        if 'channel_id' in vals:
+            for website in self:
+                if website.channel_id:
+                    website.channel_id.sync_colors_from_website()
+        return result
+
     @add_guest_to_context
     def _get_livechat_channel_info(self):
         """ Get the livechat info dict (button text, channel name, ...) for the livechat channel of

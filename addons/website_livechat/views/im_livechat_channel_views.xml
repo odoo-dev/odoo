@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_livechat_channel_view_form_website_theme_sync" model="ir.ui.view">
+        <field name="name">im_livechat.channel.form.website.theme.sync</field>
+        <field name="model">im_livechat.channel</field>
+        <field name="inherit_id" ref="im_livechat.im_livechat_channel_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="js_class">website_livechat_channel_form</attribute>
+            </xpath>
+            <xpath expr="//div[@name='design_theme_sync']" position="before">
+                <field name="website_theme_sync_url" invisible="1"/>
+                <field name="theme_colors_synced" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='design_theme_sync']" position="attributes">
+                <attribute name="invisible">website_theme_sync_url</attribute>
+            </xpath>
+            <xpath expr="//page[@name='design']/group" position="after">
+                <widget name="get_website_colors_button" invisible="not website_theme_sync_url or theme_colors_synced"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

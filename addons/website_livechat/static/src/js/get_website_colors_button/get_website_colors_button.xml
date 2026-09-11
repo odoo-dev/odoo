@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="website_livechat.GetWebsiteColorsButton">
+        <button class="btn btn-link p-0 oe_edit_only" t-on-click="this.onGetWebsiteColorsClick">Restore website styles</button>
+    </t>
+
+</templates>
