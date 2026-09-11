@@ -430,7 +430,7 @@ class CalendarEvent(models.Model):
             existing_attendees = self.env['calendar.attendee'].search([
                 ('event_id', '=', microsoft_event.odoo_id(self.env)),
                 ('partner_id.email_normalized', 'in', emails)])
-        elif self.env.user.partner_id.email_normalized not in emails:
+        elif self.env.user.partner_id.email_normalized not in emails and self.env.user.partner_id.active:
             commands_attendee += [(0, 0, {'state': 'accepted', 'partner_id': self.env.user.partner_id.id})]
             commands_partner += [(4, self.env.user.partner_id.id)]
         partners = self.env['mail.thread'].with_context(
