@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_bank_form_inherit_account" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.inherit.l10n_ph</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="account_qr_code_emv.view_partner_bank_form_inherit_account"/>
+        <field name="arch" type="xml">
+            <field name="include_reference" position="after">
+                <field name="l10n_ph_qrph_api_key" invisible="country_code != 'PH'"/>
+                <field name="l10n_ph_qrph_public_key" invisible="country_code != 'PH'"/>
+            </field>
+        </field>
+    </record>
+</odoo>

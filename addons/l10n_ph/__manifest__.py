@@ -10,6 +10,7 @@
     'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/philippines.html',
     'depends': [
         'account',
+        'account_qr_code_emv',
         'l10n_account_withholding_tax',
     ],
     'auto_install': ['account'],
@@ -18,6 +19,7 @@
         'data/menuitem_data.xml',
         'views/res_config_settings_views.xml',
         'views/account_tax_views.xml',
+        'views/res_bank_views.xml',
         'views/res_company_views.xml',
         'views/res_partner_views.xml',
         'views/report_disbursement_voucher_template.xml',
