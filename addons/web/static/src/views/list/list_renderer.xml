@@ -108,7 +108,7 @@
                 <tbody class="ui-sortable">
                     <t t-call="{{ this.constructor.rowsTemplate }}" list="this.props.list"/>
                 </tbody>
-                <tfoot t-on-click="() => this.props.list.leaveEditMode()" class="o_list_footer cursor-default" t-att-class="{o_sample_data_disabled: this.props.list.model.useSampleModel}">
+                <tfoot t-if="this.displayFooter" t-on-click="() => this.props.list.leaveEditMode()" class="o_list_footer cursor-default" t-att-class="{o_sample_data_disabled: this.props.list.model.useSampleModel}">
                     <tr>
                         <t t-set="groupNameCellColspan" t-value="this.getGroupNameCellColSpan()"/>
                         <td t-if="groupNameCellColspan > 0" t-att-colspan="groupNameCellColspan">

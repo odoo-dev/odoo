@@ -5168,7 +5168,7 @@ test(`aggregates are computed correctly on desktop`, async () => {
     await contains(`.o_unselect_all`).click();
     await toggleSearchBarMenu();
     await toggleMenuItem("My Filter");
-    expect(queryAllTexts(`tfoot td`)).toEqual([""]);
+    expect(`tfoot`).toHaveCount(0);
 });
 
 test.tags("mobile");
@@ -5209,7 +5209,7 @@ test(`aggregates are computed correctly on mobile`, async () => {
     // Let's update the view to dislay NO records
     await toggleSearchBarMenu();
     await toggleMenuItem("My Filter");
-    expect(queryAllTexts(`tfoot td`)).toEqual([""]);
+    expect(`tfoot`).toHaveCount(0);
 });
 
 test(`aggregates are computed correctly in grouped lists`, async () => {
@@ -5482,7 +5482,7 @@ test(`hide aggregated value in grouped lists when no data provided by RPC call`,
             </list>
         `,
     });
-    expect(`tfoot`).toHaveText("", { message: "There isn't any aggregated value" });
+    expect(`tfoot`).toHaveCount(0, { message: "There isn't any aggregated value" });
 });
 
 test(`aggregates are updated when a line is edited`, async () => {

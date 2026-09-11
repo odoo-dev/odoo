@@ -1259,6 +1259,13 @@ export class ListRenderer extends Component {
         return this.isX2Many && this.canCreate;
     }
 
+    get displayFooter() {
+        return (
+            Object.keys(this.aggregates).length > 0 ||
+            (this.props.list.isGrouped && this.canCreateGroup)
+        );
+    }
+
     /**
      * @param {Group} group
      */
