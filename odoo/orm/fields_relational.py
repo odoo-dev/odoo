@@ -1420,6 +1420,31 @@ class Many2many(_RelationalMulti):
 
         # make the query for the lines
         domain = self.get_comodel_domain(records)
+        domain = domain.optimize_dynamic(records)
+        fixed_values = {}  # some values are fixed in the domain, fill their cache
+        if not domain.is_true():
+            # check sibling with a true domain to filter and filter values
+            registry = records.env.registry
+            for model_name, field_name in registry.many2many_relations[self.relation, self.column1, self.column2]:
+                if (
+                    model_name == self.model_name
+                    and (sibling_field := records._fields[field_name]) is not self
+                    and sibling_field.get_comodel_domain(records).is_true()
+                    and not list(sibling_field._cache_missing_ids(records))
+                ):
+                    values = (sibling_field.__get__(record).filtered_domain(domain)._ids for record in records)
+                    self._insert_cache(records, values)
+                    return
+            if getattr(domain, 'OPERATOR', '&'):
+                fixable = domain.children
+            elif domain.is_condition(operator='in'):
+                fixable = [domain]
+            else:
+                fixable = ()
+            for c in fixable:
+                if c.is_condition(operator='in') and len(c.value) == 1 and '.' not in c.field_expr:
+                    fixed_values[c.field_expr] = c._field(comodel).convert_to_cache(next(iter(c.value)), comodel)
+
         # bypass_access set because of context management in ir.attachment
         query = comodel.sudo()._search(domain, order=comodel._order, bypass_access=True)
 
@@ -1441,6 +1466,8 @@ class Many2many(_RelationalMulti):
         # store result in cache
         values = [tuple(group[id_]) for id_ in records._ids]
         self._insert_cache(records, values)
+        if fixed_values and corecord_ids:
+            comodel.browse(corecord_ids)._update_cache(fixed_values)
 
     def write_batch(self, records_commands_list, create=False):
         records, records_commands_list = self._parse_write_commands(records_commands_list)
