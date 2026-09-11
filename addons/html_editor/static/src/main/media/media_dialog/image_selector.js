@@ -191,6 +191,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async validateUrl(...args) {
+        console.warn("validateUrl", ...args);
         const { isValidUrl, path } = super.validateUrl(...args);
         const isValidFileFormat =
             isValidUrl &&

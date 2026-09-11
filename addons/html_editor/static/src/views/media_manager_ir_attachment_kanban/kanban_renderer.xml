@@ -17,13 +17,38 @@
                 </div>
             </div>
             <div class="media-manager-side-panel">
+                <input type="file" class="d-none o_file_input"
+                       t-ref="this.fileInputRef"
+                       t-on-change="this.onFileInputChanged"
+                       t-att-accept="this.props.accept"
+                       t-att-multiple="this.props.multiUpload and 'multiple'"
+                />
                 <div class="media-manager-side-panel-buttons">
-                    <a class="btn btn-secondary">upload</a>
-                    <a class="btn btn-secondary">upload url</a>
-                    <a class="btn btn-secondary">AI generate image</a>
+                    <button class="btn btn-secondary text-nowrap w-100 mb-2" t-on-click="this.uploadFileClicked.bind(this)">Upload</button>
+                    <div class="col justify-content-end flex-nowrap input-group has-validation"
+                         t-att-class="{ 'd-none': !this.state.showUrlInput}">
+                        <input type="text" class="form-control o_input o_we_url_input o_we_transition_ease flex-grow-0 w-auto"
+                               name="url" placeholder="Image url..."
+                               t-model.proxy="this.state.urlInput"
+                               t-on-input="this.onUrlInputInputed"
+                               t-ref="this.urlInputRef"/>
+                        <div class="d-flex align-items-center">
+                            <span t-if="this.state.urlInput and this.state.isValidatingUrl" class="o_we_url_loading mx-2 oi oi-lg oi-spin" data-icon="autorenew" title="Loading..."/>
+                            <span t-elif="this.state.urlInput and this.state.isValidUrl and this.state.isValidImageFormat" class="o_we_url_success text-success mx-2 oi oi-lg" data-icon="check" title="The URL seems valid."/>
+                            <span t-elif="this.state.urlInput and !this.state.isValidUrl" class="o_we_url_error text-danger mx-2 oi oi-lg" data-icon="close_small" title="The URL does not seem to work."/>
+                            <span t-elif="this.props.urlWarningTitle and this.state.urlInput and this.state.isValidUrl and !this.state.isValidImageFormat" class="o_we_url_warning text-warning mx-2 oi oi-lg" data-icon="warning" t-att-title="this.props.urlWarningTitle"/>
+                        </div>
+                    </div>
+                    <button type="button"
+                            class="btn btn-import-url text-nowrap w-100 mb-2"
+                            t-att-class="{ 'btn-primary': this.state.showUrlInput, 'btn-secondary': !this.state.showUrlInput}"
+                            t-on-click="this.importLinkClicked">
+                        Import image link
+                    </button>
                 </div>
 
-                <div class="media-manager-side-panel-filters" t-if="this.props.filters">
+                <div class="media-manager-side-panel-filters mt-4" t-if="this.props.filters">
+                    <h4>Filters :</h4>
                     <a href="#" t-on-click="() => this.filterRecords()">All</a>
                     <t t-foreach="this.props.filters" t-as="filter" t-key="filter.label">
                         <br/><a href="#" t-on-click.prevent="() => this.filterRecords(filter.domain)"><t t-out="filter.label"/></a>
