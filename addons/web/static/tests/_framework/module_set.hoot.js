@@ -1,6 +1,7 @@
 // ! WARNING: this module cannot depend on modules not ending with ".hoot" (except libs) !
 
 import {
+    afterEach,
     delay,
     describe,
     dryRun,
@@ -347,8 +348,8 @@ function unfreezeModel(model) {
 
 /**
  * This method tries to manually run the garbage collector (if exposed) and logs
- * the current heap size (if available). It is meant to be called right after a
- * suite's module set has been fully executed.
+ * the current heap size (if available). It is meant to be called right after
+ * each individual test has been run.
  *
  * This is used for debugging memory leaks, or if the containing process running
  * unit tests doesn't know how much available memory it actually has.
@@ -357,9 +358,8 @@ function unfreezeModel(model) {
  * flag.
  *
  * @param {string} label
- * @param {number} [testCount]
  */
-async function __gcAndLogMemory(label, testCount) {
+async function __gcAndLogMemory(label) {
     if (typeof window.gc !== "function") {
         return;
     }
@@ -375,19 +375,15 @@ async function __gcAndLogMemory(label, testCount) {
     await window.gc({ type: "major", execution: "async" });
 
     // Log memory usage
-    const logs = [
+    console.log(
         `[MEMINFO] ${label} (after GC)`,
         "- used:",
         window.performance.memory.usedJSHeapSize,
         "- total:",
         window.performance.memory.totalJSHeapSize,
         "- limit:",
-        window.performance.memory.jsHeapSizeLimit,
-    ];
-    if (Number.isInteger(testCount)) {
-        logs.push("- tests:", testCount);
-    }
-    console.log(...logs);
+        window.performance.memory.jsHeapSizeLimit
+    );
 }
 
 /** @extends {OdooModuleLoader} */
@@ -685,16 +681,14 @@ export async function runTests(options) {
     // Dry run
     const { suites } = await dryRun(() => describeDrySuite(fileSuffix, testModuleNames));
 
+    // Manually run the garbage collector after each individual test (instead of
+    // once per suite) to get a more granular view of memory usage.
+    afterEach((test) => __gcAndLogMemory(test.fullName), { global: true });
+
     // Run all test files
     const filteredSuitePaths = new Set(suites.map((s) => s.fullName));
     let currentAddonsKey = "";
-    let lastSuiteName = null;
-    let lastNumberTests = 0;
     for (const moduleName of testModuleNames) {
-        if (lastSuiteName) {
-            await __gcAndLogMemory(lastSuiteName, lastNumberTests);
-            lastSuiteName = null;
-        }
         const suitePath = getSuitePath(moduleName);
         if (!filteredSuitePaths.has(suitePath)) {
             continue;
@@ -724,15 +718,9 @@ export async function runTests(options) {
 
         await moduleSetLoader.cleanup();
 
-        lastSuiteName = suite.fullName;
-        lastNumberTests = suite.reporting.tests;
-
         if (!running) {
             break;
         }
-    }
-    if (lastSuiteName) {
-        await __gcAndLogMemory(lastSuiteName, lastNumberTests);
     }
 
     // Perform final cleanups
