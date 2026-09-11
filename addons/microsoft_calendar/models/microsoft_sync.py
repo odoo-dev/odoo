@@ -199,7 +199,7 @@ class MicrosoftCalendarSync(models.AbstractModel):
 
             new_calendar_recurrence['calendar_event_ids'] = [(0, 0, to_create_value) for to_create_value in to_create_values]
             new_recurrence_odoo = self.env['calendar.recurrence'].with_context(dont_notify=True).create(new_calendar_recurrence)
-            new_recurrence_odoo.base_event_id = new_recurrence_odoo.calendar_event_ids[0] if new_recurrence_odoo.calendar_event_ids else False
+            new_recurrence_odoo._select_new_base_event()
             new_recurrence |= new_recurrence_odoo
 
         # Outlook can turn an existing single event into a recurring one in place:
