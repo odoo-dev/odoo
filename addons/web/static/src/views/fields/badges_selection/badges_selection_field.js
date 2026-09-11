@@ -32,7 +32,7 @@ export class BadgesSelectionField extends Component {
             options = options.filter(([value]) => !excludedOptions.includes(value));
         }
 
-        // Map icons to options
+        // Map icons to options,
         return options.map(([value, label]) => {
             const icon = this.props.iconMapping[value] ?? this.props.defaultIcon;
             return [value, label, icon];
