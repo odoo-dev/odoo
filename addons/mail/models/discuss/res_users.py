@@ -46,7 +46,7 @@ class ResUsers(models.Model):
                 cm.channel_id.channel_type == "channel"
                 and cm.channel_id.group_public_id
                 and not (
-                    cm.channel_id.group_public_id & (cm.partner_id.user_ids - self).all_group_ids
+                    cm.channel_id.group_public_id & (cm.partner_id.user_ids.filtered('active') - self).all_group_ids
                 )
             )
         ).unlink()
