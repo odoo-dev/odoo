@@ -5,13 +5,16 @@ from odoo.exceptions import ValidationError
 from odoo import api, fields, models, _
 from odoo.fields import Domain
 from odoo.tools.misc import unquote
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 TIMESHEET_BILLABLE_TYPES = [
-    ('02_billable_fixed', 'Timesheets (Fixed Price)'),
-    ('04_billable_time', 'Timesheets (Time & Materials)'),
-    ('06_billable_milestones', 'Timesheets (Milestones)'),
-    ('08_billable_manual', 'Timesheets (Manual) '),
-    ('09_non_billable', 'Timesheets (Non-Billable)'),
+    (100, '02_billable_fixed', _lt('Timesheets (Fixed Price)')),
+    (110, '04_billable_time', _lt('Timesheets (Time & Materials)')),
+    (120, '06_billable_milestones', _lt('Timesheets (Milestones)')),
+    (130, '08_billable_manual', _lt('Timesheets (Manual)')),
+    (140, '09_non_billable', _lt('Timesheets (Non-Billable)')),
 ]
 
 
@@ -30,7 +33,6 @@ class AccountAnalyticLine(models.Model):
             ],
         ])
 
-    billable_type = fields.Selection(selection_add=TIMESHEET_BILLABLE_TYPES)
     commercial_partner_id = fields.Many2one('res.partner', compute="_compute_commercial_partner")
     so_line = fields.Many2one(
         falsy_value_label="Non-billable",
@@ -40,6 +42,9 @@ class AccountAnalyticLine(models.Model):
     product_id = fields.Many2one(compute='_compute_product_id', store=True, readonly=False)
     allow_billable = fields.Boolean(related="project_id.allow_billable")
     sale_order_state = fields.Selection(related='order_id.state')
+
+    def _get_billable_types(self):
+        return super()._get_billable_types() + TIMESHEET_BILLABLE_TYPES
 
     @api.depends('project_id.partner_id.commercial_partner_id', 'task_id.partner_id.commercial_partner_id')
     def _compute_commercial_partner(self):

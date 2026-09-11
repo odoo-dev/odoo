@@ -1,13 +1,19 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, api
+from odoo import api, models
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-    billable_type = fields.Selection(selection_add=[('15_picking_entry_positive', 'Inventory Transfers (Revenues)'),
-                                                    ('16_picking_entry_negative', 'Inventory Transfers (Costs)')])
+    def _get_billable_types(self):
+        return super()._get_billable_types() + [
+            (80, '15_picking_entry_positive', _lt('Inventory Transfers (Revenue)')),
+            (190, '16_picking_entry_negative', _lt('Inventory Transfers (Costs)')),
+        ]
 
     @api.depends('billable_type')
     def _compute_category_report(self):
