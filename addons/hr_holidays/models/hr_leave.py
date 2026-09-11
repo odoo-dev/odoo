@@ -858,6 +858,10 @@ class HrLeave(models.Model):
             if not leave.date_from or not leave.date_to or (not calendar and not leave.employee_id):
                 result[leave.id] = (0, 0)
                 continue
+            leave_key = (
+                leave.date_from, leave.date_to,
+                leave.work_entry_type_id.include_public_holidays_in_duration, calendar,
+            )
             if leave.work_entry_type_id.count_days_as == 'calendar':
                 start_date = leave.request_date_from
                 end_date = leave.request_date_to
@@ -877,7 +881,7 @@ class HrLeave(models.Model):
                     hours = days * (day_end - day_start)
                 else:
                     # Partial Day Leave
-                    work_days_data = work_days_data_mapped[leave.date_from, leave.date_to, include_public, calendar][leave.employee_id.id]
+                    work_days_data = work_days_data_mapped[leave_key][leave.employee_id.id]
                     hours, days = work_days_data['hours'], work_days_data['days']
 
                     # sudo as is_flexible is on version model and employee does not have access to it.
@@ -885,7 +889,7 @@ class HrLeave(models.Model):
                         result[leave.id] = (days, hours)
                         continue
                     # Identify workin days
-                    work_time_per_day_list = work_time_per_day_mapped[leave.date_from, leave.date_to, include_public, calendar][leave.employee_id.id]
+                    work_time_per_day_list = work_time_per_day_mapped[leave_key][leave.employee_id.id]
                     working_dates = {interval[0] for interval in work_time_per_day_list}
 
                     total_dates = {
@@ -938,7 +942,7 @@ class HrLeave(models.Model):
                         days = hours / 24
                 elif leave.work_entry_type_request_unit == 'day' and check_work_entry_type:
                     # list of tuples (day, hours)
-                    work_time_per_day_list = work_time_per_day_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar][leave.employee_id.id]
+                    work_time_per_day_list = work_time_per_day_mapped[leave_key][leave.employee_id.id]
                     days = len(work_time_per_day_list)
                     hours = sum(map(lambda t: t[1], work_time_per_day_list))
                     if (hours, days) == (0, 0) and leave.work_entry_type_id.count_as == "working_time":
@@ -947,7 +951,7 @@ class HrLeave(models.Model):
                         hours_per_day = calendar.hours_per_day if calendar else leave.employee_id.sudo().hours_per_day
                         hours = days * (hours_per_day or HOURS_PER_DAY)
                 else:
-                    work_days_data = work_days_data_mapped[leave.date_from, leave.date_to, leave.work_entry_type_id.include_public_holidays_in_duration, calendar][leave.employee_id.id]
+                    work_days_data = work_days_data_mapped[leave_key][leave.employee_id.id]
                     hours, days = work_days_data['hours'], work_days_data['days']
                     if (hours, days) == (0, 0) and leave.work_entry_type_id.count_as == "working_time":
                         # an end on the last microsecond of a day is that day's end
