@@ -1395,7 +1395,7 @@ class DiscussChannel(models.Model):
             self._update_last_interest_dt()
         if special_mentions := kwargs.pop("special_mentions", []):
             partners = self.env['res.partner'].browse(partner_ids or [])
-            partner_members = self.channel_member_ids.partner_id
+            partner_members = self.channel_partner_ids
             if "everyone" in special_mentions:
                 partners |= partner_members
             if "here" in special_mentions:
