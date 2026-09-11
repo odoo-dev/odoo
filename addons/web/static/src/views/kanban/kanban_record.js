@@ -51,6 +51,7 @@ export const kanbanRecordProps = {
     forceGlobalClick: t.any().optional(),
     getSelection: t.function().optional(() => () => []),
     groupByField: t.any().optional(),
+    hasSelectedRecords: t.any().optional(false),
     openAction: t.any().optional(),
     openRecord: t.function().optional(() => () => {}),
     progressBarState: t.any().optional(),

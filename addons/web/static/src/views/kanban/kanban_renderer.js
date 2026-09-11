@@ -373,6 +373,14 @@ export class KanbanRenderer extends Component {
         return this.props.list.selection || [];
     }
 
+    get hasSelectedRecords() {
+        return this.props.list.selection?.length || this.isDomainSelected;
+    }
+
+    get isDomainSelected() {
+        return this.props.list.isDomainSelected;
+    }
+
     /**
      * When the kanban records are grouped, the 'false' or 'undefined' group
      * must appear first.

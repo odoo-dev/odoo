@@ -11,10 +11,26 @@
             <attribute name="t-on-touchend">this.onTouchEnd</attribute>
         </xpath>
         <xpath expr="article" position="inside">
+            <!-- <span
+                t-if="this.props.selectionAvailable or this.props.record.selected"
+                class="o_record_selection_tooltip position-absolute d-flex align-items-start p-1 cursor-pointer opacity-trigger-hover z-1">
+                <span class="d-flex p-1 border bg-dark border rounded" t-att-class="{'opacity-0 opacity-100-hover': !this.props.record.selected}">
+                    <i class="oi text-success" data-icon="check" t-att-class="{'opacity-0': !this.props.record.selected}"/>
+                </span> -->
+                    <!-- <span class="rounded py-1 px-2 text-bg-secondary opacity-0 opacity-100-hover">
+                        Click to
+                        <t t-if="this.props.record.selected">unselect</t>
+                        <t t-else="">select</t>
+                    </span> -->
+            <!-- </span> -->
+            <t t-log="this.props.hasSelectedRecords"/>
             <span
-                t-if="this.props.selectionAvailable" 
-                class="o_record_selection_tooltip d-none position-absolute p-2 rounded-3 start-50 top-50">
-                    Click to select
+                t-if="this.props.selectionAvailable or this.props.hasSelectedRecords"
+                class="o_record_selection_tooltip position-absolute d-flex align-items-end justify-content-end bg-secondary bg-opacity-0 cursor-pointer opacity-trigger-hover z-1">
+                    <span class="rounded rounded-end-0 rounded-bottom-0 py-1 px-2 small text-bg-action bg-opacity-100 opacity-0 opacity-100-hover">
+                        <t t-if="this.props.record.selected">Unselect</t>
+                        <t t-else="">Select</t>
+                    </span>
             </span>
             <t t-call="{{ this.constructor.menuTemplate }}"/>
         </xpath>

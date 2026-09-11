@@ -20,7 +20,34 @@
     }
 
     &.o_record_selected {
+        // --KanbanRecord__selectionTooltip-border-color: transparent;
+        --Card-border-color: var(--KanbanColumn__highlight-selected-border);
+
         background-color: var(--KanbanColumn__highlight-selected);
+
+        &:hover {
+            --Card-border-color: var(--KanbanColumn__highlight-border);
+        }
+    }
+
+    &.o_record_selection_available:not(.o_record_selected) {
+        --Card-border-color: #{$o-action};
+
+        &:hover {
+            --KanbanRecord__selectionTooltip-background: linear-gradient(to left, #{rgba(#fff, .95)} 32px, #{rgba(#fff, .25)});
+        }
+    }
+
+    &.o_record_selected {
+        --KanbanRecord__selectionTooltip-background: linear-gradient(to right, #{rgba(mix($o-action, $o-view-background-color, 20%), .75)} 32px, #{rgba(mix($o-action, $o-view-background-color, 20%), 0)});
+    }
+
+    .o_record_selection_tooltip {
+        inset: 0;
+        border-radius: inherit;
+        background: var(--KanbanRecord__selectionTooltip-background);
+        // outline: 1px dashed $dark;
+        // outline-offset: -2px;
     }
 
     // Follow the card's top corner (only rounded on E.E) (see --Card-border-radius-top).
@@ -67,27 +94,6 @@
     @include media-breakpoint-up(md) {
         outline: 3px solid var(--KanbanColumn__highlight-selected-border);
         box-shadow: none;
-    }
-}
-
-.o_kanban_selection_available .o_kanban_record.o_record_selection_available {
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-    &:hover {
-        &::after {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .o_record_selection_tooltip {
-            display: block !important;
-            z-index: 1;
-            transform: translate(-50%, -50%);
-            background: white;
-            color: black;
-        }
     }
 }
 
