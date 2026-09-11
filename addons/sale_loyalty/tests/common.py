@@ -233,14 +233,15 @@ class TestSaleCouponCommon(SaleCommon):
             return rewards
 
     def _claim_reward(self, order, program, coupon=False):
-        if len(program.reward_ids) != 1:
+        rewards = program.reward_ids.filtered('active')
+        if len(rewards) != 1:
             return False
         coupon = coupon or order.coupon_point_ids.coupon_id.filtered(
             lambda c: c.program_id == program
         )
         if len(coupon) != 1:
             return False
-        status = order._apply_program_reward(program.reward_ids, coupon)
+        status = order._apply_program_reward(rewards, coupon)
         return "error" not in status
 
     def _auto_rewards(self, order, programs):
