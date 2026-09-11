@@ -378,13 +378,16 @@ export class RelationalModel extends Model {
                     // have to deal with the second case:
                     if (this.useSampleModel) {
                         // We displayed sample data from the cache, but the rpc returned records
-                        // or groups => leave sample mode, forget previous groups and update
-                        this.useSampleModel = false;
+                        // or groups => leave sample mode, forget previous groups and update.
+                        // The data must be updated before leaving sample mode, so that there is
+                        // no instant where useSampleModel is false but the root still holds
+                        // sample data.
                         if (this.root.config.groupBy.length) {
                             delete this.root.config.currentGroups;
                             result = await this._postprocessReadGroup(this.root.config, result);
                         }
                         this.root._setData(result);
+                        this.useSampleModel = false;
                         this.hooks.onRootUpdated(this.root);
                     }
                     return;
