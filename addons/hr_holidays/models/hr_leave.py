@@ -284,10 +284,7 @@ class HrLeave(models.Model):
     def _compute_allowed_work_entry_type_ids(self):
         for leave in self:
             country = leave.company_id.country_id
-            if not country or not self.env['hr.work.entry.type'].search_count([('country_id', '=', country.id)], limit=1):
-                domain = [('country_id', '=', False)]
-            else:
-                domain = [('country_id', '=', country.id)]
+            domain = [('country_id', '=', country.id)] if country else [('id', '=', False)]
             leave.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search(domain)
 
     @api.onchange('request_hour_from', 'request_hour_to')
@@ -747,7 +744,7 @@ class HrLeave(models.Model):
                     continue
             if no_alloc_types:
                 holiday.work_entry_type_id = no_alloc_types[0]
-            else:
+            elif not holiday.work_entry_type_id:
                 holiday.work_entry_type_id = False
 
     @api.depends('employee_id')
