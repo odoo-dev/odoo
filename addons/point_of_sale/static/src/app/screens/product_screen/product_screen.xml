@@ -39,7 +39,14 @@
                                 imageUrl="this.pos.config.show_product_images and this.getProductImage(product)"
                                 onClick.bind="() => this.addProductToOrder(product)"
                                 t-on-pointerdown="(event) => this.onPointerDown(event, product)"
+<<<<<<< 9044b82553bd29f225be7cffe91a2f1b24bdc510
                                 t-on-pointerup="this.longPressHandlers.onMouseUp"
+||||||| 9a2a8b57156b041d49c0b50b164d6581d2ad7da8
+                                t-on-pointerup="longPressHandlers.onMouseUp"
+=======
+                                t-on-pointerup="longPressHandlers.onMouseUp"
+                                t-on-pointercancel="longPressHandlers.onTouchEnd"
+>>>>>>> 9c1dd2474f830c1eb2f911514b9c9417f641f29e
                                 productCartQty="this.state.quantityByProductTmplId[product.id]" />
                         </div>
                     </div>
