@@ -2,16 +2,37 @@
     width: $o-mail-ChatWindow-width;
 
     z-index: $zindex-sticky;
+
     &.o-mobile {
         z-index: var(--mail-ChatWindow-mobileZindex, $zindex-sticky - 2) !important;
     }
+
     &:not(.o-mobile) {
-        --border-opacity: var(--mail-ChatWindow-desktopBorderOpacity, .15);
-        height: Min(95vh, $o-mail-ChatWindow-width * 15 / 9)
+        height: Min(95vh, $o-mail-ChatWindow-width * 15 / 9);
+
+        // Adaptative border using backdrop-filter: this way, the contrast is good on
+        // whatever background (e.g. embedded live chat).
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            padding: 1px;
+            border-radius: $border-radius-xl;
+            box-sizing: border-box;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            // Blur first to avoid picking up insignifican details.
+            backdrop-filter: blur(6px) grayscale(1) invert(65%);
+            opacity: .3;
+            pointer-events: none;
+        }
     }
+
     outline: none;
 
     transition: box-shadow 2.0s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
     &.o-highlighted {
         box-shadow: 0 0 1.5rem #{$o-component-active-border} !important;
     }
@@ -20,11 +41,15 @@
 .o-mail-ChatWindow-moreActions {
     color: inherit !important;
     background-color: inherit !important;
-    &:hover, &.o-active, &.o-hover {
+
+    &:hover,
+    &.o-active,
+    &.o-hover {
         color: var(--mail-ChatWindow-moreActionsHoverColor, black) !important;
         backdrop-filter: invert(.025);
         border-color: transparent !important;
     }
+
     &:not(.o-active):not(.o-hover) [data-icon="arrow_drop_down"] {
         opacity: 50%;
     }
@@ -44,7 +69,21 @@
 
 .o-mail-ChatWindow-header {
     --o-btn-circle-height: 0;
-    --border-opacity: var(--mail-ChatWindow-headerBorderOpacity, .15);
+    position: relative;
+
+    // Same adaptive border logic as the window: a fixed border color can vanish or clash
+    // depending on the header's background.
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        backdrop-filter: blur(6px) grayscale(1) invert(65%);
+        opacity: .3;
+        pointer-events: none;
+    }
 
     .o-mail-ActionList-group {
         gap: map-get($spacers, 3);
