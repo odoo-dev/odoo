@@ -422,7 +422,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             new_msg = self.test_channel.message_post(
                 body="Test", special_mentions=["everyone"],
                 message_type="comment", subtype_xmlid="mail.mt_comment")
-        self.assertEqual(new_msg.partner_ids, self.test_channel.channel_member_ids.partner_id)
+        self.assertEqual(new_msg.partner_ids, self.test_channel.channel_partner_ids)
         with self.mock_mail_gateway():
             new_msg = self.test_channel.message_post(
                 body="Test", special_mentions=["here"],
