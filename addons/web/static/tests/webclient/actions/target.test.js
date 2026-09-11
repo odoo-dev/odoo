@@ -8,7 +8,6 @@ import {
     defineMenus,
     defineModels,
     getService,
-    mockService,
     models,
     mountWithCleanup,
     onRpc,
@@ -17,6 +16,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
+import { TitlePlugin } from "@web/core/browser/title_plugin";
 import { ClientErrorDialog } from "@web/core/errors/error_dialogs";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -357,15 +357,14 @@ describe("new", () => {
     });
 
     test('actions in target="new" do not update page title', async () => {
-        mockService("title", {
+        await mountWithCleanup(WebClient);
+        patchWithCleanup(getService(TitlePlugin), {
             setParts({ action }) {
                 if (action) {
                     expect.step(action);
                 }
             },
         });
-
-        await mountWithCleanup(WebClient);
 
         // sanity check: execute an action in target="current"
         await getService("action").doAction(1);

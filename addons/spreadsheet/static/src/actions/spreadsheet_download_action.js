@@ -1,3 +1,4 @@
+import { useEnv } from "@web/owl2/utils";
 import { createSpreadsheetModel, waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
@@ -6,10 +7,10 @@ import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 
 /**
- * @param {import("@web/env").OdooEnv} env
  * @param {object} action
  */
-async function downloadSpreadsheet(env, action) {
+async function downloadSpreadsheet(action) {
+    const env = useEnv();
     const notification = useService("notification");
     const canExport = await user.hasGroup("base.group_allow_export");
     if (!canExport) {

@@ -1,4 +1,4 @@
-import { useSubEnv, useEnv } from "@web/owl2/utils";
+import { useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { location, browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
@@ -9,7 +9,7 @@ import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 import { user } from "@web/core/user";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { View, ViewNotFoundError } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { ReportAction } from "./reports/report_action";
@@ -28,6 +28,7 @@ import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 import {
     Component,
+    computed,
     markup,
     onError,
     onMounted,
@@ -36,6 +37,7 @@ import {
     usePlugin,
     useListener,
     proxy,
+    signal,
     status,
     t,
     useProps,
@@ -58,7 +60,7 @@ class BlankComponent extends Component {
     static components = { ControlPanel };
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiPlugin = usePlugin(UIPlugin);
         useSubEnv({ config: { breadcrumbs: [], noBreadcrumbs: true } });
         onMounted(() => this.props.onMounted());
     }
@@ -161,12 +163,11 @@ export function useActionManager(router = _router) {
     const notification = usePlugin(NotificationPlugin);
     const title = usePlugin(TitlePlugin);
     const ui = usePlugin(UIPlugin);
-    const env = useEnv();
 
     const breadcrumbCache = {};
     const keepLast = new KeepLast();
     let id = 0;
-    let controllerStack = [];
+    const controllerStack = signal([]);
     let dialog = null;
     let nextDialog = null;
 
@@ -181,13 +182,13 @@ export function useActionManager(router = _router) {
         ) {
             rpcBus.trigger("CLEAR-CACHES", "/web/action/load");
             const virtualStack = await _controllersFromState(router.current);
-            const nextStack = [...virtualStack, controllerStack[controllerStack.length - 1]];
+            const nextStack = [...virtualStack, controllerStack().at(-1)];
             nextStack[nextStack.length - 1].config.breadcrumbs.splice(
                 0,
                 nextStack[nextStack.length - 1].config.breadcrumbs.length,
                 ..._getBreadcrumbs(nextStack)
             );
-            controllerStack = nextStack;
+            controllerStack.set(nextStack);
         }
     });
 
@@ -351,28 +352,27 @@ export function useActionManager(router = _router) {
     }
 
     /**
-     * Returns the last controller of the current controller stack.
+     * Computed value holding the last controller of the current controller stack.
      *
-     * @returns {Controller|null}
+     * @type {() => Controller|null}
      */
-    function _getCurrentController() {
-        const stack = controllerStack;
-        return stack.length ? stack[stack.length - 1] : null;
-    }
+    const currentController = computed(() => {
+        const stack = controllerStack();
+        return stack.length ? stack.at(-1) : null;
+    });
 
     /**
      * Returns the current action, which is the action of the last controller in the stack.
      *
      * @returns {Action|null}
      */
-
     async function _getCurrentAction() {
-        const currentController = _getCurrentController();
+        const controller = currentController();
         let action = null;
-        if (currentController) {
-            if (currentController.virtual) {
+        if (controller) {
+            if (controller.virtual) {
                 try {
-                    action = await _loadAction(currentController.action.id);
+                    action = await _loadAction(controller.action.id);
                 } catch (error) {
                     if (
                         error.exceptionName ===
@@ -384,7 +384,7 @@ export function useActionManager(router = _router) {
                     }
                 }
             } else {
-                action = JSON.parse(currentController.action._originalAction);
+                action = JSON.parse(controller.action._originalAction);
             }
         }
         return action;
@@ -496,11 +496,11 @@ export function useActionManager(router = _router) {
      * @returns {View | null}
      */
     function _getView(viewType) {
-        const currentController = controllerStack[controllerStack.length - 1];
-        if (currentController.action.type !== "ir.actions.act_window") {
+        const controller = currentController();
+        if (controller.action.type !== "ir.actions.act_window") {
             throw new Error(`switchView called but the current controller isn't a view`);
         }
-        const view = currentController.views.find((view) => view.type === viewType);
+        const view = controller.views.find((view) => view.type === viewType);
         return view || null;
     }
 
@@ -855,16 +855,17 @@ export function useActionManager(router = _router) {
         if (options.clearBreadcrumbs) {
             return 0;
         } else if (options.stackPosition === "replaceCurrentAction") {
-            const currentController = controllerStack[controllerStack.length - 1];
-            if (currentController) {
-                return controllerStack.findIndex(
-                    (ct) => ct.action.jsId === currentController.action.jsId
+            const controller = currentController();
+            if (controller) {
+                return controllerStack().findIndex(
+                    (ct) => ct.action.jsId === controller.action.jsId
                 );
             }
         } else if (options.stackPosition === "replacePreviousAction") {
+            const stack = controllerStack();
             let last;
-            for (let i = controllerStack.length - 1; i >= 0; i--) {
-                const action = controllerStack[i].action.jsId;
+            for (let i = stack.length - 1; i >= 0; i--) {
+                const action = stack[i].action.jsId;
                 if (!last) {
                     last = action;
                 }
@@ -874,13 +875,13 @@ export function useActionManager(router = _router) {
                 }
             }
             if (last) {
-                return controllerStack.findIndex((ct) => ct.action.jsId === last);
+                return stack.findIndex((ct) => ct.action.jsId === last);
             }
             // TODO: throw if there is no previous action?
         } else if (options.index !== undefined) {
             return options.index;
         }
-        return controllerStack.length;
+        return controllerStack().length;
     }
 
     /**
@@ -929,10 +930,10 @@ export function useActionManager(router = _router) {
         const { promise: currentActionProm, resolve, reject } = Promise.withResolvers();
         const action = controller.action;
         if (action.target !== "new" && "newStack" in options) {
-            controllerStack = options.newStack;
+            controllerStack.set(options.newStack);
         }
         const index = _computeStackIndex(options);
-        const nextStack = [...controllerStack.slice(0, index), controller];
+        const nextStack = [...controllerStack().slice(0, index), controller];
         if (action.target !== "new" && options.newWindow) {
             return _openActionInNewWindow(action, makeState(nextStack));
         }
@@ -943,7 +944,7 @@ export function useActionManager(router = _router) {
         controller.config.getDisplayName = () => controller.displayName;
         controller.config.setDisplayName = (displayName) => {
             controller.displayName = displayName;
-            if (controller === _getCurrentController()) {
+            if (controller === currentController()) {
                 // if not mounted yet, will be done in "mounted"
                 title.setParts({ action: controller.displayName });
             }
@@ -960,14 +961,14 @@ export function useActionManager(router = _router) {
             controller.embeddedActions = embeddedActions;
         };
         controller.config.historyBack = () => {
-            const previousController = controllerStack[controllerStack.length - 2];
+            const previousController = controllerStack().at(-2);
             if (previousController) {
                 restore(previousController.jsId);
             } else {
                 bus.trigger("WEBCLIENT:LOAD_DEFAULT_APP");
             }
         };
-        controller.config.isReloadingController = controller === controllerStack.at(-1);
+        controller.config.isReloadingController = controller === currentController();
 
         class ControllerComponent extends Component {
             static template = ControllerComponentTemplate;
@@ -975,7 +976,7 @@ export function useActionManager(router = _router) {
             props = useProps();
             setup() {
                 this.Component = controller.Component;
-                this.titleService = useService("title");
+                this.titleService = title;
                 useDebugCategory("action", { action });
                 useSubEnv({
                     config: controller.config,
@@ -1035,18 +1036,19 @@ export function useActionManager(router = _router) {
                     removeDialogFn?.();
                     return;
                 }
-                const index = controllerStack.findIndex((ct) => ct.jsId === controller.jsId);
+                const stack = controllerStack();
+                const index = stack.findIndex((ct) => ct.jsId === controller.jsId);
                 if (index > 0) {
                     // The error occurred while rendering an existing controller,
                     // so go back to the previous controller, of the current faulty one.
                     // This occurs when clicking on a breadcrumbs.
-                    return _restore(controllerStack[index - 1].jsId, { keepDialogs: true });
+                    return _restore(stack[index - 1].jsId, { keepDialogs: true });
                 }
                 if (index === 0) {
                     // No previous controller to restore, so do nothing but display the error
                     return;
                 }
-                const lastController = controllerStack.at(-1);
+                const lastController = currentController();
                 if (lastController) {
                     if (lastController.jsId !== controller.jsId) {
                         // the error occurred while rendering a new controller,
@@ -1077,8 +1079,8 @@ export function useActionManager(router = _router) {
                         }
                     };
 
-                    controllerStack = nextStack; // the controller is mounted, commit the new stack
-                    pushState(controllerStack, { sync: true });
+                    controllerStack.set(nextStack); // the controller is mounted, commit the new stack
+                    pushState(controllerStack(), { sync: true });
                     this.titleService.setParts({ action: controller.displayName });
                     browser.sessionStorage.setItem(
                         "current_action",
@@ -1142,9 +1144,9 @@ export function useActionManager(router = _router) {
             return currentActionProm;
         }
 
-        const currentController = _getCurrentController();
-        if (currentController && currentController.getLocalState) {
-            currentController.exportedState = currentController.getLocalState();
+        const previousController = currentController();
+        if (previousController && previousController.getLocalState) {
+            previousController.exportedState = previousController.getLocalState();
         }
         if (controller.exportedState) {
             controller.props.state = controller.exportedState;
@@ -1156,21 +1158,21 @@ export function useActionManager(router = _router) {
         // if prop globalState has been passed in doAction, since the action is new the prop won't be overridden in l655.
         // if globalState is not useful for client actions --> maybe use that thing in useSetupView instead of useSetupAction?
         // a good thing: the Object.assign seems to reflect the use of "externalState" in legacy Model class --> things should be fine.
-        if (currentController && currentController.getGlobalState) {
+        if (previousController && previousController.getGlobalState) {
             const globalState = Object.assign(
                 {},
-                currentController.action.globalState,
-                currentController.getGlobalState() // what if this = {}?
+                previousController.action.globalState,
+                previousController.getGlobalState() // what if this = {}?
             );
 
-            currentController.action.globalState = globalState;
+            previousController.action.globalState = globalState;
             // Avoid pushing the globalState, if the state on the router was changed.
-            // For instance, if a link was clicked, the state of the router will be the one of the link and not the one of the currentController.
+            // For instance, if a link was clicked, the state of the router will be the one of the link and not the one of the previousController.
             // Or when using the back or forward buttons on the browser.
             if (
-                currentController.state.action === router.current.action &&
-                currentController.state.active_id === router.current.active_id &&
-                currentController.state.resId === router.current.resId
+                previousController.state.action === router.current.action &&
+                previousController.state.active_id === router.current.active_id &&
+                previousController.state.resId === router.current.resId
             ) {
                 router.pushState({ globalState }, { sync: true });
             }
@@ -1389,7 +1391,7 @@ export function useActionManager(router = _router) {
             controller.displayName ||= clientAction.displayName?.toString() || "";
             return _updateUI(controller, options);
         } else {
-            const next = await scope.run(() => clientAction(env, action, options));
+            const next = await scope.run(() => clientAction(action, options));
             if (next) {
                 return doAction(next, options);
             }
@@ -1429,7 +1431,7 @@ export function useActionManager(router = _router) {
     async function _executeReportAction(action, options) {
         const handlers = registry.category("ir.actions.report handlers").getAll();
         for (const handler of handlers) {
-            const result = await scope.run(() => handler(action, options, env));
+            const result = await scope.run(() => handler(action, options));
             if (result) {
                 const { onClose } = options;
                 if (action.close_on_report_download) {
@@ -1568,7 +1570,7 @@ export function useActionManager(router = _router) {
             default: {
                 const handler = actionHandlersRegistry.get(action.type, null);
                 if (handler !== null) {
-                    return scope.run(() => handler({ env, action, options }));
+                    return scope.run(() => handler({ action, options }));
                 }
                 throw new Error(
                     `The ActionManager service can't handle actions of type ${action.type}`
@@ -1752,7 +1754,7 @@ export function useActionManager(router = _router) {
             // not switch in the correct action (action in background != dialog action)
             return;
         }
-        const controller = controllerStack[controllerStack.length - 1];
+        const controller = currentController();
         const view = _getView(viewType);
         if (!view) {
             throw new ViewNotFoundError(
@@ -1781,17 +1783,18 @@ export function useActionManager(router = _router) {
         );
         controller.action.controllers[viewType] = newController;
         let index;
+        const stack = controllerStack();
         if (view.multiRecord) {
-            index = controllerStack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
-            index = index > -1 ? index : controllerStack.length - 1;
+            index = stack.findIndex((ct) => ct.action.jsId === controller.action.jsId);
+            index = index > -1 ? index : stack.length - 1;
         } else {
             // This case would mostly happen when loadState detects a change in the URL.
             // Also, I guess we may need it when we have other monoRecord views
-            index = controllerStack.findIndex(
+            index = stack.findIndex(
                 (ct) =>
                     ct.action.jsId === controller.action.jsId && !ct.virtual && !ct.view.multiRecord
             );
-            index = index > -1 ? index : controllerStack.length;
+            index = index > -1 ? index : stack.length;
         }
         await _updateUI(newController, { newWindow, index });
     }
@@ -1816,9 +1819,9 @@ export function useActionManager(router = _router) {
         await keepLast.add(Promise.resolve());
         let index;
         if (!jsId) {
-            index = controllerStack.length - 2;
+            index = controllerStack().length - 2;
         } else {
-            index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+            index = controllerStack().findIndex((controller) => controller.jsId === jsId);
         }
         if (index < 0) {
             const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
@@ -1828,14 +1831,14 @@ export function useActionManager(router = _router) {
         if (!canProceed) {
             return;
         }
-        const controller = controllerStack[index];
+        const controller = controllerStack()[index];
         if (controller.virtual) {
             const actionParams = _getActionParams(controller.state);
             if (!actionParams) {
                 throw new Error("Attempted to restore a virtual controller whose state is invalid");
             }
             const { actionRequest, options } = actionParams;
-            controllerStack = controllerStack.slice(0, index);
+            controllerStack.set(controllerStack().slice(0, index));
             return doAction(actionRequest, options);
         }
         if (controller.action.type === "ir.actions.act_window") {
@@ -1948,7 +1951,7 @@ export function useActionManager(router = _router) {
         return Object.assign(newState, pick(newState.actionStack.at(-1), ...stateKeys));
     }
 
-    function pushState(cStack = controllerStack, options) {
+    function pushState(cStack = controllerStack(), options) {
         if (!cStack.length) {
             return;
         }
@@ -1970,7 +1973,7 @@ export function useActionManager(router = _router) {
             return _preprocessAction(action, context);
         },
         get currentController() {
-            return _getCurrentController();
+            return currentController();
         },
         get currentAction() {
             return _getCurrentAction();

@@ -1,9 +1,11 @@
 import { markup } from "@odoo/owl";
+import { useEnv } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { htmlSprintf } from "@web/core/utils/html";
 
-registry.category("actions").add("res_partner_to_list_results", (env, action) => {
+registry.category("actions").add("res_partner_to_list_results", (action) => {
+    const env = useEnv();
     const { notification, next } = action.params;
     const { button, message, type } = notification;
     const actionService = useService("action");
