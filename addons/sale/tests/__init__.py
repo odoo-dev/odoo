@@ -18,6 +18,7 @@ from . import (
     test_sale_combo_multicurrency,
     test_sale_early_payment_discount,
     test_sale_flow,
+    test_sale_lse,
     test_sale_order,
     test_sale_order_onchange_combo,
     test_sale_order_product_catalog,
