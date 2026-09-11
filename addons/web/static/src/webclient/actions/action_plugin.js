@@ -1,4 +1,4 @@
-import { useSubEnv, useEnv } from "@web/owl2/utils";
+import { useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { location, browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
@@ -9,7 +9,7 @@ import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 import { user } from "@web/core/user";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { View, ViewNotFoundError } from "@web/views/view";
 import { ActionDialog } from "./action_dialog";
 import { ReportAction } from "./reports/report_action";
@@ -58,7 +58,7 @@ class BlankComponent extends Component {
     static components = { ControlPanel };
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiPlugin = usePlugin(UIPlugin);
         useSubEnv({ config: { breadcrumbs: [], noBreadcrumbs: true } });
         onMounted(() => this.props.onMounted());
     }
@@ -161,7 +161,6 @@ export function useActionManager(router = _router) {
     const notification = usePlugin(NotificationPlugin);
     const title = usePlugin(TitlePlugin);
     const ui = usePlugin(UIPlugin);
-    const env = useEnv();
 
     const breadcrumbCache = {};
     const keepLast = new KeepLast();
@@ -975,7 +974,7 @@ export function useActionManager(router = _router) {
             props = useProps();
             setup() {
                 this.Component = controller.Component;
-                this.titleService = useService("title");
+                this.titleService = title;
                 useDebugCategory("action", { action });
                 useSubEnv({
                     config: controller.config,
@@ -1389,7 +1388,7 @@ export function useActionManager(router = _router) {
             controller.displayName ||= clientAction.displayName?.toString() || "";
             return _updateUI(controller, options);
         } else {
-            const next = await scope.run(() => clientAction(env, action, options));
+            const next = await scope.run(() => clientAction(action, options));
             if (next) {
                 return doAction(next, options);
             }
@@ -1429,7 +1428,7 @@ export function useActionManager(router = _router) {
     async function _executeReportAction(action, options) {
         const handlers = registry.category("ir.actions.report handlers").getAll();
         for (const handler of handlers) {
-            const result = await scope.run(() => handler(action, options, env));
+            const result = await scope.run(() => handler(action, options));
             if (result) {
                 const { onClose } = options;
                 if (action.close_on_report_download) {
@@ -1568,7 +1567,7 @@ export function useActionManager(router = _router) {
             default: {
                 const handler = actionHandlersRegistry.get(action.type, null);
                 if (handler !== null) {
-                    return scope.run(() => handler({ env, action, options }));
+                    return scope.run(() => handler({ action, options }));
                 }
                 throw new Error(
                     `The ActionManager service can't handle actions of type ${action.type}`

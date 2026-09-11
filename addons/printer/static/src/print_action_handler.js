@@ -1,24 +1,21 @@
+import { useEnv } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
 const base64Decode = (base64) => {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new TextDecoder("utf-8").decode(bytes);
-}
-
-
-const baseRequestParams = (report) => {
-    return {
-        method: "POST",
-        body: report,
-        signal: AbortSignal.timeout(15000),
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
     }
-}
+    return new TextDecoder("utf-8").decode(bytes);
+};
 
+const baseRequestParams = (report) => ({
+    method: "POST",
+    body: report,
+    signal: AbortSignal.timeout(15000),
+});
 
 /**
  * Zebra printers host a web server that accepts print jobs
@@ -47,7 +44,7 @@ async function ePosPrint(ip, report) {
     try {
         const res = await fetch(
             `http://${ip}/cgi-bin/epos/service.cgi?devid=local_printer`,
-            baseRequestParams(report),
+            baseRequestParams(report)
         );
         const body = await res.text();
         const parser = new DOMParser();
@@ -83,26 +80,33 @@ export async function printJobs(printer, jobs, { notification }) {
         }
 
         if (res.errorCode === "ERROR_WAIT_EJECT") {
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise((r) => setTimeout(r, 1000));
             continue;
         }
 
-        notification.add(_t(
+        notification.add(
+            _t(
                 "Error occurred while printing the document. Please check the printer and try again: %s",
                 res.errorCode
-            ), {
+            ),
+            {
                 type: "danger",
-            },
+            }
         );
         jobs.pop();
     }
 }
 
 const printerTypeRegistry = registry.category("printer.type.handlers");
-printerTypeRegistry.add("epos", (printer, _duplex, jobs, services) => printJobs(printer, jobs, services));
-printerTypeRegistry.add("zpl", (printer, _duplex, jobs, services) => printJobs(printer, jobs, services));
+printerTypeRegistry.add("epos", (printer, _duplex, jobs, services) =>
+    printJobs(printer, jobs, services)
+);
+printerTypeRegistry.add("zpl", (printer, _duplex, jobs, services) =>
+    printJobs(printer, jobs, services)
+);
 
-async function printActionHandler(action, options, { services }) {
+async function printActionHandler(action, options) {
+    const { services } = useEnv();
     const printersCache = services.report_printers_cache;
     const { report_id, jobs } = action.context;
     if (!jobs?.length) {
@@ -123,6 +127,4 @@ async function printActionHandler(action, options, { services }) {
     return true;
 }
 
-registry
-    .category("ir.actions.report handlers")
-    .add("print_action_handler", printActionHandler);
+registry.category("ir.actions.report handlers").add("print_action_handler", printActionHandler);
