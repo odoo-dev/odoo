@@ -57,7 +57,7 @@ class ProcessingState[M: BaseModel, Resource]:
         self.allow_referencing = bool(getattr(model, process_name + '_allow_referencing', True))
         self.order: str = getattr(model, process_name + '_order', '')
         self._resource_batcher: Callable[[M, Resource | None], Iterable[tuple[Resource | None, M]]] = (
-            getattr(Model, self.__process_name + '_resources', None)
+            getattr(Model, self.__process_name + '_resource_batcher', None)
             or (lambda records, _r: [(None, records)])
         )
 
