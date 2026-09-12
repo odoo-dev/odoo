@@ -242,21 +242,12 @@ class MailMail(models.Model):
         if email_ids:
             domain &= Domain('id', 'in', email_ids)
             batch_size = batch_size * 10 if len(email_ids) > 1 else 0
-        if self.env.context('demo_send_mail'):
-            api.process.cron_implementation(self, '_send', search_domain=domain, search_limit=batch_size, compute_remaining=domain.is_true())
-            return
-        remaining = domain.is_true()
-        domain &= self._send_precondition()
-        domain = domain.optimize_full(self)
-        all_mails = self.search(domain, limit=batch_size, order=self._send_order)
-        if remaining:
-            remaining = len(all_mails)
-            if remaining == batch_size:
-                remaining = self.search_count(self._send_precondition())
-            self.env['ir.cron']._commit_progress(remaining=remaining)
-        for batch in all_mails._split_by_mail_configuration():  # XXX make a resource handler
-            api.process.run_try_now(self.browse(batch[-1]), '_send', use_commit=True)
-            #api.process.cron_implementation(self, '_send', search_domain=Domain('id', 'in', batch[-1]), compute_remaining=False)
+        api.process.cron_implementation(
+            self, '_send',
+            search_domain=domain,
+            search_limit=batch_size,
+            compute_remaining=domain.is_true(),
+        )
 
     def _postprocess_sent_message(self, success_pids, success_emails, failure_reason=False, failure_type=None):
         """Perform any post-processing necessary after sending ``mail``
@@ -772,31 +763,34 @@ class MailMail(models.Model):
 
     _send_cron_id = 'mail.ir_cron_mail_scheduler_action'
     _send_order = 'id'
-    # XXX _send_batch_group = ...  # group mails together, or just use order?
-
-    def _send_precondition(self):
-        return Domain('state', '=', 'outgoing') & (
+    _send_precondition = (
+        Domain('state', '=', 'outgoing') & (
             Domain('scheduled_date', '=', False)
             | Domain('scheduled_date', '<=', 'now'),
         )
+    )
 
-    def _send_resource(self, old_resource=None) -> 'SmtpSessionX':  # XXX resource must be private?
-        if isinstance(old_resource, SmtpSessionX) and old_resource.can_handle(self):
-            return old_resource
-        session = SmtpSessionX(self)
-        if not session.ready:
-            return None
-        mail_server = session.mail_server_id
-        if not self._filter_mail_mail_servers(mail_server):
-            raise UserError(_('Unauthorized server for some of the sending mails.'))
-        if mail_server.owner_user_id:
-            # Throttle the sending that use personal mail servers
-            # XXX need to find other mail items to update in batch
-            if not self._split_by_delayed_batch(mail_server):
-                session.close()
-                return None
-
-        return session
+    def _send_resource_batcher(self, session=None) -> 'SmtpSessionX' | None:  # XXX resource must be private?
+        for mail_server_id, alias_domain_id, email_from, ids in self._split_by_mail_configuration():
+            if (
+                session is not None
+                and mail_server_id == session.mail_server_id
+                and alias_domain_id == session.alias_domain_id
+                and email_from == session.email_from
+            ):
+                pass
+            else:
+                session = SmtpSessionX(self.env, mail_server_id, alias_domain_id, email_from)
+            mail_server = session.mail_server_id
+            mails = self.browse(ids)
+            if not mails._filter_mail_mail_servers(mail_server):
+                raise UserError(self.env._('Unauthorized server for some of the sending mails.'))
+            if mail_server.owner_user_id:
+                # Throttle the sending that use personal mail servers
+                mails = mails._split_by_delayed_batch(mail_server)
+                if not mails:
+                    continue
+            yield session, mails
 
     def _send_error_handler(self, exception):
         raise exception  # handled in _send, but should be moved here to persist the info
@@ -810,7 +804,7 @@ class MailMail(models.Model):
             # during testing skip sending e-mails unless monkeypatched
             return True
         try:
-            send_resource.open()
+            send_resource.open()  # XXX connection failure marks the mails!
         except Exception as exc:  # noqa: BLE001
             self.write({'state': 'exception', 'failure_reason': tools.exception_to_unicode(exc)})
             self._postprocess_sent_message(success_pids=[], success_emails=[], failure_type="mail_smtp")
@@ -1041,45 +1035,27 @@ class MailMail(models.Model):
 
 
 class SmtpSessionX:
-    def __init__(self, mail: MailMail):
-        assert mail._name == MailMail._name
-        self.env = mail.env
-        for data in mail._split_by_mail_configuration():
-            self.mail_server_id, self.alias_domain_id, self.email_from, _ids = data
-            break
-        else:
-            self.mail_server_id = self.alias_domain_id = self.email_from = False
+    def __init__(self, env, mail_server_id, alias_domain_id, email_from):
+        self.mail_server = env['ir.mail_server'].browse(mail_server_id)
+        self.mail_server_id = mail_server_id
+        self.alias_domain_id = alias_domain_id
+        self.email_from = email_from
         self.smtp_session = None
         self.first_mail = True
 
-    def can_handle(self, mail: MailMail):
-        assert mail._name == MailMail._name
-        self.first_mail = False
-        if not self.ready:
-            return False
-        res = False
-        for mail_server_id, alias_domain_id, email_from, _ids in mail._split_by_mail_configuration():
-            if res:
-                return False  # more than one batch
-            res = mail_server_id == self.mail_server_id and alias_domain_id == self.alias_domain_id and email_from == self.email_from
-            if res and mail_server_id.owner_stuff_throttle_XXX and not mail_server_id.try_lock_for_update(allow_referencing=True):
-                return False  # server locked
-        return res
-
     @property
     def ready(self):
-        # XXX Check lock on mail server?
-        return self.smtp_session or self.first_mail
+        return self.mail_server.try_lock_for_update() and (self.smtp_session or self.first_mail)
 
-    def open(self):
-        if self.smtp_session is None:
-            try:
-                self.smtp_session = self.env['ir.mail_server']._connect__(mail_server_id=self.mail_server_id, smtp_from=self.smtp_from)
-            except Exception as exc:  # noqa: BLE001
-                raise MailDeliveryException(_('Unable to connect to SMTP Server'), exc)
-        return self.smtp_session
+    def __enter__(self):
+        if self.smtp_session is not None:
+            raise RuntimeError('already connected')
+        try:
+            self.smtp_session = self.mail_server._connect__(mail_server_id=self.mail_server_id, smtp_from=self.smtp_from)
+        except Exception as exc:  # noqa: BLE001
+            raise MailDeliveryException(self.env._('Unable to connect to SMTP Server'), exc)
 
-    def close(self):
+    def __exit__(self, exc_type, exc, tb):
         if smtp_session := self.smtp_session:
             self.smtp_session = None
             try:
