@@ -4213,7 +4213,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
 
         with (
             self.enter_registry_test_mode(),
-            patch('odoo.addons.base.models.ir_cron.IrCron._reschedule_asap') as reschedule_asap,
+            patch('odoo.addons.base.models.ir_cron.IrCron._reschedule_asap') as reschedule_asap,  # XXX will fail
         ):
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
             # No retries for batches with failed moves
