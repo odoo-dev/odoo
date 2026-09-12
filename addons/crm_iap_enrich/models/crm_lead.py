@@ -5,7 +5,6 @@ import logging
 
 from odoo import _, api, fields, models, modules, tools
 from odoo.addons.iap.tools import iap_tools
-from odoo.tools import OrderedSet
 
 _logger = logging.getLogger(__name__)
 
@@ -28,15 +27,11 @@ class CrmLead(models.Model):
     def _iap_enrich_leads_cron(self, enrich_hours_delay=24, batch_size=50):
         timeDelta = self.env.cr.now() - datetime.timedelta(hours=enrich_hours_delay)
         # Get all leads not lost nor won (lost: active = False)
-        leads = self.search([
-            ('iap_enrich_done', '=', False),
-            '|', ('probability', '<', 100), ('probability', '=', False),
-            ('email_from', '!=', False),
+        search_domain = [
             ('reveal_id', '=', False),
             ('create_date', '>', timeDelta),
-            ('active', '=', True),
-        ])
-        leads.iap_enrich(batch_size=batch_size)
+        ]
+        api.process.cron_implementation(self, '_iap_enrich', search_domain=search_domain, search_limit=batch_size, search_order='create_date')
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -103,57 +98,41 @@ class CrmLead(models.Model):
         enriched_leads = self._iap_enrich_from_response(iap_response)
         return enriched_leads
 
-    def iap_enrich(self, *, batch_size=50):
+    @property
+    def _iap_enrich_precondition(self):
+        return [
+            ('iap_enrich_done', '=', False),
+            ('probability', '<', 100),
+            ('email_from', '!=', False),
+            ('active', '=', True),
+        ]
+
+    @property
+    def _iap_batch_size(self):
+        return self.env.context.get('batch_size') or 50
+
+    _iap_enrich_cron_id = 'crm_iap_enrich.ir_cron_lead_enrichment'
+
+    def _iap_enrich(self):
         from_cron = bool(self.env.context.get('cron_id'))
         send_notification = not from_cron
+        remaining = self - self._process_leads(send_notification=send_notification)
+        if remaining:
+            _logger.info("not possible to enrich %s", remaining)
 
-        if from_cron:
-            self.env['ir.cron']._commit_progress(remaining=len(self))
-        all_lead_ids = OrderedSet(self.ids)
-        while all_lead_ids:
-            leads = self.browse(all_lead_ids).try_lock_for_update(limit=batch_size)
-            if not leads:
-                _logger.error('A batch of leads could not be enriched (locked): %s', repr(self.browse(all_lead_ids)))
-                # all are locked, schedule the cron later when the records might be unlocked
-                self.env.ref('crm_iap_enrich.ir_cron_lead_enrichment')._trigger(self.env.cr.now() + datetime.timedelta(minutes=5))
-                if from_cron:
-                    # mark the cron as fully done to prevent immediate reschedule
-                    self.env['ir.cron']._commit_progress(remaining=0)
-                break
-            all_lead_ids -= set(leads._ids)
+    def _iap_enrich_error_handler(self, exc):
+        if isinstance(exc, iap_tools.InsufficientCreditError):
+            # Since there are no credits left, there is no point to process the other batches
+            return XXX  # XXX break the cron
+        # _send_error_notification already called, what now?
+        pass  # XXX stop it?
 
-            if from_cron:
-                # Using commit progress for processed leads
-                try:
-                    leads._process_leads(send_notification=send_notification)
-                    time_left = self.env['ir.cron']._commit_progress(len(leads))
-                except iap_tools.InsufficientCreditError:
-                    # Since there are no credits left, there is no point to process the other batches
-                    # set remaining=0 to avoid being called again
-                    self.env['ir.cron']._commit_progress(remaining=0)
-                    break
-                except Exception:
-                    self.env['ir.cron']._rollback_progress()
-                    _logger.error('A batch of leads could not be enriched: %s', repr(leads))
-                    time_left = self.env['ir.cron']._commit_progress(len(leads))
-                if not time_left:
-                    break
-            else:
-                # Commit processed batch to avoid complete rollbacks and therefore losing credits.
-                try:
-                    if modules.module.current_test:
-                        with self.env.cr.savepoint():
-                            leads._process_leads(send_notification=send_notification)
-                    else:
-                        leads._process_leads(send_notification=send_notification)
-                        self.env.cr.commit()
-                except iap_tools.InsufficientCreditError:
-                    # Since there are no credits left, there is no point to process the other batches
-                    break
-                except Exception:
-                    if not modules.module.current_test:
-                        self.env['ir.cron']._rollback_progress()
-                    _logger.error('A batch of leads could not be enriched: %s', repr(leads))
+    def iap_enrich(self, *, batch_size=50):
+        self.iap_enrich_done = False
+        if modules.module.current_test:  # XXX this should not be needed at all
+            api.process.run_try_now(self.with_context(batch_size=batch_size), '_iap_enrich')
+        else:
+            api.process.run_with_commit(self.with_context(batch_size=batch_size), '_iap_enrich')
 
     @api.model
     def _iap_enrich_from_response(self, iap_response):
