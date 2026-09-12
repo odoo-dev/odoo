@@ -82,7 +82,8 @@ class StockMove(models.Model):
     location_dest_id = fields.Many2one(
         'stock.location', 'Intermediate Location', required=True,
         help='The operations brings product to this location', readonly=False,
-        index=True, store=True, compute='_compute_location_dest_id', precompute=True, inverse='_set_location_dest_id')
+        index=True, store=True, compute='_compute_location_dest_id', precompute=True,
+        inverse='_set_location_dest_id', force_inverse=True)
     forecasted_location_id = fields.Many2one(
         'stock.location', 'Forecasted Location',
         readonly=False, store=True,
