@@ -22,6 +22,7 @@ class PaymentProvider(models.Model):
         comodel_name='account.journal',
         compute='_compute_journal_id',
         inverse='_inverse_journal_id',
+        force_inverse=True,
         check_company=True,
         domain='[("type", "=", "bank")]',
         copy=False,
