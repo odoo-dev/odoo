@@ -6,7 +6,13 @@ import { markRaw, signal } from "@odoo/owl";
 /** @typedef {import("./record_list").RecordList} RecordList */
 
 export class RecordListInternal {
-    /** @type {import("@odoo/owl").Signal<Record[]>} raw */
+    /**
+     * Callback-based reads of many relations capture this array and its initial length.
+     * Replace it when removing, reordering or replacing records so callbacks and synchronous
+     * observers cannot change an ongoing traversal. Appending in place is safe for these reads.
+     *
+     * @type {import("@odoo/owl").Signal<Record[]>}
+     */
     data = signal.Array();
     /** @type {string} */
     name;
@@ -245,7 +251,11 @@ export class RecordListInternal {
                 const index = parseInt(name);
                 self.insert(val, function recordListSet_Insert(newRecord) {
                     const oldRecord = self.data()[index];
-                    self.data()[index] = newRecord;
+                    if (oldRecord !== newRecord) {
+                        const list = self.data().slice();
+                        list[index] = newRecord;
+                        self.data.set(list);
+                    }
                     if (oldRecord && oldRecord.notEq(newRecord)) {
                         oldRecord._.uses.delete(recordList);
                     }
@@ -272,7 +282,11 @@ export class RecordListInternal {
                     if (newLength < self.data().length) {
                         recordList.splice(newLength, recordList.length - newLength);
                     }
-                    self.data().length = newLength;
+                    if (self.data().length !== newLength) {
+                        const list = self.data().slice();
+                        list.length = newLength;
+                        self.data.set(list);
+                    }
                     self.syncLength();
                 }
             } else {

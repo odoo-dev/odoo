@@ -69,18 +69,11 @@ export class RecordList extends Array {
         const recordList = this._raw;
         const store = recordList._store;
         return store.MAKE_UPDATE(function recordListShift() {
-            const record = recordList._.data().shift();
-            recordList._.syncLength();
-            if (!record) {
-                return;
+            const oldRecordProxy = recordList.at(0);
+            if (oldRecordProxy) {
+                recordList.splice(0, 1);
             }
-            record._.uses.delete(recordList);
-            store._.ADD_QUEUE("onDelete", recordList._.owner, recordList._.name, record);
-            const inverse = recordList._.getInverse();
-            if (inverse) {
-                store._.updateFields(record, { [inverse]: [["DELETE", recordList._.owner]] });
-            }
-            return record._proxy;
+            return oldRecordProxy;
         });
     }
     /** @param {R[]} records */
@@ -91,7 +84,9 @@ export class RecordList extends Array {
             const inverse = recordList._.getInverse();
             for (let i = records.length - 1; i >= 0; i--) {
                 const record = recordList._.insert(records[i], (record) => {
-                    recordList._.data().unshift(record);
+                    const list = recordList._.data().slice();
+                    list.unshift(record);
+                    recordList._.data.set(list);
                     recordList._.syncLength();
                     record._.uses.add(recordList);
                 });
