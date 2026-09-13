@@ -98,19 +98,13 @@ class CrmLead(models.Model):
         enriched_leads = self._iap_enrich_from_response(iap_response)
         return enriched_leads
 
-    @property
-    def _iap_enrich_precondition(self):
-        return [
+    _iap_enrich_precondition = [
             ('iap_enrich_done', '=', False),
             ('probability', '<', 100),
             ('email_from', '!=', False),
             ('active', '=', True),
-        ]
-
-    @property
-    def _iap_batch_size(self):
-        return self.env.context.get('batch_size') or 50
-
+    ]
+    _iap_enrich_batch_size = 50
     _iap_enrich_cron_id = 'crm_iap_enrich.ir_cron_lead_enrichment'
 
     def _iap_enrich(self):
@@ -123,16 +117,16 @@ class CrmLead(models.Model):
     def _iap_enrich_error_handler(self, exc):
         if isinstance(exc, iap_tools.InsufficientCreditError):
             # Since there are no credits left, there is no point to process the other batches
-            return XXX  # XXX break the cron
+            raise exc
         # _send_error_notification already called, what now?
         pass  # XXX stop it?
 
     def iap_enrich(self, *, batch_size=50):
         self.iap_enrich_done = False
         if modules.module.current_test:  # XXX this should not be needed at all
-            api.process.run_try_now(self.with_context(batch_size=batch_size), '_iap_enrich')
+            api.process.run_try_now(self.with_context(_iap_enrich_batch_size=batch_size), '_iap_enrich')
         else:
-            api.process.run_with_commit(self.with_context(batch_size=batch_size), '_iap_enrich')
+            api.process.run_with_commit(self.with_context(_iap_enrich_batch_size=batch_size), '_iap_enrich')
 
     @api.model
     def _iap_enrich_from_response(self, iap_response):

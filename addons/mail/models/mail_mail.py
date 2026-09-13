@@ -246,6 +246,7 @@ class MailMail(models.Model):
             self, '_send',
             search_domain=domain,
             search_limit=batch_size,
+            search_order='id',
             compute_remaining=domain.is_true(),
         )
 
@@ -762,7 +763,6 @@ class MailMail(models.Model):
         }
 
     _send_cron_id = 'mail.ir_cron_mail_scheduler_action'
-    _send_order = 'id'
     _send_precondition = (
         Domain('state', '=', 'outgoing') & (
             Domain('scheduled_date', '=', False)
@@ -770,34 +770,52 @@ class MailMail(models.Model):
         )
     )
 
-    def _send_resource_batcher(self, session=None) -> 'SmtpSessionX' | None:  # XXX resource must be private?
+    def _send_order(self):
+        batches = defaultdict(list)
         for mail_server_id, alias_domain_id, email_from, ids in self._split_by_mail_configuration():
-            if (
-                session is not None
-                and mail_server_id == session.mail_server_id
-                and alias_domain_id == session.alias_domain_id
-                and email_from == session.email_from
-            ):
-                pass
-            else:
-                session = SmtpSessionX(self.env, mail_server_id, alias_domain_id, email_from)
-            mail_server = session.mail_server_id
-            mails = self.browse(ids)
-            if not mails._filter_mail_mail_servers(mail_server):
+            batches[mail_server_id, alias_domain_id, email_from].extend(ids)
+            # XXX filter
+            if not mail._filter_mail_mail_servers(mail_server):
                 raise UserError(self.env._('Unauthorized server for some of the sending mails.'))
+            IrMailServer = send_resource.IrMailServer
             if mail_server.owner_user_id:
                 # Throttle the sending that use personal mail servers
                 mails = mails._split_by_delayed_batch(mail_server)
-                if not mails:
-                    continue
-            yield session, mails
+        index = dict(zip(batches, range(len(batches))))
+        lookup = {
+            id_: key
+            for key, ids in batches.items()
+            if (index := index[key]) is not None
+            for id_ in ids
+        }
+        return self.browse(sorted(lookup, key=lookup.__get__))
 
     def _send_error_handler(self, exception):
         raise exception  # handled in _send, but should be moved here to persist the info
 
     def _send(self, alias_domain_id=False):
-        send_resource: SmtpSessionX = api.process.check(self, '_send')
+        mail = self.ensure_one()
+        for mail_server_id, mail_alias_domain_id, email_from, _ids in self._split_by_mail_configuration():
+            if alias_domain_id is not None and alias_domain_id != mail_alias_domain_id:
+                raise ValueError("Alias domain does not match")
+            alias_domain_id = mail_alias_domain_id
+            resource_key = (mail_server_id, mail_alias_domain_id, email_from)
+            break
+        else:
+            raise RuntimeError('unreachable')
+        send_resource: SmtpSessionX | None = api.process.resource(self, '_send', key=resource_key)
+        if send_resource is None:
+            send_resource = SmtpSessionX(self.env, *resource_key)
+            api.process.resource(self, '_send', key=resource_key, set_resource=send_resource)
+        mail_server = send_resource.mail_server_id
+        if not mail._filter_mail_mail_servers(mail_server):
+            raise UserError(self.env._('Unauthorized server for some of the sending mails.'))
         IrMailServer = send_resource.IrMailServer
+        if mail_server.owner_user_id:
+            # Throttle the sending that use personal mail servers
+            mails = mails._split_by_delayed_batch(mail_server)
+            if not mails:
+                continue
 
         if not send_resource.ready or IrMailServer._disable_send():
             # throttled or
@@ -821,7 +839,6 @@ class MailMail(models.Model):
             success_emails = []
             failure_reason = None
             failure_type = None
-            mail = self
             try:
                 no_recipients = (not (mail.email_to or '').strip() and not mail.recipient_ids
                                  and not (mail.email_cc or '').strip() and not mail.recipient_cc_ids)
