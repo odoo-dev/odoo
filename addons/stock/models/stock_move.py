@@ -170,7 +170,7 @@ class StockMove(models.Model):
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
     has_lines_without_result_package = fields.Boolean(compute="_compute_has_lines_without_result_package")
     quantity = fields.Float(
-        'Quantity', compute='_compute_quantity', digits='Product Unit', inverse='_set_quantity', store=True,
+        'Quantity', compute='_compute_quantity', digits='Product Unit', inverse='_set_quantity', force_inverse=True, store=True,
         write_sequence=25,  # ensure that the lot_ids changed is processed before processing the quantity change,
                             # to avoid unexpected lot_ids that will be re-added later in the process.
     )
