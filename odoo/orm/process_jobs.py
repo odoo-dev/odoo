@@ -40,7 +40,7 @@ class ProcessingState[M: BaseModel, Resource]:
         self.error_handler: Callable[[M, Exception], None] = error_handler
 
         precondition = getattr(model, process_name + '_precondition')
-        if callable(precondition):
+        if callable(precondition):  # XXX make it a property
             precondition = precondition()
         precondition = Domain(precondition)
         assert not precondition.is_true()
@@ -49,7 +49,7 @@ class ProcessingState[M: BaseModel, Resource]:
         self._cron_id = getattr(model, self.__process_name + '_cron_id')
 
         batch_size = getattr(model, process_name + '_batch_size', 1)
-        if callable(batch_size):
+        if callable(batch_size):  # XXX make it a property or read from context?
             batch_size = batch_size()
         assert batch_size > 0
         self.batch_size: int = batch_size
