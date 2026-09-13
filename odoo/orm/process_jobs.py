@@ -42,7 +42,7 @@ class ProcessingState[M: BaseModel]:
         precondition = getattr(model, process_name + '_precondition')
         if callable(precondition):  # XXX make it a property
             precondition = precondition()
-        precondition = Domain(precondition)
+        precondition = Domain(precondition).optimize(model)
         assert not precondition.is_true()
         self.precondition = precondition
 
@@ -120,24 +120,20 @@ class ProcessingState[M: BaseModel]:
     def _run_with_commit(self, records: BaseModel):
         self.check(records, self.__process_name)
         cron = records.env['ir.cron']
-        ids = OrderedSet(records._ids)
         remaining_time = True
-        while remaining_time and ids:
-            records = records.browse(ids).try_lock_for_update(allow_referencing=self.allow_referencing, limit=self.batch_size)
-            if not records:
-                break  # failed to lock anything
-            ids.difference_update(records._ids)
-            records = records.filtered_domain(self.precondition)
-            for records in self.resource_batcher(records):
-                try:
+        records = records.filtered_domain(self.precondition)
+        for records in self.resource_batcher(records):
+            try:
+                records = records.try_lock_for_update(allow_referencing=self.allow_referencing).filtered_domain(self.precondition)
+                if records:
                     self.process(records)
-                    remaining_time = cron._commit_progress(len(records))
-                except Exception as exception:  # noqa: BLE001
-                    cron._rollback_progress()
-                    self.error_handler(records, exception)
-                    remaining_time = cron._commit_progress(0)
-                if not remaining_time:
-                    break
+                remaining_time = cron._commit_progress(len(records))
+            except Exception as exception:  # noqa: BLE001
+                cron._rollback_progress()
+                self.error_handler(records, exception)
+                remaining_time = cron._commit_progress(0)
+            if not remaining_time:
+                break
         return remaining_time
 
     def _run_in_env(self, records: BaseModel, raise_on_error: bool = False) -> int:
@@ -165,7 +161,7 @@ class process:
     def __new__(cls):
         raise RuntimeError("process is just a namespace")
 
-    @staticmethod
+    @staticmethod  # XXX move to ProcessingState
     def _get(model: BaseModel, process_name: str, *, create: bool) -> ProcessingState:
         try:
             state = processing_state.get()
@@ -228,9 +224,15 @@ class process:
             sql = SQL("%s %s", query.select(), lock_sql)
             while remaining and (rows := model.env.execute_query(sql)):
                 batch_records = model.browse(row[0] for row in rows)
+                first_batch = True
                 for records in proc.resource_batcher(batch_records):
                     try:
-                        proc.process(records)
+                        if first_batch:
+                            first_batch = False
+                        else:
+                            records = records.try_lock_for_upate(allow_referencing=proc.allow_referencing).filtered_domain(proc.precondition)
+                        if records:
+                            proc.process(records)
                         remaining = cron._commit_progress(len(records))
                     except Exception as exception:  # noqa: BLE001
                         cron._rollback_progress()
@@ -253,7 +255,7 @@ class process:
 
     @staticmethod
     def run_with_commit(records: BaseModel, process_name: str) -> float:
-        """Process the queue in the current cursor. Return remaining time."""
+        """Process the queue in the current cursor and context. Return remaining time."""
         with process._get(records, process_name, create=False) as proc:
             return proc._run_with_commit(records)
 
@@ -287,7 +289,7 @@ class process:
                 records = self.identifier  # init for exception handler
                 try:
                     with Registry(db_name).cursor() as cr:
-                        env = Environment(cr, SUPERUSER_ID, {'end_time': end_time})
+                        env = Environment(cr, SUPERUSER_ID, {'cron_end_time': end_time})
                         records = env[self.__model_name]
                         cron = self.get_cron(records)
                         records = records.browse(todo).with_user(cron.user_id)
