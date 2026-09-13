@@ -9,10 +9,23 @@ import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {Object} SearchFilter
- * @property {string} label
  * @property {TranslatedString} name
- * @property {true|false|undefined} [is_notification]
+ * @property {string|undefined} search_filter id for `_message_fetch` (`undefined` = All)
  */
+
+/**
+ * Supported message search filters for `_message_fetch`.
+ * Keep in sync with `MESSAGE_SEARCH_FILTERS` in `mail/models/mail_message.py`.
+ *
+ * @type {SearchFilter[]}
+ */
+export const MESSAGE_SEARCH_FILTERS = [
+    { name: _t("All"), search_filter: undefined },
+    { name: _t("Messages"), search_filter: "messages" },
+    { name: _t("Notes"), search_filter: "notes" },
+    { name: _t("Activities"), search_filter: "activities" },
+    { name: _t("Changes"), search_filter: "changes" },
+];
 
 export class SearchMessageInput extends Component {
     static template = "mail.SearchMessageInput";
@@ -21,6 +34,7 @@ export class SearchMessageInput extends Component {
     setup() {
         super.setup();
         this.store = useService("mail.store");
+        this.MESSAGE_SEARCH_FILTERS = MESSAGE_SEARCH_FILTERS;
         this.props = useProps({
             closeSearch: t.function([]).optional(),
             messageSearch: t.instanceOf(MessageSearchState),
@@ -40,19 +54,10 @@ export class SearchMessageInput extends Component {
 
     /** @param {SearchFilter} searchFilter */
     onChangeSearchFilter(searchFilter) {
-        if (searchFilter.is_notification !== this.props.messageSearch.is_notification) {
+        if (searchFilter.search_filter !== this.props.messageSearch.search_filter) {
             this.props.messageSearch.lastEmptyTerm = undefined;
-            this.props.messageSearch.is_notification = searchFilter.is_notification;
+            this.props.messageSearch.search_filter = searchFilter.search_filter;
         }
-    }
-
-    /** @returns {SearchFilter[]} */
-    get searchFilters() {
-        return [
-            { label: "all", name: _t("All"), is_notification: undefined },
-            { label: "conversations", name: _t("Conversations"), is_notification: false },
-            { label: "tracked_changes", name: _t("Tracked Changes"), is_notification: true },
-        ];
     }
 
     get inputPlaceholder() {
