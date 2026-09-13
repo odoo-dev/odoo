@@ -55,11 +55,7 @@ class ProcessingState[M: BaseModel, Resource]:
         self.batch_size: int = batch_size
 
         self.allow_referencing = bool(getattr(model, process_name + '_allow_referencing', True))
-        self.order: str = getattr(model, process_name + '_order', '')
-        self._resource_batcher: Callable[[M, Resource | None], Iterable[tuple[Resource | None, M]]] = (
-            getattr(Model, self.__process_name + '_resource_batcher', None)
-            or (lambda records, _r: [(None, records)])
-        )
+        self.order: str = getattr(model, process_name + '_order', '')  # XXX make it callable for batching?
 
         # context manager variables
         self.resource: Resource | None = None
