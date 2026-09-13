@@ -9,7 +9,7 @@ import os
 import threading
 import time
 import typing
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, UTC
 
 import psycopg2
 import psycopg2.errors
