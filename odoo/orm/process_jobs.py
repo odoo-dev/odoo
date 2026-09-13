@@ -21,7 +21,7 @@ _logger = logging.getLogger(__name__)
 EMPTY_RESOURCE = contextlib.nullcontext(None)
 
 
-class ProcessingState[M: BaseModel, Resource]:
+class ProcessingState[M: BaseModel]:
     def __init__(self, model: M, process_name: str):
         if '__' in process_name or not process_name:
             raise ValueError
@@ -58,7 +58,7 @@ class ProcessingState[M: BaseModel, Resource]:
         self.order: str = getattr(model, process_name + '_order', '')  # XXX make it callable for batching?
 
         # context manager variables
-        self.resource: Resource | None = None
+        self.resource_exit: Callable | None = None
         self.resource_value = None
         self.__reset_token = None
 
@@ -75,18 +75,19 @@ class ProcessingState[M: BaseModel, Resource]:
             processing_state.reset(self.__reset_token)
             self.__reset_token = None
 
-    def _set_resource(self, resource: Resource, exit_args=(None, None, None)):
+    def _set_resource(self, resource, exit_args=(None, None, None)):
         if resource is self.resource:
             return
         # exit the old resource
+        resource_exit = self.resource_exit
         self.resource_value = None
-        if self.resource is not None:
-            self.resource.__exit__(*exit_args)
-            self.resource = None
+        self.resource_exit = None
+        if resource_exit:
+            resource_exit(*exit_args)
         # enter the new resource
         if resource is not None:
             self.resource_value = resource.__enter__()  # ruff:ignore[unnecessary-dunder-call]
-            self.resource = resource
+            self.resource = resource.__exit__
 
     def resource_batcher(self, records: M):
         """Create batches per resource and per batch_size."""
