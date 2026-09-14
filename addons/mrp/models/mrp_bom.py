@@ -49,7 +49,7 @@ class MrpBom(models.Model):
         default=_default_uom_id, required=True,
         help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control")
     sequence = fields.Integer('Sequence')
-    operation_ids = fields.One2many('mrp.routing.workcenter', 'bom_id', 'Operations', copy=True)
+    operation_ids = fields.One2many('mrp.routing.workcenter', 'bom_id', 'Operations', copy=True, domain=[('active', '=', True)])
     operation_count = fields.Integer('Operations Count', compute='_compute_operation_count')
     component_count = fields.Integer(compute='_compute_component_count')
     subassembly_count = fields.Integer(compute='_compute_subassembly_count')
