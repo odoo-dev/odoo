@@ -130,7 +130,9 @@ class CalendarEvent(models.Model):
         if 'res_id' not in defaults and 'res_id' in fields and \
                 defaults.get('res_model_id') and context.get('active_id'):
             defaults['res_id'] = context['active_id']
-
+        if defaults.get('is_draft') and 'show_as' in fields and 'default_show_as' not in context:
+            # if the show_as was not enforced by the context, set 'free' for 'is_draft'
+            defaults['show_as'] = 'free'
         return defaults
 
     @api.model
@@ -327,13 +329,8 @@ class CalendarEvent(models.Model):
 
     @api.onchange("allday")
     def _onchange_allday(self):
-        for event in self:
+        for event in self.filtered(lambda event: event.allday):
             event.show_as = 'free' if event.allday else 'busy'
-
-    @api.onchange('is_draft')
-    def _onchange_is_draft(self):
-        for event in self:
-            event.show_as = 'free' if event.is_draft else 'busy'
 
     @api.depends("attendee_ids")
     def _compute_should_show_status(self):
@@ -1172,6 +1169,7 @@ class CalendarEvent(models.Model):
         return new_events
 
     def action_confirm(self):
+        self.show_as = 'busy'
         self.is_draft = False
 
     def action_open_archive_or_unlink_wizard(self, requested_action, next_action=None):
