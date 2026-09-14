@@ -140,6 +140,7 @@ class Website(models.CachedModel):
         ondelete='restrict',
     )
     configurator_done = fields.Boolean(help='True if configurator has been completed or ignored')
+    brief = fields.Text(string="Brief", help="A short description of what this website is about: industry, type of website, vibe. AI features read it to tailor their output.")
     block_third_party_domains = fields.Boolean(
         'Block 3rd-party domains',
         help="Block 3rd-party domains that may track users (YouTube, Google Maps, etc.).",
@@ -927,6 +928,13 @@ class Website(models.CachedModel):
         website = self.env['website'].browse(website.id)
 
         website.configurator_done = True
+
+        brief_description = [self.env._('Industry: %s', kwargs['industry_name'])]
+        if website_type := kwargs.get('website_type'):
+            brief_description.append(self.env._('Website type: %s', website_type))
+        if website_purpose := kwargs.get('website_purpose'):
+            brief_description.append(self.env._('Vibe: %s', website_purpose))
+        website.brief = '\n'.join(brief_description)
 
         # Enable tour
         tour_asset_id = self.env.ref('website.configurator_tour')
