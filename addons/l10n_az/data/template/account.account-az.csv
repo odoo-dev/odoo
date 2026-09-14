@@ -147,6 +147,7 @@
 "az_account_24110","VAT recoverable","Əvəzləşdirilən ƏDV","","","24110","asset_receivable","True","True","az_account_241",""
 "az_account_24120","Excise tax recoverable","Əvəzləşdirilən aksiz vergisi","","","24120","asset_receivable","True","True","az_account_241",""
 "az_account_24130","Other Tax receivables","Digər əvəzləşdirilən vergilər","","","24130","asset_receivable","True","True","az_account_241",""
+"az_account_24140","Simplified tax receivable","Əvəzləşdirilən sadələşdirilmiş vergi","","","24140","asset_receivable","True","True","az_account_241",""
 "az_account_242","Prepaid expenses","Gələcək hesabat dövrünün xərcləri","","","242","asset_current","","","az_account_24","False"
 "az_account_24210","Future accounting period expenses for cost of sales expenses","Satışın maya dəyəri xərcləri üzrə gələcək hesabat dövrlərinin xərcləri","","","24210","asset_prepayments","","","az_account_242",""
 "az_account_24220","Expenses for future accounting periods on commercial expenses","Kommersiya xərcləri üzrə gələcək hesabat dövrlərinin xərcləri","","","24220","asset_prepayments","","","az_account_242",""
