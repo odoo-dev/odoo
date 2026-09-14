@@ -89,7 +89,7 @@ class MrpProduction(models.Model):
 
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain="[('type', '=', 'consu')]",
+        domain=[('type', '=', 'consu')],
         compute='_compute_product_id', store=True, copy=True, precompute=True,
         readonly=False, required=True, index=True, check_company=True)
     product_name = fields.Char(compute='_compute_product_name')  # technical: used in views only
