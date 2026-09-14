@@ -19,7 +19,7 @@ class ResourceResource(models.Model):
     hours_per_week = fields.Float(compute='_compute_hours_per_week', inverse='_inverse_hours_per_week', store=True, readonly=False)
     hours_per_day = fields.Float(compute='_compute_hours_per_day', inverse='_inverse_hours_per_day', store=True, readonly=False)
 
-    job_title = fields.Char(compute='_compute_job_title', compute_sudo=True)
+    job_id = fields.Many2one(related='employee_id.job_id')
     department_id = fields.Many2one('hr.department', compute='_compute_department_id', compute_sudo=True)
     work_location_id = fields.Many2one(related='employee_id.work_location_id')
     work_email = fields.Char(related='employee_id.work_email')
@@ -54,11 +54,6 @@ class ResourceResource(models.Model):
     def _inverse_hours_per_day(self):
         for resource in self.filtered('employee_id'):
             resource.employee_id.current_version_id.hours_per_day = resource.hours_per_day
-
-    @api.depends('employee_id')
-    def _compute_job_title(self):
-        for resource in self:
-            resource.job_title = resource.employee_id.job_title
 
     @api.depends('employee_id')
     def _compute_department_id(self):

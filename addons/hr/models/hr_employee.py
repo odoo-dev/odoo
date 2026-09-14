@@ -2390,7 +2390,7 @@ class HrEmployee(models.Model):
             "active",
             "company_id",
             "hr_icon_display",
-            "job_title",
+            "job_id",
             "name",
             "show_hr_icon_display",
         ])
