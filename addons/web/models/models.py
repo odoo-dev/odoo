@@ -2249,8 +2249,9 @@ class Base(models.AbstractModel):
             field = self._fields[field_name]
             if field.type not in ('one2many', 'many2many'):
                 continue
-            sub_fields_spec = field_spec.get('fields') or {}
-            if sub_fields_spec and values.get(field_name):
+            sub_fields = OrderedSet(field_spec.get('fields') or ())
+            sub_fields.update(self[field_name]._inherits.values())
+            if sub_fields and values.get(field_name):
                 # retrieve all line ids in commands
                 line_ids = OrderedSet(self[field_name].ids)
                 for cmd in values[field_name]:
@@ -2260,11 +2261,11 @@ class Base(models.AbstractModel):
                         line_ids.update(cmd[2])
                 # prefetch stored fields on lines
                 lines = self[field_name].browse(line_ids)
-                lines.fetch(sub_fields_spec.keys())
+                lines.fetch(sub_fields)
                 # copy the cache of lines to their corresponding new records;
                 # this avoids computing computed stored fields on new_lines
                 new_lines = lines.browse(map(NewId, line_ids))
-                for field_name in sub_fields_spec:
+                for field_name in sub_fields:
                     field = lines._fields[field_name]
                     for new_line, line in zip(new_lines, lines):
                         line_value = field.convert_to_cache(line[field_name], new_line, validate=False)
