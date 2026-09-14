@@ -82,9 +82,12 @@ class StockWarehouse(models.Model):
     delivery_route_id = fields.Many2one('stock.route', 'Delivery Route', ondelete='restrict', copy=False)
     resupply_wh_ids = fields.Many2many(
         'stock.warehouse', 'stock_wh_resupply_table', 'supplied_wh_id', 'supplier_wh_id',
-        'Resupply From', help="Routes will be created automatically to resupply this warehouse from the warehouses ticked")
+        string='Resupply From',
+        domain=[('active', '=', True)],
+        help="Routes will be created automatically to resupply this warehouse from the warehouses ticked")
     resupply_route_ids = fields.One2many(
         'stock.route', 'supplied_wh_id', 'Resupply Routes',
+        domain=[('active', '=', True)],
         help="Routes will be created for these resupply warehouses and you can select them on products and product categories", copy=False)
     sequence = fields.Integer(default=10,
         help="Gives the sequence of this line when displaying the warehouses.")
