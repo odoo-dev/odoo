@@ -18,6 +18,7 @@ from werkzeug import urls
 
 from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
+from odoo.fields import Domain
 from odoo.tools import SQL, LazyTranslate
 from odoo.tools.business_data import street_split, split_vat
 from odoo.tools.date_utils import all_timezones
@@ -378,7 +379,7 @@ class ResPartner(models.Model):
         "When a single user is needed, this field attempts to find the most appropriate one.",
     )
     partner_share = fields.Boolean(
-        'Share Partner', compute='_compute_partner_share', store=True,
+        'Share Partner', compute='_compute_partner_share', search='_search_partner_share',
         help="Either customer (not a user), either shared user. Indicated the current partner is a customer without "
              "access or with a limited access created for sharing data.")
     contact_address = fields.Char(compute='_compute_address', string="Complete Address")
@@ -536,6 +537,15 @@ class ResPartner(models.Model):
             super_partner.partner_share = False
         for partner in self - super_partner:
             partner.partner_share = not partner.user_ids or not any(not user.share for user in partner.user_ids)
+
+    def _search_partner_share(self, operator, value):
+        if operator not in ('=', '!='):
+            return NotImplemented
+        is_share = (value and operator == '=') or (not value and operator == '!=')
+        # has_internal_user == True  <=>  at least one of its users is internal (share=False)
+        has_internal_user = Domain('user_ids.share', '=', False)
+        # partner_share == True  <=>  none of its users is an internal (non-share) user
+        return ~has_internal_user if is_share else has_internal_user
 
     @api.depends('vat', 'company_id', 'country_id')
     def _compute_same_vat_partner_id(self):

@@ -220,7 +220,7 @@ class ResUsers(models.Model):
     device_ids = fields.One2many('res.device', 'user_id', string='User devices')
     session_ids = fields.One2many('res.session', 'user_id', string='User sessions')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest Login', readonly=False)
-    share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
+    share = fields.Boolean(compute='_compute_share', compute_sudo=True, search='_search_share', string='Share User',
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies")
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset')
@@ -490,6 +490,20 @@ class ResUsers(models.Model):
         internal_users = self.filtered_domain([('all_group_ids', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
+
+    def _search_share(self, operator, value):
+        if operator not in ('=', '!='):
+            return NotImplemented
+        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
+        group_definitions = self.env['res.groups']._get_group_definitions()
+        # groups that grant (transitively imply) base.group_user
+        internal_group_ids = [user_group_id, *group_definitions.get_subset_ids([user_group_id])]
+        # build the condition directly on the stored 'group_ids' m2m (single hop)
+        # so that its negation is a plain "NOT ANY" on the relation, instead of
+        # negating through the 'all_group_ids' / 'all_implied_ids' custom searches
+        is_internal = Domain('group_ids', 'in', internal_group_ids)
+        # share == True  <=>  not internal
+        return ~is_internal if (value and operator == '=') or (not value and operator == '!=') else is_internal
 
     @api.depends('company_id')
     def _compute_companies_count(self):
