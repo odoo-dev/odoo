@@ -3261,9 +3261,6 @@ class MrpProduction(models.Model):
     def _show_prices(self) -> bool:
         return False
 
-    def _get_product_catalog_domain(self):
-        return super()._get_product_catalog_domain() & Domain('type', '=', 'consu')
-
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),

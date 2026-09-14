@@ -757,12 +757,6 @@ class RepairOrder(models.Model):
         res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
         return res
 
-    def _get_product_catalog_domain(self):
-        catalog_domain = Domain('type', '=', 'consu')
-        if self.env.context.get('child_field') == 'repair_service_line_ids':
-            catalog_domain = Domain('type', '=', 'service')
-        return super()._get_product_catalog_domain() & catalog_domain
-
     def _get_action_add_from_catalog_extra_context(self):
         return {
             **super()._get_action_add_from_catalog_extra_context(),
