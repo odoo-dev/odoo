@@ -237,7 +237,7 @@
 "az_account_52210","Provisions for severance payments","İşdən azad olma ilə bağlı qısamüddətli müavinətlər və öhdəliklər","","","52210","liability_current","","","az_account_522",""
 "az_account_52220","Social security liabilities","Sosial sığorta və təminat üzrə öhdəliklər","","","52220","liability_current","","","az_account_522",""
 "az_account_52300","Other mandatory payment obligations","Digər məcburi ödənişlər üzrə öhdəliklər","","","52300","liability_current","","","az_account_50",""
-"az_account_53100","Accounts Payable Trade and Services","Malsatan və podratçılara qısamüddətli kreditor borcları","","","53100","liability_current","True","","az_account_50",""
+"az_account_53100","Accounts Payable Trade and Services","Malsatan və podratçılara qısamüddətli kreditor borcları","","","53100","liability_payable","True","","az_account_50",""
 "az_account_53200","Short-term payables to subsidiaries","Törəmə (asılı) müəssisələrə qısamüddətli kreditor borcları","","","53200","liability_current","","","az_account_50",""
 "az_account_53300","Salaries payable","Əməyin ödənişi üzrə işçi heyətinə olan borclar","","","53300","liability_current","","","az_account_50",""
 "az_account_53400","Dividends payable","Dividendlərin ödənilməsi üzrə təsisçilərə kreditor borcları","","","53400","liability_current","","","az_account_50",""

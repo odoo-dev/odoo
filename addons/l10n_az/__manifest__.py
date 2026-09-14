@@ -24,5 +24,8 @@ The module is designed to provide a standard accounting setup for companies oper
         'data/account_tax_report_vat_data.xml',
         'data/account_tax_report_tit_data.xml',
     ],
+    'demo': [
+        'demo/demo_company.xml',
+    ],
     'license': "LGPL-3",
 }
