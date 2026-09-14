@@ -330,7 +330,7 @@
                                     </td>
                                     <td t-if="display_price_and_taxes" class="text-end">
                                         <span
-                                            t-out="line._get_section_totals()"
+                                            t-out="line._get_section_totals('price_subtotal')"
                                             t-options='{"widget": "monetary", "display_currency": order.currency_id}'
                                         />
                                     </td>
