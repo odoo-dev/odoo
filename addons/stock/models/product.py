@@ -698,7 +698,7 @@ class ProductProduct(models.Model):
         if not seen_rules:
             seen_rules = self.env['stock.rule']
         warehouse = location.warehouse_id
-        rule = self.env['stock.rule'].with_context(active_test=True)._get_rule(self, location, {
+        rule = self.env['stock.rule']._get_rule(self, location, {
             'route_ids': route_ids,
             'warehouse_id': warehouse,
         })

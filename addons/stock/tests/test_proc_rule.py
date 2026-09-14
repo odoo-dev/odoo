@@ -734,7 +734,7 @@ class TestProcRule(TransactionCase):
 
         # Archive the route
         orderpoint.rule_ids.route_id.active = False
-        orderpoint.invalidate_recordset(fnames=['show_supply_warning'])
+        orderpoint.invalidate_recordset(fnames=['show_supply_warning', 'rule_ids'])
         self.assertTrue(orderpoint.show_supply_warning)
 
         # Add a route to the product
@@ -750,7 +750,7 @@ class TestProcRule(TransactionCase):
             })],
         })
         self.product.write({'route_ids': [Command.set(product_route.ids)]})
-        orderpoint.invalidate_recordset(fnames=['show_supply_warning'])
+        orderpoint.invalidate_recordset(fnames=['show_supply_warning', 'rule_ids'])
         self.assertFalse(orderpoint.show_supply_warning)
 
     @freeze_time('2025-09-02 14:00:00')

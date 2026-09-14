@@ -569,7 +569,7 @@ class StockRule(models.Model):
 
         def extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id):
             rule = self.env['stock.rule']
-            for route_id in sorted(route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):
+            for route_id in route_ids.filtered('active').sorted(lambda r: (r not in product_id.route_ids, r.sequence)):
                 sub_dict = rule_dict.get((location_dest_id.id, route_id.id))
                 if not sub_dict:
                     continue
@@ -634,7 +634,7 @@ class StockRule(models.Model):
         # This is to avoid having to duplicate every rules that deliver to Customer to have the Inter-company part.
         if self._check_intercomp_location(locations):
             location_ids.append(self.env.ref('stock.stock_location_customers', raise_if_not_found=False).id)
-        domain = Domain('location_dest_id', 'in', location_ids) & Domain('action', '!=', 'push')
+        domain = Domain('location_dest_id', 'in', location_ids) & Domain('action', '!=', 'push') & Domain('active', '=', True)
         # In case the method is called by the superuser, we need to restrict the rules to the
         # ones of the company. This is not useful as a regular user since there is a record
         # rule to filter out the rules based on the company.

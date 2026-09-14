@@ -586,7 +586,7 @@ class StockRoute(models.Model):
         rule_actions = self._get_non_push_pull_rule_actions()
         route_domain = [
             ('warehouse_selectable', '=', True),
-            ('rule_ids.action', 'in', rule_actions),
+            ('rule_ids', 'any', [('active', '=', True), ('action', 'in', rule_actions)]),
             ('company_id', 'in', [False, self.env.company.id]),
             '|',
                 ('warehouse_ids', '=', False),

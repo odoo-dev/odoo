@@ -26,7 +26,7 @@ class StockReplenishMixin(models.AbstractModel):
     def _get_allowed_route_domain(self):
         stock_location_inter_company_id = self.env.ref('stock.stock_location_inter_company').id
 
-        base_domain = Domain('product_selectable', '=', True)
+        base_domain = Domain('product_selectable', '=', True) & Domain('active', '=', True)
         if self.warehouse_id:
             wh_route_ids = self.warehouse_id.route_ids.filtered(lambda r: r._is_valid_resupply_route_for_product(self.product_id)).ids
             if wh_route_ids:
