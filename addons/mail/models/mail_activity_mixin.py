@@ -49,7 +49,9 @@ class MailActivityMixin(models.AbstractModel):
     activity_ids = fields.One2many(
         'mail.activity', 'res_id', 'Activities',
         bypass_search_access=True,
-        groups="base.group_user",)
+        groups="base.group_user",
+        domain=[('active', '=', True)],
+    )
     activity_state = fields.Selection([
         ('overdue', 'Overdue'),
         ('today', 'Today'),
