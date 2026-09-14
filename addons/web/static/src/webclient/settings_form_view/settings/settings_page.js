@@ -2,6 +2,7 @@ import { Component, computed, proxy, signal, t, useProps } from "@odoo/owl";
 import { location } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { useService } from "@web/core/utils/hooks";
 import { useLayoutEffect } from "@web/owl2/utils";
 
@@ -82,5 +83,33 @@ export class SettingsPage extends Component {
             location.hash = key;
         }
         this.env.searchState.clearSearch();
+    }
+
+    onSettingTabKeydown(ev) {
+        const hotkey = getActiveHotkey(ev);
+        if (!["arrowup", "arrowdown", "home", "end"].includes(hotkey)) {
+            return;
+        }
+        ev.preventDefault();
+        let elToFocus;
+        const firstEl = ev.currentTarget.parentElement.firstElementChild;
+        const lastEl = ev.currentTarget.parentElement.lastElementChild;
+        switch (hotkey) {
+            case "arrowup":
+                elToFocus = ev.currentTarget.previousElementSibling || lastEl;
+                break;
+            case "arrowdown":
+                elToFocus = ev.currentTarget.nextElementSibling || firstEl;
+                break;
+            case "home":
+                elToFocus = firstEl;
+                break;
+            case "end":
+                elToFocus = lastEl;
+                break;
+            default:
+                return;
+        }
+        elToFocus.focus();
     }
 }
