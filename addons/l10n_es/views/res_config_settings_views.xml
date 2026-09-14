@@ -19,7 +19,11 @@
                         </div>
                         <field name="l10n_es_special_vat_regime"/>
                     </setting>
-                    <setting>
+                    <setting string="Facturae Electrónica y EDIs" class="w-100" company_dependent="1">
+                        <div>
+                            <field name="module_l10n_es_edi_facturae"/>
+                            <label name="module_l10n_es_edi_facturae_label" for="module_l10n_es_edi_facturae" string="Facturae"/>
+                        </div>
                         <div>
                             <field name="module_l10n_es_edi_verifactu"/>
                             <label name="module_l10n_es_edi_verifactu_label" for="module_l10n_es_edi_verifactu" string="Veri*Factu"/> 

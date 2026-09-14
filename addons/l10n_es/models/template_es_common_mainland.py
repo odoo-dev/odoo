@@ -22,3 +22,9 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'account_tax_template_p_iva21_bc',
             },
         }
+
+    def _post_load_data(self, template_code, company, template_data):
+        company = (company or self.env.company)
+        if company:
+            company._l10n_es_archive_taxes_by_state()
+        return super()._post_load_data(template_code, company, template_data)

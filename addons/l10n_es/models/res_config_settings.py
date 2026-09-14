@@ -12,6 +12,7 @@ class ResConfigSettings(models.TransientModel):
         related='company_id.l10n_es_special_vat_regime',
         readonly=False,
     )
+    module_l10n_es_edi_facturae = fields.Boolean('Facturae')
     module_l10n_es_edi_verifactu = fields.Boolean('Veri*Factu')
     module_l10n_es_edi_sii = fields.Boolean('SII')
     module_l10n_es_edi_tbai = fields.Boolean('TicketBai')
