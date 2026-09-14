@@ -68,11 +68,3 @@ class AccountMoveLine(models.Model):
             line['l10n_gcc_invoice_tax_amount'] = line['price_total'] - line['price_subtotal']
 
         return res
-
-    def _l10n_gcc_get_section_total(self):
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped('price_total'))
-
-    def _l10n_gcc_get_section_tax_amount(self):
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped('l10n_gcc_invoice_tax_amount'))

@@ -8,13 +8,15 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.tools import float_compare, float_is_zero, format_date, groupby
 
+from odoo.addons.account.models.ordered_product_line_mixin import DISPLAY_TYPES
+
 
 class SaleOrderLine(models.Model):
     _name = "sale.order.line"
     _inherit = [
         "analytic.mixin",
         "res.currency.rate.consolidation.mixin",
-        "product.catalog.line.mixin",
+        "ordered.product.line.mixin",
     ]
     _description = "Sales Order Line"
     _rec_names_search = ("name", "order_id.name")
@@ -71,14 +73,7 @@ class SaleOrderLine(models.Model):
     tax_country_id = fields.Many2one(related="order_id.tax_country_id")
 
     # Fields specifying custom line logic
-    display_type = fields.Selection(
-        selection=[
-            ("line_section", "Section"),
-            ("line_subsection", "Subsection"),
-            ("line_note", "Note"),
-        ],
-        default=False,
-    )
+    display_type = fields.Selection(selection=DISPLAY_TYPES, default=False)
     is_configurable_product = fields.Boolean(
         string="Is the product configurable?",
         related="product_template_id.has_configurable_attributes",
@@ -365,14 +360,14 @@ class SaleOrderLine(models.Model):
         string="Amount", compute="_compute_amount_to_invoice_at_date"
     )
     accrual_move_ids = fields.Many2many(
-        comodel_name='account.move',
-        relation='sale_order_line_accrual_move_rel',
-        column1='order_line_id',
-        column2='move_id',
+        comodel_name="account.move",
+        relation="sale_order_line_accrual_move_rel",
+        column1="order_line_id",
+        column2="move_id",
         string="Accrual Entries",
         copy=False,
         help="Accrual entries generated for this line, so it isn't accrued again while one is "
-             "still standing (posted, not yet reversed or cancelled).",
+        "still standing (posted, not yet reversed or cancelled).",
     )
 
     # Same than `qty_delivered` and `qty_invoiced` but non-stored and depending of the context.
@@ -1575,7 +1570,7 @@ class SaleOrderLine(models.Model):
             ) * line.price_unit
 
     def _get_accrual_domain(self, date=False):
-        """ Reused by account.accrued.orders.wizard and stock_account's Stock Valuation report.
+        """Reused by account.accrued.orders.wizard and stock_account's Stock Valuation report.
         When `date` is given, also restrict to lines that need an accrual entry as of it: the
         ones currently out of sync, or that were out of sync as of `date` but have since been
         settled (nothing left to accrue today). Extended by `sale_stock`, which can also detect
@@ -1588,7 +1583,11 @@ class SaleOrderLine(models.Model):
             ("product_id.type", "!=", "combo"),
             # Lines with an accrual entry that's still standing (posted, not yet reversed or
             # cancelled) already have their accrual accounted for: excluded until it isn't.
-            ("accrual_move_ids", "not any", [("state", "=", "posted"), ("reversal_move_ids", "=", False)]),
+            (
+                "accrual_move_ids",
+                "not any",
+                [("state", "=", "posted"), ("reversal_move_ids", "=", False)],
+            ),
         ])
         if date:
             domain &= Domain.OR([
@@ -1613,14 +1612,14 @@ class SaleOrderLine(models.Model):
 
     @api.model
     def _get_accrual_line_ids(self, mode=False, date=False, extra_domain=None):
-        """ Order lines whose invoiced and delivered quantities are out of sync, i.e. that need
+        """Order lines whose invoiced and delivered quantities are out of sync, i.e. that need
         an accrual entry as of `date` (today if not given). `mode` splits the result by the
         direction of the mismatch: 'deferred' (invoiced ahead of delivery) or 'invoice_issued'
         (delivered ahead of invoicing). Reused by the `deferred_revenue`/`invoice_to_be_issued`
         filters and by `res.company._get_accrual_candidate_lines`.
         """
         if not date:
-            date = fields.Date.to_date(self.env.context.get('accrual_entry_date'))
+            date = fields.Date.to_date(self.env.context.get("accrual_entry_date"))
         accrual_entry_date = date or fields.Date.context_today(self)
         domain = self._get_accrual_domain(accrual_entry_date)
         if extra_domain:
@@ -1628,7 +1627,9 @@ class SaleOrderLine(models.Model):
         order_lines = self.env["sale.order.line"].search(domain)
         # Applied after the search: flushing pending computations with this
         # context would corrupt the stored quantities with at-date values.
-        order_lines = order_lines.with_context(accrual_entry_date=fields.Date.to_string(accrual_entry_date))
+        order_lines = order_lines.with_context(
+            accrual_entry_date=fields.Date.to_string(accrual_entry_date)
+        )
         if mode == "deferred":
             order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
         elif mode == "invoice_issued":
@@ -1667,27 +1668,6 @@ class SaleOrderLine(models.Model):
         for line in self:
             # line.ids checks whether it's a new record not yet saved
             line.product_uom_readonly = line.ids and line.state in ["sale", "cancel"]
-
-    def _compute_parent_id(self):
-        sale_order_lines = set(self)
-        for order, lines in self.grouped("order_id").items():
-            if not order:
-                lines.parent_id = False
-                continue
-            last_section = False
-            last_sub = False
-            for line in order.order_line.sorted("sequence"):
-                if line.display_type == "line_section":
-                    last_section = line
-                    if line in sale_order_lines:
-                        line.parent_id = False
-                    last_sub = False
-                elif line.display_type == "line_subsection":
-                    if line in sale_order_lines:
-                        line.parent_id = last_section
-                    last_sub = line
-                elif line in sale_order_lines:
-                    line.parent_id = last_sub or last_section
 
     def _compute_mandatory_product(self):
         self.mandatory_product = (
@@ -1942,12 +1922,13 @@ class SaleOrderLine(models.Model):
                 )
             )
 
-    # === CATALOG ===#
+    # === Ordered Line Mixin - Catalog & (sub)sections ===#
 
-    @api.readonly
-    def action_add_from_catalog(self):
-        order = self.env["sale.order"].browse(self.env.context.get("order_id"))
-        return order.with_context(child_field="order_line").action_add_from_catalog()
+    def _get_parent_field(self) -> str:
+        return "order_id"
+
+    def _get_child_field_on_parent_model(self) -> str:
+        return "order_line"
 
     def _get_quantity_field(self) -> str:
         return "product_uom_qty"
@@ -2106,12 +2087,6 @@ class SaleOrderLine(models.Model):
             ]
         return res
 
-    def _get_section_totals(self, totals_field):
-        """Return the total/subtotal amount sale order lines linked to section."""
-        self.ensure_one()
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped(totals_field))
-
     def _get_combo_totals(self, totals_field):
         """Return the total/subtotal amount sale order lines linked to combo."""
         self.ensure_one()
@@ -2128,10 +2103,6 @@ class SaleOrderLine(models.Model):
             # For (sub)sections, check if any child line has taxes.
             or (self.display_type and any(line._has_taxes() for line in self._get_section_lines()))
         )
-
-    def _get_section_lines(self):
-        self.ensure_one()
-        return self.order_id.order_line.filtered(self._is_line_in_section)
 
     # === CORE METHODS OVERRIDES ===#
 

@@ -4,11 +4,13 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Command
 
+from odoo.addons.account.models.ordered_product_line_mixin import DISPLAY_TYPES
+
 
 class SaleOrderTemplateLine(models.Model):
     _name = "sale.order.template.line"
     _description = "Quotation Template Line"
-    _inherit = ["product.catalog.line.mixin"]
+    _inherit = ["ordered.product.line.mixin"]
     _order = "sale_order_template_id, sequence, id"
 
     _accountable_product_id_required = models.Constraint(
@@ -109,10 +111,7 @@ class SaleOrderTemplateLine(models.Model):
         string="Quantity", required=True, digits="Product Unit", default=1
     )
 
-    display_type = fields.Selection(
-        [("line_section", "Section"), ("line_subsection", "Subsection"), ("line_note", "Note")],
-        default=False,
-    )
+    display_type = fields.Selection(DISPLAY_TYPES, default=False)
 
     # Section-related fields
     parent_id = fields.Many2one(
@@ -403,24 +402,16 @@ class SaleOrderTemplateLine(models.Model):
 
         return vals
 
-    # === CATALOG ===#
+    # === ORDERED PRODUCT LINE MIXIN ===#
 
-    def action_add_from_catalog(self):
-        sale_order_template = self.env["sale.order.template"].browse(
-            self.env.context.get("order_id")
-        )
-        return sale_order_template.with_context(
-            child_field="sale_order_template_line_ids"
-        ).action_add_from_catalog()
+    def _get_parent_field(self) -> str:
+        return "sale_order_template_id"
+
+    def _get_child_field_on_parent_model(self) -> str:
+        return "sale_order_template_line_ids"
 
     def _get_quantity_field(self) -> str:
         return "product_uom_qty"
 
     def _get_product_uom_field(self) -> str:
         return "product_uom_id"
-
-    def _get_section_lines(self):
-        self.ensure_one()
-        return self.sale_order_template_id.sale_order_template_line_ids.filtered(
-            self._is_line_in_section
-        )

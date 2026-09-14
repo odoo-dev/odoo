@@ -26,7 +26,7 @@ class AccountMoveLine(models.Model):
         "analytic.mixin",
         "mail.track.mixin",
         "res.currency.rate.consolidation.mixin",
-        "product.catalog.line.mixin",
+        "ordered.product.line.mixin",
     ]
     _description = "Journal Item"
     _explanation = "An individual line item within an account.move. Used to detail specific debits, credits, taxes, and products on invoices and journal entries."
@@ -3980,16 +3980,10 @@ class AccountMoveLine(models.Model):
         }]
 
     def get_section_subtotal(self):
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped('price_subtotal'))
+        return self._get_section_totals('price_subtotal')
 
     def get_section_total(self):
-        section_lines = self._get_section_lines()
-        return sum(section_lines.mapped('price_total'))
-
-    def _get_section_lines(self):
-        self.ensure_one()
-        return self.move_id.invoice_line_ids.filtered(self._is_line_in_section)
+        return self._get_section_totals('price_total')
 
     # -------------------------------------------------------------------------
     # PUBLIC ACTIONS
@@ -4017,13 +4011,8 @@ class AccountMoveLine(models.Model):
         action['context'] = ctx
         return action
 
-    def action_add_from_catalog(self):
-        """ Will open the catalog view """
-        move = self.env['account.move'].browse(self.env.context.get('order_id'))
-        return move.with_context(child_field='line_ids').action_add_from_catalog()
-
     # -------------------------------------------------------------------------
-    # Catalog
+    # Ordered line mixin: Catalog & (Sub)Sections
     # -------------------------------------------------------------------------
 
     def _consider_in_catalog(self, *args, **kwargs) -> bool:
@@ -4040,6 +4029,12 @@ class AccountMoveLine(models.Model):
 
     def _can_be_unlinked_from_catalog(self):
         return super()._can_be_unlinked_from_catalog() and self.parent_state in {'draft', 'sent'}
+
+    def _get_parent_field(self) -> str:
+        return 'move_id'
+
+    def _get_child_field_on_parent_model(self) -> str:
+        return 'line_ids'
 
     # -------------------------------------------------------------------------
     # TOOLING
