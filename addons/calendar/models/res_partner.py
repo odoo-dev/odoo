@@ -11,6 +11,7 @@ from odoo.tools import SQL
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    is_in_calendar_meeting = fields.Boolean(compute='_compute_is_in_calendar_meeting')
     meeting_count = fields.Integer("# Meetings", compute='_compute_meeting_count')
     meeting_ids = fields.Many2many('calendar.event', 'calendar_event_res_partner_rel', 'res_partner_id',
                                    'calendar_event_id', string='Meetings', copy=False)
@@ -19,6 +20,31 @@ class ResPartner(models.Model):
 
     calendar_last_notif_ack = fields.Datetime(
         'Last notification marked as read from base Calendar', default=fields.Datetime.now)
+
+    def _compute_is_in_calendar_meeting(self):
+        attendees = self.env['calendar.attendee'].sudo()._read_group(
+            [
+                ('partner_id', 'in', self.ids),
+                ('state', '=', 'accepted'),
+                ('event_id.show_as', '=', 'busy'),
+                ('event_id.start', '<=', fields.Datetime.now()),
+                ('event_id.stop', '>=', fields.Datetime.now()),
+            ],
+            ['partner_id'],
+            ['__count'],
+        )
+        partner_ids = {partner.id for partner, count in attendees if count}
+        for partner in self:
+            partner.is_in_calendar_meeting = partner.id in partner_ids
+
+    def _store_im_status_fields(self, res):
+        super()._store_im_status_fields(res)
+        # The presence signal intentionally exposes only that a busy meeting is ongoing.
+        res.attr('is_in_calendar_meeting', sudo=True)
+
+    def _broadcast_im_status_update(self):
+        self.invalidate_recordset(['is_in_calendar_meeting'])
+        return super()._broadcast_im_status_update()
 
     def _compute_meeting_count(self):
         result = self._compute_meeting()

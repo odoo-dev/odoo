@@ -27,6 +27,16 @@ class ResPartner(models.Model):
         for partner in self:
             partner.is_in_call = bool(partner.rtc_session_ids)
 
+    def _store_im_status_fields(self, res: Store.FieldList):
+        super()._store_im_status_fields(res)
+        # A call is visible to the people with whom the partner shares a conversation.
+        res.attr("is_in_call", sudo=True)
+
+    def _broadcast_im_status_update(self):
+        for partner in self:
+            for channel in partner.channel_ids:
+                Store(channel).add(partner, "_store_im_status_fields")
+
     @api.depends("name", "email")
     @api.depends_context("display_email", "formatted_display_name")
     def _compute_display_name(self):

@@ -834,7 +834,7 @@ class HrEmployee(models.Model):
 
     def _store_im_status_fields(self, res: Store.FieldList):
         super()._store_im_status_fields(res)
-        res.attr("leave_date_to")
+        res.extend(["is_absent", "leave_date_to"])
 
     def _get_hours_for_date(self, target_date, day_period=None, count_non_working_days=False):
         """

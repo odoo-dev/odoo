@@ -64,10 +64,12 @@ class DiscussChannelRtcSession(models.Model):
                 "_store_rtc_update_fields",
                 fields_params={"added": rtc_session},
             )
+        rtc_sessions.partner_id._broadcast_im_status_update()
         return rtc_sessions
 
     def unlink(self):
         stores = Store.Stores()
+        partners = self.partner_id
         call_ended_channels = self.channel_id.filtered(lambda c: not (c.rtc_session_ids - self))
         for channel in call_ended_channels:
             # If there is no member left in the RTC call, all invitations are cancelled.
@@ -95,7 +97,9 @@ class DiscussChannelRtcSession(models.Model):
         for history in self.env["discuss.call.history"].sudo().search(domain):
             history.end_dt = fields.Datetime.now()
             stores[history.channel_id].add(history, ["duration_hour", "end_dt"])
-        return super().unlink()
+        result = super().unlink()
+        partners._broadcast_im_status_update()
+        return result
 
     def _bus_channels(self):
         return self.channel_member_id._bus_channels()

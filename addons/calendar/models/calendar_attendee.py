@@ -66,16 +66,22 @@ class CalendarAttendee(models.Model):
                 values['common_name'] = values.get("common_name")
         attendees = super().create(vals_list)
         attendees.event_id.check_access('write')
+        attendees.partner_id._broadcast_im_status_update()
         return attendees
 
     def write(self, vals):
         attendees = super().write(vals)
         self.event_id.check_access('write')
+        if 'state' in vals:
+            self.partner_id._broadcast_im_status_update()
         return attendees
 
     def unlink(self):
+        partners = self.partner_id
         self._unsubscribe_partner()
-        return super().unlink()
+        result = super().unlink()
+        partners._broadcast_im_status_update()
+        return result
 
     def copy(self, default=None):
         raise UserError(_('You cannot duplicate a calendar attendee.'))

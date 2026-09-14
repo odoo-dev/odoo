@@ -21,9 +21,9 @@ test("on leave members are categorised correctly in online/offline", async () =>
         { partner_id: partnerId4, im_status: "offline" },
     ]);
     pyEnv["hr.employee"].create([
-        { user_id: userId2, leave_date_to: "2023-01-03" },
-        { user_id: userId3, leave_date_to: "2023-01-04" },
-        { user_id: userId4, leave_date_to: "2023-01-05" },
+        { is_absent: true, user_id: userId2, leave_date_to: "2023-01-03" },
+        { is_absent: true, user_id: userId3, leave_date_to: "2023-01-04" },
+        { is_absent: true, user_id: userId4, leave_date_to: "2023-01-05" },
     ]);
     const channelId = pyEnv["discuss.channel"].create({
         name: "TestChanel",

@@ -10,6 +10,7 @@ import { patch } from "@web/core/utils/patch";
 const hrEmployeePatch = {
     setup() {
         super.setup();
+        this.is_absent = fields.Boolean();
         this.leave_date_to = fields.Date();
     },
     /** @returns {string} */

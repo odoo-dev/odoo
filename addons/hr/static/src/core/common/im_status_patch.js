@@ -2,6 +2,23 @@ import { imStatusDataRegistry } from "@mail/core/common/im_status";
 import { _t } from "@web/core/l10n/translation";
 
 imStatusDataRegistry.add(
+    "hr-off-hours",
+    {
+        condition: ({ user }) => Boolean(user?.employee_id?.is_outside_working_hours),
+        icon: "bedtime",
+        iconClass: "",
+        title: {
+            online: _t("User is outside working hours and online"),
+            away: _t("User is outside working hours and idle"),
+            busy: _t("User is outside working hours and busy"),
+            offline: _t("User is outside working hours and offline"),
+            default: _t("User is outside working hours"),
+        },
+    },
+    { sequence: 50 }
+);
+
+imStatusDataRegistry.add(
     "hr-homeworking-home",
     {
         condition: ({ user }) => user?.employee_id?.work_location_type === "home",

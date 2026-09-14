@@ -1048,6 +1048,8 @@ class CalendarEvent(models.Model):
             ])
             recurrences._select_new_base_event()
 
+        if {"active", "show_as", "start", "stop"} & values.keys():
+            (previous_attendees.partner_id | self.attendee_ids.partner_id)._broadcast_im_status_update()
         return True
 
     def _check_calendar_privacy_write_permissions(self):
@@ -1113,6 +1115,7 @@ class CalendarEvent(models.Model):
         # as it might have changed their next event notification
         events = self.filtered_domain([('alarm_ids', '!=', False)])
         partner_ids = events.mapped('partner_ids').ids
+        partners = self.attendee_ids.partner_id
 
         # don't forget to update recurrences if there are some base events in the set to unlink,
         # but after having removed the events ;-)
@@ -1129,6 +1132,7 @@ class CalendarEvent(models.Model):
 
         # Notify the concerned attendees (must be done after removing the events)
         self.env['calendar.alarm_manager']._notify_next_alarm(partner_ids)
+        partners._broadcast_im_status_update()
         return result
 
     def copy(self, default=None):

@@ -130,6 +130,7 @@ class HrEmployee(models.Model):
         ('present', 'Present'),
         ('absent', 'Absent'),
         ('out_of_working_hour', 'Off-Hours')], compute='_compute_presence_state', compute_sql='_compute_sql_presence_state', compute_sudo=False, default='out_of_working_hour')
+    is_outside_working_hours = fields.Boolean(compute='_compute_is_outside_working_hours')
     last_activity = fields.Date(compute="_compute_last_activity")
     last_activity_time = fields.Char(compute="_compute_last_activity")
     hr_icon_display = fields.Selection([
@@ -1116,6 +1117,12 @@ class HrEmployee(models.Model):
                     # The employees should be working now according to their work schedule
                     working_now += res_employee_ids.ids
         return working_now
+
+    @api.depends('resource_calendar_id', 'tz')
+    def _compute_is_outside_working_hours(self):
+        working_employee_ids = set(self._get_employee_working_now())
+        for employee in self:
+            employee.is_outside_working_hours = employee.id not in working_employee_ids
 
     @api.depends('user_id.im_status')
     def _compute_presence_state(self):
@@ -2399,6 +2406,7 @@ class HrEmployee(models.Model):
         res.extend([
             "active",
             "company_id",
+            "is_outside_working_hours",
             "work_location_type",
         ])
 

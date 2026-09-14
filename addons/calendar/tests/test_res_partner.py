@@ -1,11 +1,31 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import new_test_user, tagged, TransactionCase
+from odoo import Command
+from odoo.tests.common import freeze_time, new_test_user, tagged, TransactionCase
 from odoo.addons.mail.tests.common import mail_new_test_user
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestResPartner(TransactionCase):
+
+    @freeze_time("2024-06-04 12:00:00")
+    def test_is_in_calendar_meeting(self):
+        partner = self.env["res.partner"].create({"name": "Attendee"})
+        event = self.env["calendar.event"].create({
+            "name": "Busy meeting",
+            "show_as": "busy",
+            "start": "2024-06-04 11:00:00",
+            "stop": "2024-06-04 13:00:00",
+            "attendee_ids": [Command.create({"partner_id": partner.id, "state": "accepted"})],
+        })
+        self.assertTrue(partner.is_in_calendar_meeting)
+
+        event.attendee_ids.state = "declined"
+        self.assertFalse(partner.is_in_calendar_meeting)
+
+        event.attendee_ids.state = "accepted"
+        event.show_as = "free"
+        self.assertFalse(partner.is_in_calendar_meeting)
 
     def test_meeting_count(self):
         test_user = new_test_user(self.env, login='test_user', groups='base.group_user, base.group_partner_manager')

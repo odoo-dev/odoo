@@ -244,6 +244,7 @@ export class ResPartner extends webModels.ResPartner {
 
     _store_im_status_fields(res) {
         res.many("user_ids", "_store_im_status_fields", { sudo: true });
+        res.attr("is_in_call", undefined, { sudo: true });
     }
 
     _store_mention_fields(res) {

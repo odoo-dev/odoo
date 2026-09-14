@@ -4,6 +4,7 @@ import { fields } from "@web/../tests/web_test_helpers";
 export class HrEmployee extends hrModels.HrEmployee {
     _name = "hr.employee";
 
+    is_absent = fields.Boolean();
     leave_date_to = fields.Date();
 
     _records = [
@@ -27,6 +28,6 @@ export class HrEmployee extends hrModels.HrEmployee {
 
     _store_im_status_fields(res) {
         super._store_im_status_fields(res);
-        res.attr("leave_date_to");
+        res.attr("is_absent");
     }
 }

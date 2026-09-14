@@ -10,7 +10,11 @@ test("on leave & online", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const userId = pyEnv["res.users"].create({ partner_id: partnerId, im_status: "online" });
-    pyEnv["hr.employee"].create({ leave_date_to: "2023-01-01", user_id: userId });
+    pyEnv["hr.employee"].create({
+        is_absent: true,
+        leave_date_to: "2023-01-01",
+        user_id: userId,
+    });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -29,7 +33,11 @@ test("on leave & away", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const userId = pyEnv["res.users"].create({ partner_id: partnerId, im_status: "away" });
-    pyEnv["hr.employee"].create({ leave_date_to: "2023-01-01", user_id: userId });
+    pyEnv["hr.employee"].create({
+        is_absent: true,
+        leave_date_to: "2023-01-01",
+        user_id: userId,
+    });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -48,7 +56,11 @@ test("on leave & offline", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
     const userId = pyEnv["res.users"].create({ partner_id: partnerId, im_status: "offline" });
-    pyEnv["hr.employee"].create({ leave_date_to: "2023-01-01", user_id: userId });
+    pyEnv["hr.employee"].create({
+        is_absent: true,
+        leave_date_to: "2023-01-01",
+        user_id: userId,
+    });
     const channelId = pyEnv["discuss.channel"].create({
         channel_member_ids: [
             Command.create({ partner_id: serverState.partnerId }),
@@ -60,5 +72,29 @@ test("on leave & offline", async () => {
     await openDiscuss(channelId);
     await contains(
         ".o-mail-DiscussContent-header .o-mail-ImStatus[data-icon='travel'][title='User is on leave']"
+    );
+});
+
+test("worked-time time off falls back to the next status", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId, im_status: "online" });
+    pyEnv["hr.employee"].create({
+        is_absent: false,
+        leave_date_to: "2023-01-01",
+        user_id: userId,
+        work_location_type: "home",
+    });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        channel_type: "chat",
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(
+        ".o-mail-DiscussContent-header .o-mail-ImStatus[data-icon='home'][title='User is at home and online']"
     );
 });
