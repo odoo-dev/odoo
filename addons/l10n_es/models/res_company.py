@@ -6,6 +6,9 @@ from .account_tax import REGIME_CODES_BY_USE, REGIME_CODES_IGIC_SALE_EXTRA
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _L10N_ES_CANARY_APPLICABILITY = '03'
+    _L10N_ES_CANARY_STATE_CODES = {'GC', 'TF'}
+
     l10n_es_simplified_invoice_limit = fields.Float(
         string="Simplified Invoice limit amount",
         help="Over this amount is not legally possible to create a simplified invoice",
@@ -49,3 +52,40 @@ class ResCompany(models.Model):
         """
         self.ensure_one()
         return False
+
+    def _l10n_es_is_canary(self):
+        self.ensure_one()
+        return self.state_id.code in self._L10N_ES_CANARY_STATE_CODES
+
+    def _l10n_es_archive_taxes_by_state(self):
+        """For Canary companies, flip the CSV's mainland-oriented defaults:
+        activate the IGIC taxes (l10n_es_applicability == '03', shipped inactive)
+        and archive the mainland IVA taxes (shipped active).
+
+        Non-Canary companies need no action: the CSV defaults already match
+        (mainland active, IGIC inactive).
+
+        Taxes without `l10n_es_applicability` set (withholdings/IRPF, common
+        to both regimes) are left untouched.
+        """
+        self.ensure_one()
+        if self.account_fiscal_country_id.code != 'ES' or not self.state_id:
+            return
+
+        if not self._l10n_es_is_canary():
+            return
+
+        regime_taxes = self.env['account.tax'].with_context(active_test=False).search([
+            ('company_id', '=', self.id),
+            ('country_id.code', '=', 'ES'),
+            ('l10n_es_applicability', '!=', False)
+        ])
+
+        canary_taxes = regime_taxes.filtered(
+            lambda t: t.l10n_es_applicability == self._L10N_ES_CANARY_APPLICABILITY
+        )
+
+        mainland_taxes = regime_taxes - canary_taxes
+
+        canary_taxes.active = True
+        mainland_taxes.active = False
