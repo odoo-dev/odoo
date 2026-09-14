@@ -1229,7 +1229,7 @@ class DiscussChannel(models.Model):
         pids = (message.partner_ids | message.partner_cc_ids).ids
         if pids:
             email_from = tools.email_normalize(message.email_from)
-            self.env['res.partner'].flush_model(['active', 'email', 'partner_share'])
+            self.env['res.partner'].flush_model(['active', 'email'])
             self.env['res.users'].flush_model(['active', 'partner_id', 'share'])
             sql_query = SQL(
                 """
@@ -1237,7 +1237,7 @@ class DiscussChannel(models.Model):
                        partner.email_normalized,
                        partner.lang,
                        partner.name,
-                       partner.partner_share,
+                       COALESCE(sub_user.share, TRUE) as partner_share,
                        sub_user.uid as uid,
                        COALESCE(sub_user.share, FALSE) as ushare
                   FROM res_partner partner

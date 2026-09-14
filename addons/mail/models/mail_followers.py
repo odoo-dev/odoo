@@ -138,8 +138,8 @@ class MailFollowers(models.Model):
         """
         self.env['mail.followers'].flush_model(['partner_id', 'subtype_ids'])
         self.env['mail.message.subtype'].flush_model(['internal'])
-        self.env['res.users'].flush_model(['notification_type', 'active', 'partner_id', 'group_ids'])
-        self.env['res.partner'].flush_model(['active', 'email_normalized', 'name', 'partner_share'])
+        self.env['res.users'].flush_model(['notification_type', 'active', 'partner_id', 'group_ids', 'share'])
+        self.env['res.partner'].flush_model(['active', 'email_normalized', 'name'])
         self.env['res.groups'].flush_model(['user_ids'])
         # if we have records and a subtype: we have to fetch followers, unless being
         # in user notification mode (contact only pids)
@@ -179,7 +179,6 @@ class MailFollowers(models.Model):
            partner.email_normalized AS email_normalized,
            partner.lang as lang,
            partner.name as name,
-           partner.partner_share as pshare,
            sub_user.uid as uid,
            COALESCE(sub_user.share, FALSE) as ushare,
            COALESCE(sub_user.notification_type, 'email') as notif,
@@ -188,7 +187,9 @@ class MailFollowers(models.Model):
            sub_followers.is_follower as _insert_followerslower
       FROM res_partner partner
       JOIN sub_followers ON sub_followers.pid = partner.id
-                        AND (sub_followers.internal IS NOT TRUE OR partner.partner_share IS NOT TRUE)
+                        AND (sub_followers.internal IS NOT TRUE OR EXISTS (
+                            SELECT 1 FROM res_users iu WHERE iu.share IS NOT TRUE AND iu.partner_id = partner.id
+                        ))
  LEFT JOIN LATERAL (
         SELECT users.id AS uid,
                users.share AS share,
@@ -218,7 +219,6 @@ class MailFollowers(models.Model):
            partner.email_normalized AS email_normalized,
            partner.lang as lang,
            partner.name as name,
-           partner.partner_share as pshare,
            sub_user.uid as uid,
            COALESCE(sub_user.share, FALSE) as ushare,
            COALESCE(sub_user.notification_type, 'email') as notif,
@@ -272,7 +272,6 @@ class MailFollowers(models.Model):
            partner.email_normalized AS email_normalized,
            partner.lang as lang,
            partner.name as name,
-           partner.partner_share as pshare,
            sub_user.uid as uid,
            COALESCE(sub_user.share, FALSE) as ushare,
            COALESCE(sub_user.notification_type, 'email') as notif,
@@ -312,7 +311,7 @@ class MailFollowers(models.Model):
         doc_infos = dict((res_id, {}) for res_id in res_ids)
         for (
             partner_id, is_active, email_normalized, lang, name,
-            pshare, uid, ushare, notif, groups, res_id, is_follower
+            uid, ushare, notif, groups, res_id, is_follower
         ) in res:
             to_update = [res_id] if res_id else res_ids
             # add transitive closure of implied groups; note that the field
@@ -333,14 +332,14 @@ class MailFollowers(models.Model):
                     'name': name,
                     'groups': set(groups or []),
                     'notif': notif,
-                    'share': pshare,
+                    'share': ushare or not uid,  # no user, or only share user(s) -> not internal
                     'uid': uid,
                     'ushare': ushare,
                 }
                 # additional information
                 if follower_data['ushare']:  # any type of share user
                     follower_data['type'] = 'portal'
-                elif follower_data['share']:  # no user, is share -> customer (partner only)
+                elif not follower_data['uid']:  # no user, is share -> customer (partner only)
                     follower_data['type'] = 'customer'
                 else:  # has a user not share -> internal user
                     follower_data['type'] = 'user'
