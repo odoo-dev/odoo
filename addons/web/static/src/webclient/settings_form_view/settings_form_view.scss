@@ -82,6 +82,7 @@ body:not(.o_touch_device) .o_settings_container .o_field_selection {
    .o_setting_container {
        display: flex;
        flex: 1 1 auto;
+       margin-top: var(--settings__container-margin-top, #{map-get($spacers, 3)});
        overflow: auto;
 
        .settings_tab {
