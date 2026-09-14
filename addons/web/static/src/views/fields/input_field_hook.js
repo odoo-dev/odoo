@@ -84,10 +84,16 @@ export function useInputField(params) {
                     pendingUpdate = true;
                     await props.record.update({ [fieldName]: val }, { save: shouldSave() });
                     pendingUpdate = false;
+<<<<<<< dd1b75085720bc8271b011be61d53de1fe160585
                     props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
+||||||| 71c040ae236c9487afc49559486a588f21ccb37b
+                    component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
+=======
+>>>>>>> 73ef64452ee1f64bea41c482324ccf7e26b42c2d
                 } else {
                     getEl().value = params.getValue();
                 }
+                component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
             }
         }
     }
@@ -172,13 +178,25 @@ export function useInputField(params) {
                 return;
             }
 
+<<<<<<< dd1b75085720bc8271b011be61d53de1fe160585
             if ((val || false) !== (props.record.data[fieldName] || false)) {
                 lastSetValue = el.value;
                 await props.record.update({ [fieldName]: val }, { save: shouldSave() });
                 props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
+||||||| 71c040ae236c9487afc49559486a588f21ccb37b
+            if ((val || false) !== (component.props.record.data[fieldName] || false)) {
+                lastSetValue = inputRef.el.value;
+                await component.props.record.update({ [fieldName]: val }, { save: shouldSave() });
+                component.props.record.model.bus.trigger("FIELD_IS_DIRTY", false);
+=======
+            if ((val || false) !== (component.props.record.data[fieldName] || false)) {
+                lastSetValue = inputRef.el.value;
+                await component.props.record.update({ [fieldName]: val }, { save: shouldSave() });
+>>>>>>> 73ef64452ee1f64bea41c482324ccf7e26b42c2d
             } else {
                 el.value = params.getValue();
             }
+            component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
         }
     }
 
