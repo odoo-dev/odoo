@@ -12,14 +12,61 @@ import {
 import { parseRawValue, toRawValue } from "@mail/utils/common/local_storage";
 import { Settings } from "@mail/core/common/settings_model";
 import { makeRecordFieldLocalId } from "@mail/model/misc";
+<<<<<<< 0164b2ba0eabfba25b563c130b4ed10c0848342a
 import { describe, keyDown, test, expect } from "@odoo/hoot";
 import { getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
+||||||| 9b9cd3ebff4c209a09a26c72f81d6e5f21a9f0ad
+import { describe, test, expect } from "@odoo/hoot";
+import { getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
+=======
+import { CallSettings } from "@mail/discuss/call/common/call_settings";
+import { describe, test, expect } from "@odoo/hoot";
+import { getService, mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpers";
+>>>>>>> e3cbf5c81ffe98613fd6b530ee8cdd582fba0a0b
 
 import { browser } from "@web/core/browser/browser";
 import { isBrowserChrome } from "@web/core/browser/feature_detection";
 
 describe.current.tags("desktop");
 defineMailModels();
+
+test("Device selectors match a selected device by ID and kind", async () => {
+    patchWithCleanup(browser.navigator.mediaDevices, {
+        enumerateDevices: async () => [
+            {
+                deviceId: "default",
+                kind: "audioinput",
+                label: "Default headset microphone",
+            },
+            {
+                deviceId: "default",
+                kind: "audiooutput",
+                label: "Default headset speakers",
+            },
+        ],
+    });
+    const env = await start();
+    const store = env.services["mail.store"];
+    store.settings.audioInputDeviceId = "default";
+    store.settings.audioOutputDeviceId = "default";
+    store.rtc.microphonePermission = "granted";
+
+    await mountWithCleanup(CallSettings, {
+        env,
+        props: { withActionPanel: false },
+    });
+
+    // Browsers can use the same "default" device ID for the input and output
+    // endpoints. When settings are reopened, the selected label must therefore
+    // also be matched by kind, or the speaker selector displays the microphone
+    // endpoint listed first by enumerateDevices().
+    await contains(".o-mail-DeviceSelect-button[data-kind='audioinput']", {
+        text: "Default headset microphone",
+    });
+    await contains(".o-mail-DeviceSelect-button[data-kind='audiooutput']", {
+        text: "Default headset speakers",
+    });
+});
 
 test("Renders the call settings", async () => {
     patchWithCleanup(browser.navigator.mediaDevices, {
