@@ -10,6 +10,7 @@ from operator import attrgetter
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.tools import SQL, OrderedSet, sql, unique
 from odoo.tools.misc import SENTINEL, Sentinel, unquote
+from odoo.tools.safe_eval import expr_eval
 
 from .commands import Command
 from .domains import Domain
@@ -94,9 +95,24 @@ class _Relational(Field[BaseModel]):
         if callable(domain):
             # the callable can return either a list, Domain or a string
             domain = domain(model)
-        if not domain or isinstance(domain, str):
-            # if we don't have a domain or
+        if not domain:
+            return Domain.TRUE
+        if isinstance(domain, str):
             # domain=str is used only for the client-side
+            # check if we constrain some fields
+            try:
+                ignore = "(IGNORED)"
+                domain = expr_eval(domain, {'user_id': ignore, 'company_id': ignore})
+                if isinstance(domain, list):
+                    domain = Domain(domain).map_conditions(
+                        lambda c: Domain.TRUE
+                        if c.value is ignore or (hasattr(c.value, '__iter__') and any(v is ignore for v in c.value))
+                        else c
+                    )
+                    if not domain.is_false():
+                        return domain
+            except (NameError, ValueError):
+                _logger.debug("failed to evaluate comodel domain: %r", domain)
             return Domain.TRUE
         return Domain(domain)
 
