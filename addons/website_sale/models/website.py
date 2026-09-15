@@ -691,7 +691,9 @@ class Website(models.Model):
         return {
             "company_id": self.company_id.id,
             "partner_id": partner_sudo.id,
-            **(self.is_public_user() and {"fiscal_position_id": request.fiscal_position.id} or {}),
+            **(
+                (self.is_public_user() and {"fiscal_position_id": request.fiscal_position.id}) or {}
+            ),
             "pricelist_id": request.pricelist.id,
             "team_id": self.salesteam_id.id,
             "website_id": self.id,

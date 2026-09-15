@@ -981,8 +981,7 @@ class SaleOrder(models.Model):
         :rtype: None
         """
         self.ensure_one()
-
-        invalid_lines = self.order_line.filtered(lambda sol: sol._must_drop_from_cart())
+        invalid_lines = self.order_line.filtered(lambda sol: sol._is_invalid_line())
         invalid_lines.unlink()
 
         if invalid_lines or force_update_checks:
