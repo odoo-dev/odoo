@@ -45,7 +45,8 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             order_line_label = ellipsis(order_line.name, 20)
             qty_to_invoice, price_unit, amount, amount_currency = self._get_accrual_qty_price_and_amount(order_line)
 
-            account = self._get_computed_account(order, product, False)
+            accounts = product.with_company(order.company_id).product_tmpl_id.get_product_accounts(fiscal_pos=order.fiscal_position_id)
+            account = accounts['income']
             label = _(
                 '%(order)s - %(order_line)s; %(quantity_invoiced)s Invoiced, %(quantity_delivered)s Delivered at %(unit_price)s each',
                 order=order.display_name,
@@ -57,9 +58,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             distribution = order_line.analytic_distribution if order_line.analytic_distribution else {}
             revenue_vals = self._get_aml_vals(False, order, amount, amount_currency, account.id, label=label, analytic_distribution=distribution)
 
-            accrual_account = self.account_id or product.product_tmpl_id._get_product_accounts()[
-                'invoices_to_issue' if qty_to_invoice > 0 else 'invoiced_not_delivered'
-            ]
+            accrual_account = self.account_id or accounts['invoices_to_issue' if qty_to_invoice > 0 else 'invoiced_not_delivered']
             counterpart_vals = self._get_aml_vals(
                 False, order, -amount, -amount_currency, accrual_account.id,
                 label=_('Accrued total'), analytic_distribution=distribution,
@@ -68,14 +67,13 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             vals_list.append(revenue_vals)
         return vals_list, self._merge_aml_vals(counterpart_vals_list)
 
-    def _get_accrual_cogs_line_vals(self, order_lines, is_purchase, accrual_entry_date):
+    def _get_accrual_pending_cogs_vals(self, order_lines, is_purchase, accrual_entry_date):
         if is_purchase:
-            return super()._get_accrual_cogs_line_vals(order_lines, is_purchase, accrual_entry_date)
+            return super()._get_accrual_pending_cogs_vals(order_lines, is_purchase, accrual_entry_date)
 
-        # For real-time-valued, storable products, the perpetual-valuation adjustment needed
-        # because perpetual valuation already posts COGS in real time instead of waiting for
-        # the invoice.
-        inventory_vals_list = []
+        # A real invoice always posts a COGS entry (debit expense / credit stock_valuation)
+        # alongside the plain revenue/accrual pair for such products.
+        vals_list = []
         counterpart_vals_list = []
         for order_line in order_lines:
             order = order_line.order_id
@@ -87,18 +85,14 @@ class AccountAccruedOrdersWizard(models.TransientModel):
                 continue
             product_accounts = product._get_product_accounts()
             expense_account = product_accounts.get('expense')
-            stock_variation_account = product_accounts.get('stock_variation')
-            if not expense_account or not stock_variation_account:
+            stock_valuation_account = product_accounts.get('stock_valuation')
+            if not expense_account or not stock_valuation_account:
                 continue
 
-            order_line_label = ellipsis(order_line.name, 20)
             if qty_to_invoice > 0:
-                # Delivered, not invoiced yet: no COGS posted for this quantity yet, simulate
-                # it at the actual weighted cost of what was delivered — `standard_price`
-                # alone doesn't reflect the real per-unit cost under FIFO.
-                delivery_moves = order_line.move_ids.filtered(lambda m: m.state == 'done' and m.is_out)
-                delivered_qty = sum(delivery_moves.mapped('quantity'))
-                perpetual_price_unit = -sum(delivery_moves.mapped('value')) / delivered_qty if delivered_qty else product.standard_price
+                # Delivered, not invoiced: no COGS posted yet, simulate it at standard cost
+                # (no stock moves to price it more precisely without the stock module).
+                perpetual_price_unit = product.standard_price
             else:
                 # Invoiced, not delivered yet: the COGS is already posted, revert it
                 # at the average cost of what was actually posted.
@@ -118,17 +112,40 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             perpetual_amount = perpetual_price_unit * qty_to_invoice
             perpetual_label = _('Goods Delivered not Invoiced (perpetual valuation)') if qty_to_invoice > 0 \
                 else _('Goods Invoiced not Delivered (perpetual valuation)')
-            perpetual_line_label = _(
-                "%(order)s - %(order_line)s; %(qty_invoiced)s invoiced, %(qty_delivered)s delivered at %(unit_price)s",
-                order=order.display_name,
-                order_line=order_line_label,
-                qty_invoiced=order_line.qty_invoiced_at_date,
-                qty_delivered=order_line.qty_delivered_at_date,
-                unit_price=formatLang(self.env, perpetual_price_unit, currency_obj=order.currency_id),
-            )
-            inventory_vals = self._get_aml_vals(False, order, perpetual_amount, 0.0, stock_variation_account.id, label=perpetual_line_label)
+            vals = self._get_aml_vals(False, order, perpetual_amount, 0.0, stock_valuation_account.id, label=perpetual_label)
             counterpart_vals = self._get_aml_vals(False, order, -perpetual_amount, 0.0, expense_account.id, label=perpetual_label)
-            inventory_vals['display_type'] = counterpart_vals['display_type'] = 'cogs'
-            inventory_vals_list.append(inventory_vals)
+            vals['display_type'] = counterpart_vals['display_type'] = 'cogs'
+            vals_list.append(vals)
             counterpart_vals_list.append(counterpart_vals)
-        return inventory_vals_list, self._merge_aml_vals(counterpart_vals_list)
+        return vals_list, self._merge_aml_vals(counterpart_vals_list)
+
+    def _get_accrual_closing_correction_vals(self, order_lines, is_purchase, accrual_entry_date):
+        if is_purchase:
+            return super()._get_accrual_closing_correction_vals(order_lines, is_purchase, accrual_entry_date)
+
+        valuation_vals_list = []
+        variation_vals_list = []
+        for order_line in order_lines:
+            order = order_line.order_id
+            product = order_line.product_id
+            if product.valuation != 'periodic' or not product.is_storable:
+                continue
+            qty_to_invoice, __, amount, amount_currency = self._get_accrual_qty_price_and_amount(order_line)
+            if qty_to_invoice <= 0:
+                # Invoiced, not delivered: nothing physical has left the warehouse to
+                # correct for yet.
+                continue
+            product_accounts = product._get_product_accounts()
+            stock_valuation_account = product_accounts.get('stock_valuation')
+            stock_variation_account = product_accounts.get('stock_variation')
+            if not stock_valuation_account or not stock_variation_account:
+                continue
+
+            label = _(
+                'Closing: %(order)s - %(order_line)s pending inventory value',
+                order=order.display_name,
+                order_line=ellipsis(order_line.name, 20),
+            )
+            valuation_vals_list.append(self._get_aml_vals(False, order, amount, amount_currency, stock_valuation_account.id, label=label))
+            variation_vals_list.append(self._get_aml_vals(False, order, -amount, -amount_currency, stock_variation_account.id, label=label))
+        return valuation_vals_list, self._merge_aml_vals(variation_vals_list)

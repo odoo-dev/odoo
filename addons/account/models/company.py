@@ -1289,9 +1289,9 @@ class ResCompany(models.Model):
         aml_vals_list = self.with_context(allowed_company_ids=self.ids)._action_close_stock_valuation(at_date=at_date)
 
         if include_accruals and not self.use_stock_account():
-            # No independent stock valuation: post the accrual *after* computing the closing
-            # entry instead, so its real GL impact isn't silently absorbed into Stock
-            # Variation — matching the report, which doesn't net the accrual against it either.
+            # No independent stock valuation: the closing gap above is computed before the
+            # accrual posts, and is naturally zero for every account it's about to touch
+            # (see `get_inventory_value`), so this can't double-correct.
             accrual_moves = self._create_accrual_moves(date=at_date)
 
         if not aml_vals_list and not accrual_moves:
@@ -1355,6 +1355,7 @@ class ResCompany(models.Model):
                 active_ids=candidate_lines.ids,
                 accrual_entry_date=fields.Date.to_string(accrual_entry_date),
                 accrual_allow_mixed_currencies=True,
+                accrual_include_closing_correction=True,
             ).new({
                 'company_id': self.id,
                 'date': accrual_entry_date,
@@ -1378,9 +1379,18 @@ class ResCompany(models.Model):
         reconstructed by undoing, from the current `qty_available`, the effect of every
         posted invoice/bill line dated after `at_date`.
         Overridden by `stock_account` to use the real valuation computed from stock moves/quants.
+
+        Scoped to real-time-valued products: `qty_available` is only nudged by billing
+        (`_update_qty_available`), a meaningful receipt/delivery proxy for real-time
+        valuation but not for periodic, which has no reliable signal here (see
+        `account.accrued.orders.wizard._get_accrual_closing_correction_vals` instead).
         """
         self.ensure_one()
         accounts_by_product = self.with_context(prefetch_fields=False)._get_accounts_by_product(at_date)
+        accounts_by_product = {
+            product: accounts for product, accounts in accounts_by_product.items()
+            if product.valuation == 'real_time'
+        }
 
         qty_variation_by_product = defaultdict(float)
         if at_date:

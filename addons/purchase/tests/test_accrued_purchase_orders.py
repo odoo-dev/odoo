@@ -76,31 +76,350 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             'account_id': account_id,
         })
 
-    def test_accrued_order(self):
-        # nothing to bill : no entries to be created
-        with self.assertRaises(UserError):
-            self.wizard.create_entries()
+    def _create_accrual_product(self, storable, real_time):
+        category = self.env['product.category'].create({
+            'name': 'Real Time Category' if real_time else 'Periodic Category',
+            'property_valuation': 'real_time' if real_time else 'periodic',
+        })
+        return self.env['product.product'].create({
+            'name': 'Storable Product' if storable else 'Non-stock Product',
+            'type': 'consu',
+            'is_storable': storable,
+            'categ_id': category.id,
+            'standard_price': 100.0,
+        })
 
-        # 5 qty of each product billeable
-        self.purchase_order.order_line.qty_received = 5
-        self.assertRecordValues(self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids, [
-            # reverse move lines
-            {'account_id': self.account_expense.id, 'debit': 0, 'credit': 5000},
-            {'account_id': self.alt_exp_account.id, 'debit': 0, 'credit': 1000},
-            {'account_id': self.account_revenue.id, 'debit': 6000, 'credit': 0},
-            # move lines
-            {'account_id': self.account_expense.id, 'debit': 5000, 'credit': 0},
-            {'account_id': self.alt_exp_account.id, 'debit': 1000, 'credit': 0},
-            {'account_id': self.account_revenue.id, 'debit': 0, 'credit': 6000},
+    def _create_purchase_order(self, product, qty=10.0):
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': product.name,
+                'product_id': product.id,
+                'product_qty': qty,
+                'price_unit': product.standard_price,
+                'tax_ids': False,
+            })],
+        })
+        purchase_order.button_confirm()
+        return purchase_order
+
+    def _create_bill(self, purchase_order, invoice_date=False):
+        move = self.env['account.move'].browse(purchase_order.action_create_invoice()['res_id'])
+        move.invoice_date = invoice_date or fields.Date.today()
+        move.action_post()
+        return move
+
+    def _cancel_accrual_entries(self, moves):
+        moves.filtered(lambda m: m.state == 'posted').button_draft()
+        moves.unlink()
+
+    def _filter_reversal(self, moves):
+        """ `moves.line_ids` without the scheduled reversal move's lines (its exact mirror). """
+        return moves.filtered(lambda m: not m.reversed_entry_id).line_ids
+
+    def test_bill_to_receive(self):
+        """ A non-stock-tracked product's "Bills to Receive" accrual: check both the created
+        journal entries and the inventory valuation report's accrual breakdown. """
+        product = self._create_accrual_product(storable=False, real_time=False)
+        purchase_order = self._create_purchase_order(product)
+        # No manual `account_id`: it must default to "Bills to Receive", never revenue.
+        accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
+        expense_account = product.product_tmpl_id._get_product_accounts()['expense']
+
+        # nothing to bill: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'bill_to_receive',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # 5 qty received, nothing billed yet
+        purchase_order.order_line.qty_received = 5
+
+        # Not a stock-tracked product: no place in a *stock* valuation report.
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertNotIn('accrual', report_data)
+        self.assertFalse(report_data["stock_variation"]["lines"])
+
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': expense_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
         ])
 
-        # received products billed, nothing to bill left
-        move = self.env['account.move'].browse(self.purchase_order.action_create_invoice()['res_id'])
-        move.invoice_date = '2020-01-01'
-        move.action_post()
-
+        # The closing action is scoped to storable products, so it has nothing to do here.
+        self._cancel_accrual_entries(account_move)
         with self.assertRaises(UserError):
-            self.wizard.with_context(accrual_entry_date='2020-01-30').create_entries()
+            self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+
+    def test_billed_not_received(self):
+        """ A non-stock-tracked product's "Billed Not Received" accrual: the vendor bill is
+        posted for the full ordered quantity before anything is received, so the accrual
+        reverses the expense already recognized until the goods actually come in. """
+        product = self._create_accrual_product(storable=False, real_time=False)
+        # Bill on ordered quantities, or nothing would be invoiceable with none received.
+        product.purchase_method = 'purchase'
+        purchase_order = self._create_purchase_order(product)
+        accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
+        expense_account = product.product_tmpl_id._get_product_accounts()['expense']
+
+        # nothing billed yet: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'billed_not_received',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # full quantity billed, nothing received yet
+        self._create_bill(purchase_order)
+
+        # Not a stock-tracked product: no place in a *stock* valuation report.
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertNotIn('accrual', report_data)
+        self.assertFalse(report_data["stock_variation"]["lines"])
+
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': expense_account.id, 'debit': 0, 'credit': 1000},
+            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
+        ])
+
+        # The closing action is scoped to storable products, so it has nothing to do here
+        # either, even though the bill itself is still posted.
+        self._cancel_accrual_entries(account_move)
+        with self.assertRaises(UserError):
+            self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+
+    def test_bill_to_receive_realtime(self):
+        """ Same as `test_bill_to_receive`, but for a storable, real-time-valued product:
+        a real-time bill never posts to the expense account, so the only commercial line
+        is the stock valuation adjustment, counterbalanced by the accrual account. """
+        product = self._create_accrual_product(storable=True, real_time=True)
+        purchase_order = self._create_purchase_order(product)
+        accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
+        stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
+
+        # nothing to bill: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'bill_to_receive',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # 5 qty received, nothing billed yet
+        purchase_order.order_line.qty_received = 5
+
+        # No classic expense line for real-time: the accrual is purely an inventory
+        # matter, so it shows up under "Bills to Receive" here...
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertEqual(report_data['accrual']['lines'], [{
+            'display_name': 'Bills to Receive',
+            'account_id': False,
+            'debit': 0,
+            'credit': 500.0,
+            'lines': [{
+                'display_name': accrual_account.display_name,
+                'account_id': accrual_account.id,
+                'debit': 0,
+                'credit': 500.0,
+            }],
+        }])
+        # ... and, netted against Stock Variation, in Ending Stock too.
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 500.0})
+        self.assertFalse(report_data['stock_variation']['lines'])
+
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': stock_valuation_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
+        ])
+
+        # No separate "classic" line to add here (unlike periodic), so the closing
+        # action reproduces the exact same thing.
+        self._cancel_accrual_entries(account_move)
+        action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+        moves = self.env['account.move'].search(action['domain'])
+        self.assertRecordValues(self._filter_reversal(moves), [
+            {'account_id': stock_valuation_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
+        ])
+
+    def test_billed_not_received_realtime(self):
+        """ Same as `test_billed_not_received`, but for a storable, real-time-valued
+        product: the bill posted straight to `stock_valuation` (no expense line at all,
+        real-time never uses one), so reverting it credits/debits that account directly
+        instead of `expense`. """
+        product = self._create_accrual_product(storable=True, real_time=True)
+        product.purchase_method = 'purchase'
+        purchase_order = self._create_purchase_order(product)
+        accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
+        stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
+
+        # nothing billed yet: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'billed_not_received',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # full quantity billed, nothing received yet
+        self._create_bill(purchase_order)
+
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertEqual(report_data['accrual']['lines'], [{
+            'display_name': 'Billed Not Received',
+            'account_id': False,
+            'debit': 1000.0,
+            'credit': 0,
+            'lines': [{
+                'display_name': accrual_account.display_name,
+                'account_id': accrual_account.id,
+                'debit': 1000.0,
+                'credit': 0,
+            }],
+        }])
+        # Posting the bill also nudges the `qty_available` proxy as if the goods had been
+        # received, contributing +1000 here; the accrual's own -1000 correction nets that
+        # back to 0 — correct, since nothing was actually received.
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 0.0})
+        self.assertFalse(report_data['stock_variation']['lines'])
+
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': stock_valuation_account.id, 'debit': 0, 'credit': 1000},
+            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
+        ])
+
+        self._cancel_accrual_entries(account_move)
+        action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+        moves = self.env['account.move'].search(action['domain'])
+        self.assertRecordValues(self._filter_reversal(moves), [
+            {'account_id': stock_valuation_account.id, 'debit': 0, 'credit': 1000},
+            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
+        ])
+
+    def test_bill_to_receive_periodic(self):
+        """ Same as `test_bill_to_receive`, but for a storable, periodic-valued product.
+        The classic expense line still applies, but the `qty_available` correction it
+        also needs is the closing action's job, not a plain accrual entry's. """
+        product = self._create_accrual_product(storable=True, real_time=False)
+        purchase_order = self._create_purchase_order(product)
+        accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
+        stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
+        stock_variation_account = product.product_tmpl_id._get_product_accounts()['stock_variation']
+        expense_account = product.product_tmpl_id._get_product_accounts()['expense']
+
+        # nothing to bill: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'bill_to_receive',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # 5 qty received, nothing billed yet
+        purchase_order.order_line.qty_received = 5
+
+        # No "Bills to Receive" entry (periodic has nothing to do with stock valuation),
+        # but the pending correction already previews through Ending Stock.
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertNotIn('accrual', report_data)
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 500.0})
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_variation_account.id], {'value': -500.0})
+
+        # The plain wizard only ever posts the classic pair.
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': expense_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
+        ])
+
+        # The closing action reproduces that pair, plus the correction it alone posts.
+        self._cancel_accrual_entries(account_move)
+        action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+        moves = self.env['account.move'].search(action['domain'])
+        self.assertRecordValues(self._filter_reversal(moves), [
+            {'account_id': expense_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': stock_valuation_account.id, 'debit': 500, 'credit': 0},
+            {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
+            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 500},
+        ])
+
+    def test_billed_not_received_periodic(self):
+        """ Same as `test_billed_not_received`, but for a storable, periodic-valued
+        product. Same split as `test_bill_to_receive_periodic`: the wizard only posts
+        the classic pair, the correction is the closing action's job. """
+        product = self._create_accrual_product(storable=True, real_time=False)
+        product.purchase_method = 'purchase'
+        purchase_order = self._create_purchase_order(product)
+        accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
+        stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
+        stock_variation_account = product.product_tmpl_id._get_product_accounts()['stock_variation']
+        expense_account = product.product_tmpl_id._get_product_accounts()['expense']
+
+        # nothing billed yet: no entries to be created
+        wizard = self.env['account.accrued.orders.wizard'].with_context({
+            'active_model': 'purchase.order.line',
+            'active_ids': purchase_order.order_line.ids,
+            'default_accrual_type': 'billed_not_received',
+        }).create({
+            'date': fields.Date.today(),
+        })
+        with self.assertRaises(UserError):
+            wizard.create_entries()
+
+        # full quantity billed, nothing received yet
+        self._create_bill(purchase_order)
+
+        # Still no "Billed Not Received" entry. Posting the bill nudges the `qty_available`
+        # proxy as if the goods had been received, but a bill never really creates any
+        # inventory value for a periodic product (see `get_inventory_value`): that nudge is
+        # itself an artifact of billing, not of anything physical, so it's excluded from
+        # Ending Stock's valuation-account total up front, leaving only its counterpart
+        # under Stock Variation.
+        report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
+        self.assertNotIn('accrual', report_data)
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 0.0})
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_variation_account.id], {'value': 0.0})
+        # Nothing physically received, nothing really posted to the valuation account
+        # either: no genuine gap left for Stock Variation to flag.
+        self.assertFalse(report_data['stock_variation']['lines'])
+
+        account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(self._filter_reversal(account_move), [
+            {'account_id': expense_account.id, 'debit': 0, 'credit': 1000},
+            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
+        ])
+
+        # For the same reason, the closing action's own GL reconciliation has nothing left
+        # to do here either: it just reproduces the accrual entry as-is.
+        self._cancel_accrual_entries(account_move)
+        action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
+        moves = self.env['account.move'].search(action['domain'])
+        forward_lines = self._filter_reversal(moves).sorted(lambda l: (l.account_id.id, l.debit, l.credit))
+        self.assertRecordValues(forward_lines, [
+            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
+            {'account_id': expense_account.id, 'debit': 0, 'credit': 1000},
+        ])
 
     def test_multi_currency_accrued_order(self):
         # 5 qty of each product billeable
