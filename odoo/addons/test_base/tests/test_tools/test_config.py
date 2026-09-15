@@ -769,6 +769,18 @@ class TestConfigManager(TransactionCase):
                     _, options = self.parse_reset(args)
                 self.assertEqual(options['stop_after_init'], stop_after_init)
 
+    def test_12_with_test_data_explicitness(self):
+        for args, with_test_data, explicit in [
+            (['-d', 'test', '--test-enable'], False, False),
+            (['-d', 'test', '--test-enable', '-i', 'base'], True, False),
+            (['-d', 'test', '--test-enable', '-u', 'base'], False, False),
+            (['-d', 'test', '--test-enable', '-u', 'base', '--with-test-data'], True, True),
+        ]:
+            with self.subTest(args=args):
+                cli, options = self.parse_reset(args)
+                self.assertIs(options['with_test_data'], with_test_data)
+                self.assertIs(cli.with_test_data, True if explicit else None)
+
     def test_13_empty_db_replica_host(self):
         with self.assertLogs('py.warnings', 'WARNING') as capture:
             _, options = self.parse_reset(['--db_replica_host', ''])

@@ -91,6 +91,14 @@ def load_demo(env: Environment, package: ModuleNode, idref: IdRef, mode: LoadMod
         return False
 
 
+def load_test(env: Environment, package: ModuleNode, idref: IdRef, mode: LoadMode) -> bool:
+    """Load test data for the specified package."""
+    if package.manifest.get('test_data'):
+        _logger.info("Module %s: loading test data", package.name)
+        load_data(env, idref, mode, kind='test', package=package)
+    return True
+
+
 def force_demo(env: Environment) -> None:
     """
     Forces the `demo` flag on all modules, and installs demo data for all installed modules.
@@ -116,6 +124,40 @@ def force_demo(env: Environment) -> None:
         env.cr.commit()
         Registry.new(env.cr.dbname, update_module=True)
         env.cr.rollback()
+
+
+def force_test(env: Environment, graph: ModuleGraph, module_names: Collection[str]) -> list[str]:
+    """Backfill test data for the selected modules and their dependencies."""
+    module_names = set(module_names)
+    for package in reversed(list(graph)):
+        if package.name in module_names:
+            module_names.update(dependency.name for dependency in package.depends)
+
+    loaded_ids = []
+    for package in graph:
+        if package.name not in module_names or package.test_data:
+            continue
+        package.test_data = package.data_installable('test_data')
+        if package.test_data:
+            load_test(env, package, {}, 'init')
+            loaded_ids.append(package.id)
+
+    if loaded_ids:
+        env.cr.execute(
+            'UPDATE ir_module_module SET test_data = TRUE WHERE id IN %s',
+            [tuple(loaded_ids)],
+        )
+
+    env['ir.module.module'].invalidate_model(['test_data'])
+    return [
+        package.name
+        for package in graph
+        if (
+            package.name in module_names
+            and package.manifest['test_data']
+            and not package.test_data
+        )
+    ]
 
 
 def load_module_graph(
@@ -218,7 +260,7 @@ def load_module_graph(
 
             if update_operation == 'install':
                 load_data(env, idref, 'init', kind='data', package=package)
-                if install_demo and package.demo_installable:
+                if install_demo and package.data_installable('demo'):
                     package.demo = load_demo(env, package, idref, 'init')
                 mode = 'init'
             else:  # 'upgrade' or 'reinit'
@@ -229,8 +271,20 @@ def load_module_graph(
                 if package.demo:
                     package.demo = load_demo(env, package, idref, mode)
 
-            if install_test_data and all(p.test_data for p in package.depends):
-                load_data(env, idref, mode, kind='test', package=package)
+            backfill_dependencies = (
+                tools.config['test_enable']
+                and tools.config['with_test_data']
+                and update_operation in ('install', 'upgrade')
+            )
+            if backfill_dependencies and not package.data_installable('test_data'):
+                missing = force_test(env, graph, [dependency.name for dependency in package.depends])
+                if missing:
+                    _logger.warning(
+                        "Test data could not be loaded for modules with missing test-data dependencies: %s",
+                        ', '.join(missing),
+                    )
+            if install_test_data and package.data_installable('test_data'):
+                load_test(env, package, idref, mode)
                 package.test_data = True
             env.cr.execute(
                 'UPDATE ir_module_module SET demo = %s, test_data = %s WHERE id = %s',
@@ -368,13 +422,23 @@ def load_modules(
     # connection settings are automatically reset when the connection is
     # borrowed from the pool
     cr.execute("SET SESSION lock_timeout = '15s'")
-    if not modules_db.is_initialized(cr):
+    database_initialized = modules_db.is_initialized(cr)
+    if not database_initialized:
         if not update_module:
             raise ImportError(f"Database {cr.dbname} not initialized, you can force it with `-i base`")
         _logger.info("Initializing database %s", cr.dbname)
         modules_db.initialize(cr)
     elif 'base' in reinit_modules:
         registry._reinit_modules.add('base')
+
+    if (
+        database_initialized
+        and tools.config._cli_options.get('with_test_data')
+        and not tools.config['test_enable']
+    ):
+        raise RuntimeError(
+            "Test data cannot be enabled on an existing database without running tests."
+        )
 
     if 'base' in upgrade_modules:
         cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))

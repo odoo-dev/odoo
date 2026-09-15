@@ -26,7 +26,6 @@ if typing.TYPE_CHECKING:
         'to remove',
         'to install',
     ]
-
 _logger = logging.getLogger(__name__)
 
 
@@ -199,9 +198,8 @@ class ModuleNode:
             for dependency in self.depends
         )
 
-    @property
-    def demo_installable(self) -> bool:
-        return all(p.demo for p in self.depends)
+    def data_installable(self, flag: Literal['demo', 'test_data']) -> bool:
+        return all(getattr(package, flag) for package in self.depends)
 
 
 class ModuleGraph:
