@@ -312,8 +312,12 @@ class ProjectProject(models.Model):
                 project.allowed_internal_user_ids = project.allowed_internal_user_ids.filtered(
                     lambda u: project.company_id in u.company_ids._origin
                 )
-            if project.user_id and project.privacy_visibility in ['followers', 'invited_users']:
-                project.allowed_internal_user_ids |= project.user_id
+            if (
+                (user := project.user_id)
+                and project.privacy_visibility in ['followers', 'invited_users']
+                and user.filtered_domain(self._fields['allowed_internal_user_ids'].get_comodel_domain(self))
+            ):
+                project.allowed_internal_user_ids |= user
 
     @api.depends_context('company')
     @api.depends('company_id', 'company_id.resource_calendar_id')
