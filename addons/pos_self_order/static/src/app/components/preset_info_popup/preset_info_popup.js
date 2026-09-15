@@ -1,5 +1,11 @@
+<<<<<<< 4a1cffd5577e1ce12be30bc9c1a18c86a1b029e3
 import { useState } from "@web/owl2/utils";
 import { Component, EventBus, onWillStart } from "@odoo/owl";
+||||||| 997afdf840c5620fd83f81c00eb44ad461cd830a
+import { Component, onWillStart, useState } from "@odoo/owl";
+=======
+import { Component, useState } from "@odoo/owl";
+>>>>>>> c29954d766ce5be2f37da9c958ab6b277b1d4234
 import { rpc } from "@web/core/network/rpc";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
@@ -121,11 +127,19 @@ export class PresetInfoPopup extends Component {
             validationError: null,
             isSubmitting: false,
         });
+<<<<<<< 4a1cffd5577e1ce12be30bc9c1a18c86a1b029e3
         this.addressRecord = this.makeAddressRecord();
 
         onWillStart(async () => {
             await this.selfOrder.syncPresetSlotAvaibility(this.preset);
         });
+||||||| 997afdf840c5620fd83f81c00eb44ad461cd830a
+
+        onWillStart(async () => {
+            await this.selfOrder.syncPresetSlotAvaibility(this.preset);
+        });
+=======
+>>>>>>> c29954d766ce5be2f37da9c958ab6b277b1d4234
     }
 
     async setInformations() {

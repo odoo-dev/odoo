@@ -1,3 +1,4 @@
+<<<<<<< 4a1cffd5577e1ce12be30bc9c1a18c86a1b029e3
 import { test, expect, mockTouch } from "@odoo/hoot";
 import {
     manuallyDispatchProgrammaticEvent,
@@ -13,6 +14,14 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
+||||||| 997afdf840c5620fd83f81c00eb44ad461cd830a
+import { test, expect } from "@odoo/hoot";
+import { mountWithCleanup } from "@web/../tests/web_test_helpers";
+=======
+import { test, expect } from "@odoo/hoot";
+import { queryAll } from "@odoo/hoot-dom";
+import { contains, mountWithCleanup } from "@web/../tests/web_test_helpers";
+>>>>>>> c29954d766ce5be2f37da9c958ab6b277b1d4234
 import { setupPosEnv } from "../utils";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { definePosModels } from "../data/generate_model_definitions";
@@ -70,6 +79,7 @@ test("fastValidate", async () => {
     expect(order.amount_paid).toBe(3.45);
 });
 
+<<<<<<< 4a1cffd5577e1ce12be30bc9c1a18c86a1b029e3
 test("long press on a product opens the product info popup", async () => {
     const { store } = await mountProductScreen();
 
@@ -188,6 +198,27 @@ test("drag and drop reorders products", async () => {
     expect(products.get(6).pos_sequence).toBe(21);
 });
 
+||||||| 997afdf840c5620fd83f81c00eb44ad461cd830a
+=======
+test("full slots remain available in POS", async () => {
+    const store = await setupPosEnv();
+    const order = store.addNewOrder();
+    const preset = store.models["pos.preset"].get(2);
+    preset.slots_per_interval = 1;
+
+    await mountWithCleanup(ProductScreen, { props: { orderUuid: order.uuid } });
+    store.selectPreset(preset);
+    await contains(".o_dialog .btn:contains('03/12/2019')").click();
+
+    const fullSlots = queryAll(".preset-slot-button.o_colorlist_item_numpad_color_1");
+    const fullSlot = preset.availabilities["2019-03-12"].find(
+        (s) => s.time === "2019-03-12 12:00:00"
+    );
+    expect(fullSlot.isFull).toBe(true);
+    expect(fullSlots[0].textContent.trim()).toBe("12:00");
+});
+
+>>>>>>> c29954d766ce5be2f37da9c958ab6b277b1d4234
 test("addProductToOrder presets the variant matched by default_code search", async () => {
     const store = await setupPosEnv();
     store.addNewOrder();

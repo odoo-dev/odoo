@@ -127,6 +127,7 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         last_order = self.env["pos.order"].search([], limit=1, order="id desc")
         self.assertEqual(last_order.floating_order_name, 'Dr Dre')
         self.assertNotEqual(last_order.preset_time, False)
+<<<<<<< 4a1cffd5577e1ce12be30bc9c1a18c86a1b029e3
 
     def test_slot_limit_orders(self):
         """
@@ -157,3 +158,30 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.pos_config.current_session_id.set_opening_control(0, '')
         self.start_tour(self.pos_config._get_self_order_route(), 'test_self_order_preset_btn')
+||||||| 997afdf840c5620fd83f81c00eb44ad461cd830a
+
+    def test_slot_limit_orders(self):
+        """
+        Tests that when a slot reached it's limit capacity, it is not shown
+        in the selector anymore.
+        """
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'dayofweek': '0',
+                'hour_from': 0,
+                'hour_to': 24,
+            })],
+        })
+        self.preset_takeaway.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar,
+            'slots_per_interval': 1,
+            'interval_time': 20,
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, "")
+        self_route = self.pos_config._get_self_order_route()
+        self.start_tour(self_route, "test_slot_limit_orders")
+=======
+>>>>>>> c29954d766ce5be2f37da9c958ab6b277b1d4234
