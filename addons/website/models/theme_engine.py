@@ -54,20 +54,16 @@ class ThemeEngine(models.AbstractModel):
         if not self.env.user.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
-        themes_sudo = themes.sudo()
-
         theme_model_name = self._theme_model_names[model_name]
         IrModelData = self.env['ir.model.data'].sudo()
         records = self.env[theme_model_name].sudo()
 
-        for module in themes_sudo:
-            imd_ids = IrModelData.search([
-                ('module', '=', module.name),
-                ('model', '=', theme_model_name),
-                ('res_id', '!=', False),
-            ]).mapped('res_id')
-            records |= self.env[theme_model_name].sudo().with_context(active_test=False).browse(imd_ids)
-        return records
+        imd_ids = IrModelData.search([
+            ('module', 'in', themes.sudo().mapped('name')),
+            ('model', '=', theme_model_name),
+            ('res_id', '!=', False),
+        ]).mapped('res_id')
+        return records | records.with_context(active_test=False).browse(imd_ids)
 
     @api.model
     def _update_records(self, theme, model_name, website):
