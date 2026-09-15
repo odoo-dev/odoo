@@ -1535,9 +1535,18 @@ class TransactionCase(BaseCase):
             transaction.ormcaches__[name] = CacheLayer(layer)
 
     @classmethod
-    def add_company(cls, xmlid):
-        company = cls.env.ref(xmlid)
+    def add_class_company(cls, xmlid, values=None):
+        company = cls.env.ref(xmlid).sudo()
+        if values:
+            company.write(values)
         cls.env.user.company_ids += company | company.child_ids
+        return company
+
+    def add_company(self, xmlid, values=None):
+        company = self.env.ref(xmlid).sudo()
+        if values:
+            company.write(values)
+        self.env.user.company_ids += company | company.child_ids
         return company
 
     @classmethod

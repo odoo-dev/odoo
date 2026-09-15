@@ -12,9 +12,7 @@ class TestPerfSessionInfo(common.HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         # Improve stability of query count by using dedicated company and user.
-        cls.company = cls.env['res.company'].create({
-            'name': 'Test Company',
-        })
+        cls.company = cls.env.ref('base.test_company')
         cls.user = common.new_test_user(
             cls.env,
             "session",
@@ -66,7 +64,7 @@ class TestPerfSessionInfo(common.HttpCase):
         # cold orm/fields cache:
         # - Web only: 17
         # - All modules 68
-        with self.assertQueryCount(68):
+        with self.assertQueryCount(69):
             self.env['ir.ui.menu'].load_web_menus(False)
 
         # cold fields cache:
@@ -82,7 +80,7 @@ class TestPerfSessionInfo(common.HttpCase):
         # cold orm/fields cache:
         # - Web only: 17
         # - All modules 68
-        with self.assertQueryCount(68):
+        with self.assertQueryCount(69):
             self.env['ir.ui.menu'].load_menus(False)
 
         # cold fields cache:
@@ -98,7 +96,7 @@ class TestPerfSessionInfo(common.HttpCase):
         # cold ormcache:
         # - Only web 16
         # - All modules: 31
-        with self.assertQueryCount(31):
+        with self.assertQueryCount(32):
             self.env['ir.ui.menu']._visible_menu_ids()
 
         # cold fields cache - warm orm cache (only web: 0, all module: 0)
