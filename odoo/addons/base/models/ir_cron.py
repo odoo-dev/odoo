@@ -350,6 +350,13 @@ class IrCron(models.Model):
         #
         # Learn more: https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS
 
+        try:
+            # take registry lock to prevent updates of the registry while the cron is processed
+            cr.execute("SELECT pg_advisory_xact_lock_shared(hashtext('registry_loading')) NOWAIT")
+        except psycopg2.OperationalError as e:
+            # the registry is being modified
+            raise BadModuleState() from e
+
         where_clause = SQL("id = %s", job_id)
         if not include_not_ready:
             where_clause = SQL("%s AND %s", where_clause, IrCron._get_ready_sql_condition(cr))
