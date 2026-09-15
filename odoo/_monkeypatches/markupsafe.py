@@ -1,8 +1,12 @@
+import atexit
+import logging
 import re
 
+from collections import Counter
 from importlib.metadata import version
 
-from markupsafe import Markup
+import markupsafe
+from markupsafe import Markup, escape
 from odoo.tools import parse_version
 
 
@@ -10,6 +14,16 @@ orig_markupsafe_striptags = Markup.striptags
 
 
 def patch_module():
+    counter = Counter()
+    @atexit.register
+    def _log():
+        logging.getLogger(__name__).runbot("escapes: %r", counter)
+    def _escape_counter(value):
+        if not hasattr(value, '__html__'):
+            counter[len(str(value))] += 1
+        return escape(value)
+    markupsafe.escape = _escape_counter
+
     # ---------------------------------------------------------
     # MarkupSafe changed the implementation of striptags starting
     # version 2.1.4, which is causing a significant performance
