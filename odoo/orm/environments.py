@@ -808,6 +808,12 @@ class Transaction:
 
         Note: registry changes are not thread-safe.
         """
+        if self._registry_invalidated == 0:
+            # While we are invalidating the registry, prevent other workers from
+            # loading it while it is being modified. This is similar to locking
+            # it during registry loading.
+            env = self.default_env or next(iter(self.envs), None)
+            env.cr.execute("SELECT pg_advisory_xact_lock(hashtext('registry_loading'))", log_exceptions=False)
         self._registry_invalidated += 1
 
     def _reset_registry_change(self):
