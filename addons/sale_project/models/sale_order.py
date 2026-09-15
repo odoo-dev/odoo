@@ -1,8 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import ast
-from collections import defaultdict
-
 from odoo import api, fields, models, _
 from odoo.fields import Command, Domain
 from odoo.exceptions import UserError
@@ -129,9 +126,7 @@ class SaleOrder(models.Model):
     @api.depends('order_line.product_id', 'order_line.project_id')
     def _compute_project_ids(self):
         projects = self.env['project.project'].search(['|', ('sale_order_id', 'in', self.ids), ('reinvoiced_sale_order_id', 'in', self.ids)])
-        projects_per_so = defaultdict(lambda: self.env['project.project'])
-        for project in projects:
-            projects_per_so[project.sale_order_id.id or project.reinvoiced_sale_order_id.id] |= project
+        projects_per_so = projects.grouped(lambda project: project.sale_order_id.id or project.reinvoiced_sale_order_id.id)
         for order in self:
             projects = order.order_line.filtered(
                 lambda sol:
@@ -140,10 +135,10 @@ class SaleOrder(models.Model):
                 ).mapped('product_id.project_id')
             projects |= order.project_id
             projects |= order.order_line.mapped('project_id')
-            projects |= projects_per_so[order.id or order._origin.id]
-            projects = projects._filtered_access('read')
+            projects |= projects_per_so.get(order.id or order._origin.id) or projects.browse()
+            projects = projects._filtered_access('read').filtered('active')
             order.project_ids = projects
-            order.project_count = len(projects.filtered('active'))
+            order.project_count = len(projects)
 
     def _action_confirm(self):
         """ On SO confirmation, some lines should generate a task or a project. """
