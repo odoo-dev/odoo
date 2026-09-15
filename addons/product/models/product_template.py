@@ -904,26 +904,20 @@ class ProductTemplate(models.Model):
 
             # Duplicate variant-specific rules
             if variant_specific_pricings:
-                def get_combination_key(variant, attribute_line_ids):
+                def get_combination_key(variant):
                     return frozenset(
                         variant.product_template_variant_value_ids.mapped(
-                            lambda v: (
-                                attribute_line_ids.index(v.attribute_line_id.id),
-                                v.product_attribute_value_id.id,
-                            )
+                            lambda v: (v.attribute_id.id, v.product_attribute_value_id.id)
                         )
                     )
-
-                template_copy_line_ids = template_copy.attribute_line_ids.ids
                 copy_variant_by_attribute_combo = {
-                    get_combination_key(v, template_copy_line_ids): v.id
+                    get_combination_key(v): v.id
                     for v in template_copy.product_variant_ids
                 }
 
-                template_line_ids = template.attribute_line_ids.ids
                 variant_mapping = {}
                 for variant in template.product_variant_ids:
-                    key = get_combination_key(variant, template_line_ids)
+                    key = get_combination_key(variant)
                     if key in copy_variant_by_attribute_combo:
                         variant_mapping[variant.id] = copy_variant_by_attribute_combo[key]
 
