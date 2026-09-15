@@ -188,7 +188,7 @@
                         <OrderDisplay order="_selectedSyncedOrder" t-slot-scope="scope">
                             <t t-set="line" t-value="scope.line" />
                             <t t-set="qty" t-value="line.order_id?.uiState?.lineToRefund?.[line.uuid]?.qty" />
-                            <Orderline line="line" t-on-click="() => this.onClickOrderline(line)" toRefund="qty" class="{'selected': line.id === _selectedOrderlineId}">
+                            <Orderline line="line" t-on-click="() => this.onClickOrderline(line)" toRefund="qty" showPreparationStage="true" class="{'selected': line.id === _selectedOrderlineId}">
                                 <t t-set="toRefundDetail" t-value="line.order_id?.uiState?.lineToRefund?.[line.uuid]" />
                                 <li t-if="!this.pos.isProductQtyZero(line.refundedQty)"
                                     class="info refund-note mt-1">

@@ -16,6 +16,7 @@ export class Orderline extends Component {
         onClick: t.function().optional(() => () => {}),
         onLongPress: t.function().optional(() => () => {}),
         toRefund: t.number().optional(),
+        showPreparationStage: t.boolean().optional(false),
     });
 
     root = signal.ref();

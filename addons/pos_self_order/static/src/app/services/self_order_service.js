@@ -840,7 +840,9 @@ export class SelfOrder extends Reactive {
                     table_identifier: tableIdentifier, // Always trust URL one, is the one user scanned
                 }
             );
+            const additionalData = this.extractAdditionalServerData(data);
             const result = this.models.connectNewData(data);
+            this.processAdditionalServerData(additionalData);
             if (result["pos.order"][0].uuid !== this.selectedOrderUuid) {
                 this.orderTakeAwayState[result["pos.order"][0].uuid] =
                     this.orderTakeAwayState[this.selectedOrderUuid];
@@ -867,10 +869,18 @@ export class SelfOrder extends Reactive {
         return this.orderSyncMutex.exec(() => this._getUserDataFromServer(tokens, opts));
     }
 
+    extractAdditionalServerData(_data) {
+        return {};
+    }
+
+    processAdditionalServerData(_data) {}
+
     async _getUserDataFromServer(tokens = [], { pushOrphanedLines = true } = {}) {
         const tableIdentifier = this.currentTableIdentifier;
         const dbAccessToken = this.models["pos.order"]
-            .filter((o) => o.state === "draft" && o.isSynced && o.access_token)
+            // Keep completed orders in sync too: their preparation stage can
+            // continue to change after payment.
+            .filter((o) => o.isSynced && o.access_token)
             .map((order) => ({
                 access_token: order.access_token,
                 state: order.state,
@@ -897,7 +907,9 @@ export class SelfOrder extends Reactive {
                 order_access_tokens: accessTokens,
                 table_identifier: tableIdentifier,
             });
+            const additionalData = this.extractAdditionalServerData(data);
             const result = this.models.connectNewData(data);
+            this.processAdditionalServerData(additionalData);
 
             let openOrder = null;
             if (tokens.length === 0) {

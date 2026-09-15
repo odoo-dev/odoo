@@ -59,7 +59,6 @@ class PosSelfOrderController(http.Controller):
 
     def _generate_return_values(self, order, config):
         orders = self.env['pos.order']._load_pos_self_data_read(order, config)
-
         for o in orders:
             del o['email']
             del o['mobile']
@@ -200,9 +199,10 @@ class PosSelfOrderController(http.Controller):
         for data in order_access_tokens:
             domain = Domain.OR([domain, ['&',
                 ('access_token', '=', data['access_token']),
-                '|',
+                '|', '|',
                 ('write_date', '>', data.get('write_date')),
                 ('state', '!=', data.get('state')),
+                ('prep_order_ids.prep_line_ids.write_date', '>', data.get('write_date')),
             ]])
 
         if (
