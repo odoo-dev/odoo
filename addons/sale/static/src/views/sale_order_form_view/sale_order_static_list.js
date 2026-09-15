@@ -38,7 +38,7 @@ export class SaleOrderFormStaticList extends StaticList {
         }
 
         const sectionLines = getSectionRecords(this, record, this.isSubsection(record)).filter(
-            (line) => !this.isNote(line) && !this.isComboItem(line) && line !== record
+            (line) => this.shouldPropagateQuantity(line, record)
         );
 
         if (!sectionLines.length) {
@@ -95,5 +95,9 @@ export class SaleOrderFormStaticList extends StaticList {
         await this._applyCommands(commands);
         await this._onUpdate();
         return {};
+    }
+
+    shouldPropagateQuantity(line, sectionRecord) {
+        return !this.isNote(line) && !this.isComboItem(line) && line !== sectionRecord;
     }
 }
