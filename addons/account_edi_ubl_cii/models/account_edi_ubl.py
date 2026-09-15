@@ -1042,7 +1042,9 @@ class AccountEdiUBL(models.AbstractModel):
             ),
         )
         for grouping_key, values in aggregated_values.items():
-            if not grouping_key:
+            # scheme_id 'OM' is for France Octroi de mer, it act as a tax, but shouldn't be counted in classified_tax_category_nodes,
+            # it's part of the allowance charges, see l10n_fr_octroi_de_mer
+            if not grouping_key or grouping_key['scheme_id'] == 'OM':
                 continue
 
             classified_tax_category_nodes.append(self._ubl_get_line_item_node_classified_tax_category_node(vals, {
