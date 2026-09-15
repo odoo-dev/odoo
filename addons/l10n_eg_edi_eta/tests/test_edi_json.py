@@ -4,7 +4,6 @@ from unittest.mock import patch
 from freezegun import freeze_time
 
 from odoo import Command
-from odoo.addons.l10n_eg_edi_eta.tools.eta_serialize import serialize_eta_document
 from odoo.fields import Datetime
 from odoo.exceptions import UserError
 from odoo.tests import tagged

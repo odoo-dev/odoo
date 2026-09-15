@@ -862,7 +862,6 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         self.assert_tax_totals_summary(document, expected_values)
         self._run_js_tests()
 
-
     def test_discount_with_round_globally(self):
         tax = self.percent_tax(21.0)
 

@@ -3,7 +3,7 @@ from odoo import api, fields, Command
 from odoo.models import BaseModel
 from odoo.tests import HttpCase, new_test_user, tagged, save_test_file
 from odoo.tools import BinaryValue, config, file_path, file_open
-from odoo.tools.float_utils import float_round, float_compare
+from odoo.tools.float_utils import float_compare
 
 from odoo.addons.product.tests.common import ProductCommon
 

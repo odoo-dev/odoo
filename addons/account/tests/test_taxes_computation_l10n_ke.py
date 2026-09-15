@@ -1,4 +1,3 @@
-from odoo import Command
 from odoo.addons.account.tests.test_taxes_computation import TestTaxesComputation
 from odoo.tests import tagged
 

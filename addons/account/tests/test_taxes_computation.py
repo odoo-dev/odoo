@@ -856,7 +856,6 @@ class TestTaxesComputation(TestTaxCommon):
 
         self._run_js_tests()
 
-
     def test_reverse_charge_division_tax(self):
         tax = self.division_tax(
             21.0,

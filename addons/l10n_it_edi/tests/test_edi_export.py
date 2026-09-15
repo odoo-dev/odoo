@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from unittest import SkipTest
 from lxml import etree
 from odoo import Command
 from odoo.tests import freeze_time, tagged

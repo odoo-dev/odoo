@@ -8,7 +8,7 @@ from markupsafe import Markup
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import float_repr, float_compare, float_is_zero, date_utils, SQL
+from odoo.tools import float_repr, float_compare, date_utils, SQL
 from odoo.tools.xml_utils import cleanup_xml_node, find_xml_value
 from odoo.addons.l10n_es_edi_facturae.xml_utils import (
     NS_MAP,

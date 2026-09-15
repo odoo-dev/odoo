@@ -54,7 +54,7 @@ class AccountMoveLine(models.Model):
 
     # --- Price unit / taxes / discount helpers (called by the wizard) ---
 
-    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids):
+    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids, document_tax_mode):
         """
         Compute the new price_unit and original_price_unit to set on the
         line after applying (or removing) the privilege's fiscal position.
