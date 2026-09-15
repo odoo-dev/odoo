@@ -44,4 +44,4 @@ class PosConfig(models.Model):
             values['default_product_id'] = default_sol_product.id
 
         if values:
-            self.with_context(active_test=False).search([]).write(values)
+            self.with_context(active_test=False).search([('self_ordering_mode', '!=', 'nothing')]).write(values)
