@@ -73,6 +73,15 @@ const chatterPatch = {
                 if (record?.data) {
                     Object.keys(record.data).forEach((field) => record.data[field]);
                 }
+                const currentThread = this.state.thread;
+                const resId = record?.data.id;
+                const resModel = record?._config.resModel;
+                if (
+                    currentThread &&
+                    (currentThread.id !== resId || currentThread.model !== resModel)
+                ) {
+                    this.changeThread(resModel, resId);
+                }
                 return [record];
             },
             (record) => this.updateRecipients(record)
