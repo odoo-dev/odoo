@@ -15,7 +15,8 @@ class PosConfig(models.Model):
 
     @api.model
     def _default_discount_value_on_module_install(self):
-        configs = self.env['pos.config'].search([])
+        pos_domain = [('self_ordering_mode', '!=', 'nothing')] if 'self_ordering_mode' in self.env.registry['pos.config']._fields else []
+        configs = self.env['pos.config'].search(pos_domain)
         product = self.env.ref("pos_discount.product_product_consumable", raise_if_not_found=False)
         for conf in configs:
             conf.discount_product_id = product if conf.module_pos_discount and product and (not product.company_id or product.company_id == conf.company_id) else False
