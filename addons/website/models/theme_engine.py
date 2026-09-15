@@ -15,9 +15,11 @@ _logger = logging.getLogger(__name__)
 class ThemeEngine(models.AbstractModel):
     """ Turns what a theme module ships into real records.
 
-        A theme module holds ``theme.*`` template records; this model copies
-        them into the records of a given website, removes them again, and
-        cleans up the orphans left behind by a theme update.
+        Installing a theme module is what creates its ``theme.*`` template
+        records on the database. Applying a theme on a website is what this
+        model does: it copies those templates into website records and applies
+        the theme configuration. The two are independent, and a module upgrade
+        never applies anything on a website.
 
         It also generates the primary snippet and page templates declared in a
         module manifest, which is unrelated to any website.
@@ -187,11 +189,6 @@ class ThemeEngine(models.AbstractModel):
             for model_name in self._theme_model_names:
                 self._update_records(module, model_name, website)
 
-            if self.env.context.get('apply_new_theme'):
-                # TODO Kept for backward compatibility with design-themes tests
-                # and web_studio. This could become a parameter in master.
-                self.env['theme.utils'].with_context(website_id=website.id)._post_copy(module)
-
     @api.model
     def _theme_unload(self, themes, website):
         """
@@ -269,6 +266,29 @@ class ThemeEngine(models.AbstractModel):
         for theme in reversed(website.theme_id._theme_get_stream_themes()):
             self._theme_unload(theme, website)
         website.theme_id = False
+
+    @api.model
+    def _theme_apply(self, theme, website):
+        """
+            Apply ``theme`` on ``website``: remove the theme currently applied,
+            copy the templates of the whole theme stream into website records,
+            then apply the theme configuration.
+
+            The theme must already be installed: this never triggers a module
+            operation, and therefore never reloads the registry.
+
+            :param theme: ``ir.module.module`` theme to apply
+            :param website: ``website`` model on which to apply the theme
+        """
+        theme.ensure_one()
+        website.ensure_one()
+
+        self._theme_remove(website)
+
+        website.theme_id = theme
+        self._theme_load(theme._theme_get_stream_themes(), website)
+
+        self.env['theme.utils'].with_context(website_id=website.id)._apply_theme_config(theme)
 
     # ----------------------------------------------------------------
     # New page templates
