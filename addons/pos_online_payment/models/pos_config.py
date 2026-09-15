@@ -33,6 +33,7 @@ class PosConfig(models.Model):
                 module_payment_demo.button_install()
             new_online_pm = self.env['pos.payment.method'].sudo()._get_or_create_online_payment_method(self.env.company.id, False)
             if demo_provider := self.env.ref('payment.payment_provider_demo', raise_if_not_found=False):
+                demo_provider.is_published = True
                 new_online_pm.write({'online_payment_provider_ids': [(6, 0, demo_provider.ids)]})
             return new_online_pm
 
