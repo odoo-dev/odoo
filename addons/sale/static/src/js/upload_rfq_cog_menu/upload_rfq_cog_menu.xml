@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="upload_rfq_cog_menu.QuotationRequestUploader">
+<<<<<<< 5afb461b2ad75e03693d960ddb2d79f7af236d42
         <DropdownItem>
             <FileUploader
                 multiUpload="true"
@@ -12,5 +13,27 @@
                 </t>
             </FileUploader>
         </DropdownItem>
+||||||| 114953ecb1751091ac2115c210c9bce228ab3c5f
+        <FileUploader
+            multiUpload="true"
+            onUploaded.bind="this.onFileUploaded"
+            onUploadComplete.bind="this.onUploadComplete"
+        >
+            <t t-set-slot="toggler">
+                <span class="mx-3 cursor-pointer">Upload Request For Quotation</span>
+            </t>
+        </FileUploader>
+=======
+        <FileUploader
+            fileUploadClass="'document_file_uploader'"
+            multiUpload="true"
+            onUploaded.bind="this.onFileUploaded"
+            onUploadComplete.bind="this.onUploadComplete"
+        >
+            <t t-set-slot="toggler">
+                <span class="mx-3 cursor-pointer">Upload Request For Quotation</span>
+            </t>
+        </FileUploader>
+>>>>>>> b7dbfa050568bd7df3794b9207ae749558393863
     </t>
 </templates>
