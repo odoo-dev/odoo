@@ -54,6 +54,14 @@ class PosOrder(models.Model):
             config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
             config._notify('ORDER_STATE_CHANGED', {})
 
+    def _notify_new_self_order(self):
+        for config, orders in self.grouped('config_id').items():
+            orders_to_notify = orders.filtered(
+                lambda order: order.source != 'mobile' or order._should_send_to_preparation()
+            )
+            if orders_to_notify:
+                config._notify('NEW_SELF_ORDER', {'order_ids': orders_to_notify.ids})
+
     def _send_self_order_receipt(self):
         self.ensure_one()
         if (
