@@ -1,5 +1,4 @@
 import { Plugin } from "@html_editor/plugin";
-import { NATIVE_MUTATION_TYPES } from "@html_editor/core/dom_observer_plugin";
 import { registry } from "@web/core/registry";
 import { closestElement, descendants } from "@html_editor/utils/dom_traversal";
 
@@ -23,7 +22,6 @@ class AnimatedNumberOptionPlugin extends Plugin {
         is_formattable_node_predicates: (node) => (this.getValueElement(node) ? true : undefined),
         is_node_editable_predicates: (node) => (this.getValueElement(node) ? true : undefined),
         can_have_scroll_effect_predicates: (el) => !el.matches(ANIMATED_NUMBER_SELECTOR),
-        is_mutation_savable_predicates: this.isMutationSavable.bind(this),
     };
 
     getValueElement(node) {
@@ -50,20 +48,6 @@ class AnimatedNumberOptionPlugin extends Plugin {
         const { anchorNode, focusNode } = selection;
         if (anchorNode === focusNode && this.getValueElement(anchorNode)) {
             return true;
-        }
-    }
-
-    isMutationSavable(mutation) {
-        // The animated number updates its text while previewing/editing. Those
-        // rendering-only mutations should not enter the history, but style
-        // mutations on the value element still have to be saved.
-        if (
-            [NATIVE_MUTATION_TYPES.CHARACTER_DATA, NATIVE_MUTATION_TYPES.CHILD_LIST].includes(
-                mutation.type
-            ) &&
-            this.getValueElement(mutation.target)
-        ) {
-            return false;
         }
     }
 

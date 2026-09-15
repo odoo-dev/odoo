@@ -19,6 +19,7 @@ async function setupAnimatedNumber() {
     const valueEl = editable.querySelector(".s_animated_number_value");
     valueEl.textContent = "1000";
     const displayEl = editable.querySelector(".s_animated_number_display");
+    getEditor().shared.history.commit();
     return {
         displayEl,
         editor: getEditor(),
