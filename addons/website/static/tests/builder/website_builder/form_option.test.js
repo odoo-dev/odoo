@@ -1,6 +1,6 @@
 import { redo, undo } from "@html_editor/../tests/_helpers/user_actions";
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, edit, press } from "@odoo/hoot-dom";
+import { animationFrame, edit, press, queryAllTexts } from "@odoo/hoot-dom";
 import { contains, defineModels, models, onRpc } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
@@ -652,4 +652,55 @@ test("Changing field type from date to datetime removes value property (and attr
 
     expect(":iframe input#field").toHaveAttribute("value", "");
     expect(":iframe input#field").toHaveProperty("value", "");
+});
+
+const formWithFieldInRow = `
+<section class="s_website_form"><form data-model_name="mail.mail">
+    <div class="s_website_form_rows row s_col_no_bgcolor">
+        <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_custom" data-type="char">
+            <div class="row s_col_no_resize s_col_no_bgcolor">
+                <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="first">
+                    <span class="s_website_form_label_content">a</span>
+                </label>
+                <div class="col-sm">
+                    <input class="form-control s_website_form_input" type="text" name="a" id="first"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</form></section>
+`;
+
+test("device visibility option is hidden for an always hidden field", async () => {
+    onRpc("get_authorized_fields", () => ({}));
+    await setupWebsiteBuilder(formWithFieldInRow);
+    await contains(":iframe input[name=a]").click();
+    const deviceButtons =
+        "[data-container-title='Field'] button[data-action-id='toggleDeviceVisibility']";
+    expect(deviceButtons).toHaveCount(2);
+
+    await contains(".hb-row[data-label='Visibility'] button.o-dropdown-caret").click();
+    await contains(".o_popover [data-action-value='hidden']").click();
+    await animationFrame();
+    expect(":iframe .s_website_form_field").toHaveClass("s_website_form_field_hidden");
+    expect(deviceButtons).toHaveCount(0);
+
+    await contains(".hb-row[data-label='Visibility'] button.o-dropdown-caret").click();
+    await contains(".o_popover [data-action-value='visible']").click();
+    await animationFrame();
+    expect(":iframe .s_website_form_field").not.toHaveClass("s_website_form_field_hidden");
+    expect(deviceButtons).toHaveCount(2);
+});
+
+test("field visibility options are next to each other", async () => {
+    onRpc("get_authorized_fields", () => ({}));
+    await setupWebsiteBuilder(formWithFieldInRow);
+    await contains(":iframe input[name=a]").click();
+    const labels = queryAllTexts("[data-container-title='Field'] .hb-row-label");
+    const visibilityIndex = labels.indexOf("Visibility");
+    expect(labels.slice(visibilityIndex, visibilityIndex + 2)).toEqual([
+        "Visibility",
+        "Visibility",
+    ]);
+    expect(labels.filter((label) => label === "Visibility")).toHaveLength(2);
 });
