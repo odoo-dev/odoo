@@ -2412,7 +2412,13 @@ class AccountTax(models.Model):
 
         # Tags on the base line.
         taxes_data = base_line['tax_details']['taxes_data']
-        base_line['tax_tag_ids'] = self.env['account.account.tag']
+        existing_tags = self.env['account.account.tag']
+        if base_line.get('record') and 'tax_tag_ids' in base_line['record']._fields:
+            existing_tags |= base_line['record'].tax_tag_ids
+        if isinstance(base_line.get('tax_tag_ids'), models.BaseModel):
+            existing_tags |= base_line['tax_tag_ids']
+        base_line['tax_tag_ids'] = existing_tags
+
         product_tags = self.env['account.account.tag']
         if product:
             countries = {tax_data['tax'].country_id for tax_data in taxes_data}

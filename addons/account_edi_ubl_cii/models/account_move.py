@@ -327,16 +327,26 @@ class AccountMove(models.Model):
     def _get_line_vals_list(self, lines_vals):
         """ Get invoice line values list.
 
-        param list line_vals: List of values [name, qty, price, tax].
+        param list line_vals: List of values [name, qty, price, tax, (optional tax_tag_ids)].
         :return: List of invoice line values.
         """
-        return [{
-            'sequence': 0,  # be sure to put these lines above the 'real' invoice lines
-            'name': name,
-            'quantity': quantity,
-            'price_unit': price_unit,
-            'tax_ids': [Command.set(tax_ids)],
-        } for name, quantity, price_unit, tax_ids in lines_vals]
+        res = []
+        for line in lines_vals:
+            if isinstance(line, dict):
+                res.append(line)
+            else:
+                name, quantity, price_unit, tax_ids = line[:4]
+                val = {
+                    'sequence': 0,  # be sure to put these lines above the 'real' invoice lines
+                    'name': name,
+                    'quantity': quantity,
+                    'price_unit': price_unit,
+                    'tax_ids': [Command.set(tax_ids)],
+                }
+                if len(line) > 4 and line[4]:
+                    val['tax_tag_ids'] = line[4]
+                res.append(val)
+        return res
 
     def _get_specific_tax(self, name, amount_type, amount, tax_type):
         AccountMoveLine = self.env['account.move.line']

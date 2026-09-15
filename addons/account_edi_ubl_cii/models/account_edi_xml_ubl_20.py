@@ -906,6 +906,8 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'invoice_line_ids': [Command.create(line_value) for line_value in line_vals],
         }
         invoice.write(invoice_values)
+        for line_val, move_line in zip(line_vals, invoice.invoice_line_ids.sorted('id')):
+                move_line.write({'tax_tag_ids': line_val.get('tax_tag_ids')})
         logs += partner_logs + currency_logs + line_logs + allowance_charges_logs + rounding_logs
         return logs
 
