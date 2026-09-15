@@ -305,7 +305,7 @@ class AccountMove(models.Model):
             }
 
             com_partner = move.commercial_partner_id
-            is_simplified = move.l10n_es_invoice_type in ('F2', 'R5')
+            is_simplified = move.l10n_es_invoice_type in ('F2', 'F4', 'R5')
 
             if move.is_sale_document():
                 invoice_node = info['FacturaExpedida'] = {}
@@ -334,6 +334,9 @@ class AccountMove(models.Model):
 
                 info['IDFactura']['IDEmisorFactura'] = {'NIF': nif}
                 info['IDFactura']['NumSerieFacturaEmisor'] = move.name[:60]
+
+                if move.l10n_es_invoice_type == 'F4' and move.last_invoice:
+                    info['IDFactura']['NumSerieFacturaEmisorResumenFin'] = move.last_invoice[:60]
 
                 if not is_simplified:
                     invoice_node['Contraparte'] = {
