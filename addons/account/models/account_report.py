@@ -75,8 +75,8 @@ class AccountReport(models.Model):
     )
     column_ids = fields.One2many(string="Columns", comodel_name='account.report.column', inverse_name='report_id')
     root_report_id = fields.Many2one(string="Root Report", comodel_name='account.report', index='btree_not_null', help="The report this report is a variant of.")
-    variant_report_ids = fields.One2many(string="Variants", comodel_name='account.report', inverse_name='root_report_id')
-    section_report_ids = fields.Many2many(string="Sections", comodel_name='account.report', relation="account_report_section_rel", column1="main_report_id", column2="sub_report_id")
+    variant_report_ids = fields.One2many(string="Variants", comodel_name='account.report', inverse_name='root_report_id', domain=[('active', '=', True)])
+    section_report_ids = fields.Many2many(string="Sections", comodel_name='account.report', relation="account_report_section_rel", column1="main_report_id", column2="sub_report_id", domain=[('active', '=', True)])
     section_main_report_ids = fields.Many2many(string="Section Of", comodel_name='account.report', relation="account_report_section_rel", column1="sub_report_id", column2="main_report_id")
     use_sections = fields.Boolean(
         string="Composite Report",
