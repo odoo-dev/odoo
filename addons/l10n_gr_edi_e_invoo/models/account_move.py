@@ -288,7 +288,9 @@ class AccountMove(models.Model):
 
                 document, request_values = submission
                 try:
-                    result = proxy_user._l10n_gr_edi_proxy_request('send_invoice', request_values)
+                    xml_content = request_values.pop('xml').encode('utf-8')
+                    result = proxy_user._l10n_gr_edi_proxy_request(
+                        'send_invoice', request_values, data=xml_content, content_type='application/xml')
                 except AccountEdiProxyError as error:
                     unknown_result_message = self.env._(
                         "The electronic invoice submission result could not be confirmed. "

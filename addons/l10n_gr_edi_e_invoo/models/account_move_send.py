@@ -1,5 +1,3 @@
-import base64
-
 from odoo import api, models
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 
@@ -55,8 +53,9 @@ class AccountMoveSend(models.AbstractModel):
                     {
                         'invoice_id': invoice._l10n_gr_edi_get_provider_invoice_id(),
                         'parent_token': parent_token,
-                        'pdf_b64': base64.b64encode(pdf_content).decode(),
                     },
+                    data=pdf_content,
+                    content_type='application/pdf',
                 )
             except AccountEdiProxyError as error:
                 if error.code in ('invalid_request', 'e_invoo_request_failed') and error.message:

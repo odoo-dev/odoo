@@ -1,4 +1,3 @@
-import base64
 from unittest.mock import MagicMock, patch
 
 from lxml import etree
@@ -102,6 +101,7 @@ class TestEInvoo(AccountTestInvoicingCommon):
             }])
 
             route, request_values = proxy_user._l10n_gr_edi_proxy_request.call_args_list[0].args
+            xml_data = proxy_user._l10n_gr_edi_proxy_request.call_args_list[0].kwargs['data']
             self.assertEqual(route, 'send_invoice')
             self.assertEqual(
                 request_values['invoice_id'],
@@ -109,10 +109,10 @@ class TestEInvoo(AccountTestInvoicingCommon):
             )
             self.assertEqual(request_values['issue_date'], '2024-01-01')
             self.assertTrue(
-                request_values['xml'].startswith("<?xml version='1.0' encoding='UTF-8'")
+                xml_data.startswith(b"<?xml version='1.0' encoding='UTF-8'")
             )
 
-            root = etree.fromstring(request_values['xml'].encode())
+            root = etree.fromstring(xml_data)
             self.assertEqual(etree.QName(root).localname, 'InvoicesDoc')
             self.assertEqual(len(root.xpath('./*[local-name() = "invoice"]')), 1)
 
@@ -124,13 +124,14 @@ class TestEInvoo(AccountTestInvoicingCommon):
             self.env['account.move.send']._l10n_gr_edi_try_upload_final_pdf(invoice, invoice_data)
 
         route, pdf_values = proxy_user._l10n_gr_edi_proxy_request.call_args_list[1].args
+        pdf_data = proxy_user._l10n_gr_edi_proxy_request.call_args_list[1].kwargs['data']
         self.assertEqual(route, 'save_final_pdf')
         self.assertEqual(
             pdf_values['invoice_id'],
             invoice._l10n_gr_edi_get_provider_invoice_id(),
         )
         self.assertEqual(pdf_values['parent_token'], 'PARENT-TOKEN')
-        self.assertEqual(base64.b64decode(pdf_values['pdf_b64']), pdf_content)
+        self.assertEqual(pdf_data, pdf_content)
         self.assertEqual(document.provider_pdf_state, 'sent')
         self.assertFalse(document.provider_pdf_error)
         self.assertNotIn('error', invoice_data)
@@ -164,9 +165,11 @@ class TestEInvoo(AccountTestInvoicingCommon):
 
         first_request = proxy_user._l10n_gr_edi_proxy_request.call_args_list[0].args[1]
         retry_request = proxy_user._l10n_gr_edi_proxy_request.call_args_list[1].args[1]
+        first_xml = proxy_user._l10n_gr_edi_proxy_request.call_args_list[0].kwargs['data']
+        retry_xml = proxy_user._l10n_gr_edi_proxy_request.call_args_list[1].kwargs['data']
         self.assertEqual(retry_request['invoice_id'], first_request['invoice_id'])
         self.assertEqual(retry_request['invoice_datetime'], first_request['invoice_datetime'])
-        self.assertEqual(retry_request['xml'], first_request['xml'])
+        self.assertEqual(retry_xml, first_xml)
 
     def test_tf_errors_start_a_fresh_submission(self):
         for error_code in ('tf1', 'tf2'):

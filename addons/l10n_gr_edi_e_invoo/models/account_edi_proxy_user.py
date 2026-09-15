@@ -7,7 +7,7 @@ from odoo.exceptions import RedirectWarning
 L10N_GR_EDI_DEFAULT_IAP_ENDPOINT = 'https://l10n-gr-edi.api.odoo.com'
 L10N_GR_EDI_DEFAULT_IAP_TEST_ENDPOINT = 'https://l10n-gr-edi.test.odoo.com'
 L10N_GR_EDI_IAP_ENDPOINT_PARAM = 'l10n_gr_edi.iap_endpoint'
-L10N_GR_EDI_IAP_ROUTE_PREFIX = '/api/l10n_gr_edi/1'
+L10N_GR_EDI_IAP_ROUTE_PREFIX = '/api/l10n_gr_edi/2'
 L10N_GR_EDI_PROXY_TYPE = 'l10n_gr_edi'
 
 
@@ -48,9 +48,13 @@ class AccountEdiProxyClientUser(models.Model):
             return gr_vat.compact(company.vat)
         return super()._get_proxy_identification(company, proxy_type)
 
-    def _l10n_gr_edi_proxy_request(self, route, params):
+    def _l10n_gr_edi_proxy_request(self, route, params, *, data, content_type):
         self.ensure_one()
-        return self._make_request(
+        res = self._make_http_request(
             url=f"{self._get_server_url()}{L10N_GR_EDI_IAP_ROUTE_PREFIX}/{route}",
+            method='POST',
             params={**params, 'lang': self.env.lang},
+            data=data,
+            headers={'content-type': content_type},
         )
+        return res.json()
