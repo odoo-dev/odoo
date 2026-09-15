@@ -451,11 +451,13 @@ class PosConfig(models.Model):
             'limit_categories': True,
             'iface_available_categ_ids': restaurant_categories,
             'module_pos_restaurant': True,
-        })
-        config.write({
             'self_ordering_mode': 'kiosk',
             'self_ordering_pay_after': 'each',
         })
+        #config.write({
+        #'self_ordering_mode': 'kiosk',
+        #'self_ordering_pay_after': 'each',
+        #})
 
     def _load_restaurant_demo_data(self, with_demo_data=True):
         self.ensure_one()
