@@ -104,7 +104,7 @@ class WebsiteSnippetFilter(models.Model):
             if search_domain:
                 domain = expression.AND([domain, search_domain])
             try:
-                records = self.env[filter_sudo.model_id].sudo(False).with_context(**literal_eval(filter_sudo.context)).search(
+                records = self.env[filter_sudo.model_id].sudo(False).with_context(**literal_eval(filter_sudo.context), lang=False).search(
                     domain,
                     order=','.join(literal_eval(filter_sudo.sort)) or None,
                     limit=limit
@@ -119,6 +119,7 @@ class WebsiteSnippetFilter(models.Model):
                     dynamic_filter=self,
                     limit=limit,
                     search_domain=search_domain,
+                    lang=False
                 ).sudo().run() or []
             except MissingError:
                 _logger.warning("The provided domain %s in 'ir.actions.server' generated a MissingError in '%s'", search_domain, self._name)
