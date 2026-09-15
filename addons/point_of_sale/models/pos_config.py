@@ -563,11 +563,8 @@ class PosConfig(models.Model):
     def _compute_current_cash_register_balance(self):
         for pos_config in self:
             cash_method = pos_config.payment_method_ids.filtered(lambda pm: pm.type == 'cash')
-            if cash_method:
-                balance = cash_method.journal_id.current_statement_balance
-                pos_config.current_cash_register_balance = balance
-            else:
-                pos_config.current_cash_register_balance = 0
+            balance = cash_method.journal_id.current_statement_balance if cash_method else 0
+            pos_config.write({'current_cash_register_balance': balance})
 
     @api.depends('session_ids')
     def _compute_current_session_user(self):
