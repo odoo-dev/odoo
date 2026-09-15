@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.cron" id="cron_notify_xendit_webhook_migration">
+        <field name="name">Xendit: Notify webhook migration to v3</field>
+        <field name="model_id" ref="payment.model_payment_provider" />
+        <field name="state">code</field>
+        <field name="code">model._cron_notify_xendit_webhook_migration()</field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
+</odoo>

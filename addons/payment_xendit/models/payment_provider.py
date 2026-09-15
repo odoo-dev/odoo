@@ -4,6 +4,7 @@ import logging
 import pprint
 
 import requests
+from markupsafe import Markup
 
 from odoo import _, fields, models
 from odoo.exceptions import ValidationError
@@ -29,6 +30,9 @@ class PaymentProvider(models.Model):
     xendit_webhook_token = fields.Char(
         string="Xendit Webhook Token", groups='base.group_system', required_if_provider='xendit'
     )
+    # Tracks whether Sales admins were already notified to reconfigure the v3 webhook fields on
+    # the Xendit Dashboard; not reset once set, so admins added afterward aren't notified again.
+    xendit_webhook_migration_notified = fields.Boolean(copy=False)
 
     # === COMPUTE METHODS === #
 
@@ -110,3 +114,55 @@ class PaymentProvider(models.Model):
         if self.code == 'xendit' and is_validation:
             return None
         return super()._get_redirect_form_view(is_validation)
+
+    # === BUSINESS METHODS - CRON ===#
+
+    def _cron_notify_xendit_webhook_migration(self):
+        """ Remind Sales admins to reconfigure the Xendit webhook fields for v3.
+
+        Xendit replaced the single webhook field with separate v3 event groups; a provider
+        configured before this change stops receiving payment and card token status updates
+        until the Xendit Dashboard is updated. This runs periodically, rather than once on
+        module upgrade, so that providers configured or admins added afterward are still
+        covered.
+
+        :return: None
+        """
+        sales_admin_group = self.env.ref('sales_team.group_sale_manager', raise_if_not_found=False)
+        if not sales_admin_group:
+            return  # The Sales app isn't installed; there is no one to notify through it.
+
+        doc_url = (
+            'https://www.odoo.com/documentation/18.0/applications/finance/payment_providers'
+            '/xendit.html?highlight=xendit#webhook-configuration'
+        )
+        providers_to_notify = self.search([
+            ('code', '=', 'xendit'),
+            ('state', '!=', 'disabled'),
+            ('xendit_webhook_migration_notified', '=', False),
+        ])
+        for provider in providers_to_notify:
+            admins = sales_admin_group.users.filtered(
+                lambda user: provider.company_id in user.company_ids,
+            )
+            if not admins:
+                continue  # Retry on the next run in case an admin is added later.
+
+            for user in admins:
+                provider.company_id.partner_id.activity_schedule(
+                    act_type_xmlid='mail.mail_activity_data_warning',
+                    user_id=user.id,
+                    summary=_("Update the Xendit webhook configuration"),
+                    note=Markup('%s<br/><a href="%s" target="_blank">%s</a>') % (
+                        _(
+                            "Xendit replaced the single webhook field used by the %(provider)s "
+                            "payment provider with separate v3 event groups. Until the Xendit "
+                            "Dashboard is updated, Odoo no longer receives payment and card "
+                            "token status updates for it.",
+                            provider=provider.display_name,
+                        ),
+                        doc_url,
+                        _("Webhook configuration"),
+                    ),
+                )
+            provider.xendit_webhook_migration_notified = True
