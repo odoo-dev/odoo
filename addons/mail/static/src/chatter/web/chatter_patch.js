@@ -118,6 +118,10 @@ const chatterPatch = {
                             if (!saved) {
                                 return;
                             }
+                            const recId = this.webChatterProps.record.data.id;
+                            if (recId) {
+                                this.changeThread(this.props.threadModel, recId);
+                            }
                         }
                         Promise.all(
                             files.map((file) => this.attachmentUploader.uploadFile(file))
