@@ -63,23 +63,13 @@ class IrQWeb(models.AbstractModel):
         sign_el = html.Element('input', type='hidden', name='__sign__')
         el.insert(0, sign_el)
 
-        # Determine values `etree._Element` to sign
-        entries: dict[str, etree._element | None] = {}
-        # If key in entries (A):
-        #   - if value is `None`: the client shouldn't submit the key (A1)
-        #   - if value: the client must submit the key with same value (A2)
-        # If not key in entries (B):
-        #   - the client can submit the value (B1)
-        for field_name in self.env[model_name]._get_form_signed_fields():
-            entry_els = el.xpath(
-                f".//*[@name='{field_name}' and contains(concat(' ', normalize-space(@class), ' '), ' s_website_form_input ')]"
-            )
-            entry_el = entry_els[0] if entry_els else None
-            if entry_el is None:
-                entries[field_name] = None  # (A1)
-            elif entry_el.get('type') == 'hidden':
-                entries[field_name] = entry_el  # (A2)
-            # else: (B1)
+        entries: dict[str, etree._element | None]
+        data_to_sign: dict[str, str | None]
+
+        entries = {
+            input_el.get("name"): input_el if input_el.get('type') == 'hidden' else None
+            for input_el in el.xpath(".//*[@name and contains(concat(' ', normalize-space(@class), ' '), ' s_website_form_input ')]")
+        }
 
         # Determine the dynamic context of the form
         dynamic_ctx: str | None = None
@@ -88,30 +78,29 @@ class IrQWeb(models.AbstractModel):
         if dynamic_form_ctx and form_id:
             dynamic_ctx = dynamic_form_ctx.pop(form_id, None)
 
-        data_to_sign: dict[str, str | None] = {}
-
         if dynamic_ctx is None:  # Compute signature statically
             data_to_sign = {name: el.get('value') if el is not None else None for name, el in entries.items()}
             sign_el.set('value', self._runtime_form_signature(data_to_sign, model_name))
             return
 
         # Defer computation of signature during rendering
+        data_to_sign = {}
         for name, el in entries.items():
             if el is None:
                 data_to_sign[name] = None
-            else:
-                static_value = el.get('value', None)
-                dynamic_value = el.get('t-att-value', "''")
-                dynamic_format_value = el.get('t-attf-value', "''")
-                predefined_value = [
-                    f'{dynamic_ctx!s}.get({name!r})',
-                    f'{dynamic_value!s} or {dynamic_format_value!s}',
-                    f'{static_value!r}',
-                ]
-                # data-for takes priority over default values but `email_to` is an exception
-                if name == 'email_to':
-                    predefined_value.reverse()
-                data_to_sign[name] = ' or '.join(predefined_value)
+                continue
+            static_value = el.get('value', None)
+            dynamic_value = el.get('t-att-value', "''")
+            dynamic_format_value = el.get('t-attf-value', "''")
+            predefined_value = [
+                f'{dynamic_ctx!s}.get({name!r})',
+                f'{dynamic_value!s} or {dynamic_format_value!s}',
+                f'{static_value!r}',
+            ]
+            # data-for takes priority over default values but `email_to` is an exception
+            if name == 'email_to':
+                predefined_value.reverse()
+            data_to_sign[name] = ' or '.join(predefined_value)
         data_to_sign = '{' + ','.join(f'{k!r}: {v!s}' for k, v in data_to_sign.items()) + '}'
         sign_el.set('t-att-value', f"env['ir.qweb']._runtime_form_signature({data_to_sign!s}, {model_name!r})")
 
