@@ -104,6 +104,16 @@ $o-bubble-colors: (
     }
 }
 
+// Shared look of the discuss "..." buttons.
+.o-discuss-ellipsisButton {
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: 50%;
+    --btn-border-color: #{rgba($dark, var(--o-discuss-ellipsisButton-mutedBorderOpacity, .5))};
+    --btn-hover-border-color: #{$dark};
+    --btn-active-border-color: #{$o-action};
+}
+
 .o-discuss-mobileContextMenu {
     top: auto !important;
 }

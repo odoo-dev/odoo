@@ -26,7 +26,7 @@
                         noClasses="true"
                     >
                         <button
-                            class="btn btn-light rounded-circle d-flex h-100 w-100 align-items-center justify-content-center o-mail-DiscussApp-sidebarBgColor border border-dark"
+                            class="btn btn-light o-discuss-ellipsisButton d-flex h-100 w-100 align-items-center justify-content-center o-mail-DiscussApp-sidebarBgColor"
                             t-att-class="this.actionsButtonClass"
                             t-att-title="this.actionsButtonTitle"
                             t-on-click.stop="() => this.actionsDropdownState.isOpen ? this.actionsDropdownState.close() : this.actionsDropdownState.open()"
