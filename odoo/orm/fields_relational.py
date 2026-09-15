@@ -10,6 +10,7 @@ from operator import attrgetter
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.tools import SQL, OrderedSet, sql, unique
 from odoo.tools.misc import SENTINEL, Sentinel, unquote
+from odoo.tools.safe_eval import expr_eval
 
 from .commands import Command
 from .domains import Domain
