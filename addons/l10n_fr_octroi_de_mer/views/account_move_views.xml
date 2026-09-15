@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="l10n_fr_octroi_de_mer_account_move_form" model="ir.ui.view">
+            <field name="name">l10n_fr_octroi_de_mer.account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='invoice_tab']//field[@name='tax_ids']" position="after">
+                    <field name="l10n_fr_rate" optional="hide" widget="border_rate"/>
+                    <field name="l10n_fr_regional_rate" column_invisible="True"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
