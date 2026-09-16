@@ -313,9 +313,9 @@
                 <field name="work_entry_type_id" filters="1" color="color"/>
                 <field name="worked_hours" widget="float_time"/>
                 <field name="break_duration" widget="float_time"/>
-                <field name="source_stale" invisible="1"/>
-                <field name="source_attendance_id" invisible="1"/>
                 <popover>
+                    <field name="source_stale" invisible="1"/>
+                    <field name="source_attendance_id" invisible="1"/>
                     <templates>
                         <t t-name="popover-body" class="gap-3">
                             <div class="alert alert-warning py-1 px-2 mb-0 small" role="status" invisible="not source_stale">
