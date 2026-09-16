@@ -681,6 +681,17 @@
     .o_field_monetary {
         /*rtl:ignore*/
         direction : ltr;
+        justify-content: flex-start #{"/*rtl:flex-end*/"};
+
+        > div {
+            justify-content: flex-start #{"/*rtl:flex-end*/"};
+            input {
+                flex-grow: 1 !important #{"/*rtl:0*/"};
+            }
+        }
+        input {
+            text-align: left #{"/*rtl:right*/"};
+        }
     }
 
     .o_list_monetary {
