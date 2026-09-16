@@ -8,6 +8,7 @@ from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Command
 from odoo.http import request_var
+from odoo.http.router import API_KEY_READONLY_PREFIX
 from odoo.tests import (
     Form,
     HttpCase,
@@ -21,6 +22,7 @@ from odoo.tests import (
 from odoo.tools import mute_logger
 
 from odoo.addons.base.models.res_groups import ResGroups
+from odoo.addons.base.models.res_users import _check_apikey_credentials
 
 
 class UsersCommonCase(TransactionCase):
@@ -968,6 +970,27 @@ class TestApiKeys(UsersCommonCase):
         with self.assertRaisesRegex(UserError, 'The provided API key is invalid or does not belong to the current user'):
             self.env['res.users.apikeys'].with_user(SUPERUSER_ID).generate(
                 self.api_key, 'scope', 'Another key', self.tomorrow)
+
+    def test_readonly_apikey_is_prefixed_and_valid(self):
+        UsersApiKeys = self.env['res.users.apikeys'].with_user(self.user_internal)
+        readonly_key = UsersApiKeys._generate('scope', 'RO Key', self.tomorrow, readonly=True)
+
+        self.assertTrue(readonly_key.startswith(API_KEY_READONLY_PREFIX))
+        self.assertEqual(
+            _check_apikey_credentials(self.env.cr, scope='scope', key=readonly_key),
+            self.user_internal.id,
+        )
+
+    def test_readonly_apikey_rejected_without_its_prefix(self):
+        UsersApiKeys = self.env['res.users.apikeys'].with_user(self.user_internal)
+        readonly_key = UsersApiKeys._generate('scope', 'RO Key', self.tomorrow, readonly=True)
+        bare_key = readonly_key.removeprefix(API_KEY_READONLY_PREFIX)
+
+        self.assertIsNone(_check_apikey_credentials(self.env.cr, scope='scope', key=bare_key))
+
+    def test_readwrite_apikey_rejected_with_readonly_prefix(self):
+        self.assertIsNone(_check_apikey_credentials(
+            self.env.cr, scope='scope', key=API_KEY_READONLY_PREFIX + self.api_key))
 
 
 class TestResUsersForm(TransactionCase):

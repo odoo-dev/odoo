@@ -66,6 +66,11 @@ class TestHttp(http.Controller):
     def greeting_bearer_other_scope(self):
         return f"Tek'ma'te; user={self.env.user.login}"
 
+    @http.route('/test_http/greeting-bearer-write', type='http', auth='bearer', bearer_scope='rpc')
+    def greeting_bearer_write(self):
+        self.env['res.users.apikeys.description'].create({'name': "Tek'ma'te"})
+        return "Tek'ma'te"
+
     @http.route('/test_http/wsgi_environ', type='http', auth='none')
     def wsgi_environ(self):
         _logger.debug("Full WSGI environ:\n%s", pprint.pformat(request.httprequest.environ))

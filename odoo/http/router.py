@@ -66,6 +66,17 @@ if typing.TYPE_CHECKING:
 
 _logger = logging.getLogger('odoo.http')
 
+# Prefix marking an API key's plaintext value as read-only, see res.users.apikeys._generate().
+API_KEY_READONLY_PREFIX = 'ro-'
+
+
+def _get_bearer_token(request: Request) -> str | None:
+    """ Return the token carried by an ``Authorization: Bearer <token>`` header, if any. """
+    header = request.httprequest.headers.get("Authorization")
+    if header and (m := re.match(r"^bearer\s+(.+)$", header, re.IGNORECASE)):
+        return m.group(1)
+    return None
+
 
 def db_list(force: bool = False, host: str | None = None) -> list[str]:
     """
@@ -380,6 +391,9 @@ def serve_db(request: Request) -> Response:
     # matching the controller endpoint and serving the data
     cr = None
     try:
+        token = _get_bearer_token(request)
+        token_readonly = bool(token and token.startswith(API_KEY_READONLY_PREFIX))
+
         # get the registry and cursor (RO)
         try:
             registry = Registry(request.db)
@@ -404,7 +418,7 @@ def serve_db(request: Request) -> Response:
             _set_request_dispatcher(request, rule)
             serve_func = functools.partial(serve_ir_http, request, rule, args)
             endpoint: Endpoint = rule.endpoint  # type: ignore
-            readonly = endpoint.routing['readonly']
+            readonly = token_readonly or endpoint.routing['readonly']
             if callable(readonly):
                 readonly = readonly(endpoint.func.__self__, rule, args)
         # update the parent cache for the route mapping to make it available as
@@ -419,6 +433,8 @@ def serve_db(request: Request) -> Response:
             try:
                 return retrying(serve_func, env=request.env)
             except ReadOnlySqlTransaction as exc:
+                if token_readonly:
+                    raise AccessError(request.env._("This API key is read-only and cannot perform write operations.")) from exc
                 # although the controller is marked read-only, it
                 # attempted a write operation, try again using a
                 # read/write cursor

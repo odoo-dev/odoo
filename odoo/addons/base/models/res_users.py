@@ -24,6 +24,7 @@ from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.http import request
+from odoo.http.router import API_KEY_READONLY_PREFIX
 from odoo.http.session import DEFAULT_LANG
 from odoo.tools import (
     SQL,
@@ -1546,6 +1547,7 @@ class ResUsersApikeys(models.Model):
     scope = fields.Char("Scope", required=True, readonly=True)
     create_date = fields.Datetime("Creation Date", readonly=True)
     expiration_date = fields.Datetime("Expiration Date", readonly=True)
+    readonly = fields.Boolean("Read-only", readonly=True)
 
     def init(self):
         table = SQL.identifier(self._table)
@@ -1558,9 +1560,14 @@ class ResUsersApikeys(models.Model):
             expiration_date timestamp without time zone,
             index varchar(%(index_size)s) not null CHECK (char_length(index) = %(index_size)s),
             key varchar not null,
+            readonly boolean not null default false,
             create_date timestamp without time zone DEFAULT (now() at time zone 'utc')
         )
         """, table=table, index_size=INDEX_SIZE))
+        self.env.cr.execute(SQL(
+            "ALTER TABLE %s ADD COLUMN IF NOT EXISTS readonly boolean not null default false",
+            table,
+        ))
 
         index_name = self._table + "_user_id_index_idx"
         if len(index_name) > 63:
@@ -1605,11 +1612,13 @@ class ResUsersApikeys(models.Model):
         if date > datetime.datetime.now() + datetime.timedelta(days=max_duration):
             raise ValidationError(_("You cannot exceed %(duration)s days.", duration=max_duration))
 
-    def _generate(self, scope, name, expiration_date):
+    def _generate(self, scope, name, expiration_date, readonly=False):
         """Generates an api key.
         :param str scope: the scope of the key.
         :param str name: the name of the key, mainly intended to be displayed in the UI.
         :param datetime.datetime expiration_date: the expiration date of the key.
+        :param bool readonly: whether the key may only open a read-only database
+            connection, encoded as a prefix on the returned plaintext key.
         :returns: the key.
         :rtype: str
 
@@ -1622,19 +1631,19 @@ class ResUsersApikeys(models.Model):
         # no need to clear the LRU when *adding* a key, only when removing
         k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
         self.env.cr.execute(SQL("""
-            INSERT INTO %s (name, user_id, scope, expiration_date, key, index)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO %s (name, user_id, scope, expiration_date, key, index, readonly)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
             SQL.identifier(self._table),
-            name, self.env.user.id, scope, expiration_date or None, KEY_CRYPT_CONTEXT.hash(k), k[:INDEX_SIZE]
+            name, self.env.user.id, scope, expiration_date or None, KEY_CRYPT_CONTEXT.hash(k), k[:INDEX_SIZE], readonly,
         ))
 
         ip = request.httprequest.environ['REMOTE_ADDR'] if request else 'n/a'
         _logger.info("%s generated: scope: <%s> for '%s' (#%s) from %s",
             self._description, scope, self.env.user.login, self.env.uid, ip)
 
-        return k
+        return API_KEY_READONLY_PREFIX + k if readonly else k
 
     def _ensure_can_manage_keys_programmatically(self):
         # Administrators would not be restricted by the ICP check alone,
@@ -1751,9 +1760,11 @@ def _check_apikey_credentials(cr, *, scope, key, table='res_users_apikeys'):
     :rtype: int|None
     """
     assert scope and key, "scope and key required"
+    presented_readonly = key.startswith(API_KEY_READONLY_PREFIX)
+    key = key[len(API_KEY_READONLY_PREFIX):] if presented_readonly else key
     index = key[:INDEX_SIZE]
     cr.execute(SQL('''
-        SELECT user_id, key
+        SELECT user_id, key, readonly
         FROM %(table)s INNER JOIN res_users u ON (u.id = user_id)
         WHERE
             u.active and index = %(index)s
@@ -1764,7 +1775,11 @@ def _check_apikey_credentials(cr, *, scope, key, table='res_users_apikeys'):
             )
     ''',
     index=index, scope=scope, table=SQL.identifier(table)))
-    for user_id, current_key in cr.fetchall():
+    for user_id, current_key, readonly in cr.fetchall():
+        # prevents stripping the read-only prefix off a stolen key's plaintext
+        # to obtain a read/write connection
+        if readonly != presented_readonly:
+            continue
         if key and KEY_CRYPT_CONTEXT.verify(key, current_key):
             return user_id
 
@@ -1811,6 +1826,11 @@ class ResUsersApikeysDescription(models.TransientModel):
         default=_default_duration,
     )
     expiration_date = fields.Datetime('Expiration Date', compute='_compute_expiration_date', store=True, readonly=False)
+    readonly = fields.Boolean(
+        "Read-only",
+        help="A read-only key can only be used to open a read-only database connection: "
+             "any attempt to create, write or delete data with it is refused.",
+    )
 
     @api.depends('duration')
     def _compute_expiration_date(self):
@@ -1853,7 +1873,8 @@ class ResUsersApikeysDescription(models.TransientModel):
         self.check_access_make_key()
 
         description = self.sudo()
-        k = self.env['res.users.apikeys']._generate(description.scope, description.name, self.expiration_date)
+        k = self.env['res.users.apikeys']._generate(
+            description.scope, description.name, self.expiration_date, readonly=description.readonly)
         scope = description.scope
         base_url = ((request and request.httprequest.url_root) or "<Your URL>").rstrip('/')
         description.unlink()

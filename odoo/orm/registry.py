@@ -298,10 +298,12 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.db_name = db_name
         self._db: Connection = sql_db.db_connect(db_name, readonly=False)
-        self._db_readonly: Connection | None = None
+        # db_connect() is lazy (no connection is actually made until .cursor()
+        # is called), so this is always created: a readonly cursor must be a
+        # genuine Postgres read-only transaction even without a configured
+        # replica, instead of silently falling back to a read/write one.
+        self._db_readonly: Connection = sql_db.db_connect(db_name, readonly=True)
         self._db_readonly_failed_time: float | None = None
-        if config['db_replica_host'] or config['test_enable'] or 'replica' in config['dev_mode']:  # by default, only use readonly pool if we have a db_replica_host defined.
-            self._db_readonly = sql_db.db_connect(db_name, readonly=True)
 
         # field dependencies
         self.field_depends: Collector[Field, str] = Collector()
@@ -1149,7 +1151,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 Acquire a read/write cursor on the primary database in case no
                 replica exists or that no readonly cursor could be acquired.
         """
-        if readonly and self._db_readonly is not None:
+        if readonly:
             if (
                 self._db_readonly_failed_time is None
                 or time.monotonic() > self._db_readonly_failed_time + _REPLICA_RETRY_TIME

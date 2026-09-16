@@ -3,9 +3,12 @@ import collections
 import datetime
 import time
 
+from psycopg2.errors import ReadOnlySqlTransaction
+
 import odoo
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.http import request_var
+from odoo.http.router import API_KEY_READONLY_PREFIX
 from odoo.service import common as auth
 from odoo.service import model
 from odoo.tests import common, tagged
@@ -300,6 +303,37 @@ class TestAPIKeys(common.HttpCase):
         with self.assertRaises(AccessDenied):
             model.dispatch('execute_kw', [
                 self.env.cr.dbname, self._user.id, k,
+                'res.users', 'context_get', []
+            ])
+
+    def test_readonly_key_can_read(self):
+        env = self.env(user=self._user)
+        k = env['res.users.apikeys.description'].create({'name': 'ro', 'readonly': True}).make_key()['context']['default_key']
+
+        ctx = model.dispatch('execute_kw', [
+            self.env.cr.dbname, self._user.id, k,
+            'res.users', 'context_get', []
+        ])
+        self.assertEqual(ctx['tz'], 'Australia/Eucla')
+
+    def test_readonly_key_cannot_write(self):
+        env = self.env(user=self._user)
+        k = env['res.users.apikeys.description'].create({'name': 'ro', 'readonly': True}).make_key()['context']['default_key']
+
+        with self.assertRaises(ReadOnlySqlTransaction):
+            model.dispatch('execute_kw', [
+                self.env.cr.dbname, self._user.id, k,
+                'res.users.apikeys.description', 'create', [{'name': 'should not be created'}]
+            ])
+
+    def test_readonly_key_rejected_without_prefix(self):
+        env = self.env(user=self._user)
+        k = env['res.users.apikeys.description'].create({'name': 'ro', 'readonly': True}).make_key()['context']['default_key']
+        bare_key = k.removeprefix(API_KEY_READONLY_PREFIX)
+
+        with self.assertRaises(AccessDenied):
+            model.dispatch('execute_kw', [
+                self.env.cr.dbname, self._user.id, bare_key,
                 'res.users', 'context_get', []
             ])
 

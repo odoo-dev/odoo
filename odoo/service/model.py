@@ -87,7 +87,11 @@ def dispatch(method, params):
             kw = {}
     else:
         raise NameError(f"Method not available {method}")  # noqa: TRY301
-    with Registry(db).cursor() as cr:
+
+    # see odoo.http.router.serve_db for the same mechanism on the HTTP path
+    from odoo.http.router import API_KEY_READONLY_PREFIX  # noqa: PLC0415
+    readonly = passwd.startswith(API_KEY_READONLY_PREFIX)
+    with Registry(db).cursor(readonly=readonly) as cr:
         api.Environment(cr, api.SUPERUSER_ID, {})['res.users']._check_uid_passwd(uid, passwd)
         return execute_cr(cr, uid, model, method_, args, kw)
 
