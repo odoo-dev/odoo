@@ -208,7 +208,7 @@ class SaleOrderLine(models.Model):
         precompute=True,
         context={"active_test": False, "hide_original_tax_ids": True},
         check_company=True,
-        domain="[('type_tax_use', '=', 'sale'), ('country_id', '=', tax_country_id)]",
+        ui_domain="[('type_tax_use', '=', 'sale'), ('country_id', '=', tax_country_id)]",
     )
     document_tax_mode = fields.Selection(related="order_id.document_tax_mode")
 
