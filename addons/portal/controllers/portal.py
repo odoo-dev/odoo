@@ -874,6 +874,19 @@ class CustomerPortal(Controller):
         for field_name in required_field_set:
             if not address_values.get(field_name):
                 missing_fields.add(field_name)
+
+        if address_type == 'billing' or use_delivery_as_billing:
+            identifiers = address_values.get('additional_identifiers') or {}
+            # The VAT is absent from the payload when hidden or popped as a commercial field.
+            vat = address_values.get('vat', partner_sudo.vat)
+            mandatory_identifiers = ResPartnerSudo._filter_mandatory_additional_identifiers(
+                ResPartnerSudo._get_mandatory_additional_identifiers(country, **kwargs), vat,
+            )
+            for key in mandatory_identifiers:
+                # An unchanged identifier is popped from the payload by the commercial-field block.
+                if not identifiers.get(key) and not partner_sudo._get_additional_identifier(key):
+                    missing_fields.add(key)
+
         if missing_fields:
             error_messages.append(_("Some required fields are empty."))
 

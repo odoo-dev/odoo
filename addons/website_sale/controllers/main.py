@@ -1333,6 +1333,12 @@ class WebsiteSale(payment_portal.PaymentPortal):
             )
         return super()._get_default_country(order_sudo=order_sudo, **kwargs)
 
+    @route()
+    def portal_address_country_info(self, country, address_type, **kwargs):
+        """Override `portal` to base the country's requirements on the current cart."""
+        kwargs.setdefault("order_sudo", request.cart)
+        return super().portal_address_country_info(country, address_type, **kwargs)
+
     @route(
         "/shop/address/submit",
         type="http",
