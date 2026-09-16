@@ -123,19 +123,17 @@ export class Subscribe extends Interaction {
             ...(tokenObj.token ? { recaptcha_token_response: tokenObj.token } : {}),
             turnstile_captcha: this.el.parentElement.querySelector('input[name="turnstile_captcha"]')?.value,
         }));
-        const toastType = result.toast_type;
-        if (toastType === 'success') {
+        const isSuccess = result.toast_type === "success";
+        if (isSuccess) {
             this._updateSubscribeControlsStatus(true);
-            const modalEl = this.el.closest('.o_newsletter_modal');
-            if (modalEl) {
-                window.Modal.getOrCreateInstance(modalEl).hide();
-            }
         }
-        this.notification.add(result.toast_content, {
-            type: toastType,
-            title: toastType === 'success' ? _t("Success") : _t("Error"),
-            sticky: true,
-        });
+        else {
+            this.notification.add(result.toast_content, {
+                type: "danger",
+                title: _t("Error"),
+                sticky: true,
+            });
+        }
     }
 }
 
