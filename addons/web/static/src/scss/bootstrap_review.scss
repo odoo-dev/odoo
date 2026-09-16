@@ -127,6 +127,10 @@ $o-datetime-picker-reduced-width: calc(5px * 7 * 7 + (2 * #{map-get($spacers, 2)
 // Buttons
 
 .btn {
+    // --#{$prefix}btn-hover-color: #{$black};
+    // --#{$prefix}btn-active-color: #{$black};
+    // --#{$prefix}btn-hover-border-color: #{$border-color};
+    // --#{$prefix}btn-hover-bg: #{rgba($body-color, .1)};
     &:focus-visible {
         // Make sure to have a fallback for :focus-visible state when the element use only the `.btn` class.
         box-shadow: var(--#{$prefix}btn-focus-box-shadow, 0 0 0 #{$btn-focus-width} RGBA(#{$btn-link-focus-shadow-rgb}, .5));

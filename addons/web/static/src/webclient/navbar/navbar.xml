@@ -2,6 +2,35 @@
 <templates xml:space="preserve">
 
   <t t-name="web.NavBar">
+  <div class="d-flex gap-3 justify-content-center p-3 border-bottom">
+        <a class="btn btn-link-primary" href="#">
+            Primary
+        </a>
+        <a class="btn btn-link-secondary" href="#">
+            Secondary
+        </a>
+        <a class="btn btn-link-success" href="#">
+            Success
+        </a>
+        <a class="btn btn-link-danger" href="#">
+            Danger
+        </a>
+        <a class="btn btn-link-warning" href="#">
+            Warning
+        </a>
+        <a class="btn btn-link-info" href="#">
+            Info
+        </a>
+        <a class="btn btn-link-light" href="#">
+            Light
+        </a>
+        <a class="btn btn-link-dark" href="#">
+            Dark
+        </a>
+        <a class="btn btn-link" href="#">
+            Link
+        </a>
+    </div>
     <header class="o_navbar" t-ref="this.root">
       <nav
         class="o_main_navbar d-print-none"
