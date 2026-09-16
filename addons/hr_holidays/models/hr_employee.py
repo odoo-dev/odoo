@@ -22,7 +22,7 @@ class HrEmployee(models.Model):
     leave_manager_id = fields.Many2one(
         'res.users', string='Time Off Approver',
         compute='_compute_leave_manager', store=True, readonly=False,
-        domain=_get_leave_manager_domain,
+        ui_domain=_get_leave_manager_domain,
         help='Select the user responsible for approving "Time Off" of this employee.\n'
              'If empty, the approval is done by an Administrator or Approver (determined in settings/users).')
     current_work_entry_type_id = fields.Many2one('hr.work.entry.type', compute='_compute_current_work_entry_type_id', string="Current Time Type",

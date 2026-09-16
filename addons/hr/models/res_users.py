@@ -91,9 +91,9 @@ class ResUsers(models.Model):
         return super()._post_model_setup__()
 
     # note: a user can only be linked to one employee per company (see sql constraint in `hr.employee`)
-    employee_ids = fields.One2many('hr.employee', 'user_id', string='Related employee', domain=_employee_ids_domain)
+    employee_ids = fields.One2many('hr.employee', 'user_id', string='Related employee', ui_domain=_employee_ids_domain)
     all_employee_ids = fields.One2many("hr.employee", "user_id", string="Related employees from all companies")
-    employee_public_ids = fields.One2many('hr.employee.public', 'user_id', string='Related employee (public)', domain=_employee_ids_domain, readonly=True)
+    employee_public_ids = fields.One2many('hr.employee.public', 'user_id', string='Related employee (public)', ui_domain=_employee_ids_domain, readonly=True)
     employee_id = fields.Many2one('hr.employee', string="Company employee",
         compute='_compute_company_employee', search='_search_company_employee', readonly=True)
     department_id = fields.Many2one(related='employee_id.department_id', string='Department')
