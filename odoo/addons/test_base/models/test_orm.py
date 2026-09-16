@@ -102,7 +102,7 @@ class TestOrmDiscussion(models.Model):
                                          domain=[('important', '=', True)])
     very_important_messages = fields.One2many(
         'test_orm.message', 'discussion',
-        ui_domain=lambda self: self._domain_very_important())
+        domain=lambda self: self._domain_very_important())
     emails = fields.One2many('test_orm.emailmessage', 'discussion')
     important_emails = fields.One2many('test_orm.emailmessage', 'discussion',
                                        domain=[('important', '=', True)])
