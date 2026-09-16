@@ -19,7 +19,7 @@ class SpreadsheetDashboard(models.Model):
     group_ids = fields.Many2many('res.groups', string="Access Groups", default=lambda self: self.env.ref('base.group_user'))
     favorite_user_ids = fields.Many2many(
         'res.users',
-        domain=lambda self: [('id', '=', self.env.uid)],
+        ui_domain=lambda self: [('id', '=', self.env.uid)],
         string='Favorite Users',
         help='Users who have favorited this dashboard'
     )

@@ -58,7 +58,7 @@ class ProductPricelist(models.Model):
         inverse_name='pricelist_id',
         string="Pricelist Rules",
         # must be given as lambda for overrides to work
-        domain=lambda self: self._domain_item_ids(),
+        ui_domain=lambda self: self._domain_item_ids(),
         copy=True)
 
     @api.depends('currency_id')

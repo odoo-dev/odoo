@@ -29,7 +29,7 @@ class HrRecruitmentStage(models.Model):
     is_warning_visible = fields.Boolean(compute='_compute_is_warning_visible')
     company_id = fields.Many2one(
         'res.company', string='Company',
-        domain=lambda self: [('id', 'in', self.env.companies.ids)],
+        ui_domain=lambda self: [('id', 'in', self.env.companies.ids)],
         help="The company this stage is available to. If not set, it is available to all companies.")
 
     @api.model

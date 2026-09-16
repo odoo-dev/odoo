@@ -167,7 +167,7 @@ class HrLeave(models.Model):
     work_entry_type_id = fields.Many2one(
         "hr.work.entry.type", string="Time Type",
         required=True, index=True,
-        domain="""[
+        ui_domain="""[
             [('id', 'in', allowed_work_entry_type_ids)],
             ('time_off_selectable', '=', True),
             '|',
@@ -185,7 +185,7 @@ class HrLeave(models.Model):
 
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', index=True, ondelete="restrict", required=True,
-        tracking=True, domain=lambda self: self._get_employee_domain(), default=lambda self: self.env.user.employee_id)
+        tracking=True, ui_domain=lambda self: self._get_employee_domain(), default=lambda self: self.env.user.employee_id)
     employee_company_id = fields.Many2one(related='employee_id.company_id', string="Employee Company", store=True)
     company_id = fields.Many2one('res.company', compute='_compute_company_id', store=True, index=True)
     active_employee = fields.Boolean(related='employee_id.active', string='Employee Active')

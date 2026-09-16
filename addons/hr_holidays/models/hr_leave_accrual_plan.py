@@ -16,12 +16,12 @@ class HrLeaveAccrualPlan(models.Model):
     name = fields.Char('Name', required=True)
     employees_count = fields.Integer("Employees", compute='_compute_employee_count')
     level_ids = fields.One2many('hr.leave.accrual.level', 'accrual_plan_id', copy=True, string="Milestones")
-    work_entry_type_id = fields.Many2one("hr.work.entry.type", string="Time Type", domain='[("id", "in", allowed_work_entry_type_ids)]', help="Time type to be accrued")
+    work_entry_type_id = fields.Many2one("hr.work.entry.type", string="Time Type", ui_domain='[("id", "in", allowed_work_entry_type_ids)]', help="Time type to be accrued")
     allowed_work_entry_type_ids = fields.Many2many(
         "hr.work.entry.type", compute='_compute_allowed_work_entry_type_ids')
     allocation_ids = fields.One2many('hr.leave.allocation', 'accrual_plan_id',
         export_string_translation=False)
-    company_id = fields.Many2one('res.company', string='Company', domain=lambda self: [('id', 'in', self.env.companies.ids)])
+    company_id = fields.Many2one('res.company', string='Company', ui_domain=lambda self: [('id', 'in', self.env.companies.ids)])
     transition_mode = fields.Selection([
         ('immediately', 'Immediately'),
         ('end_of_accrual', "After this accrual's period")],

@@ -44,7 +44,7 @@ class SaleOrderTemplateLine(models.Model):
     product_id = fields.Many2one(
         comodel_name="product.product",
         check_company=True,
-        domain=lambda self: self._product_id_domain(),
+        ui_domain=lambda self: self._product_id_domain(),
     )
     product_template_id = fields.Many2one(
         string="Product Template",
@@ -54,7 +54,7 @@ class SaleOrderTemplateLine(models.Model):
         search="_search_product_template_id",
         # magic way to make sure the domain integrates the check_company _domain_product_id logics
         # despite not being a check_company=True field
-        domain=lambda self: self._fields["product_id"]._description_domain(self.env),
+        ui_domain=lambda self: self._fields["product_id"]._description_domain(self.env),
     )
 
     product_template_attribute_value_ids = fields.Many2many(
@@ -99,7 +99,7 @@ class SaleOrderTemplateLine(models.Model):
     product_uom_id = fields.Many2one(
         comodel_name="uom.uom",
         string="Unit",
-        domain="[('id', 'in', allowed_uom_ids)] if allowed_uom_ids or mandatory_product else []",
+        ui_domain="[('id', 'in', allowed_uom_ids)] if allowed_uom_ids or mandatory_product else []",
         compute="_compute_product_uom_id",
         store=True,
         readonly=False,

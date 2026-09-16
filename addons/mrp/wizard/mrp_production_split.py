@@ -104,5 +104,5 @@ class MrpProductionSplitLine(models.TransientModel):
     quantity = fields.Float('Quantity To Produce', digits='Product Unit', required=True)
     user_id = fields.Many2one(
         'res.users', 'Responsible',
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('mrp.group_mrp_user').id)])
+        ui_domain=lambda self: [('all_group_ids', 'in', self.env.ref('mrp.group_mrp_user').id)])
     date = fields.Datetime('Schedule Date')

@@ -10,7 +10,7 @@ class StockPickingType(models.Model):
     l10n_ar_document_type_id = fields.Many2one(
         comodel_name='l10n_latam.document.type',
         string="Document Type",
-        domain=lambda self: [('id', 'in', self._get_allowed_document_type_ids())],
+        ui_domain=lambda self: [('id', 'in', self._get_allowed_document_type_ids())],
         help="Argentina: Select the document type to be assigned on the Remito"
     )
     l10n_ar_cai_authorization_code = fields.Char(

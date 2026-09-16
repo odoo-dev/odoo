@@ -18,7 +18,7 @@ class PosConfig(models.Model):
         string='Operation Type',
         default=_default_picking_type_id,
         required=True,
-        domain=lambda self: [('code', '=', 'outgoing'), ('warehouse_id.company_id', '=', self.env.company.id)],
+        ui_domain=lambda self: [('code', '=', 'outgoing'), ('warehouse_id.company_id', '=', self.env.company.id)],
         ondelete='restrict')
     ship_later = fields.Boolean(string="Ship Later")
     warehouse_id = fields.Many2one('stock.warehouse', compute='_compute_warehouse_id', store=True, readonly=False, precompute=True, ondelete='restrict')

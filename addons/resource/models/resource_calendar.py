@@ -50,7 +50,7 @@ class ResourceCalendar(models.Model):
         'resource.calendar.attendance', 'calendar_id', 'Working Time', precompute=True,
         compute='_compute_attendance_ids', store=True, readonly=False, copy=True)
     company_id = fields.Many2one(
-        'res.company', 'Company', domain=lambda self: [('id', 'in', self.env.companies.ids)],
+        'res.company', 'Company', ui_domain=lambda self: [('id', 'in', self.env.companies.ids)],
         default=lambda self: self.env.company, index='btree_not_null')
     country_id = fields.Many2one(related='company_id.country_id')
     country_code = fields.Char(related='country_id.code', depends=['country_id'])

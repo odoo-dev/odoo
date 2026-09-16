@@ -21,7 +21,7 @@ class HrEmployeeDeparture(models.Model):
     employee_id = fields.Many2one(
         'hr.employee', string='Employee', required=True,
         default=_get_default_employee_id,
-        domain=lambda self: self._get_domain_employee_id(),
+        ui_domain=lambda self: self._get_domain_employee_id(),
         index=True,
         ondelete="cascade",
     )

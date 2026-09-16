@@ -102,7 +102,7 @@ class TestOrmDiscussion(models.Model):
                                          domain=[('important', '=', True)])
     very_important_messages = fields.One2many(
         'test_orm.message', 'discussion',
-        domain=lambda self: self._domain_very_important())
+        ui_domain=lambda self: self._domain_very_important())
     emails = fields.One2many('test_orm.emailmessage', 'discussion')
     important_emails = fields.One2many('test_orm.emailmessage', 'discussion',
                                        domain=[('important', '=', True)])
@@ -1166,7 +1166,7 @@ class TestOrmAttachmentHost(models.Model):
     real_binary = fields.Binary(attachment=True)
     real_attachment_ids = fields.One2many(
         'ir.attachment', 'res_id', bypass_search_access=True,
-        domain=lambda self: [('res_model', '=', self._name)],
+        ui_domain=lambda self: [('res_model', '=', self._name)],
     )
     real_m2m_attachment_ids = fields.Many2many(
         'ir.attachment', bypass_search_access=True,
@@ -1736,7 +1736,7 @@ class TestOrmModel2Some_Access(models.Model):
     _name = 'test_orm.model2.some_access'
     _description = 'Testing Utilities attrs and groups sub'
 
-    g_id = fields.Many2one('test_orm.model.some_access', domain='[("a", "=", g_d)]')
+    g_id = fields.Many2one('test_orm.model.some_access', ui_domain='[("a", "=", g_d)]')
     g_d = fields.Integer(related='g_id.d')
 
 

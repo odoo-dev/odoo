@@ -54,7 +54,7 @@ class AccountMove(models.Model):
     l10n_hr_fiscal_user_id = fields.Many2one(
         comodel_name="res.partner",
         string="Fiscal User",
-        domain=lambda self: self._get_l10n_hr_fiscal_user_id_domain(),
+        ui_domain=lambda self: self._get_l10n_hr_fiscal_user_id_domain(),
     )
     l10n_hr_operator_name = fields.Char(string="Operator Label", related='l10n_hr_fiscal_user_id.name')
     l10n_hr_operator_oib = fields.Char(string="Operator OIB", related='l10n_hr_fiscal_user_id.l10n_hr_personal_oib')

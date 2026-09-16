@@ -46,7 +46,7 @@ class StockQuant(models.Model):
 
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain=lambda self: self._domain_product_id(),
+        ui_domain=lambda self: self._domain_product_id(),
         ondelete='restrict', required=True, index=True, check_company=True)
     product_tmpl_id = fields.Many2one(
         'product.template', string='Product Template',
@@ -58,7 +58,7 @@ class StockQuant(models.Model):
     company_id = fields.Many2one(related='location_id.company_id', string='Company', store=True, readonly=True, index='btree_not_null')
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        domain=lambda self: self._domain_location_id(),
+        ui_domain=lambda self: self._domain_location_id(),
         bypass_search_access=True, ondelete='restrict', required=True, index=True)
     warehouse_id = fields.Many2one('stock.warehouse', related='location_id.warehouse_id')
     storage_category_id = fields.Many2one(related='location_id.storage_category_id')
@@ -66,12 +66,12 @@ class StockQuant(models.Model):
     lot_id = fields.Many2one(
         'stock.lot', 'Lot/Serial Number', index=True,
         ondelete='restrict', check_company=True,
-        domain=lambda self: self._domain_lot_id())
+        ui_domain=lambda self: self._domain_lot_id())
     lot_properties = fields.Properties(related='lot_id.lot_properties', definition='product_id.lot_properties_definition', readonly=True)
     sn_duplicated = fields.Boolean(string="Duplicated Serial Number", compute='_compute_sn_duplicated', help="If the same SN is in another Quant")
     package_id = fields.Many2one(
         'stock.package', 'Package',
-        domain="['|', ('location_id', '=', location_id), '&', ('location_id', '=', False), ('quant_ids', '=', False)]",
+        ui_domain="['|', ('location_id', '=', location_id), '&', ('location_id', '=', False), ('quant_ids', '=', False)]",
         help='The package containing this quant', ondelete='restrict', check_company=True, index=True)
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
@@ -116,7 +116,7 @@ class StockQuant(models.Model):
     is_outdated = fields.Boolean('Quantity has been moved since last count', compute='_compute_is_outdated', search='_search_is_outdated')
     user_id = fields.Many2one(
         'res.users', 'Assigned To', help="User assigned to do product count.",
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)])
+        ui_domain=lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)])
 
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):

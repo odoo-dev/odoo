@@ -157,7 +157,7 @@ class ProductTemplate(models.Model):
         'uom.uom', 'Unit', tracking=True,
         default=_default_uom_id, required=True, index=True,
         help="Default unit of measure used for all stock operations.")
-    uom_ids = fields.Many2many('uom.uom', string='Packagings', help="Additional packagings for this product which can be used for sales", domain="[('id', '!=', uom_id)]")
+    uom_ids = fields.Many2many('uom.uom', string='Packagings', help="Additional packagings for this product which can be used for sales", ui_domain="[('id', '!=', uom_id)]")
     uom_name = fields.Char(string='Unit Name', related='uom_id.name', readonly=True)
     company_id = fields.Many2one(
         'res.company', 'Company', index=True)
@@ -216,7 +216,7 @@ class ProductTemplate(models.Model):
         string="Documents",
         comodel_name='product.document',
         inverse_name='res_id',
-        domain=lambda self: [('res_model', '=', self._name)])
+        ui_domain=lambda self: [('res_model', '=', self._name)])
     product_document_count = fields.Integer(
         string="Documents Count", compute='_compute_product_document_count')
 

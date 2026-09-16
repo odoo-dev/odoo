@@ -10,7 +10,7 @@ class FleetVehicleSendMail(models.TransientModel):
 
     vehicle_ids = fields.Many2many('fleet.vehicle', string='Vehicles', required=True)
     author_id = fields.Many2one('res.partner', 'Author', required=True, default=lambda self: self.env.user.partner_id.id)
-    template_id = fields.Many2one(domain=lambda self: [('model_id', '=', self.env['ir.model']._get('fleet.vehicle').id)])
+    template_id = fields.Many2one(ui_domain=lambda self: [('model_id', '=', self.env['ir.model']._get('fleet.vehicle').id)])
     attachment_ids = fields.Many2many(
         'ir.attachment', 'fleet_vehicle_mail_compose_message_ir_attachments_rel',
         'wizard_id', 'attachment_id',

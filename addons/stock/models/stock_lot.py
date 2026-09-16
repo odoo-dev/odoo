@@ -60,7 +60,7 @@ class StockLot(models.Model):
     lot_properties = fields.Properties('Properties', definition='product_id.lot_properties_definition', copy=True)
     location_id = fields.Many2one(
         'stock.location', 'Location', compute='_compute_single_location', store=True, readonly=False,
-        inverse='_set_single_location', domain="[('usage', '!=', 'view')]", group_expand='_read_group_location_id')
+        inverse='_set_single_location', ui_domain="[('usage', '!=', 'view')]", group_expand='_read_group_location_id')
     is_scrap = fields.Boolean('Is Scrapped', compute='_compute_is_scrap')
 
     @api.depends('product_id')

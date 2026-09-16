@@ -10,7 +10,7 @@ class ResPartner(models.Model):
         'l10n_it_edi_doi.declaration_of_intent',
         'partner_id',
         string="Available Declarations of Intent of this partner",
-        domain=lambda self: [('company_id', '=', self.env.company.id)],
+        ui_domain=lambda self: [('company_id', '=', self.env.company.id)],
     )
 
     def l10n_it_edi_doi_action_open_declarations(self):

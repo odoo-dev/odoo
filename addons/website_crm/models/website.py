@@ -14,7 +14,7 @@ class Website(models.Model):
 
     crm_default_team_id = fields.Many2one(
         'crm.team', string='Default Sales Teams',
-        domain=lambda self: self._get_crm_default_team_domain(),
+        ui_domain=lambda self: self._get_crm_default_team_domain(),
         help='Default Sales Team for new leads created through the Contact Us form.')
     crm_default_user_id = fields.Many2one(
         'res.users', string='Default Salesperson', domain=[('share', '=', False)],

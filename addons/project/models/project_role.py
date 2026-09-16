@@ -20,5 +20,5 @@ class ProjectRole(models.Model):
         'project_role_id',
         'res_users_id',
         string='Team Members',
-        domain=lambda self: [('all_group_ids', '=', self.env.ref('project.group_project_user').id)],
+        ui_domain=lambda self: [('all_group_ids', '=', self.env.ref('project.group_project_user').id)],
     )

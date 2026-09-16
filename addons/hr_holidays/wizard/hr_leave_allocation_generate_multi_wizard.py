@@ -41,7 +41,7 @@ class HrLeaveAllocationGenerateMultiWizard(models.TransientModel):
     allowed_work_entry_type_ids = fields.Many2many(
         'hr.work.entry.type', compute='_compute_allowed_work_entry_type_ids')
     unit_of_measure = fields.Selection(related="work_entry_type_id.unit_of_measure")
-    employee_ids = fields.Many2many('hr.employee', string='Employees', domain=lambda self: self._get_employee_domain())
+    employee_ids = fields.Many2many('hr.employee', string='Employees', ui_domain=lambda self: self._get_employee_domain())
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True)
     accrual_plan_id = fields.Many2one('hr.leave.accrual.plan')
     date_from = fields.Date('Start Date', default=fields.Date.context_today, required=True)

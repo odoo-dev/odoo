@@ -47,7 +47,7 @@ class HrJob(models.Model):
     recruiter_id = fields.Many2one(domain=_recruiter_domain, check_company=True, groups="hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user")
     address_id = fields.Many2one(
         'res.partner', "Job Location", default=_default_address_id,
-        domain=lambda self: self._address_id_domain(), tracking=True,
+        ui_domain=lambda self: self._address_id_domain(), tracking=True,
         help="Select the location where the applicant will work. Addresses listed here are defined on the company's contact information.")
     application_ids = fields.One2many('hr.applicant', 'job_id', "Job Applications", groups="hr_recruitment.group_hr_recruitment_interviewer")
     application_count = fields.Integer(compute='_compute_application_count', string="Application Count", groups="hr_recruitment.group_hr_recruitment_interviewer")
@@ -73,7 +73,7 @@ class HrJob(models.Model):
     favorite_recruiter_ids = fields.Many2many('hr.employee', 'job_favorite_recruiter_rel', 'job_id', 'recruiter_id', default=_get_default_favorite_recruiter_ids)
     interviewer_ids = fields.Many2many(
         "res.users",
-        domain="[('share', '=', False), ('company_ids', '=?', company_id)]",
+        ui_domain="[('share', '=', False), ('company_ids', '=?', company_id)]",
         string="Interviewers",
         groups="hr_recruitment.group_hr_recruitment_interviewer",
         help="The Interviewers set on the job position can see all Applicants in it. They have access to the information, the attachments, the meeting management and they can refuse him. You don't need to have Recruitment rights to be set as an interviewer.",

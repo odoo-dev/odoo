@@ -30,7 +30,7 @@ class HrWorkEntryType(models.Model):
         'res.country',
         string="Country",
         tracking=True,
-        domain=lambda self: [('id', 'in', self.env.companies.country_id.ids)]
+        ui_domain=lambda self: [('id', 'in', self.env.companies.country_id.ids)]
     )
     country_code = fields.Char(related='country_id.code')
     count_as = fields.Selection(

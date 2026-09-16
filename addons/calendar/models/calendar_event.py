@@ -168,7 +168,7 @@ class CalendarEvent(models.Model):
     name = fields.Char('Meeting Subject', required=True, copy=True)
     calendar_id = fields.Many2one('calendar.calendar', string='Calendar', index='btree',
         compute='_compute_calendar_id', store=True, readonly=False, ondelete='cascade',
-        domain=lambda self: self._get_calendar_id_domain())
+        ui_domain=lambda self: self._get_calendar_id_domain())
     calendar_color = fields.Integer(related='calendar_id.color')
     description = fields.Html('Description',
         help="""When synchronization with an external calendar is active, this description is synchronized \

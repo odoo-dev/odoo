@@ -17,7 +17,7 @@ class ResPartner(models.Model):
         compute='_compute_product_pricelist',
         inverse="_inverse_product_pricelist",
         company_dependent=False,  # behave like company dependent field but is not company_dependent
-        domain=lambda self: [('company_id', 'in', (self.env.company.id, False))],
+        ui_domain=lambda self: [('company_id', 'in', (self.env.company.id, False))],
         help="Used for sales to the current partner",
         tracking=True,
     )

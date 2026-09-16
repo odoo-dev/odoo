@@ -31,7 +31,7 @@ class MailCannedResponse(models.Model):
     group_ids = fields.Many2many(
         "res.groups",
         string="Authorized Groups",
-        domain=lambda self: [("id", "in", self.env.user.all_group_ids.ids)],
+        ui_domain=lambda self: [("id", "in", self.env.user.all_group_ids.ids)],
         falsy_value_label=_lt("🔒 Private"),
     )
     is_shared = fields.Boolean(
