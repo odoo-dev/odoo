@@ -298,12 +298,10 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         self.db_name = db_name
         self._db: Connection = sql_db.db_connect(db_name, readonly=False)
-        # db_connect() is lazy (no connection is actually made until .cursor()
-        # is called), so this is always created: a readonly cursor must be a
-        # genuine Postgres read-only transaction even without a configured
-        # replica, instead of silently falling back to a read/write one.
-        self._db_readonly: Connection = sql_db.db_connect(db_name, readonly=True)
+        self._db_readonly: Connection | None = None
         self._db_readonly_failed_time: float | None = None
+        if config['db_replica_host'] or config['test_enable'] or 'replica' in config['dev_mode']:  # by default, only use readonly pool if we have a db_replica_host defined.
+            self._db_readonly = sql_db.db_connect(db_name, readonly=True)
 
         # field dependencies
         self.field_depends: Collector[Field, str] = Collector()
@@ -1143,15 +1141,23 @@ class Registry(Mapping[str, type["BaseModel"]]):
         for cache_name in names:
             cr.execute(SQL("INSERT INTO %s DEFAULT VALUES", SQL.identifier(f'orm_signaling_{cache_name}')))
 
-    def cursor(self, /, readonly: bool = False) -> BaseCursor:
+    def cursor(self, /, readonly: bool = False, force_readonly: bool = False) -> BaseCursor:
         """ Return a new cursor for the database. The cursor itself may be used
             as a context manager to commit/rollback and close automatically.
 
             :param readonly: Attempt to acquire a cursor on a replica database.
                 Acquire a read/write cursor on the primary database in case no
                 replica exists or that no readonly cursor could be acquired.
+            :param force_readonly: Like ``readonly``, but never falls back to a
+                read/write cursor: a genuine read-only connection to the primary
+                database is used when no replica is configured, and a failure to
+                open it propagates instead of silently granting write access.
         """
-        if readonly:
+        if force_readonly:
+            if self._db_readonly is None:
+                self._db_readonly = sql_db.db_connect(self.db_name, readonly=True)
+            return self._db_readonly.cursor()
+        if readonly and self._db_readonly is not None:
             if (
                 self._db_readonly_failed_time is None
                 or time.monotonic() > self._db_readonly_failed_time + _REPLICA_RETRY_TIME

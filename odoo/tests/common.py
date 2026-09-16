@@ -1093,9 +1093,9 @@ class BaseCase(case.TestCase):
         assert cr, 'No cursor'
         assert registry, 'No registry'
 
-        def _patched_cursor(readonly: bool = False):
+        def _patched_cursor(readonly: bool = False, force_readonly: bool = False):
             return test_cursor.TestCursor(
-                cr, _registry_test_lock, readonly and cls._registry_readonly_enabled
+                cr, _registry_test_lock, (readonly or force_readonly) and cls._registry_readonly_enabled
             )
 
         try:

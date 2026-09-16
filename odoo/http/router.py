@@ -397,7 +397,7 @@ def serve_db(request: Request) -> Response:
         # get the registry and cursor (RO)
         try:
             registry = Registry(request.db)
-            cr = registry.cursor(readonly=True)
+            cr = registry.cursor(readonly=True, force_readonly=token_readonly)
             # check signaling
             request.env = Environment(cr, request.session.uid, request.session.context)
             request.update_context(host_id=request.env['ir.http']._get_host_id_from_domain(request.httprequest.host))
