@@ -17,7 +17,15 @@ export class PortalAdditionalIdentifiers extends Interaction {
     };
 
     setup() {
+        this.vatInput = this.el.closest('form')?.elements.vat;
         this._syncDropdown();
+        this._syncVatExclusivity();
+    }
+
+    start() {
+        if (this.vatInput) {
+            this.addListener(this.vatInput, 'input', this._syncVatExclusivity);
+        }
     }
 
     /**
@@ -51,7 +59,7 @@ export class PortalAdditionalIdentifiers extends Interaction {
      * @param {Event} ev
      */
     onChangeValue(ev) {
-        if (ev.currentTarget.value.trim() !== '') return;
+        if (ev.currentTarget.value.trim() !== '' || ev.currentTarget.required) return;
         this._removeField(ev.currentTarget.closest('.o_additional_identifier_field'));
     }
 
@@ -73,6 +81,17 @@ export class PortalAdditionalIdentifiers extends Interaction {
         }
         this.updateContent();
         this._syncDropdown();
+        this._syncVatExclusivity();
+    }
+
+    /** Drop the requirement of every individual identifier while a VAT number is filled in. */
+    _syncVatExclusivity() {
+        const hasVat = !!this.vatInput?.value.trim();
+        this.el.querySelectorAll('.o_additional_identifier_field[data-individual]').forEach((field) => {
+            const required = !!field.dataset.required && !hasVat;
+            field.querySelector('input').required = required;
+            field.querySelector('label')?.classList.toggle('label-optional', !required);
+        });
     }
 
     _removeField(field) {
@@ -113,15 +132,24 @@ export class PortalAdditionalIdentifiers extends Interaction {
         this._updateDropdownVisibility();
     }
 
-    /** Build an empty, hidden identifier field. Mirrors the QWeb template. */
+    /** Build an empty identifier field, hidden unless required. Mirrors the QWeb template. */
     _buildField(key, meta) {
         const field = document.createElement('div');
         field.className = 'o_additional_identifier_field mb-2';
         field.dataset.identifierKey = key;
-        field.style.display = 'none';
+        if (meta.required) {
+            field.dataset.required = '1';
+        } else {
+            field.style.display = 'none';
+        }
+        if (meta.individual) {
+            field.dataset.individual = '1';
+        }
 
         const label = document.createElement('label');
-        label.className = 'col-form-label fw-normal label-optional';
+        label.className = meta.required
+            ? 'col-form-label fw-normal'
+            : 'col-form-label fw-normal label-optional';
         label.setAttribute('for', `o_additional_identifier_${key}`);
         label.textContent = meta.label || key;
 
@@ -133,6 +161,7 @@ export class PortalAdditionalIdentifiers extends Interaction {
         input.className = 'form-control';
         input.id = `o_additional_identifier_${key}`;
         input.name = key;
+        input.required = !!meta.required;
         if (meta.placeholder) {
             input.placeholder = meta.placeholder;
         }
@@ -140,16 +169,18 @@ export class PortalAdditionalIdentifiers extends Interaction {
             input.setAttribute('aria-describedby', `o_additional_identifier_${key}_help`);
         }
 
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'btn btn-outline-secondary o_remove_identifier';
-        button.title = _t("Remove");
-        button.setAttribute('aria-label', _t("Remove"));
-        const icon = document.createElement('i');
-        icon.className = 'fa fa-trash-o';
-        button.appendChild(icon);
-
-        group.append(input, button);
+        group.append(input);
+        if (!meta.required) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-outline-secondary o_remove_identifier';
+            button.title = _t("Remove");
+            button.setAttribute('aria-label', _t("Remove"));
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-trash-o';
+            button.appendChild(icon);
+            group.append(button);
+        }
         field.append(label, group);
         if (meta.help) {
             const help = document.createElement('div');

@@ -439,6 +439,17 @@ class CustomerPortal(Controller):
                 " account. Please contact us directly for this operation."
             )
 
+        is_used_as_billing = address_type == 'billing' or use_delivery_as_billing
+        required_fields = self.env['res.partner']._get_required_address_fields(
+            address_type, country_sudo, use_delivery_as_billing=use_delivery_as_billing, **kwargs,
+        )
+        if is_used_as_billing:
+            ResPartner = self.env['res.partner']
+            required_fields |= ResPartner._filter_mandatory_additional_identifiers(
+                ResPartner._get_mandatory_additional_identifiers(country_sudo, **kwargs),
+                partner_sudo.vat,
+            )
+
         return {
             'partner_sudo': partner_sudo,  # If set, customer is editing an existing address
             'partner_id': partner_sudo.id,
@@ -452,11 +463,8 @@ class CustomerPortal(Controller):
             'commercial_fields_warning': commercial_fields_warning,
             'country_warning': country_warning,
             'callback': callback,
-            'is_used_as_billing': address_type == 'billing' or use_delivery_as_billing,
-            'required_fields': self.env['res.partner']._get_required_address_fields(
-                address_type, country_sudo,
-                use_delivery_as_billing=use_delivery_as_billing, **kwargs
-            ),
+            'is_used_as_billing': is_used_as_billing,
+            'required_fields': required_fields,
             'use_delivery_as_billing': use_delivery_as_billing,
             'zip_applicability': country_sudo.zip_applicability,
             'zip_before_city': country_sudo._is_zip_before_city(),
@@ -874,6 +882,19 @@ class CustomerPortal(Controller):
         for field_name in required_field_set:
             if not address_values.get(field_name):
                 missing_fields.add(field_name)
+
+        if address_type == 'billing' or use_delivery_as_billing:
+            identifiers = address_values.get('additional_identifiers') or {}
+            # The VAT is absent from the payload when hidden or popped as a commercial field.
+            vat = address_values['vat'] if 'vat' in address_values else partner_sudo.vat
+            mandatory_identifiers = ResPartnerSudo._filter_mandatory_additional_identifiers(
+                ResPartnerSudo._get_mandatory_additional_identifiers(country, **kwargs), vat,
+            )
+            for key in mandatory_identifiers:
+                # An unchanged identifier is popped from the payload by the commercial-field block.
+                if not identifiers.get(key) and not partner_sudo._get_additional_identifier(key):
+                    missing_fields.add(key)
+
         if missing_fields:
             error_messages.append(_("Some required fields are empty."))
 
@@ -939,6 +960,10 @@ class CustomerPortal(Controller):
         required_fields = self.env['res.partner']._get_required_address_fields(
             address_type, country, **kwargs
         )
+        if address_type == 'billing' or kwargs.get('use_delivery_as_billing'):
+            required_fields |= self.env['res.partner']._get_mandatory_additional_identifiers(
+                country, **kwargs,
+            )
         state_data = self.env['res.country.state'].sudo().search_read(
             [('country_id', '=', country.id)],
             ['id', 'name', 'code'],

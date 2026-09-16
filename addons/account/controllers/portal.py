@@ -236,17 +236,21 @@ class PortalAccount(CustomerPortal):
     # Address form - additional identifiers
     # ------------------------------------------------------------
 
-    def _get_checkout_additional_identifiers_metadata(self, country):
+    def _get_checkout_additional_identifiers_metadata(self, country, **kwargs):
         """Return additional identifiers for a country."""
         if not country:
             return {}
-        partner = request.env['res.partner'].new({'country_id': country.id})
+        ResPartner = request.env['res.partner']
+        partner = ResPartner.new({'country_id': country.id})
         metadata = partner.available_additional_identifiers_metadata
+        mandatory_keys = ResPartner._get_mandatory_additional_identifiers(country, **kwargs)
         return {
             key: {
                 'label': entry.get('label') or key,
                 'placeholder': entry.get('placeholder') or '',
                 'help': entry.get('help') or '',
+                'required': key in mandatory_keys,
+                'individual': ResPartner._is_individual_identifier(key),
             }
             for key, entry in sorted(metadata.items(), key=lambda item: item[1].get('sequence', 100))
         }
@@ -254,7 +258,9 @@ class PortalAccount(CustomerPortal):
     def _prepare_address_form_values(self, partner_sudo, *args, **kwargs):
         rendering_values = super()._prepare_address_form_values(partner_sudo, *args, **kwargs)
         if rendering_values['is_used_as_billing']:
-            metadata = self._get_checkout_additional_identifiers_metadata(rendering_values['country'])
+            metadata = self._get_checkout_additional_identifiers_metadata(
+                rendering_values['country'], **kwargs,
+            )
             current_partner = partner_sudo or rendering_values['current_partner']
             rendering_values.update({
                 'additional_identifiers_metadata': metadata,
@@ -265,7 +271,9 @@ class PortalAccount(CustomerPortal):
     @http.route()
     def portal_address_country_info(self, country, address_type, **kw):
         res = super().portal_address_country_info(country, address_type, **kw)
-        res['additional_identifiers_metadata'] = self._get_checkout_additional_identifiers_metadata(country)
+        res['additional_identifiers_metadata'] = self._get_checkout_additional_identifiers_metadata(
+            country, **kw,
+        )
         return res
 
     def _validate_address_values(self, address_values, *args, **kwargs):

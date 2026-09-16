@@ -259,8 +259,11 @@
                     <t t-set="identifier_value" t-value="partner_additional_identifiers.get(identifier_key)"/>
                     <div class="o_additional_identifier_field mb-2"
                          t-att-data-identifier-key="identifier_key"
-                         t-attf-style="#{'' if identifier_value else 'display: none;'}">
-                        <label class="col-form-label fw-normal label-optional" t-attf-for="o_additional_identifier_{{identifier_key}}"
+                         t-att-data-required="'1' if meta.get('required') else None"
+                         t-att-data-individual="'1' if meta.get('individual') else None"
+                         t-attf-style="#{'' if identifier_value or meta.get('required') else 'display: none;'}">
+                        <label t-attf-class="col-form-label fw-normal#{'' if meta.get('required') else ' label-optional'}"
+                               t-attf-for="o_additional_identifier_{{identifier_key}}"
                                t-out="meta['label']"/>
                         <div class="input-group">
                             <input
@@ -272,7 +275,8 @@
                                 t-att-placeholder="meta.get('placeholder')"
                                 t-att-aria-describedby="('o_additional_identifier_%s_help' % identifier_key) if meta.get('help') else None"
                             />
-                            <button type="button" class="btn btn-outline-secondary o_remove_identifier"
+                            <button t-if="not meta.get('required')" type="button"
+                                    class="btn btn-outline-secondary o_remove_identifier"
                                     title="Remove" aria-label="Remove">
                                 <i class="oi" data-icon="delete"/>
                             </button>
