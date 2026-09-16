@@ -12,7 +12,7 @@ class Website(models.Model):
         suggested_controllers.append((_('Blog'), self.env['ir.http']._url_for('/blog'), 'website_blog'))
         return suggested_controllers
 
-    def configurator_set_menu_links(self, menu_company, module_data):
+    def _configurator_set_menu_links(self, menu_company, module_data):
         blogs = module_data.get('#blog', [])
         for idx, blog in enumerate(blogs):
             new_blog = self.env['blog.blog'].create({
@@ -31,7 +31,7 @@ class Website(models.Model):
                 blog_menu.write(blog_menu_values)
             else:
                 self.env['website.menu'].create(blog_menu_values)
-        super().configurator_set_menu_links(menu_company, module_data)
+        super()._configurator_set_menu_links(menu_company, module_data)
 
     def _get_search_scopes(self):
         return {

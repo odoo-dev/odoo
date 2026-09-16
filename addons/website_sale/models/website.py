@@ -477,7 +477,7 @@ class Website(models.Model):
 
         return res
 
-    def configurator_addons_apply(self, industry_name=None, **kwargs):
+    def _configurator_addons_apply(self, industry_name=None, **kwargs):
         """Override of `website` to generate eCommerce categories for a given industry using AI."""
 
         def generate_categories(industry_name_):
@@ -536,7 +536,7 @@ class Website(models.Model):
                 logger.warning("Response could not be generated for the category generation")
             return None
 
-        res = super().configurator_addons_apply(industry_name=industry_name, **kwargs)
+        res = super()._configurator_addons_apply(industry_name=industry_name, **kwargs)
 
         if self.env["product.public.category"].search_count([], limit=1):
             logger.info("Categories already exist, skipping AI generation.")

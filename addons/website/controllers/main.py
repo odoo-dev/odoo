@@ -57,6 +57,28 @@ MAX_FONT_FILE_SIZE = 10 * 1024 * 1024
 SUPPORTED_FONT_EXTENSIONS = ['ttf', 'woff', 'woff2', 'otf']
 FORCE_SHOW_FIELDS = ['name', 'search_item_metadata', 'tags']
 API_WEBSITE_IMAGES_URL = 'https://website-image.api.odoo.com/images/'
+# Static theme previews are stored at a fixed location in each theme addon.
+CONFIGURATOR_PREVIEW_PATH_RE = re.compile(r'/[a-z0-9_]+/static/description/preview\.html')
+CONFIGURATOR_PREVIEW_THEME_RE = re.compile(r'[a-z0-9_]+')
+# The configurator sends hex colors, `rgb()` is accepted for palettes
+# holding a transparent color.
+CONFIGURATOR_PREVIEW_COLOR_RE = re.compile(
+    r'#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})'
+    r'|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)'
+)
+# The preview is served on the host origin and fully embeds its own styling:
+# only allow what such a static page needs (theme images, IAP industry
+# images and Google fonts), everything else is blocked.
+CONFIGURATOR_PREVIEW_CSP = (
+    "default-src 'none';"
+    " img-src 'self' data: https://website-image.api.odoo.com;"
+    " style-src 'self' 'unsafe-inline';"
+    " font-src 'self' data: https://fonts.gstatic.com;"
+    " base-uri 'self';"
+    " form-action 'none';"
+    " frame-ancestors 'self';"
+    " sandbox allow-same-origin"
+)
 CONFIGURATOR_PREVIEW_FALLBACK_IMAGES = {
     f'website.{image_name}': f'website.{fallback_image_name}'
     for image_name, fallback_image_name in [
@@ -476,6 +498,11 @@ class Website(Home):
 
     @http.route('/website/info', type='http', auth="public", website=True, sitemap=False, readonly=True, list_as_website_content=_lt("Website Information"))
     def website_info(self, **kwargs):
+        # This page exposes technical details about the instance (installed
+        # apps, Odoo version, ...), it is therefore never published to
+        # visitors and is only reachable by website editors.
+        if not request.env.user.has_group('website.group_website_restricted_editor'):
+            raise werkzeug.exceptions.NotFound()
         Module = request.env['ir.module.module'].sudo()
         apps = Module.search([('state', '=', 'installed'), ('application', '=', True)])
         l10n = Module.search([('state', '=', 'installed'), ('name', '=like', 'l10n_%')])
@@ -508,14 +535,52 @@ class Website(Home):
         url = self.env.website.cookie_policy_id.sudo().url or '/cookie-policy'
         return request.redirect(url)
 
+    def _get_configurator_preview_path(self, theme_name):
+        """Return the static preview path of the given theme.
+
+        The path is always computed server side: taking it from the request
+        would turn `file_open` into an arbitrary addon file reader.
+
+        :param str theme_name: name of the previewed theme
+        :return: local static file path of the theme preview
+        :rtype: str
+        :raise NotFound: if the theme or its preview does not exist
+        """
+        if not theme_name or not CONFIGURATOR_PREVIEW_THEME_RE.fullmatch(theme_name):
+            raise NotFound()
+        Module = request.env['ir.module.module'].sudo()
+        themes_domain = Domain.AND([[('name', '=', theme_name)], Module.get_themes_domain()])
+        if not Module.search_count(themes_domain, limit=1):
+            raise NotFound()
+        preview_url = request.env['website']._get_configurator_theme_preview_url(theme_name)
+        if not preview_url:
+            raise NotFound()
+        return preview_url
+
+    def _get_configurator_preview_palette(self, colors):
+        """Sanitize the palette colors received from the preview request.
+
+        Those colors are injected as-is in the stylesheet of the preview:
+        anything that is not a plain hex color is dropped.
+
+        :param list[str] colors: raw ``colorX`` request parameters
+        :return: the valid colors, the invalid ones replaced by an empty string
+        :rtype: list[str]
+        """
+        return [
+            color.strip() if CONFIGURATOR_PREVIEW_COLOR_RE.fullmatch(color.strip()) else ''
+            for color in colors
+        ]
+
     def _load_configurator_preview_html(self, preview_url):
         """Load the static HTML used by the configurator theme preview.
 
-        :param str preview_url: local static file path
+        :param str preview_url: local static file path, as returned by
+            :meth:`_get_configurator_preview_path`
         :return: preview HTML
         :rtype: str
         """
-        if not preview_url.startswith('/'):
+        if not CONFIGURATOR_PREVIEW_PATH_RE.fullmatch(preview_url):
             raise NotFound()
         try:
             with tools.file_open(preview_url.lstrip('/'), 'rb') as file:
@@ -879,7 +944,6 @@ class Website(Home):
     @http.route('/website/configurator/preview', type='http', auth="user", website=True, multilang=False)
     def website_configurator_preview(
         self,
-        preview_url,
         theme_name=None,
         industry_id=-1,
         color1='',
@@ -890,12 +954,18 @@ class Website(Home):
         is_dark='0',
         **kwargs,
     ):
-        if not preview_url:
+        # The preview inlines theme HTML in the host origin, it is only meant
+        # to be displayed by the configurator, which is designer only.
+        if not request.env.user.has_group('website.group_website_designer'):
             raise NotFound()
 
-        industry_id = int(industry_id)
+        preview_url = self._get_configurator_preview_path(theme_name)
+        try:
+            industry_id = int(industry_id)
+        except ValueError as exc:
+            raise NotFound() from exc
         is_dark_color_palette = is_dark == '1'
-        palette = [color1, color2, color3, color4, color5]
+        palette = self._get_configurator_preview_palette([color1, color2, color3, color4, color5])
         palette_map = {
             f'o-color-{index}': color
             for index, color in enumerate(palette, start=1)
@@ -928,7 +998,10 @@ class Website(Home):
             preview_overrides,
         )
 
-        return request.make_response(final_html, [('Content-Type', 'text/html; charset=utf-8')])
+        return request.make_response(final_html, [
+            ('Content-Type', 'text/html; charset=utf-8'),
+            ('Content-Security-Policy', CONFIGURATOR_PREVIEW_CSP),
+        ])
 
     @http.route('/website/get_suggested_links', type='jsonrpc', auth="user", website=True, readonly=True)
     def get_suggested_link(self, needle, limit=10):
