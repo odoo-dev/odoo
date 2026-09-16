@@ -59,8 +59,8 @@ export class Dialog extends Component {
     static template = "web.Dialog";
     // don't do this, it is only temporary to allow the dialog props to be
     // overridden.
-    static props = dialogProps;
-    props = useProps(this.constructor.props);
+    static propsSchema = dialogProps;
+    props = useProps(this.constructor.propsSchema);
     // Ref on the modal element, either owned by the parent (`modalRef` prop) or local.
     modalRef = useProps.static(
         "modalRef",
