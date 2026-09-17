@@ -14,7 +14,7 @@ import typing
 import warnings
 from collections import defaultdict, deque
 from collections.abc import Mapping
-from contextlib import closing, ExitStack
+from contextlib import closing, ContextDecorator, ExitStack
 from functools import partial
 from operator import attrgetter
 
@@ -30,7 +30,7 @@ from odoo.tools import (
     remove_accents,
     sql,
 )
-from odoo.tools.func import locked, reset_cached_properties
+from odoo.tools.func import reset_cached_properties
 from odoo.tools.lru import LRU
 from odoo.tools.misc import Collector
 from odoo.tools.version_tag_reset import reset_classes_tp_versions_used
@@ -83,18 +83,28 @@ def _unaccent(x: SQL | str | psycopg2.sql.Composable) -> SQL | str | psycopg2.sq
     return f'unaccent({x})'
 
 
+class RegistryLock(ContextDecorator):
+    def __enter__(self):
+        Registry._lock.acquire()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        Registry._lock.release()
+        return False
+
+
 class Registry(Mapping[str, type["BaseModel"]]):
     """ Model registry for a particular database.
 
     The registry is essentially a mapping between model names and model classes.
     There is one registry instance per database.
-
     """
-    _lock = threading.RLock()
 
     idle_timeout = 0
     registries = LRU[str, "Registry"](42)  # random default value
     """ A mapping from database names to registries. """
+
+    _lock = registries._lock  # reuse the same lock as the LRU, backward compatibility
 
     def __new__(cls, db_name: str):
         """ Return the registry for the given database name."""
@@ -115,7 +125,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
     models: dict[str, type[BaseModel]]
 
     @classmethod
-    @locked
+    @RegistryLock()
     def new(
         cls,
         db_name: str,
@@ -151,7 +161,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         :param lock_wait: How long to wait to acquire the lock on the database (in seconds).
         """
         if (registry := cls.registries.get(db_name)) and not registry.ready:
-            raise Exception('Registry for database %s can not be loaded recursively' % db_name)
+            raise Exception('Registry for database %s cannot be loaded recursively' % db_name)
 
         from odoo.modules import db  # noqa: PLC0415
         from odoo.modules.loading import load_modules, reset_modules_state  # noqa: PLC0415
@@ -341,32 +351,26 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.new = self.init = self.registries = None  # type: ignore
 
     @classmethod
-    @locked
     def delete(cls, db_name: str) -> None:
         """ Delete the registry linked to a given database. """
-        if db_name in cls.registries:  # pylint: disable=unsupported-membership-test
-            del cls.registries[db_name]  # pylint: disable=unsupported-delete-operation
+        cls.registries.pop(db_name, None)
 
     @classmethod
-    @locked
     def delete_all(cls):
         """ Delete all the registries. """
         cls.registries.clear()
 
     @classmethod
-    @locked
     def _drop_idle(cls) -> None:
         """ Drop registries that have not been used for a while. """
         if cls.idle_timeout <= 0:
             return
         now = time.monotonic()
-        gc_list = []
-        for db_name, registry in cls.registries.items():
-            if now - registry.last_used > cls.idle_timeout:
-                gc_list.append(db_name)
-        for db_name in gc_list:
-            _logger.info("Drop idle registry for %s", db_name)
-            cls.delete(db_name)
+        with cls.registries._lock:
+            for db_name, registry in cls.registries.snapshot.items():
+                if now - registry.last_used > cls.idle_timeout:
+                    _logger.info("Drop idle registry for %s", db_name)
+                    cls.registries.pop(db_name, None)
 
     #
     # Mapping abstract methods implementation
@@ -444,7 +448,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         return model_names
 
-    @locked
+    @RegistryLock()
     def _setup_models__(self, cr: BaseCursor, model_names: Iterable[str] | None = None) -> None:  # noqa: PLW3201
         """ Perform the setup of models.
         This must be called after loading modules and before using the ORM.

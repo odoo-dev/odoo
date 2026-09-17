@@ -10,10 +10,10 @@ from inspect import Parameter, getsourcefile, signature
 __all__ = [
     'classproperty',
     'conditional',
+    'deprecated',
     'lazy',
     'lazy_classproperty',
     'reset_cached_properties',
-    'deprecated',
 ]
 
 
@@ -60,6 +60,7 @@ def filter_kwargs(func: Callable, kwargs: dict[str, typing.Any]) -> dict[str, ty
 
 
 def synchronized[**P, T](lock_attr: str = '_lock') -> Callable[[Callable[P, T]], Callable[P, T]]:
+    @deprecated("Since 21.0, synchronized and locked methods are deprecated, use a with statement explictly")
     def synchronized_lock(func, /):
         @functools.wraps(func)
         def locked(inst, *args, **kwargs):
@@ -67,9 +68,6 @@ def synchronized[**P, T](lock_attr: str = '_lock') -> Callable[[Callable[P, T]],
                 return func(inst, *args, **kwargs)
         return locked
     return synchronized_lock
-
-
-locked = synchronized()
 
 
 def frame_codeinfo(fframe, back=0):
@@ -295,3 +293,6 @@ except ImportError:
                 obj.__deprecated__ = wrapper.__deprecated__ = message
                 return wrapper
             raise TypeError(f"@deprecated decorator cannot be applied to {obj!r}")
+
+
+locked = synchronized()

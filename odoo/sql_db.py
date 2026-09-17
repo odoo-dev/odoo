@@ -36,7 +36,7 @@ from . import tools
 from .release import MIN_PG_VERSION
 from .tools import SQL, config
 from .tools.constants import IN_MAX as IN_MAX_CONST
-from .tools.func import frame_codeinfo, locked
+from .tools.func import frame_codeinfo
 from .tools.misc import Callbacks, real_time
 
 if typing.TYPE_CHECKING:
@@ -659,7 +659,6 @@ class ConnectionPool:
     def _debug(self, msg: str, *args):
         _logger_conn.debug(('%r ' + msg), self, *args)
 
-    @locked
     def borrow(self, connection_info: dict) -> PsycoConnection:
         """
         Borrow a PsycoConnection from the pool. If no connection is available, create a new one
@@ -669,94 +668,95 @@ class ConnectionPool:
         :param dict connection_info: dict of psql connection keywords
         :rtype: PsycoConnection
         """
-        # find a connection, free idle and dead connections
-        now = time.time()
-        if (check_all := self._check_free_at < now):
-            self._check_free_at = now + MAX_IDLE_TIMEOUT / 10
-        close_used_before = now - MAX_IDLE_TIMEOUT
-        selected_cnx = None
-        for i, cnx in tools.reverse_enumerate(self._free_connections):
-            if not cnx.closed and cnx._pool_last_used < close_used_before:
-                self._debug('Close connection at index %d: %r', i, cnx.dsn)
-                cnx.close()
-            if cnx.closed:
-                self._free_connections.pop(i)
-                self._debug('Removing closed connection at index %d: %r', i, cnx.dsn)
-            elif selected_cnx is None and self._dsn_equals(cnx.dsn, connection_info):
-                self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
-                self._free_connections.pop(i)
-                self._used_connections.add(cnx)
-                if not check_all:
-                    return cnx
-                selected_cnx = cnx
-        if selected_cnx is not None:
-            return selected_cnx
+        with self._lock:
+            # find a connection, free idle and dead connections
+            now = time.time()
+            if (check_all := self._check_free_at < now):
+                self._check_free_at = now + MAX_IDLE_TIMEOUT / 10
+            close_used_before = now - MAX_IDLE_TIMEOUT
+            selected_cnx = None
+            for i, cnx in tools.reverse_enumerate(self._free_connections):
+                if not cnx.closed and cnx._pool_last_used < close_used_before:
+                    self._debug('Close connection at index %d: %r', i, cnx.dsn)
+                    cnx.close()
+                if cnx.closed:
+                    self._free_connections.pop(i)
+                    self._debug('Removing closed connection at index %d: %r', i, cnx.dsn)
+                elif selected_cnx is None and self._dsn_equals(cnx.dsn, connection_info):
+                    self._debug('Borrow existing connection to %r at index %d', cnx.dsn, i)
+                    self._free_connections.pop(i)
+                    self._used_connections.add(cnx)
+                    if not check_all:
+                        return cnx
+                    selected_cnx = cnx
+            if selected_cnx is not None:
+                return selected_cnx
 
-        if len(self._free_connections) + len(self._used_connections) >= self._maxconn:
-            # pool is full, try to close the oldest connection
-            if self._free_connections:
-                cnx = self._free_connections.pop(0)
-                cnx.close()
-                self._debug('Removing old connection at index %d: %r', 0, cnx.dsn)
-            else:
-                raise PoolError('The Connection Pool Is Full')
+            if len(self._free_connections) + len(self._used_connections) >= self._maxconn:
+                # pool is full, try to close the oldest connection
+                if self._free_connections:
+                    cnx = self._free_connections.pop(0)
+                    cnx.close()
+                    self._debug('Removing old connection at index %d: %r', 0, cnx.dsn)
+                else:
+                    raise PoolError('The Connection Pool Is Full')
 
-        try:
-            result = psycopg2.connect(
-                connection_factory=PsycoConnection,
-                **connection_info)
-            result.give_back = functools.partial(self.give_back, result)
-        except psycopg2.Error:
-            _logger.info('Connection to the database failed')
-            raise
-        if result.server_version < MIN_PG_VERSION * 10000:
-            warnings.warn(f"Postgres version is {result.server_version}, lower than minimum required {MIN_PG_VERSION * 10000}")
-        self._used_connections.add(result)
-        self._debug('Create new connection backend PID %d', result.get_backend_pid())
+            try:
+                result = psycopg2.connect(
+                    connection_factory=PsycoConnection,
+                    **connection_info)
+                result.give_back = functools.partial(self.give_back, result)
+            except psycopg2.Error:
+                _logger.info('Connection to the database failed')
+                raise
+            if result.server_version < MIN_PG_VERSION * 10000:
+                warnings.warn(f"Postgres version is {result.server_version}, lower than minimum required {MIN_PG_VERSION * 10000}")
+            self._used_connections.add(result)
+            self._debug('Create new connection backend PID %d', result.get_backend_pid())
 
-        return result
+            return result
 
-    @locked
     def give_back(self, connection: PsycoConnection, keep_in_pool: bool = True):
         self._debug('Give back connection to %r', connection.dsn)
-        try:
-            self._used_connections.remove(connection)
-        except KeyError:
-            if connection in self._free_connections:
-                raise PoolError("Closing a free connection")
-            raise PoolError('This connection does not belong to the pool')
-
-        if keep_in_pool and not connection.closed:
-            # Release the connection and record the last time used
-            self._debug('Put connection to %r in pool', connection.dsn)
+        with self._lock:
             try:
-                connection.reset()
-            except psycopg2.OperationalError as e:
-                self._debug('Cannot reset connection: %r (%s)', connection.dsn, e)
-            else:
-                connection._pool_last_used = time.time()
-                self._free_connections.append(connection)
-                return
+                self._used_connections.remove(connection)
+            except KeyError:
+                if connection in self._free_connections:
+                    raise PoolError("Closing a free connection")
+                raise PoolError('This connection does not belong to the pool')
+
+            if keep_in_pool and not connection.closed:
+                # Release the connection and record the last time used
+                self._debug('Put connection to %r in pool', connection.dsn)
+                try:
+                    connection.reset()
+                except psycopg2.OperationalError as e:
+                    self._debug('Cannot reset connection: %r (%s)', connection.dsn, e)
+                else:
+                    connection._pool_last_used = time.time()
+                    self._free_connections.append(connection)
+                    return
         self._debug('Forget connection to %r', connection.dsn)
         connection.close()
 
-    @locked
     def close_all(self, dsn: dict | str | None = None):
-        count = 0
-        last = None
-        for i, cnx in tools.reverse_enumerate(self._free_connections):
-            if dsn is None or self._dsn_equals(cnx.dsn, dsn):
-                cnx.close()
-                last = self._free_connections.pop(i)
-                count += 1
-        for cnx in self._used_connections:
-            if dsn is None or self._dsn_equals(cnx.dsn, dsn):
-                cnx.close()
-                last = cnx
-                count += 1
-        if count:
-            _logger.info('%r: Closed %d connections %s', self, count,
-                        (dsn and last and 'to %r' % last.dsn) or '')
+        with self._lock:
+            count = 0
+            last = None
+            for i, cnx in tools.reverse_enumerate(self._free_connections):
+                if dsn is None or self._dsn_equals(cnx.dsn, dsn):
+                    cnx.close()
+                    last = self._free_connections.pop(i)
+                    count += 1
+            for cnx in self._used_connections:
+                if dsn is None or self._dsn_equals(cnx.dsn, dsn):
+                    cnx.close()
+                    last = cnx
+                    count += 1
+            if count:
+                _logger.info('%r: Closed %d connections %s', self, count,
+                            (dsn and last and 'to %r' % last.dsn) or '')
 
     def _dsn_equals(self, dsn1: dict | str, dsn2: dict | str) -> bool:
         alias_keys = {'dbname': 'database'}
