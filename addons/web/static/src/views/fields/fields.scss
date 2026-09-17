@@ -171,6 +171,10 @@
     }
 
     .o_external_button {
+        // Keep the arrow on the field line: stretching the button over the whole
+        // row (or, with the definite M3 height, pinning it to the top) puts the
+        // arrow off-center.
+        align-self: center;
         padding-top: 0;
         padding-bottom: 0;
     }
