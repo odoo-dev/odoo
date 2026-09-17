@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo import api, fields, models
 from odoo.tools import float_is_zero
 
 
@@ -37,8 +36,8 @@ class ChangeProductionQty(models.TransientModel):
         for move in production.move_finished_ids:
             if move.state in ('done', 'cancel') or move.has_source_move():
                 continue
-            unit_factor, additional_qty = move._get_production_move_qty_values((production.product_qty - production.qty_produced) or 1)
-            qty = (new_qty - old_qty) * unit_factor - additional_qty
+            unit_factor, _ = move._get_production_move_qty_values((production.product_qty - production.qty_produced) or 1)
+            qty = (new_qty - old_qty) * unit_factor
             modification[move] = (move.product_uom_qty + qty, move.product_uom_qty)
             if self._need_quantity_propagation(move, qty):
                 push_moves |= move.copy({'product_uom_qty': qty})

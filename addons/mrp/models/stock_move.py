@@ -260,6 +260,8 @@ class StockMove(models.Model):
                         values['state'] = 'done'
                         values['date'] = mo.date_finished
                     continue
+                if values.get('production_id', False) and mo.state == 'done':
+                    values['state'] = 'done'
                 # produced products + byproducts
                 values['location_id'] = mo.production_location_id.id
                 values['date'] = mo.date_finished

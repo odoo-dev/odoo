@@ -1222,14 +1222,14 @@ class MrpProduction(models.Model):
             if not default or 'move_finished_ids' not in default:
                 move_finished_ids = []
                 for move in production.move_finished_ids:
-                    if (production.state != 'cancel' and (move.state == 'cancel' or move.product_qty == 0.0)) or move.has_source_move():
+                    if (production.state != 'cancel' and (move.state == 'cancel' or move.uom_id.is_zero(move.product_qty))) or move.has_source_move():
                         continue
                     unit_factor, _ = move._get_production_move_qty_values(production.product_uom_qty or 1)
                     new_qty = move.uom_id.round(production.product_uom_qty * unit_factor)
                     move_finished_ids.append((0, 0, move.copy_data({'product_uom_qty': new_qty})[0]))
                 vals['move_finished_ids'] = move_finished_ids
             if not default or 'move_raw_ids' not in default:
-                vals['move_raw_ids'] = [(0, 0, move_vals) for move_vals in production.move_raw_ids.filtered(lambda m: m.product_qty != 0.0).copy_data()]
+                vals['move_raw_ids'] = [(0, 0, move_vals) for move_vals in production.move_raw_ids.filtered(lambda m: not m.uom_id.is_zero(m.product_qty)).copy_data()]
         return vals_list
 
     def action_generate_bom(self):
@@ -1509,12 +1509,13 @@ class MrpProduction(models.Model):
         moves = self.move_finished_ids
         if not self.env.context.get('skip_raw_moves'):
             moves |= self.move_raw_ids
+        negative_qty_by_source = {}
 
         for move in moves:
             is_byproduct = move in self.move_byproduct_ids
             # Never update already picked moves.
             # sudo needed for portal users
-            if move.picked or move.sudo()._should_bypass_set_qty_producing():
+            if move.picked or move.sudo()._should_bypass_set_qty_producing() or move.has_source_move():
                 continue
 
             unit_factor, additional_qty = move._get_production_move_qty_values((self.product_qty - self.qty_produced) or 1)
@@ -1534,10 +1535,9 @@ class MrpProduction(models.Model):
                 if relevant_orig_ids and move.uom_id.compare(qty_available, qty_taken) >= 0:
                     new_qty = min(new_qty, qty_available - qty_taken)
 
-            if move.product_id == self.product_id and not new_qty:
-                new_qty = move.uom_id.round((self.product_qty - self.qty_produced) * move.unit_factor)
-
-            move._set_quantity_done(new_qty)
+            move._set_quantity_done(max(0, new_qty))
+            if new_qty < 0:
+                negative_qty_by_source[move] = -new_qty
 
             if mark_moves_picked \
                     and move.quantity \
@@ -1545,6 +1545,18 @@ class MrpProduction(models.Model):
                     and (move.raw_material_production_id or move.product_id.tracking != 'serial') \
                     and move.product_id != self.product_id:
                 move.picked = True
+
+        moves_by_source = moves.grouped(lambda move: move.has_source_move())
+        for source_move, source_moves in moves_by_source.items():
+            if source_move and (
+                qty_to_remove := negative_qty_by_source.get(source_move, 0)
+            ):
+                for move in source_moves:
+                    if not qty_to_remove:
+                        break
+                    decrease_qty = min(move.quantity, qty_to_remove)
+                    move.quantity -= decrease_qty
+                    qty_to_remove -= decrease_qty
 
     def _should_postpone_date_finished(self, date_finished):
         self.ensure_one()

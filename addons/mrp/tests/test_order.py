@@ -5415,7 +5415,9 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             qty_base_1=1,
             qty_base_2=1
         )
-        mo.qty_producing = 1.0
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1.0
+        mo = mo_form.save()
         self.assertEqual(mo.finished_move_line_ids.production_id, mo)
 
     def test_reset_to_draft_cancelled_mo(self):

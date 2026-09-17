@@ -291,7 +291,7 @@ class TestWarehouseMrp(common.TestMrpCommon):
             'product_qty': 3,
         })
         change_qty.change_prod_qty()
-        self.assertEqual(len(mo_laptop.move_finished_ids.move_line_ids), 2)
+        self.assertEqual(len(mo_laptop.move_finished_ids.move_line_ids), 1)
         mo_laptop.action_generate_serial()
         mo_laptop.button_mark_done()
         self.assertEqual(mo_laptop.state, 'done')
