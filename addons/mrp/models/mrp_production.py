@@ -1222,14 +1222,14 @@ class MrpProduction(models.Model):
             if not default or 'move_finished_ids' not in default:
                 move_finished_ids = []
                 for move in production.move_finished_ids:
-                    if (production.state != 'cancel' and (move.state == 'cancel' or move.product_qty == 0.0)) or move.has_source_move():
+                    if (production.state != 'cancel' and (move.state == 'cancel' or move.uom_id.is_zero(move.product_qty))) or move.has_source_move():
                         continue
                     unit_factor, _ = move._get_production_move_qty_values(production.product_uom_qty or 1)
                     new_qty = move.uom_id.round(production.product_uom_qty * unit_factor)
                     move_finished_ids.append((0, 0, move.copy_data({'product_uom_qty': new_qty})[0]))
                 vals['move_finished_ids'] = move_finished_ids
             if not default or 'move_raw_ids' not in default:
-                vals['move_raw_ids'] = [(0, 0, move_vals) for move_vals in production.move_raw_ids.filtered(lambda m: m.product_qty != 0.0).copy_data()]
+                vals['move_raw_ids'] = [(0, 0, move_vals) for move_vals in production.move_raw_ids.filtered(lambda m: not m.uom_id.is_zero(m.product_qty)).copy_data()]
         return vals_list
 
     def action_generate_bom(self):
@@ -1533,9 +1533,6 @@ class MrpProduction(models.Model):
                         qty_taken += move_sibling.uom_id._compute_quantity(move_sibling.quantity, move.uom_id)
                 if relevant_orig_ids and move.uom_id.compare(qty_available, qty_taken) >= 0:
                     new_qty = min(new_qty, qty_available - qty_taken)
-
-            if move.product_id == self.product_id and not new_qty:
-                new_qty = move.uom_id.round((self.product_qty - self.qty_produced) * move.unit_factor)
 
             move._set_quantity_done(new_qty)
 
