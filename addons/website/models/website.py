@@ -41,6 +41,13 @@ from odoo.tools.translate import _
 
 logger = logging.getLogger(__name__)
 
+lcp_preload_link = Markup('<link rel="preload" as="image" fetchpriority="high" href="%s" media="%s"/>')
+lcp_head_close = Markup('</head>')
+lcp_preload_media = (
+    ('website_lcp_image_mobile', '(max-width: 991.98px)'),
+    ('website_lcp_image_desktop', '(min-width: 992px)'),
+)
+
 
 DEFAULT_CDN_FILTERS = [
     "^/[^/]+/static/",
