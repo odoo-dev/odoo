@@ -906,11 +906,27 @@ class PosOrder(models.Model):
                 order_ids.append(self._process_order(order, False))
                 _logger.info("PoS synchronisation #%d order %s created pos.order #%d", sync_token, order_log_name, order_ids[-1])
             else:
-                # In theory, this situation is unintended
                 # In practice it can happen when "Tip later" option is used
                 # This will update the order if edited after payent from UI.
-                if existing_order.state == "paid" and not existing_order.nb_print:
-                    self.process_saved_payments(order, existing_order)
+                if existing_order.state != 'cancel':
+                    if existing_order.nb_print or existing_order.account_move:
+                        # create a refund of old order which we want to edit
+                        refunded_order = existing_order._refund()
+                        for payment in existing_order.payment_ids:
+                            refunded_order.add_payment({
+                                'pos_order_id': refunded_order.id,
+                                'amount': -payment.amount,
+                                'name': payment.name,
+                                'payment_method_id': payment.payment_method_id.id,
+                            })
+                        refunded_order._process_saved_order(False)
+                        # create a new copy order ith the new details
+                        # TODO SJAI: name should be proper also invoices should be loaded
+                        new_edit_order = existing_order.copy({'name': ''})
+                        self._process_order(order, new_edit_order)
+                    else:
+                        # when no invoiced and no prints so just a normal payment edit
+                        self.process_saved_payments(order, existing_order)
                 order_ids.append(existing_order.id)
                 _logger.info("PoS synchronisation #%d order %s sync ignored for existing PoS order %s (state: %s)", sync_token, order_log_name, existing_order, existing_order.state)
 
@@ -972,6 +988,7 @@ class PosOrder(models.Model):
             'amount_paid': 0,
             'is_total_cost_computed': False,
             'is_refund': True,
+            'to_invoice': self.to_invoice,
             'tracking_number': tracking_number,
         }
 

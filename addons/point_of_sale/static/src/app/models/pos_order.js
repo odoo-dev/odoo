@@ -242,7 +242,7 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     assertEditable() {
-        if (this.finalized && (this.nb_print || this.state == "done")) {
+        if (this.finalized) {
             throw new Error("Finalized Order cannot be modified");
         }
         return true;
@@ -431,8 +431,6 @@ export class PosOrder extends PosOrderAccounting {
 
     /* ---- Payment Lines --- */
     addPaymentline(payment_method, args = {}) {
-        this.assertEditable();
-
         const { status: canSend, message } = payment_method.getPaymentInterfaceStates();
         if (!canSend) {
             return { status: false, data: message, size: "sm" };
@@ -460,8 +458,6 @@ export class PosOrder extends PosOrderAccounting {
     }
 
     removePaymentline(line) {
-        this.assertEditable();
-
         if (this.getSelectedPaymentline() === line) {
             this.selectPaymentline(undefined);
         }
@@ -529,7 +525,6 @@ export class PosOrder extends PosOrderAccounting {
 
     /* ---- Invoice --- */
     setToInvoice(to_invoice) {
-        this.assertEditable();
         this.to_invoice = to_invoice;
     }
 
@@ -540,7 +535,6 @@ export class PosOrder extends PosOrderAccounting {
     /* ---- Partner --- */
     // the partner related to the current order.
     setPartner(partner) {
-        this.assertEditable();
         this.partner_id = partner;
         this.updatePricelistAndFiscalPosition(partner);
         if (partner.is_company) {

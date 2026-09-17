@@ -86,12 +86,6 @@ class PosPayment(models.Model):
             else:
                 payment.display_name = formatLang(self.env, payment.amount, currency_obj=payment.currency_id)
 
-    @api.constrains('amount')
-    def _check_amount(self):
-        for payment in self:
-            if payment.pos_order_id.state == 'done' or payment.pos_order_id.account_move:
-                raise ValidationError(_('You cannot edit a payment for a posted order.'))
-
     @api.constrains('payment_method_id')
     def _check_payment_method_id(self):
         for payment in self:
