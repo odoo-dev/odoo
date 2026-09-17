@@ -35,6 +35,11 @@ class EventBooth(models.Model):
     def action_set_paid(self):
         self.write({'is_paid': True})
 
+    def _get_release_values(self):
+        # Booth registrations are kept, only the booking is undone: confirming
+        # the order again re-books the very same booths, if still available.
+        return {**super()._get_release_values(), 'sale_order_line_id': False, 'is_paid': False}
+
     def action_view_sale_order(self):
         self.sale_order_id.ensure_one()
         action = self.env['ir.actions.actions']._for_xml_id('sale.action_orders')

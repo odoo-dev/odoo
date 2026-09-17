@@ -64,9 +64,13 @@ class EventBooth(models.Model):
 
     def write(self, vals):
         to_confirm = self.filtered(lambda booth: booth.state == 'available')
+        to_release = self.filtered(lambda booth: booth.state == 'unavailable')
         res = super(EventBooth, self).write(vals)
         if vals.get('state') == 'unavailable':
             to_confirm._action_post_confirm(vals)
+        elif vals.get('state') == 'available':
+            # Booths can be released by the event_user, and they don't have access to sponsors.
+            to_release.sudo()._action_post_release(vals)
         return res
 
     def _post_confirmation_message(self):
@@ -79,9 +83,37 @@ class EventBooth(models.Model):
                 subtype_xmlid='event_booth.mt_event_booth_booked',
             )
 
+    def _post_release_message(self):
+        for booth in self:
+            booth.event_id.message_post_with_source(
+                'event_booth.event_booth_unbooked_template',
+                render_values={
+                    'booth': booth,
+                },
+                subtype_xmlid='event_booth.mt_event_booth_unbooked',
+            )
+
     def action_confirm(self, additional_values=None):
         write_vals = dict({'state': 'unavailable'}, **additional_values or {})
         self.write(write_vals)
 
+    def action_release(self):
+        self.write({'state': 'available'})
+
     def _action_post_confirm(self, write_vals):
         self._post_confirmation_message()
+
+    def _action_post_release(self, write_vals):
+        # The booking details are logged before being dropped, as the message
+        # reports the booth is not rented by that renter anymore.
+        self._post_release_message()
+        self.write(self._get_release_values())
+
+    def _get_release_values(self):
+        """ Booking details a booth loses once it is freed. """
+        return {
+            'partner_id': False,
+            'contact_name': False,
+            'contact_email': False,
+            'contact_phone': False,
+        }

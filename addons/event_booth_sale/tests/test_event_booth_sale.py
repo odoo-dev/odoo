@@ -211,3 +211,44 @@ class TestEventBoothSaleInvoice(AccountTestInvoicingCommon, TestEventBoothSaleWD
         self.assertEqual(is_paid, booth.is_paid)
         invoice._invoice_paid_hook()
         self.assertTrue(booth.is_paid)
+
+    @users('user_sales_salesman')
+    def test_event_booth_release_on_sale_order_cancel(self):
+        """ Booths booked through an order are freed when it is cancelled. """
+        booths = self.booth_1 + self.booth_2
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.event_customer.id,
+            'pricelist_id': self.test_pricelist.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.event_booth_product.id,
+                    'event_id': self.event_0.id,
+                    'event_booth_category_id': self.event_booth_category_1.id,
+                    'event_booth_pending_ids': booths.ids,
+                })
+            ]
+        })
+        sale_order.action_confirm()
+
+        self.assertEqual(set(booths.mapped('state')), {'unavailable'})
+        registrations = sale_order.order_line.event_booth_registration_ids
+
+        sale_order._action_cancel()
+
+        for booth in booths:
+            self.assertEqual(booth.state, 'available', "Cancelling the order should free its booths.")
+            self.assertFalse(booth.partner_id, "Freed booth should not keep the ex-customer.")
+            self.assertFalse(booth.contact_name)
+            self.assertFalse(booth.contact_email)
+            self.assertFalse(booth.contact_phone)
+            self.assertFalse(booth.sale_order_line_id, "Freed booth should not be linked to the order anymore.")
+            self.assertFalse(booth.is_paid, "Freed booth should lose its paid state.")
+
+        self.assertEqual(sale_order.event_booth_count, 0)
+        self.assertEqual(
+            booths.event_booth_registration_ids, registrations,
+            "Registrations should be kept, so that confirming the order again re-books the same booths.")
+
+        unbooked_messages = self.event_0.message_ids.filtered(
+            lambda message: message.subtype_id == self.env.ref('event_booth.mt_event_booth_unbooked'))
+        self.assertEqual(len(unbooked_messages), 2, "Each freed booth should be tracked on the event.")
