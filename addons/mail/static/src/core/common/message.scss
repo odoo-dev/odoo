@@ -78,6 +78,10 @@
     table[align="left"][width="100%"] {
         float: none;
     }
+
+    .o-mail-Message-richBody:has(span[data-o-mail-full-composer]) a {
+        user-select: auto;
+    }
 }
 
 .o_track {
