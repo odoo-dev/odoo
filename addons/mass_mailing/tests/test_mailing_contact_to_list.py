@@ -91,13 +91,16 @@ class TestMailingContactToList(MailingContactToListCommon):
             {'name': 'Iris', 'email': 'iris@test.example.com'}
         ])
 
-        self._assert_from_partner_uses_contacts(partner_1, contact_1, query_count=2)  # Already linked
-        self._assert_from_partner_uses_contacts(partner_2, contact_2, query_count=7)  # Search & link
-        new_contact = self._assert_from_partner_creates_contacts(partner_3, query_count=8)
+        # +1 query per case below: 'res.partner.partner_share' is no longer stored,
+        # so following a newly-created contact's partner costs one extra query to
+        # compute it (used by the auto-subscribe/bus notification of the new follower).
+        self._assert_from_partner_uses_contacts(partner_1, contact_1, query_count=3)  # Already linked
+        self._assert_from_partner_uses_contacts(partner_2, contact_2, query_count=8)  # Search & link
+        new_contact = self._assert_from_partner_creates_contacts(partner_3, query_count=9)
         self.assertEqual(new_contact.email, partner_3.email)
 
         # And in batch
-        (res_contacts, _), new_contact = self._mock_from_partners_with_capture(partner_4 | partner_6 | partner_5, 10)
+        (res_contacts, _), new_contact = self._mock_from_partners_with_capture(partner_4 | partner_6 | partner_5, 11)
         self.assertEqual(new_contact.partner_id, partner_6)
         self.assertEqual(res_contacts, (contact_4 | new_contact | contact_5))
 
@@ -113,14 +116,14 @@ class TestMailingContactToList(MailingContactToListCommon):
             'email': 'shared@test.example.com',
         })
 
-        (res_contacts, _), new_contacts = self._mock_from_partners_with_capture(partners, 6)
+        (res_contacts, _), new_contacts = self._mock_from_partners_with_capture(partners, 7)
         self.assertFalse(new_contacts)
         self.assertEqual(contact.partner_id, partner_newer_duplicate, 'Newest partner should have been linked.')
         self.assertEqual(res_contacts, contact)
 
         contact.partner_id = partner_one
 
-        (res_contacts, _), new_contacts = self._mock_from_partners_with_capture(partner_newer_duplicate, 3)
+        (res_contacts, _), new_contacts = self._mock_from_partners_with_capture(partner_newer_duplicate, 4)
         self.assertFalse(new_contacts)
         self.assertEqual(res_contacts, contact, 'Contact should have been returned even if not linked to the partner.')
         self.assertEqual(contact.partner_id, partner_one, 'Existing partner_id should have persisted.')
@@ -139,10 +142,10 @@ class TestMailingContactToList(MailingContactToListCommon):
         with self.assertRaises(exceptions.UserError):
             self._mock_from_partners_with_capture(partners[:self.MAX_FROM_PARTNERS + 1], 1)
 
-        self._assert_from_partner_uses_contacts(partners[:self.MAX_FROM_PARTNERS], contacts, query_count=9)
+        self._assert_from_partner_uses_contacts(partners[:self.MAX_FROM_PARTNERS], contacts, query_count=11)
 
         # only half to create now => no error even with all partners in input.
-        (res_contacts, _), capture_records = self._mock_from_partners_with_capture(partners, 14)
+        (res_contacts, _), capture_records = self._mock_from_partners_with_capture(partners, 15)
 
         self.assertEqual(len(res_contacts), len(partners))
         self.assertEqual(res_contacts.partner_id, partners)
@@ -176,13 +179,13 @@ class TestMailingContactToList(MailingContactToListCommon):
             {'name': 'Dave Duplicate', 'email': 'dave@test.example.com'},
          ])
         partners = partner_frank | partner_charlie_1 | partner_charlie_2
-        (res_contacts, nb_ignored), new_contacts = self._mock_from_partners_with_capture(partners, 8)
+        (res_contacts, nb_ignored), new_contacts = self._mock_from_partners_with_capture(partners, 9)
         self.assertEqual(nb_ignored, 1, "No contact should be returned created for a partner with no email.")
         self.assertEqual(len(new_contacts), 1, "No contact should be created for partner without email.")
         self.assertEqual(new_contacts.partner_id, partner_charlie_2)
         self.assertEqual(res_contacts, new_contacts)
-        self._assert_from_partner_uses_contacts(partner_eve_1, contact_eve, query_count=6)
-        self._assert_from_partner_creates_contacts(partner_charlie_3, query_count=8)
+        self._assert_from_partner_uses_contacts(partner_eve_1, contact_eve, query_count=7)
+        self._assert_from_partner_creates_contacts(partner_charlie_3, query_count=9)
         self._assert_from_partner_uses_contacts(
             partner_dave, contact_dave_2, msg='Most recent contact should have been linked')
 

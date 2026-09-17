@@ -440,14 +440,10 @@ class TestPermissions(TransactionCaseWithUserDemo):
                         FROM "res_partner"
                         WHERE "res_partner"."id" IN %s AND (
                             ("res_partner"."company_id" IN %s OR "res_partner"."company_id" IS NULL)
-                            OR EXISTS(
-                                SELECT FROM (
-                                    SELECT "res_users"."partner_id" AS __inverse
-                                    FROM "res_users"
-                                    WHERE "res_users"."share" IS NOT TRUE
-                                ) AS __sub
-                                WHERE __inverse = "res_partner"."id"
-                            )
+                            OR NOT EXISTS (
+                                SELECT FROM res_users u
+                                WHERE u.share IS NOT TRUE AND u.partner_id = "res_partner"."id"
+                            ) IS NOT TRUE
                         )
                     )
                     AND "ir_attachment"."res_model" IN %s

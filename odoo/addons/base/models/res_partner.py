@@ -18,7 +18,6 @@ from werkzeug import urls
 
 from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
-from odoo.fields import Domain
 from odoo.tools import SQL, LazyTranslate
 from odoo.tools.business_data import street_split, split_vat
 from odoo.tools.date_utils import all_timezones
@@ -379,7 +378,7 @@ class ResPartner(models.Model):
         "When a single user is needed, this field attempts to find the most appropriate one.",
     )
     partner_share = fields.Boolean(
-        'Share Partner', compute='_compute_partner_share', search='_search_partner_share',
+        'Share Partner', compute='_compute_partner_share',
         compute_sql='_compute_sql_partner_share', compute_sudo=True,
         help="Either customer (not a user), either shared user. Indicated the current partner is a customer without "
              "access or with a limited access created for sharing data.")
@@ -542,11 +541,6 @@ class ResPartner(models.Model):
     def _compute_sql_partner_share(self, table):
         self.env['res.users'].flush_model(['share'])
         return SQL('NOT EXISTS (SELECT FROM res_users u WHERE u.share IS NOT TRUE AND u.partner_id = %s)', table.id)
-
-    def _search_partner_share(self, operator, value):
-        if operator != 'in':
-            return NotImplemented
-        return ~Domain('user_ids.share', '=', False)
 
     @api.depends('vat', 'company_id', 'country_id')
     def _compute_same_vat_partner_id(self):

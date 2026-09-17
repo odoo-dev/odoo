@@ -405,6 +405,33 @@ class TestPartner(TransactionCaseWithUserDemo):
         # current user is always preferred
         self.assertEqual(partner.with_user(portal_user).main_user_id, portal_user)
 
+    def test_partner_share(self):
+        """Test partner_share compute, on stored and on new records, and its
+        consistency with the search (based on the SQL of the field)."""
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        self.assertTrue(partner.partner_share)
+        self.env['res.users'].create({
+            'group_ids': [Command.set([self.ref('base.group_user')])],
+            'login': 'internal_user',
+            'partner_id': partner.id,
+        })
+        self.assertFalse(partner.partner_share)
+        self.assertFalse(self.env.ref('base.partner_root').partner_share)
+
+        # new records (e.g. in an onchange) have no id to query the database with
+        new_partner = self.env['res.partner'].new({'name': 'New Partner'})
+        self.assertTrue(new_partner.partner_share)
+        self.assertEqual(
+            (partner + new_partner).mapped('partner_share'),
+            [False, True],
+            'the compute should support a mix of stored and new records',
+        )
+
+        partners = self.env['res.partner'].search([])
+        shared_partners = self.env['res.partner'].search([('partner_share', '=', True)])
+        self.assertEqual(shared_partners, partners.filtered('partner_share'))
+        self.assertEqual(partners - shared_partners, partners.filtered(lambda p: not p.partner_share))
+
     def test_res_partner_recursion(self):
         res_partner = self.env['res.partner']
         p1 = res_partner.browse(res_partner.name_create('Elmtree')[0])
