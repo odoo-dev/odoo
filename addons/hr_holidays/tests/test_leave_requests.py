@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, UTC
 
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
@@ -1827,6 +1827,55 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'request_date_to_period': 'am',
         })
         self.assertEqual(leave_half_day_multi4.duration_display, '2 days')
+
+    def test_adjust_leaves_two_half_days_same_day(self):
+        """ For duration based calendars (e.g. flexible hours), a half-day's boundaries are
+        centered on noon (see `HrEmployee._get_hours_for_date`), so two half-day leaves (am + pm)
+        on the same day produce touching resource.calendar.leaves intervals: `Intervals` merges
+        them into a single group holding both records. `_adjust_leaves` must not assume that
+        group is a single leave record, or it crashes with "Expected singleton" when reading
+        `holiday_id` fields. """
+        employee = self.employee_emp
+        employee.resource_calendar_id = self.env['resource.calendar'].create({
+            'name': 'Duration based calendar',
+            'attendance_ids': [
+                Command.create({'dayofweek': '0', 'duration_hours': 4, 'day_period': 'morning'}),
+                Command.create({'dayofweek': '0', 'duration_hours': 4, 'day_period': 'afternoon'}),
+            ],
+        })
+        # 2024-04-01 is a Monday (dayofweek '0')
+        self.env['hr.leave'].with_user(self.user_employee_id).create([{
+            'name': 'Half Day Morning',
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': self.holidays_type_half.id,
+            'request_date_from': time.strftime('2024-04-01'),
+            'request_date_to': time.strftime('2024-04-01'),
+            'request_date_from_period': 'am',
+            'request_date_to_period': 'am',
+        }, {
+            'name': 'Half Day Afternoon',
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': self.holidays_type_half.id,
+            'request_date_from': time.strftime('2024-04-01'),
+            'request_date_to': time.strftime('2024-04-01'),
+            'request_date_from_period': 'pm',
+            'request_date_to_period': 'pm',
+        }])
+
+        start_dt = datetime(2024, 4, 1, tzinfo=UTC)
+        stop_dt = datetime(2024, 4, 2, tzinfo=UTC)
+        resources_per_tz = {UTC: employee.resource_id}
+
+        merged = employee.resource_calendar_id._leave_intervals_batch(start_dt, stop_dt, resources_per_tz)[employee.resource_id.id]
+        self.assertEqual(len(merged), 1, "touching half-day leaves are merged into one interval")
+        self.assertEqual(len(merged._items[0][2]), 2, "the merged interval's records should hold both leaves")
+
+        adjusted = employee._adjust_leaves(merged)
+        self.assertEqual(
+            [(start, stop) for start, stop, _ in adjusted],
+            [(start_dt, datetime(2024, 4, 2, tzinfo=UTC))],
+            "the two half-day leaves should adjust into a single full-day unavailability",
+        )
 
     def test_unified_time_off_half_day_scenarios_irregular_calendar(self):
         employee = self.employee_emp
