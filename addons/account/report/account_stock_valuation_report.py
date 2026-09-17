@@ -61,38 +61,33 @@ class StockValuationReport(models.AbstractModel):
             'ending_stock': ending_stock,
             'initial_balance': initial_balance,
         }
-
-        accrual, pending_cogs_vals = self._get_accrual_data(date=date)
+        accrual, pending_cogs_vals, pending_stock_variation_vals = self._format_accrual_data(
+            company._get_accrual_data(date=date, post=False))
         if accrual:
             account_ids.update(self._get_line_account_ids(accrual['lines']))
             report_data['accrual'] = accrual
 
-        extra_aml_vals_list = self._get_extra_stock_valuation_aml_vals(date)
+        initial_aml_vals_list = self._get_extra_stock_valuation_aml_vals(date)
+        initial_aml_vals_list += pending_cogs_vals
+
+        ending_stock_vals_list = []
+        if not company.use_stock_account():
+            ending_stock_vals_list = pending_stock_variation_vals
+        for vals in ending_stock_vals_list:
+            if vals['account_id'] not in ending_stock['lines_by_account_id']:
+                continue
+            ending_stock['value'] += vals['balance']
+            ending_stock['lines_by_account_id'][vals['account_id']]['value'] += vals['balance']
+
         stock_variation = {
             'label': self.env._("Stock Variation"),
             'value': 0,
             'lines': [],
         }
-        if company.use_stock_account():
-            stock_valuation_account_vals = company.with_context(inventory_data=inventory_data)._get_stock_valuation_account_vals(
-                date, extra_aml_vals_list)
-            lines_by_account_id = defaultdict(float)
-            for vals in stock_valuation_account_vals:
-                account_ids.add(vals['account_id'])
-                stock_variation['value'] += vals['balance']
-                lines_by_account_id[vals['account_id']] += vals['balance']
-            stock_variation['lines'] = [{
-                'account_id': account_id,
-                'debit': balance if balance > 0 else 0,
-                'credit': -balance if balance < 0 else 0,
-            } for (account_id, balance) in lines_by_account_id.items()]
-        else:
-            pending_vals = company.with_context(inventory_data=inventory_data)._get_stock_valuation_account_vals(
-                date, extra_aml_vals_list) + pending_cogs_vals
-            for vals in pending_vals:
-                ending_stock['value'] += vals['balance']
-                ending_stock['lines_by_account_id'][vals['account_id']]['value'] += vals['balance']
-                account_ids.add(vals['account_id'])
+        stock_valuation_account_vals = company.with_context(inventory_data=inventory_data)._get_stock_valuation_account_vals(date, initial_aml_vals_list, ending_stock_vals_list)
+        account_ids.update(vals["account_id"] for vals in stock_valuation_account_vals)
+        stock_variation["value"] = sum(vals["balance"] for vals in stock_valuation_account_vals)
+        stock_variation["lines"] = self._get_balance_lines_by_account(stock_valuation_account_vals)
 
         accounts_read_data = self.env['account.account'].search_read(
             [('id', 'in', account_ids)],
@@ -103,6 +98,18 @@ class StockValuationReport(models.AbstractModel):
             stock_variation=stock_variation,
         )
         return report_data
+
+    def _get_balance_lines_by_account(self, vals_list):
+        """ `vals_list` (each a {'account_id', 'balance'} dict) folded into one
+        debit/credit line per account. """
+        lines_by_account_id = defaultdict(float)
+        for vals in vals_list:
+            lines_by_account_id[vals['account_id']] += vals['balance']
+        return [{
+            'account_id': account_id,
+            'debit': balance if balance > 0 else 0,
+            'credit': -balance if balance < 0 else 0,
+        } for (account_id, balance) in lines_by_account_id.items()]
 
     def _get_line_account_ids(self, lines):
         """ Account ids referenced anywhere in `lines`, including nested sublines (a line's
@@ -122,10 +129,12 @@ class StockValuationReport(models.AbstractModel):
         """
         return []
 
-    def _get_accrual_data(self, date=False):
-        """ (accrual display data or False, pending_cogs_vals) """
+    def _format_accrual_data(self, accrual_data_by_type):
+        """ Format `res.company._get_accrual_data`'s preview (`post=False`) output for
+        display.
+
+        :return: (accrual display data or False, pending_cogs_vals, pending_stock_variation_vals) """
         company = self.env.company
-        accrual_entry_date = date or fields.Date.context_today(self)
         accrual_labels = {
             'bills_to_receive': self.env._("Bills to Receive"),
             'billed_not_received': self.env._("Billed Not Received"),
@@ -149,58 +158,21 @@ class StockValuationReport(models.AbstractModel):
             'lines': [],
         }
         pending_cogs_vals = []
+        pending_stock_variation_vals = []
 
-        for accrual_type, candidate_lines in company._get_accrual_candidate_lines(date=date).items():
-            if not candidate_lines:
+        for accrual_type, entry in accrual_data_by_type.items():
+            pending_cogs_vals += entry['cogs_vals']
+            pending_stock_variation_vals += entry['ending_stock_vals']
+
+            if not entry['display_vals']:
                 continue
-
-            wizard = self.env['account.accrued.orders.wizard'].with_context(
-                active_model=candidate_lines._name,
-                active_ids=candidate_lines.ids,
-                accrual_entry_date=fields.Date.to_string(accrual_entry_date),
-                accrual_allow_mixed_currencies=True,
-            ).new({
-                'company_id': company.id,
-                'date': accrual_entry_date,
-            })
-            is_purchase = candidate_lines._name == 'purchase.order.line'
-
-            # Fold the pending COGS (real-time) and closing correction (periodic) impact
-            # into Ending Stock, whether or not this bucket also shows up below.
-            cogs_vals_list, cogs_counterpart_vals_list = wizard._get_accrual_pending_cogs_vals(
-                candidate_lines, is_purchase, accrual_entry_date)
-            closing_vals_list, closing_counterpart_vals_list = wizard._get_accrual_closing_correction_vals(
-                candidate_lines, is_purchase, accrual_entry_date)
-            pending_cogs_vals += [
-                {'account_id': vals['account_id'], 'balance': vals['debit'] - vals['credit']}
-                for vals in cogs_vals_list + cogs_counterpart_vals_list + closing_vals_list + closing_counterpart_vals_list
-            ]
-
-            # Only real-time, storable products' accrual lands on `stock_valuation`
-            # (`_get_accrual_main_line_vals`): periodic has no place in a *stock* report.
-            stock_lines = candidate_lines.filtered(lambda l: l.product_id.valuation == 'real_time' and l.product_id.is_storable)
-            if not stock_lines:
-                continue
-
-            # A purchase bill only ever touches `stock_valuation` (no expense line), so the
-            # meaningful nested breakdown is the accrual counterpart account. A sale invoice
-            # posts a separate COGS/expense entry, which is the meaningful one there instead.
-            if is_purchase:
-                main_vals_list, nested_vals_list = wizard._get_accrual_main_line_vals(stock_lines, is_purchase, accrual_entry_date)
-                pending_cogs_vals += [
-                    {'account_id': vals['account_id'], 'balance': vals['debit'] - vals['credit']}
-                    for vals in main_vals_list
-                ]
-            else:
-                nested_vals_list = cogs_counterpart_vals_list
 
             type_valuation_amount_by_account = defaultdict(float)
-            for vals in nested_vals_list:
-                amount = vals['debit'] - vals['credit']
-                if company.currency_id.is_zero(amount):
+            for vals in entry['display_vals']:
+                if company.currency_id.is_zero(vals['balance']):
                     continue
                 account = self.env['account.account'].browse(vals['account_id'])
-                type_valuation_amount_by_account[account] += amount
+                type_valuation_amount_by_account[account] += vals['balance']
             if not type_valuation_amount_by_account:
                 continue
 
@@ -216,6 +188,6 @@ class StockValuationReport(models.AbstractModel):
             accrual_data['lines'].append(type_line)
 
         if not accrual_data['lines']:
-            return False, pending_cogs_vals
+            return False, pending_cogs_vals, pending_stock_variation_vals
         accrual_data['value'] = sum(line['debit'] - line['credit'] for line in accrual_data['lines'])
-        return accrual_data, pending_cogs_vals
+        return accrual_data, pending_cogs_vals, pending_stock_variation_vals

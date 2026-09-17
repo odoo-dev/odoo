@@ -209,6 +209,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
     def _compute_move_vals(self):
         self.ensure_one()
         move_lines = []
+        closing_move_lines = []
         active_model = self.env.context.get('active_model')
         if active_model in ['purchase.order.line', 'sale.order.line']:
             lines = self.env[active_model].with_company(self.company_id).browse(self.env.context['active_ids'])
@@ -248,14 +249,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
                 order_lines_with_entries |= order_lines
                 main_vals_list, main_counterpart_vals_list = self._get_accrual_main_line_vals(order_lines, is_purchase, accrual_entry_date)
                 cogs_vals_list, cogs_counterpart_vals_list = self._get_accrual_pending_cogs_vals(order_lines, is_purchase, accrual_entry_date)
-                closing_vals_list, closing_counterpart_vals_list = [], []
-                if self.env.context.get('accrual_include_closing_correction'):
-                    closing_vals_list, closing_counterpart_vals_list = self._get_accrual_closing_correction_vals(
-                        order_lines, is_purchase, accrual_entry_date)
-                for vals in (
-                    main_vals_list + cogs_vals_list + closing_vals_list
-                    + main_counterpart_vals_list + cogs_counterpart_vals_list + closing_counterpart_vals_list
-                ):
+                for vals in main_vals_list + cogs_vals_list + main_counterpart_vals_list + cogs_counterpart_vals_list:
                     move_lines.append(Command.create(vals))
 
         # Manual amount case: a single globalized counterpart on the manually chosen account.
@@ -276,15 +270,26 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             date = format_date(self.env, self.date)
             ref = _("%(accrual_type)s entry as of %(date)s", accrual_type=accrual_type_string, date=date)
 
+        currency_id = self.company_id.currency_id.id if mixed_currencies else (orders.currency_id.id or self.company_id.currency_id.id)
         move_vals = {
             'ref': ref,
             'name': '/',
             'journal_id': self.journal_id.id,
             'date': self.date,
             'line_ids': move_lines,
-            'currency_id': self.company_id.currency_id.id if mixed_currencies else (orders.currency_id.id or self.company_id.currency_id.id),
+            'currency_id': currency_id,
         }
-        return move_vals, orders_with_entries, order_lines_with_entries
+        closing_move_vals = None
+        if closing_move_lines:
+            closing_move_vals = {
+                'ref': _("Closing correction as of %(date)s", date=format_date(self.env, self.date)),
+                'name': '/',
+                'journal_id': self.journal_id.id,
+                'date': self.date,
+                'line_ids': closing_move_lines,
+                'currency_id': currency_id,
+            }
+        return move_vals, closing_move_vals, orders_with_entries, order_lines_with_entries
 
     def _get_accrual_message_body(self, move, reverse_move):
         self.ensure_one()
@@ -317,20 +322,24 @@ class AccountAccruedOrdersWizard(models.TransientModel):
                 for move in moves_to_delete
             ])
 
-        move_vals, orders_with_entries, order_lines_with_entries = self._compute_move_vals()
-        move = self.env['account.move'].create(move_vals)
+        move_vals, closing_move_vals, orders_with_entries, order_lines_with_entries = self._compute_move_vals()
+        moves = self.env['account.move'].create(
+            [move_vals, closing_move_vals] if closing_move_vals else [move_vals],
+        )
+        move = moves[0]
         order_lines_with_entries.accrual_move_ids = [Command.link(move.id)]
-        reverse_move = move._reverse_moves(default_values_list=[{
-            'ref': _('Reversal of: %s', move.ref),
+        reverse_moves = moves._reverse_moves(default_values_list=[{
+            'ref': _('Reversal of: %s', entry.ref),
             'name': '/',
             'date': self.reversal_date,
             # Posted on its own date by the daily auto-post cron, not right away: it must stay
             # draft until then, or its reversing effect (accounting and quantity alike) would
             # apply immediately and cancel the accrual out before it's ever seen.
             'auto_post': 'at_date',
-        }])
+        } for entry in moves])
+        reverse_move = reverse_moves[0]
         if auto_post:
-            move._post()
+            moves._post()
         for order in orders_with_entries:
             order.message_post(body=self._get_accrual_message_body(move, reverse_move))
         return {
@@ -338,7 +347,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
             'view_mode': 'list,form',
-            'domain': [('id', 'in', (move | reverse_move).ids)],
+            'domain': [('id', 'in', (moves | reverse_moves).ids)],
         }
 
     def open_duplicate(self):

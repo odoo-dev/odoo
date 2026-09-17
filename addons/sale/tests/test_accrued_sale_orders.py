@@ -348,11 +348,20 @@ class TestAccruedSaleOrders(TestSaleCommon):
         sale_order.order_line.qty_delivered = 5
 
         # No "Invoices to be Issued" entry (periodic has nothing to do with stock
-        # valuation), but the pending correction already previews through Ending Stock.
+        # valuation), but the pending closing correction already previews under Stock
+        # Variation, like the closing entry it anticipates: its per-account breakdown stays
+        # out of Ending Stock's own lines, but its -$500 pending value (goods leaving
+        # inventory) still counts towards both totals.
         report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
         self.assertNotIn('accrual', report_data)
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': -500.0})
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_variation_account.id], {'value': 500.0})
+        self.assertNotIn(stock_valuation_account.id, report_data['ending_stock']['lines_by_account_id'])
+        self.assertNotIn(stock_variation_account.id, report_data['ending_stock']['lines_by_account_id'])
+        self.assertEqual(report_data['stock_variation']['lines'], [
+            {'account_id': stock_valuation_account.id, 'debit': 0, 'credit': 500.0},
+            {'account_id': stock_variation_account.id, 'debit': 500.0, 'credit': 0},
+        ])
+        self.assertEqual(report_data['stock_variation']['value'], -500.0)
+        self.assertEqual(report_data['ending_stock']['value'], -500.0)
 
         # The plain wizard only ever posts the classic pair.
         account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
@@ -361,14 +370,20 @@ class TestAccruedSaleOrders(TestSaleCommon):
             {'account_id': accrual_account.id, 'debit': 500, 'credit': 0},
         ])
 
-        # The closing action reproduces that pair, plus the correction it alone posts.
+        # The closing action reproduces that same pair in its own entry, plus a second,
+        # separate entry for the correction it alone posts.
         self._cancel_accrual_entries(account_move)
         action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
-        moves = self.env['account.move'].search(action['domain'])
-        self.assertRecordValues(self._filter_reversal(moves), [
+        moves = self.env['account.move'].search(action['domain']).filtered(lambda m: not m.reversed_entry_id)
+        accrual_move = moves.filtered(lambda m: accrual_account in m.line_ids.account_id)
+        closing_move = moves.filtered(lambda m: stock_variation_account in m.line_ids.account_id)
+        self.assertEqual(len(moves), 2)
+        self.assertRecordValues(accrual_move.line_ids, [
             {'account_id': income_account.id, 'debit': 0, 'credit': 500},
-            {'account_id': stock_valuation_account.id, 'debit': 0, 'credit': 500},
             {'account_id': accrual_account.id, 'debit': 500, 'credit': 0},
+        ])
+        self.assertRecordValues(closing_move.line_ids, [
+            {'account_id': stock_valuation_account.id, 'debit': 0, 'credit': 500},
             {'account_id': stock_variation_account.id, 'debit': 500, 'credit': 0},
         ])
 

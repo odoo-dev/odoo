@@ -89,18 +89,24 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             'standard_price': 100.0,
         })
 
-    def _create_purchase_order(self, product, qty=10.0):
+    def _create_purchase_order(self, product, qty, price_unit, fulfill=False):
+        """ `fulfill=True` also fully receives and bills the PO on the spot, e.g. to give
+        a test some pre-existing stock: fully received and fully billed leaves nothing
+        pending to accrue. """
         purchase_order = self.env['purchase.order'].create({
             'partner_id': self.partner_a.id,
             'order_line': [Command.create({
                 'name': product.name,
                 'product_id': product.id,
                 'product_qty': qty,
-                'price_unit': product.standard_price,
+                'price_unit': price_unit,
                 'tax_ids': False,
             })],
         })
         purchase_order.button_confirm()
+        if fulfill:
+            purchase_order.order_line.qty_received = qty
+            self._create_bill(purchase_order)
         return purchase_order
 
     def _create_bill(self, purchase_order, invoice_date=False):
@@ -121,7 +127,8 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         """ A non-stock-tracked product's "Bills to Receive" accrual: check both the created
         journal entries and the inventory valuation report's accrual breakdown. """
         product = self._create_accrual_product(storable=False, real_time=False)
-        purchase_order = self._create_purchase_order(product)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         # No manual `account_id`: it must default to "Bills to Receive", never revenue.
         accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
         expense_account = product.product_tmpl_id._get_product_accounts()['expense']
@@ -161,9 +168,10 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         posted for the full ordered quantity before anything is received, so the accrual
         reverses the expense already recognized until the goods actually come in. """
         product = self._create_accrual_product(storable=False, real_time=False)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
         # Bill on ordered quantities, or nothing would be invoiceable with none received.
         product.purchase_method = 'purchase'
-        purchase_order = self._create_purchase_order(product)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
         expense_account = product.product_tmpl_id._get_product_accounts()['expense']
 
@@ -203,7 +211,8 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         a real-time bill never posts to the expense account, so the only commercial line
         is the stock valuation adjustment, counterbalanced by the accrual account. """
         product = self._create_accrual_product(storable=True, real_time=True)
-        purchase_order = self._create_purchase_order(product)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
         stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
 
@@ -237,7 +246,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             }],
         }])
         # ... and, netted against Stock Variation, in Ending Stock too.
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 500.0})
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 2500.0})
         self.assertFalse(report_data['stock_variation']['lines'])
 
         account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
@@ -262,8 +271,9 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         real-time never uses one), so reverting it credits/debits that account directly
         instead of `expense`. """
         product = self._create_accrual_product(storable=True, real_time=True)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
         product.purchase_method = 'purchase'
-        purchase_order = self._create_purchase_order(product)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
         stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
 
@@ -297,7 +307,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         # Posting the bill also nudges the `qty_available` proxy as if the goods had been
         # received, contributing +1000 here; the accrual's own -1000 correction nets that
         # back to 0 — correct, since nothing was actually received.
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 0.0})
+        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 2000.0})
         self.assertFalse(report_data['stock_variation']['lines'])
 
         account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
@@ -319,7 +329,8 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         The classic expense line still applies, but the `qty_available` correction it
         also needs is the closing action's job, not a plain accrual entry's. """
         product = self._create_accrual_product(storable=True, real_time=False)
-        purchase_order = self._create_purchase_order(product)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         accrual_account = product.product_tmpl_id._get_product_accounts()['bills_to_receive']
         stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
         stock_variation_account = product.product_tmpl_id._get_product_accounts()['stock_variation']
@@ -340,11 +351,19 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         purchase_order.order_line.qty_received = 5
 
         # No "Bills to Receive" entry (periodic has nothing to do with stock valuation),
-        # but the pending correction already previews through Ending Stock.
+        # but the pending closing correction already previews under Stock Variation, like
+        # the closing entry it anticipates: its per-account breakdown stays out of Ending
+        # Stock's own lines, but its $500 pending value still counts towards both totals.
         report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
         self.assertNotIn('accrual', report_data)
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 500.0})
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_variation_account.id], {'value': -500.0})
+        self.assertNotIn(stock_valuation_account.id, report_data['ending_stock']['lines_by_account_id'])
+        self.assertNotIn(stock_variation_account.id, report_data['ending_stock']['lines_by_account_id'])
+        self.assertEqual(report_data['stock_variation']['lines'], [
+            {'account_id': stock_valuation_account.id, 'debit': 2500.0, 'credit': 0},
+            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 2500.0},
+        ])
+        self.assertEqual(report_data['stock_variation']['value'], 2500.0)
+        self.assertEqual(report_data['ending_stock']['value'], 2500.0)
 
         # The plain wizard only ever posts the classic pair.
         account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
@@ -353,15 +372,21 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
         ])
 
-        # The closing action reproduces that pair, plus the correction it alone posts.
+        # The closing action reproduces that same pair in its own entry, plus a second,
+        # separate entry for the correction it alone posts.
         self._cancel_accrual_entries(account_move)
         action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
-        moves = self.env['account.move'].search(action['domain'])
-        self.assertRecordValues(self._filter_reversal(moves), [
+        moves = self.env['account.move'].search(action['domain']).filtered(lambda m: not m.reversed_entry_id)
+        accrual_move = moves.filtered(lambda m: accrual_account in m.line_ids.account_id)
+        closing_move = moves.filtered(lambda m: stock_variation_account in m.line_ids.account_id)
+        self.assertEqual(len(moves), 2)
+        self.assertRecordValues(accrual_move.line_ids, [
             {'account_id': expense_account.id, 'debit': 500, 'credit': 0},
-            {'account_id': stock_valuation_account.id, 'debit': 500, 'credit': 0},
             {'account_id': accrual_account.id, 'debit': 0, 'credit': 500},
-            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 500},
+        ])
+        self.assertRecordValues(closing_move.line_ids, [
+            {'account_id': stock_valuation_account.id, 'debit': 2500, 'credit': 0},
+            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 2500},
         ])
 
     def test_billed_not_received_periodic(self):
@@ -369,8 +394,9 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         product. Same split as `test_bill_to_receive_periodic`: the wizard only posts
         the classic pair, the correction is the closing action's job. """
         product = self._create_accrual_product(storable=True, real_time=False)
+        self._create_purchase_order(product, qty=10.0, price_unit=200.0, fulfill=True)
         product.purchase_method = 'purchase'
-        purchase_order = self._create_purchase_order(product)
+        purchase_order = self._create_purchase_order(product, qty=10.0, price_unit=100.0)
         accrual_account = product.product_tmpl_id._get_product_accounts()['billed_not_received']
         stock_valuation_account = product.product_tmpl_id._get_product_accounts()['stock_valuation']
         stock_variation_account = product.product_tmpl_id._get_product_accounts()['stock_variation']
@@ -398,11 +424,12 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         # under Stock Variation.
         report_data = self.env['account.stock.valuation.report'].with_company(self.env.company)._get_report_data()
         self.assertNotIn('accrual', report_data)
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_valuation_account.id], {'value': 0.0})
-        self.assertEqual(report_data['ending_stock']['lines_by_account_id'][stock_variation_account.id], {'value': 0.0})
-        # Nothing physically received, nothing really posted to the valuation account
-        # either: no genuine gap left for Stock Variation to flag.
-        self.assertFalse(report_data['stock_variation']['lines'])
+        self.assertEqual(report_data['stock_variation']['lines'], [
+            {'account_id': stock_valuation_account.id, 'debit': 2000.0, 'credit': 0},
+            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 2000.0},
+        ])
+        self.assertEqual(report_data["stock_variation"]["value"], 2000.0)
+        self.assertEqual(report_data["ending_stock"]["value"], 2000.0)
 
         account_move = self.env['account.move'].search(wizard.create_entries()['domain'])
         self.assertRecordValues(self._filter_reversal(account_move), [
@@ -410,15 +437,25 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
         ])
 
-        # For the same reason, the closing action's own GL reconciliation has nothing left
-        # to do here either: it just reproduces the accrual entry as-is.
+
+        # The closing action reproduces that same pair in its own entry, plus a second,
+        # separate entry for the correction it alone posts.
         self._cancel_accrual_entries(account_move)
         action = self.env.company.action_close_stock_valuation(auto_post=True, include_accruals=True)
-        moves = self.env['account.move'].search(action['domain'])
-        forward_lines = self._filter_reversal(moves).sorted(lambda l: (l.account_id.id, l.debit, l.credit))
-        self.assertRecordValues(forward_lines, [
-            {'account_id': accrual_account.id, 'debit': 1000, 'credit': 0},
-            {'account_id': expense_account.id, 'debit': 0, 'credit': 1000},
+        moves = self.env['account.move'].search(action['domain']).filtered(lambda m: not m.reversed_entry_id)
+        accrual_move = moves.filtered(lambda m: accrual_account in m.line_ids.account_id)
+        closing_move = moves.filtered(lambda m: stock_variation_account in m.line_ids.account_id)
+        self.assertEqual(len(moves), 2)
+        self.assertRecordValues(
+            forward_lines,
+            [
+                {"account_id": accrual_account.id, "debit": 1000, "credit": 0},
+                {"account_id": expense_account.id, "debit": 0, "credit": 1000},
+            ],
+        )
+        self.assertRecordValues(closing_move.line_ids, [
+            {'account_id': stock_valuation_account.id, 'debit': 2000, 'credit': 0},
+            {'account_id': stock_variation_account.id, 'debit': 0, 'credit': 2000},
         ])
 
     def test_multi_currency_accrued_order(self):
