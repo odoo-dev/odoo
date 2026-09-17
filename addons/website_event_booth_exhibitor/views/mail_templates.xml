@@ -10,4 +10,12 @@
         </ul>
     </template>
 
+    <template id="event_booth_unbooked_template" inherit_id="event_booth.event_booth_unbooked_template">
+        <ul name="contact_details" position="inside">
+            <li t-if="booth.use_sponsor">
+                <b>Sponsor</b>: <span t-out="booth.sponsor_name">None</span>
+            </li>
+        </ul>
+    </template>
+
 </data></odoo>

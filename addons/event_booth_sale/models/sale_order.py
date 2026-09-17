@@ -33,6 +33,10 @@ class SaleOrder(models.Model):
             so.order_line._update_event_booths()
         return res
 
+    def _action_cancel(self):
+        self.filtered(lambda so: so.state != 'cancel').sudo().event_booth_ids.action_release()
+        return super()._action_cancel()
+
     def action_view_booth_list(self):
         action = self.env['ir.actions.act_window']._for_xml_id('event_booth.event_booth_action')
         action['domain'] = [('sale_order_id', 'in', self.ids)]

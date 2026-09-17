@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from markupsafe import Markup
+
+from odoo import fields, models, _
 
 
 class EventBooth(models.Model):
@@ -50,3 +52,12 @@ class EventBooth(models.Model):
             if booth.use_sponsor and booth.partner_id:
                 booth.sponsor_id = booth._get_or_create_sponsor(write_vals)
         super(EventBooth, self)._action_post_confirm(write_vals)
+
+    def _action_post_release(self, write_vals):
+        """ Logs a message on the sponsor that the booth is released and unlinked from it. """
+        for booth in self.filtered('sponsor_id'):
+            booth.sponsor_id.message_post(body=Markup('<p>%s</p>') % _(
+                'Booth %(booth_name)s has been released and is not linked to this sponsor anymore.',
+                booth_name=booth.display_name))
+            booth.sponsor_id = False
+        super()._action_post_release(write_vals)

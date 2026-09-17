@@ -32,4 +32,32 @@
         </ul>
     </template>
 
+    <template id="event_booth_unbooked_template" technical_usage="mail_post_source">
+        <p>
+            <span>
+                Booth
+                <a href="#" t-att-data-oe-model="booth._name" t-att-data-oe-id="booth.id" t-out="booth.name"/>
+            </span>
+            <span t-out="'unbooked from' if booth.partner_id else 'has been unbooked by'"/>
+            <span>
+                <a href="#" t-att-data-oe-model="booth.partner_id._name or booth.env.user.partner_id._name"
+                   t-att-data-oe-id="booth.partner_id.id or booth.env.user.partner_id.id"
+                   t-out="booth.partner_id.name or booth.env.user.partner_id.name"/>
+            </span>
+        </p>
+        <!-- Rendered once the booth is available again, so the details it lost
+             show up as their current, empty value rather than as stale data. -->
+        <ul name="contact_details">
+            <li>
+                <b>Renter Name</b>: <span t-out="booth.contact_name">None</span>
+            </li>
+            <li>
+                <b>Renter Email</b>: <span t-out="booth.contact_email">None</span>
+            </li>
+            <li>
+                <b>Renter Phone</b>: <span t-out="booth.contact_phone">None</span>
+            </li>
+        </ul>
+    </template>
+
 </data></odoo>
