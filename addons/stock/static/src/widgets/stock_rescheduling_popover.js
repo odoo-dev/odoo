@@ -1,4 +1,4 @@
-import { computed } from "@odoo/owl";
+import { computed, useProps, t } from "@odoo/owl";
 import {
     PopoverComponent,
     PopoverWidgetField,
@@ -8,6 +8,11 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 export class StockRescheculingPopoverComponent extends PopoverComponent {
+    props = useProps({
+        late_elements: t.array().optional([]),
+        delay_alert_date: t.string().optional(""),
+        popoverTemplate: t.string().optional(),
+    });
     setup() {
         super.setup();
 
