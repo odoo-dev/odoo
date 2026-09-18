@@ -4,10 +4,9 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { formatMonetary } from "@web/views/fields/formatters";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { serializeDate } from "@web/core/l10n/dates";
 
-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
 
 import { StockValuationReportButtonsBar } from "./buttons_bar/buttons_bar"
 import { StockValuationReportController } from "./controller"
@@ -26,7 +25,7 @@ export class StockValuationReport extends Component {
         StockValuationReportLine,
     };
 
-    props = useProps(standardActionServiceProps);
+    props = useProps({ action: t.object() });
 
     setup() {
         this.controller = proxy(new StockValuationReportController(this.props.action));

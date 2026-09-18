@@ -1,8 +1,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { standardActionServiceProps } from "./action_plugin";
 
-import { Component, onWillStart, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, useProps } from "@odoo/owl";
 
 /**
  * Client action to use in a dialog to display the URL of a Kiosk, containing a
@@ -10,9 +9,7 @@ import { Component, onWillStart, useProps } from "@odoo/owl";
  */
 export class InstallKiosk extends Component {
     static template = "web.ActionInstallKioskPWA";
-    props = useProps({
-        ...standardActionServiceProps,
-    });
+    props = useProps({ action: t.object() });
 
     setup() {
         this.resModel = this.props.action.res_model;

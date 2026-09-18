@@ -1,4 +1,4 @@
-import { Component, markup, onMounted, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, markup, onMounted, onWillStart, proxy, t, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
@@ -6,7 +6,6 @@ import { useService } from "@web/core/utils/hooks";
 import { useSetupAction } from "@web/search/action_hook";
 import { Layout } from "@web/search/layout";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { serializeDate } from "@web/core/l10n/dates";
 
@@ -22,7 +21,10 @@ function sendCustomNotification(type, message) {
 }
 
 export class ProductPricelistReport extends Component {
-    props = useProps(standardActionServiceProps);
+    props = useProps({
+        action: t.object(),
+        state: t.object().optional(),
+    });
     static components = { Layout, DateTimeInput };
     static template = "product.ProductPricelistReport";
 

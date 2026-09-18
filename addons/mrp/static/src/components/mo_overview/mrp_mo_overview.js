@@ -1,9 +1,8 @@
 import { useSubEnv } from "@web/owl2/utils";
-import { Component, EventBus, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, EventBus, onWillStart, proxy, t, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { MoOverviewLine } from "../mo_overview_line/mrp_mo_overview_line";
 import { MoOverviewDisplayFilter } from "../mo_overview_display_filter/mrp_mo_overview_display_filter";
 import { MoOverviewComponentsBlock } from "../mo_overview_components_block/mrp_mo_overview_components_block";
@@ -16,7 +15,7 @@ export class MoOverview extends Component {
         MoOverviewDisplayFilter,
         MoOverviewComponentsBlock,
     };
-    props = useProps(standardActionServiceProps);
+    props = useProps({ action: t.object() });
 
     static template = "mrp.MoOverview";
 

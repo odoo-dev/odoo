@@ -1,15 +1,14 @@
-import { Component, onWillStart, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
 
 export class BadgeScanner extends Component {
     static template = "hr.BadgeScannerTemplate";
     static components = { BarcodeScanner };
 
-    props = useProps(standardActionServiceProps);
+    props = useProps({ action: t.object() });
     setup() {
         this.employeeId = this.props.action?.context?.active_id;
         this.notification = useService("notification");

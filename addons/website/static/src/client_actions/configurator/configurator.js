@@ -29,7 +29,6 @@ import {
     usePlugin,
     useProps,
 } from "@odoo/owl";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { fuzzyLevenshteinLookup } from "@web/core/utils/search";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 
@@ -1479,7 +1478,7 @@ export class Configurator extends Component {
         ThemeSelectionScreen,
     };
     static template = "website.Configurator.Configurator";
-    props = useProps({ ...standardActionServiceProps });
+    props = useProps();
 
     setup() {
         this.orm = useService("orm");
