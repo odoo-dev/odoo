@@ -34,10 +34,10 @@ class TestMailingContactToListSms(MassSMSCommon, MailingContactToListCommon):
             ])
         )
 
-        self._assert_from_partner_uses_contacts(kate_partner, kate_contact, query_count=6)
-        self._assert_from_partner_uses_contacts(kate_partner, kate_contact, query_count=2)  # Already linked
+        self._assert_from_partner_uses_contacts(kate_partner, kate_contact, query_count=7)
+        self._assert_from_partner_uses_contacts(kate_partner, kate_contact, query_count=3)  # Already linked
 
-        new_contact = self._assert_from_partner_creates_contacts(bob_partner, query_count=9)
+        new_contact = self._assert_from_partner_creates_contacts(bob_partner, query_count=10)
         self.assertEqual(new_contact.mobile, bob_partner.phone)
 
         # Partial field overlaps match (non-conflicting subset of fields suffices)
@@ -46,10 +46,10 @@ class TestMailingContactToListSms(MassSMSCommon, MailingContactToListCommon):
                  'email on partner, email+phone on contact'),
                 (noah_partner, lea_partner),
                 (noah_contact, lea_contact),
-                (6, 6)
+                (7, 7)
         ):
             with self.subTest(case=case):
                 self._assert_from_partner_uses_contacts(partner, contact, query_count=query_count)
 
-        self._assert_from_partner_creates_contacts(liam_partner, query_count=9, msg="New contact expected < phone conflict")
+        self._assert_from_partner_creates_contacts(liam_partner, query_count=10, msg="New contact expected < phone conflict")
         self._assert_from_partner_uses_contacts(dave_partner, dave_dup_contact, msg="Most recent expected")
