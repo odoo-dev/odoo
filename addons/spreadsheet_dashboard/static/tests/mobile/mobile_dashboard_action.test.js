@@ -7,6 +7,7 @@ import {
     getDashboardServerData,
 } from "@spreadsheet_dashboard/../tests/helpers/data";
 import { contains } from "@web/../tests/web_test_helpers";
+import { getChartDefinition } from "@spreadsheet/../tests/helpers/chart";
 
 describe.current.tags("mobile");
 defineSpreadsheetDashboardModels();
@@ -250,3 +251,46 @@ test("Figures are correctly sized", async () => {
         `width: ${lineChartWidth}px; height: ${(lineChartWidth * 3) / 4}px;`
     );
 });
+
+// test("Can change chart granularity in mobile view", async () => {
+//     const figure = {
+//         tag: "chart",
+//         height: 500,
+//         width: 500,
+//         offset: { x: 100, y: 100 },
+//         col: 0,
+//         row: 0,
+//     };
+//     const definition = getChartDefinition("line");
+//     definition.dataSource = {
+//         metaData: {
+//             groupBy: ["date:month"],
+//             resModel: "partner",
+//             measure: "__count",
+//             order: null,
+//         },
+//     };
+//     const spreadsheetData = {
+//         sheets: [
+//             {
+//                 id: "sheet1",
+//                 figures: [{ ...figure, id: "figure1", data: definition }],
+//             },
+//         ],
+//     };
+//     const serverData = getDashboardServerData();
+//     serverData.models["spreadsheet.dashboard.group"].records = [
+//         { published_dashboard_ids: [789], id: 1, name: "Chart" },
+//     ];
+//     serverData.models["spreadsheet.dashboard"].records = [
+//         {
+//             id: 789,
+//             name: "Spreadsheet with chart figure",
+//             json_data: JSON.stringify(spreadsheetData),
+//             spreadsheet_data: JSON.stringify(spreadsheetData),
+//             dashboard_group_id: 1,
+//         },
+//     ];
+//     await createMobileSpreadsheetDashboard({ serverData });
+//     // Add assertions and interactions to test changing chart granularity in mobile view
+// });

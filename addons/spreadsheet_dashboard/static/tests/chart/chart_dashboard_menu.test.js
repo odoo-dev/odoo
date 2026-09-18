@@ -8,7 +8,7 @@ import { defineSpreadsheetDashboardModels } from "@spreadsheet_dashboard/../test
 import { contains, getMockEnv } from "@web/../tests/web_test_helpers";
 import { click } from "@odoo/hoot-dom";
 
-describe.current.tags("desktop");
+describe.current.tags("desktop", "mobile");
 defineSpreadsheetDashboardModels();
 
 test("can change granularity", async () => {
