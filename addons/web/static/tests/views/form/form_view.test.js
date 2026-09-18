@@ -2300,6 +2300,49 @@ test(`label with empty string attribute renders to an empty label`, async () => 
     expect(`label.o_form_label`).toHaveText("");
 });
 
+test(`implicit label of a title`, async () => {
+    await mountView({
+        resModel: "partner",
+        type: "form",
+        arch: `
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="foo"/></h1>
+                    </div>
+                    <div class="oe_title">
+                        <label for="float_field"/>
+                        <h1><field name="float_field"/></h1>
+                    </div>
+                    <field name="child_ids">
+                        <list><field name="foo"/></list>
+                        <form>
+                            <group>
+                                <label for="foo" string="Nested Foo"/>
+                                <div><field name="foo"/></div>
+                            </group>
+                        </form>
+                    </field>
+                </sheet>
+            </form>
+        `,
+        resId: 1,
+    });
+    // the field of a title is displayed as a box on small screens: it gets a
+    // label, only displayed in that layout and added right before that box. The
+    // label targeting "foo" in the nested view doesn't label the first title.
+    expect(queryAllTexts(`label.o_form_label`)).toEqual(["Foo", "Float field"]);
+    expect(`.oe_title:eq(0) > *:first-child`).toHaveClass([
+        "o_form_label",
+        "o_label_implicit",
+        "d-md-none",
+    ]);
+    expect(`.oe_title:eq(0) > h1`).toHaveClass("o_outlined");
+    // the label of the arch is left as is
+    expect(`.oe_title:eq(1) > *:first-child`).not.toHaveClass("o_label_implicit");
+    expect(`.oe_title:eq(1) > h1`).toHaveClass("o_outlined");
+});
+
 test(`two mutually exclusive labels with a dynamic invisible attribute`, async () => {
     await mountView({
         resModel: "partner",

@@ -96,6 +96,67 @@ export class FormCompiler extends ViewCompiler {
     }
 
     /**
+     * Adds a <label/> to the field of the titles the arch doesn't label: on small
+     * screens, that field is displayed inside a box whose label is drawn over its
+     * border (@see form_controller_m3.scss). Such a label defaults to the name of
+     * the field and is only displayed in that layout.
+     *
+     * @param {Element} arch a form arch node
+     */
+    addTitleLabels(arch) {
+        for (const box of arch.querySelectorAll(".oe_title > *")) {
+            if (box.closest("group")) {
+                continue; // the cells of a group are already labelled
+            }
+            // the element holding the field (usually a heading) is the box
+            const fieldNode = getTag(box, true) === "field" ? box : box.querySelector("field");
+            if (!fieldNode) {
+                continue;
+            }
+            if (!this.hasArchLabel(fieldNode)) {
+                const label = createElement("label", {
+                    for: fieldNode.getAttribute("id") || fieldNode.getAttribute("name"),
+                    class: "o_label_implicit d-md-none",
+                });
+                const invisible = box.getAttribute("invisible");
+                if (invisible) {
+                    label.setAttribute("invisible", invisible); // hidden along with its box
+                }
+                box.before(label);
+            }
+            box.classList.add("o_outlined");
+        }
+    }
+
+    /**
+     * The root of the view a given arch node belongs to. A nested view (e.g. the
+     * list of an x2many field) is always defined inside a <field/>, whose content
+     * is compiled apart: its nodes don't take part in the view holding the field.
+     *
+     * @param {Element} node
+     * @returns {Element|Document}
+     */
+    getArchViewRoot(node) {
+        return node.parentElement?.closest("field") || node.getRootNode();
+    }
+
+    /**
+     * Whether the arch defines a <label/> targeting the given field node.
+     *
+     * @param {Element} fieldNode
+     * @returns {boolean}
+     */
+    hasArchLabel(fieldNode) {
+        const forAttr = fieldNode.getAttribute("id") || fieldNode.getAttribute("name");
+        const viewRoot = this.getArchViewRoot(fieldNode);
+        // a label of a nested view doesn't label the fields of this one, even
+        // though it may target the same field name
+        return [...viewRoot.querySelectorAll(`label[for='${forAttr}']`)].some(
+            (label) => this.getArchViewRoot(label) === viewRoot
+        );
+    }
+
+    /**
      * @param {string} fieldName
      * @returns {Element[]}
      */
@@ -213,6 +274,7 @@ export class FormCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileForm(el, params) {
+        this.addTitleLabels(el);
         let sheetNode = null;
         for (const sheet of el.querySelectorAll("sheet")) {
             if (sheet.closest("form") === el) {
