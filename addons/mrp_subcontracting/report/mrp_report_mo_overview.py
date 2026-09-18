@@ -16,6 +16,12 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             data['is_subcontract'] = True
         return data
 
+    def _should_get_component_replenishment(self, production, move_raw):
+        return not (
+            production.subcontractor_id
+            and move_raw.rule_id.procure_method == 'make_to_stock'
+        )
+
     def _get_components_data(self, production, replenish_data=False, level=0, current_index=False):
         components = super()._get_components_data(production, replenish_data, level, current_index)
         if production.subcontractor_id and production.state != 'done' and components:

@@ -384,6 +384,9 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             replenish_data = self._get_replenishments_from_forecast(production, replenish_data)
         return replenish_data
 
+    def _should_get_component_replenishment(self, production, move_raw):
+        return True
+
     def _get_components_data(self, production, replenish_data=False, level=0, current_index=False):
         replenish_data = self._get_replenish_data(production, replenish_data)
         components = []
@@ -392,7 +395,9 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
                 # If a product wasn't consumed in the MO by the time it is done, no need to display it on the final Overview.
                 continue
             component_index = f"{current_index}{count}"
-            replenishments = self._get_replenishment_lines(production, move_raw, replenish_data, level, component_index)
+            replenishments = []
+            if self._should_get_component_replenishment(production, move_raw):
+                replenishments = self._get_replenishment_lines(production, move_raw, replenish_data, level, component_index)
             # If not enough replenishment -> To Order / Might get "non-available" in summary since all component won't be there in time
             components.append({
                 'summary': self._format_component_move(production, move_raw, replenishments, replenish_data, level, component_index),
