@@ -539,8 +539,14 @@ class ResPartner(models.Model):
             partner.partner_share = not partner.user_ids or not any(not user.share for user in partner.user_ids)
 
     def _compute_sql_partner_share(self, table):
-        self.env['res.users'].flush_model(['share'])
-        return SQL('NOT EXISTS (SELECT FROM res_users u WHERE u.share IS NOT TRUE AND u.partner_id = %s)', table.id)
+        # ``res.users.share`` is not stored either, so there is no column left
+        # to read: a partner is shared when no internal user points to it.
+        return SQL(
+            'NOT EXISTS (SELECT FROM res_users u'
+            ' JOIN res_groups_users_rel r ON r.uid = u.id'
+            ' WHERE u.partner_id = %s AND r.gid IN %s)',
+            table.id, self.env['res.users']._get_internal_group_ids(),
+        )
 
     @api.depends('vat', 'company_id', 'country_id')
     def _compute_same_vat_partner_id(self):

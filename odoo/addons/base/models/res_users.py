@@ -220,7 +220,7 @@ class ResUsers(models.Model):
     device_ids = fields.One2many('res.device', 'user_id', string='User devices')
     session_ids = fields.One2many('res.session', 'user_id', string='User sessions')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest Login', readonly=False)
-    share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
+    share = fields.Boolean(compute='_compute_share', compute_sql='_compute_sql_share', compute_sudo=True, string='Share User',
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies")
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset')
@@ -494,6 +494,33 @@ class ResUsers(models.Model):
         internal_users.share = False
         (self - internal_users).share = True
 
+    @api.model
+    def _invalidate_share_cache(self):
+        """ Drop the cached values of ``res.users.share`` and
+        ``res.partner.partner_share``.
+
+        Both are computed from the group relations and no longer stored, so a
+        change in those relations makes every cached value suspect. Invalidating
+        the two fields model-wide is O(1), whereas resolving the dependency from
+        the groups means fetching every user of every changed group.
+        """
+        self.env['res.users'].invalidate_model(['share'])
+        self.env['res.partner'].invalidate_model(['partner_share'])
+
+    @api.model
+    def _get_internal_group_ids(self):
+        """ Return the ids of the groups whose members are internal users, i.e.
+        ``base.group_user`` and every group implying it. """
+        group_definitions = self.env['res.groups']._get_group_definitions()
+        group_user_id = group_definitions.get_id('base.group_user')
+        return (group_user_id, *group_definitions.get_subset_ids([group_user_id]))
+
+    def _compute_sql_share(self, table):
+        return SQL(
+            'NOT EXISTS (SELECT FROM res_groups_users_rel r WHERE r.uid = %s AND r.gid IN %s)',
+            table.id, self._get_internal_group_ids(),
+        )
+
     @api.depends('company_id')
     def _compute_companies_count(self):
         self.companies_count = self.env['res.company'].sudo().search_count([])
@@ -656,7 +683,7 @@ class ResUsers(models.Model):
 
         if 'group_ids' in vals and any(self._ids):
             # clear caches linked to the users
-            self.env.invalidate_all()
+            self._invalidate_share_cache()
             self.env.transaction.invalidate_ormcache()
 
         # per-method / per-model caches have been removed so the various

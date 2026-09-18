@@ -260,6 +260,9 @@ class ResGroups(models.Model):
         if any(self._ids) and not self.env.su:
             self.env['ir.access']._clear_caches()
 
+        # group implications drive `res.users.share` / `res.partner.partner_share`
+        self.env['res.users']._invalidate_share_cache()
+
         if self.env.context.get('apply_regular_group') is not REGULAR_VALUE:
             self._apply_group_regular()
         return res
@@ -267,11 +270,13 @@ class ResGroups(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
+        self.env['res.users']._invalidate_share_cache()
         self._apply_group_regular()
         return res
 
     def unlink(self):
         res = super().unlink()
+        self.env['res.users']._invalidate_share_cache()
         self._apply_group_regular()
         return res
 
