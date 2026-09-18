@@ -190,11 +190,51 @@ class TestL10nArWebsiteSaleCheckout(TestArCommon, HttpCase):
         return user.partner_id, res
 
     def test_hidden_arca_responsibility_is_defaulted(self):
-        """Without the B2B block the ARCA Responsibility is not asked but set from the country."""
+        """A hidden ARCA Responsibility is set from the country, a shown one pre-selects CF."""
+        state = {'state_id': self.env.ref('base.state_ar_s').id}
         for country, extra, responsibility in (
-            ('base.ar', {'state_id': self.env.ref('base.state_ar_s').id}, 'l10n_ar.res_CF'),
+            ('base.ar', state, 'l10n_ar.res_CF'),
             ('base.fr', {}, 'l10n_ar.res_EXT'),
         ):
             partner, res = self._submit_billing(country, self.env.ref(country), **extra)
             self.assertNotIn('invalid_fields', res)
             self.assertEqual(partner.l10n_ar_afip_responsibility_type_id, self.env.ref(responsibility))
+
+        self.env.ref('website_sale.address_b2b').sudo().active = True
+        partner, res = self._submit_billing('b2b', self.env.ref('base.ar'), **state)
+        self.assertEqual(res['invalid_fields'], ['l10n_ar_afip_responsibility_type_id'])
+        page = self.url_open(f'/shop/address?partner_id={partner.id}&address_type=billing').text
+        self.assertRegex(page, rf'value="{self.env.ref("l10n_ar.res_CF").id}"\s+selected')
+
+    def test_dni_required_above_final_consumer_limit(self):
+        """Strictly above the limit an Argentinean buyer must give a DNI, which a CUIT replaces."""
+        ar, state = self.env.ref('base.ar'), {'state_id': self.env.ref('base.state_ar_s').id}
+        self.product.taxes_id = False
+        self.website.l10n_ar_final_consumer_limit = 1000
+        _partner, res = self._submit_billing('at_limit', ar, **state)
+        self.assertNotIn('invalid_fields', res)
+
+        self.website.l10n_ar_final_consumer_limit = 999.99
+        partner, res = self._submit_billing('over_limit', ar, **state)
+        self.assertEqual(res['invalid_fields'], ['AR_DNI'])
+        partner.sudo().country_id = ar
+        page = self.url_open(f'/shop/address?partner_id={partner.id}&address_type=billing').text
+        self.assertRegex(page, r'data-identifier-key="AR_DNI"\s+data-required="1"')
+        _partner, res = self._submit_billing('cuit', ar, vat='20222222223', **state)
+        self.assertNotIn('invalid_fields', res)
+        _partner, res = self._submit_billing('dni', ar, AR_DNI='12345678', **state)
+        self.assertNotIn('invalid_fields', res)
+
+    def test_bounce_once_over_final_consumer_limit(self):
+        """A cart pushed over the limit after the address step is sent back with a specific alert."""
+        partner, _res = self._submit_billing(
+            'bounce', self.env.ref('base.ar'), state_id=self.env.ref('base.state_ar_s').id,
+        )
+        self.website.l10n_ar_final_consumer_limit = 1
+        res = self.url_open('/shop/payment', allow_redirects=False)
+        self.assertIn(f'partner_id={partner.id}&address_type=billing', res.headers['Location'])
+        self.assertEqual(partner.sale_order_ids.alerts, [{
+            'level': 'warning',
+            'message': "Your order exceeds the maximum amount for an unidentified final consumer."
+            " Please provide your identification number.",
+        }])
