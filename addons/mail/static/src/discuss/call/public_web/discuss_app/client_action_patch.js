@@ -1,5 +1,4 @@
 import { DiscussClientAction } from "@mail/core/public_web/discuss_app/client_action";
-import { t, useProps } from "@odoo/owl";
 
 import { location, browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
@@ -9,7 +8,6 @@ patch(DiscussClientAction.prototype, {
     setup() {
         super.setup(...arguments);
         this.rtc = useService("discuss.rtc");
-        this.publicAppProps = useProps({ action: t.any() });
     },
     /**
      * Checks if we are in a client action and if we have a query parameter requesting to join a call,
@@ -18,7 +16,7 @@ patch(DiscussClientAction.prototype, {
     async restoreDiscussThread() {
         const hasFullScreenUrl = new URL(location.href).searchParams.has("fullscreen");
         await super.restoreDiscussThread(...arguments);
-        const action = this.publicAppProps.action;
+        const action = this.action;
         if (!action) {
             return;
         }
