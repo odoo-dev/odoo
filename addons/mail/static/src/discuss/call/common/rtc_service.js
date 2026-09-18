@@ -1798,10 +1798,9 @@ export class Rtc extends Record {
                 this.sfuClient.updateUpload("camera", this.cameraTrack);
                 this.sfuClient.updateUpload("screen", this.screenTrack);
                 this.recordingState = this.sfuClient.recordingState;
-                this.can_record_audio = this.sfuClient.availableFeatures.recording.audio;
-                this.can_record_transcription =
-                    this.sfuClient.availableFeatures.recording.transcription;
-                this.can_record_video = this.sfuClient.availableFeatures.recording.video;
+                this.can_record_audio = this.sfuClient.availableFeatures.recordingAudio;
+                this.can_record_transcription = this.sfuClient.availableFeatures.transcription;
+                this.can_record_video = this.sfuClient.availableFeatures.recordingVideo;
                 if (this.recordingRequest) {
                     this.setRecording(this.recordingRequest);
                 }
