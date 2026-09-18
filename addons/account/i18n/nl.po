@@ -105,7 +105,7 @@ msgstr "# Afgeletterde afschriftregels"
 #: model:ir.model.fields,field_description:account.field_res_partner__supplier_invoice_count
 #: model:ir.model.fields,field_description:account.field_res_users__supplier_invoice_count
 msgid "# Vendor Bill"
-msgstr ""
+msgstr "# Leveranciersfacturen"
 
 #. module: account
 #. odoo-python
