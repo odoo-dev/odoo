@@ -190,9 +190,10 @@ class TestL10nArWebsiteSaleCheckout(TestArCommon, HttpCase):
         return user.partner_id, res
 
     def test_hidden_arca_responsibility_is_defaulted(self):
-        """A hidden ARCA Responsibility is set from the country, a chosen one is kept."""
+        """A hidden ARCA type follows the country, a shown one defaults to CF and is kept."""
+        state = {'state_id': self.env.ref('base.state_ar_s').id}
         for country, extra, responsibility in (
-            ('base.ar', {'state_id': self.env.ref('base.state_ar_s').id}, 'l10n_ar.res_CF'),
+            ('base.ar', state, 'l10n_ar.res_CF'),
             ('base.fr', {}, 'l10n_ar.res_EXT'),
         ):
             partner, res = self._submit_billing(country, self.env.ref(country), **extra)
@@ -200,10 +201,37 @@ class TestL10nArWebsiteSaleCheckout(TestArCommon, HttpCase):
             self.assertEqual(partner.l10n_ar_afip_responsibility_type_id, self.env.ref(responsibility))
 
         self.env.ref('website_sale.address_b2b').sudo().active = True
+        partner, res = self._submit_billing('b2b', self.env.ref('base.ar'), **state)
+        self.assertEqual(res['invalid_fields'], ['l10n_ar_afip_responsibility_type_id'])
+        page = self.url_open(f'/shop/address?partner_id={partner.id}&address_type=billing').text
+        self.assertRegex(page, rf'value="{self.env.ref("l10n_ar.res_CF").id}"\s+selected')
+
         ri = self.env.ref('l10n_ar.res_IVARI')
         partner, res = self._submit_billing(
             'b2b_company', self.env.ref('base.ar'), parent_name="Company", vat='30714295698',
-            l10n_ar_afip_responsibility_type_id=ri.id, state_id=self.env.ref('base.state_ar_s').id,
+            l10n_ar_afip_responsibility_type_id=ri.id, **state,
         )
         self.assertNotIn('invalid_fields', res)
         self.assertEqual(partner.commercial_partner_id.l10n_ar_afip_responsibility_type_id, ri)
+
+    def test_dni_required_above_final_consumer_limit(self):
+        """Strictly above the limit a DNI is required, and a cart crossing it later bounces."""
+        ar, state = self.env.ref('base.ar'), {'state_id': self.env.ref('base.state_ar_s').id}
+        self.product.taxes_id = False
+        self.website.l10n_ar_final_consumer_limit = 1000
+        partner, res = self._submit_billing('at_limit', ar, **state)
+        self.assertNotIn('invalid_fields', res)
+
+        self.website.l10n_ar_final_consumer_limit = 999.99
+        res = self.url_open('/shop/payment', allow_redirects=False)
+        self.assertIn(f'partner_id={partner.id}&address_type=billing', res.headers['Location'])
+        self.assertEqual(partner.sale_order_ids.alerts, [{
+            'level': 'warning',
+            'message': "Your order exceeds the maximum amount for an unidentified final consumer."
+            " Please provide your identification number.",
+        }])
+
+        _partner, res = self._submit_billing('over_limit', ar, **state)
+        self.assertEqual(res['invalid_fields'], ['AR_DNI'])
+        _partner, res = self._submit_billing('dni', ar, AR_DNI='12345678', **state)
+        self.assertNotIn('invalid_fields', res)
