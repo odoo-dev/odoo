@@ -2,4 +2,17 @@
     .btn-secondary {
         background-color: var(--gray-200);
     }
+
+    .o-popover-sliding-panel {
+        --o-popover-sliding-panel-input-bg: var(--o-we-bg-light);
+
+        .o-popover-sliding-panel-back-icon {
+            background-color: var(--o-we-bg-lightest);
+        }
+
+        .form-check-input:not(:checked) {
+            --border-color: var(--o-we-bg-lightest);
+            background-color: var(--o-popover-sliding-panel-input-bg);
+        }
+    }
 }
