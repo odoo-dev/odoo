@@ -603,12 +603,12 @@ class IrAttachment(models.Model):
         groups=fields.NO_ACCESS,
         compute=lambda self: self._compute_res_access('read'),
         search=lambda self, operator, value: self._search_res_access('read', operator),
-        compute_sudo=True, depends_context=('uid',))
+        compute_sudo=True, depends_context=('uid', 'skip_res_field_check'))
     res_access_write = fields.Boolean(
         groups=fields.NO_ACCESS,
         compute=lambda self: self._compute_res_access('write'),
         search=lambda self, operator, value: self._search_res_access('write', operator),
-        compute_sudo=True, depends_context=('uid',))
+        compute_sudo=True, depends_context=('uid', 'skip_res_field_check'))
 
     # for external access
     access_token = fields.Char('Access Token', groups="base.group_user")
@@ -644,6 +644,13 @@ class IrAttachment(models.Model):
                     "Attachment %(record)s cannot have res_id: %(res_id)s",
                     record=record, res_id=record))
 
+    @api.constrains('public', 'res_field')
+    def _check_public_no_field(self):
+        if any(record.public and record.res_field for record in self.sudo()):
+            raise ValidationError(self.env._(
+                "You cannot make field attachments public."
+            ))
+
     def _make_access_error_message(self, operation, domain):
         if not domain.is_false():
             return AccessError(self.env._(
@@ -662,9 +669,10 @@ class IrAttachment(models.Model):
 
         Rules:
 
+        - If `res_field != False` the attachment is not accessible, unless
+          specified in context. XXX ? skip_res_field_check
         - If we have `res_model and res_id`, the attachment is accessible if the
-          referenced model is accessible. Also, when `res_field != False` and
-          the user is not an administrator, we check the access on the field.
+          referenced model is accessible.
         - If we don't have a referenced record, the attachment is accessible to
           the administrator and the creator of the attachment.
         """
@@ -676,11 +684,15 @@ class IrAttachment(models.Model):
         att_model_ids = []                      # [(att_id, (res_model, res_id))]
         # DLE P173: `test_01_portal_attachment`
         self.fetch(SECURITY_FIELDS)  # fetch only these fields
+        allow_fields = bool(self.env.context.get('skip_res_field_check'))
         user_model = self.sudo(False)
         forbidden_ids = set()
         for attachment in self:
             att_id = attachment.id
             res_model, res_id = attachment.res_model, attachment.res_id
+            if not allow_fields and attachment.res_field:
+                forbidden_ids.add(att_id)
+                continue
             if not user_model.env.is_system():
                 if not res_id and attachment.create_uid.id != self.env.uid:
                     forbidden_ids.add(att_id)
@@ -728,11 +740,12 @@ class IrAttachment(models.Model):
 
         # Search by res_model and res_id, filter using permissions from res_model
         # - res_id != False needs then check access on the linked res_model record
-        # - res_field != False needs to check field access on the res_model
+        # - res_field != False needs to check field access on the res_model  XXX
         res_model_names = condition_values(self, 'res_model', domain)
         if 0 < len(res_model_names or ()) <= MAX_COMODELS_FOR_DOMAIN:
             env = self.with_context(active_test=False).env
-            check_res_fields = not self.env.is_system() and tuple(condition_values(self, 'res_field', domain) or ()) != (False,)
+            allow_fields = bool(self.env.context.get('skip_res_field_check'))
+            check_res_fields = allow_fields and not self.env.is_system() and tuple(condition_values(self, 'res_field', domain) or ()) != (False,)
             for res_model_name in res_model_names:
                 comodel = env.get(res_model_name)
                 if comodel is None:
@@ -760,6 +773,8 @@ class IrAttachment(models.Model):
                     codomain &= Domain('res_field', 'in', accessible_fields)
                 sec_domain |= codomain
 
+            if not allow_fields:
+                sec_domain &= Domain('res_field', '=', False)
             return sec_domain
 
         # We do not have a small restriction on res_model. We still need to
@@ -804,15 +819,7 @@ class IrAttachment(models.Model):
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, *, active_test=True, bypass_access=False):
         assert not self._active_name, "active name not supported on ir.attachment"
-        domain = Domain(domain)
-        if (
-            not self.env.context.get('skip_res_field_check')
-            and not any(d.field_expr in ('id', 'res_field') for d in domain.iter_conditions())
-            and not bypass_access
-        ):
-            domain &= Domain('res_field', '=', False)
-
-        domain = domain.optimize_full(self)
+        domain = Domain(domain).optimize_full(self)
         if self.env.su or bypass_access or domain.is_false():
             return super()._search(domain, offset, limit, order, active_test=active_test, bypass_access=bypass_access)
         if self.env.context.get('_generating_sql_for_fields'):

@@ -424,6 +424,12 @@ class TestPermissions(TransactionCaseWithUserDemo):
             ('res_id', '=', main_partner.id),
             ('res_field', '=', 'image_128')
         ])
+        self.assertFalse(attachment.raw)
+        attachment = self.env['ir.attachment'].with_context(skip_res_field_check=True).search([
+            ('res_model', '=', 'res.partner'),
+            ('res_id', '=', main_partner.id),
+            ('res_field', '=', 'image_128')
+        ])
         self.assertTrue(attachment.raw)
         with self.assertQueries([
             # security SQL contains public check or accessible field with
@@ -449,7 +455,7 @@ class TestPermissions(TransactionCaseWithUserDemo):
             ORDER BY "ir_attachment"."id" DESC
             """
         ]):
-            self.env['ir.attachment'].search([
+            self.env['ir.attachment'].with_context(skip_res_field_check=True).search([
                 ('res_model', '=', 'res.partner'),
                 ('res_id', '=', main_partner.id),
                 ('res_field', '=', 'image_128')
