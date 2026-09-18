@@ -535,6 +535,9 @@ class ResPartner(models.Model):
         super_partner = self.env['res.users'].browse(api.SUPERUSER_ID).partner_id
         if super_partner in self:
             super_partner.partner_share = False
+        # compute `share` for all the users of the recordset in one batch:
+        # reading it partner by partner is what makes this compute expensive
+        self.user_ids.mapped('share')
         for partner in self - super_partner:
             partner.partner_share = not partner.user_ids or not any(not user.share for user in partner.user_ids)
 

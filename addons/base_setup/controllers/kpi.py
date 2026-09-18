@@ -123,7 +123,18 @@ def _db_kpi_summary(database, api_key):
                 if not odoo_modules_module.current_test:
                     cr.rollback()
 
+        # `res.users.share` is a computed field without a column: an internal
+        # user is one holding `base.group_user` or any group implying it.
         cr.execute(SQL("""
+            WITH RECURSIVE internal_groups(id) AS (
+                    SELECT res_id
+                      FROM ir_model_data
+                     WHERE model = 'res.groups' AND module = 'base' AND name = 'group_user'
+                 UNION
+                    SELECT rel.gid
+                      FROM res_groups_implied_rel rel
+                      JOIN internal_groups ig ON rel.hid = ig.id
+            )
             SELECT u.id,
                    p.name,
                    u.login,
@@ -133,7 +144,10 @@ def _db_kpi_summary(database, api_key):
               FROM res_users u
               JOIN res_partner p ON u.partner_id = p.id
              WHERE u.active
-               AND not u.share
+               AND EXISTS (SELECT 1
+                             FROM res_groups_users_rel r
+                            WHERE r.uid = u.id
+                              AND r.gid IN (SELECT id FROM internal_groups))
         """))
         users = cr.dictfetchall()
 

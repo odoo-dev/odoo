@@ -1230,7 +1230,7 @@ class DiscussChannel(models.Model):
         if pids:
             email_from = tools.email_normalize(message.email_from)
             self.env['res.partner'].flush_model(['active', 'email'])
-            self.env['res.users'].flush_model(['active', 'partner_id', 'share'])
+            self.env['res.users'].flush_model(['active', 'partner_id', 'group_ids'])
             sql_query = SQL(
                 """
                 SELECT partner.id,
@@ -1243,10 +1243,13 @@ class DiscussChannel(models.Model):
                   FROM res_partner partner
      LEFT JOIN LATERAL (
                         SELECT users.id AS uid,
-                               users.share AS share
+                               NOT EXISTS (
+                                   SELECT FROM res_groups_users_rel r
+                                    WHERE r.uid = users.id AND r.gid IN %(internal_gids)s
+                               ) AS share
                           FROM res_users users
                          WHERE users.partner_id = partner.id AND users.active
-                      ORDER BY users.share ASC NULLS FIRST, users.id ASC
+                      ORDER BY share ASC, users.id ASC
                          FETCH FIRST ROW ONLY
                        ) sub_user ON TRUE
                  WHERE partner.active IS TRUE
@@ -1256,6 +1259,9 @@ class DiscussChannel(models.Model):
                 email=email_from or "",
                 partner_ids=tuple(pids),
                 author_id=author_id or 0,
+                # `res.users.share` has no column: an internal user is one
+                # holding `base.group_user` or any group implying it
+                internal_gids=tuple(self.env['res.users']._get_internal_group_ids()),
             )
             self.env.cr.execute(sql_query)
             for partner_id, email_normalized, lang, name, partner_share, uid, ushare in self.env.cr.fetchall():

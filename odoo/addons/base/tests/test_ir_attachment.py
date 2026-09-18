@@ -442,7 +442,8 @@ class TestPermissions(TransactionCaseWithUserDemo):
                             ("res_partner"."company_id" IN %s OR "res_partner"."company_id" IS NULL)
                             OR NOT EXISTS (
                                 SELECT FROM res_users u
-                                WHERE u.share IS NOT TRUE AND u.partner_id = "res_partner"."id"
+                                JOIN res_groups_users_rel r ON r.uid = u.id
+                                WHERE u.partner_id = "res_partner"."id" AND r.gid IN %s
                             ) IS NOT TRUE
                         )
                     )

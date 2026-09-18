@@ -489,10 +489,15 @@ class ResUsers(models.Model):
 
     @api.depends('all_group_ids')
     def _compute_share(self):
-        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
-        internal_users = self.filtered_domain([('all_group_ids', 'in', [user_group_id])])
-        internal_users.share = False
-        (self - internal_users).share = True
+        # Going through `all_group_ids` (a non-stored many2many) means building
+        # the implied closure for each user; comparing the directly assigned
+        # groups against the closure of `base.group_user` gives the same answer
+        # with a single set lookup per user, and matches `_compute_sql_share`.
+        internal_group_ids = set(self._get_internal_group_ids())
+        for user in self:
+            # `_origin`: on a new record (onchange) the groups are new records
+            # pointing at the real ones, same as in `has_group()`
+            user.share = internal_group_ids.isdisjoint(user.group_ids._origin._ids)
 
     @api.model
     def _invalidate_share_cache(self):
@@ -683,7 +688,7 @@ class ResUsers(models.Model):
 
         if 'group_ids' in vals and any(self._ids):
             # clear caches linked to the users
-            self._invalidate_share_cache()
+            self.env.invalidate_all()
             self.env.transaction.invalidate_ormcache()
 
         # per-method / per-model caches have been removed so the various

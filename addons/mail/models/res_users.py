@@ -4,7 +4,7 @@ from collections import defaultdict
 import contextlib
 
 from odoo import _, api, Command, fields, models, modules, tools
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 from odoo.tools import email_normalize, split_every
 from odoo.tools.misc import limited_field_access_token
@@ -86,10 +86,12 @@ class ResUsers(models.Model):
         self.has_external_mail_server = self.env['ir.config_parameter'].sudo().get_bool(
             'base_setup.default_external_email_server')
 
-    _notification_type = models.Constraint(
-        "CHECK (notification_type = 'email' OR NOT share)",
-        'Only internal user can receive notifications in Odoo',
-    )
+    @api.constrains('notification_type', 'group_ids')
+    def _check_notification_type(self):
+        # `share` is a computed field without a column, so this invariant
+        # cannot be a SQL CHECK constraint any more.
+        if any(user.notification_type != 'email' and user.share for user in self):
+            raise ValidationError(_('Only internal user can receive notifications in Odoo'))
 
     @api.depends('share', 'all_group_ids')
     def _compute_notification_type(self):

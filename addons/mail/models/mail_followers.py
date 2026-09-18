@@ -138,13 +138,19 @@ class MailFollowers(models.Model):
         """
         self.env['mail.followers'].flush_model(['partner_id', 'subtype_ids'])
         self.env['mail.message.subtype'].flush_model(['internal'])
-        self.env['res.users'].flush_model(['notification_type', 'active', 'partner_id', 'group_ids', 'share'])
+        self.env['res.users'].flush_model(['notification_type', 'active', 'partner_id', 'group_ids'])
         self.env['res.partner'].flush_model(['active', 'email_normalized', 'name'])
         self.env['res.groups'].flush_model(['user_ids'])
+        # `res.users.share` is not stored: derive it from the group relation,
+        # which the queries below already join to aggregate the user's groups.
+        internal_gids = ', '.join(
+            str(gid) for gid in self.env['res.users']._get_internal_group_ids()
+        )
+        sql_user_share = f'NOT COALESCE(BOOL_OR(groups_rel.gid IN ({internal_gids})), FALSE)'
         # if we have records and a subtype: we have to fetch followers, unless being
         # in user notification mode (contact only pids)
         if message_type != 'user_notification' and records and subtype_id:
-            query = """
+            query = f"""
     WITH sub_followers AS (
         SELECT fol.partner_id AS pid,
                fol.id AS fid,
@@ -187,25 +193,26 @@ class MailFollowers(models.Model):
            sub_followers.is_follower as _insert_followerslower
       FROM res_partner partner
       JOIN sub_followers ON sub_followers.pid = partner.id
-                        AND (sub_followers.internal IS NOT TRUE OR EXISTS (
-                            SELECT 1 FROM res_users iu WHERE iu.share IS NOT TRUE AND iu.partner_id = partner.id
-                        ))
  LEFT JOIN LATERAL (
         SELECT users.id AS uid,
-               users.share AS share,
+               {sql_user_share} AS share,
                users.notification_type AS notification_type,
                ARRAY_AGG(groups_rel.gid) FILTER (WHERE groups_rel.gid IS NOT NULL) AS groups
           FROM res_users users
      LEFT JOIN res_groups_users_rel groups_rel ON groups_rel.uid = users.id
          WHERE users.partner_id = partner.id AND users.active
       GROUP BY users.id,
-               users.share,
                users.notification_type
-      ORDER BY users.share ASC NULLS FIRST, users.id ASC
+      ORDER BY share ASC, users.id ASC
          FETCH FIRST ROW ONLY
          ) sub_user ON TRUE
 
-     WHERE sub_followers.subtype_follower OR partner.id = ANY(%s)
+     WHERE (sub_followers.subtype_follower OR partner.id = ANY(%s))
+           -- a subtype flagged `internal` only reaches partners having an
+           -- internal user: `sub_user` is that user when there is one, so no
+           -- extra subquery is needed to know it
+           AND (sub_followers.internal IS NOT TRUE
+                OR (sub_user.uid IS NOT NULL AND sub_user.share IS NOT TRUE))
 """
             params = [subtype_id, records._name, tuple(records.ids), list(pids or []), list(pids or [])]
             self.env.cr.execute(query, tuple(params))
@@ -213,7 +220,7 @@ class MailFollowers(models.Model):
         # partner_ids and records: no sub query for followers but check for follower status
         elif pids and records:
             params = []
-            query = """
+            query = f"""
     SELECT partner.id as pid,
            partner.active as active,
            partner.email_normalized AS email_normalized,
@@ -230,16 +237,15 @@ class MailFollowers(models.Model):
                               AND fol.res_id IN %s
  LEFT JOIN LATERAL (
         SELECT users.id AS uid,
-               users.share AS share,
+               {sql_user_share} AS share,
                users.notification_type AS notification_type,
                ARRAY_AGG(groups_rel.gid) FILTER (WHERE groups_rel.gid IS NOT NULL) AS groups
           FROM res_users users
      LEFT JOIN res_groups_users_rel groups_rel ON groups_rel.uid = users.id
          WHERE users.partner_id = partner.id AND users.active
       GROUP BY users.id,
-               users.share,
                users.notification_type
-      ORDER BY users.share ASC NULLS FIRST, users.id ASC
+      ORDER BY share ASC, users.id ASC
          FETCH FIRST ROW ONLY
          ) sub_user ON TRUE
 
@@ -266,7 +272,7 @@ class MailFollowers(models.Model):
                 res += flattened
         # only partner ids: no follower status involved, fetch only direct recipients information
         elif pids:
-            query = """
+            query = f"""
     SELECT partner.id as pid,
            partner.active as active,
            partner.email_normalized AS email_normalized,
@@ -281,16 +287,15 @@ class MailFollowers(models.Model):
       FROM res_partner partner
  LEFT JOIN LATERAL (
         SELECT users.id AS uid,
-               users.share AS share,
+               {sql_user_share} AS share,
                users.notification_type AS notification_type,
                ARRAY_AGG(groups_rel.gid) FILTER (WHERE groups_rel.gid IS NOT NULL) AS groups
           FROM res_users users
      LEFT JOIN res_groups_users_rel groups_rel ON groups_rel.uid = users.id
          WHERE users.partner_id = partner.id AND users.active
       GROUP BY users.id,
-               users.share,
                users.notification_type
-      ORDER BY users.share ASC NULLS FIRST, users.id ASC
+      ORDER BY share ASC, users.id ASC
          FETCH FIRST ROW ONLY
          ) sub_user ON TRUE
 

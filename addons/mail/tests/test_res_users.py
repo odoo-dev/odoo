@@ -5,10 +5,9 @@ from unittest import skip
 from unittest.mock import patch
 
 from freezegun import freeze_time
-from psycopg2 import IntegrityError
 
 from odoo import Command
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import HttpCase, RecordCapturer, tagged, users
 from odoo.tools import mute_logger
 
@@ -63,9 +62,9 @@ class TestUser(MailCommon):
         super().setUpClass()
         cls.portal_user = cls._create_portal_user()
 
-    @mute_logger('odoo.sql_db')
     def test_notification_type_constraint(self):
-        with self.assertRaises(IntegrityError, msg='Portal user can not receive notification in Odoo'):
+        # `share` has no column, so the invariant is a python constraint
+        with self.assertRaises(ValidationError, msg='Portal user can not receive notification in Odoo'):
             mail_new_test_user(
                 self.env,
                 login='user_test_constraint_2',
