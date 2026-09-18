@@ -5,7 +5,6 @@ class IrUiMenu(models.Model):
     _inherit = 'ir.ui.menu'
 
     @api.model
-    @api.ormcache('frozenset(self.env.user._get_group_ids())', 'debug')
     def _visible_menu_ids(self, debug=False):
         visible_ids = super()._visible_menu_ids(debug)
         if not self.env.user.has_group('base.group_user_regular'):
