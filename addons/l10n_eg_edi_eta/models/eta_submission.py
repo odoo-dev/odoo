@@ -39,7 +39,7 @@ class L10nEgEdiEtaSubmission(models.Model):
 
     def action_resign(self):
         self.ensure_one()
-        if alerts := self.move_id._get_l10n_eg_edi_alerts():
+        if alerts := self.move_id._get_l10n_eg_edi_alerts(check_sign=False):
             return self.env['account.move.send']._raise_danger_alerts(alerts)
         return self.move_id.action_post_sign_invoices()
 

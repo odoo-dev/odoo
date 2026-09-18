@@ -138,14 +138,9 @@ class AccountMove(models.Model):
         if eg_moves.company_id.filtered(lambda c: c.l10n_eg_edi_api_mode == 'demo'):
             raise UserError(self.env._("Cannot fetch PDF if the invoice company's ETA API mode is in Demo."))
 
-        access_data = self._l10n_eg_eta_get_access_token()
-        if access_data.get('error'):
-            raise UserError(self.env._("Failed to authenticate with the ETA server. Please verify your ETA credentials!"))
-
-        access_token = access_data.get('access_token')
         moves_failed_to_fetch = self.env['account.move']
         for move in eg_moves:
-            if not move._l10n_eg_get_eta_invoice_pdf(access_token):
+            if not move._l10n_eg_get_eta_invoice_pdf():
                 moves_failed_to_fetch |= move
 
         action_to_return = {
@@ -248,29 +243,23 @@ class AccountMove(models.Model):
     # Account move send validations
     # ===================================================
 
-    def _get_l10n_eg_edi_alerts(self):
+    def _get_l10n_eg_edi_alerts(self, check_sign=True):
         alerts = {}
 
-        if (companies := self.company_id) and len(companies) > 1:
-            alerts.update({
-                'eg_eta_edi_multiple_companiesbranch partner': {
-                    'level': 'danger',
-                    'message': self.env._(
-                        """Only invoices from one company can be signed at a time.
-                        Please select invoices from a single company to sign and send to ETA.""",
-                    ),
-                },
-            })
-        elif companies.l10n_eg_edi_api_mode != 'demo' and (
-            not companies.l10n_eg_client_identifier or not companies.l10n_eg_client_secret
+        if companies := self.company_id.filtered(
+            lambda c: (
+                c.l10n_eg_edi_api_mode != "demo"
+                and (not c.l10n_eg_client_identifier or not c.l10n_eg_client_secret)
+            ),
         ):
             alerts.update({
                 'eg_eta_edi_no_client_id_secret': {
                     'level': 'danger',
                     'message': self.env._(
-                        "Please configure Client ID and Secret Key for the company %s.",
-                        companies[0].name,
+                        "Please configure Client ID and Secret Key for the Company(s)."
                     ),
+                    'action_text': self.env._("View Company(s)"),
+                    'action': companies._get_records_action(),
                 },
             })
 
@@ -281,7 +270,7 @@ class AccountMove(models.Model):
                 'eg_eta_edi_missing_company_address': {
                     'level': 'danger',
                     'message': self.env._("Please fill in the address details for the following Journal Branches"),
-                    'action_text': self.env._("view branches"),
+                    'action_text': self.env._("View branches"),
                     'action': missing_branch_details._get_records_action(),
                 },
             })
@@ -373,7 +362,7 @@ class AccountMove(models.Model):
                 },
             })
 
-        if unsigned_moves := self.filtered(lambda inv: not inv.l10n_eg_is_signed):
+        if check_sign and (unsigned_moves := self.filtered(lambda inv: not inv.l10n_eg_is_signed)):
             alerts.update({
                 'eg_eta_edi_moves_not_signed': {
                     'level': 'danger',
@@ -598,12 +587,14 @@ class AccountMove(models.Model):
         """
         ETA Supports sending multiple invoices to it and they send back a response containing results
         for all the invoices sent to it.
-        So we send multiple invoices to ETA in a fix batch size and process their responses.
+        So we send multiple invoices to ETA in a fix batch size and process their responses, grouped by company, since
+        the client id and secret will be different for each company.
         """
-        for i in range(0, len(self.ids), ETA_INVOICE_SENDING_BATCH_SIZE):
-            batch = self[i:i + ETA_INVOICE_SENDING_BATCH_SIZE]
-            if error := batch._l10n_eg_eta_send_invoice(notify=notify):
-                return error
+        for invoices in self.grouped('company_id').values():
+            for i in range(0, len(invoices), ETA_INVOICE_SENDING_BATCH_SIZE):
+                batch = invoices[i:i + ETA_INVOICE_SENDING_BATCH_SIZE]
+                if error := batch._l10n_eg_eta_send_invoice(notify=notify):
+                    return error
 
     def _l10n_eg_eta_send_invoice(self, notify=False):
         if (access_data := self._l10n_eg_eta_get_access_token()) and access_data.get('error'):
@@ -619,7 +610,7 @@ class AccountMove(models.Model):
         ).encode('utf-8')
         headers = self._l10n_eg_edi_prepare_headers(access_data.get('access_token'))
         client = ETAClient(
-            is_production=self.l10n_eg_edi_api_mode == 'production'
+            is_production=self.company_id.l10n_eg_edi_api_mode == 'production'
         )
 
         content = client.submit_invoices(
@@ -697,10 +688,14 @@ class AccountMove(models.Model):
                 ),
             })
 
-    def _l10n_eg_get_eta_invoice_pdf(self, access_token):
+    def _l10n_eg_get_eta_invoice_pdf(self):
         """This method fetches the PDF Invoice as per the format set by ETA."""
         self.ensure_one()
-        headers = self._l10n_eg_edi_prepare_headers(access_token)
+        access_data = self._l10n_eg_eta_get_access_token()
+        if access_data.get('error'):
+            raise UserError(self.env._("Failed to authenticate with the ETA server. Please verify your ETA credentials!"))
+
+        headers = self._l10n_eg_edi_prepare_headers(access_data.get('access_token'))
         client = ETAClient(
             is_production=self.l10n_eg_edi_api_mode == 'production',
         )
@@ -773,7 +768,7 @@ class AccountMove(models.Model):
         )
 
         data = json.loads(content or "{}")
-        if data.get('error'):
+        if isinstance(data, dict) and data.get('error'):
             error = data.get('error', {})
             raise UserError(self.env._(
                 "Error occured when trying to cancel invoice: [%(code)s] %(message)s",
@@ -822,7 +817,7 @@ class AccountMove(models.Model):
         body = {'grant_type': 'client_credentials', 'client_id': user, 'client_secret': secret}
 
         client = ETAClient(
-            is_production=self.l10n_eg_edi_api_mode == 'production',
+            is_production=self.company_id.l10n_eg_edi_api_mode == 'production',
         )
 
         content = client.get_access_token(
