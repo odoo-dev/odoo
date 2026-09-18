@@ -285,7 +285,6 @@ export class SearchBar extends Component {
                 items.push(...this.subItems[searchItem.id]);
             }
         }
-
         return items;
     }
 

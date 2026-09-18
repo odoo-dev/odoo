@@ -36,6 +36,11 @@ export class SearchBarMenu extends Component {
     });
 
     setup() {
+        console.groupCollapsed("%c SearchBarMenu :: setup()", "background: #adf;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         this.facet_icons = FACET_ICONS;
         // Filter
         this.actionService = useService("action");

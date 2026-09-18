@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { omit } from "@web/core/utils/objects";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
+import { user } from "@web/core/user";
 
 import { useService } from "@web/core/utils/hooks";
 import {
@@ -154,14 +155,17 @@ export class MediaManagerDialog extends SelectCreateDialog {
 }
 
 export function getMediaManagertDialogProps(recordInfo) {
+    const lastWeekDate = luxon.DateTime.now().minus({ weeks: 1 }).toFormat("yyyy-MM-dd HH:mm:ss");
     return {
         title: _t("Select a media"),
         resModel: "ir.attachment", // todo we probably don't need this
+        // searchViewId: "mediamanager_media_search", // todo doesn't work, need id, how ?
         baseResModel: recordInfo.resModel ?? "ir.attachment",
         baseResId: recordInfo.resId ?? -1,
         filters: [
-            { label: "uploaded last week", domain: [] },
-            { label: "uploaded by me", domain: [] },
+            // todo link this to the search bar filters somehow
+            { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
+            { label: "uploaded by me", domain: [["create_uid", "=", user.userId]] },
         ],
         noCreate: true,
         domain: [
@@ -176,6 +180,7 @@ export function getMediaManagertDialogProps(recordInfo) {
         ],
         context: {
             kanban_view_ref: "html_editor.mediamanager_media_kanban",
+            search_view_ref: "html_editor.mediamanager_media_search",
         },
     };
 }

@@ -49,7 +49,7 @@
 
                 <div class="media-manager-side-panel-filters mt-4" t-if="this.props.filters">
                     <h4>Filters :</h4>
-                    <a href="#" t-on-click="() => this.filterRecords()">All</a>
+                    <a href="#" t-on-click="() => this.filterRecords()">Reset Filters</a>
                     <t t-foreach="this.props.filters" t-as="filter" t-key="filter.label">
                         <br/><a href="#" t-on-click.prevent="() => this.filterRecords(filter.domain)"><t t-out="filter.label"/></a>
                     </t>

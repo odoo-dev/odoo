@@ -7,7 +7,7 @@
         height: var(--Card-min-width);
     }
     .o_kanban_renderer .o_kanban_record.o_kanban_attachment {
-        .o_kanban_image{
+        .o_kanban_image {
             height: 160px;
             width: 160px;
             padding: 4px;
@@ -22,8 +22,16 @@
             left: 5px;
             display: none;
         }
+        .o_kanban_details_wrapper {
+            min-height: 60px;
+        }
         .o_record_main {
             display: none;
+            background-color: rgba(255, 255, 255, 0.5);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: auto;
         }
         &:hover{
             .o_record_box_star, .o_record_box_star_bg {
@@ -52,7 +60,7 @@
             background-color: lighten($o-main-favorite-color, 30%);
             border-color: $o-main-favorite-color;
 
-            .o_record_box_star{
+            .o_record_box_star {
                 color: desaturate($o-main-favorite-color, 35%);
             }
         }

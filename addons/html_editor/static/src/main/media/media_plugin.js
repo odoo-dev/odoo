@@ -281,6 +281,7 @@ export class MediaPlugin extends Plugin {
         const recordInfo = this.getRecordInfo(editableEl);
         const { resModel, resId, field, type } = recordInfo;
         let imageToReplace = params.node || null;
+
         if (params.tempMediaManagerSwitch) {
             return this.dependencies.dialog.addDialog(MediaManagerDialog, {
                 ...getMediaManagertDialogProps(recordInfo),

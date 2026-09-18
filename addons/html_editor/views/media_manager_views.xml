@@ -1,6 +1,30 @@
 <?xml version="1.0"?>
 <odoo>
     <data>
+        <record model="ir.ui.view" id="mediamanager_media_search">
+            <field name="name">ir.attachment.mediamanager.search</field>
+            <field name="model">ir.attachment</field>
+            <field name="arch" type="xml">
+                <search string="Media">
+                    <field name="name" filter_domain="[('name','ilike',self)]" string="Attachment"/>
+                    <field name="create_date"/>
+                    <filter name="my_media_filter"
+                            string="My Media(s)"
+                            domain="[('create_uid','=',uid)]"
+                            help="Filter on my media"/>
+                    <filter name="url_filter" string="URL" domain="[('type', '=', 'url')]"/>
+                    <separator/>
+                    <field name="create_uid" string="Created by"/>
+                    <field name="type"/>
+                    <group>
+                        <filter name="owner" string="Owner" domain="[]" context="{'group_by':'create_uid'}"/>
+                        <filter string="Type" name="type" domain="[]" context="{'group_by':'type'}" groups="base.group_no_one"/>
+                        <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Creation Date" name="creation_month" domain="[]" context="{'group_by':'create_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
         <record model="ir.ui.view" id="mediamanager_media_kanban">
             <field name="name">ir.attachment.mediamanager.kanban</field>
             <field name="model">ir.attachment</field>
@@ -27,17 +51,16 @@
                             </aside>
                             <main class="position-absolute" >
                                 <div class="o_kanban_details_wrapper d-flex flex-column">
-                                    <field name="display_name" class="text-truncate fw-bold fs-5"/>
-                                    <small class="text-muted text-truncate fs-7">
-                                        <field name="name"/>
-                                    </small>
-                                    <div class="d-flex flex-grow-1 align-items-center">
+                                    <field name="display_name" />
+                                    <div>
                                         <t t-if="record.type.raw_value == 'url'">
                                             <i class="fa fa-globe" aria-label="Document url"/> <field name="url" widget="url"/>
                                         </t>
                                     </div>
                                     <div class="d-flex">
-                                        <field name="create_date"/>
+                                        <small class="text-truncate">
+                                            <field name="create_date"/>
+                                        </small>
                                         <field name="create_uid" widget="many2one_avatar_user" class="ms-auto"/>
                                     </div>
                                 </div>

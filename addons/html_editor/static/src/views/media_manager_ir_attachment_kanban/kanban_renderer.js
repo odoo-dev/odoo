@@ -35,6 +35,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
+        this.initialDomain = [...this.env.model.config.domain];
     }
 
     async validateUrl(url) {
@@ -58,9 +59,12 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     // ----------------
 
     filterRecords(domain) {
-        console.warn("filterRecords", domain);
-        console.log("this.env.model : ", this.env.model);
-        this.env.model.load();
+        console.log("filterRecords", domain);
+        if (domain) {
+            this.env.model.env.searchModel.splitAndAddDomain(domain);
+        } else {
+            this.env.model.env.searchModel.clearFilters();
+        }
     }
 
     // -----------------
