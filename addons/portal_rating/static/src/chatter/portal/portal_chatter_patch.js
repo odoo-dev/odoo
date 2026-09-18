@@ -10,7 +10,6 @@ patch(PortalChatter.prototype, {
         providePlugins([PortalRatingPlugin]);
 
         this.portalChatterProps = useProps({
-            composer: t.any(),
             reviewChatter: t.any().optional(),
         });
         usePlugin(PortalRatingPlugin).reviewChatter.set(this.portalChatterProps.reviewChatter ?? false);
