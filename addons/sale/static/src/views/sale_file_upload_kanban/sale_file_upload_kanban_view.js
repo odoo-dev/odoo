@@ -6,6 +6,7 @@ import { SaleFileUploadKanbanRenderer } from './sale_file_upload_kanban_renderer
 export const saleFileUploadKanbanView = {
     ...fileUploadKanbanView,
     Controller: SaleFileUploadKanbanController,
+    buttonTemplate: 'sale.SaleFileUploadKanbanView.Buttons',
     Renderer: SaleFileUploadKanbanRenderer,
 };
 

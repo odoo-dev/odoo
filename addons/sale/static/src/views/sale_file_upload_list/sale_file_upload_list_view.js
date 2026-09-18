@@ -6,6 +6,7 @@ import { SaleFileUploadListRenderer } from './sale_file_upload_list_renderer';
 export const saleFileUploadListView = {
     ...fileUploadListView,
     Controller: SaleFileUploadListController,
+    buttonTemplate: 'sale.SaleFileUploadListView.Buttons',
     Renderer: SaleFileUploadListRenderer,
 };
 

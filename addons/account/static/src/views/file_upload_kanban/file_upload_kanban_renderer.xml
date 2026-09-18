@@ -7,6 +7,7 @@
                 hideZone="() => this.dropzoneState.visible = false"
                 dropZoneTitle="this.dropZoneTitle"
                 dropZoneDescription="this.dropZoneDescription"/>
+            <DocumentFileUploader t-if="this.hasOwnFileUploader" resModel="this.props.list.resModel"/>
         </xpath>
         <xpath expr="//div[@t-ref='this.rootRef']" position="attributes">
             <attribute name="t-on-dragenter.stop.prevent">this.onDragStart</attribute>

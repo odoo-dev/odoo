@@ -4,6 +4,7 @@ import { FileUploadKanbanRenderer } from '@account/views/file_upload_kanban/file
 export class SaleFileUploadKanbanRenderer extends FileUploadKanbanRenderer {
     setup() {
         super.setup();
+        this.hasOwnFileUploader = true;
         this.dropZoneTitle = _t("Import a request for quotation from a customer");
         this.dropZoneDescription = _t(`
             If your customer runs on Odoo 18 or higher, customer data and sales order lines

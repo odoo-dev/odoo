@@ -2,6 +2,7 @@ import { proxy } from "@odoo/owl";
 import { _t } from '@web/core/l10n/translation';
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { UploadDropZone } from "@account/components/upload_drop_zone/upload_drop_zone";
+import { DocumentFileUploader } from "@account/components/document_file_uploader/document_file_uploader";
 import { uploadFileFromData } from "../upload_file_from_data_hook";
 
 export class FileUploadKanbanRenderer extends KanbanRenderer {
@@ -9,10 +10,12 @@ export class FileUploadKanbanRenderer extends KanbanRenderer {
     static components = {
         ...KanbanRenderer.components,
         UploadDropZone,
+        DocumentFileUploader,
     };
 
     setup() {
         super.setup();
+        this.hasOwnFileUploader = false;
         this.dropzoneState = proxy({ visible: false });
         this.uploadFileFromData = uploadFileFromData();
         this.dropZoneTitle = _t("Drop and let the AI process your bills automatically.");
