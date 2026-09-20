@@ -1791,6 +1791,9 @@ class Field[T]:
         :param dirty: whether ``field`` must be made dirty on ``record`` after
             the update
         """
+        if cache_value is None and self.required and any(records._ids):
+            raise ValueError(f"Cannot assign None to a required field {self}")
+
         env = records.env
         field_cache = self._get_cache(env)
         for id_ in records._ids:
@@ -2061,6 +2064,10 @@ class Field[T]:
                 if field.store:
                     env.add_to_compute(field, records)
             raise
+        if self.required:
+            cache = self._get_cache(records.env)
+            if not all(not id_ or cache.get(id_) is not None for id_ in records._ids):
+                raise ValueError(f"computed readonly on required field, {self}")
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """

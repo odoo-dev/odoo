@@ -614,8 +614,12 @@ class _RelationalMulti(_Relational):
                 else:
                     value = cache_value
                 super()._update_cache(record, value, dirty)
+                if value == () and self.required:
+                    raise ValueError(f"required x2m {self}")
             return
         super()._update_cache(records, cache_value, dirty)
+        if cache_value == () and self.required:
+            raise ValueError(f"required x2m {self}")
 
     def _compute_related(self, records):
         # Related fields for x2m must be computed in sudo to ensure cache
