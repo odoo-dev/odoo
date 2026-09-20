@@ -59,7 +59,7 @@ class BaseDocumentLayout(models.TransientModel):
     logo_secondary_color = fields.Char(compute="_compute_logo_colors")
 
     report_layout_id = fields.Many2one('report.layout')
-    report_tables_id = fields.Selection(related='company_id.report_tables_id', readonly=False, required=True)
+    report_tables_id = fields.Selection(related='company_id.report_tables_id', readonly=False, ui_required=True)
 
     # All the sanitization get disabled as we want true raw html to be passed to an iframe.
     preview = fields.Html(compute='_compute_preview', sanitize=False)

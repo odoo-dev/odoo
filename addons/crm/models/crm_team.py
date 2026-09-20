@@ -174,7 +174,7 @@ class CrmTeam(models.Model):
         if self.id:
             if not self.use_leads and not self.use_opportunities:
                 values['alias_name'] = False
-            values['alias_defaults'] = defaults = literal_eval(self.alias_defaults or "{}")
+            values['alias_defaults'] = defaults = literal_eval(self.alias_defaults or "{}") if self.alias_id else {}
             has_group_use_lead = self.env.user.has_group('crm.group_use_lead')
             defaults['type'] = 'lead' if has_group_use_lead and self.use_leads else 'opportunity'
             defaults['team_id'] = self.id
