@@ -333,7 +333,7 @@ class HrJob(models.Model):
         values = super()._alias_get_creation_values()
         values['alias_model_id'] = self.env['ir.model']._get('hr.applicant').id
         if self.id:
-            values['alias_defaults'] = defaults = ast.literal_eval(self.alias_defaults or "{}")
+            values['alias_defaults'] = defaults = ast.literal_eval((self.alias_id and self.alias_defaults) or "{}")
             defaults.update({
                 'job_id': self.id,
                 'department_id': self.department_id.id,

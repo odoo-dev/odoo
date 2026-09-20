@@ -26,6 +26,8 @@ def company_default_for(fname, target_model, target_fname):
             default = field.get_company_dependent_fallback(model.with_company(company))
             if field.type == 'many2one':
                 default = default.exists()
+            if not default and field.default:
+                default = field.default(model)
             company[fname] = default
 
     def _inverse_to_ir_default(self):
@@ -40,7 +42,10 @@ def company_default_for(fname, target_model, target_fname):
         data = {}
         for company_id in self.env['res.company'].sudo()._cached_data()['id']:
             model = model.with_company(company_id)
-            data[company_id] = field.convert_to_column(field.convert_to_write(field.get_company_dependent_fallback(model), model), model)
+            default = field.get_company_dependent_fallback(model)
+            if not default and field.default:
+                default = field.default(model)
+            data[company_id] = field.convert_to_column(field.convert_to_write(default, model), model)
         default_sql = SQL("(%s::jsonb->>%s::text)::%s", Json(data), table.id, field.sql_column_type)
         if field.type == 'many2one':
             related_alias = table._make_alias(fname)

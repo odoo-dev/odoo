@@ -590,7 +590,7 @@ class Field[T, C]:
             if self.required and not (
                 (self.store and self.column_type)
                 or (self.inherited_field and self.inherited_field.required)  # the inherited field is required
-                or self.compute  # TODO checked after computation
+                or self.compute  # checked after computation
             ):
                 setup_warning(self, "required is not enforced on a field without a database column")
 
@@ -2098,6 +2098,10 @@ class Field[T, C]:
                 if field.store:
                     env.add_to_compute(field, records)
             raise
+        if self.required:
+            cache = self._get_cache(records.env)
+            if not all(not id_ or cache.get(id_) is not None for id_ in records._ids):
+                _logger.warning("computed empty value on required field, %s", self, stack_info=True)
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """

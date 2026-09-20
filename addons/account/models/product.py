@@ -56,7 +56,7 @@ class ProductCategory(models.Model):
             ('average', "Average Cost (AVCO)"),
         ],
         company_dependent=True, copy=True,
-        default=lambda self: self.env.company.cost_method,
+        default=lambda self: self.env.company.cost_method or 'standard',
         help="""Standard Price: The products are valued at their standard cost defined on the product.
         Average Cost (AVCO): The products are valued at weighted average cost.
         """,
