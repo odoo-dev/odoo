@@ -15,7 +15,7 @@ from operator import attrgetter
 
 from psycopg2.extras import Json as PsycopgJson
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.tools import SQL, reset_cached_properties, sql
 from odoo.tools.constants import IN_MAX
 from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
@@ -583,6 +583,12 @@ class Field[T, C]:
 
             if not isinstance(self.required, bool):
                 self._setup_warning(f'property required should be a boolean ({self.required})')
+            if self.required and not (
+                (self.store and self.column_type)
+                or (self.inherited_field and self.inherited_field.required)  # the inherited field is required
+                or self.compute  # checked after computation
+            ):
+                self._setup_warning("required is not enforced on a field without a database column")
 
             if not isinstance(self.readonly, bool):
                 self._setup_warning(f'property readonly should be a boolean ({self.readonly})')
@@ -1714,6 +1720,9 @@ class Field[T, C]:
             return
 
         # update the cache
+        if cache_value is None and self.required and any(records._ids) and not self.compute:
+            #_logger.warning("cannot assign nothing to req field %s", self, stack_info=True)
+            raise ValidationError(records.env._('Cannot assign nothing to a required field %s', self))
         self._update_cache(records, cache_value, dirty=True)
 
     ############################################################################
@@ -1816,6 +1825,10 @@ class Field[T, C]:
         :param dirty: whether ``field`` must be made dirty on ``record`` after
             the update
         """
+        if cache_value is None and self.required and any(records._ids) and not self.compute:
+            #_logger.warning('cannot assign None to %s', self)
+            raise ValueError(f"Cannot assign None to a required field {self}")
+
         env = records.env
         field_cache = self._get_cache(env)
         for id_ in records._ids:
@@ -2097,6 +2110,10 @@ class Field[T, C]:
                 if field.store:
                     env.add_to_compute(field, records)
             raise
+        if self.required:
+            cache = self._get_cache(records.env)
+            if not all(not id_ or cache.get(id_) is not None for id_ in records._ids):
+                _logger.info(f"computed empty value on required field, {self}")
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """

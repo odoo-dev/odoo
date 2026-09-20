@@ -3937,6 +3937,10 @@ class SudoCommands(TransactionCaseWithUserDemo):
         self.assertEqual(self.env['res.partner']._fields['user_ids'].type, 'one2many')
         p = my_user.partner_id
 
+        # partner_id is required, so cannot set to null when unlinking, patch it here
+        self.env.transaction.will_change_registry()
+        self.patch(self.registry['res.users']._fields['partner_id'], 'required', False)
+
         for Partner, my_partner in [
             (self.env['res.partner'].with_user(admin_user), p.with_user(admin_user)),
             (self.env['res.partner'].sudo(), p.sudo()),

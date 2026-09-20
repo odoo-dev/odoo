@@ -652,8 +652,12 @@ class _RelationalMulti(_Relational[tuple['IdType', ...]]):
                 else:
                     value = cache_value
                 super()._update_cache(record, value, dirty)
+                if value == () and self.required:
+                    _logger.warning(f"required x2m {self}")
             return
         super()._update_cache(records, cache_value, dirty)
+        if cache_value == () and self.required:
+            _logger.warning(f"required x2m {self}")
 
     def _compute_related(self, records):
         # Related fields for x2m must be computed in sudo to ensure cache
@@ -1102,11 +1106,13 @@ class One2many(_RelationalMulti):
                 inverse_field = comodel._fields[inverse]
                 ondelete = inverse_field.ondelete
                 if callable(ondelete):  # many2one_reference may be dynamic
-                    inverse_value = lines[inverse]
-                    assert isinstance(inverse_value, int)
-                    ondelete = ondelete(lines, model.browse(inverse_value))
+                    inverse_values = [line[inverse] for line in lines]
+                    assert all(isinstance(inverse_value, int) for inverse_value in inverse_values)
+                    ondelete = ondelete(lines, model.browse(inverse_values))
                 if ondelete == 'cascade':
                     to_delete.extend(lines._ids)
+                elif inverse_field.required:
+                    raise UserError(lines.env._("Cannot set inverse %s to blank", inverse_field))
                 else:
                     lines[inverse] = False
 
