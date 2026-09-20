@@ -918,6 +918,9 @@ class Field[T]:
             .with_company(records.env.company) \
             ._get_model_defaults(records._name).get(self.name)
         fallback = self.convert_to_cache(fallback, records, validate=False)
+        if fallback is None and self.default:
+            fallback = self.default(records)
+            fallback = self.convert_to_cache(fallback, records, validate=False)
         return self.convert_to_record(fallback, records)
 
     #
@@ -1792,7 +1795,7 @@ class Field[T]:
             the update
         """
         if cache_value is None and self.required and any(records._ids):
-            raise ValueError(f"Cannot assign None to a required field {self}")
+            _logger.warning("Cannot assign None to a required field %s", self)
 
         env = records.env
         field_cache = self._get_cache(env)
