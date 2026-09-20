@@ -33,7 +33,7 @@ class L10n_Vn_Symbol(models.Model):
     )
     invoice_template_code = fields.Char(
         string='Template Code',
-        required=True,
+        ui_required=True,  # see test_check_configuration_errors
     )
     company_id = fields.Many2one(
         'res.company',

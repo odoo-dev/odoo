@@ -26,12 +26,12 @@ class MailAliasDomain(models.Model):
         help="Companies using this domain as default for sending mails")
     sequence = fields.Integer(default=10)
     bounce_alias = fields.Char(
-        'Bounce Alias', default='bounce', required=True,
+        'Bounce Alias', default='bounce', ui_required=True,
         help="Local-part of email used for Return-Path used when emails bounce e.g. "
              "'bounce' in 'bounce@example.com'")
     bounce_email = fields.Char('Bounce Email', compute='_compute_bounce_email')
     catchall_alias = fields.Char(
-        'Catchall Alias', default='catchall', required=True,
+        'Catchall Alias', default='catchall', ui_required=True,
         help="Local-part of email used for Reply-To to catch answers e.g. "
              "'catchall' in 'catchall@example.com'")
     catchall_email = fields.Char('Catchall Email', compute='_compute_catchall_email')

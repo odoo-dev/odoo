@@ -84,7 +84,7 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         self.assertEqual(self._get_mail_message(move).preview, 'The invoice has been sent to the Approved Platform. The following attachments were sent with the XML:')
 
     def test_send_pdp_not_receiver(self):
-        self.env.company.account_peppol_proxy_state = False
+        self.env.company.account_peppol_proxy_state = 'not_registered'
         move = self._create_french_invoice()
         with mock_pdp_annuaire_lookup(PDP_IDENTIFIER):
             move.partner_id.button_account_peppol_check_partner_endpoint()

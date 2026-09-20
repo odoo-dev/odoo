@@ -440,15 +440,14 @@ class TestMassMailValues(MassMailCommon):
             'model': recipient._name,
             'res_id': recipient.id,
         })
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(ValidationError):
             activity.write({'model': False})
-            self.env.flush_all()
         with self.assertRaises(IntegrityError):
             activity.write({'res_id': False})
-            self.env.flush_all()
+            activity.flush_recordset()
         with self.assertRaises(IntegrityError):
             activity.write({'res_id': 0})
-            self.env.flush_all()
+            activity.flush_recordset()
 
     def test_mailing_editor_created_attachments(self):
         mailing = self.env['mailing.mailing'].create({

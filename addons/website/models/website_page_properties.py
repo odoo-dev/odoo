@@ -220,7 +220,7 @@ class WebsitePageProperties(models.TransientModel):
         ],
         default='301',
         store=False,
-        required=True,
+        ui_required=True,
     )
     url_in_website_default_lang = fields.Char(compute='_compute_url_in_website_default_lang')
 

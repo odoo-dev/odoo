@@ -14,7 +14,7 @@ from operator import attrgetter
 
 from psycopg2.extras import Json as PsycopgJson
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.tools import SQL, reset_cached_properties, sql
 from odoo.tools.constants import IN_MAX
 from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
@@ -587,6 +587,12 @@ class Field[T, C]:
 
             if not isinstance(self.required, bool):
                 setup_warning(self, f'property required should be a boolean ({self.required})')
+            if self.required and not (
+                (self.store and self.column_type)
+                or (self.inherited_field and self.inherited_field.required)  # the inherited field is required
+                or self.compute  # TODO checked after computation
+            ):
+                setup_warning(self, "required is not enforced on a field without a database column")
 
             if not isinstance(self.readonly, bool):
                 setup_warning(self, f'property readonly should be a boolean ({self.readonly})')
@@ -1707,6 +1713,8 @@ class Field[T, C]:
             return
 
         # update the cache
+        if cache_value is None and self.required and any(records._ids) and not self.compute:
+            raise ValidationError(records.env._('Cannot assign nothing to a required field %s', self))
         self._update_cache(records, cache_value, dirty=True)
 
     ############################################################################

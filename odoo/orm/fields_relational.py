@@ -7,7 +7,7 @@ import typing
 from collections import defaultdict
 from operator import attrgetter
 
-from odoo.exceptions import AccessError, MissingError, UserError
+from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.tools import SQL, OrderedSet, sql, unique
 from odoo.tools.misc import SENTINEL, Sentinel, unquote
 
@@ -1112,6 +1112,8 @@ class One2many(_RelationalMulti):
                     ondelete = ondelete(lines, model.browse(inverse_values))
                 if ondelete == 'cascade':
                     to_delete.extend(lines._ids)
+                elif inverse_field.required:
+                    raise ValidationError(lines.env._("Cannot set inverse %s to blank", inverse_field))
                 else:
                     lines[inverse] = False
 
