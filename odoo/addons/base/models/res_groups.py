@@ -262,17 +262,23 @@ class ResGroups(models.Model):
 
         if self.env.context.get('apply_regular_group') is not REGULAR_VALUE:
             self._apply_group_regular()
+
+        # group implications drive `res.users.share` / `res.partner.partner_share`
+        self.env['res.users']._recompute_user_share()
+
         return res
 
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
         self._apply_group_regular()
+        self.env['res.users']._recompute_user_share()
         return res
 
     def unlink(self):
         res = super().unlink()
         self._apply_group_regular()
+        self.env['res.users']._recompute_user_share()
         return res
 
     def _ensure_xml_id(self):
@@ -393,6 +399,14 @@ class ResGroups(models.Model):
         """
         groups = self.all_implied_ids.filtered(lambda g: implied_group in g.implied_ids)
         groups.write({'implied_ids': [Command.unlink(implied_group.id)]})
+
+    @api.model
+    def _get_internal_group_ids(self):
+        """ Return the ids of the groups whose members are internal users, i.e.
+        ``base.group_user`` and every group implying it. """
+        group_definitions = self._get_group_definitions()
+        group_user_id = group_definitions.get_id('base.group_user')
+        return (group_user_id, *group_definitions.get_subset_ids([group_user_id]))
 
     def _get_light_group_xmlids(self):
         """List of XML IDs of groups considered light

@@ -487,12 +487,63 @@ class ResUsers(models.Model):
         for user in self.filtered(lambda user: user.name and is_html_empty(user.signature)):
             user.signature = Markup('<div>%s</div>') % user['name']
 
-    @api.depends('all_group_ids')
+    # To avoid a cache memory error, we do not use @api.depends('all_group_ids').
+    # This update is make manually during group implying updates.
+    @api.depends('group_ids')
     def _compute_share(self):
         user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
         internal_users = self.filtered_domain([('all_group_ids', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
+
+    @api.model
+    def _recompute_user_share(self):
+        """ Recalculate ``res.users.share`` and ``res.partner.partner_share`` in bulk via SQL.
+
+        Changes in group relations or group hierarchy invalidate the share status of users
+        and their associated partners. Resolving this dependency through standard ORM
+        recordsets requires loading every user of every modified group, which causes
+        memory overhead and poor performance O(N).
+
+        This method executes a direct bulk SQL update in set-based queries, followed
+        by ORM cache invalidation to ensure consistency across the environment.
+        """
+        internal_group_ids = list(self.env['res.groups']._get_internal_group_ids())
+
+        # 1. Mise à jour de res_users : share = False si l'utilisateur appartient à au moins un groupe interne
+        if internal_group_ids:
+            self.env.cr.execute("""
+                UPDATE res_users
+                SET share = NOT EXISTS (
+                    SELECT 1
+                    FROM res_groups_users_rel rel
+                    WHERE rel.uid = res_users.id
+                      AND rel.gid = ANY(%s)
+                )
+            """, [internal_group_ids])
+        else:
+            self.env.cr.execute("UPDATE res_users SET share = TRUE")
+
+        # 2. Mise à jour de res_partner : partner_share = False si le partenaire est lié à au moins un utilisateur interne
+        self.env.cr.execute("""
+            UPDATE res_partner
+            SET partner_share = NOT EXISTS (
+                SELECT 1
+                FROM res_users
+                WHERE res_users.partner_id = res_partner.id
+                  AND res_users.share = FALSE
+            )
+        """)
+
+        # 3. Invalidation du cache ORM pour forcer le rechargement des données SQL
+        self.env['res.users'].invalidate_model(['share'])
+        self.env['res.partner'].invalidate_model(['partner_share'])
+
+    def _compute_sql_share(self, table):
+        return SQL(
+            'NOT EXISTS (SELECT FROM res_groups_users_rel r WHERE r.uid = %s AND r.gid IN %s)',
+            table.id, self.env['res.groups']._get_internal_group_ids(),
+        )
 
     @api.depends('company_id')
     def _compute_companies_count(self):
