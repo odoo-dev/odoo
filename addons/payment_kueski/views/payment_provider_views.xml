@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">Kueski Pay Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <field
+                    string="Merchant ID"
+                    name="kueski_merchant_id"
+                    invisible="code != 'kueski'"
+                    required="is_live"
+                />
+                <label
+                    for="kueski_key_id"
+                    string="Private Key"
+                    invisible="code != 'kueski'"
+                    groups="base.group_system"
+                />
+                <div class="o_row" invisible="code != 'kueski'" groups="base.group_system">
+                    <field name="kueski_key_id" required="is_live"/>
+                    <button
+                        string="Generate"
+                        name="action_kueski_generate_key"
+                        type="object"
+                        class="btn-link"
+                        icon="key"
+                        invisible="kueski_key_id"
+                    />
+                </div>
+                <field
+                    string="Public Key"
+                    name="kueski_public_key"
+                    invisible="code != 'kueski' or not kueski_key_id"
+                    widget="CopyClipboardText"
+                    groups="base.group_system"
+                    help="Send this public key to Kueski to register it on your merchant account."
+                />
+            </group>
+        </field>
+    </record>
+
+</odoo>
