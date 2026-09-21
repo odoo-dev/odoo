@@ -251,6 +251,36 @@ test("Form dialog and subview with _view_ref contexts", async () => {
     await animationFrame();
 });
 
+test("FormViewDialog reloads the form view when its context differs from the cached one", async () => {
+    Partner._views[["form", 42]] = /* xml */ `<form><field name="foo"/></form>`;
+
+    onRpc("get_views", ({ kwargs }) => {
+        expect.step(["get_views", kwargs.context.form_view_ref]);
+        expect(kwargs.views).toEqual([[42, "form"]]);
+    });
+
+    await mountWithCleanup(WebClient);
+    getService("dialog").add(FormViewDialog, {
+        resModel: "partner",
+        resId: 1,
+        viewId: 42,
+        context: { form_view_ref: "dialog_form" },
+        viewDescriptions: {
+            fields: {},
+            relatedModels: {},
+            views: { form: { arch: `<form/>`, id: 42 } },
+            request: {
+                context: { lang: "en", form_view_ref: "cached_form" },
+                views: [[42, "form"]],
+            },
+        },
+    });
+    await animationFrame();
+
+    expect(".modal .o_form_view").toHaveCount(1);
+    expect.verifySteps([["get_views", "dialog_form"]]);
+});
+
 test("click on view buttons in a FormViewDialog", async () => {
     Partner._views.form = /* xml */ `
         <form>

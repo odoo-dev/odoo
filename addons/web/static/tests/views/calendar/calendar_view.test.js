@@ -5172,6 +5172,26 @@ test(`calendar with custom quick create view`, async () => {
     expect.verifySteps(["add dialog 2"]);
 });
 
+test(`quick create reuses the form view loaded with the calendar action`, async () => {
+    onRpc("get_views", () => expect.step("get_views"));
+
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `
+            <calendar date_start="start" date_stop="stop" all_day="is_all_day" mode="month" quick_create="1" quick_create_view_id="1">
+                <field name="name"/>
+            </calendar>
+        `,
+        config: { views: [[1, "form"]] },
+    });
+    expect.verifySteps(["get_views"]);
+
+    await clickAllDaySlot("2016-12-01");
+    expect(".modal .o_form_view").toHaveCount(1);
+    expect.verifySteps([]);
+});
+
 test(`check apply default record label`, async () => {
     class TestCalendarController extends CalendarController {
         get editRecordDefaultDisplayText() {

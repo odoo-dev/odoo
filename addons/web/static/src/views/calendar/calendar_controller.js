@@ -312,6 +312,7 @@ export class CalendarController extends Component {
         return {
             resModel: this.model.resModel,
             viewId: this.model.quickCreateFormViewId,
+            viewDescriptions: this.env.config.viewDescriptions,
             title: _t("New Event"),
             context,
         };
@@ -360,6 +361,7 @@ export class CalendarController extends Component {
                             ? _t("Open: %s", record.title)
                             : this.editRecordDefaultDisplayText,
                         viewId: this.model.formViewId,
+                        viewDescriptions: this.env.config.viewDescriptions,
                         onRecordSaved: () => this.model.load(),
                     },
                     { onClose: () => resolve() }

@@ -1,4 +1,5 @@
 import { Dialog } from "@web/core/dialog/dialog";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { CallbackRecorder } from "@web/search/action_hook";
 import { View } from "@web/views/view";
@@ -20,6 +21,7 @@ export const formViewDialogProps = {
     resId: t.or([t.number(), t.boolean()]).optional(),
     title: t.string().optional(),
     viewId: t.or([t.number(), t.boolean()]).optional(),
+    viewDescriptions: t.object().optional(),
     preventCreate: t.boolean().optional(false),
     preventEdit: t.boolean().optional(false),
     canExpand: t.boolean().optional(true),
@@ -47,6 +49,8 @@ export class FormViewDialog extends Component {
 
         this.currentResId = this.props.resId;
 
+        const formViewDescription = this.getFormViewDescription();
+
         if (this.props.canExpand) {
             this.onExpandCallback = this.onExpand.bind(this);
         }
@@ -61,6 +65,11 @@ export class FormViewDialog extends Component {
             resId: this.props.resId || false,
             resModel: this.props.resModel,
             viewId: this.props.viewId || false,
+            ...(formViewDescription && {
+                arch: formViewDescription.arch,
+                fields: this.props.viewDescriptions.fields,
+                relatedModels: this.props.viewDescriptions.relatedModels,
+            }),
             preventCreate: this.props.preventCreate,
             preventEdit: this.props.preventEdit,
             discardRecord: this.discardRecord.bind(this),
@@ -89,6 +98,37 @@ export class FormViewDialog extends Component {
                 this.props.close();
             };
         }
+    }
+
+    getFormViewDescription() {
+        const { viewDescriptions, viewId = false } = this.props;
+        const formViewDescription = viewDescriptions?.views?.form;
+        const requestedFormView = viewDescriptions?.request?.views?.find(
+            ([, viewType]) => viewType === "form"
+        );
+        if (!formViewDescription || !requestedFormView || !viewDescriptions.fields) {
+            return;
+        }
+
+        const requestedViewId = requestedFormView[0] || false;
+        const isSameView = viewId
+            ? formViewDescription.id === viewId
+            : requestedViewId === false;
+        if (!isSameView) {
+            return;
+        }
+
+        const sourceContext = viewDescriptions.request.context || {};
+        const dialogContext = { ...user.context, ...this.props.context };
+        const viewContextKeys = new Set(
+            [...Object.keys(sourceContext), ...Object.keys(dialogContext)].filter(
+                (key) => key === "lang" || key.endsWith("_view_ref")
+            )
+        );
+        if ([...viewContextKeys].some((key) => sourceContext[key] !== dialogContext[key])) {
+            return;
+        }
+        return formViewDescription;
     }
 
     /**

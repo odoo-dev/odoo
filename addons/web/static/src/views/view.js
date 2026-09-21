@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { deepCopy, pick } from "@web/core/utils/objects";
 import { nbsp } from "@web/core/utils/strings";
 import { parseXML } from "@web/core/utils/xml";
+import { user } from "@web/core/user";
 import { extractLayoutComponents } from "@web/search/layout";
 import { WithSearch, withSearchProps } from "@web/search/with_search/with_search";
 import { useActionLinks } from "@web/views/view_hook";
@@ -36,6 +37,7 @@ import { session } from "@web/session";
  * @property {() => Record<string, any>} getPagerProps
  * @property {Record<string, any>[]} viewSwitcherEntry
  * @property {typeof Component} Banner
+ * @property {Object} [viewDescriptions]
  *
  * @typedef {import("@web/core/context").Context} Context
  * @typedef {import("@web/env").OdooEnv} OdooEnv
@@ -321,6 +323,10 @@ export class View extends Component {
                 options.embeddedParentResId = context.active_id;
             }
             const result = await this.viewService.loadViews({ context, resModel, views }, options);
+            this.env.config.viewDescriptions = markRaw({
+                ...result,
+                request: { context: { ...user.context, ...context }, views },
+            });
             // Note: if props.views is different from views, the cached descriptions
             // will certainly not be reused! (but for the standard flow this will work as
             // before)
