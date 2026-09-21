@@ -23,7 +23,9 @@ function useEarlyExternalListener(target, eventName, handler, eventParams) {
  */
 function useClickAway(callback) {
     const pointerDownHandler = (event) => {
-        callback(event.composedPath()[0]);
+        if (event.detail === 0) {
+            callback(event.composedPath()[0]);
+        }
     };
 
     const blurHandler = (ev) => {
@@ -35,6 +37,7 @@ function useClickAway(callback) {
 
     useEarlyExternalListener(window, "pointerdown", pointerDownHandler, { capture: true });
     useEarlyExternalListener(window, "blur", blurHandler, { capture: true });
+    useEarlyExternalListener(window, "click", pointerDownHandler, { capture: true });
 }
 
 const POPOVERS = new WeakMap();
