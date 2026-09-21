@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_method_kueski" model="payment.method">
+        <field name="name">Kueski Pay</field>
+        <field name="code">kueski</field>
+        <field name="provider_id" ref="payment.payment_provider_kueski"/>
+        <field name="image" type="bytes" file="payment_kueski/static/description/icon.png"/>
+        <field name="supported_country_ids" eval="[Command.set([ref('base.mx')])]"/>
+        <field name="supported_currency_ids" eval="[Command.set([ref('base.MXN')])]"/>
+    </record>
+
+</odoo>
