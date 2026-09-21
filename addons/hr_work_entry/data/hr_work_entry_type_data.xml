@@ -495,6 +495,7 @@
         <field name="count_as">absence</field>
         <field name="country_id" ref="base.be"/>
         <field name="amount_rate">0.0</field>
+        <field name="sequence">10</field>
     </record>
 
     <record id="be_work_entry_type_additional_hours" model="hr.work.entry.type">
@@ -533,6 +534,7 @@
         <field name="color">5</field>
         <field name="count_as">absence</field>
         <field name="country_id" ref="base.be"/>
+        <field name="sequence">9</field>
     </record>
 
     <record id="be_work_entry_type_legal_leave" model="hr.work.entry.type">
@@ -604,6 +606,7 @@
         <field name="color">3</field>
         <field name="country_id" ref="base.be"/>
         <field name="count_as">absence</field>
+        <field name="sequence">5</field>
     </record>
 
     <record id="l10n_be_work_entry_type_upcomming_public_holiday" model="hr.work.entry.type">
@@ -613,6 +616,7 @@
         <field name="color">3</field>
         <field name="country_id" ref="base.be"/>
         <field name="count_as">absence</field>
+        <field name="sequence">5</field>
     </record>
 
     <record id="l10n_be_work_entry_type_solicitation_time_off" model="hr.work.entry.type">
@@ -807,6 +811,7 @@
         <field name="country_id" ref="base.be"/>
         <field name="count_as">absence</field>
         <field name="amount_rate">0.0</field>
+        <field name="sequence">10</field>
     </record>
 
     <record id="l10n_be_work_entry_type_breast_feeding" model="hr.work.entry.type">
@@ -937,6 +942,7 @@
         <field name="count_as">absence</field>
         <field name="resource_calendar_selectable" eval="True"/>
         <field name="amount_rate">0.0</field>
+        <field name="sequence">10</field>
     </record>
 
     <record id="l10n_be_work_entry_type_parental_time_off" model="hr.work.entry.type">
@@ -948,6 +954,7 @@
         <field name="count_as">absence</field>
         <field name="resource_calendar_selectable" eval="True"/>
         <field name="amount_rate">0.0</field>
+        <field name="sequence">10</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident_unpaid" model="hr.work.entry.type">
@@ -989,6 +996,7 @@
         <field name="count_as">absence</field>
         <field name="resource_calendar_selectable" eval="True"/>
         <field name="amount_rate">0.0</field>
+        <field name="sequence">10</field>
     </record>
 
     <record id="l10n_be_work_entry_type_partial_incapacity_unassimilated" model="hr.work.entry.type">

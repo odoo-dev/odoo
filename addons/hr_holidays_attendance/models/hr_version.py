@@ -26,7 +26,7 @@ class HrVersion(models.Model):
 
     @api.model
     def _get_work_entry_source_fields(self):
-        return super()._get_work_entry_source_fields() + ['attendance_based', 'attendance_ids']
+        return super()._get_work_entry_source_fields() + ['attendance_based']
 
     def _resolve_attendance_intervals(self, intervals):
         """Split overlapping intervals and pick the winner by work_entry_type.sequence."""
@@ -153,19 +153,12 @@ class HrVersion(models.Model):
             return False
         return super()._generate_work_entries_postprocess_adapt_to_calendar(vals)
 
-    def _get_more_vals_attendance_interval(self, interval):
-        vals = super()._get_more_vals_attendance_interval(interval)
-        att = interval[2]
-        if att and hasattr(att, '_name') and att._name == 'hr.attendance':
-            vals.append(('attendance_ids', att))
-        return vals
-
     def _get_valid_leave_intervals(self, attendances, interval):
         payload = interval[2]
         if not payload:
             return [interval]
 
-        count_as = self._get_interval_work_entry_type(interval).count_as
+        count_as = payload.work_entry_type.count_as
 
         if count_as == 'absence':
             # worked time wins over absence where they overlap
