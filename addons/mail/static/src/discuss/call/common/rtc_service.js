@@ -22,6 +22,7 @@ import { url } from "@web/core/utils/urls";
 import { isBrowserSafari, isMobileOS } from "@web/core/browser/feature_detection";
 import { CallAction } from "@mail/discuss/call/common/call_actions";
 import { ACTION_TAGS } from "@mail/core/common/action";
+import { TalkingDetector } from "./talking_detector";
 
 let sequence = 1;
 const getSequence = () => sequence++;
@@ -414,6 +415,12 @@ export class Rtc extends Record {
      * be accessed from the tab that is hosting the call.
      */
     selfSession = fields.One("discuss.channel.rtc.session", {
+        onAdd() {
+            this.talkingDetector?.start();
+        },
+        onDelete() {
+            this.talkingDetector?.stop();
+        },
         compute() {
             return (
                 this.localSession ||
@@ -462,6 +469,12 @@ export class Rtc extends Record {
     sfuTimeout;
     /** @type {AudioContext} AudioContext used to mix screen and mic audio */
     audioContext;
+    /** @type {TalkingDetector|undefined} */
+    talkingDetector;
+    /** @type {boolean} whether the user has been talking for long while muted */
+    showMicrophoneMuteWarning = false;
+    /** @type {boolean} whether the user asked not to see that warning again in this call */
+    isMicrophoneMuteWarningDismissed = false;
     // cross tab sync
     _broadcastChannel = new browser.BroadcastChannel("call_sync_state");
     _remotelyHostedSessionId;
@@ -516,7 +529,10 @@ export class Rtc extends Record {
     }
 
     get showMicrophoneSilentWarning() {
-        return !this.selfSession?.isMute && this.isMicAudioTrackMuted;
+        return (
+            (this.showMicrophoneMuteWarning && !this.isMicrophoneMuteWarningDismissed) ||
+            (!this.selfSession?.isMute && this.isMicAudioTrackMuted)
+        );
     }
 
     callActions = this.computed(() => {
@@ -555,6 +571,7 @@ export class Rtc extends Record {
         this.linkVoiceActivationDebounce = debounce(this.linkVoiceActivation, 500);
         this.upgradeConnectionDebounce = debounce(this._upgradeConnection, 15000, true);
         this.blurManager = undefined;
+        this.talkingDetector = new TalkingDetector(this);
     }
 
     start() {
@@ -2274,6 +2291,7 @@ export class Rtc extends Record {
             isSendingScreen: false,
             isMicAudioTrackMuted: false,
             isCallPermissionDialogOpen: false,
+            isMicrophoneMuteWarningDismissed: false,
             isMicrophonePermissionWarningDismissed: false,
             localChannel: undefined,
             localSession: undefined,

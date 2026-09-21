@@ -6,12 +6,20 @@
                 <t t-if="this.rtc.microphonePermission !== 'granted'">
                     <i class="oi text-warning me-1" data-icon="warning"/> No microphone permissions
                 </t>
+                <t t-elif="this.rtc.showMicrophoneMuteWarning">
+                    <div class="fs-5 mb-1"><i class="oi text-warning me-1" data-icon="warning"/> You may be muted</div>
+                    <div>It looks like you've been talking for a while. Others may not hear you.</div>
+                    <div class="d-flex flex-row gap-1 mt-2">
+                        <button class="btn btn-sm btn-primary" t-on-click="() => this.onClickUnmute()">Unmute</button>
+                        <button class="btn btn-sm btn-link" t-on-click="() => this.onClickDismissForever()">Don't show this again</button>
+                    </div>
+                </t>
                 <t t-else="">
                     <div class="fs-5 mb-1"><i class="oi text-warning me-1" data-icon="warning"/> Microphone muted by system</div>
                     <div>Go to your computer's settings to unmute your mic and increase its level</div>
                 </t>
             </div>
-            <div class="align-self-start cursor-pointer" t-on-click="this.onClickClose" title="Dismiss warning">
+            <div class="align-self-start cursor-pointer" t-on-click="() => this.onClickClose()" title="Dismiss warning">
                 <i class="oi" data-icon="close"/>
             </div>
         </div>

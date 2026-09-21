@@ -18,4 +18,14 @@ export class MicrophoneWarning extends Component {
         }
         this.props.close();
     }
+
+    onClickUnmute() {
+        this.props.close();
+        return this.rtc.toggleMicrophone();
+    }
+
+    onClickDismissForever() {
+        this.rtc.isMicrophoneMuteWarningDismissed = true;
+        this.props.close();
+    }
 }

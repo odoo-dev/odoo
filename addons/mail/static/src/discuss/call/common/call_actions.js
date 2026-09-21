@@ -45,7 +45,10 @@ export const muteAction = {
     badgeIcon: "priority_high",
     condition: ({ owner, store, channel }) =>
         channel?.isSelfInCall && (owner.env.inCallMenu || !store.rtc.selfSession?.is_deaf),
-    disabledCondition: ({ store }) => store.rtc.showMicrophoneSilentWarning,
+    // Only when the system holds the track muted: unmuting from here cannot help.
+    // When the user is merely muted while talking, the button is how they recover.
+    disabledCondition: ({ store }) =>
+        !store.rtc.selfSession?.isMute && store.rtc.isMicAudioTrackMuted,
     name: ({ store }) => (store.rtc.selfSession?.isMute ? _t("Unmute") : _t("Mute")),
     isActive: ({ store }) => store.rtc.selfSession?.isMute,
     icon: ({ action, owner, store }) =>
