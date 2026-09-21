@@ -1217,6 +1217,11 @@ class SaleOrder(models.Model):
 
         return False
 
+    def _get_online_confirmation_error(self):
+        """ Return why the customer cannot confirm the order online (signature or payment), if any. """
+        self.ensure_one()
+        return False
+
     def _prepare_confirmation_values(self):
         """ Prepare the sales order confirmation values.
 
