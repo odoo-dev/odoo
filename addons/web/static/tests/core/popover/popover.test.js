@@ -1,5 +1,5 @@
 import { beforeEach, expect, getFixture, runAllTimers, test } from "@odoo/hoot";
-import { queryOne, resize, scroll, waitFor } from "@odoo/hoot-dom";
+import { press, queryOne, resize, scroll, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import { mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -406,4 +406,25 @@ test("popover can animate", async () => {
     await runAllTimers();
 
     expect.verifySteps(["animated"]);
+});
+
+test("popover closes on click away triggered by a hotkey", async () => {
+    await mountWithCleanup(`
+        <button id="target">Target</button>
+        <button id="outside" data-hotkey="h">Outside</button>
+    `);
+    await mountWithCleanup(Popover, {
+        props: {
+            target: queryOne("#target"),
+            close: () => expect.step("close"),
+            component: Content,
+        },
+    });
+
+    expect(".o_popover").toHaveCount(1);
+
+    await press("alt+h");
+    await animationFrame();
+
+    expect.verifySteps(["close"]);
 });
