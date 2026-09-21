@@ -416,30 +416,44 @@ class AccountAccount(models.Model):
                 record[f'{fname}_path'] = False
 
     def _compute_sql_field_path(self, table, fname):
-        path_table = table._make_alias('path_table')
-        ancestor_table = TableSQL('ancestor', self.with_company(self.env.company.root_id).sudo(), path_table._query)
-        table._query.add_join(
-            'LEFT JOIN',
-            path_table,
-            SQL("""(
-                    SELECT child.id AS id,
-                           CASE
-                           WHEN COUNT(%(ancestors_codes)s) = COUNT(%(ancestors_ids)s)
-                           THEN STRING_AGG(%(ancestors_codes)s, ' / ' ORDER BY ord)
-                            END AS code_path,
-                           STRING_AGG(%(ancestors_names)s, ' / ' ORDER BY ord) AS name_path
-                      FROM account_account child
-        CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(RTRIM(child.parent_path, '/'), '/')) WITH ORDINALITY AS t(id, ord)
-                      JOIN account_account ancestor ON ancestor.id = t.id::int
-                  GROUP BY child.id
-                )""",
-                ancestors_ids=ancestor_table.id,
-                ancestors_codes=ancestor_table.code,
-                ancestors_names=ancestor_table.name,
-            ),
-            SQL('%(path_table_id)s = %(account_id)s', path_table_id=path_table.id, account_id=table.id),
+        root_model = self.with_company(self.env.company.root_id).sudo()
+        ancestor_table = TableSQL('ancestor', root_model, table._query)
+        if fname == 'code':
+            path = SQL(
+                "CASE WHEN COUNT(%(codes)s) = COUNT(%(ids)s) THEN STRING_AGG(%(codes)s, ' / ' ORDER BY ord) END",
+                codes=ancestor_table.code,
+                ids=ancestor_table.id,
+            )
+        else:
+            path = SQL("STRING_AGG(%s, ' / ' ORDER BY ord)", ancestor_table.name)
+        # uncorrelated subquery: PostgreSQL evaluates it once per query as an InitPlan
+        return SQL("""
+            CASE
+            WHEN %(parent_id)s IS NULL THEN %(own_value)s
+            ELSE (
+                SELECT JSONB_OBJECT_AGG(paths.id, paths.path)
+                  FROM (
+                        SELECT child.id AS id, %(path)s AS path
+                          FROM account_account child
+            CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(RTRIM(child.parent_path, '/'), '/')) WITH ORDINALITY AS t(id, ord)
+                          JOIN account_account ancestor ON ancestor.id = t.id::int
+                         WHERE child.parent_id IS NOT NULL
+                           AND EXISTS (
+                                SELECT 1
+                                  FROM account_account_res_company_rel rel
+                                 WHERE rel.account_account_id = child.id
+                                   AND rel.res_company_id IN %(company_ids)s
+                           )
+                      GROUP BY child.id
+                  ) paths
+            ) ->> %(account_id)s::text
+            END""",
+            parent_id=table.parent_id,
+            own_value=table._with_model(root_model)[fname],
+            path=path,
+            company_ids=tuple(self.env.companies.root_id.ids),
+            account_id=table.id,
         )
-        return path_table[f'{fname}_path']
 
     @api.depends_context('company')
     @api.depends('code')
