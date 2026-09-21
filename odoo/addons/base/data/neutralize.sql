@@ -36,3 +36,9 @@ UPDATE ir_act_server
 UPDATE ir_config_parameter
    SET value = 'dummysecret'
  WHERE key = 'database.secret';
+
+-- disable outgoing server action requests in neutralized databases
+UPDATE ir_config_parameter
+   SET value = ''
+ WHERE key = 'server_action_request_domains';
+

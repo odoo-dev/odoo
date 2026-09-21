@@ -4,6 +4,7 @@ from . import common
 from . import test_avatar_mixin
 from . import test_calendar_view
 from . import test_ir_actions
+from . import test_ir_server_action_request
 from . import test_ir_actions_report
 from . import test_ir_asset
 from . import test_ir_attachment
