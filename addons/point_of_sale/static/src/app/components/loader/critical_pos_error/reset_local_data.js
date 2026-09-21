@@ -54,5 +54,10 @@ export async function resetLocalData() {
     }
 
     await Promise.all(tasks);
-    location.reload();
+    // Use setTimeout to defer navigation past any pending microtasks
+    // (e.g. BackButtonManager._deactivate's history.back()) that would
+    // otherwise cancel the reload on Android Chrome.
+    setTimeout(() => {
+        location.reload();
+    }, 0);
 }

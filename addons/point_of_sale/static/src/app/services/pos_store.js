@@ -406,7 +406,12 @@ export class PosStore extends WithLazyGetterTrap {
             url.searchParams.set("limited_loading", "0");
         }
 
-        window.location.href = url.href;
+        // Use setTimeout to defer navigation past any pending microtasks
+        // (e.g. BackButtonManager._deactivate's history.back()) that would
+        // otherwise cancel the reload on Android Chrome.
+        setTimeout(() => {
+            window.location.href = url.href;
+        }, 0);
     }
 
     async showLoginScreen() {
@@ -2516,7 +2521,12 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     redirectToBackend() {
-        window.location = "/odoo/action-point_of_sale.action_client_pos_menu";
+        // Use setTimeout to defer navigation past any pending microtasks
+        // (e.g. BackButtonManager._deactivate's history.back()) that would
+        // otherwise cancel the navigation on Android Chrome.
+        setTimeout(() => {
+            window.location = "/odoo/action-point_of_sale.action_client_pos_menu";
+        }, 0);
     }
 
     getExcludedProductIds() {
