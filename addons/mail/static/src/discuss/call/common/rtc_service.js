@@ -22,6 +22,7 @@ import { url } from "@web/core/utils/urls";
 import { isBrowserSafari, isMobileOS } from "@web/core/browser/feature_detection";
 import { CallAction } from "@mail/discuss/call/common/call_actions";
 import { ACTION_TAGS } from "@mail/core/common/action";
+import { TalkingDetector } from "./talking_detector";
 
 let sequence = 1;
 const getSequence = () => sequence++;
@@ -412,6 +413,13 @@ export class Rtc extends Record {
      * be accessed from the tab that is hosting the call.
      */
     selfSession = fields.One("discuss.channel.rtc.session", {
+        onAdd() {
+            this.talkingDetector = new TalkingDetector(this);
+            this.talkingDetector.start();
+        },
+        onDelete() {
+            this.talkingDetector?.stop();
+        },
         compute() {
             return (
                 this.localSession ||
@@ -460,6 +468,7 @@ export class Rtc extends Record {
     sfuTimeout;
     /** @type {AudioContext} AudioContext used to mix screen and mic audio */
     audioContext;
+    showMicrophoneMuteWarning = false;
     // cross tab sync
     _broadcastChannel = new browser.BroadcastChannel("call_sync_state");
     _remotelyHostedSessionId;
@@ -512,7 +521,10 @@ export class Rtc extends Record {
     }
 
     get showMicrophoneSilentWarning() {
-        return !this.selfSession?.isMute && this.isMicAudioTrackMuted;
+        return (
+            this.showMicrophoneMuteWarning ||
+            (!this.selfSession?.isMute && this.isMicAudioTrackMuted)
+        );
     }
 
     callActions = this.computed(() => {
