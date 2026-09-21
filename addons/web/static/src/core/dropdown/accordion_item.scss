@@ -1,12 +1,18 @@
-.o_accordion_toggle {
-    @include caret();
+.o_accordion {
+    .o_accordion_toggle {
+        @include caret();
 
-    &.open {
-        @include caret('up');
+        &.open {
+            @include caret('up');
+        }
+
+        &::after {
+            @include o-position-absolute($top: 0, $right: 0);
+            transform: translate(-0.6em, 0.8em) /*rtl:translate(0.6em, 0.8em) scaleX(-1)*/;
+        }
     }
 
-    &::after {
-        @include o-position-absolute($top: 0, $right: 0);
-        transform: translate(-0.6em, 0.8em) /*rtl:translate(0.6em, 0.8em) scaleX(-1)*/;
+    &:has(.o-dropdown-item:hover) .o_accordion_toggle {
+        font-weight: $font-weight-bold;
     }
 }
