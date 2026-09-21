@@ -107,6 +107,13 @@ def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into']
 
 sql_counter: int = 0
 
+_slow_logger = logging.getLogger('odoo.sql_db.slow')
+_slow_threshold = float(os.environ.get('ODOO_PERF_PROBE_SLOW_QUERY', '1.0'))
+_slow_explain_budget = 30
+_slow_local = threading.local()
+_re_readonly = re.compile(r'\s*(SELECT|WITH)\b', re.IGNORECASE)
+_re_not_readonly = re.compile(r'\bFOR\s+(UPDATE|NO\s+KEY\s+UPDATE|SHARE|KEY\s+SHARE)\b|\b(nextval|setval)\s*\(', re.IGNORECASE)
+
 MAX_IDLE_TIMEOUT = int(os.getenv("ODOO_DB_MAX_IDLE_TIMEOUT", "600"))
 
 
@@ -432,6 +439,9 @@ class Cursor(_CursorProtocol):
         self.sql_log_count += 1
         sql_counter += 1
 
+        if delay > _slow_threshold:
+            self._log_slow_query(delay)
+
         if hasattr(current_thread, 'query_count'):
             current_thread.query_count += 1
         if hasattr(current_thread, 'query_time'):
@@ -450,6 +460,37 @@ class Cursor(_CursorProtocol):
             if log_target:
                 stat_count, stat_time = log_target.get(table or '', (0, 0))
                 log_target[table or ''] = (stat_count + 1, stat_time + delay * 1E6)
+
+    def _log_slow_query(self, delay: float) -> None:
+        """Log a slow statement and the EXPLAIN ANALYZE of it when read-only, never raising."""
+        global _slow_explain_budget  # noqa: PLW0603
+        if getattr(_slow_local, 'active', False):
+            return
+        _slow_local.active = True
+        try:
+            query = (self._obj.query or b'').decode(errors='replace')
+            _slow_logger.warning("slow query %.3fs rowcount=%s: %s", delay, self._obj.rowcount, query[:500])
+            if (
+                _slow_explain_budget <= 0 or self._cnx.autocommit
+                or not _re_readonly.match(query) or _re_not_readonly.search(query)
+                or self._cnx.get_transaction_status() != psycopg2.extensions.TRANSACTION_STATUS_INTRANS
+            ):
+                return
+            _slow_explain_budget -= 1
+            # separate cursor on the same connection so the caller's result set survives
+            with self._cnx.cursor() as explain_cr:
+                explain_cr.execute("SAVEPOINT perf_probe_explain")
+                try:
+                    explain_cr.execute("EXPLAIN (ANALYZE, BUFFERS, SETTINGS) " + query)
+                    plan = [row[0] for row in explain_cr.fetchall()]
+                finally:
+                    explain_cr.execute("ROLLBACK TO SAVEPOINT perf_probe_explain")
+                    explain_cr.execute("RELEASE SAVEPOINT perf_probe_explain")
+            _slow_logger.warning("slow query plan (%.3fs):\n%s", delay, "\n".join(plan[:80]))
+        except Exception:  # noqa: BLE001
+            _slow_logger.warning("slow query explain failed", exc_info=True)
+        finally:
+            _slow_local.active = False
 
     def executemany(self, query: typing.LiteralString | psql.Composable, vars_list) -> None:
         """Execute the query for each row in the vars_list."""

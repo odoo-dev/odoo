@@ -19,6 +19,7 @@ import sys
 import warnings
 
 import odoo.modules
+from odoo.tests import perf_probe
 from . import case
 from .common import HttpCase
 from .result import stats_logger
@@ -39,6 +40,7 @@ class TestSuite(BaseTestSuite):
     """
 
     def run(self, result, debug=False):
+        perf_probe.start()
         default_tests_run_count = int(os.environ.get('ODOO_TEST_FAILURE_RETRIES', '0')) + 1
         for test in self:
             if result.shouldStop:
@@ -60,6 +62,7 @@ class TestSuite(BaseTestSuite):
                     tests_run_count = 1
                     _logger.info('Auto retry disabled for %s', test)
 
+                probe_before = perf_probe.snapshot()
                 for retry in range(tests_run_count):
                     result.had_failure = False  # reset in case of retry without soft_fail
                     if retry:
@@ -81,6 +84,7 @@ class TestSuite(BaseTestSuite):
                         if not result.wasSuccessful() and default_tests_run_count != 1:
                             _logger.runbot('Disabling auto-retry after a failed test')
                             default_tests_run_count = 1
+                perf_probe.report('test', test.id(), probe_before, min_wall=10)
 
         self._tearDownPreviousClass(None, result)
         odoo.modules.module.current_test = None
@@ -98,6 +102,7 @@ class TestSuite(BaseTestSuite):
 
         currentClass._classSetupFailed = False
 
+        probe_before = perf_probe.snapshot()
         try:
             currentClass.setUpClass()
         except Exception as e:
@@ -114,6 +119,7 @@ class TestSuite(BaseTestSuite):
                         self._createClassOrModuleLevelException(
                                 result, exc[1], 'setUpClass', className,
                                 info=exc)
+            perf_probe.report('setup_class', util.strclass(currentClass), probe_before)
 
     def _createClassOrModuleLevelException(self, result, exception, method_name,
                                            parent, info=None):
