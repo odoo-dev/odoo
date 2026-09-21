@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n_az</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='fiscal_localization_setting_container']" position="inside">
+                <setting string="Simplified Tax Rate" company_dependent="1" invisible="country_code != 'AZ'"
+                         help="Rate (%) applied to the quarterly turnover on the Simplified Tax Report">
+                    <field name="l10n_az_simplified_tax_rate"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
