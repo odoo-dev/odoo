@@ -1,0 +1,394 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_az
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-20 13:26+0000\n"
+"PO-Revision-Date: 2026-08-20 13:26+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_b
+msgid "1(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_b_w_d
+msgid "1(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_b_w_g
+msgid "1(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_t
+msgid "1(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_t_w_d
+msgid "1(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_1_t_w_g
+msgid "1(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_10_b
+msgid "10(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_11_b
+msgid "11(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_12_b
+msgid "12(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_12_t
+msgid "12(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_13_b
+msgid "13(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_13_t
+msgid "13(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_14_b
+msgid "14(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_14_t
+msgid "14(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_15_b
+msgid "15(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_16_b
+msgid "16(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_16_t
+msgid "16(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_17_t
+msgid "17(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_18_t
+msgid "18(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_19_t
+msgid "19(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_b
+msgid "2(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_b_w_d
+msgid "2(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_b_w_g
+msgid "2(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_t
+msgid "2(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_t_w_d
+msgid "2(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_2_t_w_g
+msgid "2(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_20_b
+msgid "20(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_21_b
+msgid "21(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_21_t
+msgid "21(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_22_t
+msgid "22(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_b
+msgid "3(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_b_w_d
+msgid "3(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_b_w_g
+msgid "3(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_t
+msgid "3(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_t_w_d
+msgid "3(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_3_t_w_g
+msgid "3(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_4_b
+msgid "4(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_4_b_w_d
+msgid "4(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_4_b_w_g
+msgid "4(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_4_t_w_d
+msgid "4(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_4_t_w_g
+msgid "4(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_5_b
+msgid "5(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_5_b_w_d
+msgid "5(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_5_b_w_g
+msgid "5(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_5_t_w_d
+msgid "5(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_5_t_w_g
+msgid "5(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_b
+msgid "6(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_b_w_d
+msgid "6(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_b_w_g
+msgid "6(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_t
+msgid "6(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_t_w_d
+msgid "6(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_6_t_w_g
+msgid "6(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_b
+msgid "7(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_b_w_d
+msgid "7(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_b_w_g
+msgid "7(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_t
+msgid "7(T)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_t_w_d
+msgid "7(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_7_t_w_g
+msgid "7(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_8_b
+msgid "8(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_8_b_w_d
+msgid "8(B)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_8_b_w_g
+msgid "8(B)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_8_t_w_d
+msgid "8(T)_W_D"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_8_t_w_g
+msgid "8(T)_W_G"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_9_b
+msgid "9(B)"
+msgstr ""
+
+#. module: l10n_az
+#: model:ir.model,name:l10n_az.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_az
+#: model:ir.model,name:l10n_az.model_account_report
+msgid "Accounting Report"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.report.column,name:l10n_az.tax_report_tit_column_base
+msgid "Amount"
+msgstr ""
+
+#. module: l10n_az
+#. odoo-python
+#: code:addons/l10n_az/models/template_az.py:0
+msgid "Azerbaijani Chart of Accounts (IFRS)"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.report.column,name:l10n_az.tax_report_withholding_tax_column_base
+msgid "Base"
+msgstr ""
+
+#. module: l10n_az
+#: model:ir.model.fields,field_description:l10n_az.field_account_chart_template__display_name
+#: model:ir.model.fields,field_description:l10n_az.field_account_report__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: l10n_az
+#: model:ir.model.fields,field_description:l10n_az.field_account_chart_template__id
+#: model:ir.model.fields,field_description:l10n_az.field_account_report__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.account.tag,name:l10n_az.az_tag_sv1
+msgid "SV1"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.report.column,name:l10n_az.tax_report_withholding_tax_column_tax
+msgid "Tax"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.report.column,name:l10n_az.tax_report_vat_column_base
+msgid "Taxable Turnover excl. VAT"
+msgstr ""
+
+#. module: l10n_az
+#: model:account.report.column,name:l10n_az.tax_report_vat_column_tax
+msgid "VAT Amount"
+msgstr ""
