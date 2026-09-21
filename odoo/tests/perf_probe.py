@@ -55,6 +55,18 @@ SUBXACT_QUERY = """
                        AND pg_stat_get_backend_pid(b.id) <> pg_backend_pid()) AS own
       FROM pg_stat_get_backend_idset() AS b(id) CROSS JOIN LATERAL pg_stat_get_backend_subxact(b.id) AS s
 """
+TABLES_QUERY = """
+    SELECT relname, n_live_tup, n_dead_tup, n_mod_since_analyze, autovacuum_count, autoanalyze_count,
+           extract(epoch FROM now() - last_autovacuum)::int AS vacuum_ago
+      FROM pg_stat_user_tables
+     WHERE relname IN ('account_account', 'account_tax', 'account_tax_repartition_line', 'account_account_res_company_rel')
+"""
+AUTOVACUUM_QUERY = """
+    SELECT a.datname = current_database() AS is_mine, a.datname, p.relid, p.phase,
+           left(regexp_replace(a.query, '\\s+', ' ', 'g'), 80) AS query
+      FROM pg_stat_activity a LEFT JOIN pg_stat_progress_vacuum p ON p.pid = a.pid
+     WHERE a.backend_type = 'autovacuum worker'
+"""
 
 
 def start():
@@ -273,6 +285,19 @@ class Probe(threading.Thread):
         if self.samples % SUMMARY_EVERY == 0:
             self.summary(mine, frames)
 
+    def vacuum_summary(self):
+        """Log dead rows of the accounting tables and what the autovacuum workers are doing server-wide."""
+        tables = ' '.join(
+            f"{row['relname']}=live:{row['n_live_tup']},dead:{row['n_dead_tup']},mod:{row['n_mod_since_analyze']},"
+            f"vac:{row['autovacuum_count']},anl:{row['autoanalyze_count']},vac_ago:{row['vacuum_ago']}"
+            for row in self.optional(TABLES_QUERY)
+        )
+        workers = self.optional(AUTOVACUUM_QUERY)
+        on = ','.join(
+            f"{'OURS' if row['is_mine'] else row['datname']}:{row['phase'] or row['query']}" for row in workers
+        )
+        _logger.info("perf_probe vacuum %s av_workers=%s av_on=%s", tables or 'tables=-', len(workers), on or '-')
+
     def summary(self, mine, frames):
         new, old = self.counters(), self.prev
         wall = new['wall'] - old['wall']
@@ -301,6 +326,7 @@ class Probe(threading.Thread):
             new['xmin_age'], new['xid_age'], new['xid_next'] - old['xid_next'],
             odoo.modules.module.current_test, frames,
         )
+        self.vacuum_summary()
         self.prev = new
         self.ash_db.clear()
         self.ash_srv.clear()
