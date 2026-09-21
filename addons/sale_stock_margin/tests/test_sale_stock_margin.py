@@ -68,6 +68,34 @@ class TestSaleStockMargin(TestStockValuationCommon):
     # TESTS #
     #########
 
+    def test_margin_split_done_move_line(self):
+        product = self.product_avco
+        self._make_in_move(product, 20, 100)
+        order = self._create_sale_order()
+        line = self._create_sale_order_line(order, product, 10, 150)
+        order.action_confirm()
+        picking = order.picking_ids
+        move = picking.move_ids
+        move.write({'quantity': 10, 'picked': True})
+        picking.button_validate()
+        self.assertEqual(move.value, 1000)
+        self.assertEqual(line.purchase_price, 100)
+
+        picking.action_toggle_is_locked()
+        # The detailed operations form saves the total along with its move lines.
+        move.write({'quantity': 10, 'move_line_ids': [
+            Command.create({
+                'product_id': product.id,
+                'uom_id': product.uom_id.id,
+                'location_id': move.location_id.id,
+                'location_dest_id': move.location_dest_id.id,
+                'quantity': 6,
+            }),
+            Command.update(move.move_line_ids.id, {'quantity': 4}),
+        ]})
+        self.assertRecordValues(move, [{'quantity': 10, 'value': 1000}])
+        self.assertRecordValues(line, [{'qty_delivered': 10, 'purchase_price': 100, 'margin': 500}])
+
     def test_sale_stock_margin_1(self):
         sale_order = self._create_sale_order()
         product = self._create_product()
