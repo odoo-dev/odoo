@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from uuid import uuid4
+
 from odoo import models
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
@@ -243,11 +245,25 @@ class ProductCatalogMixin(models.AbstractModel):
             child_field, after_section_id=section_id, lines_to_insert=section_lines
         )
 
-        # Insert duplicated block
-        self[child_field] = [
-            Command.create({**line_data, "sequence": new_section_sequence + index})
-            for index, line_data in enumerate(section_lines.copy_data())
-        ]
+        # Build a mapping from each line's old virtual_id to a new one that is
+        # unique to this duplicated block, so combo parent/child links in the copy
+        # point at each other instead of back at the original section's lines.
+        virtual_id_map = {
+            line.virtual_id: f"{line.virtual_id}_copy_{uuid4().hex}"
+            for line in section_lines
+            if line.virtual_id
+        }
+
+        new_lines_data = []
+        for index, (line, line_data) in enumerate(zip(section_lines, section_lines.copy_data())):
+            line_data["sequence"] = new_section_sequence + index
+            if line.virtual_id in virtual_id_map:
+                line_data["virtual_id"] = virtual_id_map[line.virtual_id]
+            if line.linked_virtual_id in virtual_id_map:
+                line_data["linked_virtual_id"] = virtual_id_map[line.linked_virtual_id]
+            new_lines_data.append(Command.create(line_data))
+
+        self[child_field] = new_lines_data
         new_lines = (self[child_field] - lines).sorted("sequence")
 
         return {
