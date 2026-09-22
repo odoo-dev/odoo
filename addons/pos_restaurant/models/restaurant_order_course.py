@@ -26,6 +26,7 @@ class RestaurantOrderCourse(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
+        print(vals)
         if vals.get('fired') and not self.fired_date:
             vals['fired_date'] = fields.Datetime.now()
         return super().write(vals)
