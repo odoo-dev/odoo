@@ -538,7 +538,7 @@ been taken for this time off type. Changing it now would affect existing employe
                         'holds_changes': False,
                         'total_virtual_excess': 0,
                         'virtual_excess_data': {},
-                        'exceeding_duration': extra_data[employee][work_entry_type]['exceeding_duration'],
+                        'future_accrual_exceeding_duration': extra_data[employee][work_entry_type]['future_accrual_exceeding_duration'],
                         'request_unit': work_entry_type.request_unit,
                         'unit_of_measure': work_entry_type.unit_of_measure,
                         'allows_negative': work_entry_type.allows_negative,

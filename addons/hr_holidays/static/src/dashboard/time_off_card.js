@@ -15,7 +15,7 @@ export class TimeOffCardPopover extends Component {
         warning: t.any(),
         closest: t.any(),
         unit_of_measure: t.any(),
-        exceeding_duration: t.any(),
+        future_accrual_exceeding_duration: t.any(),
         close: t.any().optional(),
         allows_negative: t.any(),
         max_allowed_negative: t.any(),
@@ -171,7 +171,7 @@ export class TimeOffCard extends Component {
             warning: this.warning(),
             closest: data.closest_allocation_duration,
             unit_of_measure: data.unit_of_measure,
-            exceeding_duration: data.exceeding_duration,
+            future_accrual_exceeding_duration: data.future_accrual_exceeding_duration,
             allows_negative: data.allows_negative,
             max_allowed_negative: data.max_allowed_negative,
             errorLeaves: this.errorLeaves,
@@ -185,8 +185,8 @@ export class TimeOffCard extends Component {
 
     getAccrualExcess(data) {
         return data.allows_negative
-            ? -data.exceeding_duration > data.max_allowed_negative
-            : -data.exceeding_duration > 0;
+            ? -data.future_accrual_exceeding_duration > data.max_allowed_negative
+            : -data.future_accrual_exceeding_duration > 0;
     }
 
     async navigateTimeOffType() {

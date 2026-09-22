@@ -2552,9 +2552,9 @@ class HrLeave(models.Model):
             if not work_entry_type_data[leave.employee_id][0][1]['max_leaves']:
                 leave._force_cancel(reason, 'mail.mt_note')
                 continue
-            exceeding_duration = work_entry_type_data[leave.employee_id][0][1]['total_virtual_excess']
+            future_accrual_exceeding_duration = work_entry_type_data[leave.employee_id][0][1]['total_virtual_excess']
             excess_limit = work_entry_type.max_allowed_negative if work_entry_type.allows_negative else 0
-            if exceeding_duration <= excess_limit:
+            if future_accrual_exceeding_duration <= excess_limit:
                 continue
             leave._force_cancel(reason, 'mail.mt_note')
 
