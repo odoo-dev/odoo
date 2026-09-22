@@ -779,7 +779,8 @@ class TestAllocations(TestHrHolidaysCommon):
             allocation.write({'date_to': date(2024, 1, 11)})
             self.assertEqual(allocation.date_to, date(2024, 1, 11))
 
-            with self.assertRaises(ValidationError):
+            # Assert modifying the allocation date_to so that the leaves is not covered by any allocation anymore will raise an error!
+            with self.assertRaisesRegex(ValidationError, r'You cannot reduce the duration below the duration of leaves already taken by the employee.'):
                 allocation.write({'date_to': date(2024, 1, 8)})
 
             allocation.write({'date_to': date(2024, 1, 20)})

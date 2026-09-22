@@ -1324,7 +1324,7 @@ class HrLeave(models.Model):
         for leave in self:
             virtual_remaining_leaves = 0
             max_leaves = 0
-            primary_unit = 'hours' if leave.work_entry_type_id.unit_of_measure == 'hour' else 'days'
+            primary_unit = 'hour' if leave.work_entry_type_id.unit_of_measure == 'hour' else 'day'
             for allocation, allocation_dict in employee_days_per_allocation[leave.employee_id][leave.work_entry_type_id].items():
                 if allocation and (not allocation.date_to or allocation.date_to >= date_from):
                     max_leaves += allocation_dict[f'{primary_unit}_max_leaves']
@@ -2552,9 +2552,9 @@ class HrLeave(models.Model):
             if not work_entry_type_data[leave.employee_id][0][1]['max_leaves']:
                 leave._force_cancel(reason, 'mail.mt_note')
                 continue
-            exceeding_duration = work_entry_type_data[leave.employee_id][0][1]['total_virtual_excess']
+            total_virtual_excess = work_entry_type_data[leave.employee_id][0][1]['total_virtual_excess']
             excess_limit = work_entry_type.max_allowed_negative if work_entry_type.allows_negative else 0
-            if exceeding_duration <= excess_limit:
+            if total_virtual_excess <= excess_limit:
                 continue
             leave._force_cancel(reason, 'mail.mt_note')
 
