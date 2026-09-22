@@ -406,6 +406,7 @@ class L10nInEwaybill(models.Model):
         for line in invoice_lines:
             if (
                 line.display_type == 'product'
+                and line.l10n_in_hsn_code
                 and not AccountMove._l10n_in_is_service_hsn(line.l10n_in_hsn_code)
                 and (hsn_error_message := line._l10n_in_check_invalid_hsn_code())
             ):
@@ -700,9 +701,14 @@ class L10nInEwaybill(models.Model):
         tax_details = self.account_move_id._l10n_in_prepare_tax_details()
         tax_details_by_code = self.env['account.move']._get_l10n_in_tax_details_by_line_code(tax_details.get("tax_details", {}))
         invoice_line_tax_details = tax_details.get("tax_details_per_record")
+        filter_invoice_line_tax_details = {
+            line:line_tax_details for line, line_tax_details in invoice_line_tax_details.items() if line.l10n_in_hsn_code and line.tax_ids
+        }
         sign = self.account_move_id.is_inbound() and -1 or 1
+        g_discount = sum(line.balance * sign for line in invoice_line_tax_details.keys() if not (line.l10n_in_hsn_code and line.tax_ids))
         rounding_amount = sum(line.balance for line in self.account_move_id.line_ids if line.display_type == 'rounding') * sign
         total_invoice_value = tax_details.get("base_amount", 0.00) + tax_details.get("tax_amount", 0.00) + rounding_amount
+        print(tax_details.get('base_amount'), tax_details.get("tax_amount", 0.00))
         if self.account_move_id.l10n_in_gst_treatment == 'overseas' and self.partner_ship_to_id.country_id.code != 'IN':
             # For exports without LUT, the e-waybill total invoice value must include Reverse Charges.
             # Reverse charge amounts are stored as a negative value,
@@ -712,14 +718,14 @@ class L10nInEwaybill(models.Model):
             )
             total_invoice_value -= adjusting_rc_amount
         return {
-            "itemList": list(starmap(self._get_l10n_in_ewaybill_line_details, invoice_line_tax_details.items())),
+            "itemList": list(starmap(self._get_l10n_in_ewaybill_line_details, filter_invoice_line_tax_details.items())),
             "totalValue": round_value(tax_details.get("base_amount", 0.00)),
             **{
                 f'{tax_type}Value': round_value(tax_details_by_code.get(f'{tax_type}_amount', 0.00))
                 for tax_type in ['cgst', 'sgst', 'igst', 'cess']
             },
             "cessNonAdvolValue": round_value(tax_details_by_code.get("cess_non_advol_amount", 0.00)),
-            "otherValue": round_value(tax_details_by_code.get("other_amount", 0.00) + rounding_amount),
+            "otherValue": round_value(tax_details_by_code.get("other_amount", 0.00) + rounding_amount + g_discount),
             "totInvValue": round_value(total_invoice_value),
         }
 
