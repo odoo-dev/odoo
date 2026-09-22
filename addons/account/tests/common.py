@@ -336,48 +336,38 @@ class AccountTestInvoicingCommon(ProductCommon):
         AccountAccount = cls.env['account.account'].with_company(company)
         account_company_domain = cls.env['account.account']._check_company_domain(company)
         journal_company_domain = cls.env['account.journal']._check_company_domain(company)
+        account_ids = AccountAccount.search([
+            *account_company_domain,
+            ('account_type', 'in', ['income', 'expense', 'liability_payable', 'asset_receivable', 'asset_fixed', 'asset_current', 'liability_current']),
+        ], order='id').ids
+        # Default order on known ids, the planner has no statistics on this new company's accounts
+        accounts = AccountAccount.search([('id', 'in', account_ids)])
+
+        def first_account(account_type, exclude=None, non_trade=False):
+            return next(
+                (
+                    account for account in accounts
+                    if account.account_type == account_type
+                    and account != exclude
+                    and (not non_trade or account.non_trade)
+                ),
+                AccountAccount,
+            )
+
         return {
             'company': company,
             'currency': company.currency_id,
-            'default_account_revenue': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'income'),
-                    ('id', '!=', company.account_journal_early_pay_discount_gain_account_id.id)
-                ], limit=1),
-            'default_account_expense': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'expense'),
-                    ('id', '!=', company.account_journal_early_pay_discount_loss_account_id.id)
-                ], limit=1),
+            'default_account_revenue': first_account('income', exclude=company.account_journal_early_pay_discount_gain_account_id),
+            'default_account_expense': first_account('expense', exclude=company.account_journal_early_pay_discount_loss_account_id),
             'default_account_receivable': cls.env['res.partner']._fields['property_account_receivable_id'].get_company_dependent_fallback(
                 cls.env['res.partner'].with_company(company)
             ),
-            'default_account_payable': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'liability_payable')
-                ], limit=1),
-            'default_tax_account_receivable': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'asset_receivable'),
-                    ('non_trade', '=', True),
-                ], limit=1),
-            'default_tax_account_payable': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'liability_payable'),
-                    ('non_trade', '=', True),
-                ], limit=1),
-            'default_account_assets': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'asset_fixed')
-                ], limit=1),
-            'default_account_deferred_expense': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'asset_current')
-                ], limit=1),
-            'default_account_deferred_revenue': AccountAccount.search([
-                    *account_company_domain,
-                    ('account_type', '=', 'liability_current')
-                ], limit=1),
+            'default_account_payable': first_account('liability_payable'),
+            'default_tax_account_receivable': first_account('asset_receivable', non_trade=True),
+            'default_tax_account_payable': first_account('liability_payable', non_trade=True),
+            'default_account_assets': first_account('asset_fixed'),
+            'default_account_deferred_expense': first_account('asset_current'),
+            'default_account_deferred_revenue': first_account('liability_current'),
             'default_account_tax_sale': company.account_sale_tax_id.mapped('invoice_repartition_line_ids.account_id'),
             'default_account_tax_purchase': company.account_purchase_tax_id.mapped('invoice_repartition_line_ids.account_id'),
             'default_journal_misc': cls.env['account.journal'].search([
