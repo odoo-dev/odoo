@@ -128,25 +128,39 @@
     }
 }
 
-.o_search_panel:has(.o_treeEntry:hover) {
-    .o_treeEntry::before,
-    .o_treeEntry::after {
-        background-color: var(--treeEntry--beforeAfter-color, #{$border-color});
-    }
-
-    .o_search_panel_category_value_header_expanded::before {
-        background-color: $body-color;
-    }
-
-    .o_search_panel_category_value:hover > .o_search_panel_category_value_header {
-        --list-group-color: #{$black};
+// Highlight the branch going from the root down to the hovered entry.
+//
+// Keep every selector below cheap: this runs on trees that can hold thousands
+// of entries (e.g. a Documents folder with 10k sub-folders). In particular do
+// not reintroduce `:has()` here. `.o_treeEntry:has(~ .o_treeEntry:hover)` makes
+// selector matching quadratic in the number of siblings, and wrapping the whole
+// block in `.o_search_panel:has(.o_treeEntry:hover)` invalidates the style of
+// the entire panel every time the pointer enters or leaves the tree. On 10k
+// entries a single mouse move then costs seconds of style recalculation.
+//
+// `:hover` matches the hovered element *and* all of its ancestors, so
+// `.o_treeEntry:hover` already covers the hovered entry together with all of
+// its parent entries, i.e. the whole branch.
+.o_search_panel {
+    // The highlighted line above an entry spans all the entries preceding it.
+    // Instead of selecting those (which needs a sibling walk per entry), the
+    // hovered entry grows its own line upwards and the list clips it.
+    // Hover-scoped so that a focus ring is never clipped while navigating with
+    // the keyboard, and scoped to the panel rather than to each list so that
+    // moving from one entry to the next does not toggle `overflow` at all.
+    &:hover .list-group {
+        overflow-x: visible;
+        overflow-y: clip;
     }
 
     // Unfolded parent tree entry and hovered entry
-    .o_treeEntry:hover,
-    .o_treeEntry:has(.o_treeEntry:hover) {
+    .o_treeEntry:hover {
         &::before {
-            height: var(--treeEntry-branch-top);
+            top: auto;
+            bottom: calc(100% - var(--treeEntry-branch-top));
+            // Only the part between the top of the list and the entry shows,
+            // and a list never scrolls on its own: a viewport is always enough.
+            height: 100vmax;
         }
 
         &::before, &::after {
@@ -154,8 +168,8 @@
         }
     }
 
-    .o_treeEntry:has(~ .o_treeEntry:hover, ~ .o_treeEntry .o_treeEntry:hover)::before {
-        background-color: $body-color;
+    .o_search_panel_category_value:hover > .o_search_panel_category_value_header {
+        --list-group-color: #{$black};
     }
 }
 
