@@ -23,13 +23,11 @@ class TestChannel(TestHrCommon):
     def test_auto_subscribe_department(self):
         self.assertEqual(self.channel.channel_partner_ids, self.env['res.partner'])
         self.emp0.write({'department_id': self.department.id})
-        self.department.invalidate_recordset(['member_ids'])
-        self.assertEqual(self.department.member_ids, self.emp0)
+        self.assertEqual(self.department.member_version_ids.employee_id, self.emp0)
 
         self.channel.write({
             'subscription_department_ids': [(4, self.department.id)]
         })
-
         self.assertEqual(self.channel.channel_partner_ids, self.emp0.user_id.partner_id)
 
     def test_auto_subscribe_when_updating_employee_department(self):
@@ -37,8 +35,6 @@ class TestChannel(TestHrCommon):
             'subscription_department_ids': [(4, self.department.id)],
         })
         self.assertEqual(self.channel.channel_partner_ids, self.env['res.partner'])
-        self.department.invalidate_recordset(['member_ids'])
 
         self.emp0.write({'department_id': self.department.id})
-
         self.assertEqual(self.channel.channel_partner_ids, self.emp0.user_id.partner_id)

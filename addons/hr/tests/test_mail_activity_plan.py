@@ -96,11 +96,11 @@ class ActivityScheduleHRCase(ActivityScheduleCase):
         cls.employee_manager, cls.employee_1, cls.employee_2, cls.employee_dep_b = cls.employees
         cls.department_a = cls.env['hr.department'].create({
             'name': 'Test Department A',
-            'member_ids': [Command.link(employee.id) for employee in cls.employees - cls.employee_dep_b],
+            'member_version_ids': [Command.link(employee.version_id.id) for employee in cls.employees - cls.employee_dep_b],
         })
         cls.department_b = cls.env['hr.department'].create({
             'name': 'Test Department B',
-            'member_ids': [Command.link(cls.employee_dep_b.id)],
+            'member_version_ids': [Command.link(cls.employee_dep_b.version_id.id)],
         })
         cls.employee_1.parent_id = cls.employee_manager
         cls.employee_2.parent_id = cls.employee_manager
