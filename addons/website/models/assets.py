@@ -203,7 +203,6 @@ class WebsiteAssets(models.AbstractModel):
         """
         if not self.env.website and (host_id := self.env.context.get('host_id')):
             self = self.with_context(website_id=host_id)  # noqa: PLW0642
-
         IrAttachment = self.env['ir.attachment']
         if 'color-palettes-name' in values:
             self.reset_asset('/website/static/src/scss/options/colors/user_color_palette.scss', 'web.assets_frontend')

@@ -1,0 +1,82 @@
+// Every override that makes the embed's UI follow the livechat channel's configured
+// colors (see `im_livechat.channel`'s primary/secondary color fields).
+
+@mixin o-livechat-filled-btn-colors($role) {
+    --btn-color: var(--o-mail-livechat-#{$role}-text, var(--btn-color));
+    --btn-bg: var(--o-mail-livechat-#{$role}, var(--btn-bg));
+    --btn-border-color: var(--o-mail-livechat-#{$role}, var(--btn-border-color));
+    --btn-hover-bg: var(--o-mail-livechat-#{$role}, var(--btn-hover-bg));
+    --btn-hover-border-color: var(--o-mail-livechat-#{$role}, var(--btn-hover-border-color));
+    --btn-active-bg: var(--o-mail-livechat-#{$role}, var(--btn-active-bg));
+    --btn-active-border-color: var(--o-mail-livechat-#{$role}, var(--btn-active-border-color));
+}
+
+@mixin o-livechat-outline-btn-colors($role) {
+    --btn-color: var(--o-mail-livechat-#{$role}-outline, var(--btn-color));
+    --btn-border-color: var(--o-mail-livechat-#{$role}-outline, var(--btn-border-color));
+    --btn-hover-color: var(--o-mail-livechat-#{$role}-text, var(--btn-hover-color));
+    --btn-hover-bg: var(--o-mail-livechat-#{$role}, var(--btn-hover-bg));
+    --btn-hover-border-color: var(--o-mail-livechat-#{$role}, var(--btn-hover-border-color));
+    --btn-active-color: var(--o-mail-livechat-#{$role}-text, var(--btn-active-color));
+    --btn-active-bg: var(--o-mail-livechat-#{$role}, var(--btn-active-bg));
+    --btn-active-border-color: var(--o-mail-livechat-#{$role}, var(--btn-active-border-color));
+}
+
+@each $variant in (primary, secondary) {
+    .btn-#{$variant} {
+        @include o-livechat-filled-btn-colors($variant);
+    }
+
+    .btn-outline-#{$variant} {
+        @include o-livechat-outline-btn-colors($variant);
+    }
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-outline-primary,
+.btn-outline-secondary {
+
+    &:hover,
+    &:active {
+        filter: brightness(90%);
+    }
+}
+
+.btn-link {
+    color: var(--o-mail-livechat-primary-outline, inherit);
+}
+
+.o-mail-Composer-send i[data-icon="send"] {
+    color: var(--o-mail-livechat-primary-text, #FFF) !important;
+}
+
+@each $class, $variant in (o-green: primary, o-blue: secondary) {
+
+    .o-mail-Message-bubble.#{$class},
+    .o-mail-Message-bubbleTail.#{$class} {
+        --o-bubble-color-base: var(--o-mail-livechat-#{$variant}-bubble-base, var(--o-bubble-color-base));
+        --o-bubble-bg-ratio: var(--o-mail-livechat-bubble-bg-ratio, var(--o-bubble-bg-ratio));
+        --o-bubble-border-color: color-mix(in srgb,
+            #{$o-view-background-color} calc(var(--o-bubble-bg-ratio) - 20%),
+            var(--o-mail-livechat-#{$variant}-bubble-base, var(--o-bubble-border-color)));
+    }
+
+    .o-discuss-text-body:has(> .o-mail-Message-bubble.#{$class}) {
+        color: var(--o-mail-livechat-#{$variant}-bubble-text, #{$body-color}) !important;
+    }
+}
+
+a.o-discuss-mention,
+a.o_mail_redirect,
+a.o_channel_redirect,
+a.o_message_redirect_transformed {
+    color: var(--o-mail-livechat-primary-outline, inherit) !important;
+    background-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 15%, transparent);
+    outline-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 25%, transparent);
+
+    &:hover,
+    &:active {
+        background-color: color-mix(in srgb, var(--o-mail-livechat-primary, transparent) 25%, transparent);
+    }
+}

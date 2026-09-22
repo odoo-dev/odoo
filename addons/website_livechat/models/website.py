@@ -10,6 +10,21 @@ class Website(models.Model):
 
     channel_id = fields.Many2one('im_livechat.channel', string='Website Live Chat Channel')
 
+    def write(self, vals):
+        result = super().write(vals)
+        if "channel_id" in vals:
+            for website in self:
+                channel = website.channel_id.sudo()
+                # Newly linked channel: seed it with the website's current
+                # theme colors right away rather than leaving it on
+                # im_livechat's generic defaults until someone happens to
+                # edit a theme color or click "sync now" (see
+                # website_assets.py's make_scss_customization override,
+                # which only re-syncs a channel that was already synced).
+                if channel and not channel.theme_colors_synced:
+                    channel.write(channel.get_website_theme_colors())
+        return result
+
     @add_guest_to_context
     def _get_livechat_channel_info(self):
         """ Get the livechat info dict (button text, channel name, ...) for the livechat channel of
