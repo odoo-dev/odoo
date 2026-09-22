@@ -13,6 +13,7 @@ import { fillHtmlTransferData } from "../utils/clipboard";
 import { childNodes, closestElement } from "../utils/dom_traversal";
 import { parseHTML } from "../utils/html";
 import {
+    BASE_CONTAINER_CLASS,
     baseContainerGlobalSelector,
     getBaseContainerSelector,
 } from "@html_editor/utils/base_container";
@@ -139,6 +140,10 @@ export class ClipboardPlugin extends Plugin {
     ];
     static shared = ["pasteText"];
 
+    resources = {
+        paste_odoo_editor_html_overrides: this.convertDivToParagraph.bind(this),
+    };
+
     setup() {
         this.addDomListener(this.editable, "copy", this.onCopy);
         this.addDomListener(this.editable, "cut", this.onCut);
@@ -210,7 +215,10 @@ export class ClipboardPlugin extends Plugin {
         // refresh selection after potential changes from `before_paste` handlers
         selection = this.dependencies.selection.getEditableSelection();
 
-        if (this.checkPredicates("should_paste_as_text_predicates", selection, ev.clipboardData) ?? false) {
+        if (
+            this.checkPredicates("should_paste_as_text_predicates", selection, ev.clipboardData) ??
+            false
+        ) {
             this.pasteText(ev.clipboardData.getData("text/plain"));
         } else {
             this.handlePasteUnsupportedHtml(selection, ev.clipboardData) ||
@@ -610,6 +618,19 @@ export class ClipboardPlugin extends Plugin {
                 this.cleanForPaste(child);
             }
         }
+    }
+    // TODO: maybe use a fragment processor instead of an override for this case?
+    convertDivToParagraph(selection, fragment) {
+        if (this.config.baseContainers.includes("DIV")) {
+            return;
+        }
+        for (const baseContainer of fragment.querySelector(`div.${BASE_CONTAINER_CLASS}`)) {
+            this.dependencies.dom.setTagName(baseContainer, "P");
+        }
+        if (fragment.hasChildNodes()) {
+            this.dependencies.dom.insert(fragment);
+        }
+        return true;
     }
     /**
      * Return true if the given attribute, class or node is whitelisted for
