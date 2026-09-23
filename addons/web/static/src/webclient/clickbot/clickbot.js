@@ -21,7 +21,7 @@ const BLACKLISTED_MENUS = new Set([
     "hr_attendance.menu_action_open_form", // same here (tablet mode)
     "hr_attendance.menu_hr_attendance_onboarding", // same here (tablet mode)
     "mrp_workorder.menu_mrp_workorder_root", // same here (tablet mode)
-    "pos_enterprise.menu_point_kitchen_display_root", // conditional menu that may leads to frontend
+    "pos_enterprise.menu_point_preparation_display_root", // conditional menu that may leads to frontend
     "mail.menu_settings", // menu that leads to another App
     "website_sale.menu_open_shop", // menu that opens a website editor
 ]);
