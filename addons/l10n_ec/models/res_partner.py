@@ -25,9 +25,11 @@ EC_IDENTIFICATION_TYPES = {
     'PASSPORT': 'passport',
 }
 
+EC_FINAL_CONSUMER_VAT = '9' * 13
+
 
 def verify_final_consumer(vat):
-    return vat == '9' * 13  # final consumer is identified with 9999999999999
+    return vat == EC_FINAL_CONSUMER_VAT
 
 
 class ResPartner(models.Model):
