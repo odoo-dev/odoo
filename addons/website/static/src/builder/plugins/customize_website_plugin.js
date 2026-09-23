@@ -46,7 +46,13 @@ export const NO_IMAGE_SELECTION = Symbol.for("NoImageSelection");
 
 export class CustomizeWebsitePlugin extends Plugin {
     static id = "customizeWebsite";
-    static dependencies = ["builderActions", "domObserver", "savePlugin", "edit_interaction", "websiteBridge"];
+    static dependencies = [
+        "builderActions",
+        "domObserver",
+        "savePlugin",
+        "edit_interaction",
+        "websiteBridge",
+    ];
     static shared = [
         "customizeWebsiteColors",
         "customizeWebsiteVariables",
@@ -82,6 +88,7 @@ export class CustomizeWebsitePlugin extends Plugin {
             ReplaceBodyBgImageAction,
             RemoveBodyBgImageAction,
             BodyBgPositionOverlayAction,
+            SetCssAction,
         },
         color_combination_providers: withSequence(5, (el, actionParam) => {
             const combination = actionParam.combinationColor;
@@ -365,7 +372,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 "ir.ui.view",
                 "render_public_asset",
                 [`${key}`, {}],
-                { context: this.dependencies.websiteBridge.getWebsiteContextLang() },
+                { context: this.dependencies.websiteBridge.getWebsiteContextLang() }
             );
         }
         return this.getTemplateKey(key);
@@ -643,6 +650,79 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
         } else {
             clearInlinePosition();
         }
+    }
+}
+
+/**
+ * @returns {Map<string, [string, string]>} property -> [value, priority] of
+ *  the enabled, filled items. The Map keeps the last duplicate, like CSS does.
+ */
+function getEnabledDeclarations(items) {
+    const important = /\s*!important$/i;
+    return new Map(
+        items
+            .filter((item) => item.enabled && item.property?.trim() && item.value?.trim())
+            .map(({ property, value }) => [
+                property.trim(),
+                [value.trim().replace(important, ""), important.test(value) ? "important" : ""],
+            ])
+    );
+}
+
+export class SetCssAction extends BuilderAction {
+    static id = "setCss";
+    apply({ editingElement: el, value: listValue }) {
+        const oldProps = getEnabledDeclarations(JSON.parse(this.getValue({ editingElement: el })));
+        // Keep only the fields we own: BuilderList adds `_id` / `id` itself.
+        const newItems = JSON.parse(listValue).map(({ property, value, enabled }) => ({
+            property,
+            value,
+            enabled,
+        }));
+        const newProps = getEnabledDeclarations(newItems);
+        for (const prop of oldProps.keys()) {
+            if (!newProps.has(prop)) {
+                el.style.removeProperty(prop);
+            }
+        }
+        for (const [prop, [value, priority]] of newProps) {
+            el.style.setProperty(prop, value, priority);
+        }
+        if (newItems.length) {
+            el.dataset.customCss = JSON.stringify(newItems);
+        } else {
+            delete el.dataset.customCss;
+        }
+    }
+    getValue({ editingElement: el }) {
+        const items = JSON.parse(el.dataset.customCss || "[]");
+        // Also list inline styles set elsewhere (html, other options). Compare
+        // longhands on scratch styles so that `margin` covers `margin-top`.
+        const ownStyle = el.ownerDocument.createElement("div").style;
+        for (const [prop, [value, priority]] of getEnabledDeclarations(items)) {
+            ownStyle.setProperty(prop, value, priority);
+        }
+        const otherStyle = el.ownerDocument.createElement("div").style;
+        for (const prop of el.style) {
+            const value = el.style.getPropertyValue(prop);
+            if (ownStyle.getPropertyValue(prop) !== value) {
+                otherStyle.setProperty(prop, value, el.style.getPropertyPriority(prop));
+            }
+        }
+        // `cssText` turns longhands back into shorthands. Split it on ";"
+        // outside parentheses (url(data:...;base64,...)), then on the first
+        // ":" (values may contain colons, e.g. urls).
+        for (const declaration of otherStyle.cssText.split(/;(?![^(]*\))/)) {
+            const i = declaration.indexOf(":");
+            if (i !== -1) {
+                items.push({
+                    property: declaration.slice(0, i).trim(),
+                    value: declaration.slice(i + 1).trim(),
+                    enabled: true,
+                });
+            }
+        }
+        return JSON.stringify(items);
     }
 }
 

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.CssOption">
+    <!-- No row label: the list needs the full sidebar width (as in form_option). -->
+    <BuilderRow>
+        <div class="o_custom_css_list d-flex flex-column w-100">
+            <p class="hb-row-label mb-0 flex-grow-0 flex-shrink-0 flex-basis-auto">Custom CSS</p>
+            <BuilderList
+                action="'setCss'"
+                addItemTitle.translate="Add Property"
+                itemShape="{ property: 'text', value: 'text', enabled: 'boolean' }"
+                defaultNewValue="{ property: '', value: '', enabled: true }"
+                columnWidth="{ property: 'o_custom_css_property w-50', value: 'w-50' }"
+                sortable="false"
+            />
+        </div>
+    </BuilderRow>
+</t>
+
+</templates>

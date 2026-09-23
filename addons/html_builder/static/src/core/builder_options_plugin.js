@@ -386,6 +386,14 @@ export class BuilderOptionsPlugin extends Plugin {
             return map;
         };
         const elementToOptions = mapElementsToOptions(this.builderOptions);
+        // Non-standalone options only join the containers of other options.
+        const nonStandaloneOptions = new Map();
+        for (const [element, Options] of elementToOptions) {
+            if (Options.every((Option) => Option.standalone === false)) {
+                nonStandaloneOptions.set(element, Options);
+                elementToOptions.delete(element);
+            }
+        }
         const elementToHeaderMiddleButtons = mapElementsToOptions(this.builderHeaderMiddleButtons);
         const elementToContainerTitle = mapElementsToOptions(this.builderContainerTitle);
         const elementToOptionTitleComponents = mapElementsToOptions(
@@ -397,7 +405,7 @@ export class BuilderOptionsPlugin extends Plugin {
         let element = target;
         while (element && !elementToOptions.has(element)) {
             if (this.hasOverlayOptions(element)) {
-                elementToOptions.set(element, []);
+                elementToOptions.set(element, nonStandaloneOptions.get(element) || []);
                 break;
             }
             element = element.parentElement;
@@ -778,6 +786,9 @@ export class BuilderOptionsPlugin extends Plugin {
             title: node.getAttribute("title"),
             editableOnly: node.getAttribute("editableOnly") !== "false",
             reloadTarget: node.getAttribute("reloadTarget") === "true",
+            // When "false", the option never creates a container on its own
+            // (e.g. a `selector="*"` option would create one per ancestor).
+            standalone: node.getAttribute("standalone") !== "false",
             groups: jsonGroups ? JSON.parse(jsonGroups) : [],
             props: jsonProps ? JSON.parse(jsonProps) : {},
         };

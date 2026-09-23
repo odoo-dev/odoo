@@ -1,0 +1,24 @@
+.o_custom_css_list {
+    table {
+        width: 100%;
+    }
+
+    input.o-hb-input-base {
+        width: 100%;
+        min-width: 0;
+    }
+
+    // "property : value" separator, drawn in the property cell's right padding.
+    .o_custom_css_property {
+        position: relative;
+        padding-right: 0.6em;
+
+        &::after {
+            content: ":";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+    }
+}
