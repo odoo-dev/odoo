@@ -79,25 +79,6 @@ class MailRenderMixin(models.AbstractModel):
         model. """
         self.render_model = False
 
-    @api.model
-    def _build_expression(self, field_name, sub_field_name, null_value):
-        """Returns a placeholder expression for use in a template field,
-        based on the values provided in the placeholder assistant.
-
-        :param field_name: main field name
-        :param sub_field_name: sub field name (M2O)
-        :param null_value: default value if the target value is empty
-        :return: final placeholder expression """
-        expression = ''
-        if field_name:
-            expression = "{{ object." + field_name
-            if sub_field_name:
-                expression += "." + sub_field_name
-            if null_value:
-                expression += f" ||| {null_value}"
-            expression += " }}"
-        return expression
-
     # ------------------------------------------------------------
     # ORM
     # ------------------------------------------------------------

@@ -18,21 +18,15 @@ $o-discuss-talkingColor: lighten($success, 10%);
 }
 
 .o-discuss-badge {
-    &, & .o-innerBadge {
-        --o-discuss-badge-bg: #{$o-success}; // sync with --o-navbar-badge-bg
-        color: white !important;
-        background-color: var(--o-discuss-badge-bg) !important;
-        align-items: center;
-        justify-content: center;
-        padding: 3px 4px;
+    --o-discuss-badge-bg: #{$o-success}; // sync with --o-navbar-badge-bg
+    color: white !important;
+    background-color: var(--o-discuss-badge-bg) !important;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 4px;
 
-        &.o-muted {
-            --o-discuss-badge-bg: #{var(--mail-discuss-badge-mutedBg, mix($gray-500, $gray-600))};
-        }
-    }
-
-    & .o-innerBadge {
-        min-width: $o-badge-min-width; // same as .badge, without using .badge to keep semantics of a single .badge
+    &.o-muted {
+        --o-discuss-badge-bg: #{var(--mail-discuss-badge-mutedBg, mix($gray-500, $gray-600))};
     }
 }
 
@@ -150,12 +144,10 @@ $o-bubble-colors: (
 }
 
 .o-discuss-badge, .o-discuss-badgeShape {
-    &, & .o-innerBadge {
-        display: flex;
-        transform: translate(0, 0) !important; // cancel systray style on badge
-        font-size: .78572 * $font-size-base !important; // roughly 11px, small but readable
-        user-select: none;
-    }
+    display: flex;
+    transform: translate(0, 0) !important; // cancel systray style on badge
+    font-size: .78572 * $font-size-base !important; // roughly 11px, small but readable
+    user-select: none;
 }
 
 .o-dvh-100 {

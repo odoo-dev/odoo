@@ -34,7 +34,6 @@ class ResUsers(models.Model):
         string="User Roles",
         help="Users are notified whenever one of their roles is @-mentioned in a conversation.",
     )
-    can_edit_role = fields.Boolean(compute="_compute_can_edit_role")
     notification_type = fields.Selection([
         ('email', 'By Emails'),
         ('inbox', 'In Odoo')],
@@ -147,10 +146,6 @@ class ResUsers(models.Model):
         inbox_users = self.filtered(lambda user: user.notification_type == 'inbox')
         inbox_users.with_context(no_group_change_log=NO_GROUP_CHANGE_LOG).sudo().write({"group_ids": [Command.link(inbox_group.id)]})
         (self - inbox_users).with_context(no_group_change_log=NO_GROUP_CHANGE_LOG).sudo().write({"group_ids": [Command.unlink(inbox_group.id)]})
-
-    @api.depends_context("uid")
-    def _compute_can_edit_role(self):
-        self.can_edit_role = self.env["res.role"].sudo(False).has_access("write")
 
     @api.depends("email")
     @api.depends_context("uid")

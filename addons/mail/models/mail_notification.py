@@ -102,19 +102,6 @@ class MailNotification(models.Model):
         return len(records), len(records) == GC_UNLINK_LIMIT  # done, remaining
 
     # ------------------------------------------------------------
-    # TOOLS
-    # ------------------------------------------------------------
-
-    def format_failure_reason(self):
-        self.ensure_one()
-        if self.failure_type != 'unknown':
-            return dict(self._fields['failure_type']._description_selection(self.env)).get(self.failure_type, _('No Error'))
-        else:
-            if self.failure_reason:
-                return _("Unknown error: %(error)s", error=self.failure_reason)
-            return _("Unknown error")
-
-    # ------------------------------------------------------------
     # DISCUSS
     # ------------------------------------------------------------
 

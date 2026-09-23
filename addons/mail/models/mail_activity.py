@@ -654,11 +654,6 @@ class MailActivity(models.Model):
         )._action_done(feedback=feedback, attachment_ids=attachment_ids)
         return messages[0].id if messages else False
 
-    def action_done_schedule_next(self):
-        """ Wrapper without feedback because web button add context as
-        parameter, therefore setting context to feedback """
-        return self.action_feedback_schedule_next()
-
     def action_feedback_schedule_next(self, feedback=False, attachment_ids=None):
         ctx = dict(
             clean_context(self.env.context),

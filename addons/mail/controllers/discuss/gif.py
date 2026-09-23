@@ -72,14 +72,6 @@ class DiscussGifController(Controller):
         if response:
             return response.json()
 
-    @route("/discuss/gif/add_favorite", type="jsonrpc", auth="user")
-    def add_favorite(self, tenor_gif_id):
-        # sudo: ir.config_parameter - read keys are hard-coded and values are only used for server requests
-        ir_config = request.env["ir.config_parameter"].sudo()
-        if not ir_config.get_bool("discuss.use_klipy_api"):
-            return
-        request.env["discuss.gif.favorite"].create({"tenor_gif_id": tenor_gif_id})
-
     def _gif_posts(self, ids):
         # sudo: ir.config_parameter - read keys are hard-coded and values are only used for server requests
         ir_config = request.env["ir.config_parameter"].sudo()
