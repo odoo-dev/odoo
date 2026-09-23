@@ -716,16 +716,15 @@ class Task(models.Model):
 
     def _compute_display_follow_button(self):
         if not self.env.user.share:
-            self.display_follow_button = False
+            self.display_follow_button = True
             return
-        project_collaborator_read_group = self.env['project.collaborator']._read_group(
-            [('project_id', 'in', self.project_id.ids), ('partner_id', '=', self.env.user.partner_id.id)],
-            ['project_id'],
-            ['limited_access:bool_and'],
-        )
-        limited_access_per_project_id = dict(project_collaborator_read_group)
         for task in self:
-            task.display_follow_button = not limited_access_per_project_id.get(task.project_id, True)
+            task.display_follow_button = bool(
+                task.project_id.collaborator_ids.filtered_domain([
+                    ("partner_id", "=", self.env.user.partner_id.id),
+                    ("limited_access", "=", False),
+                ])
+            )
 
     def _get_group_pattern(self):
         return {
