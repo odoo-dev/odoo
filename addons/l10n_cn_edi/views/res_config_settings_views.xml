@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n_cn_edi</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='peppol']" position="after">
+                <block title="E-Fapiao" id="l10n_cn_edi" invisible="country_code != 'CN'">
+                    <!-- The provider module fills in its own connection settings next to this one. -->
+                    <setting id="l10n_cn_edi_provider" string="E-Fapiao Provider" company_dependent="1">
+                        <div class="text-muted" invisible="l10n_cn_edi_is_ready">
+                            No e-Fapiao provider is connected for this company.
+                        </div>
+                        <div class="text-success" invisible="not l10n_cn_edi_is_ready">
+                            <i class="oi oi-filled" data-icon="check_circle"/> E-Fapiao is connected.
+                        </div>
+                    </setting>
+                    <setting id="l10n_cn_edi_drawer" string="Drawer (开票人)" company_dependent="1"
+                        help="Printed as the drawer on issued e-Fapiao. Defaults to the current user.">
+                        <field name="l10n_cn_edi_drawer"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>
