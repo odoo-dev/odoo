@@ -4810,6 +4810,7 @@ class BaseModel(metaclass=MetaModel):
         *,
         active_test: bool = True,
         bypass_access: bool = False,
+        search_from_field = None,
     ) -> Query:
         """
         Private implementation of search() method.
@@ -4859,7 +4860,7 @@ class BaseModel(metaclass=MetaModel):
         # security access domain
         if not sec_domain.is_true():
             self_sudo = self.sudo().with_context(active_test=False)
-            sec_domain = sec_domain.optimize_full(self_sudo, search_domain=domain)
+            sec_domain = sec_domain.optimize_full(self_sudo, search_domain=domain, search_from_field=search_from_field)
             if sec_domain.is_false():
                 return self.browse()._as_query()
             if (

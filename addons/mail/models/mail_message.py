@@ -476,7 +476,7 @@ class MailMessage(models.Model):
         if not self or not self.browse().sudo(False).has_access(operation):
             self[field_name] = False
             return
-        if self.env.context.get('search_from_field') is self.env.registry['mail.mail']._fields['mail_message_id']:
+        if self.env.context.get('search_from_field') is self.env.registry['mail.mail']._fields['mail_message_id'] and False:  # XXX need?
             # allow when coming from mail.mail
             self[field_name] = True
             return

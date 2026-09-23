@@ -458,7 +458,7 @@ class Domain:
         """
         return self._optimize(model, OptimizationLevel.DYNAMIC_VALUES)
 
-    def optimize_full(self, model: BaseModel, search_domain: Domain | None = None) -> Domain:
+    def optimize_full(self, model: BaseModel, search_domain: Domain | None = None, search_from_field=None) -> Domain:
         """Perform optimizations of the node given a model.
 
         Basic and advanced optimizations are applied.
@@ -470,8 +470,8 @@ class Domain:
 
         The `search_domain` is the whole domain the user provided for searching.
         """
-        if search_domain is not model.env.context.get('search_domain'):
-            model = model.with_context(search_domain=search_domain)
+        if search_domain is not model.env.context.get('search_domain') or search_from_field is not model.env.context.get('search_from_field'):
+            model = model.with_context(search_domain=search_domain, search_from_field=search_from_field)
         return self._optimize(model, OptimizationLevel.FULL)
 
     @typing.final
@@ -1939,7 +1939,6 @@ def _operator_access_rule_domain(condition, model):
     operation = condition.value
     if operation not in ('read', 'write', 'create', 'unlink'):
         condition._raise("Invalid value for 'access' operator")
-
     if operation == 'read' and field in model.env.registry.field_inverses.get(model.env.context.get('search_from_field'), ()):
         return Domain.TRUE  # the join will restrain the field to a not-null value
 
