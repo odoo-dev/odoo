@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n_cn_edi_nuonuo</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="l10n_cn_edi.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='l10n_cn_edi_provider']" position="after">
+                <setting id="l10n_cn_edi_nuonuo" string="Nuonuo 诺税通" company_dependent="1"
+                    help="The company's own Nuonuo app (自用型), created on open.nuonuo.com with a permanent token.">
+                    <div class="content-group">
+                        <div class="row mt8">
+                            <label for="l10n_cn_edi_nuonuo_app_key" class="col-lg-4"/>
+                            <field name="l10n_cn_edi_nuonuo_app_key"/>
+                        </div>
+                        <div class="row" groups="base.group_system">
+                            <label for="l10n_cn_edi_nuonuo_app_secret" class="col-lg-4"/>
+                            <field name="l10n_cn_edi_nuonuo_app_secret" password="True"/>
+                        </div>
+                        <div class="row" groups="base.group_system">
+                            <label for="l10n_cn_edi_nuonuo_token" class="col-lg-4"/>
+                            <field name="l10n_cn_edi_nuonuo_token" password="True"/>
+                        </div>
+                        <div class="row">
+                            <label for="l10n_cn_edi_nuonuo_extension_number" class="col-lg-4"/>
+                            <field name="l10n_cn_edi_nuonuo_extension_number"/>
+                        </div>
+                        <div class="row">
+                            <label for="l10n_cn_edi_nuonuo_ele_account" class="col-lg-4"/>
+                            <field name="l10n_cn_edi_nuonuo_ele_account"/>
+                        </div>
+                        <div class="mt16">
+                            <button name="action_l10n_cn_edi_nuonuo_test_connection"
+                                type="object"
+                                string="Test Connection"
+                                class="btn-secondary"
+                                icon="network_check"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
