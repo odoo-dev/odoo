@@ -62,12 +62,12 @@ class TestMenusAdminLight(odoo.tests.HttpCase):
         # Disable onboarding tours to remove warnings
         if 'tour_enabled' in self.env['res.users']._fields:
             self.env.ref('base.user_admin').tour_enabled = False
-        # Due to action_pos_preparation_display_kitchen_display, cliking on the "Kitchen Display"
+        # Due to action_pos_preparation_display_preparation_display, cliking on the "Preparation Display"
         # menuitem could open the UI display, which will break the crawler tests as there is no
         # way for the tour to be executed, leading to a timeout
         if 'pos.prep.display' in self.env:
             self.env['pos.prep.display'].create({
-                'name': 'Super Smart Kitchen Display',
+                'name': 'Super Smart Preparation Display',
             })
 
         click_bot_options = "{ light: true, offline: true }" if offline else "{ light: true }"

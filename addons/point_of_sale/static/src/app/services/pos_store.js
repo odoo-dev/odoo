@@ -2290,7 +2290,7 @@ export class PosStore extends WithLazyGetterTrap {
                           bodyClass: "pb-4",
                       });
         }
-
+        debugger
         if (preset) {
             order.setPreset(preset);
 

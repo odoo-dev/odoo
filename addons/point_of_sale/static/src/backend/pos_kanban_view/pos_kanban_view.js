@@ -128,7 +128,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
             {
                 name: _t("Restaurant"),
                 isRestaurant: true,
-                description: _t("Tables, menus, kitchen display, etc."),
+                description: _t("Tables, menus, preparation display, etc."),
                 functionName: "load_onboarding_restaurant_scenario",
                 iconFile: "restaurant-icon.svg",
             },
