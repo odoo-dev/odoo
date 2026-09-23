@@ -1,4 +1,5 @@
 from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from .common import TestL10nEgEdiPosCommon
@@ -57,6 +58,27 @@ class TestL10nEgEdiPosCheckData(TestL10nEgEdiPosCommon):
         order = self._create_unpaid_order()
         errors = order._l10n_eg_edi_pos_check_data()
         self.assertFalse(any('National ID' in e for e in errors))
+
+    def test_threshold_foreign_person_requires_foreign_id(self):
+        """Above-threshold sales to a foreign individual are rejected until a
+        Foreign ID is set; below the threshold it stays optional."""
+        order = self._create_unpaid_order(partner=self.foreign_customer)
+        self.assertFalse(any('Foreign ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+        self.env['ir.config_parameter'].sudo().set_float('l10n_eg_edi_eta.invoicing_threshold', 1.0)
+        self.assertTrue(any('Foreign ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+        self.foreign_customer.vat = False
+        self.foreign_customer._set_additional_identifier('EG_FID', 'A12345678')
+        self.assertFalse(any('Foreign ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+    def test_foreign_id_only_available_for_foreign_partners(self):
+        """The Foreign ID is offered in the identifiers menu of non-Egyptian
+        partners only, and must be alphanumeric."""
+        self.assertIn('EG_FID', self.foreign_customer.available_additional_identifiers_metadata)
+        self.assertNotIn('EG_FID', self.eg_individual_customer.available_additional_identifiers_metadata)
+        with self.assertRaises(ValidationError):
+            self.foreign_customer._set_additional_identifier('EG_FID', 'A123-456')
 
     def test_branch_vat_equals_partner_vat_returns_error(self):
         """The branch and the customer cannot share the same VAT — check_data
