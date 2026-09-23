@@ -1716,6 +1716,73 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         so_1.write({'order_line': [(1, so_1.order_line.id, {'product_uom_qty': so_1.order_line.qty_delivered})]})
         self.assertEqual(len(so_1.picking_ids), 1)
 
+    def test_reduce_qty_no_backorder_multistep(self):
+        """Only return the quantities that actually passed through each delivery step."""
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_pack_ship'
+        self.env['stock.quant']._update_available_quantity(self.new_product, warehouse.lot_stock_id, 2)
+        order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': self.new_product.id,
+                'product_uom_qty': 2,
+            })],
+        })
+        order.action_confirm()
+        pick = order.picking_ids
+        pick.button_validate()
+        pack = order.picking_ids - pick
+        pack.move_ids.quantity = 1
+        Form.from_action(self.env, pack.button_validate()).save().process_cancel_backorder()
+        delivery = order.picking_ids - pick - pack
+        self.assertEqual(order.order_line.qty_delivered, 0)
+        order.order_line.product_uom_qty = 0
+        returns = order.picking_ids - pick - pack - delivery
+        self.assertFalse(returns.filtered(lambda p: p.location_id.usage == 'customer'))
+        self.assertEqual(delivery.state, 'cancel')
+        self.assertRecordValues(returns.move_ids.sorted('id'), [
+            {'location_id': warehouse.wh_pack_stock_loc_id.id, 'location_dest_id': warehouse.lot_stock_id.id, 'product_uom_qty': 2},
+            {'location_id': warehouse.wh_output_stock_loc_id.id, 'location_dest_id': warehouse.wh_pack_stock_loc_id.id, 'product_uom_qty': 1},
+        ])
+
+    def test_reduce_qty_no_backorder_multistep_gradually(self):
+        """Return the unit left in packing before returning the unit sent to output."""
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_pack_ship'
+        self.env['stock.quant']._update_available_quantity(self.new_product, warehouse.lot_stock_id, 2)
+        order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': self.new_product.id,
+                'product_uom_qty': 2,
+            })],
+        })
+        order.action_confirm()
+        pick = order.picking_ids
+        pick.button_validate()
+        pack = order.picking_ids - pick
+        pack.move_ids.quantity = 1
+        Form.from_action(self.env, pack.button_validate()).save().process_cancel_backorder()
+        delivery = order.picking_ids - pick - pack
+        self.assertEqual(order.order_line.qty_delivered, 0)
+        order.order_line.product_uom_qty = 1
+        returns = order.picking_ids - pick - pack - delivery
+        self.assertRecordValues(returns.move_ids, [{
+            'location_id': warehouse.wh_pack_stock_loc_id.id,
+            'location_dest_id': warehouse.lot_stock_id.id,
+            'product_uom_qty': 1,
+        }])
+        self.assertEqual(delivery.move_ids.product_uom_qty, 1)
+        order.order_line.product_uom_qty = 0
+        returns = order.picking_ids - pick - pack - delivery
+        self.assertFalse(returns.filtered(lambda p: p.location_id.usage == 'customer'))
+        self.assertEqual(delivery.state, 'cancel')
+        self.assertRecordValues(returns.move_ids.sorted('id'), [
+            {'location_id': warehouse.wh_pack_stock_loc_id.id, 'location_dest_id': warehouse.lot_stock_id.id, 'product_uom_qty': 1},
+            {'location_id': warehouse.wh_pack_stock_loc_id.id, 'location_dest_id': warehouse.lot_stock_id.id, 'product_uom_qty': 1},
+            {'location_id': warehouse.wh_output_stock_loc_id.id, 'location_dest_id': warehouse.wh_pack_stock_loc_id.id, 'product_uom_qty': 1},
+        ])
+
     def test_decrease_sol_qty_to_zero(self):
         """
         2 steps delivery.
