@@ -1,4 +1,3 @@
-import { CodeEditor } from "@web/core/code_editor/code_editor";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
@@ -10,9 +9,21 @@ import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
+import { useDebounced } from "@web/core/utils/timing";
+import { usePopover } from "@web/core/popover/popover_hook";
 
+import { buildChangeMap, getChanges, getLocatedOperations, updateChangeMap } from "./change_map";
+import { ResourceCodeEditor } from "./resource_code_editor";
 import { ResourceEditorWarningOverlay } from "./resource_editor_warning";
-import { checkSCSS, checkXML, formatXML } from "./utils";
+import {
+    checkSCSS,
+    checkXML,
+    describeOperation,
+    formatXML,
+    getAttributeAddition,
+    getOperationRows,
+    getOperationTargetRows,
+} from "./utils";
 
 import {
     Component,
@@ -33,10 +44,31 @@ const BUNDLES_RESTRICTION = [
     "web.assets_frontend_lazy",
 ];
 
+/**
+ * Lists the views changing a row of the edited view, and the targets of the
+ * operations of the edited view on this row.
+ */
+class ResourceChangesPopover extends Component {
+    static template = "website.ResourceEditor.ChangesPopover";
+    props = useProps({
+        title: t.string(),
+        items: t.array(
+            t.object({
+                key: t.string(),
+                view: t.object(),
+                description: t.string(),
+                onSelect: t.function(),
+            })
+        ),
+        // Popover service
+        close: t.function().optional(),
+    });
+}
+
 export class ResourceEditor extends Component {
     static components = {
         ResourceEditorWarningOverlay,
-        CodeEditor,
+        ResourceCodeEditor,
         Dropdown,
         CheckboxItem,
         DropdownItem,
@@ -57,6 +89,15 @@ export class ResourceEditor extends Component {
         this.dialog = useService("dialog");
 
         this.keepLast = new KeepLast();
+        this.changesPopover = usePopover(ResourceChangesPopover);
+        // The change map of the views (see `buildChangeMap`), null until loaded.
+        this.changeMap = signal(null);
+        // The row to reveal in the code editor (see `ResourceCodeEditor`).
+        this.revealRow = signal(null);
+        this.lastRevealId = 0;
+        // Views edited since the change map was last updated.
+        this.editedViewIds = new Set();
+        this.scheduleChangeMapUpdate = useDebounced(() => this.flushEditedViews(), 300);
 
         this.viewKey =
             this.website.pageDocument &&
@@ -140,6 +181,184 @@ export class ResourceEditor extends Component {
         } else {
             return _t("JS file: %s", this.state.currentResource.url);
         }
+    }
+
+    /**
+     * The changes located on the current resource (see `buildChangeMap`):
+     * - `changes`: the changes made to it by other views, each with the row
+     *   of its target in the current arch (null if the target is not found);
+     * - `targets`: the changes it makes to other views, each with the row of
+     *   its operation in the current arch.
+     * `wellFormed` is false while the arch cannot be parsed, in which case
+     * the rows are unknown (undefined).
+     *
+     * @returns {{
+     *  wellFormed: boolean,
+     *  changes: {view: Object, operation: Element, index: number, row: number|null|undefined}[],
+     *  targets: {targetView: Object, operation: Element, row: number|null|undefined}[],
+     * }}
+     */
+    get locatedChanges() {
+        const resource = this.state.currentResource;
+        const changeMap = this.changeMap();
+        if (this.state.type !== "xml" || !resource || !changeMap) {
+            return { wellFormed: true, changes: [], targets: [] };
+        }
+        const changes = getChanges(changeMap, resource.id);
+        const locatedOperations = getLocatedOperations(changeMap, resource.id);
+        if (!changes.length && !locatedOperations.length) {
+            return { wellFormed: true, changes: [], targets: [] };
+        }
+        const targetRows = getOperationTargetRows(
+            resource.arch,
+            Boolean(resource.inherit_id),
+            changes.map(({ operation }) => operation)
+        );
+        const operationRows = getOperationRows(resource.arch);
+        return {
+            wellFormed: Boolean(targetRows),
+            changes: changes.map((change, index) => ({
+                ...change,
+                row: targetRows?.[index],
+            })),
+            targets: locatedOperations.map(({ targetId, change }) => ({
+                targetView: this.state.resources.xml[targetId],
+                operation: change.operation,
+                row: operationRows ? operationRows[change.index] ?? null : undefined,
+            })),
+        };
+    }
+
+    /**
+     * The banners (see `ResourceCodeEditor`) announcing the micro views that
+     * are shown on the current resource instead of in the list, below the
+     * opening tag of their target. Null while the arch is not well-formed,
+     * to keep the current ones.
+     *
+     * @param {Object} locatedChanges see `locatedChanges`
+     */
+    getCodeEditorBanners({ wellFormed, changes }) {
+        if (!wellFormed) {
+            return null;
+        }
+        const linesByRow = new Map();
+        for (const { view, operation, row } of changes) {
+            const addition =
+                this.changeMap().bannerViewIds.has(view.id) && getAttributeAddition(operation);
+            if (row === null || !addition) {
+                continue;
+            }
+            if (!linesByRow.has(row)) {
+                linesByRow.set(row, []);
+            }
+            linesByRow.get(row).push({
+                key: view.id,
+                text: _t('%(view)s adds "%(value)s" to %(attribute)s', {
+                    view: view.name,
+                    value: addition.add,
+                    attribute: addition.attribute,
+                }),
+            });
+        }
+        return sortBy(
+            [...linesByRow].map(([row, lines]) => ({ row, lines })),
+            "row"
+        );
+    }
+
+    /**
+     * The gutter markers (see `ResourceCodeEditor`) on the rows changed by
+     * other views, with the number of these views, and on the rows of the
+     * operations whose target is located. Null while the arch is not
+     * well-formed, to keep the current ones.
+     *
+     * @param {Object} locatedChanges see `locatedChanges`
+     */
+    getCodeEditorMarkers({ wellFormed, changes, targets }) {
+        if (!wellFormed) {
+            return null;
+        }
+        const markersByRow = new Map();
+        const getMarker = (row) => {
+            if (!markersByRow.has(row)) {
+                markersByRow.set(row, { row, viewIds: new Set(), target: false });
+            }
+            return markersByRow.get(row);
+        };
+        for (const { view, row } of changes) {
+            if (row !== null) {
+                getMarker(row).viewIds.add(view.id);
+            }
+        }
+        for (const { row } of targets) {
+            if (row !== null) {
+                getMarker(row).target = true;
+            }
+        }
+        return sortBy(
+            [...markersByRow.values()].map(({ row, viewIds, target }) => ({
+                row,
+                count: viewIds.size,
+                target,
+            })),
+            "row"
+        );
+    }
+
+    /**
+     * @param {Object} locatedChanges see `locatedChanges`
+     * @returns {{view: Object, changes: Object[]}[]} the views changing the
+     *  current resource, each with its changes
+     */
+    getChangingViews({ changes }) {
+        const changesByView = new Map();
+        for (const change of changes) {
+            if (!changesByView.has(change.view)) {
+                changesByView.set(change.view, []);
+            }
+            changesByView.get(change.view).push(change);
+        }
+        return [...changesByView].map(([view, changes]) => ({ view, changes }));
+    }
+
+    /**
+     * @param {Object} locatedChanges see `locatedChanges`
+     * @returns {number} how many changes have no target in the current arch
+     *  (0 while it is not well-formed, as it is unknown)
+     */
+    getNotLocatedCount({ changes }) {
+        return changes.filter(({ row }) => row === null).length;
+    }
+
+    /**
+     * @param {Object} locatedChanges see `locatedChanges`
+     * @returns {string}
+     */
+    getChangedByLabel(locatedChanges) {
+        const count = this.getChangingViews(locatedChanges).length;
+        const label = count === 1 ? _t("Changed by 1 view") : _t("Changed by %s views", count);
+        const notLocatedCount = this.getNotLocatedCount(locatedChanges);
+        if (!notLocatedCount) {
+            return label;
+        }
+        return _t("%(label)s · %(count)s not located", { label, count: notLocatedCount });
+    }
+
+    /**
+     * @param {Object[]} changes items of `locatedChanges.changes`
+     * @returns {string}
+     */
+    getChangesDescription(changes) {
+        return changes
+            .map(({ operation, row }) => {
+                const effect = describeOperation(operation);
+                if (row === undefined) {
+                    return effect;
+                }
+                const location = row === null ? _t("not located") : _t("line %s", row + 1);
+                return _t("%(effect)s, %(location)s", { effect, location });
+            })
+            .join(" · ");
     }
 
     get selectMenuProps() {
@@ -254,7 +473,15 @@ export class ResourceEditor extends Component {
             roots.forEach((root) => {
                 visit(root, 0);
             });
-            this.state.sortedXML = sortedXML;
+
+            const changeMap = buildChangeMap(this.state.resources.xml);
+            this.changeMap.set(changeMap);
+            this.editedViewIds.clear();
+
+            // Micro views shown as a banner on their target are not listed.
+            this.state.sortedXML = sortedXML.filter(
+                (view) => !changeMap.bannerViewIds.has(view.id)
+            );
 
             // Compute labels
             Object.values(this.state.resources.xml).forEach((view) => {
@@ -293,6 +520,21 @@ export class ResourceEditor extends Component {
                 }
             });
         }
+    }
+
+    /**
+     * Updates the change map for the views edited since its last update.
+     */
+    flushEditedViews() {
+        let changeMap = this.changeMap();
+        if (!changeMap) {
+            return;
+        }
+        for (const viewId of this.editedViewIds) {
+            changeMap = updateChangeMap(changeMap, viewId);
+        }
+        this.editedViewIds.clear();
+        this.changeMap.set(changeMap);
     }
 
     /**
@@ -460,6 +702,80 @@ export class ResourceEditor extends Component {
         currentResource.arch = value;
         currentResource.dirty = true;
         this.errors.length = 0;
+        if (currentResource.type === "xml") {
+            this.editedViewIds.add(currentResource.id);
+            this.scheduleChangeMapUpdate();
+        }
+    }
+
+    /**
+     * Opens a view, on one of its operations.
+     *
+     * @param {number} viewId
+     * @param {number} [operationIndex=0] see `getViewOperations`
+     */
+    openView(viewId, operationIndex = 0) {
+        const view = this.state.resources.xml[viewId];
+        this.openViewOnRow(view, getOperationRows(view.arch)?.[operationIndex]);
+    }
+
+    /**
+     * Opens the view changed by an operation of the current view, on the
+     * target of the operation.
+     *
+     * @param {Object} target an item of `locatedChanges.targets`
+     */
+    goToTarget({ targetView, operation }) {
+        const rows = getOperationTargetRows(targetView.arch, Boolean(targetView.inherit_id), [
+            operation,
+        ]);
+        this.openViewOnRow(targetView, rows?.[0]);
+    }
+
+    /**
+     * @param {Object} view
+     * @param {number|null|undefined} row the row to reveal, if known
+     */
+    openViewOnRow(view, row) {
+        this.changesPopover.close();
+        this.state.currentResource = view;
+        if (typeof row === "number") {
+            this.revealRow.set({ sessionId: view.id, row, id: ++this.lastRevealId });
+        }
+    }
+
+    /**
+     * @param {number} row
+     * @param {HTMLElement} cellEl the gutter cell of the row
+     */
+    onMarkerClick(row, cellEl) {
+        const locatedChanges = this.locatedChanges;
+        const changes = locatedChanges.changes.filter((change) => change.row === row);
+        const targets = locatedChanges.targets.filter((target) => target.row === row);
+        if (!changes.length && targets.length === 1) {
+            this.goToTarget(targets[0]);
+            return;
+        }
+        if (!changes.length && !targets.length) {
+            return;
+        }
+        this.changesPopover.open(cellEl, {
+            title: _t("Line %s", row + 1),
+            items: [
+                ...changes.map((change) => ({
+                    key: `change_${change.view.id}_${change.index}`,
+                    view: change.view,
+                    description: describeOperation(change.operation),
+                    onSelect: () => this.openView(change.view.id, change.index),
+                })),
+                ...targets.map((target, index) => ({
+                    key: `target_${index}`,
+                    view: target.targetView,
+                    description: _t("Go to target"),
+                    onSelect: () => this.goToTarget(target),
+                })),
+            ],
+        });
     }
 
     /**

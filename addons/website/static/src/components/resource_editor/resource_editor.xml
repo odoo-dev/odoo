@@ -60,6 +60,7 @@
                     <button class="btn btn-secondary" t-on-click="this.props.close">Close</button>
                 </div>
             </div>
+            <t t-set="locatedChanges" t-value="this.locatedChanges"/>
             <div t-if="this.state.currentResource" id="resource-editor-id">
                 <div class="float-end">
                     <button t-if="this.state.type !== 'xml' and this.isCustomResource(this.state.currentResource.url)" type="button" class="btn btn-sm btn-danger" t-on-click="this.onReset">
@@ -69,15 +70,39 @@
                     <button t-if="this.state.type === 'xml'" type="button" class="btn btn-sm btn-link" t-on-click="this.onFormat">Format</button>
                 </div>
                 <span class="o_resource_editor_resource_info" t-out="this.resourceInfo"/>
+                <Dropdown t-if="locatedChanges.changes.length">
+                    <button type="button"
+                        class="btn btn-sm btn-link o_resource_editor_changed_by"
+                        t-att-class="{ o_resource_editor_changed_by_warning: this.getNotLocatedCount(locatedChanges) }">
+                        <t t-out="this.getChangedByLabel(locatedChanges)"/>
+                    </button>
+                    <t t-set-slot="content">
+                        <t t-foreach="this.getChangingViews(locatedChanges)" t-as="changingView" t-key="changingView.view.id">
+                            <DropdownItem onSelected="() => this.openView(changingView.view.id, changingView.changes[0].index)">
+                                <span class="d-block">
+                                    <t t-call="website.ResourceEditor.ResourceLabel"
+                                        resource="changingView.view"
+                                        label="changingView.view.name"/>
+                                </span>
+                                <small class="d-block text-muted" t-out="this.getChangesDescription(changingView.changes)"/>
+                            </DropdownItem>
+                        </t>
+                    </t>
+                </Dropdown>
             </div>
             <div t-if="this.state.currentResource" id="resource-editor" t-ref="this.editorRef">
-                <CodeEditor
+                <ResourceCodeEditor
                     class="'h-100'"
                     value="this.state.currentResource.arch"
                     sessionId="this.state.currentResource.id"
                     mode="this.typeToCodeEditorModeMap[this.state.type]"
                     theme="'monokai'"
-                    onChange.bind="this.onEditorChange"/>
+                    onChange.bind="this.onEditorChange"
+                    banners="this.getCodeEditorBanners(locatedChanges)"
+                    onBannerClick.bind="this.openView"
+                    markers="this.getCodeEditorMarkers(locatedChanges)"
+                    onMarkerClick.bind="this.onMarkerClick"
+                    revealRow="this.revealRow()"/>
             </div>
         </div>
         <ResourceEditorWarningOverlay/>
@@ -86,6 +111,24 @@
     <t t-name="website.ResourceEditor.ResourceLabel">
         <i t-if="resource.customized or resource.dirty" t-att-class="{ 'oi mr8': true, 'text-warning': resource.dirty, 'text-success': resource.customized }" data-icon="save"/>
         <t t-out="label"/>
+    </t>
+
+    <t t-name="website.ResourceEditor.ChangesPopover">
+        <div class="o_resource_editor_changes_popover py-2">
+            <div class="px-3 pb-1 small text-muted" t-out="this.props.title"/>
+            <t t-foreach="this.props.items" t-as="item" t-key="item.key">
+                <button type="button"
+                    class="dropdown-item d-flex align-items-baseline justify-content-between gap-3"
+                    t-on-click="() => item.onSelect()">
+                    <span>
+                        <t t-call="website.ResourceEditor.ResourceLabel"
+                            resource="item.view"
+                            label="item.view.name"/>
+                    </span>
+                    <small class="text-muted text-nowrap" t-out="item.description"/>
+                </button>
+            </t>
+        </div>
     </t>
 
 </templates>

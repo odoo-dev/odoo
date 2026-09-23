@@ -134,6 +134,96 @@ registerWebsitePreviewTour(
     ]
 );
 
+registerWebsitePreviewTour("html_editor_micro_views", {}, () => [
+    {
+        content: "Wait for the page, with its micro view applied",
+        trigger: ":iframe #micro_target.micro_added",
+    },
+    {
+        content: "open site menu",
+        trigger: 'button[data-menu-xmlid="website.menu_site"]',
+        run: "click",
+    },
+    {
+        content: "open html editor",
+        trigger: 'a[data-menu-xmlid="website.menu_ace_editor"]',
+        run: "click",
+    },
+    {
+        content: "check that the micro view is announced by a banner on its target",
+        trigger: '#resource-editor .o_resource_editor_banner:contains("Micro Class")',
+    },
+    {
+        content: "check that the view says it is changed by a view",
+        trigger: '.o_resource_editor_changed_by:contains("Changed by 1 view")',
+    },
+    {
+        content: "open the list of views changing the view",
+        trigger: ".o_resource_editor_changed_by",
+        run: "click",
+    },
+    {
+        content: "check that the micro view is listed with the line of its target",
+        trigger: '.o-dropdown--menu .o-dropdown-item:contains("Micro Class"):contains("line ")',
+    },
+    {
+        content: "close the list of views",
+        trigger: ".o_resource_editor_changed_by",
+        run: "click",
+    },
+    {
+        content: "open file selector menu",
+        trigger: ".o_resource_editor .o_select_menu_toggler",
+        run: "click",
+    },
+    {
+        content: "check that the micro view is not listed",
+        trigger:
+            ".o-dropdown--menu:has(.o-dropdown-item:contains(Micro Target)):not(:has(.o-dropdown-item:contains(Micro Class)))",
+    },
+    {
+        content: "close file selector menu",
+        trigger: ".o-dropdown--menu .o-dropdown-item:contains(Micro Target)",
+        run: "click",
+    },
+    {
+        content: "edit the micro view's target view",
+        trigger: '.o_resource_editor .o_select_menu_toggler:contains("Micro Target")',
+        run() {
+            ace.edit(document.querySelector("#resource-editor div"))
+                .getSession()
+                .insert({ row: 1, column: 0 }, '<p class="micro_edit">micro edit</p>\n');
+        },
+    },
+    {
+        content: "save the html editor",
+        trigger:
+            'body:has(div.ace_line:contains("micro_edit")) .o_resource_editor button:contains(Save)',
+        run: "click",
+    },
+    {
+        content: "check that the page has the modification",
+        trigger: ":iframe #wrapwrap .micro_edit",
+    },
+    {
+        content: "check that the micro view still applies",
+        trigger: ":iframe #micro_target.micro_added",
+    },
+    {
+        content: "open the micro view from its banner",
+        trigger: '#resource-editor .o_resource_editor_banner:contains("Micro Class") button',
+        run: "click",
+    },
+    {
+        content: "check that the micro view is opened",
+        trigger: '.o_resource_editor .o_select_menu_toggler:contains("Micro Class")',
+    },
+    {
+        content: "check that the micro view's arch is displayed",
+        trigger: '#resource-editor .ace_line:contains("micro_added")',
+    },
+]);
+
 registerWebsitePreviewTour("test_html_editor_scss", {}, () => [
     // 1. Open Html Editor and select a scss file
     {

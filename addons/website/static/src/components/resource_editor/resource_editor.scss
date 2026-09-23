@@ -43,6 +43,21 @@ $o-we-ace-color: #2F3129 !default;
         .o_resource_editor_resource_info {
             color: #ebecee;
         }
+        .o_resource_editor_changed_by {
+            margin-left: $grid-gutter-width/4;
+            padding: 0;
+            border: 0;
+            vertical-align: baseline;
+            color: #66d9ef;
+
+            &::after {
+                @include o-caret-down;
+                margin-left: 4px;
+            }
+            &.o_resource_editor_changed_by_warning {
+                color: $o-we-color-warning;
+            }
+        }
     }
 
     #resource-editor {
@@ -59,7 +74,78 @@ $o-we-ace-color: #2F3129 !default;
         }
 
         flex: 1 1 auto;
+        .o_resource_editor_banner {
+            padding: 2px 8px;
+            border-block: 1px solid darken($o-we-ace-color, 3%);
+            background-color: lighten($o-we-ace-color, 4%);
+            color: #cfcfc2;
+            font-family: $font-family-sans-serif;
+            line-height: 1.5;
+
+            .o_resource_editor_banner_line {
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+
+                &::before {
+                    content: "\21B3";
+                    color: #66d9ef;
+                }
+                > span {
+                    min-width: 0;
+                }
+            }
+            .btn-link {
+                flex: 0 0 auto;
+                padding: 0;
+                border: 0;
+                font-size: inherit;
+                line-height: inherit;
+                color: #66d9ef;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+        .o_resource_editor_revealed_row {
+            position: absolute;
+            background-color: rgba(#66d9ef, 0.2);
+        }
         .ace_gutter {
+            .ace_gutter-cell.o_resource_editor_marker {
+                cursor: pointer;
+
+                &:not(.o_error)::before {
+                    @include o-position-absolute($left: 3px);
+                    top: 50%;
+                    transform: translateY(-50%);
+                    min-width: 14px;
+                    height: 14px;
+                    padding: 0 3px;
+                    border-radius: 7px;
+                    background-color: #66d9ef;
+                    color: $o-we-ace-color;
+                    font-size: 9px;
+                    font-weight: bold;
+                    line-height: 14px;
+                    text-align: center;
+                }
+                @for $count from 1 through 9 {
+                    &.o_resource_editor_marker_#{$count}::before {
+                        content: "#{$count}";
+                    }
+                }
+                &.o_resource_editor_marker_10::before {
+                    content: "9+";
+                }
+                &.o_resource_editor_marker_target:not(.o_error)::before {
+                    content: "\2192";
+                    background-color: transparent;
+                    color: #66d9ef;
+                    font-size: 12px;
+                }
+            }
             .ace_gutter-cell.o_error {
                 position: relative;
 
