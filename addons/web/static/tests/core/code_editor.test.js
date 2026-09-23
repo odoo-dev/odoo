@@ -438,7 +438,61 @@ test("qweb mode readonly attributes", async () => {
         <div />
         </form>
         `.replace(/^\s*/gm, "")
-    )
+    );
+});
+
+test("qweb mode readonly attributes with exact value", async () => {
+    class Parent extends Component {
+        static components = { CodeEditor };
+        static template = xml`<CodeEditor maxLines="10" mode="'qweb'" value="this.props.value" modeOptions="this.props.modeOptions"/>`;
+        props = useProps();
+    }
+
+    const lockedValue = "#{is_view_active(website.my.view) and 'a+b'}";
+    const initialValue = `
+        <div t-attf-class="#{free}"/>
+        <div t-attf-class="${lockedValue}"/>
+        <span lock-id="0"/>
+        `.replace(/^\s*/gm, ""); // simple dedent;
+
+    await mountWithCleanup(Parent, {
+        props: {
+            value: initialValue,
+            modeOptions: {
+                highlightRulesConfig: {
+                    readonlyAttributes: ["lock-id", { name: "t-attf-class", value: lockedValue }],
+                },
+            },
+        },
+    });
+    await animationFrame();
+    const editor = window.ace.edit(queryOne(".ace_editor"));
+
+    // Only the exact value is readonly (escaped as a literal, despite
+    // containing regex special characters), along with the name-only entry.
+    expect(".ace_line:eq(0) .ace_odoo_attr_readonly").toHaveCount(0);
+    expect(".ace_line:eq(1) .ace_odoo_attr_readonly").toHaveCount(5);
+    expect(".ace_line:eq(2) .ace_odoo_attr_readonly").toHaveCount(5);
+
+    // The readonly attribute cannot be deleted...
+    editor.focus();
+    editor.selection.moveToPosition({
+        row: 1,
+        column: `<div t-attf-class="${lockedValue}"`.length,
+    });
+    for (let i = 0; i < `t-attf-class="${lockedValue}"`.length; i++) {
+        editor.commands.commands.backspace.exec(editor);
+    }
+    await animationFrame();
+    expect(editor.getValue()).toBe(initialValue);
+
+    // ... while the other attribute with the same name can.
+    editor.selection.moveToPosition({ row: 0, column: '<div t-attf-class="#{free}"'.length });
+    for (let i = 0; i < 't-attf-class="#{free}"'.length; i++) {
+        editor.commands.commands.backspace.exec(editor);
+    }
+    await animationFrame();
+    expect(editor.getValue()).toBe(initialValue.replace('t-attf-class="#{free}"', ""));
 });
 
 test("get undo/redo state using editorState prop", async () => {

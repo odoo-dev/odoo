@@ -146,6 +146,39 @@ class TestUiHtmlEditor(HttpCaseWithUserDemo):
         self.assertTrue(specific_page.arch != oe_structure_layout, "Specific homepage view should have been changed")
         self.assertEqual(len(specific_page.inherit_children_ids.filtered(lambda v: 'oe_structure' in v.name)), 1, "oe_structure view should have been created on the specific tree")
 
+    def test_html_editor_micro_views(self):
+        page = self.env['website.page'].create({
+            'name': 'Micro Target',
+            'type': 'qweb',
+            'arch': """
+                <t t-call="website.layout">
+                    <div id="micro_target" class="original">micro target</div>
+                </t>
+            """,
+            'key': 'test.micro_target',
+            'website_id': self.env.ref('base.default_website').id,
+            'is_published': True,
+            'url': '/micro_target',
+        })
+        micro_view = self.env['ir.ui.view'].create({
+            'name': 'Micro Class',
+            'type': 'qweb',
+            'key': 'test.micro_view',
+            'inherit_id': page.view_id.id,
+            'arch': """
+                <data>
+                    <xpath expr="//div[@id='micro_target']" position="attributes">
+                        <attribute name="class" add="micro_added" separator=" "/>
+                    </xpath>
+                </data>
+            """,
+        })
+        micro_view_arch = micro_view.arch
+        self.start_tour(self.env['website'].get_client_action_url('/micro_target'), 'html_editor_micro_views', login='admin')
+        self.assertIn('micro_edit', page.view_id.arch)
+        self.assertNotIn('is_view_active', page.view_id.arch, "The micro view's inline attribute is display-only")
+        self.assertEqual(micro_view.arch, micro_view_arch, "The micro view should be untouched")
+
     def test_html_editor_scss(self):
         self.user_demo.write({
             'group_ids': [(6, 0, [

@@ -59,6 +59,18 @@ $o-we-ace-color: #2F3129 !default;
         }
 
         flex: 1 1 auto;
+        .ace_odoo_attr_readonly {
+            // Ace's text layer is `pointer-events: none` (perf/Safari
+            // scroll workaround), so without this, this span can never be
+            // the real target of a native hover/click event: hovering it
+            // never fires "mouseenter" (breaking the tooltip service) even
+            // though Ace's own click handling still works, since that goes
+            // through Ace's own coordinate-based hit testing, not real DOM
+            // events on the span.
+            pointer-events: auto;
+            text-decoration: underline;
+            cursor: pointer;
+        }
         .ace_gutter {
             .ace_gutter-cell.o_error {
                 position: relative;

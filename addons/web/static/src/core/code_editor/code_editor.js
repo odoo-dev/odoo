@@ -83,6 +83,7 @@ export class CodeEditor extends Component {
             readonly: t.boolean().optional(false),
             onChange: t.function().optional(() => () => {}),
             onBlur: t.function().optional(),
+            onTokenClick: t.function().optional(),
             class: t.string().optional(""),
             theme: t.selection(CodeEditor.THEMES).optional(""),
             maxLines: t.number().optional(),
@@ -152,6 +153,23 @@ export class CodeEditor extends Component {
                 }
                 session.setValue(this.props.value);
                 session.on("change", onChange);
+
+                this.aceEditor.on("click", (e) => {
+                    if (this.props.onTokenClick) {
+                        const position = e.getDocumentPosition();
+                        const token = this.aceEditor.session.getTokenAt(
+                            position.row,
+                            position.column
+                        );
+                        if (token) {
+                            this.props.onTokenClick(
+                                token,
+                                position,
+                                this.aceEditor.session.getLine(position.row)
+                            );
+                        }
+                    }
+                });
 
                 this.aceEditor.on("blur", () => {
                     if (this.props.onBlur) {

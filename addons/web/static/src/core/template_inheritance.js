@@ -136,7 +136,7 @@ function getXpath(operation) {
  * @param {Element} operation
  * @returns {Node|null}
  */
-function getNode(element, operation) {
+export function getNode(element, operation) {
     const root = getRoot(element);
     const doc = new Document();
     doc.appendChild(root); // => root is the documentElement of its ownerDocument (we do that in case root is a clone)

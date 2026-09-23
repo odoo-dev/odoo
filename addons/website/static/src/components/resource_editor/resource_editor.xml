@@ -73,11 +73,13 @@
             <div t-if="this.state.currentResource" id="resource-editor" t-ref="this.editorRef">
                 <CodeEditor
                     class="'h-100'"
-                    value="this.state.currentResource.arch"
+                    value="this.codeEditorValue"
+                    modeOptions="this.codeEditorModeOptions"
                     sessionId="this.state.currentResource.id"
                     mode="this.typeToCodeEditorModeMap[this.state.type]"
                     theme="'monokai'"
-                    onChange.bind="this.onEditorChange"/>
+                    onChange.bind="this.onEditorChange"
+                    onTokenClick.bind="this.onMicroViewTokenClick"/>
             </div>
         </div>
         <ResourceEditorWarningOverlay/>

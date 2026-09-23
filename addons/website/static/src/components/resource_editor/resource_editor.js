@@ -12,7 +12,15 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 
 import { ResourceEditorWarningOverlay } from "./resource_editor_warning";
-import { checkSCSS, checkXML, formatXML } from "./utils";
+import {
+    checkSCSS,
+    checkXML,
+    formatXML,
+    getMicroViewInfo,
+    getMicroViewTargetElement,
+    injectMicroViewAttributes,
+    stripMicroViewAttributes,
+} from "./utils";
 
 import {
     Component,
@@ -23,6 +31,7 @@ import {
     signal,
     t,
     useEffect,
+    useListener,
     usePlugin,
 } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
@@ -115,6 +124,8 @@ export class ResourceEditor extends Component {
         });
         onWillUnmount(() => clearInterval(showErrorInterval));
 
+        useListener(this.editorRef, "mouseover", (ev) => this.onEditorMouseOver(ev));
+
         onWillStart(async () => this.loadResources());
     }
 
@@ -140,6 +151,46 @@ export class ResourceEditor extends Component {
         } else {
             return _t("JS file: %s", this.state.currentResource.url);
         }
+    }
+
+    /**
+     * The micro views targeting the current resource (empty if it is not an
+     * XML view).
+     */
+    get currentMicroViews() {
+        if (this.state.type !== "xml" || !this.state.currentResource) {
+            return [];
+        }
+        return this.state.currentResource.microViews;
+    }
+
+    /**
+     * The value fed to the CodeEditor: for XML, the current resource's arch
+     * with a `t-attf-...` attribute (see `getMicroViewInfo`) spliced into the
+     * tag targeted by each micro view that targets this resource
+     * (display-only, see `stripMicroViewAttributes`).
+     */
+    get codeEditorValue() {
+        const arch = this.state.currentResource.arch;
+        const microViews = this.currentMicroViews;
+        return microViews.length ? injectMicroViewAttributes(arch, microViews) : arch;
+    }
+
+    /**
+     * Marks the injected micro view attributes as unremovable in the ace
+     * qweb mode.
+     */
+    get codeEditorModeOptions() {
+        if (!this.currentMicroViews.length) {
+            return undefined;
+        }
+        const readonlyAttributes = this.currentMicroViews.map(
+            ({ microViewInfo: { name, value } }) => ({
+                name,
+                value,
+            })
+        );
+        return { highlightRulesConfig: { readonlyAttributes } };
     }
 
     get selectMenuProps() {
@@ -254,7 +305,38 @@ export class ResourceEditor extends Component {
             roots.forEach((root) => {
                 visit(root, 0);
             });
-            this.state.sortedXML = sortedXML;
+
+            // Detect "micro views": views only made of a single
+            // position="attributes" "add" xpath (e.g. adding a class).
+            const allMicroViews = [];
+            Object.values(this.state.resources.xml).forEach((view) => {
+                view.microViewInfo = getMicroViewInfo(view.arch, view.key);
+                view.microViews = [];
+                if (view.microViewInfo) {
+                    allMicroViews.push(view);
+                }
+            });
+
+            // Find micro views' target.
+            const inlinedMicroViewIds = new Set();
+            allMicroViews.forEach((microView) => {
+                let viewId = microView.inherit_id[0];
+                while (viewId && this.state.resources.xml[viewId]) {
+                    const target = getMicroViewTargetElement(
+                        this.state.resources.xml[viewId].arch,
+                        microView.microViewInfo.xpath
+                    );
+                    if (target) {
+                        this.state.resources.xml[viewId].microViews.push(microView);
+                        inlinedMicroViewIds.add(microView.id);
+                        break;
+                    }
+                    viewId = this.state.resources.xml[viewId].inherit_id[0];
+                }
+            });
+
+            // Micro views shown inline on their target are not listed.
+            this.state.sortedXML = sortedXML.filter((view) => !inlinedMicroViewIds.has(view.id));
 
             // Compute labels
             Object.values(this.state.resources.xml).forEach((view) => {
@@ -457,9 +539,73 @@ export class ResourceEditor extends Component {
 
     onEditorChange(value) {
         const currentResource = this.state.currentResource;
-        currentResource.arch = value;
+        currentResource.arch = stripMicroViewAttributes(value, this.currentMicroViews);
         currentResource.dirty = true;
         this.errors.length = 0;
+    }
+
+    /**
+     * Hovering a micro view t-attf attribute shows a tooltip naming the micro
+     * view. Ace re-renders its spans at will, so the tooltip is set on the
+     * hovered attribute's spans right before the tooltip service handles the
+     * "mouseenter" event (which follows "mouseover").
+     *
+     * @param {MouseEvent} ev
+     */
+    onEditorMouseOver(ev) {
+        const span = ev.target.closest?.(".ace_odoo_attr_readonly");
+        if (!span || span.hasAttribute("data-tooltip")) {
+            return;
+        }
+        // Each part (name, "=", quotes, value) of the attribute is its own
+        // span: gather them to rebuild the whole `name="value"`.
+        let first = span;
+        while (first.previousSibling?.classList?.contains("ace_odoo_attr_readonly")) {
+            first = first.previousSibling;
+        }
+        const spans = [first];
+        while (spans.at(-1).nextSibling?.classList?.contains("ace_odoo_attr_readonly")) {
+            spans.push(spans.at(-1).nextSibling);
+        }
+        const text = spans.map((span) => span.textContent).join("");
+        const microView = this.currentMicroViews.find(
+            ({ microViewInfo }) => microViewInfo.text === text
+        );
+        if (microView) {
+            for (const span of spans) {
+                span.setAttribute("data-tooltip", _t("Click to open view %s", microView.name));
+                span.setAttribute("data-tooltip-position", "top");
+            }
+        }
+    }
+
+    /**
+     * Clicking on a micro view t-attf attribute switches the editor to that
+     * micro view, so the user can still edit what it does.
+     *
+     * @param {{type: string, value: string}} token
+     * @param {{row: number, column: number}} position
+     * @param {string} line the text of the clicked line
+     */
+    onMicroViewTokenClick(token, position, line) {
+        if (!token.type?.includes("odoo_attr_readonly")) {
+            return;
+        }
+        // The token is only a part of the injected string: find the injected
+        // string spanning the clicked column.
+        const microView = this.currentMicroViews.find(({ microViewInfo: { text } }) => {
+            let index = line.indexOf(text);
+            while (index !== -1) {
+                if (position.column >= index && position.column <= index + text.length) {
+                    return true;
+                }
+                index = line.indexOf(text, index + 1);
+            }
+            return false;
+        });
+        if (microView) {
+            this.state.currentResource = microView;
+        }
     }
 
     /**

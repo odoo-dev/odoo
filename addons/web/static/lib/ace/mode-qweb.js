@@ -4,17 +4,32 @@ define("ace/mode/qweb_highlight_rules", ["require", "exports", "module", "ace/li
     var oop = require("../lib/oop");
     var XmlHighlightRules = require("./xml_highlight_rules").XmlHighlightRules;
 
+    const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     var QWebHighlightRules = function (options) {
         XmlHighlightRules.call(this);
         const xmlRules = this.$rules;
 
+        // readonlyAttributes entries are either attribute names (any value
+        // is readonly) or {name, value} objects (only that exact value is).
         const attributes_display_custom = [];
         if (options?.readonlyAttributes) {
-            const attrRegx = options.readonlyAttributes.join("|");
-            attributes_display_custom.push({
-                regex: `(${attrRegx})(=)(\\s*)(")([^"]*)(")`,
-                token: ["entity.other.attribute-name.xml.odoo_attr_readonly", "keyword.operator.attribute-equals.xml.odoo_attr_readonly", "text.odoo_attr_readonly", "string.attribute-value.xml.start.odoo_attr_readonly", "string.attribute-value.xml.code.odoo_attr_readonly", "string.attribute-value.xml.end.odoo_attr_readonly"],
-            })
+            const readonlyTokenTypes = ["entity.other.attribute-name.xml.odoo_attr_readonly", "keyword.operator.attribute-equals.xml.odoo_attr_readonly", "text.odoo_attr_readonly", "string.attribute-value.xml.start.odoo_attr_readonly", "string.attribute-value.xml.code.odoo_attr_readonly", "string.attribute-value.xml.end.odoo_attr_readonly"];
+            for (const attr of options.readonlyAttributes) {
+                if (typeof attr === "object") {
+                    attributes_display_custom.push({
+                        regex: `(${escapeRegExp(attr.name)})(=)(\\s*)(")(${escapeRegExp(attr.value)})(")`,
+                        token: readonlyTokenTypes,
+                    });
+                }
+            }
+            const attrRegx = options.readonlyAttributes.filter((attr) => typeof attr !== "object").join("|");
+            if (attrRegx) {
+                attributes_display_custom.push({
+                    regex: `(${attrRegx})(=)(\\s*)(")([^"]*)(")`,
+                    token: readonlyTokenTypes,
+                });
+            }
         }
 
         const tagRegex = xmlRules.attributes[0].regex;

@@ -428,6 +428,8 @@
             'website/static/tests/new_content_systray_item.test.js',
             'website/static/tests/page_url_field.test.js',
             'website/static/tests/website_loader.test.js',
+            'website/static/src/components/resource_editor/utils.js',
+            'website/static/tests/components/**/*',
         ],
         'web.assets_unit_tests_setup': [
             'html_builder/static/src/utils/scrolling.js',
