@@ -5,7 +5,7 @@ from unittest.mock import patch
 import requests
 
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
-from odoo.addons.l10n_cn_edi_nuonuo.tools import sign
+from odoo.addons.l10n_cn_edi_nuonuo.tools import NuonuoClient, sign
 
 APP_KEY = 'test-app-key'
 APP_SECRET = 'test-app-secret'
@@ -14,9 +14,10 @@ TOKEN = 'test-token'
 
 class MockResponse:
 
-    def __init__(self, body, status=200):
+    def __init__(self, body=None, status=200, content=b''):
         self.body = body
         self.status_code = status
+        self.content = content
 
     def raise_for_status(self):
         if self.status_code >= 400:
@@ -64,9 +65,29 @@ class L10nCnEdiNuonuoTestCommon(TestAccountMoveSendCommon):
             'l10n_cn_edi_nuonuo_token': TOKEN,
             'l10n_cn_edi_nuonuo_extension_number': '923',
         })
+        cls.partner_a.write({'country_id': cls.env.ref('base.cn').id, 'vat': '91330106MA2B2ABCDN'})
+        tax_category = cls.env['l10n_cn_edi.tax.category'].sudo().create({'name': 'Test', 'code': '1090511030000000000'})
+        (cls.product_a + cls.product_b).product_tmpl_id.l10n_cn_tax_category_id = tax_category
 
     def setUp(self):
         super().setUp()
         self.nuonuo = MockNuonuo()
+        self.downloads = {}
         patch('odoo.addons.l10n_cn_edi_nuonuo.tools.nuonuo_client.requests.post', self.nuonuo).start()
+        patch(
+            'odoo.addons.l10n_cn_edi_nuonuo.tools.nuonuo_client.requests.get',
+            lambda url, timeout=None: MockResponse(content=self.downloads[url]) if url in self.downloads else MockResponse(status=404),
+        ).start()
+        patch.object(NuonuoClient, '_wait', lambda client, seconds: None).start()
         self.addCleanup(patch.stopall)
+
+    def _answer(self, method, *responses):
+        """Answer ``method`` with each body in turn, repeating the last one."""
+        queue = list(responses)
+
+        def handler(payload):
+            return MockResponse(queue.pop(0) if len(queue) > 1 else queue[0])
+        self.nuonuo.handlers[method] = handler
+
+    def _requests_for(self, method):
+        return [request for request in self.nuonuo.requests if request['headers']['method'] == method]
