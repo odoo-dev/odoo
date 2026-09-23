@@ -458,7 +458,9 @@ class HrAttendanceOvertimeRule(models.Model):
         for employee in employees:
             if {'work_days', 'non_work_days'} & timing_type_set:
                 sudo_calendar = employee.sudo().resource_calendar_id
-                if sudo_calendar and sudo_calendar.flexible_hours:
+                # A fully flexible employee has no calendar at all,
+                # so it has no working day either just like a flexible one.
+                if not sudo_calendar or sudo_calendar.flexible_hours:
                     intervals_by_timing_type['work_days'][employee] = _generate_days_intervals(
                         Intervals([(
                             datetime.combine(min_check_in, datetime.min.time()),
