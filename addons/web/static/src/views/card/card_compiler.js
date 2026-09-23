@@ -176,8 +176,15 @@ export class CardCompiler extends ViewCompiler {
      * @returns {Element}
      */
     compileTCall(el, params) {
-        const compiled = this.compileGenericNode(el, params);
         const tname = el.getAttribute("t-call");
+        if (tname === "menu") {
+            // renders the whole record menu (dropdown toggler + items) where it is called
+            return createElement("t", {
+                "t-call": "{{ __comp__.constructor.menuTemplate }}",
+                "t-call-context": "__comp__.this",
+            });
+        }
+        const compiled = this.compileGenericNode(el, params);
         if (tname in this.templates) {
             compiled.setAttribute("t-call", `{{__comp__.templates[${toStringExpression(tname)}]}}`);
         }
