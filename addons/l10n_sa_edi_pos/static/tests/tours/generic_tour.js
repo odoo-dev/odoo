@@ -1,3 +1,4 @@
+/* global posmodel */
 import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
 import "@point_of_sale/../tests/pos/tours/generic_tour";
@@ -15,6 +16,9 @@ patch(registry.category("web_tour.tours").get("generic_localization_tour"), {
                 content: "Close the modal that appears with l10n_sa_edi_pos",
                 trigger: `body`,
                 async run({ waitFor, click }) {
+                    if (posmodel.company.country_id?.code !== "SA") {
+                        return;
+                    }
                     const selector = `.modal:has(.modal-title:contains(zatca validation error))`;
                     const modal = await waitFor(selector, {
                         timeout: 9000,
