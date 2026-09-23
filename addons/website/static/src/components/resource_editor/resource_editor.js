@@ -1,4 +1,3 @@
-import { CodeEditor } from "@web/core/code_editor/code_editor";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
@@ -10,12 +9,25 @@ import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
+import { useDebounced } from "@web/core/utils/timing";
+import { usePopover } from "@web/core/popover/popover_hook";
 
+import { locateOperations } from "./operation_map";
+import { CodeEditorWithGutterMarkers } from "./code_editor_with_gutter_markers";
 import { ResourceEditorWarningOverlay } from "./resource_editor_warning";
-import { checkSCSS, checkXML, formatXML } from "./utils";
+import {
+    checkSCSS,
+    checkXML,
+    describeOperation,
+    formatXML,
+    getOperationRows,
+    getOperationTargetRows,
+    parseTargetArch,
+} from "./utils";
 
 import {
     Component,
+    computed,
     onWillUnmount,
     onWillStart,
     useProps,
@@ -33,10 +45,30 @@ const BUNDLES_RESTRICTION = [
     "web.assets_frontend_lazy",
 ];
 
+/**
+ * Lists the views with an operation on a row of the edited view, and the
+ * targets of the operations of the edited view on this row.
+ */
+class ResourceOperationsPopover extends Component {
+    static template = "website.ResourceOperationsPopover";
+    props = useProps({
+        title: t.string(),
+        items: t.array(
+            t.object({
+                view: t.object(),
+                description: t.string(),
+                onSelect: t.function(),
+            })
+        ),
+        // Popover service
+        close: t.function().optional(),
+    });
+}
+
 export class ResourceEditor extends Component {
     static components = {
         ResourceEditorWarningOverlay,
-        CodeEditor,
+        CodeEditorWithGutterMarkers,
         Dropdown,
         CheckboxItem,
         DropdownItem,
@@ -57,6 +89,18 @@ export class ResourceEditor extends Component {
         this.dialog = useService("dialog");
 
         this.keepLast = new KeepLast();
+        this.operationsPopover = usePopover(ResourceOperationsPopover);
+        // allLocatedOperations lists the located operations of every xml available
+        // in the editor
+        this.allLocatedOperations = signal([]);
+        this.debouncedUpdateLocatedOperations = useDebounced(
+            () => this.updateLocatedOperations(),
+            300
+        );
+        this.currentOperations = computed(() => this.computeCurrentOperations());
+        this.codeEditorMarkers = computed(() => this.computeCodeEditorMarkers());
+        // The row to reveal in the code editor (see `CodeEditorWithGutterMarkers`).
+        this.revealRow = signal(null);
 
         this.viewKey =
             this.website.pageDocument &&
@@ -140,6 +184,125 @@ export class ResourceEditor extends Component {
         } else {
             return _t("JS file: %s", this.state.currentResource.url);
         }
+    }
+
+    /**
+     * The located operations of the current resource (see `locateOperations`):
+     * - `incoming`: the operations of other views on it, each with the row of
+     *   its target in the current arch (null if the target is not found);
+     * - `outgoing`: its operations on other views, each with the row of the
+     *   operation in the current arch.
+     * `wellFormed` is false while the arch cannot be parsed, in which case
+     * the rows are unknown (undefined).
+     *
+     * @returns {{
+     *  wellFormed: boolean,
+     *  incoming: {view: Object, operation: Element, index: number, row: number|null|undefined}[],
+     *  outgoing: {targetView: Object, operation: Element, row: number|null|undefined}[],
+     * }}
+     */
+    computeCurrentOperations() {
+        const resource = this.state.currentResource;
+        if (this.state.type !== "xml" || !resource) {
+            return { wellFormed: true, incoming: [], outgoing: [] };
+        }
+        const allLocatedOperations = this.allLocatedOperations();
+        const incoming = allLocatedOperations.filter(({ targetId }) => targetId === resource.id);
+        const outgoing = allLocatedOperations.filter(({ view }) => view.id === resource.id);
+        if (!incoming.length && !outgoing.length) {
+            return { wellFormed: true, incoming: [], outgoing: [] };
+        }
+        const targetRows = getOperationTargetRows(
+            resource.arch,
+            Boolean(resource.inherit_id),
+            incoming.map(({ operation }) => operation)
+        );
+        const operationRows = getOperationRows(resource.arch);
+        return {
+            wellFormed: Boolean(targetRows),
+            incoming: incoming.map((locatedOperation, index) => ({
+                ...locatedOperation,
+                row: targetRows?.[index],
+            })),
+            outgoing: outgoing.map(({ targetId, operation, index }) => ({
+                targetView: this.state.resources.xml[targetId],
+                operation,
+                row: operationRows ? operationRows[index] ?? null : undefined,
+            })),
+        };
+    }
+
+    /**
+     * The gutter markers (see `CodeEditorWithGutterMarkers`) on the rows changed by
+     * other views, with the number of these views, and on the rows of the
+     * operations whose target is located. Null while the arch is not
+     * well-formed, to remove the current ones (their rows are unknown).
+     */
+    computeCodeEditorMarkers() {
+        const { wellFormed, incoming, outgoing } = this.currentOperations();
+        if (!wellFormed) {
+            return null;
+        }
+        const itemsByRow = Map.groupBy(
+            [...incoming, ...outgoing].filter(({ row }) => row !== null),
+            ({ row }) => row
+        );
+        return sortBy(
+            [...itemsByRow].map(([row, items]) => ({
+                row,
+                count: new Set(items.filter(({ view }) => view).map(({ view }) => view.id)).size,
+                target: items.some(({ targetView }) => targetView),
+            })),
+            "row"
+        );
+    }
+
+    /**
+     * @returns {{view: Object, operations: Object[]}[]} the views with
+     *  operations on the current resource, each with these operations
+     */
+    getIncomingViews() {
+        const operationsByView = Map.groupBy(this.currentOperations().incoming, ({ view }) => view);
+        return [...operationsByView].map(([view, operations]) => ({ view, operations }));
+    }
+
+    /**
+     * @returns {number} how many incoming operations have no target in the
+     *  current arch
+     *  (0 while it is not well-formed, as it is unknown)
+     */
+    getNotLocatedCount() {
+        return this.currentOperations().incoming.filter(({ row }) => row === null).length;
+    }
+
+    /**
+     * @returns {string}
+     */
+    getChangedByLabel() {
+        const count = this.getIncomingViews().length;
+        const label = count === 1 ? _t("Changed by 1 view") : _t("Changed by %s views", count);
+        const notLocatedCount = this.getNotLocatedCount();
+        if (!notLocatedCount) {
+            return label;
+        }
+        return _t("%(label)s · %(count)s not located", { label, count: notLocatedCount });
+    }
+
+    /**
+     * @param {Object[]} operations items of `currentOperations.incoming`
+     * @returns {string}
+     */
+    getOperationsDescription(operations) {
+        return operations
+            .map(({ operation, row }) => {
+                const effect = describeOperation(operation);
+                if (row === undefined) {
+                    return effect;
+                }
+                const location = row === null ? _t("not located") : _t("line %s", row + 1);
+                return _t("%(effect)s, %(location)s", { effect, location });
+            })
+            .join(" · ");
     }
 
     get selectMenuProps() {
@@ -254,7 +417,10 @@ export class ResourceEditor extends Component {
             roots.forEach((root) => {
                 visit(root, 0);
             });
+
             this.state.sortedXML = sortedXML;
+
+            this.allLocatedOperations.set(locateOperations(this.state.resources.xml));
 
             // Compute labels
             Object.values(this.state.resources.xml).forEach((view) => {
@@ -293,6 +459,19 @@ export class ResourceEditor extends Component {
                 }
             });
         }
+    }
+
+    /**
+     * Locates the operations again, after an edit of a view.
+     */
+    updateLocatedOperations() {
+        const resource = this.state.currentResource;
+        // Keep the current located operations while the arch is not well-formed
+        // (for example, while the user types).
+        if (resource?.type !== "xml" || !parseTargetArch(resource.arch, false)) {
+            return;
+        }
+        this.allLocatedOperations.set(locateOperations(this.state.resources.xml));
     }
 
     /**
@@ -460,6 +639,74 @@ export class ResourceEditor extends Component {
         currentResource.arch = value;
         currentResource.dirty = true;
         this.errors.length = 0;
+        if (currentResource.type === "xml") {
+            this.debouncedUpdateLocatedOperations();
+        }
+    }
+
+    /**
+     * Opens a view, on one of its operations.
+     *
+     * @param {number} viewId
+     * @param {number} [operationIndex=0] see `parseTargetArch`
+     */
+    openView(viewId, operationIndex = 0) {
+        const view = this.state.resources.xml[viewId];
+        this.openViewOnRow(view, getOperationRows(view.arch)?.[operationIndex]);
+    }
+
+    /**
+     * Opens the view changed by an operation of the current view, on the
+     * target of the operation.
+     *
+     * @param {Object} target an item of `currentOperations.outgoing`
+     */
+    goToTarget({ targetView, operation }) {
+        const rows = getOperationTargetRows(targetView.arch, Boolean(targetView.inherit_id), [
+            operation,
+        ]);
+        this.openViewOnRow(targetView, rows?.[0]);
+    }
+
+    /**
+     * @param {Object} view
+     * @param {number|null|undefined} row the row to reveal, if known
+     */
+    openViewOnRow(view, row) {
+        this.operationsPopover.close();
+        this.state.currentResource = view;
+        if (typeof row === "number") {
+            this.revealRow.set({ sessionId: view.id, row });
+        }
+    }
+
+    /**
+     * @param {number} row
+     * @param {HTMLElement} cellEl the gutter cell of the row
+     */
+    onMarkerClick(row, cellEl) {
+        const { incoming, outgoing } = this.currentOperations();
+        const rowIncoming = incoming.filter((item) => item.row === row);
+        const rowOutgoing = outgoing.filter((item) => item.row === row);
+        if (!rowIncoming.length && rowOutgoing.length === 1) {
+            this.goToTarget(rowOutgoing[0]);
+            return;
+        }
+        const items = [
+            ...rowIncoming.map((item) => ({
+                view: item.view,
+                description: describeOperation(item.operation),
+                onSelect: () => this.openView(item.view.id, item.index),
+            })),
+            ...rowOutgoing.map((target) => ({
+                view: target.targetView,
+                description: _t("Go to target"),
+                onSelect: () => this.goToTarget(target),
+            })),
+        ];
+        if (items.length) {
+            this.operationsPopover.open(cellEl, { title: _t("Line %s", row + 1), items });
+        }
     }
 
     /**
