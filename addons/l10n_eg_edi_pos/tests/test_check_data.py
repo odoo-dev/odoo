@@ -1,4 +1,5 @@
 from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from .common import TestL10nEgEdiPosCommon
@@ -57,6 +58,30 @@ class TestL10nEgEdiPosCheckData(TestL10nEgEdiPosCommon):
         order = self._create_unpaid_order()
         errors = order._l10n_eg_edi_pos_check_data()
         self.assertFalse(any('National ID' in e for e in errors))
+
+    def test_threshold_foreign_person_requires_passport_id(self):
+        """Above-threshold sales to a foreign individual are rejected until a
+        Passport ID is set; below the threshold it stays optional."""
+        order = self._create_unpaid_order(partner=self.foreign_customer)
+        self.assertFalse(any('Passport ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+        self.env['ir.config_parameter'].sudo().set_float('l10n_eg_edi_eta.invoicing_threshold', 1.0)
+        self.assertTrue(any('Passport ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+        self.foreign_customer.vat = False
+        self.foreign_customer._set_additional_identifier('EG_PASSPORT', 'L898902C')
+        self.assertFalse(any('Passport ID' in e for e in order._l10n_eg_edi_pos_check_data()))
+
+    def test_passport_id_only_available_for_foreign_partners(self):
+        """The Passport ID is offered in the identifiers menu of non-Egyptian
+        partners only, and accepts up to 9 letters or digits."""
+        self.assertIn('EG_PASSPORT', self.foreign_customer.available_additional_identifiers_metadata)
+        self.assertNotIn('EG_PASSPORT', self.eg_individual_customer.available_additional_identifiers_metadata)
+        self.foreign_customer.vat = False
+        self.foreign_customer._set_additional_identifier('EG_PASSPORT', 'C01X0056J')
+        for invalid_id in ('A123-4567', 'A' * 10):
+            with self.assertRaises(ValidationError):
+                self.foreign_customer._set_additional_identifier('EG_PASSPORT', invalid_id)
 
     def test_branch_vat_equals_partner_vat_returns_error(self):
         """The branch and the customer cannot share the same VAT — check_data
