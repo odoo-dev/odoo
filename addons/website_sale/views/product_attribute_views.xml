@@ -35,6 +35,14 @@
                     </group>
                 </page>
             </page>
+            <field name="default_extra_price" position="after">
+                <field 
+                    name="parent_id"
+                    column_invisible="parent.display_type == 'range'"
+                    context="{'show_attribute': False}"
+                    optional="hide"
+                />
+            </field>
         </field>
     </record>
 
