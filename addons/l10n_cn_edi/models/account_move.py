@@ -1,4 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import logging
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -16,6 +18,8 @@ EDI_STATES = [
     ('issued', 'Issued'),
     ('failed', 'Failed'),
 ]
+
+_logger = logging.getLogger(__name__)
 
 # The bureau's 发票行性质: shared by every provider.
 LINE_NORMAL, LINE_DISCOUNT, LINE_DISCOUNTED = '0', '1', '2'
@@ -46,6 +50,12 @@ class AccountMove(models.Model):
         help="Request serial number sent to the provider; reusing it makes a retry idempotent.",
     )
     l10n_cn_edi_qr_code = fields.Char(string="Fapiao QR Code", copy=False, readonly=True)
+    l10n_cn_edi_fapiao_pdf_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        string="Fapiao PDF",
+        copy=False,
+        readonly=True,
+    )
     l10n_cn_edi_red_form_reason = fields.Selection(
         selection=RED_FORM_REASONS,
         string="Red Form Reason",
@@ -344,21 +354,49 @@ class AccountMove(models.Model):
         """Record an invoice result from the provider. Return an error message, or None."""
         self.ensure_one()
         if result.get('state') == 'issued':
-            self.write({
+            vals = {
                 'l10n_cn_edi_state': 'issued',
                 'l10n_cn_edi_fapiao_no': result.get('fapiao_no'),
                 'l10n_cn_edi_fapiao_date': result.get('fapiao_date'),
                 'l10n_cn_edi_qr_code': result.get('qr_code'),
-            })
-            self.message_post(body=self.env._("E-Fapiao issued successfully. Invoice No: %s", result.get('fapiao_no')))
+            }
+            if result.get('pdf'):
+                vals['l10n_cn_edi_fapiao_pdf_id'] = self.env['ir.attachment'].create({
+                    'name': result.get('pdf_filename') or f"{result.get('fapiao_no')}.pdf",
+                    'raw': result['pdf'],
+                    'mimetype': 'application/pdf',
+                    'res_model': self._name,
+                    'res_id': self.id,
+                }).id
+            self.write(vals)
+            self.message_post(
+                body=self.env._("E-Fapiao issued successfully. Invoice No: %s", result.get('fapiao_no')),
+                attachment_ids=self.l10n_cn_edi_fapiao_pdf_id.ids,
+            )
             return None
         if result.get('state') == 'sent':
             self.l10n_cn_edi_state = 'sent'
+            self.env.ref('l10n_cn_edi.ir_cron_l10n_cn_edi_poll_invoices')._trigger()
             return None
         error = result.get('error') or self.env._("Unexpected response from the e-Fapiao provider.")
         self.l10n_cn_edi_state = 'failed'
         self.message_post(body=error)
         return error
+
+    @api.model
+    def _cron_l10n_cn_edi_poll_invoices(self):
+        """Fetch the result of every fapiao the provider accepted but hadn't finished issuing."""
+        moves = self.search([('l10n_cn_edi_state', '=', 'sent')])
+        for company, company_moves in moves.grouped('company_id').items():
+            if not company._l10n_cn_edi_is_ready():
+                continue
+            client = company._l10n_cn_edi_get_client()
+            for move in company_moves:
+                try:
+                    with self.env.cr.savepoint():
+                        move._l10n_cn_edi_apply_invoice_result(client.query_invoice(move))
+                except UserError as e:
+                    _logger.warning("E-Fapiao: could not poll invoice %s: %s", move.name, e)
 
     def _l10n_cn_edi_prepare_invoice_values(self):
         """The provider-neutral content of this invoice's fapiao (see tools/client.py)."""
@@ -440,6 +478,7 @@ class AccountMove(models.Model):
             is_discounted = discount < 0
             tax_record = line.tax_ids[:1]
             line_values = {
+                'price_include': tax_record.price_include,
                 'line_no': len(lines) + 1,
                 'nature': LINE_DISCOUNTED if is_discounted else LINE_NORMAL,
                 'name': (line.name or line.product_id.name or '').replace('\n', ' ')[:100],
@@ -447,6 +486,7 @@ class AccountMove(models.Model):
                 'tax_rate': abs(tax_rate),
                 'amount_untaxed': amount,
                 'amount_tax': tax,
+                'amount_total': round(amount + tax, 2),
                 'quantity': line.quantity or False,
                 'unit_price': round(amount / line.quantity, 8) if line.quantity else round(line.price_unit, 8),
                 'uom': line.product_uom_id.name or '',
@@ -462,6 +502,7 @@ class AccountMove(models.Model):
                     'nature': LINE_DISCOUNT,
                     'amount_untaxed': round(discount, 2),
                     'amount_tax': round(discount_tax, 2),
+                    'amount_total': round(discount + discount_tax, 2),
                     'quantity': False,
                     'unit_price': False,
                     'uom': '',
@@ -504,12 +545,14 @@ class AccountMove(models.Model):
                 parent = red_lines[-1]
                 parent['amount_untaxed'] = round(parent['amount_untaxed'] + line['amount_untaxed'], 2)
                 parent['amount_tax'] = round(parent['amount_tax'] + line['amount_tax'], 2)
+                parent['amount_total'] = round(parent['amount_total'] + line['amount_total'], 2)
                 parent['nature'] = LINE_NORMAL
                 continue
             red_lines.append({**line, 'original_line_no': line['line_no']})
         for line in red_lines:
             line['amount_untaxed'] = -abs(line['amount_untaxed'])
             line['amount_tax'] = -abs(line['amount_tax'])
+            line['amount_total'] = -abs(line['amount_total'])
             if line['quantity']:
                 line['quantity'] = -abs(line['quantity'])
         return red_lines

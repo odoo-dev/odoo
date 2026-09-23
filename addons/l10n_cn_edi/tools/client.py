@@ -14,7 +14,12 @@ Results are plain dicts:
     ``fapiao_no``   the 数电 number, once issued
     ``fapiao_date`` naive UTC ``datetime``, once issued
     ``qr_code``     QR payload, if the provider returns one
+    ``pdf``         the fapiao PDF as bytes, once issued, with ``pdf_filename``
     ``error``       human-readable reason, when failed
+
+Invoice values carry, per line, ``price_include`` (the Odoo tax's basis) and both
+``amount_untaxed`` and ``amount_total``, so a provider can send whichever basis the
+line was priced in and still match the Odoo invoice to the fen.
 
 ``red form result`` (request_red_form, query_red_form, list_inbound_red_forms items)
     ``uuid``, ``number``       the provider's and the bureau's identifiers

@@ -25,6 +25,11 @@ class AccountMoveSend(models.AbstractModel):
         return res
 
     @api.model
+    def _get_invoice_extra_attachments(self, move):
+        # EXTENDS 'account'
+        return super()._get_invoice_extra_attachments(move) + move.l10n_cn_edi_fapiao_pdf_id
+
+    @api.model
     def _call_web_service_before_invoice_pdf_render(self, invoices_data):
         # EXTENDS 'account'
         super()._call_web_service_before_invoice_pdf_render(invoices_data)
