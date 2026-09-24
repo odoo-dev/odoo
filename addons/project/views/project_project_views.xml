@@ -105,7 +105,7 @@
                     </div>
                     <group>
                         <group>
-                            <label for="partner_id" class="d-md-none"/>
+                            <span class="o_form_label d-md-none">Customer</span>
                             <div class="d-flex align-items-baseline">
                                 <i class="d-none d-md-inline fa fa-fw fa-user me-2" title="Customer" name="partner_id"/>
                                 <field name="partner_id" nolabel="1" widget="res_partner_many2one" placeholder="Select Customer" context="{'show_address': True}"/>
@@ -120,7 +120,7 @@
                                 <i class="d-none d-md-inline fa fa-fw fa-user me-2 fa fa-envelope" title="Email"/>
                                 <field name="partner_email" nolabel="1" widget="email"/>
                             </div>
-                            <label for="tag_ids" class="d-md-none"/>
+                            <span class="o_form_label d-md-none">Tags</span>
                             <div class="d-flex align-items-baseline">
                                 <i class="d-none d-md-inline fa fa-fw fa-user me-2 fa fa-tag" title="Tags"/>
                                 <field name="tag_ids" nolabel="1" widget="many2many_tags" placeholder="Select Tags" options="{'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
