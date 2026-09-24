@@ -184,7 +184,7 @@ export class GeneratePrinterData {
     generateLineData() {
         return this.order.lines.map((line) => {
             const productData = { ...line.product_id.raw };
-            productData.display_name = line.getFullProductName();
+            // productData.display_name = line.getFullProductName();
             return {
                 ...line.raw,
                 product_data: productData,

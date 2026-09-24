@@ -2,18 +2,18 @@
 <odoo>
     <data>
         <template id="l10n_gcc_pos.pos_order_receipt_header" inherit_id="point_of_sale.pos_order_receipt_header">
-            <span name="served_by" position="after">
-                <span t-if="conditions.get('gcc_country') and conditions.get('l10n_gcc_dual_language_receipt')">Served by / خدم بواسطة</span>
-            </span>
-            <span name="served_by" position="attributes">
+            <td name="cashier_name" position="after">
+                <span t-if="conditions.get('gcc_country') and conditions.get('l10n_gcc_dual_language_receipt')">Waiter / النادل</span>
+            </td>
+            <td name="cashier_name" position="attributes">
                 <attribute name="t-if">not conditions.get('gcc_country') or not conditions.get('l10n_gcc_dual_language_receipt')</attribute>
-            </span>
-            <span name="ticket" position="after">
+            </td>
+            <td name="ticket" position="after">
                 <span t-if="conditions.get('gcc_country') and conditions.get('l10n_gcc_dual_language_receipt')">Ticket / تذكرة</span>
-            </span>
-            <span name="ticket" position="attributes">
+            </td>
+            <td name="ticket" position="attributes">
                 <attribute name="t-if">not conditions.get('gcc_country') or not conditions.get('l10n_gcc_dual_language_receipt')</attribute>
-            </span>
+            </td>
             <div name="cashier_name" position="after">
                 <t t-set="show_title" t-value="false"/>
                 <t t-set="show_simplified_title" t-value="false"/>
