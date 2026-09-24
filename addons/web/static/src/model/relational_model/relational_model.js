@@ -166,6 +166,7 @@ export class RelationalModel extends Model {
         this.multiEdit = params.multiEdit;
         this.activeIdsLimit = params.activeIdsLimit || Number.MAX_SAFE_INTEGER;
         this.specialDataCaches = markRaw(params.state?.specialDataCaches || {});
+        this.restoredOrderBy = params.state?.config?.orderBy;
         this.useSendBeaconToSaveUrgently = params.useSendBeaconToSaveUrgently || false;
         this.withCache = this.constructor.withCache && this.env.config?.cache;
         this.initialSampleGroups = undefined; // real groups to populate with sample records
@@ -202,6 +203,10 @@ export class RelationalModel extends Model {
     async load(params = {}) {
         if (this.orm.isSample && this.initialSampleGroups?.length) {
             this.orm.setGroups(this.initialSampleGroups);
+        }
+        if (this.restoredOrderBy && !this.isReady()) {
+            params = { ...params, orderBy: this.restoredOrderBy };
+            this.restoredOrderBy = undefined;
         }
         const config = this._getNextConfig(this.config, params);
         if (!this.isReady()) {

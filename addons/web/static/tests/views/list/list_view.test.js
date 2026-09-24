@@ -217,9 +217,7 @@ defineModels([Foo, Bar, Currency, ResCompany, ResPartner, ResUsers]);
 
 async function clickControlPanelAction(buttonName) {
     if (isSmall()) {
-        await contains(
-            ".o_cp_action_menus [data-icon='more_vert']"
-        ).click();
+        await contains(".o_cp_action_menus [data-icon='more_vert']").click();
         await contains(`.o-dropdown-item button[name="${buttonName}"]`).click();
     } else {
         await contains(`.o_control_panel_actions button[name="${buttonName}"]`).click();
@@ -1448,14 +1446,10 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
         `,
     });
     expect(`.o_control_panel_actions > *`).toHaveCount(0);
-    await contains(
-        ".o_cp_action_menus [data-icon='more_vert']"
-    ).click();
+    await contains(".o_cp_action_menus [data-icon='more_vert']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export"]);
     await clickRecordSelector();
-    await contains(
-        ".o_cp_action_menus [data-icon='more_vert']"
-    ).click();
+    await contains(".o_cp_action_menus [data-icon='more_vert']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "plaf",
         "Export",
@@ -1463,9 +1457,7 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
         "Delete",
     ]);
     await clickRecordSelector();
-    await contains(
-        ".o_cp_action_menus [data-icon='more_vert']"
-    ).click();
+    await contains(".o_cp_action_menus [data-icon='more_vert']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export"]);
 });
 
@@ -1545,9 +1537,7 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
     ]);
 
     await clickRecordSelector();
-    await contains(
-        ".o_cp_action_menus [data-icon='more_vert']"
-    ).click();
+    await contains(".o_cp_action_menus [data-icon='more_vert']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "",
         "default-selection",
@@ -2265,7 +2255,9 @@ test(`discard a new record in editable="top" list with less than 4 records`, asy
     expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row");
 
     if (isSmall()) {
-        await contains(".o_control_panel_main_buttons button.o-control-panel-adaptive-dropdown").click();
+        await contains(
+            ".o_control_panel_main_buttons button.o-control-panel-adaptive-dropdown"
+        ).click();
         expect(`.o_list_button_discard`).toHaveCount(0);
         expect(`.o_control_panel .o_list_button_add`).toHaveCount(1);
     } else {
@@ -3556,6 +3548,45 @@ test(`Loading a filter with a sort attribute`, async () => {
     await toggleSearchBarMenu();
     await toggleMenuItem("My second favorite");
     expect.verifySteps(["date ASC, foo DESC", "date DESC, foo ASC"]);
+});
+
+test(`restores the local order when returning to a list with a favorite`, async () => {
+    Foo._filters = [
+        {
+            context: "{}",
+            domain: "[]",
+            id: 7,
+            is_default: true,
+            name: "My favorite",
+            sort: '["date asc", "foo desc"]',
+            user_ids: [2],
+        },
+    ];
+    Foo._views = {
+        "list,1": `<list><field name="foo"/><field name="date"/></list>`,
+        "form,2": `<form><field name="foo"/></form>`,
+        "search,3": `<search/>`,
+    };
+
+    onRpc("web_search_read", ({ kwargs }) => expect.step(kwargs.order));
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        name: "Foo",
+        res_model: "foo",
+        type: "ir.actions.act_window",
+        views: [
+            [1, "list"],
+            [2, "form"],
+        ],
+        search_view_id: [3, "search"],
+        load_filters: true,
+    });
+
+    await contains(`thead th.o_column_sortable[data-name=foo]`).click();
+    await contains(`.o_data_cell`).click();
+    await contains(`.o_back_button`).click();
+
+    expect.verifySteps(["date ASC, foo DESC", "foo ASC, date ASC", "foo ASC, date ASC"]);
 });
 
 test(`many2one field rendering`, async () => {
