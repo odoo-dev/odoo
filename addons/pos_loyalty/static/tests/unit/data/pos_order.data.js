@@ -45,6 +45,12 @@ patch(PosOrder.prototype, {
         };
     },
 
+    read_pos_orders(domain) {
+        const results = super.read_pos_orders(domain);
+        // debugger
+        return this.read_pos_data(results);
+    },
+
     confirm_coupon_programs(self, coupon_data) {
         const couponNewIdMap = {};
         for (const k of Object.keys(coupon_data)) {

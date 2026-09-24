@@ -8,7 +8,15 @@ export class LoyaltyCard extends models.ServerModel {
     _name = "loyalty.card";
 
     _load_pos_data_fields() {
-        return ["partner_id", "code", "points", "program_id", "expiration_date", "write_date"];
+        return [
+            "partner_id",
+            "code",
+            "points",
+            "program_id",
+            "expiration_date",
+            "write_date",
+            "source_pos_order_id",
+        ];
     }
 
     _records = [
@@ -46,7 +54,30 @@ export class LoyaltyCard extends models.ServerModel {
             program_id: 7,
             write_date: DateTime.now().minus({ days: 2 }).toFormat("yyyy-MM-dd HH:mm:ss"),
         },
+        {
+            id: 5,
+            code: "CARD005",
+            points: 3,
+            partner_id: 1,
+            program_id: 10,
+            expiration_date: DateTime.now().plus({ days: 30 }).toISODate(),
+            source_pos_order_id: 1,
+            write_date: DateTime.now().minus({ days: 1 }).toFormat("yyyy-MM-dd HH:mm:ss"),
+        },
     ];
 }
 
-patch(hootPosModels, [...hootPosModels, LoyaltyCard]);
+export class LoyaltyHistory extends models.ServerModel {
+    _name = "loyalty.history";
+
+    _records = [
+        {
+            id: 1,
+            order_model: "pos.order",
+            order_id: 1,
+            card_id: 5,
+        },
+    ];
+}
+
+patch(hootPosModels, [...hootPosModels, LoyaltyCard, LoyaltyHistory]);

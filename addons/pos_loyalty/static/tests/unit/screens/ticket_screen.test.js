@@ -37,6 +37,7 @@ test("TicketScreen.setOrder keeps reward line and triggers pos.updateRewards", a
     expect(updateRewardsCalled).toBe(true);
     const currentOrder = store.getOrder();
     expect(currentOrder).toBe(order);
+    // debugger
     const rewardLines = currentOrder.lines.filter((l) => l.is_reward_line);
     expect(rewardLines.length).toBe(1);
     expect(rewardLines[0].reward_id.id).toBe(reward.id);
