@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="pos_reports.SaleDetailsExtension">
+        <small t-if="this.props.line.values.combo_label"
+            class="text-muted ms-2"
+            t-out="this.props.line.values.combo_label"/>
+
+        <small t-if="this.props.line.values.uom" class="text-muted ms-2" t-out="this.props.line.values.uom"/>
+
+        <img t-if="this.props.line.values.barcode"
+            class="o_sale_details_barcode ms-auto"
+            t-att-src="'/report/barcode/Code128/' + this.props.line.values.barcode"
+            alt="Barcode"
+            style="height: 1.5rem;"/>
+    </t>
+</templates>
