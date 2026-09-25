@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, models
+from odoo.tools.misc import formatLang
 
 
 class ResConfigSettings(models.TransientModel):
@@ -38,3 +39,24 @@ class ResConfigSettings(models.TransientModel):
     def action_l10n_cn_edi_nuonuo_login(self):
         self.ensure_one()
         return self.company_id._l10n_cn_edi_action_login()
+
+    def action_l10n_cn_edi_nuonuo_credit_line(self):
+        self.ensure_one()
+        company = self.company_id
+        credit_line = company._l10n_cn_edi_get_client().get_credit_line()
+        currency = company.currency_id
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'info',
+                'sticky': True,
+                'message': self.env._(
+                    "%(company)s can still invoice %(available)s (tax excluded) of its %(total)s credit line, as of %(updated)s.",
+                    company=company.name,
+                    available=formatLang(self.env, credit_line['available'], currency_obj=currency),
+                    total=formatLang(self.env, credit_line['total'], currency_obj=currency),
+                    updated=credit_line['updated'],
+                ),
+            },
+        }

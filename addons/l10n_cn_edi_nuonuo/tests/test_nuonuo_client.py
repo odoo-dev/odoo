@@ -73,3 +73,29 @@ class TestNuonuoClient(L10nCnEdiNuonuoTestCommon):
         self.assertTrue(company._l10n_cn_edi_is_ready())
         company._l10n_cn_edi_get_client().test_connection()
         self.assertEqual(self.nuonuo.requests[-1]['headers']['accessToken'], TOKEN)
+
+    def test_credit_line_is_fetched_when_nuonuo_has_none(self):
+        empty = {'code': 'E0000', 'result': {'requestStatus': '0', 'availableCreditLine': None}}
+        known = {'code': 'E0000', 'result': {
+            'requestStatus': '1',
+            'availableCreditLine': '9000.12',
+            'usedCreditLine': '1000.12',
+            'totalCreditLine': '10000.24',
+            'amountUpdateTime': '2026-09-25 09:12:20',
+        }}
+        answers = {'1': [empty, known], '0': [{'code': 'E0000'}]}
+        self.nuonuo.handlers['nuonuo.OpeMplatform.getCreditLine'] = lambda payload: MockResponse(
+            answers[payload['queryType']].pop(0) if len(answers[payload['queryType']]) > 1 else answers[payload['queryType']][0],
+        )
+
+        credit_line = self.company._l10n_cn_edi_get_client().get_credit_line()
+
+        self.assertEqual(credit_line, {'available': 9000.12, 'used': 1000.12, 'total': 10000.24, 'updated': '2026-09-25 09:12:20'})
+        query_types = [request['payload']['queryType'] for request in self.nuonuo.requests]
+        self.assertEqual(query_types, ['1', '0', '1'])
+
+    def test_credit_line_still_unknown_asks_to_retry(self):
+        self.nuonuo.handlers['nuonuo.OpeMplatform.getCreditLine'] = MockResponse({'code': 'E0000', 'result': {'requestStatus': '0'}})
+
+        with self.assertRaisesRegex(UserError, "still fetching"):
+            self.env['res.config.settings'].create({'company_id': self.company.id}).action_l10n_cn_edi_nuonuo_credit_line()

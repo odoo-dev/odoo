@@ -53,6 +53,7 @@ RED_FORM_MAX_PAGES = 20
 GET_CERTIFICATION_STATUS = 'nuonuo.OpeMplatform.getCertificationStatus'
 GET_QR_CODE = 'nuonuo.OpeMplatform.getQrCode'
 VERIFY_COMPLETE = 'nuonuo.OpeMplatform.verifyComplete'
+GET_CREDIT_LINE = 'nuonuo.OpeMplatform.getCreditLine'
 LOGGED_OUT = '0'  # getCertificationStatus queryType 2: 0-未登录
 IDENTITY_CONFIRMED, IDENTITY_PENDING = '1', '2'  # queryType 1: 1-已认证, 2-待认证
 # getQrCode queryType per purpose: (what Nuonuo already holds, a new one from the bureau).
@@ -254,6 +255,32 @@ class NuonuoClient(L10nCnEdiClient):
         """
         self._session_call(GET_CERTIFICATION_STATUS, queryType='0', authId=auth_id or '', eleAccount=self._ele_account())
         return self._certification_status('1').get('certificationStatus') == IDENTITY_CONFIRMED
+
+    def get_credit_line(self):
+        """The company's invoicing quota (授信额度, tax excluded), as Nuonuo last got it from the bureau.
+
+        Return ``{available, used, total, updated}``.
+        """
+        env = self.company.env
+        result = self._session_call(GET_CREDIT_LINE, queryType='1')
+        if result.get('availableCreditLine') is None:
+            # Nuonuo holds no figure yet: have it fetched (at most once per 30 s, 20 times a day).
+            self._session_call(GET_CREDIT_LINE, queryType='0')
+            for delay in SESSION_DELAYS:
+                self.wait(delay)
+                result = self._session_call(GET_CREDIT_LINE, queryType='1')
+                if result.get('availableCreditLine') is not None or result.get('requestStatus') == '2':
+                    break
+        if result.get('requestStatus') == '2':
+            raise UserError(result.get('message') or env._("The tax bureau didn't give the credit line."))
+        if result.get('availableCreditLine') is None:
+            raise UserError(env._("Nuonuo is still fetching the credit line from the tax bureau. Please try again in a minute."))
+        return {
+            'available': float(result['availableCreditLine']),
+            'used': float(result.get('usedCreditLine') or 0.0),
+            'total': float(result.get('totalCreditLine') or 0.0),
+            'updated': result.get('amountUpdateTime') or '',
+        }
 
     # ------------------------------------------------------------------
     # Blue fapiao

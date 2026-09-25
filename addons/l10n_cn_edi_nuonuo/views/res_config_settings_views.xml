@@ -40,6 +40,11 @@
                                 string="Tax Bureau Login"
                                 class="btn-secondary ms-2"
                                 icon="qr_code"/>
+                            <button name="action_l10n_cn_edi_nuonuo_credit_line"
+                                type="object"
+                                string="Credit Line"
+                                class="btn-secondary ms-2"
+                                icon="account_balance"/>
                         </div>
                     </div>
                 </setting>
