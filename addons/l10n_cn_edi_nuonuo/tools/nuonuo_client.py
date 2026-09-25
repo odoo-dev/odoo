@@ -420,27 +420,32 @@ class NuonuoClient(L10nCnEdiClient):
             raise UserError(env._("Nuonuo answered %(code)s: %(message)s", code=body.get('code'), message=body.get('describe') or ''))
 
     def list_inbound_red_forms(self, date_from, date_to):
+        # Suppliers' forms against our bills, whatever their state; customers' forms against
+        # our invoices only while they wait for us (03), or we'd page through every form we raised.
+        return [
+            *self._list_other_side_forms(BUYER, SELLER, date_from, date_to),
+            *self._list_other_side_forms(SELLER, BUYER, date_from, date_to, bill_status='03'),
+        ]
+
+    def _list_other_side_forms(self, identity, raised_by, date_from, date_to, bill_status=None):
         window = {'startTime': f'{date_from:%Y-%m-%d}', 'endTime': f'{date_to:%Y-%m-%d}'}
-        # Forms raised by suppliers at the bureau reach Nuonuo only when downloaded.
+        # Forms raised at the bureau reach Nuonuo only when downloaded.
         self._call(REFRESH_RED_FORM, {
-            'identity': BUYER,
+            'identity': identity,
             'extensionNumber': self.company.l10n_cn_edi_nuonuo_extension_number or '',
             **window,
         })
+        query = {'identity': identity, 'billTimeStart': window['startTime'], 'billTimeEnd': window['endTime']}
+        if bill_status:
+            query['billStatus'] = bill_status
         forms = []
         for page in range(1, RED_FORM_MAX_PAGES + 1):
-            result = self._query_red_forms({
-                'identity': BUYER,
-                'billTimeStart': window['startTime'],
-                'billTimeEnd': window['endTime'],
-                'pageNo': str(page),
-                'pageSize': str(RED_FORM_PAGE_SIZE),
-            })
+            result = self._query_red_forms({**query, 'pageNo': str(page), 'pageSize': str(RED_FORM_PAGE_SIZE)})
             batch = result.get('list') or []
             forms += batch
             if len(batch) < RED_FORM_PAGE_SIZE or len(forms) >= int(result.get('total') or 0):
                 break
-        return [self._red_form_result(form) for form in forms if form.get('applySource') is not None and str(form['applySource']) == SELLER]
+        return [self._red_form_result(form) for form in forms if str(form.get('applySource')) == raised_by]
 
     def _identity(self, document):
         return BUYER if document.move_id.move_type in ('in_invoice', 'in_refund') else SELLER

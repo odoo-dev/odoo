@@ -185,16 +185,21 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         bill.action_post()
         bill.l10n_cn_edi_fapiao_no = BLUE_FAPIAO_NO
         self._answer(REFRESH, OK)
-        self._answer_forms(listing(
-            red_form(billId='IN-1'),
-            red_form(billId='IN-2', applySource=1),  # raised by us as the buyer: not a request to us
-        ))
+        self._answer_forms(
+            listing(
+                red_form(billId='IN-1'),
+                red_form(billId='IN-2', applySource=1),  # raised by us as the buyer: not a request to us
+            ),
+            listing(red_form(billId='OWN-1')),  # seller side, but raised by us
+        )
 
         forms = self.company._l10n_cn_edi_get_client().list_inbound_red_forms(date(2026, 9, 1), date(2026, 9, 25))
 
-        refresh = self._requests_for(REFRESH)[0]['payload']
-        self.assertEqual((refresh['identity'], refresh['startTime'], refresh['endTime']), ('1', '2026-09-01', '2026-09-25'))
-        self.assertEqual(self._requests_for(QUERY)[0]['payload']['identity'], '1')
+        refreshes = [request['payload'] for request in self._requests_for(REFRESH)]
+        self.assertEqual([refresh['identity'] for refresh in refreshes], ['1', '0'])
+        self.assertEqual((refreshes[0]['startTime'], refreshes[0]['endTime']), ('2026-09-01', '2026-09-25'))
+        queries = [request['payload'] for request in self._requests_for(QUERY)]
+        self.assertEqual([(query['identity'], query.get('billStatus')) for query in queries], [('1', None), ('0', '03')])
         self.assertEqual(forms, [{
             'uuid': 'IN-1',
             'number': '990000007566113377',
@@ -207,6 +212,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
             'reason': '02',
         }])
 
+        self._answer_forms(listing(red_form(billId='IN-1')), listing())
         self.env['l10n_cn_edi.document']._l10n_cn_edi_import_inbound_red_forms(self.company, date(2026, 9, 1), date(2026, 9, 25))
         self._answer(CONFIRM, OK)
         bill.action_l10n_cn_edi_approve_inbound_red_form()
@@ -217,12 +223,24 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
     def test_inbound_listing_follows_the_pages(self):
         self._answer(REFRESH, OK)
         full_page = {'code': 'E0000', 'result': {'total': 51, 'list': [red_form(billId=f'IN-{n}') for n in range(50)]}}
-        self._answer_forms(full_page, {'code': 'E0000', 'result': {'total': 51, 'list': [red_form(billId='IN-50')]}})
+        self._answer_forms(
+            full_page,
+            {'code': 'E0000', 'result': {'total': 51, 'list': [red_form(billId='IN-50')]}},
+            listing(),
+        )
 
         forms = self.company._l10n_cn_edi_get_client().list_inbound_red_forms(date(2026, 9, 1), date(2026, 9, 25))
 
         self.assertEqual(len(forms), 51)
-        self.assertEqual([request['payload']['pageNo'] for request in self._requests_for(QUERY)], ['1', '2'])
+        self.assertEqual([request['payload']['pageNo'] for request in self._requests_for(QUERY)], ['1', '2', '1'])
+
+    def test_customer_raised_form_is_listed(self):
+        self._answer(REFRESH, OK)
+        self._answer_forms(listing(), listing(red_form(billId='CUST-1', billStatus='03', applySource=1)))
+
+        forms = self.company._l10n_cn_edi_get_client().list_inbound_red_forms(date(2026, 9, 1), date(2026, 9, 25))
+
+        self.assertEqual([(form['uuid'], form['bureau_state']) for form in forms], [('CUST-1', '03')])
 
     def test_failed_confirmation_is_reported(self):
         bill = self.init_invoice('in_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_purchase_a)
