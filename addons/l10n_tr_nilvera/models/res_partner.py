@@ -66,7 +66,7 @@ class ResPartner(models.Model):
         retry_existing = self.env.context.get('retry_existing', False)
         for record in self.filtered(lambda p: p.vat and (retry_existing or p.l10n_tr_nilvera_customer_status == 'not_checked')):
             if record._check_nilvera_customer():
-                if len(record.l10n_tr_nilvera_customer_alias_ids) > 1:
+                if len(record._l10n_tr_nilvera_get_customer_aliases()) > 1:
                     results['multi_alias'] |= record
                 else:
                     results['success'] |= record
@@ -105,8 +105,10 @@ class ResPartner(models.Model):
                     self.l10n_tr_nilvera_customer_status = 'einvoice'
 
                     # We need to sync the data from the API with the records in database.
-                    aliases = {result.get('Name') for result in query_result}
-                    persisted_aliases = self.l10n_tr_nilvera_customer_alias_ids
+                    aliases = {result.get('Name') for result in query_result if result.get('Name')}
+                    persisted_aliases = self.l10n_tr_nilvera_customer_alias_ids.filtered(
+                        lambda alias: not alias.global_user_type
+                    )
                     # Find aliases to add (in query result but not in database).
                     aliases_to_add = aliases - set(persisted_aliases.mapped('name'))
                     # Find aliases to remove (in database but not in query result).
@@ -126,6 +128,45 @@ class ResPartner(models.Model):
                 return True
             else:
                 return False
+
+    def _l10n_tr_nilvera_get_customer_aliases(self):
+        self.ensure_one()
+        return self.l10n_tr_nilvera_customer_alias_ids.filtered(lambda alias: not alias.global_user_type)
+
+    def _l10n_tr_nilvera_sync_customer_aliases(self, global_user_type):
+        """Synchronize aliases returned by Nilvera for a document type."""
+        self.ensure_one()
+        with _get_nilvera_client(self.env._, self.env.company) as client:
+            response = client.request(
+                "GET",
+                "/general/GlobalCompany/GetGlobalCustomerInfo/" + urllib.parse.quote(self.vat),
+                params={'globalUserType': global_user_type},
+                handle_response=False,
+            )
+
+        if response.status_code != 200:
+            return False
+
+        aliases = {
+            alias.get('Name')
+            for alias in response.json().get('Aliases') or []
+            if alias.get('Name')
+        }
+        persisted_aliases = self.l10n_tr_nilvera_customer_alias_ids.filtered(
+            lambda alias: alias.global_user_type == global_user_type
+        )
+        aliases_to_add = aliases - set(persisted_aliases.mapped('name'))
+        aliases_to_remove = set(persisted_aliases.mapped('name')) - aliases
+        self.env['l10n_tr.nilvera.alias'].create([{
+            'name': alias_name,
+            'partner_id': self.id,
+            'global_user_type': global_user_type,
+        } for alias_name in aliases_to_add])
+        persisted_aliases.filtered(lambda alias: alias.name in aliases_to_remove).unlink()
+
+        # As with the generic taxpayer check, retain results during a bulk verification.
+        self.env.cr.commit()
+        return True
 
     def _get_suggested_invoice_edi_format(self):
         # EXTENDS 'account'

@@ -13,17 +13,25 @@ class ResPartner(models.Model):
         comodel_name='l10n_tr.nilvera.alias',
         string="eDispatch Alias",
         compute='_compute_l10n_tr_nilvera_edispatch_alias_id',
-        domain="[('partner_id', '=', id)]",
+        domain="[('partner_id', '=', id), ('global_user_type', '=', 'DespatchAdvice')]",
         copy=False,
         store=True,
         readonly=False,
     )
 
-    @api.depends('l10n_tr_nilvera_customer_alias_ids', 'l10n_tr_nilvera_customer_status')
+    @api.depends('l10n_tr_nilvera_customer_alias_ids.global_user_type')
     def _compute_l10n_tr_nilvera_edispatch_alias_id(self):
         for record in self:
-            if not record.l10n_tr_nilvera_edispatch_alias_id:
-                record.l10n_tr_nilvera_edispatch_alias_id = record.l10n_tr_nilvera_customer_alias_ids[:1]
+            if (
+                not record.l10n_tr_nilvera_edispatch_alias_id
+                or record.l10n_tr_nilvera_edispatch_alias_id.global_user_type != 'DespatchAdvice'
+            ):
+                record.l10n_tr_nilvera_edispatch_alias_id = record.l10n_tr_nilvera_customer_alias_ids.filtered(
+                    lambda alias: alias.global_user_type == 'DespatchAdvice'
+                )[:1]
+
+    def _check_nilvera_customer(self):
+        return super()._check_nilvera_customer() and self._l10n_tr_nilvera_sync_customer_aliases('DespatchAdvice')
 
     def _l10n_tr_nilvera_validate_partner_details(self, tax_office_required=False):
         error_messages = {}
