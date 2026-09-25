@@ -35,9 +35,11 @@ line was priced in and still match the Odoo invoice to the fen.
 
 ``red form result`` (request_red_form, query_red_form, list_inbound_red_forms items)
     ``uuid``, ``number``       the provider's and the bureau's identifiers
-    ``bureau_state``           the tax bureau's 01-10 code (see BUREAU_STATES)
+    ``bureau_state``           the tax bureau's 01-10 code (see BUREAU_STATES), or
+                               False while the bureau hasn't registered the form
     ``red_fapiao_no``          the red fapiao number, once issued
     ``red_fapiao_date``        naive UTC ``datetime``, once issued
+    ``pdf``, ``ofd``           the red fapiao's files, as for an invoice result
     ``error``                  human-readable reason, when refused
     inbound items also carry ``original_fapiao_no``, ``amount_untaxed``,
     ``amount_tax`` and ``reason``.
@@ -86,7 +88,11 @@ class L10nCnEdiClient:
         raise NotImplementedError
 
     def request_red_form(self, values):
-        """Submit a red letter confirmation form from ``_l10n_cn_edi_prepare_red_form_values()``."""
+        """Submit a red letter confirmation form from ``_l10n_cn_edi_prepare_red_form_values()``.
+
+        Only full reversals are sent: the bureau's partial-red rules depend on the buyer's
+        bookkeeping and may change, and every provider advises against them.
+        """
         raise NotImplementedError
 
     def query_red_form(self, document):

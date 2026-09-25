@@ -212,6 +212,52 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
             'l10n_cn_edi_fapiao_date': datetime(2026, 9, 23, 4, 30),
         }])
 
+    def test_only_a_full_reversal_gets_a_red_form(self):
+        credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
+        credit_note.invoice_line_ids.price_unit /= 2
+
+        with self.assertRaisesRegex(UserError, "whole fapiao"):
+            credit_note.action_l10n_cn_edi_request_red_form()
+        self.assertNotIn('request_red_form', [method for method, _args in self.client.calls])
+
+    def test_red_form_waits_for_the_bureau_to_register_it(self):
+        credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
+        self.responses['request_red_form'] = {'uuid': 'uuid-1', 'bureau_state': False}
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        doc = credit_note.l10n_cn_edi_document_ids
+        self.assertRecordValues(doc, [{'state': 'red_form_pending', 'red_form_uuid': 'uuid-1', 'bureau_state': False}])
+
+        self.responses['query_red_form'] = {'uuid': 'uuid-1', 'bureau_state': False, 'error': "Blue fapiao already reversed"}
+        self.env['l10n_cn_edi.document']._cron_check_red_form_status()
+
+        self.assertRecordValues(doc, [{'state': 'failed', 'error_message': "Blue fapiao already reversed"}])
+        self.assertEqual(credit_note.l10n_cn_edi_state, 'failed')
+
+    def test_confirmed_red_form_waits_for_its_red_fapiao(self):
+        credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
+        self.responses['request_red_form'] = {'uuid': 'uuid-1', 'number': 'no-1', 'bureau_state': '01'}
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        doc = credit_note.l10n_cn_edi_document_ids
+        self.assertRecordValues(doc, [{'state': 'red_form_pending', 'bureau_state': '01'}])
+        self.assertEqual(credit_note.l10n_cn_edi_state, 'not_sent')
+
+        self.responses['query_red_form'] = {
+            'bureau_state': '01',
+            'red_fapiao_no': 'red-fapiao-789',
+            'pdf': b'%PDF red',
+            'ofd': b'PK red',
+        }
+        self.env['l10n_cn_edi.document']._cron_check_red_form_status()
+
+        self.assertEqual(doc.state, 'red_form_confirmed')
+        self.assertEqual(credit_note.l10n_cn_edi_fapiao_no, 'red-fapiao-789')
+        self.assertEqual(credit_note.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF red')
+        self.assertEqual(credit_note.l10n_cn_edi_fapiao_ofd_id.name, 'red-fapiao-789.ofd')
+
     def test_red_form_reuses_single_document(self):
         credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
         self.responses['request_red_form'] = {'uuid': 'uuid-1', 'number': 'no-1', 'bureau_state': '02'}

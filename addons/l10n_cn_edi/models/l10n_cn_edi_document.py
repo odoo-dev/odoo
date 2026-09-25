@@ -85,27 +85,38 @@ class L10nCnEdiDocument(models.Model):
         self.ensure_one()
         bureau_state = result.get('bureau_state')
         if not bureau_state:
+            if result.get('error'):
+                self.write({'state': 'failed', 'error_message': result['error']})
+                if self.move_id.move_type == 'out_refund':
+                    self.move_id.l10n_cn_edi_state = 'failed'
+                self.move_id.message_post(body=self.env._("Red Form rejected: %s", result['error']))
+            # Otherwise the bureau hasn't registered the form yet: still pending.
             return
+        move = self.move_id
+        red_fapiao_no = result.get('red_fapiao_no') or self.red_fapiao_no
         state = self._l10n_cn_edi_state_from_bureau(bureau_state)
+        if state == 'red_form_confirmed' and move.move_type == 'out_refund' and not red_fapiao_no:
+            # The bureau issues the red fapiao after the confirmation: keep polling until it's out.
+            state = 'red_form_pending'
         was_state = self.state
         self.write({
             'state': state,
             'bureau_state': bureau_state,
             'red_form_number': result.get('number') or self.red_form_number,
-            'red_fapiao_no': result.get('red_fapiao_no') or self.red_fapiao_no,
+            'red_fapiao_no': red_fapiao_no,
             'error_message': result.get('error') if state == 'failed' else False,
         })
         if state == was_state:
             return
-        move = self.move_id
         if state == 'red_form_confirmed':
             if move.move_type == 'out_refund':
                 vals = {'l10n_cn_edi_state': 'issued'}
-                if result.get('red_fapiao_no'):
-                    vals['l10n_cn_edi_fapiao_no'] = result['red_fapiao_no']
+                if red_fapiao_no:
+                    vals['l10n_cn_edi_fapiao_no'] = red_fapiao_no
                 if result.get('red_fapiao_date'):
                     vals['l10n_cn_edi_fapiao_date'] = result['red_fapiao_date']
                 move.write(vals)
+                move._l10n_cn_edi_attach_fapiao_files(result, red_fapiao_no)
                 move.activity_schedule(
                     'mail.mail_activity_data_todo',
                     summary=self.env._("Red Form has been approved and Red Fapiao has been issued, Please confirm Credit Note in Odoo accordingly"),

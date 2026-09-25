@@ -260,6 +260,13 @@ class AccountMove(models.Model):
         original_move = self.reversed_entry_id
         if not original_move.l10n_cn_edi_fapiao_no:
             raise UserError(self.env._("Cannot find the original fapiao number. Ensure this credit note was created from an issued e-Fapiao."))
+        if self.currency_id.compare_amounts(self.amount_total, original_move.amount_total):
+            raise UserError(self.env._(
+                "A red fapiao can only reverse the whole fapiao %(fapiao)s (%(amount)s). "
+                "Credit the full amount, then issue a new invoice with the right amounts.",
+                fapiao=original_move.l10n_cn_edi_fapiao_no,
+                amount=original_move.amount_total,
+            ))
         client = self.company_id._l10n_cn_edi_get_client()
         client.ensure_ready()
         doc = self.l10n_cn_edi_document_ids[:1]
@@ -280,15 +287,15 @@ class AccountMove(models.Model):
             self.l10n_cn_edi_state = 'failed'
             self.message_post(body=self.env._("Red Form request failed: %s", e))
             return
-        if not result.get('bureau_state'):
+        if not result.get('bureau_state') and (result.get('error') or not result.get('uuid')):
             error = result.get('error') or self.env._("The provider returned no red form.")
             doc.write({'state': 'failed', 'error_message': error})
             self.l10n_cn_edi_state = 'failed'
             self.message_post(body=self.env._("Red Form rejected: %s", error))
             return
-        doc.red_form_uuid = result.get('uuid')
+        doc.write({'red_form_uuid': result['uuid'], 'state': 'red_form_pending'})
         doc._l10n_cn_edi_apply_red_form_result(result)
-        if result['bureau_state'] in BUREAU_STATES_CONFIRMED:
+        if result.get('bureau_state') in BUREAU_STATES_CONFIRMED:
             self.message_post(body=self.env._("Red Form confirmed (auto-approved). No: %s", doc.red_form_number))
 
     def action_l10n_cn_edi_cancel_red_form(self):
@@ -386,19 +393,10 @@ class AccountMove(models.Model):
                 'l10n_cn_edi_fapiao_date': result.get('fapiao_date'),
                 'l10n_cn_edi_qr_code': result.get('qr_code'),
             }
-            for kind, mimetype in (('pdf', 'application/pdf'), ('ofd', 'application/ofd')):
-                if result.get(kind):
-                    vals[f'l10n_cn_edi_fapiao_{kind}_id'] = self.env['ir.attachment'].create({
-                        'name': result.get(f'{kind}_filename') or f"{result.get('fapiao_no')}.{kind}",
-                        'raw': result[kind],
-                        'mimetype': mimetype,
-                        'res_model': self._name,
-                        'res_id': self.id,
-                    }).id
             self.write(vals)
             self.message_post(
                 body=self.env._("E-Fapiao issued successfully. Invoice No: %s", result.get('fapiao_no')),
-                attachment_ids=(self.l10n_cn_edi_fapiao_pdf_id + self.l10n_cn_edi_fapiao_ofd_id).ids,
+                attachment_ids=self._l10n_cn_edi_attach_fapiao_files(result, result.get('fapiao_no')).ids,
             )
             return None
         if result.get('state') == 'sent':
@@ -411,6 +409,23 @@ class AccountMove(models.Model):
             self.l10n_cn_edi_serial_no = False
         self.message_post(body=error)
         return error
+
+    def _l10n_cn_edi_attach_fapiao_files(self, result, fapiao_no):
+        """Attach the PDF and OFD of a provider result to this move. Return the attachments."""
+        self.ensure_one()
+        attachments = self.env['ir.attachment']
+        for kind, mimetype in (('pdf', 'application/pdf'), ('ofd', 'application/ofd')):
+            if result.get(kind):
+                attachment = self.env['ir.attachment'].create({
+                    'name': result.get(f'{kind}_filename') or f"{fapiao_no}.{kind}",
+                    'raw': result[kind],
+                    'mimetype': mimetype,
+                    'res_model': self._name,
+                    'res_id': self.id,
+                })
+                self[f'l10n_cn_edi_fapiao_{kind}_id'] = attachment
+                attachments += attachment
+        return attachments
 
     @api.model
     def _cron_l10n_cn_edi_poll_invoices(self):
