@@ -31,6 +31,16 @@ STATUS_PENDING = {'20', '21'}  # 开票中, 开票成功签章中
 STATUS_FAILED = '22'  # 开票失败
 STATUS_SEAL_FAILED = '24'  # 签章失败: retried with reInvoice
 STATUS_VOID = {'3', '31'}  # 已作废, 作废中
+# The drawer's tax bureau session (联调参考 4.2, 4.12, 4.13).
+GET_CERTIFICATION_STATUS = 'nuonuo.OpeMplatform.getCertificationStatus'
+GET_QR_CODE = 'nuonuo.OpeMplatform.getQrCode'
+VERIFY_COMPLETE = 'nuonuo.OpeMplatform.verifyComplete'
+LOGGED_OUT = '0'  # getCertificationStatus queryType 2: 0-未登录
+IDENTITY_CONFIRMED, IDENTITY_PENDING = '1', '2'  # queryType 1: 1-已认证, 2-待认证
+# getQrCode queryType per purpose: (what Nuonuo already holds, a new one from the bureau).
+QR_QUERY_TYPES = {'login': ('3', '2'), 'verify': ('1', '0')}
+# Getting a new QR code or login result from the bureau takes a few seconds.
+SESSION_DELAYS = (2, 3)
 # Gateway codes meaning the app's credentials are wrong, not the request.
 CREDENTIAL_ERRORS = {
     '070101',  # 获取app密钥失败或appkey无效
@@ -135,6 +145,97 @@ class NuonuoClient(L10nCnEdiClient):
                 code=body.get('code'),
                 message=body.get('describe') or '',
             ))
+
+    # ------------------------------------------------------------------
+    # Tax bureau session
+    # ------------------------------------------------------------------
+
+    def get_session_state(self):
+        if self._certification_status('2').get('certificationStatus') == LOGGED_OUT:
+            return 'login'
+        if self._certification_status('1').get('certificationStatus') == IDENTITY_PENDING:
+            return 'verify'
+        return 'ok'
+
+    def _certification_status(self, query_type):
+        body = self._call(GET_CERTIFICATION_STATUS, self._session_payload(queryType=query_type, eleAccount=self._ele_account()))
+        if body.get('code') != SUCCESS:
+            # An unknown session must not hold invoices back: issuing will tell.
+            _logger.warning("Nuonuo: no session status for company %s: %s %s", self.company.vat, body.get('code'), body.get('describe'))
+            return {}
+        return body.get('result') or {}
+
+    def _session_payload(self, **values):
+        return {'extensionNumber': self.company.l10n_cn_edi_nuonuo_extension_number or '', **values}
+
+    def _ele_account(self):
+        return self.company.l10n_cn_edi_nuonuo_ele_account or ''
+
+    def _session_call(self, method, **values):
+        body = self._call(method, self._session_payload(**values))
+        if body.get('code') != SUCCESS:
+            raise UserError(self.company.env._(
+                "Nuonuo answered %(code)s: %(message)s",
+                code=body.get('code'),
+                message=body.get('describe') or '',
+            ))
+        return body.get('result') or {}
+
+    def get_qr_code(self, purpose, renew=False):
+        """The QR code the drawer scans to log in ('login') or to confirm their identity ('verify').
+
+        Return ``{qr_code, qr_type, auth_id, expires}``. Nuonuo's code is reused unless
+        ``renew``: the bureau hands out a new one at most once a minute, 20 times a day.
+        """
+        env = self.company.env
+        query_type, renew_type = QR_QUERY_TYPES[purpose]
+        result = {} if renew else self._session_call(GET_QR_CODE, queryType=query_type)
+        if not result.get('qrCode'):
+            self._session_call(GET_QR_CODE, queryType=renew_type)
+            for delay in SESSION_DELAYS:
+                self.wait(delay)
+                result = self._session_call(GET_QR_CODE, queryType=query_type)
+                if result.get('qrCode') or result.get('status') == '2':
+                    break
+        if not result.get('qrCode'):
+            raise UserError(result.get('message') or env._("Nuonuo has no QR code yet. Please try again in a minute."))
+        return {
+            'qr_code': result['qrCode'],
+            'qr_type': result.get('qrCodeType') or '',
+            # Needed to confirm the identity check; their guide names it, their field list doesn't.
+            'auth_id': result.get('authId') or '',
+            'expires': result.get('endTime') or '',
+        }
+
+    def send_login_sms(self):
+        """Text a login code to the drawer's phone."""
+        self._session_call(GET_QR_CODE, queryType='4')
+
+    def confirm_login(self, sms_code=None):
+        """Complete the login after the scan, or with the texted code. Return whether the bureau accepted it."""
+        env = self.company.env
+        if sms_code:
+            self._session_call(VERIFY_COMPLETE, queryType='2', verifyCode=int(sms_code))
+        else:
+            self._session_call(VERIFY_COMPLETE, queryType='0')
+        result_type = '3' if sms_code else '1'
+        result = self._session_call(VERIFY_COMPLETE, queryType=result_type)
+        for delay in SESSION_DELAYS:
+            if result.get('status') != '0':  # 0-登录执行中
+                break
+            self.wait(delay)
+            result = self._session_call(VERIFY_COMPLETE, queryType=result_type)
+        if result.get('status') == '2':
+            raise UserError(result.get('message') or env._("The tax bureau refused the login."))
+        return result.get('status') == '1'
+
+    def confirm_identity(self, auth_id):
+        """After the drawer scanned the identity QR code, sync the bureau's verdict. Return whether it's confirmed.
+
+        Nuonuo allows this once every 30 s, 20 times a day.
+        """
+        self._session_call(GET_CERTIFICATION_STATUS, queryType='0', authId=auth_id or '', eleAccount=self._ele_account())
+        return self._certification_status('1').get('certificationStatus') == IDENTITY_CONFIRMED
 
     # ------------------------------------------------------------------
     # Blue fapiao

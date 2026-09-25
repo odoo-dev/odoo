@@ -13,7 +13,9 @@ permanent token, then enter its appKey, appSecret and token in the Accounting se
     """,
     'depends': ['l10n_cn_edi'],
     'data': [
+        'security/ir.access.csv',
         'views/res_config_settings_views.xml',
+        'wizard/l10n_cn_edi_nuonuo_login_views.xml',
     ],
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',

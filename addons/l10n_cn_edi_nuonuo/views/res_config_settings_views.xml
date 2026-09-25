@@ -35,6 +35,11 @@
                                 string="Test Connection"
                                 class="btn-secondary"
                                 icon="network_check"/>
+                            <button name="action_l10n_cn_edi_nuonuo_login"
+                                type="object"
+                                string="Tax Bureau Login"
+                                class="btn-secondary ms-2"
+                                icon="qr_code"/>
                         </div>
                     </div>
                 </setting>

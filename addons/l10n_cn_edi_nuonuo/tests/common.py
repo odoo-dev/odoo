@@ -80,6 +80,15 @@ class L10nCnEdiNuonuoTestCommon(TestAccountMoveSendCommon):
         ).start()
         patch.object(NuonuoClient, 'wait', lambda client, seconds: None).start()
         self.addCleanup(patch.stopall)
+        self._set_session(login='1', identity='1')
+
+    def _set_session(self, login, identity):
+        """Answer getCertificationStatus: login is queryType 2 (0-未登录 1-已登录), identity queryType 1 (1-已认证 2-待认证)."""
+        statuses = {'2': login, '1': identity}
+        self.nuonuo.handlers['nuonuo.OpeMplatform.getCertificationStatus'] = lambda payload: MockResponse({
+            'code': 'E0000',
+            'result': {'certificationStatus': statuses.get(payload['queryType'], '1')},
+        })
 
     def _issue(self, invoice):
         """Issue through the send flow; return the invoice's error, or None."""

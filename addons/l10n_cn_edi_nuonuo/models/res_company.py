@@ -38,3 +38,31 @@ class ResCompany(models.Model):
             and company.l10n_cn_edi_nuonuo_app_secret
             and company.l10n_cn_edi_nuonuo_token,
         )
+
+    def _l10n_cn_edi_action_login(self, invoices=None):
+        # EXTENDS 'l10n_cn_edi'
+        self.ensure_one()
+        client = self._l10n_cn_edi_get_client()
+        client.ensure_ready()
+        session_state = client.get_session_state()
+        if session_state == 'ok':
+            if invoices:
+                return invoices.action_send_and_print()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'success',
+                    'message': self.env._("%s is logged in to the tax bureau.", self.name),
+                    'next': {'type': 'ir.actions.act_window_close'},
+                },
+            }
+        wizard = self.env['l10n_cn_edi_nuonuo.login'].create({
+            'company_id': self.id,
+            'invoice_ids': invoices.ids if invoices else [],
+            'purpose': session_state,
+        })
+        if session_state == 'verify':
+            # The identity check only works by QR code.
+            wizard._fetch_qr_code()
+        return wizard._action_reopen()

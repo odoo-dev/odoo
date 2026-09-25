@@ -34,3 +34,7 @@ class ResConfigSettings(models.TransientModel):
                 'next': {'type': 'ir.actions.act_window_close'},
             },
         }
+
+    def action_l10n_cn_edi_nuonuo_login(self):
+        self.ensure_one()
+        return self.company_id._l10n_cn_edi_action_login()

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="l10n_cn_edi_nuonuo_login_view_form" model="ir.ui.view">
+        <field name="name">l10n_cn_edi_nuonuo.login.form</field>
+        <field name="model">l10n_cn_edi_nuonuo.login</field>
+        <field name="arch" type="xml">
+            <form>
+                <p invisible="purpose != 'login'">
+                    The drawer is logged out of the tax bureau. Log in with a QR code, or with a code texted to the drawer's phone.
+                </p>
+                <p invisible="purpose != 'verify'">
+                    The tax bureau asks the drawer to confirm their identity (实名认证). Scan the code below, then click Done.
+                    The code expires after 5 minutes.
+                </p>
+                <group invisible="purpose != 'login'">
+                    <field name="method" widget="radio" options="{'horizontal': true}" readonly="qr_code or sms_sent"/>
+                </group>
+                <div class="text-center" invisible="not qr_code">
+                    <field name="qr_image_url" widget="image_url" options="{'size': [240, 240]}" nolabel="1"/>
+                    <group>
+                        <field name="qr_app" invisible="not qr_app"/>
+                        <field name="qr_expires" invisible="not qr_expires"/>
+                    </group>
+                </div>
+                <group invisible="method != 'sms' or not sms_sent">
+                    <field name="sms_code" placeholder="123456"/>
+                </group>
+                <footer>
+                    <button name="action_show_qr_code" string="Show QR Code" type="object" class="btn-primary"
+                        invisible="qr_code or method != 'qr'"/>
+                    <button name="action_send_sms" string="Send SMS Code" type="object" class="btn-primary"
+                        invisible="method != 'sms' or sms_sent"/>
+                    <button name="action_confirm" string="Done" type="object" class="btn-primary"
+                        invisible="(method == 'qr' and not qr_code) or (method == 'sms' and not sms_sent)"/>
+                    <button name="action_renew_qr_code" string="New QR Code" type="object" invisible="not qr_code"/>
+                    <button name="action_send_sms" string="Send Again" type="object" invisible="not sms_sent"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
