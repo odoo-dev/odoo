@@ -629,7 +629,7 @@ class StockPicking(models.Model):
 
     @api.onchange('picking_type_id', 'partner_id')
     def _onchange_picking_type(self):
-        if self.picking_type_id and self.state == 'draft':
+        if self.picking_type_id:
             self = self.with_company(self.company_id)
             self.move_ids.filtered(
                 lambda m: m.picking_type_id != self.picking_type_id
