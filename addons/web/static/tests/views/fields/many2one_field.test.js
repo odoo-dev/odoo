@@ -3709,6 +3709,62 @@ test("closing the many2one modal does not focus the field if it becomes readonly
     expect(".o_field_widget[name=trululu]").toHaveClass("o_readonly_modifier");
 });
 
+test("many2one in line inside dialog does not save or reload line when opening related record", async () => {
+    Turtle._views = {
+        form: `<form><field name="turtle_trululu"/><field name="name"/></form>`,
+    };
+
+    onRpc("get_formview_id", () => false);
+    onRpc("turtle", "web_save", () => {
+        expect.step("turtle_web_save");
+    });
+    onRpc("turtle", "web_read", () => {
+        expect.step("turtle_web_read");
+    });
+    onRpc("partner", "web_save", () => {
+        expect.step("partner_web_save");
+    });
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: `
+            <form>
+                <field name="turtles" mode="kanban" add-label="Add Turtle">
+                    <kanban>
+                        <templates>
+                            <t t-name="card">
+                                <field name="turtle_trululu"/>
+                            </t>
+                        </templates>
+                    </kanban>
+                    <form string="Create Turtle">
+                        <field name="turtle_trululu"/>
+                        <field name="name"/>
+                    </form>
+                </field>
+            </form>`,
+    });
+
+    expect("button:contains(Add Turtle)").toHaveCount(1);
+    await contains("button:contains(Add Turtle)").click();
+
+    expect(".o_dialog").toHaveCount(1);
+
+    await selectFieldDropdownItem("turtle_trululu", "first record");
+
+    expect(".o_dialog").toHaveCount(1);
+
+    expect(".o_dialog .o_field_widget[name=turtle_trululu] .o_external_button").toHaveCount(1);
+    await contains(".o_dialog .o_field_widget[name=turtle_trululu] .o_external_button", {
+        visible: false,
+    }).click();
+
+    expect(".o_dialog").toHaveCount(2);
+    expect.verifySteps([]);
+});
+
 test("search more pager is reset when doing a new search", async () => {
     Partner._fields.datetime = fields.Datetime({ string: "Datetime Field", searchable: true });
     Partner._records.push(...range(170).map((i) => ({ id: i + 10, name: `Partner ${i}` })));
