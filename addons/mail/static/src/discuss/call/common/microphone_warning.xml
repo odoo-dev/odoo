@@ -6,6 +6,9 @@
                 <t t-if="this.rtc.microphonePermission !== 'granted'">
                     <i class="oi text-warning me-1" data-icon="warning"/> No microphone permissions
                 </t>
+                <t t-elif="this.rtc.showMutedPttWarning">
+                    You are currently muted
+                </t>
                 <t t-else="">
                     <div class="fs-5 mb-1"><i class="oi text-warning me-1" data-icon="warning"/> Microphone muted by system</div>
                     <div>Go to your computer's settings to unmute your mic and increase its level</div>

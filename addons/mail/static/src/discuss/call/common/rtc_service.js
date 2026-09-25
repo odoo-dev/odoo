@@ -92,6 +92,7 @@ function subscribe(target, event, f) {
 }
 
 export const PTT_RELEASE_DURATION = 200;
+export const MUTED_PTT_WARNING_DURATION = 2000;
 const RECORDING_CONNECTION_TIMEOUT = 15_000;
 const SW_MESSAGE_TYPE = {
     POST_RTC_LOGS: "POST_RTC_LOGS",
@@ -349,6 +350,8 @@ export class Rtc extends Record {
     disconnectMicAudioTrackListeners;
     /** @type {ReturnType<setTimeout>} */
     pttReleaseTimeout;
+    /** @type {ReturnType<setTimeout>} */
+    mutedPttWarningTimeout;
     /**
      * Whether the network fell back to p2p mode in a SFU call.
      */
@@ -513,6 +516,10 @@ export class Rtc extends Record {
             !this.isMicrophonePermissionWarningDismissed &&
             this.microphonePermission !== "granted"
         );
+    }
+
+    get showMutedPttWarning() {
+        return Boolean(this.isMutedPttWarningActive && this.selfSession?.isMute);
     }
 
     get showMicrophoneSilentWarning() {
@@ -800,6 +807,11 @@ export class Rtc extends Record {
             if (!this.localSession?.isMute) {
                 this.soundEffectsService.play("ptt-release");
             }
+            if (this.isMutedPttWarningActive) {
+                this.mutedPttWarningTimeout = browser.setTimeout(() => {
+                    this.isMutedPttWarningActive = false;
+                }, MUTED_PTT_WARNING_DURATION);
+            }
         }, Math.max(this.store.settings.voiceActiveDuration || 0, duration));
     }
 
@@ -812,6 +824,10 @@ export class Rtc extends Record {
             return;
         }
         browser.clearTimeout(this.pttReleaseTimeout);
+        if (this.localSession.isMute) {
+            browser.clearTimeout(this.mutedPttWarningTimeout);
+            this.isMutedPttWarningActive = true;
+        }
         if (!this.localSession.isTalking && !this.localSession.isMute) {
             this.soundEffectsService.play("ptt-press");
         }
@@ -2275,6 +2291,7 @@ export class Rtc extends Record {
             isMicAudioTrackMuted: false,
             isCallPermissionDialogOpen: false,
             isMicrophonePermissionWarningDismissed: false,
+            isMutedPttWarningActive: false,
             localChannel: undefined,
             localSession: undefined,
             micAudioTrack: undefined,

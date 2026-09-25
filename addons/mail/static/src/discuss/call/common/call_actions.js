@@ -68,11 +68,12 @@ export const muteAction = {
             useEffect(() => {
                 const hasWarning =
                     store.rtc.showMicrophonePermissionWarning ||
-                    store.rtc.showMicrophoneSilentWarning;
-                if (!action.popover.isOpen && action.actionRef() && hasWarning) {
-                    action.popover.open(action.actionRef(), {});
-                } else {
+                    store.rtc.showMicrophoneSilentWarning ||
+                    store.rtc.showMutedPttWarning;
+                if (!hasWarning) {
                     action.popover.close();
+                } else if (!action.popover.isOpen && action.actionRef()) {
+                    action.popover.open(action.actionRef(), {});
                 }
             });
         }

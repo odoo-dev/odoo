@@ -16,6 +16,9 @@ export class MicrophoneWarning extends Component {
         if (this.rtc.showMicrophonePermissionWarning) {
             this.rtc.isMicrophonePermissionWarningDismissed = true;
         }
+        if (this.rtc.showMutedPttWarning) {
+            this.rtc.isMutedPttWarningActive = false;
+        }
         this.props.close();
     }
 }
