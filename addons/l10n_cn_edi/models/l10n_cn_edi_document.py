@@ -54,9 +54,11 @@ class L10nCnEdiDocument(models.Model):
     error_message = fields.Text(string="Error Details")
 
     @api.model
-    def _l10n_cn_edi_state_from_bureau(self, bureau_state):
+    def _l10n_cn_edi_state_from_bureau(self, bureau_state, red_fapiao_no):
         if bureau_state in BUREAU_STATES_CONFIRMED:
-            return 'red_form_confirmed'
+            # In 数电 the bureau issues the red fapiao once the form is confirmed: until
+            # it's out, the credit note has no number to carry, so keep polling.
+            return 'red_form_confirmed' if red_fapiao_no else 'red_form_pending'
         if bureau_state in BUREAU_STATES_PENDING:
             return 'red_form_pending'
         return 'failed'
@@ -94,10 +96,7 @@ class L10nCnEdiDocument(models.Model):
             return
         move = self.move_id
         red_fapiao_no = result.get('red_fapiao_no') or self.red_fapiao_no
-        state = self._l10n_cn_edi_state_from_bureau(bureau_state)
-        if state == 'red_form_confirmed' and move.move_type == 'out_refund' and not red_fapiao_no:
-            # The bureau issues the red fapiao after the confirmation: keep polling until it's out.
-            state = 'red_form_pending'
+        state = self._l10n_cn_edi_state_from_bureau(bureau_state, red_fapiao_no)
         was_state = self.state
         self.write({
             'state': state,
@@ -160,11 +159,14 @@ class L10nCnEdiDocument(models.Model):
 
     @api.model
     def _l10n_cn_edi_import_inbound_red_forms(self, company, start_date, end_date):
-        """Create tracking documents for inbound red forms and notify the buyer."""
+        """Track the red forms the other party raised against our fapiao, and tell whoever has to act.
+
+        A supplier's form lands on the vendor bill it reverses, a customer's on the invoice.
+        """
         forms = company._l10n_cn_edi_get_client().list_inbound_red_forms(start_date, end_date)
         forms = [
             form for form in forms
-            if form.get('uuid') and form.get('bureau_state') in BUREAU_STATES_CONFIRMED | {'02'}
+            if form.get('uuid') and form.get('bureau_state') in BUREAU_STATES_CONFIRMED | BUREAU_STATES_PENDING
         ]
         if not forms:
             return
@@ -172,7 +174,7 @@ class L10nCnEdiDocument(models.Model):
         bills = self.env['account.move'].search([
             ('l10n_cn_edi_fapiao_no', 'in', [form.get('original_fapiao_no') for form in forms]),
             ('company_id', '=', company.id),
-            ('move_type', '=', 'in_invoice'),
+            ('move_type', 'in', ('in_invoice', 'out_invoice')),
         ])
         bill_by_fapiao_no = {bill.l10n_cn_edi_fapiao_no: bill for bill in bills}
         vals_list = []
@@ -182,13 +184,13 @@ class L10nCnEdiDocument(models.Model):
             bill = bill_by_fapiao_no.get(form.get('original_fapiao_no'))
             if not bill:
                 _logger.info(
-                    "E-Fapiao: inbound red form %s refers to fapiao %s, which matches no vendor bill of %s",
+                    "E-Fapiao: inbound red form %s refers to fapiao %s, which matches no invoice or bill of %s",
                     form.get('number'), form.get('original_fapiao_no'), company.name,
                 )
                 continue
             vals_list.append({
                 'move_id': bill.id,
-                'state': self._l10n_cn_edi_state_from_bureau(form['bureau_state']),
+                'state': self._l10n_cn_edi_state_from_bureau(form['bureau_state'], form.get('red_fapiao_no')),
                 'red_form_uuid': form['uuid'],
                 'red_form_number': form.get('number'),
                 'red_fapiao_no': form.get('red_fapiao_no'),

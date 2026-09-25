@@ -4,7 +4,11 @@ import logging
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
-from .l10n_cn_edi_document import BUREAU_STATES_CONFIRMED, RED_FORM_REASONS
+from .l10n_cn_edi_document import (
+    BUREAU_STATES,
+    BUREAU_STATES_CONFIRMED,
+    RED_FORM_REASONS,
+)
 from odoo.addons.phone_validation.tools.phone_validation import phone_format
 
 INVOICE_TYPE_CODES = [
@@ -112,6 +116,12 @@ class AccountMove(models.Model):
         compute='_compute_l10n_cn_edi_latest_red_form',
         compute_sudo=True,
     )
+    l10n_cn_edi_red_form_bureau_state = fields.Selection(
+        selection=BUREAU_STATES,
+        string="Red Form Tax Bureau State",
+        compute='_compute_l10n_cn_edi_latest_red_form',
+        compute_sudo=True,
+    )
     l10n_cn_edi_red_form_amount_untaxed = fields.Float(
         string="Inbound Credit Price",
         compute='_compute_l10n_cn_edi_latest_red_form',
@@ -152,14 +162,16 @@ class AccountMove(models.Model):
                 and move.l10n_cn_edi_state not in ('issued', 'sent')
             )
 
-    @api.depends('country_code', 'move_type', 'state', 'reversed_entry_id.l10n_cn_edi_fapiao_no')
+    @api.depends('country_code', 'move_type', 'state', 'l10n_cn_edi_state', 'reversed_entry_id.l10n_cn_edi_fapiao_no')
     def _compute_l10n_cn_edi_red_form_required(self):
         for move in self:
             move.l10n_cn_edi_red_form_required = bool(
                 move.country_code == 'CN'
                 and move.move_type == 'out_refund'
                 and move.state == 'draft'
-                and move.reversed_entry_id.l10n_cn_edi_fapiao_no,
+                and move.reversed_entry_id.l10n_cn_edi_fapiao_no
+                # A credit note of a red form the customer raised already carries its red fapiao.
+                and move.l10n_cn_edi_state != 'issued',
             )
 
     @api.depends('invoice_date', 'l10n_cn_edi_fapiao_date', 'l10n_cn_edi_fapiao_no', 'state', 'move_type')
@@ -186,6 +198,7 @@ class AccountMove(models.Model):
 
     @api.depends(
         'l10n_cn_edi_document_ids.state',
+        'l10n_cn_edi_document_ids.bureau_state',
         'l10n_cn_edi_document_ids.red_form_uuid',
         'l10n_cn_edi_document_ids.red_form_number',
         'l10n_cn_edi_document_ids.amount_untaxed',
@@ -197,6 +210,7 @@ class AccountMove(models.Model):
             move.l10n_cn_edi_red_form_uuid = latest.red_form_uuid
             move.l10n_cn_edi_red_form_number = latest.red_form_number
             move.l10n_cn_edi_red_form_status = latest.state
+            move.l10n_cn_edi_red_form_bureau_state = latest.bureau_state
             move.l10n_cn_edi_red_form_amount_untaxed = latest.amount_untaxed
             move.l10n_cn_edi_red_form_amount_tax = latest.amount_tax
 
@@ -227,10 +241,10 @@ class AccountMove(models.Model):
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
         # EXTENDS 'account'
-        # A vendor credit note created from an approved inbound red form carries that red fapiao.
+        # The credit note of a red form the other party raised carries that red fapiao.
         reversals = super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
         for move, reversal in zip(self, reversals):
-            if move.move_type == 'in_invoice' and move.l10n_cn_edi_red_form_status in ('red_form_pending', 'red_form_confirmed'):
+            if move.move_type in ('in_invoice', 'out_invoice') and move.l10n_cn_edi_red_form_status in ('red_form_pending', 'red_form_confirmed'):
                 doc = move.l10n_cn_edi_document_ids.filtered(lambda d: d.red_form_uuid == move.l10n_cn_edi_red_form_uuid)[:1]
                 if doc.red_fapiao_no:
                     reversal.write({
@@ -322,7 +336,7 @@ class AccountMove(models.Model):
         return self.company_id._l10n_cn_edi_action_login(self)
 
     def action_l10n_cn_edi_approve_inbound_red_form(self):
-        """Approve a red form raised by the supplier against this vendor bill."""
+        """Approve a red form the other party raised against this vendor bill or invoice."""
         self.ensure_one()
         doc = self.l10n_cn_edi_document_ids.filtered(lambda d: d.state == 'red_form_pending')[:1]
         if not doc:
@@ -331,11 +345,12 @@ class AccountMove(models.Model):
             self.company_id._l10n_cn_edi_get_client().operate_red_form(doc, 'confirm')
         except UserError as e:
             raise UserError(self.env._("Failed to approve the Red Form: %s", e))
-        doc.write({'state': 'red_form_confirmed', 'bureau_state': '04'})
-        self.message_post(body=self.env._("Inbound Red Form approved. Please draft a Credit Note."))
+        # The bureau issues the red fapiao now; the cron picks up its number.
+        doc._l10n_cn_edi_apply_red_form_result({'bureau_state': '04'})
+        self.message_post(body=self.env._("Inbound Red Form approved. The tax bureau now issues the red fapiao."))
 
     def action_l10n_cn_edi_reject_inbound_red_form(self):
-        """Refuse a red form raised by the supplier against this vendor bill."""
+        """Refuse a red form the other party raised against this vendor bill or invoice."""
         self.ensure_one()
         doc = self.l10n_cn_edi_document_ids.filtered(lambda d: d.state == 'red_form_pending')[:1]
         if not doc:
@@ -344,7 +359,9 @@ class AccountMove(models.Model):
             self.company_id._l10n_cn_edi_get_client().operate_red_form(doc, 'reject')
         except UserError as e:
             raise UserError(self.env._("Failed to reject the Red Form: %s", e))
-        doc.write({'state': 'failed', 'bureau_state': '05', 'error_message': self.env._("Rejected by user.")})
+        # 05: the buyer refused the seller's form; 06: the seller refused the buyer's.
+        bureau_state = '06' if self.move_type == 'out_invoice' else '05'
+        doc.write({'state': 'failed', 'bureau_state': bureau_state, 'error_message': self.env._("Rejected by user.")})
         self.message_post(body=self.env._("Inbound Red Form %s rejected.", doc.red_form_number))
 
     # ------------------------------------------------------------------

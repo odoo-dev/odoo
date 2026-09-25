@@ -308,7 +308,54 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         bill.action_l10n_cn_edi_approve_inbound_red_form()
 
         self.assertEqual(self.client.calls[-1][1][1], 'confirm')
-        self.assertRecordValues(doc, [{'state': 'red_form_confirmed', 'bureau_state': '04'}])
+        # Confirmed at the bureau, which now issues the red fapiao: no credit note to draft yet.
+        self.assertRecordValues(doc, [{'state': 'red_form_pending', 'bureau_state': '04'}])
+
+        self.responses['list_inbound_red_forms'] = []
+        self.responses['query_red_form'] = {'bureau_state': '04', 'red_fapiao_no': '31000000000000000009'}
+        self.env['l10n_cn_edi.document']._cron_check_red_form_status()
+
+        self.assertEqual(doc.state, 'red_form_confirmed')
+        credit_note = self._reverse(bill)
+        self.assertRecordValues(credit_note, [{'l10n_cn_edi_fapiao_no': '31000000000000000009', 'l10n_cn_edi_state': 'issued'}])
+
+    def test_customer_raised_red_form_lands_on_the_invoice(self):
+        invoice = self._create_posted_invoice(fapiao_no='24442000000071309399')
+        self.responses['list_inbound_red_forms'] = [
+            {'uuid': 'in-9', 'number': 'rf-9', 'bureau_state': '03', 'original_fapiao_no': '24442000000071309399',
+             'amount_untaxed': -50.0, 'amount_tax': -6.5, 'reason': '04'},
+        ]
+        self.responses['query_red_form'] = {'bureau_state': '03'}
+
+        self.env['l10n_cn_edi.document']._cron_check_red_form_status()
+
+        doc = invoice.l10n_cn_edi_document_ids
+        self.assertRecordValues(doc, [{'red_form_uuid': 'in-9', 'state': 'red_form_pending', 'bureau_state': '03'}])
+        self.assertEqual(invoice.l10n_cn_edi_red_form_bureau_state, '03')
+
+        invoice.action_l10n_cn_edi_reject_inbound_red_form()
+
+        self.assertEqual(self.client.calls[-1][1][1:], ('reject',))
+        self.assertRecordValues(doc, [{'state': 'failed', 'bureau_state': '06'}])
+
+    def test_credit_note_of_a_customer_raised_red_form_needs_no_red_form(self):
+        invoice = self._create_posted_invoice(fapiao_no='24442000000071309399')
+        self.env['l10n_cn_edi.document'].create({
+            'move_id': invoice.id,
+            'state': 'red_form_confirmed',
+            'bureau_state': '04',
+            'red_form_uuid': 'in-9',
+            'red_fapiao_no': '24442000000071309400',
+        })
+
+        credit_note = self._reverse(invoice)
+
+        self.assertRecordValues(credit_note, [{
+            'l10n_cn_edi_fapiao_no': '24442000000071309400',
+            'l10n_cn_edi_state': 'issued',
+            'l10n_cn_edi_red_form_required': False,
+            'hide_post_button': False,
+        }])
 
     def test_inbound_red_form_is_not_imported_twice(self):
         bill = self._create_vendor_bill('31000000000000000001')
