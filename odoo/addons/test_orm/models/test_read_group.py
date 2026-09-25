@@ -126,6 +126,19 @@ class Test_Read_GroupOrderLine(models.Model):
     date = fields.Date(related='order_id.date')
 
 
+class Test_Read_GroupNullOrder(models.Model):
+    _inherit = 'test_read_group.order'
+    _order = 'country_id NULLS FIRST'
+
+    country_id = fields.Many2one('res.country')
+
+
+class Test_Read_GroupNullOrderLine(models.Model):
+    _inherit = 'test_read_group.order.line'
+
+    null_order_id = fields.Many2one('test_read_group.order')
+
+
 class Test_Read_GroupUser(models.Model):
     _name = 'test_read_group.user'
     _description = "User"
