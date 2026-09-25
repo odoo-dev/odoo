@@ -3,7 +3,8 @@
 
 import unittest
 
-from datetime import date
+from datetime import date, datetime, time
+import pytz
 from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
@@ -700,6 +701,37 @@ class TestAccessRightsUnlink(TestHrHolidaysAccessRightsCommon):
 
     # base.group_user
 
+    def test_flexible_leave_date_inaccessible_holiday(self):
+        """A user without access to another employee's leave can process flexible leaves."""
+        employee = self.employee_hruser
+
+        employee.resource_calendar_id.write({
+            'flexible_hours': True,
+        })
+        leave = self.env['hr.leave'].create({
+            'name': 'Flexible Resource Leave',
+            'holiday_status_id': self.leave_type.id,
+            'employee_id': employee.id,
+            'request_date_from': date.today(),
+            'request_date_to': date.today(),
+        })
+        leave.action_approve()
+
+        user = self.user_employee
+        with self.assertRaises(AccessError):
+            leave.with_user(user).read(['request_unit_half'])
+
+        calendar = employee.resource_calendar_id.with_user(user)
+
+        start_dt = datetime.combine(date.today(), time.min, tzinfo=pytz.UTC)
+        end_dt = datetime.combine(date.today(), time.max, tzinfo=pytz.UTC)
+
+        calendar._unavailable_intervals_batch(
+            start_dt,
+            end_dt,
+            resources=employee.resource_id,
+            tz=pytz.UTC,
+        )
 
     def test_leave_unlink_confirm_by_user(self):
         """ A simple user may delete its leave in confirm state in the future"""
