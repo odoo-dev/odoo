@@ -650,12 +650,24 @@ def safe_gen_wrapper(func):
     return _wrapper
 
 
+_GENERATOR_CONSUMERS = frozenset((all, any, dict, frozenset, list, max, min, set, sorted, sum, tuple))
+
+
 def safe_call(callee, /, *args, **kwargs):
     """ Ensure objects used for the call are safe """
     try:
         safe_checker.check((callee, args, kwargs))
     except UnsafeError as e:
         handle_unsafe_error(e)
+    if callee in _GENERATOR_CONSUMERS and args and not kwargs and type(args[0]) is _SafeGenerator:
+        # Consumed at once like a list comprehension, so check context and result once
+        assert_safe_context(args[0])
+        result = callee(args[0]._GeneratorWrapper__wrapped, *args[1:])
+        try:
+            safe_checker.check(result)
+        except UnsafeError as e:
+            handle_unsafe_error(e)
+        return result
     return callee(*args, **kwargs)
 
 

@@ -19,6 +19,7 @@ from odoo.tools.safe_eval.runtime import (
     UnsafeModuleError,
     UnsafePolicy,
     _SafeGenerator,
+    assert_safe_context,
     safe_call,
 )
 
@@ -708,6 +709,53 @@ class TestSafeEvalRuntime(TransactionCase):
         safe_ctx = {'d': {}, 'use_generator': use_generator, 'manipulate': manipulate}
         with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
             safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    @mute_logger('odoo.tools.safe_eval.runtime')
+    def test_check_generator_consumed_by_builtin(self):
+        # Attempt to alter the context of a generator consumed by a builtin
+        expr = """
+            def gen():
+                yield 0
+                yield d['foo']
+
+            d['g'] = gen()
+            for _ in d['g']:
+                break
+            manipulate(d)
+            list(d['g'])
+        """
+
+        def manipulate(d):
+            d['foo'] = self.UnsafeClass
+
+        safe_ctx = {'d': {}, 'manipulate': manipulate}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+        # Attempt to alter the context from within a generator consumed by a builtin
+        expr = """
+            def gen():
+                manipulate(d)
+                yield d['foo']
+
+            list(gen())
+        """
+        safe_ctx = {'d': {}, 'manipulate': manipulate}
+        with self.assertRaisesRegex(ValueError, '^UnsafeClassError'):
+            safe_eval(dedent(expr), safe_ctx, mode='exec')
+
+    def test_check_generator_consumed_by_builtin_once(self):
+        expr = """
+            result = sum(values[key] for key in values)
+        """
+        with patch(
+            'odoo.tools.safe_eval.runtime.assert_safe_context',
+            wraps=assert_safe_context,
+        ) as mock_assert_safe_context:
+            ctx = {'values': dict.fromkeys(range(100), 1)}
+            safe_eval(dedent(expr), ctx, mode='exec')
+            self.assertEqual(ctx['result'], 100)
+            self.assertEqual(mock_assert_safe_context.call_count, 1)
 
     def test_trust_iterators(self):
         iterators = (
