@@ -61,8 +61,15 @@ class AccountMoveSend(models.AbstractModel):
             client = company._l10n_cn_edi_get_client()
             try:
                 client.ensure_ready()
+                session_state = client.get_session_state()
             except UserError as e:
                 errors.update(dict.fromkeys(company_invoices, str(e)))
+                continue
+            if session_state != 'ok':
+                company_invoices.l10n_cn_edi_state = 'waiting_login'
+                if self._can_commit():
+                    self.env.cr.commit()
+                errors.update(dict.fromkeys(company_invoices, self._l10n_cn_edi_session_error(company, session_state)))
                 continue
             for invoice in company_invoices:
                 if error := invoice._l10n_cn_edi_submit_invoice(client):
@@ -74,3 +81,16 @@ class AccountMoveSend(models.AbstractModel):
             if self._can_commit():
                 self.env.cr.commit()
         return errors
+
+    @api.model
+    def _l10n_cn_edi_session_error(self, company, session_state):
+        if session_state == 'verify':
+            return self.env._(
+                "The tax bureau asks the drawer of %s to confirm their identity (实名认证). "
+                "Use 'Log In' on the invoice, then send it again.",
+                company.name,
+            )
+        return self.env._(
+            "%s is logged out of the tax bureau. Use 'Log In' on the invoice, then send it again.",
+            company.name,
+        )

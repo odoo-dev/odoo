@@ -42,6 +42,12 @@ line was priced in and still match the Odoo invoice to the fen.
     inbound items also carry ``original_fapiao_no``, ``amount_untaxed``,
     ``amount_tax`` and ``reason``.
 
+``session state`` (get_session_state)
+    'ok', 'login' (the drawer is logged out of the tax bureau) or 'verify' (the
+    bureau wants the drawer's identity confirmed, 实名认证). Anything but 'ok' holds
+    the invoices as 'waiting_login' until someone logs in through the provider's
+    ``res.company._l10n_cn_edi_action_login()``.
+
 Connectivity and configuration problems are raised as ``UserError``: the flow
 treats them as "try again later" and never marks the invoice failed for them.
 """
@@ -62,6 +68,10 @@ class L10nCnEdiClient:
     def ensure_ready(self):
         """Raise a UserError if the company can't issue right now (credentials, session...)."""
         raise NotImplementedError
+
+    def get_session_state(self):
+        """The drawer's tax bureau session: 'ok', 'login' or 'verify'."""
+        return 'ok'
 
     def issue_invoice(self, values):
         """Submit a fapiao from ``account.move._l10n_cn_edi_prepare_invoice_values()``."""

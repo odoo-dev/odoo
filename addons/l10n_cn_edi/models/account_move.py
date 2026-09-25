@@ -14,6 +14,7 @@ INVOICE_TYPE_CODES = [
 
 EDI_STATES = [
     ('not_sent', 'Not Sent'),
+    ('waiting_login', 'Waiting for Login'),
     ('sent', 'Sent'),
     ('issued', 'Issued'),
     ('failed', 'Failed'),
@@ -307,6 +308,11 @@ class AccountMove(models.Model):
         })
         self.l10n_cn_edi_red_form_reason = False
         self.message_post(body=self.env._("Red Form request revoked and cancelled by user. You may request a new one."))
+
+    def action_l10n_cn_edi_login(self):
+        """Log the drawer back in to the tax bureau, then send this invoice again."""
+        self.ensure_one()
+        return self.company_id._l10n_cn_edi_action_login(self)
 
     def action_l10n_cn_edi_approve_inbound_red_form(self):
         """Approve a red form raised by the supplier against this vendor bill."""

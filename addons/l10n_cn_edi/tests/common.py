@@ -23,6 +23,9 @@ class FakeClient(L10nCnEdiClient):
     def ensure_ready(self):
         return self._answer('ensure_ready')
 
+    def get_session_state(self):
+        return self._answer('get_session_state') or 'ok'
+
     def issue_invoice(self, values):
         return self._answer('issue_invoice', values)
 

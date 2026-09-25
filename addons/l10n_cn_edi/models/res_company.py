@@ -24,3 +24,11 @@ class ResCompany(models.Model):
         """Whether this company is configured to issue e-Fapiao. Overridden by the provider module."""
         self.ensure_one()
         return False
+
+    def _l10n_cn_edi_action_login(self, invoices=None):
+        """Return the action logging the drawer back in to the tax bureau. Overridden by the provider module.
+
+        :param invoices: invoices waiting for the login, to send again once logged in.
+        """
+        self.ensure_one()
+        raise UserError(self.env._("The installed e-Fapiao provider has no tax bureau login."))

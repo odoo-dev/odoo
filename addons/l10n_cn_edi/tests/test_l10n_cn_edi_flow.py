@@ -82,7 +82,7 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.assertFalse(errors)
         self.assertEqual(
             [method for method, _args in self.client.calls],
-            ['ensure_ready', 'issue_invoice', 'issue_invoice', 'wait', 'query_invoice', 'query_invoice'],
+            ['ensure_ready', 'get_session_state', 'issue_invoice', 'issue_invoice', 'wait', 'query_invoice', 'query_invoice'],
         )
         self.assertEqual(invoices.mapped('l10n_cn_edi_state'), ['issued', 'issued'])
 
@@ -107,6 +107,25 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.responses['issue_invoice'] = {'state': 'failed', 'error': "Buyer tax number is invalid", 'new_serial': True}
         self._issue(invoice)
         self.assertFalse(invoice.l10n_cn_edi_serial_no)
+
+    def test_lapsed_session_holds_the_batch_for_login(self):
+        invoices = self._create_posted_invoice() + self._create_posted_invoice()
+        self.responses['get_session_state'] = 'verify'
+
+        errors = self.env['account.move.send']._l10n_cn_edi_issue_invoices(invoices)
+
+        self.assertEqual(set(errors), set(invoices))
+        self.assertIn("实名认证", errors[invoices[0]])
+        self.assertEqual(invoices.mapped('l10n_cn_edi_state'), ['waiting_login', 'waiting_login'])
+        self.assertEqual([method for method, _args in self.client.calls], ['ensure_ready', 'get_session_state'])
+        self.assertTrue(self.env['account.move.send']._is_cn_edi_applicable(invoices[0]))
+
+    def test_login_is_the_provider_s(self):
+        invoice = self._create_posted_invoice()
+        invoice.l10n_cn_edi_state = 'waiting_login'
+        with patch.object(self.env.registry['res.company'], '_l10n_cn_edi_action_login', return_value={'type': 'login'}) as login:
+            self.assertEqual(invoice.action_l10n_cn_edi_login(), {'type': 'login'})
+        self.assertEqual(login.call_args.args, (invoice,))
 
     def test_send_print_uses_the_e_fapiao_extra_edi(self):
         invoice = self._create_posted_invoice()
