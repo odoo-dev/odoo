@@ -3,6 +3,7 @@ from datetime import timedelta
 from odoo import fields
 from odoo.addons.mail.controllers.thread import ThreadController
 from odoo.addons.mail.tools.discuss import mail_route, Store
+from odoo.exceptions import ValidationError
 from odoo.fields import Command, Domain
 
 
@@ -22,6 +23,8 @@ class PollController(ThreadController):
         thread = self._get_thread_with_access_for_post(thread_model, thread_id)
         if not thread:
             return
+        if duration < 0:
+            raise ValidationError(self.env._("The poll end time cannot be in the past."))
         end_dt = fields.Datetime.now() + timedelta(minutes=duration)
         poll_values = {
             "allow_multiple_options": allow_multiple_options,
