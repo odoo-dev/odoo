@@ -214,6 +214,25 @@ class TestMailPoll(MailCommon, HttpCase):
             f'{self.user_employee.name}\'s poll "What is your favorite dessert?" has closed.',
         )
 
+    def test_cannot_create_poll_in_the_past(self):
+        self.authenticate(self.user_employee.login, self.user_employee.login)
+        with (
+            self.assertRaises(JsonRpcException) as error_catcher,
+            self.assertLogs("odoo.http", level="WARNING") as log_catcher,
+        ):
+            self.make_jsonrpc_request(
+                "/mail/poll/create",
+                {
+                    "duration": -1,
+                    "options": self.POLL_OPTIONS,
+                    "question": "What is your favorite food?",
+                    "thread_id": self.test_record.id,
+                    "thread_model": self.test_record._name,
+                },
+            )
+        self.assertEqual(error_catcher.exception.args[0], "odoo.exceptions.ValidationError")
+        self.assertIn("The poll end time cannot be in the past.", "\n".join(log_catcher.output))
+
     def test_do_not_end_expired_polls_twice(self):
         self.authenticate(self.user_employee.login, self.user_employee.login)
         poll_id = self.make_jsonrpc_request(
