@@ -16,6 +16,15 @@ Results are plain dicts:
     ``qr_code``     QR payload, if the provider returns one
     ``pdf``         the fapiao PDF as bytes, once issued, with ``pdf_filename``
     ``error``       human-readable reason, when failed
+    ``new_serial``  set on a failure when the order is dead (refused, failed, voided), so
+                    the next attempt may use a new serial number. Otherwise it reuses
+                    the old one: a new serial for an order that may still go through
+                    would issue a second fapiao
+
+Issuing is two steps, so a batch waits once instead of once per invoice:
+``issue_invoice`` submits and usually answers 'sent'; after each of the client's
+``result_delays`` the flow asks ``query_invoice(move, just_submitted=True)`` about
+the batch's pending fapiao, and leaves whatever is still pending to the cron.
 
 Invoice values carry, per line, ``price_include`` (the Odoo tax's basis) and both
 ``amount_untaxed`` and ``amount_total``, so a provider can send whichever basis the
@@ -33,23 +42,34 @@ line was priced in and still match the Odoo invoice to the fen.
 Connectivity and configuration problems are raised as ``UserError``: the flow
 treats them as "try again later" and never marks the invoice failed for them.
 """
+import time
 
 
 class L10nCnEdiClient:
 
+    # Seconds to wait before each follow-up query of freshly submitted fapiao.
+    result_delays = ()
+
     def __init__(self, company):
         self.company = company
+
+    def wait(self, seconds):
+        time.sleep(seconds)
 
     def ensure_ready(self):
         """Raise a UserError if the company can't issue right now (credentials, session...)."""
         raise NotImplementedError
 
     def issue_invoice(self, values):
-        """Issue a blue or red fapiao from ``account.move._l10n_cn_edi_prepare_invoice_values()``."""
+        """Submit a fapiao from ``account.move._l10n_cn_edi_prepare_invoice_values()``."""
         raise NotImplementedError
 
-    def query_invoice(self, move):
-        """Fetch the current result of a fapiao that was accepted as 'sent'."""
+    def query_invoice(self, move, just_submitted=False):
+        """Fetch the current result of a fapiao that was accepted as 'sent'.
+
+        Right after submitting (``just_submitted``), a fapiao the provider doesn't know
+        yet is still 'sent'; later, it is 'failed'.
+        """
         raise NotImplementedError
 
     def request_red_form(self, values):

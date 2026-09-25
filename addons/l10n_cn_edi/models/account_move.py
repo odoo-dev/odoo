@@ -331,24 +331,37 @@ class AccountMove(models.Model):
     # Blue fapiao issuance
     # ------------------------------------------------------------------
 
-    def _l10n_cn_edi_issue_invoice(self):
-        """Issue the e-Fapiao of this customer invoice. Return an error message, or None on success."""
+    def _l10n_cn_edi_submit_invoice(self, client):
+        """Submit the e-Fapiao of this customer invoice. Return an error message, or None."""
         self.ensure_one()
-        company = self.company_id
-        if not company._l10n_cn_edi_is_ready():
-            return self.env._("E-Fapiao is not set up for %s. Please go to Settings.", company.name)
-        client = company._l10n_cn_edi_get_client()
-        try:
-            client.ensure_ready()
-        except UserError as e:
-            # Connectivity or configuration: leave the invoice retryable.
-            return str(e)
         self.l10n_cn_edi_serial_no = self.l10n_cn_edi_serial_no or f"BLUE_{self.id}_{fields.Datetime.now():%Y%m%d%H%M%S}"
         try:
             result = client.issue_invoice(self._l10n_cn_edi_prepare_invoice_values())
         except UserError as e:
+            # Connectivity or configuration: leave the invoice retryable.
             return str(e)
         return self._l10n_cn_edi_apply_invoice_result(result)
+
+    def _l10n_cn_edi_fetch_submitted(self, client):
+        """Follow up on fapiao just submitted, once per delay of the client; the cron takes over after.
+
+        Return ``{move: error message}`` for those that failed meanwhile.
+        """
+        errors = {}
+        for delay in client.result_delays:
+            pending = self.filtered(lambda move: move.l10n_cn_edi_state == 'sent')
+            if not pending:
+                break
+            client.wait(delay)
+            for move in pending:
+                try:
+                    result = client.query_invoice(move, just_submitted=True)
+                except UserError as e:
+                    _logger.warning("E-Fapiao: could not follow up on invoice %s: %s", move.name, e)
+                    continue
+                if error := move._l10n_cn_edi_apply_invoice_result(result):
+                    errors[move] = error
+        return errors
 
     def _l10n_cn_edi_apply_invoice_result(self, result):
         """Record an invoice result from the provider. Return an error message, or None."""
@@ -380,6 +393,8 @@ class AccountMove(models.Model):
             return None
         error = result.get('error') or self.env._("Unexpected response from the e-Fapiao provider.")
         self.l10n_cn_edi_state = 'failed'
+        if result.get('new_serial'):
+            self.l10n_cn_edi_serial_no = False
         self.message_post(body=error)
         return error
 

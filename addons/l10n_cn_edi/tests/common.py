@@ -26,8 +26,11 @@ class FakeClient(L10nCnEdiClient):
     def issue_invoice(self, values):
         return self._answer('issue_invoice', values)
 
-    def query_invoice(self, move):
-        return self._answer('query_invoice', move)
+    def wait(self, seconds):
+        self.calls.append(('wait', (seconds,)))
+
+    def query_invoice(self, move, just_submitted=False):
+        return self._answer('query_invoice', move, just_submitted)
 
     def request_red_form(self, values):
         return self._answer('request_red_form', values)
@@ -61,6 +64,10 @@ class L10nCnEdiTestCommon(TestAccountMoveSendCommon):
         patch.object(Company, '_l10n_cn_edi_is_ready', lambda company: True).start()
         patch.object(Company, '_l10n_cn_edi_get_client', lambda company: self.client).start()
         self.addCleanup(patch.stopall)
+
+    def _issue(self, invoice):
+        """Issue through the send flow; return the invoice's error, or None."""
+        return self.env['account.move.send']._l10n_cn_edi_issue_invoices(invoice).get(invoice)
 
     def _create_posted_invoice(self, fapiao_no=None):
         invoice = self.init_invoice('out_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a)

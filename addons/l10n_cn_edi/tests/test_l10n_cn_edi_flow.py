@@ -24,7 +24,7 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         invoice = self._create_posted_invoice()
         self.responses['ensure_ready'] = UserError("Offline: DNS failure")
 
-        error = invoice._l10n_cn_edi_issue_invoice()
+        error = self._issue(invoice)
 
         self.assertEqual(error, "Offline: DNS failure")
         self.assertEqual(invoice.l10n_cn_edi_state, 'not_sent')
@@ -40,7 +40,7 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
             'qr_code': 'qr-payload',
         }
 
-        self.assertIsNone(invoice._l10n_cn_edi_issue_invoice())
+        self.assertIsNone(self._issue(invoice))
 
         self.assertRecordValues(invoice, [{
             'l10n_cn_edi_state': 'issued',
@@ -55,11 +55,11 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
     def test_issue_retry_reuses_the_serial_number(self):
         invoice = self._create_posted_invoice()
         self.responses['issue_invoice'] = UserError("Timeout")
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
         first_serial = invoice.l10n_cn_edi_serial_no
 
         self.responses['issue_invoice'] = {'state': 'sent'}
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
         self.assertEqual(self.client.calls[-1][1][0]['serial_no'], first_serial)
@@ -68,8 +68,45 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         invoice = self._create_posted_invoice()
         self.responses['issue_invoice'] = {'state': 'failed', 'error': "Buyer tax number is invalid"}
 
-        self.assertEqual(invoice._l10n_cn_edi_issue_invoice(), "Buyer tax number is invalid")
+        self.assertEqual(self._issue(invoice), "Buyer tax number is invalid")
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
+
+    def test_batch_is_submitted_before_waiting_once(self):
+        invoices = self._create_posted_invoice() + self._create_posted_invoice()
+        self.client.result_delays = (3, 5)
+        self.responses['issue_invoice'] = {'state': 'sent'}
+        self.responses['query_invoice'] = {'state': 'issued', 'fapiao_no': '24442000000071309399'}
+
+        errors = self.env['account.move.send']._l10n_cn_edi_issue_invoices(invoices)
+
+        self.assertFalse(errors)
+        self.assertEqual(
+            [method for method, _args in self.client.calls],
+            ['ensure_ready', 'issue_invoice', 'issue_invoice', 'wait', 'query_invoice', 'query_invoice'],
+        )
+        self.assertEqual(invoices.mapped('l10n_cn_edi_state'), ['issued', 'issued'])
+
+    def test_still_pending_fapiao_is_left_to_the_cron(self):
+        invoice = self._create_posted_invoice()
+        self.client.result_delays = (3, 5)
+        self.responses['issue_invoice'] = {'state': 'sent'}
+        self.responses['query_invoice'] = {'state': 'sent'}
+
+        self.assertIsNone(self._issue(invoice))
+
+        self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
+        self.assertEqual([args for method, args in self.client.calls if method == 'wait'], [(3,), (5,)])
+        self.assertTrue(all(args[1] for method, args in self.client.calls if method == 'query_invoice'))
+
+    def test_only_a_dead_order_gets_a_new_serial(self):
+        invoice = self._create_posted_invoice()
+        self.responses['issue_invoice'] = {'state': 'failed', 'error': "Unknown order"}
+        self._issue(invoice)
+        self.assertTrue(invoice.l10n_cn_edi_serial_no)
+
+        self.responses['issue_invoice'] = {'state': 'failed', 'error': "Buyer tax number is invalid", 'new_serial': True}
+        self._issue(invoice)
+        self.assertFalse(invoice.l10n_cn_edi_serial_no)
 
     def test_send_print_uses_the_e_fapiao_extra_edi(self):
         invoice = self._create_posted_invoice()
@@ -79,7 +116,7 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.assertTrue(all_extra_edis['cn_edi']['is_applicable'](invoice))
 
         invoices_data = {invoice: {'extra_edis': {'cn_edi'}}}
-        with patch.object(invoice.__class__, '_l10n_cn_edi_issue_invoice', return_value="Provider error"):
+        with patch.object(invoice.__class__, '_l10n_cn_edi_submit_invoice', return_value="Provider error"):
             send_model._call_web_service_before_invoice_pdf_render(invoices_data)
 
         self.assertIn("Provider error", invoices_data[invoice]['error']['errors'])

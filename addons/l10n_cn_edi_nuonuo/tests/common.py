@@ -78,8 +78,12 @@ class L10nCnEdiNuonuoTestCommon(TestAccountMoveSendCommon):
             'odoo.addons.l10n_cn_edi_nuonuo.tools.nuonuo_client.requests.get',
             lambda url, timeout=None: MockResponse(content=self.downloads[url]) if url in self.downloads else MockResponse(status=404),
         ).start()
-        patch.object(NuonuoClient, '_wait', lambda client, seconds: None).start()
+        patch.object(NuonuoClient, 'wait', lambda client, seconds: None).start()
         self.addCleanup(patch.stopall)
+
+    def _issue(self, invoice):
+        """Issue through the send flow; return the invoice's error, or None."""
+        return self.env['account.move.send']._l10n_cn_edi_issue_invoices(invoice).get(invoice)
 
     def _answer(self, method, *responses):
         """Answer ``method`` with each body in turn, repeating the last one."""

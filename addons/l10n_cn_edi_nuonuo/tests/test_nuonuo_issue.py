@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import datetime
 
+from freezegun import freeze_time
+
 from odoo.tests import tagged
 
 from .common import L10nCnEdiNuonuoTestCommon
@@ -49,7 +51,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         order = self._requests_for(ISSUE)[0]['payload']['order']
         self.assertEqual(order['orderNo'], invoice.l10n_cn_edi_serial_no)
@@ -73,7 +75,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         self.assertEqual(self._requests_for(ISSUE)[0]['payload']['order']['invoiceLine'], 'bs')
 
@@ -88,7 +90,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         line = self._requests_for(ISSUE)[0]['payload']['order']['invoiceDetail'][0]
         self.assertEqual(line['withTaxFlag'], '1')
@@ -104,7 +106,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         discounted, discount = self._requests_for(ISSUE)[0]['payload']['order']['invoiceDetail']
         self.assertEqual((discounted['invoiceLineProperty'], discount['invoiceLineProperty']), ('2', '1'))
@@ -119,7 +121,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         line = self._requests_for(ISSUE)[0]['payload']['order']['invoiceDetail'][0]
         # 09 按5%简易征收, as in Nuonuo's own 停车费 example.
@@ -134,7 +136,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, PENDING, ISSUED)
 
-        self.assertIsNone(invoice._l10n_cn_edi_issue_invoice())
+        self.assertIsNone(self._issue(invoice))
 
         self.assertRecordValues(invoice, [{
             'l10n_cn_edi_state': 'issued',
@@ -150,7 +152,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, PENDING)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
         self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
 
         self._answer(QUERY, ISSUED)
@@ -164,14 +166,14 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, {'code': 'E9106', 'describe': '订单编号或流水号不能重复'})
         self._answer(QUERY, ISSUED)
 
-        self.assertIsNone(invoice._l10n_cn_edi_issue_invoice())
+        self.assertIsNone(self._issue(invoice))
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
 
     def test_refused_fapiao_is_failed_with_the_reason(self):
         invoice = self._post_invoice()
         self._answer(ISSUE, {'code': 'E9105', 'describe': '折扣行的商品名称必须和被折扣行相同'})
 
-        error = invoice._l10n_cn_edi_issue_invoice()
+        error = self._issue(invoice)
 
         self.assertIn('E9105', error)
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
@@ -182,7 +184,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, {'code': 'E0000', 'result': [{'status': '22', 'failCause': '购方税号有误'}]})
 
-        self.assertEqual(invoice._l10n_cn_edi_issue_invoice(), '购方税号有误')
+        self.assertEqual(self._issue(invoice), '购方税号有误')
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
 
     def test_seal_failure_is_retried(self):
@@ -191,11 +193,37 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(QUERY, {'code': 'E0000', 'result': [{'status': '24', 'serialNo': '20160108165823395151'}]})
         self._answer(RETRY, {'code': 'E0000'})
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
         retry = self._requests_for(RETRY)[0]['payload']
         self.assertEqual(retry, {'fpqqlsh': '20160108165823395151', 'orderno': invoice.l10n_cn_edi_serial_no})
+
+    def test_seal_retries_used_up_keep_the_order(self):
+        invoice = self._post_invoice()
+        self._answer(ISSUE, ACCEPTED)
+        self._answer(QUERY, {'code': 'E0000', 'result': [{'status': '24', 'serialNo': '20160108165823395151'}]})
+        self._answer(RETRY, {'code': 'E9613', 'describe': '同一流水号(订单号)单日最多重试20次'})
+
+        self.assertIn("retries are used up", self._issue(invoice))
+
+        self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
+        self.assertEqual(self._requests_for(RETRY)[0]['payload']['orderno'], invoice.l10n_cn_edi_serial_no)
+
+    def test_failed_issuance_frees_the_order_number(self):
+        invoice = self._post_invoice()
+        self._answer(ISSUE, ACCEPTED)
+        self._answer(QUERY, {'code': 'E0000', 'result': [{'status': '22', 'failCause': '购方税号有误'}]})
+        with freeze_time('2026-09-25 02:00:00'):
+            self._issue(invoice)
+        first_order = self._requests_for(ISSUE)[0]['payload']['order']['orderNo']
+
+        self._answer(QUERY, ISSUED)
+        with freeze_time('2026-09-25 02:05:00'):
+            self._issue(invoice)
+
+        self.assertNotEqual(self._requests_for(ISSUE)[1]['payload']['order']['orderNo'], first_order)
+        self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
 
     def test_order_unknown_to_nuonuo_is_failed_by_the_cron(self):
         invoice = self._post_invoice()
@@ -211,7 +239,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
-        invoice._l10n_cn_edi_issue_invoice()
+        self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
         self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id)

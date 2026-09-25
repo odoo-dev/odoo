@@ -25,8 +25,6 @@ SUCCESS = 'E0000'
 INVOICE_NOT_FOUND = 'E9500'
 DUPLICATE_ORDER = 'E9106'  # 订单编号或流水号不能重复: already submitted, so fetch it instead
 RETRY_LIMIT = 'E9613'  # 同一流水号(订单号)单日最多重试 20 次
-# After submitting, their guide polls after 3-5 s; anything slower is left to the cron.
-POLL_DELAYS = (3, 5)
 INVOICE_LINES = {'01': 'bs', '02': 'pc'}  # 数电电子专票 / 数电电子普票
 STATUS_ISSUED = '2'  # 开票完成
 STATUS_PENDING = {'20', '21'}  # 开票中, 开票成功签章中
@@ -55,6 +53,9 @@ def sign(app_secret, app_key, senid, nonce, timestamp, content):
 
 
 class NuonuoClient(L10nCnEdiClient):
+
+    # After submitting, their guide polls after 3-5 s; anything slower is left to the cron.
+    result_delays = (3, 5)
 
     def __init__(self, company):
         super().__init__(company)
@@ -143,20 +144,18 @@ class NuonuoClient(L10nCnEdiClient):
         env = self.company.env
         body = self._call('nuonuo.OpeMplatform.requestBillingNew', {'order': self._prepare_order(values)})
         code = body.get('code')
-        if code not in (SUCCESS, DUPLICATE_ORDER):
-            return {'state': 'failed', 'error': env._("Nuonuo refused the fapiao (%(code)s): %(message)s", code=code, message=body.get('describe') or '')}
-        for delay in POLL_DELAYS:
-            self._wait(delay)
-            result = self._query(values['serial_no'], missing_is_failure=False)
-            if result['state'] != 'sent':
-                return result
+        if code == DUPLICATE_ORDER:
+            return self._query(values['serial_no'], missing_is_failure=False)
+        if code != SUCCESS:
+            return {
+                'state': 'failed',
+                'error': env._("Nuonuo refused the fapiao (%(code)s): %(message)s", code=code, message=body.get('describe') or ''),
+                'new_serial': True,
+            }
         return {'state': 'sent'}
 
-    def _wait(self, seconds):
-        time.sleep(seconds)
-
-    def query_invoice(self, move):
-        return self._query(move.l10n_cn_edi_serial_no, missing_is_failure=True)
+    def query_invoice(self, move, just_submitted=False):
+        return self._query(move.l10n_cn_edi_serial_no, missing_is_failure=not just_submitted)
 
     def _query(self, order_no, missing_is_failure):
         env = self.company.env
@@ -177,9 +176,10 @@ class NuonuoClient(L10nCnEdiClient):
         if status == STATUS_SEAL_FAILED:
             return self._retry_seal(invoice, order_no)
         if status == STATUS_FAILED:
-            return {'state': 'failed', 'error': invoice.get('failCause') or invoice.get('statusMsg') or env._("Nuonuo failed to issue the fapiao.")}
+            error = invoice.get('failCause') or invoice.get('statusMsg') or env._("Nuonuo failed to issue the fapiao.")
+            return {'state': 'failed', 'error': error, 'new_serial': True}
         if status in STATUS_VOID:
-            return {'state': 'failed', 'error': env._("The fapiao of order %s was voided on Nuonuo.", order_no)}
+            return {'state': 'failed', 'error': env._("The fapiao of order %s was voided on Nuonuo.", order_no), 'new_serial': True}
         return {'state': 'sent'}
 
     def _issued_result(self, invoice):
@@ -200,6 +200,7 @@ class NuonuoClient(L10nCnEdiClient):
         env = self.company.env
         body = self._call('nuonuo.OpeMplatform.reInvoice', {'fpqqlsh': invoice.get('serialNo') or '', 'orderno': order_no})
         if body.get('code') == RETRY_LIMIT:
+            # The fapiao exists unsealed: sending again targets the same order.
             return {'state': 'failed', 'error': env._("Nuonuo could not seal the fapiao of order %s and today's retries are used up.", order_no)}
         return {'state': 'sent'}
 
