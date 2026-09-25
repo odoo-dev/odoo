@@ -14,7 +14,10 @@ Results are plain dicts:
     ``fapiao_no``   the 数电 number, once issued
     ``fapiao_date`` naive UTC ``datetime``, once issued
     ``qr_code``     QR payload, if the provider returns one
-    ``pdf``         the fapiao PDF as bytes, once issued, with ``pdf_filename``
+    ``pdf``         the fapiao PDF as bytes, once issued, with ``pdf_filename``: the
+                    copy that goes out with the invoice email
+    ``ofd``         the fapiao OFD as bytes, with ``ofd_filename``: the legal original
+                    voucher, kept on the invoice
     ``error``       human-readable reason, when failed
     ``new_serial``  set on a failure when the order is dead (refused, failed, voided), so
                     the next attempt may use a new serial number. Otherwise it reuses

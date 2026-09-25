@@ -56,6 +56,13 @@ class AccountMove(models.Model):
         copy=False,
         readonly=True,
     )
+    l10n_cn_edi_fapiao_ofd_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        string="Fapiao OFD",
+        copy=False,
+        readonly=True,
+        help="The legal original of the e-Fapiao. The PDF is a copy for reading and emailing.",
+    )
     l10n_cn_edi_red_form_reason = fields.Selection(
         selection=RED_FORM_REASONS,
         string="Red Form Reason",
@@ -373,18 +380,19 @@ class AccountMove(models.Model):
                 'l10n_cn_edi_fapiao_date': result.get('fapiao_date'),
                 'l10n_cn_edi_qr_code': result.get('qr_code'),
             }
-            if result.get('pdf'):
-                vals['l10n_cn_edi_fapiao_pdf_id'] = self.env['ir.attachment'].create({
-                    'name': result.get('pdf_filename') or f"{result.get('fapiao_no')}.pdf",
-                    'raw': result['pdf'],
-                    'mimetype': 'application/pdf',
-                    'res_model': self._name,
-                    'res_id': self.id,
-                }).id
+            for kind, mimetype in (('pdf', 'application/pdf'), ('ofd', 'application/ofd')):
+                if result.get(kind):
+                    vals[f'l10n_cn_edi_fapiao_{kind}_id'] = self.env['ir.attachment'].create({
+                        'name': result.get(f'{kind}_filename') or f"{result.get('fapiao_no')}.{kind}",
+                        'raw': result[kind],
+                        'mimetype': mimetype,
+                        'res_model': self._name,
+                        'res_id': self.id,
+                    }).id
             self.write(vals)
             self.message_post(
                 body=self.env._("E-Fapiao issued successfully. Invoice No: %s", result.get('fapiao_no')),
-                attachment_ids=self.l10n_cn_edi_fapiao_pdf_id.ids,
+                attachment_ids=(self.l10n_cn_edi_fapiao_pdf_id + self.l10n_cn_edi_fapiao_ofd_id).ids,
             )
             return None
         if result.get('state') == 'sent':

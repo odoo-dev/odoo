@@ -192,8 +192,9 @@ class NuonuoClient(L10nCnEdiClient):
             'fapiao_date': datetime.fromtimestamp(int(invoice_time) / 1000, UTC).replace(tzinfo=None) if invoice_time else False,
             'qr_code': invoice.get('qrCode') or False,
         }
-        if pdf := self._download(invoice.get('pdfUrl')):
-            result.update(pdf=pdf, pdf_filename=f"{fapiao_no}.pdf")
+        for kind in ('pdf', 'ofd'):
+            if content := self._download(invoice.get(f'{kind}Url')):
+                result.update({kind: content, f'{kind}_filename': f"{fapiao_no}.{kind}"})
         return result
 
     def _retry_seal(self, invoice, order_no):
@@ -205,14 +206,14 @@ class NuonuoClient(L10nCnEdiClient):
         return {'state': 'sent'}
 
     def _download(self, url):
-        """The fapiao PDF, or None: a missing copy must not undo an issued fapiao."""
+        """A fapiao file, or None: a missing copy must not undo an issued fapiao."""
         if not url:
             return None
         try:
             response = requests.get(url, timeout=TIMEOUT)
             response.raise_for_status()
         except requests.RequestException as e:
-            _logger.warning("Nuonuo: could not download the fapiao PDF of company %s: %s", self.company.vat, e)
+            _logger.warning("Nuonuo: could not download a fapiao file of company %s: %s", self.company.vat, e)
             return None
         return response.content
 

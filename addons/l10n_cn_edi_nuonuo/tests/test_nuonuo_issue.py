@@ -19,6 +19,7 @@ ISSUED = {'code': 'E0000', 'result': [{
     'invoiceTime': 1790121600000,  # 2026-09-23 00:00:00 UTC
     'qrCode': 'qr-payload',
     'pdfUrl': 'https://nuonuo.test/fapiao.pdf',
+    'ofdUrl': 'https://nuonuo.test/fapiao.ofd',
     'serialNo': '20160108165823395151',
 }]}
 
@@ -29,6 +30,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
     def setUp(self):
         super().setUp()
         self.downloads['https://nuonuo.test/fapiao.pdf'] = b'%PDF-1.4 fapiao'
+        self.downloads['https://nuonuo.test/fapiao.ofd'] = b'PK ofd'
 
     def _post_invoice(self, lines=None, taxes=None):
         invoice = self.init_invoice(
@@ -145,7 +147,9 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
             'l10n_cn_edi_qr_code': 'qr-payload',
         }])
         self.assertEqual(invoice.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF-1.4 fapiao')
-        self.assertIn(invoice.l10n_cn_edi_fapiao_pdf_id, self.env['account.move.send']._get_invoice_extra_attachments(invoice))
+        self.assertEqual(invoice.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK ofd')
+        # The OFD is the legal original, kept on the invoice; the customer gets the PDF.
+        self.assertEqual(self.env['account.move.send']._get_invoice_extra_attachments(invoice), invoice.l10n_cn_edi_fapiao_pdf_id)
 
     def test_slow_fapiao_is_picked_up_by_the_cron(self):
         invoice = self._post_invoice()
@@ -233,13 +237,13 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
 
-    def test_missing_pdf_does_not_undo_the_fapiao(self):
+    def test_missing_files_do_not_undo_the_fapiao(self):
         invoice = self._post_invoice()
-        del self.downloads['https://nuonuo.test/fapiao.pdf']
+        self.downloads.clear()
         self._answer(ISSUE, ACCEPTED)
         self._answer(QUERY, ISSUED)
 
         self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
-        self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id)
+        self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id + invoice.l10n_cn_edi_fapiao_ofd_id)
