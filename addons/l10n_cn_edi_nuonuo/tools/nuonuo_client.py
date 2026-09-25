@@ -14,6 +14,10 @@ import requests
 
 from odoo.exceptions import UserError
 
+from odoo.addons.l10n_cn_edi.models.l10n_cn_edi_document import (
+    BUREAU_STATES,
+    BUREAU_STATES_PENDING,
+)
 from odoo.addons.l10n_cn_edi.tools import L10nCnEdiClient
 
 _logger = logging.getLogger(__name__)
@@ -31,6 +35,20 @@ STATUS_PENDING = {'20', '21'}  # 开票中, 开票成功签章中
 STATUS_FAILED = '22'  # 开票失败
 STATUS_SEAL_FAILED = '24'  # 签章失败: retried with reInvoice
 STATUS_VOID = {'3', '31'}  # 已作废, 作废中
+# Red letter confirmation forms (红字确认单, 联调参考 4.6).
+SAVE_RED_FORM = 'nuonuo.OpeMplatform.saveInvoiceRedConfirm'
+QUERY_RED_FORM = 'nuonuo.OpeMplatform.queryInvoiceRedConfirm'
+REFRESH_RED_FORM = 'nuonuo.OpeMplatform.refreshInvoiceRedConfirm'  # 下载: syncs Nuonuo with the bureau
+CONFIRM_RED_FORM = 'nuonuo.OpeMplatform.confirm'
+REVOKE_RED_FORM = 'nuonuo.OpeMplatform.confirmInfoCancel'
+SELLER, BUYER = '0', '1'  # identity / applySource
+# The bureau's reason codes (ours) against Nuonuo's redReason: 1销货退回 2开票有误 3服务中止 4销售折让.
+RED_REASONS = {'01': '2', '02': '1', '03': '3', '04': '4'}
+RED_FORM_APPLYING, RED_FORM_APPLICATION_FAILED = '15', '16'  # 申请中, 申请失败: Nuonuo's own
+BUREAU_STATES_ALL = dict(BUREAU_STATES)
+RED_FORM_PAGE_SIZE = 50  # the most Nuonuo returns per page
+RED_FORM_MAX_PAGES = 20
+
 # The drawer's tax bureau session (联调参考 4.2, 4.12, 4.13).
 GET_CERTIFICATION_STATUS = 'nuonuo.OpeMplatform.getCertificationStatus'
 GET_QR_CODE = 'nuonuo.OpeMplatform.getQrCode'
@@ -317,6 +335,132 @@ class NuonuoClient(L10nCnEdiClient):
             _logger.warning("Nuonuo: could not download a fapiao file of company %s: %s", self.company.vat, e)
             return None
         return response.content
+
+    # ------------------------------------------------------------------
+    # Red forms
+    # ------------------------------------------------------------------
+
+    def request_red_form(self, values):
+        env = self.company.env
+        company = self.company
+        bill_id = values['serial_no']
+        # Full reversal: no lines (联调参考 4.7.1). The bureau issues the red fapiao itself
+        # once the form needs no confirmation or both sides confirmed it.
+        body = self._call(SAVE_RED_FORM, {
+            'billId': bill_id,
+            'blueInvoiceLine': INVOICE_LINES[values['original_invoice_type_code'] or '02'],
+            'applySource': SELLER,
+            'blueElecInvoiceNumber': values['original_fapiao_no'],
+            'sellerTaxNo': self.tax_no,
+            'sellerName': values['seller_name'],
+            'buyerTaxNo': values['buyer_tax_no'],
+            'buyerName': values['buyer_name'],
+            'redReason': RED_REASONS[values['reason']],
+            'extensionNumber': company.l10n_cn_edi_nuonuo_extension_number or '',
+        })
+        if body.get('code') != SUCCESS:
+            # A resubmitted billId is refused as a duplicate: the form exists, so read it back.
+            if form := self._find_red_form(SELLER, bill_id):
+                return self._red_form_result(form, fetch_red_fapiao=True)
+            return {'error': env._("Nuonuo refused the red form (%(code)s): %(message)s", code=body.get('code'), message=body.get('describe') or '')}
+        form = self._find_red_form(SELLER, bill_id)
+        return self._red_form_result(form, fetch_red_fapiao=True) if form else {'uuid': bill_id}
+
+    def query_red_form(self, document):
+        identity = self._identity(document)
+        form = self._find_red_form(identity, document.red_form_uuid)
+        if form and form.get('billStatus') in BUREAU_STATES_PENDING and form.get('billUuid'):
+            # Someone has to act at the bureau: download its latest state into Nuonuo first.
+            self._call(REFRESH_RED_FORM, {'identity': identity, 'billUuid': form['billUuid']})
+            form = self._find_red_form(identity, document.red_form_uuid) or form
+        if not form:
+            return {}
+        return self._red_form_result(form, fetch_red_fapiao=identity == SELLER)
+
+    def operate_red_form(self, document, action):
+        env = self.company.env
+        identity = self._identity(document)
+        payload = {
+            'billId': document.red_form_uuid,
+            'identity': identity,
+            'extensionNumber': self.company.l10n_cn_edi_nuonuo_extension_number or '',
+        }
+        if action == 'revoke':
+            body = self._call(REVOKE_RED_FORM, payload)
+        else:
+            body = self._call(CONFIRM_RED_FORM, {**payload, 'confirmAgreement': '1' if action == 'confirm' else '0'})
+        if body.get('code') != SUCCESS:
+            raise UserError(env._("Nuonuo answered %(code)s: %(message)s", code=body.get('code'), message=body.get('describe') or ''))
+
+    def list_inbound_red_forms(self, date_from, date_to):
+        window = {'startTime': f'{date_from:%Y-%m-%d}', 'endTime': f'{date_to:%Y-%m-%d}'}
+        # Forms raised by suppliers at the bureau reach Nuonuo only when downloaded.
+        self._call(REFRESH_RED_FORM, {
+            'identity': BUYER,
+            'extensionNumber': self.company.l10n_cn_edi_nuonuo_extension_number or '',
+            **window,
+        })
+        forms = []
+        for page in range(1, RED_FORM_MAX_PAGES + 1):
+            result = self._query_red_forms({
+                'identity': BUYER,
+                'billTimeStart': window['startTime'],
+                'billTimeEnd': window['endTime'],
+                'pageNo': str(page),
+                'pageSize': str(RED_FORM_PAGE_SIZE),
+            })
+            batch = result.get('list') or []
+            forms += batch
+            if len(batch) < RED_FORM_PAGE_SIZE or len(forms) >= int(result.get('total') or 0):
+                break
+        return [self._red_form_result(form) for form in forms if form.get('applySource') is not None and str(form['applySource']) == SELLER]
+
+    def _identity(self, document):
+        return BUYER if document.move_id.move_type in ('in_invoice', 'in_refund') else SELLER
+
+    def _query_red_forms(self, payload):
+        env = self.company.env
+        body = self._call(QUERY_RED_FORM, payload)
+        if body.get('code') != SUCCESS:
+            raise UserError(env._("Nuonuo could not list red forms (%(code)s): %(message)s", code=body.get('code'), message=body.get('describe') or ''))
+        return body.get('result') or {}
+
+    def _find_red_form(self, identity, bill_id):
+        # A billId makes the date range optional (unlike a bare query, which needs one).
+        forms = self._query_red_forms({'identity': identity, 'billId': bill_id}).get('list') or []
+        return forms[0] if forms else None
+
+    def _red_form_result(self, form, fetch_red_fapiao=False):
+        env = self.company.env
+        status = str(form.get('billStatus') or '')
+        result = {
+            'uuid': form.get('billId'),
+            'number': form.get('billNo') or False,
+            'bureau_state': status if status in BUREAU_STATES_ALL else False,
+            'red_fapiao_no': form.get('redInvoiceNumber') or False,
+            'original_fapiao_no': form.get('blueElecInvoiceNumber') or form.get('blueInvoiceNumber') or False,
+            'amount_untaxed': float(form.get('taxExcludedAmount') or 0.0),
+            'amount_tax': float(form.get('taxAmount') or 0.0),
+            'reason': {nuonuo: ours for ours, nuonuo in RED_REASONS.items()}.get(str(form.get('redReason') or '')) or False,
+        }
+        if status == RED_FORM_APPLICATION_FAILED:
+            result['error'] = form.get('billMessage') or env._("The tax bureau refused the red form.")
+        if fetch_red_fapiao and result['red_fapiao_no'] and form.get('invoiceSerialNum'):
+            result.update(self._red_fapiao(form['invoiceSerialNum']))
+        return result
+
+    def _red_fapiao(self, serial_no):
+        """Date and files of the red fapiao the bureau issued for a form."""
+        body = self._call('nuonuo.OpeMplatform.queryInvoiceResult', {'serialNos': [serial_no], 'isOfferInvoiceDetail': '0'})
+        invoices = body.get('result') or []
+        if body.get('code') != SUCCESS or not invoices or str(invoices[0].get('status')) != STATUS_ISSUED:
+            # The number is known from the form: the date and files can wait for a later look.
+            return {}
+        issued = self._issued_result(invoices[0])
+        return {
+            'red_fapiao_date': issued['fapiao_date'],
+            **{key: issued[key] for key in ('pdf', 'pdf_filename', 'ofd', 'ofd_filename') if key in issued},
+        }
 
     # ------------------------------------------------------------------
     # Mapping
