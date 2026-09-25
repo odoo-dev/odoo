@@ -8,6 +8,7 @@ again. Standalone: no Odoo, stdlib + the sibling crypto module only.
     export AISINO_IDENTITY_CODE=...   # 授权码
     export AISINO_PLATFORM_CODE=...   # 组织编码
     export AISINO_TAX_NO=...          # 税号
+    export AISINO_PROXY=http://user:pass@host:port   # optional: mainland IP Aisino whitelisted
     python3 probe.py envelope         # offline, run this first
     python3 probe.py auth             # is our envelope right? (read-only)
     python3 probe.py keyvariant       # only if auth fails: which derivation works?
@@ -61,6 +62,13 @@ class Probe:
         self.platform = os.environ.get('AISINO_PLATFORM_CODE', '')
         self.tax_no = os.environ.get('AISINO_TAX_NO', '')
         self.timeout = args.timeout
+        # Only this probe goes through the proxy: an HTTPS_PROXY in the shell would also route
+        # the Nuonuo probe, whose gateway is production. An empty mapping ignores HTTPS_PROXY.
+        proxy = os.environ.get('AISINO_PROXY')
+        self.opener = urllib.request.build_opener(
+            urllib.request.ProxyHandler({'http': proxy, 'https': proxy} if proxy else {}),
+        )
+        print(f'route: {"proxy " + proxy.rpartition("@")[2] if proxy else "direct"}')
         self.allow_writes = args.allow_writes
         self.findings = {}
         if args.host == 'prod' and not args.i_mean_production:
@@ -101,7 +109,7 @@ class Probe:
         )
         started = time.monotonic()
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            with self.opener.open(req, timeout=self.timeout) as resp:
                 raw = resp.read().decode('utf-8', 'replace')
                 status = resp.status
         except urllib.error.HTTPError as exc:
