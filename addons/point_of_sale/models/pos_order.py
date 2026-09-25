@@ -910,11 +910,27 @@ class PosOrder(models.Model):
             elif not existing_order:
                 order_ids.append(self._process_order(order, False))
                 _logger.info("PoS synchronisation #%d order %s created pos.order #%d", sync_token, order_log_name, order_ids[-1])
-            else:
-                # In theory, this situation is unintended
-                # In practice it can happen when "Tip later" option is used
-                # This will update the order if edited after payent from UI.
-                if existing_order.state == "paid" and not existing_order.nb_print:
+            # For cases where an order is edited after payment (e.g., adding a tip or editing the payment)
+            elif existing_order.state == 'paid' and not existing_order.account_move:
+                if (existing_order.config_id.iface_print_auto and existing_order.nb_print > 1) or (not existing_order.config_id.iface_print_auto and existing_order.nb_print):
+                    # create a refund of old order which we want to edit
+                    refunded_order = existing_order._refund()
+                    for payment in existing_order.payment_ids:
+                        refunded_order.add_payment({
+                            'pos_order_id': refunded_order.id,
+                            'amount': -payment.amount,
+                            'name': payment.name,
+                            'payment_method_id': payment.payment_method_id.id,
+                        })
+                    refunded_order._process_saved_order(False)
+
+                    # create a new copy order with the new details
+                    new_edit_order = existing_order.copy()
+                    self._update_edit_order_payments(order, existing_order, new_edit_order)
+                    new_edit_order._process_saved_order(False)
+                    order_ids.extend([refunded_order.id, new_edit_order.id])
+                else:
+                    # when no invoiced and no prints so just a normal payment edit
                     self.process_saved_payments(order, existing_order)
                 order_ids.append(existing_order.id)
                 _logger.info("PoS synchronisation #%d order %s sync ignored for existing PoS order %s (state: %s)", sync_token, order_log_name, existing_order, existing_order.state)
@@ -953,6 +969,49 @@ class PosOrder(models.Model):
             'pos.prep.order': self.env['pos.prep.order']._load_pos_data_read(self.prep_order_ids, config) if config else [],
             'pos.prep.line': self.env['pos.prep.line']._load_pos_data_read(self.prep_order_ids.prep_line_ids, config) if config else [],
         }
+
+    def _update_edit_order_payments(self, order, existing_order, new_edit_order):
+        payment_commands = order.get('payment_ids', [])
+        updated_payments = {
+            command[1]: command[2]
+            for command in payment_commands
+            if command[0] == 1
+        }
+
+        deleted_payment_ids = {
+            command[1]
+            for command in payment_commands
+            if command[0] == 2
+        }
+
+        Payment = self.env['pos.payment']
+        for payment in existing_order.payment_ids:
+            vals = updated_payments.get(payment.id)
+
+            # Payment was deleted or wasn't part of the edited order.
+            if payment.id in deleted_payment_ids or vals is None:
+                continue
+
+            payment_vals = payment.copy_data()[0]
+            payment_vals['pos_order_id'] = new_edit_order.id
+
+            new_payment = Payment.create(payment_vals)
+
+            vals = vals.copy()
+            vals.pop('uuid', None)
+            vals.pop('pos_order_id', None)
+
+            new_payment.write(vals)
+
+        # Create new payments.
+        for command in payment_commands:
+            if command[0] != 0:
+                continue
+
+            vals = command[2].copy()
+            vals['pos_order_id'] = new_edit_order.id
+
+            Payment.create(vals)
 
     @api.model
     def _get_refunded_orders(self, order):
