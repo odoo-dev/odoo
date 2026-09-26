@@ -20,7 +20,7 @@
         'account_edi_ubl_cii',
     ],
     'external_dependencies': [
-        {'pypi': 'phonenumbers', 'apt': 'python3-phonenumbers'},
+        {'pypi': 'phonenumbers', 'apt': 'python3-phonenumbers', 'custom_install': 'A custom package is available on the odoo repositories'},
     ],
     'data': [
         'data/cron.xml',

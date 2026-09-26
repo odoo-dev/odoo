@@ -330,7 +330,7 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         """ Test the timesheets linked to a invoice determined as a invoiced imported form app legacy
             are still considered as billed even if the state of those invoices is cancelled.
 
-            Since the account_accountant module is not in the dependencies of sale_timesheet module,
+            Since the account_accountant module is not detected in the dependencies of sale_timesheet module,
             this test will manually set the state and payment_status to be in the same condition
             than the feature "Invoicing Switch Threshold".
         """
