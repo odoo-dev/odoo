@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { getValueFromVar } from "@html_builder/utils/utils";
 import { normalizeColor } from "@html_builder/utils/utils_css";
 import { Plugin } from "@html_editor/plugin";
@@ -114,8 +115,8 @@ export class BackgroundShapeOptionPlugin extends Plugin {
         // Add the "selectedColor" key on bg shape introduced before the
         // computed background shape color feature.
         for (const bgShapeEl of selectElements(this.editable, "[data-oe-shape-data]")) {
-            const shapeData = JSON.parse(bgShapeEl.dataset.oeShapeData.replace(/'/g, '"'));
-            if (!Object.hasOwn(shapeData, "selectedColor")) {
+            const shapeData = parseJSON(bgShapeEl.dataset.oeShapeData.replace(/'/g, '"'));
+            if (shapeData && !Object.hasOwn(shapeData, "selectedColor")) {
                 this.markShape(bgShapeEl, { selectedColor: true });
             }
         }
