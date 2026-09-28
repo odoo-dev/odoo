@@ -83,7 +83,12 @@ export function generateVideoPlayer(parentEl, manageIframeSrcFct) {
     // A video file is played by a `<video>` element, rebuilt from the options
     // saved on the container since its url does not encode them.
     if (parentEl.dataset.platform === VideoFile.id) {
-        const options = JSON.parse(parentEl.dataset.videoOptions || "{}");
+        let options = {};
+        try {
+            options = JSON.parse(parentEl.dataset.videoOptions || "{}");
+        } catch {
+            // Malformed options: play the video with the default ones.
+        }
         const videoEl = VideoFile.createPlayerElement({ embedUrl: src, options });
         parentEl.append(videoEl);
         return videoEl;

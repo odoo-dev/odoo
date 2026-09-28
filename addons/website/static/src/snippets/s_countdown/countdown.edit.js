@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { registry } from "@web/core/registry";
@@ -60,7 +61,7 @@ const CountdownEdit = (I) =>
             // should restart the interaction if the color has changed
             // so canvas' text color is updated
             if (this.el.querySelector(".o_template_circle")) {
-                snapshot = JSON.parse(snapshot) || {};
+                snapshot = parseJSON(snapshot) || {};
                 snapshot.style = { ...snapshot.style, color: this.textColor };
                 snapshot = JSON.stringify(snapshot);
             }
