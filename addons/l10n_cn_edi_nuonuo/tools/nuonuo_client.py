@@ -16,6 +16,7 @@ from odoo.exceptions import UserError
 
 from odoo.addons.l10n_cn_edi.models.l10n_cn_edi_document import (
     BUREAU_STATES,
+    BUREAU_STATES_CONFIRMED,
     BUREAU_STATES_PENDING,
 )
 from odoo.addons.l10n_cn_edi.tools import L10nCnEdiClient
@@ -41,6 +42,7 @@ QUERY_RED_FORM = 'nuonuo.OpeMplatform.queryInvoiceRedConfirm'
 REFRESH_RED_FORM = 'nuonuo.OpeMplatform.refreshInvoiceRedConfirm'  # 下载: syncs Nuonuo with the bureau
 CONFIRM_RED_FORM = 'nuonuo.OpeMplatform.confirm'
 REVOKE_RED_FORM = 'nuonuo.OpeMplatform.confirmInfoCancel'
+FAST_RED = 'nuonuo.OpeMplatform.fastInvoiceRed'  # also fetches a red fapiao the bureau issued by itself
 SELLER, BUYER = '0', '1'  # identity / applySource
 # The bureau's reason codes (ours) against Nuonuo's redReason: 1销货退回 2开票有误 3服务中止 4销售折让.
 RED_REASONS = {'01': '2', '02': '1', '03': '3', '04': '4'}
@@ -477,9 +479,36 @@ class NuonuoClient(L10nCnEdiClient):
         }
         if status == RED_FORM_APPLICATION_FAILED:
             result['error'] = form.get('billMessage') or env._("The tax bureau refused the red form.")
-        if fetch_red_fapiao and result['red_fapiao_no'] and form.get('invoiceSerialNum'):
-            result.update(self._red_fapiao(form['invoiceSerialNum']))
+        if fetch_red_fapiao and result['bureau_state'] in BUREAU_STATES_CONFIRMED:
+            if serial_no := form.get('invoiceSerialNum') or self._fast_red(form):
+                result.update({key: value for key, value in self._red_fapiao(serial_no).items() if value})
         return result
+
+    def _fast_red(self, form):
+        """The serial number of the red fapiao of a confirmed form Nuonuo has none for yet, or None.
+
+        联调参考 4.6.1: when the form shows no invoiceSerialNum, fastInvoiceRed gets the
+        red fapiao from the bureau. Its orderNo can replace Nuonuo's only once, so it is
+        derived from the form: a second attempt looks that order up instead.
+        """
+        order_no = f"R{''.join(filter(str.isdigit, form.get('billId') or ''))}"[:20]
+        body = self._call(FAST_RED, {
+            'orderNo': order_no,
+            'taxNum': self.tax_no,
+            'elecInvoiceNumber': form.get('blueElecInvoiceNumber') or form.get('blueInvoiceNumber') or '',
+            'billNo': form.get('billNo') or '',
+            'billUuid': form.get('billUuid') or '',
+            'invoiceLine': form.get('blueInvoiceLine') or '',
+            'extensionNumber': self.company.l10n_cn_edi_nuonuo_extension_number or '',
+        })
+        if body.get('code') == SUCCESS and (body.get('result') or {}).get('invoiceSerialNum'):
+            return body['result']['invoiceSerialNum']
+        known = self._call('nuonuo.OpeMplatform.queryInvoiceResult', {'orderNos': [order_no], 'isOfferInvoiceDetail': '0'})
+        invoices = known.get('result') or []
+        if known.get('code') == SUCCESS and invoices and invoices[0].get('serialNo'):
+            return invoices[0]['serialNo']
+        _logger.info("Nuonuo: no red fapiao yet for red form %s: %s %s", form.get('billNo'), body.get('code'), body.get('describe'))
+        return None
 
     def _red_fapiao(self, serial_no):
         """Date and files of the red fapiao the bureau issued for a form."""
@@ -490,6 +519,7 @@ class NuonuoClient(L10nCnEdiClient):
             return {}
         issued = self._issued_result(invoices[0])
         return {
+            'red_fapiao_no': issued['fapiao_no'],
             'red_fapiao_date': issued['fapiao_date'],
             **{key: issued[key] for key in ('pdf', 'pdf_filename', 'ofd', 'ofd_filename') if key in issued},
         }

@@ -12,6 +12,7 @@ REFRESH = 'nuonuo.OpeMplatform.refreshInvoiceRedConfirm'
 CONFIRM = 'nuonuo.OpeMplatform.confirm'
 REVOKE = 'nuonuo.OpeMplatform.confirmInfoCancel'
 QUERY_INVOICE = 'nuonuo.OpeMplatform.queryInvoiceResult'
+FAST_RED = 'nuonuo.OpeMplatform.fastInvoiceRed'
 BLUE_FAPIAO_NO = '20882609251614194530'
 OK = {'code': 'E0000', 'describe': '请求成功'}
 
@@ -116,6 +117,56 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
             'l10n_cn_edi_fapiao_date': datetime(2026, 9, 25, 8, 14, 55),
         }])
         self.assertEqual(credit_note.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK red')
+
+    def test_confirmed_form_without_red_serial_gets_it_by_fast_red(self):
+        credit_note = self._credit_note()
+        self._answer(SAVE, OK)
+        self._answer_forms(listing(red_form(billId='RED20260928', billStatus='01', blueInvoiceLine='pc')))
+        self._answer(FAST_RED, {'code': 'E0000', 'result': {'invoiceSerialNum': '26092816145524147049'}})
+        self._answer(QUERY_INVOICE, {'code': 'E0000', 'result': [{
+            'status': '2',
+            'allElectronicInvoiceNumber': '20882609281614554424',
+            'invoiceTime': 1790324095000,
+        }]})
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        fast_red = self._requests_for(FAST_RED)[0]['payload']
+        self.assertEqual(fast_red['orderNo'], 'R20260928')
+        self.assertEqual((fast_red['billNo'], fast_red['billUuid']), ('990000007566113377', 'nuouuid545926b2d144475ba653d90'))
+        self.assertEqual((fast_red['elecInvoiceNumber'], fast_red['invoiceLine']), (BLUE_FAPIAO_NO, 'pc'))
+        self.assertEqual(self._requests_for(QUERY_INVOICE)[0]['payload']['serialNos'], ['26092816145524147049'])
+        self.assertRecordValues(credit_note, [{'l10n_cn_edi_state': 'issued', 'l10n_cn_edi_fapiao_no': '20882609281614554424'}])
+
+    def test_repeated_fast_red_looks_up_its_order(self):
+        credit_note = self._credit_note()
+        self._answer(SAVE, OK)
+        self._answer_forms(listing(red_form(billId='RED20260928', billStatus='04')))
+        self._answer(FAST_RED, {'code': 'E9106', 'describe': '订单编号或流水号不能重复'})
+        self._answer(QUERY_INVOICE, {'code': 'E0000', 'result': [{
+            'status': '2',
+            'serialNo': '26092816145524147049',
+            'allElectronicInvoiceNumber': '20882609281614554424',
+            'invoiceTime': 1790324095000,
+        }]})
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        lookups = [request['payload'] for request in self._requests_for(QUERY_INVOICE)]
+        self.assertEqual(lookups[0], {'orderNos': ['R20260928'], 'isOfferInvoiceDetail': '0'})
+        self.assertEqual(credit_note.l10n_cn_edi_fapiao_no, '20882609281614554424')
+
+    def test_red_fapiao_not_out_yet_keeps_the_form_pending(self):
+        credit_note = self._credit_note()
+        self._answer(SAVE, OK)
+        self._answer_forms(listing(red_form(billStatus='01')))
+        self._answer(FAST_RED, {'code': 'E9999', 'describe': '红票开具中'})
+        self._answer(QUERY_INVOICE, {'code': 'E9500', 'describe': '发票不存在'})
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        self.assertRecordValues(credit_note.l10n_cn_edi_document_ids, [{'state': 'red_form_pending', 'bureau_state': '01'}])
+        self.assertEqual(credit_note.l10n_cn_edi_state, 'not_sent')
 
     def test_form_still_applying_is_polled(self):
         credit_note = self._credit_note()
