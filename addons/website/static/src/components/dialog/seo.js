@@ -37,8 +37,10 @@ export const seoContext = proxy({
     seoName: "",
     metaImage: "",
     defaultTitle: "",
+    hasNoImageWarning: true,
     updatedAlts: [],
     brokenLinks: [],
+    checkedLinks: false,
 });
 
 const LINK_CHECK_BASE_OPTIONS = {
@@ -360,16 +362,31 @@ class Keyword extends Component {
             usedInH1: _t('"%(keyword)s" is used in page first level heading', {
                 keyword: this.props.keyword,
             }),
+            notUsedInH1: _t('"%(keyword)s" is not used in page first level heading', {
+                keyword: this.props.keyword,
+            }),
             usedInH2: _t('"%(keyword)s" is used in page second level heading', {
+                keyword: this.props.keyword,
+            }),
+            notUsedInH2: _t('"%(keyword)s" is not used in page second level heading', {
                 keyword: this.props.keyword,
             }),
             usedInTitle: _t('"%(keyword)s" is used in page title', {
                 keyword: this.props.keyword,
             }),
+            notUsedInTitle: _t('"%(keyword)s" is not used in page title', {
+                keyword: this.props.keyword,
+            }),
             usedInDescription: _t('"%(keyword)s" is used in page description', {
                 keyword: this.props.keyword,
             }),
+            notUsedInDescription: _t('"%(keyword)s" is not used in page description', {
+                keyword: this.props.keyword,
+            }),
             usedInContent: _t('"%(keyword)s" is used in page content', {
+                keyword: this.props.keyword,
+            }),
+            notUsedInContent: _t('"%(keyword)s" is not used in page content', {
                 keyword: this.props.keyword,
             }),
             suggestionTag: (suggestion) => _t('Add "%(suggestion)s"', { suggestion }),
@@ -394,7 +411,7 @@ class Keyword extends Component {
                         .map((word) => word.replace(regex, "").trim())
                         .filter(Boolean)
                 ),
-            ];
+            ].slice(0, 5);
         });
     }
 
@@ -595,6 +612,7 @@ export class TitleDescription extends Component {
         defaultTitle: t.string(),
         previewDescription: t.string(),
         url: t.string(),
+        slots: t.object().optional(),
     });
     static components = {
         SEOPreview,
@@ -678,10 +696,17 @@ export class TitleDescription extends Component {
         if (!this.seoContext.description) {
             return false;
         }
-        if (this.seoContext.description.length < this.minRecommendedDescriptionSize) {
-            return _t("Too short (min 50 chars)");
-        } else if (this.seoContext.description.length > this.maxRecommendedDescriptionSize) {
-            return _t("Too long (max 160 chars)");
+        const count = this.seoContext.description.length;
+        if (count < this.minRecommendedDescriptionSize) {
+            return _t("%(count)s/%(limit)s chars min.", {
+                count,
+                limit: this.minRecommendedDescriptionSize,
+            });
+        } else if (count > this.maxRecommendedDescriptionSize) {
+            return _t("%(count)s/%(limit)s chars max.", {
+                count,
+                limit: this.maxRecommendedDescriptionSize,
+            });
         }
         return false;
     }
@@ -695,10 +720,6 @@ export class TitleDescription extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    autoFill() {
-        getSeo(this);
-    }
 
     /**
      * @private
@@ -803,19 +824,22 @@ export class SeoChecks extends Component {
         this.state = proxy({
             altAttributes: [],
             checkingLinks: false,
-            checkedLinks: false,
             counterLinks: 0,
             totalLinks: 0,
         });
         this.imgUpdated = this.imgUpdated.bind(this);
         onWillStart(async () => {
             this.state.altAttributes = await this.getAltAttributes();
+            this.hasNoImageWarning = !this.state.altAttributes.some(
+                (alt) => !alt.decorative && alt.alt === ""
+            );
             this.seoContext.updatedAlts = [];
             if (!this.props.isDefaultLang) {
                 this.hasDelayedTranslation = await fetchDelayedTranslations(path);
             }
         });
         onMounted(() => {
+            this.seoContext.hasNoImageWarning = this.hasNoImageWarning;
             if (this.props.isDefaultLang) {
                 this.getBrokenLinks();
             }
@@ -950,7 +974,7 @@ export class SeoChecks extends Component {
         });
         await Promise.all(promises);
         this.state.checkingLinks = false;
-        this.state.checkedLinks = true;
+        this.seoContext.checkedLinks = true;
         // Keep links order in the DOM.
         brokenLinks.sort((a, b) => a.position - b.position);
         this.seoContext.brokenLinks = brokenLinks.map((link) => ({
@@ -989,13 +1013,19 @@ export class OptimizeSEODialog extends Component {
 
         this.title = _t("Search Engine Optimization");
         this.saveButton = _t("Save");
-        this.size = "lg";
+        this.size = "xl";
         this.contentClass = "oe_seo_configuration";
+        this.seoContext = proxy(seoContext);
+        this.seoContext.hasNoImageWarning = true;
+        this.seoContext.checkedLinks = false;
 
         onWillStart(async () => {
             // Wait for the preview iframe because this dialog reads directly
             // from the iframe DOM.
             await this.waitForIframe();
+            this.state = proxy({
+                language: pyToJsLocale(this.pageDocumentElement.getAttribute("lang") || "en-US"),
+            });
             const {
                 metadata: { mainObject, seoObject, path, langName },
             } = this.website.currentWebsite;
@@ -1108,6 +1138,10 @@ export class OptimizeSEODialog extends Component {
             return parsed && parsed[0] ? [...new Set(parsed)] : [];
         }
         return el && el.content;
+    }
+
+    autoFill() {
+        getSeo(this);
     }
 
     async save() {

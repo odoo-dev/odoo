@@ -224,6 +224,7 @@ hearing_disabled
 height
 help
 help_outline
+hide_image
 history
 home
 horizontal_align_left
