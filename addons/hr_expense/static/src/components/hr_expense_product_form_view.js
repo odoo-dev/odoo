@@ -19,7 +19,7 @@ export class ProductExpenseFormController extends FormController {
             return super.save(params);
         }
 
-        const warning = await this.orm.call(
+        const warning = await this.orm.call(//TODO maybe add same for percent markup change ?
             "product.product",
             "get_standard_price_update_warning",
             [productId, standard_price],
