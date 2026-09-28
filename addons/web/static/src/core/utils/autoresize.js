@@ -14,10 +14,13 @@ import { memoize } from "@web/core/utils/functions";
 export function useAutoresize(ref, options = {}) {
     let wasProgrammaticallyResized = false;
     let resize = null;
+    let rafId = null;
+ 
     useEffect(
         (el) => {
             if (el) {
-                resize = (programmaticResize = false) => {
+                const doResize = (programmaticResize) => {
+                    rafId = null;
                     wasProgrammaticallyResized = programmaticResize;
                     if (options.ignoreIfEmpty && !el.value) {
                         return;
@@ -29,9 +32,15 @@ export function useAutoresize(ref, options = {}) {
                     }
                     options.onResize?.(el, options);
                 };
-                el.addEventListener("input", () => resize(true));
+                resize = (programmaticResize = false) => {
+                    if (rafId !== null) {
+                        cancelAnimationFrame(rafId);
+                    }
+                    rafId = requestAnimationFrame(() => doResize(programmaticResize));
+                };
+                const onInput = () => resize(true);
+                el.addEventListener("input", onInput);
                 const resizeObserver = new ResizeObserver(() => {
-                    // This ensures that the resize function is not called twice on input or page load
                     if (wasProgrammaticallyResized) {
                         wasProgrammaticallyResized = false;
                         return;
@@ -40,9 +49,11 @@ export function useAutoresize(ref, options = {}) {
                 });
                 resizeObserver.observe(el);
                 return () => {
-                    el.removeEventListener("input", resize);
-                    resizeObserver.unobserve(el);
+                    el.removeEventListener("input", onInput);
                     resizeObserver.disconnect();
+                    if (rafId !== null) {
+                        cancelAnimationFrame(rafId);
+                    }
                     resize = null;
                 };
             }
@@ -50,9 +61,7 @@ export function useAutoresize(ref, options = {}) {
         () => [ref.el]
     );
     useEffect(() => {
-        if (resize) {
-            resize(true);
-        }
+        resize?.(true);
     });
 }
 
