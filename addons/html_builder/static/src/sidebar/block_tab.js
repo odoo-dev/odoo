@@ -455,7 +455,12 @@ export class BlockTab extends Component {
      * the snippet group to open.
      */
     async handlePostModuleInstall(newInstalledModule) {
-        const { snippetTitle } = JSON.parse(decodeURIComponent(newInstalledModule));
+        let snippetTitle;
+        try {
+            ({ snippetTitle } = JSON.parse(decodeURIComponent(newInstalledModule)) || {});
+        } catch {
+            return;
+        }
         if (snippetTitle) {
             const snippet = this.snippetModel.snippetGroups.find(
                 (snippetEl) => snippetEl.title === snippetTitle

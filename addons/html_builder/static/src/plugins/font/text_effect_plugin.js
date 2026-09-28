@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { proxy } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { unwrapContents } from "@html_editor/utils/dom";
@@ -62,7 +63,7 @@ export class TextEffectPlugin extends Plugin {
         ],
         has_format_predicates: (node) => {
             const effectEl = closestElement(node, "[data-text-effect]");
-            if (effectEl && !!JSON.parse(effectEl.dataset.textEffect).preset) {
+            if (effectEl && !!parseJSON(effectEl.dataset.textEffect)?.preset) {
                 return true;
             }
         },
@@ -192,7 +193,7 @@ export class TextEffectPlugin extends Plugin {
             element,
             hasTextEffect: selectedTextEffects.length > 0,
             activePreset: element
-                ? getTextEffectPresetId(JSON.parse(element.dataset.textEffect || "{}"))
+                ? getTextEffectPresetId(parseJSON(element.dataset.textEffect) || {})
                 : undefined,
         };
     }
@@ -240,9 +241,7 @@ export class TextEffectPlugin extends Plugin {
             selectedTextEffects.length === 1 &&
             this.isSelectionWithinTextEffect(selectedTextEffects[0])
         ) {
-            const previousTextEffect = JSON.parse(
-                selectedTextEffects[0].dataset.textEffect || "{}"
-            );
+            const previousTextEffect = parseJSON(selectedTextEffects[0].dataset.textEffect) || {};
             this.setTextEffect(selectedTextEffects[0], effect, previousTextEffect);
             return;
         }
@@ -392,14 +391,14 @@ export class TextEffectPlugin extends Plugin {
         if (!textEffectEl) {
             return false;
         }
-        return !!Object.keys(JSON.parse(textEffectEl.dataset.textEffect || "{}")).length;
+        return !!Object.keys(parseJSON(textEffectEl.dataset.textEffect) || {}).length;
     }
     isTextEffectDisabled() {
         return 2 <= this.dependencies.selection.getTargetedNodes().size;
     }
     removeEmptyTextEffects(root) {
         for (const el of selectElements(root, "[data-text-effect]")) {
-            const textEffect = JSON.parse(el.dataset.textEffect || "{}");
+            const textEffect = parseJSON(el.dataset.textEffect) || {};
             if (!hasConfiguredTextEffect(textEffect)) {
                 unwrapContents(el);
             }
@@ -418,7 +417,7 @@ export class UpdateTextEffectAction extends BuilderAction {
     };
 
     getValue({ editingElement, params: { mainParam: variable, shadowIndex = 0 } }) {
-        const json = JSON.parse(editingElement.dataset.textEffect || "{}");
+        const json = parseJSON(editingElement.dataset.textEffect) || {};
         let value;
         if (isShadowParam(variable)) {
             const hasShadow = !!getShadowCount(json);
@@ -437,7 +436,7 @@ export class UpdateTextEffectAction extends BuilderAction {
         return this.getValue({ editingElement, params }) === value;
     }
     apply({ editingElement, params: { mainParam: variable, shadowIndex = 0 }, value }) {
-        const json = JSON.parse(editingElement.dataset.textEffect || "{}");
+        const json = parseJSON(editingElement.dataset.textEffect) || {};
         if (isShadowParam(variable)) {
             const hasShadow = !!getShadowCount(json);
             const defaultValue = hasShadow

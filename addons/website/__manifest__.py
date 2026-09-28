@@ -272,6 +272,7 @@
             "website/static/src/mail/core/common/**/*",
         ],
         'web.assets_frontend': [
+            'html_builder/static/src/utils/json.js',
             'html_builder/static/src/utils/scrolling.js',
             'website/static/src/interactions/**/*',
             'website/static/src/core/**/*',
@@ -399,6 +400,7 @@
             'website/static/tests/website_loader.test.js',
         ],
         'web.assets_unit_tests_setup': [
+            'html_builder/static/src/utils/json.js',
             'html_builder/static/src/utils/scrolling.js',
             'web/static/src/public/utils.js',
             'web/static/src/public/lazyloader.js',

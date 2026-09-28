@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { scrollTo } from "@html_builder/utils/scrolling";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
@@ -21,6 +22,19 @@ import {
 import { getParsedDataFor } from "@website/js/utils";
 
 const { DateTime } = luxon;
+
+/**
+ * @param {string} condition JSON list of `{ requirement_text }` objects
+ * @returns {string[]} the trimmed and lowercased requirement texts, or an
+ * empty list if the condition is malformed
+ */
+function getRequirementTexts(condition) {
+    const requirements = parseJSON(condition);
+    if (!Array.isArray(requirements)) {
+        return [];
+    }
+    return requirements.map(({ requirement_text }) => requirement_text.trim().toLowerCase());
+}
 
 export class Form extends Interaction {
     static selector = ".s_website_form form, form.s_website_form"; // !compatibility
@@ -853,9 +867,7 @@ export class Form extends Interaction {
                 return !isContains(comparable, value);
             case "substring":
             case "!substring": {
-                const words = JSON.parse(comparable).map(({ requirement_text }) =>
-                    requirement_text.trim().toLowerCase()
-                );
+                const words = getRequirementTexts(comparable);
                 // Pass if no words.
                 if (!words.length) {
                     return true;
@@ -867,9 +879,7 @@ export class Form extends Interaction {
                     : words.every((w) => !value.trim().toLowerCase().includes(w));
             }
             case "domain": {
-                const domains = JSON.parse(comparable).map(({ requirement_text }) =>
-                    requirement_text.trim().toLowerCase()
-                );
+                const domains = getRequirementTexts(comparable);
                 if (!domains.length) {
                     return true;
                 }
@@ -1211,12 +1221,9 @@ export class Form extends Interaction {
             type,
         } = fieldEl.dataset;
         if (["substring", "!substring", "domain"].includes(comparator)) {
-            condition = JSON.parse(condition).map(({ requirement_text }) => {
-                if (comparator == "domain") {
-                    return "@" + requirement_text.trim().toLowerCase();
-                }
-                return requirement_text.trim().toLowerCase();
-            });
+            condition = getRequirementTexts(condition).map((text) =>
+                comparator == "domain" ? "@" + text : text
+            );
             condition = formatList(condition, { style: "or" });
         }
         const textMessages = {

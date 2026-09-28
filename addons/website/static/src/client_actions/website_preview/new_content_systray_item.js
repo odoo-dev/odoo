@@ -330,9 +330,12 @@ export class NewContentSystrayItem extends Component {
      * installed module.
      */
     async handlePostModuleInstall(newInstalledModule) {
-        const { moduleXmlId } = JSON.parse(
-            decodeURIComponent(newInstalledModule)
-        );
+        let moduleXmlId;
+        try {
+            ({ moduleXmlId } = JSON.parse(decodeURIComponent(newInstalledModule)) || {});
+        } catch {
+            return;
+        }
         if (moduleXmlId) {
             const newContentElement = this.state.newContentElements.find(
                 (el) => el.moduleXmlId === moduleXmlId

@@ -59,7 +59,13 @@ export function adaptDarkPaletteContent(rootEl) {
     // so update both to keep the color picker in sync.
     for (const adventureEl of selectElements(rootEl, ".s_adventure")) {
         const shapeColor = "o-color-4";
-        const shapeData = JSON.parse(adventureEl.dataset.oeShapeData.replace(/'/g, '"'));
+        let shapeData;
+        try {
+            shapeData = JSON.parse(adventureEl.dataset.oeShapeData.replace(/'/g, '"'));
+        } catch {
+            // Missing or malformed shape data: leave this snippet untouched.
+            continue;
+        }
         shapeData.colors = { ...shapeData.colors, c5: shapeColor };
         adventureEl.dataset.oeShapeData = JSON.stringify(shapeData);
         const shapeEl = adventureEl.querySelector(":scope > .o_we_shape");

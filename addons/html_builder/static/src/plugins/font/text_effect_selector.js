@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { useChildSubEnv } from "@web/owl2/utils";
 import { Component, proxy } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -58,7 +59,7 @@ export class TextEffectOption extends BaseOptionComponent {
         return this.getTextEffect(editingElement).preset === "custom";
     }
     getTextEffect(editingElement) {
-        return JSON.parse(editingElement.dataset.textEffect || "{}");
+        return parseJSON(editingElement.dataset.textEffect) || {};
     }
     getAppliedPreset(editingElement) {
         return getTextEffectPresetId(this.getTextEffect(editingElement));
@@ -76,7 +77,7 @@ export class TextEffectOption extends BaseOptionComponent {
     getPresets() {
         const customPresetIds = new Set();
         const customPresets = [...this.document.querySelectorAll("#wrap span[data-text-effect]")]
-            .map((el) => JSON.parse(el.dataset.textEffect))
+            .map((el) => parseJSON(el.dataset.textEffect) || {})
             .filter(
                 (textEffect) =>
                     textEffect.preset === "custom" && hasConfiguredTextEffect(textEffect)

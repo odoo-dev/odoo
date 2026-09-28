@@ -1,3 +1,4 @@
+import { parseJSON } from "@html_builder/utils/json";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { hashCode } from "@web/core/utils/strings";
 
@@ -107,10 +108,7 @@ export function removeShadow(textEffect, shadowIndex) {
 }
 
 export function applyConfiguredEffects(element, previousTextEffect = {}) {
-    let json = {};
-    if (element.dataset.textEffect) {
-        json = JSON.parse(element.dataset.textEffect);
-    }
+    let json = parseJSON(element.dataset.textEffect) || {};
     if (
         Object.keys(previousTextEffect).length &&
         json.preset === "custom" &&
