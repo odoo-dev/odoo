@@ -199,12 +199,30 @@ class LivechatController(http.Controller):
             return channel._apply_livechat_feedback(rate, reason, **kwargs)
         return False
 
-    @http.route("/im_livechat/history", type="jsonrpc", auth="public")
+    @http.route("/im_livechat/history/request", type="jsonrpc", auth="user", methods=["POST"])
+    def request_history_pages(self, channel_id, request_id):
+        channel = request.env["discuss.channel"].search_fetch([("id", "=", channel_id)], ["livechat_end_dt", "self_member_id"])
+        operator = request.env.user.partner_id
+        if channel.livechat_end_dt or channel.self_member_id.livechat_member_type != "agent":
+            return
+        channel._bus_send(
+            "im_livechat.history/request",
+            {"id": channel.id, "partner_id": operator.id, "request_id": request_id},
+        )
+
+    @http.route("/im_livechat/history/response", type="jsonrpc", auth="public", methods=["POST"])
     @add_guest_to_context
-    def history_pages(self, pid, channel_id, page_history=None):
-        if channel := request.env["discuss.channel"].search([("id", "=", channel_id)]):
-            if pid in channel.sudo().channel_member_ids.partner_id.ids:
-                request.env["res.partner"].browse(pid)._bus_send_history_message(channel, page_history)
+    def history_pages_response(self, partner_id, channel_id, request_id, page_history):
+        channel = request.env["discuss.channel"].search_fetch([
+            ("id", "=", channel_id),
+            ("livechat_agent_partner_ids", "=", partner_id),
+        ])
+        if not channel:
+            return
+        request.env["res.partner"].browse(partner_id)._bus_send(
+            "im_livechat.history/response",
+            {"channel_id": channel.id, "request_id": request_id, "page_history": page_history[:15]},
+        )
 
     @http.route("/im_livechat/email_livechat_transcript", type="jsonrpc", auth="user")
     @add_guest_to_context

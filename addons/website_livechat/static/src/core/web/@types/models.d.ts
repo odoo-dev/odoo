@@ -1,5 +1,5 @@
 declare module "models" {
-    export interface WebsiteVisitor {
-        pageVisitHistoryText: Readonly<string>;
+    export interface Store {
+        has_multi_website: boolean;
     }
 }

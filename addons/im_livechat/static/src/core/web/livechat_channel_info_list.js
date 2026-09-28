@@ -24,6 +24,7 @@ export class LivechatChannelInfoList extends Component {
         super.setup();
         this.ancestors = useAncestors();
         this.actionService = useService("action");
+        this.historyService = useService("im_livechat.history");
         this.store = useService("mail.store");
         this.ui = useService("ui");
         useEffect(() => {
@@ -34,6 +35,11 @@ export class LivechatChannelInfoList extends Component {
                 channel_id: this.props.thread.id,
             });
             this.props.thread.hasFetchedLivechatSessionData = true;
+        });
+        useEffect(() => {
+            if (this.props.thread.channel.livechatVisitorHistoryStatus === "idle") {
+                this.requestVisitorHistory();
+            }
         });
     }
 
@@ -50,6 +56,15 @@ export class LivechatChannelInfoList extends Component {
                 note,
             });
         });
+    }
+
+    formatVisitTime(visitDatetime) {
+        const datetime = luxon.DateTime.fromISO(visitDatetime);
+        return datetime.isValid ? datetime.toLocaleString(luxon.DateTime.TIME_24_SIMPLE) : "";
+    }
+
+    requestVisitorHistory() {
+        this.historyService.request(this.props.thread.channel);
     }
 
     async openVisitorProfile() {

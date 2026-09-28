@@ -586,12 +586,6 @@ class DiscussChannel(models.Model):
         ])
         stale_sessions.livechat_end_dt = fields.Datetime.now()
 
-    def execute_command_history(self, **kwargs):
-        self._bus_send(
-            "im_livechat.history_command",
-            {"id": self.id, "partner_id": self.env.user.partner_id.id},
-        )
-
     def _get_visitor_leave_message(self, correspondents=False, cancel=False):
         """ Return the message to post when the visitor leaves the conversation.
 
