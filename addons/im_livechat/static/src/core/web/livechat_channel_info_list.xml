@@ -47,6 +47,56 @@
                     <span t-if="this.props.thread.channel.livechat_lang_id" title="Language" t-out="this.props.thread.channel.livechat_lang_id.name"/>
                 </div>
             </div>
+            <div class="d-flex flex-column bg-inherit gap-1">
+                <div class="d-flex align-items-center justify-content-between pt-3">
+                    <h6 class="mb-0">Visitor browsing history</h6>
+                    <button
+                        t-if="!this.props.thread.channel.livechat_end_dt and ['ready', 'empty'].includes(this.props.thread.channel.livechatVisitorHistoryStatus)"
+                        type="button"
+                        class="btn btn-sm btn-link p-0"
+                        title="Refresh browsing history"
+                        t-on-click="this.requestVisitorHistory"
+                    >
+                        <i class="oi" data-icon="refresh"/>
+                    </button>
+                </div>
+                <div t-if="this.props.thread.channel.livechatVisitorHistoryStatus === 'loading'" class="d-flex align-items-center text-muted small py-1">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"/>
+                    Requesting browsing history...
+                </div>
+                <span t-elif="this.props.thread.channel.livechatVisitorHistoryStatus === 'empty'" class="text-muted small">
+                    No browsing history is available.
+                </span>
+                <div t-elif="this.props.thread.channel.livechatVisitorHistoryStatus === 'error'" class="alert alert-warning py-2 px-3 mb-0 small">
+                    <div>Couldn't retrieve browsing history. The visitor may be offline.</div>
+                    <button type="button" class="btn btn-sm btn-link p-0 mt-1" t-on-click="this.requestVisitorHistory">Retry</button>
+                </div>
+                <span t-elif="this.props.thread.channel.livechatVisitorHistoryStatus === 'unavailable'" class="text-muted small">
+                    Browsing history is unavailable after the conversation has ended.
+                </span>
+                <div t-elif="this.props.thread.channel.livechatVisitorHistoryStatus === 'ready'" class="d-flex flex-column o-gap-0_5">
+                    <a
+                        t-foreach="this.props.thread.channel.livechatVisitorHistory"
+                        t-as="visit"
+                        t-key="visit.url"
+                        t-att-href="visit.url"
+                        t-att-title="visit.url"
+                        target="_blank"
+                        class="btn btn-sm btn-secondary d-flex flex-column align-items-start px-3 py-1 rounded-0"
+                        t-att-class="{
+                            'o-rounded-top-bubble': visit_first,
+                            'o-rounded-bottom-bubble': visit_last,
+                        }"
+                    >
+                        <div class="d-flex align-items-center w-100 gap-2">
+                            <i class="oi opacity-75" data-icon="open_in_new"/>
+                            <span class="fw-bold text-truncate flex-grow-1 text-start" t-out="visit.title || visit.url"/>
+                            <span class="small text-muted flex-shrink-0" t-out="this.formatVisitTime(visit.visit_datetime)"/>
+                        </div>
+                        <span class="text-muted smaller text-truncate w-100 text-start ps-4" t-out="visit.url"/>
+                    </a>
+                </div>
+            </div>
             <t t-name="extra_infos"/>
             <div class="d-flex flex-column bg-inherit gap-1">
                 <h6 class="pt-3 mb-0">Send conversation</h6>
