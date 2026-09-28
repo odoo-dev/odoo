@@ -36,7 +36,7 @@ livechatRoutingMap
     .add("/im_livechat/get_session", "/im_livechat/cors/get_session")
     .add("/im_livechat/init", "/im_livechat/cors/init")
     .add("/im_livechat/feedback", "/im_livechat/cors/feedback")
-    .add("/im_livechat/history", "/im_livechat/cors/history")
+    .add("/im_livechat/session/history/response", "/im_livechat/cors/session/history/response")
     .add("/chatbot/restart", "/chatbot/cors/restart")
     .add("/chatbot/answer/save", "/chatbot/cors/answer/save")
     .add("/chatbot/step/trigger", "/chatbot/cors/step/trigger")
