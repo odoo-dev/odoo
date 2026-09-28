@@ -16,6 +16,13 @@
                 </group>
             </xpath>
             <xpath expr="//label[@for='standard_price']" position="before">
+                <field
+                    name="percent_markup"
+                    class="w-auto o_input_6ch"
+                    widget="percentage"
+                    invisible="reinvoice_policy != 'cost_markup'"
+                    required="reinvoice_policy == 'cost_markup'"
+                />
                 <field name="list_price" invisible="reinvoice_policy != 'sales_price'"/>
             </xpath>
             <xpath expr="//field[@name='supplier_taxes_id']" position="after">
