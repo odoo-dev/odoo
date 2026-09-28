@@ -1,0 +1,5 @@
+"id","name","country_id","auto_apply","sequence","name@es"
+"fiscal_position_cr_estado","Sales to State institutions (CCSS, municipalities)","","False","10","Ventas a instituciones del Estado (CCSS, municipalidades)"
+"fiscal_position_cr_general","Costa Rica - Domestic","base.cr","True","20","Costa Rica - Doméstico"
+"fiscal_position_cr_exterior","Foreign (export)","","True","30","Exterior (exportación)"
+"fiscal_position_cr_zona_franca","Free Trade Zone","","False","40","Zona Franca"
