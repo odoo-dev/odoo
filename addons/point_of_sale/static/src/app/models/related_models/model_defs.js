@@ -37,6 +37,7 @@ export function processModelDefs(modelDefs) {
                 let [inverseField, ...others] = Object.values(relationModel).filter(
                     (f) =>
                         model === f.relation &&
+                        Boolean(field.relation_table) &&
                         f.relation_table === field.relation_table &&
                         field.name !== f.name
                 );

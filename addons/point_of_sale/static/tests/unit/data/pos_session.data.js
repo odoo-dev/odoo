@@ -129,6 +129,11 @@ export class PosSession extends models.ServerModel {
                 relation: field.relation,
                 inverse_name: field.inverse_fname_by_model_name?.[field.relation] || false,
             };
+            if (field.type === "many2many") {
+                // Field definitions don't expose the relation table, use Odoo's default name
+                const tables = [model, field.relation].map((name) => name.replaceAll(".", "_"));
+                response[fieldName].relation_table = `${tables.sort().join("_")}_rel`;
+            }
         }
 
         return response;
