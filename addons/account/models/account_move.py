@@ -3350,13 +3350,14 @@ class AccountMove(models.Model):
         def get_tax_line_tracked_fields(line):
             return ('amount_currency', 'balance', 'analytic_distribution')
 
+        def get_base_line_amount_fields(line):
+            if line.move_id.is_invoice(include_receipts=True):
+                return ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'extra_tax_data']
+            return ['amount_currency']
+
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
-            if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'extra_tax_data']
-            else:
-                extra_fields = ['amount_currency']
-            return list(grouping_key.keys()) + extra_fields
+            return list(grouping_key.keys()) + get_base_line_amount_fields(line)
 
         def field_has_changed(values, record, field):
             return get_value(record, field) != values.get(record, {}).get(field)
@@ -3406,11 +3407,21 @@ class AccountMove(models.Model):
             }
             for move in container['records']
         }
+        # Snapshotted separately from 'tax_lines_values_before': deleting a base line cascades and prunes it
+        # from 'tax_line_origin_ids' immediately, so the live field can't be trusted after the write.
+        tax_line_origin_ids_before = {
+            move: {
+                line: get_value(line, 'tax_line_origin_ids')
+                for line in get_tax_lines(move)
+            }
+            for move in container['records']
+        }
         yield
 
         to_delete = []
         to_create = []
         grouped_update = defaultdict(set)
+        grouped_origin_update = defaultdict(set)
         for move in container['records']:
             if move.state != 'draft':
                 continue
@@ -3418,6 +3429,7 @@ class AccountMove(models.Model):
             tax_lines = get_tax_lines(move)
             base_lines = get_base_lines(move)
             move_tax_lines_values_before = tax_lines_values_before.get(move, {})
+            move_tax_line_origin_ids_before = tax_line_origin_ids_before.get(move, {})
             move_base_lines_values_before = base_lines_values_before.get(move, {})
             if (
                 move.is_invoice(include_receipts=True)
@@ -3529,8 +3541,41 @@ class AccountMove(models.Model):
                     'move_id': move.id,
                 })
 
+            def origin_amounts_changed(base_line_ids):
+                return any(
+                    field_has_changed(move_base_lines_values_before, base_line, fname)
+                    for base_line in self.env['account.move.line'].browse(base_line_ids)
+                    for fname in get_base_line_amount_fields(base_line)
+                )
+
+            def touched_in_this_write(line):
+                # The write already applied by the time we get here (we're in the post-yield half
+                # of the sync), so a mismatch against the pre-write snapshot can only mean the
+                # incoming vals explicitly set this field in this very write - not env.is_protected(),
+                # which has already lapsed by this point.
+                before = move_tax_lines_values_before.get(line, {})
+                return any(
+                    fname in before and get_value(line, fname) != before[fname]
+                    for fname in ('amount_currency', 'balance')
+                )
+
             for tax_line_vals, _grouping_key, to_update in tax_results['tax_lines_to_update']:
                 line = tax_line_vals['record']
+                # 'tax_line_origin_ids' carries recordset ids, not hashable/batchable like the other amounts.
+                origin_ids = tuple(sorted(to_update.pop('tax_line_origin_ids', [Command.set([])])[0][2]))
+                origin_ids_before_cmd = move_tax_line_origin_ids_before.get(line)
+                origin_ids_before = set(origin_ids_before_cmd[0][2]) if origin_ids_before_cmd else set()
+                same_group = bool(origin_ids) and origin_ids_before == set(origin_ids)
+                if (same_group and not origin_amounts_changed(origin_ids)) or touched_in_this_write(line):
+                    # Either dispatch is stable with nothing underneath it moving, or the user's own
+                    # vals just set this line's amount directly in this exact write: either way, don't
+                    # override it with a fresh recompute.
+                    for fname in ('tax_base_amount', 'amount_currency', 'balance'):
+                        to_update.pop(fname, None)
+                # Origin tracking must stay accurate regardless of whether the amount was protected -
+                # it's independent bookkeeping, not a signal of what we chose to do with the amount.
+                if not same_group and set(line.tax_line_origin_ids.ids) != set(origin_ids):
+                    grouped_origin_update[origin_ids].add(line.id)
                 if is_write_needed(line, to_update):
                     grouped_update[line.currency_id.id, frozendict(to_update)].add(line.id)
 
@@ -3538,6 +3583,8 @@ class AccountMove(models.Model):
             # Need to use currency_id as a key to avoid writing with multiple currencies
             for (currency_id, values), lines in grouped_update.items():
                 self.env['account.move.line'].browse(lines).write(dict(values))
+        for origin_ids, lines in grouped_origin_update.items():
+            self.env['account.move.line'].browse(lines).write({'tax_line_origin_ids': [Command.set(list(origin_ids))]})
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:

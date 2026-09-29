@@ -264,6 +264,15 @@ class AccountMoveLine(models.Model):
         readonly=True,
         check_company=True,
         help="Tax distribution line that caused the creation of this move line, if any")
+    tax_line_origin_ids = fields.Many2many(
+        comodel_name='account.move.line',
+        relation='account_move_line_tax_line_origin_rel',
+        column1='tax_line_id',
+        column2='base_line_id',
+        string="Tax Base Lines",
+        copy=False,
+        help="The base lines whose tax computation is aggregated into this tax line, kept in sync by _prepare_tax_lines.",
+    )
     tax_tag_ids = fields.Many2many(
         string="Tags",
         comodel_name='account.account.tag',

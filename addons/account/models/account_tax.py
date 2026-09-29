@@ -3106,7 +3106,8 @@ class AccountTax(models.Model):
                 tax_line                is the tax line to be updated,
                 grouping_key            is the accounting grouping key matching the tax line and used to determine the tax line can be
                                         updated instead of created again,
-                amounts                 is a dictionary containing the new values for 'tax_base_amount', 'amount_currency', 'balance'.
+                amounts                 is a dictionary containing the new values for 'tax_base_amount', 'amount_currency', 'balance',
+                                        'tax_line_origin_ids' (the base lines aggregated into this tax line).
             base_lines_to_update:   A list of tuple <base_line, amounts> where:
                 base_line               is the base line to be updated.
                 amounts                 is a dictionary containing the new values for 'tax_tag_ids', 'amount_currency', 'balance'.
@@ -3115,6 +3116,7 @@ class AccountTax(models.Model):
             'tax_base_amount': 0.0,
             'amount_currency': 0.0,
             'balance': 0.0,
+            'origin_base_lines': self.env['account.move.line'],
         })
 
         base_lines_to_update = []
@@ -3138,6 +3140,9 @@ class AccountTax(models.Model):
                     tax_line['tax_base_amount'] += sign * tax_data['base_amount']
                     tax_line['amount_currency'] += sign * tax_rep_data['tax_amount_currency']
                     tax_line['balance'] += sign * tax_rep_data['tax_amount']
+                    # 'record' can be a plain dict (e.g. a not-yet-created epd line during an onchange).
+                    if getattr(base_line['record'], '_name', None) == 'account.move.line':
+                        tax_line['origin_base_lines'] |= base_line['record']
 
         # Remove tax lines having a zero amount.
         tax_lines_mapping = {
@@ -3151,17 +3156,21 @@ class AccountTax(models.Model):
             )
         }
 
+        def to_vals(values):
+            origin_base_lines = values.pop('origin_base_lines')
+            return {**values, 'tax_line_origin_ids': [Command.set(origin_base_lines.ids)]}
+
         # Compute 'tax_lines_to_update' / 'tax_lines_to_delete' / 'tax_lines_to_add'.
         tax_lines_to_update = []
         tax_lines_to_delete = []
         for tax_line in tax_lines or []:
             grouping_key = frozendict(self._prepare_tax_line_repartition_grouping_key(tax_line))
             if grouping_key in tax_lines_mapping and grouping_key not in tax_lines_to_update:
-                amounts = tax_lines_mapping.pop(grouping_key)
+                amounts = to_vals(tax_lines_mapping.pop(grouping_key))
                 tax_lines_to_update.append((tax_line, grouping_key, amounts))
             else:
                 tax_lines_to_delete.append(tax_line)
-        tax_lines_to_add = [{**grouping_key, **values} for grouping_key, values in tax_lines_mapping.items()]
+        tax_lines_to_add = [{**grouping_key, **to_vals(values)} for grouping_key, values in tax_lines_mapping.items()]
 
         return {
             'tax_lines_to_add': tax_lines_to_add,
