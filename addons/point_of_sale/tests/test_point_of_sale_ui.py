@@ -5,6 +5,8 @@ from odoo.tests import HttpCase, tagged
 from odoo import tools
 
 
+# TODO-PARP: Move tests and remove File
+
 @tagged('post_install', '-at_install')
 class TestUi(HttpCase):
 
