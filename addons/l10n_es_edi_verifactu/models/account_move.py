@@ -225,7 +225,7 @@ class AccountMove(models.Model):
         # EXTENDS 'account'
         super()._compute_show_reset_to_draft_button()
         for move in self:
-            if (move.l10n_es_edi_verifactu_state in ('registered_with_errors', 'accepted', 'cancelled')
+            if (move.l10n_es_edi_verifactu_state in ('registered_with_errors', 'accepted')
                 or move.l10n_es_edi_verifactu_document_ids._filter_waiting()):
                 move.show_reset_to_draft_button = False
 

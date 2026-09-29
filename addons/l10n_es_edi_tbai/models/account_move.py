@@ -115,7 +115,7 @@ class AccountMove(models.Model):
         super()._compute_show_reset_to_draft_button()
 
         for move in self:
-            if move.l10n_es_tbai_chain_index:
+            if move.l10n_es_tbai_chain_index and move.l10n_es_tbai_state != 'cancelled':
                 move.show_reset_to_draft_button = False
 
     def button_draft(self):
