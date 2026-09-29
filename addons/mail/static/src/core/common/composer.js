@@ -7,7 +7,7 @@ import { NavigableList } from "@mail/core/common/navigable_list";
 import { MAIL_PLUGINS, MAIL_SMALL_UI_PLUGINS } from "@mail/core/common/plugin/plugin_sets";
 import { mapSuggestionsToOptions, useSuggestion } from "@mail/core/common/suggestion_hook";
 import { groupAttachments } from "@mail/utils/common/attachments";
-import { propComputed, useSelection, useVisible } from "@mail/utils/common/hooks";
+import { useSelection, useVisible } from "@mail/utils/common/hooks";
 import { generatePartnerMentionElement, trimEmptyBlocksAround } from "@mail/utils/common/format";
 import { getInnerHtml } from "@mail/utils/common/html";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
@@ -131,7 +131,6 @@ export class Composer extends Component {
             allowUpload: t.boolean().optional(true),
             autofocus: t.or([t.number(), t.boolean()]).optional(0),
             className: t.string().optional(""),
-            /** @deprecated use the `this.composer` signal instead */
             composer: t.instanceOf(this.store["Composer"]),
             disabled: t.boolean().optional(),
             dropzoneRef: t.signal(t.instanceOf(HTMLElement)).optional(),
@@ -144,7 +143,7 @@ export class Composer extends Component {
             showFullComposer: t.boolean().optional(true),
             type: t.or([t.selection(["message", "note"]), t.literal(false)]).optional(),
         });
-        this.composer = propComputed("composer", t.instanceOf(this.store["Composer"]));
+        this.composer = computed(() => this.props.composer);
         this.composerActions = useComposerActions(this.composerActionsParams);
         this.EDIT_CLICK_TYPE = EDIT_CLICK_TYPE;
         this.OR_PRESS_SEND_KEYBIND = _t("or press %(send_keybind)s", {
@@ -179,7 +178,7 @@ export class Composer extends Component {
         this.fullComposerBus = new EventBus();
         this.selection = useSelection({
             ref: this.ref,
-            model: this.props.composer.selection,
+            model: this.composer().selection,
             preserveOnClickAwayPredicate: async (ev) => {
                 // Let event be handled by bubbling handlers first.
                 await new Promise(setTimeout);
@@ -246,7 +245,7 @@ export class Composer extends Component {
         useSubEnv({ inComposer: true });
         useLayoutEffect(
             () => {
-                const focus = this.props.autofocus + this.props.composer.autofocus;
+                const focus = this.props.autofocus + this.composer().autofocus;
                 if (focus && this.ref()) {
                     this.selection.restore();
                     this.ref().focus();
@@ -257,18 +256,18 @@ export class Composer extends Component {
                 }
             },
             () => [
-                this.props.autofocus + this.props.composer.autofocus,
+                this.props.autofocus + this.composer().autofocus,
                 this.props.placeholder,
                 untrack(this.ref),
             ]
         );
         useLayoutEffect(
             () => {
-                if (this.props.composer.replyToMessage) {
-                    this.props.composer.autofocus++;
+                if (this.composer().replyToMessage) {
+                    this.composer().autofocus++;
                 }
             },
-            () => [this.props.composer.replyToMessage]
+            () => [this.composer().replyToMessage]
         );
         useLayoutEffect(
             () => {
@@ -286,33 +285,31 @@ export class Composer extends Component {
                 }
                 this.saveContentDebounced();
             },
-            () => [this.props.composer.composerText, untrack(this.ref)]
+            () => [this.composer().composerText, untrack(this.ref)]
         );
         useLayoutEffect(
             () => {
-                if (!this.props.composer.forceCursorMove) {
+                if (!this.composer().forceCursorMove) {
                     return;
                 }
                 this.selection.restore();
-                this.props.composer.forceCursorMove = false;
+                this.composer().forceCursorMove = false;
             },
-            () => [this.props.composer.forceCursorMove]
+            () => [this.composer().forceCursorMove]
         );
         useLayoutEffect(
             () => {
-                if (!this.env.inChatter || !this.props.composer.mentionedPartners.length) {
+                if (!this.env.inChatter || !this.composer().mentionedPartners.length) {
                     return;
                 }
-                const fragment = createDocumentFragmentFromContent(
-                    this.props.composer.composerHtml
-                );
+                const fragment = createDocumentFragmentFromContent(this.composer().composerHtml);
                 const elements = fragment.querySelectorAll(
                     `.o_mail_redirect, .o-discuss-readonly-mention`
                 );
                 let hasChanged = false;
                 for (const el of elements) {
                     const partnerId = Number(el.dataset.oeId);
-                    const partner = this.props.composer.mentionedPartners.find(
+                    const partner = this.composer().mentionedPartners.find(
                         (p) => p.id === partnerId
                     );
                     if (
@@ -330,7 +327,7 @@ export class Composer extends Component {
                     }
                 }
                 if (hasChanged) {
-                    this.props.composer.composerHtml = getInnerHtml(fragment);
+                    this.composer().composerHtml = getInnerHtml(fragment);
                 }
             },
             () => [this.props.type]
@@ -345,39 +342,39 @@ export class Composer extends Component {
                     return;
                 }
                 this.fullComposerRecoveryPopover.open(fullComposerButtonEl, {
-                    composer: this.props.composer,
+                    composer: this.composer(),
                     onClickFullRecover: () => {
                         this.onClickFullComposer();
-                        this.props.composer.restoredFromFullComposer = false;
+                        this.composer().restoredFromFullComposer = false;
                     },
                     onClickTextRecover: () => {
-                        this.props.composer.restoredFromFullComposer = false;
+                        this.composer().restoredFromFullComposer = false;
                     },
                 });
             },
             () => [
                 this.state.isFullComposerOpen,
-                this.props.composer.restoredFromFullComposer,
-                this.props.composer.message
+                this.composer().restoredFromFullComposer,
+                this.composer().message
                     ? untrack(() => this.moreAction()?.actionRef())
                     : untrack(this.rootRef)?.querySelector("button[name='open-full-composer']"),
             ]
         );
         onMounted(() => {
             this.ref()?.scrollTo({ top: 0, behavior: "instant" });
-            if (!this.props.composer.composerText) {
+            if (!this.composer().composerText) {
                 this.restoreContent();
             }
         });
         onWillUnmount(() => {
-            this.props.composer.isFocused = false;
+            this.composer().isFocused = false;
         });
         onWillDestroy(
             immediateEffect(() => {
                 if (this.status === 2 /* DESTROYED */) {
                     return;
                 }
-                const composerHtml = this.props.composer.composerHtml;
+                const composerHtml = this.composer().composerHtml;
                 if (this.updateFromEditor) {
                     return;
                 }
@@ -411,7 +408,7 @@ export class Composer extends Component {
     }
 
     get composerActionsParams() {
-        return { composer: () => this.props.composer };
+        return { composer: this.composer };
     }
 
     quickActionsList = computed(() => this.composerActions.partition.quick);
@@ -463,7 +460,7 @@ export class Composer extends Component {
 
     get wysiwygConfig() {
         return {
-            content: this.props.composer.composerHtml,
+            content: this.composer().composerHtml,
             placeholder: this.placeholder,
             baseContainers: ["DIV", "P"],
             Plugins: this.ui.isSmall ? MAIL_SMALL_UI_PLUGINS : MAIL_PLUGINS,
@@ -488,10 +485,10 @@ export class Composer extends Component {
     }
 
     onClickCancelOrSaveEditText(ev) {
-        if (this.props.composer.message && ev.target.dataset?.type === EDIT_CLICK_TYPE.CANCEL) {
+        if (this.composer().message && ev.target.dataset?.type === EDIT_CLICK_TYPE.CANCEL) {
             this.props.onDiscardCallback(ev);
         }
-        if (this.props.composer.message && ev.target.dataset?.type === EDIT_CLICK_TYPE.SAVE) {
+        if (this.composer().message && ev.target.dataset?.type === EDIT_CLICK_TYPE.SAVE) {
             this.editMessage(ev);
         }
     }
@@ -531,7 +528,7 @@ export class Composer extends Component {
     }
 
     get SEND_TEXT() {
-        if (this.props.composer.message) {
+        if (this.composer().message) {
             return _t("Save editing");
         }
         return this.props.type === "note" ? _t("Log") : _t("Send");
@@ -551,7 +548,7 @@ export class Composer extends Component {
     }
 
     get thread() {
-        return this.props.composer.targetThread;
+        return this.composer().targetThread;
     }
 
     get allowUpload() {
@@ -559,7 +556,7 @@ export class Composer extends Component {
     }
 
     get message() {
-        return this.props.composer.message ?? null;
+        return this.composer().message ?? null;
     }
 
     get extraData() {
@@ -567,14 +564,14 @@ export class Composer extends Component {
     }
 
     get attachmentGroups() {
-        return groupAttachments(this.props.composer.attachments);
+        return groupAttachments(this.composer().attachments);
     }
 
     get isSendButtonDisabled() {
-        const attachments = this.props.composer.attachments;
+        const attachments = this.composer().attachments;
         return (
             !this.state.active ||
-            (isHtmlEmpty(this.props.composer.composerHtml) && attachments.length === 0) ||
+            (isHtmlEmpty(this.composer().composerHtml) && attachments.length === 0) ||
             attachments.some(({ uploading }) => Boolean(uploading))
         );
     }
@@ -639,8 +636,8 @@ export class Composer extends Component {
     }
 
     onInput(ev) {
-        if (!this.props.composer.isDirty) {
-            this.props.composer.isDirty = true;
+        if (!this.composer().isDirty) {
+            this.composer().isDirty = true;
         }
     }
 
@@ -668,10 +665,10 @@ export class Composer extends Component {
             case "ArrowUp":
                 if (
                     !this.env.inChatter &&
-                    this.props.composer.composerText === "" &&
-                    this.props.composer.thread
+                    this.composer().composerText === "" &&
+                    this.composer().thread
                 ) {
-                    const messageToEdit = this.props.composer.thread.lastEditableMessageOfSelf;
+                    const messageToEdit = this.composer().thread.lastEditableMessageOfSelf;
                     if (messageToEdit) {
                         messageToEdit.enterEditMode();
                     }
@@ -695,7 +692,7 @@ export class Composer extends Component {
                     return;
                 }
                 ev.preventDefault(); // to prevent useless return
-                if (this.props.composer.message) {
+                if (this.composer().message) {
                     this.editMessage();
                 } else {
                     this.sendMessage();
@@ -720,8 +717,8 @@ export class Composer extends Component {
     }
 
     async onClickFullComposerGetAction() {
-        const message = this.props.composer.message;
-        this.props.composer.restoredFromFullComposer = false;
+        const message = this.composer().message;
+        this.composer().restoredFromFullComposer = false;
         const isEditing = Boolean(message);
         const allRecipients = isEditing
             ? message.partner_ids
@@ -751,17 +748,17 @@ export class Composer extends Component {
         }
         const attachmentIds = isEditing
             ? message.attachment_ids.map((a) => a.id)
-            : this.props.composer.attachments.map((attachment) => attachment.id);
-        let default_body = this.props.composer.composerHtml;
+            : this.composer().attachments.map((attachment) => attachment.id);
+        let default_body = this.composer().composerHtml;
         if (!isEditing) {
             if (isHtmlEmpty(default_body)) {
                 // Reset signature when recovering an empty body.
-                this.props.composer.emailAddSignature = true;
+                this.composer().emailAddSignature = true;
             }
             const signature = this.thread.effectiveSelf.main_user_id?.getSignatureBlock();
             default_body = this.formatDefaultBodyForFullComposer(
                 default_body,
-                this.props.composer.emailAddSignature ? signature : ""
+                this.composer().emailAddSignature ? signature : ""
             );
         }
         const context = {
@@ -789,8 +786,7 @@ export class Composer extends Component {
                     ? "mail.mt_note"
                     : "mail.mt_comment",
             body_contains_signature_only:
-                !this.props.composer.composerText ||
-                this.props.composer.composerText.trim().length === 0,
+                !this.composer().composerText || this.composer().composerText.trim().length === 0,
             default_message_id: isEditing ? message.id : undefined,
             // Changed in 18.2+: finally get rid of autofollow, following should be done manually
             sync_attachments_to_thread_composer: true,
@@ -835,7 +831,7 @@ export class Composer extends Component {
                         message.exitEditMode();
                     }
                 }
-                this.props.composer.replyToMessage = undefined;
+                this.composer().replyToMessage = undefined;
                 this.onCloseFullComposerCallback(isDiscard);
                 this.state.isFullComposerOpen = false;
                 // Use another event bus so that no message is sent to the
@@ -868,7 +864,7 @@ export class Composer extends Component {
     }
 
     clear() {
-        this.props.composer.clear();
+        this.composer().clear();
         this.deleteSavedContent();
     }
 
@@ -878,7 +874,7 @@ export class Composer extends Component {
     }
 
     async processMessage(cb) {
-        if (this.props.composer.attachments.some(({ uploading }) => uploading)) {
+        if (this.composer().attachments.some(({ uploading }) => uploading)) {
             this.notification.add(_t("Please wait while the file is uploading."), {
                 type: "warning",
             });
@@ -887,7 +883,7 @@ export class Composer extends Component {
                 return;
             }
             this.state.active = false;
-            await cb(trimEmptyBlocksAround(this.props.composer.composerHtml));
+            await cb(trimEmptyBlocksAround(this.composer().composerHtml));
             if (this.props.onPostCallback) {
                 this.props.onPostCallback();
             }
@@ -899,22 +895,22 @@ export class Composer extends Component {
 
     get canProcessMessage() {
         return (
-            !isHtmlEmpty(this.props.composer.composerHtml) ||
-            this.props.composer.attachments.length > 0 ||
+            !isHtmlEmpty(this.composer().composerHtml) ||
+            this.composer().attachments.length > 0 ||
             (this.message && this.message.attachment_ids.length > 0)
         );
     }
 
     async sendMessage() {
         this.composerActions.activeAction?.actionPanelClose?.();
-        if (this.props.composer.message) {
+        if (this.composer().message) {
             this.editMessage();
             return;
         }
         if (this.props.type !== "note") {
             const allRecipients = [
-                ...this.props.composer.thread.suggestedRecipients,
-                ...this.props.composer.thread.additionalRecipients,
+                ...this.composer().thread.suggestedRecipients,
+                ...this.composer().thread.additionalRecipients,
             ];
             const invalidRecipients = allRecipients.filter(
                 (recipient) => !isEmail(recipient.email)
@@ -931,14 +927,14 @@ export class Composer extends Component {
             }
         }
         const { specialMentions, roles } = this.store.getMentionsFromText(
-            this.props.composer.composerHtml,
+            this.composer().composerHtml,
             {
-                mentionedRoles: this.props.composer.mentionedRoles,
+                mentionedRoles: this.composer().mentionedRoles,
             }
         );
         const hasEveryoneBigMention =
             specialMentions.includes("everyone") &&
-            this.props.composer.thread.channel?.member_count > MENTION_AMOUNT_WARNING;
+            this.composer().thread.channel?.member_count > MENTION_AMOUNT_WARNING;
         const rolesMentionAmount = roles.reduce((sum, role) => sum + (role.user_ids_count || 0), 0);
         if (hasEveryoneBigMention || rolesMentionAmount > MENTION_AMOUNT_WARNING) {
             const confirmDef = Promise.withResolvers();
@@ -947,7 +943,7 @@ export class Composer extends Component {
                     "You're about to notify %(amount)s people with %(mention)s. Do you want to continue?",
                     {
                         amount: hasEveryoneBigMention
-                            ? this.props.composer.thread.channel.member_count
+                            ? this.composer().thread.channel.member_count
                             : rolesMentionAmount,
                         mention: hasEveryoneBigMention
                             ? markup`<a class="o-discuss-mention pe-none">@everyone</a>`
@@ -974,13 +970,13 @@ export class Composer extends Component {
 
     get postData() {
         return {
-            attachments: [...(this.props.composer.attachments || [])],
-            emailAddSignature: this.props.composer.emailAddSignature,
+            attachments: [...(this.composer().attachments || [])],
+            emailAddSignature: this.composer().emailAddSignature,
             isNote: this.props.type === "note",
-            mentionedPartners: [...(this.props.composer.mentionedPartners || [])],
-            mentionedRoles: [...(this.props.composer.mentionedRoles || [])],
-            cannedResponseIds: this.props.composer.cannedResponses.map((c) => c.id),
-            parentId: this.props.composer.replyToMessage?.id,
+            mentionedPartners: [...(this.composer().mentionedPartners || [])],
+            mentionedRoles: [...(this.composer().mentionedRoles || [])],
+            cannedResponseIds: this.composer().cannedResponses.map((c) => c.id),
+            parentId: this.composer().replyToMessage?.id,
         };
     }
 
@@ -1009,22 +1005,22 @@ export class Composer extends Component {
         }
         this.suggestion?.clearRawMentions();
         this.suggestion?.clearCannedResponses();
-        this.props.composer.replyToMessage = undefined;
-        this.props.composer.emailAddSignature = true;
-        this.props.composer.thread.additionalRecipients = [];
+        this.composer().replyToMessage = undefined;
+        this.composer().emailAddSignature = true;
+        this.composer().thread.additionalRecipients = [];
         return message;
     }
 
     async editMessage() {
         if (!this.askDeleteFromEdit) {
             await this.processMessage(async (value) =>
-                this.props.composer.message.edit(value, this.props.composer.attachments, {
-                    mentionedPartners: this.props.composer.mentionedPartners,
-                    mentionedRoles: this.props.composer.mentionedRoles,
+                this.composer().message.edit(value, this.composer().attachments, {
+                    mentionedPartners: this.composer().mentionedPartners,
+                    mentionedRoles: this.composer().mentionedRoles,
                 })
             );
         } else {
-            this.props.composer.message.showDeleteConfirm(this, this.rootRef);
+            this.composer().message.showDeleteConfirm(this, this.rootRef);
         }
         this.suggestion?.clearRawMentions();
     }
@@ -1036,33 +1032,33 @@ export class Composer extends Component {
     onClickInsertCannedResponse(ev) {
         markEventHandled(ev, "composer.clickInsertCannedResponse");
         if (this.editor) {
-            if (!isHtmlEmpty(this.props.composer.composerHtml)) {
+            if (!isHtmlEmpty(this.composer().composerHtml)) {
                 this.editor.shared.dom.insert(" ");
             }
             this.editor.shared.dom.insert("::");
             this.editor.shared.history.commit();
         } else {
-            const composerText = this.props.composer.composerText;
-            const firstPart = composerText.slice(0, this.props.composer.selection.start);
+            const composerText = this.composer().composerText;
+            const firstPart = composerText.slice(0, this.composer().selection.start);
             const secondPart = composerText.slice(
-                this.props.composer.selection.end,
+                this.composer().selection.end,
                 composerText.length
             );
             const toInsertPart = firstPart.length === 0 || firstPart.at(-1) === " " ? "::" : " ::";
-            this.props.composer.composerText = firstPart + toInsertPart + secondPart;
+            this.composer().composerText = firstPart + toInsertPart + secondPart;
             this.selection.moveCursor((firstPart + toInsertPart).length);
         }
         if (!this.ui.isSmall || !this.env.inChatter) {
-            this.props.composer.autofocus++;
+            this.composer().autofocus++;
         }
     }
 
     onChangeWysiwygContent() {
         this.updateFromEditor = true;
         // markup: editor content is trusted
-        this.props.composer.composerHtml = markup(this.editor.getContent());
-        if (!this.props.composer.isDirty) {
-            this.props.composer.isDirty = true;
+        this.composer().composerHtml = markup(this.editor.getContent());
+        if (!this.composer().isDirty) {
+            this.composer().isDirty = true;
         }
         this.updateFromEditor = false;
     }
@@ -1076,27 +1072,27 @@ export class Composer extends Component {
             this.editor.shared.dom.insert(str);
             this.editor.shared.history.commit();
         } else {
-            const composerText = this.props.composer.composerText;
-            const firstPart = composerText.slice(0, this.props.composer.selection.start);
+            const composerText = this.composer().composerText;
+            const firstPart = composerText.slice(0, this.composer().selection.start);
             const secondPart = composerText.slice(
-                this.props.composer.selection.end,
+                this.composer().selection.end,
                 composerText.length
             );
-            this.props.composer.composerText = firstPart + str + secondPart;
+            this.composer().composerText = firstPart + str + secondPart;
             this.selection.moveCursor((firstPart + str).length);
         }
         if (this.ui.isSmall && !this.env.inChatter) {
             return false;
         } else {
-            this.props.composer.autofocus++;
+            this.composer().autofocus++;
         }
     }
 
     onFocusin(ev) {
         ev.stopPropagation();
-        this.props.composer.isFocused = true;
-        if (this.props.composer.thread?.shouldMarkAsReadOnFocus) {
-            this.props.composer.thread.markAsRead();
+        this.composer().isFocused = true;
+        if (this.composer().thread?.shouldMarkAsReadOnFocus) {
+            this.composer().thread.markAsRead();
         }
     }
 
@@ -1107,13 +1103,13 @@ export class Composer extends Component {
             // Edit or Save most likely clicked: early return as to not re-render (which prevents click)
             return;
         }
-        this.props.composer.isFocused = false;
+        this.composer().isFocused = false;
     }
 
     saveContent() {
         if (
             !this.state.active ||
-            (this.props.composer.restoredFromFullComposer && !this.state.isFullComposerOpen)
+            (this.composer().restoredFromFullComposer && !this.state.isFullComposerOpen)
         ) {
             return;
         }
@@ -1121,13 +1117,13 @@ export class Composer extends Component {
             composerHtml,
             emailAddSignature,
             replyToMessageId,
-            fromFullComposer = this.props.composer.restoredFromFullComposer,
+            fromFullComposer = this.composer().restoredFromFullComposer,
         }) => {
             if (isHtmlEmpty(composerHtml)) {
                 await this.deleteSavedContent();
             } else {
                 const db = new IndexedDB("mail");
-                await db.write("composer", this.props.composer.localId, {
+                await db.write("composer", this.composer().localId, {
                     emailAddSignature,
                     replyToMessageId,
                     composerHtml: isMarkup(composerHtml) ? ["markup", composerHtml] : composerHtml,
@@ -1142,9 +1138,9 @@ export class Composer extends Component {
             });
         } else {
             saveContentToLocalStorage({
-                composerHtml: this.props.composer.composerHtml,
+                composerHtml: this.composer().composerHtml,
                 emailAddSignature: true,
-                replyToMessageId: this.props.composer.replyToMessage?.id,
+                replyToMessageId: this.composer().replyToMessage?.id,
                 fromFullComposer: false,
             });
         }
@@ -1152,25 +1148,25 @@ export class Composer extends Component {
 
     async deleteSavedContent() {
         const db = new IndexedDB("mail");
-        await db.delete("composer", this.props.composer.localId);
+        await db.delete("composer", this.composer().localId);
     }
 
     async restoreContent() {
         const db = new IndexedDB("mail");
-        const config = await db.read("composer", this.props.composer.localId);
+        const config = await db.read("composer", this.composer().localId);
         if (!config) {
             await this.deleteSavedContent();
             return;
         }
         if (!isHtmlEmpty(config.composerHtml)) {
-            if (this.props.composer.thread && !this.props.composer.thread.channel) {
-                this.props.composer.restoredFromFullComposer = config.fromFullComposer;
+            if (this.composer().thread && !this.composer().thread.channel) {
+                this.composer().restoredFromFullComposer = config.fromFullComposer;
             }
-            this.props.composer.emailAddSignature = config.emailAddSignature;
-            this.props.composer.composerHtml = config.composerHtml;
+            this.composer().emailAddSignature = config.emailAddSignature;
+            this.composer().composerHtml = config.composerHtml;
         }
         if (Number.isInteger(config.replyToMessageId)) {
-            this.props.composer.replyToMessage = this.store["mail.message"].insert(
+            this.composer().replyToMessage = this.store["mail.message"].insert(
                 config.replyToMessageId
             );
         }
