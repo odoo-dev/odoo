@@ -1887,9 +1887,9 @@ test(`simple editable rendering`, async () => {
     expect(`.o_list_button_discard`).toHaveCount(0);
 
     await contains(`.o_field_cell`).click();
-    expect(`.o_list_button_add`).toHaveCount(0);
-    expect(`.o_list_button_save`).toHaveCount(1);
-    expect(`.o_list_button_discard`).toHaveCount(1);
+    expect(`.o_list_button_add`).toHaveCount(1);
+    expect(`.o_list_status_indicator .o_list_button_save`).toHaveCount(1);
+    expect(`.o_list_status_indicator .o_list_button_discard`).toHaveCount(1);
     expect(`.o_list_record_selector input:enabled`).toHaveCount(0);
 
     await contains(`.o_list_button_save`).click();
@@ -2075,7 +2075,7 @@ test("multi_edit: edit a required field with invalid value", async () => {
 });
 
 test.tags("desktop");
-test(`multi_edit: clicking on a readonly field switches the focus to the next editable field`, async () => {
+test(`multi_edit: clicking on a readonly field doesn't switch the record in edition`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
@@ -2086,12 +2086,23 @@ test(`multi_edit: clicking on a readonly field switches the focus to the next ed
             </list>
         `,
     });
-    await contains(`.o_list_record_selector input`).click();
-    await contains(`.o_data_row:eq(0) [name=int_field]`).click();
+    await contains(`.o_data_row:eq(0) .o_list_record_selector input`).click();
+    await contains(`.o_data_row:eq(1) .o_list_record_selector input`).click();
+    await contains(`.o_data_row:eq(0) td[name=int_field]`).click();
+    expect(`.o_selected_row`).toHaveCount(0);
+    expect(`.o_data_row_selected`).toHaveCount(2);
+
+    await contains(`.o_data_row:eq(0) td[name=foo]`).click();
+    expect(`.o_data_row:eq(0)`).toHaveClass("o_selected_row");
     expect(`.o_field_widget[name=foo] input`).toBeFocused();
 
-    await contains(`.o_data_row:eq(0) [name=int_field]`).click();
-    expect(`.o_field_widget[name=foo] input`).toBeFocused();
+    await contains(`.o_data_row:eq(0) td[name=int_field]`).click();
+    expect(`.o_data_row:eq(0)`).toHaveClass("o_selected_row");
+
+    // clicking on a readonly field of another selected record leaves the edition
+    await contains(`.o_data_row:eq(1) td[name=int_field]`).click();
+    expect(`.o_selected_row`).toHaveCount(0);
+    expect(`.o_data_row_selected`).toHaveCount(2);
 });
 
 test.tags("desktop");
@@ -2264,14 +2275,7 @@ test(`discard a new record in editable="top" list with less than 4 records`, asy
     expect(`.o_data_row`).toHaveCount(4);
     expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row");
 
-    if (isSmall()) {
-        await contains(".o_control_panel_main_buttons button.o-control-panel-adaptive-dropdown").click();
-        expect(`.o_list_button_discard`).toHaveCount(0);
-        expect(`.o_control_panel .o_list_button_add`).toHaveCount(1);
-    } else {
-        await contains(`.o_list_button_discard`).click();
-    }
-
+    await contains(`.o_list_button_discard`).click();
     expect(`.o_data_row`).toHaveCount(3);
     expect(`tbody tr`).toHaveCount(4);
     expect(`tbody tr:eq(0)`).toHaveClass("o_data_row");
@@ -4150,10 +4154,8 @@ test(`editable list view: check that controlpanel buttons are updating when grou
     await mountWithCleanup(WebClient);
     await getService("action").doAction(11);
     await contains(`.o_list_button_add`).click();
-    expect(`.o_list_button_add`).toHaveCount(0);
-    expect(`.o_list_button_save`).toHaveCount(1, {
-        message: "Should have 2 save button (small and xl screens)",
-    });
+    expect(`.o_list_button_add`).toHaveCount(1);
+    expect(`.o_list_button_save`).toHaveCount(1);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("candle");
@@ -9506,7 +9508,7 @@ test(`edition: create new line, then discard`, async () => {
     expect(`.o_list_record_selector input:enabled`).toHaveCount(5);
 
     await contains(`.o_list_button_add`).click();
-    expect(`.o_list_button_add`).toHaveCount(0);
+    expect(`.o_list_button_add`).toHaveCount(1);
     expect(`.o_list_button_discard`).toHaveCount(1);
     expect(`.o_list_record_selector input:enabled`).toHaveCount(0);
 
@@ -22397,24 +22399,104 @@ test("should not crash in lists with groupby node and sample data", async () => 
 });
 
 test.tags("desktop");
-test("mass edit discoverability: pencil icon displays on selected row and enters edit mode", async () => {
+test("multi_edit: cursor on the cells of selected records", async () => {
     await mountView({
         resModel: "foo",
         type: "list",
         arch: `<list multi_edit="1">
             <field name="foo"/>
-            <field name="int_field"/>
-            <field name="reference" optional="hide"/>
+            <field name="int_field" readonly="1"/>
+            <field name="bar"/>
         </list>`,
     });
-    expect(".o_mass_edit_btn").toHaveCount(0);
+    expect(".o_data_row:eq(0) td[name=foo]").toHaveClass("cursor-pointer");
 
-    await clickRecordSelector(1);
-    expect(".o_data_row:eq(0) .o_mass_edit_btn").toHaveCount(1);
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    expect(".o_data_row:eq(0) td[name=foo]").toHaveClass("cursor-text");
+    expect(".o_data_row:eq(0) td[name=foo]").not.toHaveClass("cursor-pointer");
+    expect(".o_data_row:eq(0) td[name=foo]").toHaveStyle({ cursor: "text" });
+    expect(".o_data_row:eq(0) td[name=int_field]").toHaveClass("user-select-text");
+    expect(".o_data_row:eq(0) td[name=int_field]").not.toHaveClass("cursor-text");
+    expect(".o_data_row:eq(0) td[name=int_field]").not.toHaveClass("cursor-pointer");
+    expect(".o_data_row:eq(0) td[name=int_field]").toHaveStyle({ userSelect: "text" });
+    expect(".o_data_row:eq(0) td[name=bar]").toHaveClass("cursor-pointer");
+    expect(".o_data_row:eq(1) td[name=foo]").toHaveClass("cursor-pointer");
 
-    await click(`.o_data_row:eq(0) .o_mass_edit_btn`);
-    await animationFrame();
-    expect(".o_selected_row .o_field_widget[name='foo'] input").toBeFocused();
+    await contains(".o_data_row:eq(0) td[name=foo]").click();
+    expect(".o_data_row:eq(0)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(0) td[name=foo]").toHaveClass("cursor-text");
+    expect(".o_data_row:eq(0) td[name=int_field]").toHaveClass(["user-select-text", "text-muted"]);
+});
+
+test.tags("desktop");
+test("column tag: multi_edit: clicking on a readonly sub-field doesn't switch the record in edition", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list multi_edit="1">
+                <column>
+                    <field name="int_field" readonly="1"/>
+                    <field name="foo"/>
+                </column>
+            </list>
+        `,
+    });
+    await contains(".o_data_row:eq(0) .o_list_record_selector input").click();
+    expect(".o_data_row:eq(0) [data-field-name=int_field]").toHaveClass("user-select-text");
+    expect(".o_data_row:eq(0) [data-field-name=foo]").toHaveClass("cursor-text");
+
+    await contains(".o_data_row:eq(0) [data-field-name=int_field]").click();
+    expect(".o_selected_row").toHaveCount(0);
+
+    await contains(".o_data_row:eq(0) [data-field-name=foo]").click();
+    expect(".o_data_row:eq(0)").toHaveClass("o_selected_row");
+    expect(".o_selected_row [data-field-name=foo] input").toBeFocused();
+});
+
+test.tags("desktop");
+test("editable list: click on New while a record is in edition", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="top"><field name="foo"/></list>`,
+    });
+    await contains(".o_data_row:eq(0) td[name=foo]").click();
+    await contains(".o_selected_row [name=foo] input").edit("new value", { confirm: false });
+    expect(".o_list_button_add").toHaveCount(1);
+
+    await contains(".o_list_button_add").click();
+    expect(".o_data_row").toHaveCount(5);
+    expect(".o_data_row:eq(0)").toHaveClass("o_selected_row");
+    expect(".o_data_row:eq(1) td[name=foo]").toHaveText("new value");
+});
+
+test.tags("desktop");
+test("editable list: dropdown carets of the record in edition are displayed on hover", async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="top"><field name="foo"/><field name="m2o"/></list>`,
+    });
+    await contains(".o_data_row:eq(0) td[name=foo]").click();
+    expect(".o_selected_row [name=m2o] .o_dropdown_button").toHaveCount(1);
+    expect(".o_selected_row [name=m2o] .o_dropdown_button").not.toBeVisible();
+
+    await contains(".o_selected_row [name=m2o] input").click();
+    expect(".o_selected_row [name=m2o] .o_dropdown_button").toBeVisible();
+});
+
+test.tags("desktop");
+test("editable list in a dialog: save and discard buttons are in the footer", async () => {
+    await mountViewInDialog({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="top"><field name="foo"/></list>`,
+    });
+    await contains(".o_data_row:eq(0) td[name=foo]").click();
+    expect(".o_list_status_indicator").toHaveCount(0);
+    expect(".modal-footer .o_list_button_save").toHaveCount(1);
+    expect(".modal-footer .o_list_button_discard").toHaveCount(1);
 });
 
 test("Empty Groups: filter out empty groups unless field has group_expand", async () => {

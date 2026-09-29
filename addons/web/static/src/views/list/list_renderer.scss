@@ -468,23 +468,6 @@
             }
         }
 
-        .o_data_row_selected {
-            --mass-edit-btn-display: none;
-
-            .o_mass_edit_btn {
-                display: var(--mass-edit-btn-display);
-
-            }
-
-            &:hover {
-                --mass-edit-btn-display: block;
-                td:last-of-type {
-                    position: sticky;
-                    right: 0;
-                }
-            }
-        }
-
         .o_field_x2many_list_row_add,
         .o_group_field_row_add {
             a:focus,
@@ -500,6 +483,14 @@
                 padding: 0;
                 vertical-align: baseline;
             }
+        }
+    }
+
+    // Like in form views (in which x2many lists already follow the form rules), the
+    // dropdown carets of the row in edition are only displayed on hover
+    body:not(.o_touch_device) .o_list_view & {
+        .o_data_row.o_selected_row > .o_data_cell:not(:hover):not(:focus-within) .o_dropdown_button {
+            visibility: hidden;
         }
     }
 
@@ -632,4 +623,9 @@
     > * {
         margin: auto 0;
     }
+}
+
+// Same alignment as the form status indicator, when there is no breadcrumb displayed
+.o_breadcrumb:not(:has(.breadcrumb)) + .o_list_status_indicator {
+    align-self: center !important;
 }

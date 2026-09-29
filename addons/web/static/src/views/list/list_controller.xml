@@ -23,6 +23,10 @@
                     </t>
                 </t>
 
+                <t t-set-slot="control-panel-status-indicator">
+                    <t t-call="web.ListView.StatusIndicator"/>
+                </t>
+
                 <t t-set-slot="control-panel-actions">
                     <SearchBar t-if="!this.offlinePlugin.isOffline()" toggler="this.searchBarToggler" autofocus="this.firstLoad"/>
                     <OfflineSearchBar t-else="" toggler="this.searchBarToggler" autofocus="this.firstLoad"/>
@@ -103,15 +107,41 @@
     </t>
 
     <t t-name="web.ListView.Buttons">
-        <button t-if="!this.env.inDialog and !this.editedRecord and this.activeActions.create" type="button" class="btn btn-primary o_list_button_add" t-att-data-available-offline="this.isNewButtonAvailableOffline" data-hotkey="c" t-on-click="this.onClickCreate" data-bounce-button="">
+        <button t-if="!this.env.inDialog and this.activeActions.create" type="button" class="btn btn-primary o_list_button_add" t-att-data-available-offline="this.isNewButtonAvailableOffline" data-hotkey="c" t-on-click="this.onClickCreate" data-bounce-button="">
             New
         </button>
-        <button t-if="this.editedRecord" type="button" class="btn btn-primary o_list_button_save" data-hotkey="s" t-on-click.stop="this.onClickSave">
+        <button t-if="this.env.inDialog and this.editedRecord" type="button" class="btn btn-primary o_list_button_save" data-hotkey="s" t-on-click.stop="this.onClickSave">
             Save
         </button>
-        <button t-if="this.editedRecord" type="button" class="btn btn-secondary o_list_button_discard" data-hotkey="j" t-on-click.stop="this.onClickDiscard" t-on-mousedown="this.onMouseDownDiscard">
+        <button t-if="this.env.inDialog and this.editedRecord" type="button" class="btn btn-secondary o_list_button_discard" data-hotkey="j" t-on-click.stop="this.onClickDiscard" t-on-mousedown="this.onMouseDownDiscard">
             Discard
         </button>
+    </t>
+
+    <t t-name="web.ListView.StatusIndicator">
+        <div t-if="!this.env.inDialog and this.editedRecord" class="o_list_status_indicator d-md-flex align-items-center align-self-md-end me-auto">
+            <div class="o_list_status_indicator_buttons gap-1 d-flex border-start ps-1 ps-xl-2">
+                <button
+                    type="button"
+                    class="o_list_button_save btn btn-light p-1"
+                    data-hotkey="s"
+                    t-on-click.stop="this.onClickSave"
+                    data-tooltip="Save manually"
+                    aria-label="Save manually">
+                    <i class="oi oi-fw" data-icon="cloud_upload"/>
+                </button>
+                <button
+                    type="button"
+                    class="o_list_button_discard btn btn-light p-1"
+                    data-hotkey="j"
+                    t-on-click.stop="this.onClickDiscard"
+                    t-on-mousedown="this.onMouseDownDiscard"
+                    data-tooltip="Discard all changes"
+                    aria-label="Discard all changes">
+                    <i class="oi oi-fw" data-icon="close"/>
+                </button>
+            </div>
+        </div>
     </t>
 
 </templates>

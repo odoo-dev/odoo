@@ -330,7 +330,7 @@
                 <t t-if="column.type === 'field'">
                     <t t-set="isInvisible" t-value="this.evalInvisible(column.invisible, record) or !(column.name in record.data)"/>
                     <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
-                        class="o_data_cell cursor-pointer"
+                        class="o_data_cell"
                         t-att-class="this.getCellClass(column, record)"
                         t-att-name="column.name"
                         t-att-data-column-id="column.id"
@@ -432,18 +432,7 @@
                         />
                     </td>
                 </t>
-                <td t-else="" tabindex="-1" class="w-print-0 p-print-0">
-                   <button
-                        t-on-click.prevent.stop="() => this.props.list.enterEditMode(record)"
-                        t-if="this.props.list.model.multiEdit and record.selected and !this.uiService.isSmall"
-                        class="o_mass_edit_btn btn btn-link btn-dark p-0 w-100 text-start"
-                        name="edit"
-                        aria-label="Click to edit the row"
-                        title="Click to edit the row"
-                    >
-                        <i class="oi oi-fw" role="img" data-icon="pencil" />
-                    </button>
-                </td>
+                <td t-else="" tabindex="-1" class="w-print-0 p-print-0"/>
             </t>
 
         </tr>

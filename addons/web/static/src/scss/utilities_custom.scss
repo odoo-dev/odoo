@@ -145,6 +145,12 @@ $utilities: map-merge(
                 values: $order-array,
             ),
         ),
+        "user-select": map-merge(
+            map-get($utilities, "user-select"),
+            (
+                values: join(map-get(map-get($utilities, "user-select"), "values"), text),
+            ),
+        ),
     ),
 );
 
@@ -154,7 +160,7 @@ $utilities: map-merge(
     (
         "cursor": (
             property: cursor,
-            values: default pointer,
+            values: default pointer text,
         ),
         "bg-opacity": (
             css-var: true,

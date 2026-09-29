@@ -1191,17 +1191,47 @@ export class ListRenderer extends Component {
             if (this.canUseFormatter(column, record)) {
                 classNames.push(...this.getDecorationClassNames(column, record));
             }
+            const isMultiEditable = this.isMultiEditable(record);
             if (
                 record.isInEdition &&
                 this.editedRecord() &&
                 this.isFieldReadonly(column, this.editedRecord())
             ) {
                 classNames.push("text-muted");
-            } else if (this.isRecordAvailable(record)) {
+            } else if (this.isRecordAvailable(record) && !isMultiEditable) {
                 classNames.push("cursor-pointer");
+            }
+            if (isMultiEditable) {
+                classNames.push(this.getMultiEditFieldClass(column, record));
             }
         }
         return classNames.join(" ");
+    }
+
+    /**
+     * In multi-edition, a click on a selected record switches it in edition
+     * (except on small screens, where it only toggles its selection).
+     *
+     * @param {RelationalRecord} record
+     */
+    isMultiEditable(record) {
+        return record.selected && record.model.multiEdit && !this.uiService.isSmall;
+    }
+
+    /**
+     * Classname to apply on the element displaying a field of a multi-editable
+     * record: a click on it switches the record in edition, unless the field is
+     * readonly, in which case its content can be selected instead.
+     *
+     * @param {Column} fieldInfo
+     * @param {RelationalRecord} record
+     */
+    getMultiEditFieldClass(fieldInfo, record) {
+        if (this.isFieldReadonly(fieldInfo, record)) {
+            return "user-select-text";
+        }
+        // a click on a boolean directly toggles its value
+        return this.fields[fieldInfo.name].type === "boolean" ? "cursor-pointer" : "cursor-text";
     }
 
     /**
@@ -1260,6 +1290,9 @@ export class ListRenderer extends Component {
             if (record.isInEdition) {
                 classNames.push("text-muted");
             }
+        }
+        if (this.isMultiEditable(record)) {
+            classNames.push(this.getMultiEditFieldClass(fieldInfo, record));
         }
         if (this.canUseFormatter(fieldInfo, record)) {
             classNames.push(...this.getDecorationClassNames(fieldInfo, record));
@@ -1515,6 +1548,19 @@ export class ListRenderer extends Component {
     /**
      * @param {RelationalRecord} record
      * @param {Column} column
+     * @param {string} [subFieldName] name of the clicked field, in a column group
+     */
+    isClickedFieldReadonly(record, column, subFieldName) {
+        if (column.type === "column_group") {
+            const fieldInfo = column.fields.find((f) => f.name === subFieldName);
+            return !!fieldInfo && this.isFieldReadonly(fieldInfo, record);
+        }
+        return column.type === "field" && this.isFieldReadonly(column, record);
+    }
+
+    /**
+     * @param {RelationalRecord} record
+     * @param {Column} column
      * @param {PointerEvent} ev
      */
     async onCellClicked(record, column, ev, newWindow) {
@@ -1524,13 +1570,22 @@ export class ListRenderer extends Component {
 
         const multiEdit = this.props.list.model.multiEdit;
         const hasSelection = !!this.props.list.selection.length;
+        const clickedSubFieldName = ev.target.closest("[data-field-name]")?.dataset.fieldName;
         if (hasSelection && this.canSelectRecord && (!multiEdit || !record.selected)) {
             this.toggleRecordSelection(record);
+        } else if (
+            multiEdit &&
+            record.selected &&
+            this.isClickedFieldReadonly(record, column, clickedSubFieldName)
+        ) {
+            // don't switch the record in edition, so that the content of the field can be selected
+            if (this.editedRecord() && this.editedRecord() !== record) {
+                this.props.list.leaveEditMode();
+            }
         } else if (
             (multiEdit && record.selected) ||
             (this.isInlineEditable(record) && !hasSelection)
         ) {
-            const clickedSubFieldName = ev.target.closest("[data-field-name]")?.dataset.fieldName;
             if (record.isInEdition && this.editedRecord() === record) {
                 const cell = this.tableRef().querySelector(
                     `.o_selected_row td[name='${column.name}']`
