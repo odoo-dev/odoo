@@ -6,6 +6,10 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
+    l10n_pt_pos_at_series_id = fields.Many2one(
+        'l10n_pt.at.series',
+        string="PT AT Series",
+    )
 
     def get_limited_partners_loading(self, offset=0):
         partner_ids = super().get_limited_partners_loading(offset)
@@ -43,19 +47,27 @@ class PosConfig(models.Model):
 
         payment_methods = self.env['pos.payment.method'].search([('config_ids', 'in', self.ids)])
         missing_payment_mechanism = payment_methods.filtered(lambda pm: not pm.l10n_pt_pos_payment_mechanism)
+        missing_series = payment_methods.filtered(
+            lambda pm: pm.journal_id and pm.journal_id.type == 'bank' and not self.env['l10n_pt.at.series'].search_count([
+                ('journal_id', '=', pm.journal_id.id),
+                ('active', '=', True),
+            ])
+        )
         msg = ""
         if missing_payment_mechanism:
             msg += _("All payment methods available for this Point of Sale should have a payment mechanism. ")
+        if missing_series or (missing_payment_mechanism and any(pm.journal_id and pm.journal_id.type == 'bank' for pm in missing_payment_mechanism)):
+            msg += _("Payment methods with a bank journal should also have an AT Series defined.")
         if msg:
             raise RedirectWarning(
-                msg,
+                msg.strip(),
                 {
                     'type': 'ir.actions.act_window',
                     'name': 'Payment Methods',
                     'res_model': 'pos.payment.method',
                     'view_mode': 'list',
                     'views': [[False, 'list'], [False, 'form']],
-                    'domain': [('id', 'in', missing_payment_mechanism.ids)],
+                    'domain': [('id', 'in', (missing_payment_mechanism | missing_series).ids or payment_methods.ids)],
                 },
                 _("See Payment Methods"),
             )

@@ -46,12 +46,13 @@ class TestL10nPtPosCommon(TestL10nPtCommon, TestPoSCommon):
             pos_order_lines_ui_args=[
                 (self.product1, 1.0),
             ],
-            payments=[(self.bank_pm1, 50.0)],
+            payments=[(self.bank_pm1, 100.0)],
             customer=partner
         )
         results = self.env['pos.order'].sync_from_ui([order_data])
         order = self.env['pos.order'].browse(results['pos.order'][0]['id'])
-        order.action_pos_order_paid()
+        if order.state != 'paid':
+            order.action_pos_order_paid()
         if date_order:
             # Bypass the write method of pos.order to change the date_order
             Model.write(order, {'date_order': fields.Date.from_string(date_order)})
@@ -115,6 +116,23 @@ class TestL10nPtPosHash(TestL10nPtPosCommon):
                                       self.company_pt._l10n_pt_pos_check_hash_integrity()['results']))
         self.assertEqual(integrity_check['status'], 'corrupted')
         self.assertEqual(integrity_check['msg_cover'], f'Corrupted data on POS order with id {order4.id} ({order4.l10n_pt_document_number}).')
+
+    def test_l10n_pt_pos_refund_gross_total(self):
+        """Ensure POS refund gross total is positive for AT certification."""
+        self.open_new_session()
+        order_data = self.create_ui_order_data(
+            pos_order_lines_ui_args=[
+                (self.product1, -1.0),
+            ],
+            payments=[(self.bank_pm1, -100.0)],
+        )
+        results = self.env['pos.order'].sync_from_ui([order_data])
+        refund_order = self.env['pos.order'].browse(results['pos.order'][0]['id'])
+        if refund_order.state != 'paid':
+            refund_order.action_pos_order_paid()
+        self.assertEqual(refund_order._l10n_pt_get_document_type(), 'pos_refund')
+        self.assertGreater(refund_order._l10n_pt_get_gross_total(), 0.0)
+        self.assertEqual(refund_order._l10n_pt_get_gross_total(), 100.0)
 
 
 @freeze_time('2024-06-15')

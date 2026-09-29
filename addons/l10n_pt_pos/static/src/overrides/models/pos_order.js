@@ -10,9 +10,16 @@ patch(PosOrder.prototype, {
     },
 
     l10nPtPosGetQrCodeData(qrCodeStr) {
+        // Decode URL encoding in case qrCodeStr was stored URL-encoded for QWeb reports
+        let rawStr = qrCodeStr;
+        try {
+            rawStr = decodeURIComponent(qrCodeStr.replace(/\+/g, ' '));
+        } catch {
+            rawStr = qrCodeStr;
+        }
         const codeWriter = new window.ZXing.BrowserQRCodeSvgWriter();
         const qdCodeSvg = new XMLSerializer().serializeToString(
-            codeWriter.write(qrCodeStr, 200, 200)
+            codeWriter.write(rawStr, 200, 200)
         );
         return "data:image/svg+xml;base64," + window.btoa(qdCodeSvg);
     },
