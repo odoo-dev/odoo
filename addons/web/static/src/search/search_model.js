@@ -71,7 +71,7 @@ const { DateTime } = luxon;
  * }} Search
  */
 
-const DEFAULT_GROUPBY_ID = -1;
+export const DEFAULT_GROUPBY_ID = -1;
 
 /** @todo rework doc */
 // interface SectionCommon { // check optional keys

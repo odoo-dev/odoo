@@ -20856,11 +20856,8 @@ test(`cache web_read_group: do not send opening_info if not necessary`, async ()
     await getService("action").doAction(1);
     expect(`.o_group_header`).toHaveCount(1);
 
-    // Do not follow the same steps as earlier, directly remove the filter
-    if (isSmall()) {
-        // Toggle searchbar in mobile
-        await contains(`.o_control_panel_navigation [data-icon='search']`).click();
-    }
+    // Do not follow the same steps as earlier, directly remove the filter (in mobile, the search
+    // bar is expanded by default, as there are active filters)
     await contains(".o_searchview_facet [data-icon='close']").click();
     expect(`.o_group_header`).toHaveCount(4);
 

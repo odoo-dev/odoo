@@ -28,8 +28,10 @@ export class OfflineSearchBar extends Component {
         this.ui = useService("ui");
         this.inputRef = this.autofocusRef;
         if (!(this.env.config.disableSearchBarAutofocus || !this.props.autofocus)) {
-            // only force the focus on touch devices on small screens
-            useAutofocus({ ref: this.autofocusRef, mobile: this.ui.isSmall });
+            // only force the focus on touch devices on small screens, but not if the search bar
+            // is expanded by default, as it would open the virtual keyboard when opening the view
+            const expandedByDefault = this.props.toggler?.state.showSearchBar;
+            useAutofocus({ ref: this.autofocusRef, mobile: this.ui.isSmall && !expandedByDefault });
         }
         this.searchBarDropdownState = useDropdownState();
         this.visibilityState = proxy(this.props.toggler?.state || { showSearchBar: true });

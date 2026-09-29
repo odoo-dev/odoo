@@ -185,7 +185,12 @@ export const stepUtils = {
             {
                 isActive: ["mobile"],
                 trigger: `.modal:not(.o_inactive_modal) .o_control_panel_navigation .btn [data-icon='search']`,
-                run: "click",
+                async run(helpers) {
+                    // the search bar is already expanded if there are default filters
+                    if (!helpers.anchor.closest(".btn").classList.contains("active")) {
+                        await helpers.click();
+                    }
+                },
             },
             {
                 isActive: ["mobile"],

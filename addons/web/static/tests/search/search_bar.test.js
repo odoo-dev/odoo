@@ -280,21 +280,22 @@ test("navigation should move backward from search bar filter", async () => {
     expect(queryFirst`.d-print-none.btn`).toBeFocused();
 });
 
+class SearchBarWithToggler extends Component {
+    static template = xml`
+        <div>
+            <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
+            <SearchBar toggler="this.searchBarToggler"/>
+        </div>
+    `;
+    static components = { SearchBar };
+    setup() {
+        this.searchBarToggler = useSearchBarToggler();
+    }
+}
+
 test.tags("mobile");
 test("search input is focused when being toggled", async () => {
-    class Parent extends Component {
-        static template = xml`
-            <div>
-                <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
-                <SearchBar toggler="this.searchBarToggler"/>
-            </div>
-        `;
-        static components = { SearchBar };
-        setup() {
-            this.searchBarToggler = useSearchBarToggler();
-        }
-    }
-    await mountWithSearch(Parent, {
+    await mountWithSearch(SearchBarWithToggler, {
         resModel: "partner",
         searchMenuTypes: [],
         searchViewId: false,
@@ -303,6 +304,52 @@ test("search input is focused when being toggled", async () => {
     await contains(`button [data-icon="search"]`).click();
     expect(".o_searchview input").toHaveCount(1);
     expect(queryFirst`.o_searchview input`).toBeFocused();
+});
+
+test.tags("mobile");
+test("search bar is expanded by default when there are default filters", async () => {
+    await mountWithSearch(SearchBarWithToggler, {
+        resModel: "partner",
+        searchMenuTypes: ["filter"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter name="bool" string="Bool" domain="[('bool', '=', True)]"/>
+            </search>
+        `,
+        context: { search_default_bool: 1 },
+    });
+    expect(".o_searchview input").toHaveCount(1);
+    expect(".o_searchview input").not.toBeFocused();
+    expect(getFacetTexts()).toEqual(["Bool"]);
+    expect(`button.btn-secondary.active [data-icon="search"]`).toHaveCount(1);
+
+    // the user can still collapse it
+    await contains(`button.btn-secondary [data-icon="search"]`).click();
+    expect(".o_searchview input").toHaveCount(0);
+});
+
+test.tags("mobile");
+test("search bar is expanded by default when there is a default favorite", async () => {
+    await mountWithSearch(SearchBarWithToggler, {
+        resModel: "partner",
+        searchMenuTypes: ["favorite"],
+        searchViewId: false,
+        irFilters: [
+            {
+                context: "{}",
+                domain: "[('foo', 'ilike', 'abc')]",
+                id: 1,
+                is_default: true,
+                name: "My favorite",
+                sort: "[]",
+                user_ids: [2],
+            },
+        ],
+    });
+    expect(".o_searchview input").toHaveCount(1);
+    expect(".o_searchview input").not.toBeFocused();
+    expect(getFacetTexts()).toEqual(["My favorite"]);
 });
 
 test.tags("desktop");
