@@ -1,6 +1,8 @@
 import base64
+import datetime
 
-from cryptography.hazmat.primitives import serialization
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from odoo.exceptions import UserError
@@ -32,11 +34,26 @@ class TestL10nPtAtSeriesWS(TestL10nPtCommon):
     @staticmethod
     def _get_test_rsa_public_key_pem_b64():
         key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        pem = key.public_key().public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo,
-        )
-        return base64.b64encode(pem)
+        subject = issuer = x509.Name([
+            x509.NameAttribute(x509.oid.NameOID.COUNTRY_NAME, "PT"),
+            x509.NameAttribute(x509.oid.NameOID.ORGANIZATION_NAME, "Autoridade Tributaria"),
+            x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "at.gov.pt"),
+        ])
+        now = datetime.datetime.now(datetime.timezone.utc)
+        cert = x509.CertificateBuilder().subject_name(
+            subject
+        ).issuer_name(
+            issuer
+        ).public_key(
+            key.public_key()
+        ).serial_number(
+            x509.random_serial_number()
+        ).not_valid_before(
+            now - datetime.timedelta(days=10)
+        ).not_valid_after(
+            now + datetime.timedelta(days=365)
+        ).sign(key, hashes.SHA256())
+        return base64.b64encode(cert.public_bytes(serialization.Encoding.PEM))
 
     def test_action_register_at_series_sets_at_code(self):
         at_series = self.env['l10n_pt.at.series'].create({
@@ -111,13 +128,19 @@ class TestL10nPtAtSeriesWS(TestL10nPtCommon):
         company_no_creds = self.env['res.company'].create({
             'name': 'No Creds Co',
         })
+        journal_no_creds = self.env['account.journal'].create({
+            'name': 'Customer Invoices No Creds',
+            'type': 'sale',
+            'code': 'INVNC',
+            'company_id': company_no_creds.id,
+        })
         with self._mock_ws() as mock:
             series = self.env['l10n_pt.at.series'].create({
                 'name': '2025',
                 'company_id': company_no_creds.id,
                 'training_series': False,
                 'date_start': '2025-01-01',
-                'journal_id': self.company_data['default_journal_sale'].id,
+                'journal_id': journal_no_creds.id,
                 'document_type': 'out_invoice',
                 'prefix': 'FT',
             })
@@ -168,12 +191,18 @@ class TestL10nPtAtSeriesWS(TestL10nPtCommon):
             'name': 'No Creds Co',
             'l10n_pt_at_ws_env': 'test',
         })
+        journal_no_creds = self.env['account.journal'].create({
+            'name': 'Customer Invoices No Creds 2',
+            'type': 'sale',
+            'code': 'INVN2',
+            'company_id': company_no_creds.id,
+        })
         at_series = self.env['l10n_pt.at.series'].create({
             'name': '2025',
             'company_id': company_no_creds.id,
             'training_series': False,
             'date_start': '2025-01-01',
-            'journal_id': self.company_data['default_journal_sale'].id,
+            'journal_id': journal_no_creds.id,
             'document_type': 'out_invoice',
             'prefix': 'FT',
         })

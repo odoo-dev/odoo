@@ -100,7 +100,9 @@ class L10nPtATSeries(models.Model):
     def _compute_active(self):
         today = fields.Date.today()
         for at_series in self:
-            at_series.active = at_series.date_end >= today if at_series.date_end else True
+            is_valid_start = at_series.date_start <= today if at_series.date_start else True
+            is_valid_end = at_series.date_end >= today if at_series.date_end else True
+            at_series.active = is_valid_start and is_valid_end
 
     def _search_active(self, operator, value):
         if value is None:
@@ -110,13 +112,25 @@ class L10nPtATSeries(models.Model):
         if operator not in ['not in', 'in', '=', '!=']:
             raise ValueError(_('Operator (%s) is not supported', operator))
         today = fields.Date.today()
-        active_domain = Domain.OR([
-            Domain('date_end', '=', False),
-            Domain('date_end', '>=', today),
+        active_domain = Domain.AND([
+            Domain.OR([
+                Domain('date_start', '=', False),
+                Domain('date_start', '<=', today),
+            ]),
+            Domain.OR([
+                Domain('date_end', '=', False),
+                Domain('date_end', '>=', today),
+            ]),
         ])
-        not_active_domain = Domain.AND([
-            Domain('date_end', '!=', False),
-            Domain('date_end', '<', today),
+        not_active_domain = Domain.OR([
+            Domain.AND([
+                Domain('date_start', '!=', False),
+                Domain('date_start', '>', today),
+            ]),
+            Domain.AND([
+                Domain('date_end', '!=', False),
+                Domain('date_end', '<', today),
+            ]),
         ])
         if len(value) == 1:
             if (
@@ -209,9 +223,12 @@ class L10nPtATSeries(models.Model):
             if series.document_type in {'out_receipt', 'out_invoice', 'out_invoice_receipt', 'out_refund', 'debit_note'} and not series.journal_id:
                 raise ValidationError(_("A Sales Journal is required for account move document types (FT, FS, NC, ND)."))
 
-    def _get_at_code(self):
+    def _get_at_code(self, date=None):
         self.ensure_one()
-        if not self.active:
+        if date:
+            if not self._l10n_pt_is_valid_on(date):
+                raise UserError(_("The series %(prefix)s is not active.", prefix=self.prefix))
+        elif not self.active:
             raise UserError(_("The series %(prefix)s is not active.", prefix=self.prefix))
         return self.at_code
 

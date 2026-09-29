@@ -58,7 +58,6 @@
                                         The AT public key certificate used to encrypt the webservice password.
                                     </div>
                                     <br/>
-                                    <field name="l10n_pt_at_ws_ssl_certificate_ids" invisible="1"/>
                                     <button
                                         name="%(l10n_pt_certification.l10n_pt_at_ws_certificate_action)d"
                                         icon="oi-arrow-right" type="action"

@@ -81,6 +81,11 @@ class StockPicking(models.Model):
         self.filtered(lambda p: p.country_code == 'PT')._set_l10n_pt_document_number()
         return res
 
+    def _action_done(self):
+        res = super()._action_done()
+        self.filtered(lambda p: p.country_code == 'PT' and not p.l10n_pt_document_number)._set_l10n_pt_document_number()
+        return res
+
     def button_validate(self):
         picking = super().button_validate()
         self.filtered(lambda p: p.country_code == 'PT' and p.state == 'done')._check_l10n_pt_dates()
@@ -118,6 +123,9 @@ class StockPicking(models.Model):
         # which always has a value. Transfers that were validated keep signing `date_done`, so no
         # existing signature changes.
         return self.date_done or self.l10n_pt_start_transport_date
+
+    def _l10n_pt_get_document_number(self):
+        return super()._l10n_pt_get_document_number()
 
     def _l10n_pt_get_gross_total(self):
         """ Returns 0 (transfers have no monetary total). Split out to allow patching in tests. """

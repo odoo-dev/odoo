@@ -75,7 +75,6 @@ class L10nPtPricedLineMixin(models.AbstractModel):
     l10n_pt_line_discount = fields.Float(
         string="Line Discount",
         digits='Discount',
-        default=0.0,
         inverse='_inverse_l10n_pt_line_discount',
     )
 
@@ -94,7 +93,9 @@ class L10nPtPricedLineMixin(models.AbstractModel):
         # folded into the line's effective discount here.
         global_discount = (self._l10n_pt_get_document().l10n_pt_global_discount or 0.0) / 100
         line_discount = (self.l10n_pt_line_discount or 0.0) / 100
-        self.discount = (1 - (1 - global_discount) * (1 - line_discount)) * 100
+        new_discount = (1 - (1 - global_discount) * (1 - line_discount)) * 100
+        if self.discount != new_discount:
+            self.discount = new_discount
 
     @api.onchange('l10n_pt_line_discount')
     def _inverse_l10n_pt_line_discount(self):

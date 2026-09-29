@@ -79,7 +79,7 @@ class TestL10nPtMiscRequirements(TestL10nPtCommon):
         """
         Test that invoices without taxes or non-positive lines cannot be posted
         """
-        with self.assertRaisesRegex(UserError, "You cannot create a move line without VAT tax."):
+        with self.assertRaisesRegex(UserError, "You cannot create an invoice line without VAT tax."):
             move = self.env['account.move'].with_company(self.company_pt).create({
                 'company_id': self.company_pt.id,
                 'move_type': 'out_invoice',
@@ -233,7 +233,7 @@ class TestL10nPtMiscRequirements(TestL10nPtCommon):
         move.action_post()
         self.assertInvoiceValues(move, [
             {
-                'price_unit': 1234.57,
+                'price_unit': 1234.568,
                 'price_subtotal': 1000.00,  # 10% global discount + 10% line discount
                 'price_total': 1230.00,
                 'debit': 0.0,

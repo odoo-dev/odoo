@@ -36,7 +36,7 @@ class TestL10nPtSaleCommon(TestL10nPtCommon, TestSaleCommon):
                 'product_id': (product or self.company_data['product_order_no']).id,
                 'product_uom_qty': 1,
                 'price_unit': amount,
-                'tax_id': [tax.id if tax else self.tax_sale_23.id],
+                'tax_ids': [tax.id if tax else self.tax_sale_23.id],
             })]
         }
 
@@ -106,6 +106,19 @@ class TestL10nPtSaleHashing(TestL10nPtSaleCommon):
             so.name = "new name"
         with self.assertRaisesRegex(UserError, expected_error_msg):
             so.l10n_pt_document_number = "new number/0001"
+
+        # Test SaleOrderLine tamper protection
+        with self.assertRaisesRegex(UserError, "This quotation/order has been cryptographically signed and locked"):
+            so.order_line.price_unit = 999.0
+        with self.assertRaisesRegex(UserError, "This quotation/order has been cryptographically signed and locked"):
+            so.order_line.unlink()
+        with self.assertRaisesRegex(UserError, "This quotation/order has been cryptographically signed and locked"):
+            self.env['sale.order.line'].create({
+                'order_id': so.id,
+                'product_id': self.company_data['product_order_no'].id,
+                'product_uom_qty': 1,
+                'price_unit': 50.0,
+            })
 
         # The following field is not part of the hash so it can be modified
         so.validity_date = fields.Date.from_string('2000-01-01')

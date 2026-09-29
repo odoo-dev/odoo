@@ -143,7 +143,8 @@ class L10nPtDocumentMixin(models.AbstractModel):
     def _compute_l10n_pt_atcud(self):
         for record in self:
             if record._l10n_pt_country_ok() and not record.l10n_pt_atcud and record.l10n_pt_document_number:
-                record.l10n_pt_atcud = f"{record.l10n_pt_at_series_id._get_at_code()}-{record._l10n_pt_get_sequence_number()}"
+                record_date = fields.Date.to_date(record._l10n_pt_get_document_date())
+                record.l10n_pt_atcud = f"{record.l10n_pt_at_series_id._get_at_code(date=record_date)}-{record._l10n_pt_get_sequence_number()}"
             else:
                 record.l10n_pt_atcud = record.l10n_pt_atcud or False
 
@@ -252,11 +253,23 @@ class L10nPtDocumentMixin(models.AbstractModel):
             max_document_date = max_date_per_series.get(record.l10n_pt_at_series_id)
             document_date = record._l10n_pt_get_document_date()
             if max_document_date and document_date and document_date < max_document_date:
-                raise UserError(self.env._(
-                    "You cannot issue a document dated earlier than the last document issued in this "
-                    "AT series (%(series)s).",
-                    series=record.l10n_pt_at_series_id.display_name,
-                ))
+                if record._name == 'account.move':
+                    raise UserError(self.env._(
+                        "You cannot create an invoice with a date earlier than the date of the last invoice issued in this AT series (%(series)s).",
+                        series=record.l10n_pt_at_series_id.display_name,
+                    ))
+                elif record._name == 'account.payment':
+                    raise UserError(self.env._(
+                        "You cannot create a payment with a date earlier than the date of the last payment issued in this AT series (%(series)s).",
+                        series=record.l10n_pt_at_series_id.display_name,
+                    ))
+                else:
+                    doc_name = self.env._("order") if record._name == 'sale.order' else self.env._("document")
+                    raise UserError(self.env._(
+                        "You cannot create a %(doc_name)s with a date earlier than the date of the last %(doc_name)s issued in this AT series (%(series)s).",
+                        doc_name=doc_name,
+                        series=record.l10n_pt_at_series_id.display_name,
+                    ))
 
     def _check_l10n_pt_at_series_id(self):
         for record in self.filtered(lambda r: r._l10n_pt_country_ok()):
@@ -266,7 +279,7 @@ class L10nPtDocumentMixin(models.AbstractModel):
             if record.l10n_pt_document_type and record.l10n_pt_document_type != series.document_type:
                 raise UserError(self.env._("The series does not match the document type."))
             record_date = fields.Date.to_date(record._l10n_pt_get_document_date())
-            if not series.active or not series._l10n_pt_is_valid_on(record_date):
+            if not series._l10n_pt_is_valid_on(record_date):
                 raise UserError(self.env._("An inactive series cannot be used."))
 
 

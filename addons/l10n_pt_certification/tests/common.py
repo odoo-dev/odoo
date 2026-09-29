@@ -1,6 +1,11 @@
+import base64
+import datetime
 from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from freezegun import freeze_time
 
 from odoo import Command, fields
@@ -39,6 +44,7 @@ class TestL10nPtCommon(AccountTestInvoicingCommon):
             'company_registry': '123456',
             'phone': '+351 11 11 11 11',
             'country_id': cls.env.ref('base.pt').id,
+            'account_fiscal_country_id': cls.env.ref('base.pt').id,
             'vat': 'PT123456789',
         })
         cls.partner_a.vat = 'PT123456789'
@@ -47,10 +53,40 @@ class TestL10nPtCommon(AccountTestInvoicingCommon):
         cls.series_2024 = create_at_series('2024')
         cls.tax_sale_23 = cls.env['account.chart.template'].ref('iva_pt_sale_normal')
         cls.tax_sale_0 = cls.env['account.chart.template'].ref('iva_pt_sale_eu_isenta')
+        cls.at_public_cert = cls.env['certificate.certificate'].create({
+            'name': 'AT Public Cert Test',
+            'content': cls._get_test_rsa_public_key_pem_b64(),
+            'company_id': cls.company_pt.id,
+        })
+        cls.company_pt.l10n_pt_at_ws_public_cert_id = cls.at_public_cert
+
+    @staticmethod
+    def _get_test_rsa_public_key_pem_b64():
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        subject = issuer = x509.Name([
+            x509.NameAttribute(x509.oid.NameOID.COUNTRY_NAME, "PT"),
+            x509.NameAttribute(x509.oid.NameOID.ORGANIZATION_NAME, "Autoridade Tributaria"),
+            x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "at.gov.pt"),
+        ])
+        now = datetime.datetime.now(datetime.timezone.utc)
+        cert = x509.CertificateBuilder().subject_name(
+            subject
+        ).issuer_name(
+            issuer
+        ).public_key(
+            key.public_key()
+        ).serial_number(
+            x509.random_serial_number()
+        ).not_valid_before(
+            now - datetime.timedelta(days=10)
+        ).not_valid_after(
+            now + datetime.timedelta(days=365)
+        ).sign(key, hashes.SHA256())
+        return base64.b64encode(cert.public_bytes(serialization.Encoding.PEM))
 
     @classmethod
     def create_invoice(cls, move_type='out_invoice', invoice_date='2024-01-01', post=True, l10n_pt_hashed_on=None, amount=1000.0,
-                       quantity=1, tax=None, product_id=False, do_hash=False, mock_hash=False):
+                       quantity=1, tax=None, product_id=False, do_hash=False, mock_hash=False, reversed_entry_id=False, ref=False):
         invoice_data = {
             'company_id': cls.company_pt.id,
             'move_type': move_type,
@@ -66,6 +102,13 @@ class TestL10nPtCommon(AccountTestInvoicingCommon):
                 }),
             ],
         }
+        if reversed_entry_id:
+            invoice_data['reversed_entry_id'] = reversed_entry_id
+        if ref:
+            invoice_data['ref'] = ref
+        elif move_type == 'out_refund' and post and not reversed_entry_id:
+            invoice_data['ref'] = 'REF-ORIGINAL-INVOICE'
+
         year = str(invoice_data['invoice_date'].year)
         series_for_year = cls.series_2017 if year == '2017' else cls.series_2024
         invoice_data['l10n_pt_at_series_id'] = series_for_year.filtered(lambda s: s.document_type == move_type).id

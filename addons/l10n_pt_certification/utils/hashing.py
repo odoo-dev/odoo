@@ -6,7 +6,7 @@ import requests
 import stdnum.pt.nif
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from odoo.exceptions import UserError
 from odoo.tools import LazyTranslate, float_repr, format_date
@@ -14,7 +14,6 @@ from odoo.tools import LazyTranslate, float_repr, format_date
 from odoo.addons.l10n_pt_certification.const import PT_CERTIFICATION_NUMBER
 
 _lt = LazyTranslate(__name__)
-
 
 SIGN_DEFAULT_ENDPOINT = 'https://l10n-pt.api.odoo.com/api/l10n_pt/1'
 ERROR_MESSAGES = {
@@ -121,14 +120,18 @@ def l10n_pt_common_qr_code_str(record, env, date):
     else:
         tax_letter = 'I'
 
+    # Customer country code must be a 2-letter ISO 3166-1 alpha-2 code
+    country_code = record.partner_id.country_id.code if record.partner_id and record.partner_id.country_id else 'PT'
+
     qr_code_dict = {}
     qr_code_dict['A:'] = f"{company_vat}*"
     qr_code_dict['B:'] = f"{partner_vat}*"
-    qr_code_dict['C:'] = f"{record.partner_id.country_id.code if record.partner_id and record.partner_id.country_id else 'Desconhecido'}*"
+    qr_code_dict['C:'] = f"{country_code}*"
     qr_code_dict['E:'] = f"{'A' if record.state == 'cancel' else 'N'}*"
     qr_code_dict['F:'] = f"{format_date(env, date, date_format='yyyyMMdd')}*"
     qr_code_dict['G:'] = f"{record.l10n_pt_document_number}*"
-    qr_code_dict[f'{tax_letter}1:'] = f"{record.company_id.l10n_pt_region_code}*"
+    qr_code_dict[f'{tax_letter}1:'] = f"{record.company_id.l10n_pt_region_code or 'PT'}*"
     qr_code_dict['R:'] = f"{PT_CERTIFICATION_NUMBER}"
 
     return qr_code_dict, tax_letter
+

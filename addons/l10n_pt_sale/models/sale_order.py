@@ -1,5 +1,5 @@
 from odoo import _, api, fields, models
-from odoo.exceptions import RedirectWarning, ValidationError
+from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.tools import float_repr
 
 from odoo.addons.l10n_pt_sale.models.l10n_pt_at_series import (
@@ -19,6 +19,46 @@ class SaleOrderLine(models.Model):
     def _l10n_pt_get_document(self):
         self.ensure_one()
         return self.order_id
+
+    PROTECTED_FIELDS = {
+        'product_id', 'name', 'product_uom_qty', 'product_uom_id',
+        'price_unit', 'discount', 'tax_ids', 'l10n_pt_line_discount'
+    }
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if order_id := vals.get('order_id'):
+                order = self.env['sale.order'].browse(order_id)
+                if order.company_id.account_fiscal_country_id.code == 'PT' and order.l10n_pt_inalterable_hash:
+                    if not vals.get('is_downpayment') and not vals.get('display_type'):
+                        raise UserError(_(
+                            "This quotation/order has been cryptographically signed and locked. "
+                            "You cannot add lines to a signed Portuguese document."
+                        ))
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if not vals:
+            return super().write(vals)
+        if any(field in vals for field in self.PROTECTED_FIELDS):
+            for line in self:
+                if line.company_id.account_fiscal_country_id.code == 'PT' and line.order_id.l10n_pt_inalterable_hash:
+                    raise UserError(_(
+                        "This quotation/order has been cryptographically signed and locked. "
+                        "You cannot edit financial fields of a signed Portuguese document."
+                    ))
+        return super().write(vals)
+
+    def unlink(self):
+        for line in self:
+            if line.company_id.account_fiscal_country_id.code == 'PT' and line.order_id.l10n_pt_inalterable_hash:
+                if not line.is_downpayment and not line.display_type:
+                    raise UserError(_(
+                        "This quotation/order has been cryptographically signed and locked. "
+                        "You cannot delete lines from a signed Portuguese document."
+                    ))
+        return super().unlink()
 
     @api.constrains('tax_ids')
     def _check_l10n_pt_tax_id(self):
@@ -86,6 +126,9 @@ class SaleOrder(models.Model):
         help="Sale orders created from this quotation."
     )
     sales_order_count = fields.Integer(compute="_compute_related_so_count", string='Sale Order Count')
+
+    def _l10n_pt_get_document_number(self):
+        return self.l10n_pt_document_number
 
     ####################################
     # COMPUTE, INVERSE AND CONSTRAINS

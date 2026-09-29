@@ -143,7 +143,7 @@ class TestL10nPtFlows(TestL10nPtCommon):
             'prefix': 'FUT',
             'at_code': 'AT-TESTFUT2025',
         })
-        self.assertTrue(early_series.active)
+        self.assertFalse(early_series.active)
         invoice.l10n_pt_at_series_id = early_series
         with self.assertRaisesRegex(UserError, "An inactive series cannot be used"):
             invoice.action_post()
@@ -506,7 +506,8 @@ class TestL10nPtFlows(TestL10nPtCommon):
     def test_sales_receipt_limits(self):
         """ A sales receipt's amount must be below a certain limit depending on if product is goods or service """
         good = self.product_a
-        service = self.product_a.copy({'type': 'service'})
+        good.type = 'consu'
+        service = self.env['product.product'].create({'name': 'Service Product', 'type': 'service'})
 
         with self.assertRaisesRegex(UserError, "A sales receipt.*cannot exceed.*EUR"):
             self.create_invoice('out_receipt', amount=PT_SIMPLIFIED_INVOICE_SERVICES_LIMIT + 1, product_id=service.id)
@@ -685,3 +686,42 @@ class TestL10nPtFlows(TestL10nPtCommon):
         invoice.invoice_line_ids.l10n_pt_line_discount = 10.0
         self.assertAlmostEqual(invoice.invoice_line_ids.discount, 19.0)
         self.assertAlmostEqual(invoice.invoice_line_ids.price_subtotal, 810.0)
+
+    def test_tax_exemption_v4_selection(self):
+        """ AT Exemption table v4.0 verification """
+        from odoo.addons.l10n_pt_certification.models.account_tax import L10N_PT_TAX_EXEMPTION_REASONS_SELECTION
+        exemption_dict = dict(L10N_PT_TAX_EXEMPTION_REASONS_SELECTION)
+        self.assertNotIn("M03", exemption_dict)
+        self.assertNotIn("M08", exemption_dict)
+        self.assertIn("M10", exemption_dict)
+        self.assertIn("Artigo 53.º, n.º 1", exemption_dict["M10"])
+        self.assertIn("M35", exemption_dict)
+        self.assertIn("DL 97/2026", exemption_dict["M35"])
+        self.assertIn("M44", exemption_dict)
+        self.assertIn("M45", exemption_dict)
+        self.assertIn("M46", exemption_dict)
+
+    def test_saft_pt_export_wizard(self):
+        """ Test SAF-T (PT) v1.04_01 XML generation """
+        import base64
+        from xml.etree import ElementTree as ET
+
+        invoice = self.create_invoice('out_invoice', do_hash=True, mock_hash=True)
+        wizard = self.env['l10n_pt.saft.export.wizard'].create({
+            'company_id': self.company_data['company'].id,
+            'date_from': '2024-06-01',
+            'date_to': '2024-06-30',
+            'type': 'F',
+        })
+        wizard.action_export_saft()
+        self.assertTrue(wizard.export_file)
+        self.assertTrue(wizard.export_filename.endswith('.xml'))
+
+        xml_content = base64.b64decode(wizard.export_file)
+        root = ET.fromstring(xml_content)
+        self.assertTrue(root.tag.endswith('AuditFile'))
+        header = root.find('{urn:OECD:StandardAuditFile-Tax:PT_1.04_01}Header')
+        self.assertIsNotNone(header)
+        version = header.find('{urn:OECD:StandardAuditFile-Tax:PT_1.04_01}AuditFileVersion')
+        self.assertEqual(version.text, '1.04_01')
+
