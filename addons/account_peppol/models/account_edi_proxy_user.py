@@ -30,6 +30,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
     proxy_type = fields.Selection(selection_add=[('peppol', 'Peppol')], ondelete={'peppol': 'cascade'})
+    edi_mode = fields.Selection(selection_add=[('local', 'Local mode')])
 
     # -------------------------------------------------------------------------
     # HELPER METHODS

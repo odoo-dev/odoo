@@ -52,6 +52,8 @@ class AccountMoveSendWizard(models.TransientModel):
                 addendum_mode = ''
                 if peppol_proxy_mode == 'test':
                     addendum_mode = _(' (Test)')
+                elif peppol_proxy_mode == 'local':
+                    addendum_mode = _(' (Local)')
                 elif peppol_proxy_mode == 'demo':
                     addendum_mode = _(' (Demo)')
                 if addendum_disable_reason or addendum_mode:

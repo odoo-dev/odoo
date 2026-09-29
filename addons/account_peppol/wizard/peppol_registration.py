@@ -60,7 +60,7 @@ class PeppolRegistration(models.TransientModel):
 
     edi_mode = fields.Selection(
         string='EDI mode',
-        selection=[('demo', 'Demo'), ('test', 'Test'), ('prod', 'Live')],
+        selection=[('demo', 'Demo'), ('test', 'Test'), ('local', 'Local'), ('prod', 'Live')],
         compute='_compute_edi_mode',
     )
     edi_user_id = fields.Many2one(

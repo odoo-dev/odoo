@@ -101,7 +101,7 @@ class ResPartner(models.Model):
         hash_participant = md5(edi_identification.lower().encode()).hexdigest()
         endpoint_participant = parse.quote_plus(f"iso6523-actorid-upis::{edi_identification}")
         edi_mode = self.env.company._get_peppol_edi_mode()
-        sml_zone = 'acc.edelivery' if edi_mode == 'test' else 'edelivery'
+        sml_zone = 'acc.edelivery' if edi_mode in ('test', 'local') else 'edelivery'
         smp_url = f"http://B-{hash_participant}.iso6523-actorid-upis.{sml_zone}.tech.ec.europa.eu/{endpoint_participant}"
 
         try:

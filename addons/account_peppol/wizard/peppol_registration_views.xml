@@ -41,7 +41,7 @@
                                        readonly="use_parent_connection"
                                        string="Email"/>
                                 <field name="phone_number"
-                                       required="edi_mode not in ('demo', 'test')"
+                                       required="edi_mode not in ('demo', 'test', 'local')"
                                        readonly="use_parent_connection"
                                        string="Phone"/>
                             </group>
@@ -77,6 +77,8 @@
                             class="btn-primary" data-hotkey="q" invisible="edi_mode != 'prod' or not display_no_auth_buttons"/>
                     <button string="Activate Peppol (Test)" name="button_register_peppol_participant" type="object"
                             class="btn-primary" data-hotkey="q" invisible="edi_mode != 'test' or not display_no_auth_buttons"/>
+                    <button string="Activate Peppol (Local)" name="button_register_peppol_participant" type="object"
+                            class="btn-primary" data-hotkey="q" invisible="edi_mode != 'local' or not display_no_auth_buttons"/>
                     <button string="Activate Peppol (Demo)" name="button_register_peppol_participant" type="object"
                             class="btn-primary" data-hotkey="q" invisible="edi_mode != 'demo' or not display_no_auth_buttons"/>
                     <button class="btn-secondary" special="cancel" data-hotkey="x"/>

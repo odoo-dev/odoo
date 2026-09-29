@@ -12,6 +12,7 @@ TIMEOUT = 10
 PEPPOL_PROXY_URLS = {
     'prod': 'https://peppol.api.odoo.com',
     'test': 'https://peppol.test.odoo.com',
+    'local': 'http://localhost:8469',  # Peppol proxy (IAP) running locally, for development.
     'demo': None,  # 'demo' has no real proxy; only lookup() works (querying the prod proxy).
 }
 
