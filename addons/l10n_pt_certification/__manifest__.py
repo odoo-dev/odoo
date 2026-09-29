@@ -26,6 +26,7 @@ The module adds the following features:
         'wizard/account_payment_register_views.xml',
         'wizard/l10n_pt_cancel_wizard_views.xml',
         'wizard/l10n_pt_reprint_reason_views.xml',
+        'wizard/l10n_pt_saft_export_wizard_views.xml',
         'views/account_journal_views.xml',
         'views/account_move_views.xml',
         'views/account_payment_views.xml',

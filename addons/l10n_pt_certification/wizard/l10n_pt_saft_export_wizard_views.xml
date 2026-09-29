@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_l10n_pt_saft_export_wizard_form" model="ir.ui.view">
+        <field name="name">l10n_pt.saft.export.wizard.form</field>
+        <field name="model">l10n_pt.saft.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export Portuguese SAF-T (PT) v1.04_01">
+                <sheet>
+                    <div class="alert alert-info" role="alert" invisible="export_file">
+                        Generate official Portuguese Tax Authority Audit File (SAF-T PT v1.04_01) as required by Portaria 302/2016.
+                    </div>
+                    <div class="alert alert-success" role="alert" invisible="not export_file">
+                        Your SAF-T (PT) file has been successfully generated. Click the link below to download.
+                    </div>
+                    <group invisible="export_file">
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="type"/>
+                        </group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                    </group>
+                    <group invisible="not export_file">
+                        <field name="export_filename" invisible="1"/>
+                        <field name="export_file" filename="export_filename"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Export XML" name="action_export_saft" type="object" class="btn-primary" invisible="export_file" data-hotkey="q"/>
+                    <button string="Close" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_l10n_pt_saft_export_wizard" model="ir.actions.act_window">
+        <field name="name">SAF-T (PT) Export</field>
+        <field name="res_model">l10n_pt.saft.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_l10n_pt_saft_export_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_l10n_pt_saft_export"
+              name="SAF-T (PT) Export"
+              parent="account.menu_finance_reports"
+              action="action_l10n_pt_saft_export_wizard"
+              sequence="100"/>
+</odoo>
