@@ -72,6 +72,6 @@ function registerServiceWorker() {
 
     navigator.serviceWorker?.register("/pos/service-worker.js").then((registration) => {
         const worker = registration.installing || registration.waiting || registration.active;
-        worker.postMessage({ urlsToCache });
+        worker.postMessage({ urlsToCache, database: odoo.info?.db });
     });
 }
