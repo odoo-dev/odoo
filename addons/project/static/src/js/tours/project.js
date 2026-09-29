@@ -247,7 +247,7 @@ registry.category("web_tour.tours").add('project_tour', {
 },
 {
     isActive: ["auto"],
-    trigger: ".project_task_state_selection_menu.dropdown-menu i.o_status_red",
+    trigger: ".project_task_state_selection_menu.dropdown-menu i.o_status_danger",
     content: markup(_t("Mark the task as <b>Cancelled</b>")),
     run: "click",
 }, {
