@@ -68,11 +68,11 @@
 /* This should normally be put in fields.scss but these classes are used outside */
 /* of `.o_field_widget` so it needs to be placed at an upper level. */
 .o_status {
-    &.o_status_green {
+    &.o_status_success {
         color: map-get($theme-colors, "success");
     }
 
-    &.o_status_red {
+    &.o_status_danger {
         color: map-get($theme-colors, "danger");
     }
 
@@ -80,11 +80,11 @@
         background-color: map-get($theme-colors, "warning");
     }
 
-    &.o_status_orange {
+    &.o_status_warning {
         color: map-get($theme-colors, "warning");
     }
 
-    &.o_status_blue {
+    &.o_status_info {
         color: map-get($theme-colors, "info");
     }
 }
