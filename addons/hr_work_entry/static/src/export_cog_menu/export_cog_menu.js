@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -15,7 +15,7 @@ export class ExportWorkEntriesCogMenu extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     async exportWorkEntries() {

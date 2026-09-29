@@ -3,6 +3,7 @@ import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 import { AccountDashboardKpiCard } from "./account_dashboard_kpi_card";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AccountDashboardKpis extends Component {
     static template = "account.AccountDashboardKpis";
@@ -12,7 +13,7 @@ export class AccountDashboardKpis extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.state = proxy({
             cards: [],

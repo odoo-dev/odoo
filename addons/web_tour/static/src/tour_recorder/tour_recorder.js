@@ -3,13 +3,14 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { location } from "@web/core/browser/browser";
 import { queryAll, queryFirst, queryOne } from "@odoo/hoot-dom";
-import { Component, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_plugin";
 import { tourRecorderState } from "./tour_recorder_state";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const PRECISE_IDENTIFIERS = ["data-menu-xmlid", "name", "contenteditable"];
 const ODOO_CLASS_REGEX = /^oe?(-|_)[\w-]+$/;
@@ -135,7 +136,7 @@ export class TourRecorder extends Component {
         this.destClickEvent = false;
         this.notification = useService("notification");
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.state = proxy({
             ...TourRecorder.defaultState,

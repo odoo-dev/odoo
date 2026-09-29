@@ -1,5 +1,6 @@
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ImportDataColumnError extends Component {
     static template = "ImportDataColumnError";
@@ -11,7 +12,7 @@ export class ImportDataColumnError extends Component {
     });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.state = proxy({
             isExpanded: false,

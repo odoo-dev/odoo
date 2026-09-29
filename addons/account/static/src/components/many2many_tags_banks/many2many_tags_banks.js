@@ -2,11 +2,11 @@ import {
     many2ManyTagsField,
     Many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
-import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
 import { _t } from "@web/core/l10n/translation";
-import { Component, onMounted, t, useProps } from "@odoo/owl";
+import { Component, onMounted, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class BankTag extends Component {
     static template = "account.BankTag";
@@ -32,7 +32,7 @@ export class FieldMany2ManyTagsBanks extends Many2ManyTagsField {
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         onMounted(async () => {
             // Needed when you create a partner (from a move for example), we want the partner to be saved to be able
             // to have it as account holder

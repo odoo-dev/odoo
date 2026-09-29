@@ -4,7 +4,8 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, proxy, signal } from "@odoo/owl";
+import { Component, proxy, signal, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -17,7 +18,7 @@ export class CustomFavoriteItem extends Component {
     descriptionRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.notificationService = useService("notification");
         this.state = proxy({
             description: this.env.config.getDisplayName(),

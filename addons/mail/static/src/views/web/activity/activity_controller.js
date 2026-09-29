@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { useModel } from "@web/model/model";
@@ -11,6 +11,7 @@ import { SearchBar } from "@web/search/search_bar/search_bar";
 import { usePager } from "@web/search/pager_hook";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ActivityController extends Component {
     static components = { Layout, SearchBar, CogMenu };
@@ -27,7 +28,7 @@ export class ActivityController extends Component {
         this.model = proxy(useModel(this.props.Model, this.modelParams));
 
         this.dialog = useService("dialog");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.store = useService("mail.store");
         this.ui = useService("ui");
         usePager(() => {

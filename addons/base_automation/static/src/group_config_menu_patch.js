@@ -1,3 +1,4 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
@@ -5,6 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
 import { TRIGGER_FILTERS } from "./utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const SUPPORTED_TRIGGERS = [
     "on_stage_set",
@@ -49,7 +51,7 @@ function enrichContext(context, group) {
 patch(GroupConfigMenu.prototype, {
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
     },
 

@@ -1,8 +1,9 @@
 import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
+import { useOwnedDialogs } from "@web/core/utils/hooks";
 import { TimeOffPlugin } from "./time_off_plugin";
 import { AllocationFormViewDialog } from "./view_dialog/allocation_form_view_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export function formatNumber(lang, number, maxDecimals = 2) {
     const numberFormat = new Intl.NumberFormat(lang, { maximumFractionDigits: maxDecimals });
@@ -21,7 +22,7 @@ export function useMandatoryDays(props) {
 }
 
 export function useLeaveCancelWizard() {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
 
     return (leaveId, callback) => {
         action.doAction(

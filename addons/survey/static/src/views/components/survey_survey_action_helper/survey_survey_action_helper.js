@@ -1,12 +1,13 @@
 import { useService } from '@web/core/utils/hooks';
-import { Component, onWillStart } from '@odoo/owl';
+import { Component, onWillStart, usePlugin } from '@odoo/owl';
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class SurveySurveyActionHelper extends Component {
     static template = 'survey.SurveySurveyActionHelper';
 
     setup() {
         this.orm = useService('orm');
-        this.action = useService('action');
+        this.action = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.surveyTemplateData = await this.orm.call(

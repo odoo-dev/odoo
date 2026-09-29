@@ -1,4 +1,4 @@
-import { onMounted } from "@odoo/owl";
+import { onMounted, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -10,6 +10,7 @@ import {
     provideViewButtonHandler,
     useViewButtonHandler,
 } from "@web/views/view_button/view_button_hook";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /*
  * Common code for theme installation/update handler.
@@ -19,7 +20,7 @@ import {
 export function useLoaderOnClick() {
     const website = useService("website");
     const orm = useService("orm");
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const previousOnClickViewButton = useViewButtonHandler();
     provideViewButtonHandler(async function onClickViewButton(params) {
         const name = params.clickParams.name;

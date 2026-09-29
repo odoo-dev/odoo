@@ -1,9 +1,10 @@
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { getActionRecords, getPresenceActionItems } from "../views/hooks";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -21,7 +22,7 @@ export class PresenceCogMenu extends Component {
 
         this.presenceActionItems = [];
         this.orm = useService('orm');
-        this.actionService = useService('action');
+        this.actionService = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.records = await getActionRecords(this.orm);

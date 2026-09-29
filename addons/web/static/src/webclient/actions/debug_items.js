@@ -3,12 +3,12 @@ import { editModelDebug } from "@web/core/debug/debug_utils";
 import { registry } from "@web/core/registry";
 import { usePlugin } from "@odoo/owl";
 import { ORM } from "@web/core/orm_plugin";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const debugRegistry = registry.category("debug");
 
 function editAction({ action }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     if (!action.id) {
         return null;
     }
@@ -25,7 +25,7 @@ function editAction({ action }) {
 }
 
 function viewFields({ action }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const orm = usePlugin(ORM);
 
     if (!action.res_model) {
@@ -61,7 +61,7 @@ function viewFields({ action }) {
 }
 
 function ViewModel({ action }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const orm = usePlugin(ORM);
 
     if (!action.res_model) {
@@ -85,7 +85,7 @@ function ViewModel({ action }) {
 }
 
 function manageFilters({ action }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     if (!action.res_model) {
         return null;
     }
@@ -115,7 +115,7 @@ function manageFilters({ action }) {
 }
 
 function viewAccessRights({ accessRights, action }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const orm = usePlugin(ORM);
 
     if (!action.res_model || !accessRights.canSeeAccess) {

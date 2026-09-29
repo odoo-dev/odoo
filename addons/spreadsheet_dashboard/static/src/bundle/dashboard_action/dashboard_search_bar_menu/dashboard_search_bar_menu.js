@@ -1,4 +1,4 @@
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { useService } from "@web/core/utils/hooks";
 import { deepEqual } from "@web/core/utils/objects";
@@ -12,6 +12,7 @@ import {
 import { DashboardFilterList } from "../dashboard_filter_list/dashboard_filter_list";
 import { DashboardCustomFavoriteItem } from "./dashboard_custom_favorite_item";
 import { FACET_ICONS } from "@web/search/utils/misc";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * This component manages the state and behavior of the filter value list
@@ -34,7 +35,7 @@ export class DashboardSearchBarMenu extends Component {
     setup() {
         this.orm = useService("orm");
         this.facet_icons = FACET_ICONS;
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.loader = useService("spreadsheet_dashboard_loader");
         this.searchModel = this.loader.getDashboard(this.loader.activeDashboardId).searchModel;
         this.sharedFavoritesExpanded = proxy({ value: false });

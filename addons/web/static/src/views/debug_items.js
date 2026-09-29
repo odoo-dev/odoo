@@ -12,6 +12,7 @@ import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { Component, onWillStart, usePlugin, proxy, t, useProps, xml } from "@odoo/owl";
 import { serializeDate, serializeDateTime } from "../core/l10n/dates";
 import { ORM } from "@web/core/orm_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const debugRegistry = registry.category("debug");
 
@@ -48,7 +49,7 @@ debugRegistry.category("view").add("getView", getView);
 //------------------------------------------------------------------------------
 
 export function editView({ accessRights, component }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     if (!accessRights.canEditView) {
         return null;
     }
@@ -76,7 +77,7 @@ debugRegistry.category("view").add("editView", editView);
 //------------------------------------------------------------------------------
 
 export function editSearchView({ accessRights, component }) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     if (!accessRights.canEditView) {
         return null;
     }
@@ -392,7 +393,7 @@ debugRegistry.category("form").add("setDefaults", setDefaults);
 //------------------------------------------------------------------------------
 
 export function manageAttachments({ component }) {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const resId = component.model.root.resId;
     if (!resId) {
         return null; // No record

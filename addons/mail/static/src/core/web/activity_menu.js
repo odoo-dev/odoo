@@ -1,4 +1,4 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 
 import { useDiscussSystray } from "@mail/utils/common/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -9,6 +9,7 @@ import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
 import { useCommand } from "@web/core/commands/command_hook";
 import { _t } from "@web/core/l10n/translation";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ActivityMenu extends Component {
     static components = { Dropdown };
@@ -17,7 +18,7 @@ export class ActivityMenu extends Component {
     setup() {
         super.setup();
         this.store = useService("mail.store");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.userId = user.userId;
         this.ui = useService("ui");
         this.dropdown = useDropdownState();

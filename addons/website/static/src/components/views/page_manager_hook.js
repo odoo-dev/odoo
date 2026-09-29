@@ -2,6 +2,7 @@ import { useEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
 import { onWillStart, proxy, usePlugin } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
@@ -17,7 +18,7 @@ export function usePageManager({ resModel, createAction }) {
     const env = useEnv();
     const website = useService("website");
     const dialog = useService("dialog");
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const debugMode = usePlugin(DebugModePlugin);
     const websiteSelection = debugMode.isActive() ? [{ id: 0, name: _t("All Websites") }] : [];
     const state = proxy({

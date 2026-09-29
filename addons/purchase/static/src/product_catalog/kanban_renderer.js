@@ -1,14 +1,15 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
 import { x2ManyCommands } from "@web/core/orm_plugin";
 
 import { ProductCatalogKanbanRenderer } from "@product/product_catalog/kanban_renderer";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class PurchaseProductCatalogKanbanRenderer extends ProductCatalogKanbanRenderer {
     static template = "PurchaseProductCatalogKanbanRenderer";
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     get createProductContext() {
@@ -40,7 +41,7 @@ export class PurchaseProductCatalogKanbanRenderer extends ProductCatalogKanbanRe
                             type: "ir.actions.act_window_close",
                         });
                     },
-                }
+                },
             }
         );
     }

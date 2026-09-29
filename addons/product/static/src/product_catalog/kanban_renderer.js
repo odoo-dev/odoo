@@ -1,7 +1,8 @@
+import { usePlugin } from "@odoo/owl";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
-import { useService } from "@web/core/utils/hooks";
 
 import { ProductCatalogKanbanRecord } from "./kanban_record";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProductCatalogKanbanRenderer extends KanbanRenderer {
     static template = "ProductCatalogKanbanRenderer";
@@ -12,7 +13,7 @@ export class ProductCatalogKanbanRenderer extends KanbanRenderer {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     get createProductContext() {

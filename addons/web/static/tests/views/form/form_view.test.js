@@ -30,6 +30,7 @@ import {
     proxy,
     signal,
     useEffect,
+    usePlugin,
     useProps,
     xml,
 } from "@odoo/owl";
@@ -69,7 +70,7 @@ import { makeErrorFromResponse } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { config as transitionConfig } from "@web/core/transition";
 import { SIZES } from "@web/core/ui/ui_utils";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { redirect } from "@web/core/utils/urls";
 import { CharField } from "@web/views/fields/char/char_field";
 import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
@@ -82,6 +83,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { FormController } from "@web/views/form/form_controller";
 import { AttachDocumentWidget } from "@web/views/widgets/attach_document/attach_document";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { WebClient } from "@web/webclient/webclient";
 
 const fieldsRegistry = registry.category("fields");
@@ -12053,7 +12055,7 @@ test(`coming to an action with an error from a form view with a dirty x2m`, asyn
             </div>
         `;
         setup() {
-            this.actionService = useService("action");
+            this.actionService = usePlugin(ActionPlugin);
         }
         onClick() {
             this.actionService.doAction({
@@ -12132,7 +12134,7 @@ test(`coming to an action with an error from a form view with a record in creati
                     <button t-on-click="this.onClick">MyButton</button>
                 </div>`;
         setup() {
-            this.actionService = useService("action");
+            this.actionService = usePlugin(ActionPlugin);
         }
         onClick() {
             this.actionService.doAction({

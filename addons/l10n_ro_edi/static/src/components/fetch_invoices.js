@@ -1,8 +1,8 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 
 export class FetchInvoicesCogMenu extends Component {
@@ -10,7 +10,7 @@ export class FetchInvoicesCogMenu extends Component {
     static components = { DropdownItem };
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async fetchInvoices() {

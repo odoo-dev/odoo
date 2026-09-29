@@ -21,6 +21,7 @@ import {
 } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { EmbeddedActionsPanel, useEmbeddedActions } from "./embedded_actions";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const STICKY_CLASS = "o_mobile_sticky";
 const DEFAULT_DISPLAY = {
@@ -45,7 +46,7 @@ export class ControlPanel extends Component {
 
     setup() {
         this.embeddedPanelState = useEmbeddedActions();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.uiService = useService("ui");
         this.pagerProps = this.env.config.pagerProps

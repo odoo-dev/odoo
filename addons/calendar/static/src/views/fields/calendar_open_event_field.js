@@ -1,14 +1,15 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { charFieldProps } from "@web/views/fields/char/char_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class CalendarOpenEventField extends Component {
     static template = "calendar.CalendarOpenEventField";
     props = useProps(charFieldProps);
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
     }
     async onClickOpenRecord() {

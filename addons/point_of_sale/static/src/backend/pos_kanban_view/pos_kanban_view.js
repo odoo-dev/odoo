@@ -2,13 +2,14 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
 import { cookie } from "@web/core/browser/cookie";
 import { kanbanView } from "@web/views/kanban/kanban_view";
-import { onWillStart, useProps, proxy, t } from "@odoo/owl";
+import { onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 async function updatePosKanbanViewState(orm, stateObj) {
     const result = await orm
@@ -22,7 +23,7 @@ export class PosKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.initialPosState = {
             has_pos_config: true,
             has_chart_template: true,
@@ -41,7 +42,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.posState = proxy(this.props.initialPosState);
         this.loadScenario = useTrackedAsync(
             async ({ functionName, isRestaurant }) =>

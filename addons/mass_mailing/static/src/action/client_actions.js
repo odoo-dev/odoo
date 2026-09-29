@@ -1,12 +1,13 @@
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { htmlSprintf } from "@web/core/utils/html";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 registry.category("actions").add("res_partner_to_list_results", (env, action) => {
     const { notification, next } = action.params;
     const { button, message, type } = notification;
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const notificationService = useService("notification");
     const onButtonClick = function () {
         this.close(); // Close notification

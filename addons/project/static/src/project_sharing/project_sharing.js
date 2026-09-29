@@ -1,16 +1,17 @@
 import { location } from "@web/core/browser/browser";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
 import { ActionContainer } from "@web/webclient/actions/action_container";
-import { Component, onMounted, proxy, useListener } from "@odoo/owl";
+import { Component, onMounted, proxy, useListener, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectSharingWebClient extends Component {
     static components = { ActionContainer, MainComponentsContainer };
     static template = "project.ProjectSharingWebClient";
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         useOwnDebugContext({ categories: ["default"] });
         this.state = proxy({
             fullscreen: false,

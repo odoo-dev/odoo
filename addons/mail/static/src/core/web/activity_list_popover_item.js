@@ -5,12 +5,13 @@ import { ActivityAssignPopover } from "@mail/core/web/activity_assign_popover";
 import { propComputed } from "@mail/utils/common/hooks";
 import { toggleFn } from "@mail/utils/common/signal";
 
-import { Component, computed, signal, t, useProps } from "@odoo/owl";
+import { Component, computed, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ActivityListPopoverItem extends Component {
     static components = { ActivityMailTemplate, ActivityMarkAsDone, FileUploader };
@@ -18,7 +19,7 @@ export class ActivityListPopoverItem extends Component {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.store = useService("mail.store");
         this.activity = propComputed("activity", t.instanceOf(this.store["mail.activity"]));
         this.onActivityChanged = useProps.static("onActivityChanged", t.function([]).optional());
@@ -62,11 +63,14 @@ export class ActivityListPopoverItem extends Component {
         } else if (diff == 7) {
             return _t("Due in 1 week");
         } else {
-            return _t("Due %s", this.activity().date_deadline.toLocaleString({
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-            }));
+            return _t(
+                "Due %s",
+                this.activity().date_deadline.toLocaleString({
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                })
+            );
         }
     }
 
@@ -127,10 +131,9 @@ export class ActivityListPopoverItem extends Component {
             model: activity.res_model,
             id: activity.res_id,
         });
-        const recipients = [
-            ...thread.suggestedRecipients,
-            ...thread.additionalRecipients,
-        ].filter((r) => r.partner_id);
+        const recipients = [...thread.suggestedRecipients, ...thread.additionalRecipients].filter(
+            (r) => r.partner_id
+        );
         this.onActivityChanged?.(thread);
         this.action.doAction(
             {

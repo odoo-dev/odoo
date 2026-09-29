@@ -1,7 +1,8 @@
-import { Component, onMounted, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, onMounted, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class EventRegistrationSummaryDialog extends Component {
     static template = "event.EventRegistrationSummaryDialog";
@@ -17,7 +18,7 @@ export class EventRegistrationSummaryDialog extends Component {
     continueButtonRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.isBarcodeScannerSupported = isBarcodeScannerSupported();
         this.orm = useService("orm");
         this.notification = useService("notification");

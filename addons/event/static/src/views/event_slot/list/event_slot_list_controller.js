@@ -1,11 +1,12 @@
+import { usePlugin } from "@odoo/owl";
 import { ListController } from "@web/views/list/list_controller";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class EventSlotListController extends ListController {
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
     /**
      * @override

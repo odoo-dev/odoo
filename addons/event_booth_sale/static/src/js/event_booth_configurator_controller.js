@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { formView } from "@web/views/form/form_view";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * This controller is overridden to allow configuring sale_order_lines through a popup
@@ -13,7 +14,7 @@ import { formView } from "@web/views/form/form_view";
 class EventBoothConfiguratorController extends formView.Controller {
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async onRecordSaved(record) {

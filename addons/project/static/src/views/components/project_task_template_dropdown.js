@@ -7,6 +7,7 @@ import { user } from "@web/core/user";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { ProjectTemplateButtons } from "./project_template_buttons";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectTaskTemplateDropdown extends Component {
     static template = "project.TemplateDropdown";
@@ -28,7 +29,7 @@ export class ProjectTaskTemplateDropdown extends Component {
     });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.addDialog = useOwnedDialogs();

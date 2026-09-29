@@ -3,6 +3,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { evaluateExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";
 import { useEnv } from "@web/owl2/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export async function executeButtonCallback(el, fct) {
     let btns = [];
@@ -77,7 +78,7 @@ export function useViewButtonHandler() {
  * @param {Options} [options={}]
  */
 export function useViewButtons(ref, options = {}) {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const dialog = useService("dialog");
     const scope = useScope();
     const env = useEnv();

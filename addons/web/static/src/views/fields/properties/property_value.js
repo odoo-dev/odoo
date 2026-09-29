@@ -1,4 +1,4 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { getCurrency } from "@web/core/currency";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
@@ -28,6 +28,7 @@ import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relat
 import { PropertyTags } from "./property_tags";
 import { PropertyText } from "./property_text";
 import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class PropertyValueTag extends Component {
     static template = "web.PropertyValueTag";
@@ -103,7 +104,7 @@ export class PropertyValue extends Component {
         this.nbsp = nbsp;
 
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         this.openMany2X = useOpenMany2XRecord({
             resModel: this.props.model,

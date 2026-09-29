@@ -1,4 +1,13 @@
-import { Component, proxy, signal, t, useEnv, useLayoutEffect, useProps } from "@odoo/owl";
+import {
+    Component,
+    proxy,
+    signal,
+    t,
+    useEnv,
+    useLayoutEffect,
+    usePlugin,
+    useProps,
+} from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
@@ -10,6 +19,7 @@ import { Transition } from "@web/core/transition";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class EmbeddedActionsConfigHandler {
     constructor(parentActionId, currentActiveId, parentResModel, ormService) {
@@ -372,7 +382,7 @@ export class EmbeddedActionsState {
 export function useEmbeddedActions() {
     const env = useEnv();
     const orm = useService("orm");
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const dialogService = useService("dialog");
     const notificationService = useService("notification");
 

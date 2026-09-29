@@ -5,8 +5,18 @@ import { url } from "@web/core/utils/urls";
 import { standardFieldProps } from "../standard_field_props";
 import { FileUploader } from "../file_handler";
 
-import { Component, onWillUpdateProps, proxy, signal, t, useOnChange, useProps } from "@odoo/owl";
+import {
+    Component,
+    onWillUpdateProps,
+    proxy,
+    signal,
+    t,
+    useOnChange,
+    usePlugin,
+    useProps,
+} from "@odoo/owl";
 import { hidePDFJSButtons } from "@web/core/utils/pdfjs";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class PdfViewerField extends Component {
     static template = "web.PdfViewerField";
@@ -22,7 +32,7 @@ export class PdfViewerField extends Component {
 
     setup() {
         this.notification = useService("notification");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.state = proxy({
             isValid: true,
             objectUrl: "",
@@ -66,10 +76,13 @@ export class PdfViewerField extends Component {
     }
 
     update({ name, data }) {
-        const payload = data || name ? {
-            filename: name || "",
-            content: data || false,
-        } : false;
+        const payload =
+            data || name
+                ? {
+                      filename: name || "",
+                      content: data || false,
+                  }
+                : false;
         const changes = { [this.props.name]: payload };
         if (this.props.fileNameField && this.props.record.data[this.props.fileNameField] !== name) {
             changes[this.props.fileNameField] = name || false;

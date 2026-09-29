@@ -2,15 +2,15 @@
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { useService } from "@web/core/utils/hooks";
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class OpenDecimalPrecisionButton extends Component {
     static template = "account.OpenDecimalPrecisionButton";
     props = useProps(standardFieldProps);
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async discardAndOpen() {

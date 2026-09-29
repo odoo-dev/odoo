@@ -1,5 +1,6 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
 
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { HierarchyRenderer } from "@web_hierarchy/hierarchy_renderer";
 
 export class HrEmployeeHierarchyRenderer extends HierarchyRenderer {
@@ -10,7 +11,7 @@ export class HrEmployeeHierarchyRenderer extends HierarchyRenderer {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     get employeesInCycleIds() {

@@ -1,7 +1,8 @@
+import { BusMonitoringPlugin } from "@bus/services/bus_monitoring_plugin";
 import { ActionList } from "@mail/core/common/action_list";
 import { ChatWindow } from "@mail/core/common/chat_window";
 import { useHover, useMovable } from "@mail/utils/common/hooks";
-import { Component, computed, proxy, signal, useListener } from "@odoo/owl";
+import { Component, computed, proxy, signal, useListener, usePlugin } from "@odoo/owl";
 
 import { Action } from "@mail/core/common/action";
 import { browser } from "@web/core/browser/browser";
@@ -30,7 +31,7 @@ export class ChatHub extends Component {
         super.setup();
         this.store = useService("mail.store");
         this.ui = useService("ui");
-        this.busMonitoring = useService("bus.monitoring_service");
+        this.busMonitoring = usePlugin(BusMonitoringPlugin);
         this.bubblesHover = useHover(this.bubblesRef);
         this.moreHover = useHover([this.moreButtonRef, this.hiddenMenuRef], {
             onHover: () => (this.more.isOpen = true),

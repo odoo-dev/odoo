@@ -1,9 +1,10 @@
-import { Component, onWillStart, useProps, proxy, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 import { ProjectTemplateButtons } from "./project_template_buttons";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectTemplateDropdown extends Component {
     static template = "project.ProjectTemplateDropdown";
@@ -23,7 +24,7 @@ export class ProjectTemplateDropdown extends Component {
     });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.state = proxy({ projectTemplates: [] });
         onWillStart(this.onWillStart);

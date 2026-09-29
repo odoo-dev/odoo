@@ -4,11 +4,12 @@ import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 
-import { Component, proxy, signal } from "@odoo/owl";
+import { Component, proxy, signal, usePlugin } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { _t } from "@web/core/l10n/translation";
 import { symmetricalDifference } from "@web/core/utils/arrays";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { SwitchCompanyItem } from "@web/webclient/switch_company_menu/switch_company_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -195,7 +196,7 @@ export class SwitchCompanyMenu extends Component {
     setup() {
         this.dropdown = useDropdownState();
         this.user = user;
-        const actionService = useService("action");
+        const actionService = usePlugin(ActionPlugin);
 
         this.companySelector = proxy(
             new this.constructor.CompanySelector(actionService, this.dropdown)

@@ -1,10 +1,11 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectProjectGroupConfigMenu extends GroupConfigMenu {
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async deleteGroup() {

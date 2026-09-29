@@ -1,12 +1,13 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { QuickVideoSettings } from "../common/quick_video_settings";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 patch(QuickVideoSettings.prototype, {
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     },
     onClickVideoSettings() {
         this.actionService.doAction({

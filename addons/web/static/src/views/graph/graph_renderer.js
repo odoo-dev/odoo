@@ -15,13 +15,14 @@ import { renderToMarkup } from "@web/core/utils/render";
 import { useChart } from "@web/core/utils/chart_hook";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, markup, signal, t, useProps } from "@odoo/owl";
+import { Component, markup, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { cookie } from "@web/core/browser/cookie";
 import { createElementWithContent } from "@web/core/utils/html";
 import { ReportViewMeasures } from "@web/views/view_components/report_view_measures";
 import { Widget } from "@web/views/widgets/widget";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const NO_DATA = _t("No data");
 const formatters = registry.category("formatters");
@@ -129,7 +130,7 @@ export class GraphRenderer extends Component {
     setup() {
         this.model = this.props.model;
 
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.uiService = useService("ui");
 
         this.tooltip = null;

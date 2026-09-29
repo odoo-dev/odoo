@@ -2,9 +2,9 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class TeamSwitcher extends Component {
     static template = "crm.team_switcher";
@@ -15,7 +15,7 @@ export class TeamSwitcher extends Component {
      */
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.isSaleManager = await user.hasGroup("sales_team.group_sale_manager");

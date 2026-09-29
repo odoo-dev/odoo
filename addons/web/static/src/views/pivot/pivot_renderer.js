@@ -1,4 +1,4 @@
-import { Component, onWillUpdateProps, signal, useProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, signal, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -17,6 +17,7 @@ import { getIntervalOptions } from "@web/search/utils/dates";
 import { GROUPABLE_TYPES } from "@web/search/utils/misc";
 import { MultiCurrencyPopover } from "@web/views/view_components/multi_currency_popover";
 import { ReportViewMeasures } from "@web/views/view_components/report_view_measures";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const formatters = registry.category("formatters");
 
@@ -51,7 +52,7 @@ export class PivotRenderer extends Component {
     tableRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.uiService = useService("ui");
         this.model = this.props.model;
         this.table = this.model.getTable();

@@ -1,8 +1,9 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class PosOpenUIButton extends Component {
     static template = "point_of_sale.PosOpenUIButton";
@@ -13,7 +14,7 @@ export class PosOpenUIButton extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     // Visibility method intended to be overridden by other modules

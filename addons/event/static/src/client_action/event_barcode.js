@@ -8,7 +8,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { url } from '@web/core/utils/urls';
 import { EventRegistrationSummaryDialog } from "./event_registration_summary_dialog";
 import { scanBarcode } from "@web/core/barcode/barcode_dialog";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { BarcodePlugin } from "@barcodes/barcode_plugin";
 
 export class EventScanView extends Component {
@@ -18,7 +18,7 @@ export class EventScanView extends Component {
     props = useProps(standardActionServiceProps);
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.orm = useService("orm");

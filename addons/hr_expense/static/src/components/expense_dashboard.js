@@ -3,6 +3,7 @@ import { DebugModePlugin } from '@web/core/debug_mode_plugin';
 import { Domain } from "@web/core/domain";
 import { useBus, useService } from '@web/core/utils/hooks';
 import { formatMonetary } from "@web/views/fields/formatters";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ExpenseDashboard extends Component {
     static template = "hr_expense.ExpenseDashboard";
@@ -12,7 +13,7 @@ export class ExpenseDashboard extends Component {
     setup() {
         super.setup();
         this.orm = useService('orm');
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.state = proxy({ expenses: {} });
         useBus(this.env.searchModel, "update", async () => { await this.fetchExpenseDashboardData(); });
 

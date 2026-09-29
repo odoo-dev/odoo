@@ -10,6 +10,7 @@ import { post } from "@web/core/network/http_service";
 import { redirect } from "@web/core/utils/urls";
 import { useService } from "@web/core/utils/hooks";
 import { ORM } from "@web/core/orm_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 function supportItem() {
     const url = session.support_url;
@@ -63,7 +64,7 @@ function separator() {
 }
 
 export function preferencesItem() {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const orm = usePlugin(ORM);
 
     return {

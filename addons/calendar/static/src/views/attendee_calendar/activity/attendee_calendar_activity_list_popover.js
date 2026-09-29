@@ -2,8 +2,9 @@ import { AttendeeCalendarActivityListPopoverItem } from "@calendar/views/attende
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { useSubEnv } from "@web/owl2/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * @typedef {Object} Props
@@ -31,7 +32,7 @@ export class AttendeeCalendarActivityListPopover extends Component {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.store = useService("mail.store");
         this.uiService = useService("ui");
         this.limit = this.uiService.isSmall ? false : 5;

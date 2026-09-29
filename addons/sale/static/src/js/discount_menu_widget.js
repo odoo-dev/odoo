@@ -1,10 +1,10 @@
-import { Component, onWillStart, useProps } from "@odoo/owl";
+import { Component, onWillStart, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class DiscountMenuWidget extends Component {
     static template = "sale.DiscountMenuWidget";
@@ -12,7 +12,7 @@ export class DiscountMenuWidget extends Component {
     props = useProps({ ...standardWidgetProps });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.canAddManualDiscount = await user.hasGroup("sale.group_discount_per_so_line");

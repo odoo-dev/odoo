@@ -1,12 +1,14 @@
+import { usePlugin } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 function shouldUseArchiveOrUnlinkWizard(isDraft, now, partnerIds, recurrency, start) {
     return (
-        start >= now
-        && !isDraft
-        && (recurrency || !(partnerIds.length === 1 && partnerIds[0] === user.partnerId))
-    )
+        start >= now &&
+        !isDraft &&
+        (recurrency || !(partnerIds.length === 1 && partnerIds[0] === user.partnerId))
+    );
 }
 
 /**
@@ -15,11 +17,28 @@ function shouldUseArchiveOrUnlinkWizard(isDraft, now, partnerIds, recurrency, st
  * recurrence must be archived or deleted.
  */
 export function useArchiveOrUnlinkCalendarEvent() {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const orm = useService("orm");
 
-    return async ({ requestedAction, resId, isDraft, partnerIds, recurrency, start, defaultAction, nextAction }) => {
-        if (shouldUseArchiveOrUnlinkWizard(isDraft, luxon.DateTime.now(), partnerIds, recurrency, start)) {
+    return async ({
+        requestedAction,
+        resId,
+        isDraft,
+        partnerIds,
+        recurrency,
+        start,
+        defaultAction,
+        nextAction,
+    }) => {
+        if (
+            shouldUseArchiveOrUnlinkWizard(
+                isDraft,
+                luxon.DateTime.now(),
+                partnerIds,
+                recurrency,
+                start
+            )
+        ) {
             const actionOpenArchiveOrUnlinkWizard = await orm.call(
                 "calendar.event",
                 "action_open_archive_or_unlink_wizard",
@@ -31,14 +50,14 @@ export function useArchiveOrUnlinkCalendarEvent() {
         } else {
             defaultAction();
         }
-    }
+    };
 }
 
 /**
  * Display modals to send cancellation emails or select the events to delete or archive in the recurrency.
  */
 export function useArchiveOrUnlinkCalendarEvents() {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const orm = useService("orm");
 
     return async ({ requestedAction, records, defaultAction }) => {
@@ -46,7 +65,15 @@ export function useArchiveOrUnlinkCalendarEvents() {
         const now = luxon.DateTime.now();
         for (const record of records) {
             const { data } = record;
-            if (shouldUseArchiveOrUnlinkWizard(data.is_draft, now, data.partner_ids.resIds, data.recurrency, data.start)) {
+            if (
+                shouldUseArchiveOrUnlinkWizard(
+                    data.is_draft,
+                    now,
+                    data.partner_ids.resIds,
+                    data.recurrency,
+                    data.start
+                )
+            ) {
                 isArchiveOrUnlinkWizardRequired = true;
                 break;
             }
@@ -55,7 +82,7 @@ export function useArchiveOrUnlinkCalendarEvents() {
             const actionOpenArchiveOrUnlinkWizard = await orm.call(
                 "calendar.event",
                 "action_open_archive_or_unlink_wizard",
-                [records.map(record => record.resId), requestedAction]
+                [records.map((record) => record.resId), requestedAction]
             );
             if (actionOpenArchiveOrUnlinkWizard) {
                 actionService.doAction(actionOpenArchiveOrUnlinkWizard);
@@ -63,5 +90,5 @@ export function useArchiveOrUnlinkCalendarEvents() {
         } else {
             defaultAction();
         }
-    }
+    };
 }

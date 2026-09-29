@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { useService, useBus } from "@web/core/utils/hooks";
-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -9,7 +10,7 @@ export class EditInBackendSystrayItem extends Component {
     props = useProps({});
     setup() {
         this.websiteService = useService("website");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.state = proxy({ mainObjectName: "" });
 
         onWillStart(this._updateMainObjectName);

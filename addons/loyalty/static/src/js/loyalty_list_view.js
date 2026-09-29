@@ -1,8 +1,9 @@
-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { listView } from "@web/views/list/list_view";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class LoyaltyActionHelper extends Component {
     static template = "loyalty.LoyaltyActionHelper";
@@ -11,7 +12,7 @@ export class LoyaltyActionHelper extends Component {
     });
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.loyaltyTemplateData = await this.orm.call(

@@ -4,8 +4,9 @@ import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { session } from "@web/session";
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { isHTTPSorNakedDomainRedirection } from "./utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class WebsiteSwitcherSystrayItem extends Component {
     static template = "website.WebsiteSwitcherSystrayItem";
@@ -17,7 +18,7 @@ export class WebsiteSwitcherSystrayItem extends Component {
     setup() {
         this.websiteService = useService("website");
         this.notificationService = useService("notification");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     getElements() {

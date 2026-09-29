@@ -1,6 +1,7 @@
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class RecruitmentActionHelper extends Component {
     static template = "hr_recruitment.RecruitmentActionHelper";
@@ -11,7 +12,7 @@ export class RecruitmentActionHelper extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.state = proxy({
             hasDemoData: false,
         });

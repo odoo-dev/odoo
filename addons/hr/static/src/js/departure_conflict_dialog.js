@@ -6,12 +6,13 @@ import { _t } from "@web/core/l10n/translation";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 registry.category("actions").add("departure_conflict_dialog", async (env, actionDescr) => {
     const { title, message, employee_id } = actionDescr.params || {};
     const orm = usePlugin(ORM);
     const dialog = useService("dialog");
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
 
     return new Promise((resolve) => {
         dialog.add(ConfirmationDialog, {

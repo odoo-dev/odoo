@@ -1,5 +1,5 @@
 import { loadIframe } from "@mail/convert_inline/iframe_utils";
-import { Component, onMounted, proxy, signal, status, useProps } from "@odoo/owl";
+import { Component, onMounted, proxy, signal, status, usePlugin, useProps } from "@odoo/owl";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -9,6 +9,7 @@ import { useLayoutEffect } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { MailingPreviewDisplayModeToggle } from "../mailing_preview_mode_toggle/mailing_preview_mode_toggle";
 import { MassMailingPreviewRecordField } from "./mass_mailing_preview_record_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class MailingPreviewIframe extends Component {
     static template = "mass_mailing.MailingPreviewIframe";
@@ -23,7 +24,7 @@ export class MailingPreviewIframe extends Component {
 
     setup() {
         this.state = proxy(this.env.displayState);
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.ui = useService("ui");
         this.iframeLoaded = Promise.withResolvers();
 

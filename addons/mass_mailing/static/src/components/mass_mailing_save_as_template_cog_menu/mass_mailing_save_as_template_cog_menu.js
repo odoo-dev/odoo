@@ -7,6 +7,7 @@ import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { ORM } from "@web/core/orm_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -17,7 +18,7 @@ export class MassMailingSaveAsTemplateCogMenu extends Component {
     setup() {
         this.notification = usePlugin(NotificationPlugin);
         this.orm = usePlugin(ORM);
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.dropdown = useDropdownCloser();
     }

@@ -1,5 +1,5 @@
-import { Component, computed, useProps, t } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, computed, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class IapContainer extends Component {
     static template = "mysubscription.IapContainer";
@@ -16,7 +16,7 @@ class IapContainer extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     openSettings() {

@@ -1,11 +1,12 @@
+import { usePlugin } from "@odoo/owl";
 import { CalendarFilterSection } from "@web/views/calendar/calendar_filter_section/calendar_filter_section";
 import { CalendarFormDialog } from "@calendar/views/calendar_form/calendar_form_dialog";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Domain } from '@web/core/domain';
+import { Domain } from "@web/core/domain";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Filter event by calendars. eg. 'My Calendar' or 'Work Calendar'
@@ -19,7 +20,7 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
 
     setup() {
         super.setup();
-        this.action = useService('action');
+        this.action = usePlugin(ActionPlugin);
         this.state.activityFilterChecked = this.showActivities;
     }
 
@@ -50,11 +51,11 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
     // =========================================================================
 
     /*
-    * @override
-    * Only fetch records for the current user -> extended domain before the search
-    * Add a 'Create Calendar' and 'All calendars' options to the selection
-    * Override onSelect behavior to use existing calendar.user record
-    */
+     * @override
+     * Only fetch records for the current user -> extended domain before the search
+     * Add a 'Create Calendar' and 'All calendars' options to the selection
+     * Override onSelect behavior to use existing calendar.user record
+     */
     async loadSource(request) {
         const options = await super.loadSource(request);
 
@@ -62,24 +63,27 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
             cssClass: "o_calendar_dropdown_option",
             label: _t("Create Calendar"),
             onSelect: () => this.createCalendar(request),
-        })
+        });
 
         options.push({
             cssClass: "o_calendar_dropdown_option",
             label: _t("All calendars"),
-            onSelect: () => this.action.doAction("calendar.action_calendar_calendar")
-        })
+            onSelect: () => this.action.doAction("calendar.action_calendar_calendar"),
+        });
 
         return options;
     }
 
     getFilterDomain(activeIds) {
         const domain = super.getFilterDomain(activeIds);
-        return Domain.and([domain, [["calendar_user_ids", "any", [["user_id", "=", user.userId]]]]]).toList();
+        return Domain.and([
+            domain,
+            [["calendar_user_ids", "any", [["user_id", "=", user.userId]]]],
+        ]).toList();
     }
 
     async onFilterSelected(filterRecord) {
-        await this.orm.call('calendar.calendar', 'add_filter_to_list', [filterRecord[0]])
+        await this.orm.call("calendar.calendar", "add_filter_to_list", [filterRecord[0]]);
         await this.props.model.load();
     }
 
@@ -91,35 +95,37 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
             title: _t("New Calendar"),
             context: {
                 default_name: request,
-                show_google_sync: this.props.model.syncStatus.google_calendar === 'sync_active',
-                show_microsoft_sync: this.props.model.syncStatus.microsoft_calendar === 'sync_active',
+                show_google_sync: this.props.model.syncStatus.google_calendar === "sync_active",
+                show_microsoft_sync:
+                    this.props.model.syncStatus.microsoft_calendar === "sync_active",
             },
             onRecordSaved: async () => {
-                this.props.model.load()
+                this.props.model.load();
             },
         });
     }
     /*
-    * Owners of a calendar can edit the calendar record directly. Non-owners can only edit the
-    * calendar_user record which edits their user-specific settings for it. Similarly, only the
-    * owner of a calendar can delete it, non-owners can instead 'unsubscribe'
-    */
+     * Owners of a calendar can edit the calendar record directly. Non-owners can only edit the
+     * calendar_user record which edits their user-specific settings for it. Similarly, only the
+     * owner of a calendar can delete it, non-owners can instead 'unsubscribe'
+     */
     editCalendar(filter) {
         this.addDialog(CalendarFormDialog, {
             canExpand: false,
-            resModel: filter.accessRole === 'owner' ? "calendar.calendar" : "calendar.user",
+            resModel: filter.accessRole === "owner" ? "calendar.calendar" : "calendar.user",
             size: "md",
             title: _t("Edit Calendar"),
-            resId: filter.accessRole === 'owner' ? filter.value : filter.recordId,
+            resId: filter.accessRole === "owner" ? filter.value : filter.recordId,
             removeRecord: filter.isPrimary ? undefined : () => this.deleteCalendar(filter),
             context: {
                 default_calendar_id: filter.value,
-                show_google_sync: this.props.model.syncStatus.google_calendar === 'sync_active',
-                show_microsoft_sync: this.props.model.syncStatus.microsoft_calendar === 'sync_active',
+                show_google_sync: this.props.model.syncStatus.google_calendar === "sync_active",
+                show_microsoft_sync:
+                    this.props.model.syncStatus.microsoft_calendar === "sync_active",
             },
             onRecordSaved: async () => {
-                this.props.model.load()
-            }
+                this.props.model.load();
+            },
         });
     }
 
@@ -128,16 +134,16 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
             title: _t("Warning"),
             body: _t(
                 "If you are the only person using this calendar, all of it's events will be deleted." +
-                "Are you sure you want to proceed?\n\n" +
-                "This action cannot be reversed."
+                    "Are you sure you want to proceed?\n\n" +
+                    "This action cannot be reversed."
             ),
             confirmLabel: _t("Yes, delete this calendar"),
             cancelLabel: _t("Keep this calendar"),
             confirm: async () => {
-                await this.orm.unlink('calendar.user', [filter.recordId]);
-                await this.props.model.load()
+                await this.orm.unlink("calendar.user", [filter.recordId]);
+                await this.props.model.load();
             },
-            cancel: async () => {}
+            cancel: async () => {},
         };
     }
 
@@ -146,12 +152,16 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
     }
 
     /*
-    * @override - Always show the primary calendar first in the list
-    */
+     * @override - Always show the primary calendar first in the list
+     */
     getSortedFilters() {
         return super.getSortedFilters().sort((a, b) => {
-            if (a.isPrimary && !b.isPrimary) return -1;
-            if (b.isPrimary && !a.isPrimary) return 1;
+            if (a.isPrimary && !b.isPrimary) {
+                return -1;
+            }
+            if (b.isPrimary && !a.isPrimary) {
+                return 1;
+            }
             return 0;
         });
     }

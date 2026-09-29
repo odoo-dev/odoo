@@ -1,9 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
-import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
-import { t } from "@odoo/owl";
+import { t, usePlugin } from "@odoo/owl";
 import { PhoneField, phoneField, phoneFieldProps } from "@web/views/fields/phone/phone_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 Object.assign(phoneFieldProps, {
     enableButton: t.boolean().optional(true),
@@ -11,7 +11,7 @@ Object.assign(phoneFieldProps, {
 patch(PhoneField.prototype, {
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     },
     get actionButtons() {
         if (!this.props.enableButton || !this.value) {

@@ -1,4 +1,4 @@
-import { Component, types, useProps } from "@odoo/owl";
+import { Component, types, usePlugin, useProps } from "@odoo/owl";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -6,6 +6,7 @@ import { serializeDate } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/relational_model/record";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 const { DateTime } = luxon;
 
 /**
@@ -21,7 +22,7 @@ export class MailActivityListRescheduleDropdown extends Component {
     setup() {
         this.props = useProps({ record: types.instanceOf(Record) });
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         const today = DateTime.now().startOf("day");
         this.targetDays = {
             today: {

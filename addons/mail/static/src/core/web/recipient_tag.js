@@ -1,11 +1,12 @@
 import { useLayoutEffect } from "@web/owl2/utils";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { RecipientsInputTagsListPopover } from "./recipients_input_tags_list_popover";
 import { RecipientsPopover } from "./recipients_popover";
 
-import { Component, EventBus, signal, types, useProps } from "@odoo/owl";
+import { Component, EventBus, signal, types, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class RecipientTag extends Component {
     static template = "mail.RecipientTag";
@@ -25,7 +26,7 @@ export class RecipientTag extends Component {
             updateRecipient: types.function([types.string(), types.number()]),
         });
         this.ref = signal.ref();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         this.recipientPopover = usePopover(RecipientsPopover, {
             position: "bottom-middle",

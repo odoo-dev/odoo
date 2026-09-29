@@ -2,7 +2,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { Component, asyncComputed, useProps } from "@odoo/owl";
+import { Component, asyncComputed, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class DepartmentChart extends Component {
     static template = "hr.DepartmentChart";
@@ -11,7 +12,7 @@ export class DepartmentChart extends Component {
     setup() {
         super.setup();
 
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.hierarchy = asyncComputed(
             () =>

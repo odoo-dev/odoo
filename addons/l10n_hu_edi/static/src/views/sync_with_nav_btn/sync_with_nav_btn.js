@@ -1,15 +1,15 @@
 import { AccountMoveListController } from "@account/views/account_move_list/account_move_list_controller";
 import { accountMoveUploadListView } from "@account/views/account_move_list/account_move_list_view";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class SyncWithNavBtn extends Component {
     static template = "l10n_hu_edi.SyncWithNavBtn";
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.showButton = await this.env.services.orm.call(

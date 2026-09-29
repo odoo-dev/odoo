@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { ListController } from "@web/views/list/list_controller";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 
 export class DataCleaningCommonListController extends ListController {
@@ -7,7 +9,7 @@ export class DataCleaningCommonListController extends ListController {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.notificationService = useService("notification");
     }
 

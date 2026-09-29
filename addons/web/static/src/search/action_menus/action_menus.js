@@ -9,6 +9,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, asyncComputed, onWillStart, usePlugin, proxy, t, useProps } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { ConnectionLostError } from "@web/core/network/rpc";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export const STATIC_ACTIONS_GROUP_NUMBER = 1;
 export const ACTIONS_GROUP_NUMBER = 100;
@@ -53,7 +54,7 @@ export class ActionMenus extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.state = proxy({ printItems: [] });
         this.actionItems = asyncComputed(() => this.getActionItems(this.props), { initial: [] });

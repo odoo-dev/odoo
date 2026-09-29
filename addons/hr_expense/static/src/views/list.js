@@ -10,7 +10,8 @@ import { listView } from "@web/views/list/list_view";
 
 import { ListController } from "@web/views/list/list_controller";
 import { ListRenderer, listRendererProps } from "@web/views/list/list_renderer";
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ExpenseListController extends ExpenseDocumentUpload(ListController) {
     static template = `hr_expense.ListView`;
@@ -18,7 +19,7 @@ export class ExpenseListController extends ExpenseDocumentUpload(ListController)
     setup() {
         super.setup();
         this.orm = useService('orm');
-        this.actionService = useService('action');
+        this.actionService = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             [this.userIsExpenseTeamApprover, this.userIsAccountInvoicing, this.userHasEmployee] =

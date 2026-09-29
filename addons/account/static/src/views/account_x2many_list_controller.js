@@ -1,13 +1,15 @@
+import { usePlugin } from "@odoo/owl";
 import { ListController } from "@web/views/list/list_controller";
 import { useService } from "@web/core/utils/hooks";
 import {registry} from "@web/core/registry";
 import {listView} from "@web/views/list/list_view";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AccountX2ManyListController extends ListController {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async openRecord(record) {

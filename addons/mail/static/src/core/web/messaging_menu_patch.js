@@ -1,9 +1,11 @@
 import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_menu";
 import { attClassObjectToString } from "@mail/utils/common/format";
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 Object.assign(MessagingMenu.components, { NotificationItem });
 
@@ -11,7 +13,7 @@ Object.assign(MessagingMenu.components, { NotificationItem });
 const messagingMenuPatch = {
     setup() {
         super.setup(...arguments);
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.attClassObjectToString = attClassObjectToString;
     },

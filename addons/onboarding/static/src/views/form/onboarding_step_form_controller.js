@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { FormController } from "@web/views/form/form_controller";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Controller to use for an onboarding step dialog, not the
@@ -8,7 +10,7 @@ import { useService } from "@web/core/utils/hooks";
 export default class OnboardingStepFormController extends FormController {
     setup() {
         super.setup();
-        this.action = useService('action');
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService('orm');
     }
     /**

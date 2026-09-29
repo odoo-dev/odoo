@@ -1,9 +1,9 @@
 import { useSubEnv } from "@web/owl2/utils";
-import { Component, EventBus, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, EventBus, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { MoOverviewLine } from "../mo_overview_line/mrp_mo_overview_line";
 import { MoOverviewDisplayFilter } from "../mo_overview_display_filter/mrp_mo_overview_display_filter";
 import { MoOverviewComponentsBlock } from "../mo_overview_components_block/mrp_mo_overview_components_block";
@@ -21,7 +21,7 @@ export class MoOverview extends Component {
     static template = "mrp.MoOverview";
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.ormService = useService("orm");
         this.unfoldedIds = new Set();
         this.context = {};

@@ -4,10 +4,11 @@ import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/relational_model/record";
 
-import { Component, onWillStart, proxy, types, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, types, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class MailComposerTemplateSelector extends Component {
     static template = "mail.MailComposerTemplateSelector";
@@ -15,7 +16,7 @@ export class MailComposerTemplateSelector extends Component {
 
     setup() {
         this.props = useProps({ record: types.instanceOf(Record) });
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.limit = 80;
 

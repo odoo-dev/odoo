@@ -1,12 +1,13 @@
 import { ActionList } from "@mail/core/common/action_list";
 import { ImStatus } from "@mail/core/common/im_status";
 
-import { Component, computed, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, computed, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AvatarCard extends Component {
     static template = "mail.AvatarCard";
@@ -23,7 +24,7 @@ export class AvatarCard extends Component {
             id: t.number(),
             model: t.selection(AvatarCard.allowedModels),
         });
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.store = useService("mail.store");
         this.dialog = useService("dialog");
         this.store.fetchStoreData("avatar_card", {

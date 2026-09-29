@@ -1,9 +1,9 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class InvoiceGuide extends Component {
     static template = "account.InvoiceGuide";
@@ -11,7 +11,7 @@ export class InvoiceGuide extends Component {
     props = useProps(standardWidgetProps);
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.kanbanDashboard = JSON.parse(this.props.record.data.kanban_dashboard);
     }
 

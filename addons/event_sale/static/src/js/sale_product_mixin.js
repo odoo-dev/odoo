@@ -1,12 +1,13 @@
+import { usePlugin } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { SaleOrderLineProductField } from "@sale/js/sale_product_field/sale_product_field";
 import { SaleLabelTextField } from "@sale/js/sale_label_text/sale_label_text";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const eventSaleProductMixin = () => ({
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     },
     get isEvent() {
         return this.props.record.data.service_tracking === "event";

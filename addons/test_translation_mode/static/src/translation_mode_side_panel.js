@@ -1,7 +1,8 @@
-import { Component, onWillDestroy, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, onWillDestroy, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { normalizedMatch } from "@web/core/l10n/utils";
 import { useService } from "@web/core/utils/hooks";
 import { isVisible } from "@web/core/utils/ui";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * @typedef {import("./translation_mode_service").TargetedTranslation} TargetedTranslation
@@ -83,7 +84,7 @@ export class TranslationModeSidePanel extends Component {
     rootRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.localization = useService("localization");
         this.orm = useService("orm");
         this.translationMode = useService("translation_mode");

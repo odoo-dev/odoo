@@ -1,9 +1,9 @@
 import { KanbanRenderer, kanbanRendererProps } from '@web/views/kanban/kanban_renderer';
 import { ProjectTaskKanbanRecord } from './project_task_kanban_record';
 import { ProjectTaskKanbanHeader } from './project_task_kanban_header';
-import { useService } from '@web/core/utils/hooks';
-import { onWillStart, useProps, t } from "@odoo/owl";
+import { onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { user } from "@web/core/user";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectTaskKanbanRenderer extends KanbanRenderer {
     static template = "project.ProjectTaskKanbanRenderer";
@@ -17,7 +17,7 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
 
     setup() {
         super.setup();
-        this.action = useService('action');
+        this.action = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             this.isProjectManager = await user.hasGroup('project.group_project_manager');

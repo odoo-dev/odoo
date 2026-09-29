@@ -1,12 +1,12 @@
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectTaskGroupConfigMenu extends GroupConfigMenu {
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         this.isProjectManager = false;
         onWillStart(async () => {

@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { TimeOffPlugin } from "../views/time_off_plugin";
 import { TimeOffCard } from "./time_off_card";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class TimeOffDashboard extends Component {
     static components = { TimeOffCard, DateTimeInput };
@@ -16,7 +17,7 @@ export class TimeOffDashboard extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.newAllocRequest = useNewAllocationRequest();
         this.state = proxy({
             date: luxon.DateTime.now(),
@@ -72,7 +73,10 @@ export class TimeOffDashboard extends Component {
             type: "ir.actions.act_window",
             name: _t("Pending Allocations"),
             res_model: "hr.leave.allocation",
-            views: [[false, "list"], [false, "form"]],
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
             domain: [["state", "in", ["confirm", "validate1"]]],
             context,
         });

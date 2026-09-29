@@ -1,15 +1,16 @@
+import { usePlugin } from "@odoo/owl";
 import {
     many2ManyTagsField,
     Many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/relational_model/record";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class FieldMany2ManyTagsSalaryBank extends Many2ManyTagsField {
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         const parentOpenMany2xRecord = this.openMany2xRecord;
         this.openMany2xRecord = async (...args) => {
             const result = await parentOpenMany2xRecord(...args);

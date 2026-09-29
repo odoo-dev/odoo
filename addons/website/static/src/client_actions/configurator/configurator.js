@@ -29,7 +29,7 @@ import {
     usePlugin,
     useProps,
 } from "@odoo/owl";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { fuzzyLevenshteinLookup } from "@web/core/utils/search";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 
@@ -1482,7 +1482,7 @@ export class Configurator extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.website = useService("website");
 
         // Using the back button must update the router state.

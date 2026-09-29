@@ -1,7 +1,8 @@
 import { registry } from "@web/core/registry";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const WARNING_TYPE_ORDER = ["danger", "warning", "info"];
 
@@ -14,7 +15,7 @@ export class ActionableErrors extends Component {
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
     }
 

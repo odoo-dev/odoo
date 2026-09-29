@@ -1,3 +1,4 @@
+import { BusPlugin } from "@bus/services/bus_plugin";
 import { Component, onMounted, onPatched, signal, usePlugin } from "@odoo/owl";
 import { OdooLogo } from "@point_of_sale/app/components/odoo_logo/odoo_logo";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -18,7 +19,7 @@ export class CustomerDisplay extends Component {
     setup() {
         this.session = session;
         this.uiService = useService("ui");
-        this.customerDisplay.init({ bus: useService("bus_service") });
+        this.customerDisplay.init({ bus: usePlugin(BusPlugin) });
 
         this.time = useTime();
 

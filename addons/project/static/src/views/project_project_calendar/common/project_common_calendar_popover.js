@@ -1,12 +1,13 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
 import { CalendarCommonPopover } from "@web/views/calendar/calendar_common/calendar_common_popover";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ProjectCalendarCommonPopover extends CalendarCommonPopover {
     static defaultFooterButtonsTemplate = "project.ProjectCalendarCommonPopover.footer";
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     onClickViewTasks() {

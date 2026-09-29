@@ -1,7 +1,8 @@
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, proxy, useProps, signal } from "@odoo/owl";
+import { Component, onWillStart, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class PosPaymentProviderCards extends Component {
     static template = "point_of_sale.PosPaymentProviderCards";
@@ -13,7 +14,7 @@ export class PosPaymentProviderCards extends Component {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.state = proxy({
             allProviders: [],
             disabled: false,

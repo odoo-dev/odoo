@@ -1,6 +1,6 @@
-import { Component, proxy, t, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { omit } from "@web/core/utils/objects";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ResUserGroupIdsPopover extends Component {
     static template = "web.ResUserGroupIdsPopover";
@@ -12,7 +12,7 @@ export class ResUserGroupIdsPopover extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
 
         this.state = proxy({
             showExtraGroups: false,

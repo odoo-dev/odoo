@@ -1,10 +1,11 @@
-import { t, useProps } from "@odoo/owl";
+import { t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import {
     CustomFavoriteItem,
     customFavoriteItemProps,
 } from "@web/search/custom_favorite_item/custom_favorite_item";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class DashboardCustomFavoriteItem extends CustomFavoriteItem {
     props = useProps({
@@ -14,7 +15,7 @@ export class DashboardCustomFavoriteItem extends CustomFavoriteItem {
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.loader = useService("spreadsheet_dashboard_loader");
         this.searchModel = this.loader.getDashboard(this.loader.activeDashboardId).searchModel;
         this.state.description = this.loader.getDashboard(this.loader.activeDashboardId).data.name;

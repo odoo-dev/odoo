@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Setting } from "@web/views/form/setting/setting";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { SettingsBlock } from "@web/webclient/settings_form_view/settings/settings_block";
 
 /**
@@ -25,7 +26,7 @@ export class ResConfigDevTool extends Component {
     debugMode = usePlugin(DebugModePlugin);
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.isDemoDataActive = proxy({ value: true });
         useService("lazy_session").getValue("is_demo", (v) => (this.isDemoDataActive.value = !!v));
     }

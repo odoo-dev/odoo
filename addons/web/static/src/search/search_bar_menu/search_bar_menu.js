@@ -1,4 +1,4 @@
-import { Component, proxy, t, useProps, useScope } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps, useScope } from "@odoo/owl";
 import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
 import { SearchBarDropdown } from "../search_bar_dropdown";
 import { dropdownProps } from "@web/core/dropdown/dropdown";
@@ -19,6 +19,7 @@ import { render } from "@web/owl2/utils";
 import { condition } from "@web/core/tree_editor/condition_tree";
 import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
 import { constructDateRange } from "@web/search/utils/dates";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -43,7 +44,7 @@ export class SearchBarMenu extends Component {
         this.facet_icons = FACET_ICONS;
         this.hasTouch = hasTouch();
         // Filter
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         // GroupBy
         const fields = [];
         for (const [fieldName, field] of Object.entries(this.env.searchModel.searchViewFields)) {

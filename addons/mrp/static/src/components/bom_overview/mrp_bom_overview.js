@@ -3,8 +3,8 @@ import { registry } from "@web/core/registry";
 import { useService, useBus } from "@web/core/utils/hooks";
 import { BomOverviewControlPanel } from "../bom_overview_control_panel/mrp_bom_overview_control_panel";
 import { BomOverviewTable } from "../bom_overview_table/mrp_bom_overview_table";
-import { Component, EventBus, onWillStart, proxy, useProps } from "@odoo/owl";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { Component, EventBus, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 export class BomOverviewComponent extends Component {
     static template = "mrp.BomOverviewComponent";
@@ -16,7 +16,7 @@ export class BomOverviewComponent extends Component {
     setup() {
         this.orm = useService("orm");
         this.context = this.props.action.context;
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
 
         this.variants = [];
         this.warehouses = [];

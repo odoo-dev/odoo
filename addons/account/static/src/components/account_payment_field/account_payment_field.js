@@ -1,4 +1,4 @@
-import { t, Component, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { deserializeDate, formatDate } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class AccountPaymentPopOver extends Component {
     static template = "account.AccountPaymentPopOver";
@@ -37,7 +38,7 @@ export class AccountPaymentField extends Component {
         const position = localization.direction === "rtl" ? "bottom" : "left";
         this.popover = usePopover(AccountPaymentPopOver, { position });
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     getInfo() {

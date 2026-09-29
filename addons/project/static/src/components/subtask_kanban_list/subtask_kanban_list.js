@@ -1,4 +1,4 @@
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -7,6 +7,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Field, getPropertyFieldInfo } from "@web/views/fields/field";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { SubtaskCreate } from "./subtask_kanban_create/subtask_kanban_create";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class SubtaskKanbanList extends Component {
     static components = {
@@ -20,7 +21,7 @@ export class SubtaskKanbanList extends Component {
     static template = "project.SubtaskKanbanList";
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.subtaskCreate = proxy({

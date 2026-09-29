@@ -1,13 +1,14 @@
+import { usePlugin } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { FormController } from "@web/views/form/form_controller";
 import { useArchiveOrUnlinkCalendarEvent } from "@calendar/views/hooks";
 import { useAskRecurrenceUpdatePolicy } from "@calendar/views/ask_recurrence_update_policy_hook";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class CalendarEventFormController extends FormController {
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.askRecurrenceUpdatePolicy = useAskRecurrenceUpdatePolicy();
         this.archiveOrUnlinkCalendarEvent = useArchiveOrUnlinkCalendarEvent();
     }
@@ -31,7 +32,8 @@ export class CalendarEventFormController extends FormController {
                     partnerIds: record.data.partner_ids.resIds,
                     recurrency: record.data.recurrency,
                     start: record.data.start,
-                    defaultAction: () => this.dialogService.add(ConfirmationDialog, this.archiveDialogProps),
+                    defaultAction: () =>
+                        this.dialogService.add(ConfirmationDialog, this.archiveDialogProps),
                 });
             };
         }
@@ -59,7 +61,10 @@ export class CalendarEventFormController extends FormController {
     async deleteRecord() {
         const record = this.model.root;
         const rootValues = record._values;
-        if (rootValues.attendees_count == 1 && rootValues.user_id.id !== rootValues.partner_ids._currentIds[0]) {
+        if (
+            rootValues.attendees_count == 1 &&
+            rootValues.user_id.id !== rootValues.partner_ids._currentIds[0]
+        ) {
             await this._archiveRecord(record);
         } else {
             await this.archiveOrUnlinkCalendarEvent({
@@ -69,7 +74,8 @@ export class CalendarEventFormController extends FormController {
                 partnerIds: record.data.partner_ids.resIds,
                 recurrency: record.data.recurrency,
                 start: record.data.start,
-                defaultAction: () => this.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps),
+                defaultAction: () =>
+                    this.deleteRecordsWithConfirmation(this.deleteConfirmationDialogProps),
                 nextAction: { type: "ir.actions.act_url", target: "self", url: "/odoo/calendar" },
             });
         }
@@ -84,7 +90,8 @@ export class CalendarEventFormController extends FormController {
             recurrenceUpdate = await this.askRecurrenceUpdatePolicy();
         }
         await this.orm.call(this.model.root.resModel, "action_mass_archive", [
-            [record.resId], recurrenceUpdate
+            [record.resId],
+            recurrenceUpdate,
         ]);
         this.env.config.historyBack();
     }

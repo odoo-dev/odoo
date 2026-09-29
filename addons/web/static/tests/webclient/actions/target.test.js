@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { queryAll, queryAllTexts, queryText } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { Component, onMounted, xml } from "@odoo/owl";
+import { Component, onMounted, usePlugin, xml } from "@odoo/owl";
 import {
     contains,
     defineActions,
@@ -19,7 +19,7 @@ import {
 
 import { ClientErrorDialog } from "@web/core/errors/error_dialogs";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { WebClient } from "@web/webclient/webclient";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
@@ -399,7 +399,7 @@ describe("new", () => {
                     My Action
                 </div>`;
             setup() {
-                this.action = useService("action");
+                this.action = usePlugin(ActionPlugin);
             }
             async onClick() {
                 try {

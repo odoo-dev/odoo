@@ -5,8 +5,9 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { useArchiveOrUnlinkCalendarEvent } from "@calendar/views/hooks";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
 import { CalendarEventQuickCreateFormViewDialog } from "@calendar/views/calendar_form/calendar_event_quick_create";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AttendeeCalendarController extends CalendarController {
     static template = "calendar.AttendeeCalendarController";
@@ -18,7 +19,7 @@ export class AttendeeCalendarController extends CalendarController {
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.archiveOrUnlinkCalendarEvent = useArchiveOrUnlinkCalendarEvent();
         this.orm = useService("orm");
         onWillStart(async () => {
@@ -101,7 +102,11 @@ export class AttendeeCalendarController extends CalendarController {
                 partnerIds: record.rawRecord.partner_ids,
                 recurrency: record.rawRecord.recurrency,
                 start: record.start,
-                defaultAction: () => this.displayDialog(ConfirmationDialog, this.deleteConfirmationDialogProps(record)),
+                defaultAction: () =>
+                    this.displayDialog(
+                        ConfirmationDialog,
+                        this.deleteConfirmationDialogProps(record)
+                    ),
             });
         } else {
             // Decline event

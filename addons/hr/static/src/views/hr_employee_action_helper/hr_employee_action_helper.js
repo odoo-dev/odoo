@@ -1,8 +1,9 @@
 import { ActionHelper } from "@web/views/action_helper";
 import { user } from "@web/core/user";
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class OnboardingIconCard extends Component {
     static template = "hr.OnboardingIconCard";
@@ -25,7 +26,7 @@ export class HrEmployeeActionHelper extends ActionHelper {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.uiService = useService("ui");
         this.state = proxy({ isOnboarding: null });
         onWillStart(() => {

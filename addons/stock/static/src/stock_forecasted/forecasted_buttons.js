@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { Component, markup, t, useProps } from "@odoo/owl";
+import { Component, markup, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ForecastedButtons extends Component {
     static template = "stock.ForecastedButtons";
@@ -12,7 +13,7 @@ export class ForecastedButtons extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.context = this.props.action.context;
         this.productId = this.context.active_id;

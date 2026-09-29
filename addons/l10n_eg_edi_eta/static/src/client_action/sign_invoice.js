@@ -5,6 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 function jsonToFormData(params) {
     if (params instanceof FormData) {
@@ -41,7 +42,7 @@ async function actionGetDrive(env, actionDescr, type) {
     const orm = usePlugin(ORM);
     const notification = useService("notification");
     const dialog = useService("dialog");
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
 
     let route = host;
     let key, method;

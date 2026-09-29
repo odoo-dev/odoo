@@ -21,6 +21,7 @@ import { ErrorHandler } from "@web/core/utils/components";
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
 import { render } from "@web/owl2/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const systrayRegistry = registry.category("systray");
 
@@ -50,7 +51,7 @@ export class NavBar extends Component {
 
     setup() {
         this.currentAppSectionsExtra = [];
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.menuService = useService("menu");
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.pwa = useService("pwa");

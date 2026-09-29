@@ -1,7 +1,9 @@
+import { usePlugin } from "@odoo/owl";
 import { RPCErrorDialog } from "@web/core/errors/error_dialogs";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class BaseAutomationErrorDialog extends RPCErrorDialog {
     static template = "base_automation.ErrorDialog";
@@ -11,7 +13,7 @@ export class BaseAutomationErrorDialog extends RPCErrorDialog {
         this.automationId = id;
         this.automationName = name;
         this.isUserAdmin = user.isAdmin;
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
     }
 

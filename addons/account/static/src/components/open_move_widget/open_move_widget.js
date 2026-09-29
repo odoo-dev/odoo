@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class OpenMoveWidget extends Component {
     static template = "account.OpenMoveWidget";
@@ -9,7 +9,7 @@ class OpenMoveWidget extends Component {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     async openMove(ev) {

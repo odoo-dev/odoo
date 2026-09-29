@@ -1,4 +1,4 @@
-import { onWillStart, useProps, t } from "@odoo/owl";
+import { onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { FormViewDialog, formViewDialogProps } from "@web/views/view_dialogs/form_view_dialog";
 
 import { registry } from "@web/core/registry";
@@ -9,6 +9,7 @@ import { formView } from "@web/views/form/form_view";
 import { FormController, formControllerProps } from "@web/views/form/form_controller";
 
 import { useLeaveCancelWizard } from "../hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class TimeOffDialogFormController extends FormController {
     props = useProps({
@@ -22,7 +23,7 @@ export class TimeOffDialogFormController extends FormController {
         super.setup();
         this.leaveCancelWizard = useLeaveCancelWizard();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         onWillStart(async () => {
             this.isHrHolidaysUser = await user.hasGroup("hr_holidays.group_hr_holidays_user");
         });

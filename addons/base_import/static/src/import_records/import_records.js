@@ -1,9 +1,10 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -18,7 +19,7 @@ export class ImportRecords extends Component {
     static components = { DropdownItem };
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     //---------------------------------------------------------------------

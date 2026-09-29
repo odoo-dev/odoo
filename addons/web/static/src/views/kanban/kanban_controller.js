@@ -38,6 +38,7 @@ import {
 } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { QuickCreateState } from "./kanban_record_quick_create";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const QUICK_CREATE_FIELD_TYPES = ["char", "boolean", "many2one", "selection", "many2many"];
 
@@ -76,7 +77,7 @@ export class KanbanController extends Component {
     rootRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.uiService = useService("ui");
         this.offlinePlugin = usePlugin(OfflinePlugin);

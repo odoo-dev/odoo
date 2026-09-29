@@ -6,13 +6,13 @@ import { TimeOffCalendarRenderer, TimeOffDashboardCalendarRenderer } from "./cal
 
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class TimeOffCalendarControllerHrLeave extends TimeOffCalendarController {
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         onWillStart(async () => {
             this.canCreateGroupTimeOff = await user.hasGroup(
                 "hr_holidays.group_hr_holidays_responsible"

@@ -23,7 +23,8 @@ import { ListRenderer } from "@web/views/list/list_renderer";
 import { computeViewClassName } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export const x2ManyFieldProps = {
     ...standardFieldProps,
@@ -121,7 +122,7 @@ export class X2ManyField extends Component {
             p.domain = [...(p.domain || []), "!", ["id", "in", currentIds]];
             return selectCreate(p);
         };
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.notificationService = useService("notification");
     }
 

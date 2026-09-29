@@ -1,8 +1,8 @@
-import { Component, onWillStart, useProps } from "@odoo/owl";
+import { Component, onWillStart, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
 
 export class BadgeScanner extends Component {
@@ -13,7 +13,7 @@ export class BadgeScanner extends Component {
     setup() {
         this.employeeId = this.props.action?.context?.active_id;
         this.notification = useService("notification");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         onWillStart(async () => {
             this.employee = await this.orm.read("hr.employee", [this.employeeId], ["name"]);

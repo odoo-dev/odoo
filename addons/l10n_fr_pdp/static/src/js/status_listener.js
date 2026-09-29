@@ -1,17 +1,18 @@
+import { BusPlugin } from "@bus/services/bus_plugin";
 import { formView } from "@web/views/form/form_view";
 import { FormController } from "@web/views/form/form_controller";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { onMounted, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class KycStatusFormController extends FormController {
     orm = usePlugin(ORM);
 
     setup() {
         super.setup();
-        this.busService = useService("bus_service");
-        this.action = useService("action");
+        this.busService = usePlugin(BusPlugin);
+        this.action = usePlugin(ActionPlugin);
 
         onMounted(() => {
             this.busService.subscribe("auth_done", async (data) => {

@@ -1,11 +1,13 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export const LunchRendererMixin = (T) => class LunchRendererMixin extends T {
     setup() {
         super.setup(...arguments);
 
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         useBus(this.env.bus, 'lunch_open_order', (ev) => this.openOrderLine(ev.detail.productId));
     }
 

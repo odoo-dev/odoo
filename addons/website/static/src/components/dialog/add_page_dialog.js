@@ -4,12 +4,13 @@ import {
     Component,
     onMounted,
     onWillStart,
-    useProps,
     proxy,
     signal,
     status,
     t,
     useListener,
+    usePlugin,
+    useProps,
 } from "@odoo/owl";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
@@ -20,6 +21,7 @@ import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { renderToElement } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 import { useSubEnv } from "@web/owl2/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { WebsiteDialog } from "@website/components/dialog/dialog";
 import {
     applyTextHighlight,
@@ -520,7 +522,7 @@ export class AddPageDialog extends Component {
         this.website = useService("website");
         this.dialogs = useService("dialog");
         this.http = useService("http");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         this.cssLinkEls = undefined;
         this.lastTabName = "";

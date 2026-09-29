@@ -1,4 +1,4 @@
-import { Component, onMounted, xml, proxy, useProps, t } from "@odoo/owl";
+import { Component, onMounted, proxy, t, usePlugin, useProps, xml } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -10,6 +10,7 @@ import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
 import { redirect } from "@web/core/utils/urls";
 import { InstallModuleDialog } from "./install_module_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export const MODULE_STATUS = {
     NOT_INSTALLED: "NOT_INSTALLED",
@@ -30,7 +31,7 @@ export class NewContentSystrayItem extends Component {
         this.orm = useService("orm");
         this.dialogs = useService("dialog");
         this.website = useService("website");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
 
         this.isDesigner = this.website.isDesigner;
         this.dropdown = useDropdownState();

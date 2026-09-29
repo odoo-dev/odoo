@@ -12,6 +12,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { DynamicList } from "@web/model/relational_model/dynamic_list";
 import { useEnv } from "@web/owl2/utils";
 import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Allows for a component (usually a View component) to handle links with
@@ -27,7 +28,7 @@ import { ExportDataDialog } from "@web/views/view_dialogs/export_data_dialog";
  * @param {() => any} reload function to run to reload, if a button has data-reload-on-close
  */
 export function useActionLinks(resModel, reload) {
-    const actionService = useService("action");
+    const actionService = usePlugin(ActionPlugin);
     const { keepLast } = useEnv();
     const orm = usePlugin(ORM);
 

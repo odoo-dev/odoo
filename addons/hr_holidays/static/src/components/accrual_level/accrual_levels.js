@@ -1,4 +1,4 @@
-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -8,6 +8,7 @@ import { useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AccrualLevels extends Component {
     static template = "hr_holidays.AccrualLevels";
@@ -15,7 +16,7 @@ export class AccrualLevels extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.state = proxy({});
 
@@ -50,10 +51,10 @@ export class AccrualLevels extends Component {
 
     get durationTypes() {
         return {
-            'day': _t('day(s)'),
-            'month': _t('month(s)'),
-            'year': _t('year(s)'),
-            'hour': _t('hour(s)')
+            day: _t("day(s)"),
+            month: _t("month(s)"),
+            year: _t("year(s)"),
+            hour: _t("hour(s)"),
         };
     }
 

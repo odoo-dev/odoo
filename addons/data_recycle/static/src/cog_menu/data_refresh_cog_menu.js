@@ -1,7 +1,7 @@
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
-import { Component } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -10,7 +10,7 @@ export class DataRefreshCogMenu extends Component {
     static components = { DropdownItem };
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     _getDomainValue(fieldName) {

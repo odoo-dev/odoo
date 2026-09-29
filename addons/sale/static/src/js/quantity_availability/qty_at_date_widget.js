@@ -3,9 +3,10 @@ import { localization } from "@web/core/l10n/localization";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { Component, computed, t, useProps } from "@odoo/owl";
+import { Component, computed, t, usePlugin, useProps } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class QtyAtDatePopover extends Component {
     static template = "sale.QtyAtDatePopover";
@@ -15,7 +16,7 @@ export class QtyAtDatePopover extends Component {
         close: t.function(),
     });
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     get forecastedLabel() {

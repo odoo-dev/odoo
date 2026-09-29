@@ -7,6 +7,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "../../core/l10n/translation";
 import { formatDateTime } from "@web/core/l10n/dates";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const { DateTime } = luxon;
 
@@ -24,7 +25,7 @@ class OfflineSystray extends Component {
 
     setup() {
         this.offlinePlugin = usePlugin(OfflinePlugin);
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.dialogService = useService("dialog");
         this.uiService = useService("ui");
     }

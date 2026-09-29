@@ -1,9 +1,9 @@
 import { rpc } from "@web/core/network/rpc";
-import { useService } from "@web/core/utils/hooks";
 import { View } from "@web/views/view";
 import { makeContext } from "@web/core/context";
 import { user } from "@web/core/user";
-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class BoardAction extends Component {
     static template = "board.BoardAction";
@@ -16,7 +16,7 @@ export class BoardAction extends Component {
         className: t.string().optional(),
     });
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         const action = this.props.action;
         this.formViewId = false;
         this.isValid = true;

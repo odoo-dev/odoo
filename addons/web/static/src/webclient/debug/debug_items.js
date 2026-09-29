@@ -9,6 +9,7 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 function runUnitTestsItem() {
     const href = "/web/tests?debug=assets";
@@ -23,7 +24,7 @@ function runUnitTestsItem() {
 }
 
 export function openViewItem() {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const orm = usePlugin(ORM);
     const dialog = useService("dialog");
 
@@ -71,7 +72,7 @@ class ClocReport extends Component {
     });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         onWillStart(async () => {
             const data = await this.fetchCloc();
             this.data = data;

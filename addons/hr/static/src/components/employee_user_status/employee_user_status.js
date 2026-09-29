@@ -1,12 +1,13 @@
 import { registry } from "@web/core/registry";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { UserDeactivationDialog } from "./user_deactivation_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 // Visual representation of res.users.state, mirrored on the employee.
 const STATUS = {
@@ -29,7 +30,7 @@ export class EmployeeUserStatus extends Component {
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
     }
 
@@ -42,33 +43,68 @@ export class EmployeeUserStatus extends Component {
     }
 
     get buttonClass() {
-        return `btn-outline-${this.status.decoration || 'secondary'}`;
+        return `btn-outline-${this.status.decoration || "secondary"}`;
     }
 
     get icon() {
-        return STATUS[this.state]['icon'];
+        return STATUS[this.state]["icon"];
     }
 
     get items() {
         switch (this.state) {
             case "new":
                 return [
-                    { key: "send", label: _t("Resend Invitation"), icon: "send", method: "action_reset_password" },
-                    { key: "copy", label: _t("Copy Invitation Link"), icon: "content_copy", method: "action_copy_invitation_link" },
-                    { key: "deactivate", label: _t("Deactivate"), icon: "block", method: "action_toggle_user_active" },
+                    {
+                        key: "send",
+                        label: _t("Resend Invitation"),
+                        icon: "send",
+                        method: "action_reset_password",
+                    },
+                    {
+                        key: "copy",
+                        label: _t("Copy Invitation Link"),
+                        icon: "content_copy",
+                        method: "action_copy_invitation_link",
+                    },
+                    {
+                        key: "deactivate",
+                        label: _t("Deactivate"),
+                        icon: "block",
+                        method: "action_toggle_user_active",
+                    },
                 ];
             case "active":
                 return [
-                    { key: "reset", label: _t("Reset Password"), icon: "key", method: "action_reset_password" },
-                    { key: "deactivate", label: _t("Deactivate"), icon: "block", method: "action_toggle_user_active" },
+                    {
+                        key: "reset",
+                        label: _t("Reset Password"),
+                        icon: "key",
+                        method: "action_reset_password",
+                    },
+                    {
+                        key: "deactivate",
+                        label: _t("Deactivate"),
+                        icon: "block",
+                        method: "action_toggle_user_active",
+                    },
                 ];
             case "inactive":
                 return [
-                    { key: "reactivate", label: _t("Reactivate"), icon: "lock_open_right", method: "action_toggle_user_active" },
+                    {
+                        key: "reactivate",
+                        label: _t("Reactivate"),
+                        icon: "lock_open_right",
+                        method: "action_toggle_user_active",
+                    },
                 ];
             default:
                 return [
-                    { key: "create_user", label: _t("Invite"), icon: "person_add", method: "action_send_invitation" },
+                    {
+                        key: "create_user",
+                        label: _t("Invite"),
+                        icon: "person_add",
+                        method: "action_send_invitation",
+                    },
                 ];
         }
     }
@@ -79,13 +115,13 @@ export class EmployeeUserStatus extends Component {
         if (!resId) {
             return;
         }
-        if (item.key === 'deactivate') {
+        if (item.key === "deactivate") {
             return this.confirmDeactivation(resId, item.method);
         }
         const result = await this.orm.call("hr.employee", item.method, [resId]);
-        if (item.key === 'create_user') {
+        if (item.key === "create_user") {
             await this.action.doAction(result); // will soft reload.
-        } else if (result && item.key === 'copy') {
+        } else if (result && item.key === "copy") {
             await browser.navigator.clipboard.writeText(result);
             this.notification.add(_t("Invitation link copied to clipboard."), { type: "success" });
         } else if (result && typeof result === "object") {
@@ -97,20 +133,25 @@ export class EmployeeUserStatus extends Component {
 
     async confirmDeactivation(resId, method) {
         const [employee] = await this.orm.read("hr.employee", [resId], ["is_in_contract"]);
-        this.dialog.add(UserDeactivationDialog, {
-            canEndCollaboration: Boolean(employee.is_in_contract),
-        }, {
-            onClose: (choice) => this.applyDeactivation(resId, method, choice),
-        });
+        this.dialog.add(
+            UserDeactivationDialog,
+            {
+                canEndCollaboration: Boolean(employee.is_in_contract),
+            },
+            {
+                onClose: (choice) => this.applyDeactivation(resId, method, choice),
+            }
+        );
     }
 
     async applyDeactivation(resId, method, choice) {
         if (choice === "deactivate") {
             await this.orm.call("hr.employee", method, [resId]);
             await this.props.record.load();
-        }
-        else if (choice === "end_collaboration") {
-            const action = await this.orm.call("hr.employee", "action_deactivate_user_and_depart", [resId]);
+        } else if (choice === "end_collaboration") {
+            const action = await this.orm.call("hr.employee", "action_deactivate_user_and_depart", [
+                resId,
+            ]);
             await this.action.doAction(action, { onClose: () => this.props.record.load() });
         }
     }

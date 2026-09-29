@@ -1,11 +1,11 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
 import {
     buildM2OFieldDescription,
     many2OneFieldProps,
 } from "@web/views/fields/many2one/many2one_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class LineOpenMoveWidget extends Component {
     static template = "account.LineOpenMoveWidget";
@@ -13,7 +13,7 @@ class LineOpenMoveWidget extends Component {
     props = useProps({ ...many2OneFieldProps });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
     }
 
     get m2oProps() {

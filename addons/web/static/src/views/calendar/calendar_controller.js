@@ -20,8 +20,9 @@ import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiSelectionButtons } from "@web/views/view_components/multi_selection_buttons";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const { DateTime } = luxon;
 
@@ -66,7 +67,7 @@ export class CalendarController extends Component {
     });
 
     setup() {
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.orm = useService("orm");
         this.displayDialog = useUniqueDialog();
         this.uiService = useService("ui");
@@ -163,10 +164,13 @@ export class CalendarController extends Component {
     get weekHeader() {
         const { start, end } = this.model.visibleRange;
         if (start.year != end.year) {
-            return `${start.toFormat(isMobileOS() ? "MMM" : "MMMM")} ${start.year} - ${end.toFormat(isMobileOS() ? "MMM" : "MMMM")} ${end.year}`;
+            return `${start.toFormat(isMobileOS() ? "MMM" : "MMMM")} ${start.year} - ${end.toFormat(
+                isMobileOS() ? "MMM" : "MMMM"
+            )} ${end.year}`;
         } else if (start.month != end.month) {
-            return isMobileOS() ? `${start.toFormat("MMM")}-${end.toFormat("MMM")} ${start.year}` :
-                `${start.toFormat("MMMM")} - ${end.toFormat("MMMM")} ${start.year}`;
+            return isMobileOS()
+                ? `${start.toFormat("MMM")}-${end.toFormat("MMM")} ${start.year}`
+                : `${start.toFormat("MMMM")} - ${end.toFormat("MMMM")} ${start.year}`;
         }
         return `${start.toFormat("MMMM")} ${start.year}`;
     }

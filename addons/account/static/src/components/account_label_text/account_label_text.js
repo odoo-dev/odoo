@@ -1,4 +1,4 @@
-import { Component, onMounted, onPatched, signal, t, useProps } from "@odoo/owl";
+import { Component, onMounted, onPatched, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { omit } from "@web/core/utils/objects";
@@ -11,6 +11,7 @@ import {
     textField,
     textFieldProps,
 } from "@web/views/fields/text/text_field";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AccountLabelTextField extends ListTextField {
     static template = "account.AccountLabelTextField";
@@ -27,7 +28,7 @@ export class AccountLabelTextField extends ListTextField {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.debouncedOnLabelInput = useDebounced(this.onLabelInput.bind(this), 200);
 
         const fixM2xTabIndex = () => {

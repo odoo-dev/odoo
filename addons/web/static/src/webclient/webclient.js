@@ -10,6 +10,7 @@ import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { ActionContainer } from "@web/webclient/actions/action_container";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { NavBar } from "@web/webclient/navbar/navbar";
 
 export class WebClient extends Component {
@@ -22,7 +23,7 @@ export class WebClient extends Component {
 
     setup() {
         this.menuService = useService("menu");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.title = useService("title");
         useOwnDebugContext({ categories: ["default"] });
         const debugMode = usePlugin(DebugModePlugin);

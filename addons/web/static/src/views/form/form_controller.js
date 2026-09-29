@@ -51,6 +51,7 @@ import {
 } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { FetchRecordError } from "@web/model/relational_model/errors";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const viewRegistry = registry.category("views");
 
@@ -165,7 +166,7 @@ export class FormController extends Component {
 
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.dialogService = useService("dialog");
         this.orm = useService("orm");
         this.viewService = useService("view");

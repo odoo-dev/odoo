@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 // Add an activity category for the command palette
 registry.category("command_categories").add("activity", {}, { sequence: 45 });
@@ -9,7 +10,7 @@ const commandProviderRegistry = registry.category("command_provider");
 
 commandProviderRegistry.add("activity", {
     provide() {
-        const action = useService("action");
+        const action = usePlugin(ActionPlugin);
         return [
             {
                 name: _t("Show My Activities"),

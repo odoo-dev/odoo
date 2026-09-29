@@ -4,10 +4,10 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { formatMonetary } from "@web/views/fields/formatters";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { serializeDate } from "@web/core/l10n/dates";
 
-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 
 import { StockValuationReportButtonsBar } from "./buttons_bar/buttons_bar"
 import { StockValuationReportController } from "./controller"
@@ -34,7 +34,7 @@ export class StockValuationReport extends Component {
             displayInventoryValuationLine: false,
         })
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
 
         onWillStart(async () => {
             await this.controller.load(this.data);

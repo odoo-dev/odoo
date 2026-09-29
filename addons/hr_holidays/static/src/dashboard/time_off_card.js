@@ -2,8 +2,8 @@ import { cookie } from "@web/core/browser/cookie";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
 import { formatNumber } from "@hr_holidays/views/hooks";
-import { useService } from "@web/core/utils/hooks";
-import { Component, computed, t, useProps } from "@odoo/owl";
+import { Component, computed, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 export class TimeOffCardPopover extends Component {
     static template = "hr_holidays.TimeOffCardPopover";
 
@@ -29,7 +29,7 @@ export class TimeOffCardPopover extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     async openLeaves() {
@@ -114,7 +114,7 @@ export class TimeOffCard extends Component {
             position: "bottom",
             popoverClass: "bg-view",
         });
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.lang = user.lang;
         this.isDarkTheme = cookie.get("color_scheme") === "dark";
         this.formatNumber = formatNumber;

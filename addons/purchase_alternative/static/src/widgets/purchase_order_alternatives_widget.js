@@ -1,7 +1,9 @@
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { ListRenderer } from "@web/views/list/list_renderer";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 
 export class FieldMany2ManyAltPOsRenderer extends ListRenderer {
@@ -21,7 +23,7 @@ export class FieldMany2ManyAltPOs extends X2ManyField {
    setup() {
       super.setup();
       this.orm = useService("orm");
-      this.action = useService("action");
+      this.action = usePlugin(ActionPlugin);
    }
 
    get isMany2Many() {

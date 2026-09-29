@@ -1,9 +1,10 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
 import { getStateDecorator } from "./mo_overview_colors";
 import { SHOW_OPTIONS } from "../mo_overview_display_filter/mrp_mo_overview_display_filter";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class MoOverviewLine extends Component {
     props = useProps({
@@ -50,7 +51,7 @@ export class MoOverviewLine extends Component {
     static template = "mrp.MoOverviewLine";
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.ormService = useService("orm");
         this.formatFloat = (val) => formatFloat(val, { digits: [false, this.data.uom_precision || undefined] });
         this.formatFloatTime = formatFloatTime;

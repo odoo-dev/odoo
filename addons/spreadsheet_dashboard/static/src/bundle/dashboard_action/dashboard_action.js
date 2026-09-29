@@ -6,6 +6,7 @@ import {
     proxy,
     useEffect,
     useListener,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { SpreadsheetComponent } from "@spreadsheet/actions/spreadsheet_component";
@@ -17,7 +18,7 @@ import { render } from "@web/owl2/utils";
 import { useSetupAction } from "@web/search/action_hook";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { Status } from "./dashboard_loader_service";
 import { DashboardSearchBar } from "./dashboard_search_bar/dashboard_search_bar";
 import { MobileFigureContainer } from "./mobile_figure_container/mobile_figure_container";
@@ -51,7 +52,7 @@ export class SpreadsheetDashboardAction extends Component {
         this.controlPanelDisplay = {};
         this.orm = useService("orm");
         this.uiService = useService("ui");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.loader = useService("spreadsheet_dashboard_loader");
         onWillStart(async () => {
             if (this.props.state && this.props.state.dashboardLoader) {

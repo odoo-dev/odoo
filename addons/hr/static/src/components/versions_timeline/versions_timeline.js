@@ -4,7 +4,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { statusBarField, StatusBarField } from "@web/views/fields/statusbar/statusbar_field";
 import { _t } from "@web/core/l10n/translation";
-import { signal } from "@odoo/owl";
+import { signal, usePlugin } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class VersionsTimeline extends StatusBarField {
     static template = "hr.VersionsTimeline";
@@ -14,7 +15,7 @@ export class VersionsTimeline extends StatusBarField {
     /** @override **/
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.orm = useService("orm");
 
         this.dateTimePicker = useDateTimePicker({

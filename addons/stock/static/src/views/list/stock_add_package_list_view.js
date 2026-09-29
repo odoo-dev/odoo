@@ -1,15 +1,17 @@
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { listView } from "@web/views/list/list_view";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AddPackageListRenderer extends ListRenderer {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.addDialog = useOwnedDialogs();
         this.pickingId = this.props.list.context.picking_ids?.length
             ? this.props.list.context.picking_ids[0]

@@ -33,6 +33,7 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { executeButtonCallback, useViewButtons } from "@web/views/view_button/view_button_hook";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * @typedef {Object} RelationalActiveActions {
@@ -713,7 +714,7 @@ export class X2ManyFieldDialog extends Component {
     props = useProps(x2ManyFieldDialogProps);
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.ui = useService("ui");
         this.archInfo = this.props.archInfo;
         this.record = this.props.record;

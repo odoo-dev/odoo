@@ -1,4 +1,4 @@
-import { useProps, t } from "@odoo/owl";
+import { t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -6,6 +6,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { BadgeField, badgeField } from "@web/views/fields/badge/badge_field";
 import { _t } from "@web/core/l10n/translation";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class MOListViewDropdown extends BadgeField {
     static template = "mrp.MOViewListDropdown";
@@ -21,7 +22,7 @@ export class MOListViewDropdown extends BadgeField {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.colorIcons = {
             "blocked": "text-bg-warning",
             "ready": "text-bg-secondary",

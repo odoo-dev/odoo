@@ -1,7 +1,8 @@
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class BomOverviewLine extends Component {
     static template = "mrp.BomOverviewLine";
@@ -19,7 +20,7 @@ export class BomOverviewLine extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.ormService = useService("orm");
         this.formatFloat = formatFloat;
         this.formatFloatTime = formatFloatTime;

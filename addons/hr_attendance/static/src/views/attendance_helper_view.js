@@ -3,7 +3,8 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class AttendanceActionHelper extends Component {
     static template = "hr_attendance.AttendanceActionHelper";
@@ -12,7 +13,7 @@ export class AttendanceActionHelper extends Component {
         noContentHelp: t.any(),
     });
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.uiService = useService("ui");
         this.dialogService = useService("dialog");
         this.state = proxy({

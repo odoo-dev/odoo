@@ -1,10 +1,11 @@
-import { Component, onWillDestroy, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillDestroy, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { checkFileSize } from "@web/core/utils/files";
 import { Record } from "@web/model/record";
 import { Field } from "@web/views/fields/field";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export class ShareTargetItem extends Component {
     static template = "web.ShareTargetItem";
@@ -17,7 +18,7 @@ export class ShareTargetItem extends Component {
 
     setup() {
         super.setup();
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.dialog = useService("dialog");
         this.http = useService("http");
         this.notification = useService("notification");

@@ -6,7 +6,8 @@ import { Tooltip } from "@web/core/tooltip/tooltip";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { capitalize } from "../utils/strings";
-import { Component, markup, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, markup, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 const { DateTime } = luxon;
 
@@ -191,7 +192,7 @@ export class RedirectWarningDialog extends Component {
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         const { data, subType } = this.props;
         const [message, actionId, buttonText, additionalContext] = data.arguments;
         this.title = capitalize(subType) || _t("Odoo Warning");
@@ -231,7 +232,7 @@ export class UnlinkBlockedErrorDialog extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         const {
             archivable,
             model_name: modelName,

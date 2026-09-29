@@ -36,6 +36,7 @@ import { SelectionBox } from "@web/views/view_components/selection_box";
 import { useDeleteRecords, useExportRecords } from "@web/views/view_hook";
 import { ListCogMenu } from "./list_cog_menu";
 import { ListConfirmationDialog } from "./list_confirmation_dialog";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 // -----------------------------------------------------------------------------
 
@@ -70,7 +71,7 @@ export class ListController extends Component {
     rootRef = signal.ref();
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.dialogService = useService("dialog");
         this.uiService = useService("ui");
         this.orm = useService("orm");

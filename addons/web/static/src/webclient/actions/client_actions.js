@@ -1,10 +1,11 @@
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { location, browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { makeErrorFromResponse, rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { htmlSprintf } from "@web/core/utils/html";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export function displayNotificationAction(env, action) {
     const notification = useService("notification");
@@ -93,7 +94,7 @@ registry.category("actions").add("reload_context", reloadContext);
  * Serves as a trigger to reload the interface without a full browser reload
  */
 async function softReload() {
-    const action = useService("action");
+    const action = usePlugin(ActionPlugin);
     const controller = action.currentController;
     if (controller) {
         await action.restore(controller.jsId);

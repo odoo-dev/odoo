@@ -4,9 +4,10 @@ import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
 import { onEmployeeSubRedirect } from "./hooks";
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useRecordObserver } from "@web/model/relational_model/utils";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 class HrOrgChartPopover extends Component {
     static template = "hr.hr_orgchart_emp_popover";
@@ -20,7 +21,7 @@ class HrOrgChartPopover extends Component {
         super.setup();
 
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this._onEmployeeSubRedirect = onEmployeeSubRedirect();
     }
 
@@ -47,7 +48,7 @@ export class HrOrgChart extends Component {
         super.setup();
 
         this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
         this.popover = usePopover(HrOrgChartPopover);
 
         this.state = proxy({

@@ -1,9 +1,8 @@
 /** @odoo-module **/
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import {_t} from "@web/core/l10n/translation";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { ActionPlugin, standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 
 export class WhatIsPeppol extends Component {
@@ -13,7 +12,7 @@ export class WhatIsPeppol extends Component {
 
     setup() {
         super.setup();
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     get shouldRegisterOnClose() {

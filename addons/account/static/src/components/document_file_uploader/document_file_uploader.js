@@ -2,14 +2,15 @@ import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-import { Component, markup, t, useProps } from "@odoo/owl";
+import { Component, markup, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 export const AbstractDocumentFileUploader = (T = Component)  => class AbstractDocumentFileUploader extends T {
 
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.notification = useService("notification");
         this.attachmentIdsToProcess = [];
         this.extraContext = this.getExtraContext();

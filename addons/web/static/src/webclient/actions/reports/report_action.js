@@ -1,9 +1,9 @@
-import { Component, t, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { useSubEnv } from "@web/owl2/utils";
 import { useSetupAction } from "@web/search/action_hook";
 import { Layout } from "@web/search/layout";
 import { getDefaultConfig } from "@web/views/view";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 /**
  * Most of the time reports are printed as pdfs.
@@ -38,7 +38,7 @@ export class ReportAction extends Component {
         });
         useSetupAction();
 
-        this.action = useService("action");
+        this.action = usePlugin(ActionPlugin);
         this.title = this.props.display_name || this.props.name;
         this.reportUrl = this.props.report_url;
     }
