@@ -690,6 +690,21 @@ export class PosDataPlugin extends Plugin {
     }
 
     handleLoadingDataError(error, localData) {
+        const hasUsableSession = localData["pos.session"]?.some(
+            (record) => record.id === parseInt(odoo.pos_session_id)
+        );
+        if (!hasUsableSession) {
+            logPosMessage(
+                "DataService",
+                "loadInitialData",
+                `Cannot load session ${odoo.pos_session_id} and no usable cached session is available.`,
+                CONSOLE_COLOR,
+                [],
+                true
+            );
+            throw error;
+        }
+
         let message = _t("An error occurred while loading the Point of Sale: \n");
         if (error instanceof RPCError) {
             message += error.data.message;
@@ -1164,6 +1179,8 @@ export class PosDataPlugin extends Plugin {
     }
 
     async loadServerOrders(domain) {
+        // Let ConnectionLostError propagate: an empty result must mean the server has no such
+        // orders, callers like checkAndDeleteMissingOrders delete local orders based on it.
         const result = await this.callRelated(
             "pos.order",
             "read_pos_orders",
@@ -1185,17 +1202,29 @@ export class PosDataPlugin extends Plugin {
     }
 
     async checkAndDeleteMissingOrders(results) {
-        if (results && results["pos.order"]) {
-            const ids = new Set(results["pos.order"].filter((o) => o.isSynced).map((o) => o.id));
-            if (ids.size) {
-                const orders = await this.loadServerOrders([["id", "in", [...ids]]]);
-                const serverIds = orders.map((r) => r.id);
-                for (const id of [...ids]) {
-                    if (!serverIds.includes(id)) {
-                        this.localDeleteCascade(this.models["pos.order"].get(id));
+        if (this.network.offline) {
+            return;
+        }
+        try {
+            if (results && results["pos.order"]) {
+                const ids = new Set(
+                    results["pos.order"].filter((o) => o.isSynced).map((o) => o.id)
+                );
+                if (ids.size) {
+                    const orders = await this.loadServerOrders([["id", "in", [...ids]]]);
+                    const serverIds = orders.map((r) => r.id);
+                    for (const id of [...ids]) {
+                        if (!serverIds.includes(id)) {
+                            this.localDeleteCascade(this.models["pos.order"].get(id));
+                        }
                     }
                 }
             }
+        } catch (error) {
+            if (error instanceof ConnectionLostError) {
+                return;
+            }
+            throw error;
         }
     }
 

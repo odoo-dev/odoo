@@ -871,7 +871,13 @@ export class PosStore extends WithLazyGetterTrap {
         const orderPathUuid = this.router.currentScreenParams().orderUuid;
         const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
         if (orderPathUuid && !order) {
-            await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            try {
+                await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            } catch (error) {
+                if (!(error instanceof ConnectionLostError)) {
+                    throw error;
+                }
+            }
             const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
             if (order) {
                 this.setOrder(order);
@@ -2396,6 +2402,9 @@ export class PosStore extends WithLazyGetterTrap {
      * Close other tabs that contain the same pos session.
      */
     closeOtherTabs() {
+        if (!this.session) {
+            return;
+        }
         localStorage["message"] = "";
         localStorage["message"] = JSON.stringify({
             message: "close_tabs",
