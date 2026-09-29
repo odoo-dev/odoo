@@ -1,6 +1,7 @@
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { PermissionPromptDialog } from "@web/core/permission_prompt_dialog/permission_prompt_dialog";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class CallPermissionDialog extends Component {
@@ -19,7 +20,7 @@ export class CallPermissionDialog extends Component {
         /** @type {import("@odoo/owl").Signal<Element>} */
         this.rootRef = signal();
         this.rtc = useService("discuss.rtc");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
     }
 
     async onClickUseMicrophone() {

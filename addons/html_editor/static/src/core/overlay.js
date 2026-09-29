@@ -1,19 +1,19 @@
 import {
     Component,
     onWillDestroy,
-    useProps,
     proxy,
     signal,
     t,
     useListener,
     useOnChange,
+    usePlugin,
+    useProps,
     xml,
 } from "@odoo/owl";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { usePosition } from "@web/core/position/position_hook";
 import { getIFrame } from "@web/core/position/utils";
-import { useActiveElement } from "@web/core/ui/ui_plugin";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin, useActiveElement } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { useCrossDocumentListener } from "../utils/hooks";
 
@@ -45,7 +45,7 @@ export class EditorOverlay extends Component {
     rootRef = signal.ref();
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.lastSelection = this.props.initialSelection;
         /** @type {HTMLElement} */
         const editable = this.props.editable;

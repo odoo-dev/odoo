@@ -1,9 +1,10 @@
 import { Dialog } from "@web/core/dialog/dialog";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { CallbackRecorder } from "@web/search/action_hook";
 import { View } from "@web/views/view";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 export const formViewDialogProps = {
     close: t.function(),
@@ -36,7 +37,7 @@ export class FormViewDialog extends Component {
     setup() {
         super.setup();
 
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.actionService = useService("action");
         this.modalRef = signal.ref();
         this.env.dialogData.dismiss = () => this.discardRecord();

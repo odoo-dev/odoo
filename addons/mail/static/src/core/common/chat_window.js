@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { ActionList } from "@mail/core/common/action_list";
 import { Composer } from "@mail/core/common/composer";
@@ -63,7 +64,7 @@ export class ChatWindow extends Component {
             jumpThreadPresent: 0,
             editingGuestName: false,
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.chatWindowContentRef = signal.ref(HTMLDivElement);
         this.threadActions = useThreadActions({ thread: () => this.channel?.thread });
         this.quickActionsList = computed(() =>

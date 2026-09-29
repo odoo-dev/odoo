@@ -8,6 +8,7 @@ import {
     darkenColor,
 } from "@web/core/colors/colors";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { formatFloat, formatMonetary } from "@web/views/fields/formatters";
 import { SEP } from "./graph_model";
 import { sortBy } from "@web/core/utils/arrays";
@@ -15,7 +16,7 @@ import { renderToMarkup } from "@web/core/utils/render";
 import { useChart } from "@web/core/utils/chart_hook";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, markup, signal, t, useProps } from "@odoo/owl";
+import { Component, markup, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { cookie } from "@web/core/browser/cookie";
@@ -130,7 +131,7 @@ export class GraphRenderer extends Component {
         this.model = this.props.model;
 
         this.actionService = useService("action");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         this.tooltip = null;
         this.legendTooltip = null;

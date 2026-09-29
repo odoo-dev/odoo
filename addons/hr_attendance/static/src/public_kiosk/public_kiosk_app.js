@@ -12,6 +12,7 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { rpc } from "@web/core/network/rpc";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 import { mountComponent } from "@web/env";
@@ -49,7 +50,7 @@ class kioskAttendanceApp extends Component {
         this.dialogService = useService("dialog");
         this.barcode = usePlugin(BarcodePlugin);
         this.notification = useService("notification");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.companyImageUrl = url("/web/binary/company_logo", {
             company: this.props.companyId,
         });

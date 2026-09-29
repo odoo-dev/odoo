@@ -5,6 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { reposition } from "@web/core/position/utils";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
@@ -23,6 +24,7 @@ import {
     signal,
     t,
     useEffect,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { deepCopy } from "@web/core/utils/objects";
@@ -57,7 +59,7 @@ export class PropertiesField extends Component {
             closeOnEscape: false,
         });
         this.propertiesRef = signal.ref();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         let currentResId;
         useEffect(() => {

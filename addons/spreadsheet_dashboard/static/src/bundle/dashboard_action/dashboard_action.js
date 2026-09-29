@@ -6,12 +6,14 @@ import {
     proxy,
     useEffect,
     useListener,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { SpreadsheetComponent } from "@spreadsheet/actions/spreadsheet_component";
 import { SpreadsheetShareButton } from "@spreadsheet/components/share_button/share_button";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { render } from "@web/owl2/utils";
 import { useSetupAction } from "@web/search/action_hook";
@@ -50,7 +52,7 @@ export class SpreadsheetDashboardAction extends Component {
         this.Status = Status;
         this.controlPanelDisplay = {};
         this.orm = useService("orm");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.actionService = useService("action");
         this.loader = useService("spreadsheet_dashboard_loader");
         onWillStart(async () => {

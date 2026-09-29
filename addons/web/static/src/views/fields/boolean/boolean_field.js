@@ -1,8 +1,8 @@
-import { Component, proxy, useEffect, useProps } from "@odoo/owl";
+import { Component, proxy, useEffect, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { standardFieldProps } from "../standard_field_props";
 
 export const booleanFieldProps = {
@@ -15,7 +15,7 @@ export class BooleanField extends Component {
     props = useProps(booleanFieldProps);
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({});
         useEffect(() => {
             this.state.value = this.props.record.data[this.props.name];

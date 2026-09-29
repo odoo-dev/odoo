@@ -1,9 +1,9 @@
-import { Component, onMounted, onPatched, onWillUnmount, useProps, proxy, t } from '@odoo/owl';
+import { Component, onMounted, onPatched, onWillUnmount, proxy, t, usePlugin, useProps } from '@odoo/owl';
 import { browser } from '@web/core/browser/browser';
 import { Dialog } from '@web/core/dialog/dialog';
 import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useDebounced } from '@web/core/utils/timing';
 import { LocationList } from '@website_sale_stock/js/location_selector/location_list/location_list';
 import { MapContainer } from '@website_sale_stock/js/location_selector/map_container/map_container';
@@ -24,7 +24,7 @@ export class LocationSelectorDialog extends Component {
     props = useProps(locationSelectorDialogProps);
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.state = proxy({
             locations: [],
             error: false,

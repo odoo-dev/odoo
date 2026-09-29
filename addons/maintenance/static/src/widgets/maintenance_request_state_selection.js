@@ -1,6 +1,6 @@
-import { useProps, t } from "@odoo/owl";
+import { t, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { StateSelectionField, stateSelectionField } from "@web/views/fields/state_selection/state_selection_field";
 
@@ -16,7 +16,7 @@ export class MaintenanceRequestStateSelection extends StateSelectionField {
 
     setup() {
         super.setup();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.icons = {
             normal: "",
             changes_requested: "priority_high",

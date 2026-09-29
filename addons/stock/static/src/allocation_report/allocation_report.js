@@ -1,6 +1,7 @@
-import { Component, computed, onWillStart, signal, useProps } from "@odoo/owl";
+import { Component, computed, onWillStart, signal, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { Mutex } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
@@ -36,7 +37,7 @@ export class AllocationReport extends Component {
     setup() {
         this.actionService = useService("action");
         this.ormService = useService("orm");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.context = this.props.action.context;
         this.mutex = new Mutex();
         this._onGoingJob = false;

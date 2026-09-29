@@ -1,5 +1,6 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { onWillRender } from "@web/owl2/utils";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { Component, onWillStart, usePlugin, proxy, signal, t, useProps } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -25,7 +26,7 @@ export class OfflineSearchBar extends Component {
     autofocusRef = signal.ref();
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.inputRef = this.autofocusRef;
         if (!(this.env.config.disableSearchBarAutofocus || !this.props.autofocus)) {
             // only force the focus on touch devices on small screens

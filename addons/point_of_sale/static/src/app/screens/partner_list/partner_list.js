@@ -1,4 +1,4 @@
-import { Component, computed, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, computed, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ResPartner } from "@point_of_sale/app/models/res_partner";
@@ -7,6 +7,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { localeCompare, normalize } from "@web/core/l10n/utils";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
 
@@ -21,7 +22,7 @@ export class PartnerList extends Component {
 
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.notification = useService("notification");
         this.dialog = useService("dialog");
         this.modalRef = signal.ref();

@@ -1,6 +1,6 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 // Previously UsernameWidget
 export class CashierName extends Component {
@@ -8,7 +8,7 @@ export class CashierName extends Component {
 
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
     }
     get avatar() {
         const user_id = this.pos.accessRight.cashierUserId;

@@ -1,9 +1,10 @@
 import { attClassObjectToString } from "@mail/utils/common/format";
 import { propSignal } from "@mail/utils/common/hooks";
-import { Component, computed, onWillUnmount, shallowEqual, t, useProps } from "@odoo/owl";
+import { Component, computed, onWillUnmount, shallowEqual, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { Action as ActionModel } from "@mail/core/common/action";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 const actionListProps = [
@@ -44,7 +45,7 @@ class Action extends Component {
             ...actionListPropsSchema,
         });
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.attClassObjectToString = attClassObjectToString;
         if (this.props.action.definition?.isMoreAction) {
             onWillUnmount(() => {
@@ -125,7 +126,7 @@ export class ActionList extends Component {
             ...actionListPropsSchema,
         });
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.actionListProps = actionListProps;
     }
 

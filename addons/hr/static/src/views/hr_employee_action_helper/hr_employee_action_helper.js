@@ -1,6 +1,7 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { ActionHelper } from "@web/views/action_helper";
 import { user } from "@web/core/user";
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -26,7 +27,7 @@ export class HrEmployeeActionHelper extends ActionHelper {
         super.setup();
         this.orm = useService("orm");
         this.action = useService("action");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.state = proxy({ isOnboarding: null });
         onWillStart(() => {
             this.orm

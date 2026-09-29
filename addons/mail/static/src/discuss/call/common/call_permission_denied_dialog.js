@@ -1,11 +1,11 @@
-import { t, useProps } from "@odoo/owl";
+import { t, usePlugin, useProps } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import {
     NotificationAlertDialog,
     notificationAlertDialogProps,
 } from "@web/core/notification_alert_dialog/notification_alert_dialog";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class CallPermissionDeniedDialog extends NotificationAlertDialog {
     props = useProps({
@@ -16,7 +16,7 @@ export class CallPermissionDeniedDialog extends NotificationAlertDialog {
     static template = "discuss.CallPermissionDeniedDialog";
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
     }
 
     get title() {

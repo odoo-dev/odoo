@@ -22,6 +22,7 @@ import { loadBundle } from "@web/core/assets";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class MassMailingHtmlField extends HtmlField {
@@ -52,7 +53,7 @@ export class MassMailingHtmlField extends HtmlField {
             bundles: ["mass_mailing.assets_iframe_style"],
         });
         this.themeService = useService("mass_mailing.themes");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         Object.assign(this.state, {
             showThemeSelector: this.props.record.isNew,
             activeTheme: undefined,

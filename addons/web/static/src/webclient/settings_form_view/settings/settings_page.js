@@ -1,8 +1,8 @@
-import { Component, computed, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, computed, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { location } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 
 export class SettingsPage extends Component {
@@ -16,7 +16,7 @@ export class SettingsPage extends Component {
     });
     settingsRef = signal.ref();
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.state = proxy({
             selectedTab: "",
             search: this.env.searchState,

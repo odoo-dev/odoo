@@ -1,8 +1,9 @@
-import { proxy } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { formView } from "@web/views/form/form_view";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { FormController } from "@web/views/form/form_controller";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { StatusBarButtons } from "@web/views/form/status_bar_buttons/status_bar_buttons";
@@ -10,7 +11,7 @@ import { StatusBarButtons } from "@web/views/form/status_bar_buttons/status_bar_
 class MailingPreviewFormController extends FormController {
     setup() {
         super.setup();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         const displayState = proxy({
             isMobileMode: this.ui.isSmall,
             isSmall: this.ui.isSmall,

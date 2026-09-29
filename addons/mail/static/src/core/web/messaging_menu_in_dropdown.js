@@ -3,11 +3,12 @@ import { MessagingMenu } from "@mail/core/public_web/messaging_menu/messaging_me
 import { useDiscussSystray } from "@mail/utils/common/hooks";
 import { incrementFn } from "@mail/utils/common/signal";
 
-import { Component, computed, signal, useEffect } from "@odoo/owl";
+import { Component, computed, signal, useEffect, usePlugin } from "@odoo/owl";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class MessagingMenuInDropdown extends Component {
@@ -19,7 +20,7 @@ export class MessagingMenuInDropdown extends Component {
         this.dropdown = useDropdownState();
         this.discussSystray = useDiscussSystray(this.dropdown);
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.menuState = computed(() => this.store.messagingMenuSystrayState);
         // Bound once so `close` is a stable (useProps.static) handler.
         this.closeDropdown = this.dropdown.close.bind(this.dropdown);

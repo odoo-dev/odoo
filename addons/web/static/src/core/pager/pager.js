@@ -1,5 +1,6 @@
-import { Component, EventBus, proxy, signal, t, useEffect, useListener, useProps } from "@odoo/owl";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { Component, EventBus, proxy, signal, t, useEffect, useListener, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { clamp } from "@web/core/utils/numbers";
 
 export const PAGER_UPDATED_EVENT = "PAGER:UPDATED";
@@ -38,7 +39,7 @@ export class Pager extends Component {
             isDisabled: false,
         });
         useAutofocus({ ref: this.inputRef });
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         useListener(document, "mousedown", this.onClickAway.bind(this), { capture: true });
         let firstMount = true;
         useEffect(() => {

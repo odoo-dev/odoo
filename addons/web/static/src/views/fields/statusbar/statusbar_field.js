@@ -1,5 +1,6 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { onWillRender, render } from "@web/owl2/utils";
-import { Component, signal, t, onMounted, onPatched, useListener, useProps } from "@odoo/owl";
+import { Component, onMounted, onPatched, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -11,7 +12,6 @@ import { getFieldDomain } from "@web/model/relational_model/utils";
 import { useSpecialData } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "../standard_field_props";
 import { ConnectionLostError } from "@web/core/network/rpc";
-import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {import("../standard_field_props").StandardFieldProps & {
@@ -68,7 +68,7 @@ export class StatusBarField extends Component {
     setup() {
         // Properties
         this.items = {};
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         // Resize listeners
         let status = "idle";

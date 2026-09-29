@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect, useSubEnv } from "@web/owl2/utils";
 import { DateSection } from "@mail/core/common/date_section";
 import { Message } from "@mail/core/common/message";
@@ -16,6 +17,7 @@ import {
     t,
     untrack,
     useOnChange,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
@@ -74,7 +76,7 @@ export class Thread extends Component {
             showJumpPresent: t.boolean().optional(true),
             thread: t.instanceOf(this.store["mail.thread"]),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({
             isReplyingTo: false,
             mountedAndLoaded: false,
@@ -90,7 +92,7 @@ export class Thread extends Component {
         this.incrementResetCount = incrementFn(this.resetCount);
         this.lastJumpPresent = this.props.jumpPresent;
         this.orm = useService("orm");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         /** @type {ReturnType<import('@mail/utils/common/hooks').useMessageScrolling>|null} */
         this.messageHighlight = this.env.messageHighlight;
         this.scrollingToHighlight = false;

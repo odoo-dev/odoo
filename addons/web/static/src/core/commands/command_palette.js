@@ -8,6 +8,7 @@ import {
     signal,
     t,
     useListener,
+    usePlugin,
     useProps,
     useScope,
 } from "@odoo/owl";
@@ -15,8 +16,9 @@ import { hasTouch, isMacOS } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { KeepLast, Race } from "@web/core/utils/concurrency";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { highlightText } from "@web/core/utils/html";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -122,7 +124,7 @@ export class CommandPalette extends Component {
         this.keepLast = new KeepLast();
         this._sessionId = CommandPalette.lastSessionId++;
         this.DefaultCommandItem = DefaultCommandItem;
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.activeElement = this.uiService.activeElement;
         useAutofocus({ ref: this.inputRef });
 

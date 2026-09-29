@@ -1,6 +1,7 @@
 import { AccountFileUploader } from "@account/components/account_file_uploader/account_file_uploader";
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { DocumentFileUploader } from "../document_file_uploader/document_file_uploader";
@@ -20,7 +21,7 @@ export class BillGuide extends Component {
     setup() {
         this.lazySession = useService("lazy_session");
         this.action = useService("action");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
 
         const rec = this.props.record;
         const ctx = this.env.searchModel.context;

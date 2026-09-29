@@ -8,6 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { useNavigation } from "@web/core/navigation/navigation";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
@@ -71,7 +72,7 @@ export class SearchBar extends Component {
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.fields = this.env.searchModel.searchViewFields;
         this.searchItemsFields = this.env.searchModel.getSearchItems((f) => f.type === "field");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
 
         this.visibilityState = proxy(this.props.toggler?.state || { showSearchBar: true });
 

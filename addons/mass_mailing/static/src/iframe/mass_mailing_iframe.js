@@ -7,19 +7,21 @@ import {
     onMounted,
     onWillDestroy,
     onWillUnmount,
-    useProps,
+    proxy,
     signal,
     status,
-    proxy,
     t,
     useEffect,
+    usePlugin,
+    useProps,
 } from "@odoo/owl";
 import { LazyComponent } from "@web/core/lazy_component";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { uniqueId } from "@web/core/utils/functions";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { renderToFragment } from "@web/core/utils/render";
 import { closestScrollableY } from "@web/core/utils/scrolling";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
@@ -56,7 +58,7 @@ export class MassMailingIframe extends Component {
     iframeWrapperRef = useProps.static("iframeWrapperRef", t.signal(t.ref()));
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.overlayRef = signal.ref();
         this.isRTL = localization.direction === "rtl";
         this.localOverlayContainerKey = uniqueId("mass_mailing_iframe");

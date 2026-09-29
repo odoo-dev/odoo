@@ -20,6 +20,7 @@ import { rpc } from "@web/core/network/rpc";
 import { x2ManyCommands } from "@web/core/orm_plugin";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
 import { TagsList } from "@web/core/tags_list/tags_list";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { unique } from "@web/core/utils/arrays";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
@@ -130,7 +131,7 @@ export class ExportDataDialog extends Component {
         this.dialog = useService("dialog");
         this.notification = useService("notification");
         this.orm = useService("orm");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         useAutofocus({ ref: this.templateNameRef });
 
         this.knownFields = {};

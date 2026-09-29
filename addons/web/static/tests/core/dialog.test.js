@@ -11,7 +11,7 @@ import {
     resize,
     test,
 } from "@odoo/hoot";
-import { Component, onMounted, proxy, useProps, xml } from "@odoo/owl";
+import { Component, onMounted, proxy, usePlugin, useProps, xml } from "@odoo/owl";
 import {
     assignDialogTestEnv,
     contains,
@@ -21,7 +21,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { Dialog } from "@web/core/dialog/dialog";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 test("simple rendering", async () => {
     expect.assertions(7);
@@ -363,7 +363,7 @@ test("can be the UI active element", async () => {
         static template = xml`<Dialog>content</Dialog>`;
         static components = { Dialog };
         setup() {
-            this.ui = useService("ui");
+            this.ui = usePlugin(UIPlugin);
             expect(this.ui.activeElement).toBe(document, {
                 message:
                     "UI active element should be the default (document) as Parent is not mounted yet",

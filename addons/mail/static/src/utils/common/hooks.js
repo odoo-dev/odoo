@@ -14,6 +14,7 @@ import {
     useScope,
 } from "@odoo/owl";
 
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { Reactive } from "@web/core/utils/reactive";
 import { useLayoutEffect } from "@web/owl2/utils";
 
@@ -509,7 +510,7 @@ export function useMicrophoneVolume() {
 }
 
 export function useSelection({ ref, model, preserveOnClickAwayPredicate = () => false }) {
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     const elRef = ref;
     const getEl = () => untrack(elRef);
     function onSelectionChange() {
@@ -770,7 +771,7 @@ export function useSequential() {
 
 /** @param {import("@web/core/dropdown/dropdown_hooks").DropdownState} [dropdownState] */
 export function useDiscussSystray(dropdownState) {
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     if (dropdownState) {
         useEffect(() => {
             if (dropdownState.isOpen) {

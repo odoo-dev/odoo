@@ -1,8 +1,9 @@
 import { AttendeeCalendarActivityListPopoverItem } from "@calendar/views/attendee_calendar/activity/attendee_calendar_activity_list_popover_item";
 import { Dialog } from "@web/core/dialog/dialog";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillStart, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { useSubEnv } from "@web/owl2/utils";
 
 /**
@@ -33,7 +34,7 @@ export class AttendeeCalendarActivityListPopover extends Component {
         super.setup();
         this.action = useService("action");
         this.store = useService("mail.store");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.limit = this.uiService.isSmall ? false : 5;
 
         this.activityIds = this.props.activityIds;

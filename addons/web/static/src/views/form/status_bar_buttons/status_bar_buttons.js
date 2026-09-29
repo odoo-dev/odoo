@@ -1,7 +1,7 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class StatusBarButtons extends Component {
     static template = "web.StatusBarButtons";
@@ -14,7 +14,7 @@ export class StatusBarButtons extends Component {
     });
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
 
     get visibleSlotNames() {

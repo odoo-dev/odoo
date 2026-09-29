@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export const LivechatViewControllerMixin = (ViewController) =>
@@ -5,7 +7,7 @@ export const LivechatViewControllerMixin = (ViewController) =>
         setup() {
             super.setup(...arguments);
             this.store = useService("mail.store");
-            this.ui = useService("ui");
+            this.ui = usePlugin(UIPlugin);
         }
 
         async openRecord(record) {

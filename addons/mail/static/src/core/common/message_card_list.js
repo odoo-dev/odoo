@@ -1,9 +1,10 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { Message } from "@mail/core/common/message";
 import { MessageSearchState } from "@mail/core/common/message_search_hook";
 import { useVisible } from "@mail/utils/common/hooks";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -28,7 +29,7 @@ export class MessageCardList extends Component {
             showEmpty: t.boolean().optional(),
             thread: t.instanceOf(this.store["mail.thread"]),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         useSubEnv({ messageCard: true });
         useVisible(this.loadMoreRef, (isVisible) => {
             if (isVisible) {

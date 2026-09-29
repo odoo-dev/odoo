@@ -6,6 +6,7 @@ import {
     signal,
     t,
     useListener,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -15,6 +16,7 @@ import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
@@ -93,7 +95,7 @@ export class KanbanRenderer extends Component {
                 !this.props.list.isGrouped || this.props.list.groups.length > 0,
         });
         this.dialog = useService("dialog");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.exampleData = registry
             .category("kanban_examples")
             .get(this.props.archInfo.examples, null);

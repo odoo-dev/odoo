@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillStart, onWillUnmount, signal, useProps, t } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { FeedbackPaymentSummary } from "@point_of_sale/app/components/feedback_payment_summary/feedback_payment_summary";
 import { PrintPopup } from "@point_of_sale/app/components/popups/print_popup/print_popup";
 import { SendReceiptPopup } from "@point_of_sale/app/components/popups/send_receipt_popup/send_receipt_popup";
@@ -6,6 +6,7 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import OrderPaymentValidation from "@point_of_sale/app/utils/order_payment_validation";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class FeedbackScreen extends Component {
@@ -22,7 +23,7 @@ export class FeedbackScreen extends Component {
 
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.dialog = useService("dialog");
         if (new URLSearchParams(window.location.search).get("post_validate") == 1) {
             // This means we got here from a backend redirect, so waitFor is always undefined

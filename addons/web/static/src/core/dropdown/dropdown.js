@@ -7,6 +7,7 @@ import {
     status,
     t,
     useEffect,
+    usePlugin,
     useProps,
     xml,
 } from "@odoo/owl";
@@ -17,8 +18,8 @@ import { DropdownPopover } from "@web/core/dropdown/_behaviours/dropdown_popover
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useNavigation } from "@web/core/navigation/navigation";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { mergeClasses } from "@web/core/utils/classname";
-import { useService } from "@web/core/utils/hooks";
 import { deepMerge } from "@web/core/utils/objects";
 import { useLayoutEffect } from "@web/owl2/utils";
 
@@ -131,7 +132,7 @@ export class Dropdown extends Component {
             ...deepMerge(this.nesting.navigationOptions, this.props.navigationOptions),
         });
 
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         const getPosition = () => this.position;
         const options = {

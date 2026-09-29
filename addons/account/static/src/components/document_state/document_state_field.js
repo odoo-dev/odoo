@@ -1,10 +1,11 @@
 import { _t } from "@web/core/l10n/translation";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 import { SelectionField, selectionField } from "@web/views/fields/selection/selection_field";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 
 export class DocumentStatePopover extends Component {
     static template = "account.DocumentStatePopover";
@@ -22,7 +23,7 @@ export class DocumentState extends SelectionField {
 
     setup() {
         super.setup();
-        this.popover = useService("popover");
+        this.popover = usePlugin(PopoverPlugin);
         this.notification = useService("notification");
     }
 

@@ -1,9 +1,9 @@
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import { QuantityButtons } from "@point_of_sale/app/components/buttons/quantity_buttons/quantity_buttons";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { ProductProduct } from "@point_of_sale/app/models/product_product";
 import { PosOrderline } from "@point_of_sale/app/models/pos_order_line";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
@@ -22,7 +22,7 @@ export class ComboConfiguratorPopup extends Component {
 
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
 
         let combo = {};
         let selected = undefined;

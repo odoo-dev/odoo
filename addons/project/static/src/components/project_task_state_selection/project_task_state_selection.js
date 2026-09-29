@@ -1,8 +1,8 @@
-import { useProps, proxy, t } from "@odoo/owl";
+import { proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { useCommand } from "@web/core/commands/command_hook";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { formatSelection } from "@web/views/fields/formatters";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import {
@@ -22,7 +22,7 @@ export class ProjectTaskStateSelection extends StateSelectionField {
     });
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.state = proxy({
             isStateButtonHighlighted: false,
         });

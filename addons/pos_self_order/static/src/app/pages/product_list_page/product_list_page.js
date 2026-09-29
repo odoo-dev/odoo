@@ -1,5 +1,6 @@
-import { Component, onMounted, onWillUnmount, computed, proxy, signal } from "@odoo/owl";
+import { Component, computed, onMounted, onWillUnmount, proxy, signal, usePlugin } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -28,7 +29,7 @@ export class ProductListPage extends Component {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
         this.dialog = useService("dialog");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
 
         const initCategories = !this.selfOrder.currentCategory;
         if (initCategories) {

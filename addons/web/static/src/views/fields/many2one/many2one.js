@@ -1,4 +1,4 @@
-import { Component, useProps, toRaw, proxy, signal, t } from "@odoo/owl";
+import { Component, proxy, signal, t, toRaw, usePlugin, useProps } from "@odoo/owl";
 import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -6,6 +6,7 @@ import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
@@ -114,7 +115,7 @@ export class Many2One extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.orm = useService("orm");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         this.state = proxy({ isFloating: false });
 

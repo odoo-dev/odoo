@@ -1,8 +1,8 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { Component, onWillUnmount, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillUnmount, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
-import { useService } from "@web/core/utils/hooks";
 import { AccordionItem } from "@point_of_sale/app/components/accordion_item/accordion_item";
 import { debounce } from "@web/core/utils/timing";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
@@ -24,7 +24,7 @@ export class ProductInfoBanner extends Component {
         this.fetchStock = useTrackedAsync((pt, p) => this.pos.getProductInfo(pt, 1, 0, p), {
             keepLast: true,
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({
             other_warehouses: [],
             available_quantity: 0,

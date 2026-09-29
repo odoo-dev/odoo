@@ -1,8 +1,9 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useActiveElement } from "../ui/ui_plugin";
-import { useBackButton, useService } from "@web/core/utils/hooks";
-import { Component, onWillDestroy, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { useBackButton } from "@web/core/utils/hooks";
+import { Component, onWillDestroy, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { makeDraggableHook } from "../utils/draggable_hook_builder_owl";
 import { hasTouch } from "@web/core/browser/feature_detection";
@@ -70,7 +71,7 @@ export class Dialog extends Component {
     );
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         useActiveElement(this.modalRef);
         this.data = proxy(this.env.dialogData);
         useHotkey("escape", () => this.onEscape());

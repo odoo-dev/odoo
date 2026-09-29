@@ -1,13 +1,13 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { pick } from "@web/core/utils/objects";
 
 export class CategorySelector extends Component {
     static template = "point_of_sale.CategorySelector";
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.pos = usePos();
     }
 

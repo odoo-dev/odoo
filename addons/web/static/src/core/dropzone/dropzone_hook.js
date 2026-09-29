@@ -1,6 +1,6 @@
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { Dropzone } from "@web/core/dropzone/dropzone";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useListener, useOnChange, usePlugin } from "@odoo/owl";
 
 /**
@@ -16,7 +16,7 @@ export function useCustomDropzone(
     isDropzoneEnabled = () => true
 ) {
     const overlayService = usePlugin(OverlayPlugin);
-    const uiService = useService("ui");
+    const uiService = usePlugin(UIPlugin);
 
     const getTargetEl = () => targetRef();
 

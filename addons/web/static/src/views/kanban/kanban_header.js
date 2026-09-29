@@ -1,9 +1,10 @@
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { utils } from "@web/core/ui/ui_utils";
 import { memoize } from "@web/core/utils/functions";
 import { useService } from "@web/core/utils/hooks";
@@ -42,7 +43,7 @@ export class KanbanHeader extends Component {
     setup() {
         this.dialog = useService("dialog");
         this.orm = useService("orm");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.popover = usePopover(KanbanHeaderTooltip);
         this.onTitleMouseEnter = useDebounced(this.onTitleMouseEnter.bind(this), 400);
         this.odoomark = odoomark;

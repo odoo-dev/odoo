@@ -8,6 +8,7 @@ import { localization } from "@web/core/l10n/localization";
 import { Pager } from "@web/core/pager/pager";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { getTabableElements } from "@web/core/utils/ui";
@@ -181,7 +182,7 @@ export class ListRenderer extends Component {
     debugMode = usePlugin(DebugModePlugin);
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.notificationService = useService("notification");
         this.orm = useService("orm");

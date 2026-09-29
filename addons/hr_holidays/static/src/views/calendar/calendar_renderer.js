@@ -1,4 +1,5 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { CalendarRenderer } from "@web/views/calendar/calendar_renderer";
 
 import { TimeOffCalendarCommonRenderer } from "./common/calendar_common_renderer";
@@ -28,7 +29,7 @@ export class TimeOffCalendarRenderer extends CalendarRenderer {
 export class TimeOffDashboardCalendarRenderer extends TimeOffCalendarRenderer {
     setup() {
         super.setup();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
     get showDashboard() {
         return !this.uiService.isSmall;

@@ -1,5 +1,5 @@
-import { Component, useProps, t, xml } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, t, usePlugin, useProps, xml } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class Alert extends Component {
     static template = xml`
@@ -16,6 +16,6 @@ export class Alert extends Component {
     });
     setup() {
         super.setup(...arguments);
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
     }
 }

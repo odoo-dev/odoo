@@ -1,7 +1,8 @@
-import { Component, signal, status, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, status, t, usePlugin, useProps } from "@odoo/owl";
 import { DashboardFacet } from "../dashboard_facet/dashboard_facet";
 import { DashboardDateFilter } from "../dashboard_date_filter/dashboard_date_filter";
 import { DashboardSearchBarMenu } from "../dashboard_search_bar_menu/dashboard_search_bar_menu";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
@@ -33,7 +34,7 @@ export class DashboardSearchBar extends Component {
 
     setup() {
         this.nameService = useService("name");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.orm = useService("orm");
         this.keepLast = new KeepLast();
         this.fields = useService("field");

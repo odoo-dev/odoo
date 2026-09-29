@@ -1,6 +1,7 @@
 import { Component, computed, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -26,7 +27,7 @@ class OfflineSystray extends Component {
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
 
     groupEntries = computed(() => {

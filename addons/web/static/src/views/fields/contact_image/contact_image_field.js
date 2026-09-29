@@ -1,5 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { imageUrl } from "@web/core/utils/urls";
 import { fileTypeMagicWordMap, ImageField, imageField } from "@web/views/fields/image/image_field";
 
@@ -8,7 +9,7 @@ export class ContactImageField extends ImageField {
 
     setup() {
         super.setup();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
 
     getUrl(imageFieldName) {

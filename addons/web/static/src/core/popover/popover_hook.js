@@ -1,4 +1,5 @@
-import { onWillUnmount, useScope } from "@odoo/owl";
+import { onWillUnmount, usePlugin, useScope } from "@odoo/owl";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -57,7 +58,7 @@ export function usePopover(component, options = {}) {
     if (options.useBottomSheet) {
         service = useService("bottom_sheet");
     } else {
-        service = useService("popover");
+        service = usePlugin(PopoverPlugin);
     }
     const newOptions = Object.create(options);
     const scope = useScope();

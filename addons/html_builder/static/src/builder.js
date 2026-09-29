@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { useEditor } from "@html_editor/editor";
 import {
@@ -8,11 +9,12 @@ import {
     onWillStart,
     onWillUnmount,
     providePlugins,
+    proxy,
     signal,
     status,
-    proxy,
-    useProps,
     t,
+    usePlugin,
+    useProps,
 } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
@@ -91,7 +93,7 @@ export class Builder extends Component {
         useHotkey("control+y", () => this.redo());
         useHotkey("control+shift+z", () => this.redo());
         this.orm = useService("orm");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.notification = useService("notification");
 
         this.snippetModel = useSnippets(this.props.snippetsName);

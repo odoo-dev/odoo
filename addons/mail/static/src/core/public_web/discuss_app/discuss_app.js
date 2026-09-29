@@ -1,5 +1,6 @@
 import { EffectPlugin } from "@web/core/effects/effect_plugin";
 import { useMessageScrolling } from "@mail/utils/common/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 
 import {
@@ -42,7 +43,7 @@ export class Discuss extends Component {
         this.messageHighlight = useMessageScrolling({ thread: () => this.thread });
         this.orm = useService("orm");
         this.effect = usePlugin(EffectPlugin);
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         useSubEnv({
             inDiscussApp: true,
             messageHighlight: this.messageHighlight,

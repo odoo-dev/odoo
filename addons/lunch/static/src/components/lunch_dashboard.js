@@ -1,9 +1,10 @@
 import { rpc } from "@web/core/network/rpc";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { DateTimeInput } from '@web/core/datetime/datetime_input';
-import { Component, onWillStart, markup, xml, proxy, t, useProps } from "@odoo/owl";
+import { Component, markup, onWillStart, proxy, t, usePlugin, useProps, xml } from "@odoo/owl";
 const { DateTime } = luxon;
 
 export class LunchCurrency extends Component {
@@ -137,7 +138,7 @@ export class LunchDashboard extends Component {
     static template = "lunch.LunchDashboard";
     setup() {
         super.setup();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.state = proxy({
             infos: {},
             date: DateTime.now(),

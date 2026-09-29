@@ -1,6 +1,7 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { FloorPlanBase } from "@pos_restaurant/app/screens/floor_screen/floor_plan_base";
-import { markRaw, onWillUnmount, useListener, proxy } from "@odoo/owl";
+import { markRaw, onWillUnmount, proxy, useListener, usePlugin } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { setElementTransform } from "@pos_restaurant/app/services/floor_plan/utils/utils";
@@ -20,7 +21,7 @@ export class FloorPlan extends FloorPlanBase {
         super.setup();
         this.pos = usePos();
         this.alert = this.pos.alert;
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.notification = useService("notification");
         useListener(window, "resize", useDebounced(this.handleWindowResize.bind(this), 100));
         this.scrollFloorId = null;

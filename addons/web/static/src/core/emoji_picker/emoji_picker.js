@@ -1,4 +1,5 @@
 import { FrequentEmojiPlugin } from "@web/core/emoji_picker/frequent_emoji_plugin";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { markEventHandled } from "@web/core/utils/misc";
 import {
     Component,
@@ -116,7 +117,7 @@ export class EmojiPicker extends Component {
     });
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.isMobileOS = isMobileOS();
         this.frequentEmojiService = usePlugin(FrequentEmojiPlugin);
         const loadEmoji = useLoadEmoji();
@@ -476,7 +477,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     const app = useApp();
     const targets = [];
     const state = proxy({ isOpen: false });
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     const dialog = useService("dialog");
     const loadEmoji = useLoadEmoji();
     let remove;

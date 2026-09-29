@@ -6,10 +6,12 @@ import {
     t,
     toRaw,
     useOnChange,
+    usePlugin,
     useScope,
 } from "@odoo/owl";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useEnv } from "@web/owl2/utils";
 
 /**
@@ -53,7 +55,7 @@ export const autofocusParamsType = t.object({
  * @returns {import("@odoo/owl").Signal<HTMLElement>} the element reference
  */
 export function useAutofocus({ ref, selectAll, mobile }) {
-    const uiService = useService("ui");
+    const uiService = usePlugin(UIPlugin);
 
     // Prevent autofocus on touch devices to avoid the virtual keyboard from popping up unexpectedly
     if (!mobile && hasTouch()) {

@@ -10,10 +10,11 @@ import {
     toRaw,
     useEffect,
     useListener,
+    usePlugin,
     useScope,
 } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useDebounced } from "@web/core/utils/timing";
 import { useEnv, useSubEnv } from "@web/owl2/utils";
 import { BuilderAction } from "./builder_action";
@@ -870,7 +871,7 @@ export function useClickableBuilderComponent(props) {
  */
 export function useOperationWithReload(callApply, reload) {
     const env = useEnv();
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     return async (...args) => {
         const { editingElement } = args[0][0];
         ui.block();

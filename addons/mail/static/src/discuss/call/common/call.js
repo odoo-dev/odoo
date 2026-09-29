@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { BlurPerformanceWarning } from "@mail/discuss/call/common/blur_performance_warning";
 import { CALL_GRID_LAYOUT } from "@mail/discuss/call/common/call_layout";
@@ -26,6 +27,7 @@ import {
     signal,
     t,
     useEffect,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 
@@ -106,7 +108,7 @@ export class Call extends Component {
         this.notification = useService("notification");
         this.rtc = useService("discuss.rtc");
         this.isMobileOs = isMobileOS();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({
             /** Tiles are cropped to fill their rect, rather than letterboxed inside it. */
             cropsTiles: false,

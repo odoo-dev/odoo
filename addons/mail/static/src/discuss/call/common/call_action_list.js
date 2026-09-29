@@ -1,6 +1,7 @@
-import { Component, computed, signal, toRaw, types, useProps } from "@odoo/owl";
+import { Component, computed, signal, toRaw, types, usePlugin, useProps } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { useCallActions } from "@mail/discuss/call/common/call_actions";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -41,7 +42,7 @@ export class CallActionList extends Component {
             pipExtraActions: types.array().optional(),
         });
         this.rtc = useService("discuss.rtc");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.pipService = useService("discuss.pip_service");
         this.callActions = useCallActions(this.callActionsParams);
         this.popover = usePopover(Tooltip, {

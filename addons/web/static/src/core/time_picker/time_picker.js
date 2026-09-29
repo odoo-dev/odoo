@@ -1,11 +1,11 @@
-import { Component, onWillUpdateProps, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { Time, parseTime } from "@web/core/l10n/time";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { mergeClasses } from "@web/core/utils/classname";
-import { useService } from "@web/core/utils/hooks";
 import { range } from "@web/core/utils/numbers";
 
 /**
@@ -43,7 +43,7 @@ export class TimePicker extends Component {
 
     setup() {
         this.dropdownState = useDropdownState();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         this.state = proxy({
             value: null,

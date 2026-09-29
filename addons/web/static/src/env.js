@@ -1,9 +1,10 @@
 // eslint-disable-next-line no-unused-vars
-import { App } from "@odoo/owl";
+import { App, usePlugin } from "@odoo/owl";
 import { isMacOS } from "@web/core/browser/feature_detection";
 import { appTranslateFn } from "@web/core/l10n/translation";
 import { services } from "@web/core/services";
 import { getTemplate } from "@web/core/templates";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { session } from "@web/session";
 
 /**
@@ -20,7 +21,7 @@ const REMOVED_KEYS = {
         `outside of one.`,
     isSmall:
         `"env.isSmall" was removed when the ui service became UIPlugin. Use ` +
-        `useService("ui").isSmall in a component, env.services.ui.isSmall ` +
+        `usePlugin(UIPlugin).isSmall in a component, env.services.ui.isSmall ` +
         `with a plain env, or UIPlugin's isSmall() signal in a plugin.`,
 };
 

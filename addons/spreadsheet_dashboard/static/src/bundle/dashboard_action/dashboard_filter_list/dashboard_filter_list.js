@@ -1,4 +1,4 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { FilterValue } from "@spreadsheet/global_filters/components/filter_value/filter_value";
 import {
     getEmptyFilterValue,
@@ -7,7 +7,7 @@ import {
 } from "@spreadsheet/global_filters/helpers";
 import { _t } from "@web/core/l10n/translation";
 import { getOperatorLabel } from "@web/core/tree_editor/tree_editor_operator_editor";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 /**
  * This component is used to display a list of all the global filters of a dashboard.
@@ -24,7 +24,7 @@ export class DashboardFilterList extends Component {
     });
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
 
     getTranslatedFilterLabel(filter) {

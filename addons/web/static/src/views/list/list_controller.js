@@ -12,6 +12,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { evaluateBooleanExpr, evaluateExpr } from "@web/core/py_js/py";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { omit } from "@web/core/utils/objects";
@@ -72,7 +73,7 @@ export class ListController extends Component {
     setup() {
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.orm = useService("orm");
         this.offlinePlugin = usePlugin(OfflinePlugin);
 

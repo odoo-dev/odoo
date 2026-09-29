@@ -1,8 +1,8 @@
 import { AvatarCard } from "@mail/core/web/avatar_card/avatar_card";
-import { onWillStart, useProps, t } from "@odoo/owl";
+import { onWillStart, t, usePlugin, useProps } from "@odoo/owl";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
 
 /**
  * Mixin that handles public/private access of employee records in many2X fields
@@ -19,7 +19,7 @@ export function EmployeeFieldRelationMixin(fieldClass, parentProps) {
 
         setup() {
             super.setup();
-            this.uiService = useService("ui");
+            this.uiService = usePlugin(UIPlugin);
             onWillStart(async () => {
                 this.isHrUser = await user.hasGroup("hr.group_hr_user");
             });

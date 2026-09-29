@@ -5,6 +5,7 @@ import { useDebugCategory } from "@web/core/debug/debug_context";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { SIZES } from "@web/core/ui/ui_utils";
 import { user } from "@web/core/user";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -170,7 +171,7 @@ export class FormController extends Component {
         this.dialogService = useService("dialog");
         this.orm = useService("orm");
         this.viewService = useService("view");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         useBus(this.ui.bus, "resize", () => render(this));
 

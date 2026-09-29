@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
@@ -5,7 +6,7 @@ import { Call } from "@mail/discuss/call/common/call";
 import { CallActionList } from "@mail/discuss/call/common/call_action_list";
 import { useMessageScrolling } from "@mail/utils/common/hooks";
 
-import { Component, onMounted, onWillUnmount, types, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, types, usePlugin, useProps } from "@odoo/owl";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { user } from "@web/core/user";
@@ -39,7 +40,7 @@ export class Meeting extends Component {
             isPip: types.boolean().optional(),
         });
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.rtc = useService("discuss.rtc");
         useSubEnv({
             inDiscussCallView: true,

@@ -2,7 +2,8 @@ import { browser } from "@web/core/browser/browser";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { is24HourFormat } from "@web/core/l10n/time";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
+import { useBus } from "@web/core/utils/hooks";
 import { renderToFragment, renderToString } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
 import { makeWeekColumn } from "@web/views/calendar/calendar_common/calendar_common_week_column";
@@ -13,7 +14,7 @@ import { useFullCalendar } from "@web/views/calendar/hooks/full_calendar_hook";
 import { useSquareSelection } from "@web/views/calendar/hooks/square_selection_hook";
 import { TOUCH_SELECTION_THRESHOLD } from "@web/views/utils";
 
-import { Component, signal, t, useOnChange, useProps } from "@odoo/owl";
+import { Component, signal, t, useOnChange, usePlugin, useProps } from "@odoo/owl";
 
 const SCALE_TO_FC_VIEW = {
     day: "timeGridDay",
@@ -72,7 +73,7 @@ export class CalendarCommonRenderer extends Component {
     ref = signal.ref();
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.fc = useFullCalendar(
             this.ref,
             this.props.isDisabled ? this.disabledOptions : this.interactiveOptions

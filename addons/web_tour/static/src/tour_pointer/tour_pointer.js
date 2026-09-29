@@ -1,5 +1,6 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { Component, useProps, proxy, signal, t } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { location } from "@web/core/browser/browser";
 import { usePosition } from "@web/core/position/position_hook";
@@ -192,7 +193,7 @@ export class TourPointer extends Component {
             pointerPositionOptions
         );
 
-        const uiService = useService("ui");
+        const uiService = usePlugin(UIPlugin);
         const onActiveElementChanged = () => {
             const activeEl = uiService.activeElement;
             const pointerAnchor = this.trigger;

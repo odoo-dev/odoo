@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { render, useLayoutEffect, useSubEnv } from "@web/owl2/utils";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -78,7 +79,7 @@ export class KanbanController extends Component {
     setup() {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         const { Model, archInfo } = this.props;
 

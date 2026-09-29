@@ -17,6 +17,7 @@ import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { ORM } from "@web/core/orm_plugin";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { SIZES } from "@web/core/ui/ui_utils";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useBus, useOwnedDialogs, useService } from "@web/core/utils/hooks";
@@ -232,7 +233,7 @@ export class Many2XAutocomplete extends Component {
     setup() {
         this.orm = useService("orm");
         this.offlinePlugin = usePlugin(OfflinePlugin);
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         const { activeActions, resModel, update, isToMany, fieldString } = this.props;
 
@@ -714,7 +715,7 @@ export class X2ManyFieldDialog extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.archInfo = this.props.archInfo;
         this.record = this.props.record;
         this.title = this.props.title;
@@ -921,7 +922,7 @@ export function useOpenX2ManyRecord({
     isMany2Many,
 }) {
     const viewService = useService("view");
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     const env = useEnv();
     const props = useProps();
 

@@ -1,4 +1,4 @@
-import { Component, proxy, signal, t, useEnv, useLayoutEffect, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useEnv, useLayoutEffect, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
@@ -7,6 +7,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { Transition } from "@web/core/transition";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
@@ -398,7 +399,7 @@ export class EmbeddedActionsPanel extends Component {
     newActionNameRef = signal.ref();
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         useSortable({
             enable: true,

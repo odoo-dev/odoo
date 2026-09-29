@@ -1,8 +1,8 @@
-import { Component, useProps, proxy, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { localization } from "@web/core/l10n/localization";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { BACKSPACE, DECIMAL, Numpad } from "@point_of_sale/app/components/numpad/numpad";
 
 export class NumberPopup extends Component {
@@ -17,7 +17,7 @@ export class NumberPopup extends Component {
     });
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({
             buffer: String(this.props.startingValue || ""),
             isInitial: true,

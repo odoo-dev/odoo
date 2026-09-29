@@ -1,5 +1,5 @@
-import { Component, t, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class SelectionBox extends Component {
     static components = {};
@@ -9,7 +9,7 @@ export class SelectionBox extends Component {
     });
     setup() {
         this.root = this.props.root;
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
     get nbSelected() {
         return this.selectedRecords.length;

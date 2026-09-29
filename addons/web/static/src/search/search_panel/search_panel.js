@@ -1,7 +1,8 @@
-import { Component, onWillStart, onWillUpdateProps, proxy, signal, useEffect } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, proxy, signal, useEffect, usePlugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
+import { useBus } from "@web/core/utils/hooks";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { render } from "@web/owl2/utils";
 import { useSetupAction } from "@web/search/action_hook";
@@ -61,7 +62,7 @@ export class SearchPanel extends Component {
         this.dropdownStates = {};
         this.width = "10px";
 
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         this.importState(this.env.searchPanelState);
         const sidebarExpandedPreference = browser.localStorage.getItem(this.keyExpandSidebar);

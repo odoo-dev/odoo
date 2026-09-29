@@ -6,6 +6,7 @@ import {
     signal,
     types,
     useOnChange,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 
@@ -18,6 +19,7 @@ import { ThreadIcon } from "@mail/core/common/thread_icon";
 import { Composer } from "@mail/core/common/composer";
 import { attClassObjectToString } from "@mail/utils/common/format";
 
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { useService } from "@web/core/utils/hooks";
 
@@ -39,7 +41,7 @@ export class DiscussContent extends Component {
         this.props = useProps({
             thread: types.instanceOf(this.store["mail.thread"]).optional(),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.notification = useService("notification");
         this.rootRef = signal.ref(HTMLDivElement);
         this.threadAvatarRef = signal.ref(HTMLDivElement);

@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { render, useSubEnv } from "@web/owl2/utils";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { Notebook } from "@web/core/notebook/notebook";
@@ -5,7 +6,6 @@ import { Setting } from "./setting/setting";
 import { Field } from "@web/views/fields/field";
 import { browser } from "@web/core/browser/browser";
 import { hasTouch } from "@web/core/browser/feature_detection";
-import { useService } from "@web/core/utils/hooks";
 import { useDebounced, useThrottleForAnimation } from "@web/core/utils/timing";
 import { ButtonBox } from "@web/views/form/button_box/button_box";
 import { InnerGroup, OuterGroup } from "@web/views/form/form_group/form_group";
@@ -24,6 +24,7 @@ import {
     signal,
     t,
     useEffect,
+    usePlugin,
     useProps,
     xml,
 } from "@odoo/owl";
@@ -68,7 +69,7 @@ export class FormRenderer extends Component {
         this.state = proxy({}); // Used by Form Compiler
         this.templates = useViewCompiler(Compiler || FormCompiler, templates);
         useSubEnv({ model: record.model });
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.onResize = useDebounced(() => render(this), 200);
         this.onScrollThrottled = useThrottleForAnimation(this.onScroll.bind(this));
         onMounted(() => browser.addEventListener("resize", this.onResize));

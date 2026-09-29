@@ -1,7 +1,8 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useEnv, useSubEnv } from "@web/owl2/utils";
-import { EventBus, onMounted, onWillDestroy, useEffect } from "@odoo/owl";
+import { EventBus, onMounted, onWillDestroy, useEffect, usePlugin } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 
 export const DROPDOWN_NESTING = Symbol("dropdownNesting");
 const BUS = new EventBus();
@@ -81,7 +82,7 @@ export function useDropdownNesting(state) {
     });
 
     // Set up UI active element related behavior ---------------------------
-    const uiService = useService("ui");
+    const uiService = usePlugin(UIPlugin);
     onMounted(() => {
         Promise.resolve().then(() => {
             current.activeEl = uiService.activeElement;

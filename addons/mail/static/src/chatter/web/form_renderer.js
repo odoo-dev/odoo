@@ -1,9 +1,10 @@
 import { AttachmentView } from "@mail/core/common/attachment_view";
 import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 
-import { onMounted, onWillUnmount, signal, types } from "@odoo/owl";
+import { onMounted, onWillUnmount, signal, types, usePlugin } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { SIZES } from "@web/core/ui/ui_utils";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
@@ -24,7 +25,7 @@ patch(FormRenderer.prototype, {
                 type: types.instanceOf(this.mailStore["mail.thread"]),
             });
         }
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.mailPopoutService = useService("mail.popout");
 
         this.onResize = useDebounced(() => render(this), 200);

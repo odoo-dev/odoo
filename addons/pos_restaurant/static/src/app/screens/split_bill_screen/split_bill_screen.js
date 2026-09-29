@@ -1,4 +1,4 @@
-import { Component, onWillDestroy, useProps, proxy, t } from "@odoo/owl";
+import { Component, onWillDestroy, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
 import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
@@ -7,7 +7,7 @@ import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook
 import { _t } from "@web/core/l10n/translation";
 import { localeCompare } from "@web/core/l10n/utils";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class SplitBillScreen extends Component {
     static template = "pos_restaurant.SplitBillScreen";
@@ -20,7 +20,7 @@ export class SplitBillScreen extends Component {
 
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.qtyTracker = proxy({});
         this.priceTracker = proxy({});
         this.isTransferred = false;

@@ -4,6 +4,7 @@ import { CONNECTION_TYPES } from "@mail/discuss/call/common/rtc_service";
 import { TalkingAudioBars } from "@mail/discuss/call/common/talking_audio_bars";
 import { useHover } from "@mail/utils/common/hooks";
 import { extractAccentColor } from "@mail/utils/common/misc";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { isEventHandled } from "@web/core/utils/misc";
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -59,7 +60,7 @@ export class CallParticipantCard extends Component {
             isSidebarItem: types.boolean().optional(),
             minimized: types.boolean().optional(),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.rootHover = useHover(this.root);
         this.contextMenuDropdownState = useDropdownState();
         this.isMobileOS = isMobileOS();

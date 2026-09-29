@@ -1,4 +1,4 @@
-import { Component, onWillUpdateProps, signal, useProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, signal, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -8,6 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
 import { useService } from "@web/core/utils/hooks";
@@ -52,7 +53,7 @@ export class PivotRenderer extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.model = this.props.model;
         this.table = this.model.getTable();
         this.l10n = localization;

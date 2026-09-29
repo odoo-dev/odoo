@@ -27,6 +27,7 @@ import { post } from "@web/core/network/http_service";
 import { rpc, RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { uniqueId } from "@web/core/utils/functions";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { renderToElement } from "@web/core/utils/render";
@@ -75,7 +76,7 @@ export class WebsiteBuilderClientAction extends Component {
         this.notification = useService("notification");
         this.dialog = useService("dialog");
         this.websiteService = useService("website");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.title = useService("title");
         this.hotkeyService = useService("hotkey");
         this.websiteService.websiteRootInstance = undefined;

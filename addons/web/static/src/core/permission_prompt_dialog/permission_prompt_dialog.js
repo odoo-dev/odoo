@@ -1,6 +1,6 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class PermissionPromptDialog extends Component {
     static components = { Dialog };
@@ -15,6 +15,6 @@ export class PermissionPromptDialog extends Component {
     });
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
     }
 }

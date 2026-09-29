@@ -1,5 +1,5 @@
-import { onMounted, onWillUnmount, untrack, useListener, useProps, useScope } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { onMounted, onWillUnmount, untrack, useListener, usePlugin, useProps, useScope } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useEnv } from "../owl2/utils";
 
 export const scrollSymbol = Symbol("scroll");
@@ -50,7 +50,7 @@ export function useCallbackRecorder(callbackRecorder, callback) {
 export function useSetupAction(params = {}) {
     const env = useEnv();
     const props = useProps();
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     const {
         __beforeLeave__,
         __getGlobalState__,

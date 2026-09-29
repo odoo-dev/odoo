@@ -1,9 +1,10 @@
 import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { MessageSeenIndicator } from "@mail/discuss/core/common/message_seen_indicator";
 import { useHover } from "@mail/utils/common/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 import { ActionSwiper, onSwipeType } from "@web/core/action_swiper/action_swiper";
 import { useService } from "@web/core/utils/hooks";
@@ -23,7 +24,7 @@ export class NotificationItem extends Component {
     setup() {
         super.setup();
         this.DateTime = DateTime;
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.store = useService("mail.store");
         this.props = useProps({
             className: t.string().optional(""),

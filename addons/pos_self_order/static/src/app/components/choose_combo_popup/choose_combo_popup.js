@@ -1,5 +1,5 @@
-import { Component, signal, useProps, t } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 
 export class ChooseComboPopup extends Component {
@@ -13,7 +13,7 @@ export class ChooseComboPopup extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.potentialCombos = signal(this.props.potentialCombos);
         this.loadingComboIndex = signal(null);
         this.hasAppliedCombo = false;

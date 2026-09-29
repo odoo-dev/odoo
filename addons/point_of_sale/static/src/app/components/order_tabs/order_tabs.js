@@ -1,6 +1,7 @@
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { ListContainer } from "@point_of_sale/app/components/list_container/list_container";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 
@@ -15,7 +16,7 @@ export class OrderTabs extends Component {
     });
     setup() {
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.dialog = useService("dialog");
     }
     async newFloatingOrder() {

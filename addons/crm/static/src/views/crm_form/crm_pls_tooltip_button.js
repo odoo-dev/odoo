@@ -1,4 +1,5 @@
-import { Component, status, t, useProps } from "@odoo/owl";
+import { Component, status, t, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { localization } from "@web/core/l10n/localization";
 import { registry } from '@web/core/registry';
@@ -28,7 +29,7 @@ export class CrmPlsTooltipButton extends Component {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.popover = usePopover(CrmPlsTooltip, {
             popoverClass: 'mt-2 me-2',
             position: "bottom-start",

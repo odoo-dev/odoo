@@ -1,8 +1,8 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class Breadcrumbs extends Component {
     static template = "web.Breadcrumbs";
@@ -13,7 +13,7 @@ export class Breadcrumbs extends Component {
     });
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
 
     getBreadcrumbTooltip({ isFormView, name }) {

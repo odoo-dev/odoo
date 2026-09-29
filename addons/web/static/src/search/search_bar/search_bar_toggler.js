@@ -10,7 +10,7 @@ import {
 } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { browser } from "@web/core/browser/browser";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useDebounced } from "@web/core/utils/timing";
 
 export class SearchBarToggler extends Component {
@@ -35,7 +35,7 @@ export class OfflineSearchBarToggler extends SearchBarToggler {
 }
 
 export function useSearchBarToggler() {
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
 
     let isToggled = false;
     const state = proxy({

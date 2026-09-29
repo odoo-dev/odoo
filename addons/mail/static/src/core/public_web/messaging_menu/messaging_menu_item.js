@@ -6,13 +6,14 @@ import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { propSignal, useLongPress, useRightClickMenu } from "@mail/utils/common/hooks";
 import { nestedShallowEqual } from "@mail/utils/common/signal";
 
-import { Component, computed, shallowEqual, signal, types, useProps } from "@odoo/owl";
+import { Component, computed, shallowEqual, signal, types, usePlugin, useProps } from "@odoo/owl";
 
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { DROPDOWN_NESTING } from "@web/core/dropdown/_behaviours/dropdown_nesting";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { useEnv, useSubEnv } from "@web/owl2/utils";
 
@@ -61,7 +62,7 @@ export class MessagingMenuItem extends Component {
             thread: () => this.message?.thread,
         });
         this.messageDropdownState = useDropdownState();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         useSubEnv({ inMessagingMenu: true });
         if (isMobileOS()) {
             useLongPress(this.root, {

@@ -3,6 +3,7 @@ import {
     ConfirmationDialog,
 } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { useModelWithSampleData } from "@web/model/model";
@@ -20,7 +21,7 @@ import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiSelectionButtons } from "@web/views/view_components/multi_selection_buttons";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
 const { DateTime } = luxon;
@@ -69,7 +70,7 @@ export class CalendarController extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.displayDialog = useUniqueDialog();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         this.model = useModelWithSampleData(this.props.Model, this.modelParams);
 

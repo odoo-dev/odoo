@@ -1,6 +1,6 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { sortBy } from "@web/core/utils/arrays";
-import { useService } from "@web/core/utils/hooks";
 
 export const groupProps = {
     class: t.any().optional(),
@@ -59,7 +59,7 @@ export class OuterGroup extends Group {
 export class InnerGroup extends Group {
     static template = "web.Form.InnerGroup";
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
     }
     getTemplate(subType) {
         return this.constructor.templates[subType] || this.constructor.templates.default;

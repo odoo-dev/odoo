@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { parseXML } from "@web/core/utils/xml";
@@ -87,7 +88,7 @@ export class KanbanQuickCreateController extends Component {
     setup() {
         super.setup();
 
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.state = proxy({ disabled: false });
         this.addDialog = useOwnedDialogs();

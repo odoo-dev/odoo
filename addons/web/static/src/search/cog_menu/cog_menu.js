@@ -1,8 +1,8 @@
-import { asyncComputed, onWillStart, t, useScope } from "@odoo/owl";
+import { asyncComputed, onWillStart, t, usePlugin, useScope } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { ActionMenus, actionMenusProps } from "@web/search/action_menus/action_menus";
 
 const cogMenuRegistry = registry.category("cogMenu");
@@ -44,7 +44,7 @@ export class CogMenu extends ActionMenus {
 
     setup() {
         super.setup();
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.registryItems = asyncComputed(async () => this._registryItems(), { initial: [] });
         onWillStart(() => this.registryItems.currentPromise());
     }

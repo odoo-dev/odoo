@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect, useSubEnv } from "@web/owl2/utils";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
@@ -157,7 +158,7 @@ export class Composer extends Component {
             computed(() => this.thread ?? this.composer().message.thread),
             { composer: this.composer }
         );
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.composerService = useService("mail.composer");
         this.ref = signal.ref(HTMLTextAreaElement);
         this.fakeTextarea = signal.ref(HTMLTextAreaElement);

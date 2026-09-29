@@ -4,10 +4,11 @@ import { ExpertiseTagsAutocomplete } from "@im_livechat/core/web/expertise_tags_
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
 import { prettifyMessageContent } from "@mail/utils/common/format";
 
-import { Component, t, useEffect, useProps } from "@odoo/owl";
+import { Component, t, useEffect, usePlugin, useProps } from "@odoo/owl";
 
 import { startUrl } from "@web/core/browser/router";
 import { rpc } from "@web/core/network/rpc";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { url } from "@web/core/utils/urls";
 
@@ -23,7 +24,7 @@ export class LivechatChannelInfoList extends Component {
         super.setup();
         this.actionService = useService("action");
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         useEffect(() => {
             if (this.props.thread.hasFetchedLivechatSessionData) {
                 return;

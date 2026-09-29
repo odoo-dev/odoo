@@ -17,6 +17,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 import { registry } from "@web/core/registry";
 import { Transition } from "@web/core/transition";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { ErrorHandler } from "@web/core/utils/components";
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
@@ -103,7 +104,7 @@ export class NavBar extends Component {
             isAllAppsMenuOpened: false,
             isAppMenuSidebarOpened: false,
         });
-        this.ui = proxy(useService("ui"));
+        this.ui = proxy(usePlugin(UIPlugin));
     }
 
     handleItemError(error, item) {

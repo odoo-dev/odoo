@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { Pager } from "@web/core/pager/pager";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useCommand } from "@web/core/commands/command_hook";
@@ -47,7 +48,7 @@ export class ControlPanel extends Component {
         this.embeddedPanelState = useEmbeddedActions();
         this.actionService = useService("action");
         this.offlinePlugin = usePlugin(OfflinePlugin);
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.pagerProps = this.env.config.pagerProps
             ? proxy(this.env.config.pagerProps)
             : undefined;

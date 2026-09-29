@@ -1,6 +1,7 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { attClassObjectToString } from "@mail/utils/common/format";
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
 import { useBackButton, useService } from "@web/core/utils/hooks";
@@ -26,7 +27,7 @@ export class ActionPanel extends Component {
             t.signal(t.instanceOf(HTMLDivElement)).optional(() => signal.ref())
         );
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         useSubEnv({ inDiscussActionPanel: true });
         useBackButton(
             () => this.props.close(),

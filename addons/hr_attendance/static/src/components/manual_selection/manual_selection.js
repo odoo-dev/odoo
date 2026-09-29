@@ -1,4 +1,4 @@
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -6,6 +6,7 @@ import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { Pager } from "@web/core/pager/pager";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_utils";
 import { useService } from "@web/core/utils/hooks";
 
@@ -26,7 +27,7 @@ export class KioskManualSelection extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         const limit = this.calculateLimit();
         this.state = proxy({
             employeesData: {

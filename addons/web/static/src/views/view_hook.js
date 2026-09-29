@@ -8,6 +8,7 @@ import { download } from "@web/core/network/download";
 import { rpc } from "@web/core/network/rpc";
 import { ORM } from "@web/core/orm_plugin";
 import { evaluateExpr } from "@web/core/py_js/py";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { DynamicList } from "@web/model/relational_model/dynamic_list";
 import { useEnv } from "@web/owl2/utils";
@@ -98,7 +99,7 @@ export function useActionLinks(resModel, reload) {
 
 export function useBounceButton(containerRef, shouldBounce) {
     let timeout;
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     const onClick = (ev) => {
         const button = ui.activeElement.querySelector("[data-bounce-button]");
         if (button && shouldBounce(ev.target)) {

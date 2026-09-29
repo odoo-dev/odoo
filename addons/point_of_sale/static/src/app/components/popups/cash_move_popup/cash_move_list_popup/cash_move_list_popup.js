@@ -1,5 +1,6 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
-import { Component, signal, useProps, t } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -18,7 +19,7 @@ export class CashMoveListPopup extends Component {
     async setup() {
         super.setup();
         this.pos = usePos();
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.dialog = useService("dialog");
         this.cashMoves = signal(this.props.cashMoves);
         this.callbacks = this.props.cashMoves.reduce(

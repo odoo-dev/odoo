@@ -6,12 +6,13 @@ import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { useOnBottomScrolled, useSearch } from "@mail/utils/common/hooks";
 import { incrementFn } from "@mail/utils/common/signal";
 
-import { Component, computed, shallowEqual, signal, types, useEffect, useProps } from "@odoo/owl";
+import { Component, computed, shallowEqual, signal, types, useEffect, usePlugin, useProps } from "@odoo/owl";
 
 import { hasTouch, isDisplayStandalone, isIOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { normalize } from "@web/core/l10n/utils";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 /** Never a submenu of an ancestor Dropdown it's embedded in, even visually/positionally. */
@@ -87,7 +88,7 @@ export class MessagingMenu extends Component {
             types.signal(types.number()).optional(() => signal(0))
         );
         this.focusSearchInput = incrementFn(this.searchInputAutofocus);
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         // Bound once so `onClickMessage` is a stable (useProps.static) handler.
         this.onClickMessage = this.onClickMessage.bind(this);
         useOnBottomScrolled(this.tabContentRef, () =>

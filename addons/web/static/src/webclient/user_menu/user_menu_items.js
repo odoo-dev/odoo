@@ -1,6 +1,7 @@
 import { Component, markup, usePlugin, t, useProps } from "@odoo/owl";
 import { isDisplayStandalone, isMacOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { user } from "@web/core/user";
 import { session } from "@web/session";
 import { router } from "@web/core/browser/router";
@@ -37,7 +38,7 @@ class ShortcutsFooterComponent extends Component {
 
 function shortCutsItem() {
     const command = useService("command");
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
 
     return {
         type: "item",
@@ -130,7 +131,7 @@ function logOutItem() {
 }
 
 export function shareUrlMenuItem() {
-    const ui = useService("ui");
+    const ui = usePlugin(UIPlugin);
     return {
         type: "item",
         hide: !router.shareUrl || ui.isSmall || !isDisplayStandalone(),

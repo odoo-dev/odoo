@@ -1,7 +1,8 @@
 import { loadIframe } from "@mail/convert_inline/iframe_utils";
-import { Component, onMounted, proxy, signal, status, useProps } from "@odoo/owl";
+import { Component, onMounted, proxy, signal, status, usePlugin, useProps } from "@odoo/owl";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { renderToFragment } from "@web/core/utils/render";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
@@ -24,7 +25,7 @@ export class MailingPreviewIframe extends Component {
     setup() {
         this.state = proxy(this.env.displayState);
         this.action = useService("action");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.iframeLoaded = Promise.withResolvers();
 
         onMounted(() => {

@@ -5,6 +5,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { emojiLoader, useLoadEmoji } from "@web/core/emoji_picker/emoji_loader";
 import { useEmojiPicker } from "@web/core/emoji_picker/emoji_picker";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 /** @typedef {import("@web/core/emoji_picker/emoji_picker").EmojiPicker} EmojiPicker */
@@ -25,7 +26,7 @@ export class QuickReactionMenu extends Component {
             message: t.instanceOf(this.store["mail.message"]),
             messageActive: t.boolean().optional(),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.loadEmoji = useLoadEmoji();
         this.picker = useEmojiPicker(
             null,

@@ -58,7 +58,7 @@ class BlankComponent extends Component {
     static components = { ControlPanel };
 
     setup() {
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         useSubEnv({ config: { breadcrumbs: [], noBreadcrumbs: true } });
         onMounted(() => this.props.onMounted());
     }

@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useEnv, useLayoutEffect, useSubEnv } from "@web/owl2/utils";
 import { location, browser } from "@web/core/browser/browser";
 const sessionStorage = browser.sessionStorage;
@@ -1067,7 +1068,7 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
     setup() {
         super.setup();
 
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         this.orm = useService("orm");
         this.maxNbrDisplayExtraThemes = 100;
         const env = useEnv();

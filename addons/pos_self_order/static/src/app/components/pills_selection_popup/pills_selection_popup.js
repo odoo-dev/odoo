@@ -1,6 +1,7 @@
-import { Component, proxy, useProps, t, signal } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { scrollToSelected } from "@pos_self_order/app/utils/scroll_to_selected";
 import { Dialog } from "@web/core/dialog/dialog";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { getDisplayDateInfo } from "@point_of_sale/utils";
 
@@ -40,7 +41,7 @@ export class PillsSelectionPopup extends Component {
     categoryListRef = signal.ref();
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.selfOrder = useService("self_order");
         this.state = proxy({
             selectedCategoryId: this.categories.length > 0 ? this.categories[0].id : null,

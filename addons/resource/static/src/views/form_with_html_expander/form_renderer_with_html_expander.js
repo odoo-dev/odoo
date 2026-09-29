@@ -1,5 +1,5 @@
-import { t, untrack, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { t, untrack, usePlugin, useProps } from "@odoo/owl";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { FormRenderer, formRendererProps } from "@web/views/form/form_renderer";
 
@@ -14,7 +14,7 @@ export class FormRendererWithHtmlExpander extends FormRenderer {
         super.setup();
         if (!this.uiService) {
             // Should be defined in FormRenderer
-            this.uiService = useService("ui");
+            this.uiService = usePlugin(UIPlugin);
         }
         useLayoutEffect(
             (el, size) => {

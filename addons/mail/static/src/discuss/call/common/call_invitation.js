@@ -1,3 +1,4 @@
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { Action, ACTION_TAGS } from "@mail/core/common/action";
 import { ActionList } from "@mail/core/common/action_list";
@@ -9,7 +10,7 @@ import {
 } from "@mail/discuss/call/common/call_actions";
 import { CallPreview } from "@mail/discuss/call/common/call_preview";
 
-import { Component, computed, proxy, signal, types, useProps } from "@odoo/owl";
+import { Component, computed, proxy, signal, types, usePlugin, useProps } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -27,7 +28,7 @@ export class CallInvitation extends Component {
         this.props = useProps({
             channel: types.instanceOf(this.store["discuss.channel"]),
         });
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.state = proxy({
             activateCamera: 0,
             activateMicrophone: 0,

@@ -1,6 +1,7 @@
-import { Component, onPatched, signal, t, useProps } from "@odoo/owl";
+import { Component, onPatched, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { scrollTo } from "@web/core/utils/scrolling";
 
@@ -23,7 +24,7 @@ export class HierarchyRenderer extends Component {
 
     setup() {
         this.notification = useService("notification");
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
         if (this.canDragAndDropRecord) {
             useHierarchyNodeDraggable({
                 ref: this.rendererRef,

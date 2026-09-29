@@ -1,7 +1,7 @@
 import { ActionList } from "@mail/core/common/action_list";
 import { ChatWindow } from "@mail/core/common/chat_window";
 import { useHover, useMovable } from "@mail/utils/common/hooks";
-import { Component, computed, proxy, signal, useListener } from "@odoo/owl";
+import { Component, computed, proxy, signal, useListener, usePlugin } from "@odoo/owl";
 
 import { Action } from "@mail/core/common/action";
 import { browser } from "@web/core/browser/browser";
@@ -10,6 +10,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { ChatBubble } from "./chat_bubble";
 
@@ -29,7 +30,7 @@ export class ChatHub extends Component {
     setup() {
         super.setup();
         this.store = useService("mail.store");
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.busMonitoring = useService("bus.monitoring_service");
         this.bubblesHover = useHover(this.bubblesRef);
         this.moreHover = useHover([this.moreButtonRef, this.hiddenMenuRef], {

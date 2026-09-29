@@ -1,7 +1,8 @@
 import { _t } from "@web/core/l10n/translation";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloat } from "@web/views/fields/parsers";
-import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { CashMoveListPopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_list_popup/cash_move_list_popup";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -34,7 +35,7 @@ export class CashMovePopup extends Component {
             cashMoves: [],
         });
         this.confirm = useAsyncLockedMethod(this.confirm.bind(this));
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         onWillStart(() => {
             this.loadCashMoves();
         });

@@ -1,5 +1,6 @@
-import { Component, useProps, signal, t, useEffect, xml } from "@odoo/owl";
+import { Component, signal, t, useEffect, usePlugin, useProps, xml } from "@odoo/owl";
 import { useIsChildLarger } from "@point_of_sale/app/hooks/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -56,7 +57,7 @@ export class ListContainer extends Component {
     container = signal.ref();
     setup() {
         this.sizing = useIsChildLarger(this.container);
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.dialog = useService("dialog");
 
         useEffect(() => {

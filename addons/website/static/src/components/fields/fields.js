@@ -1,7 +1,7 @@
-import { Component, onMounted, onPatched, onWillUnmount, useProps, t } from "@odoo/owl";
+import { Component, onMounted, onPatched, onWillUnmount, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { debounce } from "@web/core/utils/timing";
 import { charField, CharField } from "@web/views/fields/char/char_field";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
@@ -28,7 +28,7 @@ class PageUrlField extends UrlField {
     setup() {
         super.setup();
         this.serverUrl = `${window.location.origin}/`;
-        this.uiService = useService("ui");
+        this.uiService = usePlugin(UIPlugin);
 
         // Trigger onchange api on input event to display redirection
         // parameters as soon as the user types.

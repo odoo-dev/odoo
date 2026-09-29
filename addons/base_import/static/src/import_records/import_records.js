@@ -1,6 +1,7 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { STATIC_ACTIONS_GROUP_NUMBER } from "@web/search/action_menus/action_menus";
@@ -39,7 +40,7 @@ export const importRecordsItem = {
     Component: ImportRecords,
     groupNumber: STATIC_ACTIONS_GROUP_NUMBER,
     isDisplayed: ({ config }) => {
-        const ui = useService("ui");
+        const ui = usePlugin(UIPlugin);
         return (
             !ui.isSmall &&
             config.actionType === "ir.actions.act_window" &&

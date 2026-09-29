@@ -1,15 +1,17 @@
 import { useCrossDocumentListener } from "../../utils/hooks";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
 import {
     Component,
-    useProps,
+    onMounted,
+    onWillUnmount,
     proxy,
     signal,
     t,
     useEffect,
-    onMounted,
-    onWillUnmount,
+    usePlugin,
+    useProps,
 } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { cleanZWChars, deduceURLfromText } from "./utils";
@@ -78,7 +80,7 @@ export class LinkPopover extends Component {
     labelRef = signal.ref();
 
     setup() {
-        this.ui = useService("ui");
+        this.ui = usePlugin(UIPlugin);
         this.notificationService = useService("notification");
         this.uploadService = useService("uploadLocalFiles");
 
