@@ -68,32 +68,24 @@
 /* This should normally be put in fields.scss but these classes are used outside */
 /* of `.o_field_widget` so it needs to be placed at an upper level. */
 .o_status {
-    border-radius: 50%;
-    background-color: map-get($grays, '200');
-    height: var(--Status-size, 12px);
-    width: var(--Status-size, 12px);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--o-bs-black) 20%, transparent);
-
     &.o_status_green {
-        background-color: map-get($theme-colors, "success");
+        color: map-get($theme-colors, "success");
     }
 
     &.o_status_red {
-        background-color: map-get($theme-colors, "danger");
+        color: map-get($theme-colors, "danger");
     }
 
     &.o_status_changes_requested {
         background-color: map-get($theme-colors, "warning");
     }
-}
 
-.state_selection_field_menu .dropdown-item {
-    > .o_status, > .oi {
-        width: var(--o-bubble-color-size);
-        height: var(--o-bubble-color-size);
-        font-size: var(--o-bubble-color-size);
-        transform: translateX(-50%);
-        text-align: center;
+    &.o_status_orange {
+        color: map-get($theme-colors, "warning");
+    }
+
+    &.o_status_blue {
+        color: map-get($theme-colors, "info");
     }
 }
 
