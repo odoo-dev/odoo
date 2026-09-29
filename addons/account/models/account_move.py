@@ -6649,6 +6649,8 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
             if move.inalterable_hash:
                 raise UserError(_('You cannot reset to draft a locked journal entry.'))
+            if not move.show_reset_to_draft_button:
+                raise UserError(_("You can't reset to draft those journal entries."))
 
     def button_hash(self):
         self._hash_moves(force_hash=True)
