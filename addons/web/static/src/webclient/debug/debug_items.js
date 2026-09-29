@@ -1,6 +1,7 @@
 import { Component, onWillStart, usePlugin, t, useProps } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { localeCompare } from "@web/core/l10n/utils";
 import { rpc } from "@web/core/network/rpc";
@@ -25,7 +26,7 @@ function runUnitTestsItem() {
 export function openViewItem() {
     const action = useService("action");
     const orm = usePlugin(ORM);
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
 
     async function onSelected(records) {
         const views = await orm.searchRead(
@@ -138,7 +139,7 @@ class ClocReport extends Component {
 
 function clocReport() {
     if (user.isAdmin) {
-        const dialog = useService("dialog");
+        const dialog = usePlugin(DialogPlugin);
         return {
             type: "item",
             description: _t("Count LoC"),

@@ -1,5 +1,6 @@
-import { Component, proxy, types, useProps } from "@odoo/owl";
+import { Component, proxy, types, usePlugin, useProps } from "@odoo/owl";
 
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { memoize } from "@web/core/utils/functions";
 import { useService } from "@web/core/utils/hooks";
@@ -27,7 +28,7 @@ class ActivityModelSelector extends Component {
         this.props = useProps({ record: types.instanceOf(Record) });
         // Use a state for the model to not write on the record the model without record id
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             resModel: this.props.record.data.res_model,
             resModelName: this.props.record.data.res_model_name || "",

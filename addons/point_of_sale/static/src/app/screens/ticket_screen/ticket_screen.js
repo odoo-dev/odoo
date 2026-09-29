@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -83,7 +84,7 @@ export class TicketScreen extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.doPrint = useTrackedAsync((_selectedSyncedOrder) => this.print(_selectedSyncedOrder));
         this.numberBuffer.use({

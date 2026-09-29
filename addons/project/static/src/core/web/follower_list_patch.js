@@ -1,14 +1,15 @@
 import { FollowerList } from "@mail/core/web/follower_list";
+import { usePlugin } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 
 import { patch } from "@web/core/utils/patch";
 
 const followerListPatch = {
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     },
     /**
      * @param {MouseEvent} ev

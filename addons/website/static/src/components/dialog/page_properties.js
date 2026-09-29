@@ -1,4 +1,5 @@
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
@@ -250,7 +251,7 @@ export class PagePropertiesDialog extends FormViewDialog {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.website = useService("website");
 

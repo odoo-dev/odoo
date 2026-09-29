@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_plugin";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -5,7 +6,7 @@ import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { parseInteger } from "@web/views/fields/parsers";
 import { getId } from "@web/model/relational_model/utils";
-import { Component, onMounted, onWillStart, signal, t, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillStart, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { user } from "@web/core/user";
 
@@ -150,7 +151,7 @@ class GenerateSerials extends Component {
     props = useProps(standardWidgetProps);
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     openDialog(ev) {
@@ -165,7 +166,7 @@ class ImportLots extends Component {
     static template = "stock.ImportLots";
     props = useProps(standardWidgetProps);
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     openDialog(ev) {

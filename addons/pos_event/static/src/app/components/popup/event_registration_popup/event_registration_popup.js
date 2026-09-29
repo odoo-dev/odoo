@@ -1,10 +1,10 @@
 // Part of Odoo. See LICENSE file for full copyright and licensing details.
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import { NumericInput } from "@point_of_sale/app/components/inputs/numeric_input/numeric_input";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { isValidEmail } from "@point_of_sale/utils";
@@ -24,7 +24,7 @@ export class EventRegistrationPopup extends Component {
     };
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             byRegistration: [],
             byOrder: {},

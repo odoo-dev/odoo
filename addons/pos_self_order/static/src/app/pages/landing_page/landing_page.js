@@ -1,5 +1,6 @@
-import { Component, onWillStart, signal } from "@odoo/owl";
+import { Component, onWillStart, signal, usePlugin } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
 import { useCarousel } from "@pos_self_order/app/utils/carousel_hook";
@@ -12,7 +13,7 @@ export class LandingPage extends Component {
     setup() {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.activeSelected = false;
 
         onWillStart(() => {

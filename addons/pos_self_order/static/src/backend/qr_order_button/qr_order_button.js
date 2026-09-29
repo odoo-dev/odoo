@@ -1,10 +1,11 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 async function posQrStands(env, action) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const user_data = action.params.data;
 
     function addInputToForm(form, name, value) {

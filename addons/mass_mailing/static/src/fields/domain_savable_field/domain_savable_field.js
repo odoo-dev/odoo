@@ -1,4 +1,5 @@
-import { t, useEffect, useProps } from "@odoo/owl";
+import { t, useEffect, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -28,7 +29,7 @@ export class DomainSavableField extends DomainField {
     setup() {
         super.setup();
         this.actionService = useService("action");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         useEffect(() => {
             this.state.showSaveButton = this.getDomain() !== "[]";

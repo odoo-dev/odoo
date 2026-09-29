@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { formatFloat } from "@web/core/utils/numbers";
 import { parseFloat } from "@web/views/fields/parsers";
@@ -15,11 +16,12 @@ import {
     computed,
     onPatched,
     onWillStart,
+    proxy,
     signal,
     t,
     toRaw,
-    proxy,
     useEffect,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { useNumpadDecimal } from "@web/views/fields/numpad_decimal_hook";
@@ -166,7 +168,7 @@ export class TaxTotalsComponent extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.cashRoundingDropdown = usePopover(DropdownPopover, {
             popoverClass: "o-dropdown--menu dropdown-menu o_cash_rounding_dropdown",
             position: "left-middle",

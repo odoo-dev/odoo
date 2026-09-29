@@ -1,4 +1,5 @@
-import { Component, onMounted, onWillDestroy, proxy, signal, useProps, t } from "@odoo/owl";
+import { Component, onMounted, onWillDestroy, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Tooltip } from "@web/core/tooltip/tooltip";
 import { closestScrollableY, getScrollingElement, isScrollableY } from "@web/core/utils/scrolling";
@@ -35,7 +36,7 @@ export class BlockTab extends Component {
     innerSnippetsContainer = signal.ref();
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.popover = useService("popover");
         this.snippetModel = useSnippets(this.props.snippetsName);

@@ -1,7 +1,8 @@
-import { Component, proxy, signal, t, useEnv, useLayoutEffect, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useEnv, useLayoutEffect, usePlugin, useProps } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { AccordionItem } from "@web/core/dropdown/accordion_item";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -373,7 +374,7 @@ export function useEmbeddedActions() {
     const env = useEnv();
     const orm = useService("orm");
     const actionService = useService("action");
-    const dialogService = useService("dialog");
+    const dialogService = usePlugin(DialogPlugin);
     const notificationService = useService("notification");
 
     const state = proxy(

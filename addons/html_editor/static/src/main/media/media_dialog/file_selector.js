@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
@@ -8,7 +9,7 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { user } from "@web/core/user";
 import { useDebounced } from "@web/core/utils/timing";
 import { SearchMedia } from "./search_media";
-import { Component, onWillStart, proxy, signal, t, useListener, useProps, xml } from "@odoo/owl";
+import { Component, onWillStart, proxy, signal, t, useListener, usePlugin, useProps, xml } from "@odoo/owl";
 
 export const IMAGE_MIMETYPES = [
     "image/jpg",
@@ -101,7 +102,7 @@ export class Attachment extends Component {
     });
 
     setup() {
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
     }
 
     remove() {

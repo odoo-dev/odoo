@@ -1,8 +1,9 @@
 import { ActionList } from "@mail/core/common/action_list";
 import { ImStatus } from "@mail/core/common/im_status";
 
-import { Component, computed, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, computed, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -25,7 +26,7 @@ export class AvatarCard extends Component {
         });
         this.actionService = useService("action");
         this.store = useService("mail.store");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.store.fetchStoreData("avatar_card", {
             id: this.props.id,
             model: this.props.model,

@@ -1,4 +1,5 @@
-import { proxy } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { serializeDate } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
@@ -8,7 +9,7 @@ export class StockValuationReportController {
     constructor(action) {
         this.action = action;
         this.actionService = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.state = proxy({
             date: this.action.params?.date_to

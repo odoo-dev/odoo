@@ -4,9 +4,10 @@ import { AvatarCard } from "@mail/core/web/avatar_card/avatar_card";
 import { groupAttachments } from "@mail/utils/common/attachments";
 import { toggleFn } from "@mail/utils/common/signal";
 
-import { Component, signal, types, useProps } from "@odoo/owl";
+import { Component, signal, types, usePlugin, useProps } from "@odoo/owl";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -32,7 +33,7 @@ export class ScheduledMessage extends Component {
         this.readMore = signal(false);
         this.toggleFn = toggleFn;
         this.avatarCard = usePopover(AvatarCard);
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     }
 
     get isShort() {

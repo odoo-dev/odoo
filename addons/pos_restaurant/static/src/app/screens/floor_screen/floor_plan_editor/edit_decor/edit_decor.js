@@ -1,10 +1,10 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { getColors } from "@pos_restaurant/app/services/floor_plan/utils/colors";
 import {
     opacityToTransparency,
     transparencyToOpacity,
 } from "@pos_restaurant/app/services/floor_plan/utils/utils";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import { _t } from "@web/core/l10n/translation";
 import { FloorElement } from "@pos_restaurant/app/services/floor_plan/elements";
@@ -20,7 +20,7 @@ export class EditDecorProperties extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     get element() {

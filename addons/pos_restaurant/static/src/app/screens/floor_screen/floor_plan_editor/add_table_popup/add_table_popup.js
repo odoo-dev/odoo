@@ -1,6 +1,6 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 
 export class AddTablePopup extends Component {
     static template = "pos_restaurant.floor_editor.add_table_popup";
@@ -12,7 +12,7 @@ export class AddTablePopup extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     addTable(shape) {

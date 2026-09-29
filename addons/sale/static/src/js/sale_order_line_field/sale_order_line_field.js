@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import {
     ProductLabelSectionAndNoteListRender,
@@ -286,7 +288,7 @@ export class SaleOrderLineOne2Many extends ProductLabelSectionAndNoteOne2Many {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

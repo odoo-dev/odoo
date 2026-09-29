@@ -1,10 +1,10 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useSubEnv } from "@web/owl2/utils";
-import { Component, onMounted, onWillUnmount, proxy, t, useProps } from '@odoo/owl';
+import { Component, onMounted, onWillUnmount, proxy, t, usePlugin, useProps } from '@odoo/owl';
 import { formatCurrency } from '@web/core/currency';
 import { Dialog } from '@web/core/dialog/dialog';
 import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
-import { useService } from '@web/core/utils/hooks';
 import { ProductCombo } from '../models/product_combo';
 import { ProductTemplateAttributeLine } from '../models/product_template_attribute_line';
 import { ProductCard } from '../product_card/product_card';
@@ -42,7 +42,7 @@ export class ComboConfiguratorDialog extends Component {
     });
 
     setup() {
-        this.dialog = useService('dialog');
+        this.dialog = usePlugin(DialogPlugin);
         this.env.dialogData.dismiss = !this.props.edit && this.props.discard.bind(this);
         this.state = proxy({
             // Maps combo ids to selected combo items.

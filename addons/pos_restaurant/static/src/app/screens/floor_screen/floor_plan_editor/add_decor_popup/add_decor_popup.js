@@ -1,8 +1,8 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import {
     measureText,
@@ -23,7 +23,7 @@ export class AddDecorPopup extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     addImage(data) {

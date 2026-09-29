@@ -1,9 +1,10 @@
-import { Component, useProps, proxy, t } from '@odoo/owl';
+import { Component, proxy, t, usePlugin, useProps } from '@odoo/owl';
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { deserializeDate, toLocaleDateString } from '@web/core/l10n/dates';
 import { _t } from '@web/core/l10n/translation';
 import { rpc } from '@web/core/network/rpc';
 import { registry } from '@web/core/registry';
-import { useBus, useService } from '@web/core/utils/hooks';
+import { useBus } from '@web/core/utils/hooks';
 
 import {
     LocationSelectorDialog
@@ -24,7 +25,7 @@ export class ClickAndCollectAvailability extends Component {
     });
     setup() {
         super.setup();
-        this.dialog = useService('dialog');
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             productId: this.props.productId,
             selectedLocationData: this.props.selectedLocationData,

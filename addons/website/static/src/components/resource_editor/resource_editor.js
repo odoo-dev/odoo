@@ -1,5 +1,6 @@
 import { CodeEditor } from "@web/core/code_editor/code_editor";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -54,7 +55,7 @@ export class ResourceEditor extends Component {
     setup() {
         this.website = useService("website");
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         this.keepLast = new KeepLast();
 

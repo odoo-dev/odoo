@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { CopyButton } from "@web/core/copy_button/copy_button";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -29,7 +30,7 @@ class GetViewDialog extends Component {
 }
 
 export function getView({ component }) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     return {
         type: "item",
         description: _t("Computed Arch"),
@@ -112,7 +113,7 @@ class GetMetadataDialog extends Component {
     });
     setup() {
         this.orm = usePlugin(ORM);
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.title = _t("View Metadata");
         this.state = proxy({});
         onWillStart(() => this.loadMetadata());
@@ -159,7 +160,7 @@ class GetMetadataDialog extends Component {
 }
 
 export function viewMetadata({ component }) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const resId = component.model.root.resId;
     if (!resId) {
         return null; // No record
@@ -217,7 +218,7 @@ class RawRecordDialog extends Component {
 }
 
 export function viewRawRecord({ component }) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const { resId, resModel, fields } = component.model.config;
     if (!resId) {
         return null;
@@ -371,7 +372,7 @@ class SetDefaultDialog extends Component {
 }
 
 export function setDefaults({ component }) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     return {
         type: "item",
         description: _t("Set Default Values"),

@@ -8,6 +8,7 @@ import {
     t,
     useProps,
 } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
@@ -71,7 +72,7 @@ export class ListController extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.uiService = useService("ui");
         this.orm = useService("orm");
         this.offlinePlugin = usePlugin(OfflinePlugin);

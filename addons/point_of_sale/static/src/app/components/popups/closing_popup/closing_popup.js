@@ -2,8 +2,9 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { SaleDetailsButton } from "@point_of_sale/app/components/navbar/sale_details_button/sale_details_button";
 import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { MoneyDetailsPopup } from "@point_of_sale/app/components/popups/money_details_popup/money_details_popup";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { parseFloat } from "@web/views/fields/parsers";
@@ -30,7 +31,7 @@ export class ClosePosPopup extends Component {
     setup() {
         this.pos = usePos();
         this.report = useService("report");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.ui = useService("ui");
         this.state = proxy(this.getInitialState());
         this.confirm = useAsyncLockedMethod(this.confirm.bind(this));

@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from '@web/core/l10n/translation';
 import { ConfirmationDialog, deleteConfirmationMessage } from '@web/core/confirmation_dialog/confirmation_dialog';
 import { ListRenderer } from '@web/views/list/list_renderer';
@@ -9,7 +11,7 @@ import { X2ManyField, x2ManyField } from '@web/views/fields/x2many/x2many_field'
 export class PAVListRenderer extends ListRenderer {
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

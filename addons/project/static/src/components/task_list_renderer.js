@@ -1,11 +1,11 @@
-import { onPatched } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { onPatched, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { ListRenderer } from "@web/views/list/list_renderer";
 
 export class TaskListRenderer extends ListRenderer {
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         onPatched(() => {
             this.focusName(this.editedRecord());
         });

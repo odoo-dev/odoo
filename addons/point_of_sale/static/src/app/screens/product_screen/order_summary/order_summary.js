@@ -1,7 +1,7 @@
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Component, computed, usePlugin } from "@odoo/owl";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
@@ -20,7 +20,7 @@ export class OrderSummary extends Component {
 
     setup() {
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.pos = usePos();
 
         this.numberBuffer.use({

@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -94,7 +95,7 @@ export class CardRenderer extends Component {
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.offlinePlugin = usePlugin(OfflinePlugin);
 

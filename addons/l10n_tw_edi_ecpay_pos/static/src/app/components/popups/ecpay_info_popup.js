@@ -1,9 +1,9 @@
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { useService } from "@web/core/utils/hooks";
 
 const CARRIER_TYPES = Object.freeze({
     MEMBER_ACCOUNT: "1",
@@ -28,7 +28,7 @@ export class EcpayInfoPopup extends Component {
 
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         const order = this.pos.getOrder();
         this.data = {};
         this.state = proxy({

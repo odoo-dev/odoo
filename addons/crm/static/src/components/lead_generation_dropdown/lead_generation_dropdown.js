@@ -1,4 +1,5 @@
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -24,7 +25,7 @@ export class LeadGenerationDropdown extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.action = useService("action");
         this.newContentText = {
             FAILED_TO_INSTALL: _t('Failed to install "%(module_name)s"'),

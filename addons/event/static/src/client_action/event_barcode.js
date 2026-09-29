@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { BarcodeScanner } from "@barcodes/components/barcode_scanner";
 import { Component, onWillStart, usePlugin, useProps } from "@odoo/owl";
@@ -19,7 +20,7 @@ export class EventScanView extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.orm = useService("orm");
 

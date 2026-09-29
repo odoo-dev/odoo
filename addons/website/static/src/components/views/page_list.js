@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { usePageManager } from "./page_manager_hook";
 import { PageSearchModel } from "./page_search_model";
@@ -19,7 +21,7 @@ export class PageListController extends listView.Controller {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.pageManager = usePageManager({
             resModel: this.props.resModel,
             createAction: this.props.context.create_action,

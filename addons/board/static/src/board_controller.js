@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { render } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
@@ -10,7 +11,7 @@ import { renderToFragment } from "@web/core/utils/render";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { BoardAction } from "./board_action";
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 
 export class BoardController extends Component {
     static template = "board.BoardView";
@@ -25,7 +26,7 @@ export class BoardController extends Component {
 
     setup() {
         this.board = proxy(this.props.board);
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.uiService = useService("ui");
         if (this.uiService.isSmall) {
             this.selectLayout("1", false);

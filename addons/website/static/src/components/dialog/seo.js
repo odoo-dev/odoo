@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { deduceURLfromText } from "@html_editor/main/link/utils";
@@ -21,6 +22,7 @@ import {
     t,
     useApp,
     useEffect,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import wUtils from "@website/js/utils";
@@ -237,7 +239,7 @@ class ImageSelector extends Component {
 
     setup() {
         this.website = useService("website");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.notification = useService("notification");
 
         this.seoContext = proxy(seoContext);
@@ -984,7 +986,7 @@ export class OptimizeSEODialog extends Component {
 
     setup() {
         this.website = useService("website");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.orm = useService("orm");
 
         this.title = _t("Search Engine Optimization");

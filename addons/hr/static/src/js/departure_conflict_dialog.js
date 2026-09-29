@@ -2,6 +2,7 @@
 
 import { usePlugin } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
@@ -10,7 +11,7 @@ import { useService } from "@web/core/utils/hooks";
 registry.category("actions").add("departure_conflict_dialog", async (env, actionDescr) => {
     const { title, message, employee_id } = actionDescr.params || {};
     const orm = usePlugin(ORM);
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const action = useService("action");
 
     return new Promise((resolve) => {

@@ -1,4 +1,5 @@
-import { Component, EventBus, proxy, useProps, signal, t } from "@odoo/owl";
+import { Component, EventBus, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { rpc } from "@web/core/network/rpc";
 import { Dialog } from "@web/core/dialog/dialog";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
@@ -115,7 +116,7 @@ export class PresetInfoPopup extends Component {
     setup() {
         this.selfOrder = useService("self_order");
         useAutofocus({ ref: this.autofocusRef, mobile: true });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         const partner = this.selfOrder.currentOrder.partner_id;
         const companyStateId = this.selfOrder.config.company_id.country_id.state_ids[0]?.id;

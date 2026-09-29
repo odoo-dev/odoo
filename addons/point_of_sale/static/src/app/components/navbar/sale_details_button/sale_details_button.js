@@ -1,5 +1,5 @@
-import { useService } from "@web/core/utils/hooks";
-import { Component, useProps, t } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
 export class SaleDetailsButton extends Component {
@@ -10,7 +10,7 @@ export class SaleDetailsButton extends Component {
     setup() {
         super.setup(...arguments);
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     async onClick() {

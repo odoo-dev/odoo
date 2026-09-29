@@ -1,4 +1,5 @@
-import { Component, onWillDestroy, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillDestroy, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { checkFileSize } from "@web/core/utils/files";
@@ -18,7 +19,7 @@ export class ShareTargetItem extends Component {
     setup() {
         super.setup();
         this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.http = useService("http");
         this.notification = useService("notification");
         this.orm = useService("orm");

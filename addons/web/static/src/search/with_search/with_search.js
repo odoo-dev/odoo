@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { render, useSubEnv } from "@web/owl2/utils";
-import { Component, onWillStart, onWillUpdateProps, t, toRaw, useProps } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, t, toRaw, usePlugin, useProps } from "@odoo/owl";
 import { CallbackRecorder, useSetupAction } from "@web/search/action_hook";
 import { SearchModel } from "@web/search/search_model";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -60,7 +61,7 @@ export class WithSearch extends Component {
                 view: useService("view"),
                 field: useService("field"),
                 name: useService("name"),
-                dialog: useService("dialog"),
+                dialog: usePlugin(DialogPlugin),
                 treeProcessor: useService("tree_processor"),
             },
             this.props.searchModelArgs

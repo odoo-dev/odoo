@@ -1,7 +1,8 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloat } from "@web/views/fields/parsers";
-import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { CashMoveListPopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_list_popup/cash_move_list_popup";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -25,7 +26,7 @@ export class CashMovePopup extends Component {
         super.setup();
         this.notification = useService("notification");
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             /** @type {'in'|'out'} */
             type: "out",

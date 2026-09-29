@@ -2,8 +2,9 @@ import { Builder } from "@html_builder/builder";
 import { CORE_PLUGINS, MAIN_PLUGINS } from "@html_builder/core/core_plugins";
 import { removePlugins } from "@html_builder/utils/utils";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { Component, onMounted, onWillStart, onWillUnmount, useProps, t } from "@odoo/owl";
+import { Component, onMounted, onWillStart, onWillUnmount, t, usePlugin, useProps } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -40,7 +41,7 @@ export class WebsiteBuilder extends Component {
 
     setup() {
         this.websiteService = useService("website");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.websiteEditService =
             this.websiteService.websiteRootInstance?.env.services["website_edit"];
         useSetupAction({

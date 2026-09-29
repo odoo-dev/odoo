@@ -1,6 +1,6 @@
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { onWillDestroy, useListener } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { onWillDestroy, useListener, usePlugin } from "@odoo/owl";
 import { deepMerge } from "@web/core/utils/objects";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { throttleForAnimation } from "@web/core/utils/timing";
@@ -442,7 +442,7 @@ export function useNavigation(containerRef, options = {}) {
         newOptions.getItems = () => getContainerEl()?.querySelectorAll(":scope .o-navigable") ?? [];
     }
 
-    const hotkeyService = useService("hotkey");
+    const hotkeyService = usePlugin(HotkeyPlugin);
     const navigator = new Navigator(newOptions, hotkeyService);
     const observer = new MutationObserver(() => navigator.update());
 

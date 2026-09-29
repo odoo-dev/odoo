@@ -1,10 +1,10 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { useFloorPlanStore } from "@pos_restaurant/app/hooks/floor_plan_hook";
 import { AddTablePopup } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/add_table_popup/add_table_popup";
 import { AddDecorPopup } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/add_decor_popup/add_decor_popup";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useService } from "@web/core/utils/hooks";
 
 export class FloorEditorToolBar extends Component {
     static template = "pos_restaurant.floor_editor.toolbar";
@@ -19,7 +19,7 @@ export class FloorEditorToolBar extends Component {
 
     setup() {
         this.floorStore = useFloorPlanStore();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     selectFloor(floorUuid) {

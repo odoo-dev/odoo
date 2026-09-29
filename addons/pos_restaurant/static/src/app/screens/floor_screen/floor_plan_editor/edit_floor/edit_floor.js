@@ -1,5 +1,6 @@
-import { Component, onMounted, proxy, useListener, useProps, t } from "@odoo/owl";
+import { Component, onMounted, proxy, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { Handles } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/handles/handles";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { getColorRGBA, getColors } from "@pos_restaurant/app/services/floor_plan/utils/colors";
 import { selectImage } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/utils/image";
@@ -11,7 +12,6 @@ import {
     FLOOR_TEXTURE,
     isFloorTextureId,
 } from "@pos_restaurant/app/services/floor_plan/utils/floor_texture";
-import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useFloorPlanStore } from "@pos_restaurant/app/hooks/floor_plan_hook";
 import { Floor } from "@pos_restaurant/app/services/floor_plan/elements";
@@ -26,7 +26,7 @@ export class EditFloorProperties extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.floorPlanStore = useFloorPlanStore();
         this.state = proxy({ resolution: "" });
         useListener(window, "resize", this.handleWindowResize);

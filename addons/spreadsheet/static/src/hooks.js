@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -58,7 +59,7 @@ export function useSpreadsheetNotificationPlugin() {
             }
         );
     }
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const notifications = useService("notification");
     providePlugins([NotificationPlugin]);
     const notificationPlugin = usePlugin(NotificationPlugin);

@@ -1,8 +1,8 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { CodeEditor } from "@web/core/code_editor/code_editor";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { EditHeadBodyDialog } from "@website/components/edit_head_body_dialog/edit_head_body_dialog";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 export class EmbedCodeOptionDialog extends Component {
     static template = "website.EmbedCodeOptionDialog";
@@ -15,7 +15,7 @@ export class EmbedCodeOptionDialog extends Component {
         close: t.function(),
     });
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({ value: this.props.value });
     }
     onCodeChange(newValue) {

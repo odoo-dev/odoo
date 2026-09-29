@@ -1,10 +1,11 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { CalendarController } from "@web/views/calendar/calendar_controller";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { formatFloatTime } from "@web/views/fields/formatters";
 import { parseTime } from "@web/core/l10n/time";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 
 import { EventSlotCalendarMultiSelectionButtons } from "./event_slot_multi_selection_buttons";
 
@@ -19,7 +20,7 @@ export class EventSlotCalendarController extends CalendarController {
 
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     }
 
     /**

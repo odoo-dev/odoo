@@ -1,5 +1,6 @@
-import { Component, onMounted, proxy, t, useProps } from "@odoo/owl";
+import { Component, onMounted, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { redirect } from "@web/core/utils/urls";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
@@ -60,7 +61,7 @@ export class SlideUploadDialog extends Component {
     setup() {
         this.defaultCategoryID = this.props.categoryId;
         this.modulesToInstallStatus = null;
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.pagesTemplates = this.constructor.pagesTemplates;
         this.slideCategoryData = this.constructor.categoryData;

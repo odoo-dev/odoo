@@ -1,5 +1,5 @@
-import { onMounted, onWillUnmount } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { onMounted, onWillUnmount, usePlugin } from "@odoo/owl";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 
 /**
  * This hook will register/unregister the given registration
@@ -10,7 +10,7 @@ import { useService } from "@web/core/utils/hooks";
  * @param {import("./hotkey_plugin").HotkeyOptions} [options] additional options
  */
 export function useHotkey(hotkey, callback, options = {}) {
-    const hotkeyService = useService("hotkey");
+    const hotkeyService = usePlugin(HotkeyPlugin);
     let cleanup;
     onMounted(() => {
         cleanup = hotkeyService.add(hotkey, callback, options);

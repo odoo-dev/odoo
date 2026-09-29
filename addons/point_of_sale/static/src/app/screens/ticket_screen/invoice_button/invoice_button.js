@@ -1,8 +1,9 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { ask, makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PartnerList } from "../../partner_list/partner_list";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
@@ -16,7 +17,7 @@ export class InvoiceButton extends Component {
 
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.invoiceService = useService("account_move");
         this.lock = false;
     }

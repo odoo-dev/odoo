@@ -33,6 +33,7 @@ import {
 import { browser } from "@web/core/browser/browser";
 import { CommandPalette } from "@web/core/commands/command_palette";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { registry } from "@web/core/registry";
 import {
@@ -186,7 +187,7 @@ describe("useAutofocus", () => {
             `;
             static components = { MainComponentsContainer };
             setup() {
-                this.dialog = useService("dialog");
+                this.dialog = usePlugin(DialogPlugin);
             }
             openDialog() {
                 this.dialog.add(MyDialog);

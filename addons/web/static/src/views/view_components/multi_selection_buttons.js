@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { onWillRender } from "@web/owl2/utils";
-import { Component, proxy, signal, t, toRaw, useOnChange, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, toRaw, useOnChange, usePlugin, useProps } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
@@ -40,7 +41,7 @@ export class MultiSelectionButtons extends Component {
 
     setup() {
         this.viewService = useService("view");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.state = proxy({ isReady: false });
         onWillRender(() => {
             if (this.props.reactive.visible && !this.state.isReady) {

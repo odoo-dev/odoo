@@ -1,4 +1,5 @@
 import { Component, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -18,7 +19,7 @@ export class MassMailingSaveAsTemplateCogMenu extends Component {
         this.notification = usePlugin(NotificationPlugin);
         this.orm = usePlugin(ORM);
         this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.dropdown = useDropdownCloser();
     }
 

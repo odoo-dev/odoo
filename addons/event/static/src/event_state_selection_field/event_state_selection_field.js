@@ -1,7 +1,8 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { formatSelection } from "@web/views/fields/formatters";
 import { registry } from "@web/core/registry";
 import { StateSelectionField, stateSelectionField } from "@web/views/fields/state_selection/state_selection_field";
-import { useService } from "@web/core/utils/hooks";
 
 
 /**
@@ -13,7 +14,7 @@ export class EventStateSelection extends StateSelectionField {
     static template = "event.EventStateSelection";
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.icons = {
             normal: "",
             done: "",

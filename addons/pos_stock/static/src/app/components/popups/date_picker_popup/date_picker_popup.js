@@ -1,8 +1,8 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
-import { Component, onMounted, useProps, proxy, t } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, onMounted, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 const { DateTime } = luxon;
 
@@ -19,7 +19,7 @@ export class DatePickerPopup extends Component {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({ shippingDate: this.props.defaultValue ?? DateTime.now() });
         onMounted(() => {
             const input = document.querySelector(".shipping-date-selector input");

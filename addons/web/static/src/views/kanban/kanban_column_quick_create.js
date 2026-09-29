@@ -1,7 +1,8 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 
-import { Component, onPatched, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, onPatched, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 
 export class KanbanColumnQuickCreate extends Component {
     static template = "web.KanbanColumnQuickCreate";
@@ -16,7 +17,7 @@ export class KanbanColumnQuickCreate extends Component {
     inputRef = signal.ref();
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             hasInputFocused: false,
         });

@@ -1,5 +1,6 @@
-import { Component, signal, t, useProps, xml } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps, xml } from "@odoo/owl";
 import { ActionPanel } from "@mail/discuss/core/common/action_panel";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useService } from "@web/core/utils/hooks";
@@ -31,7 +32,7 @@ export class NotificationSettings extends Component {
             channel: t.instanceOf(this.store["discuss.channel"]),
             close: t.function([t.instanceOf(MouseEvent)]).optional(),
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.ui = useService("ui");
         this.DROPDOWN_NESTING = DROPDOWN_NESTING;
         this.muteConversationDropdownState = useDropdownState();

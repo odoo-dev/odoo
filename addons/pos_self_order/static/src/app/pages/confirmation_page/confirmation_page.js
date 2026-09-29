@@ -1,7 +1,8 @@
-import { Component, onMounted, onWillUnmount, proxy, t, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { PrintingFailurePopup } from "@pos_self_order/app/components/printing_failure_popup/printing_failure_popup";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { cookie } from "@web/core/browser/cookie";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { imageDataUri } from "@point_of_sale/utils";
@@ -13,7 +14,7 @@ export class ConfirmationPage extends Component {
     setup() {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.changeToDisplay = [];
         this.state = proxy({
             continueDisabled: true,

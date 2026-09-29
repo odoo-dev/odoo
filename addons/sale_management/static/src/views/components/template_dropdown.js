@@ -1,4 +1,5 @@
-import { Component, onWillStart, useProps, proxy, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog, deleteConfirmationMessage } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -22,7 +23,7 @@ export class SaleTemplateDropdown extends Component {
 
     setup() {
         this.action = useService("action");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.state = proxy({
             canManageTemplates: false,

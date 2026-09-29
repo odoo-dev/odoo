@@ -1,4 +1,5 @@
-import { Component, proxy, t, useProps, useScope } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps, useScope } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
 import { SearchBarDropdown } from "../search_bar_dropdown";
 import { dropdownProps } from "@web/core/dropdown/dropdown";
@@ -55,7 +56,7 @@ export class SearchBarMenu extends Component {
         // Favorite
         this.state = proxy({ sharedFavoritesExpanded: false });
         useBus(this.env.searchModel, "update", () => render(this));
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.notificationService = useService("notification");
 
         // Add Share command

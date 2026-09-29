@@ -1,8 +1,9 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService, useAutofocus } from "@web/core/utils/hooks";
 import { useNestedSortable } from "@web/core/utils/nested_sortable";
 import wUtils from "@website/js/utils";
 import { WebsiteDialog } from "./dialog";
-import { Component, onWillStart, proxy, signal, useApp, useEffect, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, signal, t, useApp, useEffect, usePlugin, useProps } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { isEmail } from "@web/core/utils/strings";
 import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
@@ -196,7 +197,7 @@ export class EditMenuDialog extends Component {
     setup() {
         this.orm = useService("orm");
         this.website = useService("website");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
 
         this.state = proxy({ rootMenu: {} });
 

@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { serializeDate } from "@web/core/l10n/dates";
@@ -10,7 +12,7 @@ import { MultiVersionUpdateConfirmationDialog } from "./form/multi_version_updat
 export class EmployeeFormController extends FormController {
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.orm = useService('orm');
         this.pendingNewContract = null;
     }

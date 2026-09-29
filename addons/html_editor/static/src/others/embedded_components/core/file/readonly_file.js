@@ -1,7 +1,7 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { downloadFile } from "@web/core/network/download";
 import { useFileViewer } from "@web/core/file_viewer/file_viewer_hook";
-import { useService } from "@web/core/utils/hooks";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
     EmbeddedComponentToolbar,
@@ -9,7 +9,7 @@ import {
 } from "@html_editor/others/embedded_components/core/embedded_component_toolbar/embedded_component_toolbar";
 import { StateFileModel } from "@html_editor/others/embedded_components/core/file/state_file_model";
 import { getEmbeddedProps } from "@html_editor/others/embedded_component_utils";
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 export class ReadonlyEmbeddedFileComponent extends Component {
     static components = {
@@ -23,7 +23,7 @@ export class ReadonlyEmbeddedFileComponent extends Component {
     static template = "html_editor.ReadonlyEmbeddedFile";
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.state = proxy({
             fileData: { ...this.props.fileData },
         });

@@ -1,9 +1,9 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, usePlugin, useProps } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { NotificationAlertDialog } from "@web/core/notification_alert_dialog/notification_alert_dialog";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
 export class NotificationAlert extends Component {
@@ -11,7 +11,7 @@ export class NotificationAlert extends Component {
     static template = "web.NotificationAlert";
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     get isNotificationBlocked() {

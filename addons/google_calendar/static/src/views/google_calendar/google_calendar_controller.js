@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { render } from "@web/owl2/utils";
 import { AttendeeCalendarController } from "@calendar/views/attendee_calendar/attendee_calendar_controller";
 
@@ -10,7 +12,7 @@ import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/c
 patch(AttendeeCalendarController.prototype, {
     setup() {
         super.setup(...arguments);
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
     },
 

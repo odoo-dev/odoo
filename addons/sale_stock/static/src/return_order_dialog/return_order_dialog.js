@@ -1,7 +1,7 @@
-import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { formatCurrency } from "@web/core/currency";
 import { renderToMarkup } from "@web/core/utils/render";
@@ -19,7 +19,7 @@ export class ReturnOrderDialog extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({ returnableLines: [], returnReasonId: null });
 
         onWillStart(async () => {

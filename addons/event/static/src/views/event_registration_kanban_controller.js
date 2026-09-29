@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { EventRegistrationSummaryDialog } from "@event/client_action/event_registration_summary_dialog";
@@ -8,7 +10,7 @@ export class EventRegistrationKanbanController extends KanbanController {
 
     setup() {
         super.setup()
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

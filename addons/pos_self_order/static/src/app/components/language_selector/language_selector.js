@@ -1,7 +1,7 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 
 export class LanguageSelector extends Component {
     static template = "pos_self_order.LanguageSelector";
@@ -9,7 +9,7 @@ export class LanguageSelector extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     get currentLanguage() {

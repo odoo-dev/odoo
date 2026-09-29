@@ -1,10 +1,10 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { isRelational } from "@web/model/relational_model/utils";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
@@ -22,7 +22,7 @@ export class GroupConfigMenu extends Component {
         list: t.object(),
     });
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     get configItems() {

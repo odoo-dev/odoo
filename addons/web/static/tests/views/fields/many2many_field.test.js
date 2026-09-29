@@ -22,12 +22,12 @@ import {
     mockService,
 } from "@web/../tests/web_test_helpers";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { Many2XAutocomplete, many2XAutocompleteProps } from "@web/views/fields/relational_utils";
 import { cookie } from "@web/core/browser/cookie";
-import { t } from "@odoo/owl";
+import { t, usePlugin } from "@odoo/owl";
 import { ListRenderer } from "@web/views/list/list_renderer";
 
 describe.current.tags("desktop");
@@ -1318,7 +1318,7 @@ test("many2many list (editable): edition concurrence", async () => {
 test("many2many editable list: delete with confirmation (cancel, then delete again)", async () => {
     class ListRendererWithConfirmation extends ListRenderer {
         setup() {
-            this.dialog = useService("dialog");
+            this.dialog = usePlugin(DialogPlugin);
             super.setup();
         }
         onDeleteRecord(record) {

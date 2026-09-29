@@ -1,4 +1,5 @@
-import { Component, onMounted, xml, proxy, useProps, t } from "@odoo/owl";
+import { Component, onMounted, proxy, t, usePlugin, useProps, xml } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -28,7 +29,7 @@ export class NewContentSystrayItem extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.website = useService("website");
         this.action = useService("action");
 

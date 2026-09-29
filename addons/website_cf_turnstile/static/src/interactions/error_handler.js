@@ -1,10 +1,11 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { ErrorDialog } from "@web/core/errors/error_dialogs";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 function turnstileErrorHandler(env, error) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     if (error.message.includes("Turnstile Error")) {
         dialog.add(ErrorDialog, {
             name: _t("Cloudflare Turnstile Error"),

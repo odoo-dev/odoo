@@ -1,6 +1,7 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { useModel } from "@web/model/model";
@@ -26,7 +27,7 @@ export class ActivityController extends Component {
         this.archInfo = this.props.archInfo;
         this.model = proxy(useModel(this.props.Model, this.modelParams));
 
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.action = useService("action");
         this.store = useService("mail.store");
         this.ui = useService("ui");

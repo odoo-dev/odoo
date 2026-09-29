@@ -1,6 +1,7 @@
-import { signal } from "@odoo/owl";
+import { signal, usePlugin } from "@odoo/owl";
 import { CreatePollDialog } from "@mail/core/common/create_poll_dialog";
 
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { EmojiPicker, useEmojiPickerStoreScroll } from "@web/core/emoji_picker/emoji_picker";
 
 import {
@@ -15,7 +16,6 @@ import { SUGGESTION_DELIMITERS } from "@mail/core/common/suggestion_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { markEventHandled } from "@web/core/utils/misc";
 
 export const composerActionsRegistry = registry.category("mail.composer/actions");
@@ -172,7 +172,7 @@ registerComposerAction("create-poll", {
         );
     },
     setup: ({ owner }) => {
-        owner.dialogService = useService("dialog");
+        owner.dialogService = usePlugin(DialogPlugin);
     },
 });
 

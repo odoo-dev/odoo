@@ -2,11 +2,11 @@ import { BuilderComponent } from "@html_builder/core/building_blocks/builder_com
 import { BuilderListDialog } from "@html_builder/core/building_blocks/builder_list_dialog";
 import { useBuilderComponent, useInputBuilderComponent } from "@html_builder/core/utils";
 import { isSmallInteger } from "@html_builder/utils/utils";
-import { Component, computed, onPatched, useProps, proxy, signal, t, xml } from "@odoo/owl";
+import { Component, computed, onPatched, proxy, signal, t, usePlugin, useProps, xml } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
 import { useSortable } from "@web/core/utils/sortable_owl";
-import { useService } from "@web/core/utils/hooks";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { localeCompare } from "@web/core/l10n/utils";
 
@@ -96,7 +96,7 @@ export class BuilderList extends Component {
         if (this.props.default) {
             this.validateProps();
         }
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         useBuilderComponent(this.props);
         useAutoFocusNewItem(this.tableRef);
         const { state, commit, preview } = useInputBuilderComponent(this.props, {

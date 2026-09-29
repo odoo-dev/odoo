@@ -25,11 +25,13 @@ import {
     t,
     untrack,
     useApp,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { MessageSearchState } from "@mail/core/common/message_search_hook";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
@@ -129,7 +131,7 @@ export class Message extends Component {
         this.messageActions = useMessageActions(this.messageActionsParams);
         this.shadowBody = signal.ref(HTMLDivElement);
         this.shadowRoot = signal(null, { type: t.ref(ShadowRoot) });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.ui = useService("ui");
         this.openReactionMenu = this.openReactionMenu.bind(this);
         this.optionsDropdown = useDropdownState();

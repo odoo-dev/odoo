@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -30,7 +31,7 @@ export class PaymentScreen extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.invoiceService = useService("account_move");
         this.notification = useService("notification");
         this.payment_methods_from_config = this.configPaymentMethods || [];

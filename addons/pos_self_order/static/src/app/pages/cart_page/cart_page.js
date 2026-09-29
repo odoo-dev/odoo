@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { Component, proxy, signal } from "@odoo/owl";
+import { Component, proxy, signal, usePlugin } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
@@ -26,7 +27,7 @@ export class CartPage extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.router = useService("router");
         this.ui = useService("ui");
         this.state = proxy({

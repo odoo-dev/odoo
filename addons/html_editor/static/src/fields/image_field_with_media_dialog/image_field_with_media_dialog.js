@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ImageField, imageField } from "@web/views/fields/image/image_field";
@@ -10,7 +12,7 @@ export class ImageFieldWithMediaDialog extends ImageField {
     setup() {
         super.setup();
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     onFileEdit(ev) {

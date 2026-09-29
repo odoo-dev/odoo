@@ -14,9 +14,10 @@ import { FollowerList } from "@mail/core/web/follower_list";
 import { groupAttachments } from "@mail/utils/common/attachments";
 import { assignGetter, isDragSourceExternalFile } from "@mail/utils/common/misc";
 
-import { status, t, untrack, useEffect, useOnChange, useProps } from "@odoo/owl";
+import { status, t, untrack, useEffect, useOnChange, usePlugin, useProps } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
@@ -102,7 +103,7 @@ const chatterPatch = {
             showAttachmentLoading: false,
             showScheduledMessages: true,
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.messageSearch = useMessageSearch();
         this.attachmentUploader = useAttachmentUploader(this.thread);
         this.followerListDropdown = useDropdownState();

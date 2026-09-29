@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
@@ -5,7 +6,7 @@ import { FileUploader } from "@web/views/fields/file_handler";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 
 export class PurchaseFileUploader extends Component {
     static template = "purchase.DocumentFileUploader";
@@ -19,7 +20,7 @@ export class PurchaseFileUploader extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.attachmentIdsToProcess = [];
     }
 

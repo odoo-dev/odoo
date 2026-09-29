@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -19,7 +20,7 @@ export class DebugWidget extends Component {
         this.barcodeReader = useService("barcode_reader");
         this.notification = useService("notification");
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             isOpen: false,
             barcodeInput: "",

@@ -1,8 +1,9 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useSubEnv } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { X2ManyField, x2ManyField, x2ManyFieldProps } from "@web/views/fields/x2many/x2many_field";
-import { t, useProps } from "@odoo/owl";
+import { t, usePlugin, useProps } from "@odoo/owl";
 import { CustomMediaDialog } from "./custom_media_dialog";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import { saveMultipleAttachments } from "@web/core/utils/image_library";
@@ -19,7 +20,7 @@ export class X2ManyMediaViewer extends X2ManyField {
 
     setup() {
         super.setup();
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.supportedFields = ["image_1920", "image_1024", "image_512", "image_256", "image_128"];

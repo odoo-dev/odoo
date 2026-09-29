@@ -1,5 +1,6 @@
 import { Component, proxy, signal, status, t, usePlugin, useProps } from "@odoo/owl";
 import { hasTouch } from "@web/core/browser/feature_detection";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Domain } from "@web/core/domain";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -67,7 +68,7 @@ export class SearchBar extends Component {
     inputRef = useProps.static("inputRef", t.signal(t.ref()).optional(() => signal.ref()));
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.fields = this.env.searchModel.searchViewFields;
         this.searchItemsFields = this.env.searchModel.getSearchItems((f) => f.type === "field");

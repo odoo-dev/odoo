@@ -1,4 +1,5 @@
-import { Component, markup, onMounted, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, markup, onMounted, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { download } from "@web/core/network/download";
 import { registry } from "@web/core/registry";
@@ -29,7 +30,7 @@ export class ProductPricelistReport extends Component {
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         this.MAX_QTY = 5;
         const pastState = this.props.state || {};

@@ -1,5 +1,6 @@
 import { Plugin, providePlugins, useConfig, usePlugin, useScope } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";
 import { useEnv } from "@web/owl2/utils";
@@ -78,7 +79,7 @@ export function useViewButtonHandler() {
  */
 export function useViewButtons(ref, options = {}) {
     const action = useService("action");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const scope = useScope();
     const env = useEnv();
 

@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { KanbanHeader } from "@web/views/kanban/kanban_header";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
 export class MrpWorkorderKanbanHeader extends KanbanHeader {
@@ -10,7 +11,7 @@ export class MrpWorkorderKanbanHeader extends KanbanHeader {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     canQuickCreate() {

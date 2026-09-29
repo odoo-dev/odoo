@@ -1,7 +1,8 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { MoneyDetailsPopup } from "@point_of_sale/app/components/popups/money_details_popup/money_details_popup";
-import { Component, proxy, onMounted, useProps, t } from "@odoo/owl";
+import { Component, onMounted, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { parseFloat } from "@web/views/fields/parsers";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -23,7 +24,7 @@ export class OpeningControlPopup extends Component {
     setup() {
         this.moneyDetails = null;
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             notes: "",
             openingCash: this.pos.formatCurrency(

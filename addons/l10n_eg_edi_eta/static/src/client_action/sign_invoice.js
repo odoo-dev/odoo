@@ -1,6 +1,7 @@
 import { usePlugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
@@ -40,7 +41,7 @@ async function actionGetDrive(env, actionDescr, type) {
     const { drive_id, sign_host: host } = actionDescr.params;
     const orm = usePlugin(ORM);
     const notification = useService("notification");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const action = useService("action");
 
     let route = host;

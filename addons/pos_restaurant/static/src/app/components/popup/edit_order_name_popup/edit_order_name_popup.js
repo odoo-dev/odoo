@@ -1,15 +1,16 @@
+import { usePlugin } from "@odoo/owl";
 import { ListContainer } from "@point_of_sale/app/components/list_container/list_container";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { localeCompare } from "@web/core/l10n/utils";
-import { useService } from "@web/core/utils/hooks";
 
 export class EditOrderNamePopup extends TextInputPopup {
     static template = "pos_restaurant.EditOrderNamePopup";
     static components = { ...super.components, ListContainer };
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         super.setup();
     }
     transferOrder(order) {

@@ -1,8 +1,8 @@
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { ComboConfiguratorPopup } from "@point_of_sale/app/components/popups/combo_configurator_popup/combo_configurator_popup";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
 import { ProductProduct } from "@point_of_sale/app/models/product_product";
@@ -17,7 +17,7 @@ export class OptionalProductPopup extends Component {
 
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             product_lines:
                 this.props.productTemplate?.pos_optional_product_ids.map((product) => ({

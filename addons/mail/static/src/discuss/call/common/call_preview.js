@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { Action, ACTION_TAGS } from "@mail/core/common/action";
 import { ActionList } from "@mail/core/common/action_list";
@@ -21,6 +22,7 @@ import {
     status,
     types,
     useOnChange,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 
@@ -48,7 +50,7 @@ export class CallPreview extends Component {
                 ])
                 .optional(),
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.rtc = useService("discuss.rtc");
         this.store = useService("mail.store");

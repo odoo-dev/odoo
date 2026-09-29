@@ -1,10 +1,10 @@
 import { ScheduledDateDialog } from "./scheduled_date_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { deserializeDateTime, serializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/relational_model/record";
 
-import { Component, types, useProps } from "@odoo/owl";
+import { Component, types, usePlugin, useProps } from "@odoo/owl";
 
 /**
  * Widgets used to display and select the scheduled date in the composer (in monocomment mode)
@@ -19,7 +19,7 @@ class ScheduledDateFieldCommon extends Component {
     setup() {
         super.setup();
         this.props = useProps({ name: types.string(), record: types.instanceOf(Record) });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.dateTimeFormat = {
             day: "numeric",
             hour: "numeric",

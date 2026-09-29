@@ -1,9 +1,10 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { SignatureDialog } from "@web/core/signature/signature_dialog";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 
 export class SignatureWidget extends Component {
     static template = "web.SignatureWidget";
@@ -17,7 +18,7 @@ export class SignatureWidget extends Component {
     });
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

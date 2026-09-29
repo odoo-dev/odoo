@@ -1,8 +1,8 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "../utils/hooks";
 import { ConfirmationDialog } from "../confirmation_dialog/confirmation_dialog";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 
 export class FileUploadProgressBar extends Component {
     static template = "web.FileUploadProgressBar";
@@ -11,7 +11,7 @@ export class FileUploadProgressBar extends Component {
     });
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     }
 
     onCancel() {

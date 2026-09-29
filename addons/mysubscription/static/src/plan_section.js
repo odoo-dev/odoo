@@ -1,5 +1,5 @@
-import { Component, computed, useProps, t } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, computed, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { DashboardBlock } from "./components/dashboard_block";
 import { PlanBox } from "./components/plan_box"
 import { SubscriptionDialog } from "./components/subscription_dialog";
@@ -14,7 +14,7 @@ export class PlanSection extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.hasEnterpriseAccess = "enterprise_subscription" in this.env.services;
 
         this.hrefCommunityPlan = "https://www.odoo.com/page/editions";

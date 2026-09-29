@@ -2,6 +2,7 @@ import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { useDomState } from "@html_builder/core/utils";
 import { usePlugin } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Domain } from "@web/core/domain";
 import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import { registry } from "@web/core/registry";
@@ -22,7 +23,7 @@ export class SnippetVisibilityOption extends BaseOptionComponent {
         super.setup();
         this.getModel = this.dependencies["mass_mailing.SnippetVisibility"].getModel;
         this.treeProcessor = useService("tree_processor");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.overlayButtonsPlugin = this.env.editor.shared.overlayButtons;
 
         this.state = useDomState((editingElement) => {

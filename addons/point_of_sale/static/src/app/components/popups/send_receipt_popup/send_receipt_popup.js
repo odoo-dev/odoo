@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { Component, proxy, useProps, t, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -20,7 +21,7 @@ export class SendReceiptPopup extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = usePlugin(NotificationPlugin);
         const partner = this.order.getPartner();
         const email = partner?.invoice_emails || partner?.email || "";

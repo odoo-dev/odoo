@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { useService } from "@web/core/utils/hooks";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { roundPrecision } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import { uuidv4 } from "@point_of_sale/utils";
@@ -11,7 +12,7 @@ import { uuidv4 } from "@point_of_sale/utils";
  */
 export const useVivaApp = (validateCallback) => {
     const pos = usePos();
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const order = pos.getOrder();
 
     /**

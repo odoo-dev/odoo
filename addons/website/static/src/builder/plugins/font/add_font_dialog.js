@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { rpc } from "@web/core/network/rpc";
-import { Component, proxy, signal, useProps, t } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
@@ -90,7 +91,7 @@ export class AddFontDialog extends Component {
     });
     fileInput = signal.ref();
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

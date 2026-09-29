@@ -1,9 +1,10 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { location } from "@web/core/browser/browser";
 import { queryAll, queryFirst, queryOne } from "@odoo/hoot-dom";
-import { Component, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_plugin";
 import { tourRecorderState } from "./tour_recorder_state";
@@ -136,7 +137,7 @@ export class TourRecorder extends Component {
         this.notification = useService("notification");
         this.orm = useService("orm");
         this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             ...TourRecorder.defaultState,
             steps: [],

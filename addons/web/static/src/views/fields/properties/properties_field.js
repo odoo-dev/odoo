@@ -1,4 +1,5 @@
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -23,6 +24,7 @@ import {
     signal,
     t,
     useEffect,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { deepCopy } from "@web/core/utils/objects";
@@ -45,7 +47,7 @@ export class PropertiesField extends Component {
     setup() {
         this.notification = useService("notification");
         this.orm = useService("orm");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.popover = usePopover(PropertyDefinition, {
             closeOnClickAway: this.checkPopoverClose,
             popoverClass: "o_property_field_popover",

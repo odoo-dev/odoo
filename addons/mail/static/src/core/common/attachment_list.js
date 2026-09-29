@@ -2,10 +2,11 @@ import { AttachmentDeleteDialog } from "@mail/core/common/attachment_delete_dial
 import { Gif } from "@mail/core/common/gif";
 import { MessageSearchState } from "@mail/core/common/message_search_hook";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { downloadFile } from "@web/core/network/download";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -64,7 +65,7 @@ export class AttachmentList extends Component {
             ),
         });
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.fileViewer = useFileViewer(this.rootRef);
         this.actionsMenuState = useDropdownState();
         this.isMobileOS = isMobileOS();

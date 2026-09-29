@@ -1,8 +1,8 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
 import { Handles } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/handles/handles";
 import { getColors } from "@pos_restaurant/app/services/floor_plan/utils/colors";
-import { useService } from "@web/core/utils/hooks";
 import { SHAPE_TYPES } from "@pos_restaurant/app/services/floor_plan/elements/floor_element";
 import { FloorTable } from "@pos_restaurant/app/services/floor_plan/elements";
 
@@ -16,7 +16,7 @@ export class EditTableProperties extends Component {
     });
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         useLayoutEffect(
             (table) => {

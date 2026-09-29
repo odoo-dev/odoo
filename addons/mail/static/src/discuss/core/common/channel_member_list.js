@@ -4,7 +4,8 @@ import { openChannelInvitationDialog } from "@mail/discuss/core/common/channel_i
 import { SearchInput } from "@mail/core/common/search_input";
 import { nestedShallowEqual } from "@mail/utils/common/signal";
 
-import { Component, computed, t, useOnChange, useProps } from "@odoo/owl";
+import { Component, computed, t, useOnChange, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 
 import { useService } from "@web/core/utils/hooks";
@@ -55,7 +56,7 @@ export class ChannelMemberList extends Component {
             channel: t.instanceOf(this.store["discuss.channel"]),
             close: t.function([]).optional(),
         });
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.openChannelInvitationDialog = openChannelInvitationDialog;
         this.search = useSearch({
             fetch: async (term) => {

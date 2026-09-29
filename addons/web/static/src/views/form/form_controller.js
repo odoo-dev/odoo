@@ -2,6 +2,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
@@ -166,7 +167,7 @@ export class FormController extends Component {
     setup() {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.actionService = useService("action");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.orm = useService("orm");
         this.viewService = useService("view");
         this.ui = useService("ui");

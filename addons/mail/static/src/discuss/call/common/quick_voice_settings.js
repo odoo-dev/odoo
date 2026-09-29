@@ -1,9 +1,10 @@
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 
 import { CallSettingsDialog } from "@mail/discuss/call/common/call_settings";
 import { DeviceSelect } from "@mail/discuss/call/common/device_select";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -14,7 +15,7 @@ export class QuickVoiceSettings extends Component {
     setup() {
         super.setup();
         this.store = useService("mail.store");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.isMobile = isMobileOS;
     }
 

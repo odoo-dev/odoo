@@ -1,5 +1,6 @@
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { deserializeDateTime } from "@web/core/l10n/dates";
@@ -35,7 +36,7 @@ export class ActivityMenu extends Component {
         this.ui = useService("ui");
         this.lazySession = useService("lazy_session");
         this.notification = useService("notification");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         const { services } = this.env;
         const datetimePicker = services.datetime_picker;
         const attendanceDateTimePicker = Object.create(datetimePicker);

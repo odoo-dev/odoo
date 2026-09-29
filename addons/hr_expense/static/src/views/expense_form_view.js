@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -9,7 +11,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 export class ExpenseFormController extends FormController {
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

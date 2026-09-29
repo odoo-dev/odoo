@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
-import { onMounted, onWillUnmount, useListener, signal, useProps, t } from "@odoo/owl";
+import { onMounted, onWillUnmount, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { EditDecorProperties } from "./edit_decor/edit_decor";
 import { EditTableProperties } from "./edit_table/edit_table";
 import { EditFloorProperties } from "./edit_floor/edit_floor";
@@ -48,7 +49,7 @@ export class FloorPlanEditor extends FloorPlanBase {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.ui = useService("ui");
 
         this.state.actionMenuPosition = null;

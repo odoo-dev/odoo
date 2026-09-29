@@ -1,8 +1,9 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { ProductMatrixDialog } from "./product_matrix_dialog";
 
 export function useMatrixConfigurator() {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
 
     const openDialog = (rootRecord, jsonInfo, productTemplate, editedCellAttributes) => {
         const infos = JSON.parse(jsonInfo);

@@ -1,5 +1,5 @@
-import { Component, t, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { SaleActionHelperDialog } from "./sale_action_helper_dialog";
 
 export class SaleActionHelper extends Component {
@@ -9,7 +9,7 @@ export class SaleActionHelper extends Component {
     });
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     }
 
     openVideoPreview() {

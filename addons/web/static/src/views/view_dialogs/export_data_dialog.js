@@ -15,6 +15,7 @@ import { browser } from "@web/core/browser/browser";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { x2ManyCommands } from "@web/core/orm_plugin";
@@ -127,7 +128,7 @@ export class ExportDataDialog extends Component {
     debugMode = usePlugin(DebugModePlugin);
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.orm = useService("orm");
         this.uiService = useService("ui");

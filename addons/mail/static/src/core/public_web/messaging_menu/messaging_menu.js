@@ -6,9 +6,10 @@ import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { useOnBottomScrolled, useSearch } from "@mail/utils/common/hooks";
 import { incrementFn } from "@mail/utils/common/signal";
 
-import { Component, computed, shallowEqual, signal, types, useEffect, useProps } from "@odoo/owl";
+import { Component, computed, shallowEqual, signal, types, useEffect, usePlugin, useProps } from "@odoo/owl";
 
 import { hasTouch, isDisplayStandalone, isIOS } from "@web/core/browser/feature_detection";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { normalize } from "@web/core/l10n/utils";
@@ -55,7 +56,7 @@ export class MessagingMenu extends Component {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("mail.notification.permission");
         this.messageSearch = useSearch({
             fetch: (term) =>

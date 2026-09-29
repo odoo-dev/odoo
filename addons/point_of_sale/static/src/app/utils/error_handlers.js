@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { odooExceptionTitleMap, ErrorDialog } from "@web/core/errors/error_dialogs";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
@@ -25,7 +27,7 @@ export function handleRPCError(error, dialog) {
 }
 
 function rpcErrorHandler(env, error, originalError) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     if (originalError instanceof RPCError) {
         handleRPCError(originalError, dialog);
         return true;
@@ -35,7 +37,7 @@ registry.category("error_handlers").add("pos-rpcErrorHandler", rpcErrorHandler);
 
 export function offlineErrorHandler(env, error, originalError) {
     const pos = useService("pos");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     if (originalError instanceof ConnectionLostError) {
         if (!pos.data.network.warningTriggered) {
             dialog.add(AlertDialog, {
@@ -54,7 +56,7 @@ export function offlineErrorHandler(env, error, originalError) {
 registry.category("error_handlers").add("pos-offlineErrorHandler", offlineErrorHandler);
 
 function defaultErrorHandler(env, error, originalError) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     if (error instanceof Error) {
         dialog.add(ErrorDialog, {
             traceback: error.traceback,

@@ -1,8 +1,9 @@
 import { Gif } from "@mail/core/common/gif";
 import { LinkPreviewConfirmDelete } from "@mail/core/common/link_preview_confirm_delete";
 
-import { Component, proxy, signal, types, useOnChange, useProps } from "@odoo/owl";
+import { Component, proxy, signal, types, useOnChange, usePlugin, useProps } from "@odoo/owl";
 
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class LinkPreview extends Component {
@@ -18,7 +19,7 @@ export class LinkPreview extends Component {
         this.props = useProps({
             messageLinkPreview: types.instanceOf(this.store["mail.message.link.preview"]),
         });
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.ui = useService("ui");
         this.state = proxy({ startVideo: false, videoLoaded: false });
         useOnChange(

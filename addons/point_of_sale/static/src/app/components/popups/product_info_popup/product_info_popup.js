@@ -1,9 +1,10 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { SnoozeDialog } from "./snooze_dialog/snooze_dialog";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
 
@@ -19,7 +20,7 @@ export class ProductInfoPopup extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({
             countdown: "",
             activeSnooze: this.pos.getActiveSnooze("product", {

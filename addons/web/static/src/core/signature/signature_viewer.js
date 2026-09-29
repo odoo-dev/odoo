@@ -1,4 +1,5 @@
-import { Component, proxy, t, useOnChange, useProps } from "@odoo/owl";
+import { Component, proxy, t, useOnChange, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { SignatureDialog } from "@web/core/signature/signature_dialog";
 import { useService } from "@web/core/utils/hooks";
@@ -21,7 +22,7 @@ export class SignatureViewer extends Component {
     static displaySignatureRatio = 3;
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.state = proxy({
             isValid: true,

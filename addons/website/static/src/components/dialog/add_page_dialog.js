@@ -4,14 +4,16 @@ import {
     Component,
     onMounted,
     onWillStart,
-    useProps,
     proxy,
     signal,
     status,
     t,
     useListener,
+    usePlugin,
+    useProps,
 } from "@odoo/owl";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
@@ -518,7 +520,7 @@ export class AddPageDialog extends Component {
         this.primaryTitle = _t("Create");
         this.switchLabel = _t("Add to menu");
         this.website = useService("website");
-        this.dialogs = useService("dialog");
+        this.dialogs = usePlugin(DialogPlugin);
         this.http = useService("http");
         this.action = useService("action");
 

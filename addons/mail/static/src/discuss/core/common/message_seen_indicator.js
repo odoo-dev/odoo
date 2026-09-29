@@ -1,5 +1,6 @@
-import { Component, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { useBackButton, useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
@@ -41,7 +42,7 @@ export class MessageSeenIndicator extends Component {
             className: t.string().optional(),
             message: t.instanceOf(this.store["mail.message"]),
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
     }
 
     get summary() {

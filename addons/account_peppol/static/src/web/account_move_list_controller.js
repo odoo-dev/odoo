@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -9,7 +11,7 @@ patch(AccountMoveListController.prototype, {
     setup() {
         super.setup();
         this.notification = useService("notification");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     },
 
     async onDeleteSelectedRecords() {

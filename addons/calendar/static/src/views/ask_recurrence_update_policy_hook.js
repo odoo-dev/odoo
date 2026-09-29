@@ -1,4 +1,5 @@
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { AskRecurrenceUpdatePolicyDialog } from "@calendar/views/ask_recurrence_update_policy_dialog";
 
 export function askRecurrenceUpdatePolicy(dialogService) {
@@ -12,6 +13,6 @@ export function askRecurrenceUpdatePolicy(dialogService) {
 }
 
 export function useAskRecurrenceUpdatePolicy() {
-    const dialogService = useService("dialog");
+    const dialogService = usePlugin(DialogPlugin);
     return askRecurrenceUpdatePolicy.bind(null, dialogService);
 }

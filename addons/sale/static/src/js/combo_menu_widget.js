@@ -1,5 +1,6 @@
-import { Component, onWillStart, useProps } from "@odoo/owl";
+import { Component, onWillStart, usePlugin, useProps } from "@odoo/owl";
 import { openComboConfigurator } from "@sale/js/combo_configurator_utils";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -13,7 +14,7 @@ export class ComboMenuWidget extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         onWillStart(async () => {
             this.comboProducts = await this.orm.searchRead(

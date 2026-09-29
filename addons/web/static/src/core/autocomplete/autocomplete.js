@@ -1,9 +1,10 @@
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { isScrollableY, scrollTo } from "@web/core/utils/scrolling";
 import { useDebounced } from "@web/core/utils/timing";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { usePosition } from "@web/core/position/position_hook";
-import { Component, onWillUpdateProps, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, onWillUpdateProps, proxy, signal, t, useListener, usePlugin, useProps } from "@odoo/owl";
 import { mergeClasses } from "@web/core/utils/classname";
 
 export const autoCompleteProps = {
@@ -92,7 +93,7 @@ export class AutoComplete extends Component {
         useListener(window, "pointerdown", this.externalClose.bind(this), true);
         useListener(window, "mousemove", () => (this.mouseSelectionActive = true), true);
 
-        this.hotkey = useService("hotkey");
+        this.hotkey = usePlugin(HotkeyPlugin);
         this.hotkeysToRemove = [];
 
         onWillUpdateProps((nextProps) => {

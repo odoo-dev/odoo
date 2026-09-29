@@ -6,10 +6,12 @@ import {
     t,
     toRaw,
     useOnChange,
+    usePlugin,
     useScope,
 } from "@odoo/owl";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useEnv } from "@web/owl2/utils";
 
 /**
@@ -231,7 +233,7 @@ export function useSpellCheck({ ref } = {}) {
  */
 export function useOwnedDialogs(options = {}) {
     const scope = useScope();
-    const dialogService = useService("dialog");
+    const dialogService = usePlugin(DialogPlugin);
     const cbs = [];
     onWillUnmount(() => {
         cbs.forEach((cb) => cb());

@@ -1,4 +1,6 @@
 import { EventRegistrationSummaryDialog } from "@event/client_action/event_registration_summary_dialog";
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { listView } from "@web/views/list/list_view";
@@ -8,7 +10,7 @@ export class EventRegistrationListController extends ListController {
 
     setup() {
         super.setup();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.orm = useService("orm");
     }
 

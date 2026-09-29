@@ -1,9 +1,9 @@
-import { Component, onWillStart, signal, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, signal, t, usePlugin, useProps } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { session } from "@web/session";
 import { user } from "@web/core/user";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
 
 import { DashboardBlock } from "./components/dashboard_block";
@@ -20,7 +20,7 @@ export class DatabaseSection extends Component {
 
     setup() {
         this.serverVersion = session.server_version;
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         this.currentDbName = signal(session.db);
 

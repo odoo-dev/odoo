@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import {
     buildM2OFieldDescription,
     extractM2OFieldProps,
@@ -19,7 +21,7 @@ export class PickupLocationMany2OneField extends Many2OneField {
     async setup() {
         super.setup();
         this.orm = useService("orm");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         if (!this.props.record.resId) {
             await this.props.record.save();
         }

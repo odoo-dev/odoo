@@ -8,7 +8,7 @@ import {
     test,
     waitUntil,
 } from "@odoo/hoot";
-import { Component, xml } from "@odoo/owl";
+import { Component, usePlugin, xml } from "@odoo/owl";
 import {
     getService,
     makeTestApp,
@@ -17,9 +17,9 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { location, browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Macro } from "@web/core/macro";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 
 describe.current.tags("desktop");
 
@@ -613,7 +613,7 @@ test("check not possible to click below modal", async () => {
             </t>
         `;
         setup() {
-            this.dialogService = useService("dialog");
+            this.dialogService = usePlugin(DialogPlugin);
         }
         openDialog() {
             this.dialogService.add(DummyDialog);

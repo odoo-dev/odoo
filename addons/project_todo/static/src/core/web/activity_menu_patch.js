@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { ActivityMenu } from "@mail/core/web/activity_menu";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
@@ -9,7 +11,7 @@ patch(ActivityMenu.prototype, {
     setup() {
         super.setup(...arguments);
         this.orm = useService("orm");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         useCommand(
             _t("Add a To-Do"),
             () => {

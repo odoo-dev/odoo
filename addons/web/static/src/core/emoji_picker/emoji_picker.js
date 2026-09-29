@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { FrequentEmojiPlugin } from "@web/core/emoji_picker/frequent_emoji_plugin";
 import { markEventHandled } from "@web/core/utils/misc";
 import {
@@ -477,7 +478,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     const targets = [];
     const state = proxy({ isOpen: false });
     const ui = useService("ui");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const loadEmoji = useLoadEmoji();
     let remove;
     const newOptions = {

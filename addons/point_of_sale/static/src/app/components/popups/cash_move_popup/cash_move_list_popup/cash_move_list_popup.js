@@ -1,5 +1,6 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
-import { Component, signal, useProps, t } from "@odoo/owl";
+import { Component, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -19,7 +20,7 @@ export class CashMoveListPopup extends Component {
         super.setup();
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.cashMoves = signal(this.props.cashMoves);
         this.callbacks = this.props.cashMoves.reduce(
             (acc, cm) => ({

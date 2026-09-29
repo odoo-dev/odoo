@@ -1,10 +1,11 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { deserializeDateTime, formatDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { useService, useBus } from "@web/core/utils/hooks";
-import { Component, proxy, useProps } from "@odoo/owl";
+import { Component, proxy, usePlugin, useProps } from "@odoo/owl";
 import { OptimizeSEODialog } from "@website/components/dialog/seo";
 import { RelativePublishTime } from "./relative_publish_time";
 
@@ -56,7 +57,7 @@ export class PublishSystrayItem extends Component {
     setup() {
         this.website = useService("website");
         this.orm = useService("orm");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.notificationService = useService("notification");
         this.actionService = useService("action");
         this.websiteCustomMenus = useService("website_custom_menus");

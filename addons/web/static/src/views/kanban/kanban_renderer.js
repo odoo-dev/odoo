@@ -6,9 +6,11 @@ import {
     signal,
     t,
     useListener,
+    usePlugin,
     useProps,
 } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
@@ -92,7 +94,7 @@ export class KanbanRenderer extends Component {
             columnQuickCreateIsFolded:
                 !this.props.list.isGrouped || this.props.list.groups.length > 0,
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.uiService = useService("ui");
         this.exampleData = registry
             .category("kanban_examples")

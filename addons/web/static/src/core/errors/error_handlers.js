@@ -1,5 +1,6 @@
 import { usePlugin } from "@odoo/owl";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import {
     ClientErrorDialog,
     ErrorDialog,
@@ -43,7 +44,7 @@ export function rpcErrorHandler(env, error, originalError) {
     }
 
     const notification = useService("notification");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
 
     if (originalError instanceof RPCError) {
         // When an error comes from the server, it can have an exeption name.
@@ -106,7 +107,7 @@ export function requestEntityTooLargeHandler(env, error, originalError) {
         return false;
     }
 
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
 
     if (originalError instanceof RequestEntityTooLargeError) {
         dialog.add(RequestEntityTooLargeErrorDialog);
@@ -136,7 +137,7 @@ const defaultDialogs = new Map([
  * @returns {boolean}
  */
 export function defaultHandler(env, error) {
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const DialogComponent = defaultDialogs.get(error.constructor) || ErrorDialog;
     dialog.add(DialogComponent, {
         traceback: error.traceback,

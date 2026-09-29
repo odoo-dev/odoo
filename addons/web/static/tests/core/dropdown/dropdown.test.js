@@ -12,7 +12,7 @@ import {
     resize,
 } from "@odoo/hoot-dom";
 import { animationFrame, runAllTimers, tick } from "@odoo/hoot-mock";
-import { Component, onMounted, onPatched, proxy, signal, t, useProps, xml } from "@odoo/owl";
+import { Component, onMounted, onPatched, proxy, signal, t, usePlugin, useProps, xml } from "@odoo/owl";
 
 import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
@@ -28,12 +28,12 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { Dialog } from "@web/core/dialog/dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { DropdownPopover } from "@web/core/dropdown/_behaviours/dropdown_popover";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useActiveElement } from "@web/core/ui/ui_plugin";
-import { useService } from "@web/core/utils/hooks";
 
 const DROPDOWN_TOGGLE = ".o-dropdown.dropdown-toggle";
 const DROPDOWN_MENU = ".o-dropdown--menu.dropdown-menu";
@@ -835,7 +835,7 @@ test("don't close parent dropdown when clicking in a child active element", asyn
             `;
 
         setup() {
-            this.dialog = useService("dialog");
+            this.dialog = usePlugin(DialogPlugin);
         }
 
         clicked() {
@@ -951,7 +951,7 @@ test("Dropdown in dialog in dropdown, first dropdown should stay open when click
             `;
 
         setup() {
-            this.dialog = useService("dialog");
+            this.dialog = usePlugin(DialogPlugin);
         }
 
         onClick() {

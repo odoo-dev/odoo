@@ -1,3 +1,5 @@
+import { SoundEffectsPlugin } from "@mail/core/common/sound_effects_plugin";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { onWillRender } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -67,7 +69,7 @@ export class ProductScreen extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.notification = useService("notification");
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.state = proxy({
@@ -108,7 +110,7 @@ export class ProductScreen extends Component {
         });
 
         this.barcodeReader = useService("barcode_reader");
-        this.sound = useService("mail.sound_effects");
+        this.sound = usePlugin(SoundEffectsPlugin);
 
         useBarcodeReader({
             product: this._barcodeProductAction.bind(this),

@@ -1,13 +1,13 @@
 // Part of Odoo. See LICENSE file for full copyright and licensing details.
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { formatDate } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { NumericInput } from "@point_of_sale/app/components/inputs/numeric_input/numeric_input";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 
 const { DateTime } = luxon;
 
@@ -25,7 +25,7 @@ export class EventSlotSelectionPopup extends Component {
     };
     setup() {
         this.pos = usePos();
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.slotId = false;
         this.state = proxy({
             selectedSlotDisplay: "",

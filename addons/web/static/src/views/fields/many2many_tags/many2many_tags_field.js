@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { CheckBox } from "@web/core/checkbox/checkbox";
@@ -19,7 +20,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
 
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 
 export const DEFAULT_TAG_LIMIT = 8;
@@ -75,7 +76,7 @@ export class Many2ManyTagsField extends Component {
         this.popover = usePopover(this.constructor.components.Popover, {
             useBottomSheet: this.isBottomSheet,
         });
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.dialogClose = [];
         useTagNavigation(this.many2ManyTagsFieldRef, {
             isEnabled: () => !this.props.readonly,

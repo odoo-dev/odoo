@@ -1,7 +1,8 @@
-import { Component, xml, useProps, t } from "@odoo/owl";
+import { Component, t, usePlugin, useProps, xml } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { generateQRCodeDataUrl } from "@point_of_sale/utils";
 import { CopyButton } from "@web/core/copy_button/copy_button";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -16,7 +17,7 @@ export class QrCodeCustomerDisplay extends Component {
     setup() {
         this.ui = useService("ui");
         this.notification = useService("notification");
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
     }
 
     getQrCode() {

@@ -1,6 +1,7 @@
 import { EditHeadBodyDialog } from "../edit_head_body_dialog/edit_head_body_dialog";
-import { Component, proxy, useProps } from "@odoo/owl";
+import { Component, proxy, usePlugin, useProps } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -16,7 +17,7 @@ export class ResourceEditorWarningOverlay extends Component {
      */
     setup() {
         this.website = useService("website");
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
 
         const localStorageValue = browser.localStorage.getItem("website.ace.doNotShowWarning");
         this.state = proxy({

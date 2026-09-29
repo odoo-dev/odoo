@@ -1,9 +1,9 @@
-import { Component, markup, signal, useProps, t } from "@odoo/owl";
+import { Component, markup, signal, t, usePlugin, useProps } from "@odoo/owl";
 import { useMatrixKeyNavigation } from "@html_builder/utils/keyboard_navigation";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 import { InputConfirmationDialog } from "./input_confirmation_dialog";
 import { fuzzyLevenshteinLookup, fuzzyLookup } from "@web/core/utils/search";
 import { selectElements } from "@html_editor/utils/dom_traversal";
@@ -23,7 +23,7 @@ export class SnippetViewer extends Component {
     content = signal.ref();
 
     setup() {
-        this.dialog = useService("dialog");
+        this.dialog = usePlugin(DialogPlugin);
         this.backendDirection = localization.direction;
 
         this.handleMatrixKeyNavigation = useMatrixKeyNavigation(

@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { booleanField, BooleanField } from "@web/views/fields/boolean/boolean_field";
-import { useService } from "@web/core/utils/hooks";
 import { UpgradeDialog } from "./upgrade_dialog";
 
 /**
@@ -11,7 +12,7 @@ import { UpgradeDialog } from "./upgrade_dialog";
 export class UpgradeBooleanField extends BooleanField {
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.isEnterprise = odoo.info && odoo.info.isEnterprise;
     }
 

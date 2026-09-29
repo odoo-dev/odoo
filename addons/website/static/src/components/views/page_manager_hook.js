@@ -1,3 +1,4 @@
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { useEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
@@ -16,7 +17,7 @@ import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 export function usePageManager({ resModel, createAction }) {
     const env = useEnv();
     const website = useService("website");
-    const dialog = useService("dialog");
+    const dialog = usePlugin(DialogPlugin);
     const actionService = useService("action");
     const debugMode = usePlugin(DebugModePlugin);
     const websiteSelection = debugMode.isActive() ? [{ id: 0, name: _t("All Websites") }] : [];

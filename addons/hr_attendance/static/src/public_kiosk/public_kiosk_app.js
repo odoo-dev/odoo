@@ -8,6 +8,7 @@ import { NewEmployeeDialog } from "@hr_attendance/components/new_employee_dialog
 import { KioskPinCode } from "@hr_attendance/components/pin_code/pin_code";
 import { Component, proxy, t, usePlugin, useProps, whenReady } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -46,7 +47,7 @@ class kioskAttendanceApp extends Component {
     };
 
     setup() {
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.barcode = usePlugin(BarcodePlugin);
         this.notification = useService("notification");
         this.ui = useService("ui");

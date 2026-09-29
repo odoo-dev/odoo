@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { registry } from "@web/core/registry";
 import { selectionField, SelectionField } from "@web/views/fields/selection/selection_field";
-import { useService } from "@web/core/utils/hooks";
 import { UpgradeDialog } from "@web/webclient/settings_form_view/fields/upgrade_dialog";
 
 /**
@@ -11,7 +12,7 @@ import { UpgradeDialog } from "@web/webclient/settings_form_view/fields/upgrade_
 export class UpgradeSelectionField extends SelectionField {
     setup() {
         super.setup();
-        this.dialogService = useService("dialog");
+        this.dialogService = usePlugin(DialogPlugin);
         this.isEnterprise = odoo.info && odoo.info.isEnterprise;
     }
 
