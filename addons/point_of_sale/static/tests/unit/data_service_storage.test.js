@@ -2,6 +2,8 @@ import { test, expect, describe } from "@odoo/hoot";
 import { setupPosEnv, getFilledOrder } from "./utils";
 import { definePosModels } from "./data/generate_model_definitions";
 
+const { DateTime } = luxon;
+
 definePosModels();
 
 describe("local persistence failures", () => {
@@ -92,5 +94,36 @@ describe("IndexedDB key selection", () => {
 
         const product = store.models["product.product"].getAll()[0];
         expect(data.getIndexedDBKey(product)).toBe(product.id);
+    });
+});
+
+describe("pending sync state", () => {
+    test("counts what the next sync has to send", async () => {
+        const store = await setupPosEnv();
+        store.clearPendingOrder();
+        const baseline = store.getPendingSyncCount();
+
+        // Drafts outside the queue are local work, not pending sync
+        const draft = store.addNewOrder();
+        await store.addLineToOrder(
+            { product_tmpl_id: store.models["product.template"].get(5) },
+            draft
+        );
+        expect(store.getPendingSyncCount()).toBe(baseline);
+
+        const queued = await getFilledOrder(store);
+        const paid = await getFilledOrder(store);
+        paid.state = "paid";
+        store.addPendingOrder([999], true);
+        store.data.network.unsyncData.push({
+            date: DateTime.now(),
+            uuid: "op-1",
+            try: 1,
+            args: [{}],
+        });
+        expect(store.getPendingSyncCount()).toBe(baseline + 4);
+
+        queued.unmarkDirty();
+        expect(store.getPendingSyncCount()).toBe(baseline + 3);
     });
 });

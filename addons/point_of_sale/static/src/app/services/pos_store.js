@@ -1680,6 +1680,26 @@ export class PosStore extends WithLazyGetterTrap {
         };
     }
 
+    /**
+     * Number of operations the next sync has to send to the server.
+     */
+    getPendingSyncCount() {
+        const { orderToCreate, orderToUpdate } = this.getPendingOrder();
+        const pendingOrderUuids = new Set(
+            [...orderToCreate, ...orderToUpdate]
+                .filter((order) => order.isDirty())
+                .map((order) => order.uuid)
+        );
+        for (const order of this.models["pos.order"].filter((order) => order.isUnsyncedPaid)) {
+            pendingOrderUuids.add(order.uuid);
+        }
+        return (
+            pendingOrderUuids.size +
+            this.pendingOrder["delete"].size +
+            this.data.network.unsyncData.length
+        );
+    }
+
     shouldCreatePendingOrder(order) {
         return (
             order.lines.length > 0 ||
