@@ -160,7 +160,10 @@ class HrVersion(models.Model):
         'resource.calendar', required=True, default=lambda self: self.env.company.resource_calendar_id, inverse='_inverse_resource_calendar_id', string="Working Hours", index='btree_not_null', tracking=1,
         domain="['|', ('company_id', '=', False), ('company_id.id', 'parent_of', company_id)]")
     tz = fields.Selection(_tz_get, string='Timezone', required=True, default=lambda self: self.env.context.get('tz') or self.env.user.tz or 'UTC')
-
+    # Education
+    certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level',
+                                   groups="hr.group_hr_user", tracking=True)
+    study_field = fields.Char("Field of Study", groups="hr.group_hr_user", tracking=True)
     # Contract Information
     contract_date_start = fields.Date('Contract Start Date', tracking=1, groups="hr.group_hr_user")
     contract_date_end = fields.Date(
@@ -468,6 +471,16 @@ class HrVersion(models.Model):
         # Add here any field that you want to copy from a contract template
         # Those fields should have tracking=1 in hr.version to see the change
         return ['job_id', 'department_id', 'employee_type_id', 'structure_type_id', 'wage', 'resource_calendar_id', 'reference_calendar_id', 'hr_responsible_id']
+
+    @api.model
+    def _get_certificate_selection(self):
+        return [
+            ('graduate', self.env._('Graduate')),
+            ('bachelor', self.env._('Bachelor')),
+            ('master', self.env._('Master')),
+            ('doctor', self.env._('Doctor')),
+            ('other', self.env._('Other')),
+        ]
 
     def get_values_from_contract_template(self, contract_template_id):
         if not contract_template_id:
