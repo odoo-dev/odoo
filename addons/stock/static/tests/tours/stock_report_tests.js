@@ -18,6 +18,17 @@ import { registry } from "@web/core/registry";
     {
         trigger: '.btn[id="stock.view_diagram_button"]',
         run: "click",
+        pause: true
+    },
+    {
+        isActive: ['body:has(.btn[name="print_report"])'],
+        trigger: '.btn[name="print_report"]',
+        run: "click",
+    },
+    {
+        isActive: ['body:has(.btn[name="document_layout_save"]'],
+        trigger: '.btn[name="document_layout_save"]',
+        run: "click",
     },
     {
         trigger: ':iframe .o_report_stock_rule',
