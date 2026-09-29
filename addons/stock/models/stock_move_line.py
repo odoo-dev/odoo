@@ -92,6 +92,10 @@ class StockMoveLine(models.Model):
     quant_id = fields.Many2one('stock.quant', "Pick From", store=False)  # Dummy field for the detailed operation view
     picking_location_id = fields.Many2one(related='picking_id.location_id')
     picking_location_dest_id = fields.Many2one(related='picking_id.location_dest_id')
+    package_weight = fields.Float(compute='_compute_package_weight')
+    package_max_weight = fields.Float(related='result_package_id.outermost_package_id.package_type_id.max_weight', string="Package Max Weight")
+    package_base_weight = fields.Float(related='result_package_id.outermost_package_id.package_type_id.base_weight', string="Package Base Weight")
+    product_weight = fields.Float(related='product_id.weight', string="Product Weight")
 
     _free_reservation_index = models.Index("""(id, company_id, product_id, lot_id, location_id, owner_id, package_id)
         WHERE (state IS NULL OR state NOT IN ('cancel', 'done')) AND quantity_product_uom > 0 AND picked IS NOT TRUE""")
@@ -172,6 +176,17 @@ class StockMoveLine(models.Model):
         for line in self:
             line.quantity_product_uom = line.uom_id._compute_quantity(line.quantity, line.product_id.uom_id, rounding_method='HALF-UP')
 
+    @api.depends('result_package_id')
+    def _compute_package_weight(self):
+        self.package_weight = 0.0
+        for line in self:
+            if not (package := line.result_package_id.outermost_package_id):
+                continue
+            weight = package.with_context(picking_ids=line.picking_id.ids).weight
+            if line.picking_code == 'incoming' and package.contained_quant_ids:
+                weight += package.weight - (package.package_type_id.base_weight or 0)
+            line.package_weight = weight
+
     @api.constrains('lot_id', 'product_id')
     def _check_lot_product(self):
         for line in self:
@@ -186,6 +201,23 @@ class StockMoveLine(models.Model):
     def _check_positive_quantity(self):
         if any(ml.quantity < 0 for ml in self):
             raise ValidationError(_('You can not enter negative quantities.'))
+
+    @api.onchange('result_package_id', 'quantity', 'uom_id')
+    def _onchange_result_package_id(self):
+        package = self.result_package_id
+        if not package or not self.product_weight or not self.package_max_weight or self.move_id != self.move_id._origin:
+            return
+        updated_contribution = self.quantity_product_uom * self.product_weight
+        exiting_weight = package.with_context(picking_ids=False).weight
+        if exiting_weight + updated_contribution > self.package_max_weight + self.package_base_weight:
+            return {
+                'warning': {
+                    'title': self.env._("Package Too Heavy!"),
+                    'message': self.env._(
+                        "The weight of your package is higher than the maximum weight authorized for its package type. Please choose another package."
+                    ),
+                }
+            }
 
     @api.onchange('product_id', 'uom_id')
     def _onchange_product_id(self):
