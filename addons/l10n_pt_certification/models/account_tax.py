@@ -16,36 +16,47 @@ L10N_PT_TAX_CATEGORIES_SELECTION = [
 ]
 
 # https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/Faturacao/Fatcorews/Documents/Tabela_Codigos_Motivo_Isencao.pdf
+# AT Official Exemption Reasons Table (Versão 4.0)
+# Mapping: code -> (invoice_mention <= 60 chars, legal_basis)
+L10N_PT_TAX_EXEMPTIONS = {
+    "M01": ("Artigo 16.º, n.º 6, do CIVA", "Artigo 16.º, n.º 6, alíneas a) a d), do CIVA"),
+    "M02": ("Artigo 6.º do Decreto-Lei n.º 198/90", "Artigo 6.º do Decreto-Lei n.º 198/90, de 19 de junho"),
+    "M04": ("Isento Artigo 13.º do CIVA", "Artigo 13.º do CIVA"),
+    "M05": ("Isento Artigo 14.º do CIVA", "Artigo 14.º do CIVA"),
+    "M06": ("Isento Artigo 15.º do CIVA", "Artigo 15.º do CIVA"),
+    "M07": ("Isento Artigo 9.º do CIVA", "Artigo 9.º do CIVA"),
+    "M09": ("IVA – não confere direito a dedução", "Artigo 62.º, alínea b), do CIVA"),
+    "M10": ("IVA – regime de isenção", "Artigo 53.º, n.º 1, do CIVA"),
+    "M11": ("Regime particular do tabaco", "Decreto-Lei n.º 346/85, de 23 de agosto"),
+    "M12": ("Regime da margem de lucro – Agências de viagens", "Decreto-Lei n.º 221/85, de 3 de julho"),
+    "M13": ("Regime da margem de lucro – Bens em segunda mão", "Decreto-Lei n.º 199/96, de 18 de outubro"),
+    "M14": ("Regime da margem de lucro – Objetos de arte", "Decreto-Lei n.º 199/96, de 18 de outubro"),
+    "M15": ("Regime margem lucro – Objetos de coleção/antiguidades", "Decreto-Lei n.º 199/96, de 18 de outubro"),
+    "M16": ("Isento Artigo 14.º do RITI", "Artigo 14.º do RITI"),
+    "M19": ("Outras isenções", "Outras isenções temporárias determinadas por legislação avulsa"),
+    "M20": ("IVA – regime forfetário", "Artigo 59.º-D, n.º 2, do CIVA"),
+    "M21": ("IVA – não confere direito a dedução", "Artigo 72.º, n.º 4, do CIVA"),
+    "M25": ("Mercadorias à consignação", "Artigo 38.º, n.º 1, alínea a), do CIVA"),
+    "M26": ("Isenção de IVA com dedução no cabaz alimentar", "Lei n.º 17/2023, de 14 de abril"),
+    "M30": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea i), do CIVA"),
+    "M31": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea j), do CIVA"),
+    "M32": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea l), do CIVA"),
+    "M33": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea m), do CIVA"),
+    "M34": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea n), do CIVA"),
+    "M35": ("IVA – autoliquidação", "Artigo 2.º, n.º 1, alínea j), do CIVA – Verba 2.42 Lista I"),
+    "M40": ("IVA – autoliquidação", "Artigo 6.º, n.º 6, alínea a), do CIVA"),
+    "M41": ("IVA – autoliquidação", "Artigo 8.º, n.º 3, do RITI"),
+    "M42": ("IVA – autoliquidação", "Decreto-Lei n.º 21/2007, de 29 de janeiro"),
+    "M43": ("IVA – autoliquidação", "Decreto-Lei n.º 362/99, de 16 de setembro"),
+    "M44": ("IVA – Regras específicas – artigo 6.º", "Artigo 6.º, n.ºs 7 a 13, do CIVA"),
+    "M45": ("IVA – regime transfronteiriço de isenção", "Artigo 58.º-A do CIVA"),
+    "M46": ("IVA – e-TaxFree", "Decreto-Lei n.º 19/2017, de 14 de fevereiro"),
+    "M99": ("Não sujeito ou não tributado", "Outras situações de não liquidação do imposto"),
+}
+
 L10N_PT_TAX_EXEMPTION_REASONS_SELECTION = [
-    ("M01", "M01 - Artigo 16.º, n.º 6 do CIVA ou similar"),
-    ("M02", "M02 - Artigo 6.º do Decreto-Lei n.º 198/90, de 19 de Junho"),
-    ("M03", "M03 - Exigibilidade de caixa (revogado)"),
-    ("M04", "M04 - Artigo 13.º do CIVA ou similar"),
-    ("M05", "M05 - Artigo 14.º do CIVA ou similar"),
-    ("M06", "M06 - Artigo 15.º do CIVA ou similar"),
-    ("M07", "M07 - Artigo 9.º do CIVA ou similar"),
-    ("M08", "M08 - IVA - autoliquidação (revogado)"),
-    ("M09", "M09 - IVA - não confere direito a dedução"),
-    ("M10", "M10 - IVA - Regime de isenção (Artigo 57.º do CIVA)"),
-    ("M11", "M11 - Regime particular do tabaco"),
-    ("M12", "M12 - Regime da margem de lucro - Agências de viagens"),
-    ("M13", "M13 - Regime da margem de lucro - Bens em segunda mão"),
-    ("M14", "M14 - Regime da margem de lucro - Objetos de arte"),
-    ("M15", "M15 - Regime da margem de lucro - Objetos de coleção e antiguidades"),
-    ("M16", "M16 - Artigo 14.º do RITI ou similar"),
-    ("M19", "M19 - Outras isenções"),
-    ("M20", "M20 - IVA - regime forfetário"),
-    ("M21", "M21 - IVA – não confere direito à dedução"),
-    ("M25", "M25 - Mercadorias à consignação"),
-    ("M30", "M30 - IVA - autoliquidação (2.1.i)"),
-    ("M31", "M31 - IVA - autoliquidação (2.1.j)"),
-    ("M32", "M32 - IVA - autoliquidação (2.1.l)"),
-    ("M33", "M33 - IVA - autoliquidação (2.1.m)"),
-    ("M40", "M40 - IVA - autoliquidação (6.6.a)"),
-    ("M41", "M41 - IVA - autoliquidação (8.3.R)"),
-    ("M42", "M42 - IVA - autoliquidação (21.2007)"),
-    ("M43", "M43 - IVA - autoliquidação (362.99)"),
-    ("M99", "M99 - Não sujeito; não tributado ou similar"),
+    (code, f"{code} - {mention} ({legal})")
+    for code, (mention, legal) in L10N_PT_TAX_EXEMPTIONS.items()
 ]
 
 
