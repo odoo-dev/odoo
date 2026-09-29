@@ -47,6 +47,11 @@ export function useInputField(params) {
     let pendingUpdate = false;
 
     /**
+     * The record the input was last synchronised with.
+     */
+    let lastRecord = null;
+
+    /**
      * When a user types, we need to set the field as dirty.
      */
     function onInput(ev) {
@@ -126,6 +131,8 @@ export function useInputField(params) {
      * If the user was typing a new value (isDirty) or the field is still invalid,
      * we need to do nothing.
      * If it is not such a case, we update the field with the new value.
+     * If the record itself changed (e.g. pager navigation), the input is
+     * always refreshed.
      */
     useEffect(() => {
         // We need to call getValue before the condition to always observe
@@ -135,10 +142,16 @@ export function useInputField(params) {
         if (!inputRef.el) {
             return;
         }
-        if (inputRef.el.value === value) {
+        const record = component.props.record;
+        // The component (and its <input>) is reused when paging to another
+        // record, so a leftover value or invalid state of the previous record
+        // must not prevent the input from being refreshed.
+        const recordChanged = lastRecord !== record;
+        lastRecord = record;
+        if (recordChanged || inputRef.el.value === value) {
             isDirty = false;
         }
-        if (!isDirty && !component.props.record.isFieldInvalid(fieldName)) {
+        if (recordChanged || (!isDirty && !record.isFieldInvalid(fieldName))) {
             inputRef.el.value = value;
             lastSetValue = inputRef.el.value;
         }
