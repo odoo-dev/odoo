@@ -6,8 +6,12 @@ import { debounce } from "@web/core/utils/timing";
 import IndexedDB from "../models/utils/indexed_db";
 import { DataServiceOptions } from "../models/data_service_options";
 import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
+import { browser } from "@web/core/browser/browser";
+import { X2MANY_TYPES } from "../models/related_models/utils";
 import { ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { deserializeDateTime } from "@web/core/l10n/dates";
@@ -27,14 +31,21 @@ export class PosDataPlugin extends Plugin {
     debugMode = usePlugin(DebugModePlugin);
     bus = usePlugin(BusPlugin);
     orm = usePlugin(ORM);
+    dialog = usePlugin(DialogPlugin);
     syncInProgress = signal(false);
     dataLoadedFromCache = signal(false);
     localUnsyncedPaidOrderUuids = signal.Set(new Set()); // UUIDs of paid orders written to IndexedDB but not yet confirmed synced to the server.
+    reportedOrphanKeys = new Set(); // IndexedDB keys of kept orphan records, reported once
     network = proxy({
         warningTriggered: false,
         offline: false,
         loading: true,
         unsyncData: [],
+        storage: {
+            persistent: false,
+            writeFailed: false,
+            failureDialogShown: false,
+        },
     });
 
     setup() {
@@ -147,10 +158,17 @@ export class PosDataPlugin extends Plugin {
         return await this.indexedDB.delete(model, ids);
     }
 
+    getIndexedDBKey(record) {
+        const modelName = record.model?.name;
+        const key = (modelName && this.opts.databaseTable[modelName]?.key) || "id";
+        return record[key];
+    }
+
     async initIndexedDB(relations) {
         // This method initializes indexedDB with all models loaded into the PoS. The default key is ID.
         // But some models have another key configured in data_service_options.js. These models are
         // generally those that can be created in the frontend.
+        this.indexedDB?.close?.();
         const allModelNames = Array.from(
             new Set([...Object.keys(relations), ...Object.keys(this.opts.databaseTable)])
         );
@@ -166,6 +184,114 @@ export class PosDataPlugin extends Plugin {
 
         return new Promise((resolve) => {
             this.indexedDB = new IndexedDB(this.databaseName, false, models, resolve, this.dialog);
+            this.indexedDB.durableStores = new Set(Object.keys(this.opts.databaseTable));
+        });
+    }
+
+    async initStoragePersistence() {
+        if (!browser.navigator.storage) {
+            logPosMessage(
+                "DataService",
+                "initStoragePersistence",
+                "navigator.storage is unavailable: local data may be evicted without warning.",
+                CONSOLE_COLOR,
+                [],
+                true
+            );
+            return;
+        }
+
+        try {
+            if (browser.navigator.storage.persisted && browser.navigator.storage.persist) {
+                this.network.storage.persistent =
+                    (await browser.navigator.storage.persisted()) ||
+                    (await browser.navigator.storage.persist());
+
+                if (!this.network.storage.persistent) {
+                    logPosMessage(
+                        "DataService",
+                        "initStoragePersistence",
+                        "Persistent storage was denied: the browser may evict unsynced orders.",
+                        CONSOLE_COLOR,
+                        [],
+                        true
+                    );
+                }
+            }
+        } catch (error) {
+            logPosMessage(
+                "DataService",
+                "initStoragePersistence",
+                `Could not request persistent storage: ${error.message}`,
+                CONSOLE_COLOR
+            );
+        }
+    }
+
+    handleLocalPersistenceFailure(models) {
+        this.network.storage.writeFailed = true;
+
+        logPosMessage(
+            "DataService",
+            "handleLocalPersistenceFailure",
+            `Failed to persist local data for: ${models.join(", ")}: records only exist in memory`,
+            CONSOLE_COLOR,
+            [],
+            true
+        );
+
+        if (this.network.storage.failureDialogShown) {
+            return;
+        }
+        this.network.storage.failureDialogShown = true;
+        this.dialog?.add(AlertDialog, {
+            title: _t("Orders Could Not Be Saved Locally"),
+            body: _t(
+                "Some orders could not be saved on this device and only exist in this browser tab. Do not reload or close this page before they have been synced."
+            ),
+        });
+    }
+
+    /**
+     * Write the given orders and their records to IndexedDB, without the full pass of
+     * synchronizeLocalDataInIndexedDB (every local record written, then pruning): its cost
+     * grows with the number of open orders.
+     */
+    async persistOrdersInIndexedDB(orders) {
+        return this.indexedDBMutex.exec(async () => {
+            // Follow the x2many relations between stored models: lines, payments,
+            // preparation orders and their lines, custom attribute values...
+            const recordsByModel = {};
+            const visited = new Set();
+            const toVisit = [...orders];
+            while (toVisit.length) {
+                const record = toVisit.pop();
+                if (visited.has(record)) {
+                    continue;
+                }
+                visited.add(record);
+                const model = record.model.name;
+                (recordsByModel[model] ??= []).push(record);
+                for (const rel of Object.values(this.relations[model] || {})) {
+                    if (X2MANY_TYPES.has(rel.type) && this.opts.databaseTable[rel.relation]) {
+                        toVisit.push(...(record[rel.name] || []));
+                    }
+                }
+            }
+
+            const writeFailures = [];
+            for (const [model, records] of Object.entries(recordsByModel)) {
+                const result = await this.indexedDB.create(
+                    model,
+                    records.map((record) => record.serializeForIndexedDB())
+                );
+                if (result?.ok === false) {
+                    writeFailures.push(model);
+                }
+            }
+            if (writeFailures.length) {
+                this.handleLocalPersistenceFailure(writeFailures);
+            }
         });
     }
 
@@ -184,24 +310,26 @@ export class PosDataPlugin extends Plugin {
         const modelsParams = Object.entries(this.opts.databaseTable);
         const data = {};
         const dataToKeep = {};
+        const writeFailures = [];
         let orderlinesToKeep = [];
 
         for (const [model, params] of modelsParams) {
             if (!params.getRecordsBasedOnLines) {
-                const data = this.models[model].getAll();
-                const recordsToPut = data.filter((record) => !params.condition(record));
+                const allRecords = this.models[model].getAll();
+                const recordsToPut = allRecords.filter((record) => !params.condition(record));
 
                 if (model === "pos.order.line") {
                     orderlinesToKeep = recordsToPut;
                 }
 
-                data[model] = recordsToPut;
+                const serializedRecords = recordsToPut.map((r) => r.serializeForIndexedDB());
+                data[model] = serializedRecords;
 
                 if (recordsToPut.length) {
-                    await this.indexedDB.create(
-                        model,
-                        recordsToPut.map((r) => r.serializeForIndexedDB())
-                    );
+                    const result = await this.indexedDB.create(model, serializedRecords);
+                    if (result?.ok === false) {
+                        writeFailures.push(model);
+                    }
                     dataToKeep[model] = recordsToPut.map((r) => r[params.key]);
                 }
             }
@@ -216,34 +344,65 @@ export class PosDataPlugin extends Plugin {
                         ...new Map(recordsToPut.map((r) => [r[params.key], r])).values(),
                     ];
 
-                    data[model] = uniqueRecords;
+                    const serializedRecords = uniqueRecords.map((r) => r.serializeForIndexedDB());
+                    data[model] = serializedRecords;
 
-                    await this.indexedDB.create(
-                        model,
-                        uniqueRecords.map((r) => r.serializeForIndexedDB())
-                    );
+                    const result = await this.indexedDB.create(model, serializedRecords);
+                    if (result?.ok === false) {
+                        writeFailures.push(model);
+                    }
                     dataToKeep[model] = uniqueRecords.map((r) => r[params.key]);
                 }
             }
         }
 
-        this.indexedDB.readAll(Object.keys(this.opts.databaseTable)).then((data) => {
-            if (!data) {
-                return;
-            }
+        if (writeFailures.length) {
+            this.handleLocalPersistenceFailure(writeFailures);
+            return data;
+        }
+        this.network.storage.writeFailed = false;
 
-            for (const [model, records] of Object.entries(data)) {
+        const idbData = await this.indexedDB.readAll(Object.keys(this.opts.databaseTable));
+        if (idbData) {
+            for (const [model, records] of Object.entries(idbData)) {
                 const key = this.opts.databaseTable[model].key;
                 const keysToDelete = [];
+                const orphanedLocalKeys = [];
 
                 for (const record of records) {
                     const localRecord = this.models[model].get(record.id);
                     if (!localRecord) {
-                        keysToDelete.push(record[key]);
+                        if (typeof record.id !== "number") {
+                            orphanedLocalKeys.push(record[key]);
+                        } else {
+                            keysToDelete.push(record[key]);
+                        }
                         continue;
                     }
                     if (!dataToKeep[model] || !dataToKeep[model].includes(record[key])) {
                         keysToDelete.push(record[key]);
+                    }
+                }
+
+                // This pass runs after every change: report each kept record once
+                const newOrphanKeys = orphanedLocalKeys.filter(
+                    (orphanKey) => !this.reportedOrphanKeys.has(orphanKey)
+                );
+                if (newOrphanKeys.length) {
+                    logPosMessage(
+                        "IndexedDB",
+                        "orphanedLocalRecords",
+                        `Kept ${
+                            newOrphanKeys.length
+                        } unsynced ${model} record(s) that could not be loaded in memory: ${newOrphanKeys.join(
+                            ", "
+                        )}`,
+                        CONSOLE_COLOR,
+                        [],
+                        true
+                    );
+                    for (const orphanKey of newOrphanKeys) {
+                        this.reportedOrphanKeys.add(orphanKey);
                     }
                 }
 
@@ -282,35 +441,30 @@ export class PosDataPlugin extends Plugin {
                 }
 
                 if (keysToDelete.length) {
-                    this.indexedDB.delete(model, keysToDelete);
+                    await this.indexedDB.delete(model, keysToDelete);
                 }
             }
-        });
+        }
 
         return data;
     }
 
     async synchronizeServerDataInIndexedDB(serverData = {}) {
-        try {
-            for (const [model, data] of Object.entries(serverData)) {
-                try {
-                    await this.indexedDB.create(model, data);
-                } catch {
-                    logPosMessage(
-                        "DataService",
-                        "synchronizeServerDataInIndexedDB",
-                        `Error while updating ${model} in indexedDB.`,
-                        CONSOLE_COLOR
-                    );
-                }
+        for (const [model, data] of Object.entries(serverData)) {
+            const result = await this.indexedDB.create(model, data);
+            if (result?.ok === false) {
+                const reasons = result.failures
+                    ?.map((f) => f.reason?.message || String(f.reason))
+                    .join("; ");
+                logPosMessage(
+                    "DataService",
+                    "synchronizeServerDataInIndexedDB",
+                    `Error while updating ${model} in indexedDB: ${reasons}`,
+                    CONSOLE_COLOR,
+                    [],
+                    true
+                );
             }
-        } catch {
-            logPosMessage(
-                "DataService",
-                "synchronizeServerDataInIndexedDB",
-                "Error while synchronizing server data in indexedDB.",
-                CONSOLE_COLOR
-            );
         }
     }
 
@@ -334,6 +488,23 @@ export class PosDataPlugin extends Plugin {
         const databaseProductIds = missing["product.product"]?.map((p) => p.id) ?? [];
         const loadedProductIds = new Set([...databaseProductIds, ...serverProductIds]);
         if (missing["pos.order.line"]) {
+            const droppedLines = missing["pos.order.line"].filter(
+                (line) => !loadedProductIds.has(line.product_id)
+            );
+            if (droppedLines.length) {
+                logPosMessage(
+                    "DataService",
+                    "getLocalDataFromIndexedDB",
+                    `Could not load ${
+                        droppedLines.length
+                    } order line(s): product no longer available. Affected lines: ${droppedLines
+                        .map((line) => `${line.uuid} (product ${line.product_id})`)
+                        .join(", ")}`,
+                    CONSOLE_COLOR,
+                    [],
+                    true
+                );
+            }
             missing["pos.order.line"] = missing["pos.order.line"].filter((line) =>
                 loadedProductIds.has(line.product_id)
             );
@@ -1144,9 +1315,9 @@ export class PosDataPlugin extends Plugin {
         const recordsToDelete = relationsToDelete.flatMap((relation) => record[relation] || []);
 
         // Delete all children records before main record
-        this.deleteRecordsInIndexedDB(recordModel, [record.uuid]);
+        this.deleteRecordsInIndexedDB(recordModel, [this.getIndexedDBKey(record)]);
         for (const item of recordsToDelete) {
-            this.deleteRecordsInIndexedDB(item.model.name, [item.uuid]);
+            this.deleteRecordsInIndexedDB(item.model.name, [this.getIndexedDBKey(item)]);
             item.delete({ silent: !removeFromServer });
         }
 

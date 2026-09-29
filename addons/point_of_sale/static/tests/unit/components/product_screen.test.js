@@ -5,6 +5,7 @@ import {
     pointerUp,
     queryAll,
     queryOne,
+    waitUntil,
 } from "@odoo/hoot-dom";
 import { advanceTime, animationFrame } from "@odoo/hoot-mock";
 import {
@@ -64,6 +65,8 @@ test("fastValidate", async () => {
     expect(productScreen.items).toBe("1");
 
     await productScreen.fastValidate(fastPaymentMethod);
+    // The validation ends behind the feedback screen
+    await waitUntil(() => order.isSynced);
 
     expect(order.payment_ids[0].payment_method_id).toEqual(fastPaymentMethod);
     expect(order.state).toBe("paid");

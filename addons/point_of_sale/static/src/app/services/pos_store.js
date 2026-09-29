@@ -167,6 +167,8 @@ export class PosStore extends WithLazyGetterTrap {
 
         this.syncingOrders = new Set();
         await this.initServerData();
+        // Not awaited: Firefox asks the user, the POS must not wait for the answer to start
+        this.data.initStoragePersistence();
 
         this.closeOtherTabs();
         this.syncAllOrdersDebounced = debounce(this.syncAllOrders, 100);

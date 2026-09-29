@@ -10,8 +10,8 @@ import { patch } from "@web/core/utils/patch";
 patch(PosDataPlugin.prototype, {
     setup() {
         this.indexedDB = {
-            delete: async () => ({}),
-            create: async () => ({}),
+            delete: async () => ({ ok: true, failures: [] }),
+            create: async () => ({ ok: true, failures: [] }),
             reset: async () => ({}),
             readAll: async () => ({}),
             readAllExceptStores: async () => ({}),
@@ -20,6 +20,9 @@ patch(PosDataPlugin.prototype, {
         return super.setup(...arguments);
     },
     initIndexedDB() {
+        return true;
+    },
+    initStoragePersistence() {
         return true;
     },
     initListeners() {
