@@ -263,3 +263,10 @@ class TestL10nPtStockMiscRequirements(TestL10nPtStockCommon):
 
         with self.assertRaisesRegex(UserError, "You cannot modify the name of a product that has been used in"):
             product.name = "Product A3"
+
+    def test_l10n_pt_stock_at_doc_code(self):
+        """Test AT Document Code (ATDocCodeID) on stock picking."""
+        picking = self.create_picking(self.picking_type_out, validate=True)
+        self.assertFalse(picking.l10n_pt_at_doc_code)
+        picking.l10n_pt_at_doc_code = "ATDOC123456"
+        self.assertEqual(picking.l10n_pt_at_doc_code, "ATDOC123456")

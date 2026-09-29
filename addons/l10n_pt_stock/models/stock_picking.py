@@ -67,6 +67,11 @@ class StockPicking(models.Model):
         tracking=True,
         help="Date and time of start of transport",
     )
+    l10n_pt_at_doc_code = fields.Char(
+        string="AT Document Code",
+        copy=False,
+        help="Official code returned by the Tax Authority upon communication of the transport document (ATDocCodeID).",
+    )
     l10n_pt_show_no_at_series_warning = fields.Boolean(compute='_compute_l10n_pt_show_no_at_series_warning')
 
     ####################################
