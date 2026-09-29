@@ -832,7 +832,8 @@ class PosOrder(models.Model):
             record.message_post(body=_('Point of Sale Order cancelled'), author_id=author_id)
 
     def cancel_order_from_pos(self):
-        draft_orders = self.filtered(lambda o: o.state == 'draft')
+        # The POS resends queued cancellations: skip orders deleted in the meantime
+        draft_orders = self.exists().filtered(lambda o: o.state == 'draft')
         today = fields.Date.context_today(self)
         if self.env.context.get('active_ids'):
             orders = self.browse(self.env.context.get('active_ids'))
@@ -842,15 +843,17 @@ class PosOrder(models.Model):
             if not draft_orders:
                 raise UserError(_('This order has already been paid. You cannot set it back to draft or edit it.'))
 
-        if draft_orders:
-            draft_orders.write({'state': 'cancel', 'date_order': fields.Datetime.now()})
-            author_id = self.session_id._get_message_author().id
-            draft_orders._post_cancel_message(author_id=author_id)
-            for config in draft_orders.mapped('config_id'):
-                config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
+        if not draft_orders:
+            return {'pos.order': []}
+
+        draft_orders.write({'state': 'cancel', 'date_order': fields.Datetime.now()})
+        author_id = draft_orders.session_id._get_message_author().id
+        draft_orders._post_cancel_message(author_id=author_id)
+        for config in draft_orders.mapped('config_id'):
+            config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
 
         return {
-            'pos.order': self._load_pos_data_read(draft_orders, self.config_id),
+            'pos.order': self._load_pos_data_read(draft_orders, draft_orders.config_id),
         }
 
     def action_pos_order_cancel(self):

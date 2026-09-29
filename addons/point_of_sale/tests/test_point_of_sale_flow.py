@@ -724,6 +724,26 @@ class TestPointOfSaleFlow(CommonPosTest):
         order.cancel_order_from_pos()
         self.assertEqual(order.state, 'cancel')
 
+    def test_cancel_order_from_pos_resent(self):
+        """The POS resends queued cancellations: orders already cancelled or deleted are skipped"""
+        order, _ = self.create_backend_pos_order({
+            'line_data': [{'product_id': self.ten_dollars_no_tax.product_variant_id.id}],
+        })
+        deleted_order, _ = self.create_backend_pos_order({
+            'line_data': [{'product_id': self.ten_dollars_no_tax.product_variant_id.id}],
+        })
+        deleted_order_id = deleted_order.id
+        deleted_order.unlink()
+
+        orders = self.env['pos.order'].browse([order.id, deleted_order_id])
+        orders.cancel_order_from_pos()
+        self.assertEqual(order.state, 'cancel')
+        orders.cancel_order_from_pos()
+        self.assertEqual(order.state, 'cancel')
+
+        result = self.env['pos.order'].browse(deleted_order_id).cancel_order_from_pos()
+        self.assertEqual(result, {'pos.order': []})
+
     def _create_and_invoice_order(self):
         current_session = self.pos_config_usd.current_session_id
         order = self.env["pos.order"].create({

@@ -4,6 +4,8 @@ import { toRaw } from "@odoo/owl";
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 import { getTimeUtil } from "@point_of_sale/utils";
 
+const DIRTY_STATE_PROP = "_recordDirty";
+
 function rawValueConverter(value) {
     if (value instanceof Set) {
         return Array.from(value);
@@ -57,10 +59,14 @@ export class Base extends WithLazyGetterTrap {
      */
     restoreState(uiState) {
         this.initState();
+        const { [DIRTY_STATE_PROP]: wasDirty, ...restoredUiState } = uiState;
         this.uiState = {
             ...this.uiState,
-            ...uiState,
+            ...restoredUiState,
         };
+        if (wasDirty) {
+            this._dirty = true;
+        }
     }
 
     isDirty() {
@@ -101,7 +107,7 @@ export class Base extends WithLazyGetterTrap {
         if (!this.uiState) {
             return;
         }
-        return { ...this.uiState };
+        return { ...this.uiState, [DIRTY_STATE_PROP]: Boolean(this._dirty) };
     }
 
     backLink(link) {
