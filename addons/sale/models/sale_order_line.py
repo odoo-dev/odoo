@@ -2366,3 +2366,14 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
         invoice_line.ensure_one()
         return True
+
+    def copy(self, default=None):
+        """Override copy to ensure order_id is preserved when duplicating lines.
+        """
+        self.ensure_one()
+        if default is None:
+            default = {}
+        else:
+            default = default.copy()
+        default['order_id'] = self.order_id.id
+        return super().copy(default)
