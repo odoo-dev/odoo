@@ -243,7 +243,7 @@ class TestChannelInternals(MailCommon, HttpCase):
 
         channel.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertEqual(channel.message_partner_ids, self.env['res.partner'])
-        self.assertEqual(channel.channel_partner_ids, self.env['res.partner'])
+        self.assertEqual(channel.channel_partner_ids, self.env.user.partner_id)
 
     @users('employee')
     @mute_logger('odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
