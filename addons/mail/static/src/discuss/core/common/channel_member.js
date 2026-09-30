@@ -22,6 +22,8 @@ export class ChannelMember extends Component {
     static template = "discuss.ChannelMember";
 
     displayNameRef = signal.ref();
+    isActionsHovered = signal(false, { type: t.boolean() });
+    isEllipsisFocusVisible = signal(false, { type: t.boolean() });
 
     setup() {
         super.setup();
@@ -45,7 +47,18 @@ export class ChannelMember extends Component {
         return {
             "cursor-pointer": this.isClickable(this.member()),
             "o-offline": this.member().imStatusUI === "offline",
+            "o-actionsHovered": this.isActionsHovered(),
+            "o-ellipsisActive":
+                this.isActionsHovered() ||
+                this.isEllipsisFocusVisible() ||
+                this.showingActions.isOpen,
         };
+    }
+
+    /** @param {FocusEvent|KeyboardEvent} ev */
+    updateEllipsisFocusVisible(ev) {
+        // A key press can make an already focused button `:focus-visible`.
+        this.isEllipsisFocusVisible.set(ev.target.matches(":focus-visible"));
     }
 
     /** @param {import("models").ChannelMember} member */

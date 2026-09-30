@@ -22,9 +22,12 @@
             <div t-if="this.actions.actions.length" class="o-discuss-ChannelMember-actions" t-att-class="{
                 'd-none': !this.showingActions.isOpen and !this.store.useMobileView,
                 'd-flex': this.showingActions.isOpen or this.store.useMobileView,
-            }">
+            }" t-on-pointerenter="() => this.isActionsHovered.set(true)" t-on-pointerleave="() => this.isActionsHovered.set(false)">
                 <Dropdown state="this.showingActions" position="'bottom-end'" menuClass="'my-1 ' + this.store.discussDropdownMenuClass(this)">
-                    <button class="btn o-discuss-ellipsisButton ms-1 o-mail-DiscussApp-sidebarBgColor" title="Member Actions"/>
+                    <button class="btn o-discuss-ellipsisButton ms-1 o-mail-DiscussApp-sidebarBgColor" title="Member Actions"
+                        t-on-focus="this.updateEllipsisFocusVisible"
+                        t-on-keyup="this.updateEllipsisFocusVisible"
+                        t-on-blur="() => this.isEllipsisFocusVisible.set(false)"/>
                     <t t-set-slot="content">
                         <ActionList actions="this.actions.actionsComputed" dropdown="true"/>
                     </t>
