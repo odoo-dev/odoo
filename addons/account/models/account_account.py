@@ -631,8 +631,8 @@ class AccountAccount(models.Model):
         # We want to group accounts by company to only search for account codes of the current company
         for account in all_accounts:
             accounts_with_codes[account['code']] = account[field_name]
+        codes_list = list(accounts_with_codes.keys())
         for account in accounts_to_process:
-            codes_list = list(accounts_with_codes.keys())
             closest_index = bisect_left(codes_list, account.code) - 1
             account[field_name] = accounts_with_codes[codes_list[closest_index]] if closest_index != -1 else default_value
 

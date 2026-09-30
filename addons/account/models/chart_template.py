@@ -570,6 +570,13 @@ class AccountChartTemplate(models.AbstractModel):
                      of accounts. It is a mapping {model: {xml_id: values}}.
         :type data: dict[str, dict[(str, int), dict]]
         """
+        ref_ids = {}
+
+        def ref_id(xmlid):
+            if xmlid not in ref_ids:
+                ref_ids[xmlid] = self.ref(xmlid).id
+            return ref_ids[xmlid]
+
         def deref_values(values, model):
             """Replace xml_id references by database ids in all provided values.
 
@@ -585,7 +592,7 @@ class AccountChartTemplate(models.AbstractModel):
                     or (field.type in ('integer', 'many2one_reference') and not value.isdigit())
                 ):
                     try:
-                        values[fname] = self.ref(value).id if value not in ('', 'False', 'None') else False
+                        values[fname] = ref_id(value) if value not in ('', 'False', 'None') else False
                     except ValueError:
                         if model._name == 'res.company':
                             # Try a fallback on the company when reloading/loading on a branch
@@ -605,12 +612,12 @@ class AccountChartTemplate(models.AbstractModel):
                         elif command == Command.SET:
                             for subvalue_idx, subvalue in enumerate(last_part):
                                 if isinstance(subvalue, str):
-                                    last_part[subvalue_idx] = self.ref(subvalue).id
+                                    last_part[subvalue_idx] = ref_id(subvalue)
                         elif command == Command.LINK and isinstance(_id, str):
-                            value[i] = Command.link(self.ref(_id).id)
+                            value[i] = Command.link(ref_id(_id))
                 elif field.type in ('one2many', 'many2many') and isinstance(value, str):
                     values[fname] = [Command.set([
-                        self.ref(v).id
+                        ref_id(v)
                         for v in value.split(',')
                         if v
                     ])]
@@ -671,7 +678,20 @@ class AccountChartTemplate(models.AbstractModel):
                 created_models.add(model)
 
         created_records = {}
+        root_company = self.env.company.parent_ids[0]
         for model, model_data in delay(list(deepcopy(data).items())):
+            candidate_xmlids = {
+                xml_id: (self.company_xmlid(xml_id), self.company_xmlid(xml_id, root_company))
+                for xml_id in model_data
+                if isinstance(xml_id, str)
+            }
+            existing_ids = {
+                f'{module}.{name}': record_id
+                for _id, module, name, res_model, _res_id, _noupdate, record_id in self.env['ir.model.data']._lookup_xmlids(
+                    {xmlid for xmlids in candidate_xmlids.values() for xmlid in xmlids}, self.env[model],
+                )
+                if record_id and res_model == model
+            }
             all_records_vals = []
             for xml_id, record_vals in model_data.items():
                 # Extract the translations from the values
@@ -680,8 +700,10 @@ class AccountChartTemplate(models.AbstractModel):
                         del record_vals[key]
 
                 # Manage ids given as database id or xml_id
-                if isinstance(xml_id, str) and (record := self.ref(xml_id, raise_if_not_found=False)):
-                    xml_id = record.id
+                if isinstance(xml_id, str) and (
+                    record_id := existing_ids.get(candidate_xmlids[xml_id][0]) or existing_ids.get(candidate_xmlids[xml_id][1])
+                ):
+                    xml_id = record_id
 
                 if isinstance(xml_id, int):
                     record_vals['id'] = xml_id
@@ -1230,9 +1252,12 @@ class AccountChartTemplate(models.AbstractModel):
         return f"account.{company.id}_{xmlid}"
 
     def ref(self, xmlid, raise_if_not_found=True):
+        root_xmlid = self.company_xmlid(xmlid, self.env.company.parent_ids[0])
+        if root_xmlid == self.company_xmlid(xmlid):
+            return self.env.ref(root_xmlid, raise_if_not_found)
         return (
             self.env.ref(self.company_xmlid(xmlid), raise_if_not_found=False)
-            or self.env.ref(self.company_xmlid(xmlid, self.env.company.parent_ids[0]), raise_if_not_found)
+            or self.env.ref(root_xmlid, raise_if_not_found)
         )
 
     def _get_parent_template(self, code):
