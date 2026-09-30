@@ -229,9 +229,11 @@
                         opacity:0;
                     }
 
-                    &:hover, &.show, &:has([data-bs-toggle]:focus-visible) {
+                    &:hover, &.show, &.o_toggle_focus_visible {
                         padding-right: 1.3rem !important;
+                    }
 
+                    &:hover, &.show, [data-bs-toggle]:focus-visible {
                         [data-icon="keyboard_arrow_down"] {
                             transition: all 300ms ease 100ms;
                             opacity:1;

@@ -120,6 +120,8 @@
                         <div t-attf-class="dropdown o_configurator_type_dd d-inline-block {{this.state.selectedType ? 'o_step_completed' : 'o_step_todo show'}}"
                             t-on-focusout="this.onDropdownFocusout">
                             <button id="selectTypeToggle"
+                                    t-on-focus="this.onDropdownToggleFocus"
+                                    t-on-blur="this.onDropdownToggleBlur"
                                     class="o_btn_reset w-100 px-2"
                                     data-bs-toggle="dropdown"
                                     aria-haspopup="true"
@@ -173,6 +175,8 @@
                         <div t-attf-class="dropdown d-inline-block o_configurator_purpose_dd {{this.state.selectedPositioning ? 'o_step_completed' : 'o_step_todo'}}"
                             t-on-focusout="this.onDropdownFocusout">
                             <button id="selectPurposeToggle"
+                                    t-on-focus="this.onDropdownToggleFocus"
+                                    t-on-blur="this.onDropdownToggleBlur"
                                     t-ref="this.positioningDropdownRef"
                                     class="o_btn_reset w-100 px-2"
                                     data-bs-toggle="dropdown"

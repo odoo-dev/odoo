@@ -638,6 +638,16 @@ Return ONLY a JSON object with:
      *
      * @param {FocusEvent} ev
      */
+    onDropdownToggleFocus(ev) {
+        ev.currentTarget
+            .closest(".dropdown")
+            .classList.toggle("o_toggle_focus_visible", ev.currentTarget.matches(":focus-visible"));
+    }
+
+    onDropdownToggleBlur(ev) {
+        ev.currentTarget.closest(".dropdown").classList.remove("o_toggle_focus_visible");
+    }
+
     onDropdownFocusout(ev) {
         // On safari, we are missing relatedTarget because we can't focus on a
         // button, so we delay dropdown hiding to focusin of next element
