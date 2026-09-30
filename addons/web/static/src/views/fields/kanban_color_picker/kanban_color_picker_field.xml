@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.KanbanColorPickerField">
-        <div t-if="!props.readonly" class="o_kanban_colorpicker o_colorlist d-grid gap-3 gap-md-2">
+        <div t-if="!props.readonly" t-ref="colorList" class="o_kanban_colorpicker o_colorlist d-grid gap-3 gap-md-2">
             <t t-foreach="colors" t-as="color" t-key="color_index">
                 <button
                     role="menuitem"

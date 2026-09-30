@@ -310,7 +310,7 @@
         }
     }
 
-    .o_kanban_card_manage_settings:has(.o_colorlist) {
+    .o_kanban_card_manage_settings.o_kanban_card_manage_settings_colorlist {
         &, > div:last-child {
             padding: 0;
         }

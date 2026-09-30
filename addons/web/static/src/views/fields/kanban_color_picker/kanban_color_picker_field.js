@@ -3,11 +3,23 @@ import { ColorList } from "@web/core/colorlist/colorlist";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component } from "@odoo/owl";
+import { Component, useEffect, useRef } from "@odoo/owl";
 
 class KanbanColorPickerField extends Component {
     static template = "web.KanbanColorPickerField";
     static props = standardFieldProps;
+
+    setup() {
+        this.colorListRef = useRef("colorList");
+        useEffect(
+            (colorList) => {
+                const settings = colorList?.closest(".o_kanban_card_manage_settings");
+                settings?.classList.add("o_kanban_card_manage_settings_colorlist");
+                return () => settings?.classList.remove("o_kanban_card_manage_settings_colorlist");
+            },
+            () => [this.colorListRef.el]
+        );
+    }
 
     get colors() {
         return ColorList.COLORS;
