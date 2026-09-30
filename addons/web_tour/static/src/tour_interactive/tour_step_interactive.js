@@ -33,29 +33,21 @@ export class TourStepInteractive extends TourStep {
             return actions;
         }
 
-        for (const todo of this.run.split("&&")) {
-            const m = String(todo)
-                .trim()
-                .match(/^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/);
+        const m = this.run.trim().match(/^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/);
 
-            let action = m.groups?.action;
-            const anchor = m.groups?.arguments || this.trigger;
-            const pointerInfo = {
-                content: this.content || this.getStepContent(action, anchor),
-                tooltipPosition: this.tooltipPosition,
-            };
+        let action = m.groups?.action;
+        const anchor = m.groups?.arguments || this.trigger;
+        const pointerInfo = {
+            content: this.content || this.getStepContent(action, anchor),
+            tooltipPosition: this.tooltipPosition,
+        };
 
-            if (action === "drag_and_drop") {
-                addAction("drag", this.trigger, pointerInfo);
-                action = "drop";
-            }
-
-            addAction(
-                action,
-                ["edit", "editor"].includes(action) ? this.trigger : anchor,
-                pointerInfo
-            );
+        if (action === "drag_and_drop") {
+            addAction("drag", this.trigger, pointerInfo);
+            action = "drop";
         }
+
+        addAction(action, ["edit", "editor"].includes(action) ? this.trigger : anchor, pointerInfo);
 
         return actions;
     }

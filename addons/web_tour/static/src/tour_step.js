@@ -247,14 +247,8 @@ export class TourStep {
         if (typeof this.run === "function") {
             return await this.run.call({ anchor: element }, actionHelper);
         } else if (typeof this.run === "string") {
-            let lastResult = null;
-            for (const todo of this.run.split("&&")) {
-                const m = String(todo)
-                    .trim()
-                    .match(/^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/);
-                lastResult = await actionHelper[m.groups?.action](m.groups?.arguments);
-            }
-            return lastResult;
+            const m = this.run.trim().match(/^(?<action>\w*) *\(? *(?<arguments>.*?)\)?$/);
+            return await actionHelper[m.groups?.action](m.groups?.arguments);
         }
     }
 
