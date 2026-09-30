@@ -2,13 +2,12 @@
     // Safari bug: when there's opacity in foreignobject, position of foreignobject is reset to (0, 0)
     // https://github.com/bkrem/react-d3-tree/issues/284
     // https://bugs.webkit.org/show_bug.cgi?id=23113
-    // Trick here is moving the opacity classname to the parent svg, so that no opacity on foreignobject and safari doesn't reset position.
+    // Trick here is replacing the opacity by a translucent text color, so that no opacity on foreignobject and safari doesn't reset position.
     @each $opacity_class, $opacity_value in ("opacity-25": .25, "opacity-50": .5, "opacity-75": .75) {
-        &:has(foreignObject .#{$opacity_class}) {
-            opacity: #{$opacity_value};
-            foreignObject .#{$opacity_class} {
-                opacity: 100% !important;
-            }
+        foreignObject .#{$opacity_class} {
+            --text-opacity: #{$opacity_value};
+            color: color-mix(in srgb, currentColor #{percentage($opacity_value)}, transparent);
+            opacity: 100% !important;
         }
     }
 }
