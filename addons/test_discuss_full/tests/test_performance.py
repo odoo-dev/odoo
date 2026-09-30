@@ -1548,7 +1548,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_livechat_1 and partner == self.users[0].partner_id:
             return {
-                "channel_role": False,
+                "channel_role": "owner",
                 "create_date": member_0_create_date,
                 "custom_notifications": False,
                 "id": member_0.id,
@@ -1581,7 +1581,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             }
         if channel == self.channel_livechat_2 and partner == self.users[0].partner_id:
             return {
-                "channel_role": False,
+                "channel_role": "owner",
                 "create_date": member_0_create_date,
                 "custom_notifications": False,
                 "id": member_0.id,
