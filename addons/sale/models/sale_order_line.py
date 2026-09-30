@@ -6,7 +6,7 @@ from markupsafe import Markup
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import float_compare, float_is_zero, format_date, groupby
+from odoo.tools import float_compare, format_date, groupby
 
 
 class SaleOrderLine(models.Model):
@@ -1394,7 +1394,7 @@ class SaleOrderLine(models.Model):
                 line.invoice_status = "no"
             elif line.is_downpayment and line.untaxed_amount_to_invoice == 0:
                 line.invoice_status = "invoiced"
-            elif not float_is_zero(line.qty_to_invoice, precision_digits=precision):
+            elif line.qty_to_invoice > 0:
                 line.invoice_status = "to invoice"
             elif (
                 line.state == "sale"
