@@ -241,6 +241,15 @@ export class Message extends Component {
             },
             () => [this.isEditing, this.message.richBody, this.props.messageSearch?.searchTerm]
         );
+        useLayoutEffect(() => {
+            for (const track of this.root.el?.querySelectorAll(".o_track") ?? []) {
+                const body = track.lastElementChild;
+                track.classList.toggle(
+                    "o_track_without_arrows",
+                    body?.tagName === "DIV" && !body.querySelector("br:last-child")
+                );
+            }
+        });
     }
 
     get messageActionsParams() {

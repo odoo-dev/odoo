@@ -97,7 +97,7 @@
 
     // Stable fix: new tracking bodies miss the last `<br>` element
     // to be able to not add the arrow
-    & > div:last-child:not(:has(br:last-child)) {
+    &.o_track_without_arrows > div:last-child {
         b::before,
         i::before,
         i::after {
