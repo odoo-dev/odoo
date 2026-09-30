@@ -22,6 +22,8 @@ export class ChannelMember extends Component {
     static template = "discuss.ChannelMember";
 
     displayNameRef = signal.ref();
+    isEllipsisHovered = signal(false, { type: t.boolean() });
+    isEllipsisFocusVisible = signal(false, { type: t.boolean() });
 
     setup() {
         super.setup();
@@ -45,6 +47,10 @@ export class ChannelMember extends Component {
         return {
             "cursor-pointer": this.isClickable(this.member()),
             "o-offline": this.member().imStatusUI === "offline",
+            "o-discuss-ChannelMember-ellipsisActive":
+                this.isEllipsisHovered() ||
+                this.isEllipsisFocusVisible() ||
+                this.showingActions.isOpen,
         };
     }
 

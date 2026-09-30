@@ -24,7 +24,11 @@
                 'd-flex': this.showingActions.isOpen or this.store.useMobileView,
             }">
                 <Dropdown state="this.showingActions" position="'bottom-end'" menuClass="'my-1 ' + this.store.discussDropdownMenuClass(this)">
-                    <button class="btn o-discuss-ellipsisButton ms-1 o-mail-DiscussApp-sidebarBgColor" title="Member Actions"/>
+                    <button class="btn o-discuss-ellipsisButton ms-1 o-mail-DiscussApp-sidebarBgColor" title="Member Actions"
+                        t-on-pointerenter="() => this.isEllipsisHovered.set(true)"
+                        t-on-pointerleave="() => this.isEllipsisHovered.set(false)"
+                        t-on-focus="(ev) => this.isEllipsisFocusVisible.set(ev.target.matches(':focus-visible'))"
+                        t-on-blur="() => this.isEllipsisFocusVisible.set(false)"/>
                     <t t-set-slot="content">
                         <ActionList actions="this.actions.actionsComputed" dropdown="true"/>
                     </t>

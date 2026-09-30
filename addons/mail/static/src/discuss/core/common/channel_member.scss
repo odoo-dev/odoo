@@ -18,14 +18,11 @@
 }
 
 // Keep the "..." legible on a dimmed offline row: move the dimming to the siblings.
-.o-discuss-ChannelMember-actions .o-discuss-ellipsisButton {
-    &:hover, &:active, &:focus-visible, &.show {
-        .o-discuss-ChannelMember.o-offline:has(&) {
-            opacity: 100%;
-
-            > *:not(.o-discuss-ChannelMember-actions) {
-                opacity: 33%;
-            }
-        }
+.o-discuss-ChannelMember.o-offline.o-discuss-ChannelMember-ellipsisActive {
+    &, &.cursor-pointer:hover, &[data-right-clicking] {
+        opacity: 100%;
+    }
+    > :not(.o-discuss-ChannelMember-actions) {
+        opacity: 33%;
     }
 }
