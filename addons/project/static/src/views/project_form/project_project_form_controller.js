@@ -17,6 +17,16 @@ export class ProjectProjectFormController extends FormControllerWithHTMLExpander
 
     setup() {
         super.setup();
+        const onNotebookPageChange = this.onNotebookPageChange;
+        this.onNotebookPageChange = (notebookId, page) => {
+            onNotebookPageChange(notebookId, page);
+            for (const pane of this.rootRef.el?.querySelectorAll(".tab-pane") ?? []) {
+                pane.classList.toggle(
+                    "o_project_map_pane",
+                    Boolean(pane.querySelector(':scope > div[name="google_map_iframe"]'))
+                );
+            }
+        };
         onWillStart(async () => {
             this.isProjectManager = await user.hasGroup('project.group_project_manager');
             this.featuresToObserve = await this.orm.call(

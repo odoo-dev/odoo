@@ -7,9 +7,11 @@
         border: 0;
         padding: 0;
     }
-    .tab-pane.active:has(> div[name="google_map_iframe"]) {
+    div.tab-pane.active.o_project_map_pane {
         padding: 0;
-        div[name="google_map_iframe"] {
+    }
+    .tab-pane.active {
+        > div.o_field_widget[name="google_map_iframe"] {
             margin: 0 var(--Notebook-margin-x, -16px) calc(var(--formView-sheet-padding-y, 16px) * -1);
             border-radius: 0 0 var(--formView-sheet-border-radius, 0) var(--formView-sheet-border-radius, 0);
             overflow: hidden;
