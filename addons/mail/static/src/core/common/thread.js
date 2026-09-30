@@ -548,6 +548,10 @@ export class Thread extends Component {
         }
     }
 
+    get hasHighlightedMessage() {
+        return this.orderedMessages.some((message) => this.getMessageClassName(message));
+    }
+
     getMessageClassName(message) {
         return !message.isNotification && this.messageHighlight?.highlightedMessageId === message.id
             ? "o-highlighted"

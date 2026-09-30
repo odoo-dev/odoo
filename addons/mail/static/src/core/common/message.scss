@@ -179,7 +179,7 @@
         transition: opacity .3s ease-in-out, filter .3s ease-in-out;
     }
 
-    &:has(.o-highlighted) > *:not(.o-highlighted) {
+    &.o-mail-Thread-hasHighlightedMessage > :not(.o-highlighted) {
         opacity: .4;
     }
 }
