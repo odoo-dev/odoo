@@ -11,26 +11,26 @@ import { useAutoresize } from "@web/core/utils/autoresize";
  */
 export function useProductAndLabelAutoresize(ref, options = {}) {
     useAutoresize(ref, { 
-        onMounted: productAndLabelResizeTextArea, 
         onResize: productAndLabelResizeTextArea,
         ...options,
     });
 }
 
 export function productAndLabelResizeTextArea(textarea, options = {}) {
-    const style = window.getComputedStyle(textarea);
-    if (options.targetParentName) {
-        let target = textarea.parentElement;
-        while (target) {
-            if (target.getAttribute("name") === options.targetParentName) {
-                break;
-            }
-            const totalParentHeight = Array.from(target.children).reduce((total, child) => {
-                const childHeight = child.style.height || style.lineHeight;
+    if (!options.targetParentName) {
+        return;
+    }
+    const lineHeight = options.lineHeight;
+    let target = textarea.parentElement;
+    while (target && target !== document.body && target.getAttribute("name") !== options.targetParentName) {
+        const totalParentHeight = Array.from(target.children).reduce(
+            (total, child) => {
+                const childHeight = child.style.height || lineHeight;
                 return total + parseFloat(childHeight);
-            }, 0);
-            target.style.height = `${totalParentHeight}px`;
-            target = target.parentElement;
-        }
+            },
+            0
+        );
+        target.style.height = `${totalParentHeight}px`;
+        target = target.parentElement;
     }
 }

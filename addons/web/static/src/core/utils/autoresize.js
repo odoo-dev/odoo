@@ -22,14 +22,14 @@ export function useAutoresize(ref, options = {}) {
                     if (options.ignoreIfEmpty && !el.value) {
                         return;
                     }
-                    if (el instanceof HTMLInputElement) {
-                        resizeInput(el);
-                    } else {
-                        resizeTextArea(el, options);
+                    resizeQueue.set(el, options);
+                    if (!resizeFlushScheduled) {
+                        resizeFlushScheduled = true;
+                        queueMicrotask(flushResizeQueue);
                     }
-                    options.onResize?.(el, options);
                 };
-                el.addEventListener("input", () => resize(true));
+                const onInput = () => resize(true);
+                el.addEventListener("input", onInput);
                 const resizeObserver = new ResizeObserver(() => {
                     // This ensures that the resize function is not called twice on input or page load
                     if (wasProgrammaticallyResized) {
@@ -40,9 +40,10 @@ export function useAutoresize(ref, options = {}) {
                 });
                 resizeObserver.observe(el);
                 return () => {
-                    el.removeEventListener("input", resize);
+                    el.removeEventListener("input", onInput);
                     resizeObserver.unobserve(el);
                     resizeObserver.disconnect();
+                    resizeQueue.delete(el);
                     resize = null;
                 };
             }
@@ -73,33 +74,110 @@ const doesScrollWidthExcludePadding = memoize(() => {
     return widthWithPadding === widthWithoutPadding;
 });
 
-/**
- * @param {HTMLInputElement} input
- */
-function resizeInput(input) {
-    const style = window.getComputedStyle(input);
-    // This mesures the maximum width of the input which can get from the flex layout.
-    input.style.width = "100%";
-    const maxWidth = input.clientWidth;
-    // Minimum width of the input
-    input.style.width = "10px";
-    if (input.value === "" && input.placeholder !== "") {
-        input.style.width = "auto";
+const resizeQueue = new Map();
+let resizeFlushScheduled = false;
+// Batch pending resize operations to avoid repeated layout recalculations.
+function flushResizeQueue() {
+    resizeFlushScheduled = false;
+
+    const elementsToResize = [...resizeQueue].filter(([el]) => el.isConnected);
+    resizeQueue.clear();
+
+    if (!elementsToResize.length) {
         return;
     }
-    // scrollWidth measures the content box only; borders are added separately
-    let boxExtraWidth = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
-    // Some browsers (Safari ≤16, Firefox ≥145) exclude padding from input scrollWidth
-    if (doesScrollWidthExcludePadding()) {
-        const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-        boxExtraWidth += padding;
-    }
-    const desiredWidth = input.scrollWidth + boxExtraWidth + 1;
-    if (desiredWidth > maxWidth) {
+
+    const inputElements = elementsToResize.filter(([el]) => el instanceof HTMLInputElement);
+    const textareaElements = elementsToResize.filter(([el]) => !(el instanceof HTMLInputElement));
+
+    // Set a common width before measuring the inputs.
+    for (const [input] of inputElements) {
         input.style.width = "100%";
-        return;
     }
-    input.style.width = `${desiredWidth}px`;
+    const availableWidths = inputElements.map(([input]) => input.clientWidth);
+
+    // Use a small width to calculate the content size.
+    for (const [input] of inputElements) {
+        input.style.width = "10px";
+    }
+    const inputWidths = inputElements.map(([input], index) => {
+        const style = window.getComputedStyle(input);
+
+        if (input.value === "" && input.placeholder !== "") {
+            return "auto";
+        }
+
+        let extraWidth = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+        if (doesScrollWidthExcludePadding()) {
+            extraWidth +=
+                parseFloat(style.paddingLeft) +
+                parseFloat(style.paddingRight);
+        }
+        const contentWidth = input.scrollWidth + extraWidth + 1;
+        return contentWidth > availableWidths[index]
+            ? "100%"
+            : `${contentWidth}px`;
+    });
+
+    for (let index = 0; index < inputElements.length; index++) {
+        inputElements[index][0].style.width = inputWidths[index];
+    }
+
+    // Collect textarea dimensions before changing their styles.
+    const textareaMeasurements = textareaElements.map(
+        ([textarea, options = {}]) => {
+            const style = window.getComputedStyle(textarea);
+            let heightOffset = 0;
+            if (style.boxSizing === "border-box") {
+                heightOffset =
+                    parseFloat(style.paddingTop) +
+                    parseFloat(style.paddingBottom) +
+                    parseFloat(style.borderTopWidth) +
+                    parseFloat(style.borderBottomWidth);
+            }
+            return {
+                textarea,
+                options,
+                previousStyle: {
+                    borderTopWidth: style.borderTopWidth,
+                    borderBottomWidth: style.borderBottomWidth,
+                    padding: style.padding,
+                },
+                heightOffset,
+            };
+        }
+    );
+
+    // Reset dimensions before measuring the content height.
+    for (const { textarea } of textareaMeasurements) {
+        Object.assign(textarea.style, {
+            height: "auto",
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+            paddingTop: 0,
+            paddingBottom: 0,
+        });
+    }
+    const textareaHeights = textareaMeasurements.map(
+        ({ textarea, options, heightOffset }) =>
+            Math.max(
+                options.minimumHeight || 0,
+                textarea.scrollHeight + heightOffset
+            )
+    );
+    for (let index = 0; index < textareaMeasurements.length; index++) {
+        const { textarea, previousStyle } = textareaMeasurements[index];
+
+        Object.assign(textarea.style, previousStyle, {
+            height: `${textareaHeights[index]}px`,
+        });
+        if (textarea.parentElement) {
+            textarea.parentElement.style.height = `${textareaHeights[index]}px`;
+        }
+    }
+    for (const [element, options] of elementsToResize) {
+        options.onResize?.(element, options);
+    }
 }
 
 /**
@@ -127,7 +205,6 @@ export function resizeTextArea(textarea, options = {}) {
         paddingTop: 0,
         paddingBottom: 0,
     });
-    textarea.style.height = "auto";
     const height = Math.max(minimumHeight, textarea.scrollHeight + heightOffset);
     Object.assign(textarea.style, previousStyle, { height: `${height}px` });
     textarea.parentElement.style.height = `${height}px`;
