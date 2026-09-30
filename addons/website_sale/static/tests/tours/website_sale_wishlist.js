@@ -14,7 +14,11 @@ registry.category("web_tour.tours").add('website_sale.wishlist_updates', {
         {
             content: "hover card && click on add to wishlist",
             trigger: ".o_wsale_product_grid_wrapper:contains(desk)",
-            run: "hover && click .o_add_wishlist",
+            run: "hover",
+        },
+        {
+            trigger: ".o_add_wishlist",
+            run: "click",
         },
         tourUtils.assertWishlistQuantity(1),
         {

@@ -13,7 +13,11 @@ registry.category("web_tour.tours").add("portal_no_copy_link_tour", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message:contains(Test Message)",
-            run: "hover && click",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow .o-mail-Message:contains(Test Message)",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-actions",

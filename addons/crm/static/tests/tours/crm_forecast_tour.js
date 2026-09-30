@@ -70,7 +70,10 @@ registry.category("web_tour.tours").add('crm_forecast', {
     }, {
         trigger: ".o_field_widget[name=date_deadline] input",
         content: "complete expected closing",
-        run: `edit ${today.plus({ months: 5 }).startOf("month").minus({ days: 1 }).toFormat("MM/dd/yyyy")} && press Escape`,
+        run: `edit ${today.plus({ months: 5 }).startOf("month").minus({ days: 1 }).toFormat("MM/dd/yyyy")}`,
+    }, {
+        trigger: ".o_field_widget[name=date_deadline] input",
+        run: "press Escape",
     }, {
         trigger: "button[name=action_set_won_rainbowman]",
         content: "win the lead",

@@ -69,27 +69,39 @@ function increaseProductQuantity(productName) {
 }
 
 function setProductQuantity(productName, quantity) {
-    return {
-        content: `Set the quantity of ${productName} to ${quantity}`,
-        trigger: `
-            ${productSelector(productName)}
-            td.o_sale_product_configurator_qty
-            input[name="sale_quantity"]
-        `,
-        run: `edit ${quantity} && click .modal-body`,
-    };
+    return [
+        {
+            content: `Set the quantity of ${productName} to ${quantity}`,
+            trigger: `
+                ${productSelector(productName)}
+                td.o_sale_product_configurator_qty
+                input[name="sale_quantity"]
+            `,
+            run: `edit ${quantity}`,
+        },
+        {
+            trigger: ".modal-body",
+            run: "click",
+        },
+    ];
 }
 
 function setProductUoM(productName, uomName) {
     // UoM must be enabled
-    return {
-        content: `Set the uom of ${productName} to ${uomName}`,
-        trigger: `
-            ${productSelector(productName)}
-            label:contains("${uomName}")
-        `,
-        run: `click && click .modal-body`,
-    };
+    return [
+        {
+            content: `Set the uom of ${productName} to ${uomName}`,
+            trigger: `
+                ${productSelector(productName)}
+                label:contains("${uomName}")
+            `,
+            run: "click",
+        },
+        {
+            trigger: ".modal-body",
+            run: "click",
+        },
+    ];
 }
 
 function assertProductQuantity(productName, quantity) {
@@ -141,15 +153,21 @@ function selectAttribute(productName, attributeName, attributeValue, attributeTy
 }
 
 function setCustomAttribute(productName, attributeName, customValue) {
-    return {
-        content: `Set ${customValue} as a custom attribute for ${productName} ${attributeName}`,
-        trigger: `
-            ${productSelector(productName)}
-            td>div[name="ptal"]:has(label:contains("${attributeName}"))
-            input[type="text"]
-        `,
-        run: `edit ${customValue} && click .modal-body`,
-    };
+    return [
+        {
+            content: `Set ${customValue} as a custom attribute for ${productName} ${attributeName}`,
+            trigger: `
+                ${productSelector(productName)}
+                td>div[name="ptal"]:has(label:contains("${attributeName}"))
+                input[type="text"]
+            `,
+            run: `edit ${customValue}`,
+        },
+        {
+            trigger: ".modal-body",
+            run: "click",
+        },
+    ];
 }
 
 function selectAndSetCustomAttribute(
@@ -157,7 +175,7 @@ function selectAndSetCustomAttribute(
 ) {
     return [
         selectAttribute(productName, attributeName, attributeValue, attributeType),
-        setCustomAttribute(productName, attributeName, customValue),
+        ...setCustomAttribute(productName, attributeName, customValue),
     ];
 }
 

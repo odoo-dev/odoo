@@ -22,7 +22,7 @@ registry
             productConfiguratorTourUtils.selectAttribute("Product B", "Attribute B", "B", 'multi'),
             ...productConfiguratorTourUtils.saveConfigurator(),
             comboConfiguratorTourUtils.selectComboItem("Product D"),
-            productConfiguratorTourUtils.setCustomAttribute(
+            ...productConfiguratorTourUtils.setCustomAttribute(
                 "Product D", "Attribute D", "Test D"
             ),
             ...productConfiguratorTourUtils.saveConfigurator(),

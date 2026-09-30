@@ -169,7 +169,11 @@ const setSlideUrl = (urlText) => [
     {
         content: "Enter the URL to be linked with the slide",
         trigger: "div[data-action-id='setSlideAnchorUrl'] input[title='Your URL']",
-        run: `edit ${urlText} && press Tab`,
+        run: `edit ${urlText}`,
+    },
+    {
+        trigger: "div[data-action-id='setSlideAnchorUrl'] input[title='Your URL']",
+        run: "press Tab",
     },
 ];
 

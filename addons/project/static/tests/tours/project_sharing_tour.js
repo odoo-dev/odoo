@@ -5,7 +5,11 @@ import { stepUtils } from "@web_tour/tour_utils";
 const projectSharingSteps = [...stepUtils.goToAppSteps("project.menu_main_pm", 'Go to the Project App.'), {
     trigger: ".o_kanban_record:contains(Project Sharing)",
     content: 'Open the project dropdown.',
-    run: "hover && click .o_kanban_record:contains(Project Sharing) .o_dropdown_kanban .dropdown-toggle",
+    run: "hover",
+},
+{
+    trigger: ".o_kanban_record:contains(Project Sharing) .o_dropdown_kanban .dropdown-toggle",
+    run: "click",
 }, {
     trigger: '.dropdown-menu a:contains("Share")',
     content: 'Start editing the project.',

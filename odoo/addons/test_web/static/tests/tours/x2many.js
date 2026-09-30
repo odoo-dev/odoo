@@ -114,7 +114,11 @@
     { // change content to trigger on change
         content: "insert content",
         trigger: '.o_field_widget[name=name] input',
-        run: "edit test_trigger && press Enter",
+        run: "edit test_trigger",
+    },
+    {
+        trigger: '.o_field_widget[name=name] input',
+        run: "press Enter",
     }, {
         content: "check onchange",
         trigger: '.o_field_widget[name="message_concat"] textarea:value([test_trigger] Mitchell Admin:a\n[test_trigger] Mitchell Admin:b)',
@@ -400,7 +404,11 @@
     {
         content: "edit content",
         trigger: '.o_field_widget[name=name] input',
-        run: "edit test_trigger2 && click body",
+        run: "edit test_trigger2",
+    },
+    {
+        trigger: "body",
+        run: "click",
     }, {
         content: "click outside to trigger onchange",
         trigger: '.o_form_sheet',
@@ -416,7 +424,11 @@
     }, {
         content: "change text value",
         trigger: '.o_field_widget[name="body"] textarea',
-        run: "edit ccc && click .o_selected_row",
+        run: "edit ccc",
+    },
+    {
+        trigger: ".o_selected_row",
+        run: "click",
     }, {
         content: "click on other field (trigger the line onchange)",
         trigger: '.o_field_widget[name=messages] .o_field_many2one[name="author"] input',
@@ -530,7 +542,11 @@
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit {generate_dummy_message} && click body",
+        run: "edit {generate_dummy_message}",
+    },
+    {
+        trigger: "body",
+        run: "click",
     },
     {
         trigger: '.o_field_widget[name=important_messages] .o_data_row .o_list_number:text(13)',
@@ -544,14 +560,22 @@
     }, {
         content: "empty discussion title",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit removed_title && click body",
+        run: "edit removed_title",
+    },
+    {
+        trigger: "body",
+        run: "click",
     }, {
         content: "onchange happened",
         trigger: '.o_field_widget[name=messages] .o_data_row td:contains([removed_title])',
     }, {
         content: "set discussion title to generate dummy message",
         trigger: '.o_field_widget[name=name] input',
-        run:     "edit {generate_dummy_message} && click body",
+        run: "edit {generate_dummy_message}",
+    },
+    {
+        trigger: "body",
+        run: "click",
     },
     {
         trigger: '.o_field_widget[name=important_messages] .o_data_row .o_list_number:text(22)',

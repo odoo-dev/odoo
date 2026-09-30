@@ -12,7 +12,11 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 {
     trigger: 'div[name="product_uom_qty"] input',
     content: "Add 10 hours as ordered quantity for this product.",
-    run: "edit 10 && press Tab",
+    run: "edit 10",
+},
+{
+    trigger: 'div[name="product_uom_qty"] input',
+    run: "press Tab",
 }, {
     trigger: '.o_field_cell[name=price_subtotal]:contains(2,500.00)',
 }, {

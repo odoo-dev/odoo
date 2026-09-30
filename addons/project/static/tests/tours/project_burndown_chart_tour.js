@@ -8,7 +8,11 @@ registry.category("web_tour.tours").add('burndown_chart_tour', {
 }, {
     content: 'Open "Burndown Chart Test" project menu',
             trigger: ".o_kanban_record:contains(Burndown Chart Test)",
-    run: `hover && click .o_kanban_record:contains(Burndown Chart Test) .o_dropdown_kanban .dropdown-toggle`,
+    run: "hover",
+},
+{
+    trigger: ".o_kanban_record:contains(Burndown Chart Test) .o_dropdown_kanban .dropdown-toggle",
+    run: "click",
 }, {
     content: `Open "Burndown Chart Test" project's "Burndown Chart" view`,
     trigger: '.o_kanban_manage_reporting div[role="menuitem"] a:contains("Burndown Chart")',
@@ -24,7 +28,11 @@ registry.category("web_tour.tours").add('burndown_chart_tour', {
 }, {
     content: 'Remove the project search "Burndown Chart Test"',
     trigger: ".o_searchview_facet:contains(Burndown Chart Test)",
-    run: "hover && click .o_facet_remove",
+    run: "hover",
+},
+{
+    trigger: ".o_facet_remove",
+    run: "click",
 }, {
     content: 'Search Burndown Chart',
     trigger: 'input.o_searchview_input',

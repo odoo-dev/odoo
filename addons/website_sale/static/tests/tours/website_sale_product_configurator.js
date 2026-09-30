@@ -10,14 +10,14 @@ registry
             ...wsTourUtils.addToCartFromProductPage(),
             configuratorTourUtils.assertProductQuantity("Main product", 1),
             // Assert that it's impossible to add less than 1 product (only for the main product).
-            configuratorTourUtils.setProductQuantity("Main product", 0),
+            ...configuratorTourUtils.setProductQuantity("Main product", 0),
             configuratorTourUtils.assertProductQuantity("Main product", 1),
             {
                 content: "check that decrease button is disabled",
                 trigger: `.modal button[name=sale_quantity_button_minus]:disabled`,
             },
             // Assert that it's impossible to add more products than available.
-            configuratorTourUtils.setProductQuantity("Main product", 20),
+            ...configuratorTourUtils.setProductQuantity("Main product", 20),
             configuratorTourUtils.assertProductQuantity("Main product", 10),
             {
                 content: "check that increase button is disabled",

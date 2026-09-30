@@ -10,7 +10,7 @@ registry
             ...wsTourUtils.addToCartFromProductPage(),
             configuratorTourUtils.assertQuantity(1),
             // Assert that it's impossible to add less than 1 product.
-            configuratorTourUtils.setQuantity(0),
+            ...configuratorTourUtils.setQuantity(0),
             configuratorTourUtils.assertQuantity(1),
             {
                 content: "Verify that the quantity decrease button is disabled",
@@ -20,14 +20,14 @@ registry
                 `,
             },
             // Assert that an error is shown if the requested quantity isn't available.
-            configuratorTourUtils.setQuantity(3),
+            ...configuratorTourUtils.setQuantity(3),
             stockConfiguratorTourUtils.assertQuantityNotAvailable("Test product"),
             // Assert that a warning is shown if all available quantity is selected.
-            configuratorTourUtils.setQuantity(2),
+            ...configuratorTourUtils.setQuantity(2),
             configuratorTourUtils.selectComboItem("Test product"),
             stockConfiguratorTourUtils.assertAllQuantitySelected("Test product"),
             // Assert that it's impossible to add more products than available.
-            configuratorTourUtils.setQuantity(3),
+            ...configuratorTourUtils.setQuantity(3),
             configuratorTourUtils.assertQuantity(2),
             {
                 content: "Verify that the quantity increase button is disabled",

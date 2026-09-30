@@ -28,7 +28,11 @@ registry.category("web_tour.tours").add("project_task_templates_tour", {
         },
         {
             trigger: 'div[name="name"] .o_input',
-            run: "edit Task && press Tab",
+            run: "edit Task",
+        },
+        {
+            trigger: 'div[name="name"] .o_input',
+            run: "press Tab",
         },
         {
             trigger: ".o_form_dirty",

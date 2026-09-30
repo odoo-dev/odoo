@@ -10,7 +10,7 @@ registry
             ...wsTourUtils.addToCartFromProductPage(),
             // Assert that the combo configurator behaves as expected.
             comboConfiguratorTourUtils.assertFooterButtonsDisabled(),
-            comboConfiguratorTourUtils.setQuantity(3),
+            ...comboConfiguratorTourUtils.setQuantity(3),
             comboConfiguratorTourUtils.selectComboItem("Product A1"),
             ...productConfiguratorTourUtils.selectAndSetCustomAttribute(
                 "Product A1", "No variant attribute", "B", "Some custom value"
@@ -48,7 +48,11 @@ registry
             {
                 content: "Edit the combo quantity",
                 trigger: 'div[name="website_sale_cart_line_quantity"] input.quantity',
-                run: "edit 2 && click body",
+                run: "edit 2",
+            },
+            {
+                trigger: "body",
+                run: "click",
             },
             ...wsTourUtils.assertCartContains({ productName: "2 x Product A1" }),
             ...wsTourUtils.assertCartContains({ productName: "2 x Product B2" }),

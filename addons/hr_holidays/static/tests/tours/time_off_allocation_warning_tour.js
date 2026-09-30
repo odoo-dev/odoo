@@ -51,13 +51,25 @@ registry.category("web_tour.tours").add("time_off_allocation_warning_tour", {
             content: "Edit the start date picker",
             trigger: ".o_field_widget[name='date_from'] input",
             // Past date to trigger the warning
-            run: `click && edit ${pastDateFrom}`,
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name='date_from'] input",
+            run: `edit ${pastDateFrom}`,
         },
         {
             content: "Edit the end date picker",
             trigger: ".o_field_widget[name='date_to'] input",
             // Past date to trigger the warning
-            run: `click && edit ${pastDateTo} && click body`,
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name='date_to'] input",
+            run: `edit ${pastDateTo}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Error regarding allocation to be visible",
@@ -71,7 +83,15 @@ registry.category("web_tour.tours").add("time_off_allocation_warning_tour", {
         {
             content: "Edit the end date picker",
             trigger: ".o_field_widget[name='date_to'] input",
-            run: `click && edit ${futureDateTo} && click body`,
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name='date_to'] input",
+            run: `edit ${futureDateTo}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Error regarding allocation to be visible",

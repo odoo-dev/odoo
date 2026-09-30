@@ -28,7 +28,11 @@ function setHeaderBackgroundHex(hexColor) {
         {
             content: `Set header background to ${hexColor}`,
             trigger: ".o_color_picker_inputs :iframe input",
-            run: `edit ${hexColor} && click body`,
+            run: `edit ${hexColor}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Wait for the operation to finish",
@@ -137,7 +141,11 @@ registry.category("web_tour.tours").add("header_bg_blur_option", {
         {
             content: "Set a transparent gradient stop",
             trigger: ".o_color_picker_inputs :iframe input",
-            run: "edit #00000080 && click body",
+            run: "edit #00000080",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Wait for the operation to finish",

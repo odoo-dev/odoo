@@ -48,7 +48,11 @@ const translateUrl = function (newUrl) {
         {
             content: "Change the french translation of the contactus page url",
             trigger: `input#fr_FR`,
-            run: `edit ${newUrl} && press Enter`,
+            run: `edit ${newUrl}`,
+        },
+        {
+            trigger: `input#fr_FR`,
+            run: "press Enter",
         },
         {
             content: "Click on 'Save' in the translate modal",

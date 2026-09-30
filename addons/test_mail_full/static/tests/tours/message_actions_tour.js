@@ -5,7 +5,11 @@ registry.category("web_tour.tours").add("bookmark_message_tour", {
         {
             trigger:
                 "#chatterRoot:shadow .o-mail-Message:not([data-bookmarked]):contains(Test Message)",
-            run: "hover && click #chatterRoot:shadow button[title='Expand']",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow button[title='Expand']",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-moreMenu",
@@ -35,7 +39,11 @@ registry.category("web_tour.tours").add("message_actions_tour", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message[data-persistent]:contains(New message)",
-            run: "hover && click #chatterRoot:shadow button[title='Add a Reaction']",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow button[title='Add a Reaction']",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-QuickReactionMenu-emoji span:contains(❤️)",
@@ -47,7 +55,11 @@ registry.category("web_tour.tours").add("message_actions_tour", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message:contains(New message)",
-            run: "hover && click #chatterRoot:shadow button[title='Expand']",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow button[title='Expand']",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-moreMenu",
@@ -71,7 +83,11 @@ registry.category("web_tour.tours").add("message_actions_tour", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message:contains(Message content changed)",
-            run: "hover && click #chatterRoot:shadow button[title='Expand']",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow button[title='Expand']",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-moreMenu",

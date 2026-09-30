@@ -971,7 +971,11 @@ stepUtils.autoExpandMoreButtons(),
 }, {
     trigger: ".o_field_widget[name=qty_producing] input",
     content: 'Set the quantity producing',
-    run: "edit 1 && click body",
+    run: "edit 1",
+},
+{
+    trigger: "body",
+    run: "click",
 },
 ...stepUtils.statusbarButtonsSteps('Produce', "Produce", ".o_statusbar_status .dropdown-toggle:contains('Confirmed')"),
 ...stepUtils.toggleHomeMenu(),

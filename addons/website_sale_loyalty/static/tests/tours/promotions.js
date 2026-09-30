@@ -66,7 +66,11 @@ registry.category("web_tour.tours").add('website_sale_loyalty.promotions', {
         {
             content: "add one Small Cabinet",
             trigger: '#cart_products input.js_quantity',
-            run: "edit 3 && click body",
+            run: "edit 3",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "check reduction amount got recomputed when changing qty",
@@ -75,7 +79,11 @@ registry.category("web_tour.tours").add('website_sale_loyalty.promotions', {
         {
             content: "add more Small Cabinet into cart",
             trigger: '#cart_products input.js_quantity',
-            run: "edit 4 && click body",
+            run: "edit 4",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "check free product is added",
@@ -84,7 +92,11 @@ registry.category("web_tour.tours").add('website_sale_loyalty.promotions', {
         {
             content: "remove one cabinet from cart",
             trigger: '#cart_products input.js_quantity[value="4"]',
-            run: "edit 3 && click body",
+            run: "edit 3",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "check free product is removed",

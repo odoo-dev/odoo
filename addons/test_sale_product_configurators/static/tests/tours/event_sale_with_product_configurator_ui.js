@@ -60,7 +60,11 @@ registry.category("web_tour.tours").add("event_sale_with_product_configurator_to
             content: "Set quantity to 5 then leave input to compute the price",
             trigger:
                 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_sale_product_configurator_qty input',
-            run: "edit 5 && press Tab",
+            run: "edit 5",
+        },
+        {
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_sale_product_configurator_qty input',
+            run: "press Tab",
         },
         configuratorTourUtils.assertPriceTotal("150.00"),
         {

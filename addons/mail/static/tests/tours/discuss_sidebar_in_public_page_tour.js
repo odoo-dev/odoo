@@ -40,7 +40,11 @@ registry.category("web_tour.tours").add("sidebar_in_public_page_tour", {
             content: "Open channel actions",
             trigger:
                 ".o-mail-MessagingMenuItem:has(.o-mail-NotificationItem.o-active:has(:text('Channel 2')))",
-            run: "hover && click [title='Channel Actions']",
+            run: "hover",
+        },
+        {
+            trigger: "[title='Channel Actions']",
+            run: "click",
         },
         {
             trigger: ".o-dropdown-item:contains('Invite People')",

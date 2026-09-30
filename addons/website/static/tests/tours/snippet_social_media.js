@@ -80,7 +80,11 @@ const addNewSocialNetwork = function (optionIndex, url, replaceIcon = false) {
         {
             content: "Change added Option label",
             trigger: `.o_social_media_list tr:eq(${optionIndex}) input`,
-            run: `edit ${url} && click body`,
+            run: `edit ${url}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Ensure new link is changed",
@@ -140,7 +144,11 @@ registerWebsitePreviewTour(
         {
             content: "Change custom social to unsupported link",
             trigger: ".o_social_media_list tr:eq(6) input",
-            run: "edit https://www.paypal.com/abc && click body",
+            run: "edit https://www.paypal.com/abc",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Ensure paypal icon is found",
@@ -176,7 +184,11 @@ registerWebsitePreviewTour(
         {
             content: "Change url of the DB instagram link",
             trigger: ".o_social_media_list tr:eq(2) input",
-            run: "edit https://instagram.com/odoo.official/ && click body",
+            run: "edit https://instagram.com/odoo.official/",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...preventRaceConditionStep,
         ...clickOnSave(),

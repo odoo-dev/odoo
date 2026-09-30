@@ -255,7 +255,11 @@ registry.category("web_tour.tours").add("test_open_automation_from_grouped_kanba
     steps: () => [
         {
             trigger: ".o_kanban_header:contains(test tag)",
-            run: "hover && click .o_kanban_view .o_group_config button.dropdown-toggle",
+            run: "hover",
+        },
+        {
+            trigger: ".o_kanban_view .o_group_config button.dropdown-toggle",
+            run: "click",
         },
         {
             trigger: ".dropdown-menu .o_column_automations",

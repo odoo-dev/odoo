@@ -18,7 +18,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
         },
         ...configuratorTourUtils.saveConfigurator(),
         ...tourUtils.clickSomewhereElse(),
-        tourUtils.editConfiguration("Customizable Desk (TEST) (Aluminium, White)"),
+        ...tourUtils.editConfiguration("Customizable Desk (TEST) (Aluminium, White)"),
         {
             // check updated legs
             trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Aluminium")) ~ input:checked',
@@ -33,7 +33,11 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
         },
         {
             trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) input[type="text"]',
-            run: "edit nice custom value && click .modal-body",
+            run: "edit nice custom value",
+        },
+        {
+            trigger: ".modal-body",
+            run: "click",
         },
         {
             trigger:
@@ -46,11 +50,11 @@ registry.category("web_tour.tours").add('sale_product_configurator_edition_tour'
         },
         ...configuratorTourUtils.saveConfigurator(),
         ...tourUtils.clickSomewhereElse(),
-        tourUtils.editConfiguration("Customizable Desk (TEST) (Custom, Black)"),
-        configuratorTourUtils.setCustomAttribute("Customizable Desk", "Legs", "another nice custom value"),
+        ...tourUtils.editConfiguration("Customizable Desk (TEST) (Custom, Black)"),
+        ...configuratorTourUtils.setCustomAttribute("Customizable Desk", "Legs", "another nice custom value"),
         ...configuratorTourUtils.saveConfigurator(),
         ...tourUtils.clickSomewhereElse(),
-        tourUtils.editConfiguration("Customizable Desk (TEST) (Custom, Black)"),
+        ...tourUtils.editConfiguration("Customizable Desk (TEST) (Custom, Black)"),
         {
             trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) td>div[name="ptal"]:has(div>label:contains("Legs")) label:has(span:contains("Steel")) ~ input',
             run: "click",

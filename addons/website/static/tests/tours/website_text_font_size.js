@@ -134,8 +134,12 @@ function getFontSizeTestSteps(fontSizeClass) {
             trigger: `[data-action-param="${
                 classNameInfo.get(fontSizeClass).scssVariableName
             }"] input`,
-            // TODO: Remove "&& click body"
-            run: `edit ${classNameInfo.get(fontSizeClass).end} && click body`,
+            // TODO: Remove the next "click body" step
+            run: `edit ${classNameInfo.get(fontSizeClass).end}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: `[${fontSizeClass}] Go to blocks tab`,

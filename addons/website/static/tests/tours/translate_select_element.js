@@ -80,7 +80,11 @@ registerWebsitePreviewTour(
         {
             content: "Edit the second option and click on another one to apply the edit",
             trigger: "input.o-hb-input-base[data-id='1']",
-            run: "edit(Second option) && click input.o-hb-input-base[data-id='0']",
+            run: "edit(Second option)",
+        },
+        {
+            trigger: "input.o-hb-input-base[data-id='0']",
+            run: "click",
         },
         ...clickOnSave(),
         {

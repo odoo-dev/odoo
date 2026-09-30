@@ -203,7 +203,11 @@ function testWebsitePageProperties() {
         {
             content: `Change url to /cool-page`,
             trigger: "#url_0",
-            run: `edit cool-page && press Enter`,
+            run: "edit cool-page",
+        },
+        {
+            trigger: "#url_0",
+            run: "press Enter",
         },
         {
             content: "Enable old url redirect",
@@ -269,7 +273,11 @@ function testWebsitePageProperties() {
         {
             content: `Change url back to /new-page`,
             trigger: "#url_0",
-            run: `edit new-page && press Enter`,
+            run: "edit new-page",
+        },
+        {
+            trigger: "#url_0",
+            run: "press Enter",
         },
         {
             content: "Do index",

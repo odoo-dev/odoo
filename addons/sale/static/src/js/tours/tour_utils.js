@@ -113,8 +113,14 @@ export function editLineMatching(productName, text) {
 }
 
 export function editConfiguration(lineName) {
-    return {
-        trigger: `div[name="account_label_text_readonly"]:contains(${lineName})`,
-        run: "hover && click button[data-icon='edit']",
-    };
+    return [
+        {
+            trigger: `div[name="account_label_text_readonly"]:contains(${lineName})`,
+            run: "hover",
+        },
+        {
+            trigger: "button[data-icon='edit']",
+            run: "click",
+        },
+    ];
 }

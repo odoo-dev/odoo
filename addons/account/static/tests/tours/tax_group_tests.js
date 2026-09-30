@@ -127,7 +127,11 @@ registry.category("web_tour.tours").add('account_tax_group', {
     {
         content: "Edit tax value",
         trigger: '.o_tax_group_edit_input input',
-        run: "edit 2 && click body",
+        run: "edit 2",
+    },
+    {
+        trigger: "body",
+        run: "click",
     },
     {
         content: "Check new value of total",

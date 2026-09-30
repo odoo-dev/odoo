@@ -20,7 +20,11 @@ registry
             },
             {
                 trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Bad box!)",
-                run: "hover && click",
+                run: "hover",
+            },
+            {
+                trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Bad box!)",
+                run: "click",
             },
             {
                 trigger: "#chatterRoot:shadow .o-mail-Message-actions",

@@ -55,7 +55,11 @@ registerWebsitePreviewTour(
         {
             content: "Change font size",
             trigger: "[data-action-param='font-size-base'] input",
-            run: `edit ${TARGET_FONT_SIZE} && click body`,
+            run: `edit ${TARGET_FONT_SIZE}`,
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             // Waiting the CSS to be reloaded: the code adds a new assets bundle
@@ -163,7 +167,11 @@ registerWebsitePreviewTour(
         {
             content: "Set pattern width",
             trigger: ".o_theme_tab [data-action-param='body-image-pattern-width'] > input",
-            run: "edit 123 && click body",
+            run: "edit 123",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Ensure pattern width applied",
@@ -188,7 +196,11 @@ registerWebsitePreviewTour(
         {
             content: "Set pattern height",
             trigger: ".o_theme_tab [data-action-param='body-image-pattern-height'] > input",
-            run: "edit 77 && click body",
+            run: "edit 77",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Ensure pattern size applied",

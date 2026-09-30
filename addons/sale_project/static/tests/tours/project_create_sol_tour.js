@@ -10,7 +10,11 @@ registry.category("web_tour.tours").add('project_create_sol_tour', {
     }, {
         trigger: ".o_kanban_record:contains(Test History Project):first",
         content: "Open the project dropdown of project name 'Test History Project'.",
-        run: "hover && click .o_kanban_record:contains(Test History Project):first .o_dropdown_kanban .dropdown-toggle",
+        run: "hover",
+    },
+    {
+        trigger: ".o_kanban_record:contains(Test History Project):first .o_dropdown_kanban .dropdown-toggle",
+        run: "click",
     }, {
         trigger: ".o_kanban_card_manage_settings a:contains('Settings')",
         content: 'Start editing the project.',

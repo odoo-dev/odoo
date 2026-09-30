@@ -25,7 +25,7 @@ registry
             comboConfiguratorTourUtils.decreaseQuantity(),
             comboConfiguratorTourUtils.assertQuantity(1),
             comboConfiguratorTourUtils.assertPrice('25.00'),
-            comboConfiguratorTourUtils.setQuantity(3),
+            ...comboConfiguratorTourUtils.setQuantity(3),
             comboConfiguratorTourUtils.assertQuantity(3),
             comboConfiguratorTourUtils.assertPrice('75.00'),
             // Assert that the combo configurator can only be saved after selecting an item for each
@@ -73,8 +73,8 @@ registry
             },
             // Assert that the combo configurator is opened with the previous selection when the
             // combo is edited.
-            tourUtils.editConfiguration("Combo product"),
-            comboConfiguratorTourUtils.setQuantity(2),
+            ...tourUtils.editConfiguration("Combo product"),
+            ...comboConfiguratorTourUtils.setQuantity(2),
             comboConfiguratorTourUtils.assertComboItemSelected("Product A1"),
             comboConfiguratorTourUtils.assertComboItemSelected("Product B2"),
             comboConfiguratorTourUtils.selectComboItem("Product A2"),

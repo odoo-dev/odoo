@@ -8,10 +8,10 @@ registry.category("web_tour.tours").add('sale_product_configurator_single_custom
         ...stepUtils.goToAppSteps("sale.sale_menu_root", "Go to the Sales App"),
         ...tourUtils.createNewSalesOrder(),
         ...tourUtils.addProduct("Customizable Desk (TEST)"),
-        configuratorTourUtils.setCustomAttribute("Customizable Desk (TEST)", "product attribute", "great single custom value"),
+        ...configuratorTourUtils.setCustomAttribute("Customizable Desk (TEST)", "product attribute", "great single custom value"),
         ...configuratorTourUtils.saveConfigurator(),
         ...tourUtils.clickSomewhereElse(),
-        tourUtils.editConfiguration("Customizable Desk (TEST)"),
+        ...tourUtils.editConfiguration("Customizable Desk (TEST)"),
         {
             trigger: 'table.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] *:contains("Customizable Desk (TEST)")) td>div[name="ptal"]:has(div>label:contains("product attribute")) input[type="text"]',
             run({ queryOne }) {

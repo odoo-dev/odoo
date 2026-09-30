@@ -49,7 +49,11 @@ registerWebsitePreviewTour(
             content: "enter site URL",
             trigger:
                 ".o_customize_tab [data-container-title='Image'] div[data-action-id='setUrl'] input",
-            run: "edit odoo.com && click body",
+            run: "edit odoo.com",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...selectImageSteps,
         {
@@ -61,7 +65,11 @@ registerWebsitePreviewTour(
             content: "remove URL",
             trigger:
                 ".o_customize_tab [data-container-title='Image'] div[data-action-id='setUrl'] input",
-            run: "clear && click body",
+            run: "clear",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...selectImageSteps,
         {
@@ -72,7 +80,11 @@ registerWebsitePreviewTour(
             content: "enter email URL",
             trigger:
                 ".o_customize_tab [data-container-title='Image'] div[data-action-id='setUrl'] input",
-            run: "edit mailto:test@test.com && click body",
+            run: "edit mailto:test@test.com",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...selectImageSteps,
         {
@@ -84,7 +96,11 @@ registerWebsitePreviewTour(
             content: "enter phone URL",
             trigger:
                 ".o_customize_tab [data-container-title='Image'] div[data-action-id='setUrl'] input",
-            run: "edit tel:555-2368 && click body",
+            run: "edit tel:555-2368",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...selectImageSteps,
         {
@@ -96,7 +112,11 @@ registerWebsitePreviewTour(
             content: "remove URL",
             trigger:
                 ".o_customize_tab [data-container-title='Image'] div[data-action-id='setUrl'] input",
-            run: "clear && click body",
+            run: "clear",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...selectImageSteps,
         {

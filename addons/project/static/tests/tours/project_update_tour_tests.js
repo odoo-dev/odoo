@@ -84,7 +84,11 @@ registry.category("web_tour.tours").add('project_update_tour', {
     run: "click",
 }, {
     trigger: ".o_kanban_group:nth-child(2) .o_kanban_header",
-    run: "hover && click .o_kanban_group:nth-child(2) .o_kanban_header .dropdown-toggle",
+    run: "hover",
+},
+{
+    trigger: ".o_kanban_group:nth-child(2) .o_kanban_header .dropdown-toggle",
+    run: "click",
 }, {
     trigger: ".dropdown-item.o_group_edit",
     run: "click",

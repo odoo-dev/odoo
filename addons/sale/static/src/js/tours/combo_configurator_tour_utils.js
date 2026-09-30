@@ -104,11 +104,17 @@ function decreaseQuantity() {
 }
 
 function setQuantity(quantity) {
-    return {
-        content: `Set the combo quantity to ${quantity}`,
-        trigger: '.sale-combo-configurator-dialog input[name="sale_quantity"]',
-        run: `edit ${quantity} && click .modal-body`,
-    };
+    return [
+        {
+            content: `Set the combo quantity to ${quantity}`,
+            trigger: '.sale-combo-configurator-dialog input[name="sale_quantity"]',
+            run: `edit ${quantity}`,
+        },
+        {
+            trigger: ".modal-body",
+            run: "click",
+        },
+    ];
 }
 
 function assertQuantity(quantity) {

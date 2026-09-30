@@ -8,13 +8,17 @@ registry
         steps: () => [
             {
                 trigger: '.oe_product_cart:contains("Packaged product")',
-                run: `hover && click .oe_product_cart:contains("Packaged product") button[name="add_to_cart"]`,
+                run: "hover",
+            },
+            {
+                trigger: `.oe_product_cart:contains("Packaged product") button[name="add_to_cart"]`,
+                run: "click",
             },
             configuratorTourUtils.assertProductPrice("Packaged product", '100.00'),
             websiteConfiguratorTourUtils.assertProductStrikethroughPrice(
                 "Packaged product", '200.00'
             ),
-            configuratorTourUtils.setProductUoM("Packaged product", "Pack of 6"),
+            ...configuratorTourUtils.setProductUoM("Packaged product", "Pack of 6"),
             configuratorTourUtils.assertProductPrice("Packaged product", '600.00'),
             websiteConfiguratorTourUtils.assertProductStrikethroughPrice(
                 "Packaged product", '1,200.00'

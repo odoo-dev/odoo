@@ -234,7 +234,12 @@ registry.category("web_tour.tours").add('project_tour', {
     isActive: ["auto"],
     trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_create_input input",
     content: markup(_t("Give the sub-task a <b>name</b>")),
-    run: "edit Newer Sub-task && click body",
+    run: "edit Newer Sub-task",
+},
+{
+    isActive: ["auto"],
+    trigger: "body",
+    run: "click",
 }, {
     isActive: ["auto"],
     trigger: ".o_kanban_record .o_widget_subtask_kanban_list .subtask_list_row:contains(newer sub-task) .o_field_project_task_state_selection button",

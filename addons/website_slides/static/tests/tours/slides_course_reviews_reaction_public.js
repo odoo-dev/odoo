@@ -18,7 +18,11 @@ registry.category("web_tour.tours").add("course_reviews_reaction_public", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Bad course!)",
-            run: "hover && click",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Bad course!)",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message .o-mail-Message-actions",

@@ -66,7 +66,11 @@ registry.category("web_tour.tours").add("course_reviews", {
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Mid course!)",
-            run: "hover && click",
+            run: "hover",
+        },
+        {
+            trigger: "#chatterRoot:shadow .o-mail-Message-textContent:contains(Mid course!)",
+            run: "click",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message [title='Add a Reaction']",

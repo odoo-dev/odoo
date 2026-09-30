@@ -27,11 +27,17 @@ const ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM = [
 ];
 const essentialFieldsForDefaultFormFillInSteps = [];
 for (const data of ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM) {
-    essentialFieldsForDefaultFormFillInSteps.push({
-        content: "Enter data in model-required field",
-        trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]`,
-        run: `edit ${data.value} && press Tab`,
-    });
+    essentialFieldsForDefaultFormFillInSteps.push(
+        {
+            content: "Enter data in model-required field",
+            trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]`,
+            run: `edit ${data.value}`,
+        },
+        {
+            trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]`,
+            run: "press Tab",
+        }
+    );
     essentialFieldsForDefaultFormFillInSteps.push({
         trigger: `:iframe .s_website_form_model_required .s_website_form_input[name="${data.name}"]:value(${data.value})`,
     });
@@ -159,11 +165,17 @@ const addField = function (
     ];
     let testText = ":iframe .s_website_form_field:last";
     if (display.condition) {
-        ret.push({
-            content: "Set the visibility condition",
-            trigger: ".o_customize_tab [data-name='hidden_condition_additional_text'] input",
-            run: `edit ${display.condition} && press Tab`,
-        });
+        ret.push(
+            {
+                content: "Set the visibility condition",
+                trigger: ".o_customize_tab [data-name='hidden_condition_additional_text'] input",
+                run: `edit ${display.condition}`,
+            },
+            {
+                trigger: ".o_customize_tab [data-name='hidden_condition_additional_text'] input",
+                run: "press Tab",
+            }
+        );
     }
     const addToggleRequiredStep = (required = true) =>
         ret.push({
@@ -407,17 +419,29 @@ registerWebsitePreviewTour(
         {
             content: "Change Option 1 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
-            run: "edit Iphone && press Tab",
+            run: "edit Iphone",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
+            run: "press Tab",
         },
         {
             content: "Change Option 2 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
-            run: "edit Galaxy S && press Tab",
+            run: "edit Galaxy S",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
+            run: "press Tab",
         },
         {
             content: "Change first Option 3 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
-            run: "edit Xperia && press Tab",
+            run: "edit Xperia",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
+            run: "press Tab",
         },
         {
             content: "Click on Add new Checkbox",
@@ -427,7 +451,11 @@ registerWebsitePreviewTour(
         {
             content: "Change added Option label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(3)",
-            run: "edit Wiko Stairway && press Tab",
+            run: "edit Wiko Stairway",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(3)",
+            run: "press Tab",
         },
         {
             content: "Check the resulting field",
@@ -487,17 +515,29 @@ registerWebsitePreviewTour(
         {
             content: "Change Option 1 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
-            run: "edit After-sales Service && press Tab",
+            run: "edit After-sales Service",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
+            run: "press Tab",
         },
         {
             content: "Change Option 2 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
-            run: "edit Invoicing Service && press Tab",
+            run: "edit Invoicing Service",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
+            run: "press Tab",
         },
         {
             content: "Change first Option 3 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
-            run: "edit Development Service && press Tab",
+            run: "edit Development Service",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
+            run: "press Tab",
         },
         {
             content: "Click on Add new Checkbox",
@@ -530,17 +570,29 @@ registerWebsitePreviewTour(
         {
             content: "Change Option 1 Label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
-            run: "edit Germany && press Tab",
+            run: "edit Germany",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(0)",
+            run: "press Tab",
         },
         {
             content: "Change Option 2 Label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
-            run: "edit Belgium && press Tab",
+            run: "edit Belgium",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(1)",
+            run: "press Tab",
         },
         {
             content: "Change first Option 3 label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
-            run: "edit France && press Tab",
+            run: "edit France",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(2)",
+            run: "press Tab",
         },
         {
             content: "Click on Add new Checkbox",
@@ -551,7 +603,11 @@ registerWebsitePreviewTour(
             content: "Change last Option label",
             trigger: ".o_we_table_wrapper table input[name='display_name']:eq(3)",
             // TODO: Fix code to avoid blur event
-            run: "edit Canada && press Tab",
+            run: "edit Canada",
+        },
+        {
+            trigger: ".o_we_table_wrapper table input[name='display_name']:eq(3)",
+            run: "press Tab",
         },
         {
             content: "Remove Germany Option",
@@ -675,7 +731,11 @@ registerWebsitePreviewTour(
         {
             content: "Insert default value",
             trigger: "[data-label='Default Value'] input",
-            run: "edit prefilled && press Tab",
+            run: "edit prefilled",
+        },
+        {
+            trigger: "[data-label='Default Value'] input",
+            run: "press Tab",
         },
         ...clickOnSave(),
         {
@@ -781,7 +841,11 @@ registerWebsitePreviewTour(
         {
             content: "Write anything in C",
             trigger: `:iframe ${triggerFieldByLabel("field C")} input`,
-            run: "edit Mellon && press Tab",
+            run: "edit Mellon",
+        },
+        {
+            trigger: `:iframe ${triggerFieldByLabel("field C")} input`,
+            run: "press Tab",
         },
         {
             content: "Check that field B is visible, but field A is not",

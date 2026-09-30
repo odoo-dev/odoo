@@ -8,7 +8,11 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         {
             content: "add first product 'Color T-Shirt' in a comparison list",
             trigger: '.oe_product_cart:contains("Color T-Shirt")',
-            run: "hover && click .oe_product_cart:contains(Color T-Shirt) .o_add_compare",
+            run: "hover",
+        },
+        {
+            trigger: ".oe_product_cart:contains(Color T-Shirt) .o_add_compare",
+            run: "click",
         },
         {
             content: "check compare button contains one product",
@@ -17,7 +21,11 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         {
             content: "add second product 'Color Pants' in a comparison list",
             trigger: '.oe_product_cart:contains("Color Pants")',
-            run: "hover && click .oe_product_cart:contains(Color Pants) .o_add_compare",
+            run: "hover",
+        },
+        {
+            trigger: ".oe_product_cart:contains(Color Pants) .o_add_compare",
+            run: "click",
         },
         {
             content: "check that the compare button contains two products",
@@ -43,7 +51,11 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         {
             content: "re-add 'Color T-Shirt' in comparison list",
             trigger: '.oe_product_cart:contains("Color T-Shirt")',
-            run: "hover && click .oe_product_cart:contains(Color T-Shirt) .o_add_compare",
+            run: "hover",
+        },
+        {
+            trigger: ".oe_product_cart:contains(Color T-Shirt) .o_add_compare",
+            run: "click",
         },
         // test from product page
         {

@@ -31,7 +31,12 @@ registry.category("web_tour.tours").add("im_livechat.looking_for_help_discuss_ca
         },
         {
             trigger: ".o-mail-MessagingMenuItem:has(:text('Visitor Accounting'))",
-            run: "hover && click .o-mail-MessagingMenuItem:has(:text('Visitor Accounting')) [title='Chat Actions']",
+            run: "hover",
+        },
+        {
+            trigger:
+                ".o-mail-MessagingMenuItem:has(:text('Visitor Accounting')) [title='Chat Actions']",
+            run: "click",
         },
         {
             trigger:

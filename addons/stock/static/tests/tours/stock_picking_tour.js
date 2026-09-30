@@ -39,7 +39,11 @@ registry.category("web_tour.tours").add('test_generate_serial_1', {  steps: () =
     },
     {
         trigger: ".modal div[name=next_serial_count] input",
-        run: "edit 5 && click body",
+        run: "edit 5",
+    },
+    {
+        trigger: "body",
+        run: "click",
     },
     {
         trigger: ".modal .btn-primary:contains('Validate')",
@@ -410,7 +414,11 @@ registry.category("web_tour.tours").add("test_add_new_line_in_detailled_op", {
         },
         {
             trigger: ".modal-content .o_data_row:nth-child(1) .o_field_widget[name=quantity] input",
-            run: "edit 8 && press Tab",
+            run: "edit 8",
+        },
+        {
+            trigger: ".modal-content .o_data_row:nth-child(1) .o_field_widget[name=quantity] input",
+            run: "press Tab",
         },
         ...checkTableStructure(
             [
@@ -488,7 +496,11 @@ registry.category("web_tour.tours").add("test_add_new_line_in_detailled_op", {
         {
             trigger:
                 ".modal-content .o_data_row:has(.o_field_pick_from input:value(WH/Stock - LOT002)) .o_data_cell[name=quantity] input",
-            run: "edit 15 && click body",
+            run: "edit 15",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...checkTableStructure(
             [

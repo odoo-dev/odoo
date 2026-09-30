@@ -20,7 +20,11 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
         {
             content: "Write something in composer",
             trigger: ".o-mail-Composer-input",
-            run: "edit blahblah @Not && click body",
+            run: "edit blahblah @Not",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         {
             content: "Mention a partner",

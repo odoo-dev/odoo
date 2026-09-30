@@ -52,7 +52,12 @@ registerWebsitePreviewTour(
             content: "insert file name",
             trigger:
                 ".modal:not(.o_inactive_modal):contains(new page) .modal-body input[type=text]",
-            run: "edit rte_translator.xml && press Enter",
+            run: "edit rte_translator.xml",
+        },
+        {
+            trigger:
+                ".modal:not(.o_inactive_modal):contains(new page) .modal-body input[type=text]",
+            run: "press Enter",
         },
         {
             trigger:

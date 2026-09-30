@@ -110,7 +110,11 @@ registerWebsitePreviewTour(
         {
             content: "Describe it again in the default language, which delays its translation",
             trigger: ".hb-row[data-label='Description'] input",
-            run: "edit a photograph of the sea && click body",
+            run: "edit a photograph of the sea",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         ...clickOnSave(),
         ...switchToLang("fr"),

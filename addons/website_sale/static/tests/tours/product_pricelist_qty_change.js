@@ -7,7 +7,11 @@ registry.category('web_tour.tours').add('website_sale.product_pricelist_qty_chan
         {
             content: "Change quantity to 5",
             trigger: 'input.quantity',
-            run: 'edit 5 && click body',
+            run: "edit 5",
+        },
+        {
+            trigger: "body",
+            run: "click",
         },
         tourUtils.assertProductPagePrice('10.00'),
     ],
