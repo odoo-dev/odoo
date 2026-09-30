@@ -3,6 +3,7 @@
 
 Run without Odoo:  python3 -m pytest addons/l10n_cn_edi_aisino/tests/test_sm4_envelope.py -v
 """
+import base64
 import os
 import sys
 
@@ -169,3 +170,12 @@ def test_envelope_round_trips_without_native_sm4(monkeypatch):
         request = env.build_request('x', payload, IDENTITY, PLATFORM, TAX_NO,
                                     timestamp=TS, zip_code=zip_code)
         assert env.verify_and_decrypt(dict(request, code='1000'), IDENTITY, PLATFORM) == payload
+
+
+def test_datagram_carries_the_ciphertext_as_hex():
+    """The gateway decrypts base64(hex(sm4(json))), as the Java demo's hutool encryptHex does; raw bytes get 1001."""
+    key = env.derive_sm4_key(IDENTITY, PLATFORM, TS)
+    req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS, zip_code='0')
+    carried = base64.b64decode(req['datagram']).decode('ascii')
+    assert all(c in '0123456789abcdef' for c in carried)
+    assert env.sm4_decrypt(bytes.fromhex(carried), key) == b'{"a":1}'

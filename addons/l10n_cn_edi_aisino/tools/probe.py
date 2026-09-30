@@ -209,11 +209,12 @@ class Probe:
         self._require_creds()
         print('== auth (envelope against the real server) ==')
         code = CODES['tax_codes']
-        elapsed, status, body = self.call(code, {'pageNo': 1, 'pageSize': 1})
+        # 2.1.27 (p.126): query_type + product_value are mandatory; a name lookup is the smallest valid query.
+        elapsed, status, body = self.call(code, {'query_type': '1', 'product_value': '软件开发服务'})
         print(f'  {code} -> HTTP {status} in {elapsed:.2f}s')
         print(f'  {json.dumps(body, ensure_ascii=False)[:400] if isinstance(body, dict) else str(body)[:400]}')
         outer = body.get('code') if isinstance(body, dict) else None
-        sig_error = outer in ('9995', '9996') or 'sign' in str(body).lower()
+        sig_error = outer in ('9995', '9996') or '加解密失败' in str(body.get('msg', '') if isinstance(body, dict) else body)
         self.findings['auth'] = {'status': status, 'outer_code': outer,
                                  'signature_rejected': bool(sig_error)}
         if sig_error:
@@ -345,7 +346,7 @@ class Probe:
         # The envelope wraps the business answer; unwrap it when the response is encrypted.
         if isinstance(body, dict) and body.get('datagram'):
             try:
-                inner = env.verify_and_decrypt(body, self.identity, self.platform)
+                inner = env.verify_and_decrypt(body, self.identity, self.platform, strict=False)
                 print(f'  decrypted: {json.dumps(inner, ensure_ascii=False)[:800]}')
                 return inner
             except Exception as exc:  # noqa: BLE001 - a bad response is a finding too
