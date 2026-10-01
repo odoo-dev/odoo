@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+   <t t-name="hr_holidays.YearlyDayField">
+      <div>
+         <select class="o_input o_field_widget o_field_selection" t-att-value="this.props.record.data.yearly_day"  t-on-change="(ev) => this.onDayChanged(this.props.record, ev)">
+            <t t-foreach="this.listAvailableDays" t-as="option" t-key="option.value">
+               <option t-att-value="option.value" t-att-selected="this.props.record.data.yearly_day === option.value" t-out="option.label"/>
+            </t>
+         </select>
+      </div>
+   </t>
+</templates>
