@@ -111,6 +111,7 @@ export class PresetInfoPopup extends Component {
                 partner?.country_id?.phone_code ||
                 this.selfOrder.config.company_id.country_id.phone_code ||
                 "",
+            phoneCountryId: partner?.country_id?.id || companyCountryId || null,
             phoneLocal: "",
             phoneError: "",
             street: partner?.street || "",
@@ -295,23 +296,29 @@ export class PresetInfoPopup extends Component {
     }
 
     get selectedCountry() {
-        return this.selfOrder.models["res.country"]
-            .getAll()
-            .find((c) => c.phone_code === this.state.phoneCode);
+        return this.selfOrder.models["res.country"].get(this.state.phoneCountryId)
+        //     this.selfOrder.models["res.country"]
+        //         .getAll()
+        //         .find((c) => c.phone_code === this.state.phoneCode)
+        // );
     }
 
     flagEmoji(code) {
+        if (code === "XI") {
+            code = "GB";
+        }
         return [...code.toUpperCase()]
             .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
             .join("");
     }
 
     getFullPhone() {
-        return this.state.phoneLocal.trim()
-            ? `+${this.state.phoneCode}${this.state.phoneLocal.trim()}`
-            : "";
+        const trimmedPhoneLocal = this.state.phoneLocal.trim();
+        if (trimmedPhoneLocal.startsWith(`+${this.phoneCode}`)) {
+            return trimmedPhoneLocal;
+        }
+        return trimmedPhoneLocal && this.phoneCode ? `+${this.phoneCode}${trimmedPhoneLocal}` : "";
     }
-
     get validSelection() {
         return this.selfOrder.isValidSelection(this.selfOrder.currentOrder.raw.preset_time, {
             id: parseInt(this.state.selectedPartnerId),
