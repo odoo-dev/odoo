@@ -175,6 +175,7 @@ export class MenuRow extends Component {
     }
 
     createPage() {
+        debugger;
         this.props.createPage(this.props.menu.fields["id"]);
     }
 }

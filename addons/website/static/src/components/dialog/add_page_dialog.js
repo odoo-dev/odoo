@@ -30,8 +30,8 @@ import {
     adaptDarkPaletteContent,
     isDarkColorPalette,
 } from "@website/components/dialog/dark_palette_utils";
-import { onceAllImagesLoaded } from "@website/utils/images";
 import { slugify } from "@website/js/utils";
+import { onceAllImagesLoaded } from "@website/utils/images";
 
 const NO_OP = () => {};
 
