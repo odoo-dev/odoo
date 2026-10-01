@@ -18,8 +18,15 @@ const getAvailableResModels = memoize((_null, orm) =>
     orm.call("mail.activity.schedule", "get_model_options")
 );
 
+/** web.ModelSelector renders a readonly input instead of its autocomplete on small
+ * screens, leaving no way to pick a model. The linked record is required as soon as
+ * the activity is assigned to another user, so keep the autocomplete on mobile. */
+class AlwaysEditableModelSelector extends ModelSelector {
+    static template = "mail.ActivityModelSelector.ModelSelector";
+}
+
 class ActivityModelSelector extends Component {
-    static components = { ModelSelector };
+    static components = { ModelSelector: AlwaysEditableModelSelector };
     static template = "mail.ActivityModelSelector";
     static props = standardFieldProps;
 
