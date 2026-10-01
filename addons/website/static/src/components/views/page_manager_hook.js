@@ -32,8 +32,10 @@ export function usePageManager({ resModel, createAction }) {
 
     async function createWebsiteContent() {
         if (resModel === "website.page") {
+            debugger;
             return dialog.add(AddPageDialog, {
-                websiteId: state.activeWebsite.id,
+                websiteId: 3,
+                // websiteId: state.activeWebsite.id,
             });
         }
         if (createAction) {

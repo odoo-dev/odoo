@@ -30,8 +30,8 @@ import {
     adaptDarkPaletteContent,
     isDarkColorPalette,
 } from "@website/components/dialog/dark_palette_utils";
-import { onceAllImagesLoaded } from "@website/utils/images";
 import { slugify } from "@website/js/utils";
+import { onceAllImagesLoaded } from "@website/utils/images";
 
 const NO_OP = () => {};
 
@@ -56,6 +56,7 @@ export class AddPageConfirmDialog extends Component {
     autofocusRef = signal.ref();
 
     setup() {
+        debugger;
         super.setup();
         useAutofocus({ ref: this.autofocusRef });
 
@@ -514,6 +515,7 @@ export class AddPageDialog extends Component {
     autofocusRef = signal.ref();
 
     setup() {
+        debugger;
         super.setup();
         useAutofocus({ ref: this.autofocusRef });
 
@@ -596,6 +598,7 @@ export class AddPageDialog extends Component {
                 websiteId: this.props.websiteId,
             });
         }
+        debugger;
         this.props.onAddPage({ createdUrl: data.url });
         this.props.close();
     }

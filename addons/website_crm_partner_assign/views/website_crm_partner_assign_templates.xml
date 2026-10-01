@@ -142,7 +142,7 @@
 
 <template id="ref_country" inherit_id="website_partnership.search_setting" name="World Map">
     <xpath expr="//div[hasclass('o_wcrm_search')]" position="inside">
-        <t t-if="google_maps_api_key">
+        <!--<t t-if="google_maps_api_key">-->
             <!-- modal for large map -->
             <div role="dialog" class="modal fade partner_map_modal" tabindex="-1">
               <div class="modal-dialog modal-lg">
@@ -165,7 +165,7 @@
                     <i class="oi" data-icon="location_on" role="img" aria-label="Open map" title="Open map"/>
                 </button>
             </div>
-        </t>
+        <!--</t>-->
     </xpath>
 </template>
 

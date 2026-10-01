@@ -290,6 +290,7 @@ export class WebsiteBuilderClientAction extends Component {
         if (keepUrl) {
             params.forcedURL = this.websiteService.currentLocation;
         }
+        debugger;
         this.dialog.add(AddPageDialog, params);
     }
 
