@@ -460,6 +460,13 @@ class AccountEdiCii(models.AbstractModel):
             },
         }
 
+    def _get_france_tax_unit(self, company):
+        if 'siret' in company._fields and 'account_tax_unit_ids' in company._fields:
+            return company.account_tax_unit_ids.filtered(
+                lambda u: u.country_id.code in self.env['res.company']._get_france_country_codes()
+            )[:1]
+        return None
+
     def _cii_get_seller_trade_party_node(self, vals):
         invoice = vals['invoice']
         supplier = vals['supplier']
@@ -470,8 +477,14 @@ class AccountEdiCii(models.AbstractModel):
             siret = commercial_partner.siret[:9]
             scheme_id = "0002"
         supplier_vat = invoice.fiscal_position_id.foreign_vat or commercial_partner.vat
+        member_vat = None
+        if tax_unit := self._get_france_tax_unit(vals['company']):
+            supplier_vat = tax_unit.vat
+            if commercial_partner.vat and commercial_partner.vat != '/':
+                member_vat = commercial_partner.vat
         return self._cii_get_partner_trade_party_node(vals, {
             'gln': False,
+            'member_vat': member_vat,
             'name': supplier.name,
             'partner_specified_legal_organization': siret,
             'partner_specified_legal_organization_scheme': scheme_id,
@@ -493,11 +506,19 @@ class AccountEdiCii(models.AbstractModel):
         })
 
     def _cii_get_partner_trade_party_node(self, vals, partner_values):
-        return {
-            'ram:ID': {
+        id_nodes = []
+        if partner_values.get('gln'):
+            id_nodes.append({
                 'schemeID': '0088',
                 '_text': partner_values['gln'],
-            } if partner_values['gln'] else None,
+            })
+        if partner_values.get('member_vat'):
+            id_nodes.append({
+                'schemeID': '0231',
+                '_text': partner_values['member_vat'],
+            })
+        return {
+            'ram:ID': id_nodes or None,
             'ram:Name': {'_text': partner_values['name']},
             'ram:SpecifiedLegalOrganization': {
                 'ram:ID': {
