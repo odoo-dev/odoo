@@ -40,6 +40,11 @@ export class SearchBarMenu extends Component {
     scope = useScope();
 
     setup() {
+        console.groupCollapsed("%c SearchBarMenu :: setup()", "background: #adf;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         this.facet_icons = FACET_ICONS;
         this.hasTouch = hasTouch();
         // Filter

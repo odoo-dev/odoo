@@ -10,7 +10,6 @@
                 tabindex="0"
                 t-on-click="() => this.onFacetLabelClick(facet)"
             >
-
                 <!-- Special navigation facets for filters with date="..." and relative dates (eg Last Week) -->
                 <t t-if="facet.type === 'relative'" t-call="web.SearchBar.NavigationFacetIcon"/>
                 <t t-else="" t-call="web.SearchBar.NormalFacetIcon"/>

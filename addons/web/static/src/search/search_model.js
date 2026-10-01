@@ -818,6 +818,7 @@ export class SearchModel extends EventBus {
     }
 
     async splitAndAddDomain(domain, groupId) {
+        console.warn("splitAndAddDomain", domain, groupId);
         const group = groupId ? this._getGroups().find((g) => g.id === groupId) : null;
         let context;
         if (group) {
@@ -858,6 +859,7 @@ export class SearchModel extends EventBus {
             if (context) {
                 preFilter.context = context;
             }
+            console.log("   > preFilter", preFilter);
             return preFilter;
         });
 
