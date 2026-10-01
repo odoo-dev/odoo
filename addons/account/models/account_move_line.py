@@ -1407,6 +1407,7 @@ class AccountMoveLine(models.Model):
         if self.product_id or not self.account_id:
             self._conditional_add_to_compute('account_id', lambda line: (
                 line.display_type == 'product' and line.move_id.is_invoice(True)
+                and (not line.account_id or (line._origin and line.product_id != line._origin.product_id))
             ))
 
     # TODO: delete in master
