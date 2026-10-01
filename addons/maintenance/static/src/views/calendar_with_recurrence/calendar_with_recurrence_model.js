@@ -25,7 +25,7 @@ export class CalendarWithRecurrenceModel extends CalendarModel {
         for (const rawRecord of rawRecords) {
             records[recordsCounter] = {
                 ...this.normalizeRecord(rawRecord),
-                id: recordsCounter,
+                id: rawRecord.id,
             };
             recordsCounter++;
             if (rawRecord.recurring_maintenance && !['done', 'cancelled'].includes(rawRecord.state)) {
@@ -47,7 +47,7 @@ export class CalendarWithRecurrenceModel extends CalendarModel {
                         rawRecordCopy.schedule_end = serializeDateTime(endDate);
                         records[recordsCounter] = {
                             ...this.normalizeRecord(rawRecordCopy),
-                            id: recordsCounter,
+                            id: rawRecord.id,
                             isRecurrent: true,
                         };
                         recordsCounter++;
