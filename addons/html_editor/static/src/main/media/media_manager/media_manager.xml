@@ -80,6 +80,8 @@
                 </div>
             </div>
             <div class="media-manager-content d-md-flex flex-column flex-grow-1 min-w-0 overflow-hidden">
+<!--                <SearchBar toggler="this.searchBarToggler" autofocus="this.firstLoad"/>-->
+                    <SearchBar />
                 <div class="media-grid">
                     <t t-if="this.state.isLoading" >
                         <div class="media-manager-content-loading"><span class="fa fa-spinner fa-spin"></span></div>

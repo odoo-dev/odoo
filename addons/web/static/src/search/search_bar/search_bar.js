@@ -71,6 +71,11 @@ export class SearchBar extends Component {
     );
 
     setup() {
+        console.groupCollapsed("%c SearchBar :: setup()", "background: #9ff;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
         this.dialogService = useService("dialog");
         this.offlinePlugin = usePlugin(OfflinePlugin);
         this.fields = this.env.searchModel.searchViewFields;
@@ -296,7 +301,6 @@ export class SearchBar extends Component {
                 items.push(...this.subItems[searchItem.id]);
             }
         }
-
         return items;
     }
 

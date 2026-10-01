@@ -166,6 +166,7 @@ function getNode(element, operation) {
 function getElement(element, operation) {
     const node = getNode(element, operation);
     if (!node) {
+        console.log("base element tree : ", element);
         throw new Error(`Element '${operation.outerHTML}' cannot be located in element tree`);
     }
     if (!(node instanceof Element)) {

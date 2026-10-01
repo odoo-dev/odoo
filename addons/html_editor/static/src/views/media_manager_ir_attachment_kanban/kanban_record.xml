@@ -1,0 +1,33 @@
+<templates>
+
+    <t t-name="ir.attachment.MediaManagerKanbanRecord">
+        <article
+            t-att-class="this.getCardClasses()"
+            t-att-data-id="this.props.canResequence and this.props.record.id"
+            t-att-tabindex="this.props.record.model.useSampleModel ? -1 : 0"
+            t-on-click="this.onGlobalClick"
+            t-ref="this.rootRef">
+            <t t-call="{{ this.templates[this.constructor.CARD_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
+            <div class="o_record_box_star_bg o_record_interactive position-absolute">
+                <span class="oi" data-icon="star_filled"></span>
+            </div>
+            <div class="o_record_box_star o_record_interactive position-absolute" t-on-click="this.toggleStarred">
+                <span t-if="this.state.starred" class="oi" data-icon="star_filled"></span>
+                <span t-else="" class="oi" data-icon="star"></span>
+            </div>
+
+            <div class="o_dropdown_kanban bg-transparent position-absolute end-0 top-0 w-auto">
+                <Dropdown menuClass="'o-dropdown--kanban-record-menu'" position="'bottom-end'">
+                    <button class="btn btn-light o-no-caret px-1" title="Dropdown menu">
+                        <i class="oi oi-lg" data-icon="more_vert"/>
+                    </button>
+                    <t t-set-slot="content">
+                        <DropdownItem onSelected="() => this.previewRecord()">Preview image</DropdownItem>
+                        <hr />
+                        <DropdownItem onSelected="() => this.deleteItem()"><span class="oi" data-icon="delete"></span> Delete</DropdownItem>
+                    </t>
+                </Dropdown>
+            </div>
+        </article>
+    </t>
+</templates>

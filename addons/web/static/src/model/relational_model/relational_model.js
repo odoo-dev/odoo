@@ -203,6 +203,7 @@ export class RelationalModel extends Model {
      * @type {Model["load"]}
      */
     async load(params = {}) {
+        console.warn("load() :: this", this);
         if (this.orm.isSample && this.initialSampleGroups?.length) {
             this.orm.setGroups(this.initialSampleGroups);
         }

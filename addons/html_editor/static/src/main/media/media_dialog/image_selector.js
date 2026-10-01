@@ -91,7 +91,7 @@ export class ImageSelector extends FileSelector {
         this.fileMimetypes = IMAGE_MIMETYPES.join(",");
         this.isImageField = Boolean(
             this.props.media?.closest("[data-oe-type=image]") ||
-            this.imageSelectorProps.addFieldImage
+                this.imageSelectorProps.addFieldImage
         );
         this.isProcessingClick = false;
     }
@@ -193,6 +193,7 @@ export class ImageSelector extends FileSelector {
     }
 
     async validateUrl(url) {
+        console.warn("validateUrl", url);
         let { isValidUrl, path } = super.validateUrl(url);
         const isValidFileFormat =
             isValidUrl &&
