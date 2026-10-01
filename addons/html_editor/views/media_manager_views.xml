@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="mediamanager_media_search">
+            <field name="name">ir.attachment.mediamanager.search</field>
+            <field name="model">ir.attachment</field>
+            <field name="arch" type="xml">
+                <search string="Media">
+                    <field name="name" filter_domain="[('name','ilike',self)]" string="Attachment"/>
+                    <field name="create_date"/>
+                    <filter name="my_media_filter"
+                            string="My Media(s)"
+                            domain="[('create_uid','=',uid)]"
+                            help="Filter on my media"/>
+                    <filter name="url_filter" string="URL" domain="[('type', '=', 'url')]"/>
+                    <separator/>
+                    <field name="create_uid" string="Created by"/>
+                    <field name="type"/>
+                    <group>
+                        <filter name="owner" string="Owner" domain="[]" context="{'group_by':'create_uid'}"/>
+                        <filter string="Type" name="type" domain="[]" context="{'group_by':'type'}" groups="base.group_no_one"/>
+                        <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Creation Date" name="creation_month" domain="[]" context="{'group_by':'create_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="mediamanager_media_kanban">
+            <field name="name">ir.attachment.mediamanager.kanban</field>
+            <field name="model">ir.attachment</field>
+            <field name="arch" type="xml">
+                <kanban edit="false" import="false" class="media-manager-kanban-view" js_class="media_manager_kanban">
+                    <field name="id"/>
+                    <field name="mimetype"/>
+                    <field name="type"/>
+                    <field name="public"/>
+                    <field name="file_size"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="local_url"/>
+                    <field name="image_width"/>
+                    <field name="image_height"/>
+                    <field name="url"/>
+                    <templates>
+                        <t t-name="card" class="o_kanban_attachment">
+                            <aside class="o_kanban_image">
+                                <div class="o_kanban_image_wrapper">
+                                    <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
+                                    <div t-if="record.type.raw_value == 'url'" class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
+                                    <img t-elif="webimage"
+                                         t-attf-src="#{record.local_url.raw_value}"
+                                         t-attf-alt="#{record.description.raw_value or record.name.raw_value or 'Image'}"
+                                         t-att-width="record.image_width.value"
+                                         t-att-height="record.image_height.value"/>
+                                    <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
+                                </div>
+                            </aside>
+                            <main class="position-absolute" >
+                                <div class="o_kanban_details_wrapper d-flex flex-column">
+                                    <div class="text-truncate" t-att-title="record.display_name.raw_value">
+                                        <field name="display_name" />
+                                    </div>
+                                    <div t-if="record.type.raw_value == 'url'">
+                                        <i class="fa fa-globe" aria-label="Document url"/> <field name="url" widget="url"/>
+                                    </div>
+                                    <div class="d-flex">
+                                        <small class="text-truncate">
+                                            <field name="create_date"/>
+                                        </small>
+                                        <field name="create_uid" widget="many2one_avatar_user" class="ms-auto"/>
+                                    </div>
+                                </div>
+                            </main>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -2,43 +2,27 @@ import { useRef } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { useService, useChildRef } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
+import { SearchBar } from "@web/search/search_bar/search_bar";
 
 import { Component, onMounted, proxy } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { rpc } from "@web/core/network/rpc";
-import { AttachmentError } from "@html_editor/main/media/media_dialog/file_selector";
+import { AttachmentError } from "@html_editor/main/media/media_dialog/file_selector"; // todo : remove dependancy
 
-export const IMAGE_MIMETYPES = [
-    "image/jpg",
-    "image/jpeg",
-    "image/jpe",
-    "image/png",
-    "image/svg+xml",
-    "image/gif",
-    "image/webp",
-];
-export const VIDEO_MIMETYPES = ["video/mp4", "video/webm", "video/ogg"]; // todo : to validate
+import {
+    QueryHelper,
+    IMAGE_MIMETYPES,
+    VIDEO_MIMETYPES,
+    ATTACHMENT_FIELDS,
+    QUERRY_ORDERS_BY,
+} from "@html_editor/main/media/media_manager/helpers";
+import { useModel, Model } from "@web/model/model";
 
-export const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".jpe", ".png", ".svg", ".gif", ".webp"];
-
-export const ATTACHMENT_FIELDS = [
-    "id",
-    "name",
-    "mimetype",
-    "description",
-    "checksum",
-    "url",
-    "type",
-    "res_id",
-    "res_model",
-    "public",
-    "access_token",
-    "image_src",
-    "image_width",
-    "image_height",
-    "original_id",
-];
+// todo : why TF do I have to do this for useModel to work ?
+class IrAttachment extends Model {
+    _name = "ir.attachment";
+}
 
 class MediaManagerMediaItem extends Component {
     static template = "html_editor.MediaManagerMediaItem";
@@ -118,6 +102,7 @@ export class MediaManager extends Component {
     static template = "html_editor.MediaManager";
     static components = {
         Dialog,
+        SearchBar,
         MediaManagerMediaItem,
     };
     /** Params send to the old media dialog
@@ -159,6 +144,7 @@ export class MediaManager extends Component {
     setup() {
         console.log("----------------------\nMEDIA MANAGER setup() \n----------------------");
         console.log("props : ", { ...this.props });
+        console.log("this.env : ", this.env);
         this.contentClass = "o_select_media_dialog h-100"; // todo : necessary ?
         this.size = "xl";
         this.title = _t("Select a media");
@@ -167,6 +153,7 @@ export class MediaManager extends Component {
         this.orm = useService("orm");
         this.notificationService = useService("notification");
         this.uploadService = useService("upload");
+        this.queryHelper = new QueryHelper({ ...this.props, env: this.env });
 
         this.confirmButtonRef = useRef("confirm-button");
         this.fileInputRef = useRef("file-input");
@@ -196,34 +183,69 @@ export class MediaManager extends Component {
         // );
         this.abortUploads = null; // todo : usage ?
 
+        this.model = proxy(useModel(IrAttachment, this.modelParams, this.modelOptions));
+        //useSubEnv({ model: this.model });
+        console.log("this.env : ", this.env);
+
         onMounted(this.onMounted.bind(this));
     }
 
     async onMounted() {
-        const attachments = await this.fetchAttachment(this.props.mediaToLoadAtStart, 0);
-        this._addAttachments(attachments);
-        this.state.isLoading = false;
+        await this.resetMediaItems();
+    }
+
+    get modelParams() {
+        const modelConfig = {
+            resModel: this.props.resModel,
+            fields: ATTACHMENT_FIELDS, // todo : should this be a deferent list ?
+            activeFields: ATTACHMENT_FIELDS,
+            openGroupsByDefault: false,
+        };
+
+        return {
+            config: modelConfig,
+            state: this.props.state?.modelState,
+            groupByInfo: {}, // todo we could make use of this ?
+            limit: this.props.mediaToLoadAtStart,
+            countLimit: this.props.mediaToLoadAtStart, // todo should probably not be the same than limit
+            defaultOrderBy: QUERRY_ORDERS_BY[this.state.activeFilters.order],
+            // groupsLimit: this.archInfo.groupsLimit,
+            // activeIdsLimit: session.active_ids_limit,
+            hooks: {
+                // onRecordSaved: this.onRecordSaved.bind(this),
+                // onWillSaveRecord: this.onWillSaveRecord.bind(this),
+                // onWillSaveMulti: this.onWillSaveMulti.bind(this),
+                // onAskMultiSaveConfirmation: this.onAskMultiSaveConfirmation.bind(this),
+                // onWillSetInvalidField: this.onWillSetInvalidField.bind(this),
+            },
+        };
+    }
+
+    get modelOptions() {
+        return {
+            lazy: false,
+        };
     }
 
     // ----------------------------------
     // Attachments processing :
     // --------------
 
-    _addAttachments(attachments) {
-        console.warn("_addAttachments :: ", attachments);
+    addMediaItems(mediaItems) {
+        console.warn("addMediaItems :: ", mediaItems);
         console.log("existing media items", this.state.mediaItems);
-        for (const attachment of attachments) {
-            // skip attachments that are already in mediaItems to avoid duplicates.
+        for (const media of mediaItems) {
+            // skip media that are already in mediaItems to avoid duplicates.
             // This can happen when uploading an image already existing as an attachment.
             // this might also append when loading more items from the db but some attachements have been removed from the db in the meantime.
-            if (this.state.mediaItems.some((item) => item.id === attachment.id)) {
+            if (this.state.mediaItems.some((item) => item.id === media.id)) {
                 continue;
             }
 
-            const mediaItem = { id: attachment.id, attachment, mediaType: "attachment" };
-            if (IMAGE_MIMETYPES.includes(attachment.mimetype)) {
+            const mediaItem = { id: media.id, attachment: media, mediaType: "attachment" };
+            if (IMAGE_MIMETYPES.includes(media.mimetype)) {
                 mediaItem.mediaType = "image";
-            } else if (VIDEO_MIMETYPES.includes(attachment.mimetype)) {
+            } else if (VIDEO_MIMETYPES.includes(media.mimetype)) {
                 mediaItem.mediaType = "video";
             }
             this.state.mediaItems.push(mediaItem);
@@ -234,81 +256,48 @@ export class MediaManager extends Component {
     // Attachments ORM calls :
     // --------------
 
-    async fetchAttachment(limit, offset) {
+    async resetMediaItems() {
+        this.state.isLoading = true;
+        this.state.mediaItems = [];
+        // todo : add a debounce to avoid multiple rpc if user click filters rapidly ?
+        const mediaItems = await this.fetchAttachment(this.props.mediaToLoadAtStart, 0);
+        this.addMediaItems(mediaItems);
+        this.state.isLoading = false;
+    }
+
+    async fetchAttachment(limit, offset, queryString = "") {
         if (!user.isInternalUser) {
-            // Reading attachments as a portal user is not permitted and will raise
+            // Reading mediaItems as a portal user is not permitted and will raise
             // an access error, so we don't return any attachment
             return [];
         }
         this.state.isFetchingAttachments = true;
-        // todo : search only attachments linked to the current record or orphaned ??
-        const attachments = await this.orm.call("ir.attachment", "search_read", [], {
-            domain: [...this.baseDomain, ...this.imagesDomain],
+
+        // domain filter
+        const domain = this.queryHelper.recordDomain;
+        if (queryString) {
+            domain.push(...this.queryHelper.search(queryString));
+        }
+        domain.push(...this.queryHelper.imagesDomain);
+
+        // order by
+        const order = QUERRY_ORDERS_BY[this.state.activeFilters.order];
+
+        // todo : search only mediaItems linked to the current record or orphaned ??
+        const mediaItems = await this.orm.call("ir.attachment", "search_read", [], {
+            domain,
             fields: ATTACHMENT_FIELDS,
-            order: "id desc",
+            order,
             // Try to fetch the first record of the next page just to know whether there is a next page.
             limit: limit + 1,
             offset,
         });
-        // attachments.forEach((attachment) => (attachment.mediaType = "attachment"));
-        this.state.canLoadMoreAttachments = attachments.length > limit;
+        // mediaItems.forEach((attachment) => (attachment.mediaType = "attachment"));
+        this.state.canLoadMoreAttachments = mediaItems.length > limit;
         this.state.isFetchingAttachments = false;
-        return attachments;
+        return mediaItems;
     }
 
-    get baseDomain() {
-        const domain = [
-            "&",
-            ["res_model", "=", this.props.resModel],
-            ["res_id", "=", this.props.resId || 0],
-        ];
-        domain.unshift("|", ["public", "=", true]);
-        domain.push(["name", "ilike", this.state.searchQuery || ""]);
-        return domain;
-    }
-
-    get imagesDomain() {
-        const domain = [];
-        domain.push(["mimetype", "in", IMAGE_MIMETYPES]);
-        if (!this.props.useMediaLibrary) {
-            domain.push(
-                "|",
-                ["url", "=", false],
-                "!",
-                "|",
-                ["url", "=ilike", "/html_editor/shape/%"],
-                ["url", "=ilike", "/web_editor/shape/%"]
-            );
-        }
-        domain.push("!", ["name", "=like", "%.crop"]);
-        domain.push("|", ["type", "=", "binary"], "!", ["url", "=like", "/%/static/%"]);
-
-        // Optimized images (meaning they are related to an `original_id`) can
-        // only be shown in debug mode as the toggler to make those images
-        // appear is hidden when not in debug mode.
-        // There is thus no point in fetching those optimized images outside debug
-        // mode. Worst, it leads to bugs: it might fetch only optimized images
-        // when clicking on "load more" which will look like it's bugged as no
-        // images will appear on screen (they all will be hidden).
-        if (!this.env.debug) {
-            const subDomain = [false];
-
-            // Particular exception: if the edited image is an optimized
-            // image, we need to fetch it too so it's displayed as the
-            // selected image when opening the media dialog.
-            // We might get a few more optimized images than necessary if the
-            // original image has multiple optimized images, but it's not a
-            // big deal.
-            const originalId = this.props.media && this.props.media.dataset.originalId;
-            if (originalId) {
-                subDomain.push(originalId);
-            }
-
-            domain.push(["original_id", "in", subDomain]);
-        }
-
-        return domain;
-    }
     // ----------------------------------
     // Upload files :
     // --------------
@@ -382,9 +371,9 @@ export class MediaManager extends Component {
     }
 
     async onUploaded(attachment) {
-        this.state.attachments = [
+        this.state.mediaItems = [
             attachment,
-            ...this.state.attachments.filter((attach) => attach.id !== attachment.id),
+            ...this.state.mediaItems.filter((attach) => attach.id !== attachment.id),
         ];
         this.selectAttachment(attachment);
         if (!this.props.multiSelect) {
@@ -417,7 +406,7 @@ export class MediaManager extends Component {
 
     _fileUploaded(attachment) {
         console.log("_fileUploaded", attachment);
-        this._addAttachments([attachment]);
+        this.addMediaItems([attachment]);
     }
 
     // ----------------------------------
@@ -484,16 +473,10 @@ export class MediaManager extends Component {
     // --------------
 
     async uploadFileClicked() {
-        console.log("=============================\nuploadFileClicked");
-        console.log("this.fileInputRef", this.fileInputRef);
-        console.log("this.fileInputRef.el", this.fileInputRef.el);
-        console.log("  > ", this.fileInputRef.el.getAttribute("multiple"));
         this.fileInputRef.el.click();
     }
 
     async onChangeFileInput(ev) {
-        console.log("onChangeFileInput", ev);
-
         const fileInputEl = ev.target;
         const inputFiles = fileInputEl.files;
         if (!inputFiles.length) {
@@ -509,11 +492,13 @@ export class MediaManager extends Component {
 
     resetFilters() {
         this.state.activeFilters = {};
+        this.resetMediaItems();
     }
 
     applyFilters(options = {}) {
         console.log("applyFilter", options);
         this.state.activeFilters = { ...this.state.activeFilters, ...options };
+        this.resetMediaItems();
     }
 
     async confirmClicked() {

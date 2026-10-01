@@ -1,0 +1,187 @@
+import { _t } from "@web/core/l10n/translation";
+import { omit } from "@web/core/utils/objects";
+import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
+import { user } from "@web/core/user";
+
+import { useService } from "@web/core/utils/hooks";
+import {
+    SelectCreateDialog,
+    selectCreateDialogProps,
+} from "@web/views/view_dialogs/select_create_dialog";
+import { props, t } from "@odoo/owl";
+
+export const mediaManagerDialogProps = {
+    ...selectCreateDialogProps,
+    resModel: t.string(),
+    baseResModel: t.string(),
+    baseResId: t.number(),
+    filters: t.array().optional(),
+    domain: t.array().optional(),
+    context: t.object().optional(),
+};
+
+export class MediaManagerDialog extends SelectCreateDialog {
+    static template = "html_editor.MediaManagerDialog";
+    props = props(mediaManagerDialogProps);
+    document = document;
+
+    setup() {
+        console.groupCollapsed("%c MediaManagerDialog :: setup()", "background: #f9f;");
+        console.warn("setup() trace");
+        console.log("this : ", this);
+        console.log("props : ", this.props);
+        console.groupEnd();
+        super.setup();
+        this.state.records = [];
+        // this.state = proxy({
+        //     resIds: [],
+        // });
+        this.orm = useService("orm");
+
+        // const { thread = {}, model, resId } = this.props.chatterParams || this.props; // todo : I don't think we need this
+
+        this.onSelectionChanged = (resIds, records) => {
+            this.superOnSelectionChanged(resIds);
+            this.state.records = records;
+            if (resIds.length && !this.props.multiSelect) {
+                this.select(resIds);
+            }
+        };
+    }
+
+    get viewProps() {
+        const baseProps = super.viewProps;
+        this.superOnSelectionChanged = baseProps.onSelectionChanged;
+        const props = {
+            ...omit(baseProps, "forceGlobalClick", "display", "onSelectionChanged"),
+            type: "kanban",
+            allowSelectors: true,
+            baseResModel: this.props.baseResModel,
+            baseResId: this.props.baseResId,
+            filters: this.props.filters,
+            onSelectionChanged: this.onSelectionChanged,
+        };
+        console.warn("get viewProps", { ...props });
+        return props;
+    }
+
+    get isNewRecord() {
+        console.error("TODO");
+        return this.props.chatterParams?.isNewRecord;
+    }
+
+    async select(resIds) {
+        console.warn("select", resIds);
+        const records = this.state.records.filter((rec) => resIds.includes(rec.id));
+        if (this.props.onSelected) {
+            this.executeOnceAndClose(() => this.props.onSelected(resIds, records));
+        }
+    }
+
+    // /**
+    //  * Pastes document/s share links.
+    //  * @param {Array} resIds - List of resIDs of the selected records (documents).
+    //  */
+    // async pasteDocumentsLink(resIds) {
+    //     let response;
+    //     try {
+    //         response = await this.orm.read("documents.document", resIds, [
+    //             "display_name",
+    //             "access_url",
+    //         ]);
+    //     } catch (error) {
+    //         this.notification.add(
+    //             _t("Failed to paste link(s): ") + (error.data?.message || error.toString()),
+    //             { type: "danger" }
+    //         );
+    //         this.props.close();
+    //         return;
+    //     }
+    //     if (this.props.chatterParams.isFromFullComposer) {
+    //         this.props.chatterParams.addDocumentsBus.trigger("PASTE_SHARE_LINKS", {
+    //             links: response,
+    //         });
+    //     } else {
+    //         this.addToThread(this.model, this.resId);
+    //         const shareLinks = response
+    //             .map(({ display_name, access_url }) => `${display_name}: ${access_url}`)
+    //             .join("\n");
+    //         this.props.chatterParams.composer.composerText += `\n${shareLinks}`;
+    //     }
+    //     this.notification.add(_t("Link(s) pasted!"), { type: "success" });
+    //     this.props.close();
+    // }
+
+    // /**
+    //  * Adds the document (as an attachment) to the composer.
+    //  * @param {Array} resIds - List of resIDs of the selected records (documents).
+    //  */
+    // async addDocumentsAttachment(resIds) {
+    //     let processedAttachments;
+    //     try {
+    //         // Temporary linked to the composer with id 0 to be garbage collected if not re-linked to the thread
+    //         // (similar to what is done when uploading a file)
+    //         const attachmentRecords = await this.orm.call(
+    //             "documents.document",
+    //             "add_documents_attachment",
+    //             [resIds, "mail.compose.message", 0]
+    //         );
+    //         processedAttachments = await this._processAttachments(attachmentRecords);
+    //     } catch (error) {
+    //         this.notification.add(
+    //             _t("Failed to add document(s): ") + (error.data?.message || error.toString()),
+    //             { type: "danger" }
+    //         );
+    //         this.props.close();
+    //         return;
+    //     }
+    //     const thread = this.props.chatterParams?.thread || this.addToThread(this.model, this.resId);
+    //     const composer = this.props.chatterParams?.composer || thread.composer;
+    //
+    //     const attachmentIds = [];
+    //     for (const { name, ...attachmentRecord } of processedAttachments) {
+    //         const extension = name.slice(Math.max(0, name.lastIndexOf(".") + 1));
+    //         composer.attachments.push({
+    //             name,
+    //             extension,
+    //             has_thumbnail: false,
+    //             ...attachmentRecord,
+    //         });
+    //         attachmentIds.push(attachmentRecord.id);
+    //     }
+    //     this.props.chatterParams.saveRecordHandler?.(attachmentIds);
+    //     this.props.close();
+    // }
+}
+
+export function getMediaManagertDialogProps(recordInfo) {
+    const lastWeekDate = luxon.DateTime.now().minus({ weeks: 1 }).toFormat("yyyy-MM-dd HH:mm:ss");
+    return {
+        title: _t("Select a media"),
+        resModel: "ir.attachment", // todo we probably don't need this
+        // searchViewId: "mediamanager_media_search", // todo doesn't work, need id, how ?
+        baseResModel: recordInfo.resModel ?? "ir.attachment",
+        baseResId: recordInfo.resId ?? -1,
+        filters: [
+            // todo link this to the search bar filters somehow
+            { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
+            { label: "uploaded by me", domain: [["create_uid", "=", user.userId]] },
+        ],
+        noCreate: true,
+        domain: [
+            ["mimetype", "in", IMAGE_MIMETYPES],
+            ["type", "=", "binary"], // todo : this prevent webp url to be shown, should we change that ?
+            "|",
+            ["public", "=", true],
+            "&",
+            ["res_model", "=", recordInfo.resModel],
+            ["res_id", "=", recordInfo.resId || -1],
+            // ...queryHelper.imagesDomain,
+        ],
+        context: {
+            kanban_view_ref: "ai.mediamanager_media_kanban_ai", // todo : the ai version should be replaced by the ai override
+            //kanban_view_ref: "html_editor.mediamanager_media_kanban",
+            search_view_ref: "html_editor.mediamanager_media_search",
+        },
+    };
+}
