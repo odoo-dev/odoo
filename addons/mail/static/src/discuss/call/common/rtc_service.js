@@ -91,6 +91,10 @@ function subscribe(target, event, f) {
 }
 
 export const PTT_RELEASE_DURATION = 200;
+/** How long the PTT key must be held while muted before warning the user. */
+export const PTT_MUTED_WARNING_DELAY = 500;
+/** How long the muted PTT warning stays visible before hiding itself. */
+export const PTT_MUTED_WARNING_DURATION = 3000;
 const RECORDING_CONNECTION_TIMEOUT = 15_000;
 const SW_MESSAGE_TYPE = {
     POST_RTC_LOGS: "POST_RTC_LOGS",
@@ -348,6 +352,14 @@ export class Rtc extends Record {
     disconnectMicAudioTrackListeners;
     /** @type {ReturnType<setTimeout>} */
     pttReleaseTimeout;
+    /** Whether the warning about using PTT while the microphone is muted is displayed. */
+    showPttMutedWarning = false;
+    /** Whether the user closed the muted PTT warning, it is reset when the microphone is turned on. */
+    isPttMutedWarningDismissed = false;
+    /** @type {ReturnType<setTimeout>} */
+    pttMutedWarningDelayTimeout;
+    /** @type {ReturnType<setTimeout>} */
+    pttMutedWarningHideTimeout;
     /**
      * Whether the network fell back to p2p mode in a SFU call.
      */
@@ -667,6 +679,16 @@ export class Rtc extends Record {
             { initialRun: false }
         );
         this.onChange(
+            () => [this.selfSession?.isMute],
+            function onChangeSelfIsMute(isMute) {
+                if (!isMute) {
+                    this.isPttMutedWarningDismissed = false;
+                    this.hidePttMutedWarning();
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
             () => [this.store.settings.audioInputDeviceId],
             function onChangeAudioInputDeviceId(audioInputDeviceId) {
                 if (this.localSession) {
@@ -783,6 +805,7 @@ export class Rtc extends Record {
         if (!this.isPushToTalkRelease(ev)) {
             return;
         }
+        this.cancelPttMutedWarningDelay();
         this.setPttReleaseTimeout();
     }
 
@@ -790,11 +813,13 @@ export class Rtc extends Record {
         if (!this.isPushToTalkRelease()) {
             return;
         }
+        this.cancelPttMutedWarningDelay();
         this.setPttReleaseTimeout();
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
         this.pttReleaseTimeout = window.setTimeout(() => {
+            this.cancelPttMutedWarningDelay();
             this.setTalking(false);
             if (!this.localSession?.isMute) {
                 this.soundEffectsService.play("ptt-release");
@@ -811,10 +836,48 @@ export class Rtc extends Record {
             return;
         }
         window.clearTimeout(this.pttReleaseTimeout);
-        if (!this.localSession.isTalking && !this.localSession.isMute) {
+        if (this.localSession.isMute) {
+            this.startPttMutedWarningDelay();
+        } else if (!this.localSession.isTalking) {
             this.soundEffectsService.play("ptt-press");
         }
         this.setTalking(true);
+    }
+
+    /**
+     * Shows the muted PTT warning once the PTT key has been held long enough while muted. The
+     * timeout is only reset on release so that the warning is shown at most once per press, as the
+     * held key keeps repeating its key down events.
+     */
+    startPttMutedWarningDelay() {
+        if (this.pttMutedWarningDelayTimeout || this.isPttMutedWarningDismissed) {
+            return;
+        }
+        this.pttMutedWarningDelayTimeout = window.setTimeout(() => {
+            this.showPttMutedWarning = true;
+            window.clearTimeout(this.pttMutedWarningHideTimeout);
+            this.pttMutedWarningHideTimeout = window.setTimeout(() => {
+                this.showPttMutedWarning = false;
+            }, PTT_MUTED_WARNING_DURATION);
+        }, PTT_MUTED_WARNING_DELAY);
+    }
+
+    cancelPttMutedWarningDelay() {
+        window.clearTimeout(this.pttMutedWarningDelayTimeout);
+        this.pttMutedWarningDelayTimeout = undefined;
+    }
+
+    hidePttMutedWarning() {
+        this.cancelPttMutedWarningDelay();
+        window.clearTimeout(this.pttMutedWarningHideTimeout);
+        this.pttMutedWarningHideTimeout = undefined;
+        this.showPttMutedWarning = false;
+    }
+
+    /** Hides the muted PTT warning until the microphone is turned on again. */
+    dismissPttMutedWarning() {
+        this.isPttMutedWarningDismissed = true;
+        this.hidePttMutedWarning();
     }
 
     async openPip(options) {
@@ -2254,6 +2317,7 @@ export class Rtc extends Record {
         this.fallbackMode = undefined;
         this.isPipMode = false;
         this.isMeetingReadyBannerDismissed = false;
+        this.hidePttMutedWarning();
         closeStream(this.sourceCameraStream);
         this.sourceCameraStream = null;
         closeStream(this.sourceScreenStream);
@@ -2274,6 +2338,7 @@ export class Rtc extends Record {
             isMicAudioTrackMuted: false,
             isCallPermissionDialogOpen: false,
             isMicrophonePermissionWarningDismissed: false,
+            isPttMutedWarningDismissed: false,
             localChannel: undefined,
             localSession: undefined,
             micAudioTrack: undefined,
