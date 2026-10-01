@@ -7,12 +7,11 @@ declare module "registries" {
 
     interface ActionHandlerParams {
         action: object;
-        env: OdooEnv;
         options: ActionOptions;
     }
     export type ActionHandlersRegistryItemShape = (params: ActionHandlerParams) => (void | Promise<void>);
 
-    export type ActionsRegistryItemShape = (((env: OdooEnv, action: ActionDescription) => void) | typeof Component) & {
+    export type ActionsRegistryItemShape = (((action: ActionDescription) => void) | typeof Component) & {
         displayName?: string;
         path?: string;
         target?: ActionMode;
