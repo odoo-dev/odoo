@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.CompareImage">
+    <BuilderRow label.translate="Orientation">
+        <BuilderButtonGroup>
+            <BuilderButton classAction="''" title.translate="Vertical divider, images side by side">Vertical</BuilderButton>
+            <BuilderButton classAction="'s_compare_image_horizontal'" title.translate="Horizontal divider, images stacked">Horizontal</BuilderButton>
+        </BuilderButtonGroup>
+    </BuilderRow>
+
+    <BuilderOptionsSection title.translate="Before">
+        <BuilderContext applyTo="'.s_compare_image_before'">
+            <ReplaceMediaOption/>
+            <ImageToolOption/>
+        </BuilderContext>
+    </BuilderOptionsSection>
+
+    <BuilderOptionsSection title.translate="After">
+        <BuilderContext applyTo="'.s_compare_image_after'">
+            <ReplaceMediaOption/>
+            <ImageToolOption/>
+        </BuilderContext>
+    </BuilderOptionsSection>
+</t>
+
+<t t-inherit="website.BuilderOptions" t-inherit-mode="extension">
+    <xpath expr="//t[@id='snippet_specific_options']" position="after">
+        <compare_image_option template="website.CompareImage" selector=".s_compare_image"/>
+    </xpath>
+</t>
+</templates>
