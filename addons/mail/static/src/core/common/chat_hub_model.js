@@ -40,7 +40,7 @@ export class ChatHub extends Record {
             () => {
                 const stopStorage = subscribeToStorage(CHAT_HUB_KEY, (ev) => {
                     if (ev.key === CHAT_HUB_KEY) {
-                        this.load(ev.newValue);
+                        this.load(ev.newValue ?? ev.oldValue);
                     } else {
                         this.load();
                     }
