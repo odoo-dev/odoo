@@ -8,6 +8,10 @@
     > :not(.o_search_panel) .form-check {
         pointer-events: none !important;
     }
+
+    .o_sample_data_disabled {
+        @include o-sample-data-disabled;
+    }
 }
 
 /* No content helper */
