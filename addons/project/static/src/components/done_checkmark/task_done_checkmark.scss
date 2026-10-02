@@ -1,12 +1,14 @@
 a.o_todo_done_button {
-    margin: 0px 5px;
-    @include o-hover-text-color($gray-400, $o-success);
+    --btn-hover-color: var(--success);
+
     &:hover:before {
         content: "check_circle_f";
     }
 
     &.done_button_enabled {
-        @include o-hover-text-color($o-success, $gray-400);
+        --btn-color: var(--success);
+        --btn-hover-color: var(--body-color);
+
         &:hover:before {
             content: "check_circle";
         }
@@ -14,13 +16,8 @@ a.o_todo_done_button {
 }
 
 a.o_todo_done_button_mobile {
-    margin: 0px 5px;
-    color: var(--gray-400);
     &.done_button_enabled {
-        color: $o-success;
+        --btn-color: var(--success);
+        --btn-hover-color: var(--btn-color);
     }
-}
-
-.o_task_kanban_card_body {
-    padding-left: 9px;
 }
