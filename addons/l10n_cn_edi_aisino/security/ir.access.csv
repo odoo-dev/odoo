@@ -1,0 +1,2 @@
+id,name,model_id,group_id/id,operation,domain
+access_l10n_cn_edi_aisino_login,l10n_cn_edi_aisino.login,l10n_cn_edi_aisino.login,account.group_account_invoice,crud,"[('create_uid', '=', user.id)]"

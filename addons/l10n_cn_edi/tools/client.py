@@ -23,11 +23,19 @@ Results are plain dicts:
                     the next attempt may use a new serial number. Otherwise it reuses
                     the old one: a new serial for an order that may still go through
                     would issue a second fapiao
+    ``amount_untaxed``, ``amount_tax``, ``amount_total``
+                    optional, once issued: the amounts the provider issued. The flow warns
+                    on the move when they differ from its own, e.g. when the invoice was
+                    edited and resent under a serial the provider had already issued
 
 Issuing is two steps, so a batch waits once instead of once per invoice:
 ``issue_invoice`` submits and usually answers 'sent'; after each of the client's
 ``result_delays`` the flow asks ``query_invoice(move, just_submitted=True)`` about
-the batch's pending fapiao, and leaves whatever is still pending to the cron.
+the batch's pending fapiao, and leaves whatever is still pending to the cron. The cron
+keeps passing ``just_submitted=True`` for 10 minutes after the submission.
+
+A provider with ``supports_direct_red()`` issues the red fapiao of a credit note without
+a red form: ``issue_direct_red`` and ``query_direct_red`` answer invoice results.
 
 Invoice values carry, per line, ``price_include`` (the Odoo tax's basis) and both
 ``amount_untaxed`` and ``amount_total``, so a provider can send whichever basis the
@@ -50,10 +58,24 @@ line was priced in and still match the Odoo invoice to the fen.
     the invoices as 'waiting_login' until someone logs in through the provider's
     ``res.company._l10n_cn_edi_action_login()``.
 
-Connectivity and configuration problems are raised as ``UserError``: the flow
-treats them as "try again later" and never marks the invoice failed for them.
+Problems other than a refusal are raised:
+
+- ``UserError`` means nothing was submitted (configuration, credentials, the provider
+  unreachable before the request left): the flow keeps the move as it was, to be fixed
+  and sent again.
+- :class:`L10nCnEdiProviderUnreachable` means the request may have reached the provider
+  but its answer didn't come back: a timeout or a connection reset after sending, an
+  unreadable answer. The fapiao may be issued, so after ``issue_invoice`` or
+  ``issue_direct_red`` the flow locks the move as 'sent' and the cron queries it with
+  the same serial number until the provider tells. Elsewhere it is a ``UserError``.
 """
 import time
+
+from odoo.exceptions import UserError
+
+
+class L10nCnEdiProviderUnreachable(UserError):
+    """The request may have reached the provider, whose answer was lost: the outcome is unknown."""
 
 
 class L10nCnEdiClient:
@@ -79,10 +101,25 @@ class L10nCnEdiClient:
         """Submit a fapiao from ``account.move._l10n_cn_edi_prepare_invoice_values()``."""
         raise NotImplementedError
 
+    def supports_direct_red(self):
+        """Whether out_refund uses direct red issuance (no confirmation-form lifecycle)."""
+        return False
+
+    def issue_direct_red(self, values):
+        """Submit a direct red invoice from ``_l10n_cn_edi_prepare_red_form_values()``.
+
+        Providers with ``supports_direct_red()`` must return an invoice result dict.
+        """
+        raise NotImplementedError
+
+    def query_direct_red(self, move, just_submitted=False):
+        """Fetch the result of a direct-red invoice previously accepted as 'sent'."""
+        raise NotImplementedError
+
     def query_invoice(self, move, just_submitted=False):
         """Fetch the current result of a fapiao that was accepted as 'sent'.
 
-        Right after submitting (``just_submitted``), a fapiao the provider doesn't know
+        Shortly after submitting (``just_submitted``), a fapiao the provider doesn't know
         yet is still 'sent'; later, it is 'failed'.
         """
         raise NotImplementedError

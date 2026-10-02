@@ -129,6 +129,21 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         # 09 按5%简易征收, as in Nuonuo's own 停车费 example.
         self.assertEqual((line['favouredPolicyFlag'], line['zeroRateFlag']), ('09', '3'))
 
+    def test_invoice_amount_mismatch_is_exposed(self):
+        invoice = self._post_invoice()
+        self._answer(ISSUE, ACCEPTED)
+        mismatch = {'code': 'E0000', 'result': [{
+            **ISSUED['result'][0],
+            'exTaxAmount': '1.00',
+            'taxAmount': '0.13',
+            'orderAmount': '1.13',
+        }]}
+        self._answer(QUERY, mismatch)
+
+        self._issue(invoice)
+
+        self.assertIn('E-Fapiao amount mismatch', ''.join(invoice.message_ids.mapped('body')))
+
     # ------------------------------------------------------------------
     # Outcomes
     # ------------------------------------------------------------------
@@ -182,6 +197,20 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self.assertIn('E9105', error)
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
         self.assertFalse(self._requests_for(QUERY))
+        self.assertFalse(invoice.l10n_cn_edi_serial_no)
+
+    def test_refusal_that_may_leave_the_order_alive_keeps_it(self):
+        invoice = self._post_invoice()
+        for code, message in (('E9613', '同一流水号(订单号)单日最多重试20次'), ('E9999', '系统繁忙')):
+            with self.subTest(code=code):
+                self._answer(ISSUE, {'code': code, 'describe': message})
+
+                self._issue(invoice)
+
+                orders = [request['payload']['order']['orderNo'] for request in self._requests_for(ISSUE)]
+                self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
+                self.assertEqual(invoice.l10n_cn_edi_serial_no, orders[0])
+                self.assertEqual(len(set(orders)), 1)
 
     def test_failed_issuance_reports_the_bureau_reason(self):
         invoice = self._post_invoice()
@@ -231,7 +260,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
     def test_order_unknown_to_nuonuo_is_failed_by_the_cron(self):
         invoice = self._post_invoice()
-        invoice.write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_LOST'})
+        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_LOST'})
 
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
@@ -247,3 +276,15 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
         self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id + invoice.l10n_cn_edi_fapiao_ofd_id)
+
+    def test_dead_orders_free_the_order_number(self):
+        invoice = self._post_invoice()
+        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_DEAD'})
+        client = self.company._l10n_cn_edi_get_client()
+        for status in ('22', '3', '31'):  # failed, voided, being voided
+            with self.subTest(status=status):
+                self._answer(QUERY, {'code': 'E0000', 'result': [{'status': status}]})
+
+                result = client.query_invoice(invoice)
+
+                self.assertEqual((result['state'], result['new_serial']), ('failed', True))

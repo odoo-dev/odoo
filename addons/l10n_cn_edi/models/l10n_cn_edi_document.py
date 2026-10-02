@@ -29,6 +29,7 @@ BUREAU_STATES = [
 ]
 BUREAU_STATES_CONFIRMED = {'01', '04'}
 BUREAU_STATES_PENDING = {'02', '03'}
+RED_FORM_ACTIVE_STATES = ('red_form_pending', 'red_form_confirmed')
 
 
 class L10nCnEdiDocument(models.Model):
@@ -53,6 +54,23 @@ class L10nCnEdiDocument(models.Model):
     red_form_reason = fields.Selection(selection=RED_FORM_REASONS, string="Red Form Reason", copy=False)
     error_message = fields.Text(string="Error Details")
 
+    def _l10n_cn_edi_check_action_role(self, action):
+        self.ensure_one()
+        move = self.move_id
+        if self.state != 'red_form_pending':
+            raise UserError(self.env._("Only pending Red Forms can be processed."))
+        self.check_access('write')
+        if action == 'revoke' and move.move_type != 'out_refund':
+            raise UserError(self.env._("Only seller credit notes can revoke a Red Form request."))
+        if action == 'revoke' and move.state != 'draft':
+            raise UserError(self.env._("Only draft seller credit notes can revoke a Red Form request."))
+        if action in ('confirm', 'reject') and move.move_type not in ('in_invoice', 'out_invoice'):
+            raise UserError(self.env._("Only posted bills/invoices can confirm or reject inbound Red Forms."))
+        if action in ('confirm', 'reject') and move.state != 'posted':
+            raise UserError(self.env._("Only posted bills/invoices can confirm or reject inbound Red Forms."))
+        if action in ('confirm', 'reject') and self.bureau_state not in BUREAU_STATES_PENDING:
+            raise UserError(self.env._("This Red Form is no longer waiting for confirmation."))
+
     @api.model
     def _l10n_cn_edi_state_from_bureau(self, bureau_state, red_fapiao_no):
         if bureau_state in BUREAU_STATES_CONFIRMED:
@@ -71,16 +89,23 @@ class L10nCnEdiDocument(models.Model):
             ('state', '=', 'red_form_pending'),
             ('red_form_uuid', '!=', False),
         ])
+        self.env['ir.cron']._commit_progress(remaining=len(pending_docs))
         for company, docs in pending_docs.grouped(lambda doc: doc.move_id.company_id).items():
-            if not company._l10n_cn_edi_is_ready():
+            try:
+                if not company._l10n_cn_edi_is_ready():
+                    continue
+                client = company._l10n_cn_edi_get_client()
+            except UserError as e:
+                _logger.warning("E-Fapiao: could not poll the red forms of company %s: %s", company.name, e)
                 continue
-            client = company._l10n_cn_edi_get_client()
             for doc in docs:
                 try:
                     with self.env.cr.savepoint():
                         doc._l10n_cn_edi_apply_red_form_result(client.query_red_form(doc))
                 except UserError as e:
                     _logger.warning("E-Fapiao: could not poll red form %s: %s", doc.red_form_uuid, e)
+                if not self.env['ir.cron']._commit_progress(1):
+                    return
 
     def _l10n_cn_edi_apply_red_form_result(self, result):
         """Record a red form result on this document and on the move it belongs to."""
@@ -129,7 +154,9 @@ class L10nCnEdiDocument(models.Model):
                 )
         elif state == 'failed':
             if move.move_type == 'out_refund':
+                # The form is void at the bureau: a new request needs a new serial.
                 move.l10n_cn_edi_state = 'failed'
+                move._l10n_cn_edi_drop_serial()
             move.message_post(body=self.env._(
                 "Red Form rejected/cancelled. Tax bureau state: %(state)s",
                 state=dict(BUREAU_STATES).get(bureau_state, bureau_state),
@@ -144,18 +171,16 @@ class L10nCnEdiDocument(models.Model):
         )
         today = fields.Date.context_today(self)
         for company in companies:
-            latest = self.search([
-                ('move_id.company_id', '=', company.id),
-                ('red_form_uuid', '!=', False),
-            ], order='create_date desc', limit=1)
-            # Start from the day before the latest known form, or 30 days back for a new company.
-            start_date = (latest.create_date.date() - timedelta(days=1)) if latest else (today - timedelta(days=30))
+            # Keep a monotonically progressing watermark per company.
+            start_date = company.l10n_cn_edi_inbound_red_form_last_date or (today - timedelta(days=30))
             end_date = min(start_date + timedelta(days=30), today)
             try:
                 with self.env.cr.savepoint():
                     self._l10n_cn_edi_import_inbound_red_forms(company, start_date, end_date)
+                    company.sudo().l10n_cn_edi_inbound_red_form_last_date = end_date
             except UserError as e:
                 _logger.warning("E-Fapiao: could not pull inbound red forms for company %s: %s", company.name, e)
+            self.env['ir.cron']._commit_progress()
 
     @api.model
     def _l10n_cn_edi_import_inbound_red_forms(self, company, start_date, end_date):

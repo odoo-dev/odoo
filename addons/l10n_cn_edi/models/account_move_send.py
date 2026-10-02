@@ -44,6 +44,19 @@ class AccountMoveSend(models.AbstractModel):
                 'error_title': self.env._("Error when issuing the e-Fapiao:"),
                 'errors': [error],
             }
+        for invoice, invoice_data in invoices_data.items():
+            if (
+                not invoice_data.get('error')
+                and invoice.country_code == 'CN'
+                and invoice.move_type == 'out_invoice'
+                and invoice.l10n_cn_edi_state == 'sent'
+            ):
+                # Don't send the invoice without its fapiao: try again once it is issued.
+                invoice_data['error'] = {
+                    'error_title': self.env._("Error when issuing the e-Fapiao:"),
+                    'errors': [self.env._("The e-Fapiao is still being issued by the tax bureau. Try again once it is issued.")],
+                    'retry': True,
+                }
 
     @api.model
     def _l10n_cn_edi_issue_invoices(self, invoices):
@@ -66,10 +79,15 @@ class AccountMoveSend(models.AbstractModel):
                 errors.update(dict.fromkeys(company_invoices, str(e)))
                 continue
             if session_state != 'ok':
-                company_invoices.l10n_cn_edi_state = 'waiting_login'
+                # Another send may have submitted some of them meanwhile: leave those alone.
+                locked = company_invoices.try_lock_for_update(allow_referencing=True)
+                locked.invalidate_recordset(['l10n_cn_edi_state'])
+                waiting = locked.filtered(lambda invoice: invoice.l10n_cn_edi_state not in ('sent', 'issued'))
+                waiting.l10n_cn_edi_state = 'waiting_login'
                 if self._can_commit():
                     self.env.cr.commit()
-                errors.update(dict.fromkeys(company_invoices, self._l10n_cn_edi_session_error(company, session_state)))
+                error = self._l10n_cn_edi_session_error(company, session_state)
+                errors.update(dict.fromkeys(company_invoices - (locked - waiting), error))
                 continue
             for invoice in company_invoices:
                 if error := invoice._l10n_cn_edi_submit_invoice(client):

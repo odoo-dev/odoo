@@ -4,6 +4,7 @@
 Run without Odoo:  python3 -m pytest addons/l10n_cn_edi_aisino/tests/test_sm4_envelope.py -v
 """
 import base64
+import gzip
 import os
 import sys
 
@@ -83,12 +84,23 @@ def test_hmac_matches_doc_vector():
 
 # --- full envelope round-trip (all zipCode variants) ------------------------
 
-@pytest.mark.parametrize('zip_code', ['0', '1', '2'])
-def test_envelope_roundtrip(zip_code):
+def _signed_response(datagram, zip_code='0'):
+    """A response correctly signed over an arbitrary datagram."""
+    response = env.build_response('x', {}, IDENTITY, PLATFORM, timestamp=TS, zip_code=zip_code)
+    response['datagram'] = datagram
+    key = env.derive_sm4_key(IDENTITY, PLATFORM, TS)
+    response['signature'] = env.sign(*(response[field] for field in env.SIGNED_FIELDS), key)
+    return response
+
+
+def _encrypted_hex(data):
+    return env.sm4_encrypt(data, env.derive_sm4_key(IDENTITY, PLATFORM, TS)).hex().encode('ascii')
+
+
+def test_envelope_roundtrip():
     payload = {'fpqqlsh': 'ABC123', 'nsrsbh': TAX_NO, '金额': 1234.56, '备注': '中文'}
-    req = env.build_request('ele.encrypt.invoiceIssue', payload, IDENTITY, PLATFORM, TAX_NO,
-                            timestamp=TS, zip_code=zip_code)
-    assert req['zipCode'] == zip_code
+    req = env.build_request('ele.encrypt.invoiceIssue', payload, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
+    assert req['zipCode'] == '0'
     assert req['encryptCode'] == '1'
     assert req['signtype'] == 'HMacSHA256'
     # simulate the server side: verify + decrypt
@@ -96,16 +108,18 @@ def test_envelope_roundtrip(zip_code):
     assert inner == payload
 
 
-def test_autocompress_over_10k_uses_zip2():
+@pytest.mark.parametrize('zip_code', ['0', '1', '2'])
+def test_compressed_responses_are_decoded(zip_code):
+    payload = {'fpqqlsh': 'ABC123', '备注': '中文'}
+    response = env.build_response('x', payload, IDENTITY, PLATFORM, timestamp=TS, zip_code=zip_code)
+    assert env.verify_and_decrypt(response, IDENTITY, PLATFORM) == payload
+
+
+def test_large_payload_is_still_sent_uncompressed():
     payload = {'blob': 'x' * 20000}
     req = env.build_request('ele.encrypt.invoiceIssue', payload, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-    assert req['zipCode'] == '2'
-    assert env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM) == payload
-
-
-def test_small_payload_defaults_to_zip0():
-    req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
     assert req['zipCode'] == '0'
+    assert env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM) == payload
 
 
 # --- signature tamper detection --------------------------------------------
@@ -113,21 +127,27 @@ def test_small_payload_defaults_to_zip0():
 def test_tampered_datagram_fails_signature():
     req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
     req['datagram'] = req['datagram'][:-4] + ('AAAA' if not req['datagram'].endswith('AAAA') else 'BBBB')
-    with pytest.raises(env.AisinoProtocolError):
-        env.verify_and_decrypt(req, IDENTITY, PLATFORM)
+    with pytest.raises(env.SignatureMismatch):
+        env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM)
 
 
 def test_tampered_field_fails_signature():
     req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
     req['access_token'] = 'AAAA' + req['access_token'][4:]
-    with pytest.raises(env.AisinoProtocolError):
-        env.verify_and_decrypt(req, IDENTITY, PLATFORM)
+    with pytest.raises(env.SignatureMismatch):
+        env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM)
 
 
 def test_wrong_key_fails_signature():
     req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-    with pytest.raises(env.AisinoProtocolError):
-        env.verify_and_decrypt(req, 'wrongidentity000000', PLATFORM)
+    with pytest.raises(env.SignatureMismatch):
+        env.verify_and_decrypt(dict(req, code='1000'), 'wrongidentity000000', PLATFORM)
+
+
+def test_non_strict_accepts_a_mismatching_signature():
+    response = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
+    response['signature'] = 'BAD'
+    assert env.verify_and_decrypt(response, IDENTITY, PLATFORM, strict=False) == {'a': 1}
 
 
 # --- outer code handling ----------------------------------------------------
@@ -137,6 +157,82 @@ def test_outer_code_failure_raises():
     with pytest.raises(env.AisinoProtocolError) as ei:
         env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
     assert ei.value.code == '9994'
+
+
+def test_outer_failure_is_read_before_the_empty_datagram():
+    """On failure the datagram is an empty node (spec 1.2) and the echoed signature means nothing."""
+    resp = {'code': '9995', 'msg': '验签未通过', 'datagram': '', 'signature': 'echo'}
+    with pytest.raises(env.AisinoProtocolError) as ei:
+        env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
+    assert ei.value.code == '9995'
+    with pytest.raises(env.AisinoProtocolError):
+        env.verify_and_decrypt({}, IDENTITY, PLATFORM)
+
+
+def test_signature_mismatch_is_not_a_provider_error():
+    resp = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
+    resp['signature'] = 'BAD' + resp['signature'][3:]
+    with pytest.raises(env.SignatureMismatch) as ei:
+        env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
+    assert not isinstance(ei.value, env.AisinoProtocolError)
+
+
+@pytest.mark.parametrize('field', [*env.SIGNED_FIELDS, 'signature'])
+def test_missing_field_is_malformed(field):
+    resp = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
+    del resp[field]
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
+
+
+def test_non_object_response_is_malformed():
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(['1000'], IDENTITY, PLATFORM)
+
+
+def test_bad_access_token_is_malformed():
+    resp = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
+    resp['access_token'] = 'abc'  # bad padding
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
+
+
+@pytest.mark.parametrize('datagram', [
+    'not base64!',                                            # bad base64
+    base64.b64encode(b'zz-not-hex').decode(),                 # bad hex
+    base64.b64encode(b'abcd').decode(),                       # hex, but not a ciphertext
+    base64.b64encode(_encrypted_hex(b'{"a":')).decode(),      # decrypts, but not JSON
+])
+def test_unreadable_datagram_is_malformed(datagram):
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(_signed_response(datagram), IDENTITY, PLATFORM)
+
+
+def test_raw_ciphertext_is_no_longer_accepted():
+    key = env.derive_sm4_key(IDENTITY, PLATFORM, TS)
+    raw = env.sm4_encrypt(b'{"a":1}', key)
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(_signed_response(base64.b64encode(raw).decode()), IDENTITY, PLATFORM)
+
+
+def test_oversized_datagram_is_rejected_before_decoding(monkeypatch):
+    monkeypatch.setattr(env, 'MAX_DATAGRAM_LENGTH', 64)
+    with pytest.raises(env.MalformedEnvelope, match='too large'):
+        env.verify_and_decrypt(_signed_response('A' * 65), IDENTITY, PLATFORM)
+
+
+@pytest.mark.parametrize('zip_code', ['1', '2'])
+def test_decompression_is_capped(monkeypatch, zip_code):
+    monkeypatch.setattr(env, 'MAX_DECOMPRESSED_BYTES', 1024)
+    response = env.build_response('x', {'blob': 'x' * 4096}, IDENTITY, PLATFORM, timestamp=TS, zip_code=zip_code)
+    with pytest.raises(env.MalformedEnvelope, match='too large'):
+        env.verify_and_decrypt(response, IDENTITY, PLATFORM)
+
+
+def test_truncated_gzip_is_malformed():
+    data = gzip.compress(_encrypted_hex(b'{"a":1}'))[:-12]
+    with pytest.raises(env.MalformedEnvelope):
+        env.verify_and_decrypt(_signed_response(base64.b64encode(data).decode(), zip_code='1'), IDENTITY, PLATFORM)
 
 
 def test_success_returns_inner_dict():
@@ -166,10 +262,11 @@ def test_envelope_round_trips_without_native_sm4(monkeypatch):
     """The whole envelope must work on a host whose OpenSSL lacks SM4."""
     monkeypatch.setattr(env, 'HAS_NATIVE_SM4', False)
     payload = {'probe': 'ok', '中文': '测试', 'n': 1234.56}
-    for zip_code in ('0', '1', '2'):
-        request = env.build_request('x', payload, IDENTITY, PLATFORM, TAX_NO,
-                                    timestamp=TS, zip_code=zip_code)
-        assert env.verify_and_decrypt(dict(request, code='1000'), IDENTITY, PLATFORM) == payload
+    request = env.build_request('x', payload, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
+    assert env.verify_and_decrypt(dict(request, code='1000'), IDENTITY, PLATFORM) == payload
+    for zip_code in ('1', '2'):
+        response = env.build_response('x', payload, IDENTITY, PLATFORM, timestamp=TS, zip_code=zip_code)
+        assert env.verify_and_decrypt(response, IDENTITY, PLATFORM) == payload
 
 
 def test_datagram_carries_the_ciphertext_as_hex():

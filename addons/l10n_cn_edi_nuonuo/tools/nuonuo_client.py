@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import hmac
+import itertools
 import json
 import logging
 import secrets
@@ -19,7 +20,7 @@ from odoo.addons.l10n_cn_edi.models.l10n_cn_edi_document import (
     BUREAU_STATES_CONFIRMED,
     BUREAU_STATES_PENDING,
 )
-from odoo.addons.l10n_cn_edi.tools import L10nCnEdiClient
+from odoo.addons.l10n_cn_edi.tools import L10nCnEdiClient, L10nCnEdiProviderUnreachable
 
 _logger = logging.getLogger(__name__)
 
@@ -27,9 +28,19 @@ _logger = logging.getLogger(__name__)
 ENDPOINT = 'https://sdk.nuonuo.com/open/v1/services'
 TIMEOUT = 30
 SUCCESS = 'E0000'
+ALT_SUCCESS = '0000'
 INVOICE_NOT_FOUND = 'E9500'
 DUPLICATE_ORDER = 'E9106'  # 订单编号或流水号不能重复: already submitted, so fetch it instead
 RETRY_LIMIT = 'E9613'  # 同一流水号(订单号)单日最多重试 20 次
+# requestBillingNew's refusals of the order's content: the order is dead. Any other code
+# (setup, authorisation, system) may leave it alive, so it is sent again unchanged.
+ORDER_REFUSED = {
+    'E4000',  # 必填字段没有传值, or a wrong value
+    *(f'E{code}' for code in range(9101, 9132) if code not in (9106, 9109)),
+    'E9138',  # 商品编码获取出现异常
+    'E9154',  # 订单被拆分后大于10张发票
+    *(f'E{code}' for code in range(9796, 9802)),  # 货物运输服务
+}
 INVOICE_LINES = {'01': 'bs', '02': 'pc'}  # 数电电子专票 / 数电电子普票
 STATUS_ISSUED = '2'  # 开票完成
 STATUS_PENDING = {'20', '21'}  # 开票中, 开票成功签章中
@@ -49,7 +60,6 @@ RED_REASONS = {'01': '2', '02': '1', '03': '3', '04': '4'}
 RED_FORM_APPLYING, RED_FORM_APPLICATION_FAILED = '15', '16'  # 申请中, 申请失败: Nuonuo's own
 BUREAU_STATES_ALL = dict(BUREAU_STATES)
 RED_FORM_PAGE_SIZE = 50  # the most Nuonuo returns per page
-RED_FORM_MAX_PAGES = 20
 
 # The drawer's tax bureau session (联调参考 4.2, 4.12, 4.13).
 GET_CERTIFICATION_STATUS = 'nuonuo.OpeMplatform.getCertificationStatus'
@@ -69,6 +79,28 @@ CREDENTIAL_ERRORS = {
     '070305',  # bad credentials
     '070306',  # token call limit reached
     '070307',  # wrong app type
+}
+
+POLICY_CODES = {
+    # Nuonuo docs cover 01-18 only; unsupported policies must fail loudly.
+    'simplified': '01',
+    'rare_earth': '02',
+    'exemption': '03',
+    'non_taxable': '04',
+    'collect_refund': '05',
+    'collect_refund_100': '06',
+    'collect_refund_50': '07',
+    'simplified_3': '08',
+    'simplified_5': '09',
+    'simplified_5_1_5': '10',
+    'immediate_refund_30': '11',
+    'immediate_refund_50': '12',
+    'immediate_refund_70': '13',
+    'immediate_refund_100': '14',
+    'refund_gt_3': '15',
+    'refund_gt_8': '16',
+    'refund_gt_12': '17',
+    'refund_gt_6': '18',
 }
 
 
@@ -128,9 +160,13 @@ class NuonuoClient(L10nCnEdiClient):
             )
             response.raise_for_status()
             body = response.json()
-        except (requests.RequestException, ValueError) as e:
+        except requests.ConnectTimeout as e:
             _logger.warning("Nuonuo %s failed for company %s: %s", method, self.company.vat, e)
             raise UserError(env._("Could not reach Nuonuo. Please try again later.")) from e
+        except (requests.RequestException, ValueError) as e:
+            # The request may have gone through: only a query can tell.
+            _logger.warning("Nuonuo %s failed for company %s: %s", method, self.company.vat, e)
+            raise L10nCnEdiProviderUnreachable(env._("Nuonuo did not answer. Please try again later.")) from e
         code = str(body.get('code') or '')
         if code in CREDENTIAL_ERRORS:
             raise UserError(env._(
@@ -298,7 +334,7 @@ class NuonuoClient(L10nCnEdiClient):
             return {
                 'state': 'failed',
                 'error': env._("Nuonuo refused the fapiao (%(code)s): %(message)s", code=code, message=body.get('describe') or ''),
-                'new_serial': True,
+                'new_serial': code in ORDER_REFUSED,
             }
         return {'state': 'sent'}
 
@@ -339,6 +375,9 @@ class NuonuoClient(L10nCnEdiClient):
             # invoiceTime is epoch milliseconds.
             'fapiao_date': datetime.fromtimestamp(int(invoice_time) / 1000, UTC).replace(tzinfo=None) if invoice_time else False,
             'qr_code': invoice.get('qrCode') or False,
+            'amount_untaxed': _float_or_none(invoice.get('exTaxAmount')),
+            'amount_tax': _float_or_none(invoice.get('taxAmount')),
+            'amount_total': _float_or_none(invoice.get('orderAmount')),
         }
         for kind in ('pdf', 'ofd'):
             if content := self._download(invoice.get(f'{kind}Url')):
@@ -441,11 +480,12 @@ class NuonuoClient(L10nCnEdiClient):
         if bill_status:
             query['billStatus'] = bill_status
         forms = []
-        for page in range(1, RED_FORM_MAX_PAGES + 1):
+        for page in itertools.count(1):
             result = self._query_red_forms({**query, 'pageNo': str(page), 'pageSize': str(RED_FORM_PAGE_SIZE)})
             batch = result.get('list') or []
             forms += batch
-            if len(batch) < RED_FORM_PAGE_SIZE or len(forms) >= int(result.get('total') or 0):
+            total = result.get('total')
+            if len(batch) < RED_FORM_PAGE_SIZE or (total is not None and len(forms) >= int(total)):
                 break
         return [self._red_form_result(form) for form in forms if str(form.get('applySource')) == raised_by]
 
@@ -455,7 +495,7 @@ class NuonuoClient(L10nCnEdiClient):
     def _query_red_forms(self, payload):
         env = self.company.env
         body = self._call(QUERY_RED_FORM, payload)
-        if body.get('code') != SUCCESS:
+        if body.get('code') not in (SUCCESS, ALT_SUCCESS):
             raise UserError(env._("Nuonuo could not list red forms (%(code)s): %(message)s", code=body.get('code'), message=body.get('describe') or ''))
         return body.get('result') or {}
 
@@ -491,7 +531,9 @@ class NuonuoClient(L10nCnEdiClient):
         red fapiao from the bureau. Its orderNo can replace Nuonuo's only once, so it is
         derived from the form: a second attempt looks that order up instead.
         """
-        order_no = f"R{''.join(filter(str.isdigit, form.get('billId') or ''))}"[:20]
+        if not (bill_id := form.get('billId')):
+            return None
+        order_no = f"R{hashlib.sha1(str(bill_id).encode(), usedforsecurity=False).hexdigest()[:19].upper()}"
         body = self._call(FAST_RED, {
             'orderNo': order_no,
             'taxNum': self.tax_no,
@@ -580,10 +622,18 @@ class NuonuoClient(L10nCnEdiClient):
         """数电 wants the bureau's two-digit 增值税特殊管理 code, in the order of our selection (01 简易征收...)."""
         if not policy:
             return '0'
-        selection = self.company.env['account.tax']._fields['l10n_cn_vat_special_policy'].selection
-        return f"{[key for key, _label in selection].index(policy) + 1:02d}"
+        if policy not in POLICY_CODES:
+            raise UserError(self.company.env._("Nuonuo does not support VAT special policy '%s'.", policy))
+        return POLICY_CODES[policy]
 
 
 def _format_number(number):
     """Plain decimal notation, at most 8 decimals, no trailing zeros."""
     return f"{number:.8f}".rstrip('0').rstrip('.')
+
+
+def _float_or_none(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None

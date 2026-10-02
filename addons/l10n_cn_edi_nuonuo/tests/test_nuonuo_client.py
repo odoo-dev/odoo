@@ -74,6 +74,16 @@ class TestNuonuoClient(L10nCnEdiNuonuoTestCommon):
         company._l10n_cn_edi_get_client().test_connection()
         self.assertEqual(self.nuonuo.requests[-1]['headers']['accessToken'], TOKEN)
 
+    def test_cron_gets_a_client_for_any_company(self):
+        # The cron runs as the superuser, who belongs to the main company only.
+        company_b = self.env['res.company'].create({'name': 'Other Co', 'country_id': self.env.ref('base.cn').id})
+        root = self.env.ref('base.user_root')
+        root.company_ids -= company_b
+
+        client = company_b.with_user(root).sudo()._l10n_cn_edi_get_client()
+
+        self.assertEqual(client.company, company_b)
+
     def test_credit_line_is_fetched_when_nuonuo_has_none(self):
         empty = {'code': 'E0000', 'result': {'requestStatus': '0', 'availableCreditLine': None}}
         known = {'code': 'E0000', 'result': {

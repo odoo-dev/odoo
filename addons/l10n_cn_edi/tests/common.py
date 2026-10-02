@@ -29,6 +29,15 @@ class FakeClient(L10nCnEdiClient):
     def issue_invoice(self, values):
         return self._answer('issue_invoice', values)
 
+    def supports_direct_red(self):
+        return bool(self.responses.get('supports_direct_red'))
+
+    def issue_direct_red(self, values):
+        return self._answer('issue_direct_red', values)
+
+    def query_direct_red(self, move, just_submitted=False):
+        return self._answer('query_direct_red', move, just_submitted)
+
     def wait(self, seconds):
         self.calls.append(('wait', (seconds,)))
 
@@ -66,6 +75,8 @@ class L10nCnEdiTestCommon(TestAccountMoveSendCommon):
         Company = self.env.registry['res.company']
         patch.object(Company, '_l10n_cn_edi_is_ready', lambda company: True).start()
         patch.object(Company, '_l10n_cn_edi_get_client', lambda company: self.client).start()
+        # Outside a cron run, the crons' progress commits would commit the test transaction.
+        self.commit_progress = patch.object(self.env.registry['ir.cron'], '_commit_progress', return_value=float('inf')).start()
         self.addCleanup(patch.stopall)
 
     def _issue(self, invoice):

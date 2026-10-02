@@ -55,7 +55,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
     def _credit_note(self, reason='02'):
         invoice = self.init_invoice('out_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a)
         invoice.action_post()
-        invoice.write({'l10n_cn_edi_state': 'issued', 'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
+        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'issued', 'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
         wizard = self.env['account.move.reversal'].with_context(active_ids=invoice.ids, active_model='account.move').create({
             'journal_id': invoice.journal_id.id,
             'reason': 'placeholder',
@@ -132,7 +132,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         credit_note.action_l10n_cn_edi_request_red_form()
 
         fast_red = self._requests_for(FAST_RED)[0]['payload']
-        self.assertEqual(fast_red['orderNo'], 'R20260928')
+        self.assertEqual(fast_red['orderNo'], 'R2544FE2787C84CCF6FB')
         self.assertEqual((fast_red['billNo'], fast_red['billUuid']), ('990000007566113377', 'nuouuid545926b2d144475ba653d90'))
         self.assertEqual((fast_red['elecInvoiceNumber'], fast_red['invoiceLine']), (BLUE_FAPIAO_NO, 'pc'))
         self.assertEqual(self._requests_for(QUERY_INVOICE)[0]['payload']['serialNos'], ['26092816145524147049'])
@@ -153,7 +153,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         credit_note.action_l10n_cn_edi_request_red_form()
 
         lookups = [request['payload'] for request in self._requests_for(QUERY_INVOICE)]
-        self.assertEqual(lookups[0], {'orderNos': ['R20260928'], 'isOfferInvoiceDetail': '0'})
+        self.assertEqual(lookups[0], {'orderNos': ['R2544FE2787C84CCF6FB'], 'isOfferInvoiceDetail': '0'})
         self.assertEqual(credit_note.l10n_cn_edi_fapiao_no, '20882609281614554424')
 
     def test_red_fapiao_not_out_yet_keeps_the_form_pending(self):
@@ -285,6 +285,25 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         self.assertEqual(len(forms), 51)
         self.assertEqual([request['payload']['pageNo'] for request in self._requests_for(QUERY)], ['1', '2', '1'])
 
+    def test_inbound_listing_without_total_follows_the_pages(self):
+        self._answer(REFRESH, OK)
+        full_page = {'code': 'E0000', 'result': {'list': [red_form(billId=f'IN-{n}') for n in range(50)]}}
+        self._answer_forms(full_page, {'code': 'E0000', 'result': {'list': [red_form(billId='IN-50')]}}, listing())
+
+        forms = self.company._l10n_cn_edi_get_client().list_inbound_red_forms(date(2026, 9, 1), date(2026, 9, 25))
+
+        self.assertEqual(len(forms), 51)
+        self.assertEqual([request['payload']['pageNo'] for request in self._requests_for(QUERY)], ['1', '2', '1'])
+
+    def test_query_invoice_red_accepts_0000_success(self):
+        credit_note = self._credit_note()
+        self._answer(SAVE, OK)
+        self._answer_forms({'code': '0000', 'result': {'total': 1, 'list': [red_form(billStatus='02')]}})
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        self.assertEqual(credit_note.l10n_cn_edi_document_ids.state, 'red_form_pending')
+
     def test_customer_raised_form_is_listed(self):
         self._answer(REFRESH, OK)
         self._answer_forms(listing(), listing(red_form(billId='CUST-1', billStatus='03', applySource=1)))
@@ -296,7 +315,14 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
     def test_failed_confirmation_is_reported(self):
         bill = self.init_invoice('in_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_purchase_a)
         bill.action_post()
-        self.env['l10n_cn_edi.document'].create({'move_id': bill.id, 'state': 'red_form_pending', 'red_form_uuid': 'IN-1'})
+        bill._l10n_cn_edi_provider_write({'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
+        self.env['l10n_cn_edi.document'].create({
+            'move_id': bill.id,
+            'state': 'red_form_pending',
+            'red_form_uuid': 'IN-1',
+            'bureau_state': '02',
+            'red_form_number': '990000007566113377',
+        })
         self.nuonuo.handlers[CONFIRM] = MockResponse({'code': 'E9999', 'describe': '确认单已超时'})
 
         with self.assertRaisesRegex(UserError, '确认单已超时'):

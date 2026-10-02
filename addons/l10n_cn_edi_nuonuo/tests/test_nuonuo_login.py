@@ -157,6 +157,15 @@ class TestNuonuoLogin(L10nCnEdiNuonuoTestCommon):
         submitted = self._requests_for(VERIFY)[0]['payload']
         self.assertEqual((submitted['queryType'], submitted['verifyCode']), ('2', 123456))
 
+    def test_sms_login_send_refusal_is_reported(self):
+        self._set_session(login='0', identity='1')
+        wizard = self._open_login()
+        wizard.method = 'sms'
+        self._by_query_type(QR_CODE, {'4': [{'code': 'E9999', 'describe': '短信发送失败'}]})
+
+        with self.assertRaisesRegex(UserError, '短信发送失败'):
+            wizard.action_send_sms()
+
     def test_refused_login_is_reported(self):
         self._set_session(login='0', identity='1')
         wizard = self._open_login()

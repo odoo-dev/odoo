@@ -20,6 +20,7 @@ Write flow on the TEST environment (--allow-writes; add --dry-run to only print)
 
     export AISINO_ETAX_USERNAME=...   # 电子税务局 account of the drawer
     export AISINO_ETAX_PASSWORD=...   # optional: Yunshui uses the stored one if absent
+    export AISINO_DQBM=4403           # optional: region of the tax bureau (spec 5.1.2)
     python3 probe.py login            # interactive: SMS / QR / 责任人 steps
     python3 probe.py issue            # blue 数电普票, then poll until issued
     python3 probe.py red              # full red of that blue in ONE call, then poll
@@ -100,6 +101,7 @@ class Probe:
             self.tax_no = self.tax_no or '91440300DRYRUN000X'
         self.username = os.environ.get('AISINO_ETAX_USERNAME', '')
         self.password = os.environ.get('AISINO_ETAX_PASSWORD', '')
+        self.region = os.environ.get('AISINO_DQBM', '')  # 5.1.2 region of the tax bureau, e.g. 4403 Shenzhen
         self.company_name = os.environ.get('AISINO_COMPANY_NAME', '深圳市华夏光电子有限公司')  # the test tenant's name
         self.write_phase = args.phase in ('login', 'issue', 'red', 'margin')
         if self.write_phase and args.host != 'test':
@@ -123,8 +125,12 @@ class Probe:
             ts = timestamp or env.now_timestamp()
             body = env.build_request(code, payload, self.identity, self.platform, self.tax_no, timestamp=ts)
             print(f'  -- {code} (dry run, not sent) --')
+            printable_payload = {
+                key: ('***' if key in {'password', 'smsCode'} and value else value)
+                for key, value in payload.items()
+            }
             print('  plaintext:')
-            print('    ' + json.dumps(payload, ensure_ascii=False, indent=2).replace('\n', '\n    '))
+            print('    ' + json.dumps(printable_payload, ensure_ascii=False, indent=2).replace('\n', '\n    '))
             back = env.verify_and_decrypt(dict(body, code='1000'), self.identity, self.platform)
             print(f'  envelope: {len(json.dumps(body))} bytes, round-trips: {back == payload}')
             return 0.0, None, {}
@@ -365,6 +371,8 @@ class Probe:
         request = {'step_name': 'login', 'nsrsbh': self.tax_no, 'username': self.username or 'DRYRUN'}
         if self.password:
             request['password'] = self.password
+        if self.region:
+            request['dqbm'] = self.region
         for _ in range(20):
             _, status, body = self.call(code, request)
             if self.dry_run:

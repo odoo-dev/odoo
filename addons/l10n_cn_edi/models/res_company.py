@@ -11,6 +11,11 @@ class ResCompany(models.Model):
         help="Name printed as the drawer (开票人) on issued e-Fapiao. "
              "Defaults to the current user when left empty.",
     )
+    l10n_cn_edi_inbound_red_form_last_date = fields.Date(
+        string="Last Inbound Red Form Poll Date",
+        copy=False,
+        help="Last date reached by inbound red form catch-up polling.",
+    )
 
     def _l10n_cn_edi_get_client(self):
         """Return the provider's client for this company (an ``L10nCnEdiClient``).

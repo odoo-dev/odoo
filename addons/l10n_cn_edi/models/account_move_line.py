@@ -15,7 +15,7 @@ class AccountMoveLine(models.Model):
         compute="_compute_l10n_cn_tax_category_id",
         store=True,
         readonly=False,
-        copy=False,
+        copy=True,
     )
 
     # --------------------------------
@@ -27,3 +27,19 @@ class AccountMoveLine(models.Model):
         """ Default to the product classification if any """
         for line in self:
             line.l10n_cn_tax_category_id = line.product_id.product_tmpl_id.l10n_cn_tax_category_id if line.product_id else False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        self.env['account.move'].browse({vals['move_id'] for vals in vals_list if vals.get('move_id')})._l10n_cn_edi_check_red_lock()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if not vals.keys() <= {'sequence'}:
+            self.move_id._l10n_cn_edi_check_red_lock()
+            if vals.get('move_id'):
+                self.env['account.move'].browse(vals['move_id'])._l10n_cn_edi_check_red_lock()
+        return super().write(vals)
+
+    def unlink(self):
+        self.move_id._l10n_cn_edi_check_red_lock()
+        return super().unlink()

@@ -23,7 +23,8 @@ zipCode layering (encrypt -> datagram):
   0: base64( hex(sm4(json)) )
   1: base64( gzip( hex(sm4(json)) ) )                  (hex placement assumed)
   2: base64( hex(sm4( base64( gzip(json) ) )) )        (hex placement assumed)
-  (>10k payload must compress -> zipCode 1 or 2)
+  Requests go out as zipCode 0, the only layering verified against the gateway; 1 and 2 are
+  still decoded.
 """
 import base64
 import gzip
@@ -31,6 +32,7 @@ import hashlib
 import hmac
 import json
 import logging
+import zlib
 from datetime import datetime
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -43,19 +45,29 @@ HAS_NATIVE_SM4 = hasattr(algorithms, 'SM4')
 
 SIGNTYPE = 'HMacSHA256'
 ENCRYPT_CODE = '1'  # fixed: 1 = SM4
-COMPRESSION_THRESHOLD = 10000  # bytes; > this -> must compress (zipCode 1 or 2)
+MAX_DATAGRAM_LENGTH = 20 * 1024 * 1024
+MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024
+SIGNED_FIELDS = ('interfaceCode', 'zipCode', 'encryptCode', 'access_token', 'datagram', 'signtype')
 
 
 _logger = logging.getLogger(__name__)
 
 
 class AisinoProtocolError(Exception):
-    """Outer-envelope failure: signature mismatch or outer code != 1000."""
+    """The gateway's verdict: outer code != 1000."""
 
     def __init__(self, code, msg=''):
         super().__init__(f'Aisino protocol error {code}: {msg}')
         self.code = str(code)
         self.msg = msg
+
+
+class MalformedEnvelope(Exception):
+    """A response envelope that can't be read: missing fields, bad encoding, too large."""
+
+
+class SignatureMismatch(Exception):
+    """A response whose signature doesn't match the one computed locally."""
 
 
 def now_timestamp():
@@ -141,24 +153,32 @@ def _sm4_hex(raw, key):
 
 
 def _sm4_unhex(data, key):
-    """Decrypt a hex (as sent) or raw ciphertext: hutool's decryptStr accepts both, so may the gateway."""
-    try:
-        ciphertext = bytes.fromhex(data.decode('ascii'))
-    except (UnicodeDecodeError, ValueError):
-        ciphertext = data
-    return sm4_decrypt(ciphertext, key)
+    return sm4_decrypt(bytes.fromhex(data.decode('ascii')), key)
+
+
+def _gunzip(data):
+    decompressor = zlib.decompressobj(16 + zlib.MAX_WBITS)
+    content = decompressor.decompress(data, MAX_DECOMPRESSED_BYTES)
+    if decompressor.unconsumed_tail:
+        raise MalformedEnvelope('decompressed datagram too large')
+    if not decompressor.eof:
+        raise MalformedEnvelope('truncated gzip datagram')
+    return content
 
 
 def _parse_datagram(datagram_b64, key, zip_code):
+    if len(datagram_b64) > MAX_DATAGRAM_LENGTH:
+        raise MalformedEnvelope('datagram too large')
     raw = base64.b64decode(datagram_b64)
     if zip_code == '0':
         return _sm4_unhex(raw, key).decode('utf-8')
     if zip_code == '1':
-        return _sm4_unhex(gzip.decompress(raw), key).decode('utf-8')
+        return _sm4_unhex(_gunzip(raw), key).decode('utf-8')
     if zip_code == '2':
         inner = _sm4_unhex(raw, key).decode('ascii')  # base64 of gzip
-        return gzip.decompress(base64.b64decode(inner)).decode('utf-8')
-    raise ValueError(f'invalid zipCode {zip_code!r}')
+        return _gunzip(base64.b64decode(inner)).decode('utf-8')
+    raise MalformedEnvelope(f'invalid zipCode {zip_code!r}')
+
 
 def sign(interface_code, zip_code, encrypt_code, access_token, datagram, signtype, key):
     """HMAC-SHA256 over the concatenated fields, keyed by the SM4 key -> UPPERCASE hex."""
@@ -167,18 +187,16 @@ def sign(interface_code, zip_code, encrypt_code, access_token, datagram, signtyp
 
 
 def build_request(interface_code, datagram, identity_code, platform_code, tax_no,
-                  timestamp=None, zip_code=None):
+                  timestamp=None, zip_code='0'):
     """Build the full outer request envelope (a JSON-serialisable dict).
 
     :param datagram: the business payload (dict) — will be JSON-encoded.
-    :param zip_code: '0'/'1'/'2'; auto-picked (0 or 2) when None.
+    :param zip_code: '0'/'1'/'2'
     """
     ts = timestamp or now_timestamp()
     key = derive_sm4_key(identity_code, platform_code, ts)
     access_token = make_access_token(platform_code, tax_no, ts)
     json_str = json.dumps(datagram, ensure_ascii=False, separators=(',', ':'))
-    if zip_code is None:
-        zip_code = '2' if len(json_str.encode('utf-8')) > COMPRESSION_THRESHOLD else '0'
     datagram_b64 = _build_datagram(json_str, key, zip_code)
     signature = sign(interface_code, zip_code, ENCRYPT_CODE, access_token, datagram_b64, SIGNTYPE, key)
     return {
@@ -193,28 +211,38 @@ def build_request(interface_code, datagram, identity_code, platform_code, tax_no
 
 
 def verify_and_decrypt(response, identity_code, platform_code, strict=True):
-    """Verify the outer response signature and decrypt the datagram.
+    """Check the outer code, verify the outer response signature and decrypt the datagram.
 
     :return: the inner business dict (has its own 'code'/'message').
-    :raises AisinoProtocolError: on signature mismatch or outer code != 1000.
+    :raises AisinoProtocolError: on outer code != 1000 (the datagram is then empty).
+    :raises SignatureMismatch: when ``strict`` and the signature doesn't match.
+    :raises MalformedEnvelope: when the envelope can't be read.
     """
-    ts = timestamp_from_access_token(response['access_token'])
+    if not isinstance(response, dict):
+        raise MalformedEnvelope('response is not a JSON object')
+    outer_code = str(response.get('code') or '')
+    if outer_code != '1000':
+        raise AisinoProtocolError(outer_code, response.get('msg') or '')
+    signed = [response.get(field) for field in SIGNED_FIELDS]
+    signature = response.get('signature')
+    if not all(isinstance(value, str) for value in (*signed, signature)):
+        raise MalformedEnvelope('missing envelope field')
+    try:
+        ts = timestamp_from_access_token(response['access_token'])
+    except ValueError as e:  # binascii.Error and UnicodeDecodeError included
+        raise MalformedEnvelope('invalid access_token') from e
     key = derive_sm4_key(identity_code, platform_code, ts)
-    expected = sign(
-        response['interfaceCode'], response['zipCode'], response['encryptCode'],
-        response['access_token'], response['datagram'], response['signtype'], key,
-    )
-    if not hmac.compare_digest(expected, response['signature']):
+    if not hmac.compare_digest(sign(*signed, key), signature):
         # The test gateway's responses (2026-09-30) are not signed over the request's field order, and the
-        # spec doesn't say what they are signed over: callers talking to the real gateway pass strict=False
+        # spec doesn't say what they are signed over: callers talking to the sandbox may pass strict=False
         # until Aisino tells us.
         if strict:
-            raise AisinoProtocolError('9995', 'signature mismatch')
+            raise SignatureMismatch('response signature mismatch')
         _logger.warning("Aisino response signature doesn't match the request scheme; accepted (strict=False)")
-    outer_code = response.get('code')
-    if outer_code != '1000':
-        raise AisinoProtocolError(outer_code, response.get('msg', ''))
-    return json.loads(_parse_datagram(response['datagram'], key, response['zipCode']))
+    try:
+        return json.loads(_parse_datagram(response['datagram'], key, response['zipCode']))
+    except (ValueError, zlib.error) as e:
+        raise MalformedEnvelope(f'unreadable datagram: {e}') from e
 
 
 def build_response(interface_code, datagram, identity_code, platform_code,
