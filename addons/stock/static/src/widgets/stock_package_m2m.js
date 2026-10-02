@@ -3,12 +3,14 @@ import {
     many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
 
 export class Many2ManyPackageTagsField extends Many2ManyTagsField {
     setup() {
         super.setup();
+        this.action = useService("action");
         this.hasNoneTag = this.props.record.data?.has_lines_without_result_package || false;
     }
 
@@ -31,6 +33,21 @@ export class Many2ManyPackageTagsField extends Many2ManyTagsField {
             ...super.getTagProps(record),
             text: record.data.name,
         };
+    }
+
+    async deleteTag(id) {
+        const tagRecord = this.props.record.data[this.props.name].records.find(
+            (record) => record.id === id
+        );
+        await this.orm.call("stock.move", "unpack", [this.props.record.resId, tagRecord.resId]);
+        await this.action.doAction({
+            type: "ir.actions.client",
+            tag: "soft_reload",
+        });
+    }
+
+    get showM2OSelectionField() {
+        return false;
     }
 }
 

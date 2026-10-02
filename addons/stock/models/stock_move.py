@@ -1859,6 +1859,10 @@ Please change the quantity done or the rounding precision in your settings.""",
             neg_push_moves._action_confirm(merge_into=neg_push_moves.move_orig_ids.move_dest_ids)
         return moves
 
+    def unpack(self, package_id):
+        move_lines = self.move_line_ids.filtered(lambda ml: ml.result_package_id.outermost_package_id.id == package_id)
+        move_lines.unpack()
+
     def _prepare_procurement_origin(self):
         self.ensure_one()
         return (self.reference_ids and self.reference_ids[0].name) or self.origin or self.picking_id.display_name

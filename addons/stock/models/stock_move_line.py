@@ -1142,6 +1142,21 @@ class StockMoveLine(models.Model):
                     return action
         return package
 
+    def unpack(self):
+        def fetch_before_outermost(package):
+            if package.package_dest_id.package_dest_id:
+                return fetch_before_outermost(package.package_dest_id)
+            return package
+
+        lines_to_unpack = self.filtered(lambda ml: ml.result_package_id.package_dest_id)
+        pack_ids = set()
+        for package in lines_to_unpack.result_package_id:
+            pack_ids.add(fetch_before_outermost(package).id)
+        self.env['stock.package'].browse(pack_ids).write({'package_dest_id': False})
+
+        # No pack in pack, can remove the dest package directly
+        (self - lines_to_unpack).write({'result_package_id': False})
+
     def action_put_in_pack(self, *, package_id=False, package_type_id=False, package_name=False, package_capacity=None):
         move_lines = self
         if package_capacity and package_capacity != self.quantity:

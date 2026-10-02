@@ -386,7 +386,7 @@
                                     <field name="is_initial_demand_editable" column_invisible="True"/>
                                     <field name="display_import_lot" column_invisible="True"/>
                                     <field name="has_lines_without_result_package" column_invisible="True"/>
-                                    <field name="package_ids" optional="show" widget="package_m2m" groups="stock.group_tracking_lot" width="200px" readonly="1"/>
+                                    <field name="package_ids" optional="show" widget="package_m2m" groups="stock.group_tracking_lot" width="200px" readonly="0"/>
                                     <field name="product_uom_qty" string="Demand" readonly="not is_initial_demand_editable"/>
                                     <field name="forecast_expected_date" column_invisible="True"/>
                                     <field name="product_qty" readonly="1" column_invisible="True"/>
