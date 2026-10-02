@@ -58,7 +58,6 @@ class AisinoClient(L10nCnEdiClient):
         self.gateway = company_sudo.l10n_cn_edi_aisino_gateway or 'test'
         self.username = company_sudo.l10n_cn_edi_aisino_username or ''
         self.password = company_sudo.l10n_cn_edi_aisino_password or ''
-        self.allow_insecure_sandbox_signature = bool(company_sudo.l10n_cn_edi_aisino_allow_insecure_sandbox_signature)
 
     def ensure_ready(self):
         if not self.company._l10n_cn_edi_is_ready():
@@ -440,15 +439,6 @@ class AisinoClient(L10nCnEdiClient):
             return False
 
     def _call(self, interface_code, payload):
-        strict = True
-        if self.gateway == 'test' and self.allow_insecure_sandbox_signature:
-            # ponytail: sandbox-only workaround for unresolved provider response signing scheme.
-            strict = False
-            _logger.warning(
-                "Aisino sandbox signature verification workaround is enabled for company %s; "
-                "keep it disabled in production.",
-                self.company.name,
-            )
         request_body = sm4_envelope.build_request(
             interface_code,
             payload,
@@ -480,17 +470,11 @@ class AisinoClient(L10nCnEdiClient):
                 json.loads(body),
                 self.identity_code,
                 self.platform_code,
-                strict=strict,
             )
         except (ValueError, sm4_envelope.MalformedEnvelope) as e:
             _logger.warning("Aisino %s sent an unreadable response for company %s: %s", interface_code, self.company.vat, e)
             raise L10nCnEdiProviderUnreachable(self.company.env._(
                 "Aisino sent a response Odoo could not read. Please try again later.",
-            )) from e
-        except sm4_envelope.SignatureMismatch as e:
-            _logger.warning("Aisino %s response failed signature verification for company %s", interface_code, self.company.vat)
-            raise L10nCnEdiProviderUnreachable(self.company.env._(
-                "Aisino's response failed signature verification. Please try again later.",
             )) from e
         except sm4_envelope.AisinoProtocolError as e:
             raise AisinoProviderError(e.code, e.msg, self.company.env._(

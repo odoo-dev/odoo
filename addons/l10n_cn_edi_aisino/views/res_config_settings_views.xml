@@ -33,15 +33,6 @@
                             <label for="l10n_cn_edi_aisino_password" class="col-lg-4"/>
                             <field name="l10n_cn_edi_aisino_password" password="True"/>
                         </div>
-                        <div class="row" groups="base.group_system">
-                            <label for="l10n_cn_edi_aisino_allow_insecure_sandbox_signature" class="col-lg-4"/>
-                            <field name="l10n_cn_edi_aisino_allow_insecure_sandbox_signature"
-                                readonly="l10n_cn_edi_aisino_gateway != 'test'"/>
-                        </div>
-                        <div class="text-warning mt8" groups="base.group_system"
-                            invisible="not l10n_cn_edi_aisino_allow_insecure_sandbox_signature">
-                            Sandbox-only workaround enabled: production must keep strict response signature verification.
-                        </div>
                         <div class="mt16">
                             <button name="action_l10n_cn_edi_aisino_test_connection"
                                 type="object"

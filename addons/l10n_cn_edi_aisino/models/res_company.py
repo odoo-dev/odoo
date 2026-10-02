@@ -30,11 +30,6 @@ class ResCompany(models.Model):
         string="E-Tax Password (电子税务局密码)",
         groups='base.group_system',
     )
-    l10n_cn_edi_aisino_allow_insecure_sandbox_signature = fields.Boolean(
-        string="Allow insecure sandbox signature responses",
-        groups='base.group_system',
-        help="Sandbox-only workaround for unresolved response-signing mismatch. Keep disabled in production.",
-    )
     l10n_cn_edi_aisino_region_code = fields.Char(
         string="Aisino Region Code (地区编码)",
         groups='base.group_system',

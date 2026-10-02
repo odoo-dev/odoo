@@ -374,20 +374,6 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
         self.assertTrue(self.company.sudo().l10n_cn_edi_aisino_relogin)
 
-    def test_signature_mismatch_on_issue_is_retryable(self):
-        invoice = self._post_invoice()
-        self.company.l10n_cn_edi_aisino_gateway = 'prod'
-        self.gateway.bad_signature = True
-        self.gateway.handlers[SIMPLE_ISSUE] = {'code': '1000', 'message': '提交成功'}
-        client = self.company._l10n_cn_edi_get_client()
-        invoice._l10n_cn_edi_ensure_serial('BLUE')
-
-        error = invoice._l10n_cn_edi_submit_invoice(client)
-
-        self.assertIn('signature verification', error)
-        self.assertNotEqual(invoice.l10n_cn_edi_state, 'failed')
-        self.assertTrue(invoice.l10n_cn_edi_serial_no)
-
     def test_unreadable_responses_are_user_errors(self):
         client = self.company._l10n_cn_edi_get_client()
         for raw in (
@@ -434,27 +420,14 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         self.assertNotIn('s3cr3t', output)
         self.assertNotIn('/secret/', output)
 
-    def test_strict_signature_is_required_in_production(self):
-        self.company.write({
-            'l10n_cn_edi_aisino_gateway': 'prod',
-            'l10n_cn_edi_aisino_allow_insecure_sandbox_signature': True,
-        })
+    def test_response_signature_is_ignored(self):
+        self.company.l10n_cn_edi_aisino_gateway = 'prod'
         self.gateway.bad_signature = True
-        with self.assertRaisesRegex(UserError, 'signature verification'):
-            self.company._l10n_cn_edi_get_client().get_session_state()
-
-    def test_sandbox_signature_workaround_is_opt_in(self):
-        self.company.write({'l10n_cn_edi_aisino_gateway': 'test'})
-        self.gateway.bad_signature = True
-        with self.assertRaisesRegex(UserError, 'signature verification'):
-            self.company._l10n_cn_edi_get_client().get_session_state()
-
-        self.company.l10n_cn_edi_aisino_allow_insecure_sandbox_signature = True
         self.assertEqual(self.company._l10n_cn_edi_get_client().get_session_state(), 'ok')
 
     def test_network_failure_is_user_error(self):
         self.gateway.unreachable = True
-        with self.assertRaisesRegex(UserError, 'Could not reach Aisino'):
+        with self.assertRaisesRegex(UserError, 'Aisino did not answer'):
             self.company._l10n_cn_edi_get_client().test_connection()
 
     def test_download_rejects_unsafe_url(self):

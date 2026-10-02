@@ -29,11 +29,6 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         groups='base.group_system',
     )
-    l10n_cn_edi_aisino_allow_insecure_sandbox_signature = fields.Boolean(
-        related='company_id.l10n_cn_edi_aisino_allow_insecure_sandbox_signature',
-        readonly=False,
-        groups='base.group_system',
-    )
     l10n_cn_edi_aisino_region_code = fields.Char(
         related='company_id.l10n_cn_edi_aisino_region_code',
         readonly=False,

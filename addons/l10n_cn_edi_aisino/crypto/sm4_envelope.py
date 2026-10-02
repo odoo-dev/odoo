@@ -16,7 +16,8 @@ Implements the Ch.1 (公共请求/返回参数) + Ch.6 (JAVA DEMO) envelope:
   - datagram  = SM4/ECB/PKCS5 of the JSON payload as lowercase HEX, then base64, layered by zipCode
     (the Java demo's sm4Encrypt is hutool encryptHex; the prose never says so)
   - signature = HMAC-SHA256(interfaceCode+zipCode+encryptCode+access_token+datagram+signtype,
-                key=SM4 key) -> UPPERCASE hex
+                key=SM4 key) -> UPPERCASE hex; responses echo the request's, which Aisino says
+    to ignore (2026-10-02): only requests are verified
   - the SAME timestamp builds both the SM4 key and the access_token
 
 zipCode layering (encrypt -> datagram):
@@ -31,7 +32,6 @@ import gzip
 import hashlib
 import hmac
 import json
-import logging
 import zlib
 from datetime import datetime
 
@@ -50,7 +50,6 @@ MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024
 SIGNED_FIELDS = ('interfaceCode', 'zipCode', 'encryptCode', 'access_token', 'datagram', 'signtype')
 
 
-_logger = logging.getLogger(__name__)
 
 
 class AisinoProtocolError(Exception):
@@ -64,10 +63,6 @@ class AisinoProtocolError(Exception):
 
 class MalformedEnvelope(Exception):
     """A response envelope that can't be read: missing fields, bad encoding, too large."""
-
-
-class SignatureMismatch(Exception):
-    """A response whose signature doesn't match the one computed locally."""
 
 
 def now_timestamp():
@@ -210,12 +205,13 @@ def build_request(interface_code, datagram, identity_code, platform_code, tax_no
     }
 
 
-def verify_and_decrypt(response, identity_code, platform_code, strict=True):
-    """Check the outer code, verify the outer response signature and decrypt the datagram.
+def verify_and_decrypt(response, identity_code, platform_code):
+    """Check the outer code and decrypt the datagram.
+
+    The response signature merely echoes the request's (Aisino: “不用管，不生效”), so it isn't checked.
 
     :return: the inner business dict (has its own 'code'/'message').
     :raises AisinoProtocolError: on outer code != 1000 (the datagram is then empty).
-    :raises SignatureMismatch: when ``strict`` and the signature doesn't match.
     :raises MalformedEnvelope: when the envelope can't be read.
     """
     if not isinstance(response, dict):
@@ -223,22 +219,13 @@ def verify_and_decrypt(response, identity_code, platform_code, strict=True):
     outer_code = str(response.get('code') or '')
     if outer_code != '1000':
         raise AisinoProtocolError(outer_code, response.get('msg') or '')
-    signed = [response.get(field) for field in SIGNED_FIELDS]
-    signature = response.get('signature')
-    if not all(isinstance(value, str) for value in (*signed, signature)):
+    if not all(isinstance(response.get(field), str) for field in ('access_token', 'datagram', 'zipCode')):
         raise MalformedEnvelope('missing envelope field')
     try:
         ts = timestamp_from_access_token(response['access_token'])
     except ValueError as e:  # binascii.Error and UnicodeDecodeError included
         raise MalformedEnvelope('invalid access_token') from e
     key = derive_sm4_key(identity_code, platform_code, ts)
-    if not hmac.compare_digest(sign(*signed, key), signature):
-        # The test gateway's responses (2026-09-30) are not signed over the request's field order, and the
-        # spec doesn't say what they are signed over: callers talking to the sandbox may pass strict=False
-        # until Aisino tells us.
-        if strict:
-            raise SignatureMismatch('response signature mismatch')
-        _logger.warning("Aisino response signature doesn't match the request scheme; accepted (strict=False)")
     try:
         return json.loads(_parse_datagram(response['datagram'], key, response['zipCode']))
     except (ValueError, zlib.error) as e:

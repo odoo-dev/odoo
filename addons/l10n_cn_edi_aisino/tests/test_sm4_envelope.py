@@ -122,32 +122,13 @@ def test_large_payload_is_still_sent_uncompressed():
     assert env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM) == payload
 
 
-# --- signature tamper detection --------------------------------------------
+# --- response signature --------------------------------------------------
 
-def test_tampered_datagram_fails_signature():
-    req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-    req['datagram'] = req['datagram'][:-4] + ('AAAA' if not req['datagram'].endswith('AAAA') else 'BBBB')
-    with pytest.raises(env.SignatureMismatch):
-        env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM)
-
-
-def test_tampered_field_fails_signature():
-    req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-    req['access_token'] = 'AAAA' + req['access_token'][4:]
-    with pytest.raises(env.SignatureMismatch):
-        env.verify_and_decrypt(dict(req, code='1000'), IDENTITY, PLATFORM)
-
-
-def test_wrong_key_fails_signature():
-    req = env.build_request('x', {'a': 1}, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-    with pytest.raises(env.SignatureMismatch):
-        env.verify_and_decrypt(dict(req, code='1000'), 'wrongidentity000000', PLATFORM)
-
-
-def test_non_strict_accepts_a_mismatching_signature():
+def test_response_signature_is_ignored():
+    """Responses echo the request's signature, which Aisino says to ignore."""
     response = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
     response['signature'] = 'BAD'
-    assert env.verify_and_decrypt(response, IDENTITY, PLATFORM, strict=False) == {'a': 1}
+    assert env.verify_and_decrypt(response, IDENTITY, PLATFORM) == {'a': 1}
 
 
 # --- outer code handling ----------------------------------------------------
@@ -169,15 +150,7 @@ def test_outer_failure_is_read_before_the_empty_datagram():
         env.verify_and_decrypt({}, IDENTITY, PLATFORM)
 
 
-def test_signature_mismatch_is_not_a_provider_error():
-    resp = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
-    resp['signature'] = 'BAD' + resp['signature'][3:]
-    with pytest.raises(env.SignatureMismatch) as ei:
-        env.verify_and_decrypt(resp, IDENTITY, PLATFORM)
-    assert not isinstance(ei.value, env.AisinoProtocolError)
-
-
-@pytest.mark.parametrize('field', [*env.SIGNED_FIELDS, 'signature'])
+@pytest.mark.parametrize('field', ['access_token', 'datagram', 'zipCode'])
 def test_missing_field_is_malformed(field):
     resp = env.build_response('x', {'a': 1}, IDENTITY, PLATFORM, timestamp=TS)
     del resp[field]

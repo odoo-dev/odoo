@@ -352,7 +352,7 @@ class Probe:
         # The envelope wraps the business answer; unwrap it when the response is encrypted.
         if isinstance(body, dict) and body.get('datagram'):
             try:
-                inner = env.verify_and_decrypt(body, self.identity, self.platform, strict=False)
+                inner = env.verify_and_decrypt(body, self.identity, self.platform)
                 print(f'  decrypted: {json.dumps(inner, ensure_ascii=False)[:800]}')
                 return inner
             except Exception as exc:  # noqa: BLE001 - a bad response is a finding too
