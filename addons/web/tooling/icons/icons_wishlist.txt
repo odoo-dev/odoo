@@ -401,6 +401,7 @@ stacks
 stadia_controller
 star
 star_half
+stat_0
 stethoscope
 sticky_note_2
 stop
@@ -440,6 +441,7 @@ train
 transgender
 translate
 travel
+triangle_circle
 trophy
 troubleshoot
 tty
