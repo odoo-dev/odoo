@@ -96,6 +96,24 @@ const FAKE_PROPS = {
     close() {},
 };
 
+test("popover context uses the model hook and supports lightweight models", () => {
+    const getter = Object.getOwnPropertyDescriptor(CalendarCommonPopover.prototype, "cardPopoverProps").get;
+    const context = { default_name: "Meeting", tz: "Europe/Brussels" };
+    const popover = {
+        readonly: false,
+        resId: 5,
+        props: {
+            ...FAKE_PROPS,
+            record: FAKE_RECORD,
+            model: { ...DEFAULT_MODEL, meta: { ...DEFAULT_MODEL.meta, context } },
+        },
+    };
+    expect(getter.call(popover).context).toEqual(context);
+    popover.props.model._getCalendarContext = () => ({ ...context, tz: "Australia/Sydney" });
+    expect(getter.call(popover).context).toEqual({ default_name: "Meeting", tz: "Australia/Sydney" });
+    expect(context.tz).toBe("Europe/Brussels");
+});
+
 async function start({ arch, model = DEFAULT_MODEL, record = FAKE_RECORD, ...props } = {}) {
     let popoverNode = model.meta.popoverNode;
     let popoverFieldNodes = model.meta.popoverFieldNodes;
