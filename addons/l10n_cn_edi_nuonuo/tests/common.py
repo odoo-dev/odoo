@@ -79,6 +79,8 @@ class L10nCnEdiNuonuoTestCommon(TestAccountMoveSendCommon):
             lambda url, timeout=None: MockResponse(content=self.downloads[url]) if url in self.downloads else MockResponse(status=404),
         ).start()
         patch.object(NuonuoClient, 'wait', lambda client, seconds: None).start()
+        # Outside a cron run, the crons' progress commits would commit the test transaction.
+        patch.object(self.env.registry['ir.cron'], '_commit_progress', return_value=float('inf')).start()
         self.addCleanup(patch.stopall)
         self._set_session(login='1', identity='1')
 

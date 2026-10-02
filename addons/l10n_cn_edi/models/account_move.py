@@ -421,8 +421,7 @@ class AccountMove(models.Model):
         self._l10n_cn_edi_ensure_serial('R')
         values = self._l10n_cn_edi_prepare_red_form_values(original_move)
         if client.supports_direct_red():
-            self._l10n_cn_edi_request_direct_red(client, values)
-            return
+            return self._l10n_cn_edi_request_direct_red(client, values)
         doc = self.l10n_cn_edi_document_ids[:1]
         if doc.state == 'red_form_pending':
             raise UserError(self.env._("A Red Form request is already pending for this Credit Note."))
@@ -470,6 +469,14 @@ class AccountMove(models.Model):
         except L10nCnEdiProviderUnreachable as e:
             self._l10n_cn_edi_set_unreachable(client, e)
             return
+        except UserError as e:
+            # Not raised: that would also roll back what the provider recorded, like a forced relogin.
+            self.message_post(body=self.env._("Red fapiao not issued: %s", e))
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {'type': 'danger', 'message': str(e)},
+            }
         if self._l10n_cn_edi_apply_invoice_result(result, client) or result.get('state') != 'sent':
             return
         for delay in client.result_delays:

@@ -260,7 +260,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
     def test_order_unknown_to_nuonuo_is_failed_by_the_cron(self):
         invoice = self._post_invoice()
-        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_LOST'})
+        invoice.write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_LOST'})
 
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
@@ -279,7 +279,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
     def test_dead_orders_free_the_order_number(self):
         invoice = self._post_invoice()
-        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_DEAD'})
+        invoice.write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_DEAD'})
         client = self.company._l10n_cn_edi_get_client()
         for status in ('22', '3', '31'):  # failed, voided, being voided
             with self.subTest(status=status):

@@ -44,7 +44,7 @@ class TestNuonuoClient(L10nCnEdiNuonuoTestCommon):
     def test_network_failure_is_a_user_error(self):
         self.nuonuo.unreachable = True
 
-        with self.assertRaisesRegex(UserError, "Could not reach Nuonuo"):
+        with self.assertRaisesRegex(UserError, "Nuonuo did not answer"):
             self.company._l10n_cn_edi_get_client().test_connection()
 
     def test_unexpected_answer_fails_the_connection_test(self):

@@ -2,6 +2,7 @@
 from datetime import date
 from unittest.mock import patch
 
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 
@@ -71,6 +72,8 @@ class TestAisinoRed(L10nCnEdiAisinoTestCommon):
         credit_note.action_l10n_cn_edi_request_red_form()
 
         self.gateway.handlers[QUERY_RESULT] = {'code': '2001', 'message': '开票失败'}
+        # Past the grace period in which a fresh order may not be known yet.
+        credit_note.l10n_cn_edi_sent_date = fields.Datetime.subtract(fields.Datetime.now(), hours=1)
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
         self.assertEqual(credit_note.l10n_cn_edi_state, 'failed')

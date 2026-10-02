@@ -112,6 +112,8 @@ class L10nCnEdiAisinoTestCommon(TestAccountMoveSendCommon):
     def setUp(self):
         super().setUp()
         patch.object(AisinoClient, 'wait', lambda client, seconds: None).start()
+        # Outside a cron run, the crons' progress commits would commit the test transaction.
+        patch.object(self.env.registry['ir.cron'], '_commit_progress', return_value=float('inf')).start()
         self.addCleanup(patch.stopall)
 
     def _post_invoice(self):

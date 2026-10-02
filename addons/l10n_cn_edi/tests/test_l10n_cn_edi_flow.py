@@ -676,8 +676,9 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.responses['supports_direct_red'] = True
         self.responses['issue_direct_red'] = UserError("Invalid credentials")
 
-        with self.assertRaisesRegex(UserError, 'Invalid credentials'):
-            credit_note.action_l10n_cn_edi_request_red_form()
+        action = credit_note.action_l10n_cn_edi_request_red_form()
+
+        self.assertEqual(action['params']['message'], 'Invalid credentials')
         self.assertEqual(credit_note.l10n_cn_edi_state, 'not_sent')
 
     def test_direct_red_uses_stable_serial(self):

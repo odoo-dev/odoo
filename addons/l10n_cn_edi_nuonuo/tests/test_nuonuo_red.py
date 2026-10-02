@@ -55,7 +55,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
     def _credit_note(self, reason='02'):
         invoice = self.init_invoice('out_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a)
         invoice.action_post()
-        invoice._l10n_cn_edi_provider_write({'l10n_cn_edi_state': 'issued', 'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
+        invoice.write({'l10n_cn_edi_state': 'issued', 'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
         wizard = self.env['account.move.reversal'].with_context(active_ids=invoice.ids, active_model='account.move').create({
             'journal_id': invoice.journal_id.id,
             'reason': 'placeholder',
@@ -315,7 +315,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
     def test_failed_confirmation_is_reported(self):
         bill = self.init_invoice('in_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_purchase_a)
         bill.action_post()
-        bill._l10n_cn_edi_provider_write({'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
+        bill.write({'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
         self.env['l10n_cn_edi.document'].create({
             'move_id': bill.id,
             'state': 'red_form_pending',
