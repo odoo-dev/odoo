@@ -51,6 +51,7 @@ export function useSetupAction(params = {}) {
     const env = useEnv();
     const props = useProps();
     const ui = useService("ui");
+    const dialog = useService("dialog");
     const {
         __beforeLeave__,
         __getGlobalState__,
@@ -69,7 +70,13 @@ export function useSetupAction(params = {}) {
     } = params;
 
     if (beforeVisibilityChange) {
-        useListener(document, "visibilitychange", beforeVisibilityChange);
+        // a dialog opened from the view may hold pending changes (or be owned by the view and
+        // closed with it): don't act on the tab change while any dialog is open
+        useListener(document, "visibilitychange", (ev) => {
+            if (!dialog.hasOpenDialogs) {
+                return beforeVisibilityChange(ev);
+            }
+        });
     }
 
     if (beforeUnload) {
