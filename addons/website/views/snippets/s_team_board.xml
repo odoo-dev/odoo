@@ -46,10 +46,7 @@
                         <div class="row g-0 align-items-center">
                             <div class="col-md-4 p-4 pe-md-0">
                                 <img class="o_team_board_modal_img rounded-4" src="" alt=""/>
-                                <button type="button"
-                                        class="o_team_board_member_send_message_btn btn btn-primary w-100 mt-3">
-                                    Send a message
-                                </button>
+                                <div class="o_team_board_modal_buttons d-grid gap-2 mt-3"></div>
                             </div>
                             <div class="col-md-8 p-4 p-lg-5">
                                 <h3 class="o_team_board_modal_name h3"></h3>

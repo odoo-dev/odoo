@@ -15,6 +15,7 @@ export class TeamBoard extends Interaction {
 
     setup() {
         this.modal = this.el.querySelector(".o_team_board_modal");
+        this.contactMethods = registry.category("website.s_team_board.button_methods");
     }
 
     start() {
@@ -26,14 +27,15 @@ export class TeamBoard extends Interaction {
         document.body.appendChild(this.modal);
 
         this.modalInst = window.Modal.getOrCreateInstance(this.modal);
-        this.sendBtn = this.modal.querySelector(".o_team_board_member_send_message_btn");
 
         this.addListener(this.modal, "show.bs.modal", (ev) =>
             this.updateModal(ev.relatedTarget)
         );
 
-        this.addListener(this.sendBtn, "click", this.locked(this.sendMessage, true));
-
+        for (const method of this.contactMethods.getAll()) {
+            const btn = this.createButton(method.label, method.className ?? "");
+            this.addListener(btn, "click", this.locked(() => this.runButtonMethod(method, btn), true));
+        }
         this.registerCleanup(() => {
             this.modalInst.dispose();
             placeholder.replaceWith(this.modal);
@@ -54,28 +56,53 @@ export class TeamBoard extends Interaction {
         this.currentMemberName = member.querySelector(".card-title").textContent;
     }
 
-    async sendMessage() {
-        const sendBtnLabel = this.sendBtn.textContent;
-        this.sendBtn.textContent = _t("Sending...");
+    createButton(label, className) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `btn btn-primary ${className}`;
+        btn.textContent = label;
+        this.modal.querySelector(".o_team_board_modal_buttons").append(btn);
+        this.registerCleanup(() => btn.remove());
+
+        return btn;
+    }
+
+    async runButtonMethod(method, btn) {
+        const label = btn.textContent;
+        btn.textContent = method.loadingLabel ?? label;
         try {
-            const result = await this.waitFor(
-                rpc("/website/contact", { member_name: this.currentMemberName })
+            await this.waitFor(
+                method.onClick({
+                    memberName: this.modal.querySelector(".o_team_board_modal_name").textContent,
+                })
             );
-            if (!result.success) {
-                throw new Error(result.error);
+            if (method.closeOnSuccess !== false) {
+                this.modalInst.hide();
             }
-            this.modalInst.hide();
-            this.services.notification.add(_t("Your message has been sent."), {
-                type: "success",
-            });
+            this.services.notification.add(method.successMessage, { type: "success" });
         } catch {
-            this.services.notification.add(_t("Your message could not be sent."), {
-                type: "danger",
-            });
+            this.services.notification.add(method.errorMessage, { type: "danger" });
         } finally {
-        this.sendBtn.textContent = sendBtnLabel;
+            btn.textContent = label;
         }
     }
 }
+
+registry.category("website.s_team_board.button_methods").add(
+    "send_message",
+    {
+        label: _t("Send a message"),
+        loadingLabel: _t("Sending..."),
+        successMessage: _t("Your message has been sent."),
+        errorMessage: _t("Your message could not be sent."),
+        async onClick({ memberName }) {
+            const result = await rpc("/website/contact", { member_name: memberName });
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+        },
+    },
+    { sequence: 10 }
+);
 
 registry.category("public.interactions").add("website.team_board", TeamBoard);
