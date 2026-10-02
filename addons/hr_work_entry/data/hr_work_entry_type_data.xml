@@ -1617,6 +1617,1373 @@
         <field name="count_as">absence</field>
     </record>
 
+    <!-- Partena wage types added 2026-10 -->
+    <record id="l10n_be_work_entry_type_paid_hours_employer" model="hr.work.entry.type">
+        <field name="name">Hours paid by the employer</field>
+        <field name="code">001.49</field>
+        <field name="external_code">002.49</field>
+        <field name="color">5</field>
+        <field name="display_code">HPE</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_piece_rate_work" model="hr.work.entry.type">
+        <field name="name">Piece-rate work</field>
+        <field name="code">005.00</field>
+        <field name="color">0</field>
+        <field name="display_code">PCW</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_delivery_hours" model="hr.work.entry.type">
+        <field name="name">Delivery hours</field>
+        <field name="code">012.47</field>
+        <field name="external_code">017.46</field>
+        <field name="color">0</field>
+        <field name="display_code">DLV</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_technical_inspection_hours" model="hr.work.entry.type">
+        <field name="name">Technical inspection hours</field>
+        <field name="code">017.43</field>
+        <field name="color">0</field>
+        <field name="display_code">TIH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_bridge_day_hours" model="hr.work.entry.type">
+        <field name="name">Bridge day hours</field>
+        <field name="code">017.44</field>
+        <field name="color">0</field>
+        <field name="display_code">BRH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_german_community" model="hr.work.entry.type">
+        <field name="name">Public holiday - German-speaking Community</field>
+        <field name="code">006.13</field>
+        <field name="color">3</field>
+        <field name="display_code">PHG</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_flemish_community" model="hr.work.entry.type">
+        <field name="name">Public holiday - Flemish Community</field>
+        <field name="code">006.14</field>
+        <field name="color">3</field>
+        <field name="display_code">PHF</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_adoption_leave_company" model="hr.work.entry.type">
+        <field name="name">Adoption leave (days 1-3)</field>
+        <field name="code">007.06</field>
+        <field name="color">5</field>
+        <field name="display_code">ADC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_seniority_leave" model="hr.work.entry.type">
+        <field name="name">Seniority leave</field>
+        <field name="code">008.00</field>
+        <field name="external_code">008.01|008.02|008.03</field>
+        <field name="color">5</field>
+        <field name="display_code">SEN</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_age_related_leave" model="hr.work.entry.type">
+        <field name="name">Age-related leave (JC 116/207)</field>
+        <field name="code">008.04</field>
+        <field name="color">5</field>
+        <field name="display_code">AGL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_leave_45_plus_jc_144_145" model="hr.work.entry.type">
+        <field name="name">Leave for workers aged 45+ (JC 144/145)</field>
+        <field name="code">008.06</field>
+        <field name="color">5</field>
+        <field name="display_code">L45</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_extra_legal_leave_45_plus" model="hr.work.entry.type">
+        <field name="name">Extra-legal leave 45+</field>
+        <field name="code">008.45</field>
+        <field name="color">5</field>
+        <field name="display_code">X45</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_extra_legal_leave_56_plus" model="hr.work.entry.type">
+        <field name="name">Extra-legal leave 56+</field>
+        <field name="code">008.56</field>
+        <field name="color">5</field>
+        <field name="display_code">X56</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_extra_legal_additional_counter" model="hr.work.entry.type">
+        <field name="name">Extra-legal leave (additional counters)</field>
+        <field name="code">011.01</field>
+        <field name="external_code">011.02|011.03|011.04|011.05|014.01|014.02|014.03|014.04|014.05</field>
+        <field name="color">5</field>
+        <field name="display_code">XL1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_working_time_reduction_paid" model="hr.work.entry.type">
+        <field name="name">Working time reduction (paid)</field>
+        <field name="code">015.49</field>
+        <field name="color">5</field>
+        <field name="display_code">RT1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_paid_assimilated_days" model="hr.work.entry.type">
+        <field name="name">Paid assimilated days</field>
+        <field name="code">017.00</field>
+        <field name="color">5</field>
+        <field name="display_code">PAD</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_cafeteria_plan_leave" model="hr.work.entry.type">
+        <field name="name">Cafeteria plan leave day</field>
+        <field name="code">017.08</field>
+        <field name="color">5</field>
+        <field name="display_code">CAF</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_working_time_reduction_paid_out" model="hr.work.entry.type">
+        <field name="name">Working time reduction not taken (paid out)</field>
+        <field name="code">017.45</field>
+        <field name="color">5</field>
+        <field name="display_code">RTP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_union_delegation_paid" model="hr.work.entry.type">
+        <field name="name">Union delegation (paid)</field>
+        <field name="code">017.47</field>
+        <field name="color">5</field>
+        <field name="display_code">UND</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_social_time_hours" model="hr.work.entry.type">
+        <field name="name">Social time hours</field>
+        <field name="code">017.48</field>
+        <field name="color">5</field>
+        <field name="display_code">SOC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_selection_centre" model="hr.work.entry.type">
+        <field name="name">Selection centre attendance</field>
+        <field name="code">018.00</field>
+        <field name="color">5</field>
+        <field name="display_code">SEL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_vacation_day" model="hr.work.entry.type">
+        <field name="name">Additional vacation day</field>
+        <field name="code">019.10</field>
+        <field name="color">5</field>
+        <field name="display_code">XVD</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_monthly_paid_leave" model="hr.work.entry.type">
+        <field name="name">Monthly-paid leave</field>
+        <field name="code">019.46</field>
+        <field name="color">5</field>
+        <field name="display_code">CML</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_company_closure_day" model="hr.work.entry.type">
+        <field name="name">Company closure day</field>
+        <field name="code">019.47</field>
+        <field name="color">5</field>
+        <field name="display_code">CLD</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_supplementary_leave" model="hr.work.entry.type">
+        <field name="name">Supplementary leave</field>
+        <field name="code">019.48</field>
+        <field name="color">5</field>
+        <field name="display_code">XSL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_compensatory_rest_paid" model="hr.work.entry.type">
+        <field name="name">Compensatory rest (paid)</field>
+        <field name="code">019.49</field>
+        <field name="color">5</field>
+        <field name="display_code">CRS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_training_45_plus_jc_144_145" model="hr.work.entry.type">
+        <field name="name">Training day for workers aged 45+ (JC 144/145)</field>
+        <field name="code">020.06</field>
+        <field name="color">5</field>
+        <field name="display_code">T45</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_formal_training" model="hr.work.entry.type">
+        <field name="name">Formal training</field>
+        <field name="code">020.11</field>
+        <field name="color">5</field>
+        <field name="display_code">FTR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_informal_training" model="hr.work.entry.type">
+        <field name="name">Informal training</field>
+        <field name="code">020.12</field>
+        <field name="color">5</field>
+        <field name="display_code">ITR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_end_of_career_exemption_vap" model="hr.work.entry.type">
+        <field name="name">End-of-career exemption day (VAP)</field>
+        <field name="code">020.15</field>
+        <field name="color">5</field>
+        <field name="display_code">VAP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_medical_examination_hours" model="hr.work.entry.type">
+        <field name="name">Medical examination hours</field>
+        <field name="code">020.44</field>
+        <field name="color">5</field>
+        <field name="display_code">MEX</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_internal_training" model="hr.work.entry.type">
+        <field name="name">Internal training</field>
+        <field name="code">020.45</field>
+        <field name="color">5</field>
+        <field name="display_code">NTR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_justified_absence_paid" model="hr.work.entry.type">
+        <field name="name">Justified absence (paid)</field>
+        <field name="code">020.46</field>
+        <field name="color">5</field>
+        <field name="display_code">JAP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_attendance_leave" model="hr.work.entry.type">
+        <field name="name">Attendance leave</field>
+        <field name="code">020.47</field>
+        <field name="color">5</field>
+        <field name="display_code">ATL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_union_mission_meal_voucher" model="hr.work.entry.type">
+        <field name="name">Union mission with meal voucher entitlement</field>
+        <field name="code">021.14</field>
+        <field name="color">5</field>
+        <field name="display_code">UMV</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_union_mandate_paid" model="hr.work.entry.type">
+        <field name="name">Union mandate (paid)</field>
+        <field name="code">021.49</field>
+        <field name="color">5</field>
+        <field name="display_code">UMD</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_notice_period_hours_not_worked" model="hr.work.entry.type">
+        <field name="name">Hours not worked during notice period (paid)</field>
+        <field name="code">022.49</field>
+        <field name="color">5</field>
+        <field name="display_code">NPH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_educational_leave_capped" model="hr.work.entry.type">
+        <field name="name">Paid educational leave (capped)</field>
+        <field name="code">023.00</field>
+        <field name="color">5</field>
+        <field name="display_code">PEL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_flemish_training_leave_capped" model="hr.work.entry.type">
+        <field name="name">Flemish training leave (capped)</field>
+        <field name="code">023.04</field>
+        <field name="color">5</field>
+        <field name="display_code">FTL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_educational_leave_capped_meal_voucher" model="hr.work.entry.type">
+        <field name="name">Paid educational leave (capped) + meal voucher</field>
+        <field name="code">023.05</field>
+        <field name="color">5</field>
+        <field name="display_code">PEM</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_flemish_training_leave_capped_meal_voucher" model="hr.work.entry.type">
+        <field name="name">Flemish training leave (capped) + meal voucher</field>
+        <field name="code">023.06</field>
+        <field name="color">5</field>
+        <field name="display_code">FTM</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_educational_leave_capped_45_plus" model="hr.work.entry.type">
+        <field name="name">Paid educational leave (second cap, 45+)</field>
+        <field name="code">023.11</field>
+        <field name="color">5</field>
+        <field name="display_code">PE2</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_wage_occupational_disease" model="hr.work.entry.type">
+        <field name="name">Guaranteed wage - occupational disease</field>
+        <field name="code">009.48</field>
+        <field name="color">5</field>
+        <field name="display_code">GWO</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_weekly_wage_work_commuting_accident" model="hr.work.entry.type">
+        <field name="name">Guaranteed weekly wage - work or commuting accident</field>
+        <field name="code">009.49</field>
+        <field name="color">5</field>
+        <field name="display_code">GWA</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_weekly_wage_illness_resumption" model="hr.work.entry.type">
+        <field name="name">Guaranteed weekly wage - illness after resumption &gt; 20 weeks</field>
+        <field name="code">010.22</field>
+        <field name="color">5</field>
+        <field name="display_code">GW2</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_weekly" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate (guaranteed weekly wage)</field>
+        <field name="code">010.23</field>
+        <field name="color">5</field>
+        <field name="display_code">GW1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_weekly_wage_private_accident" model="hr.work.entry.type">
+        <field name="name">Guaranteed weekly wage - private accident</field>
+        <field name="code">010.49</field>
+        <field name="color">5</field>
+        <field name="display_code">GWP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_monthly_wage_work_commuting_accident" model="hr.work.entry.type">
+        <field name="name">Guaranteed monthly wage - work or commuting accident</field>
+        <field name="code">012.49</field>
+        <field name="color">5</field>
+        <field name="display_code">GMA</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_monthly_wage_illness_resumption" model="hr.work.entry.type">
+        <field name="name">Guaranteed monthly wage - illness after resumption &gt; 20 weeks</field>
+        <field name="code">013.22</field>
+        <field name="color">5</field>
+        <field name="display_code">GM2</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_monthly" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate (guaranteed monthly wage)</field>
+        <field name="code">013.23</field>
+        <field name="color">5</field>
+        <field name="display_code">GM1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_monthly_wage_private_accident" model="hr.work.entry.type">
+        <field name="name">Guaranteed monthly wage - private accident</field>
+        <field name="code">013.49</field>
+        <field name="color">5</field>
+        <field name="display_code">GMP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_union_hour_credit" model="hr.work.entry.type">
+        <field name="name">Union hour credit</field>
+        <field name="code">042.47</field>
+        <field name="color">5</field>
+        <field name="display_code">UHC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_temporary_unemployment_allowance_capped" model="hr.work.entry.type">
+        <field name="name">Temporary unemployment allowance (capped)</field>
+        <field name="code">015.11</field>
+        <field name="color">5</field>
+        <field name="display_code">TUE</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_hours_uncapped" model="hr.work.entry.type">
+        <field name="name">Overtime (part-time workers) - uncapped beyond 12 hours</field>
+        <field name="code">003.10</field>
+        <field name="color">4</field>
+        <field name="display_code">AHX</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_hours_auto_100" model="hr.work.entry.type">
+        <field name="name">Overtime (part-time workers) 100% - automatic</field>
+        <field name="code">003.34</field>
+        <field name="color">4</field>
+        <field name="display_code">A10</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_hours_auto_150" model="hr.work.entry.type">
+        <field name="name">Overtime (part-time workers) 150% - automatic</field>
+        <field name="code">003.35</field>
+        <field name="color">4</field>
+        <field name="display_code">A15</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">1.5</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_hours_auto_200" model="hr.work.entry.type">
+        <field name="name">Overtime (part-time workers) 200% - automatic</field>
+        <field name="code">003.36</field>
+        <field name="color">4</field>
+        <field name="display_code">A20</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">2.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_recoverable_100" model="hr.work.entry.type">
+        <field name="name">Overtime hours (recoverable) - 100%</field>
+        <field name="code">026.01</field>
+        <field name="color">4</field>
+        <field name="display_code">R10</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_voluntary_overtime_career_savings_surcharge" model="hr.work.entry.type">
+        <field name="name">Voluntary overtime - career savings (50% surcharge)</field>
+        <field name="code">026.27</field>
+        <field name="color">4</field>
+        <field name="display_code">CS1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.5</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_voluntary_overtime_career_savings_150" model="hr.work.entry.type">
+        <field name="name">Voluntary overtime - career savings 150%</field>
+        <field name="code">026.28</field>
+        <field name="color">4</field>
+        <field name="display_code">CS2</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">1.5</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_recoverable_auto_0" model="hr.work.entry.type">
+        <field name="name">Overtime hours (recoverable) 0% - automatic</field>
+        <field name="code">026.34</field>
+        <field name="color">4</field>
+        <field name="display_code">RA0</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_recoverable_auto_50" model="hr.work.entry.type">
+        <field name="name">Overtime hours (recoverable) 50% - automatic</field>
+        <field name="code">026.35</field>
+        <field name="color">4</field>
+        <field name="display_code">RA5</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.5</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_auto_100" model="hr.work.entry.type">
+        <field name="name">Overtime hours 100% - automatic</field>
+        <field name="code">026.36</field>
+        <field name="color">4</field>
+        <field name="display_code">OA1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_hours_other" model="hr.work.entry.type">
+        <field name="name">Overtime hours (days/hours)</field>
+        <field name="code">027.00</field>
+        <field name="external_code">028.00|030.00|032.00|043.15|043.16</field>
+        <field name="color">4</field>
+        <field name="display_code">OTH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_voluntary_recovery_overtime_no_onss" model="hr.work.entry.type">
+        <field name="name">Voluntary recovery overtime 2023-2025 (ONSS-exempt)</field>
+        <field name="code">037.23</field>
+        <field name="color">4</field>
+        <field name="display_code">VRO</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_no_compensatory_rest" model="hr.work.entry.type">
+        <field name="name">Overtime hours without compensatory rest</field>
+        <field name="code">038.01</field>
+        <field name="color">4</field>
+        <field name="display_code">ONC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_200" model="hr.work.entry.type">
+        <field name="name">Overtime hours non recoverable - 200%</field>
+        <field name="code">040.01</field>
+        <field name="external_code">040.36</field>
+        <field name="color">4</field>
+        <field name="display_code">O20</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">2.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_non_recoverable_auto_100" model="hr.work.entry.type">
+        <field name="name">Overtime hours non recoverable 100% - automatic</field>
+        <field name="code">040.34</field>
+        <field name="color">4</field>
+        <field name="display_code">NA1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_non_recoverable_auto_150" model="hr.work.entry.type">
+        <field name="name">Overtime hours non recoverable 150% - automatic</field>
+        <field name="code">040.35</field>
+        <field name="color">4</field>
+        <field name="display_code">NA2</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">1.5</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_300" model="hr.work.entry.type">
+        <field name="name">Overtime hours non recoverable - 300%</field>
+        <field name="code">042.26</field>
+        <field name="color">4</field>
+        <field name="display_code">O30</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">3.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_additional_hours_to_compensate" model="hr.work.entry.type">
+        <field name="name">Additional hours to be compensated</field>
+        <field name="code">043.06</field>
+        <field name="color">4</field>
+        <field name="display_code">ATC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_without_recovery" model="hr.work.entry.type">
+        <field name="name">Overtime hours without recovery</field>
+        <field name="code">043.12</field>
+        <field name="color">4</field>
+        <field name="display_code">OWR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_hours_worked" model="hr.work.entry.type">
+        <field name="name">Hours worked on a public holiday</field>
+        <field name="code">043.22</field>
+        <field name="color">3</field>
+        <field name="display_code">PHH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_overtime_compensation" model="hr.work.entry.type">
+        <field name="name">Compensation for overtime (days/hours)</field>
+        <field name="code">046.49</field>
+        <field name="color">5</field>
+        <field name="display_code">COH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_temporary_unemployment" model="hr.work.entry.type">
+        <field name="name">Work accident during temporary unemployment (assimilated)</field>
+        <field name="code">110.20</field>
+        <field name="color">5</field>
+        <field name="display_code">WAT</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_partial_after_30_days" model="hr.work.entry.type">
+        <field name="name">Work accident - temporary partial incapacity after the 30th day</field>
+        <field name="code">111.00</field>
+        <field name="color">5</field>
+        <field name="display_code">WP3</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_after_12_months" model="hr.work.entry.type">
+        <field name="name">Work accident after the 12th month</field>
+        <field name="code">112.00</field>
+        <field name="color">5</field>
+        <field name="display_code">WAY</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_7_12_months" model="hr.work.entry.type">
+        <field name="name">Work accident from the 7th to the 12th month</field>
+        <field name="code">114.00</field>
+        <field name="color">5</field>
+        <field name="display_code">WA7</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_occupational_disease_after_30_days" model="hr.work.entry.type">
+        <field name="name">Occupational disease after the 30th day</field>
+        <field name="code">115.00</field>
+        <field name="external_code">116.00</field>
+        <field name="color">5</field>
+        <field name="display_code">OD3</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_occupational_disease_31_days_6_months" model="hr.work.entry.type">
+        <field name="name">Occupational disease from the 31st day to the 6th month</field>
+        <field name="code">119.00</field>
+        <field name="color">5</field>
+        <field name="display_code">OD6</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_first_month_seniority" model="hr.work.entry.type">
+        <field name="name">Illness during the first month of seniority (no guaranteed wage)</field>
+        <field name="code">121.00</field>
+        <field name="color">5</field>
+        <field name="display_code">IL1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_unpaid" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate (unpaid)</field>
+        <field name="code">121.23</field>
+        <field name="color">5</field>
+        <field name="display_code">NC1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_reintegration_worker_initiative_12_months" model="hr.work.entry.type">
+        <field name="name">Reintegration journey &lt; 12 months (worker initiative)</field>
+        <field name="code">122.05</field>
+        <field name="color">4</field>
+        <field name="display_code">RJW</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_during_collective_closure" model="hr.work.entry.type">
+        <field name="name">Illness during collective closure for annual holidays</field>
+        <field name="code">122.07</field>
+        <field name="color">5</field>
+        <field name="display_code">ICC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_unpaid_after_medical_check" model="hr.work.entry.type">
+        <field name="name">Illness not paid following medical check</field>
+        <field name="code">122.08</field>
+        <field name="color">5</field>
+        <field name="display_code">ICK</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_unpaid_refused_medical_check" model="hr.work.entry.type">
+        <field name="name">Illness not paid - refusal of medical check</field>
+        <field name="code">122.09</field>
+        <field name="color">5</field>
+        <field name="display_code">ICR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_after_30_days" model="hr.work.entry.type">
+        <field name="name">Illness after the 30th day - first day without certificate</field>
+        <field name="code">122.23</field>
+        <field name="color">5</field>
+        <field name="display_code">NC3</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_reintegration_worker_initiative_after_12_months" model="hr.work.entry.type">
+        <field name="name">Reintegration journey &gt; 12 months (worker initiative)</field>
+        <field name="code">123.05</field>
+        <field name="color">4</field>
+        <field name="display_code">RJU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_temporary_unemployment_unassimilated" model="hr.work.entry.type">
+        <field name="name">Illness during temporary unemployment (not assimilated)</field>
+        <field name="code">123.06</field>
+        <field name="color">5</field>
+        <field name="display_code">ITN</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_taxable" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate (taxable, no withholding)</field>
+        <field name="code">123.23</field>
+        <field name="color">5</field>
+        <field name="display_code">NC4</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_31_days_6_months" model="hr.work.entry.type">
+        <field name="name">Illness from the 31st day to the 6th month</field>
+        <field name="code">124.00</field>
+        <field name="color">5</field>
+        <field name="display_code">IL6</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_7_12_months" model="hr.work.entry.type">
+        <field name="name">Illness from the 7th to the 12th month</field>
+        <field name="code">125.00</field>
+        <field name="color">5</field>
+        <field name="display_code">IL7</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_temporary_unemployment_assimilated" model="hr.work.entry.type">
+        <field name="name">Illness during temporary unemployment (assimilated)</field>
+        <field name="code">127.00</field>
+        <field name="color">5</field>
+        <field name="display_code">ITA</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_foster_parental_leave_legal" model="hr.work.entry.type">
+        <field name="name">Foster parental leave (after day 3)</field>
+        <field name="code">128.08</field>
+        <field name="color">5</field>
+        <field name="display_code">FPL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_postnatal_rest_leave" model="hr.work.entry.type">
+        <field name="name">Postnatal rest leave (Law of 22 December 2008)</field>
+        <field name="code">128.10</field>
+        <field name="color">5</field>
+        <field name="display_code">PNR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_occupational_disease_7_12_months" model="hr.work.entry.type">
+        <field name="name">Occupational disease from the 7th to the 12th month</field>
+        <field name="code">129.00</field>
+        <field name="color">5</field>
+        <field name="display_code">OD7</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_military_recall" model="hr.work.entry.type">
+        <field name="name">Recall to military service</field>
+        <field name="code">130.00</field>
+        <field name="color">5</field>
+        <field name="display_code">RMS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_lock_out" model="hr.work.entry.type">
+        <field name="name">Lock-out</field>
+        <field name="code">133.00</field>
+        <field name="color">5</field>
+        <field name="display_code">LCK</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_union_mission_training_unpaid" model="hr.work.entry.type">
+        <field name="name">Union mission - training (unpaid)</field>
+        <field name="code">134.49</field>
+        <field name="color">5</field>
+        <field name="display_code">UMT</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_carer_leave" model="hr.work.entry.type">
+        <field name="name">Carer's leave</field>
+        <field name="code">135.22</field>
+        <field name="color">8</field>
+        <field name="display_code">CAL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_civil_protection_service" model="hr.work.entry.type">
+        <field name="name">Civil protection or conscientious objection service</field>
+        <field name="code">140.00</field>
+        <field name="color">5</field>
+        <field name="display_code">CPS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_mandate_unpaid_days" model="hr.work.entry.type">
+        <field name="name">Public mandate (unpaid)</field>
+        <field name="code">144.00</field>
+        <field name="color">5</field>
+        <field name="display_code">PMD</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_health_service_stay" model="hr.work.entry.type">
+        <field name="name">Stay in a health service</field>
+        <field name="code">145.00</field>
+        <field name="color">5</field>
+        <field name="display_code">HSS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_parental_leave_cba_64" model="hr.work.entry.type">
+        <field name="name">Thematic leave - Parental leave (CBA 64)</field>
+        <field name="code">147.06</field>
+        <field name="color">8</field>
+        <field name="display_code">PL6</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_thematic_foster_parental_leave" model="hr.work.entry.type">
+        <field name="name">Thematic leave - Foster parental leave</field>
+        <field name="code">147.25</field>
+        <field name="color">8</field>
+        <field name="display_code">PLF</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_part_time_career_break" model="hr.work.entry.type">
+        <field name="name">Part-time career break</field>
+        <field name="code">147.49</field>
+        <field name="color">8</field>
+        <field name="display_code">CBP</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_unpaid" model="hr.work.entry.type">
+        <field name="name">Unpaid public holiday</field>
+        <field name="code">153.00</field>
+        <field name="external_code">159.00</field>
+        <field name="color">5</field>
+        <field name="display_code">PHU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_no_certificate_timely_notice" model="hr.work.entry.type">
+        <field name="name">Illness without certificate, timely notification (unpaid)</field>
+        <field name="code">154.04</field>
+        <field name="color">5</field>
+        <field name="display_code">ICT</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_imperative_family_reason_after_10_days" model="hr.work.entry.type">
+        <field name="name">Imperative family reasons (after day 10/year)</field>
+        <field name="code">154.49</field>
+        <field name="color">5</field>
+        <field name="display_code">IFR</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_no_certificate_late_notice" model="hr.work.entry.type">
+        <field name="name">Illness without certificate, late notification (unpaid)</field>
+        <field name="code">155.04</field>
+        <field name="color">5</field>
+        <field name="display_code">ICL</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_authorised_absence_unpaid" model="hr.work.entry.type">
+        <field name="name">Authorised absence (unpaid)</field>
+        <field name="code">156.00</field>
+        <field name="color">5</field>
+        <field name="display_code">AAU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_temporary_unemployment_force_majeure_flight_ban" model="hr.work.entry.type">
+        <field name="name">Temporary unemployment - force majeure (flight ban)</field>
+        <field name="code">156.10</field>
+        <field name="color">5</field>
+        <field name="display_code">FMF</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_temporary_unemployment_medical_force_majeure_unfit" model="hr.work.entry.type">
+        <field name="name">Temporary unemployment - medical force majeure (unfit for the agreed job)</field>
+        <field name="code">156.56</field>
+        <field name="color">5</field>
+        <field name="display_code">FMM</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_stoppage_hours" model="hr.work.entry.type">
+        <field name="name">Work stoppage hours (unpaid)</field>
+        <field name="code">162.00</field>
+        <field name="color">5</field>
+        <field name="display_code">WSH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_contract_suspension_unpaid" model="hr.work.entry.type">
+        <field name="name">Contract suspension (unpaid)</field>
+        <field name="code">162.49</field>
+        <field name="color">5</field>
+        <field name="display_code">CSU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_compensatory_rest_continuous_shift" model="hr.work.entry.type">
+        <field name="name">Compensatory rest - continuous shift work (unpaid)</field>
+        <field name="code">163.00</field>
+        <field name="color">5</field>
+        <field name="display_code">CRC</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_disciplinary_suspension" model="hr.work.entry.type">
+        <field name="name">Disciplinary suspension</field>
+        <field name="code">164.00</field>
+        <field name="color">5</field>
+        <field name="display_code">LAY</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_working_time_reduction_third_party" model="hr.work.entry.type">
+        <field name="name">Working time reduction paid by a third party</field>
+        <field name="code">165.01</field>
+        <field name="external_code">165.02|165.03</field>
+        <field name="color">5</field>
+        <field name="display_code">RTT</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_foster_care_after_6_days" model="hr.work.entry.type">
+        <field name="name">Foster care absence (after day 6)</field>
+        <field name="code">166.00</field>
+        <field name="color">5</field>
+        <field name="display_code">FC7</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_compensatory_rest_8th_day" model="hr.work.entry.type">
+        <field name="name">Compensatory rest day (8th day)</field>
+        <field name="code">168.49</field>
+        <field name="color">5</field>
+        <field name="display_code">CR8</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_days_hours_without_service" model="hr.work.entry.type">
+        <field name="name">Days or hours without service (unpaid)</field>
+        <field name="code">169.00</field>
+        <field name="color">5</field>
+        <field name="display_code">NSV</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_end_of_contract_without_service" model="hr.work.entry.type">
+        <field name="name">End of contract without service</field>
+        <field name="code">169.05</field>
+        <field name="color">5</field>
+        <field name="display_code">ECN</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_special_leave_unpaid" model="hr.work.entry.type">
+        <field name="name">Special leave (unpaid)</field>
+        <field name="code">180.00</field>
+        <field name="color">5</field>
+        <field name="display_code">SPU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_working_time_reduction_unpaid_additional_counter" model="hr.work.entry.type">
+        <field name="name">Working time reduction (unpaid) - additional counters</field>
+        <field name="code">181.01</field>
+        <field name="external_code">181.02|181.03</field>
+        <field name="color">5</field>
+        <field name="display_code">RTU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">working_time</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_unpaid_days_as_worked" model="hr.work.entry.type">
+        <field name="name">Unpaid days treated as worked days</field>
+        <field name="code">182.00</field>
+        <field name="color">5</field>
+        <field name="display_code">UDW</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_unpaid_days_as_worked_additional_counter" model="hr.work.entry.type">
+        <field name="name">Unpaid days treated as worked days (additional counters)</field>
+        <field name="code">183.00</field>
+        <field name="external_code">184.00|186.00</field>
+        <field name="color">5</field>
+        <field name="display_code">UDX</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_unpaid_days_and_hours" model="hr.work.entry.type">
+        <field name="name">Unpaid days and hours</field>
+        <field name="code">185.00</field>
+        <field name="color">5</field>
+        <field name="display_code">UDH</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_seniority_leave_unpaid" model="hr.work.entry.type">
+        <field name="name">Seniority leave (unpaid)</field>
+        <field name="code">188.00</field>
+        <field name="external_code">188.01|188.02|188.03</field>
+        <field name="color">5</field>
+        <field name="display_code">SNU</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_after_termination_activa" model="hr.work.entry.type">
+        <field name="name">Public holiday after termination (Activa Brussels)</field>
+        <field name="code">469.20</field>
+        <field name="color">3</field>
+        <field name="display_code">PHA</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_partial_8_30_days_scale" model="hr.work.entry.type">
+        <field name="name">Work accident - temporary partial incapacity, 8th-30th day (scale withholding)</field>
+        <field name="code">071.00</field>
+        <field name="color">5</field>
+        <field name="display_code">AP1</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_public_holiday_work_accident_8_30_days" model="hr.work.entry.type">
+        <field name="name">Public holiday during work accident, 8th-30th day (scale withholding)</field>
+        <field name="code">071.06</field>
+        <field name="color">5</field>
+        <field name="display_code">AP6</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_supplement_15_30_days_resumption" model="hr.work.entry.type">
+        <field name="name">Illness supplement 15th-30th day - resumption &gt; 20 weeks (exceptional withholding)</field>
+        <field name="code">072.22</field>
+        <field name="color">5</field>
+        <field name="display_code">S72</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_supplement_8_14_days_resumption" model="hr.work.entry.type">
+        <field name="name">Illness supplement 8th-14th day - resumption &gt; 20 weeks (exceptional withholding)</field>
+        <field name="code">082.22</field>
+        <field name="color">5</field>
+        <field name="display_code">S82</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_supplement_15_30_days" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate - 15th-30th day supplement</field>
+        <field name="code">072.23</field>
+        <field name="color">5</field>
+        <field name="display_code">N72</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_first_day_no_certificate_supplement_8_14_days" model="hr.work.entry.type">
+        <field name="name">First day of incapacity without certificate - 8th-14th day supplement</field>
+        <field name="code">082.23</field>
+        <field name="color">5</field>
+        <field name="display_code">N82</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_guaranteed_monthly_wage_maternity" model="hr.work.entry.type">
+        <field name="name">Guaranteed monthly wage - maternity (ONSS-exempt)</field>
+        <field name="code">073.00</field>
+        <field name="color">5</field>
+        <field name="display_code">GMM</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_occupational_disease_8_30_days_scale" model="hr.work.entry.type">
+        <field name="name">Occupational disease, 8th-30th day (scale withholding)</field>
+        <field name="code">074.00</field>
+        <field name="external_code">075.00</field>
+        <field name="color">5</field>
+        <field name="display_code">ODS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_total_8_30_days_exceptional" model="hr.work.entry.type">
+        <field name="name">Work accident - temporary total incapacity, 8th-30th day (exceptional withholding)</field>
+        <field name="code">090.00</field>
+        <field name="color">5</field>
+        <field name="display_code">AT9</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_work_accident_partial_8_30_days_exceptional" model="hr.work.entry.type">
+        <field name="name">Work accident - temporary partial incapacity, 8th-30th day (exceptional withholding)</field>
+        <field name="code">091.00</field>
+        <field name="color">5</field>
+        <field name="display_code">AP9</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_illness_15_30_days_exceptional" model="hr.work.entry.type">
+        <field name="name">Illness from the 15th to the 30th day (exceptional withholding)</field>
+        <field name="code">092.00</field>
+        <field name="color">5</field>
+        <field name="display_code">I92</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_postnatal_rest_8_14_days" model="hr.work.entry.type">
+        <field name="name">Postnatal rest from the 8th to the 14th day (exceptional withholding)</field>
+        <field name="code">093.00</field>
+        <field name="color">5</field>
+        <field name="display_code">PNS</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+    </record>
+
+    <record id="l10n_be_work_entry_type_occupational_disease_8_30_days_exceptional" model="hr.work.entry.type">
+        <field name="name">Occupational disease, 8th-30th day (exceptional withholding)</field>
+        <field name="code">094.00</field>
+        <field name="external_code">095.00</field>
+        <field name="color">5</field>
+        <field name="display_code">OD9</field>
+        <field name="country_id" ref="base.be"/>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.8588</field>
+    </record>
+
 <!-- BD : Bangladesh -->
     <record id="bd_work_entry_type_attendance" model="hr.work.entry.type">
         <field name="name">Work</field>
