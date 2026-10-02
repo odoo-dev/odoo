@@ -799,6 +799,9 @@ class AccountMoveLine(models.Model):
                 else:
                     line.account_id = line.move_id.journal_id.default_account_id
 
+                if line.account_id and line.move_id.fiscal_position_id:
+                    line.account_id = line.move_id.fiscal_position_id.map_account(line.account_id)
+
     @api.model
     def _search_account_id(self, operator, value):
         """
@@ -2057,7 +2060,8 @@ class AccountMoveLine(models.Model):
             defaults['price_unit'] = quick_encode_suggestion['price_unit']
             defaults['tax_ids'] = [Command.set(quick_encode_suggestion['tax_ids'])]
         elif (journal := self.env['account.journal'].browse(self.env.context.get('journal_id'))) and journal.default_account_id:
-            defaults['account_id'] = journal.default_account_id
+            if not self.env.context.get('default_move_type') in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                defaults['account_id'] = journal.default_account_id.id
         return defaults
 
     def _sanitize_vals(self, vals):
