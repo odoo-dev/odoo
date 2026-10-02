@@ -2,8 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from unittest.mock import patch
+from freezegun import freeze_time
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.addons.base.models.ir_mail_server import IrMailServer
 from odoo.addons.survey.tests import common
 from odoo.tests import tagged
@@ -102,7 +103,8 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
         r = self._access_begin(certification, answer_token)
         self.assertResponse(r, 200)
 
-        with patch.object(IrMailServer, 'connect'):
+        now = fields.Datetime.now()
+        with patch.object(IrMailServer, 'connect'), freeze_time(now):
             self._answer_question(q01, q01.suggested_answer_ids.ids[3], answer_token, csrf_token)
             self._answer_question(q02, q02.suggested_answer_ids.ids[1], answer_token, csrf_token)
             self._answer_question(q03, "I think they're great!", answer_token, csrf_token)
@@ -110,6 +112,9 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
             self._answer_question(q03, "Just kidding, I don't like it...", answer_token, csrf_token)
             self._answer_question(q04, q04.suggested_answer_ids.ids[0], answer_token, csrf_token)
             self._answer_question(q05, [q05.suggested_answer_ids.ids[0], q05.suggested_answer_ids.ids[1], q05.suggested_answer_ids.ids[3]], answer_token, csrf_token)
+
+        bus_presence = self.env["bus.presence"].search([("user_id", "=", self.user_emp.id)])
+        self.assertEqual(bus_presence.last_presence, now)
 
         user_inputs.invalidate_recordset()
         # Check that certification is successfully passed
