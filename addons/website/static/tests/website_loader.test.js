@@ -7,6 +7,7 @@ import {
     setupWebsiteBuilder,
 } from "@website/../tests/builder/website_helpers";
 import { WebsiteLoader } from "@website/components/website_loader/website_loader";
+import { WebsitePlugin } from "@website/services/website_plugin";
 
 defineWebsiteModels();
 
@@ -49,7 +50,7 @@ describe("website loader", () => {
     });
     beforeEach(async () => {
         await setupWebsiteBuilder("", { openEditor: false });
-        websiteService = getService("website");
+        websiteService = getService(WebsitePlugin);
     });
 
     test("should display loader correctly with default props", async () => {
