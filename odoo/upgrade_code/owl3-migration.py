@@ -1142,6 +1142,8 @@ SERVICES_MAPPING = {
     "tooltip": ['TooltipPlugin', '@web/core/tooltip/tooltip_plugin'],
     "ui": ['UIPlugin', '@web/core/ui/ui_plugin'],
     "view": ['ViewPlugin', '@web/views/view_plugin'],
+    "website": ['WebsitePlugin', '@website/services/website_plugin'],
+    "website_custom_menus": ['WebsiteCustomMenusPlugin', '@website/services/website_custom_menus_plugin'],
     "worker_service": ['WorkerPlugin', '@bus/services/worker_plugin'],
 }
 

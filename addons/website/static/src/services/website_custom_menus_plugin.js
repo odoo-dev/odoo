@@ -1,92 +1,120 @@
+import { Plugin, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { services } from "@web/core/services";
+import { useEnv } from "@web/owl2/utils";
 import { EditMenuDialog } from "@website/components/dialog/edit_menu";
 import { OptimizeSEODialog } from "@website/components/dialog/seo";
 import { PagePropertiesDialog } from "@website/components/dialog/page_properties";
+import { WebsitePlugin } from "@website/services/website_plugin";
 
 /**
- * This service displays contextual menus, depending of the state of the
+ * This plugin displays contextual menus, depending of the state of the
  * website. These menus are defined in xml with the "website_preview" action,
  * which is overriden here for displaying dialogs, or regular components that
  * are not client actions.
  */
-export const websiteCustomMenus = {
-    dependencies: ["website", "orm", "dialog", "ui", "menu"],
-    start(env, { website, orm, dialog, ui, menu }) {
-        const services = { website, orm, dialog, ui };
-        return {
-            get(xmlId) {
-                return registry.category("website_custom_menus").get(xmlId, null);
-            },
-            async open(customMenu) {
-                const parentMenu = menu.getAll().find((m) => m.children.includes(customMenu.id));
-                // Wait for navigation to complete if the selected item requires the page document
-                if (
-                    parentMenu?.xmlid === "website.menu_current_page" &&
-                    website.isNavigatingToAnotherPage
-                ) {
-                    await website.isNavigatingToAnotherPage.promise;
+export class WebsiteCustomMenusPlugin extends Plugin {
+    /** @private */
+    website = usePlugin(WebsitePlugin);
+    /** @private */
+    dialog = usePlugin(DialogPlugin);
+    /**
+     * The "website_custom_menus" registry entries receive the env and the
+     * legacy services, and the menu service is not a plugin yet.
+     * @private
+     */
+    env = useEnv();
+
+    get(xmlId) {
+        return registry.category("website_custom_menus").get(xmlId, null);
+    }
+
+    async open(customMenu) {
+        const { website, orm, dialog, ui, menu } = this.env.services;
+        const parentMenu = menu.getAll().find((m) => m.children.includes(customMenu.id));
+        // Wait for navigation to complete if the selected item requires the page document
+        const isNavigatingToAnotherPage = this.website.isNavigatingToAnotherPage();
+        if (parentMenu?.xmlid === "website.menu_current_page" && isNavigatingToAnotherPage) {
+            await isNavigatingToAnotherPage.promise;
+        }
+        const menuServices = { website, orm, dialog, ui };
+        const menuConfig = this.get(customMenu.xmlid);
+        if (menuConfig.openWidget) {
+            return menuConfig.openWidget(menuServices);
+        }
+        const menuProps = {
+            ...(menuConfig.getProps && (await menuConfig.getProps(menuServices))),
+            // Values on 'dynamicProps' are retrieved after the content is loaded (e.g. id of
+            // the content menu to be edited).
+            ...customMenu.dynamicProps,
+        };
+        return this.dialog.add(menuConfig.Component, menuProps);
+    }
+
+    addCustomMenus(sections) {
+        const filteredSections = [];
+        for (const section of sections) {
+            const isWebsiteCustomMenu = !!this.get(section.xmlid);
+            const displayWebsiteCustomMenu =
+                isWebsiteCustomMenu &&
+                this.website.isRestrictedEditor() &&
+                this.get(section.xmlid).isDisplayed(this.env);
+            if (!isWebsiteCustomMenu || displayWebsiteCustomMenu) {
+                let subSections = [];
+                if (section.childrenTree.length) {
+                    subSections = this.addCustomMenus(section.childrenTree);
                 }
-                const menuConfig = this.get(customMenu.xmlid);
-                if (menuConfig.openWidget) {
-                    return menuConfig.openWidget(services);
-                }
-                const menuProps = {
-                    ...(menuConfig.getProps && (await menuConfig.getProps(services))),
-                    // Values on 'dynamicProps' are retrieved after the content is loaded (e.g. id of
-                    // the content menu to be edited).
-                    ...customMenu.dynamicProps,
-                };
-                return dialog.add(menuConfig.Component, menuProps);
-            },
-            addCustomMenus(sections) {
-                const filteredSections = [];
-                for (const section of sections) {
-                    const isWebsiteCustomMenu = !!this.get(section.xmlid);
-                    const displayWebsiteCustomMenu =
-                        isWebsiteCustomMenu &&
-                        website.isRestrictedEditor &&
-                        this.get(section.xmlid).isDisplayed(env);
-                    if (!isWebsiteCustomMenu || displayWebsiteCustomMenu) {
-                        let subSections = [];
-                        if (section.childrenTree.length) {
-                            subSections = this.addCustomMenus(section.childrenTree);
-                        }
-                        if (section.xmlid === "website.custom_menu_edit_menu") {
-                            // Hack: this code will simulate an XML pre-configured navbar menuitem to edit each
-                            // content menu found on the current page by duplicating one menuitem with
-                            // different data (name, dialog props...). this will prevent breaking the current
-                            // 'navbar menus' display system.
-                            filteredSections.push(
-                                ...website.currentWebsite.metadata.contentMenus.map(
-                                    (menu, index) => ({
-                                        ...section,
-                                        name: _t("Edit %s", menu[0]),
-                                        dynamicProps: { rootID: parseInt(menu[1], 10) },
-                                        // Prevent a 't-foreach' duplicate key on menus template.
-                                        id: `${section.id}-${index}`,
-                                    })
-                                )
-                            );
-                        } else {
-                            filteredSections.push(
-                                Object.assign({}, section, { childrenTree: subSections })
-                            );
-                        }
-                    }
-                }
-                for (const section of filteredSections) {
-                    section.childrenTree = section.childrenTree.filter(
-                        // Exclude non-leaf node having no visible sub-element.
-                        (tree) => !(tree.children.length && !tree.childrenTree.length)
+                if (section.xmlid === "website.custom_menu_edit_menu") {
+                    // Hack: this code will simulate an XML pre-configured navbar menuitem to edit each
+                    // content menu found on the current page by duplicating one menuitem with
+                    // different data (name, dialog props...). this will prevent breaking the current
+                    // 'navbar menus' display system.
+                    filteredSections.push(
+                        ...this.website
+                            .currentWebsite()
+                            .metadata.contentMenus.map((menu, index) => ({
+                                ...section,
+                                name: _t("Edit %s", menu[0]),
+                                dynamicProps: { rootID: parseInt(menu[1], 10) },
+                                // Prevent a 't-foreach' duplicate key on menus template.
+                                id: `${section.id}-${index}`,
+                            }))
+                    );
+                } else {
+                    filteredSections.push(
+                        Object.assign({}, section, { childrenTree: subSections })
                     );
                 }
-                return filteredSections;
-            },
-        };
+            }
+        }
+        for (const section of filteredSections) {
+            section.childrenTree = section.childrenTree.filter(
+                // Exclude non-leaf node having no visible sub-element.
+                (tree) => !(tree.children.length && !tree.childrenTree.length)
+            );
+        }
+        return filteredSections;
+    }
+}
+
+services.add(WebsiteCustomMenusPlugin);
+
+/**
+ * -----------------------------------------------------------------------------
+ * @todo owl3 migration
+ * temporary - to remove when all use of the website_custom_menus service are removed
+ * -----------------------------------------------------------------------------
+ */
+export const websiteCustomMenusService = {
+    dependencies: ["website", "orm", "dialog", "ui", "menu"],
+    start() {
+        return usePlugin(WebsiteCustomMenusPlugin);
     },
 };
-registry.category("services").add("website_custom_menus", websiteCustomMenus);
+
+registry.category("services").add("website_custom_menus", websiteCustomMenusService);
 
 registry.category("website_custom_menus").add("website.menu_edit_menu", {
     Component: EditMenuDialog,
