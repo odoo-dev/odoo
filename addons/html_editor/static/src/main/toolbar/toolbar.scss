@@ -70,6 +70,11 @@
     }
 }
 
+.o-we-toolbar-menu .o-we-toolbar-menu-check {
+    /* Same color as the check of selected dropdown items. */
+    color: var(--link-color);
+}
+
 .o-we-toolbar-dropdown {
     min-width: fit-content;
     padding: var(--o-bs-spacer-1, .25rem);

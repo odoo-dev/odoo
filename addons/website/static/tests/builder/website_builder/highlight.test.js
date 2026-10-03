@@ -3,7 +3,7 @@ import { click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor } from "@html_editor/../tests/_helpers/editor";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
-import { expandToolbar } from "@html_editor/../tests/_helpers/toolbar";
+import { expandToolbar, openToolbarMenu } from "@html_editor/../tests/_helpers/toolbar";
 import { HighlightPlugin } from "@website/builder/plugins/highlight/highlight_plugin";
 import { contains } from "@web/../tests/web_test_helpers";
 import { closestElement } from "@html_editor/utils/dom_traversal";
@@ -190,7 +190,8 @@ test("Remove format on highlight does not create an empty node", async () => {
             .filter(Boolean);
     expect("p>.o_text_highlight_freehand_2").toHaveCount(1);
     expect(selectedHighlights(editor)).toHaveLength(1);
-    await contains(".o-we-toolbar [data-icon='ink_eraser']").click();
+    await openToolbarMenu("more_formatting");
+    await contains(".o-we-toolbar-menu [name='remove_format']").click();
     expect("p>.o_text_highlight_freehand_2").toHaveCount(1);
     expect(selectedHighlights(editor)).toHaveLength(0);
 });

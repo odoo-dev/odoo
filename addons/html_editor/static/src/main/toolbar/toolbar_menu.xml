@@ -1,0 +1,37 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.ToolbarMenu">
+        <Dropdown state="this.dropdown" menuClass="'o-we-toolbar-menu'" menuRef="this.menuRef" focusToggleOnClosed="false">
+            <button t-ref="this.toggleRef" class="btn btn-light" t-att-class="{ active: this.props.isActive }"
+                t-att-title="this.props.title" t-att-name="this.props.id" t-att-disabled="this.props.isDisabled">
+                <i class="oi oi-fw" t-att-data-icon="this.props.icon or 'more_horiz'"/>
+            </button>
+            <t t-set-slot="content">
+                <div data-prevent-closing-overlay="true">
+                    <t t-foreach="this.props.items" t-as="item" t-key="item.id">
+                        <t t-set="itemClass" t-value="{ 'dropdown-item_active_noarrow d-flex align-items-center gap-2': true, disabled: item.isDisabled }"/>
+                        <t t-set="itemAttrs" t-value="{ name: item.id, title: item.description, disabled: item.isDisabled }"/>
+                        <!-- A toggle is a checkbox item, so that its state is announced. -->
+                        <CheckboxItem t-if="item.isToggle" checked="item.isActive" tag="'button'" class="itemClass" attrs="itemAttrs"
+                            onSelected="() => this.onSelected(item)" t-on-pointerdown.prevent="() => {}">
+                            <t t-call="html_editor.ToolbarMenuItem"/>
+                        </CheckboxItem>
+                        <DropdownItem t-else="" tag="'button'" class="itemClass" attrs="itemAttrs"
+                            onSelected="() => this.onSelected(item)" t-on-pointerdown.prevent="() => {}">
+                            <t t-call="html_editor.ToolbarMenuItem"/>
+                        </DropdownItem>
+                    </t>
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+
+    <t t-name="html_editor.ToolbarMenuItem">
+        <t t-if="item.icon">
+            <t t-if="item.icon.includes('.')" t-call="{{ item.icon }}"/>
+            <i t-else="" t-attf-class="oi oi-fw {{ item.iconClass or '' }}" t-att-data-icon="item.icon"/>
+        </t>
+        <span t-out="item.label or item.text or item.description"/>
+        <span t-if="item.shortcut" class="ms-auto ps-4 text-muted small" t-out="item.shortcut"/>
+        <i t-if="item.isActive" class="o-we-toolbar-menu-check oi oi-fw" t-att-class="{ 'ms-auto': !item.shortcut }" data-icon="check"/>
+    </t>
+</templates>
