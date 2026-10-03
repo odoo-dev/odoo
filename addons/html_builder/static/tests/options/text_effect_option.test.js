@@ -1,13 +1,19 @@
-import { addBuilderPlugin, setupHTMLBuilder } from "@html_builder/../tests/helpers";
+import {
+    addBuilderPlugin,
+    openEffectsSection,
+    setupHTMLBuilder,
+} from "@html_builder/../tests/helpers";
 import { expect, test, describe } from "@odoo/hoot";
 import { contains } from "@web/../tests/web_test_helpers";
 import { TextEffectPlugin } from "@html_builder/plugins/font/text_effect_plugin";
+import { EffectsPanelPlugin } from "@html_builder/plugins/effects/effects_plugin";
 import { getTextEffectPresetHash } from "@html_builder/plugins/font/text_effect_util";
 import {
     advanceTime,
     animationFrame,
     hover,
     press,
+    queryAll,
     queryOne,
     waitFor,
     waitForNone,
@@ -16,8 +22,15 @@ import { getContent, setSelection } from "@html_editor/../tests/_helpers/selecti
 
 describe.current.tags("desktop");
 
-test("apply preset", async () => {
+function addTextEffectPlugins() {
     addBuilderPlugin(TextEffectPlugin);
+    addBuilderPlugin(EffectsPanelPlugin);
+}
+
+const preset = (name) => `.o-we-effects-panel .o-hb-text-effect-preset[title='${name}']`;
+
+test("apply preset", async () => {
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -28,17 +41,16 @@ test("apply preset", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("Flat")).click();
+    await animationFrame();
     expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
 });
 
-test("open applies blurred black by default", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+test("opening the panel applies nothing", async () => {
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
-    expect(":iframe p").toHaveCount(1);
     setSelection({
         anchorNode: p,
         anchorOffset: 0,
@@ -46,15 +58,15 @@ test("open applies blurred black by default", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
+    await openEffectsSection("textEffect");
 
-    expect(".o_text_effect_popover").toHaveCount(1);
-    expect(".o_text_effect_popover .active:contains('Blurred (Black)')").toHaveCount(1);
-    expect(`:iframe [data-text-effect*="blurred_black"]`).toHaveStyle("text-shadow");
-});
+    expect(".o-we-effects-panel .o-hb-text-effect-preset").toHaveCount(6);
+    expect(".o-we-effects-panel .o-hb-text-effect-preset.active").toHaveCount(0);
+    expect(":iframe [data-text-effect]").toHaveCount(0);
+}); 
 
 test("switch preset", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -65,20 +77,20 @@ test("switch preset", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("Flat")).click();
+    await animationFrame();
     expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
 
     // Change text effect
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Outline')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("Outline")).click();
+    await animationFrame();
     expect(`:iframe [data-text-effect*="outline"]`).toHaveStyle("-webkit-text-stroke");
 });
 
 test("remove", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     const { contentEl } = await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -89,29 +101,31 @@ test("remove", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("Flat")).click();
+    await animationFrame();
     expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
 
     // Remove text effect
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('No Shadow')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("No Shadow")).click();
+    await animationFrame();
     expect(":iframe [data-text-effect]").toHaveCount(0);
     expect(getContent(contentEl)).toBe("<p>[Text]</p>");
-    expect(".o-select-text-effect").not.toHaveClass("active");
+    expect(
+        ".o-we-effects-section[data-section='textEffect'] .o-we-effects-section-summary"
+    ).toHaveText("None");
 });
 
 test("remove if empty", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     const { getEditor } = await setupHTMLBuilder(`<p><span data-text-effect="{}">Text</span></p>`);
     const cleanedEl = getEditor().getElContent();
     expect(cleanedEl.querySelector("[data-text-effect]")).toBe(null);
 });
 
 test("remove if no shadow or outline", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     const { getEditor } = await setupHTMLBuilder(
         `<p><span data-text-effect='{"preset":"custom","presetHash":"00000000"}'>Text</span></p>`
     );
@@ -119,11 +133,10 @@ test("remove if no shadow or outline", async () => {
     expect(cleanedEl.querySelector("[data-text-effect]")).toBe(null);
 });
 
-test("custom opens the option", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+test("presets and shadows are on the same page", async () => {
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
-    expect(":iframe p").toHaveCount(1);
     setSelection({
         anchorNode: p,
         anchorOffset: 0,
@@ -131,14 +144,18 @@ test("custom opens the option", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Custom')").click();
-    expect(".o_text_effect_popover:contains('Text Shadow')").toHaveCount(1);
-    expect(".o_text_effect_popover .dropdown-item").toHaveCount(0);
+    await openEffectsSection("textEffect");
+    await contains(preset("Glow")).click();
+    await animationFrame();
+    expect(preset("Glow")).toHaveClass("active");
+    expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(3);
+    expect(".o-we-effects-section[data-section='textEffect'] .o-we-effects-section-summary").toHaveText(
+        "Glow"
+    );
 });
 
-test("custom preset opens the option", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+test("custom effects of the page are offered as presets", async () => {
+    addTextEffectPlugins();
     const { getEditor } = await setupHTMLBuilder(
         `<p><span data-text-effect='{"preset":"custom","shadows":[{"shadowBlur":"4px"}]}'>Preset</span> Text</p>`
     );
@@ -152,10 +169,9 @@ test("custom preset opens the option", async () => {
         focusOffset: 5,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Custom Shadow')").click();
-    expect(".o_text_effect_popover:contains('Text Shadow')").toHaveCount(1);
-    expect(".o_text_effect_popover .dropdown-item").toHaveCount(0);
+    await openEffectsSection("textEffect");
+    await contains(preset("Custom Shadow")).click();
+    await animationFrame();
     expect(p.querySelectorAll("[data-text-effect]")).toHaveLength(2);
     const textEffect = JSON.parse(p.querySelectorAll("[data-text-effect]")[1].dataset.textEffect);
     expect(textEffect).toEqual({
@@ -170,7 +186,7 @@ test("custom preset opens the option", async () => {
 });
 
 test("custom shadow hash is updated when editing text effect", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -181,13 +197,14 @@ test("custom shadow hash is updated when editing text effect", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Custom')").click();
+    await openEffectsSection("textEffect");
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
+    await animationFrame();
     let textEffect = JSON.parse(queryOne(":iframe [data-text-effect]").dataset.textEffect);
     const initialHash = textEffect.presetHash;
     expect(initialHash).toBe(getTextEffectPresetHash(textEffect));
 
-    await contains(".o_text_effect_popover .o-hb-text-effect-add-shadow").click();
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
     await animationFrame();
 
     textEffect = JSON.parse(queryOne(":iframe [data-text-effect]").dataset.textEffect);
@@ -195,8 +212,8 @@ test("custom shadow hash is updated when editing text effect", async () => {
     expect(textEffect.presetHash).toBe(getTextEffectPresetHash(textEffect));
 });
 
-test("open option by default if custom", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+test("a custom effect shows its shadows and its preset", async () => {
+    addTextEffectPlugins();
     await setupHTMLBuilder(
         `<p><span data-text-effect='{"preset":"custom","shadows":[{"shadowBlur":"4px"}]}'>Text</span></p>`
     );
@@ -208,16 +225,13 @@ test("open option by default if custom", async () => {
         focusOffset: 4,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    expect(".o_text_effect_popover:contains('Text Shadow')").toHaveCount(1);
-    expect(".o_text_effect_popover .dropdown-item").toHaveCount(0);
-
-    await contains(".o_text_effect_popover [data-icon='chevron_backward']").click();
-    expect(".o_text_effect_popover .active:contains('Custom Shadow')").toHaveCount(1);
+    await openEffectsSection("textEffect");
+    expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(1);
+    expect(preset("Custom Shadow")).toHaveClass("active");
 });
 
 test("selecting part of a text effect applies preset on the full text effect", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     const { getEditor } = await setupHTMLBuilder(
         `<p><span data-text-effect='{"preset":"flat","shadows":[{"shadowBlur":"1px"}]}'>Text</span></p>`
     );
@@ -229,9 +243,9 @@ test("selecting part of a text effect applies preset on the full text effect", a
         focusOffset: 3,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Outline')").click();
-    await waitForNone(".o_text_effect_popover");
+    await openEffectsSection("textEffect");
+    await contains(preset("Outline")).click();
+    await animationFrame();
 
     const textEffects = getEditor().editable.querySelectorAll("[data-text-effect]");
     expect(textEffects).toHaveLength(1);
@@ -240,7 +254,7 @@ test("selecting part of a text effect applies preset on the full text effect", a
 });
 
 test("selecting multiple text effects shows no active preset", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     await setupHTMLBuilder(
         `<h1><span data-text-effect='{"preset":"flat","shadows":[{"shadowBlur":"1px"}]}'>first</span> <span data-text-effect='{"preset":"outline","outline":"2px"}'>second</span></h1>`
     );
@@ -253,13 +267,13 @@ test("selecting multiple text effects shows no active preset", async () => {
         focusOffset: 3,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
+    await openEffectsSection("textEffect");
 
-    expect(".o_text_effect_popover .dropdown-item.active").toHaveCount(0);
+    expect(".o-we-effects-panel .o-hb-text-effect-preset.active").toHaveCount(0);
 });
 
 test("preview applies on full selection and stopping preview restores initial state", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     const { getEditor } = await setupHTMLBuilder(
         `<h1>Start <span data-text-effect='{"preset":"flat","shadows":[{"shadowBlur":"1px"}]}'>middle</span> end</h1>`
     );
@@ -271,10 +285,8 @@ test("preview applies on full selection and stopping preview restores initial st
         focusOffset: 3,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await hover(
-        ".o_text_effect_popover .dropdown-item:contains('Outline') .o-hb-text-effect-preset"
-    );
+    await openEffectsSection("textEffect");
+    await hover(preset("Outline"));
     await animationFrame();
 
     let textEffects = getEditor().editable.querySelectorAll("[data-text-effect]");
@@ -296,7 +308,7 @@ test("preview applies on full selection and stopping preview restores initial st
 });
 
 test("add multiple shadows on an element", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -307,20 +319,21 @@ test("add multiple shadows on an element", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Custom')").click();
-    expect(".o_text_effect_popover [data-label='Color']").toHaveCount(1);
-    await contains(".o_text_effect_popover .o-hb-text-effect-add-shadow").click();
-    await contains(".o_text_effect_popover .o-hb-text-effect-add-shadow").click();
+    await openEffectsSection("textEffect");
+    expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(0);
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
     await animationFrame();
-    expect(".o_text_effect_popover [data-label='Color']").toHaveCount(3);
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
+    await animationFrame();
+    expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(3);
     expect(
         JSON.parse(queryOne(":iframe [data-text-effect]").dataset.textEffect).shadows
     ).toHaveLength(3);
 });
 
 test("delete one specific shadow on an element", async () => {
-    addBuilderPlugin(TextEffectPlugin);
+    addTextEffectPlugins();
     await setupHTMLBuilder(`<p>Text</p>`);
     const p = await waitFor(":iframe p");
     expect(":iframe p").toHaveCount(1);
@@ -331,34 +344,35 @@ test("delete one specific shadow on an element", async () => {
         focusOffset: 1,
     });
     await contains("[data-icon='more_vert']").click();
-    await contains(".o-select-text-effect").click();
-    await contains(".o_text_effect_popover .dropdown-item:contains('Custom')").click();
-    await contains(".o_text_effect_popover .o-hb-text-effect-add-shadow").click();
-    await contains(".o_text_effect_popover .o-hb-text-effect-add-shadow").click();
+    await openEffectsSection("textEffect");
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
+    await animationFrame();
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
+    await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
     await animationFrame();
 
-    const nthShadowBlurSelector = (index) =>
-        `.o-hb-text-effect-shadow:nth-child(${index + 1}) .hb-row[data-label='Blur'] input`;
-    await contains(nthShadowBlurSelector(1)).edit(5);
-    await contains(nthShadowBlurSelector(2)).edit(6);
-    await contains(nthShadowBlurSelector(3)).edit(7);
+    // The blur is the third number of a shadow row.
+    const blurInput = (index) => queryAll(".o-hb-text-effect-shadow")[index].querySelectorAll("input")[2];
+    await contains(blurInput(0)).edit(5);
+    await contains(blurInput(1)).edit(6);
+    await contains(blurInput(2)).edit(7);
 
     await animationFrame();
-    await contains(".o-hb-text-effect-shadow:nth-child(3) [data-icon='delete']").click();
+    await contains(queryAll(".o-hb-text-effect-shadow .o-hb-text-effect-remove-shadow")[1]).click();
     await animationFrame();
 
-    expect(".o_text_effect_popover [data-label='Color']").toHaveCount(2);
+    expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(2);
     expect(
         JSON.parse(queryOne(":iframe [data-text-effect]").dataset.textEffect).shadows
     ).toHaveLength(2);
 
-    expect(nthShadowBlurSelector(1)).toHaveValue(5);
-    expect(nthShadowBlurSelector(2)).toHaveValue(7);
+    expect(blurInput(0)).toHaveValue(5);
+    expect(blurInput(1)).toHaveValue(7);
 });
 
 describe("nesting", () => {
     test("apply font size on text effect, then remove text effect should keep font size", async () => {
-        addBuilderPlugin(TextEffectPlugin);
+        addTextEffectPlugins();
         const { contentEl } = await setupHTMLBuilder(`<p>Text</p>`);
         const p = await waitFor(":iframe p");
         expect(":iframe p").toHaveCount(1);
@@ -369,9 +383,9 @@ describe("nesting", () => {
             focusOffset: 1,
         });
         await contains("[data-icon='more_vert']").click();
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("Flat")).click();
+        await animationFrame();
         expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
 
         // Apply font size
@@ -385,16 +399,16 @@ describe("nesting", () => {
         const fontSizeProperty = fontSizeEl.style.fontSize; // Current representation of 50px
 
         // Remove text effect
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('No Shadow')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("No Shadow")).click();
+        await animationFrame();
         expect(getContent(contentEl)).toBe(
             `<p><span style="font-size: ${fontSizeProperty};" class="o_rfs">[Text]</span></p>`
         );
     });
 
     test("apply text effect on font size, then remove text effect should keep font size", async () => {
-        addBuilderPlugin(TextEffectPlugin);
+        addTextEffectPlugins();
         const { contentEl } = await setupHTMLBuilder(`<p>Text</p>`);
         const p = await waitFor(":iframe p");
         expect(":iframe p").toHaveCount(1);
@@ -417,23 +431,23 @@ describe("nesting", () => {
         const fontSizeProperty = fontSizeEl.style.fontSize; // Current representation of 50px
 
         // Apply text effect
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("Flat")).click();
+        await animationFrame();
         expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
         await waitFor(":iframe span[style] span[data-text-effect]");
 
         // Remove text effect
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('No Shadow')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("No Shadow")).click();
+        await animationFrame();
         expect(getContent(contentEl)).toBe(
             `<p><span style="font-size: ${fontSizeProperty};" class="o_rfs">[Text]</span></p>`
         );
     });
 
     test("apply bold on text effect, then remove bold should keep text effect", async () => {
-        addBuilderPlugin(TextEffectPlugin);
+        addTextEffectPlugins();
         await setupHTMLBuilder(`<p>Text</p>`);
         const p = await waitFor(":iframe p");
         expect(":iframe p").toHaveCount(1);
@@ -444,9 +458,9 @@ describe("nesting", () => {
             focusOffset: 1,
         });
         await contains("[data-icon='more_vert']").click();
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("Flat")).click();
+        await animationFrame();
         expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
 
         // Apply bold
@@ -460,7 +474,7 @@ describe("nesting", () => {
     });
 
     test("apply text effect on bold, then remove bold should keep text effect", async () => {
-        addBuilderPlugin(TextEffectPlugin);
+        addTextEffectPlugins();
         await setupHTMLBuilder(`<p>Text</p>`);
         const p = await waitFor(":iframe p");
         expect(":iframe p").toHaveCount(1);
@@ -477,9 +491,9 @@ describe("nesting", () => {
 
         // Apply text effect
         await contains("[data-icon='more_vert']").click();
-        await contains(".o-select-text-effect").click();
-        await contains(".o_text_effect_popover .dropdown-item:contains('Flat')").click();
-        await waitForNone(".o_text_effect_popover");
+        await openEffectsSection("textEffect");
+        await contains(preset("Flat")).click();
+        await animationFrame();
         expect(`:iframe [data-text-effect*="flat"]`).toHaveStyle("text-shadow");
         await waitFor(":iframe strong span[data-text-effect]");
 

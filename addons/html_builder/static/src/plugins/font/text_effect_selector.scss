@@ -1,21 +1,33 @@
-.o_text_effect_popover {
-    max-height: 440px !important;
-    min-width: unset;
-    overflow-y: auto;
+// Text effects, one page: preset tiles, one row per shadow, outline.
+.o-hb-text-effect-options {
+    --o-hb-input-border: #{$border-color};
+    width: 100%;
 
-    .o-hb-text-effect-preview {
+    .o-hb-text-effect-presets {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: map-get($spacers, 1) * 1.5;
+    }
+
+    .o-hb-text-effect-preset {
+        aspect-ratio: 1;
+        min-width: 0;
+        display: grid;
+        place-items: center;
         overflow: hidden;
-        height: 40px;
-        width: 48px;
         border: $border-width solid $border-color;
-        border-radius: $border-radius-sm;
+        border-radius: $border-radius;
         background-color: $white;
         color: $black;
+        font: bold 15px / 1 Arial, sans-serif;
 
-        .o-hb-text-effect-preview-sample {
-            font-size: 32px;
-            line-height: 1em;
-            scale: 0.8;
+        &:hover {
+            border-color: $gray-600;
+        }
+
+        &.active {
+            border-color: $o-component-active-border;
+            box-shadow: 0 0 0 $border-width $o-component-active-border;
         }
 
         &.o-hb-text-effect-preview-dark {
@@ -24,55 +36,50 @@
         }
     }
 
-    .o-hb-text-effect-options {
-        --o-hb-text-effect-option-bg: $white;
-        --o-hb-text-effect-shadow-bg: rgba(0, 0, 0, 0.05);
+    // Shadow and outline belong to the presets above them: they are set apart
+    // by space only, the hairlines of the panel split its sections.
+    .o-hb-text-effect-section {
+        display: grid;
+        gap: map-get($spacers, 1);
+        padding-top: map-get($spacers, 1);
+    }
 
-        width: 330px;
-        font-size: $o-we-font-size;
-        background-color: var(--o-hb-text-effect-option-bg);
+    .o-hb-text-effect-caption {
+        min-height: 28px;
+        color: $text-muted;
+    }
 
-        [data-icon='chevron_backward'] {
-            aspect-ratio: 1 / 1;
+    .o-hb-text-effect-add-shadow, .o-hb-text-effect-remove-shadow {
+        --btn-padding-x: #{map-get($spacers, 1)};
+        --btn-padding-y: 0;
+        flex: none;
+        height: 28px;
+    }
+
+    .o-hb-text-effect-shadow {
+        .o-hb-input-field-number {
+            flex: 1 1 0;
+            min-width: 0;
         }
 
-        .o-hb-text-effect-shadow {
-            border-radius: $border-radius-sm;
-            background-color: var(--o-hb-text-effect-shadow-bg);
-
-            .o-hb-text-effect-shadow-options {
-                border-right: $border-width solid var(--o-hb-text-effect-option-bg);
-
-                .hb-row-label {
-                    background-color: transparent;
-                }
-            }
-
-
-            .o-hb-text-effect-remove-shadow {
-                width: 32px;
-            }
+        .o-hb-input-number {
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
         }
 
-        .o-hb-text-effect-add-shadow {
-            border-style: dashed;
-
-            &, &:focus, &:hover, &:active {
-                border-color: var(
-                    --o-hb-text-effect-add-shadow-border-color,
-                    var(--btn-border-color)
-                );
-            }
+        // Offsets and blur are in px: the row has no room for the unit.
+        .o-hb-input-field-unit {
+            display: none;
         }
 
-        .o-hb-text-effect-add-shadow, .o-hb-text-effect-remove-shadow {
-            &, &:focus, &:hover {
-                background-color: transparent !important;
-            }
+        .o_we_color_preview {
+            width: 22px;
+            height: 22px;
         }
     }
-}
 
-.hb-row-content .o-hb-text-effect-preview {
-    display: none !important;
+    .hb-row {
+        padding-top: 0;
+    }
 }
