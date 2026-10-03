@@ -92,7 +92,7 @@ class Many2oneReference(Field[int]):
         if isinstance(value, BaseModel):
             value = value.id
         elif isinstance(value, dict):
-            # special case, when an integer field is used as inverse for a one2many
+            # special case, when used as inverse for a one2many
             value = value.get('id', None)
         return int(value) if value else None
 
