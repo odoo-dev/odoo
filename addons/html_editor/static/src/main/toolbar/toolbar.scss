@@ -14,51 +14,75 @@
     display: none;
 }
 
+/* Button height, from the button's own variables so touch and theme
+   overrides carry over: declared on the buttons, where --btn-* resolve. */
+.o-we-toolbar .btn, .o-we-toolbar-dropdown .btn {
+    --o-we-toolbar-btn-size: calc(var(--btn-font-size) * var(--btn-line-height) + 2 * (var(--btn-padding-y) + var(--btn-border-width)));
+}
+
 .o-we-toolbar {
-    height: 40px;
-    padding: 0 2px;
-    border-bottom: 1px solid lightgrey;
-    background-color: #fff;
-    
-    .btn-group {
-        padding: 0 2px;
+    gap: calc(var(--o-bs-spacer-1, .25rem) / 2);
+    /* Same surface as the menus and panels the bar opens. */
+    border: var(--border-width) solid var(--o-bs-popover-border-color, var(--border-color-translucent));
+    border-radius: var(--o-bs-popover-border-radius, var(--border-radius-lg));
+    background-color: var(--o-we-toolbar-bg, var(--o-bs-popover-bg, var(--body-bg)));
+    box-shadow: var(--o-bs-popover-box-shadow, var(--box-shadow));
+
+    .o-toolbar-above-keyboard & {
+        border-width: var(--border-width) 0 0;
         border-radius: 0;
+        box-shadow: none;
     }
 
-    .o-we-toolbar-vertical-separator:not(:first-child) {
-        margin: unset;
-        padding: unset;
-        height: 70%;
-        border-left: 1px solid lightgrey;
+    .o-we-toolbar-group {
+        gap: calc(var(--o-bs-spacer-1, .25rem) / 2);
+    }
+
+    .btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+        /* Concentric with the bar: its radius minus its padding (.p-1), but
+           never square where the bar is barely rounded (Community). */
+        --btn-border-radius: max(calc(var(--o-bs-popover-border-radius, var(--border-radius-lg)) - var(--o-bs-spacer-1, .25rem)), var(--border-radius-sm));
+
+        /* The touch rule of the webclient outranks this one, so touch devices
+           keep their larger targets. */
+        &:has(> .oi-fw:only-child, > svg:only-child) {
+            --btn-padding-x: var(--o-bs-spacer-1, .25rem);
+        }
+
+        /* Square icon buttons, glyph or SVG (block options are the icon). */
+        &:has(> .oi-fw:only-child, > svg:only-child), &.oi {
+            min-width: var(--o-we-toolbar-btn-size);
+        }
+
+        &.disabled {
+            pointer-events: auto;
+            cursor: auto;
+            &:active {
+                border-color: var(--btn-disabled-border-color);
+                background-color: var(--btn-disabled-bg);
+                color: var(--btn-disabled-color);
+            }
+        }
     }
 }
 
-.o-we-toolbar .btn-group > .btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+.o-we-toolbar-dropdown {
+    min-width: fit-content;
+    padding: var(--o-bs-spacer-1, .25rem);
 
-.o-we-toolbar .btn-group, .o-we-toolbar-dropdown {
     .btn {
         white-space: nowrap;
         padding-left: 4px;
         padding-right: 4px;
-        height: 32px;
-        min-width: 28px;
-
-        &:not(:first-child) {
-            border-top-left-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
-        }
-        
-        &:not(:last-child) {
-            border-top-right-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
-        }
+        height: var(--o-we-toolbar-btn-size);
+        min-width: var(--o-we-toolbar-btn-size);
 
         &:not(.active):focus {
-            background-color: $dropdown-link-hover-bg;
+            background-color: var(--o-bs-dropdown-link-hover-bg, var(--tertiary-bg));
             border-color: var(--btn-hover-border-color);
             box-shadow: none;
         }
@@ -77,29 +101,27 @@
             }
         }
     }
-}
-
-.o-we-toolbar-dropdown {
-    min-width: fit-content;
-    padding: 2px;
 
     [data-prevent-closing-overlay]:not([data-vertical]) {
         display: flex;
         justify-content: space-evenly;
+        gap: calc(var(--o-bs-spacer-1, .25rem) / 2);
     }
 
     .o-dropdown-item {
         display: flex;
         justify-content: center;
         align-items: center;
-        border-radius: var(--border-radius) !important;
+        /* Concentric with the menu: its radius minus its padding, but never
+           square where the menu is barely rounded (Community). */
+        border-radius: max(calc(var(--o-bs-dropdown-border-radius, var(--border-radius)) - var(--o-bs-spacer-1, .25rem)), var(--border-radius-sm)) !important;
 
         &:not(.active) {
             border: none;
             background-color: transparent;
 
             &:hover {
-                background-color: $dropdown-link-hover-bg;
+                background-color: var(--o-bs-dropdown-link-hover-bg, var(--tertiary-bg));
             }
         }
 

@@ -15,6 +15,8 @@
 :root,
 :host {
     --o-embedded-toc-bg--active: #{$embedded-toc-bg--active};
+    --o-bs-popover-border-color: #{$popover-border-color};
+    --o-bs-popover-border-radius: #{$popover-border-radius};
     --o-we-bg-dark: #{$o-we-bg-dark};
     --o-we-bg-darker: #{$o-we-bg-darker};
     --o-we-bg-darkest: #{$o-we-bg-darkest};

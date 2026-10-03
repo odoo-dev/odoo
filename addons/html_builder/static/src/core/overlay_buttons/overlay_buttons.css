@@ -4,7 +4,14 @@
 
     button {
         &.oi {
-            min-width: min-content;
+            /* Same button box as the editor toolbar, whose icon is a child. */
+            --btn-padding-x: var(--o-bs-spacer-1, .25rem);
+            line-height: var(--btn-line-height);
+
+            &::before {
+                width: 1.28571429em; /* Same as .oi-fw */
+                text-align: center;
+            }
         }
     }
 
