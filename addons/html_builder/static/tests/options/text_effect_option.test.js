@@ -19,6 +19,7 @@ import {
     waitForNone,
 } from "@odoo/hoot-dom";
 import { getContent, setSelection } from "@html_editor/../tests/_helpers/selection";
+import { expandToolbar } from "@html_editor/../tests/_helpers/toolbar";
 
 describe.current.tags("desktop");
 
@@ -40,7 +41,7 @@ test("apply preset", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Flat")).click();
     await animationFrame();
@@ -57,7 +58,7 @@ test("opening the panel applies nothing", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
 
     expect(".o-we-effects-panel .o-hb-text-effect-preset").toHaveCount(6);
@@ -76,7 +77,7 @@ test("switch preset", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Flat")).click();
     await animationFrame();
@@ -100,7 +101,7 @@ test("remove", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Flat")).click();
     await animationFrame();
@@ -143,7 +144,7 @@ test("presets and shadows are on the same page", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Glow")).click();
     await animationFrame();
@@ -168,7 +169,7 @@ test("custom effects of the page are offered as presets", async () => {
         focusNode: textNode,
         focusOffset: 5,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Custom Shadow")).click();
     await animationFrame();
@@ -196,7 +197,7 @@ test("custom shadow hash is updated when editing text effect", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
     await animationFrame();
@@ -224,7 +225,7 @@ test("a custom effect shows its shadows and its preset", async () => {
         focusNode: textEffectEl.firstChild,
         focusOffset: 4,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(1);
     expect(preset("Custom Shadow")).toHaveClass("active");
@@ -242,7 +243,7 @@ test("selecting part of a text effect applies preset on the full text effect", a
         focusNode: textEffectEl.firstChild,
         focusOffset: 3,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(preset("Outline")).click();
     await animationFrame();
@@ -266,7 +267,7 @@ test("selecting multiple text effects shows no active preset", async () => {
         focusNode: textEffects[1].firstChild,
         focusOffset: 3,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
 
     expect(".o-we-effects-panel .o-hb-text-effect-preset.active").toHaveCount(0);
@@ -284,7 +285,7 @@ test("preview applies on full selection and stopping preview restores initial st
         focusNode: h1.lastChild,
         focusOffset: 3,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await hover(preset("Outline"));
     await animationFrame();
@@ -318,7 +319,7 @@ test("add multiple shadows on an element", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     expect(".o-we-effects-panel .o-hb-text-effect-shadow").toHaveCount(0);
     await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
@@ -343,7 +344,7 @@ test("delete one specific shadow on an element", async () => {
         focusNode: p,
         focusOffset: 1,
     });
-    await contains("[data-icon='more_vert']").click();
+    await expandToolbar();
     await openEffectsSection("textEffect");
     await contains(".o-we-effects-panel .o-hb-text-effect-add-shadow").click();
     await animationFrame();
@@ -382,7 +383,7 @@ describe("nesting", () => {
             focusNode: p,
             focusOffset: 1,
         });
-        await contains("[data-icon='more_vert']").click();
+        await expandToolbar();
         await openEffectsSection("textEffect");
         await contains(preset("Flat")).click();
         await animationFrame();
@@ -418,7 +419,7 @@ describe("nesting", () => {
             focusNode: p,
             focusOffset: 1,
         });
-        await contains("[data-icon='more_vert']").click();
+        await expandToolbar();
 
         // Apply font size
         await contains(":iframe input").click();
@@ -457,7 +458,7 @@ describe("nesting", () => {
             focusNode: p,
             focusOffset: 1,
         });
-        await contains("[data-icon='more_vert']").click();
+        await expandToolbar();
         await openEffectsSection("textEffect");
         await contains(preset("Flat")).click();
         await animationFrame();
@@ -490,7 +491,7 @@ describe("nesting", () => {
         await waitFor(":iframe strong");
 
         // Apply text effect
-        await contains("[data-icon='more_vert']").click();
+        await expandToolbar();
         await openEffectsSection("textEffect");
         await contains(preset("Flat")).click();
         await animationFrame();

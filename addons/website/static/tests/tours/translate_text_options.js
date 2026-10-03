@@ -4,6 +4,7 @@ import {
     registerWebsitePreviewTour,
     selectFullText,
     clickToolbarButton,
+    expandToolbar,
     openEffectsPanelSection,
 } from "@website/js/tours/tour_utils";
 
@@ -78,11 +79,7 @@ registerWebsitePreviewTour(
             "snippet highlighted text content",
             "#wrap .s_text_block p:last .o_text_highlight"
         ),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that the text effects are active and open them",
             trigger: ".o-we-toolbar button.o-select-effects.active",
@@ -101,22 +98,14 @@ registerWebsitePreviewTour(
         },
         // Select the animated text content and check animate options were displayed.
         selectFullText("animated text content", "#wrap .s_text_block p:first span"),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that the text effects are active",
             trigger: ".o-we-toolbar button.o-select-effects.active",
         },
         // Select a text content without any option.
         selectFullText("text content without any option", "footer .s_text_block p:first span"),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that no text effect is active",
             trigger: ".o-we-toolbar button.o-select-effects:not(.active)",
@@ -125,11 +114,7 @@ registerWebsitePreviewTour(
             "highlighted text content again",
             "#wrap .s_text_block p:last .o_text_highlight"
         ),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Open the text effects",
             trigger: ".o-we-toolbar button.o-select-effects.active",
