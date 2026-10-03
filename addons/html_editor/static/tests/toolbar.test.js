@@ -178,9 +178,10 @@ test("focus should be trap in toolbar on tab", async () => {
     await setupEditor("<p>[test]</p>");
     await waitFor(".o-we-toolbar");
 
-    await expandToolbar();
+    // The toolbar opens expanded: Alt+F moves the focus to it.
+    await waitFor(".o-we-toolbar[data-namespace='expanded']");
+    await press(["alt", "f"]);
     const toolbarBtns = queryAll(".o-we-toolbar button:not([disabled])");
-    // First button should be focused after expanding toolbar
     expect(toolbarBtns[0]).toBeFocused();
 
     for (let i = 1; i < toolbarBtns.length; i++) {
@@ -202,9 +203,10 @@ test("focus should be trap in toolbar on arrow left/right keys", async () => {
     await setupEditor("<p>[test]</p>");
     await waitFor(".o-we-toolbar");
 
-    await expandToolbar();
+    // The toolbar opens expanded: Alt+F moves the focus to it.
+    await waitFor(".o-we-toolbar[data-namespace='expanded']");
+    await press(["alt", "f"]);
     const toolbarBtns = queryAll(".o-we-toolbar button:not([disabled])");
-    // First button should be focused after expanding toolbar
     expect(toolbarBtns[0]).toBeFocused();
 
     for (let i = 1; i < toolbarBtns.length; i++) {
@@ -1650,13 +1652,21 @@ test("toolbar does not evaluate isActive when namespace does not match", async (
 });
 
 describe("compact toolbar", () => {
-    test("toolbar opens in 'compact' namespace by default", async () => {
+    test.tags("desktop");
+    test("toolbar opens expanded when the compact form would hide few buttons", async () => {
+        await setupEditor("<p>[test]</p>");
+        await waitFor(".o-we-toolbar");
+        expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
+        expect(".o-we-toolbar .btn[name='expand_toolbar']").toHaveCount(0);
+    });
+
+    test.tags("mobile");
+    test("the toolbar of phones opens compact, even when it would hide few buttons", async () => {
         await setupEditor("<p>[test]</p>");
         await waitFor(".o-we-toolbar");
         expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
-        await expandToolbar();
-        expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
     });
+
 
     const patchToUseOnlyTestButtons = () =>
         patchWithCleanup(Editor.prototype, {
@@ -1703,7 +1713,7 @@ describe("compact toolbar", () => {
         await waitFor(".o-we-toolbar");
         expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
     });
-    test("toolbar should open in compact mode if expanded toolbar is big enough (>= 7 items)", async () => {
+    test("toolbar should open in compact mode if it hides enough buttons (>= 7)", async () => {
         class TestPlugin extends Plugin {
             static id = "TestPlugin";
             resources = {
@@ -1712,8 +1722,8 @@ describe("compact toolbar", () => {
                 toolbar_items: [
                     // 3 buttons in compact and expanded namespaces
                     ...repeat(3, () => makeTestButton({ namespaces: ["compact", "expanded"] })),
-                    // 4 buttons in expanded only namespace
-                    ...repeat(4, () => makeTestButton({ namespaces: ["expanded"] })),
+                    // 7 buttons in expanded only namespace
+                    ...repeat(7, () => makeTestButton({ namespaces: ["expanded"] })),
                 ],
             };
         }
@@ -1745,7 +1755,8 @@ describe("compact toolbar", () => {
         await waitFor(".o-we-toolbar");
         expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
     });
-    test("toolbar should open in compact mode if expanded toolbar has more than one extra item", async () => {
+    test.tags("desktop");
+    test("toolbar should not open in compact mode if it hides fewer than 7 buttons", async () => {
         class TestPlugin extends Plugin {
             static id = "TestPlugin";
             resources = {
@@ -1754,9 +1765,8 @@ describe("compact toolbar", () => {
                 toolbar_items: [
                     // 10 buttons in compact and expanded namespaces
                     ...repeat(10, () => makeTestButton({ namespaces: ["compact", "expanded"] })),
-                    // 2 buttons in expanded only namespace
-                    makeTestButton({ namespaces: ["expanded"] }),
-                    makeTestButton({ namespaces: ["expanded"] }),
+                    // 6 buttons in expanded only namespace
+                    ...repeat(6, () => makeTestButton({ namespaces: ["expanded"] })),
                 ],
             };
         }
@@ -1765,26 +1775,38 @@ describe("compact toolbar", () => {
             config: { includePlugins: [TestPlugin] },
         });
         await waitFor(".o-we-toolbar");
+        expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
+    });
+
+    test.tags("desktop");
+    test("expanded toolbar reopens in 'compact' namespace by default after closing", async () => {
+        class TestPlugin extends Plugin {
+            static id = "TestPlugin";
+            resources = {
+                user_commands: { id: "test_cmd", run: () => null },
+                toolbar_groups: { id: "test_group" },
+                toolbar_items: [
+                    ...repeat(3, () => makeTestButton({ namespaces: ["compact", "expanded"] })),
+                    ...repeat(7, () => makeTestButton({ namespaces: ["expanded"] })),
+                ],
+            };
+        }
+        patchToUseOnlyTestButtons();
+        const { el } = await setupEditor("<p>[test]</p>", {
+            config: { includePlugins: [TestPlugin] },
+        });
+        await waitFor(".o-we-toolbar");
         expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
         await expandToolbar();
         expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
+        // Collapse selection
+        setContent(el, "<p>test[]</p>");
+        await waitForNone(".o-we-toolbar");
+        // Reopen toolbar
+        setContent(el, "<p>[test]</p>");
+        await waitFor(".o-we-toolbar");
+        expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
     });
-});
-
-test.tags("desktop");
-test("expanded toolbar reopens in 'compact' namespace by default after closing", async () => {
-    const { el } = await setupEditor("<p>[test]</p>");
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
-    await expandToolbar();
-    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "expanded");
-    // Collapse selection
-    setContent(el, "<p>test[]</p>");
-    await waitForNone(".o-we-toolbar");
-    // Reopen toolbar
-    setContent(el, "<p>[test]</p>");
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
 });
 
 test("toolbar items without namespace default to 'expanded'", async () => {
@@ -1817,12 +1839,12 @@ test("toolbar items without namespace default to 'expanded'", async () => {
 
 test("toolbar should open with image namespace the selection spans an image and whitespace", async () => {
     const { el } = await setupEditor(`<p>[abc]</p>`);
-    // Make sure we start with a compact toolbar so we know that at the end when
+    // Make sure we start with the text toolbar so we know that at the end when
     // we don't anymore it did in fact change and we're not just lagging behind
     // the DOM.
     await animationFrame();
     await expectElementCount(".o-we-toolbar", 1);
-    expect(".o-we-toolbar").toHaveAttribute("data-namespace", "compact");
+    expect(".o-we-toolbar").not.toHaveAttribute("data-namespace", "image");
     expect(".o-we-toolbar .o-we-toolbar-group[name='font']").toHaveCount(1);
     expect(".o-we-toolbar .o-we-toolbar-group[name='decoration']").toHaveCount(1);
     setContent(

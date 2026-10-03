@@ -4,6 +4,7 @@ import {
     registerWebsitePreviewTour,
     selectFullText,
     clickToolbarButton,
+    expandToolbar,
 } from "@website/js/tours/tour_utils";
 
 registerWebsitePreviewTour(
@@ -60,11 +61,7 @@ registerWebsitePreviewTour(
             "snippet highlighted text content",
             "#wrap .s_text_block p:last .o_text_highlight"
         ),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that the highlight options were displayed and open highlight options",
             trigger: ".o-we-toolbar button[title='Apply highlight'].active",
@@ -82,22 +79,14 @@ registerWebsitePreviewTour(
         },
         // Select the animated text content and check animate options were displayed.
         selectFullText("animated text content", "#wrap .s_text_block p:first span"),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that the animate options were displayed",
             trigger: ".o-we-toolbar button[title='Animate Text'].active",
         },
         // Select a text content without any option.
         selectFullText("text content without any option", "footer .s_text_block p:first span"),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that all text options are removed",
             trigger:
@@ -107,11 +96,7 @@ registerWebsitePreviewTour(
             "highlighted text content again",
             "#wrap .s_text_block p:last .o_text_highlight"
         ),
-        {
-            content: "Expand the toolbar for more buttons",
-            trigger: ".o-we-toolbar button[name='expand_toolbar']",
-            run: "click",
-        },
+        expandToolbar(),
         {
             content: "Check that only the highlight options are displayed",
             trigger:
