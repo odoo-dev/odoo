@@ -1181,9 +1181,7 @@ class TestDomainOptimize(TransactionCase):
             list((Domain('numeric', '=', 5) & (Domain('numeric', '=', 8) | Domain('number', '=', 0))).optimize(model)),
             ['&', ('number', 'in', [0]), ('numeric', 'in', [5])],
         )
-        # XXX needed?
-        # and to fix the tests
-        # This needs for m2o   f any a & f not any b  =>  f any (a & ~b)
+        # XXX needed, let's do it...
         self.assertEqual(
             list((Domain('currency_id.name', 'in', ['USD']) & (Domain('currency_id.name', 'in', ['EUR', 'USD']) | Domain('number', '=', 0))).optimize(model)),
             ['&', ('currency_id', 'any', [('name', 'in', ['USD'])]), '|', ('currency_id', 'any', [('name', 'in', ['EUR'])]), ('number', 'in', [0])],
