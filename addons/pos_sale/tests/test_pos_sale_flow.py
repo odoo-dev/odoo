@@ -1814,7 +1814,9 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_selected_partner_quotation_loading', login="accountman")
 
     def test_backend_settle_refund(self):
-        """Make sure that sale orders settled in PoS and refunded in the backend get their invoiced quantity updated correctly."""
+        """Make sure that sale orders settled in PoS and refunded in the backend have their
+        invoiced quantity and amount_unpaid updated correctly.
+        """
 
         product_a = self.env['product.product'].create({
             'name': 'Product A',
@@ -1836,6 +1838,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             })],
         })
         sale_order.action_confirm()
+        self.assertEqual(sale_order.amount_unpaid, 10.0)
+
         self.main_pos_config.open_ui()
         current_session = self.main_pos_config.current_session_id
 
@@ -1875,6 +1879,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         data = self.env['pos.order'].sync_from_ui([pos_order])
         self.assertEqual(sale_order.order_line.qty_invoiced, 1)
+        self.assertEqual(sale_order.amount_unpaid, 0.0)
+
         pos_order_id = data['pos.order'][0]['id']
         pos_order_record = self.env['pos.order'].browse(pos_order_id)
         refund_action = pos_order_record.refund()
@@ -1888,6 +1894,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.env.flush_all()
         refund_payment.with_context(**payment_context).check()
         self.assertEqual(sale_order.order_line.qty_invoiced, 0)
+        self.assertEqual(sale_order.amount_unpaid, 10.0)
+
 
     def test_ecommerce_paid_order_is_hidden_in_pos(self):
         """

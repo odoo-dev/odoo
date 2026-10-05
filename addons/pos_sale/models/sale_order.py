@@ -44,18 +44,21 @@ class SaleOrder(models.Model):
             'domain': [('id', 'in', linked_orders.ids)],
         }
 
-    @api.depends('transaction_ids.state', 'transaction_ids.amount', 'order_line', 'amount_total', 'order_line.invoice_lines.parent_state', 'order_line.invoice_lines.price_total', 'order_line.pos_order_line_ids')
+    @api.depends('transaction_ids.state', 'transaction_ids.amount', 'order_line', 'amount_total', 'order_line.invoice_lines.parent_state', 'order_line.invoice_lines.price_total',
+                 'order_line.pos_order_line_ids', 'order_line.pos_order_line_ids.refund_orderline_ids')
     def _compute_amount_unpaid(self):
         for sale_order in self:
             online_payments_invoices = sale_order.transaction_ids.filtered(lambda tx_move: tx_move.state in ('authorized', 'done')).mapped('invoice_ids')
+            sale_lines = sale_order.order_line.filtered(lambda l: not l.display_type)
             total_invoice_paid = sum(
-                sale_order.order_line.filtered(lambda l: not l.display_type)
+                sale_lines
                 .mapped('invoice_lines')
                 .filtered(lambda l: l.parent_state != 'cancel' and l.move_id not in online_payments_invoices)
                 .mapped(lambda l: math.copysign(l.price_total, -l.balance))
             )
-            total_pos_paid = sum(sale_order.order_line.filtered(lambda l: not l.display_type).mapped('pos_order_line_ids.price_subtotal_incl'))
-            sale_order.amount_unpaid = max(sale_order.amount_total - total_invoice_paid - total_pos_paid - sale_order.amount_paid, 0.0)
+            total_pos_paid = sum(sale_lines.pos_order_line_ids.mapped('price_subtotal_incl'))
+            total_pos_refunded = sum(sale_lines.pos_order_line_ids.refund_orderline_ids.mapped('price_subtotal_incl'))
+            sale_order.amount_unpaid = max(sale_order.amount_total - total_invoice_paid - total_pos_paid - total_pos_refunded - sale_order.amount_paid, 0.0)
 
     @api.depends('order_line.pos_order_line_ids')
     def _compute_amount_to_invoice(self):
