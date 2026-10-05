@@ -239,8 +239,8 @@ export class PosTicketPrinterService {
     async printOrderChanges({ order, opts = {}, printers = this.config.preparation_printer_ids }) {
         let isPrinted = false;
         const unsuccessfulPrints = [];
-        const retryPrinters = new Set();
-        let rawChangeForRetry = null;
+        // The changes of each printer are filtered on its categories: keep them per printer
+        const retryChanges = new Map();
 
         for (const printer of printers) {
             const template = "point_of_sale.pos_order_change_receipt";
@@ -249,7 +249,6 @@ export class PosTicketPrinterService {
             const changes = generator.generatePreparationData(categoryIds, opts);
 
             for (const ticket of changes) {
-                rawChangeForRetry = rawChangeForRetry || ticket._rawChange;
                 if (ticket.extra_data.reprint && !opts.explicitReprint) {
                     continue;
                 }
@@ -268,7 +267,7 @@ export class PosTicketPrinterService {
                 }
 
                 if (!result.successful) {
-                    retryPrinters.add(printer);
+                    retryChanges.set(printer, ticket._rawChange);
                     unsuccessfulPrints.push(printer.name + ": " + result.message.body);
                 } else if (result.warningCode) {
                     this.displayPrinterWarning(result, printer.name);
@@ -281,17 +280,15 @@ export class PosTicketPrinterService {
                 title: _t("Printing failed"),
                 body: unsuccessfulPrints.join("\n"),
             };
-            this.showPrinterErrorDialog(
-                message,
-                this.printOrderChanges.bind(this, {
-                    order,
-                    opts: {
-                        ...opts,
-                        orderChange: rawChangeForRetry,
-                    },
-                    retryPrinters,
-                })
-            );
+            this.showPrinterErrorDialog(message, async () => {
+                for (const [printer, orderChange] of retryChanges) {
+                    await this.printOrderChanges({
+                        order,
+                        opts: { ...opts, orderChange },
+                        printers: [printer],
+                    });
+                }
+            });
         }
 
         return isPrinted;
