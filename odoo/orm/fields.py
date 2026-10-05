@@ -1690,6 +1690,12 @@ class Field[T, C]:
         :param records:
         :param value: a value in any format
         """
+        if (
+            self.readonly
+            and (self.inherited_field or self).compute
+            and not all(rec.env.is_protected(self, rec) for rec in records)
+        ):
+            raise Exception(f"Cannot write on a readonly field {self}")
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
