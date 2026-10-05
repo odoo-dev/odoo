@@ -60,6 +60,7 @@ block
 bluetooth
 book
 bookmark
+border_style
 brush
 bug_report
 build
@@ -259,6 +260,7 @@ left_panel_open
 light
 light_mode
 lightbulb
+line_weight
 link
 link_off
 list_alt
@@ -301,6 +303,7 @@ north_west
 notifications
 notifications_off
 open_in_browser
+open_in_full
 open_in_new
 open_with
 package_2
