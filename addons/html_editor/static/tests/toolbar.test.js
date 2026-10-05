@@ -485,6 +485,8 @@ test("toolbar list buttons react to selection change", async () => {
     const { el } = await setupEditor("<ul><li>[abc]</li></ul>");
 
     await expandToolbar();
+    // The list button shows the type of the list of the selection
+    expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_bulleted");
     // Open list dropdown and check active state of list types
     click(".btn[name='list_selector'].dropdown-toggle");
     await waitFor(".btn[name='list_selector'].dropdown-toggle.show");
@@ -498,6 +500,7 @@ test("toolbar list buttons react to selection change", async () => {
     await waitForNone(".btn[name='list_selector'].dropdown-toggle.show");
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe("<ol><li>[abc]</li></ol>");
+    expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_numbered");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
@@ -511,6 +514,7 @@ test("toolbar list buttons react to selection change", async () => {
     await waitForNone(".btn[name='list_selector'].dropdown-toggle.show");
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe('<ul class="o_checklist"><li>[abc]</li></ul>');
+    expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "check_box");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
@@ -524,6 +528,7 @@ test("toolbar list buttons react to selection change", async () => {
     await waitForNone(".btn[name='list_selector'].dropdown-toggle.show");
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe("<p>[abc]</p>");
+    expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_bulleted");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
