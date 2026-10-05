@@ -1704,6 +1704,8 @@ class Field[T]:
         :param records:
         :param value: a value in any format
         """
+        if self.readonly and not records.env.is_protected(self, records):
+            raise Exception(f"Cannot write on a readonly field {self}")
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
