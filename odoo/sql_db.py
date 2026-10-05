@@ -106,6 +106,7 @@ def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into']
 
 
 sql_counter: int = 0
+query_probe_hook = None
 
 _slow_logger = logging.getLogger('odoo.sql_db.slow')
 _slow_threshold = float(os.environ.get('ODOO_PERF_PROBE_SLOW_QUERY', '1.0'))
@@ -438,6 +439,8 @@ class Cursor(_CursorProtocol):
         # simple query count is always computed
         self.sql_log_count += 1
         sql_counter += 1
+        if query_probe_hook is not None:
+            query_probe_hook(self, query, params, delay)
 
         if delay > _slow_threshold:
             self._log_slow_query(delay)
