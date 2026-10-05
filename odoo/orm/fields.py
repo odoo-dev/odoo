@@ -583,6 +583,9 @@ class Field[T]:
             if not isinstance(self.readonly, bool):
                 warnings.warn(f'Property {self}.readonly should be a boolean ({self.readonly}).', stacklevel=1)
 
+            if self.required and not (self.store or self.column_type or (self.related_field and self.related_field.required)):
+                warnings.warn(f'Property {self}.required set on a field that is not a column in the database.', stacklevel=1)
+
             if self.store and self._depends_context and not all(
                 (self.translate and c == 'lang')
                 or (self.company_dependent and c == 'company')

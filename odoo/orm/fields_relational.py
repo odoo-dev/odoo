@@ -592,6 +592,12 @@ class _RelationalMulti(_Relational):
     # including inactive records.  Inactive records are filtered out by
     # convert_to_record(), depending on the context.
 
+    def setup_nonrelated(self, model):
+        super().setup_nonrelated(model)
+
+        if self.required:
+            _logger.warning("%s is required, instead use @api.constrains that locks at least one record", self)
+
     def _update_inverse(self, records, value):
         new_id = value.id
         assert not new_id, "Field._update_inverse can only be called with a new id"
