@@ -82,13 +82,16 @@ export class WebsitePlugin extends Plugin {
      * client action. Multiple components based their visibility on this value,
      * which is falsy if the client action is not displayed.
      */
-    currentWebsite = computed(() => {
-        const currentWebsite = this.websites().find((w) => w.id === this.currentWebsiteId());
-        if (currentWebsite) {
-            currentWebsite.metadata = this.currentMetadata();
-        }
-        return currentWebsite;
-    });
+    currentWebsite = computed(
+        () => {
+            const currentWebsite = this.websites().find((w) => w.id === this.currentWebsiteId());
+            if (currentWebsite) {
+                currentWebsite.metadata = this.currentMetadata();
+            }
+            return currentWebsite;
+        },
+        { equals: false }
+    );
 
     is404 = computed(() => this.currentMetadata().viewXmlid === "website.page_404");
 

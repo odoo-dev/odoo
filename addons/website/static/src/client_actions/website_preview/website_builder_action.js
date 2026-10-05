@@ -151,6 +151,10 @@ export class WebsiteBuilderClientAction extends Component {
             if (!this.ui.isSmall) {
                 // preload builder and snippets so clicking on "edit" is faster
                 loadBundle("website.website_builder_assets").then(() => {
+                    if (scope.isDestroyed()) {
+                        // the preview was left before the bundle got loaded
+                        return;
+                    }
                     this.env.services["html_builder.snippets"]
                         .getSnippetModel(this.snippetsTemplate)
                         .reload({
