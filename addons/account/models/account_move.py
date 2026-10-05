@@ -561,7 +561,7 @@ class AccountMove(models.Model):
     )
     amount_total = fields.Monetary(
         string='Total',
-        compute='_compute_amount', store=True, readonly=True,
+        compute='_compute_amount', store=True, ui_readonly=True,
         inverse='_inverse_amount_total',
     )
     amount_residual = fields.Monetary(
@@ -3664,7 +3664,10 @@ class AccountMove(models.Model):
         inv_existing_before = existing()
         needed_before = needed()
         dirty_recs_before, dirty_fname = dirty()
-        dirty_recs_before[dirty_fname] = False
+        if dirty_recs_before._fields[dirty_fname].readonly:
+            dirty_recs_before.invalidate_recordset([dirty_fname])
+        else:
+            dirty_recs_before[dirty_fname] = False
         yield
         dirty_recs_after, dirty_fname = dirty()
         if not dirty_recs_after:  # TODO improve filter

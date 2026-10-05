@@ -186,7 +186,7 @@ class MrpProduction(models.Model):
         ('to_close', 'To Close'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')], string='State',
-        compute='_compute_state', copy=False, index=True, readonly=True,
+        compute='_compute_state', copy=False, index=True, ui_readonly=True,
         store=True, tracking=True,
         help=" * Draft: The MO is not confirmed yet.\n"
              " * Confirmed: The MO is confirmed, the stock rules and the reordering of the components are trigerred.\n"
@@ -199,7 +199,7 @@ class MrpProduction(models.Model):
         ('assigned', 'Ready'),
         ('waiting', 'Waiting Another Operation')],
         string='MO Readiness',
-        compute='_compute_reservation_state', copy=False, index=True, readonly=True,
+        compute='_compute_reservation_state', copy=False, index=True, ui_readonly=True,
         store=True, tracking=True,
         help="Manufacturing readiness for this MO, as per bill of material configuration:\n\
             * Ready: The material is available to start the production.\n\

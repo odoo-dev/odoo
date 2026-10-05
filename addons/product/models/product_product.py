@@ -157,7 +157,7 @@ class ProductProduct(models.Model):
     image_256 = fields.Image("Image 256", compute='_compute_image_256')
     image_128 = fields.Image("Image 128", compute='_compute_image_128')
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed')
-    write_date = fields.Datetime(compute='_compute_write_date', store=True)
+    write_date = fields.Datetime(compute='_compute_write_date', store=True, readonly=False, ui_readonly=True)
 
     # Ensure there is at most one active variant for each combination.
     # There could be no variant for a combination if using dynamic attributes.
