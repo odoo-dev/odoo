@@ -201,7 +201,7 @@ export class ToolbarPlugin extends Plugin {
             groupId: "expand_toolbar",
             commandId: "expandToolbar",
             description: _t("Expand toolbar"),
-            icon: "more_vert",
+            icon: "expand_content",
         },
         expandable_toolbar_namespaces_providers: "compact",
     };
