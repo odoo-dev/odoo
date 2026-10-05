@@ -104,6 +104,10 @@ class Field[T]:
 
     :param bool required: whether the value of the field is required (default: ``False``)
 
+    :param bool ui_required: whether the value of the field is required in the UI
+
+        Defaults to ``required``.
+
     :param str index: whether the field is indexed in database, and the kind of index.
         Note: this has no effect on non-stored and virtual fields.
         The possible values are:
@@ -309,6 +313,7 @@ class Field[T]:
     help: str | None = None             # field tooltip
     readonly: bool = False              # whether the field is readonly
     required: bool = False              # whether the field is required (NOT NULL in database)
+    ui_required: bool = False           # whether the field is required in the UI
     groups: str | None = None           # csv list of group xml ids
     change_default = False              # whether the field may trigger a "user-onchange"
 
@@ -1020,11 +1025,14 @@ class Field[T]:
     _description_related = property(attrgetter('related'))
     _description_company_dependent = property(attrgetter('company_dependent'))
     _description_readonly = property(attrgetter('readonly'))
-    _description_required = property(attrgetter('required'))
     _description_groups = property(attrgetter('groups'))
     _description_change_default = property(attrgetter('change_default'))
     _description_default_export_compatible = property(attrgetter('default_export_compatible'))
     _description_exportable = property(attrgetter('exportable'))
+
+    @property
+    def _description_required(self):
+        return self.required or self.ui_required
 
     def _description_depends(self, env: Environment):
         return env.registry.field_depends[self]
