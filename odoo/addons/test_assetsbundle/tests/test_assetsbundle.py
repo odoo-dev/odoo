@@ -1132,6 +1132,41 @@ class TestAssetsManifest(AddonManifestPatched):
         self.assertFalse(bundle.javascripts)
         self.assertFalse(bundle.get_links())
 
+    def test_09_2_remove_bundle(self):
+        self.env['ir.asset'].create({
+            'name': 'test_remove_bundle',
+            'bundle': 'test_assetsbundle.manifest5',
+            'directive': 'remove',
+            'path': 'test_assetsbundle.manifest4',
+        })
+        bundle = self.env['ir.qweb']._get_asset_bundle('test_assetsbundle.manifest5')
+        self.assertEqual(
+            [js.url for js in bundle.javascripts],
+            [
+                '/test_assetsbundle/static/src/js/test_jsfile1.js',
+                '/test_assetsbundle/static/src/js/test_jsfile2.js',
+                '/test_assetsbundle/static/src/js/test_jsfile4.js',
+            ],
+        )
+
+    def test_09_3_remove_bundle_without_common_files(self):
+        self.env['ir.asset'].create({
+            'name': 'test_jsfile1',
+            'bundle': 'test_assetsbundle.irasset_remove_bundle',
+            'path': 'test_assetsbundle/static/src/js/test_jsfile1.js',
+        })
+        self.env['ir.asset'].create({
+            'name': 'test_remove_bundle',
+            'bundle': 'test_assetsbundle.irasset_remove_bundle',
+            'directive': 'remove',
+            'path': 'test_assetsbundle.manifest4',
+        })
+        bundle = self.env['ir.qweb']._get_asset_bundle('test_assetsbundle.irasset_remove_bundle')
+        self.assertEqual(
+            [js.url for js in bundle.javascripts],
+            ['/test_assetsbundle/static/src/js/test_jsfile1.js'],
+        )
+
     def test_10_prepend(self):
         self.env['ir.asset'].create({
             'name': 'test_jsfile4',

@@ -204,6 +204,13 @@ class IrAsset(models.Model):
             # recursively call this function for each INCLUDE_DIRECTIVE directive.
             self._fill_asset_paths(path_def, asset_paths, seen + [bundle], addons, installed, **assets_params)
             return
+        if directive == REMOVE_DIRECTIVE and '/' not in path_def:
+            # remove the files of the given bundle, if any (e.g. the ones that
+            # are already loaded when the current bundle is lazy loaded)
+            bundle_paths = AssetPaths()
+            self._fill_asset_paths(path_def, bundle_paths, seen + [bundle], addons, installed, **assets_params)
+            asset_paths.remove_existing(bundle_paths.memo)
+            return
         if can_aggregate(path_def):
             paths = self._get_paths(path_def, installed)
         else:
@@ -410,14 +417,19 @@ class AssetPaths:
 
     def remove(self, paths_to_remove, bundle):
         """Removes the given paths from the current list."""
-        paths = {path for path, _full_path, _last_modified in paths_to_remove if path in self.memo}
-        if paths:
-            self.list[:] = [asset for asset in self.list if asset[0] not in paths]
-            self.memo.difference_update(paths)
+        if self.remove_existing(path for path, _full_path, _last_modified in paths_to_remove):
             return
 
         if paths_to_remove:
             self._raise_not_found([path for path, _full_path, _last_modified in paths_to_remove], bundle)
+
+    def remove_existing(self, paths):
+        """Removes the given paths that are in the current list, and returns them."""
+        paths = self.memo.intersection(paths)
+        if paths:
+            self.list[:] = [asset for asset in self.list if asset[0] not in paths]
+            self.memo.difference_update(paths)
+        return paths
 
     def _raise_not_found(self, path, bundle):
         raise ValueError("File(s) %s not found in bundle %s" % (path, bundle))
