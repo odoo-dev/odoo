@@ -61,7 +61,7 @@ class TestWorkEntryHolidays(TestWorkEntryBase, TestHolidayContract):
             'requires_allocation': False,
         })
 
-        cls.external_company = cls.env['res.company'].create({'name': 'External Test company'})
+        cls.external_company = cls.add_class_company('base.test_company_template', {'name': 'External Test company'})
         cls.external_user_employee = mail_new_test_user(cls.env, login='external', password='external', groups='base.group_user')
         cls.employee_external = cls.env['hr.employee'].create({
             'name': 'external Employee',

@@ -25,14 +25,8 @@ class TestStockFlow(TestStockCommon):
         })
         decimal_product_uom = cls.env.ref('uom.decimal_product_uom')
         decimal_product_uom.digits = 3
-        cls.partner_company2 = cls.env['res.partner'].create({
-            'name': 'My Company (Chicago)-demo',
-            'email': 'chicago@yourcompany.com',
-            'company_id': False,
-        })
-        cls.company_2 = cls.env['res.company'].create({
+        cls.company_2 = cls.add_class_company('base.test_company_template2', {
             'currency_id': cls.env.ref('base.USD').id,
-            'partner_id': cls.partner_company2.id,
             'name': 'My Company (Chicago)-demo',
         })
         cls.uom_sdozen = cls.UomObj.create({

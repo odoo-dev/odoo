@@ -82,12 +82,9 @@ class TestCheckoutAddress(WebsiteSaleCommon):
         Have 1 website 1 which company is B.
         Have admin on company A.
         """
-        self.company_a, self.company_b, self.company_c = self.env["res.company"].sudo().create([
-            {"name": "Company A"},
-            {"name": "Company B"},
-            {"name": "Company C"},
-        ])
-        self.env.user.sudo().company_ids |= self.company_a | self.company_b
+        self.company_a = self.add_company("base.test_company_template", {"name": "Company A"})
+        self.company_b = self.add_company("base.test_company_template2", {"name": "Company B"})
+        self.company_c = self.add_company("base.test_company", {"name": "Company C"})
         # sudo: assigning the website's company recomputes res.company.website_id
         # (res_company._compute_website_id writes res.company), which the restricted
         # test_user cannot modify — this is master-data setup.

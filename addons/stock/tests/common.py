@@ -56,9 +56,7 @@ class TestStockCommon(ProductVariantsCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company = cls.env['res.company'].create({
-            'name': 'Stock Tests Company',
-        })
+        cls.company = cls.add_class_company('base.test_company_template', {'name': 'Stock Tests Company'})
         # Some models use env.company in various methods, so we make sure they will find the stock company
         cls.env = cls.env(context=dict(cls.env.context, allowed_company_ids=[cls.company.id]))
         cls.env.ref('base.user_admin').company_ids |= cls.company

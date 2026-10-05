@@ -14,8 +14,8 @@ class TestMrpMulticompany(common.TransactionCase):
 
         group_user = cls.env.ref('base.group_user')
         group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
-        cls.company_a = cls.env['res.company'].create({'name': 'Company A'})
-        cls.company_b = cls.env['res.company'].create({'name': 'Company B'})
+        cls.company_a = cls.add_class_company('base.test_company_template', {'name': 'Company A'})
+        cls.company_b = cls.add_class_company('base.test_company_template2', {'name': 'Company B'})
         cls.warehouse_a = cls.env['stock.warehouse'].search([('company_id', '=', cls.company_a.id)], limit=1)
         cls.warehouse_b = cls.env['stock.warehouse'].search([('company_id', '=', cls.company_b.id)], limit=1)
         cls.stock_location_a = cls.warehouse_a.lot_stock_id

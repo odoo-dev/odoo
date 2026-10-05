@@ -1379,10 +1379,8 @@ class TestReorderingRule(TransactionCase):
 
         Check that the purchase order is created in COMP2, using its set of supplier.
         """
-        company_a, company_b = self.env['res.company'].create([
-            {'name': 'Company A'},
-            {'name': 'Company B'},
-        ])
+        company_a = self.add_company('base.test_company_template', {'name': 'Company A'})
+        company_b = self.add_company('base.test_company_template2', {'name': 'Company B'})
         warehouse_a, warehouse_b = self.env['stock.warehouse'].search([('company_id', 'in', [company_a.id, company_b.id])], limit=2).sorted('company_id')
         route_resupply_from_intercomp = self.env['stock.route'].create([
             {

@@ -15,7 +15,7 @@ class TestMultiCompanyLotValuation(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.company_b = cls.env['res.company'].create({
+        cls.company_b = cls.add_class_company('base.test_company_template', {
             'name': 'Company B',
             'currency_id': cls.env.ref('base.EUR').id,
         })

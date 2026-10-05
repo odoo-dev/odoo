@@ -582,7 +582,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     @mute_logger('odoo.models.unlink', 'odoo.addons.mail.models.mail_mail')
     def test_timezone_company_leave_request(self):
         """ Create a leave request for a company in another timezone """
-        company = self.env['res.company'].create({'name': "Hergé"})
+        company = self.add_company('base.test_company', {'name': "Hergé"})
         company.tz = 'Australia/Sydney'  # GMT+12
         company.resource_calendar_id = self.env['resource.calendar'].create({
             'attendance_ids': [
@@ -614,7 +614,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
     def test_timezone_company_validated(self):
         """ Create a leave request for a company in another timezone and validate it """
         self.env.user.tz = 'Australia/Sydney' # GMT+12
-        company = self.env['res.company'].create({'name': "Hergé"})
+        company = self.add_company('base.test_company', {'name': "Hergé"})
         company.resource_calendar_id = self.env['resource.calendar'].create({
             'attendance_ids': [
                 (0, 0,
@@ -999,9 +999,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         self.assertEqual(req1_form.record.number_of_days, 3)
 
     def test_leave_with_public_holiday_other_company(self):
-        other_company = self.env['res.company'].create({
-            'name': 'Test Company 2',
-        })
+        other_company = self.add_company('base.test_company')
         # Create a public holiday for the second company
         p_leave = self.env['resource.calendar.leaves'].create({
             'date_from': datetime(2022, 3, 11),

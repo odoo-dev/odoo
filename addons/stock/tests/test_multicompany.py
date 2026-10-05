@@ -15,8 +15,8 @@ class TestMultiCompany(TransactionCase):
         group_stock_manager = cls.env.ref('stock.group_stock_manager')
 
         cls.interco_location = cls.env.ref('stock.stock_location_inter_company')
-        cls.company_a = cls.env['res.company'].create({'name': 'Company A'})
-        cls.company_b = cls.env['res.company'].create({'name': 'Company B'})
+        cls.company_a = cls.add_class_company('base.test_company_template', {'name': 'Company A'})
+        cls.company_b = cls.add_class_company('base.test_company_template2', {'name': 'Company B'})
         cls.branch_company_a = cls.env['res.company'].create({
             'name': 'Branch of company A',
             'parent_id': cls.company_a.id,
