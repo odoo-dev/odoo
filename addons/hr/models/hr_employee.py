@@ -1797,8 +1797,38 @@ class HrEmployee(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        today = fields.Date.context_today(self)
+        version_fields = self.env['hr.version']._fields
+        primary_version_xml_ids = {}
         vals_per_company = defaultdict(list)
         for idx, vals in enumerate(vals_list):
+            version_cmds = vals.get('version_ids', [])
+            create_cmds = [
+                cmd for cmd in version_cmds
+                if isinstance(cmd, (tuple, list)) and len(cmd) == 3 and cmd[0] == 0
+            ]
+            if create_cmds:
+                past_or_current = [
+                    c for c in create_cmds
+                    if c[2].get('date_version') and fields.Date.to_date(c[2]['date_version']) and fields.Date.to_date(c[2]['date_version']) <= today
+                ]
+                if past_or_current:
+                    primary_cmd = max(past_or_current, key=lambda c: fields.Date.to_date(c[2]['date_version']))
+                else:
+                    primary_cmd = min(
+                        create_cmds,
+                        key=lambda c: fields.Date.to_date(c[2]['date_version']) if c[2].get('date_version') and fields.Date.to_date(c[2]['date_version']) else date.max
+                    )
+                primary_vals = primary_cmd[2]
+                if primary_vals.get('id'):
+                    primary_version_xml_ids[idx] = primary_vals['id']
+                for f_name, f_val in primary_vals.items():
+                    if f_name in version_fields and not version_fields[f_name].compute and f_name != 'employee_id':
+                        vals.setdefault(f_name, f_val)
+                vals['version_ids'] = [cmd for cmd in version_cmds if cmd is not primary_cmd]
+                if not vals['version_ids']:
+                    del vals['version_ids']
+
             if vals.get('user_id'):
                 user = self.env['res.users'].browse(vals['user_id'])
                 vals.update(self._sync_user(user, bool(vals.get('image_1920'))))
@@ -1822,6 +1852,22 @@ class HrEmployee(models.Model):
                 employee.resource_id.calendar_id = employee.version_id.resource_calendar_id
         # As we do a custom batch by company, we must reorder the records to respect the original order.
         employees = employees.sorted(key=lambda employee: index_per_employee[employee])
+        if primary_version_xml_ids:
+            current_module = self.env.context.get('_import_current_module', '__import__')
+            imd_list = []
+            for employee in employees:
+                idx = index_per_employee.get(employee)
+                if idx in primary_version_xml_ids:
+                    xml_id = primary_version_xml_ids[idx]
+                    if '.' not in xml_id:
+                        xml_id = f"{current_module}.{xml_id}"
+                    imd_list.append({
+                        'xml_id': xml_id,
+                        'record': employee.version_id,
+                        'noupdate': False,
+                    })
+            if imd_list:
+                self.env['ir.model.data']._update_xmlids(imd_list)
         # Sudo in case HR officer doesn't have the Contact Creation group
         employees.filtered(lambda e: not e.work_contact_id).sudo()._create_work_contacts()
         if self.env.context.get('salary_simulation'):
