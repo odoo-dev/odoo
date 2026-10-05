@@ -580,6 +580,8 @@ class Field[T, C]:
 
             if not isinstance(self.required, bool):
                 self._setup_warning(f'property required should be a boolean ({self.required})')
+            if self.required and not (self.store or self.column_type or (self.related_field and self.related_field.required)):  # XXX check last condition
+                self._setup_warning(f'property {self}.required set on a field that is not a column in the database.')
 
             if not isinstance(self.readonly, bool):
                 self._setup_warning(f'property readonly should be a boolean ({self.readonly})')
@@ -1806,7 +1808,7 @@ class Field[T, C]:
         :param dirty: whether ``field`` must be made dirty on ``record`` after
             the update
         """
-        if cache_value is None and self.required and any(records._ids):
+        if cache_value is None and self.required and any(records._ids) and not self.compute:
             _logger.warning(f"Cannot assign None to a required field {self}")
 
         env = records.env
@@ -2093,7 +2095,7 @@ class Field[T, C]:
         if self.required:
             cache = self._get_cache(records.env)
             if not all(not id_ or cache.get(id_) is not None for id_ in records._ids):
-                _logger.warning(f"computed readonly on required field, {self}")
+                _logger.info(f"computed readonly on required field, {self}")
 
     def determine_inverse(self, records):
         """ Given the value of ``self`` on ``records``, inverse the computation. """
