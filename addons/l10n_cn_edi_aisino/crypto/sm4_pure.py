@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-"""Pure Python SM4 (GB/T 32907-2016) block cipher — fallback for the Aisino envelope.
+"""
+Pure Python SM4 (GB/T 32907-2016) block cipher — fallback for the Aisino envelope.
 
 ``cryptography`` only exposes ``algorithms.SM4`` when it is built against an
 OpenSSL that carries the SM4 cipher, which is not the case on every deployment
@@ -26,7 +27,7 @@ SBOX = bytes.fromhex(
     '8d1baf92bbddbc7f11d95c411f105ad8'
     '0ac13188a5cd7bbd2d74d012b8e5b4b0'
     '8969974a0c96777e65b9f109c56ec684'
-    '18f07dec3adc4d2079ee5f3ed7cb3948'
+    '18f07dec3adc4d2079ee5f3ed7cb3948',
 )
 
 FK = (0xa3b1bac6, 0x56aa3350, 0x677d9197, 0xb27022dc)

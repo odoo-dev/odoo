@@ -20,7 +20,6 @@ from odoo.addons.l10n_cn_edi_aisino.tools.aisino_client import (
 CLIENT = 'odoo.addons.l10n_cn_edi_aisino.tools.aisino_client'
 
 
-
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 

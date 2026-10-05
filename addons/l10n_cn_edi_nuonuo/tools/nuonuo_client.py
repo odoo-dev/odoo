@@ -105,7 +105,8 @@ POLICY_CODES = {
 
 
 def sign(app_secret, app_key, senid, nonce, timestamp, content):
-    """X-Nuonuo-Sign: base64(HMAC-SHA1) over the canonical string of the request.
+    """
+    X-Nuonuo-Sign: base64(HMAC-SHA1) over the canonical string of the request.
 
     The fixed path /open/v1/services reads a=services&l=v1&p=open, and f is the exact
     request body, so the body must be sent byte for byte as it was signed.
@@ -134,7 +135,8 @@ class NuonuoClient(L10nCnEdiClient):
     # ------------------------------------------------------------------
 
     def _call(self, method, payload):
-        """Send one signed request and return the decoded ``{code, describe, result}`` body.
+        """
+        Send one signed request and return the decoded ``{code, describe, result}`` body.
 
         Transport and credential problems raise a UserError; business codes are the
         caller's to interpret.
@@ -185,8 +187,8 @@ class NuonuoClient(L10nCnEdiClient):
     def ensure_ready(self):
         if not self.company._l10n_cn_edi_is_ready():
             raise UserError(self.company.env._(
-                "Nuonuo is not set up for %s: its Tax ID, App Key, App Secret and Access Token are required.",
-                self.company.name,
+                "Nuonuo is not set up for %(company)s: its Tax ID, App Key, App Secret and Access Token are required.",
+                company=self.company.name,
             ))
 
     def test_connection(self):
@@ -239,7 +241,8 @@ class NuonuoClient(L10nCnEdiClient):
         return body.get('result') or {}
 
     def get_qr_code(self, purpose, renew=False):
-        """The QR code the drawer scans to log in ('login') or to confirm their identity ('verify').
+        """
+        The QR code the drawer scans to log in ('login') or to confirm their identity ('verify').
 
         Return ``{qr_code, qr_type, auth_id, expires}``. Nuonuo's code is reused unless
         ``renew``: the bureau hands out a new one at most once a minute, 20 times a day.
@@ -287,7 +290,8 @@ class NuonuoClient(L10nCnEdiClient):
         return result.get('status') == '1'
 
     def confirm_identity(self, auth_id):
-        """After the drawer scanned the identity QR code, sync the bureau's verdict. Return whether it's confirmed.
+        """
+        After the drawer scanned the identity QR code, sync the bureau's verdict. Return whether it's confirmed.
 
         Nuonuo allows this once every 30 s, 20 times a day.
         """
@@ -295,7 +299,8 @@ class NuonuoClient(L10nCnEdiClient):
         return self._certification_status('1').get('certificationStatus') == IDENTITY_CONFIRMED
 
     def get_credit_line(self):
-        """The company's invoicing quota (授信额度, tax excluded), as Nuonuo last got it from the bureau.
+        """
+        The company's invoicing quota (授信额度, tax excluded), as Nuonuo last got it from the bureau.
 
         Return ``{available, used, total, updated}``.
         """
@@ -349,7 +354,7 @@ class NuonuoClient(L10nCnEdiClient):
             # Right after submitting, Nuonuo may not know the order yet.
             if not missing_is_failure:
                 return {'state': 'sent'}
-            return {'state': 'failed', 'error': env._("Nuonuo has no fapiao for order %s. Please send it again.", order_no)}
+            return {'state': 'failed', 'error': env._("Nuonuo has no fapiao for order %(order)s. Please send it again.", order=order_no)}
         if code != SUCCESS:
             raise UserError(env._("Nuonuo could not report on order %(order)s (%(code)s): %(message)s", order=order_no, code=code, message=body.get('describe') or ''))
         result = body.get('result') or [{}]
@@ -363,7 +368,7 @@ class NuonuoClient(L10nCnEdiClient):
             error = invoice.get('failCause') or invoice.get('statusMsg') or env._("Nuonuo failed to issue the fapiao.")
             return {'state': 'failed', 'error': error, 'new_serial': True}
         if status in STATUS_VOID:
-            return {'state': 'failed', 'error': env._("The fapiao of order %s was voided on Nuonuo.", order_no), 'new_serial': True}
+            return {'state': 'failed', 'error': env._("The fapiao of order %(order)s was voided on Nuonuo.", order=order_no), 'new_serial': True}
         return {'state': 'sent'}
 
     def _issued_result(self, invoice):
@@ -389,7 +394,7 @@ class NuonuoClient(L10nCnEdiClient):
         body = self._call('nuonuo.OpeMplatform.reInvoice', {'fpqqlsh': invoice.get('serialNo') or '', 'orderno': order_no})
         if body.get('code') == RETRY_LIMIT:
             # The fapiao exists unsealed: sending again targets the same order.
-            return {'state': 'failed', 'error': env._("Nuonuo could not seal the fapiao of order %s and today's retries are used up.", order_no)}
+            return {'state': 'failed', 'error': env._("Nuonuo could not seal the fapiao of order %(order)s and today's retries are used up.", order=order_no)}
         return {'state': 'sent'}
 
     def _download(self, url):
@@ -525,7 +530,8 @@ class NuonuoClient(L10nCnEdiClient):
         return result
 
     def _fast_red(self, form):
-        """The serial number of the red fapiao of a confirmed form Nuonuo has none for yet, or None.
+        """
+        The serial number of the red fapiao of a confirmed form Nuonuo has none for yet, or None.
 
         联调参考 4.6.1: when the form shows no invoiceSerialNum, fastInvoiceRed gets the
         red fapiao from the bureau. Its orderNo can replace Nuonuo's only once, so it is
@@ -623,7 +629,7 @@ class NuonuoClient(L10nCnEdiClient):
         if not policy:
             return '0'
         if policy not in POLICY_CODES:
-            raise UserError(self.company.env._("Nuonuo does not support VAT special policy '%s'.", policy))
+            raise UserError(self.company.env._("Nuonuo does not support VAT special policy '%(policy)s'.", policy=policy))
         return POLICY_CODES[policy]
 
 

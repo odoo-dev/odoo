@@ -116,7 +116,7 @@ class L10nCnEdiDocument(models.Model):
                 self.write({'state': 'failed', 'error_message': result['error']})
                 if self.move_id.move_type == 'out_refund':
                     self.move_id.l10n_cn_edi_state = 'failed'
-                self.move_id.message_post(body=self.env._("Red Form rejected: %s", result['error']))
+                self.move_id.message_post(body=self.env._("Red Form rejected: %(error)s", error=result['error']))
             # Otherwise the bureau hasn't registered the form yet: still pending.
             return
         move = self.move_id
@@ -149,7 +149,7 @@ class L10nCnEdiDocument(models.Model):
             else:
                 move.activity_schedule(
                     'mail.mail_activity_data_todo',
-                    summary=self.env._("Inbound Red Form %s approved and issued. Please ensure a matching Credit Note is posted.", self.red_form_number),
+                    summary=self.env._("Inbound Red Form %(number)s approved and issued. Please ensure a matching Credit Note is posted.", number=self.red_form_number),
                     user_id=move.create_uid.id,
                 )
         elif state == 'failed':
@@ -165,9 +165,8 @@ class L10nCnEdiDocument(models.Model):
     @api.model
     def _l10n_cn_edi_pull_inbound_red_forms(self):
         """Poll for red forms raised by suppliers, using a sliding catch-up window."""
-        # A company's country isn't stored, and a database holds a handful of companies at most.
-        companies = self.env['res.company'].search([]).filtered(
-            lambda company: company.country_code == 'CN' and company._l10n_cn_edi_is_ready(),
+        companies = self.env['res.company'].search([('account_fiscal_country_id.code', '=', 'CN')]).filtered(
+            lambda company: company._l10n_cn_edi_is_ready(),
         )
         today = fields.Date.context_today(self)
         for company in companies:
@@ -184,7 +183,8 @@ class L10nCnEdiDocument(models.Model):
 
     @api.model
     def _l10n_cn_edi_import_inbound_red_forms(self, company, start_date, end_date):
-        """Track the red forms the other party raised against our fapiao, and tell whoever has to act.
+        """
+        Track the red forms the other party raised against our fapiao, and tell whoever has to act.
 
         A supplier's form lands on the vendor bill it reverses, a customer's on the invoice.
         """
@@ -233,7 +233,7 @@ class L10nCnEdiDocument(models.Model):
                     tax=doc.amount_tax,
                 )
             else:
-                summary = self.env._("Inbound Red Form %s is approved/issued. Please draft Credit Note.", doc.red_form_number)
+                summary = self.env._("Inbound Red Form %(number)s is approved/issued. Please draft Credit Note.", number=doc.red_form_number)
             doc.move_id.activity_schedule(
                 'mail.mail_activity_data_todo',
                 summary=summary,

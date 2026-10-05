@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-"""Aisino Yunshui (爱信诺云税) common-envelope crypto.
+"""
+Aisino Yunshui (爱信诺云税) common-envelope crypto.
 
 Pure Python, no Odoo dependency — importable and testable standalone.
 
@@ -50,8 +51,6 @@ MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024
 SIGNED_FIELDS = ('interfaceCode', 'zipCode', 'encryptCode', 'access_token', 'datagram', 'signtype')
 
 
-
-
 class AisinoProtocolError(Exception):
     """The gateway's verdict: outer code != 1000."""
 
@@ -71,14 +70,15 @@ def now_timestamp():
 
 
 def derive_sm4_key(identity_code, platform_code, timestamp):
-    """SM4 key = the 16-char hex string MD5(授权码+组织编码+timestamp)[8:24], as 16 UTF-8 bytes.
+    """
+    SM4 key = the 16-char hex string MD5(授权码+组织编码+timestamp)[8:24], as 16 UTF-8 bytes.
 
     The Java demo is  SmUtil.sm4(key.getBytes())  where key = Md5Utils.hash(...).substring(8,24)
     — i.e. the 16 hex CHARACTERS used as a 16-byte key (each ASCII char = 1 byte), NOT
     hex-decoded (which would give only 8 bytes and fail SM4's 128-bit key requirement).
     """
     md5hex = hashlib.md5(
-        (identity_code + platform_code + timestamp).encode('utf-8')
+        (identity_code + platform_code + timestamp).encode('utf-8'),
     ).hexdigest()
     return md5hex[8:24].encode('utf-8')
 
@@ -86,7 +86,7 @@ def derive_sm4_key(identity_code, platform_code, timestamp):
 def make_access_token(platform_code, tax_no, timestamp):
     """access_token = base64(组织编码 + 税号 + timestamp)."""
     return base64.b64encode(
-        (platform_code + tax_no + timestamp).encode('utf-8')
+        (platform_code + tax_no + timestamp).encode('utf-8'),
     ).decode('ascii')
 
 
@@ -103,10 +103,12 @@ def _pad_pkcs5(data):
 
 def _unpad_pkcs5(data):
     if not data:
-        raise ValueError('empty ciphertext')
+        error = 'empty ciphertext'
+        raise ValueError(error)
     pad = data[-1]
     if pad < 1 or pad > 16 or data[-pad:] != bytes([pad]) * pad:
-        raise ValueError('bad PKCS5 padding')
+        error = 'bad PKCS5 padding'
+        raise ValueError(error)
     return data[:-pad]
 
 
@@ -155,15 +157,18 @@ def _gunzip(data):
     decompressor = zlib.decompressobj(16 + zlib.MAX_WBITS)
     content = decompressor.decompress(data, MAX_DECOMPRESSED_BYTES)
     if decompressor.unconsumed_tail:
-        raise MalformedEnvelope('decompressed datagram too large')
+        error = 'decompressed datagram too large'
+        raise MalformedEnvelope(error)
     if not decompressor.eof:
-        raise MalformedEnvelope('truncated gzip datagram')
+        error = 'truncated gzip datagram'
+        raise MalformedEnvelope(error)
     return content
 
 
 def _parse_datagram(datagram_b64, key, zip_code):
     if len(datagram_b64) > MAX_DATAGRAM_LENGTH:
-        raise MalformedEnvelope('datagram too large')
+        error = 'datagram too large'
+        raise MalformedEnvelope(error)
     raw = base64.b64decode(datagram_b64)
     if zip_code == '0':
         return _sm4_unhex(raw, key).decode('utf-8')
@@ -183,7 +188,8 @@ def sign(interface_code, zip_code, encrypt_code, access_token, datagram, signtyp
 
 def build_request(interface_code, datagram, identity_code, platform_code, tax_no,
                   timestamp=None, zip_code='0'):
-    """Build the full outer request envelope (a JSON-serialisable dict).
+    """
+    Build the full outer request envelope (a JSON-serialisable dict).
 
     :param datagram: the business payload (dict) — will be JSON-encoded.
     :param zip_code: '0'/'1'/'2'
@@ -206,25 +212,29 @@ def build_request(interface_code, datagram, identity_code, platform_code, tax_no
 
 
 def verify_and_decrypt(response, identity_code, platform_code):
-    """Check the outer code and decrypt the datagram.
+    """
+    Check the outer code and decrypt the datagram.
 
-    The response signature merely echoes the request's (Aisino: “不用管，不生效”), so it isn't checked.
+    The response signature merely echoes the request's (Aisino: ignore it, it has no effect), so it isn't checked.
 
     :return: the inner business dict (has its own 'code'/'message').
     :raises AisinoProtocolError: on outer code != 1000 (the datagram is then empty).
     :raises MalformedEnvelope: when the envelope can't be read.
     """
     if not isinstance(response, dict):
-        raise MalformedEnvelope('response is not a JSON object')
+        error = 'response is not a JSON object'
+        raise MalformedEnvelope(error)
     outer_code = str(response.get('code') or '')
     if outer_code != '1000':
         raise AisinoProtocolError(outer_code, response.get('msg') or '')
     if not all(isinstance(response.get(field), str) for field in ('access_token', 'datagram', 'zipCode')):
-        raise MalformedEnvelope('missing envelope field')
+        error = 'missing envelope field'
+        raise MalformedEnvelope(error)
     try:
         ts = timestamp_from_access_token(response['access_token'])
     except ValueError as e:  # binascii.Error and UnicodeDecodeError included
-        raise MalformedEnvelope('invalid access_token') from e
+        error = 'invalid access_token'
+        raise MalformedEnvelope(error) from e
     key = derive_sm4_key(identity_code, platform_code, ts)
     try:
         return json.loads(_parse_datagram(response['datagram'], key, response['zipCode']))

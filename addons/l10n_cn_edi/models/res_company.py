@@ -18,7 +18,8 @@ class ResCompany(models.Model):
     )
 
     def _l10n_cn_edi_get_client(self):
-        """Return the provider's client for this company (an ``L10nCnEdiClient``).
+        """
+        Return the provider's client for this company (an ``L10nCnEdiClient``).
 
         Overridden by the provider module; the installed provider is the provider.
         """
@@ -31,7 +32,8 @@ class ResCompany(models.Model):
         return False
 
     def _l10n_cn_edi_action_login(self, invoices=None):
-        """Return the action logging the drawer back in to the tax bureau. Overridden by the provider module.
+        """
+        Return the action logging the drawer back in to the tax bureau. Overridden by the provider module.
 
         :param invoices: invoices waiting for the login, to send again once logged in.
         """

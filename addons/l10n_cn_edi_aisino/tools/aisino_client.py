@@ -464,10 +464,8 @@ class AisinoClient(L10nCnEdiClient):
             _logger.warning("Aisino %s failed for company %s: %s", interface_code, self.company.vat, e)
             raise L10nCnEdiProviderUnreachable(self.company.env._("Aisino did not answer. Please try again later.")) from e
         try:
-            if body is None:
-                raise sm4_envelope.MalformedEnvelope('response too large')
             return sm4_envelope.verify_and_decrypt(
-                json.loads(body),
+                _load_response(body),
                 self.identity_code,
                 self.platform_code,
             )
@@ -539,6 +537,14 @@ def _decimal_places(number):
     except (InvalidOperation, ValueError, TypeError):
         return 0
     return max(-int(decimal.as_tuple().exponent), 0)
+
+
+def _load_response(body):
+    """Decode a response body, ``None`` when it was over the cap."""
+    if body is None:
+        error = 'response too large'
+        raise sm4_envelope.MalformedEnvelope(error)
+    return json.loads(body)
 
 
 def _read_capped(response, limit):

@@ -8,9 +8,8 @@ from odoo import Command
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
 
-from odoo.addons.l10n_cn_edi.tools import L10nCnEdiProviderUnreachable
-
 from .common import L10nCnEdiTestCommon
+from odoo.addons.l10n_cn_edi.tools import L10nCnEdiProviderUnreachable
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -235,7 +234,8 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
 
         def get_client(company):
             if company == invoice.company_id:
-                raise UserError("Credentials expired")
+                error = "Credentials expired"
+                raise UserError(error)
             return self.client
 
         with patch.object(self.env.registry['res.company'], '_l10n_cn_edi_get_client', get_client):
@@ -968,3 +968,28 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.env['l10n_cn_edi.document']._cron_check_red_form_status()
 
         self.assertEqual(len(bill.l10n_cn_edi_document_ids), 1)
+
+    def test_fetching_files_again_only_adds_the_missing_ones(self):
+        invoice = self._create_posted_invoice(fapiao_no='24442000000071309399')
+        invoice.l10n_cn_edi_state = 'issued'
+        invoice._l10n_cn_edi_attach_fapiao_files({'pdf': b'%PDF first'}, invoice.l10n_cn_edi_fapiao_no)
+        not_issued = self._create_posted_invoice()
+        self.responses['query_invoice'] = {'state': 'issued', 'pdf': b'%PDF again', 'ofd': b'OFD'}
+
+        action = (invoice | not_issued).action_l10n_cn_edi_fetch_fapiao_files()
+
+        self.assertIsNone(action)
+        self.assertEqual([args[0] for method, args in self.client.calls if method == 'query_invoice'], [invoice])
+        self.assertEqual(invoice.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF first')
+        self.assertEqual(invoice.l10n_cn_edi_fapiao_ofd_id.raw.content, b'OFD')
+
+    def test_fetching_files_that_are_not_there_is_logged(self):
+        invoice = self._create_posted_invoice(fapiao_no='24442000000071309399')
+        invoice.l10n_cn_edi_state = 'issued'
+        self.responses['query_invoice'] = {'state': 'issued'}
+
+        action = invoice.action_l10n_cn_edi_fetch_fapiao_files()
+
+        self.assertEqual(action['params']['type'], 'warning')
+        self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id)
+        self.assertIn('could not be downloaded', invoice.message_ids[0].body)

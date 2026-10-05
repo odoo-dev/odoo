@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-"""The contract between the e-Fapiao flow and a provider.
+"""
+The contract between the e-Fapiao flow and a provider.
 
 A provider module overrides ``res.company._l10n_cn_edi_get_client()`` to return
 an instance of a subclass of :class:`L10nCnEdiClient`. The flow in this module
@@ -106,7 +107,8 @@ class L10nCnEdiClient:
         return False
 
     def issue_direct_red(self, values):
-        """Submit a direct red invoice from ``_l10n_cn_edi_prepare_red_form_values()``.
+        """
+        Submit a direct red invoice from ``_l10n_cn_edi_prepare_red_form_values()``.
 
         Providers with ``supports_direct_red()`` must return an invoice result dict.
         """
@@ -117,7 +119,8 @@ class L10nCnEdiClient:
         raise NotImplementedError
 
     def query_invoice(self, move, just_submitted=False):
-        """Fetch the current result of a fapiao that was accepted as 'sent'.
+        """
+        Fetch the current result of a fapiao that was accepted as 'sent'.
 
         Shortly after submitting (``just_submitted``), a fapiao the provider doesn't know
         yet is still 'sent'; later, it is 'failed'.
@@ -125,7 +128,8 @@ class L10nCnEdiClient:
         raise NotImplementedError
 
     def request_red_form(self, values):
-        """Submit a red letter confirmation form from ``_l10n_cn_edi_prepare_red_form_values()``.
+        """
+        Submit a red letter confirmation form from ``_l10n_cn_edi_prepare_red_form_values()``.
 
         Only full reversals are sent: the bureau's partial-red rules depend on the buyer's
         bookkeeping and may change, and every provider advises against them.

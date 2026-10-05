@@ -106,7 +106,7 @@ class AccountMove(models.Model):
         compute='_compute_l10n_cn_buyer_bank_id',
         store=True,
         readonly=False,
-        domain="[('partner_id', '=', partner_id)]",
+        domain="[('partner_id', '=', commercial_partner_id)]",
         help="The customer's bank account to be printed on the e-Fapiao.",
     )
     l10n_cn_edi_red_form_uuid = fields.Char(
@@ -189,7 +189,7 @@ class AccountMove(models.Model):
                 and move.reversed_entry_id.l10n_cn_edi_fapiao_no
                 and move.l10n_cn_edi_state != 'issued'
                 # A credit note of a red form the customer raised carries that red fapiao.
-                and not move._l10n_cn_edi_matching_inbound_red_form()
+                and not move._l10n_cn_edi_matching_inbound_red_form(),
             )
 
     @api.depends('invoice_date', 'l10n_cn_edi_fapiao_date', 'l10n_cn_edi_fapiao_no', 'state', 'move_type')
@@ -209,10 +209,10 @@ class AccountMove(models.Model):
                     "between E-fapiao Date and Odoo Invoice Date.",
                 )
 
-    @api.depends('partner_id')
+    @api.depends('commercial_partner_id')
     def _compute_l10n_cn_buyer_bank_id(self):
         for move in self:
-            move.l10n_cn_buyer_bank_id = move.partner_id.bank_ids[:1]
+            move.l10n_cn_buyer_bank_id = move.commercial_partner_id.bank_ids[:1]
 
     @api.depends(
         'l10n_cn_edi_document_ids.state',
@@ -281,8 +281,8 @@ class AccountMove(models.Model):
                 raise UserError(self.env._("This Credit Note can be posted only once its red fapiao is issued."))
             if move._l10n_cn_edi_red_amount_mismatch():
                 raise UserError(self.env._(
-                    "This Credit Note no longer credits the amount of its red fapiao %s.",
-                    move.l10n_cn_edi_fapiao_no or move.l10n_cn_edi_red_form_number,
+                    "This Credit Note no longer credits the amount of its red fapiao %(fapiao)s.",
+                    fapiao=move.l10n_cn_edi_fapiao_no or move.l10n_cn_edi_red_form_number,
                 ))
         return super()._post(soft=soft)
 
@@ -326,7 +326,8 @@ class AccountMove(models.Model):
     # ------------------------------------------------------------------
 
     def _l10n_cn_edi_inbound_red_form(self):
-        """The confirmed red form the other party raised on this credit note's invoice, unless
+        """
+        The confirmed red form the other party raised on this credit note's invoice, unless
         another credit note already carries its red fapiao."""
         self.ensure_one()
         invoice = self.reversed_entry_id
@@ -406,8 +407,8 @@ class AccountMove(models.Model):
             lambda move: move.l10n_cn_edi_state in ('sent', 'issued') or move._l10n_cn_edi_has_active_red_form(),
         ):
             raise UserError(self.env._(
-                "Another Credit Note already requested or carries the red fapiao of %s.",
-                original_move.l10n_cn_edi_fapiao_no,
+                "Another Credit Note already requested or carries the red fapiao of %(fapiao)s.",
+                fapiao=original_move.l10n_cn_edi_fapiao_no,
             ))
         if self.currency_id.compare_amounts(self.amount_total, original_move.amount_total):
             raise UserError(self.env._(
@@ -443,23 +444,24 @@ class AccountMove(models.Model):
         except L10nCnEdiProviderUnreachable as e:
             # The form may exist: requesting again under the same serial reads it back.
             doc.error_message = str(e)
-            self.message_post(body=self.env._("Red Form request unanswered, request it again: %s", e))
-            return
+            self.message_post(body=self.env._("Red Form request unanswered, request it again: %(error)s", error=e))
+            return None
         except UserError as e:
             doc.write({'state': 'failed', 'error_message': str(e)})
             self.l10n_cn_edi_state = 'failed'
-            self.message_post(body=self.env._("Red Form request failed: %s", e))
-            return
+            self.message_post(body=self.env._("Red Form request failed: %(error)s", error=e))
+            return None
         if not result.get('bureau_state') and (result.get('error') or not result.get('uuid')):
             error = result.get('error') or self.env._("The provider returned no red form.")
             doc.write({'state': 'failed', 'error_message': error})
             self.l10n_cn_edi_state = 'failed'
-            self.message_post(body=self.env._("Red Form rejected: %s", error))
-            return
+            self.message_post(body=self.env._("Red Form rejected: %(error)s", error=error))
+            return None
         doc.write({'red_form_uuid': result['uuid'], 'state': 'red_form_pending'})
         doc._l10n_cn_edi_apply_red_form_result(result)
         if result.get('bureau_state') in BUREAU_STATES_CONFIRMED:
-            self.message_post(body=self.env._("Red Form confirmed (auto-approved). No: %s", doc.red_form_number))
+            self.message_post(body=self.env._("Red Form confirmed (auto-approved). No: %(number)s", number=doc.red_form_number))
+        return None
 
     def _l10n_cn_edi_request_direct_red(self, client, values):
         """Issue the red fapiao of this credit note directly, without a red form."""
@@ -468,17 +470,17 @@ class AccountMove(models.Model):
             result = client.issue_direct_red(values)
         except L10nCnEdiProviderUnreachable as e:
             self._l10n_cn_edi_set_unreachable(client, e)
-            return
+            return None
         except UserError as e:
             # Not raised: that would also roll back what the provider recorded, like a forced relogin.
-            self.message_post(body=self.env._("Red fapiao not issued: %s", e))
+            self.message_post(body=self.env._("Red fapiao not issued: %(error)s", error=e))
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {'type': 'danger', 'message': str(e)},
             }
         if self._l10n_cn_edi_apply_invoice_result(result, client) or result.get('state') != 'sent':
-            return
+            return None
         for delay in client.result_delays:
             client.wait(delay)
             try:
@@ -488,6 +490,7 @@ class AccountMove(models.Model):
                 continue
             if self._l10n_cn_edi_apply_invoice_result(polled, client) or polled.get('state') != 'sent':
                 break
+        return None
 
     def action_l10n_cn_edi_cancel_red_form(self):
         """Withdraw a pending red form raised from this credit note."""
@@ -500,7 +503,7 @@ class AccountMove(models.Model):
         try:
             self.company_id._l10n_cn_edi_get_client().operate_red_form(doc, 'revoke')
         except UserError as e:
-            raise UserError(self.env._("Failed to revoke the Red Form: %s", e))
+            raise UserError(self.env._("Failed to revoke the Red Form: %(error)s", error=e))
         doc.write({
             'state': 'failed',
             'bureau_state': '08',
@@ -527,7 +530,7 @@ class AccountMove(models.Model):
         try:
             self.company_id._l10n_cn_edi_get_client().operate_red_form(doc, 'confirm')
         except UserError as e:
-            raise UserError(self.env._("Failed to approve the Red Form: %s", e))
+            raise UserError(self.env._("Failed to approve the Red Form: %(error)s", error=e))
         # The bureau issues the red fapiao now; the cron picks up its number.
         doc._l10n_cn_edi_apply_red_form_result({'bureau_state': '04'})
         self.message_post(body=self.env._("Inbound Red Form approved. The tax bureau now issues the red fapiao."))
@@ -543,11 +546,11 @@ class AccountMove(models.Model):
         try:
             self.company_id._l10n_cn_edi_get_client().operate_red_form(doc, 'reject')
         except UserError as e:
-            raise UserError(self.env._("Failed to reject the Red Form: %s", e))
+            raise UserError(self.env._("Failed to reject the Red Form: %(error)s", error=e))
         # 05: the buyer refused the seller's form; 06: the seller refused the buyer's.
         bureau_state = '06' if self.move_type == 'out_invoice' else '05'
         doc.write({'state': 'failed', 'bureau_state': bureau_state, 'error_message': self.env._("Rejected by user.")})
-        self.message_post(body=self.env._("Inbound Red Form %s rejected.", doc.red_form_number))
+        self.message_post(body=self.env._("Inbound Red Form %(number)s rejected.", number=doc.red_form_number))
 
     # ------------------------------------------------------------------
     # Blue fapiao issuance
@@ -579,12 +582,13 @@ class AccountMove(models.Model):
     def _l10n_cn_edi_set_unreachable(self, client, error):
         self._l10n_cn_edi_set_sent(client)
         self.message_post(body=self.env._(
-            "The e-Fapiao provider didn't answer (%s). The fapiao may have been issued: Odoo checks with the provider.",
-            error,
+            "The e-Fapiao provider didn't answer (%(error)s). The fapiao may have been issued: Odoo checks with the provider.",
+            error=error,
         ))
 
     def _l10n_cn_edi_fetch_submitted(self, client):
-        """Follow up on fapiao just submitted, once per delay of the client; the cron takes over after.
+        """
+        Follow up on fapiao just submitted, once per delay of the client; the cron takes over after.
 
         Return ``{move: error message}`` for those that failed meanwhile.
         """
@@ -615,7 +619,7 @@ class AccountMove(models.Model):
                 'l10n_cn_edi_qr_code': result.get('qr_code'),
             })
             self.message_post(
-                body=self.env._("E-Fapiao issued successfully. Invoice No: %s", result.get('fapiao_no')),
+                body=self.env._("E-Fapiao issued successfully. Invoice No: %(fapiao)s", fapiao=result.get('fapiao_no')),
                 attachment_ids=self._l10n_cn_edi_attach_fapiao_files(result, result.get('fapiao_no')).ids,
             )
             if warning := self._l10n_cn_edi_build_totals_warning(result):
@@ -665,6 +669,62 @@ class AccountMove(models.Model):
                 attachments += attachment
         return attachments
 
+    def action_l10n_cn_edi_fetch_fapiao_files(self):
+        """
+        Download again the PDF and OFD that issued fapiao are missing, e.g. after a failed download.
+
+        Each move logs its outcome in its chatter: one that fails must not undo the others.
+        """
+        self.check_access('write')
+        moves = self.filtered(lambda move: (
+            move.l10n_cn_edi_state == 'issued'
+            and not (move.l10n_cn_edi_fapiao_pdf_id and move.l10n_cn_edi_fapiao_ofd_id)
+        ))
+        failed = self.env['account.move']
+        for company, company_moves in moves.grouped('company_id').items():
+            client = company._l10n_cn_edi_get_client()
+            for move in company_moves:
+                try:
+                    result = move._l10n_cn_edi_query_issued(client)
+                except UserError as e:
+                    result = {'error': str(e)}
+                missing = {
+                    kind: result[kind]
+                    for kind in ('pdf', 'ofd')
+                    if result.get(kind) and not move[f'l10n_cn_edi_fapiao_{kind}_id']
+                }
+                if attachments := move._l10n_cn_edi_attach_fapiao_files(missing, move.l10n_cn_edi_fapiao_no):
+                    move.message_post(body=self.env._("E-Fapiao files downloaded."), attachment_ids=attachments.ids)
+                else:
+                    failed += move
+                    move.message_post(body=self.env._(
+                        "The e-Fapiao files could not be downloaded: %(error)s",
+                        error=result.get('error') or self.env._("the provider has none for this fapiao yet."),
+                    ))
+        if not failed:
+            return None
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'warning',
+                'message': self.env._(
+                    "Some e-Fapiao files could not be downloaded: %(moves)s. See their chatter.",
+                    moves=', '.join(failed.mapped('name')),
+                ),
+            },
+        }
+
+    def _l10n_cn_edi_query_issued(self, client):
+        """Ask the provider again for the result of this issued fapiao, files included."""
+        self.ensure_one()
+        if self.move_type == 'out_refund':
+            if client.supports_direct_red():
+                return client.query_direct_red(self)
+            if red_form := self.l10n_cn_edi_document_ids.filtered(lambda doc: doc.state == 'red_form_confirmed')[:1]:
+                return client.query_red_form(red_form)
+        return client.query_invoice(self)
+
     @api.model
     def _cron_l10n_cn_edi_poll_invoices(self):
         """Fetch the result of every fapiao the provider accepted but hadn't finished issuing."""
@@ -697,7 +757,8 @@ class AccountMove(models.Model):
     # ------------------------------------------------------------------
 
     def _l10n_cn_edi_make_serial(self, prefix):
-        """The same move and attempt always give the same serial, so a retry after a lost
+        """
+        The same move and attempt always give the same serial, so a retry after a lost
         answer or a rolled back transaction can't issue a second fapiao.
 
         The hashed database uuid keeps the copies of a database that share a provider
@@ -756,9 +817,10 @@ class AccountMove(models.Model):
         return {
             'serial_no': self.l10n_cn_edi_serial_no,
             'invoice_type_code': self.l10n_cn_edi_invoice_type_code or '02',
-            'buyer_name': partner.name or '',
-            'buyer_tax_no': partner.vat or '',
-            'buyer_is_natural_person': not partner.vat,
+            # The buyer is the legal entity; the address and phone are the invoiced contact's.
+            'buyer_name': self.commercial_partner_id.name or '',
+            'buyer_tax_no': self.commercial_partner_id.vat or '',
+            'buyer_is_natural_person': not self.commercial_partner_id.vat,
             'buyer_address': ' '.join(filter(None, [partner.street, partner.street2, partner.city])),
             'buyer_phone': buyer_phone,
             'buyer_email': partner.email or '',
@@ -777,7 +839,8 @@ class AccountMove(models.Model):
         return self.invoice_line_ids.filtered(lambda line: line.display_type == 'product')
 
     def _l10n_cn_edi_prepare_lines(self):
-        """Fapiao lines, with negative lines spread proportionally over the others as discount lines.
+        """
+        Fapiao lines, with negative lines spread proportionally over the others as discount lines.
 
         The bureau has no negative line: a discount is a 折扣行 (nature '1') right after the
         被折扣行 (nature '2') it reduces.
@@ -786,8 +849,8 @@ class AccountMove(models.Model):
         for line in product_lines:
             if len(line.tax_ids) > 1 or line.tax_ids.filtered(lambda tax: tax.amount_type != 'percent'):
                 raise UserError(self.env._(
-                    "Only one percentage tax is supported per line for e-Fapiao: %s",
-                    line.name,
+                    "Only one percentage tax is supported per line for e-Fapiao: %(line)s",
+                    line=line.name,
                 ))
         positive_lines = product_lines.filtered(lambda line: line.price_subtotal >= 0)
         negative_lines = product_lines - positive_lines
@@ -803,7 +866,7 @@ class AccountMove(models.Model):
         lines = []
         for index, line in enumerate(positive_lines):
             if not line.l10n_cn_tax_category_id:
-                raise UserError(self.env._("Missing Tax Category Code on line: %s", line.name))
+                raise UserError(self.env._("Missing Tax Category Code on line: %(line)s", line=line.name))
             amount = round(line.price_subtotal, 2)
             tax = round(line.price_total - line.price_subtotal, 2)
             tax_record = line.tax_ids
@@ -886,7 +949,8 @@ class AccountMove(models.Model):
         }
 
     def _l10n_cn_edi_prepare_red_form_lines(self):
-        """Red form lines: discounts netted into the line they reduce, every amount negative.
+        """
+        Red form lines: discounts netted into the line they reduce, every amount negative.
 
         ``original_line_no`` points at the line of the original fapiao being credited, which
         assumes the credit note keeps the original invoice's line order.

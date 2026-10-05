@@ -105,7 +105,7 @@ class L10nCnEdiAisinoLogin(models.TransientModel):
                 'tag': 'display_notification',
                 'params': {
                     'type': 'success',
-                    'message': self.env._("%s is logged in to the tax bureau.", self.company_id.name),
+                    'message': self.env._("%(company)s is logged in to the tax bureau.", company=self.company_id.name),
                     'next': {'type': 'ir.actions.act_window_close'},
                 },
             }

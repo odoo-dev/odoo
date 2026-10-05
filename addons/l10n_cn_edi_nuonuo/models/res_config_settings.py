@@ -31,7 +31,7 @@ class ResConfigSettings(models.TransientModel):
             'tag': 'display_notification',
             'params': {
                 'type': 'success',
-                'message': self.env._("Nuonuo accepted the credentials of %s.", self.company_id.name),
+                'message': self.env._("Nuonuo accepted the credentials of %(company)s.", company=self.company_id.name),
                 'next': {'type': 'ir.actions.act_window_close'},
             },
         }

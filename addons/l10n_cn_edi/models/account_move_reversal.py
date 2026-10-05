@@ -14,11 +14,11 @@ class AccountMoveReversal(models.TransientModel):
     )
     l10n_cn_edi_use_red_form_reason = fields.Boolean(compute='_compute_l10n_cn_edi_use_red_form_reason')
 
-    @api.depends('move_ids', 'country_code', 'move_type', 'company_id')
+    @api.depends('move_ids', 'move_type', 'company_id')
     def _compute_l10n_cn_edi_use_red_form_reason(self):
         for wizard in self:
             wizard.l10n_cn_edi_use_red_form_reason = (
-                wizard.country_code == 'CN'
+                wizard.company_id.account_fiscal_country_id.code == 'CN'
                 and wizard.move_type in ('out_invoice', 'in_invoice')
                 and bool(wizard.move_ids)
                 and wizard.company_id._l10n_cn_edi_is_ready()

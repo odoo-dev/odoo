@@ -53,7 +53,7 @@ class ResCompany(models.Model):
                 'tag': 'display_notification',
                 'params': {
                     'type': 'success',
-                    'message': self.env._("%s is logged in to the tax bureau.", self.name),
+                    'message': self.env._("%(company)s is logged in to the tax bureau.", company=self.name),
                     'next': {'type': 'ir.actions.act_window_close'},
                 },
             }

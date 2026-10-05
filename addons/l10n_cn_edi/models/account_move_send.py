@@ -60,7 +60,8 @@ class AccountMoveSend(models.AbstractModel):
 
     @api.model
     def _l10n_cn_edi_issue_invoices(self, invoices):
-        """Issue the e-Fapiao of ``invoices``: submit them all, then follow up on them together.
+        """
+        Issue the e-Fapiao of ``invoices``: submit them all, then follow up on them together.
 
         Return ``{invoice: error message}`` for those that couldn't be issued.
         """
@@ -68,7 +69,7 @@ class AccountMoveSend(models.AbstractModel):
         for company, company_invoices in invoices.grouped('company_id').items():
             if not company._l10n_cn_edi_is_ready():
                 errors.update(dict.fromkeys(company_invoices, self.env._(
-                    "E-Fapiao is not set up for %s. Please go to Settings.", company.name,
+                    "E-Fapiao is not set up for %(company)s. Please go to Settings.", company=company.name,
                 )))
                 continue
             client = company._l10n_cn_edi_get_client()
@@ -104,11 +105,11 @@ class AccountMoveSend(models.AbstractModel):
     def _l10n_cn_edi_session_error(self, company, session_state):
         if session_state == 'verify':
             return self.env._(
-                "The tax bureau asks the drawer of %s to confirm their identity (实名认证). "
+                "The tax bureau asks the drawer of %(company)s to confirm their identity (实名认证). "
                 "Use 'Log In' on the invoice, then send it again.",
-                company.name,
+                company=company.name,
             )
         return self.env._(
-            "%s is logged out of the tax bureau. Use 'Log In' on the invoice, then send it again.",
-            company.name,
+            "%(company)s is logged out of the tax bureau. Use 'Log In' on the invoice, then send it again.",
+            company=company.name,
         )
