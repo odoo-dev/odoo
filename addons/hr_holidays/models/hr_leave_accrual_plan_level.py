@@ -235,6 +235,10 @@ class HrLeaveAccrualLevel(models.Model):
     def _compute_yearly_day(self):
         self._set_day("yearly_day", "yearly_month")
 
+    @api.onchange("yearly_day")
+    def _compute_yearly_day_onchange(self):
+        self._set_day("yearly_day", "yearly_month")
+
     @api.depends('cap_accrued_time')
     def _compute_maximum_leave(self):
         for level in self:

@@ -120,6 +120,12 @@ class HrLeaveAccrualPlan(models.Model):
             # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
             plan.carryover_day = str(min(monthrange(2020, int(plan.carryover_month))[1], int(plan.carryover_day)))
 
+    @api.onchange("carryover_day")
+    def _compute_carryover_day_onchange(self):
+        for plan in self:
+            # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
+            plan.carryover_day = str(min(monthrange(2020, int(plan.carryover_month))[1], int(plan.carryover_day)))
+
     def action_open_accrual_plan_employees(self):
         self.ensure_one()
         return {
