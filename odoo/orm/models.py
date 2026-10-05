@@ -3628,7 +3628,12 @@ class BaseModel(metaclass=MetaModel):
         todo = explicit_deletions.copy()
         done = defaultdict(set)
         env = self.with_context(active_test=False).sudo().env
-        many2one_targeting = self.env.transaction.registry.many2one_targeting
+        if env.transaction.registry.uninstalling_modules:
+            # skip during uninstallation
+            many2one_targeting = many2many_targeting = frozendict()
+        else:
+            many2one_targeting = env.transaction.registry.many2one_targeting
+            many2many_targeting = env.transaction.registry.many2many_targeting
 
         while todo:
             model_name, ids = todo.popitem()
@@ -3698,7 +3703,6 @@ class BaseModel(metaclass=MetaModel):
                     cascade_many2one.append((field, corecords))
 
         # collect all the many2many fields that contain deleted records
-        many2many_targeting = self.env.transaction.registry.many2many_targeting
         cascade_many2many: list[tuple[Field, BaseModel]] = []
         for records in all_deleted_records:
             for field in many2many_targeting.get(records._name, ()):

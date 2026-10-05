@@ -2659,6 +2659,9 @@ class IrModelData(models.Model):
                 with self.env.cr.savepoint():
                     cloc_exclude_data.unlink()
                     records.unlink()
+                    # at uninstall, fixing cache is disabled for targetting
+                    # records, clear the cache manually
+                    self.env.invalidate_all()
             except Exception:
                 if len(records) <= 1:
                     undeletable_ids.extend(ref_data._ids)
