@@ -46,7 +46,7 @@ class StockPickingBatch(models.Model):
         ('done', 'Done'),
         ('cancel', 'Cancelled')], default='draft',
         store=True, compute='_compute_state',
-        copy=False, tracking=True, required=True, readonly=True, index=True)
+        copy=False, tracking=True, required=True, ui_readonly=True, index=True)
     priority = fields.Selection(PROCUREMENT_PRIORITIES, string='Priority', default='0')
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type', check_company=True, copy=False,

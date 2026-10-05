@@ -275,6 +275,8 @@ class SaleOrderLine(models.Model):
         compute="_compute_qty_delivered_method",
         store=True,
         precompute=True,
+        readonly=False,
+        ui_readonly=True,
         help="According to product configuration, the delivered quantity can be automatically"
         " computed by mechanism:\n"
         "  - Manual: the quantity is set manually on the line\n"

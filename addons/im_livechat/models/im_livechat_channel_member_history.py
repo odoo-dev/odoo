@@ -14,6 +14,7 @@ class ImLivechatChannelMemberHistory(models.Model):
         [("agent", "Agent"), ("visitor", "Visitor"), ("bot", "Chatbot")],
         compute="_compute_member_fields",
         store=True,
+        readonly=False,
     )
     channel_id = fields.Many2one(
         "discuss.channel",

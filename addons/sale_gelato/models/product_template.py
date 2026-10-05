@@ -17,7 +17,7 @@ class ProductTemplate(models.Model):
         string="Gelato Product UID",
         compute="_compute_gelato_product_uid",
         inverse="_inverse_gelato_product_uid",
-        readonly=True,
+        ui_readonly=True,
     )
     gelato_image_ids = fields.One2many(
         string="Gelato Print Images",

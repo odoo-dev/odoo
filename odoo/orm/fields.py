@@ -489,7 +489,7 @@ class Field[T, C]:
             attrs['store'] = store = attrs.get('store', False)
             attrs['compute_sudo'] = attrs.get('compute_sudo', attrs.get('related_sudo', True))
             attrs['copy'] = attrs.get('copy', False)
-            attrs['readonly'] = attrs.get('readonly', True)
+            attrs['readonly'] = attrs.get('readonly', not attrs.get('inherited'))
         elif attrs.get('compute'):
             # by default, computed fields are not stored, computed in superuser
             # mode if stored, not copied (unless stored and explicitly not
@@ -586,6 +586,8 @@ class Field[T, C]:
 
             if not isinstance(self.readonly, bool):
                 self._setup_warning(f'property readonly should be a boolean ({self.readonly})')
+            if self.readonly and self.inverse:
+                self._setup_warning('readonly with an inverse')
 
             if self.groups and ' ' in self.groups:
                 self._setup_warning('groups must not contain spaces')
@@ -674,7 +676,7 @@ class Field[T, C]:
 
         # determine dependencies, compute, inverse, and search
         self.compute = self._compute_related
-        if self.inherited or not (self.readonly or field.readonly):
+        if not self.readonly and (self.inherited or not field.readonly):
             self.inverse = self._inverse_related
         if (
             not self.store
@@ -1707,6 +1709,12 @@ class Field[T, C]:
         :param records:
         :param value: a value in any format
         """
+        if (
+            self.readonly
+            and (self.inherited_field or self).compute
+            and not all(rec.env.is_protected(self, rec) for rec in records)
+        ):
+            _logger.warning(f"Cannot write on a readonly field {self}", stack_info=True)
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
