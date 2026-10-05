@@ -36,7 +36,6 @@ export class RecordList extends Array {
         const recordList = this._raw;
         const store = recordList._store;
         return store.MAKE_UPDATE(function recordListPush() {
-            const inverse = recordList._.getInverse();
             for (const val of records) {
                 const record = recordList._.insert(val, function recordListPushInsert(record) {
                     recordList._.data().push(record);
@@ -44,9 +43,6 @@ export class RecordList extends Array {
                     record._.uses.add(recordList);
                 });
                 store._.ADD_QUEUE("onAdd", recordList._.owner, recordList._.name, record);
-                if (inverse) {
-                    store._.updateFields(record, { [inverse]: [["ADD", recordList._.owner]] });
-                }
             }
             return recordList._.data().length;
         });
@@ -81,7 +77,6 @@ export class RecordList extends Array {
         const recordList = this._raw;
         const store = recordList._store;
         return store.MAKE_UPDATE(function recordListUnshift() {
-            const inverse = recordList._.getInverse();
             for (let i = records.length - 1; i >= 0; i--) {
                 const record = recordList._.insert(records[i], (record) => {
                     const list = recordList._.data().slice();
@@ -91,9 +86,6 @@ export class RecordList extends Array {
                     record._.uses.add(recordList);
                 });
                 store._.ADD_QUEUE("onAdd", recordList._.owner, recordList._.name, record);
-                if (inverse) {
-                    store._.updateFields(record, { [inverse]: [["ADD", recordList._.owner]] });
-                }
             }
             return recordList._.data().length;
         });
@@ -122,23 +114,16 @@ export class RecordList extends Array {
             );
             recordList._.data.set(list);
             recordList._.syncLength();
-            const inverse = recordList._.getInverse();
             for (const oldRecord of oldRecords) {
                 oldRecord._.uses.delete(recordList);
                 store._.ADD_QUEUE("onDelete", recordList._.owner, recordList._.name, oldRecord);
-                if (inverse) {
-                    store._.updateFields(oldRecord, {
-                        [inverse]: [["DELETE", recordList._.owner]],
-                    });
-                }
+                recordList._.echoInverseIfAny(oldRecord, "DELETE");
             }
             for (const newRecordProxy of newRecordsProxy) {
                 const newRecord = newRecordProxy._raw;
                 newRecord._.uses.add(recordList);
                 store._.ADD_QUEUE("onAdd", recordList._.owner, recordList._.name, newRecord);
-                if (inverse) {
-                    store._.updateFields(newRecord, { [inverse]: [["ADD", recordList._.owner]] });
-                }
+                recordList._.echoInverseIfAny(newRecord, "ADD");
             }
         });
     }
@@ -184,7 +169,13 @@ export class RecordList extends Array {
                 }
                 const rec = recordList._.insert(val, function recordListAddInsertMany(record) {
                     if (recordList._.data().indexOf(record) === -1) {
-                        recordList.push(record);
+                        // Not push(): `record` is already a Record here, so push() would call
+                        // insert() again on it and re-echo onto the inverse, this time with no
+                        // version to read (lives on raw val, not the record).
+                        recordList._.data().push(record);
+                        recordList._.syncLength();
+                        record._.uses.add(recordList);
+                        store._.ADD_QUEUE("onAdd", recordList._.owner, recordList._.name, record);
                     }
                 });
                 res.push(rec);
