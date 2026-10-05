@@ -139,6 +139,9 @@ class ResUsers(models.Model):
         #   abort()
         # else:
         #   continue with the process
+        if params.get('error'):
+            raise AccessDenied(params.get('error_description') or params['error'])
+
         access_token = params.get('access_token')
         validation = self._auth_oauth_validate(provider, access_token)
 
