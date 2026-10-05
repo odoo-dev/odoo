@@ -67,7 +67,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_buyer_bank_and_address_are_sent_and_shown(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         values.update(
             buyer_bank_name='中国工商银行上海分行',
             buyer_bank_account='6222020200001234567',
@@ -84,7 +84,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_large_payload_is_sent_uncompressed(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         values['remark'] = 'x' * 20000
         self.gateway.handlers[SIMPLE_ISSUE] = {'code': '1000', 'message': '提交成功'}
 
@@ -96,7 +96,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         invoice = self._post_invoice()
         self.company.l10n_cn_edi_drawer = False
         client = self.company._l10n_cn_edi_get_client()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         self.assertNotIn('invoicer', client._prepare_simple_issue_payload(values))
         self.company.l10n_cn_edi_drawer = 'Configured Drawer'
         self.assertEqual(client._prepare_simple_issue_payload(values)['invoicer'], 'Configured Drawer')
@@ -139,8 +139,8 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         }
 
         self._issue(invoice)
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF-1.4')
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK')
+        self.assertEqual(self._fapiao(invoice).pdf_id.raw.content, b'%PDF-1.4')
+        self.assertEqual(self._fapiao(invoice).ofd_id.raw.content, b'PK')
         self.assertEqual(invoice.l10n_cn_edi_fapiao_date, datetime(2026, 9, 30, 6, 58, 10))
 
     def test_missing_ofd_uses_download_endpoint_file_payload(self):
@@ -166,8 +166,8 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF-1.4')
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK\x03\x04OFD')
+        self.assertEqual(self._fapiao(invoice).pdf_id.raw.content, b'%PDF-1.4')
+        self.assertEqual(self._fapiao(invoice).ofd_id.raw.content, b'PK\x03\x04OFD')
         download_requests = [request for request in self.gateway.requests if request['interface_code'] == DOWNLOAD_INVOICE]
         self.assertEqual(download_requests[0]['inner']['fileType'], '2')
 
@@ -197,8 +197,8 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
         self.assertEqual(invoice.l10n_cn_edi_fapiao_no, '00820748268268168425')
-        self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id)
-        self.assertFalse(invoice.l10n_cn_edi_fapiao_ofd_id)
+        self.assertFalse(self._fapiao(invoice).pdf_id)
+        self.assertFalse(self._fapiao(invoice).ofd_id)
 
     def test_get_session_state_mapping(self):
         client = self.company._l10n_cn_edi_get_client()
@@ -218,14 +218,14 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
     def test_special_vat_treatment_is_rejected(self):
         invoice = self._post_invoice()
         invoice.invoice_line_ids.tax_ids.l10n_cn_reduced_tax_code = '01'
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
 
         with self.assertRaisesRegex(UserError, 'does not support special VAT treatment'):
             self.company._l10n_cn_edi_get_client().issue_invoice(values)
 
     def test_quantity_precision_over_13_decimals_is_rejected(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         values['lines'][0]['quantity'] = 1.12345678901234
 
         with self.assertRaisesRegex(UserError, 'quantity supports at most 13 decimal places'):
@@ -233,7 +233,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_tax_rate_outside_the_spec_set_is_rejected(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         client = self.company._l10n_cn_edi_get_client()
         for rate in (0.0, 0.01, 0.03, 0.06, 0.09, 0.13, 0.17):
             values['lines'][0]['tax_rate'] = rate
@@ -246,7 +246,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_duplicate_order_is_reconciled_via_query(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         self.gateway.handlers[SIMPLE_ISSUE] = {
             '_outer_code': '9994',
             '_outer_msg': 'duplicate',
@@ -262,7 +262,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_duplicate_order_without_issued_state_fails_reconcile(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         self.gateway.handlers[SIMPLE_ISSUE] = {
             '_outer_code': '9994',
             '_outer_msg': 'duplicate',
@@ -278,7 +278,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def test_issue_pending_code_is_not_accepted(self):
         invoice = self._post_invoice()
-        values = invoice._l10n_cn_edi_prepare_invoice_values()
+        values = invoice._l10n_cn_edi_prepare_invoice_values(invoice._l10n_cn_edi_get_document('fapiao'))
         self.gateway.handlers[SIMPLE_ISSUE] = {'code': '1002', 'message': '开票中'}
 
         result = self.company._l10n_cn_edi_get_client().issue_invoice(values)
@@ -304,7 +304,7 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
 
     def _sent_invoice(self):
         invoice = self._post_invoice()
-        invoice.sudo().write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_1_1_X', 'l10n_cn_edi_serial_attempt': 1})
+        self._sent_fapiao(invoice, 'BLUE_1_1_X')
         return invoice
 
     def test_definitive_query_failure_asks_for_new_serial(self):
@@ -312,15 +312,14 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         client = self.company._l10n_cn_edi_get_client()
         self.gateway.handlers[QUERY_RESULT] = {'code': '2001', 'message': '开票失败'}
 
-        self.assertEqual(client.query_invoice(invoice, just_submitted=True), {'state': 'sent'})
-        result = client.query_invoice(invoice)
+        self.assertEqual(client.query_invoice(self._fapiao(invoice), just_submitted=True), {'state': 'sent'})
+        result = client.query_invoice(self._fapiao(invoice))
         self.assertEqual(result['state'], 'failed')
         self.assertTrue(result['new_serial'])
 
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
-        self.assertFalse(invoice.l10n_cn_edi_serial_no)
-        self.assertEqual(invoice.l10n_cn_edi_serial_attempt, 2)
+        self.assertEqual(self._fapiao(invoice).state, 'cancelled')
 
     def test_query_session_codes_are_not_failures(self):
         invoice = self._sent_invoice()
@@ -333,10 +332,10 @@ class TestAisinoClient(L10nCnEdiAisinoTestCommon):
         ):
             self.gateway.handlers[QUERY_RESULT] = response
             with self.assertRaisesRegex(UserError, error):
-                client.query_invoice(invoice)
+                client.query_invoice(self._fapiao(invoice))
         self.gateway.handlers[QUERY_RESULT] = {'_outer_code': '1001', '_outer_msg': '解密异常'}
         with self.assertRaisesRegex(UserError, 'protocol error 1001'):
-            client.query_invoice(invoice)
+            client.query_invoice(self._fapiao(invoice))
 
     def test_relogin_code_on_issue_forces_next_login(self):
         invoice = self._post_invoice()

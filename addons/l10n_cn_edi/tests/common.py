@@ -35,14 +35,14 @@ class FakeClient(L10nCnEdiClient):
     def issue_direct_red(self, values):
         return self._answer('issue_direct_red', values)
 
-    def query_direct_red(self, move, just_submitted=False):
-        return self._answer('query_direct_red', move, just_submitted)
+    def query_direct_red(self, document, just_submitted=False):
+        return self._answer('query_direct_red', document, just_submitted)
 
     def wait(self, seconds):
         self.calls.append(('wait', (seconds,)))
 
-    def query_invoice(self, move, just_submitted=False):
-        return self._answer('query_invoice', move, just_submitted)
+    def query_invoice(self, document, just_submitted=False):
+        return self._answer('query_invoice', document, just_submitted)
 
     def request_red_form(self, values):
         return self._answer('request_red_form', values)
@@ -78,6 +78,15 @@ class L10nCnEdiTestCommon(TestAccountMoveSendCommon):
         # Outside a cron run, the crons' progress commits would commit the test transaction.
         self.commit_progress = patch.object(self.env.registry['ir.cron'], '_commit_progress', return_value=float('inf')).start()
         self.addCleanup(patch.stopall)
+
+    def _fapiao(self, move):
+        """Return the latest fapiao document of ``move``."""
+        return move.l10n_cn_edi_document_ids.filtered(lambda doc: doc.kind == 'fapiao').sorted('id', reverse=True)[:1]
+
+    def _set_sent(self, moves):
+        """Put ``moves`` where the provider accepted their fapiao and still has to issue it."""
+        for move in moves:
+            move._l10n_cn_edi_get_document('fapiao')._l10n_cn_edi_set_sent(self.client)
 
     def _issue(self, invoice):
         """Issue through the send flow; return the invoice's error, or None."""

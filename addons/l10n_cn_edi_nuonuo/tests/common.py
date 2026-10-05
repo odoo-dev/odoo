@@ -4,6 +4,8 @@ from unittest.mock import patch
 
 import requests
 
+from odoo import fields
+
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 from odoo.addons.l10n_cn_edi_nuonuo.tools import NuonuoClient, sign
 
@@ -68,6 +70,21 @@ class L10nCnEdiNuonuoTestCommon(TestAccountMoveSendCommon):
         cls.partner_a.write({'country_id': cls.env.ref('base.cn').id, 'vat': '91330106MA2B2ABCDN'})
         tax_category = cls.env['l10n_cn_edi.tax.category'].sudo().create({'name': 'Test', 'code': '1090511030000000000'})
         (cls.product_a + cls.product_b).product_tmpl_id.l10n_cn_tax_category_id = tax_category
+
+    def _fapiao(self, move):
+        """Return the latest fapiao document of ``move``."""
+        return move.l10n_cn_edi_document_ids.filtered(lambda doc: doc.kind == 'fapiao').sorted('id', reverse=True)[:1]
+
+    def _sent_fapiao(self, move, serial_no):
+        """Return a fapiao document of ``move`` the provider accepted an hour ago and still has to issue."""
+        move.l10n_cn_edi_state = 'sent'
+        return self.env['l10n_cn_edi.document'].create({
+            'move_id': move.id,
+            'kind': 'fapiao',
+            'state': 'sent',
+            'serial_no': serial_no,
+            'sent_date': fields.Datetime.subtract(fields.Datetime.now(), hours=1),
+        })
 
     def setUp(self):
         super().setUp()

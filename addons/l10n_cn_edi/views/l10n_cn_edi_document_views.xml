@@ -4,13 +4,19 @@
         <field name="name">l10n_cn_edi.document.view.list</field>
         <field name="model">l10n_cn_edi.document</field>
         <field name="arch" type="xml">
-            <list string="E-Fapiao Red Forms" create="0" edit="0" decoration-danger="state == 'failed'" decoration-success="state == 'red_form_confirmed'" decoration-warning="state == 'red_form_pending'">
+            <list string="E-Fapiao Documents" create="0" edit="0"
+                decoration-danger="state in ('failed', 'cancelled')"
+                decoration-success="state in ('issued', 'red_form_confirmed')"
+                decoration-warning="state in ('sent', 'red_form_pending')">
                 <field name="create_date" string="Created On"/>
                 <field name="move_id"/>
-                <field name="red_form_number"/>
-                <field name="red_form_uuid"/>
-                <field name="amount_untaxed"/>
-                <field name="bureau_state"/>
+                <field name="kind"/>
+                <field name="serial_no"/>
+                <field name="fapiao_no"/>
+                <field name="red_form_number" optional="hide"/>
+                <field name="red_form_uuid" optional="hide"/>
+                <field name="amount_untaxed" optional="hide"/>
+                <field name="bureau_state" optional="hide"/>
                 <field name="state" widget="badge"/>
             </list>
         </field>
@@ -20,19 +26,28 @@
         <field name="name">l10n_cn_edi.document.view.form</field>
         <field name="model">l10n_cn_edi.document</field>
         <field name="arch" type="xml">
-            <form string="E-Fapiao Red Form" create="0" edit="0">
+            <form string="E-Fapiao Document" create="0" edit="0">
                 <header>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
                     <group>
-                        <group string="Related Record">
+                        <group string="Request">
                             <field name="move_id"/>
+                            <field name="kind"/>
+                            <field name="serial_no"/>
+                            <field name="sent_date"/>
+                            <field name="sent_data_id"/>
                         </group>
-                        <group string="Tax Bureau Data">
+                        <group string="Fapiao">
+                            <field name="fapiao_no"/>
+                            <field name="fapiao_date"/>
+                            <field name="pdf_id"/>
+                            <field name="ofd_id"/>
+                        </group>
+                        <group string="Red Form" invisible="kind != 'red_form'">
                             <field name="red_form_uuid"/>
                             <field name="red_form_number"/>
-                            <field name="red_fapiao_no"/>
                             <field name="bureau_state"/>
                             <field name="amount_untaxed"/>
                             <field name="amount_tax"/>
@@ -47,18 +62,18 @@
     </record>
 
     <record id="l10n_cn_edi_document_action" model="ir.actions.act_window">
-        <field name="name">E-Fapiao Red Forms</field>
+        <field name="name">E-Fapiao Documents</field>
         <field name="res_model">l10n_cn_edi.document</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_empty_folder">
-                No red forms yet.
+                No e-Fapiao documents yet.
             </p>
         </field>
     </record>
 
     <menuitem id="l10n_cn_edi_document_menu"
-              name="E-Fapiao Red Forms"
+              name="E-Fapiao Documents"
               action="l10n_cn_edi_document_action"
               parent="account.menu_finance_configuration"
               sequence="100"/>

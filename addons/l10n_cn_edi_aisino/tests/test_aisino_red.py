@@ -44,10 +44,10 @@ class TestAisinoRed(L10nCnEdiAisinoTestCommon):
         self.assertEqual(payload['originInvoiceNo'], '00820748268268168425')
         self.assertEqual(payload['redReason'], '01')
         self.assertNotIn('invoiceItems', payload)
-        self.assertFalse(credit_note.l10n_cn_edi_document_ids)
+        self.assertEqual(self._fapiao(credit_note).state, 'sent')
         self.assertEqual(credit_note.l10n_cn_edi_state, 'sent')
 
-    def test_red_poll_issues_credit_note_without_red_form_document(self):
+    def test_red_poll_issues_the_credit_note(self):
         credit_note = self._credit_note(reason='02')
         self.gateway.handlers[SIMPLE_ISSUE] = {'code': '1000', 'message': '提交成功'}
         self.gateway.handlers[QUERY_RESULT] = {'code': '1002', 'message': '开票中'}
@@ -61,7 +61,7 @@ class TestAisinoRed(L10nCnEdiAisinoTestCommon):
         }
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
-        self.assertFalse(credit_note.l10n_cn_edi_document_ids)
+        self.assertEqual(self._fapiao(credit_note).state, 'issued')
         self.assertEqual(credit_note.l10n_cn_edi_state, 'issued')
         self.assertEqual(credit_note.l10n_cn_edi_fapiao_no, '29746948242065126876')
 
@@ -73,11 +73,11 @@ class TestAisinoRed(L10nCnEdiAisinoTestCommon):
 
         self.gateway.handlers[QUERY_RESULT] = {'code': '2001', 'message': '开票失败'}
         # Past the grace period in which a fresh order may not be known yet.
-        credit_note.l10n_cn_edi_sent_date = fields.Datetime.subtract(fields.Datetime.now(), hours=1)
+        self._fapiao(credit_note).sent_date = fields.Datetime.subtract(fields.Datetime.now(), hours=1)
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
         self.assertEqual(credit_note.l10n_cn_edi_state, 'failed')
-        self.assertFalse(credit_note.l10n_cn_edi_serial_no)
+        self.assertEqual(self._fapiao(credit_note).state, 'cancelled')
 
     def test_red_relogin_code_forces_next_login(self):
         credit_note = self._credit_note(reason='02')
@@ -94,7 +94,7 @@ class TestAisinoRed(L10nCnEdiAisinoTestCommon):
 
         credit_note.action_l10n_cn_edi_request_red_form()
 
-        self.assertFalse(credit_note.l10n_cn_edi_document_ids)
+        self.assertEqual(self._fapiao(credit_note).state, 'failed')
         self.assertEqual(credit_note.l10n_cn_edi_state, 'failed')
 
     def test_inbound_listing_is_empty_for_now(self):

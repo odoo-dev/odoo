@@ -4,6 +4,8 @@ from unittest.mock import patch
 
 import requests
 
+from odoo import fields
+
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 from odoo.addons.l10n_cn_edi_aisino.crypto import sm4_envelope
 from odoo.addons.l10n_cn_edi_aisino.tools.aisino_client import AisinoClient
@@ -115,6 +117,21 @@ class L10nCnEdiAisinoTestCommon(TestAccountMoveSendCommon):
         # Outside a cron run, the crons' progress commits would commit the test transaction.
         patch.object(self.env.registry['ir.cron'], '_commit_progress', return_value=float('inf')).start()
         self.addCleanup(patch.stopall)
+
+    def _fapiao(self, move):
+        """Return the latest fapiao document of ``move``."""
+        return move.l10n_cn_edi_document_ids.filtered(lambda doc: doc.kind == 'fapiao').sorted('id', reverse=True)[:1]
+
+    def _sent_fapiao(self, move, serial_no):
+        """Return a fapiao document of ``move`` the provider accepted an hour ago and still has to issue."""
+        move.l10n_cn_edi_state = 'sent'
+        return self.env['l10n_cn_edi.document'].create({
+            'move_id': move.id,
+            'kind': 'fapiao',
+            'state': 'sent',
+            'serial_no': serial_no,
+            'sent_date': fields.Datetime.subtract(fields.Datetime.now(), hours=1),
+        })
 
     def _post_invoice(self):
         invoice = self.init_invoice('out_invoice', partner=self.partner_a, products=self.product_a, taxes=self.tax_sale_a)

@@ -2,8 +2,6 @@
 """
 Aisino Yunshui (爱信诺云税) common-envelope crypto.
 
-Pure Python, no Odoo dependency — importable and testable standalone.
-
 Implements the Ch.1 (公共请求/返回参数) + Ch.6 (JAVA DEMO) envelope:
 
   outer request/response:
@@ -37,12 +35,6 @@ import zlib
 from datetime import datetime
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
-from . import sm4_pure
-
-# ``algorithms.SM4`` only exists when cryptography is built against an OpenSSL
-# carrying SM4 (and not at all before cryptography 35), so fall back to our own.
-HAS_NATIVE_SM4 = hasattr(algorithms, 'SM4')
 
 SIGNTYPE = 'HMacSHA256'
 ENCRYPT_CODE = '1'  # fixed: 1 = SM4
@@ -115,16 +107,12 @@ def _unpad_pkcs5(data):
 def sm4_encrypt(plaintext, key):
     """SM4/ECB/PKCS5Padding encrypt -> bytes."""
     padded = _pad_pkcs5(plaintext)
-    if not HAS_NATIVE_SM4:
-        return sm4_pure.encrypt_ecb(padded, key)
     enc = Cipher(algorithms.SM4(key), modes.ECB()).encryptor()
     return enc.update(padded) + enc.finalize()
 
 
 def sm4_decrypt(ciphertext, key):
     """SM4/ECB/PKCS5Padding decrypt -> bytes."""
-    if not HAS_NATIVE_SM4:
-        return _unpad_pkcs5(sm4_pure.decrypt_ecb(ciphertext, key))
     dec = Cipher(algorithms.SM4(key), modes.ECB()).decryptor()
     return _unpad_pkcs5(dec.update(ciphertext) + dec.finalize())
 

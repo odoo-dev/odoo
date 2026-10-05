@@ -4,12 +4,9 @@ import gzip
 import hashlib
 from unittest.mock import patch
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-
 from odoo.tests import BaseCase, tagged
 
 from odoo.addons.l10n_cn_edi_aisino.crypto import sm4_envelope as env
-from odoo.addons.l10n_cn_edi_aisino.crypto import sm4_pure
 
 IDENTITY = 'b1492023dcd5368e'  # 授权码 (16-char)
 PLATFORM = '101000'  # 组织编码 (6-digit)
@@ -163,22 +160,3 @@ class TestSm4Envelope(BaseCase):
             'ele.encrypt.queryResult', {'code': '1002', 'message': '开票中'}, IDENTITY, PLATFORM, timestamp=TS,
         )
         self.assertEqual(env.verify_and_decrypt(response, IDENTITY, PLATFORM), {'code': '1002', 'message': '开票中'})
-
-    def test_sm4_fallback_agrees_with_openssl(self):
-        if not env.HAS_NATIVE_SM4:
-            self.skipTest("cryptography is built without SM4")
-        key = b'0123456789abcdef'
-        data = b'A' * 32
-        encryptor = Cipher(algorithms.SM4(key), modes.ECB()).encryptor()
-        self.assertEqual(sm4_pure.encrypt_ecb(data, key), encryptor.update(data) + encryptor.finalize())
-
-    def test_envelope_round_trips_without_native_sm4(self):
-        """The whole envelope must work on a host whose OpenSSL lacks SM4."""
-        payload = {'probe': 'ok', '中文': '测试', 'n': 1234.56}
-        with patch.object(env, 'HAS_NATIVE_SM4', False):
-            request = env.build_request('x', payload, IDENTITY, PLATFORM, TAX_NO, timestamp=TS)
-            self.assertEqual(env.verify_and_decrypt(dict(request, code='1000'), IDENTITY, PLATFORM), payload)
-            for zip_code in ('1', '2'):
-                with self.subTest(zip_code=zip_code):
-                    response = env.build_response('x', payload, IDENTITY, PLATFORM, timestamp=TS, zip_code=zip_code)
-                    self.assertEqual(env.verify_and_decrypt(response, IDENTITY, PLATFORM), payload)

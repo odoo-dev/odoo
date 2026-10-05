@@ -130,9 +130,9 @@ class AisinoClient(L10nCnEdiClient):
             ),
         }
 
-    def query_direct_red(self, move, just_submitted=False):
-        code, response = self._query_code(move.l10n_cn_edi_serial_no, move.l10n_cn_edi_invoice_type_code)
-        if result := self._query_outcome(move, code, response, just_submitted):
+    def query_direct_red(self, document, just_submitted=False):
+        code, response = self._query_code(document.serial_no, document.move_id.l10n_cn_edi_invoice_type_code)
+        if result := self._query_outcome(document, code, response, just_submitted):
             return result
         return {
             'state': 'failed',
@@ -144,9 +144,9 @@ class AisinoClient(L10nCnEdiClient):
             'new_serial': True,
         }
 
-    def query_invoice(self, move, just_submitted=False):
-        code, response = self._query_code(move.l10n_cn_edi_serial_no, move.l10n_cn_edi_invoice_type_code)
-        if result := self._query_outcome(move, code, response, just_submitted):
+    def query_invoice(self, document, just_submitted=False):
+        code, response = self._query_code(document.serial_no, document.move_id.l10n_cn_edi_invoice_type_code)
+        if result := self._query_outcome(document, code, response, just_submitted):
             return result
         return {
             'state': 'failed',
@@ -245,13 +245,13 @@ class AisinoClient(L10nCnEdiClient):
             response = {'code': e.code, 'message': e.msg}
         return str(response.get('code') or ''), response
 
-    def _query_outcome(self, move, code, response, just_submitted):
-        """The result of a queryResult code that isn't a definitive failure, else None."""
+    def _query_outcome(self, document, code, response, just_submitted):
+        """Return the result of a queryResult code that isn't a definitive failure, else None."""
         if code == ISSUED:
             return self._issued_result(
                 response,
-                serial_no=move.l10n_cn_edi_serial_no,
-                invoice_kind=INVOICE_KIND[move.l10n_cn_edi_invoice_type_code or '02'],
+                serial_no=document.serial_no,
+                invoice_kind=INVOICE_KIND[document.move_id.l10n_cn_edi_invoice_type_code or '02'],
             )
         if code == RELOGIN:
             # Recorded rather than raised: the poll cron's savepoint would roll the flag back with the error.

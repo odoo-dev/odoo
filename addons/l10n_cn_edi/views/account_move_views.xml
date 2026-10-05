@@ -64,7 +64,6 @@
                                 decoration-success="l10n_cn_edi_state == 'issued'"
                                 decoration-warning="l10n_cn_edi_state in ('sent', 'waiting_login')"
                                 decoration-danger="l10n_cn_edi_state == 'failed'"/>
-                            <field name="l10n_cn_edi_serial_no" invisible="not l10n_cn_edi_serial_no" readonly="1"/>
                         </group>
 
                         <group string="Red Form Requests" invisible="not l10n_cn_edi_red_form_uuid and move_type != 'out_refund'">
@@ -75,7 +74,7 @@
                             <field name="l10n_cn_edi_red_form_status" widget="badge"
                                 decoration-success="l10n_cn_edi_red_form_status == 'red_form_confirmed'"
                                 decoration-warning="l10n_cn_edi_red_form_status == 'red_form_pending'"
-                                decoration-danger="l10n_cn_edi_red_form_status == 'failed'"/>
+                                decoration-danger="l10n_cn_edi_red_form_status in ('failed', 'cancelled')"/>
 
                             <label for="l10n_cn_edi_red_form_uuid"/>
                             <div class="o_row">
@@ -89,6 +88,20 @@
                             </div>
                         </group>
                     </group>
+                    <field name="l10n_cn_edi_document_ids" readonly="1" invisible="not l10n_cn_edi_document_ids">
+                        <list>
+                            <field name="create_date" string="Created On"/>
+                            <field name="kind"/>
+                            <field name="serial_no"/>
+                            <field name="fapiao_no"/>
+                            <field name="red_form_number" optional="hide"/>
+                            <field name="sent_data_id" optional="hide"/>
+                            <field name="state" widget="badge"
+                                decoration-success="state in ('issued', 'red_form_confirmed')"
+                                decoration-warning="state in ('sent', 'red_form_pending')"
+                                decoration-danger="state in ('failed', 'cancelled')"/>
+                        </list>
+                    </field>
                 </page>
             </xpath>
 

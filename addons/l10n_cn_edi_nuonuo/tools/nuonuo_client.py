@@ -343,8 +343,8 @@ class NuonuoClient(L10nCnEdiClient):
             }
         return {'state': 'sent'}
 
-    def query_invoice(self, move, just_submitted=False):
-        return self._query(move.l10n_cn_edi_serial_no, missing_is_failure=not just_submitted)
+    def query_invoice(self, document, just_submitted=False):
+        return self._query(document.serial_no, missing_is_failure=not just_submitted)
 
     def _query(self, order_no, missing_is_failure):
         env = self.company.env

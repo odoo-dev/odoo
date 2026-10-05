@@ -56,7 +56,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._issue(invoice)
 
         order = self._requests_for(ISSUE)[0]['payload']['order']
-        self.assertEqual(order['orderNo'], invoice.l10n_cn_edi_serial_no)
+        self.assertEqual(order['orderNo'], self._fapiao(invoice).serial_no)
         self.assertEqual(order['invoiceType'], '1')
         self.assertEqual(order['invoiceLine'], 'pc')
         self.assertEqual(order['salerTaxNum'], self.company.vat)
@@ -159,12 +159,12 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
             'l10n_cn_edi_state': 'issued',
             'l10n_cn_edi_fapiao_no': '26332000000123456789',
             'l10n_cn_edi_fapiao_date': datetime(2026, 9, 23, 0, 0),
-            'l10n_cn_edi_qr_code': 'qr-payload',
         }])
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_pdf_id.raw.content, b'%PDF-1.4 fapiao')
-        self.assertEqual(invoice.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK ofd')
+        self.assertEqual(self._fapiao(invoice).qr_code, 'qr-payload')
+        self.assertEqual(self._fapiao(invoice).pdf_id.raw.content, b'%PDF-1.4 fapiao')
+        self.assertEqual(self._fapiao(invoice).ofd_id.raw.content, b'PK ofd')
         # The OFD is the legal original, kept on the invoice; the customer gets the PDF.
-        self.assertEqual(self.env['account.move.send']._get_invoice_extra_attachments(invoice), invoice.l10n_cn_edi_fapiao_pdf_id)
+        self.assertEqual(self.env['account.move.send']._get_invoice_extra_attachments(invoice), self._fapiao(invoice).pdf_id)
 
     def test_slow_fapiao_is_picked_up_by_the_cron(self):
         invoice = self._post_invoice()
@@ -197,7 +197,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self.assertIn('E9105', error)
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
         self.assertFalse(self._requests_for(QUERY))
-        self.assertFalse(invoice.l10n_cn_edi_serial_no)
+        self.assertEqual(self._fapiao(invoice).state, 'cancelled')
 
     def test_refusal_that_may_leave_the_order_alive_keeps_it(self):
         invoice = self._post_invoice()
@@ -209,7 +209,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
                 orders = [request['payload']['order']['orderNo'] for request in self._requests_for(ISSUE)]
                 self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
-                self.assertEqual(invoice.l10n_cn_edi_serial_no, orders[0])
+                self.assertEqual(self._fapiao(invoice).serial_no, orders[0])
                 self.assertEqual(len(set(orders)), 1)
 
     def test_failed_issuance_reports_the_bureau_reason(self):
@@ -230,7 +230,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'sent')
         retry = self._requests_for(RETRY)[0]['payload']
-        self.assertEqual(retry, {'fpqqlsh': '20160108165823395151', 'orderno': invoice.l10n_cn_edi_serial_no})
+        self.assertEqual(retry, {'fpqqlsh': '20160108165823395151', 'orderno': self._fapiao(invoice).serial_no})
 
     def test_seal_retries_used_up_keep_the_order(self):
         invoice = self._post_invoice()
@@ -241,7 +241,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self.assertIn("retries are used up", self._issue(invoice))
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'failed')
-        self.assertEqual(self._requests_for(RETRY)[0]['payload']['orderno'], invoice.l10n_cn_edi_serial_no)
+        self.assertEqual(self._requests_for(RETRY)[0]['payload']['orderno'], self._fapiao(invoice).serial_no)
 
     def test_failed_issuance_frees_the_order_number(self):
         invoice = self._post_invoice()
@@ -260,7 +260,7 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
 
     def test_order_unknown_to_nuonuo_is_failed_by_the_cron(self):
         invoice = self._post_invoice()
-        invoice.write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_LOST'})
+        self._sent_fapiao(invoice, 'BLUE_LOST')
 
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
@@ -275,16 +275,16 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         self._issue(invoice)
 
         self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
-        self.assertFalse(invoice.l10n_cn_edi_fapiao_pdf_id + invoice.l10n_cn_edi_fapiao_ofd_id)
+        self.assertFalse(self._fapiao(invoice).pdf_id + self._fapiao(invoice).ofd_id)
 
     def test_dead_orders_free_the_order_number(self):
         invoice = self._post_invoice()
-        invoice.write({'l10n_cn_edi_state': 'sent', 'l10n_cn_edi_serial_no': 'BLUE_DEAD'})
+        self._sent_fapiao(invoice, 'BLUE_DEAD')
         client = self.company._l10n_cn_edi_get_client()
         for status in ('22', '3', '31'):  # failed, voided, being voided
             with self.subTest(status=status):
                 self._answer(QUERY, {'code': 'E0000', 'result': [{'status': status}]})
 
-                result = client.query_invoice(invoice)
+                result = client.query_invoice(self._fapiao(invoice))
 
                 self.assertEqual((result['state'], result['new_serial']), ('failed', True))

@@ -76,7 +76,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         credit_note.action_l10n_cn_edi_request_red_form()
 
         payload = self._requests_for(SAVE)[0]['payload']
-        self.assertEqual(payload['billId'], credit_note.l10n_cn_edi_serial_no)
+        self.assertEqual(payload['billId'], credit_note.l10n_cn_edi_document_ids.serial_no)
         self.assertEqual(payload['blueElecInvoiceNumber'], BLUE_FAPIAO_NO)
         self.assertEqual(payload['blueInvoiceLine'], 'pc')
         self.assertEqual(payload['applySource'], '0')
@@ -116,7 +116,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
             'l10n_cn_edi_fapiao_no': '20882609251614554424',
             'l10n_cn_edi_fapiao_date': datetime(2026, 9, 25, 8, 14, 55),
         }])
-        self.assertEqual(credit_note.l10n_cn_edi_fapiao_ofd_id.raw.content, b'PK red')
+        self.assertEqual(credit_note.l10n_cn_edi_document_ids.ofd_id.raw.content, b'PK red')
 
     def test_confirmed_form_without_red_serial_gets_it_by_fast_red(self):
         credit_note = self._credit_note()
@@ -318,6 +318,7 @@ class TestNuonuoRed(L10nCnEdiNuonuoTestCommon):
         bill.write({'l10n_cn_edi_fapiao_no': BLUE_FAPIAO_NO})
         self.env['l10n_cn_edi.document'].create({
             'move_id': bill.id,
+            'kind': 'red_form',
             'state': 'red_form_pending',
             'red_form_uuid': 'IN-1',
             'bureau_state': '02',

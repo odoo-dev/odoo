@@ -31,12 +31,15 @@ Results are plain dicts:
 
 Issuing is two steps, so a batch waits once instead of once per invoice:
 ``issue_invoice`` submits and usually answers 'sent'; after each of the client's
-``result_delays`` the flow asks ``query_invoice(move, just_submitted=True)`` about
+``result_delays`` the flow asks ``query_invoice(document, just_submitted=True)`` about
 the batch's pending fapiao, and leaves whatever is still pending to the cron. The cron
 keeps passing ``just_submitted=True`` for 10 minutes after the submission.
 
 A provider with ``supports_direct_red()`` issues the red fapiao of a credit note without
 a red form: ``issue_direct_red`` and ``query_direct_red`` answer invoice results.
+
+Queries get the ``l10n_cn_edi.document`` of the request: its ``serial_no`` is the one
+the values carried, its ``move_id`` the invoice or credit note.
 
 Invoice values carry, per line, ``price_include`` (the Odoo tax's basis) and both
 ``amount_untaxed`` and ``amount_total``, so a provider can send whichever basis the
@@ -79,6 +82,8 @@ class L10nCnEdiProviderUnreachable(UserError):
     """The request may have reached the provider, whose answer was lost: the outcome is unknown."""
 
 
+# TODO: remove this provider-neutral layer once a single provider is chosen: VIN found a
+# client class around one provider of little benefit (odoo/odoo#266575).
 class L10nCnEdiClient:
 
     # Seconds to wait before each follow-up query of freshly submitted fapiao.
@@ -114,11 +119,11 @@ class L10nCnEdiClient:
         """
         raise NotImplementedError
 
-    def query_direct_red(self, move, just_submitted=False):
+    def query_direct_red(self, document, just_submitted=False):
         """Fetch the result of a direct-red invoice previously accepted as 'sent'."""
         raise NotImplementedError
 
-    def query_invoice(self, move, just_submitted=False):
+    def query_invoice(self, document, just_submitted=False):
         """
         Fetch the current result of a fapiao that was accepted as 'sent'.
 

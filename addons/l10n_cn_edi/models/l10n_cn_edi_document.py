@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
 import logging
 from datetime import timedelta
 
@@ -31,28 +32,180 @@ BUREAU_STATES_CONFIRMED = {'01', '04'}
 BUREAU_STATES_PENDING = {'02', '03'}
 RED_FORM_ACTIVE_STATES = ('red_form_pending', 'red_form_confirmed')
 
+# How long after submission a provider may not know a fapiao yet.
+SUBMISSION_GRACE = timedelta(minutes=10)
+
 
 class L10nCnEdiDocument(models.Model):
+    """
+    What the provider holds for a move: a fapiao we asked it to issue, or a red form.
+
+    Each request gets its own document, the same one for its retries: the serial number
+    makes them idempotent. A document dead at the provider is cancelled, and the next
+    request of the move gets a new document with a new serial number. Red forms the other
+    party raised are documents too, without a serial number.
+    """
     _name = 'l10n_cn_edi.document'
-    _description = 'E-Fapiao Red Form'
+    _description = 'E-Fapiao Document'
     _order = 'id desc'
 
     move_id = fields.Many2one('account.move', string="Journal Entry", required=True, index=True, ondelete='cascade')
+    kind = fields.Selection(
+        selection=[('fapiao', 'Fapiao'), ('red_form', 'Red Form')],
+        required=True,
+        readonly=True,
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('sent', 'Sent'),
+        ('issued', 'Issued'),
         ('red_form_pending', 'Pending Confirmation'),
         ('red_form_confirmed', 'Confirmed'),
-        ('failed', 'Failed/Rejected'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
     ], default='draft', required=True)
-
+    serial_no = fields.Char(
+        string="Serial No",
+        readonly=True,
+        copy=False,
+        index='btree_not_null',
+        help="Request serial number sent to the provider; reusing it makes a retry idempotent.",
+    )
+    sent_date = fields.Datetime(string="Sent On", readonly=True, copy=False)
+    sent_data_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        string="Sent Data",
+        readonly=True,
+        copy=False,
+        help="The content Odoo submitted to the provider, for reference.",
+    )
+    fapiao_no = fields.Char(
+        string="Fapiao No.",
+        copy=False,
+        help="The fapiao issued for this document: the fapiao itself, or the red fapiao of a red form.",
+    )
+    fapiao_date = fields.Datetime(string="Fapiao Date", copy=False)
+    qr_code = fields.Char(string="Fapiao QR Code", readonly=True, copy=False)
+    pdf_id = fields.Many2one(comodel_name='ir.attachment', string="Fapiao PDF", readonly=True, copy=False)
+    ofd_id = fields.Many2one(
+        comodel_name='ir.attachment',
+        string="Fapiao OFD",
+        readonly=True,
+        copy=False,
+        help="The legal original of the e-Fapiao. The PDF is a copy for reading and emailing.",
+    )
     red_form_uuid = fields.Char(string="Red Form UUID", copy=False, index='btree_not_null')
     red_form_number = fields.Char(string="Red Form Number", copy=False)
     bureau_state = fields.Selection(selection=BUREAU_STATES, string="Tax Bureau State", copy=False)
-    red_fapiao_no = fields.Char(string="Red Fapiao Number", copy=False)
     amount_untaxed = fields.Float(string="Credit Price", copy=False)
     amount_tax = fields.Float(string="Credit Tax", copy=False)
     red_form_reason = fields.Selection(selection=RED_FORM_REASONS, string="Red Form Reason", copy=False)
     error_message = fields.Text(string="Error Details")
+
+    _serial_no_uniq = models.Constraint('UNIQUE(serial_no)', "A serial number can only be sent once.")
+
+    # ------------------------------------------------------------------
+    # Sending
+    # ------------------------------------------------------------------
+
+    def _l10n_cn_edi_attach_sent_data(self, values):
+        """Keep on the move the content about to be submitted under this document's serial number."""
+        self.ensure_one()
+        raw = json.dumps(values, ensure_ascii=False, indent=2, default=str).encode()
+        if self.sent_data_id:
+            self.sent_data_id.raw = raw
+            return
+        self.sent_data_id = self.env['ir.attachment'].create({
+            'name': f"{self.serial_no}.json",
+            'raw': raw,
+            'mimetype': 'application/json',
+            'res_model': 'account.move',
+            'res_id': self.move_id.id,
+        })
+
+    def _l10n_cn_edi_attach_fapiao_files(self, result):
+        """Attach the PDF and OFD of a provider result to the move. Return the attachments."""
+        self.ensure_one()
+        attachments = self.env['ir.attachment']
+        for kind, mimetype in (('pdf', 'application/pdf'), ('ofd', 'application/ofd')):
+            if result.get(kind):
+                attachment = self.env['ir.attachment'].create({
+                    'name': result.get(f'{kind}_filename') or f"{self.fapiao_no}.{kind}",
+                    'raw': result[kind],
+                    'mimetype': mimetype,
+                    'res_model': 'account.move',
+                    'res_id': self.move_id.id,
+                })
+                self[f'{kind}_id'] = attachment
+                attachments += attachment
+        return attachments
+
+    # ------------------------------------------------------------------
+    # Fapiao
+    # ------------------------------------------------------------------
+
+    def _l10n_cn_edi_set_sent(self, client):
+        """Lock the move while the provider holds its fapiao; the cron takes over after the client's follow-ups."""
+        self.ensure_one()
+        now = fields.Datetime.now()
+        self.write({'state': 'sent', 'sent_date': now})
+        self.move_id.l10n_cn_edi_state = 'sent'
+        self.env.ref('l10n_cn_edi.ir_cron_l10n_cn_edi_poll_invoices')._trigger(now + timedelta(seconds=sum(client.result_delays)))
+
+    def _l10n_cn_edi_set_unreachable(self, client, error):
+        self._l10n_cn_edi_set_sent(client)
+        self.move_id.message_post(body=self.env._(
+            "The e-Fapiao provider didn't answer (%(error)s). The fapiao may have been issued: Odoo checks with the provider.",
+            error=error,
+        ))
+
+    def _l10n_cn_edi_apply_fapiao_result(self, result, client):
+        """Record a fapiao result of the provider on this document and its move. Return an error message, or None."""
+        self.ensure_one()
+        move = self.move_id
+        if result.get('state') == 'issued':
+            self.write({
+                'state': 'issued',
+                'fapiao_no': result.get('fapiao_no'),
+                'fapiao_date': result.get('fapiao_date'),
+                'qr_code': result.get('qr_code'),
+                'error_message': False,
+            })
+            move.write({
+                'l10n_cn_edi_state': 'issued',
+                'l10n_cn_edi_fapiao_no': result.get('fapiao_no'),
+                'l10n_cn_edi_fapiao_date': result.get('fapiao_date'),
+            })
+            move.message_post(
+                body=self.env._("E-Fapiao issued successfully. Invoice No: %(fapiao)s", fapiao=result.get('fapiao_no')),
+                attachment_ids=self._l10n_cn_edi_attach_fapiao_files(result).ids,
+            )
+            if warning := move._l10n_cn_edi_build_totals_warning(result):
+                move.message_post(body=warning)
+            return None
+        if result.get('state') == 'sent':
+            if self.state != 'sent':
+                self._l10n_cn_edi_set_sent(client)
+            return None
+        error = result.get('error') or self.env._("Unexpected response from the e-Fapiao provider.")
+        # A dead order lets the next request use a new document, with a new serial number.
+        self.write({'state': 'cancelled' if result.get('new_serial') else 'failed', 'error_message': error})
+        move.l10n_cn_edi_state = 'failed'
+        move.message_post(body=error)
+        return error
+
+    def _l10n_cn_edi_query(self, client, just_submitted=False):
+        """Ask the provider for the current result of this document."""
+        self.ensure_one()
+        if self.kind == 'red_form':
+            return client.query_red_form(self)
+        if self.move_id.move_type == 'out_refund':
+            return client.query_direct_red(self, just_submitted=just_submitted)
+        return client.query_invoice(self, just_submitted=just_submitted)
+
+    # ------------------------------------------------------------------
+    # Red forms
+    # ------------------------------------------------------------------
 
     def _l10n_cn_edi_check_action_role(self, action):
         self.ensure_one()
@@ -79,13 +232,14 @@ class L10nCnEdiDocument(models.Model):
             return 'red_form_confirmed' if red_fapiao_no else 'red_form_pending'
         if bureau_state in BUREAU_STATES_PENDING:
             return 'red_form_pending'
-        return 'failed'
+        return 'cancelled'
 
     @api.model
     def _cron_check_red_form_status(self):
         """Poll the provider for red forms still pending confirmation, and pull inbound ones."""
         self._l10n_cn_edi_pull_inbound_red_forms()
         pending_docs = self.search([
+            ('kind', '=', 'red_form'),
             ('state', '=', 'red_form_pending'),
             ('red_form_uuid', '!=', False),
         ])
@@ -120,15 +274,16 @@ class L10nCnEdiDocument(models.Model):
             # Otherwise the bureau hasn't registered the form yet: still pending.
             return
         move = self.move_id
-        red_fapiao_no = result.get('red_fapiao_no') or self.red_fapiao_no
+        red_fapiao_no = result.get('red_fapiao_no') or self.fapiao_no
         state = self._l10n_cn_edi_state_from_bureau(bureau_state, red_fapiao_no)
         was_state = self.state
         self.write({
             'state': state,
             'bureau_state': bureau_state,
             'red_form_number': result.get('number') or self.red_form_number,
-            'red_fapiao_no': red_fapiao_no,
-            'error_message': result.get('error') if state == 'failed' else False,
+            'fapiao_no': red_fapiao_no,
+            'fapiao_date': result.get('red_fapiao_date') or self.fapiao_date,
+            'error_message': result.get('error') if state == 'cancelled' else False,
         })
         if state == was_state:
             return
@@ -140,7 +295,7 @@ class L10nCnEdiDocument(models.Model):
                 if result.get('red_fapiao_date'):
                     vals['l10n_cn_edi_fapiao_date'] = result['red_fapiao_date']
                 move.write(vals)
-                move._l10n_cn_edi_attach_fapiao_files(result, red_fapiao_no)
+                self._l10n_cn_edi_attach_fapiao_files(result)
                 move.activity_schedule(
                     'mail.mail_activity_data_todo',
                     summary=self.env._("Red Form has been approved and Red Fapiao has been issued, Please confirm Credit Note in Odoo accordingly"),
@@ -152,11 +307,10 @@ class L10nCnEdiDocument(models.Model):
                     summary=self.env._("Inbound Red Form %(number)s approved and issued. Please ensure a matching Credit Note is posted.", number=self.red_form_number),
                     user_id=move.create_uid.id,
                 )
-        elif state == 'failed':
+        elif state == 'cancelled':
             if move.move_type == 'out_refund':
-                # The form is void at the bureau: a new request needs a new serial.
+                # The form is void at the bureau: a new request gets a new document.
                 move.l10n_cn_edi_state = 'failed'
-                move._l10n_cn_edi_drop_serial()
             move.message_post(body=self.env._(
                 "Red Form rejected/cancelled. Tax bureau state: %(state)s",
                 state=dict(BUREAU_STATES).get(bureau_state, bureau_state),
@@ -215,10 +369,11 @@ class L10nCnEdiDocument(models.Model):
                 continue
             vals_list.append({
                 'move_id': bill.id,
+                'kind': 'red_form',
                 'state': self._l10n_cn_edi_state_from_bureau(form['bureau_state'], form.get('red_fapiao_no')),
                 'red_form_uuid': form['uuid'],
                 'red_form_number': form.get('number'),
-                'red_fapiao_no': form.get('red_fapiao_no'),
+                'fapiao_no': form.get('red_fapiao_no'),
                 'bureau_state': form['bureau_state'],
                 'amount_untaxed': form.get('amount_untaxed') or 0.0,
                 'amount_tax': form.get('amount_tax') or 0.0,
