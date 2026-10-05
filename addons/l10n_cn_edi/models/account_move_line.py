@@ -34,7 +34,11 @@ class AccountMoveLine(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if not vals.keys() <= {'sequence'}:
+        # What the fapiao carries; posting the credit note writes technical fields, and the amounts are rechecked then.
+        if vals.keys() & {
+            'move_id', 'display_type', 'product_id', 'name', 'quantity', 'price_unit', 'discount', 'tax_ids',
+            'product_uom_id', 'l10n_cn_tax_category_id',
+        }:
             self.move_id._l10n_cn_edi_check_red_lock()
             if vals.get('move_id'):
                 self.env['account.move'].browse(vals['move_id'])._l10n_cn_edi_check_red_lock()

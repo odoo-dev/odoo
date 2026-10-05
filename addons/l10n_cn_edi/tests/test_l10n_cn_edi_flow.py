@@ -675,6 +675,16 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         credit_note._compute_hide_post_button()
         self.assertFalse(credit_note.hide_post_button)
 
+    def test_credit_note_with_its_red_fapiao_posts(self):
+        credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
+        self.responses['supports_direct_red'] = True
+        self.responses['issue_direct_red'] = {'state': 'issued', 'fapiao_no': 'red-fapiao-789'}
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        credit_note.action_post()
+
+        self.assertRecordValues(credit_note, [{'state': 'posted', 'l10n_cn_edi_fapiao_no': 'red-fapiao-789'}])
+
     def test_direct_red_cron_uses_direct_query(self):
         credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
         self._set_sent(credit_note)
