@@ -282,6 +282,7 @@ class ResPartner(models.Model):
         EAS_MAPPING, and the current EAS is not consistent with the new country_code.
         """
         for partner in self:
+            print(partner)
             partner.peppol_eas = partner.peppol_eas
             country_code = partner._deduce_country_code()
             if country_code in EAS_MAPPING:
@@ -292,8 +293,11 @@ class ResPartner(models.Model):
                     for eas, field in eas_to_field.items():
                         if field and field in partner._fields:
                             value = partner._get_peppol_endpoint_value(country_code, field, eas)
+                            print(value)
                             if value and not partner._build_error_peppol_endpoint(eas, value):
                                 new_eas = eas
+                                print("eas :")
+                                print(eas)
                                 break
                     partner.peppol_eas = new_eas
 

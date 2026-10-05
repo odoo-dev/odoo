@@ -231,11 +231,11 @@ class ResPartner(models.Model):
         return res
 
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self and partner.peppol_verification_state != 'valid'])
         super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self and partner.peppol_verification_state != 'valid'])
         super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
