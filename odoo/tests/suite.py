@@ -19,7 +19,7 @@ import sys
 import warnings
 
 import odoo.modules
-from . import case
+from . import case, query_probe
 from .common import HttpCase
 from .result import stats_logger
 from unittest import util, BaseTestSuite, TestCase
@@ -39,12 +39,14 @@ class TestSuite(BaseTestSuite):
     """
 
     def run(self, result, debug=False):
+        query_probe.start()
         default_tests_run_count = int(os.environ.get('ODOO_TEST_FAILURE_RETRIES', '0')) + 1
         for test in self:
             if result.shouldStop:
                 break
             assert isinstance(test, (TestCase))
             self._tearDownPreviousClass(test, result)
+            query_probe.enter(test.__class__)
             odoo.modules.module.current_test = test
             self._handleClassSetUp(test, result)
             result._previousTestClass = test.__class__
@@ -83,6 +85,7 @@ class TestSuite(BaseTestSuite):
                             default_tests_run_count = 1
 
         self._tearDownPreviousClass(None, result)
+        query_probe.enter(None)
         odoo.modules.module.current_test = None
         return result
 

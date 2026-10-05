@@ -106,6 +106,7 @@ def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into']
 
 
 sql_counter: int = 0
+query_probe_hook = None
 
 MAX_IDLE_TIMEOUT = int(os.getenv("ODOO_DB_MAX_IDLE_TIMEOUT", "600"))
 
@@ -431,6 +432,8 @@ class Cursor(_CursorProtocol):
         # simple query count is always computed
         self.sql_log_count += 1
         sql_counter += 1
+        if query_probe_hook is not None:
+            query_probe_hook(self, query, params, delay)
 
         if hasattr(current_thread, 'query_count'):
             current_thread.query_count += 1

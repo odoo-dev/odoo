@@ -16,6 +16,7 @@ import logging
 import os
 import re
 import sys
+import time
 import typing
 from collections import OrderedDict, defaultdict
 from contextvars import ContextVar
@@ -282,6 +283,7 @@ class _SafeTransformer(ast.NodeTransformer):
 
 
 encoder_ctx = ContextVar('encoder_ctx')
+check_fallback_hook = None
 
 
 class _SafeChecker:
@@ -370,8 +372,8 @@ class _SafeChecker:
         try:
             self._encoder(obj, 0)
             return
-        except (ValueError, TypeError, KeyError):
-            pass
+        except (ValueError, TypeError, KeyError) as e:
+            fast_error, start = e, time.perf_counter()
 
         stack = [obj]
         seen = set()
@@ -393,6 +395,8 @@ class _SafeChecker:
                     continue
                 # Serialisation failure
                 _logger_runtime.warning('_json.c_make_encoder: %s %r', e, o)
+        if check_fallback_hook is not None:
+            check_fallback_hook(fast_error, len(seen), time.perf_counter() - start)
 
     def _default(self, obj):
         """ Dispatch to the default check-serialisation function of `obj`. """
