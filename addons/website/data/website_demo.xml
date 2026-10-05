@@ -596,7 +596,12 @@
                             #snippets_menu, #o_scroll > .o_panel > .o_panel_header {
                                 display: none !important;
                             }
-                            [data-oe-type="snippet"]:not([data-module-id])::before {
+                            /* Categories only exist for the editor menu and
+                               placeholders are for uninstalled modules */
+                            [data-o-snippet-group], [data-module-id] {
+                                display: none !important;
+                            }
+                            [data-oe-type="snippet"]::before {
                                 content: attr(name);
                                 display: block;
                                 padding: 16px;
@@ -610,9 +615,10 @@
                                 clear: both;
                             }
                         </style>
-                        <div id="wrap" class="oe_structure">
-                            <t t-call="website.snippets"/>
-                        </div>
+                        <t t-set="snippets_html"><t t-call=  #snippets_menu, #o_scroll > .o_panel > .o_panel_header {
+                                display: none !important;
+                            }"website.snippets"/></t>
+                        <div id="wrap" class="oe_structure" t-out="website._configure_snippets_debug_page(snippets_html)"/>
                     </t>
                 </t>
             </field>

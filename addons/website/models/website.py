@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import copy
 import fnmatch
 import functools
 import hashlib
@@ -687,6 +688,48 @@ class Website(models.CachedModel):
             self._set_background_options(el, customizations['background'])
 
         return
+
+    def _configure_snippets_debug_page(self, snippets_html):
+        """Configure the dynamic snippets of the snippets debug page the way the
+        editor does when they are dropped, so that they display records."""
+        root = html.fragment_fromstring(str(snippets_html), create_parent='div')
+        snippet_els = root.xpath("//div[@data-oe-snippet-id]/section[hasclass('s_dynamic')]")
+        filters = self.env['website.snippet.filter'].sudo().search(self.website_domain(), order='id')
+        if not snippet_els or not filters:
+            return snippets_html
+        View = self.env['ir.ui.view']
+        snippet_keys = {view.id: view.key for view in View.browse([int(el.getparent().get('data-oe-snippet-id')) for el in snippet_els])}
+        templates = {  # by template class
+            re.sub(r'.*\.dynamic_filter_template_', 's_', view.key): view
+            for view in View.search([('key', 'ilike', '.dynamic_filter_template_'), ('type', '=', 'qweb')])
+        }
+        model_filters = {f.model_name: f for f in filters[::-1]}  # oldest filter of each model
+        published_record_id = functools.cache(lambda model: self.env[model].search([('is_published', '=', True)], limit=1).id)
+
+        for el in snippet_els:
+            for preview_el in el.find_class('s_dialog_preview'):
+                preview_el.drop_tree()
+            if self._get_snippet_defaults(snippet_key := snippet_keys[int(el.getparent().get('data-oe-snippet-id'))]):
+                # Standalone copy, as `_preconfigure_snippet` uses absolute xpaths
+                snippet_el = copy.deepcopy(el)
+                self.sudo()._preconfigure_snippet(snippet_key, snippet_el, {})
+                el.getparent().replace(el, snippet_el)
+                continue
+            # The template is given by a "template class" on the snippet, its
+            # key also tells the model of the records to display.
+            template_class = next((c for c in el.get('class').split() if c in templates), None)
+            model_name = next((m for m in model_filters if template_class and f"_{m.replace('.', '_')}_" in templates[template_class].key), filters[0].model_name)
+            template_class = template_class or next((c for c, t in templates.items() if f"_{model_name.replace('.', '_')}_" in t.key and '_single_' not in t.key), None)
+            if not template_class:
+                continue
+            template = templates[template_class]
+            if '_single_' in template.key:
+                el.attrib.update({'data-snippet-model': model_name, 'data-snippet-res-id': str(published_record_id(model_name))})
+            else:
+                el.attrib.update({'data-filter-id': str(model_filters[model_name].id), 'data-number-of-records': str(model_filters[model_name].limit)})
+            el.attrib.update({k: v for k, v in etree.fromstring(template.arch_db).items() if k in ('data-number-of-elements', 'data-extra-classes', 'data-column-classes')})
+            el.attrib.update({'data-template-key': template.key, 'class': f"{el.get('class')} {template_class}"})
+        return Markup(''.join(etree.tostring(child, encoding='unicode', method='html') for child in root))
 
     def _set_background_options(self, el, background_options):
         snippet_classes = el.get('class').split()
