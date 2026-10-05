@@ -159,7 +159,7 @@ class CrmLead(models.Model):
     day_open = fields.Float('Days to Assign', compute='_compute_day_open', store=True)
     day_close = fields.Float('Days to Close', compute='_compute_day_close', store=True)
     date_last_stage_update = fields.Datetime(
-        'Last Stage Update', compute='_compute_date_last_stage_update', index=True, readonly=True, store=True)
+        'Last Stage Update', compute='_compute_date_last_stage_update', index=True, readonly=False, ui_readonly=True, store=True)
     date_conversion = fields.Datetime('Conversion Date', readonly=True)
     date_deadline = fields.Date('Expected Closing', help="Estimate of the date on which the opportunity will be won.")
     # Customer / contact

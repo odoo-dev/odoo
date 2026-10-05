@@ -16,7 +16,7 @@ class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
     billable_type = fields.Selection(selection='_selection_billable_type', string="Billable Type",
-        compute='_compute_project_billable_type', compute_sudo=True, store=True, readonly=True)
+        compute='_compute_project_billable_type', compute_sudo=True, store=True, readonly=False, ui_readonly=True)
 
     category_report = fields.Selection(
         [('revenues', 'Revenue'), ('costs', 'Costs')],

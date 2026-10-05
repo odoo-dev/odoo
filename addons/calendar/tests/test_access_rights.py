@@ -287,7 +287,8 @@ class TestAccessRights(TransactionCase):
             john_event = self.create_event(self.john, name='event', privacy=privacy, location='loc')
 
             # Ensure that uninvited admin can edit this type of event.
-            john_event.with_user(self.admin_user)._compute_user_can_edit()
+            john_event.invalidate_model()
+            john_event.with_user(self.admin_user).user_can_edit
             self.assertTrue(john_event.user_can_edit, f"Event of type {privacy} must be editable by uninvited admins.")
             john_event.with_user(self.admin_user).write({'name': 'update'})
             self.assertEqual(john_event.name, 'update', f"Simple write must be allowed for uninvited admins in {privacy} events.")
