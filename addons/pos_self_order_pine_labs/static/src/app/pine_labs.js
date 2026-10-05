@@ -26,7 +26,11 @@ export class PineLabs {
         if (paymentRequestResponse) {
             await this.paymentPolling(this.savedOrder);
         }
-        this.removePaymentHandler(["plutusTransactionReferenceID", "paymentRefNo"]);
+        this.removePaymentHandler([
+            "plutusTransactionReferenceID",
+            "paymentRefNo",
+            "pineLabsSignature",
+        ]);
     }
 
     async processPayment(order) {
@@ -93,6 +97,7 @@ export class PineLabs {
         const data = {
             plutusTransactionReferenceID: localStorage.getItem("plutusTransactionReferenceID"),
             payment_ref_no: localStorage.getItem("paymentRefNo"),
+            pine_labs_signature: localStorage.getItem("pineLabsSignature"),
             order_token: order.access_token,
         };
         this.stopInactivePayment().then(() => (this.paymentStopped = true));
@@ -147,6 +152,8 @@ export class PineLabs {
                 response.plutusTransactionReferenceID
             );
         response.payment_ref_no && localStorage.setItem("paymentRefNo", response.payment_ref_no);
+        response.pine_labs_signature &&
+            localStorage.setItem("pineLabsSignature", response.pine_labs_signature);
         return true;
     }
 

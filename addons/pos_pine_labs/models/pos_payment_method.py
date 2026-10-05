@@ -49,12 +49,15 @@ class PosPaymentMethod(models.Model):
         """
         Fetches payment status from the Pine Labs POS API.
 
-        :param dict data: Contains `plutusTransactionReferenceID` for the status request.
+        :param dict data: Contains `plutusTransactionReferenceID` for the status request, and optionally
+                          `transactionNumber`, which Pine Labs validates against the original transaction.
         :return: On success, returns `responseCode`, `status`, `plutusTransactionReferenceID`, and `data` (formatted transaction details). 
                 On failure, returns an error message.
         :rtype: dict
         """
         body = { 'PlutusTransactionReferenceID': data['plutusTransactionReferenceID'] }
+        if data.get('transactionNumber'):
+            body['TransactionNumber'] = data['transactionNumber']
         response = call_pine_labs(payment_method=self, endpoint='GetCloudBasedTxnStatus', payload=body)
         if response.get('ResponseCode') in [0, 1001]:
             formatted_transaction_data = { d['Tag']: d['Value'] for d in response['TransactionData'] } if response.get('ResponseCode') == 0 else {}
