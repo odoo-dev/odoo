@@ -19,45 +19,18 @@ class TestPointOfSaleFlow(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
 
-    #  TODO-PARP: remove (no use)
-    def setup_tags(self):
-        tags = self.env['account.account.tag'].create([
-            {
-                'name': f"tag{i}",
-                'applicability': 'taxes',
-                'country_id': self.company_data['company'].country_id.id,
-            }
-            for i in range(1, 5)
-        ])
-        self.twenty_dollars_with_15_excl.taxes_id = [Command.set(self.tax_sale_a.ids)]
-        self.tax_sale_a.invoice_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'base').write({'tag_ids': tags[0].ids})
-        self.tax_sale_a.invoice_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'tax').write({'tag_ids': tags[1].ids})
-        self.tax_sale_a.refund_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'base').write({'tag_ids': tags[2].ids})
-        self.tax_sale_a.refund_repartition_line_ids.filtered(
-            lambda l: l.repartition_type == 'tax').write({'tag_ids': tags[3].ids})
-
-        return tags
-
     def test_order_refund(self):
         self.pos_config_usd.open_ui()
 
         # The amount_total will be 30 with 3.52 taxes included
-        order, refund = self.create_backend_pos_order({
-            'line_data': [
-                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
-                {'product_id': self.twenty_dollars_with_10_incl.product_variant_id.id},
+        order = self.create_pos_order(
+            [
+                [self.ten_dollars_with_10_incl.product_variant_id],
+                [self.twenty_dollars_with_10_incl.product_variant_id],
             ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 10},
-                {'payment_method_id': self.bank_payment_method.id, 'amount': 20},
-            ],
-            'refund_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': -30},
-            ]
-        })
+            payments=[[self.cash_pm, 10], [self.bank_pm, 20]],
+        )
+        refund = self.refund_pos_order(order, self.cash_pm, -30)
 
         self.assertAlmostEqual(order.amount_total, order.amount_paid)
         self.assertEqual(refund.state, 'paid', "The refund is not marked as paid")
@@ -83,26 +56,26 @@ class TestPointOfSaleFlow(CommonPosTest):
             rest in cash that is rounded. This sum up to 10 paid, so the refund
             should be 10.
         """
-        self.account_cash_rounding_down.rounding = 5.0
+        account_cash_rounding_down = self.env['account.cash.rounding'].create({
+            'name': 'Rounding down',
+            'rounding': 5.0,
+            'rounding_method': 'DOWN',
+            'profit_account_id': self.company_data['default_account_revenue'].id,
+            'loss_account_id': self.company_data['default_account_expense'].id,
+        })
         self.pos_config_usd.write({
-            'rounding_method': self.account_cash_rounding_down.id,
+            'rounding_method': account_cash_rounding_down.id,
             'cash_rounding': True,
         })
+        product_tmpl = self.create_product_template('10 Dollars with 10%', 10.0, tax_ids=self.taxes['tax10'].ids)
 
         self.pos_config_usd.open_ui()
-        # order total will be 11.5 with 1.5 taxes excluded, with rounding 10 should be paid
-        order, refund = self.create_backend_pos_order({
-            'line_data': [
-                {'product_id': self.ten_dollars_with_15_excl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.bank_payment_method.id, 'amount': 5},
-                {'payment_method_id': self.cash_payment_method.id},
-            ],
-            'refund_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': -10},
-            ]
-        })
+        # order total will be 11.0 with 1.0 taxes excluded, with rounding 10 should be paid
+        order = self.create_pos_order(
+            [[product_tmpl.product_variant_id]],
+            [[self.bank_pm, 5], [self.cash_pm, 5]],
+        )
+        refund = self.refund_pos_order(order, self.cash_pm, -10)
 
         self.assertEqual(order.amount_paid, 10.0)
         self.assertEqual(order.state, 'paid')
@@ -117,28 +90,16 @@ class TestPointOfSaleFlow(CommonPosTest):
             'name': 'Child Partner',
             'parent_id': parent_partner.id
         })
-        order_1, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': parent_partner.id,
-            },
-            'line_data': [
-                {'product_id': self.twenty_dollars_with_15_incl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.credit_payment_method.id, 'amount': 20},
-            ],
-        })
-        order_2, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': child_partner.id,
-            },
-            'line_data': [
-                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.credit_payment_method.id, 'amount': 10},
-            ],
-        })
+        order_1 = self.create_pos_order(
+            [[self.twenty_dollars_with_15_incl.product_variant_id]],
+            payments=[[self.credit_pm, 20]],
+            customer=parent_partner,
+        )
+        order_2 = self.create_pos_order(
+            [[self.ten_dollars_with_10_incl.product_variant_id]],
+            payments=[[self.credit_pm, 10]],
+            customer=child_partner,
+        )
         self.assertEqual(len(order_1), 1, "Expected 1 order directly on parent partner")
         self.assertEqual(len(order_2), 1, "Expected 1 order directly on child partner")
         self.assertEqual(parent_partner.pos_order_count, 2, "Parent partner should see 2 orders including child’s")
@@ -150,14 +111,10 @@ class TestPointOfSaleFlow(CommonPosTest):
         - We do not refund more than the initial order's quantity"""
         self.pos_config_usd.open_ui()
 
-        order, _ = self.create_backend_pos_order({
-            'line_data': [
-                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 10},
-            ]
-        })
+        order = self.create_pos_order(
+            [[self.ten_dollars_with_10_incl.product_variant_id]],
+            payments=[[self.cash_pm, 10]],
+        )
 
         refund_action = order.refund()
         refund = self.env['pos.order'].browse(refund_action['res_id'])
@@ -168,19 +125,14 @@ class TestPointOfSaleFlow(CommonPosTest):
                     line.qty = -3
 
     def test_order_to_invoice_no_tax(self):
-        order, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_mobt.id,
-                'pricelist_id': self.partner_mobt.property_product_pricelist.id,
-            },
-            'line_data': [
-                {'product_id': self.ten_dollars_no_tax.product_variant_id.id},
-                {'product_id': self.twenty_dollars_no_tax.product_variant_id.id},
+        order = self.create_pos_order(
+            [
+                [self.ten_dollars_no_tax.product_variant_id],
+                [self.twenty_dollars_no_tax.product_variant_id],
             ],
-            'payment_data': [
-                {'payment_method_id': self.bank_payment_method.id, 'amount': 30},
-            ],
-        })
+            payments=[[self.bank_pm, 30]],
+            customer=self.partner_mobt,
+        )
         self.assertEqual(order.state, 'paid', "Order should be in paid state.")
         self.assertFalse(order.account_move, 'Invoice should not be attached to order yet.')
 
@@ -266,20 +218,16 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.twenty_dollars_no_tax.product_variant_id.write({
             'is_storable': True,
         })
-        order, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_adgu.id,
-                'to_invoice': True,
-            },
-            'line_data': [
-                {'product_id': self.twenty_dollars_no_tax.product_variant_id.id},
+        order = self.create_pos_order(
+            [[self.twenty_dollars_no_tax.product_variant_id]],
+            payments=[
+                [self.cash_pm, 10],
+                [self.credit_pm, 20],
+                [self.cash_pm, -10],
             ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 10},
-                {'payment_method_id': self.credit_payment_method.id, 'amount': 20},
-                {'payment_method_id': self.cash_payment_method.id, 'amount': -10},
-            ],
-        })
+            customer=self.partner_adgu,
+            to_invoice=True,
+        )
         self.assertEqual(order.account_move.amount_residual, 20)
 
     def test_order_pos_tax_same_as_company(self):
@@ -293,20 +241,15 @@ class TestPointOfSaleFlow(CommonPosTest):
         account = self.partner_jcb.property_account_receivable_id
         current_session.company_id.account_default_pos_receivable_account_id = account
 
-        order, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_jcb.id,
-                'to_invoice': True,
-                'pricelist_id': self.partner_jcb.property_product_pricelist.id,
-            },
-            'line_data': [
-                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
-                {'product_id': self.twenty_dollars_with_10_incl.product_variant_id.id},
+        order = self.create_pos_order(
+            [
+                [self.ten_dollars_with_10_incl.product_variant_id],
+                [self.twenty_dollars_with_10_incl.product_variant_id],
             ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 30},
-            ],
-        })
+            payments=[[self.cash_pm, 30]],
+            customer=self.partner_jcb,
+            to_invoice=True,
+        )
 
         self.assertEqual(order.account_move.amount_residual, 0)
 
@@ -327,18 +270,11 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
 
         self.pos_config_usd.open_ui()
-        order, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_jcb.id,
-                'pricelist_id': self.partner_jcb.property_product_pricelist.id,
-            },
-            'line_data': [
-                {'product_id': self.twenty_dollars_with_10_incl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 20},
-            ],
-        })
+        order = self.create_pos_order(
+            [[self.twenty_dollars_with_10_incl.product_variant_id]],
+            payments=[[self.cash_pm, 20]],
+            customer=self.partner_jcb,
+        )
 
         order.with_user(pos_user).action_pos_order_invoice()
 
@@ -353,21 +289,13 @@ class TestPointOfSaleFlow(CommonPosTest):
            linked to the original invoice."""
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
-        self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_adgu.id,
-                'to_invoice': True,
-            },
-            'line_data': [
-                {'product_id': self.twenty_dollars_with_15_incl.product_variant_id.id}
-            ],
-            'payment_data': [
-                {'payment_method_id': self.bank_payment_method.id, 'amount': 20}
-            ],
-            'refund_data': [
-                {'payment_method_id': self.bank_payment_method.id, 'amount': -20}
-            ]
-        })
+        order = self.create_pos_order(
+            [[self.twenty_dollars_with_15_incl.product_variant_id]],
+            payments=[[self.bank_pm, 20]],
+            customer=self.partner_adgu,
+            to_invoice=True,
+        )
+        self.refund_pos_order(order, self.bank_pm, -20)
 
         current_session.close_session_from_ui()
         invoices = self.env['account.move'].search([('move_type', '=', 'out_invoice')], order='id desc', limit=1)
@@ -391,23 +319,26 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.assertFalse(loaded_data['pos.config']['records'][0]['pricelist_id'], False)
 
     def test_refund_rounding_backend(self):
-        self.account_cash_rounding_up.rounding = 5.0
+        account_cash_rounding_up = self.env['account.cash.rounding'].create({
+            'name': 'Rounding up',
+            'rounding': 5.0,
+            'rounding_method': 'UP',
+            'profit_account_id': self.company_data['default_account_revenue'].id,
+            'loss_account_id': self.company_data['default_account_expense'].id,
+        })
         self.pos_config_usd.write({
-            'rounding_method': self.account_cash_rounding_up.id,
+            'rounding_method': account_cash_rounding_up.id,
             'cash_rounding': True,
             'only_round_cash_method': True,
         })
-        _, refund = self.create_backend_pos_order({
-            'line_data': [
-                {'product_id': self.twenty_dollars_with_15_excl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': 23.0}
-            ],
-            'refund_data': [
-                {'payment_method_id': self.cash_payment_method.id}
-            ]
-        })
+        tax_15_excl = self.env['account.tax'].create({'name': 'Tax 15% Excl', 'amount': 15})
+        twenty_dollars_with_15_excl = self.create_product_template('20 Dollars with 15%', 20.0, tax_ids=tax_15_excl.ids)
+        self.pos_config_usd.open_ui()
+        order = self.create_pos_order(
+            [[twenty_dollars_with_15_excl.product_variant_id]],
+            payments=[[self.cash_pm, 23.0]],
+        )
+        refund = self.refund_pos_order(order, self.cash_pm, -25.0)
 
         current_session = self.pos_config_usd.current_session_id
         current_session.close_session_from_ui()
@@ -1124,12 +1055,11 @@ class TestPointOfSaleFlow(CommonPosTest):
     def test_add_two_lines_with_same_uuid_through_sync_from_ui(self):
         """Test that adding two lines with the same UUID doesn't cause issues."""
         self.pos_config_usd.open_ui()
-        order_data = {
-            'line_data': [
-                {'product_id': self.product.product_variant_id.id},
-            ],
-        }
-        order, _ = self.create_backend_pos_order({**order_data})
+        order = self.create_pos_order(
+            [[self.product.product_variant_id]],
+            payments=[],
+            state='draft',
+        )
         sync_from_ui_values = {
             "access_token": order.access_token,
             "date_order": fields.Datetime.to_string(fields.Datetime.now()),
@@ -1170,18 +1100,11 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.pos_config_usd.open_ui()
 
         # Create an order with negative qty only (no Refund action → is_refund stays False)
-        order, _ = self.create_backend_pos_order({
-            'order_data': {
-                'partner_id': self.partner_mobt.id,
-                'pricelist_id': self.pos_config_usd.pricelist_id.id,
-            },
-            'line_data': [
-                {'product_id': self.ten_dollars_no_tax.product_variant_id.id, 'qty': -1},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.cash_payment_method.id, 'amount': -10},
-            ],
-        })
+        order = self.create_pos_order(
+            [[self.ten_dollars_no_tax.product_variant_id, -1]],
+            payments=[[self.cash_pm, -10]],
+            customer=self.partner_mobt,
+        )
 
         self.assertEqual(order.state, 'paid')
         self.assertLess(order.amount_total, 0, 'Order total should be negative (manual refund).')
@@ -1204,18 +1127,15 @@ class TestPointOfSaleFlow(CommonPosTest):
         shows a base amount signed for the opposite direction than the tax leg, which is
         confusing and, for tax returns computed from `tax_base_amount`, incorrect.
         """
-        order_data = {
-            'line_data': [
-                {'product_id': self.twenty_dollars_with_15_excl.product_variant_id.id},
-            ],
-            'payment_data': [
-                {'payment_method_id': self.bank_payment_method.id, 'amount': 23},
-            ],
-        }
-
+        tax_15_excl = self.env['account.tax'].create({'name': 'Tax 15% Excl', 'amount': 15})
+        twenty_dollars_with_15_excl = self.create_product_template('20 Dollars with 15%', 20.0, tax_ids=tax_15_excl.ids)
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
-        order, _ = self.create_backend_pos_order({**order_data, 'order_data': {'to_invoice': False}})
+        order = self.create_pos_order(
+            [[twenty_dollars_with_15_excl.product_variant_id]],
+            payments=[[self.bank_pm, 23]],
+            to_invoice=False,
+        )
         current_session.close_session_from_ui()
         self.assertEqual(current_session.state, 'closed')
 
@@ -1436,12 +1356,15 @@ class TestPointOfSaleFlow(CommonPosTest):
             f"Order name should contain '-{current_month}', got: {order.name}")
 
     def test_order_edit_logs(self):
-        order, _ = self.create_backend_pos_order({
-            'line_data': [
-                {'product_id': self.ten_dollars_no_tax.product_variant_id.id, 'qty': 2, 'full_product_name': self.ten_dollars_no_tax.name},
-                {'product_id': self.twenty_dollars_no_tax.product_variant_id.id, 'full_product_name': self.twenty_dollars_no_tax.name}
+        self.pos_config_usd.open_ui()
+        order = self.create_pos_order(
+            [
+                [self.ten_dollars_no_tax.product_variant_id, 2],
+                [self.twenty_dollars_no_tax.product_variant_id],
             ],
-        })
+            payments=[],
+            state='draft',
+        )
         order.lines[0].qty = 1
         order.lines[1].unlink()
         logged_messages = order.message_ids.mapped('body')
@@ -1489,18 +1412,22 @@ class TestPointOfSaleFlow(CommonPosTest):
             AccountTax._add_tax_details_in_base_lines(base_lines, company)
             AccountTax._round_base_lines_tax_details(base_lines, company)
             line = AccountTax._prepare_global_discount_lines(base_lines, company, 'percent', 10.0)[0]
-            return {
-                'product_id': product.id,
-                'qty': line['quantity'],
-                'price_unit': company.currency_id.round(line['price_unit']),
-                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(line),
-            }
+            return [
+                product,
+                line['quantity'],
+                0.0,
+                {
+                    'price_unit': company.currency_id.round(line['price_unit']),
+                    'extra_tax_data': AccountTax._export_base_line_extra_tax_data(line),
+                },
+            ]
 
+        self.pos_config_usd.open_ui()
         order, refund = (
-            self.create_backend_pos_order({
-                'order_data': {'is_refund': quantity < 0},
-                'line_data': [{'product_id': product.id, 'qty': quantity}, discount_line(quantity)],
-            })[0]
+            self.create_pos_order(
+                [[product, quantity], discount_line(quantity)],
+                is_refund=(quantity < 0),
+            )
             for quantity in (2, -2)
         )
         self.assertAlmostEqual(

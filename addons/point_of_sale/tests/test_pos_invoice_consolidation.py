@@ -8,7 +8,7 @@ from odoo.addons.point_of_sale.tests.common import CommonPosTest, TestPoSCommon
 # TODO-PARP: Move tests and remove File
 
 @tagged('post_install', '-at_install')
-class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
+class TestPosInvoiceConsolidation(CommonPosTest):
 
     _test_user_groups = None  # FIXME list needed groups
 
