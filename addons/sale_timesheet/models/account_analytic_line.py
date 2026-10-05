@@ -239,7 +239,7 @@ class AccountAnalyticLine(models.Model):
 
         company = self.env['res.company'].browse(vals.get('company_id'))
         accounts = self.env['account.analytic.account'].browse([
-            int(account_id) for account_id in next(iter(distribution)).split(',')
+            int(account_id) for account_id in next(iter(distribution)).split(',') if account_id.isdigit()
         ]).exists()
 
         has_one_project_main_account = len(accounts) == 1 and accounts[0] == self.env['project.project'].sudo().browse(vals.get('project_id')).account_id

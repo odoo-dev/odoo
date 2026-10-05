@@ -52,9 +52,9 @@ class AnalyticMixin(models.AbstractModel):
             return []
 
         if isinstance(distributions, (list, tuple, set)):
-            return {int(_id) for distribution in distributions for key in (distribution or {}) for _id in key.split(',')}
+            return {int(_id) for distribution in distributions for key in (distribution or {}) for _id in key.split(',') if _id.isdigit()}
         else:
-            return {int(_id) for key in (distributions or {}) for _id in key.split(',')}
+            return {int(_id) for key in (distributions or {}) for _id in key.split(',') if _id.isdigit()}
 
     @api.depends('analytic_distribution')
     def _compute_distribution_analytic_account_ids(self):
@@ -187,7 +187,7 @@ class AnalyticMixin(models.AbstractModel):
             decimal_precision = self.env['decimal.precision'].precision_get('Percentage Analytic')
             distribution_by_root_plan = {}
             for analytic_account_ids, percentage in (self.analytic_distribution or {}).items():
-                for analytic_account in self.env['account.analytic.account'].browse(map(int, analytic_account_ids.split(","))).exists():
+                for analytic_account in self.env['account.analytic.account'].browse(int(aid) for aid in analytic_account_ids.split(",") if aid.isdigit()).exists():
                     root_plan = analytic_account.root_plan_id
                     distribution_by_root_plan[root_plan.id] = distribution_by_root_plan.get(root_plan.id, 0) + percentage
 
@@ -201,6 +201,7 @@ class AnalyticMixin(models.AbstractModel):
             vals['analytic_distribution'] = vals.get('analytic_distribution') and {
                 account_id: float_round(distribution, decimal_precision) if account_id != '__update__' else distribution
                 for account_id, distribution in vals['analytic_distribution'].items()
+                if account_id == '__update__' or any(aid.isdigit() for aid in account_id.split(','))
             }
         return vals
 
@@ -220,7 +221,7 @@ class AnalyticMixin(models.AbstractModel):
         for old_key, old_val in old_distribution.items():
             remaining_key = tuple(sorted(
                 account.id
-                for account in self.env['account.analytic.account'].browse(int(aid) for aid in old_key.split(','))
+                for account in self.env['account.analytic.account'].browse(int(aid) for aid in old_key.split(',') if aid.isdigit())
                 if account.plan_id.root_id in non_changing_plans
             ))
             if remaining_key:
@@ -232,7 +233,7 @@ class AnalyticMixin(models.AbstractModel):
         for new_key, new_val in new_distribution.items():
             remaining_key = tuple(sorted(
                 account.id
-                for account in self.env['account.analytic.account'].browse(int(aid) for aid in new_key.split(','))
+                for account in self.env['account.analytic.account'].browse(int(aid) for aid in new_key.split(',') if aid.isdigit())
                 if account.plan_id.root_id not in non_changing_plans
             ))
             if remaining_key:

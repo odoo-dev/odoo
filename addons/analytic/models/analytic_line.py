@@ -259,7 +259,7 @@ class AccountAnalyticLine(models.Model):
             vals_list = [
                 {amount_fname: line[amount_fname] * percent / 100} | empty_account | {
                     account.plan_id._column_name(): account.id
-                    for account in self.env['account.analytic.account'].browse(int(aid) for aid in account_ids.split(','))
+                    for account in self.env['account.analytic.account'].browse(int(aid) for aid in account_ids.split(',') if aid.isdigit())
                 }
                 for account_ids, percent in final_distribution.items()
             ]

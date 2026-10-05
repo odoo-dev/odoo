@@ -1557,7 +1557,7 @@ class AccountMoveLine(models.Model):
             if line.display_type == 'product' or not line.move_id.is_invoice(include_receipts=True):
                 related_distribution = line._related_analytic_distribution()
                 root_plans = self.env['account.analytic.account'].browse(
-                    list({int(account_id) for ids in related_distribution for account_id in ids.split(',') if account_id.strip()})
+                    list({int(account_id) for ids in related_distribution for account_id in ids.split(',') if account_id.isdigit()})
                 ).exists().root_plan_id
 
                 arguments = frozendict(line._get_analytic_distribution_arguments(root_plans))
@@ -3535,7 +3535,7 @@ class AccountMoveLine(models.Model):
         account_field_values = {}
         decimal_precision = self.env['decimal.precision'].precision_get('Percentage Analytic')
         amount = 0
-        for account in self.env['account.analytic.account'].browse(map(int, account_ids.split(","))).exists():
+        for account in self.env['account.analytic.account'].browse(int(aid) for aid in account_ids.split(",") if aid.isdigit()).exists():
             distribution_plan = distribution_on_each_plan.get(account.root_plan_id, 0) + distribution
             if float_compare(distribution_plan, 100, precision_digits=decimal_precision) == 0:
                 amount = -self.balance * (100 - distribution_on_each_plan.get(account.root_plan_id, 0)) / 100.0

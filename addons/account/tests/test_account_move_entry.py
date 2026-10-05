@@ -1533,3 +1533,24 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
         line = invoice.invoice_line_ids.filtered(lambda l: l.product_id == self.product_a)[:1]
         self.assertEqual(line.name, "product_a\nBouteille d'eau")
+from odoo.tests import tagged
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+
+@tagged('post_install', '-at_install')
+class TestEmptyAnalyticDistributionKey(AccountTestInvoicingCommon):
+    def test_empty_analytic_distribution_key(self):
+        move = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                (0, 0, {
+                    'name': 'test line',
+                    'price_unit': 100.0,
+                    'analytic_distribution': {'': 100.0},
+                })
+            ]
+        })
+        # The key '' is invalid, the fix should not raise an error when posting
+        move.action_post()
+        self.assertEqual(move.state, 'posted')
+
