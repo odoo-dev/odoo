@@ -123,6 +123,10 @@ class L10nCnEdiClient:
         """Fetch the result of a direct-red invoice previously accepted as 'sent'."""
         raise NotImplementedError
 
+    def query_invoices(self, documents, just_submitted=False):
+        """Return ``{document: invoice result}`` for fapiao ``documents``; providers that can batch override this."""
+        return {document: self.query_invoice(document, just_submitted=just_submitted) for document in documents}
+
     def query_invoice(self, document, just_submitted=False):
         """
         Fetch the current result of a fapiao that was accepted as 'sent'.

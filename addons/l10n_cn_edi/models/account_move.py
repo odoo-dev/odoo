@@ -553,12 +553,12 @@ class AccountMove(models.Model):
             if not pending:
                 break
             client.wait(delay)
-            for doc in pending:
-                try:
-                    result = client.query_invoice(doc, just_submitted=True)
-                except UserError as e:
-                    _logger.warning("E-Fapiao: could not follow up on invoice %s: %s", doc.move_id.name, e)
-                    continue
+            try:
+                results = client.query_invoices(pending, just_submitted=True)
+            except UserError as e:
+                _logger.warning("E-Fapiao: could not follow up on invoices %s: %s", pending.move_id.mapped('name'), e)
+                continue
+            for doc, result in results.items():
                 if error := doc._l10n_cn_edi_apply_fapiao_result(result, client):
                     errors[doc.move_id] = error
         return errors
@@ -640,7 +640,8 @@ class AccountMove(models.Model):
             except UserError as e:
                 _logger.warning("E-Fapiao: could not poll the fapiao of company %s: %s", company.name, e)
                 continue
-            for doc in company_docs:
+            direct_red = company_docs.filtered(lambda doc: doc.move_id.move_type == 'out_refund')
+            for doc in direct_red:
                 just_submitted = bool(doc.sent_date and doc.sent_date > grace_start)
                 try:
                     with self.env.cr.savepoint():
@@ -649,6 +650,23 @@ class AccountMove(models.Model):
                     _logger.warning("E-Fapiao: could not poll invoice %s: %s", doc.move_id.name, e)
                 if not self.env['ir.cron']._commit_progress(1):
                     return
+            # The others in one go per submission age, for the providers that batch their queries.
+            for just_submitted, docs_batch in (company_docs - direct_red).grouped(
+                lambda doc: bool(doc.sent_date and doc.sent_date > grace_start),
+            ).items():
+                try:
+                    results = client.query_invoices(docs_batch, just_submitted=just_submitted)
+                except UserError as e:
+                    _logger.warning("E-Fapiao: could not poll invoices %s: %s", docs_batch.move_id.mapped('name'), e)
+                    continue
+                for doc, result in results.items():
+                    try:
+                        with self.env.cr.savepoint():
+                            doc._l10n_cn_edi_apply_fapiao_result(result, client)
+                    except UserError as e:
+                        _logger.warning("E-Fapiao: could not record the fapiao of invoice %s: %s", doc.move_id.name, e)
+                    if not self.env['ir.cron']._commit_progress(1):
+                        return
 
     # ------------------------------------------------------------------
     # Serial numbers

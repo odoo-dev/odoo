@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 import requests
 
 from odoo.exceptions import UserError
+from odoo.tools import split_every
 
 from odoo.addons.l10n_cn_edi.models.l10n_cn_edi_document import (
     BUREAU_STATES,
@@ -59,7 +60,8 @@ SELLER, BUYER = '0', '1'  # identity / applySource
 RED_REASONS = {'01': '2', '02': '1', '03': '3', '04': '4'}
 RED_FORM_APPLYING, RED_FORM_APPLICATION_FAILED = '15', '16'  # 申请中, 申请失败: Nuonuo's own
 BUREAU_STATES_ALL = dict(BUREAU_STATES)
-RED_FORM_PAGE_SIZE = 50  # the most Nuonuo returns per page
+RED_FORM_PAGE_SIZE = 50
+QUERY_BATCH_SIZE = 50  # the most Nuonuo returns per page
 
 # The drawer's tax bureau session (联调参考 4.2, 4.12, 4.13).
 GET_CERTIFICATION_STATUS = 'nuonuo.OpeMplatform.getCertificationStatus'
@@ -346,19 +348,47 @@ class NuonuoClient(L10nCnEdiClient):
     def query_invoice(self, document, just_submitted=False):
         return self._query(document.serial_no, missing_is_failure=not just_submitted)
 
+    def query_invoices(self, documents, just_submitted=False):
+        # queryInvoiceResult takes up to 50 orders at once.
+        results = {}
+        for batch in split_every(QUERY_BATCH_SIZE, documents.ids, documents.browse):
+            invoices = self._query_orders(batch.mapped('serial_no'))
+            for document in batch:
+                results[document] = self._order_result(
+                    invoices.get(document.serial_no), document.serial_no, missing_is_failure=not just_submitted,
+                )
+        return results
+
     def _query(self, order_no, missing_is_failure):
+        return self._order_result(self._query_orders([order_no]).get(order_no), order_no, missing_is_failure)
+
+    def _query_orders(self, order_nos):
+        """Return Nuonuo's invoices of ``order_nos`` by order number; unknown orders are left out."""
         env = self.company.env
-        body = self._call('nuonuo.OpeMplatform.queryInvoiceResult', {'orderNos': [order_no], 'isOfferInvoiceDetail': '0'})
+        body = self._call('nuonuo.OpeMplatform.queryInvoiceResult', {'orderNos': order_nos, 'isOfferInvoiceDetail': '0'})
         code = body.get('code')
         if code == INVOICE_NOT_FOUND:
+            return {}
+        if code != SUCCESS:
+            raise UserError(env._(
+                "Nuonuo could not report on orders %(orders)s (%(code)s): %(message)s",
+                orders=', '.join(order_nos),
+                code=code,
+                message=body.get('describe') or '',
+            ))
+        result = body.get('result') or []
+        result = result if isinstance(result, list) else [result]
+        if len(order_nos) == 1 and len(result) == 1:
+            return {order_nos[0]: result[0]}
+        return {invoice.get('orderNo'): invoice for invoice in result}
+
+    def _order_result(self, invoice, order_no, missing_is_failure):
+        env = self.company.env
+        if invoice is None:
             # Right after submitting, Nuonuo may not know the order yet.
             if not missing_is_failure:
                 return {'state': 'sent'}
             return {'state': 'failed', 'error': env._("Nuonuo has no fapiao for order %(order)s. Please send it again.", order=order_no)}
-        if code != SUCCESS:
-            raise UserError(env._("Nuonuo could not report on order %(order)s (%(code)s): %(message)s", order=order_no, code=code, message=body.get('describe') or ''))
-        result = body.get('result') or [{}]
-        invoice = result[0] if isinstance(result, list) else result
         status = str(invoice.get('status') or '')
         if status == STATUS_ISSUED:
             return self._issued_result(invoice)

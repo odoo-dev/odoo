@@ -269,12 +269,12 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
     def test_poll_cron_stops_when_its_time_is_up(self):
         invoices = self._create_posted_invoice() + self._create_posted_invoice()
         self._set_sent(invoices)
-        self.responses['query_invoice'] = {'state': 'sent'}
+        self.responses['query_invoice'] = {'state': 'issued', 'fapiao_no': '24442000000071309399'}
         self.commit_progress.return_value = 0
 
         self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
 
-        self.assertEqual(len([method for method, _args in self.client.calls if method == 'query_invoice']), 1)
+        self.assertEqual(sorted(invoices.mapped('l10n_cn_edi_state')), ['issued', 'sent'])
 
     def test_lapsed_session_holds_the_batch_for_login(self):
         invoices = self._create_posted_invoice() + self._create_posted_invoice()

@@ -288,3 +288,15 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
                 result = client.query_invoice(self._fapiao(invoice))
 
                 self.assertEqual((result['state'], result['new_serial']), ('failed', True))
+
+    def test_cron_queries_pending_fapiao_in_one_call(self):
+        issued, unknown = self._post_invoice(), self._post_invoice()
+        self._sent_fapiao(issued, 'B_ISSUED')
+        self._sent_fapiao(unknown, 'B_UNKNOWN')
+        self._answer(QUERY, {'code': 'E0000', 'result': [{**ISSUED['result'][0], 'orderNo': 'B_ISSUED'}]})
+
+        self.env['account.move']._cron_l10n_cn_edi_poll_invoices()
+
+        self.assertEqual(len(self._requests_for(QUERY)), 1)
+        self.assertCountEqual(self._requests_for(QUERY)[0]['payload']['orderNos'], ['B_ISSUED', 'B_UNKNOWN'])
+        self.assertEqual((issued + unknown).mapped('l10n_cn_edi_state'), ['issued', 'failed'])
