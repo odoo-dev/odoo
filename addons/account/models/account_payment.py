@@ -465,7 +465,12 @@ class AccountPayment(models.Model):
             if payment.journal_id.company_id not in payment.company_id.parent_ids:
                 payment.company_id = (payment.journal_id.company_id or self.env.company)._accessible_branches()[:1]
 
-    @api.depends('reconciled_invoice_ids.payment_state', 'reconciled_bill_ids.payment_state', 'move_id.line_ids.amount_residual')
+    @api.depends(
+        'invoice_ids.payment_state',
+        'move_id.line_ids.matched_debit_ids.debit_move_id.move_id.payment_state',
+        'move_id.line_ids.matched_credit_ids.credit_move_id.move_id.payment_state',
+        'move_id.line_ids.amount_residual',
+    )
     def _compute_state(self):
         payments_is_matched_to_recompute = self.env['account.payment']
         for payment in self:

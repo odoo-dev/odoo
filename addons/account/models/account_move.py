@@ -1187,7 +1187,12 @@ class AccountMove(models.Model):
             move.amount_residual_signed = total_residual
             move.amount_total_in_currency_signed = abs(move.amount_total) if move.move_type == 'entry' else -(sign * move.amount_total)
 
-    @api.depends('amount_residual', 'move_type', 'state', 'company_id', 'reconciled_payment_ids.state')
+    @api.depends(
+        'amount_residual', 'move_type', 'state', 'company_id',
+        'matched_payment_ids.state',
+        'line_ids.matched_debit_ids.debit_move_id.move_id.origin_payment_id.state',
+        'line_ids.matched_credit_ids.credit_move_id.move_id.origin_payment_id.state',
+    )
     def _compute_payment_state(self):
         groups = self.grouped(lambda move:
             'legacy' if move.payment_state == 'invoicing_legacy' else
