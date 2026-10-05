@@ -26,7 +26,7 @@ class AccountMoveLine(models.Model):
     def _compute_l10n_cn_tax_category_id(self):
         """ Default to the product classification if any """
         for line in self:
-            line.l10n_cn_tax_category_id = line.product_id.product_tmpl_id.l10n_cn_tax_category_id if line.product_id else False
+            line.l10n_cn_tax_category_id = line.product_id.l10n_cn_tax_category_id
 
     @api.model_create_multi
     def create(self, vals_list):

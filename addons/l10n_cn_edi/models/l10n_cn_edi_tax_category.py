@@ -13,8 +13,8 @@ class L10nCnEdiTaxCategory(models.Model):
 
     @api.depends('code', 'name')
     def _compute_display_name(self):
-        for record in self:
-            if record.code and record.name:
-                record.display_name = f"{record.code} {record.name}"
+        for category in self:
+            if category.code and category.name:
+                category.display_name = f"{category.code} {category.name}"
             else:
-                record.display_name = record.name or record.code
+                category.display_name = category.name or category.code

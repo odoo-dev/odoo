@@ -12,7 +12,7 @@ confirmation forms (红字确认单) for credit notes, on both the seller and th
 This module holds the flow, states and screens. It talks to the tax platform
 through a provider module (e.g. China - E-Fapiao (Nuonuo)); install exactly one.
     """,
-    'depends': ['l10n_cn', 'account', 'phone_validation'],
+    'depends': ['l10n_cn', 'phone_validation'],
     'data': [
         'security/ir.access.csv',
         'data/ir_cron.xml',

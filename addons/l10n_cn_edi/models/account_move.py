@@ -64,7 +64,6 @@ class AccountMove(models.Model):
         inverse_name='move_id',
         string="E-Fapiao Documents",
     )
-    l10n_cn_edi_is_needed = fields.Boolean(compute='_compute_l10n_cn_edi_is_needed')
     l10n_cn_edi_red_form_required = fields.Boolean(compute='_compute_l10n_cn_edi_red_form_required')
     l10n_cn_edi_date_warning = fields.Char(
         string="Date Consistency Warning",
@@ -137,16 +136,6 @@ class AccountMove(models.Model):
             ).sorted('id', reverse=True)[:1]
             # Without a red form, the reason is the user's to choose.
             move.l10n_cn_edi_red_form_reason = latest_doc.red_form_reason if latest_doc else move.l10n_cn_edi_red_form_reason
-
-    @api.depends('country_code', 'move_type', 'state', 'l10n_cn_edi_state')
-    def _compute_l10n_cn_edi_is_needed(self):
-        for move in self:
-            move.l10n_cn_edi_is_needed = (
-                move.country_code == 'CN'
-                and move.move_type in ('out_invoice', 'out_refund')
-                and move.state == 'posted'
-                and move.l10n_cn_edi_state not in ('issued', 'sent')
-            )
 
     @api.depends(
         'country_code', 'move_type', 'state', 'l10n_cn_edi_state', 'amount_untaxed', 'amount_tax',
