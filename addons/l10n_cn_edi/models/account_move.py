@@ -728,7 +728,7 @@ class AccountMove(models.Model):
         bank = self.l10n_cn_buyer_bank_id
         return {
             'serial_no': document.serial_no,
-            'invoice_type_code': self.l10n_cn_edi_invoice_type_code or '02',
+            'invoice_type_code': self.l10n_cn_edi_invoice_type_code,
             # The buyer is the legal entity; the address and phone are the invoiced contact's.
             'buyer_name': self.commercial_partner_id.name or '',
             'buyer_tax_no': self.commercial_partner_id.vat or '',
@@ -847,8 +847,9 @@ class AccountMove(models.Model):
             'serial_no': document.serial_no,
             'reason': self.l10n_cn_edi_red_form_reason,
             'seller_name': self.company_id.name,
-            'buyer_name': self.partner_id.name or '',
-            'buyer_tax_no': self.partner_id.vat or '',
+            # Same buyer as the original fapiao: the legal entity, not the invoiced contact.
+            'buyer_name': self.commercial_partner_id.name or '',
+            'buyer_tax_no': self.commercial_partner_id.vat or '',
             'buyer_email': self.partner_id.email or '',
             'original_fapiao_no': original_move.l10n_cn_edi_fapiao_no,
             'original_fapiao_date': original_move.l10n_cn_edi_fapiao_date or original_move.invoice_date,

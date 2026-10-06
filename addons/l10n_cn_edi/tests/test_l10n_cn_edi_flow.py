@@ -498,6 +498,22 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         self.assertTrue(all(line['amount_untaxed'] < 0 for line in values['lines']))
         self.assertEqual(credit_note.l10n_cn_edi_red_form_reason, '02')
 
+    def test_red_form_names_the_buyer_of_the_original_fapiao(self):
+        self.partner_a.vat = '91310115MA1K394204'
+        contact = self.env['res.partner'].create({'name': 'Buyer Contact', 'parent_id': self.partner_a.id, 'email': 'contact@example.com'})
+        invoice = self.init_invoice('out_invoice', partner=contact, products=self.product_a, taxes=self.tax_sale_a)
+        invoice.action_post()
+        invoice.l10n_cn_edi_fapiao_no = '24442000000071309399'
+        credit_note = self._reverse(invoice)
+        self.responses['request_red_form'] = {'uuid': 'uuid-1', 'number': 'no-1', 'bureau_state': '02'}
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        values = self.client.calls[-1][1][0]
+        self.assertEqual(values['buyer_name'], self.partner_a.name)
+        self.assertEqual(values['buyer_tax_no'], '91310115MA1K394204')
+        self.assertEqual(values['buyer_email'], 'contact@example.com')
+
     def test_red_form_pending_to_confirmed_lifecycle(self):
         credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
         self.responses['request_red_form'] = {'uuid': 'uuid-1', 'number': 'no-1', 'bureau_state': '02'}

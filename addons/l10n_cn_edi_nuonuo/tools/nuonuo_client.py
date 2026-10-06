@@ -451,7 +451,7 @@ class NuonuoClient(L10nCnEdiClient):
         # once the form needs no confirmation or both sides confirmed it.
         body = self._call(SAVE_RED_FORM, {
             'billId': bill_id,
-            'blueInvoiceLine': INVOICE_LINES[values['original_invoice_type_code'] or '02'],
+            'blueInvoiceLine': INVOICE_LINES[values['original_invoice_type_code']],
             'applySource': SELLER,
             'blueElecInvoiceNumber': values['original_fapiao_no'],
             'sellerTaxNo': self.tax_no,

@@ -113,7 +113,7 @@ class AisinoClient(L10nCnEdiClient):
             'invoiceType': '2',
             'originInvoiceNo': values['original_fapiao_no'],
             'redReason': RED_REASONS[values['reason']],
-            'invoiceKind': INVOICE_KIND[values['original_invoice_type_code'] or '02'],
+            'invoiceKind': INVOICE_KIND[values['original_invoice_type_code']],
             'deliverType': '0',
         }
         code, message = self._submit(payload, values['original_invoice_type_code'])
@@ -232,7 +232,7 @@ class AisinoClient(L10nCnEdiClient):
         return self._call(QUERY_RESULT, {
             'fpqqlsh': serial_no,
             'nsrsbh': self.tax_no,
-            'invoiceKind': INVOICE_KIND[invoice_type_code or '02'],
+            'invoiceKind': INVOICE_KIND[invoice_type_code],
         })
 
     def _query_code(self, serial_no, invoice_type_code):
@@ -251,7 +251,7 @@ class AisinoClient(L10nCnEdiClient):
             return self._issued_result(
                 response,
                 serial_no=document.serial_no,
-                invoice_kind=INVOICE_KIND[document.move_id.l10n_cn_edi_invoice_type_code or '02'],
+                invoice_kind=INVOICE_KIND[document.move_id.l10n_cn_edi_invoice_type_code],
             )
         if code == RELOGIN:
             # Recorded rather than raised: the poll cron's savepoint would roll the flag back with the error.
