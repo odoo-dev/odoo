@@ -100,7 +100,7 @@ class L10nCnEdiTestCommon(TestAccountMoveSendCommon):
         return invoice
 
     def _reverse(self, invoice, reason='02'):
-        wizard = self.env['account.move.reversal'].with_context(
+        wizard = invoice.env['account.move.reversal'].with_context(
             active_ids=invoice.ids,
             active_model='account.move',
         ).create({

@@ -833,6 +833,8 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
 
     def test_customer_raised_red_form_lands_on_the_invoice(self):
         invoice = self._create_posted_invoice(fapiao_no='24442000000071309399')
+        salesperson = self._create_user('account.group_account_invoice')
+        invoice.invoice_user_id = salesperson
         self.responses['list_inbound_red_forms'] = [
             {'uuid': 'in-9', 'number': 'rf-9', 'bureau_state': '03', 'original_fapiao_no': '24442000000071309399',
              'amount_untaxed': -50.0, 'amount_tax': -6.5, 'reason': '04'},
@@ -844,18 +846,19 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
         doc = invoice.l10n_cn_edi_document_ids
         self.assertRecordValues(doc, [{'red_form_uuid': 'in-9', 'state': 'red_form_pending', 'bureau_state': '03'}])
         self.assertEqual(invoice.l10n_cn_edi_red_form_bureau_state, '03')
+        self.assertEqual(invoice.activity_ids.user_id, salesperson)
 
         invoice.action_l10n_cn_edi_reject_inbound_red_form()
 
         self.assertEqual(self.client.calls[-1][1][1:], ('reject',))
         self.assertRecordValues(doc, [{'state': 'cancelled', 'bureau_state': '06'}])
 
-    def _create_auditor(self):
+    def _create_user(self, group):
         company = self.company_data['company']
         return self.env['res.users'].create({
-            'name': 'Auditor',
-            'login': 'cn_edi_auditor',
-            'group_ids': [Command.set(self.env.ref('account.group_account_readonly').ids)],
+            'name': group,
+            'login': group,
+            'group_ids': [Command.set(self.env.ref(group).ids)],
             'company_id': company.id,
             'company_ids': [Command.set(company.ids)],
         })
@@ -869,7 +872,7 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
             'bureau_state': '02',
             'red_form_uuid': 'in-11',
         })
-        auditor = self._create_auditor()
+        auditor = self._create_user('account.group_account_readonly')
         self.assertEqual(doc.with_user(auditor).state, 'red_form_pending')
 
         with self.assertRaises(AccessError):
@@ -878,14 +881,40 @@ class TestL10nCnEdiFlow(L10nCnEdiTestCommon):
             bill.with_user(auditor).action_l10n_cn_edi_reject_inbound_red_form()
         self.assertNotIn('operate_red_form', [method for method, _args in self.client.calls])
 
+        bill.with_user(self._create_user('account.group_account_invoice')).action_l10n_cn_edi_approve_inbound_red_form()
+
+        self.assertEqual(self.client.calls[-1][1][1], 'confirm')
+
     def test_red_fapiao_request_requires_accounting_role(self):
         credit_note = self._reverse(self._create_posted_invoice(fapiao_no='24442000000071309399'))
         self.responses['supports_direct_red'] = True
         self.responses['issue_direct_red'] = {'state': 'issued', 'fapiao_no': 'red-fapiao-789'}
 
         with self.assertRaises(AccessError):
-            credit_note.with_user(self._create_auditor()).action_l10n_cn_edi_request_red_form()
+            credit_note.with_user(self._create_user('account.group_account_readonly')).action_l10n_cn_edi_request_red_form()
         self.assertNotIn('issue_direct_red', [method for method, _args in self.client.calls])
+
+    def test_billing_user_can_issue_and_reverse_a_fapiao(self):
+        user = self._create_user('account.group_account_invoice')
+        invoice = self._create_posted_invoice()
+        self.responses['issue_invoice'] = {'state': 'issued', 'fapiao_no': '24442000000071309399', 'pdf': b'%PDF'}
+
+        self.create_send_and_print(invoice, as_user=user).action_send_and_print()
+
+        self.assertEqual(invoice.l10n_cn_edi_state, 'issued')
+
+        self.responses['query_invoice'] = {'state': 'issued', 'ofd': b'OFD'}
+
+        invoice.with_user(user).action_l10n_cn_edi_fetch_fapiao_files()
+
+        self.assertEqual(self._fapiao(invoice).ofd_id.raw.content, b'OFD')
+
+        credit_note = self._reverse(invoice.with_user(user))
+        self.responses['request_red_form'] = {'uuid': 'uuid-1', 'number': 'no-1', 'bureau_state': '02'}
+
+        credit_note.action_l10n_cn_edi_request_red_form()
+
+        self.assertEqual(credit_note.l10n_cn_edi_red_form_status, 'red_form_pending')
 
     def test_inbound_red_form_actions_require_pending_state(self):
         bill = self._create_vendor_bill('31000000000000000001')

@@ -299,13 +299,13 @@ class L10nCnEdiDocument(models.Model):
                 move.activity_schedule(
                     'mail.mail_activity_data_todo',
                     summary=self.env._("Red Form has been approved and Red Fapiao has been issued, Please confirm Credit Note in Odoo accordingly"),
-                    user_id=move.create_uid.id,
+                    user_id=(move.invoice_user_id or move.create_uid).id,
                 )
             else:
                 move.activity_schedule(
                     'mail.mail_activity_data_todo',
                     summary=self.env._("Inbound Red Form %(number)s approved and issued. Please ensure a matching Credit Note is posted.", number=self.red_form_number),
-                    user_id=move.create_uid.id,
+                    user_id=(move.invoice_user_id or move.create_uid).id,
                 )
         elif state == 'cancelled':
             if move.move_type == 'out_refund':
@@ -389,8 +389,9 @@ class L10nCnEdiDocument(models.Model):
                 )
             else:
                 summary = self.env._("Inbound Red Form %(number)s is approved/issued. Please draft Credit Note.", number=doc.red_form_number)
+            # The salesperson rather than the creator, who is OdooBot for an invoice made by a cron.
             doc.move_id.activity_schedule(
                 'mail.mail_activity_data_todo',
                 summary=summary,
-                user_id=doc.move_id.create_uid.id,
+                user_id=(doc.move_id.invoice_user_id or doc.move_id.create_uid).id,
             )
