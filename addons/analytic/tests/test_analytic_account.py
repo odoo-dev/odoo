@@ -42,14 +42,27 @@ class TestAnalyticAccount(AnalyticCommon):
         )
 
     def test_get_plans_without_options(self):
-        """ Test that the plans with the good appliability are returned without if no options are given """
-        kwargs = {}
+        """ Test that the plans with the good appliability are returned with only the business domain given """
+        with self.assertRaises(ValueError):
+            self.env['account.analytic.plan'].get_relevant_plans()
+
+        kwargs = {'business_domain': 'general'}
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
         self.assertEqual(1, len(plans_json) - self.analytic_plan_offset, "Only the Default plan and the demo data plans should be available")
 
         self.analytic_plan_1.write({'default_applicability': 'mandatory'})
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
         self.assertEqual(2, len(plans_json) - self.analytic_plan_offset, "All root plans should be available")
+
+    def test_category_matches_business_domain(self):
+        """ The category of analytic lines and the business domain of applicabilities are a 1:1 match,
+        so that the applicability rule used for a line can always be found back from its category """
+        category = self.env['account.analytic.line']._fields['category']
+        business_domain = self.env['account.analytic.applicability']._fields['business_domain']
+        self.assertEqual(
+            category._description_selection(self.env),
+            business_domain._description_selection(self.env),
+        )
 
     def test_get_plans_with_option(self):
         """ Test the plans returned with applicability rules and options """
@@ -70,9 +83,9 @@ class TestAnalyticAccount(AnalyticCommon):
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
         self.assertEqual(1, len(plans_json) - self.analytic_plan_offset, "Plan 1 should be unavailable")
 
-        kwargs = {'business_domain': 'purchase_order'}
+        kwargs = {'business_domain': 'bill'}
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
-        self.assertEqual(2, len(plans_json) - self.analytic_plan_offset, "Both plans should be available")
+        self.assertEqual(2, len(plans_json) - self.analytic_plan_offset, "The rule of another business domain doesn't apply")
 
         kwargs = {'applicability': 'optional'}
         plans_json = self.env['account.analytic.plan'].get_relevant_plans(**kwargs)
@@ -162,7 +175,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.env['account.analytic.account'].create({'name': 'Account', 'plan_id': self.analytic_plan.id})
         self.env['account.analytic.account'].create({'name': 'Child Account', 'plan_id': self.analytic_sub_plan.id})
         self.env['account.analytic.account'].create({'name': 'Grand Child Account', 'plan_id': self.analytic_sub_sub_plan.id})
-        plans_json = self.env['account.analytic.plan'].get_relevant_plans()
+        plans_json = self.env['account.analytic.plan'].get_relevant_plans(business_domain='general')
         self.assertEqual(2, len(plans_json) - self.analytic_plan_offset,
                          "The parent plan should be available even if the analytic account is set on child of third generation")
 
@@ -214,6 +227,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.analytic_account_1.company_id = self.company
         self.env['account.analytic.line'].create({
             'name': 'company specific account',
+            'category': 'general',
             'account_id': self.analytic_account_1.id,
             'amount': 100,
             'company_id': self.company_b_branch.id,
@@ -226,6 +240,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.assertNotEqual(plan_1_col, plan_2_col)
         line = self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
         })
         self.analytic_account_1.plan_id = self.analytic_plan_2
@@ -241,6 +256,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.assertNotEqual(plan_1_col, plan_2_col)
         self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
             plan_2_col: self.analytic_account_2.id,
         })
@@ -254,6 +270,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.assertNotEqual(plan_1_col, plan_2_col)
         line = self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
             plan_2_col: self.analytic_account_1.id,
         })
@@ -269,6 +286,7 @@ class TestAnalyticAccount(AnalyticCommon):
         plan_2_col = self.analytic_plan_2._column_name()
         line = self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
         })
 
@@ -296,6 +314,7 @@ class TestAnalyticAccount(AnalyticCommon):
         plan_2_col = self.analytic_plan_2._column_name()
         self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
             plan_2_col: self.analytic_account_3.id,
         })
@@ -313,6 +332,7 @@ class TestAnalyticAccount(AnalyticCommon):
         self.analytic_account_1.plan_id = intermediate_plan
         line = self.env['account.analytic.line'].create({
             'name': 'test',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
         })
 
@@ -339,6 +359,7 @@ class TestAnalyticAccount(AnalyticCommon):
 
         line = self.env['account.analytic.line'].create({
             'name': 'Test line',
+            'category': 'general',
             plan_1_col: self.analytic_account_1.id,
             plan_2_col: self.analytic_account_3.id,
         })

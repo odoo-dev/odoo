@@ -2075,11 +2075,13 @@ class TestSaleProject(TestSaleProjectCommon):
         lines = self.env['account.analytic.line'].create([{
             'account_id': self.project_global.account_id.id,
             'name': 'other revenue',
+            'category': 'general',
             'amount': 500,
             'unit_amount': 1,
         }, {
             'account_id': self.project_global.account_id.id,
             'name': 'other cost',
+            'category': 'general',
             'amount': -500,
             'unit_amount': 1,
         }])
@@ -2099,7 +2101,7 @@ class TestSaleProject(TestSaleProjectCommon):
             })],
         })
         vendor_bill.action_post()
-        line_vendor_bill = self.env['account.analytic.line'].search([('account_id', '=', self.project_global.account_id.id), ('category', '=', 'vendor_bill')])
+        line_vendor_bill = self.env['account.analytic.line'].search([('account_id', '=', self.project_global.account_id.id), ('category', '=', 'bill')])
         self.assertEqual(line_vendor_bill.category_report, 'costs')
         self.assertEqual(line_vendor_bill.billable_type, '12_vendor_bill')
 
@@ -2116,6 +2118,7 @@ class TestSaleProject(TestSaleProjectCommon):
         vals = {
             'account_id': self.project_global.account_id.id,
             'name': 'revenue',
+            'category': 'general',
             'amount': 100,
             'unit_amount': 1,
         }
@@ -2135,6 +2138,7 @@ class TestSaleProject(TestSaleProjectCommon):
         line = self.env['account.analytic.line'].create({
             'account_id': self.project_global.account_id.id,
             'name': 'materials',
+            'category': 'general',
             'amount': 500,
             'unit_amount': 1,
             'product_id': self.product_consumable.id,

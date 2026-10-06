@@ -60,12 +60,14 @@ class TestAnalyticToSaleTimesheet(TestCommonSaleTimesheet):
 
         invoice_ordered_qty_aal = self.env['account.analytic.line'].with_context(from_services_and_material=True).create({
             'name': 'Upsell invoiced on ordered qty service',
+            'category': 'general',
             'unit_amount': 5,
             'product_id': self.product_order_timesheet2.id,
             'order_id': self.timesheet_and_services_sale_order.id,
         })
         invoice_delivered_qty_aal = self.env['account.analytic.line'].with_context(from_services_and_material=True).create({
             'name': 'Upsell invoiced on delivered qty service',
+            'category': 'general',
             'unit_amount': 5,
             'product_id': self.product_delivery_timesheet2.id,
             'order_id': self.timesheet_and_services_sale_order.id,

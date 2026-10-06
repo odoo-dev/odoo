@@ -12,6 +12,6 @@ class AccountAnalyticLine(models.Model):
         super()._compute_project_billable_type()
 
     def _set_billable_cost(self):
-        aals_purchase = self.filtered(lambda aal: aal.category == 'vendor_bill' and aal.move_line_id.purchase_line_id)
+        aals_purchase = self.filtered(lambda aal: aal.category == 'bill' and aal.move_line_id.purchase_line_id)
         aals_purchase.billable_type = '20_purchase_order'
         super(AccountAnalyticLine, self - aals_purchase)._set_billable_cost()

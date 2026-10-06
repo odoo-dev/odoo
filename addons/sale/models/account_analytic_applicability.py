@@ -10,3 +10,11 @@ class AccountAnalyticApplicability(models.Model):
     business_domain = fields.Selection(
         selection_add=[("sale_order", "Sale Order")], ondelete={"sale_order": "cascade"}
     )
+
+
+class AccountAnalyticLine(models.Model):
+    _inherit = "account.analytic.line"
+
+    category = fields.Selection(
+        selection_add=[("sale_order", "Sale Order")], ondelete={"sale_order": "set general"}
+    )

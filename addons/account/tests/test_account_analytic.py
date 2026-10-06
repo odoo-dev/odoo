@@ -42,6 +42,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         """
         self.env['account.analytic.line'].create({
             'name': 'company specific account',
+            'category': 'general',
             'account_id': self.analytic_account_3.id,
             'amount': 100,
         })
@@ -471,61 +472,29 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         other_company_applicability = company_analytic_plan._get_applicability(business_domain='invoice', company_id=other_company.id)
         self.assertEqual(other_company_applicability, 'mandatory', 'A rule scoped to a different company should be excluded entirely, falling back to the generic rule')
 
-    def test_applicability_high_criteria_without_business_domain(self):
-        """ Tests that a high-priority criterion (product_categ_id, optionally combined with
-        account_prefix) is enough on its own to override the default applicability, without a business_domain """
-        self.analytic_plan_2.default_applicability = default_applicability = 'optional'
+    def test_applicability_requires_business_domain(self):
+        """ The applicability can't be computed without a business_domain, unless it is forced """
+        with self.assertRaises(ValueError):
+            self.analytic_plan_2._get_applicability(company_id=self.env.company.id, product=self.product_a.id)
+        self.assertEqual(self.analytic_plan_2._get_applicability(applicability='optional'), 'optional')
 
-        # product_categ_id alone is enough to override the default applicability, business_domain or not
-        # (business_domain is required by the model but unused below, since _get_applicability isn't given one)
-        no_bd_product_categ_analytic_plan = self.analytic_plan_2.copy({'name': 'No Business Domain / Product Category Only'})
-        self._create_analytic_applicability('invoice', no_bd_product_categ_analytic_plan, 'mandatory', product_categ_id=self.product_a.categ_id.id)
-        no_bd_product_a_applicability = no_bd_product_categ_analytic_plan._get_applicability(product=self.product_a.id)
-        self.assertEqual(no_bd_product_a_applicability, 'mandatory', "product_categ_id alone should override the default applicability, even without business_domain")
-        no_bd_no_product_applicability = no_bd_product_categ_analytic_plan._get_applicability()
-        self.assertEqual(no_bd_no_product_applicability, default_applicability, "Without a matching product, the rule shouldn't apply, so the default applicability is kept")
-
-        # Combining two high-priority criteria (product_categ_id + account_prefix) still requires
-        # both to match (AND), confirming they're evaluated independently of business_domain
-        combined_no_bd_analytic_plan = self.analytic_plan_2.copy({'name': 'No Business Domain / Product Category and Account Prefix'})
+    def test_applicability_other_business_domain(self):
+        """ A rule of another business_domain never applies, even if all its other criteria match """
+        other_domain_analytic_plan = self.analytic_plan_2.copy({'name': 'Other Business Domain'})
+        other_domain_analytic_plan.default_applicability = default_applicability = 'unavailable'
         self._create_analytic_applicability(
-            'invoice', combined_no_bd_analytic_plan, 'mandatory',
-            product_categ_id=self.product_a.categ_id.id, account_prefix='705',
+            'invoice', other_domain_analytic_plan, 'mandatory',
+            company_id=self.env.company.id, product_categ_id=self.product_a.categ_id.id,
         )
-        both_match_applicability = combined_no_bd_analytic_plan._get_applicability(product=self.product_a.id, account=self.account_705.id)
-        self.assertEqual(both_match_applicability, 'mandatory', 'The rule should apply once both product category and account prefix match')
-        mismatched_account_applicability = combined_no_bd_analytic_plan._get_applicability(product=self.product_a.id, account=self.account_706.id)
-        self.assertEqual(
-            mismatched_account_applicability, default_applicability,
-            'A mismatching account_prefix should disqualify the rule (AND, not OR) even though the product category matches'
+        for business_domain in ('bill', 'general'):
+            applicability = other_domain_analytic_plan._get_applicability(
+                business_domain=business_domain, company_id=self.env.company.id, product=self.product_a.id,
+            )
+            self.assertEqual(applicability, default_applicability, f"The invoice rule shouldn't apply on {business_domain}")
+        applicability = other_domain_analytic_plan._get_applicability(
+            business_domain='invoice', company_id=self.env.company.id, product=self.product_a.id,
         )
-
-    def test_applicability_low_criteria_without_business_domain(self):
-        """ Without a business_domain, a low-priority criterion alone (like company_id) can't override
-        the default applicability, but stays decisive when combined with a high-priority one """
-        self.analytic_plan_2.default_applicability = default_applicability = 'optional'
-
-        # company_id alone shouldn't match with a low-priority condition only, without business_domain
-        # (business_domain is required by the model but unused below, since _get_applicability isn't given one)
-        no_bd_company_analytic_plan = self.analytic_plan_2.copy({'name': 'No Business Domain / Company Only'})
-        self._create_analytic_applicability('invoice', no_bd_company_analytic_plan, 'mandatory')
-        self._create_analytic_applicability('invoice', no_bd_company_analytic_plan, 'unavailable', company_id=self.env.company.id)
-        no_bd_company_applicability = no_bd_company_analytic_plan._get_applicability(company_id=self.env.company.id)
-        self.assertEqual(
-            no_bd_company_applicability, default_applicability,
-            "company_id alone isn't enough to beat the default applicability's baseline score"
-        )
-        no_bd_no_company_applicability = no_bd_company_analytic_plan._get_applicability()
-        self.assertEqual(no_bd_no_company_applicability, default_applicability, "Without any kwargs, the default applicability is kept")
-
-        # Company priority is still conserved without business_domain when combined with another criteria
-        no_bd_company_product_analytic_plan = self.analytic_plan_2.copy({'name': 'No Business Domain / Company with Product Category'})
-        self._create_analytic_applicability('invoice', no_bd_company_product_analytic_plan, 'mandatory', product_categ_id=self.product_a.categ_id.id)
-        self._create_analytic_applicability('invoice', no_bd_company_product_analytic_plan, 'unavailable', company_id=self.env.company.id, product_categ_id=self.product_a.categ_id.id)
-        no_bd_company_product_applicability = no_bd_company_product_analytic_plan._get_applicability(product=self.product_a.id, company_id=self.env.company.id)
-        self.assertEqual(no_bd_company_product_applicability, 'unavailable', 'Combined with a matching product_categ_id, the company-specific rule still wins for its matching company')
-        no_bd_no_company_product_applicability = no_bd_company_product_analytic_plan._get_applicability(product=self.product_a.id)
-        self.assertEqual(no_bd_no_company_product_applicability, 'mandatory', "Without a company in kwargs, only product_categ_id counts, so the generic rule wins")
+        self.assertEqual(applicability, 'mandatory')
 
     def test_model_sequence(self):
         plan_A, plan_B, plan_C = self.env['account.analytic.plan'].create([
@@ -858,6 +827,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         # Create analytic line
         self.env['account.analytic.line'].create({
             'name': 'Extra Analytic Line',
+            'category': 'invoice',
             'account_id': self.analytic_account_1.id,
             'amount': 30,
             'move_line_id': invoice_line.id,
@@ -886,6 +856,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         invoice.action_post()
         self.env['account.analytic.line'].create({
             'name': 'Zero Balance Test',
+            'category': 'invoice',
             'account_id': self.analytic_account_1.id,
             'amount': 33.0,
             'move_line_id': invoice.invoice_line_ids.id,

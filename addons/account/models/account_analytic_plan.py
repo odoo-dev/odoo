@@ -8,7 +8,7 @@ class AccountAnalyticApplicability(models.Model):
 
     business_domain = fields.Selection(
         selection_add=[
-            ('invoice', 'Invoice'),
+            ('invoice', 'Customer Invoice'),
             ('bill', 'Vendor Bill'),
         ],
         ondelete={

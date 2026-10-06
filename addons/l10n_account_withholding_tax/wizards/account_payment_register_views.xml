@@ -43,6 +43,7 @@
                                        width="92px"/>  <!-- Tax names tend to be short -->
                                 <field name="analytic_distribution"
                                        widget="analytic_distribution"
+                                       options="{'business_domain': 'general'}"
                                        groups="analytic.group_analytic_accounting"
                                        optional="hide"
                                        width="200px"/> <!-- Can be opened if needed -->

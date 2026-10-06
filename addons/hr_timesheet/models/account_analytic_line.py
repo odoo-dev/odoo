@@ -42,6 +42,11 @@ class AccountAnalyticLine(models.Model):
             favorite_project_id = self._get_favorite_project_id(employee_id)
             if favorite_project_id:
                 result['project_id'] = favorite_project_id
+        if 'category' in fields and 'category' not in result and any(
+            result.get(fname) or self.env.context.get(f'default_{fname}') for fname in ('project_id', 'task_id')
+        ):
+            # e.g. the project comes from the context, so the timesheet isn't detected in `create`
+            result['category'] = 'timesheet'
         return result
 
     def _domain_project_id(self):
@@ -56,6 +61,10 @@ class AccountAnalyticLine(models.Model):
             domain &= Domain('user_id', '=', self.env.user.id)
         return domain
 
+    category = fields.Selection(
+        selection_add=[('timesheet', 'Timesheet')],
+        ondelete={'timesheet': 'set general'},
+    )
     task_id = fields.Many2one(
         'project.task', 'Task', index='btree_not_null',
         compute='_compute_task_id', store=True, readonly=False,
@@ -249,7 +258,8 @@ class AccountAnalyticLine(models.Model):
             if not (task or project):
                 # It is not a timesheet
                 continue
-            elif task:
+            vals.setdefault('category', 'timesheet')
+            if task:
                 if not task.project_id:
                     raise ValidationError(_('Timesheets cannot be created on a private task.'))
                 if not project:

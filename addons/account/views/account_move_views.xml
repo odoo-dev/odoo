@@ -62,7 +62,9 @@
                                         <field name="product_id" readonly="1"/>
                                     </group>
                                     <group string="Analytic" groups="analytic.group_analytic_accounting">
+                                        <field name="analytic_business_domain" invisible="1"/>
                                         <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"
+                                            business_domain_compute="analytic_business_domain"
                                             readonly="1"/>
                                     </group>
                                 </group>
@@ -1333,12 +1335,13 @@
                                                options="{'no_quick_create': True, 'no_open': True, 'parent_field': 'invoice_line_ids'}"
                                                domain="[('company_ids', 'parent_of', company_id), ('account_type', 'not in', ('asset_cash', 'asset_receivable', 'liability_payable', 'off_balance'))]"
                                                required="display_type not in ('line_section', 'line_subsection', 'line_note')"/>
+                                        <field name="analytic_business_domain" column_invisible="True"/>
                                         <field name="analytic_distribution" widget="analytic_distribution"
                                                string="Analytic"
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'product_field': 'product_id', 'account_field': 'account_id', 'amount_field': 'price_subtotal'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
+                                               business_domain_compute="analytic_business_domain"/>
                                         <field name="quantity" optional="show"/>
                                         <field name="product_uom_id" groups="uom.group_uom" optional="show" width="92px" options="{'no_create': True, 'no_open': True, 'quantity_field': 'quantity'}" widget="many2one_uom"/>
                                         <!-- /l10n_in_edi.test_edi_json -->
@@ -1473,7 +1476,9 @@
                                                     }"
                                                     options="{'no_create': True}"
                                                 />
-                                                <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"/>
+                                                <field name="analytic_business_domain" invisible="1"/>
+                                                <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"
+                                                       business_domain_compute="analytic_business_domain"/>
                                             </group>
                                             <group>
                                                 <field name="price_subtotal"
@@ -1539,11 +1544,12 @@
                                                domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"
                                                column_invisible="parent.move_type != 'entry'"/>
                                         <field name="name" optional="show"/>
+                                        <field name="analytic_business_domain" column_invisible="True"/>
                                         <field name="analytic_distribution" widget="analytic_distribution"
                                                groups="analytic.group_analytic_accounting"
                                                optional="show"
                                                options="{'account_field': 'account_id'}"
-                                               business_domain_compute="parent.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and 'invoice' or parent.move_type in ['in_invoice', 'in_refund', 'in_receipt'] and 'bill' or 'general'"/>
+                                               business_domain_compute="analytic_business_domain"/>
                                         <field name="date_maturity"
                                                optional="hide"
                                                decoration-danger="date_maturity and date_maturity &lt; context_today().strftime('%Y-%m-%d') and parent.payment_state not in ('paid', 'in_payment', 'reversed')"
@@ -1612,7 +1618,9 @@
                                         <field name="account_id" domain="[('company_ids', 'parent_of', company_id)]"/>
                                         <field name="partner_id" domain="['|', ('parent_id', '=', False), ('is_company', '=', True)]"/>
                                         <field name="name"/>
-                                        <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"/>
+                                        <field name="analytic_business_domain" invisible="1"/>
+                                        <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"
+                                               business_domain_compute="analytic_business_domain"/>
                                         <field name="amount_currency" groups="base.group_multi_currency"/>
                                         <field name="company_currency_id" invisible="1"/>
                                         <field name="company_id" invisible="1"/>

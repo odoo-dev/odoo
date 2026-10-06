@@ -749,7 +749,7 @@ class StockMove(models.Model):
             'product_uom_id': self.product_id.uom_id.id,
             'company_id': self.company_id.id,
             'ref': self._description,
-            'category': 'other',
+            'category': 'stock_picking',
         }
 
     def _should_create_account_move(self):

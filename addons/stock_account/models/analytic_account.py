@@ -1,5 +1,23 @@
-from odoo import models
+from odoo import fields, models
 from odoo.tools import float_compare, float_is_zero, float_round
+
+
+class AccountAnalyticApplicability(models.Model):
+    _inherit = 'account.analytic.applicability'
+
+    business_domain = fields.Selection(
+        selection_add=[('stock_picking', 'Inventory Transfer')],
+        ondelete={'stock_picking': 'cascade'},
+    )
+
+
+class AccountAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+
+    category = fields.Selection(
+        selection_add=[('stock_picking', 'Inventory Transfer')],
+        ondelete={'stock_picking': 'set general'},
+    )
 
 
 class AccountAnalyticPlan(models.Model):

@@ -24,6 +24,15 @@ class AccountAnalyticApplicability(models.Model):
             applicability.display_account_prefix = True
 
 
+class AccountAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+
+    category = fields.Selection(
+        selection_add=[('expense', 'Expense')],
+        ondelete={'expense': 'set general'},
+    )
+
+
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
 

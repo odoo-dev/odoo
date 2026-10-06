@@ -86,6 +86,7 @@
             'search_default_today': 1,
             'from_services_and_material': 1,
             'default_unit_amount': 1,
+            'default_category': 'general',
         }</field>
         <field name="domain">[('product_id.reinvoice_policy', '!=', 'no'), ('order_id', '!=', False)]</field>
         <field name="help" type="html">

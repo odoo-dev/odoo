@@ -616,6 +616,18 @@ class TestTimesheet(TestCommonTimesheet):
         with self.assertRaises(UserError):
             timesheet.employee_id = self.empl_employee2
 
+    def test_timesheet_category(self):
+        """ Timesheets are categorized as such, whether the project is given in the values or in the context """
+        Timesheet = self.env['account.analytic.line'].with_user(self.user_employee)
+        timesheets = Timesheet.create([
+            {'name': 'with project', 'unit_amount': 1.0, 'project_id': self.project_customer.id},
+            {'name': 'with task', 'unit_amount': 1.0, 'task_id': self.task1.id},
+        ])
+        self.assertEqual(timesheets.mapped('category'), ['timesheet', 'timesheet'])
+        defaults = Timesheet.with_context(default_project_id=self.project_customer.id).default_get(['category'])
+        self.assertEqual(defaults['category'], 'timesheet')
+        self.assertNotIn('category', Timesheet.default_get(['category']))
+
     def test_create_timesheet_with_companyless_analytic_account(self):
         """ This test ensures that a timesheet can be created on an analytic account whose company_id is set to False"""
         self.project_customer.account_id.company_id = False
@@ -1025,6 +1037,7 @@ class TestTimesheet(TestCommonTimesheet):
 
         line = self.env['account.analytic.line'].create({
             'name': 'Timesheet',
+            'category': 'timesheet',
             'unit_amount': 1,
             'employee_id': self.empl_employee.id,
         })

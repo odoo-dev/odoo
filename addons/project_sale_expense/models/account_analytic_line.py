@@ -1,12 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, models
 
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
-
-    category = fields.Selection(selection_add=[('expense', 'Expense')])
 
     def _get_billable_types(self):
         return super()._get_billable_types() + [

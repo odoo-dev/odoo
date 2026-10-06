@@ -248,16 +248,18 @@ class AccountAnalyticPlan(models.Model):
             # For models for example, we want all plans to be visible, so we force the applicability
             return kwargs['applicability']
         else:
-            # Baseline: the sum of all low-priority criteria (e.g. company) must not exceed this alone,
-            # and must stay below 1 (a single high-priority criterion's weight) or it would effectively
-            # become a high-priority match. Adapt each criterion's weight if new ones are added.
-            score = 0.5
+            if not kwargs.get('business_domain'):
+                raise ValueError("A business_domain is required to compute the applicability of an analytic plan")
+            score = 0
             applicability = self.default_applicability
             for applicability_rule in self.applicability_ids.filtered(
                     lambda rule:
-                    not rule.company_id
-                    or not kwargs.get('company_id')
-                    or rule.company_id.id == kwargs.get('company_id')
+                    rule.business_domain == kwargs['business_domain']
+                    and (
+                        not rule.company_id
+                        or not kwargs.get('company_id')
+                        or rule.company_id.id == kwargs.get('company_id')
+                    )
             ):
                 score_rule = applicability_rule._get_score(**kwargs)
                 if score_rule > score:
@@ -447,10 +449,8 @@ class AccountAnalyticApplicability(models.Model):
     def _get_score(self, **kwargs):
         """ Gives the score of an applicability with the parameters of kwargs """
         self.ensure_one()
+        if kwargs.get('business_domain') != self.business_domain:
+            return -1
         # 0.5 is because company is less important than other fields for an equal number of valid fields
         # No company on the applicability and the kwargs together are not considered a more fitting rule
-        score = 0.5 if self.company_id and kwargs.get('company_id') else 0
-        if not kwargs.get('business_domain'):
-            return score
-        else:
-            return score + 1 if kwargs.get('business_domain') == self.business_domain else -1
+        return 1.5 if self.company_id and kwargs.get('company_id') else 1

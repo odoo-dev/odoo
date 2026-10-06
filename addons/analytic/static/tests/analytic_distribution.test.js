@@ -9,6 +9,7 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
+import { registry } from "@web/core/registry";
 import { AnalyticDistribution } from "@analytic/components/analytic_distribution/analytic_distribution";
 import { defineAnalyticModels } from "./analytic_test_helpers";
 
@@ -131,7 +132,7 @@ test("analytic field in form view basic features", async () => {
                 <sheet>
                     <group>
                         <field name="label"/>
-                        <field name="analytic_distribution" widget="analytic_distribution"/>
+                        <field name="analytic_distribution" widget="analytic_distribution" options="{'business_domain': 'general'}"/>
                         <field name="amount"/>
                     </group>
                 </sheet>
@@ -270,7 +271,7 @@ test("Rounding, value suggestions, keyboard only", async () => {
                         <field name="line_ids">
                             <list editable="bottom">
                                 <field name="label"/>
-                                <field name="analytic_distribution" widget="analytic_distribution"/>
+                                <field name="analytic_distribution" widget="analytic_distribution" options="{'business_domain': 'general'}"/>
                                 <field name="amount"/>
                             </list>
                         </field>
@@ -390,7 +391,7 @@ test("editable list save flushes pending dropdown pick before web_save", async (
         arch: `
             <list editable="bottom">
                 <field name="label"/>
-                <field name="analytic_distribution" widget="analytic_distribution"/>
+                <field name="analytic_distribution" widget="analytic_distribution" options="{'business_domain': 'general'}"/>
                 <field name="amount"/>
             </list>`,
     });
@@ -414,4 +415,18 @@ test("editable list save flushes pending dropdown pick before web_save", async (
     def.resolve();
     await animationFrame();
     expect(savedVals.analytic_distribution).toEqual({ 1: 100 });
+});
+
+test("analytic field requires exactly one source of business domain", () => {
+    const { extractProps } = registry.category("fields").get("analytic_distribution");
+    const error = /requires exactly one/;
+    expect(() => extractProps({ attrs: {}, options: {} })).toThrow(error);
+    expect(() =>
+        extractProps({ attrs: {}, options: { business_domain: "general", force_applicability: "optional" } })
+    ).toThrow(error);
+    expect(() =>
+        extractProps({ attrs: { business_domain_compute: "category" }, options: { business_domain: "general" } })
+    ).toThrow(error);
+    const props = extractProps({ attrs: {}, options: { business_domain_compute: "category" } });
+    expect(props.business_domain_compute).toBe("category");
 });

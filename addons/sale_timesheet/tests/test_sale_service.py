@@ -860,6 +860,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         })
         self.env['account.analytic.line'].create({
             'name': 'Test Line',
+            'category': 'general',  # the task only exists once the order is confirmed
             'project_id': so_line.task_id.project_id.id,
             'task_id': so_line.task_id.id,
             'unit_amount': 5,

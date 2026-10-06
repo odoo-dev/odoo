@@ -8,6 +8,12 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
+    def _prepare_analytic_line_values(self, account_field_values, amount, unit_amount):
+        res = super()._prepare_analytic_line_values(account_field_values, amount, unit_amount)
+        if self.raw_material_production_id:
+            res['category'] = 'manufacturing_order'
+        return res
+
     def _get_value_from_production(self, quantity):
         # TODO: Maybe move _cal_price here
         self.ensure_one()

@@ -12,3 +12,12 @@ class AccountAnalyticApplicability(models.Model):
         ],
         ondelete={'purchase_order': 'cascade'},
     )
+
+
+class AccountAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+
+    category = fields.Selection(
+        selection_add=[('purchase_order', 'Purchase Order')],
+        ondelete={'purchase_order': 'set general'},
+    )

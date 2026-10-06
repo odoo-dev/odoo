@@ -46,7 +46,10 @@ class AccountAnalyticLine(models.Model):
     )
     code = fields.Char(size=8)
     ref = fields.Char(string='Ref.')
-    category = fields.Selection(selection_add=[('invoice', 'Customer Invoice'), ('vendor_bill', 'Vendor Bill')])
+    category = fields.Selection(
+        selection_add=[('invoice', 'Customer Invoice'), ('bill', 'Vendor Bill')],
+        ondelete={'invoice': 'set general', 'bill': 'set general'},
+    )
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     analytic_profitability = fields.Selection(
         string='Profitability',
@@ -102,13 +105,13 @@ class AccountAnalyticLine(models.Model):
             if (
                 account_type.split('_')[0] == 'expense'
                 or account_type in ['asset_current', 'asset_non_current', 'asset_fixed']
-                or (not account_type and line.category not in ['invoice', 'other'])
-                or (not account_type and line.category == 'other' and line.amount < 0)
+                or (not account_type and line.category not in ['invoice', 'general', 'timesheet'])
+                or (not account_type and line.category in ['general', 'timesheet'] and line.amount < 0)
             ):
                 line.analytic_profitability = 'loss'
             elif (
                 account_type.split('_')[0] == 'income'
-                or (not account_type and line.category == 'other' and line.amount > 0)
+                or (not account_type and line.category in ['general', 'timesheet'] and line.amount > 0)
             ):
                 line.analytic_profitability = 'revenue'
             else:
@@ -120,12 +123,12 @@ class AccountAnalyticLine(models.Model):
                 WHEN (
                     SPLIT_PART(%(account_type)s, '_', 1) = 'expense'
                     OR %(account_type)s IN ('asset_current', 'asset_non_current', 'asset_fixed')
-                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s NOT IN ('invoice', 'other'))
-                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s = 'other' AND %(analytic_line_amount)s < 0)
+                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s NOT IN ('invoice', 'general', 'timesheet'))
+                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s IN ('general', 'timesheet') AND %(analytic_line_amount)s < 0)
                 ) THEN 'loss'
                 WHEN (
                     SPLIT_PART(%(account_type)s, '_', 1) = 'income'
-                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s = 'other' AND %(analytic_line_amount)s > 0)
+                    OR (%(account_type)s IS NULL AND %(analytic_line_category)s IN ('general', 'timesheet') AND %(analytic_line_amount)s > 0)
                 ) THEN 'revenue'
                 ELSE 'uncategorized'
             END
@@ -165,6 +168,10 @@ class AccountAnalyticLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('category') and vals.get('move_line_id'):
+                # e.g. when importing journal items with their analytic lines
+                vals['category'] = self.env['account.move.line'].browse(vals['move_line_id']).analytic_business_domain
         analytic_lines = super().create(vals_list)
         analytic_lines.move_line_id._update_analytic_distribution()
         return analytic_lines

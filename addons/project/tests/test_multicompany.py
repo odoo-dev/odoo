@@ -316,6 +316,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
         account_a.company_id = self.company_b
         aal = self.env['account.analytic.line'].create({
             'name': 'other revenues line',
+            'category': 'general',
             'account_id': account_a.id,
             'company_id': self.company_b.id,
             'amount': 100,

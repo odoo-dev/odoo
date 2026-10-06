@@ -9,10 +9,11 @@
                 <field name="date" optional="show"/>
                 <field name="name"/>
                 <field name="account_id" optional="show"/>
+                <field name="category" optional="hide"/>
                 <field name="analytic_distribution"
                        widget="analytic_distribution"
                        optional="hide"
-                       options="{'multi_edit': true}"
+                       options="{'multi_edit': true, 'business_domain_compute': 'category'}"
                 />
                 <field name="currency_id" column_invisible="True"/>
                 <field name="unit_amount" sum="Quantity" optional="hide"/>
@@ -41,7 +42,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="account_analytic_line_action">
-        <field name="context">{'search_default_group_date': 1, 'default_auto_account_id': active_id}</field>
+        <field name="context">{'search_default_group_date': 1, 'default_auto_account_id': active_id, 'default_category': 'general'}</field>
         <field name="domain">[('auto_account_id','=', active_id)]</field>
         <field name="name">Gross Margin</field>
         <field name="res_model">account.analytic.line</field>
@@ -79,6 +80,7 @@
                     <group name="analytic_item" string="Analytic Item">
                         <field name="name"/>
                         <field name="account_id"/>
+                        <field name="category"/>
                         <field name="date"/>
                         <field name="company_id" groups="base.group_multi_company"/>
                     </group>
@@ -146,6 +148,7 @@
         <field name="name">Analytic Items</field>
         <field name="res_model">account.analytic.line</field>
         <field name="path">analytic-items</field>
+        <field name="context">{'default_category': 'general'}</field>
         <field name="view_mode">list,kanban,form,graph,pivot</field>
         <field name="view_id" ref="view_account_analytic_line_tree"/>
         <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>

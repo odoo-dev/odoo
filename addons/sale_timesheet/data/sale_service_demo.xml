@@ -1230,6 +1230,7 @@
         <!-- Vendor bill for sale_order_1 -->
         <record id="account_analytic_line_inv_1" model="account.analytic.line">
             <field name="name" model="account.analytic.line" eval="obj().env.ref('product.product_product_3').get_product_multiline_description_sale()"/>
+            <field name="category">bill</field>
             <field name="account_id" search="[('partner_id', '=', ref('base.res_partner_2'))]"/>
             <field name="partner_id" ref="base.partner_root"/>
             <field name="date" eval="(DateTime.now() + relativedelta(days=0)).strftime('%Y-%m-%d')"/>
@@ -1242,6 +1243,7 @@
         <!-- Expense bill for sale_order_1 -->
         <record id="account_analytic_line_exp_1" model="account.analytic.line">
             <field name="name" model="account.analytic.line" eval="obj().env.ref('product.expense_product').get_product_multiline_description_sale()"/>
+            <field name="category">bill</field>
             <field name="account_id" search="[('partner_id', '=', ref('base.res_partner_2'))]"/>
             <field name="partner_id" ref="base.partner_root"/>
             <field name="date" eval="(DateTime.now() + relativedelta(days=0)).strftime('%Y-%m-%d')"/>
@@ -1254,6 +1256,7 @@
         <!-- Vendor bill for sale_order_2 -->
         <record id="account_analytic_line_inv_2" model="account.analytic.line">
             <field name="name" model="account.analytic.line" eval="obj().env.ref('product.product_product_3').get_product_multiline_description_sale()"/>
+            <field name="category">bill</field>
             <field name="account_id" search="[('partner_id', '=', ref('base.res_partner_4'))]"/>
             <field name="partner_id" ref="base.partner_root"/>
             <field name="date" eval="(DateTime.now() + relativedelta(days=0)).strftime('%Y-%m-%d')"/>
@@ -1266,6 +1269,7 @@
         <!-- Expense bill for sale_order_2 -->
         <record id="account_analytic_line_exp_2" model="account.analytic.line">
             <field name="name" model="account.analytic.line" eval="obj().env.ref('product.expense_hotel').get_product_multiline_description_sale()"/>
+            <field name="category">bill</field>
             <field name="account_id" search="[('partner_id', '=', ref('base.res_partner_4'))]"/>
             <field name="partner_id" ref="base.partner_demo"/>
             <field name="date" eval="(DateTime.now() + relativedelta(days=0)).strftime('%Y-%m-%d')"/>

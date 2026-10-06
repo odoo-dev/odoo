@@ -91,6 +91,7 @@
                 'search_default_group_by_analytic_account': 1,
                 'search_default_fiscal_date': 1,
                 'search_default_profit_loss_accounts': 1,
+                'default_category': 'general',
             }</field>
         </record>
 
@@ -103,6 +104,7 @@
                 'search_default_group_by_analytic_account': 1,
                 'search_default_fiscal_date': 1,
                 'search_default_profit_loss_accounts': 1,
+                'default_category': 'general',
             }</field>
         </record>
 

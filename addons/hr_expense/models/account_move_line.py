@@ -16,6 +16,11 @@ class AccountMoveLine(models.Model):
         for line in expense_lines:
             line.partner_id = line.move_id.partner_id  # The employee partner is correctly set on the move
 
+    @api.depends('expense_id')
+    def _compute_analytic_business_domain(self):
+        super()._compute_analytic_business_domain()
+        self.filtered('expense_id').analytic_business_domain = 'expense'
+
     @api.constrains('account_id', 'display_type')
     def _check_payable_receivable(self):
         super(AccountMoveLine, self.filtered(lambda line: line.expense_id.payment_mode != 'company_account'))._check_payable_receivable()

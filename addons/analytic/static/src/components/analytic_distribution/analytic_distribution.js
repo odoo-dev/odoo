@@ -363,10 +363,11 @@ export class AnalyticDistribution extends Component {
     // ORM
     fetchPlansArgs({ record }) {
         let args = {};
-        if (this.props.business_domain_compute) {
+        if (this.props.force_applicability) {
+            args['applicability'] = this.props.force_applicability;
+        } else if (this.props.business_domain_compute) {
             args['business_domain'] = evaluateExpr(this.props.business_domain_compute, record.evalContext);
-        }
-        if (this.props.business_domain) {
+        } else {
             args['business_domain'] = this.props.business_domain;
         }
         if (this.props.product_field && record.data[this.props.product_field]) {
@@ -374,9 +375,6 @@ export class AnalyticDistribution extends Component {
         }
         if (this.props.account_field && record.data[this.props.account_field]) {
             args['account'] = record.data[this.props.account_field].id;
-        }
-        if (this.props.force_applicability) {
-            args['applicability'] = this.props.force_applicability;
         }
         const existing_account_ids = Object.keys(record.data[this.props.name]).map((k) => k.split(",")).flat().map((i) => parseInt(i));
         if (existing_account_ids.length) {
@@ -765,17 +763,32 @@ export const analyticDistribution = {
             availableTypes: ["char"],
         },
     ],
-    extractProps: ({ attrs, options, placeholder }) => ({
-        business_domain: options.business_domain,
-        account_field: options.account_field,
-        product_field: options.product_field,
-        amount_field: options.amount_field,
-        business_domain_compute: attrs.business_domain_compute,
-        force_applicability: options.force_applicability,
-        allow_save: !options.disable_save,
-        multi_edit: options.multi_edit,
-        placeholder: placeholder,
-    }),
+    extractProps: ({ attrs, options, placeholder }) => {
+        // business_domain_compute can be given as an option where the view schema doesn't allow the attribute (list)
+        const businessDomainCompute = attrs.business_domain_compute || options.business_domain_compute;
+        const domainSources = [
+            options.business_domain,
+            businessDomainCompute,
+            options.force_applicability,
+        ].filter(Boolean);
+        if (domainSources.length !== 1) {
+            throw new Error(
+                "The analytic_distribution widget requires exactly one of the 'business_domain' option, " +
+                "the 'business_domain_compute' attribute or the 'force_applicability' option."
+            );
+        }
+        return {
+            business_domain: options.business_domain,
+            account_field: options.account_field,
+            product_field: options.product_field,
+            amount_field: options.amount_field,
+            business_domain_compute: businessDomainCompute,
+            force_applicability: options.force_applicability,
+            allow_save: !options.disable_save,
+            multi_edit: options.multi_edit,
+            placeholder: placeholder,
+        };
+    },
 };
 
 registry.category("fields").add("analytic_distribution", analyticDistribution);

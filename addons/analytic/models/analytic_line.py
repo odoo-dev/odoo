@@ -219,8 +219,9 @@ class AccountAnalyticLine(models.Model):
         compute_sudo=True,
     )
     category = fields.Selection(
-        [('other', 'Other')],
-        default='other',
+        [('general', 'Miscellaneous')],
+        required=True,
+        help="Source of the analytic line. It matches the business domain of the analytic applicabilities.",
     )
     fiscal_year_search = fields.Boolean(
         search='_search_fiscal_date',

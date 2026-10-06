@@ -73,7 +73,7 @@ class AccountAnalyticLine(models.Model):
         return self.product_id or self.so_line.product_id
 
     def _set_billable_cost(self):
-        if self.category == 'vendor_bill':
+        if self.category == 'bill':
             self.billable_type = '12_vendor_bill'
         else:
             self.billable_type = '30_other_costs'

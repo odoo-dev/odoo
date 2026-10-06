@@ -51,7 +51,7 @@ test("Analytic single-edit no dynamic", async () => {
                 <field name="account_id"/>
                 <field name="x_plan1_id"/>
                 <field name="x_plan2_id"/>
-                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': False}"/>
+                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': False, 'business_domain': 'general'}"/>
             </list>`,
     });
 
@@ -91,7 +91,7 @@ test("Analytic dynamic multi-edit", async () => {
                 <field name="account_id"/>
                 <field name="x_plan1_id"/>
                 <field name="x_plan2_id"/>
-                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True}"/>
+                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True, 'business_domain': 'general'}"/>
             </list>`,
     });
 
@@ -184,7 +184,7 @@ test("Analytic multi-edit: New Model dialog stays open", async () => {
                 <field name="account_id"/>
                 <field name="x_plan1_id"/>
                 <field name="x_plan2_id"/>
-                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True}"/>
+                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True, 'business_domain': 'general'}"/>
             </list>`,
     });
 
@@ -236,7 +236,7 @@ test("Analytic readonly list: unknown accounts are left untouched", async () => 
                 <field name="account_id"/>
                 <field name="x_plan1_id"/>
                 <field name="x_plan2_id"/>
-                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True}"/>
+                <field name="analytic_distribution" widget="analytic_distribution" options="{'multi_edit': True, 'business_domain': 'general'}"/>
             </list>`,
     });
     await runAllTimers();

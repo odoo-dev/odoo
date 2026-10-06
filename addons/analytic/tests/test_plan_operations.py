@@ -94,16 +94,16 @@ class TestAnalyticPlanOperations(TransactionCase):
 
         # the configuration makes it raise an error
         with self.assertRaisesRegex(UserError, r'require a 100% analytic distribution'):
-            distribution_model._validate_distribution()
+            distribution_model._validate_distribution(business_domain='general')
 
         # once it is fixed, the error is not raised anymore
         distribution_model.analytic_distribution = {f"{test_account.id},{mandatory_account.id}": 100}
-        distribution_model._validate_distribution()
+        distribution_model._validate_distribution(business_domain='general')
 
         # even by keeping a deleted account, the validation still works
         test_account.unlink()
         plan.unlink()
-        distribution_model._validate_distribution()
+        distribution_model._validate_distribution(business_domain='general')
 
     def test_validate_company_plans(self):
         company_2 = self.env['res.company'].create({

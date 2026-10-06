@@ -42,6 +42,7 @@
                                        width="92px"/>
                                 <field name="analytic_distribution"
                                        widget="analytic_distribution"
+                                       options="{'business_domain': 'general'}"
                                        groups="analytic.group_analytic_accounting"/>
                                 <field name="amount" string="Withheld Amount" sum="Total Withheld Amount"/>
                             </list>

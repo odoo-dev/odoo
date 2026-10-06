@@ -503,6 +503,11 @@ class AccountMoveLine(models.Model):
         inverse="_inverse_analytic_distribution",
     ) # add the inverse function used to trigger the creation/update of the analytic lines accordingly (field originally defined in the analytic mixin)
     has_invalid_analytics = fields.Boolean(compute='_compute_has_invalid_analytics')
+    analytic_business_domain = fields.Selection(
+        selection='_selection_analytic_business_domain',
+        compute='_compute_analytic_business_domain',
+        help="Business domain used to evaluate the analytic applicability, and category of the generated analytic lines.",
+    )
 
     # === Early Pay fields === #
     discount_date = fields.Date(
@@ -2392,7 +2397,19 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.display_name = line._format_aml_name(line.name or line.product_id.display_name, line.ref, line.move_id.name)
 
-    @api.depends('account_id', 'company_id', 'move_id', 'product_id', 'display_type', 'analytic_distribution')
+    def _selection_analytic_business_domain(self):
+        return self.env['account.analytic.applicability']._fields['business_domain'].selection
+
+    @api.depends('move_id.move_type')
+    def _compute_analytic_business_domain(self):
+        for line in self:
+            line.analytic_business_domain = (
+                'invoice' if line.move_id.is_sale_document(True)
+                else 'bill' if line.move_id.is_purchase_document(True)
+                else 'general'
+            )
+
+    @api.depends('account_id', 'company_id', 'move_id', 'product_id', 'display_type', 'analytic_distribution', 'analytic_business_domain')
     def _compute_has_invalid_analytics(self):
         SKIPPED_ACCOUNT_TYPES = {'asset_receivable', 'liability_payable', 'asset_cash', 'liability_credit_card'}
         lines_to_validate = self.filtered(lambda line: (
@@ -2403,16 +2420,11 @@ class AccountMoveLine(models.Model):
         for line in lines_to_validate:
             line.has_invalid_analytics = False
             try:
-                business_domain = (
-                    'invoice' if line.move_id.is_sale_document(True)
-                    else 'bill' if line.move_id.is_purchase_document(True)
-                    else 'general'
-                )
                 line.with_context(validate_analytic=True)._validate_distribution(
                     company_id=line.company_id.id,
                     product=line.product_id.id,
                     account=line.account_id.id,
-                    business_domain=business_domain,
+                    business_domain=line.analytic_business_domain,
                 )
             except ValidationError:
                 line.has_invalid_analytics = True
@@ -3520,11 +3532,7 @@ class AccountMoveLine(models.Model):
                     company_id=line.company_id.id,
                     product=line.product_id.id,
                     account=line.account_id.id,
-                    business_domain=(
-                        'invoice' if line.move_id.is_sale_document(True)
-                        else 'bill' if line.move_id.is_purchase_document(True)
-                        else 'general'
-                    ),
+                    business_domain=line.analytic_business_domain,
                 )
             except ValidationError:
                 lines_with_missing_analytic_distribution += line
@@ -3604,7 +3612,7 @@ class AccountMoveLine(models.Model):
             'move_line_id': self.id,
             'user_id': self.move_id.invoice_user_id.id or self.env.uid,
             'company_id': self.company_id.id or self.env.company.id,
-            'category': 'invoice' if self.move_id.is_sale_document() else 'vendor_bill' if self.move_id.is_purchase_document() else 'other',
+            'category': self.analytic_business_domain,
         }
 
     def _related_analytic_distribution(self):

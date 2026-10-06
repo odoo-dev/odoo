@@ -69,6 +69,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
 
         cls.at_cost_aal = cls.env["account.analytic.line"].create({
             "name": "At cost Upsale line",
+            "category": "general",
             "product_id": cls.reinvoice_at_cost_product.id,
             "unit_amount": 1,
             "order_id": cls.services_sale_order.id,
@@ -76,6 +77,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
 
         cls.at_sale_price_aal = cls.env["account.analytic.line"].create({
             "name": "At sale price Upsale line",
+            "category": "general",
             "product_id": cls.reinvoice_at_sales_price_product.id,
             "unit_amount": 1,
             "order_id": cls.services_sale_order.id,
@@ -380,6 +382,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
         """
         extra_at_sale_price_aal = self.env["account.analytic.line"].create({
             "name": "Extra work",
+            "category": "general",
             "product_id": self.reinvoice_at_sales_price_product.id,
             "unit_amount": 2,
             "order_id": self.services_sale_order.id,
@@ -409,6 +412,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
         """
         extra_at_sale_price_aal = self.env["account.analytic.line"].create({
             "name": "Extra work At sales Price",
+            "category": "general",
             "product_id": self.reinvoice_at_sales_price_product.id,
             "unit_amount": 2,
             "order_id": self.services_sale_order.id,
@@ -416,6 +420,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
 
         extra_at_cost_aal = self.env["account.analytic.line"].create({
             "name": "Extra work At cost",
+            "category": "general",
             "product_id": self.reinvoice_at_cost_product.id,
             "unit_amount": 2,
             "order_id": self.services_sale_order.id,
@@ -466,6 +471,7 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
             .with_context(from_services_and_material=True)
             .create({
                 "name": "Extra work At cost line",
+                "category": "general",
                 "product_id": self.reinvoice_at_cost_product.id,
                 "unit_amount": 2,
                 "order_id": self.services_sale_order.id,

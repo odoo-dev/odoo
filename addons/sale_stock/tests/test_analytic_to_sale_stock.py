@@ -43,6 +43,7 @@ class TestAnalyticToSaleStock(TestStockCommon):
 
         cls.product_to_upsell_aal = cls.env['account.analytic.line'].with_context(from_services_and_material=True).create({
             'name': 'Upsell Product',
+            'category': 'general',
             'unit_amount': 5,
             'product_id': cls.product_to_upsell.id,
             'order_id': cls.stock_and_materials_sale_order.id,

@@ -226,6 +226,7 @@
             <create model="account.analytic.line" count="20000" id="analytic_lines">
                 <field name="name" generator="fake.sentence" nb_words="6"/>
                 <field name="account_id" ref="analytic_accounts"/>
+                <field name="category" eval="'general'"/>
                 <field name="date" start="today -2y" end="today" distribution="normal(mean=365, std=180)"/>
                 <field name="amount" start="-5000.0" end="5000.0" distribution="normal(mean=0, std=500)"/>
                 <field name="currency_id" eval="env['account.analytic.account'].browse(account_id).company_id.currency_id.id"/>

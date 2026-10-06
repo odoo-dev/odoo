@@ -233,7 +233,7 @@ class TestAnalyticDynamicUpdate(AnalyticCommon):
         )]:
             with self.subTest(comment=comment):
                 lines = self.env['account.analytic.line'].create([
-                    {'name': 'test'} | vals
+                    {'name': 'test', 'category': 'general'} | vals
                     for vals in init
                 ])
                 with capture_create() as container:

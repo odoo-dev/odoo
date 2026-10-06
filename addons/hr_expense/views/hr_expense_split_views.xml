@@ -27,6 +27,7 @@
                             <field name="analytic_distribution"
                                 string="Analytic"
                                 widget="analytic_distribution"
+                                options="{'business_domain': 'expense'}"
                                 groups="analytic.group_analytic_accounting"
                             />
                             <field name="total_amount_currency" string="Total" force_save="1" readonly="product_has_cost"/>
