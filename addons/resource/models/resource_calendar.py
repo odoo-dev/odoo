@@ -74,6 +74,7 @@ class ResourceCalendar(models.Model):
     is_fulltime = fields.Boolean(compute='_compute_is_fulltime', string="Is Full Time")
     work_resources_count = fields.Integer("Work Resources count", compute='_compute_work_resources_count')
     work_time_rate = fields.Float(string='Work Time Rate', compute='_compute_work_time_rate', store=True,
+        readonly=False, ui_readonly=True,  # set in create_version()
         help='Work time rate versus full time working schedule, should be between 0 and 100 %.')
     calendar_type = fields.Selection([
         ('fixed', 'Fixed'),

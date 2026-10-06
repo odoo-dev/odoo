@@ -232,7 +232,7 @@ class HrVersion(models.Model):
                 version.job_title = version.job_id.name
 
     def _inverse_job_title(self):
-        for version in self:
+        for version in self.sudo():
             version.is_custom_job_title = version.job_title != version.job_id.name
 
     @api.depends('job_id')
