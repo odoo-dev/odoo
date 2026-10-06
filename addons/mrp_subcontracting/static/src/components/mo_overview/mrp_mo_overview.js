@@ -3,7 +3,7 @@ import { MoOverview } from "@mrp/components/mo_overview/mrp_mo_overview";
 
 patch(MoOverview.prototype, {
     async getManufacturingData() {
-        await super.getManufacturingData();
+        await super.getManufacturingData(...arguments);
         this.state.showOptions.subcontractorAvailabilities = this.is_subcontract;
     },
 
