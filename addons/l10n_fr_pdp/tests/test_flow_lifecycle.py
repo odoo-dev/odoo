@@ -34,12 +34,12 @@ class TestPdpReportsFlowLifecycle(TestL10nFrPdpCommon):
             'vat': 'FR23334175221',
         })
         cls.company.partner_id._set_additional_identifier('FR_SIRET', '34057796400026')
-        cls.company.invalidate_recordset([
+        recompute_fields = [
             'account_peppol_edi_user',
             'l10n_fr_f10_enable_reporting',
-        ])
-        cls.company._compute_account_peppol_edi_user()
-        cls.company._compute_l10n_fr_f10_enable_reporting()
+        ]
+        cls.company.invalidate_recordset(recompute_fields)
+        cls.company.read(recompute_fields)
         cls.env.flush_all()
 
         cls.b2c_customer = cls.env['res.partner'].create({

@@ -389,7 +389,7 @@ class SaleOrder(models.Model):
         string="Transactions",
         groups="account.group_account_invoice",
         copy=False,
-        readonly=True,
+        ui_readonly=True,
     )
     authorized_transaction_ids = fields.Many2many(
         comodel_name="payment.transaction",
