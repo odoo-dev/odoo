@@ -485,8 +485,10 @@ test("toolbar list buttons react to selection change", async () => {
     const { el } = await setupEditor("<ul><li>[abc]</li></ul>");
 
     await expandToolbar();
-    // The list button shows the type of the list of the selection
+    // The list button shows the type of the list of the selection, and is
+    // active in a list
     expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_bulleted");
+    expect(".btn[name='list_selector']").toHaveClass("active");
     // Open list dropdown and check active state of list types
     click(".btn[name='list_selector'].dropdown-toggle");
     await waitFor(".btn[name='list_selector'].dropdown-toggle.show");
@@ -501,6 +503,7 @@ test("toolbar list buttons react to selection change", async () => {
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe("<ol><li>[abc]</li></ol>");
     expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_numbered");
+    expect(".btn[name='list_selector']").toHaveClass("active");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
@@ -515,6 +518,7 @@ test("toolbar list buttons react to selection change", async () => {
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe('<ul class="o_checklist"><li>[abc]</li></ul>');
     expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "check_box");
+    expect(".btn[name='list_selector']").toHaveClass("active");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
@@ -529,6 +533,7 @@ test("toolbar list buttons react to selection change", async () => {
     expectElementCount(".dropdown-menu:has(button[name='bulleted_list'])", 0);
     expect(getContent(el)).toBe("<p>[abc]</p>");
     expect(".btn[name='list_selector'] i.oi").toHaveAttribute("data-icon", "format_list_bulleted");
+    expect(".btn[name='list_selector']").not.toHaveClass("active");
 
     // Open dropdown again and check if active state is correct after toggling list type
     click(".btn[name='list_selector'].dropdown-toggle");
@@ -848,12 +853,14 @@ test("toolbar works: show the correct text alignment", async () => {
     await expandToolbar();
     expect("button[name='text_align']").toHaveCount(1);
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_left");
+    expect("button[name='text_align']").not.toHaveClass("active");
     await click("button[name='text_align']");
     await contains(".o-we-toolbar-dropdown .btn[data-icon='format_align_right']").click();
     expect(getContent(el)).toBe(
         `<p style="text-align: end;">[test</p><p style="text-align: end;"><br>]</p>`
     );
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_right");
+    expect("button[name='text_align']").toHaveClass("active");
 });
 
 test("toolbar works: show the correct text alignment after undo/redo", async () => {
@@ -861,18 +868,22 @@ test("toolbar works: show the correct text alignment after undo/redo", async () 
     await expandToolbar();
     expect("button[name='text_align']").toHaveCount(1);
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_left");
+    expect("button[name='text_align']").not.toHaveClass("active");
     await click("button[name='text_align']");
     await contains(".o-we-toolbar-dropdown .btn[data-icon='format_align_center']").click();
     expect(getContent(el)).toBe(`<p style="text-align: center;">[test]</p>`);
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_center");
+    expect("button[name='text_align']").toHaveClass("active");
     await press(["ctrl", "z"]);
     await animationFrame();
     expect(getContent(el)).toBe(`<p>[test]</p>`);
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_left");
+    expect("button[name='text_align']").not.toHaveClass("active");
     await press(["ctrl", "y"]);
     await animationFrame();
     expect(getContent(el)).toBe(`<p style="text-align: center;">[test]</p>`);
     expect("button[name='text_align'] i.oi").toHaveAttribute("data-icon", "format_align_center");
+    expect("button[name='text_align']").toHaveClass("active");
 });
 
 test.tags("desktop");
