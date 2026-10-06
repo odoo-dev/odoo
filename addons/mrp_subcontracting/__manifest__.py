@@ -91,7 +91,7 @@
             'web/static/lib/bootstrap/js/dist/toast.js',
             'web/static/src/libs/bootstrap.js',
 
-            ('include', 'web._assets_bootstrap'),
+            ('include', 'web._assets_bootstrap_backend'),
 
             'base/static/src/css/modules.css',
 
