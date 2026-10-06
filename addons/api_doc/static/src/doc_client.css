@@ -582,3 +582,113 @@ body[theme="odoo-dark"] .o-doc-client-root {
         transform: rotate(360deg);
     }
 }
+
+/* #region ========================= Field graph ========================== */
+
+.o-doc-graph {
+    max-height: 70vh;
+    border: 1px solid var(--border);
+
+    svg {
+        display: block;
+        font: 12px sans-serif;
+    }
+}
+
+.o-doc-graph-cluster {
+    rect {
+        fill: var(--background-2);
+        stroke: var(--border);
+    }
+    text {
+        fill: var(--text);
+        opacity: 0.6;
+        font-style: italic;
+    }
+}
+
+.o-doc-graph-node {
+    cursor: pointer;
+
+    rect {
+        fill: var(--background);
+        stroke: var(--border);
+    }
+    text {
+        fill: var(--text);
+    }
+    &:hover rect {
+        stroke: var(--text-primary);
+        stroke-width: 2;
+    }
+}
+
+.o-doc-graph-computed rect {
+    fill: hsl(from var(--blue) h s l / 0.25);
+    stroke: var(--blue);
+}
+
+.o-doc-graph-stored rect {
+    fill: hsl(from var(--orange) h s l / 0.25);
+    stroke: var(--orange);
+    stroke-width: 1.6;
+}
+
+.o-doc-graph-root {
+    rect {
+        fill: var(--btn-primary);
+        stroke: var(--text-primary);
+        stroke-width: 2;
+    }
+    text {
+        fill: var(--text-active);
+        font-weight: bold;
+    }
+}
+
+.o-doc-graph-default {
+    --o-doc-graph-color: var(--text);
+}
+
+.o-doc-graph-out {
+    --o-doc-graph-color: var(--green);
+}
+
+.o-doc-graph-in {
+    --o-doc-graph-color: var(--red);
+}
+
+.o-doc-graph-edge {
+    fill: none;
+    stroke: var(--o-doc-graph-color, var(--text));
+    stroke-opacity: 0.35;
+
+    &.o-doc-graph-related {
+        stroke-dasharray: 4 3;
+    }
+    &.o-doc-graph-highlight {
+        stroke-opacity: 1;
+        stroke-width: 2;
+    }
+}
+
+.o-doc-graph-arrow {
+    fill: var(--o-doc-graph-color);
+    fill-opacity: 0.5;
+
+    &.o-doc-graph-out, &.o-doc-graph-in {
+        fill-opacity: 1;
+    }
+}
+
+.o-doc-graph-legend-out {
+    color: var(--green);
+    font-weight: bold;
+}
+
+.o-doc-graph-legend-in {
+    color: var(--red);
+    font-weight: bold;
+}
+
+/* #endregion */

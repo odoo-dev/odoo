@@ -27,8 +27,9 @@
                 t-as="rows"
                 t-key="rows_index"
                 class="bg-1"
-                t-att-class="{ 'o-doc-active': rows_index === this.props.activeIndex }"
+                t-att-class="{ 'o-doc-active': rows_index === this.props.activeIndex, 'cursor-pointer': this.props.onRowClick }"
                 t-att-id="this.getId(rows)"
+                t-on-click="() => this.props.onRowClick?.(rows)"
             >
                 <td
                     t-foreach="rows"
@@ -60,7 +61,7 @@
                         t-if="row.relation"
                         class="cursor-pointer text-muted ms-1"
                         t-attf-href="/doc/{{row.relation}}"
-                        t-on-click.prevent="() => this.goToModel(row.relation)"
+                        t-on-click.prevent.stop="() => this.goToModel(row.relation)"
                     >
                         <t t-out="row.relation"/>
                         <i

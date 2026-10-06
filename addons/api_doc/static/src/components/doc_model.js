@@ -6,6 +6,7 @@ import { DocLoadingIndicator } from "@api_doc/components/doc_loading_indicator";
 import { useDocUI } from "@api_doc/utils/doc_ui_store";
 import { DocErrorDialog } from "@api_doc/components/doc_error_dialog";
 import { localeCompare } from "@web/core/l10n/utils";
+import { DocFieldGraph } from "@api_doc/components/doc_field_graph";
 
 const TYPE_COLORS = {
     "text-success": ["integer", "char", "boolean", "selection", "float"],
@@ -49,6 +50,7 @@ export class DocModel extends Component {
         DocMethod,
         DocLoadingIndicator,
         DocErrorDialog,
+        DocFieldGraph,
     };
 
     setup() {
@@ -273,6 +275,13 @@ export class DocModel extends Component {
             this.state.activeModules[module] = active;
         }
         this.updateFields();
+    }
+
+    selectField(row) {
+        this.modelStore.setActiveModel({
+            model: this.modelStore.activeModel,
+            field: row[0].value,
+        });
     }
 
     toggleAllModules(select) {

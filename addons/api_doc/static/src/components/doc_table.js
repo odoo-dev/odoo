@@ -13,6 +13,7 @@ export class DocTable extends Component {
 
     props = useProps({
         data: t.any(),
+        onRowClick: t.any(),
     });
 
     items = computed(() => this.computeItems());

@@ -12,8 +12,18 @@
             isLoaded="this.isDocTableLoaded()"
             class="'o-fade-in'"
         >
-            <DocTable data="this.state.fields.data"/>
+            <DocTable
+                data="this.state.fields.data"
+                onRowClick.bind="selectField"
+            />
         </DocLoadingIndicator>
+
+        <t t-if="this.modelStore.activeField and this.state.model?.fields?.[this.modelStore.activeField]">
+            <h3 class="mt-3 mb-2" id="field-dependencies">
+                Dependencies of <span class="font-monospace" t-out="this.modelStore.activeField"/>
+            </h3>
+            <DocFieldGraph model="this.state.model.model" field="this.modelStore.activeField"/>
+        </t>
 
         <h3 class="mt-3 mb-2" id="methods">Methods</h3>
         <DocLoadingIndicator

@@ -133,6 +133,10 @@ export class ModelStore extends Reactive {
         }
     }
 
+    async loadFieldDependencies(modelId, fieldName) {
+        return tryFetch(`/doc/${modelId}/${fieldName}/dependencies.json`);
+    }
+
     getBasicModelData(modelId) {
         return this.models.find((m) => m.model === modelId);
     }

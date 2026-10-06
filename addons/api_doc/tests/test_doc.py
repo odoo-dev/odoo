@@ -201,6 +201,44 @@ class TestDoc(HttpCaseWithUserDemo):
             'api': ['model', 'readonly'],
         })
 
+    def test_doc_field_dependencies(self):
+        self.authenticate('demo', 'demo')
+        res = self.url_open('/doc/res.partner/commercial_partner_id/dependencies.json')
+        res.raise_for_status()
+        json = res.json()
+
+        self.assertEqual(json['root'], 'res.partner.commercial_partner_id')
+        self.assertEqual(json['nodes']['res.partner.commercial_partner_id'], {
+            'model': 'res.partner',
+            'name': 'commercial_partner_id',
+            'string': 'Commercial Entity',
+            'type': 'many2one',
+            'store': True,
+            'compute': '_compute_commercial_partner',
+            'related': None,
+            'module': 'base',
+        })
+        edges = {tuple(edge) for edge in json['edges']}
+        self.assertGreaterEqual(edges, {
+            # upstream: @api.depends('parent_id.commercial_partner_id', 'parent_id')
+            ('res.partner.commercial_partner_id', 'res.partner.parent_id'),
+            # downstream: related='commercial_partner_id.name'
+            ('res.partner.commercial_company_name', 'res.partner.commercial_partner_id'),
+            # downstream, on all levels: @api.depends('commercial_company_name')
+            ('res.partner.complete_name', 'res.partner.commercial_company_name'),
+        })
+        self.assertNotIn(
+            ('res.partner.commercial_partner_id', 'res.partner.commercial_partner_id'), edges,
+            "recursive fields should not depend on themselves")
+        self.assertNotIn(
+            ('res.partner.commercial_company_name', 'res.partner.name'), edges,
+            "the dependencies of downstream fields are not part of the graph")
+        self.assertEqual(
+            {node for edge in edges for node in edge} | {json['root']}, set(json['nodes']))
+
+        res = self.url_open('/doc/res.partner/not_a_field/dependencies.json')
+        self.assertEqual(res.status_code, 404)
+
     def test_doc_cache(self):
         self.authenticate('demo', 'demo')
 

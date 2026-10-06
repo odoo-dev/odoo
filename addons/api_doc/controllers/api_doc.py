@@ -241,6 +241,112 @@ class DocController(http.Controller):
         response.headers['Content-Language'] = py_to_js_locale(self.env.lang)
         return response
 
+    @http.route('/doc/<model_name>/<field_name>/dependencies.json', type='json2', auth='user', readonly=True)
+    def doc_field_dependencies(self, model_name, field_name):
+        """
+        Get the graph of the field dependencies of a field, on all
+        levels: the fields it depends on (upstream, via ``@api.depends``
+        and ``related``), and the fields that depend on it (downstream,
+        i.e. the fields recomputed when it is modified).
+
+        The fields the user cannot read are omitted.
+
+        It returns a json-serialized dictionnary with the following
+        structure:
+
+        .. code-block:: python
+
+            {
+                'root': str,  # "model.field" of the requested field
+                'nodes': {
+                    "model.field": {
+                        'model': str,
+                        'name': str,
+                        'string': str,
+                        'type': str,
+                        'store': bool,
+                        'compute': str | bool,
+                        'related': str | None,
+                        'module': str | None,
+                    },
+                },
+                # the source field depends on the destination field
+                'edges': list[tuple[str, str]],
+            }
+        """
+        if not self.env.user.has_group('api_doc.group_allow_doc'):
+            raise AccessError(self.env._(
+                "This page is only accessible to %s users.",
+                self.env.ref('api_doc.group_allow_doc').sudo().name))
+        if model_name not in self.env or field_name not in self.env[model_name]._fields:
+            raise NotFound()
+
+        Model = self.env[model_name]
+        Model.check_access('read')
+        registry = self.env.registry
+        root = Model._fields[field_name]
+
+        edges = set()  # {(dependent, dependency)}
+
+        # upstream: what the field depends on
+        todo, seen = [root], {root}
+        while todo:
+            field = todo.pop()
+            for dependency in get_field_dependencies(registry, field):
+                edges.add((field, dependency))
+                if dependency not in seen:
+                    seen.add(dependency)
+                    todo.append(dependency)
+
+        # downstream: what depends on the field
+        triggers = registry._field_triggers
+        todo, seen = [root], {root}
+        while todo:
+            field = todo.pop()
+            for dependents in triggers.get(field, {}).values():
+                for dependent in dependents:
+                    edges.add((dependent, field))
+                    if dependent not in seen:
+                        seen.add(dependent)
+                        todo.append(dependent)
+
+        readable = {
+            field
+            for field in {root, *(f for edge in edges for f in edge)}
+            if (Model := self.env[field.model_name]).has_access('read')
+            if Model.has_field_access(field, 'read')
+        }
+
+        def key(field):
+            return f'{field.model_name}.{field.name}'
+
+        nodes = {
+            key(field): {
+                'model': field.model_name,
+                'name': field.name,
+                'string': field._description_string(self.env),
+                'type': field.type,
+                'store': field.store,
+                'compute': field.compute if isinstance(field.compute, str) else bool(field.compute),
+                'related': field.related or None,
+                'module': next(iter(field._modules), None),
+            }
+            for field in readable
+        }
+        return request.make_json_response({
+            'root': key(root),
+            'nodes': nodes,
+            'edges': sorted(
+                (key(dependent), key(dependency))
+                for dependent, dependency in edges
+                if dependent != dependency
+                if dependent in readable and dependency in readable
+            ),
+        }, headers={
+            'Cache-Control': 'no-cache, private',
+            'Content-Language': py_to_js_locale(self.env.lang),
+        })
+
     def _doc_method(self, model, model_name, method, method_name):
         """
         Get the JSON reflection of a method.
@@ -310,6 +416,23 @@ def get_sorted_installed_modules(env):
     graph = ModuleGraph(env.cr)
     graph.extend(names)
     return [p.name for p in graph]
+
+
+def get_field_dependencies(registry, field):
+    """
+    Yield the fields ``field`` directly depends on, i.e. every field on
+    the paths of its dependencies. This is ``Field.resolve_depends``
+    without its side effects (warnings, setting ``recursive``...).
+    """
+    for dotnames in registry.field_depends.get(field, ()):
+        model_name = field.model_name
+        for fname in dotnames.split('.'):
+            dependency = registry[model_name]._fields.get(fname)
+            if dependency is None:
+                break
+            yield dependency
+            if not (model_name := dependency.comodel_name):
+                break
 
 
 def is_public_method(model, name):
