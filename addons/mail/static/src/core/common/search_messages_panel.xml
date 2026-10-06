@@ -9,9 +9,9 @@
             icon="'search'"
         >
             <t t-set-slot="header">
-                <SearchMessageInput closeSearch="this.props.closeSearch" messageSearch="this.messageSearch" thread="this.props.thread"/>
+                <SearchMessageInput closeSearch="this.props.closeSearch" thread="this.props.thread"/>
             </t>
-            <SearchMessageResult thread="this.props.thread" messageSearch="this.messageSearch"/>
+            <SearchMessageResult thread="this.props.thread"/>
         </ActionPanel>
     </t>
 </templates>

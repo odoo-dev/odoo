@@ -18,7 +18,7 @@ import { press } from "@odoo/hoot-dom";
 import { tick } from "@odoo/hoot-mock";
 import { serverState } from "@web/../tests/web_test_helpers";
 
-import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_hook";
+import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_plugin";
 
 defineMailModels();
 

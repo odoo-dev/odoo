@@ -1,6 +1,7 @@
+import { Thread } from "@mail/core/common/thread_model";
 import { SearchState } from "@mail/utils/common/hooks";
 import { getInnerHtml } from "@mail/utils/common/html";
-import { proxy } from "@odoo/owl";
+import { Plugin, plugin, t, useConfig } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { createDocumentFragmentFromContent } from "@web/core/utils/html";
 import { escapeRegExp } from "@web/core/utils/strings";
@@ -136,19 +137,38 @@ export class MessageSearchState extends SearchState {
         this.count = 0;
         this.hasMore = false;
     }
+}
+
+/**
+ * Holds the message search state of the thread given in config. Components
+ * driving or displaying the search (input, results) read it from here.
+ *
+ * Config:
+ * - `thread`: function returning the thread whose messages are searched, read
+ *   once when the plugin starts. Assign `search.thread` to search another one.
+ */
+export class MessageSearchPlugin extends Plugin {
+    thread = useConfig("thread", t.function([], t.instanceOf(Thread).optional()));
+    search = new MessageSearchState(this.thread());
+}
+
+/**
+ * Highlights the term of the parent {@link MessageSearchPlugin} search. Only
+ * provided around search results, so that messages displayed elsewhere (e.g.
+ * the thread itself) are not highlighted.
+ */
+export class SearchHighlightPlugin extends Plugin {
+    messageSearch = plugin(MessageSearchPlugin).search;
+
+    get searchTerm() {
+        return this.messageSearch.searchTerm;
+    }
 
     /**
-     * Highlights `searchTerm` in `text`.
+     * Highlights the search term in `text`.
      * @param {string} text
      */
     highlight(text) {
         return searchHighlight(this.searchTerm, text);
     }
-}
-
-/**
- * @param {import('models').Thread} [initialThread]
- */
-export function useMessageSearch(initialThread) {
-    return proxy(new MessageSearchState(initialThread));
 }

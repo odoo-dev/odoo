@@ -2,6 +2,7 @@ import {
     computed,
     onMounted,
     onPatched,
+    onWillDestroy,
     onWillUnmount,
     proxy,
     signal,
@@ -9,6 +10,7 @@ import {
     untrack,
     useEffect,
     useListener,
+    useOnChange,
     usePlugin,
     useProps,
     useScope,
@@ -537,7 +539,8 @@ export class SearchState {
             this.depsGetter = deps;
         }
         this.sequential = useSequential();
-        useLayoutEffect(
+        useOnChange(
+            () => [self.searchTerm, ...self.deps],
             () => {
                 if (!self.isActive) {
                     self.reset();
@@ -547,10 +550,9 @@ export class SearchState {
                     self.results = self.filter(self.searchTerm);
                 }
                 self.run();
-            },
-            () => [self.searchTerm, ...self.deps]
+            }
         );
-        onWillUnmount(() => self.reset());
+        onWillDestroy(() => self.reset());
         return self;
     }
 

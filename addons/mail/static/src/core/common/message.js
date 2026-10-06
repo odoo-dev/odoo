@@ -27,7 +27,7 @@ import {
     useApp,
     useProps,
 } from "@odoo/owl";
-import { MessageSearchState } from "@mail/core/common/message_search_hook";
+import { SearchHighlightPlugin } from "@mail/core/common/message_search_plugin";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -44,6 +44,7 @@ import { NotificationMessage } from "./notification_message";
 import {
     MessageSelectionState,
     propComputed,
+    useMaybePlugin,
     useForwardRefsToParent,
     useLongPress,
     useRightClickMenu,
@@ -109,13 +110,13 @@ export class Message extends Component {
             isFirstMessage: t.boolean().optional(),
             message: t.instanceOf(this.store["mail.message"]),
             messageRefs: t.instanceOf(Map).optional(),
-            messageSearch: t.instanceOf(MessageSearchState).optional(),
             messageSelection: t.instanceOf(MessageSelectionState).optional(),
             previousMessage: t.instanceOf(this.store["mail.message"]).optional(),
             showDates: t.boolean().optional(true),
             squashed: t.boolean().optional(),
             thread: t.instanceOf(this.store["mail.thread"]).optional(),
         });
+        this.searchHighlight = useMaybePlugin(SearchHighlightPlugin);
         this.isReadOnly = propComputed("isReadOnly", t.boolean().optional());
         this.onParentMessageClick = useProps.static(
             "onParentMessageClick",
@@ -224,7 +225,7 @@ export class Message extends Component {
                         "span",
                         this.message.showTranslation
                             ? this.message.richTranslationValue
-                            : this.props.messageSearch?.highlight(this.message.richBody) ??
+                            : this.searchHighlight?.highlight(this.message.richBody) ??
                                   this.message.richBody
                     );
                     const roots = this.prepareMessageBody(bodyEl) ?? [];
@@ -241,7 +242,7 @@ export class Message extends Component {
                 this.shadowRoot(),
                 this.message.showTranslation,
                 this.message.richTranslationValue,
-                this.props.messageSearch?.searchTerm,
+                this.searchHighlight?.searchTerm,
                 this.message.richBody,
                 this.isEditing,
             ]
@@ -260,7 +261,7 @@ export class Message extends Component {
             () => [
                 this.isEditing,
                 this.message.richBody,
-                this.props.messageSearch?.searchTerm,
+                this.searchHighlight?.searchTerm,
                 untrack(this.messageBody),
             ]
         );

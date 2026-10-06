@@ -14,7 +14,7 @@ import {
 import { describe, test } from "@odoo/hoot";
 import { serverState } from "@web/../tests/web_test_helpers";
 
-import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_hook";
+import { HIGHLIGHT_CLASS } from "@mail/core/common/message_search_plugin";
 
 describe.current.tags("desktop");
 defineMailModels();

@@ -1,6 +1,7 @@
 import { AttachmentDeleteDialog } from "@mail/core/common/attachment_delete_dialog";
 import { Gif } from "@mail/core/common/gif";
-import { MessageSearchState } from "@mail/core/common/message_search_hook";
+import { SearchHighlightPlugin } from "@mail/core/common/message_search_plugin";
+import { useMaybePlugin } from "@mail/utils/common/hooks";
 
 import { Component, signal, t, useProps } from "@odoo/owl";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -57,7 +58,6 @@ export class AttachmentList extends Component {
                 })
             ),
             isSelecting: t.boolean().optional(false),
-            messageSearch: t.instanceOf(MessageSearchState).optional(),
             onToggleSelected: t.function([t.instanceOf(this.store["ir.attachment"])]).optional(),
             selectedAttachments: t.array(t.instanceOf(this.store["ir.attachment"])).optional(),
             unlinkAttachments: t.function(
@@ -65,6 +65,7 @@ export class AttachmentList extends Component {
                 t.or([t.promise(), t.literal(undefined)])
             ),
         });
+        this.searchHighlight = useMaybePlugin(SearchHighlightPlugin);
         this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.fileViewer = useFileViewer(this.rootRef);
