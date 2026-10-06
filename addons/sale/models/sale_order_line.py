@@ -1051,8 +1051,16 @@ class SaleOrderLine(models.Model):
                     line.product_uom_qty >= 0.0 and\
                     float_compare(line.qty_delivered, line.product_uom_qty, precision_digits=precision) == 1:
                 line.invoice_status = 'upselling'
-            elif float_compare(line.qty_invoiced, line.product_uom_qty, precision_digits=precision) >= 0:
-                line.invoice_status = 'invoiced'
+            elif (
+                float_compare(line.qty_invoiced, line.product_uom_qty, precision_digits=precision)
+                >= 0
+            ) or (
+                line.product_id.invoice_policy == "delivery"
+                and float_is_zero(line.qty_delivered, precision_digits=precision)
+                and float_is_zero(line.qty_to_invoice, precision_digits=precision)
+                and line.invoice_lines
+            ):
+                line.invoice_status = "invoiced"
             else:
                 line.invoice_status = 'no'
 
@@ -1150,14 +1158,13 @@ class SaleOrderLine(models.Model):
 
             line.untaxed_amount_to_invoice = amount_to_invoice
 
-    @api.depends('discount', 'price_total', 'product_uom_qty', 'qty_invoiced_posted')
+    @api.depends('discount', 'price_total', 'product_uom_qty', 'qty_invoiced_posted', 'qty_to_invoice')
     def _compute_amount_to_invoice(self):
         for line in self:
             if line.product_uom_qty:
-                # The ordered quantity is what the customer committed to, delivered or not.
-                qty_to_invoice = line.product_uom_qty - line.qty_invoiced_posted
+                # Use qty_to_invoice field which already respects the invoice policy
                 unit_price_total = line.price_total / line.product_uom_qty
-                line.amount_to_invoice = unit_price_total * qty_to_invoice
+                line.amount_to_invoice = unit_price_total * line.qty_to_invoice
             else:
                 line.amount_to_invoice = 0.0
 

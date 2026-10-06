@@ -336,3 +336,45 @@ class TestSaleRefund(TestSaleCommon):
         self.assertEqual(sol_downpayment.untaxed_amount_to_invoice, -(sol_product.price_unit * 5)/2, "Amount to invoice decreased as the refund is now confirmed")
         self.assertEqual(sol_downpayment.untaxed_amount_invoiced, (sol_product.price_unit * 5)/2, "Amount invoiced is now set as half of all products' total amount to invoice, as refund is validated")
         self.assertEqual(len(sol_downpayment.invoice_lines), 3, "The product line is invoiced, so it should be linked to 3 invoice lines (downpayment invoice, partial invoice and refund)")
+
+    def test_invoice_status_after_full_return_credit_note(self):
+        """Test that invoice_status is 'invoiced' after full return + credit note for delivery policy."""
+        product = self.company_data['product_delivery_cost']
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': product.id,
+                'product_uom_qty': 5.0,
+            })],
+        })
+        sol = so.order_line
+
+        so.action_confirm()
+        picking = so.picking_ids
+        picking.action_assign()
+        for ml in picking.move_line_ids:
+            ml.quantity = ml.move_id.product_uom_qty
+        picking._action_done()
+
+        so._create_invoices()
+        invoice = so.invoice_ids
+        invoice.action_post()
+
+        return_wiz = self.env['stock.return.picking'].with_context(
+            {'active_ids': picking.ids, 'active_id': picking.id}
+        ).create({})
+        return_wiz._create_returns()
+        return_pick = self.env['stock.picking'].search([('origin', '=', picking.name)])
+        return_pick.action_assign()
+        for ml in return_pick.move_line_ids:
+            ml.quantity = ml.move_id.product_uom_qty
+        return_pick._action_done()
+
+        reversal_wiz = self.env['account.move.reversal'].with_context({
+            'active_ids': invoice.ids, 'active_id': invoice.id,
+        }).create({'reason': 'Full return'})
+        reversal_wiz.refund_moves()
+        refund = self.env['account.move'].browse(reversal_wiz['res_id'])
+        refund.action_post()
+
+        self.assertEqual(sol.invoice_status, 'invoiced')
