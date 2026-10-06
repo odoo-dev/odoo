@@ -84,7 +84,7 @@ CREDENTIAL_ERRORS = {
 }
 
 POLICY_CODES = {
-    # Nuonuo docs cover 01-18 only; unsupported policies must fail loudly.
+    # favouredPolicyFlag for 数电, in the order of requestBillingNew's doc.
     'simplified': '01',
     'rare_earth': '02',
     'exemption': '03',
@@ -103,6 +103,8 @@ POLICY_CODES = {
     'refund_gt_8': '16',
     'refund_gt_12': '17',
     'refund_gt_6': '18',
+    'simplified_2': '19',
+    'simplified_3_1_5': '20',
 }
 
 

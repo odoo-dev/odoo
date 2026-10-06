@@ -129,6 +129,14 @@ class TestNuonuoIssue(L10nCnEdiNuonuoTestCommon):
         # 09 按5%简易征收, as in Nuonuo's own 停车费 example.
         self.assertEqual((line['favouredPolicyFlag'], line['zeroRateFlag']), ('09', '3'))
 
+    def test_every_tax_policy_has_a_nuonuo_code(self):
+        client = self.company._l10n_cn_edi_get_client()
+        policies = self.env['account.tax']._fields['l10n_cn_vat_special_policy'].get_values(self.env)
+
+        codes = [client._policy_code(policy) for policy in policies]
+
+        self.assertEqual(codes, [f'{index:02}' for index in range(1, 21)])
+
     def test_invoice_amount_mismatch_is_exposed(self):
         invoice = self._post_invoice()
         self._answer(ISSUE, ACCEPTED)
