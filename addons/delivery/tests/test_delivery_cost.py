@@ -12,11 +12,11 @@ from odoo.addons.delivery.tests.common import DeliveryCommon
 @tagged("post_install", "-at_install")
 class TestDeliveryCost(DeliveryCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -28,14 +28,8 @@ class TestDeliveryCost(DeliveryCommon):
         cls.env.company.country_id = cls.env.ref("base.us").id
 
         cls.product.weight = 1.0
-        cls.product_delivery_normal = cls._prepare_carrier_product(
-            name="Normal Delivery Charges", list_price=10.0
-        )
         cls.normal_delivery = cls._prepare_carrier(
-            product=cls.product_delivery_normal,
-            name="Normal Delivery Charges",
-            delivery_type="fixed",
-            fixed_price=10.0,
+            name="Normal Delivery Charges", delivery_type="fixed", fixed_price=10.0
         )
         cls.partner_4 = cls.env["res.partner"].create({
             "name": "Another Customer",
@@ -56,12 +50,17 @@ class TestDeliveryCost(DeliveryCommon):
         })
         # I add delivery cost in Sales order
 
-        self.a_sale = self.env["account.account"].sudo().create({
-            "code": "X2020",
-            "name": "Product Sales - (test)",
-            "account_type": "income",
-            "tag_ids": [Command.set(self.env.ref("account.account_tag_operating").ids)],
-        })
+        self.a_sale = (
+            self
+            .env["account.account"]
+            .sudo()
+            .create({
+                "code": "X2020",
+                "name": "Product Sales - (test)",
+                "account_type": "income",
+                "tag_ids": [Command.set(self.env.ref("account.account_tag_operating").ids)],
+            })
+        )
 
         self.product_consultant = self.env["product.product"].create({
             "sale_ok": True,
@@ -258,24 +257,31 @@ class TestDeliveryCost(DeliveryCommon):
             "implied_ids": [(4, self.env.ref("product.group_product_pricelist").id)]
         })
 
-        fiscal_position = self.env["account.fiscal.position"].sudo().create({"name": "fiscal_pos_a"})
-        tax_price_include, tax_price_exclude = self.env["account.tax"].sudo().create([
-            {
-                "name": "10% inc",
-                "type_tax_use": "sale",
-                "amount_type": "percent",
-                "amount": 10,
-                "price_include_override": "tax_included",
-                "include_base_amount": True,
-            },
-            {
-                "name": "15% exc",
-                "type_tax_use": "sale",
-                "amount_type": "percent",
-                "amount": 15,
-                "fiscal_position_ids": [Command.link(fiscal_position.id)],
-            },
-        ])
+        fiscal_position = (
+            self.env["account.fiscal.position"].sudo().create({"name": "fiscal_pos_a"})
+        )
+        tax_price_include, tax_price_exclude = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create([
+                {
+                    "name": "10% inc",
+                    "type_tax_use": "sale",
+                    "amount_type": "percent",
+                    "amount": 10,
+                    "price_include_override": "tax_included",
+                    "include_base_amount": True,
+                },
+                {
+                    "name": "15% exc",
+                    "type_tax_use": "sale",
+                    "amount_type": "percent",
+                    "amount": 15,
+                    "fiscal_position_ids": [Command.link(fiscal_position.id)],
+                },
+            ])
+        )
         tax_price_exclude.original_tax_ids = tax_price_include
 
         # Setting tax on delivery product
@@ -415,7 +421,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "base_on_rule",
-            "product_id": self.product_delivery_normal.id,
             "price_rule_ids": [
                 Command.create({
                     "variable": "price",
@@ -437,33 +442,53 @@ class TestDeliveryCost(DeliveryCommon):
         Taxes from the branch company should be taken with a fallback on parent company.
         """
         company = self.env.company
-        branch = self.env["res.company"].sudo().create({
-            "name": "Branch",
-            "country_id": company.country_id.id,
-            "parent_id": company.id,
-        })
+        branch = (
+            self
+            .env["res.company"]
+            .sudo()
+            .create({
+                "name": "Branch",
+                "country_id": company.country_id.id,
+                "parent_id": company.id,
+            })
+        )
         self.env.user.company_ids += branch
         # create taxes for the parent company and its branch
-        tax_groups = self.env["account.tax.group"].sudo().create([
-            {"name": "Tax Group A", "company_id": company.id},
-            {"name": "Tax Group B", "company_id": branch.id},
-        ])
-        tax_a = self.env["account.tax"].sudo().create({
-            "name": "Tax A",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 10,
-            "tax_group_id": tax_groups[0].id,
-            "company_id": company.id,
-        })
-        tax_b = self.env["account.tax"].sudo().create({
-            "name": "Tax B",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 20,
-            "tax_group_id": tax_groups[1].id,
-            "company_id": branch.id,
-        })
+        tax_groups = (
+            self
+            .env["account.tax.group"]
+            .sudo()
+            .create([
+                {"name": "Tax Group A", "company_id": company.id},
+                {"name": "Tax Group B", "company_id": branch.id},
+            ])
+        )
+        tax_a = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax A",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 10,
+                "tax_group_id": tax_groups[0].id,
+                "company_id": company.id,
+            })
+        )
+        tax_b = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax B",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 20,
+                "tax_group_id": tax_groups[1].id,
+                "company_id": branch.id,
+            })
+        )
         # create delivery product with taxes from both branch and parent company
         delivery_product = self.env["product.product"].create({
             "name": "Delivery Product",
@@ -473,7 +498,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "fixed",
-            "product_id": delivery_product.id,
             "company_id": branch.id,
         })
         # create a SO from Branch
@@ -562,10 +586,12 @@ class TestDeliveryCost(DeliveryCommon):
         # Create a company that uses a different currency
         currency_bells = self.env["res.currency"].sudo().create({"name": "Bell", "symbol": "C"})
 
-        nook_inc = self.env["res.company"].sudo().create({
-            "name": "Nook inc.",
-            "currency_id": currency_bells.id,
-        })
+        nook_inc = (
+            self
+            .env["res.company"]
+            .sudo()
+            .create({"name": "Nook inc.", "currency_id": currency_bells.id})
+        )
         self.env.user.company_ids += nook_inc
 
         with freeze_time("2000-01-01"):  # Make sure the rate is in the past
@@ -576,18 +602,6 @@ class TestDeliveryCost(DeliveryCommon):
             })
 
         # Company less delivery method
-        product_delivery_rule = (
-            self
-            .env["product.product"]
-            .with_company(nook_inc)
-            .create({
-                "name": "rule delivery charges",
-                "type": "service",
-                "list_price": 10.0,
-                "categ_id": self.env.ref("delivery.product_category_deliveries").id,
-            })
-        )
-
         delivery = (
             self
             .env["delivery.carrier"]
@@ -595,7 +609,6 @@ class TestDeliveryCost(DeliveryCommon):
             .create({
                 "name": "Rule Delivery",
                 "delivery_type": "base_on_rule",
-                "product_id": product_delivery_rule.id,
                 "price_rule_ids": [
                     Command.create({
                         "variable": "price",
@@ -651,7 +664,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "base_on_rule",
-            "product_id": self.product_delivery_normal.id,
             "price_rule_ids": [
                 Command.create({
                     "variable": "quantity",
