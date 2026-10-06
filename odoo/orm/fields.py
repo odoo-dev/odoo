@@ -99,7 +99,7 @@ class Field[T]:
 
     :param bool readonly: whether the field is readonly (default: ``False``)
 
-        No effect, same as ``ui_readonly``.
+        A user has no permission to write readonly fields.
 
     :param bool ui_readonly: whether the field is readonly
 
