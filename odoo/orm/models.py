@@ -2683,6 +2683,7 @@ class BaseModel(metaclass=MetaModel):
         return res
 
     @api.model
+    @typing.final
     def has_field_access(self, field: Field, operation: typing.Literal['read', 'write']) -> bool:
         """ Determine whether the user access rights on the given field for the given operation.
 
@@ -2710,6 +2711,8 @@ class BaseModel(metaclass=MetaModel):
         :param operation: one of ``read``, ``write``
         :return: whether the field is accessible
         """
+        if operation == 'write' and field.readonly:
+            return self.env.su
         if not field.groups or self.env.su:
             return True
         if field.groups == NO_ACCESS:
@@ -2754,6 +2757,8 @@ class BaseModel(metaclass=MetaModel):
         if self.env.user._has_group('base.group_no_one'):
             if field.groups == NO_ACCESS:
                 allowed_groups_msg = _("always forbidden")
+            elif operation == 'write' and self.has_field_access(field, 'read'):
+                allowed_groups_msg = _("readonly access allowed")
             elif not field.groups:
                 allowed_groups_msg = _("custom field access rules")
             else:
