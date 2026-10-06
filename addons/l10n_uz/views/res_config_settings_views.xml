@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n.uz</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <!-- Applied after the views adding settings after Default Taxes (e.g. account_reports), so this one stays right next to it. -->
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='default_taxes']" position="after">
+                <setting id="l10n_uz_tax_regime" string="Tax Regime" company_dependent="1"
+                         help="Standard VAT, Simplified VAT or Turnover Income Taxation. Sets the default taxes and the tax returns to file."
+                         invisible="country_code != 'UZ'">
+                    <field name="l10n_uz_tax_regime" class="o_light_label mt16" widget="radio"/>
+                    <div class="content-group" invisible="l10n_uz_tax_regime != 'turnover'">
+                        <div class="row mt16">
+                            <label for="l10n_uz_turnover_tax_rate" class="col-lg-3 o_light_label"/>
+                            <field name="l10n_uz_turnover_tax_rate"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

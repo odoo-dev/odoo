@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="l10n_uz_tax_report_vat_12" model="account.report">
+        <field name="name">VAT Report 12% - Form 10006_45</field>
+        <field name="name@uz">QQS hisoboti 12% - 10006_45 shakli</field>
+        <field name="name@ru">Отчет по НДС 12% - Форма 10006_45</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.uz"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="l10n_uz_tr_vat12_column_base" model="account.report.column">
+                <field name="name">Taxable Turnover excl. VAT</field>
+                <field name="name@uz">QQSsiz soliq solinadigan aylanma</field>
+                <field name="name@ru">Облагаемый оборот без НДС</field>
+                <field name="expression_label">base</field>
+            </record>
+            <record id="l10n_uz_tr_vat12_column_tax" model="account.report.column">
+                <field name="name">VAT Amount</field>
+                <field name="name@uz">QQS summasi</field>
+                <field name="name@ru">Сумма НДС</field>
+                <field name="expression_label">tax</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="l10n_uz_tr_vat12_title_main" model="account.report.line">
+                <field name="name">Main Indicators</field>
+                <field name="name@uz">Koʻrsatkichlar</field>
+                <field name="name@ru">Показатели</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="l10n_uz_tr_vat12_uz_003" model="account.report.line">
+                        <field name="name">040 VAT calculated on sales turnover (output VAT)</field>
+                        <field name="name@uz">Amal qiluvchi stavkalar boʻyicha realizatsiya aylanmasidan hisoblangan QQS summasi (chiquvchi QQS)</field>
+                        <field name="name@ru">Сумма НДС по оборотам от реализации (исходящий НДС)</field>
+                        <field name="code">uz_003</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_003_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_001.base - uz_3.base + uz_6.base + uz_7.base + uz_8.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_003_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_001.tax + uz_6.tax + uz_7.tax + uz_8.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_004" model="account.report.line">
+                        <field name="name">030 Total VAT accepted for credit (input VAT)</field>
+                        <field name="name@uz">Hisobga olinadigan QQS summasi, jami (kiruvchi QQS)</field>
+                        <field name="name@ru">Общая сумма НДС, принимаемая к зачету (входящий НДС)</field>
+                        <field name="code">uz_004</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_004_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_18.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_004_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_18.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_005" model="account.report.line">
+                        <field name="name">050 VAT payable (+) / refundable (−) for the period</field>
+                        <field name="name@uz">Davr uchun toʻlanadigan (+) / qaytariladigan (−) QQS</field>
+                        <field name="name@ru">Сумма НДС, подлежащая уплате в бюджет (к уменьшению)</field>
+                        <field name="code">uz_005</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_005_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_003.base - uz_004.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_005_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_003.tax - uz_004.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_uz_tr_vat12_title_appendix_1" model="account.report.line">
+                <field name="name">Appendix 1 - Turnover on sales of taxable goods (services)</field>
+                <field name="name@uz">1-ILOVA — «Soliq davrida tovarlarni (xizmatlarni) realizatsiya qilish boʻyicha aylanmalar»</field>
+                <field name="name@ru">ПРИЛОЖЕНИЕ №1 — «Обороты по реализации товаров (услуг) в налоговом периоде»</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="l10n_uz_tr_vat12_uz_1" model="account.report.line">
+                        <field name="name">0101 Sales invoiced via electronic invoice (ESF)</field>
+                        <field name="name@uz">Tovarlarni (xizmatlarni) EHF orqali realizatsiya qilish</field>
+                        <field name="name@ru">Реализация товаров (услуг) через ЭСФ</field>
+                        <field name="code">uz_1</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_1_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-1(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_1_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-1(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_2" model="account.report.line">
+                        <field name="name">0102 Sales via online cash register</field>
+                        <field name="name@uz">Tovarlarni (xizmatlarni) onlayn-NKM orqali realizatsiya qilish</field>
+                        <field name="name@ru">Реализация товаров (услуг) через онлайн-ККМ</field>
+                        <field name="code">uz_2</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_2_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-2(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_2_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-2(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_3" model="account.report.line">
+                        <field name="name">0103 Export sales</field>
+                        <field name="name@uz">Tovarlarni (xizmatlarni) eksport orqali realizatsiya qilish</field>
+                        <field name="name@ru">Реализация товаров (услуг) через экспорт</field>
+                        <field name="code">uz_3</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_3_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-3(B)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_4" model="account.report.line">
+                        <field name="name">0104 Sales via marketplace platforms</field>
+                        <field name="name@uz">Tovarlarni (xizmatlarni) marketpleys orqali realizatsiya qilish</field>
+                        <field name="name@ru">Реализация товаров (услуг) через Market Place</field>
+                        <field name="code">uz_4</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_4_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-4(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_4_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-4(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_5" model="account.report.line">
+                        <field name="name">0105 Other taxable sales/income</field>
+                        <field name="name@uz">QQS solinadigan boshqa tovarlar (xizmatlar)dan realizatsiya va daromadlar</field>
+                        <field name="name@ru">Реализация и доходы от прочих товаров (услуг), облагаемых НДС</field>
+                        <field name="code">uz_5</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_5_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-5(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_5_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-5(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_001" model="account.report.line">
+                        <field name="name">010 Total turnover on taxable sales</field>
+                        <field name="name@uz">Aylanma</field>
+                        <field name="name@ru">Обороты по реализации товаров (услуг) в налоговом периоде, всего</field>
+                        <field name="code">uz_001</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_001_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_1.base + uz_2.base + uz_3.base + uz_4.base + uz_5.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_001_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_1.tax + uz_2.tax + uz_4.tax + uz_5.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_6" model="account.report.line">
+                        <field name="name">0108 Positive difference with resale below the market price</field>
+                        <field name="name@uz">Tovarlar bozor narxidan past narxda realizatsiya qilinganda yuzaga keladigan musbat farq</field>
+                        <field name="name@ru">Положительная разница между рыночной стоимостью и стоимостью реализации без НДС товаров, реализованных по ценам ниже рыночных</field>
+                        <field name="code">uz_6</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_6_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_6_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_6.base * 0.12</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_7" model="account.report.line">
+                        <field name="name">0109 Positive difference between the customs value of imported goods and their ex-VAT resale price</field>
+                        <field name="name@uz">Import qilingan tovarlarning bojxona qiymati bilan ularning QQSsiz realizatsiya narxi oʻrtasidagi musbat farq</field>
+                        <field name="name@ru">Положительная разница между таможенной стоимостью импортированных товаров и ценой их реализации без НДС</field>
+                        <field name="code">uz_7</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_7_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_7_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_7.base * 0.12</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_8" model="account.report.line">
+                        <field name="name">0112 Transfer Pricing Income Shortfall</field>
+                        <field name="name@uz">Transfert narxlash qoʻllanilishi natijasida olinmagan daromad summasi</field>
+                        <field name="name@ru">Сумма не полученного дохода, в результате применения трансфертного ценообразования</field>
+                        <field name="code">uz_8</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_8_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_8_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_8.base * 0.12</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_uz_tr_vat12_title_appendix_2" model="account.report.line">
+                <field name="name">Appendix 2 - Turnover on sales of exempt and zero-rated goods (services)</field>
+                <field name="name@uz">2-ILOVA — «QQSdan ozod qilingan va nol darajali stavka boʻyicha soliq solinadigan tovarlarni (xizmatlarni) realizatsiya qilish boʻyicha aylanmalar»</field>
+                <field name="name@ru">ПРИЛОЖЕНИЕ №2 — «Обороты по реализации товаров (услуг), освобожденные от НДС и облагаемые по нулевой ставке»</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="l10n_uz_tr_vat12_uz_002" model="account.report.line">
+                        <field name="name">010 Total exempted and zero-rated turnover</field>
+                        <field name="name@uz">QQSdan ozod qilingan va nol stavka boʻyicha soliqqa tortiladigan aylanmalar, jami</field>
+                        <field name="name@ru">Обороты, всего, освобожденные от НДС и облагаемые по нулевой ставке</field>
+                        <field name="code">uz_002</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_002_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_9.base + uz_10.base + uz_11.base</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_9" model="account.report.line">
+                        <field name="name">040 Zero-rated turnover</field>
+                        <field name="name@uz">Nol stavka boʻyicha soliqqa tortiladigan aylanma</field>
+                        <field name="name@ru">Реализация товаров (услуг), облагаемых по нулевой ставке</field>
+                        <field name="code">uz_9</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_9_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-9(B)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_10" model="account.report.line">
+                        <field name="name">041 Export turnover</field>
+                        <field name="name@uz">Eksport aylanmasi</field>
+                        <field name="name@ru">Экспорт товаров (услуг)</field>
+                        <field name="code">uz_10</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_10_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-3(B)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_11" model="account.report.line">
+                        <field name="name">0478 0% VAT - agriculture</field>
+                        <field name="name@uz">QQS 0% - qishloq xoʻjaligi mahsulotlari</field>
+                        <field name="name@ru">0% НДС - сельхозпродукция</field>
+                        <field name="code">uz_11</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_11_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-11(B)</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_uz_tr_vat12_title_appendix_3" model="account.report.line">
+                <field name="name">Appendix 3 - Input VAT calculation</field>
+                <field name="name@uz">3-ILOVA — «Hisobga olinadigan QQS summasini hisoblash»</field>
+                <field name="name@ru">ПРИЛОЖЕНИЕ №3 — «Расчет суммы НДС, принимаемого к зачету»</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="l10n_uz_tr_vat12_uz_12" model="account.report.line">
+                        <field name="name">011 Input purchase VAT accepted for credit</field>
+                        <field name="name@uz">Sotib olingan tovarlar (xizmatlar) boʻyicha hisobga olinadigan QQS summasi</field>
+                        <field name="name@ru">Сумма НДС по приобретенным товарам (услугам), принимаемая к зачету</field>
+                        <field name="code">uz_12</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_12_base_12" model="account.report.expression">
+                                <field name="label">base_12</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">12(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_12_base_18" model="account.report.expression">
+                                <field name="label">base_18</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">18(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_12_tax_12" model="account.report.expression">
+                                <field name="label">tax_12</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">12(T)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_12_tax_18" model="account.report.expression">
+                                <field name="label">tax_18</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">18(T)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_12_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.base_12 + uz_12.base_18</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_12_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.tax_12 + uz_12.tax_18</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_13" model="account.report.line">
+                        <field name="name">012-014 VAT excluded from credit</field>
+                        <field name="name@uz">Zachyotdan chiqariladigan (hisobga olinmaydigan) QQS summalari</field>
+                        <field name="name@ru">Суммы НДС, исключаемые из зачета</field>
+                        <field name="code">uz_13</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_13_base_13" model="account.report.expression">
+                                <field name="label">base_13</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">13(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_13_base_19" model="account.report.expression">
+                                <field name="label">base_19</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">19(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_13_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_13.base_13 + uz_13.base_19</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_13_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">13(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_14" model="account.report.line">
+                        <field name="name">015-017 Amounts of VAT additionally accepted for credit</field>
+                        <field name="name@uz">Qoʻshimcha hisobga olinadigan QQS summalari</field>
+                        <field name="name@ru">Суммы НДС, дополнительно принимаемые к зачету</field>
+                        <field name="code">uz_14</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_14_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">14(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_14_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">14(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_15" model="account.report.line">
+                        <field name="name">020, 030 Export-related credit adjustments</field>
+                        <field name="name@uz">Eksport bilan bogʻliq tuzatishlar</field>
+                        <field name="name@ru">Корректировки, связанные с экспортом</field>
+                        <field name="code">uz_15</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_15_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_15_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_16" model="account.report.line">
+                        <field name="name">1113 Amount of VAT on high-risk electronic invoices carried over from the previous year</field>
+                        <field name="name@uz">Oʻtgan yildan oʻtkazilgan yuqori xavfli EHF boʻyicha QQS summasi</field>
+                        <field name="name@ru">Сумма НДС по высокорисковым ЭСФ, перенесенная с прошлого года</field>
+                        <field name="code">uz_16</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_16_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_16_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable;rounding=2</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_17" model="account.report.line">
+                        <field name="name">1114 Amount of VAT on high-risk electronic invoices for the current period - blocked until payment of the VAT to the budget</field>
+                        <field name="name@uz">Joriy davr uchun yuqori xavfli EHF boʻyicha QQS summasi - yetkazib beruvchiga toʻlov amalga oshirilgunga qadar bloklangan</field>
+                        <field name="name@ru">Сумма НДС по высокорисковым ЭСФ за текущий период - заблокирована до оплаты поставщику</field>
+                        <field name="code">uz_17</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_17_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">17(B)</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_17_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">17(T)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_18" model="account.report.line">
+                        <field name="name">060 Input VAT accepted for credit</field>
+                        <field name="name@uz">Hisobga olinadigan QQSning umumiy summasi</field>
+                        <field name="name@ru">Общая сумма НДС, принимаемая к зачету</field>
+                        <field name="code">uz_18</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_18_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.base - uz_13.base + uz_14.base + uz_15.base + uz_16.base - uz_17.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_18_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.tax - uz_13.tax + uz_14.tax + uz_15.tax + uz_16.tax - uz_17.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_uz_tr_vat12_uz_19" model="account.report.line">
+                        <field name="name">070 Input VAT blocked</field>
+                        <field name="name@uz">Hisobga olinmaydigan QQS summasi</field>
+                        <field name="name@ru">Сумма НДС, не принимаемая к зачету</field>
+                        <field name="code">uz_19</field>
+                        <field name="expression_ids">
+                            <record id="l10n_uz_tr_vat12_uz_19_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.base - uz_18.base</field>
+                            </record>
+                            <record id="l10n_uz_tr_vat12_uz_19_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">uz_12.tax - uz_18.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
