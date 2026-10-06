@@ -7,6 +7,6 @@ class L10nTrNilveraEinvoiceExtendedTaxOffice(models.Model):
     _translate = False
 
     name = fields.Char(translate=True)
-    code = fields.Integer()
+    code = fields.Char()
     state_id = fields.Many2one(comodel_name="res.country.state")
     state_code = fields.Char(related="state_id.code")
