@@ -25,7 +25,7 @@ class TestESLint(LintCase):
 
     longMessage = True
 
-    def _test_eslint(self, modules, eslintrc_path):
+    def _test_eslint(self, modules, config_path):
         """ Test that there are no eslint errors in javascript files """
 
         files_to_check = [
@@ -34,8 +34,9 @@ class TestESLint(LintCase):
             if not re.match('.*/o_spreadsheet/o_spreadsheet.js', p) # don't check generated code
         ]
         _logger.info('Testing %s js files', len(files_to_check))
-        cmd = [eslint, '--no-ignore', '--no-eslintrc', '-c', eslintrc_path] + files_to_check
-        process = subprocess.run(cmd, capture_output=True, encoding="utf-8", check=False)
+        cmd = [eslint, '--no-ignore', '-c', config_path] + files_to_check
+        # eslint skips files outside of the working directory, the addons may be anywhere
+        process = subprocess.run(cmd, capture_output=True, encoding="utf-8", check=False, cwd='/')
         self.assertEqual(process.returncode, 0, msg=f"""
 stdout: {process.stdout}
 Perhaps you might benefit from installing the tooling found at:
@@ -47,5 +48,5 @@ stderr: {process.stderr}
         basic_test, strict_test = [], []
         for module in get_modules():
             strict_test.append(module) if re.search(r'^point_of_sale$|^pos_.*$|^.*_pos$|^.*_pos_.*$|^iot$|^iot_.*$|^obox$|^obox_.*$', module) else basic_test.append(module)
-        self._test_eslint(basic_test, file_path('test_lint/tests/eslintrc'))
-        self._test_eslint(strict_test, file_path('web/tooling/_eslintrc.json'))
+        self._test_eslint(basic_test, file_path('test_lint/tests/eslint_basic.config.cjs'))
+        self._test_eslint(strict_test, file_path('web/tooling/_eslint.config.cjs'))
