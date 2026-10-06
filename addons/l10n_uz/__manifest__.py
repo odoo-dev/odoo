@@ -17,6 +17,9 @@ Uzbekistan accounting chart and localization.
     ],
     'data': [
         'data/account.account.tag.csv',
+        'data/tax_report_vat_12.xml',
+        'data/tax_report_vat_6.xml',
+        'data/tax_report_turnover.xml',
         'views/report_invoice.xml',
     ],
     'author': 'Odoo S.A.',
