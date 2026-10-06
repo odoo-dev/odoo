@@ -356,6 +356,7 @@ export class DropZonePlugin extends Plugin {
                 dropzoneEl.setAttribute(messageAttribute, message);
             }
         }
+        dropzoneEl.dataset.addBlockMessage = _t("Add a block");
 
         if (isVertical) {
             dropzoneEl.classList.add("oe_vertical");

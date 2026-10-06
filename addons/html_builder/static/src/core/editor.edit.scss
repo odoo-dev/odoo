@@ -2,6 +2,45 @@
     cursor: text;
 }
 
+@function o-we-add-icon($circle-fill, $circle-stroke, $plus-color) {
+    @return url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='23' fill='#{$circle-fill}' stroke='#{$circle-stroke}' stroke-width='2'/%3E%3Cpath d='M24 18v12M18 24h12' stroke='#{$plus-color}' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+@mixin o-we-empty-page-message {
+    $-color: $o-we-handles-accent-color;
+    $-icon-color: "%23" + str-slice(inspect($-color), 2);
+    $-text-color: contrast-color(contrast-color(currentColor));
+
+    border: 0;
+    outline: $o-we-handle-border-width dashed $-color;
+    outline-offset: -$o-we-handle-border-width;
+    border-radius: $o-we-item-border-radius * 2;
+    background: rgba($o-we-handles-accent-color, .1);
+    transition: background-color .2s;
+
+    &, &.text-muted {
+        color: color-mix(in srgb, $o-we-handles-accent-color, #{$-text-color} 40%) !important;
+    }
+
+    &::before {
+        margin-bottom: $o-we-item-spacing;
+        padding-top: 72px;
+        background: o-we-add-icon(none, $-icon-color, $-icon-color) top center / 48px no-repeat;
+        color: color-mix(in srgb, $o-we-handles-accent-color, #{$-text-color} 40%);
+        font-weight: bold;
+        transition: background-image .2s;
+    }
+
+    &.o_dropzone_highlighted {
+        background: rgba($o-we-handles-accent-color, .2);
+        filter: none;
+
+        &::before {
+            background-image: o-we-add-icon($-icon-color, $-icon-color, "%23fff");
+        }
+    }
+}
+
 // This style block is about the "editor message" which highlights the areas
 // where the user can drag & drop snippets.
 .o_savable {
@@ -31,7 +70,24 @@
             }
 
             &:not(:only-child) {
-                &[data-editor-message-default]::before {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 0;
+                outline: 0;
+                border-radius: 0;
+                background: linear-gradient($o-we-handles-accent-color, $o-we-handles-accent-color) center / 100% $o-we-handle-border-width no-repeat;
+
+                &::before {
+                    content: "+\00a0" attr(data-add-block-message);
+                    padding: 0 $o-we-item-spacing * 1.5;
+                    border-radius: $o-we-item-border-radius;
+                    background-color: $o-we-handles-accent-color;
+                    font-size: $o-we-font-size-lg;
+                    line-height: 24px;
+                }
+
+                &::after {
                     content: none;
                 }
             }
@@ -40,6 +96,7 @@
         // Exception 1: empty wrap NOT during drag & drop
         &#wrap:empty, .oe_wrap:empty {
             @include o-editor-messages;
+            @include o-we-empty-page-message;
             padding: 112px 0px;
             margin: 20px $-editor-messages-margin-x;
         }
@@ -48,6 +105,7 @@
         &#wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):not(.oe_sanitized_drop_zone):only-child,
         &.oe_wrap > .oe_drop_zone.oe_insert:not(.oe_vertical):not(.oe_sanitized_drop_zone):only-child
         {
+            @include o-we-empty-page-message;
             padding: 112px 0px;
         }
     }
