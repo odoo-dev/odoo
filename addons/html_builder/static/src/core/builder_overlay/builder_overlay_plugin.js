@@ -15,12 +15,18 @@ function isResizable(el) {
  * @property { BuilderOverlayPlugin['showOverlayPreview'] } showOverlayPreview
  * @property { BuilderOverlayPlugin['hideOverlayPreview'] } hideOverlayPreview
  * @property { BuilderOverlayPlugin['refreshOverlays'] } refreshOverlays
+ * @property { BuilderOverlayPlugin['toggleOverlayName'] } toggleOverlayName
  */
 
 export class BuilderOverlayPlugin extends Plugin {
     static id = "builderOverlay";
     static dependencies = ["builderOptions", "localOverlay", "history", "operation"];
-    static shared = ["showOverlayPreview", "hideOverlayPreview", "refreshOverlays"];
+    static shared = [
+        "showOverlayPreview",
+        "hideOverlayPreview",
+        "refreshOverlays",
+        "toggleOverlayName",
+    ];
     /** @type {import("plugins").BuilderResources} */
     resources = {
         on_committed_to_history_handlers: this.refreshOverlays.bind(this),
@@ -46,6 +52,15 @@ export class BuilderOverlayPlugin extends Plugin {
             "wheel",
             (ev) => (this.document.documentElement.scrollTop += ev.deltaY)
         );
+        // Select the element of an overlay when clicking on its name.
+        this.addDomListener(this.overlayContainer, "click", (ev) => {
+            const overlay = this.overlays.find((overlay) =>
+                overlay.overlayElement.querySelector(".o_hb_overlay_name").contains(ev.target)
+            );
+            if (overlay) {
+                this.dependencies.builderOptions.updateContainers(overlay.overlayTarget);
+            }
+        });
         /** @type {[BuilderOverlay]} */
         this.overlays = [];
         // Refresh the overlays position everytime their target size changes.
@@ -145,10 +160,12 @@ export class BuilderOverlayPlugin extends Plugin {
                 const parentOverlay = this.overlays[i];
                 if (parentOverlay.hasOverlayOptions) {
                     parentOverlay.toggleOverlay(true);
+                    parentOverlay.overlayElement.classList.add("o_hb_overlay_parent");
                     break;
                 }
             }
         }
+        this.moveOverlappingNames();
     }
 
     removeHoverOverlay() {
@@ -159,6 +176,7 @@ export class BuilderOverlayPlugin extends Plugin {
             this.hoverOverlay.destroy();
             this.hoverOverlay.overlayElement.remove();
             this.hoverOverlay = null;
+            this.moveOverlappingNames();
         }
     }
 
@@ -178,6 +196,7 @@ export class BuilderOverlayPlugin extends Plugin {
             overlay.refreshPosition();
             overlay.refreshHandles();
         });
+        this.moveOverlappingNames();
     }
 
     refreshPositions() {
@@ -185,6 +204,40 @@ export class BuilderOverlayPlugin extends Plugin {
         this.overlays.forEach((overlay) => {
             overlay.refreshPosition();
         });
+        this.moveOverlappingNames();
+    }
+
+    /**
+     * Shows the name of an overlay inside its element when it overlaps the
+     * name of the overlay of one of its parents.
+     */
+    moveOverlappingNames() {
+        const overlays = [...this.overlays, this.hoverOverlay].filter(
+            (overlay) => overlay && !overlay.overlayElement.matches(".o_overlay_hidden")
+        );
+        for (const overlay of overlays) {
+            overlay.overlayElement.classList.remove("o_hb_overlay_name_moved");
+        }
+        const nameRects = new Map(
+            overlays.map((overlay) => [overlay, overlay.nameEl.getBoundingClientRect()])
+        );
+        for (const overlay of overlays) {
+            const nameRect = nameRects.get(overlay);
+            const overlapsParentName = overlays.some((parentOverlay) => {
+                const parentNameRect = nameRects.get(parentOverlay);
+                return (
+                    parentOverlay !== overlay &&
+                    parentOverlay.overlayTarget.contains(overlay.overlayTarget) &&
+                    nameRect.width &&
+                    parentNameRect.width &&
+                    nameRect.left < parentNameRect.right &&
+                    parentNameRect.left < nameRect.right &&
+                    nameRect.top < parentNameRect.bottom &&
+                    parentNameRect.top < nameRect.bottom
+                );
+            });
+            overlay.overlayElement.classList.toggle("o_hb_overlay_name_moved", overlapsParentName);
+        }
     }
 
     toggleOverlaysVisibility(show) {
@@ -220,6 +273,7 @@ export class BuilderOverlayPlugin extends Plugin {
         this.resizeObserver.observe(overlay.overlayTarget, { box: "border-box" });
         // `refreshPosition` won't be called by the resize observer if the element was already observed
         this.hoverOverlay.refreshPosition();
+        this.moveOverlappingNames();
     }
 
     showOverlayPreview(el) {
@@ -232,6 +286,19 @@ export class BuilderOverlayPlugin extends Plugin {
         }
         overlayToShow.toggleOverlayPreview(true);
         overlayToShow.toggleOverlayVisibility(true);
+        this.moveOverlappingNames();
+    }
+
+    /**
+     * Shows or hides the name of the overlay of the given element.
+     *
+     * @param {HTMLElement} el
+     * @param {Boolean} show
+     */
+    toggleOverlayName(el, show) {
+        const overlay = this.overlays.find((overlay) => overlay.overlayTarget === el);
+        overlay?.overlayElement.classList.toggle("o_hb_overlay_show_name", show);
+        this.moveOverlappingNames();
     }
 
     hideOverlayPreview(el) {
@@ -243,5 +310,6 @@ export class BuilderOverlayPlugin extends Plugin {
         overlayToHide.toggleOverlayPreview(false);
         // Show back the active overlays.
         this.toggleOverlaysVisibility(true);
+        this.moveOverlappingNames();
     }
 }

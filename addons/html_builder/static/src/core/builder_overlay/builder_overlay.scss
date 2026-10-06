@@ -1,9 +1,8 @@
+$-selected-color: mix(black, $o-we-handles-accent-color, 20%);
+
 @keyframes o_hover_overlay_fade_in {
     from {
         opacity: 0;
-    }
-    to {
-        opacity: 0.3;
     }
 }
 
@@ -14,7 +13,7 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
     .oe_overlay {
         @include o-position-absolute;
         display: none;
-        border-color: $o-we-handles-accent-color;
+        border-color: $-selected-color;
         background: transparent;
         text-align: center;
         font-size: 16px;
@@ -37,13 +36,50 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
             transition: none;
         }
 
-        &.o_hover_overlay {
-            opacity: 0.3;
+        .o_hb_overlay_name {
+            position: absolute;
+            inset-block-end: 100%;
+            inset-inline-start: 0;
+            display: none;
+            padding: 0 $o-we-sidebar-content-field-label-spacing;
+            background-color: $-selected-color;
+            color: $o-we-fg-lighter;
+            font-family: $o-we-font-family;
+            font-size: $o-we-font-size-sm;
+            line-height: 18px;
+            white-space: nowrap;
+        }
+
+        &.o_hb_overlay_name_inside .o_hb_overlay_name,
+        &.o_hb_overlay_name_moved .o_hb_overlay_name {
+            inset-block-start: 0;
+            inset-block-end: auto;
+        }
+
+        &.o_hb_overlay_show_name .o_hb_overlay_name {
+            display: block;
+        }
+
+        &.oe_active .o_hb_overlay_name {
+            display: block;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        &.o_hover_overlay > .o_handles {
             animation: o_hover_overlay_fade_in 0.1s ease-in-out forwards;
+        }
+
+        &.o_hover_overlay,
+        &.o_hb_overlay_parent {
+            .o_hb_overlay_name {
+                display: block;
+                background-color: $o-we-handles-accent-color;
+            }
 
             .o_side {
                 &::before {
-                    background: $o-we-hover-overlay-color !important;
+                    background: $o-we-handles-accent-color !important;
                 }
                 background-color: transparent !important;
                 border-bottom: none !important;
@@ -54,6 +90,10 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
             .o_handle_indicator {
                 display: none !important;
             }
+        }
+
+        &.o_hb_overlay_parent .o_handles {
+            pointer-events: none;
         }
 
         // HANDLES
@@ -87,10 +127,6 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                     body.o_rtl & {
                         transform: translateX(50%);
                     }
-
-                    &::before {
-                        border-right: $o-we-handle-contrast-border;
-                    }
                 }
                 &.e {
                     inset: $o-we-handles-offset-to-hide $o-we-handle-border-width * 0.5 $o-we-handles-offset-to-hide * -1 auto;
@@ -99,10 +135,6 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
 
                     body.o_rtl & {
                         transform: translateX(-50%);
-                    }
-
-                    &::before {
-                        border-left: $o-we-handle-contrast-border;
                     }
                 }
                 &.n {
@@ -116,10 +148,6 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                             transform: translateY($o-we-handle-border-width * 0.5);
                         }
                     }
-
-                    &::before {
-                        border-bottom: $o-we-handle-contrast-border;
-                    }
                 }
                 &.s {
                     inset: auto 0 $o-we-handles-offset-to-hide * -1 0;
@@ -131,10 +159,6 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                         &:before {
                             transform: translateY($o-we-handle-border-width * -0.5);
                         }
-                    }
-
-                    &::before {
-                        border-top: $o-we-handle-contrast-border;
                     }
                 }
                 &.ne {
@@ -180,7 +204,7 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                     width: $o-we-handles-btn-size;
                     height: $o-we-handles-btn-size;
                     margin: auto;
-                    border: solid $o-we-handle-border-width $o-we-handles-accent-color;
+                    border: solid $o-we-handle-border-width $-selected-color;
                     border-radius: $o-we-handles-btn-size;
                     background-color: $o-we-fg-lighter;
                     outline: $o-we-handle-border-width solid $o-we-fg-lighter;
@@ -197,7 +221,7 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                 }
 
                 &.o_column_handle.o_side_y {
-                    background-color: rgba($o-we-handles-accent-color, 0.1);
+                    background-color: rgba($-selected-color, 0.1);
 
                     &::after {
                         content: '';
@@ -226,7 +250,7 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
                         content: '';
                         position: absolute;
                         inset: 0;
-                        background: $o-we-handles-accent-color;
+                        background: $-selected-color;
                     }
                     &.o_side_x {
 
@@ -275,7 +299,7 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
         &.o_handlers_idle .o_handle:hover, .o_handle:active {
 
             .o_handle_indicator {
-                background-color: $o-we-handles-accent-color;
+                background-color: $-selected-color;
             }
         }
 
@@ -289,10 +313,10 @@ div[data-oe-local-overlay-id="builder-overlay-container"] {
         &.o_handlers_idle .o_column_handle.o_side_y:hover, .o_column_handle.o_side_y:active {
             background: repeating-linear-gradient(
                             45deg,
-                            rgba($o-we-handles-accent-color, .1),
-                            rgba($o-we-handles-accent-color, .1) 5px,
-                            darken(rgba($o-we-handles-accent-color, .25), 5%) 5px,
-                            darken(rgba($o-we-handles-accent-color, .25), 5%) 10px
+                            rgba($-selected-color, .1),
+                            rgba($-selected-color, .1) 5px,
+                            darken(rgba($-selected-color, .25), 5%) 5px,
+                            darken(rgba($-selected-color, .25), 5%) 10px
                         );
         }
 

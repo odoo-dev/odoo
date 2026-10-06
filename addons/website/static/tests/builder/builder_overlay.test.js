@@ -25,10 +25,12 @@ test("Show an overlay when hovering an element with options", async () => {
     await contains(":iframe section").hover();
     expect(".oe_overlay.o_hover_overlay").toHaveCount(1);
     expect(".oe_overlay.o_hover_overlay").toHaveRect(":iframe section");
+    expect(".o_hover_overlay .o_hb_overlay_name").toHaveText("Block");
 
     await contains(":iframe .col-lg-3").hover();
     expect(".oe_overlay.o_hover_overlay").toHaveCount(1);
     expect(".oe_overlay.o_hover_overlay").toHaveRect(":iframe .col-lg-3");
+    expect(".o_hover_overlay .o_hb_overlay_name").toHaveText("Column");
 });
 
 test("Do not show the hover overlay for an element with another overlay", async () => {
@@ -254,4 +256,24 @@ test("Mouse move on throttleForAnimation", async () => {
     // will be throttled at animationFrame time
     await animationFrame();
     expect(".oe_overlay.oe_active:not(.o_overlay_hidden)").toHaveCount(1);
+});
+
+test("Select the parent element when clicking on its overlay name", async () => {
+    await setupWebsiteBuilder(`
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <img src="/web/image/website.s_text_image_default_image" alt=""/>
+                    </div>
+                </div>
+            </div>
+        </section>
+    `);
+    await contains(":iframe img").click();
+    expect(".oe_overlay.o_hb_overlay_parent").toHaveRect(":iframe .col-lg-3");
+
+    await contains(".o_hb_overlay_parent .o_hb_overlay_name").click();
+    expect(".oe_overlay.o_hb_overlay_parent").toHaveCount(0);
+    expect(".oe_overlay.oe_active").toHaveRect(":iframe .col-lg-3");
 });
