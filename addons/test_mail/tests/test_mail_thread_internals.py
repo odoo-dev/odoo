@@ -1257,6 +1257,72 @@ class TestChatterTweaks(ThreadRecipients):
         self.flush_tracking()
         self.assertEqual(len(rec.message_ids), 1)
 
+    def test_chatter_mail_log_author_id(self):
+        """Automatic logs can be attributed to another partner.
+
+        ``create_uid`` stays the user who ran the operation. An explicit
+        tracking author still wins over the context key, and a missing or
+        falsy key keeps the historical user author.
+        """
+        author = self.env['res.partner'].create({'name': 'Odoo AI'})
+        explicit = self.env['res.partner'].create({'name': 'Explicit Author'})
+        log_context = {'mail_log_author_id': author.id}
+
+        rec = self.env['mail.test.simple'].with_user(self.user_employee).with_context(
+            log_context,
+        ).create({'name': 'Test'})
+        self.flush_tracking()
+        self.assertEqual(len(rec.message_ids), 1)
+        self.assertEqual(rec.message_ids.author_id, author)
+        self.assertEqual(rec.message_ids.create_uid, self.user_employee)
+
+        ticket = self.env['mail.test.ticket.partner'].with_user(
+            self.user_employee,
+        ).with_context(log_context).create({'name': 'Ticket', 'state': 'new'})
+        self.flush_tracking()
+        subtype = self.env.ref('test_mail.st_mail_test_ticket_partner_new')
+        creation = ticket.message_ids.filtered(
+            lambda message: message.subtype_id == subtype,
+        )
+        self.assertEqual(creation.author_id, author)
+        self.assertEqual(creation.create_uid, self.user_employee)
+
+        tracked = self.env['mail.test.track'].with_user(
+            self.user_employee,
+        ).with_context(log_context).create({
+            'name': 'Test',
+            'user_id': self.user_employee.id,
+        })
+        self.flush_tracking()
+        tracked.write({'user_id': self.user_admin.id})
+        self.flush_tracking()
+        tracking = tracked.message_ids.filtered(
+            lambda message: message.message_type == 'tracking',
+        )
+        self.assertEqual(tracking.author_id, author)
+        self.assertEqual(tracking.create_uid, self.user_employee)
+
+        tracked.with_context(log_context)._track_set_log_author(explicit)
+        tracked.write({'user_id': self.user_employee.id})
+        self.flush_tracking()
+        self.assertEqual(tracked.message_ids[0].author_id, explicit)
+        self.assertEqual(tracked.message_ids[0].create_uid, self.user_employee)
+        self.assertEqual(tracked.message_ids[0].message_type, 'tracking')
+
+        plain = self.env['mail.test.simple'].with_user(
+            self.user_employee,
+        ).create({'name': 'Plain'})
+        self.flush_tracking()
+        self.assertEqual(plain.message_ids.author_id, self.user_employee.partner_id)
+        self.assertEqual(plain.message_ids.create_uid, self.user_employee)
+
+        falsy = self.env['mail.test.simple'].with_user(self.user_employee).with_context(
+            mail_log_author_id=False,
+        ).create({'name': 'Falsy'})
+        self.flush_tracking()
+        self.assertEqual(falsy.message_ids.author_id, self.user_employee.partner_id)
+        self.assertEqual(falsy.message_ids.create_uid, self.user_employee)
+
     def test_chatter_mail_notrack(self):
         """ Test disable of automatic value tracking at create and write """
         self.env = self.env(context={**self.env.context, 'lang': 'en_US'})

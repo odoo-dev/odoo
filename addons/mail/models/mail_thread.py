@@ -388,15 +388,22 @@ class MailThread(models.AbstractModel):
                     threads_no_subtype += thread
                     continue
                 # if we have a subtype, post message to notify users from _message_auto_subscribe
+                author_id = (
+                    thread._message_log_author_id() or self.env.user.partner_id.id
+                )
                 thread.sudo().message_post(
-                    subtype_id=subtype.id, author_id=self.env.user.partner_id.id,
-                    body=Markup('<div><p>%s</p></div>') % thread._creation_message()
+                    subtype_id=subtype.id,
+                    author_id=author_id,
+                    body=Markup('<div><p>%s</p></div>') % thread._creation_message(),
                 )
             if threads_no_subtype:
                 bodies = dict(
                     (thread.id, thread._creation_message())
                     for thread in threads_no_subtype)
-                threads_no_subtype._message_log_batch(bodies=bodies)
+                threads_no_subtype._message_log_batch(
+                    bodies=bodies,
+                    author_id=threads_no_subtype._message_log_author_id(),
+                )
 
         # post track template if a tracked field changed
         threads._track_discard()
@@ -516,6 +523,16 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         doc_name = self.env['ir.model']._get(self._name).name
         return _('%s created', doc_name)
+
+    def _message_log_author_id(self):
+        """Partner id authoring automatic logs (creation and tracking).
+
+        ``None`` keeps the historical default: the message is authored by the
+        current user when it is posted. Context key ``mail_log_author_id``
+        attributes the log to another partner. ``create_uid`` stays the user
+        who ran the operation.
+        """
+        return self.env.context.get('mail_log_author_id') or None
 
     def _check_can_update_message_content(self, messages):
         """" Checks that the current user can update the content of the message.
@@ -658,7 +675,11 @@ class MailThread(models.AbstractModel):
             }
             # find subtypes and post messages or log if no subtype found
             subtype = record._track_log_get_default_subtype(record_init_values)
-            author_id = authors[record.id].id if record.id in authors else None
+            # An author stamped with _track_set_log_author wins over the context.
+            if record.id in authors:
+                author_id = authors[record.id].id
+            else:
+                author_id = record._message_log_author_id()
             # _track_set_log_message takes priority over _track_log_get_default_body even if it's an empty string
             body = bodies[record.id] if record.id in bodies else record._track_log_get_default_body(record_init_values)
             if subtype:
