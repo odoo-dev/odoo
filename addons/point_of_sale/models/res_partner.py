@@ -110,16 +110,6 @@ class ResPartner(models.Model):
         if self.sudo().pos_order_ids:
             raise ValidationError(_('You cannot delete a customer that has point of sales orders. You can archive it instead.'))
 
-    def action_open_partner_view(self):
-        return {
-            'name': _('Edit Partner') if self else _('Create Partner'),
-            'target': 'new',
-            'view_mode': 'form',
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.partner',
-            'views': [(self.env.ref('point_of_sale.view_partner_form_pos_ui').id, 'form')],
-        }
-
     def _get_current_partner(self, *, pos_order=False, **kwargs):
         """Override `portal` to get current partner from pos_order if user is not signed up."""
         if pos_order:

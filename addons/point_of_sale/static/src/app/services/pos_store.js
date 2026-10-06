@@ -2123,7 +2123,7 @@ export class PosStore extends WithLazyGetterTrap {
     async editPartner(partner) {
         const record = await makeActionAwaitable(
             this.action,
-            await this.data.call("res.partner", "action_open_partner_view", [partner?.id]),
+            "point_of_sale.res_partner_action_edit_pos",
             {
                 props: { resId: partner?.id },
                 additionalContext: this.editPartnerContext(),

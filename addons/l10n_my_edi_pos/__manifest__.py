@@ -13,7 +13,6 @@
         "views/myinvois_document_pos_views.xml",
         "views/pos_order_views.xml",
         "views/product_view.xml",
-        "views/res_partner_view.xml",
         "views/portal_address_templates.xml",
         "views/ticket_validation_screen.xml",
     ],
