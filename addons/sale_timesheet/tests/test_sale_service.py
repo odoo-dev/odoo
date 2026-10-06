@@ -763,7 +763,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         self.assertTrue(sale_order_1.show_create_project_button, "There is a product service with the service_policy set on 'delivered on timesheet' on the sale order, the button should be displayed")
         self.assertFalse(sale_order_1.show_project_button, "There is no project on the sale order, the button should be hidden")
         line_1.project_id = self.project_global.id
-        sale_order_1._compute_show_project_and_task_button()
+        sale_order_1.invalidate_recordset(['show_project_button', 'show_create_project_button'])
         self.assertTrue(sale_order_1.show_create_project_button, "The 'create Project Button' should be displayed reguardless of the service product type")
         self.assertTrue(sale_order_1.show_project_button, "There is a product service with the service_policy set on 'delivered on timesheet' and a project on the sale order, the button should be displayed")
 
@@ -799,7 +799,7 @@ class TestSaleService(TestCommonSaleTimesheet):
         })
         self.assertFalse(sale_order_1.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' but no project on the sale order, the button should be hidden")
         line_4.project_id = self.project_global
-        sale_order_1._compute_show_hours_recorded_button()
+        sale_order_1.invalidate_recordset(['show_hours_recorded_button'])
         self.assertTrue(sale_order_1.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' and a project on the sale order, the button should be displayed")
 
         line_1 = self.env['sale.order.line'].create({
@@ -809,11 +809,11 @@ class TestSaleService(TestCommonSaleTimesheet):
         sale_order_2.action_confirm()
         self.assertFalse(sale_order_2.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' but no project on the sale order, the button should be hidden")
         line_1.project_id = self.project_global
-        sale_order_2._compute_show_hours_recorded_button()
+        sale_order_2.invalidate_recordset(['show_hours_recorded_button'])
         self.assertTrue(sale_order_2.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' and a project on the sale order, the button should be displayed")
         # remove the project from the so and ensure the SO is back to its previous state
         line_1.project_id = False
-        sale_order_2._compute_show_hours_recorded_button()
+        sale_order_2.invalidate_recordset(['show_hours_recorded_button'])
         self.assertFalse(sale_order_2.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' but no project on the sale order, the button should be hidden")
 
         # adds a task whose sale item is a sale order line from the SO, and adds a timesheet in that task. This should enable the display of the button
@@ -829,8 +829,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'task_id': task.id,
             'employee_id': self.employee_user.id,
         })
-        sale_order_2._compute_timesheet_count()
-        sale_order_2._compute_show_hours_recorded_button()
+        sale_order_2.invalidate_recordset(['timesheet_count', 'show_hours_recorded_button'])
         self.assertTrue(sale_order_2.show_hours_recorded_button, "There is a product service with the service_policy set on 'delivered on timesheet' and a project on the sale order, the button should be displayed")
 
     def test_compute_show_timesheet_button_salesperson_user_timesheet(self):

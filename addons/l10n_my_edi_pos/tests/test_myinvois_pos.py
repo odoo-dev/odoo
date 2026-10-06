@@ -41,7 +41,7 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
             'receivable_account_id': cls.pos_receivable_cash.id,
             'company_id': cls.env.company.id,
         })
-        cls.other_config = cls.config.copy()
+        cls.other_config = cls.config.sudo().copy().with_env(cls.config.env)
         cls.other_config.payment_method_ids |= cash_payment
 
         cls.product_one = cls.create_product("Product 1", cls.categ_basic, 100, tax_ids=cls.taxes['tax7'].ids)

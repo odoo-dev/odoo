@@ -444,8 +444,8 @@ class TestRatingPerformance(FullBaseMailPerformance):
         with self.assertQueryCount(employee=363):  # tmf: 363
             self.apply_ratings(5)
 
+        self.record_ratings.invalidate_recordset(['rating_last_value'])
         with self.assertQueryCount(employee=1):
-            self.record_ratings._compute_rating_last_value()
             vals = (val == 5 for val in self.record_ratings.mapped('rating_last_value'))
             self.assertTrue(all(vals), "The last rating is kept.")
 

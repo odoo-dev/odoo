@@ -9,7 +9,7 @@ class EventEventConfigurator(models.TransientModel):
     _name = 'event.event.configurator'
     _description = 'Event Configurator'
 
-    product_id = fields.Many2one('product.product', string="Product", readonly=True)
+    product_id = fields.Many2one('product.product', string="Product", ui_readonly=True)
     event_id = fields.Many2one('event.event', string="Event")
     event_slot_id = fields.Many2one('event.slot', string="Slot", domain="[('event_id', '=', event_id)]",
         compute="_compute_event_slot_id", readonly=False, store=True)

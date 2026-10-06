@@ -952,7 +952,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
                 return {'xml_content': file.read()}
 
         # Disable access token for all companies except company_2 to be sure that the cron will try to fetch bills for company_2 only
-        self.env['res.company'].search([('id', '!=', self.company_2.id)]).l10n_pl_edi_access_token = False
+        self.env['res.company'].search([('id', '!=', self.company_2.id)]).sudo().l10n_pl_edi_access_token = False
 
         with (
             patch.object(KsefApiService, 'query_invoice_metadata', side_effect=query_invoice_metadata),

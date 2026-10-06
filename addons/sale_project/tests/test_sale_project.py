@@ -378,16 +378,18 @@ class TestSaleProject(TestSaleProjectCommon):
         })
         # the user does not have project creation right
         user_wrong_group = new_test_user(self.env, groups='sales_team.group_sale_manager,project.group_project_user', login='wendy', name='wendy')
-        sale_order_1.with_user(user_wrong_group)._compute_show_project_and_task_button()
+        sale_order_1 = sale_order_1.with_user(user_wrong_group)
+        sale_order_1.invalidate_recordset(['show_create_project_button', 'show_project_button'])
         self.assertFalse(sale_order_1.show_create_project_button, "The user does not have the right to create a new project, the button should be hidden")
         self.assertFalse(sale_order_1.show_project_button, "There is no project on the sale order, the button should be hidden")
+        sale_order_1 = sale_order_1.with_env(self.env)
         # the user has project creation right
-        sale_order_1._compute_show_project_and_task_button()
+        sale_order_1.invalidate_recordset(['show_create_project_button', 'show_project_button'])
         self.assertTrue(sale_order_1.show_create_project_button, "There is a product service with the service_policy set on 'delivered on milestone' on the sale order, the button should be displayed")
         self.assertFalse(sale_order_1.show_project_button, "There is no project on the sale order, the button should be hidden")
         # add a project to the SO
         line_delivered_milestone.project_id = self.project_global
-        sale_order_1._compute_show_project_and_task_button()
+        sale_order_1.invalidate_recordset(['show_create_project_button', 'show_project_button'])
         self.assertTrue(sale_order_1.show_project_button, "There is a product service with the service_policy set on 'delivered on milestone' and a project on the sale order, the button should be displayed")
 
         # add an ordered_prepaid service product
@@ -395,7 +397,7 @@ class TestSaleProject(TestSaleProjectCommon):
             'product_id': self.product_service_ordered_prepaid.id,
             'order_id': sale_order_2.id,
         })
-        sale_order_2._compute_show_project_and_task_button()
+        sale_order_2.invalidate_recordset(['show_create_project_button', 'show_project_button'])
         self.assertTrue(sale_order_2.show_create_project_button, "There is a product service with the service_policy set on 'ordered_prepaid' on the sale order, the button should be displayed")
         self.assertFalse(sale_order_2.show_project_button, "There is no project on the sale order, the button should be hidden")
         # create a new task, whose sale order item is a sol of the SO
@@ -404,14 +406,12 @@ class TestSaleProject(TestSaleProjectCommon):
             'project_id': self.project_global.id,
             'sale_line_id': line_prepaid.id,
         })
-        sale_order_2._compute_tasks_ids()
-        sale_order_2._compute_show_project_and_task_button()
+        sale_order_2.invalidate_recordset(['tasks_ids', 'show_create_project_button', 'show_project_button'])
         self.assertTrue(sale_order_2.show_create_project_button, "There is a product service with the service_policy set on 'ordered_prepaid' on the sale order, the button should be displayed")
         self.assertFalse(sale_order_2.show_project_button, "There is no project on the sale order, the button should be hidden")
         self.assertEqual(sale_order_2.tasks_ids, task)
         task.action_convert_to_template()
-        sale_order_2._compute_tasks_ids()
-        sale_order_2._compute_show_project_and_task_button()
+        sale_order_2.invalidate_recordset(['tasks_ids', 'show_create_project_button', 'show_project_button'])
         self.assertFalse(sale_order_2.show_project_button, 'The button should no longer be visible since no tasks are linked to the SO.')
         self.assertFalse(sale_order_2.tasks_ids, 'No tasks should be linked to the SO since the task has been converted into a template.')
 
@@ -420,7 +420,7 @@ class TestSaleProject(TestSaleProjectCommon):
             'product_id': self.product_service_delivered_manual.id,
             'order_id': sale_order_3.id,
         })
-        sale_order_3._compute_show_project_and_task_button()
+        sale_order_3.invalidate_recordset(['show_create_project_button', 'show_project_button'])
         self.assertTrue(sale_order_3.show_create_project_button, "There is a product service with the service_policy set on 'manual' on the sale order, the button should be displayed")
         self.assertFalse(sale_order_3.show_project_button, "There is no project on the sale order, the button should be hidden")
 
@@ -631,7 +631,7 @@ class TestSaleProject(TestSaleProjectCommon):
 
         # Check if button action includes both projects AFTER archivization
         project_B.write({'active': False})
-        sale_order._compute_project_ids()
+        sale_order.invalidate_recordset(['project_ids', 'project_count'])
         self.assertEqual(sale_order.project_count, 1, "Expected 1 project linked to the sale order.")
 
         action = sale_order.action_view_project_ids()
@@ -1730,8 +1730,7 @@ class TestSaleProject(TestSaleProjectCommon):
         )
 
         sale_order.action_confirm()
-        sale_order._compute_show_project_and_task_button()
-
+        sale_order.invalidate_recordset(['show_project_button'])
         self.assertTrue(
             sale_order.show_project_button,
             "The project smart buttons should be shown in the sale order."
