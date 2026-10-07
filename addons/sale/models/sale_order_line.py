@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import timedelta
+from uuid import uuid4
 
 from markupsafe import Markup
 
@@ -1827,6 +1828,20 @@ class SaleOrderLine(models.Model):
         for vals in vals_list:
             if "price_unit" in vals and "technical_price_unit" not in vals:
                 vals["technical_price_unit"] = vals["price_unit"]
+
+    def copy_data(self, default=None):
+        vals_list = super().copy_data(default=default)
+        if len(vals_list) > 1:
+            new_virtual_ids = {}
+            for line, vals in zip(self, vals_list):
+                if vals and vals.get("virtual_id"):
+                    new_virtual_ids[line.virtual_id] = vals["virtual_id"] = str(uuid4())
+            for line, vals in zip(self, vals_list):
+                if vals and vals.get("linked_virtual_id"):
+                    vals["linked_virtual_id"] = new_virtual_ids.get(
+                        line.linked_virtual_id, vals["linked_virtual_id"]
+                    )
+        return vals_list
 
     def write(self, vals):
         values = vals
