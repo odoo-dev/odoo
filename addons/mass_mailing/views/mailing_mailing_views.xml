@@ -72,7 +72,7 @@
             <field name="name">mailing.mailing.form</field>
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
-                <form string="Mailing" class="o_mass_mailing_mailing_form">
+                <form string="Mailing" class="o_mass_mailing_mailing_form" js_class="mailing_mailing_form_view">
                     <header>
                         <button name="action_new_mailing_from_template" type="object" class="oe_highlight" string="Use this" invisible="not is_template or not body_arch"/>
                         <button name="action_launch" type="object" class="oe_highlight" string="Send"

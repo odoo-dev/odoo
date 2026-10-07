@@ -163,6 +163,7 @@
             'mass_mailing/static/src/views/format_utils.js',
             'mass_mailing/static/src/views/fields/**/*',
             'mass_mailing/static/src/views/mailing_filter*/**/*.js',
+            'mass_mailing/static/src/views/mailing_mailing_form_view.js',
             'mass_mailing/static/src/views/mailing_template_kanban_view/**/*',
             'mass_mailing/static/src/editor/**/*',
             'mass_mailing/static/src/fields/**/*',
