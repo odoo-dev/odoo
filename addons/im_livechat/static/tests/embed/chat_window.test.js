@@ -78,6 +78,17 @@ test("internal users can upload file to temporary thread", async () => {
     await contains(".o-mail-Message .o-mail-AttachmentCard:contains(text.txt)");
 });
 
+test("thread actions are not displayed on temporary thread", async () => {
+    const pyEnv = await startServer();
+    await loadDefaultEmbedConfig();
+    const [partnerUser] = pyEnv["res.users"].search_read([["id", "=", serverState.partnerId]]);
+    await start({ authenticateAs: partnerUser });
+    await mountWithCleanup(LivechatButton);
+    await click(".o-livechat-LivechatButton");
+    await contains(".o-mail-ChatWindow");
+    await contains("[title='Open Actions Menu']", { count: 0 });
+});
+
 test("Conversation name is operator livechat user name", async () => {
     const pyEnv = await startServer();
     await loadDefaultEmbedConfig();
