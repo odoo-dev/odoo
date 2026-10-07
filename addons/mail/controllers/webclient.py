@@ -28,7 +28,7 @@ class WebclientController(ThreadController):
                 bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
                 store.add(messages, "_store_message_fields", fields_params=fields_params)
                 for records in messages._records_by_model_name().values():
-                    if not isinstance(records, request.env.registry["mail.thread"]):
+                    if "message_needaction_counter" not in records._fields:
                         continue
                     store.add(
                         records,

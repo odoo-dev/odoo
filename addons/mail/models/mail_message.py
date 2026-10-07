@@ -1206,7 +1206,7 @@ class MailMessage(models.Model):
             "partner_cc_ids",
             lambda res: res.from_method("_store_avatar_fields"),
             dynamic_fields="_store_partner_name_dynamic_fields",
-            predicate=lambda m: m.model != "discuss.channel",
+            predicate=lambda m: not m.model or self.env[m.model]._mail_allows_cc(),
             sort="id",
             sudo=True,
         )
@@ -1249,14 +1249,14 @@ class MailMessage(models.Model):
                 scheduled_dt_by_msg[scheduler.mail_message_id.id] = scheduler.scheduled_datetime
         record_by_message = self._record_by_message()
         records = record_by_message.values()
-        non_channel_records = filter(lambda record: record._name != "discuss.channel", records)
+        followable_records = filter(lambda record: record._mail_allows_followers(), records)
         target_user = res.target_user()
         follower_by_record_and_partner = defaultdict(self.env["mail.followers"].browse)
-        if target_user and inbox_fields and non_channel_records:
+        if target_user and inbox_fields and followable_records:
             if followers is None:
                 domain = Domain.OR(
                     [("res_model", "=", model), ("res_id", "in", [r.id for r in records])]
-                    for model, records in groupby(non_channel_records, key=lambda r: r._name)
+                    for model, records in groupby(followable_records, key=lambda r: r._name)
                 )
                 domain &= Domain("partner_id", "=", target_user.partner_id.id)
                 # sudo: mail.followers - reading followers of current partner
@@ -1273,7 +1273,7 @@ class MailMessage(models.Model):
             lambda res: (
                 # sudo: mail.thread - if mentionned in a non accessible thread, name is allowed
                 res.attr("display_name", sudo=True),
-                res.attr("has_mail_thread", lambda t: isinstance(t, self.env.registry["mail.thread"])),
+                res.attr("has_mail_thread", lambda t: hasattr(t, "_get_allowed_access_params")),
                 res.attr(
                     "module_icon",
                     lambda t: modules.module.get_module_icon(t._original_module),
@@ -1282,7 +1282,7 @@ class MailMessage(models.Model):
                 res.one(
                     "selfFollower",
                     ["is_active", "partner_id"],
-                    predicate=lambda t: target_user and inbox_fields and non_channel_records,
+                    predicate=lambda t: target_user and inbox_fields and followable_records,
                     value=lambda t: follower_by_record_and_partner[t, target_user.partner_id],
                 ),
                 res.attr(

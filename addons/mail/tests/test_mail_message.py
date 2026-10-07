@@ -30,6 +30,65 @@ class TestMailMessage(common.MailCommon, HttpCase):
         self.make_jsonrpc_request("/mail/store", {"fetch_params": ["remove_all_bookmarks"]})
         self.assertNotIn(self.env.user.partner_id, message.bookmarked_partner_ids)
 
+    @users("employee")
+    def test_store_bookmarked_messages_by_thread_model(self):
+        self.authenticate(self.env.user.login, self.env.user.login)
+        channel = self.env["discuss.channel"]._create_channel(name="General", group_id=None)
+        category = self.env["res.partner.category"].sudo().create({"name": "VIP"})
+        channel_message, partner_message, category_message = self.env["mail.message"].sudo().create([
+            {
+                "body": "Channel message",
+                "bookmarked_partner_ids": self.env.user.partner_id,
+                "model": "discuss.channel",
+                "res_id": channel.id,
+            },
+            {
+                "body": "Partner message",
+                "bookmarked_partner_ids": self.env.user.partner_id,
+                "model": "res.partner",
+                "partner_cc_ids": self.partner_root,
+                "res_id": self.partner_admin.id,
+            },
+            {
+                "body": "Category message",
+                "bookmarked_partner_ids": self.env.user.partner_id,
+                "model": "res.partner.category",
+                "res_id": category.id,
+            },
+        ])
+        # Simulate a follower on a channel, which message_subscribe refuses.
+        _channel_follower, partner_follower = self.env["mail.followers"].sudo().create([
+            {"partner_id": self.env.user.partner_id.id, "res_id": channel.id, "res_model": "discuss.channel"},
+            {"partner_id": self.env.user.partner_id.id, "res_id": self.partner_admin.id, "res_model": "res.partner"},
+        ])
+        data = self.make_jsonrpc_request("/mail/store", {"fetch_params": [
+            ["/mail/messaging_menu/mail.message/load_more", {"tab_id": "bookmark", "limit": 20}],
+        ]})
+        messages = {message["id"]: message for message in data["mail.message"]}
+        self.assertEqual(messages[partner_message.id]["partner_cc_ids"], self.partner_root.ids)
+        self.assertEqual(messages[category_message.id]["partner_cc_ids"], [])
+        self.assertNotIn("partner_cc_ids", messages[channel_message.id])
+        thread_keys = {"has_mail_thread", "message_needaction_counter", "selfFollower"}
+        self.assertEqual(
+            {
+                thread["model"]: {key: value for key, value in thread.items() if key in thread_keys}
+                for thread in data["mail.thread"]
+            },
+            {
+                "discuss.channel": {
+                    "has_mail_thread": True,
+                    "message_needaction_counter": 0,
+                    "selfFollower": False,
+                },
+                "res.partner": {
+                    "has_mail_thread": True,
+                    "message_needaction_counter": 0,
+                    "selfFollower": partner_follower.id,
+                },
+                "res.partner.category": {"has_mail_thread": False, "selfFollower": False},
+            },
+        )
+
     def test_mail_message_read_inexisting(self):
         user = new_test_user(self.env, login="Bob", email="bob@test.com")
         inexisting_message = self.env['mail.message'].with_user(user).browse(-434264)

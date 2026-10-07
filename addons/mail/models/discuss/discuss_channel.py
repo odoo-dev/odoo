@@ -1502,6 +1502,12 @@ class DiscussChannel(models.Model):
         if not message.message_type == 'comment':
             raise UserError(_("Only messages type comment can have their content updated on model 'discuss.channel'"))
 
+    def _mail_allows_cc(self):
+        return False
+
+    def _mail_allows_followers(self):
+        return False
+
     def _mail_get_operation_for_mail_message_operation(self, message_operation):
         """Override to ensure create is not allowed in read-only channels."""
         if message_operation == "write":

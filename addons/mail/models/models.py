@@ -758,6 +758,12 @@ class Base(models.AbstractModel):
     # DISCUSS
     # ------------------------------------------------------------
 
+    def _mail_allows_cc(self):
+        return True
+
+    def _mail_allows_followers(self):
+        return True
+
     def _mail_get_message_subtypes(self):
         return self.env['mail.message.subtype'].search([
             '&', ('hidden', '=', False),
