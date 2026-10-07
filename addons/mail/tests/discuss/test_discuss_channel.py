@@ -1139,7 +1139,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                 ],
                 "channel_type": "chat",
                 "member_indices": self.env["discuss.channel"]._member_indices(
-                    self.partner_admin + self.partner_employee_nomail, guests
+                    self.env["res.users"], self.partner_admin + self.partner_employee_nomail, guests
                 ),
                 "name": "Chat",
             },

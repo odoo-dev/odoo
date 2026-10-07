@@ -266,11 +266,11 @@ class DiscussChannelMember(models.Model):
                 )
             channel = self.env["discuss.channel"].browse(vals["channel_id"])
             partner = self.env["res.partner"].browse(vals.get("partner_id"))
+            user = self.env["res.users"].browse(vals.get("user_id"))
             guest = self.env["mail.guest"].browse(vals.get("guest_id"))
-            if (
-                channel.channel_type == "chat"
-                and channel._member_indices(partner, guest) not in channel.member_indices.split(",")
-            ):
+            if channel.channel_type == "chat" and channel._member_indices(
+                user, partner, guest
+            ) not in channel.member_indices.split(","):
                 raise UserError(
                     _("Adding more members to this chat isn't possible; it's designed for just two people.")
                 )

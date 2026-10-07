@@ -382,9 +382,11 @@ class DiscussChannel(models.Model):
     def _search_channel_partner_ids(self, operator, operand):
         return [('channel_member_ids', 'any', [('partner_id', operator, operand)])]
 
-    def _member_indices(self, partners, guests):
+    def _member_indices(self, users, partners, guests):
         return ",".join(
-            [f"p{pid}" for pid in sorted(partners.ids)] + [f"g{gid}" for gid in sorted(guests.ids)],
+            [f"u{uid}" for uid in sorted(users.ids)]
+            + [f"p{pid}" for pid in sorted(partners.ids)]
+            + [f"g{gid}" for gid in sorted(guests.ids)],
         )
 
     @api.depends_context('uid', 'guest')
@@ -566,6 +568,11 @@ class DiscussChannel(models.Model):
             vals["member_indices"] = None
             if vals.get("channel_type") == "chat":
                 vals["member_indices"] = self._member_indices(
+                    self.env["res.users"].browse(
+                        member_vals["user_id"]
+                        for member_vals in member_vals_list
+                        if member_vals.get("user_id")
+                    ),
                     self.env["res.partner"].browse(
                         member_vals["partner_id"]
                         for member_vals in member_vals_list
@@ -1800,7 +1807,7 @@ class DiscussChannel(models.Model):
         other_partner = partners - self.env.user.partner_id
         # sudo: discuss.channel - a chat of the current user is not readable while its members are gone
         channel = self.env["discuss.channel"].sudo().search_fetch(
-            Domain("member_indices", "=", self._member_indices(partners, self.env["mail.guest"]))
+            Domain("member_indices", "=", self._member_indices(self.env["res.users"], partners, self.env["mail.guest"]))
             & Domain("channel_type", "=", "chat"),
         )
         # use the same "now" in the whole function to ensure unpin_dt > last_interest_dt
