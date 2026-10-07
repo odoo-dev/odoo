@@ -666,9 +666,9 @@ class HrLeave(models.Model):
         domain = Domain.AND([
             Domain('employee_id', '=', self.employee_id.id),
             Domain('active', '=', True),
-            Domain('contract_date_start', '<=', self.date_to),
+            Domain('contract_date_start', '<=', fields.Date.to_date(self.date_to)),
             Domain.OR([
-                Domain('contract_date_end', '>=', self.date_from),
+                Domain('contract_date_end', '>=', fields.Date.to_date(self.date_from)),
                 Domain('contract_date_end', '=', False),
             ])
         ])
