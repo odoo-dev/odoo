@@ -28,6 +28,8 @@ function getDefaultValuesFromRecord(data) {
             const { type } = QUICK_CREATE_CALENDAR_EVENT_FIELDS[fieldName]
             if (type === 'many2many') {
                 value = value.records.map((record) => record.resId);
+            } else if (type === 'many2one') {
+                value = value && value.id;
             } else if (type === 'date') {
                 value = value && serializeDate(value);
             } else if (type === "datetime") {
