@@ -843,10 +843,8 @@ class TestSaleProject(TestSaleProjectCommon):
             "allow_billable": True,
         })
 
-        company_a, company_b = self.env['res.company'].create([
-            {"name": "Company A"},
-            {"name": "Company B"},
-        ])
+        company_a = self.add_company('base.test_company_template')
+        company_b = self.add_company('base.test_company_template2')
 
         # cannot be done in batch because of `_check_sale_product_company` constraint
         product_a, product_b = (
@@ -893,10 +891,7 @@ class TestSaleProject(TestSaleProjectCommon):
 
     def test_multi_company_so_creation(self):
         # SO with project template with non-superuser company_id able creates project with proper company
-        company = self.env['res.company'].create({
-            'name': 'Multi-Company Test Company',
-            'currency_id': self.env.ref('base.EUR').id,
-        })
+        company = self.add_company('base.test_company_template', {'currency_id': self.env.ref('base.EUR').id})
 
         company_project_template = self.env['project.project'].with_company(company).create({
             'name': 'Multi-Company Test Company Project Template',

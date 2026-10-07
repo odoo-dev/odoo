@@ -294,9 +294,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         leave_start_datetime = datetime(2021, 1, 4, 7, 0)  # This is a monday
         leave_end_datetime = datetime(2021, 1, 8, 18, 0)  # This is a friday
 
-        new_company = self.env['res.company'].create({
-            'name': 'Winterfell',
-        })
+        new_company = self.add_company('base.test_company_template')
 
         self.env['resource.calendar.leaves'].with_company(new_company).create({
             'name': 'Test',
