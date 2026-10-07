@@ -61,9 +61,15 @@ export const pttExtensionHookService = {
                 case "push-to-talk-pressed":
                     {
                         self.voiceActivated = false;
-                        const isFirstPress = !rtc.selfSession?.isTalking;
+                        const isFirstPress =
+                            !rtc.selfSession?.isTalking && rtc.pttReleaseTimeout === undefined;
                         rtc.onPushToTalk();
-                        if (rtc.selfSession?.isTalking) {
+                        // Muted presses also need the extension's release watchdog to cancel
+                        // pending warnings and allow the next press to warn again.
+                        if (
+                            rtc.selfSession?.isTalking ||
+                            rtc.pttMutedWarningTimeout !== undefined
+                        ) {
                             // Second key press is slow to come thus, the first timeout
                             // must be greater than the following ones.
                             rtc.setPttReleaseTimeout(

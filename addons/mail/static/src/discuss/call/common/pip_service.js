@@ -49,6 +49,7 @@ export const callPipService = {
             pipWindow.addEventListener("keyup", (ev) => {
                 rtc.onKeyUp(ev);
             });
+            pipWindow.addEventListener("blur", () => rtc.onBlur());
             pipWindow.document.body.style.backgroundColor = "black";
             pipWindow.document.body.style.overflow = "hidden";
             pipWindow.document.body.style.display = "block";

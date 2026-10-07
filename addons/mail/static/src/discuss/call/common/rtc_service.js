@@ -349,6 +349,15 @@ export class Rtc extends Record {
     /** @type {ReturnType<setTimeout>} */
     pttReleaseTimeout;
     /**
+     * Kept until release, including after firing, so repeats cannot warn twice per press.
+     * @type {ReturnType<setTimeout>}
+     */
+    pttMutedWarningTimeout;
+    /** @type {ReturnType<setTimeout>} */
+    pttMutedWarningHideTimeout;
+    showPttMutedWarning = false;
+    isPttMutedWarningDismissed = false;
+    /**
      * Whether the network fell back to p2p mode in a SFU call.
      */
     fallbackMode = false;
@@ -562,6 +571,18 @@ export class Rtc extends Record {
         this.dialog = services.dialog;
         this.soundEffectsService = services["mail.sound_effects"];
         this.pttExtService = services["discuss.ptt_extension"];
+        this.onChange(
+            () => [this.localSession?.isMute, this.store.settings.usePushToTalk],
+            function onChangePttMutedWarning(isMute, usePushToTalk) {
+                if (!isMute || !usePushToTalk) {
+                    this.clearPttMutedWarning();
+                }
+                if (!isMute) {
+                    this.isPttMutedWarningDismissed = false;
+                }
+            },
+            { immediate: true }
+        );
         if (this._broadcastChannel) {
             this._broadcastChannel.onmessage = this._onBroadcastChannelMessage.bind(this);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
@@ -780,6 +801,9 @@ export class Rtc extends Record {
     }
 
     onKeyUp(ev) {
+        if (this.store.settings.isPushToTalkKey(ev)) {
+            this.releasePttMutedWarning();
+        }
         if (!this.isPushToTalkRelease(ev)) {
             return;
         }
@@ -787,6 +811,7 @@ export class Rtc extends Record {
     }
 
     onBlur() {
+        this.releasePttMutedWarning();
         if (!this.isPushToTalkRelease()) {
             return;
         }
@@ -794,9 +819,13 @@ export class Rtc extends Record {
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
+        window.clearTimeout(this.pttReleaseTimeout);
         this.pttReleaseTimeout = window.setTimeout(() => {
+            this.pttReleaseTimeout = undefined;
+            this.releasePttMutedWarning();
+            const wasTalking = this.localSession?.isTalking;
             this.setTalking(false);
-            if (!this.localSession?.isMute) {
+            if (wasTalking && !this.localSession?.isMute) {
                 this.soundEffectsService.play("ptt-release");
             }
         }, Math.max(this.store.settings.voiceActiveDuration || 0, duration));
@@ -811,10 +840,36 @@ export class Rtc extends Record {
             return;
         }
         window.clearTimeout(this.pttReleaseTimeout);
-        if (!this.localSession.isTalking && !this.localSession.isMute) {
+        this.pttReleaseTimeout = undefined;
+        if (this.localSession.isMute) {
+            if (this.pttMutedWarningTimeout === undefined && !this.isPttMutedWarningDismissed) {
+                this.pttMutedWarningTimeout = window.setTimeout(() => {
+                    this.showPttMutedWarning = true;
+                    window.clearTimeout(this.pttMutedWarningHideTimeout);
+                    this.pttMutedWarningHideTimeout = window.setTimeout(() => {
+                        this.pttMutedWarningHideTimeout = undefined;
+                        this.showPttMutedWarning = false;
+                    }, 3000);
+                }, 500);
+            }
+            return;
+        }
+        if (!this.localSession.isTalking) {
             this.soundEffectsService.play("ptt-press");
         }
         this.setTalking(true);
+    }
+
+    releasePttMutedWarning() {
+        window.clearTimeout(this.pttMutedWarningTimeout);
+        this.pttMutedWarningTimeout = undefined;
+    }
+
+    clearPttMutedWarning() {
+        this.releasePttMutedWarning();
+        window.clearTimeout(this.pttMutedWarningHideTimeout);
+        this.pttMutedWarningHideTimeout = undefined;
+        this.showPttMutedWarning = false;
     }
 
     async openPip(options) {
@@ -2204,6 +2259,10 @@ export class Rtc extends Record {
     }
 
     clear() {
+        this.clearPttMutedWarning();
+        this.isPttMutedWarningDismissed = false;
+        window.clearTimeout(this.pttReleaseTimeout);
+        this.pttReleaseTimeout = undefined;
         if (this.localChannel) {
             for (const session of this.localChannel.rtc_session_ids) {
                 this.removeAudioFromSession(session);
