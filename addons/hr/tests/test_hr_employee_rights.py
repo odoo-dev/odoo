@@ -23,7 +23,7 @@ class TestHrEmployeeRights(TestHrCommon):
 
     def test_new_employee_group_hr_user(self):
         for country in self._get_payroll_l10n_countries():
-            company = self.env['res.company'].create({
+            company = self.add_company('base.test_company', {
                 'name': f'Company {country.name}',
                 'country_id': country.id,
             })
