@@ -18,7 +18,7 @@ from PIL import Image, UnidentifiedImageError
 
 from odoo import api, Command, fields, models, modules, tools, _
 from odoo.addons.base_import.models.base_import import ImportValidationError
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.fields import Datetime, Domain
 from odoo.tools import SQL
 from odoo.tools.float_utils import float_round
@@ -577,17 +577,45 @@ class MailingMailing(models.Model):
         return mailings
 
     def write(self, vals):
-        values = vals
-        if values.get('body_arch'):
-            values['body_arch'] = self._convert_inline_images_to_urls(values['body_arch'])
-        if values.get('body_html'):
-            values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
+        # Keep lifecycle updates possible while preventing content changes.
+        allowed_fields = {'kpi_mail_required', 'sent_date', 'state'}
+        if vals.get('state') == 'draft':
+            # Cancelling also clears the scheduling fields.
+            allowed_fields |= {'next_departure', 'schedule_date', 'schedule_type'}
+        protected_fields = set(vals) - allowed_fields
+
+        def raise_if_not_editable():
+            self.invalidate_recordset(['state'])
+            if not any(mailing.state != 'draft' for mailing in self):
+                return
+            reset_action = self.env.ref('mass_mailing.mailing_mailing_action_set_draft')
+            raise RedirectWarning(
+                self.env._("Oops, you cannot edit a queued mailing."),
+                reset_action.id,
+                self.env._("Set back to draft"),
+                {
+                    'active_model': self._name,
+                    'active_ids': self.ids,
+                    'mass_mailing_edit_conflict': True,
+                },
+            )
+
+        if protected_fields:
+            raise_if_not_editable()
+        if vals.get('body_arch'):
+            vals['body_arch'] = self._convert_inline_images_to_urls(vals['body_arch'])
+        if vals.get('body_html'):
+            vals['body_html'] = self._convert_inline_images_to_urls(vals['body_html'])
         # If ab_testing is already enabled on a mailing and the campaign is removed, we raise a ValidationError
-        if values.get('campaign_id') is False and any(mailing.ab_testing_enabled for mailing in self) and 'ab_testing_enabled' not in values:
+        if vals.get('campaign_id') is False and any(mailing.ab_testing_enabled for mailing in self) and 'ab_testing_enabled' not in vals:
             raise ValidationError(_("A campaign should be set when A/B test is enabled"))
 
-        result = super().write(values)
-        if values.get('ab_testing_enabled'):
+        result = super().write(vals)
+        # The row is locked by the write at this point. Recheck the state to
+        # close the race with the cron switching the mailing to ``sending``.
+        if protected_fields:
+            raise_if_not_editable()
+        if vals.get('ab_testing_enabled'):
             self._create_ab_testing_utm_campaigns()
         self._fix_attachment_ownership()
 
@@ -696,6 +724,11 @@ class MailingMailing(models.Model):
         )
 
     def action_cancel(self):
+        # Keep sent emails and cancel only those still waiting in the queue.
+        self.env['mail.mail'].sudo().search([
+            ('mailing_id', 'in', self.ids),
+            ('state', '=', 'outgoing'),
+        ]).cancel()
         self.write({'state': 'draft', 'schedule_date': False, 'schedule_type': 'now', 'next_departure': False})
 
     def action_retry_failed(self, extra_domain=None):
@@ -1197,12 +1230,14 @@ class MailingMailing(models.Model):
         mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
         self.env['ir.cron']._commit_progress(remaining=len(mass_mailings))
         for mass_mailing in mass_mailings:
+            mass_mailing.state = 'sending'
+            # Make concurrent edits fail before the first email is sent.
+            self.env['ir.cron']._commit_progress(processed=0)
             context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
             mass_mailing = mass_mailing.with_context(
                 **self.env['res.users'].with_user(context_user).context_get()
             )
-            if len(mass_mailing._get_remaining_recipients()) > 0:
-                mass_mailing.state = 'sending'
+            if mass_mailing._get_remaining_recipients():
                 mass_mailing._action_send_mail()
             else:
                 mass_mailing.write({
