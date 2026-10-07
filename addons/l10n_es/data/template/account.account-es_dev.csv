@@ -1,0 +1,6 @@
+"id","name","name@es","name@ca","code","account_type","reconcile","description","description@es","description@ca"
+"account_dev_1709","Lines of code","Líneas de código","Línies de codi","2069","asset_fixed","False","Including the commented-out ones nobody deletes","Incluidas las comentadas que nadie se atreve a borrar","Incloses les comentades que ningú s'atreveix a esborrar"
+"account_dev_4729","Tax authority, input caffeine tax","Hacienda Pública, cafeína soportada","Hisenda Pública, cafeïna suportada","4729","asset_current","False","","",""
+"account_dev_5219","Football conversation rate","Tarifa de conversaciones de fútbol","Tarifa de converses de futbol","6409","expense","False","Hours paid on Monday mornings","Horas pagadas los lunes por la mañana","Hores pagades els dilluns al matí"
+"account_dev_6297","Coffee and caffeine supplies","Suministros de café y cafeína","Subministraments de cafè i cafeïna","6297","expense","False","Main fuel of the DEV department","Principal combustible del departamento DEV","Principal combustible del departament de DEV"
+"account_dev_7599","Income from hotfixes billed as features","Ingresos por hotfixes facturados como features","Ingressos per hotfixes facturats com a features","7599","income","False","","",""
