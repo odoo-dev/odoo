@@ -26,14 +26,11 @@ class ResUsers(models.Model):
         all_activities = self.env['mail.activity'].browse(task_group['activity_ids'])
         task_ids = set(all_activities.mapped('res_id'))
 
-        activities_by_type = all_activities.grouped(
-            lambda a: bool(self.env['project.task'].browse(a.res_id).with_prefetch(task_ids).project_id)
-        )
+        activities_by_type = all_activities.grouped({
+            'task': lambda a: self.env['project.task'].browse(a.res_id).with_prefetch(task_ids).project_id,
+        }, default='todo')
 
-        todo_activities = activities_by_type.get(False, self.env['mail.activity'])
-        task_activities = activities_by_type.get(True, self.env['mail.activity'])
-
-        if todo_activities:
+        if todo_activities := activities_by_type['todo']:
             todo_group = self._format_activity_group('project.task', todo_activities)
             todo_group.update({
                 'name': _('To-Do'),
@@ -43,7 +40,7 @@ class ResUsers(models.Model):
             })
             groups.append(todo_group)
 
-        if task_activities:
+        if task_activities := activities_by_type['task']:
             project_group = self._format_activity_group('project.task', task_activities)
             project_group.update({
                 'is_todo': False,
