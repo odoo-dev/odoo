@@ -451,6 +451,7 @@ test("deserializeDateTime with different timezone", async () => {
 
 test("toLocaleDateTimeString: showWeekday", async () => {
     mockTimeZone(0);
+    patchWithCleanup(localization, { timeFormat: "hh:mm:ss a" });
     const value = DateTime.fromISO("2022-01-07T15:30:00");
 
     expect(toLocaleDateTimeString(value, {})).toBe("Jan 7, 2022, 3:30 PM");
@@ -458,6 +459,17 @@ test("toLocaleDateTimeString: showWeekday", async () => {
     expect(toLocaleDateTimeString(value, { showWeekday: true, showDate: false })).toBe(
         "Fri 3:30 PM"
     );
+});
+
+test("toLocaleDateTimeString: configured time format", async () => {
+    mockTimeZone(0);
+    const value = DateTime.fromISO("2022-01-07T15:30:00");
+
+    patchWithCleanup(localization, { timeFormat: "HH:mm:ss" });
+    expect(toLocaleDateTimeString(value)).toBe("Jan 7, 2022, 15:30");
+
+    patchWithCleanup(localization, { timeFormat: "hh:mm:ss a" });
+    expect(toLocaleDateTimeString(value.setLocale("fr-FR"), { showDate: false })).toBe("3:30 PM");
 });
 
 test("parseDate with short notations", async () => {

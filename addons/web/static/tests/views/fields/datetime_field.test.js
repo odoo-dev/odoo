@@ -118,6 +118,25 @@ test("DatetimeField in form view", async () => {
     });
 });
 
+test("DatetimeField follows a 24-hour time format in readonly", async () => {
+    mockTimeZone(+5);
+    defineParams({ lang_parameters: { time_format: "%H:%M:%S" } });
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <field name="datetime"/>
+                <field name="datetime" readonly="1"/>
+            </form>`,
+    });
+
+    expect(".o_field_datetime button").toHaveValue("02/08/2017 15:00:00");
+    expect(".o_field_datetime span").toHaveText("Feb 8, 2017, 15:00");
+});
+
 test("DatetimeField only triggers fieldChange when a day is picked and when an hour/minute is selected", async () => {
     mockTimeZone(+2);
 
@@ -670,7 +689,6 @@ test("placeholder_field shows as placeholder (datetime)", async () => {
     defineParams({
         lang_parameters: {
             date_format: "%d/%m/%Y",
-            time_format: "%H:%M",
         },
     });
 

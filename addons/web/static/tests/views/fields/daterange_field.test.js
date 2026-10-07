@@ -1050,6 +1050,7 @@ test("list daterange with empty start date and end date", async () => {
 });
 
 test("list daterange: column widths", async () => {
+    defineParams({ lang_parameters: { time_format: "%H:%M:%S" } });
     await resize({ width: 800 });
     patchWithCleanup(user, _makeUser({ user_context: { lang: "fr" } }));
     document.body.style.fontFamily = "sans-serif";
@@ -1137,6 +1138,7 @@ test("list daterange: column widths (show_time=false)", async () => {
 });
 
 test("list daterange: column widths (no record)", async () => {
+    defineParams({ lang_parameters: { time_format: "%H:%M:%S" } });
     await resize({ width: 800 });
     patchWithCleanup(user, _makeUser({ user_context: { lang: "fr" } }));
     document.body.style.fontFamily = "sans-serif";
