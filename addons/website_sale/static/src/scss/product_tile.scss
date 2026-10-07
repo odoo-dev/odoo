@@ -1557,8 +1557,8 @@ $_wsale_products_roundness_map: (
     --o-wsale-card-img-transition-hover: all .25s;
 
     @include o-wsale-card-when-secondary-img() {
-        --o-wsale-card-img-transition: all .5s ease-in-out;
-        --o-wsale-card-img-secondary-transition: all .5s ease-in-out;
+        --o-wsale-card-img-transition: transform .5s ease-in-out;
+        --o-wsale-card-img-secondary-transition: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-opacity-hover: 1;
         --o-wsale-card-img-secondary-transform-hover: scale(1.08);
     }
@@ -1568,10 +1568,10 @@ $_wsale_products_roundness_map: (
     --o-wsale-card-img-transform-hover: scale(1.04);
 
     @include o-wsale-card-when-secondary-img() {
-        --o-wsale-card-img-transition: all .5s ease-in-out;
-        --o-wsale-card-img-secondary-transition: all .5s;
+        --o-wsale-card-img-transition: transform .5s ease-in-out;
+        --o-wsale-card-img-secondary-transition: transform .5s;
         --o-wsale-card-img-secondary-opacity-hover: 1;
-        --o-wsale-card-img-secondary-transition-hover: all .5s ease-in-out;
+        --o-wsale-card-img-secondary-transition-hover: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-transform-hover: scale(1.04);
     }
 }
@@ -1582,9 +1582,9 @@ $_wsale_products_roundness_map: (
     --o-wsale-card-img-transition-hover: all .1s;
 
     @include o-wsale-card-when-secondary-img() {
-        --o-wsale-card-img-transition: all .5s ease-in-out;
+        --o-wsale-card-img-transition: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-transform: scale(1.08);
-        --o-wsale-card-img-secondary-transition: all .5s ease-in-out;
+        --o-wsale-card-img-secondary-transition: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-opacity-hover: 1;
         --o-wsale-card-img-secondary-transform-hover: scale(1);
     }
@@ -1596,9 +1596,9 @@ $_wsale_products_roundness_map: (
     --o-wsale-card-img-transition-hover: all .1s;
 
     @include o-wsale-card-when-secondary-img() {
-        --o-wsale-card-img-transition: all .5s ease-in-out;
+        --o-wsale-card-img-transition: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-transform: scale(1.04);
-        --o-wsale-card-img-secondary-transition: all .5s ease-in-out;
+        --o-wsale-card-img-secondary-transition: transform .5s ease-in-out;
         --o-wsale-card-img-secondary-opacity-hover: 1;
         --o-wsale-card-img-secondary-transform-hover: scale(1);
     }
