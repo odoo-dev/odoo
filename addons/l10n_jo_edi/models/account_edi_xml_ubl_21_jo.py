@@ -79,12 +79,14 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
 
         # Compute values for invoice lines. In Jordan, because the web-service has absolutely no tolerance,
         # what we do is: use round per line with 9 decimals (yes!)
-        base_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'product')
-        base_lines = [invoice._prepare_product_base_line_for_taxes_computation(line) for line in base_amls]
-        epd_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'epd')
-        base_lines += [invoice._prepare_epd_base_line_for_taxes_computation(line) for line in epd_amls]
-        cash_rounding_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_repartition_line_id)
-        base_lines += [invoice._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in cash_rounding_amls]
+        amls_by_type = invoice.line_ids.grouped({
+            'product': lambda line: line.display_type == 'product',
+            'epd': lambda line: line.display_type == 'epd',
+            'cash_rounding': lambda line: line.display_type == 'rounding' and not line.tax_repartition_line_id,
+        }, default='other')
+        base_lines = [invoice._prepare_product_base_line_for_taxes_computation(line) for line in amls_by_type['product']]
+        base_lines += [invoice._prepare_epd_base_line_for_taxes_computation(line) for line in amls_by_type['epd']]
+        base_lines += [invoice._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in amls_by_type['cash_rounding']]
 
         AccountTax = self.env['account.tax']
         for base_line in base_lines:

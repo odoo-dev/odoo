@@ -890,11 +890,10 @@ class MailActivity(models.Model):
             activity_domain.append(('res_id', 'in', DocModel._search(domain or [], offset, limit, DocModel._order) if is_filtered else []))
         all_activities = Activity.with_context(active_test=not fetch_done).search(
             activity_domain, order='date_done DESC, date_deadline ASC')
-        all_ongoing = all_activities.filtered('active')
-        all_completed = all_activities.filtered(lambda act: not act.active)
+        activities_by_state = all_activities.grouped({'ongoing': 'active'}, default='completed')
 
         # 2. Get attachment of completed activities
-        if all_completed:
+        if all_completed := activities_by_state['completed']:
             attachment_ids = all_completed.attachment_ids.ids
             attachments_by_id = {
                 a['id']: a
@@ -907,7 +906,7 @@ class MailActivity(models.Model):
         grouped_completed = {group: Activity.browse([v.id for v in values])
                              for group, values in groupby(all_completed, key=lambda a: (a.res_id, a.activity_type_id))}
         grouped_ongoing = {group: Activity.browse([v.id for v in values])
-                           for group, values in groupby(all_ongoing, key=lambda a: (a.res_id, a.activity_type_id))}
+                           for group, values in groupby(activities_by_state['ongoing'], key=lambda a: (a.res_id, a.activity_type_id))}
 
         # 4. Filter out unreadable records
         res_id_type_tuples = grouped_ongoing.keys() | grouped_completed.keys()

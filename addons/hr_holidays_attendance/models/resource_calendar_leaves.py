@@ -13,14 +13,13 @@ class ResourceCalendarLeaves(models.Model):
         if not ph_leaves:
             return []
 
-        global_leaves = ph_leaves.filtered(lambda l: not l.calendar_id)
-        calendar_leaves = ph_leaves.filtered('calendar_id')
+        leaves_by_scope = ph_leaves.grouped({'calendar': 'calendar_id'}, default='global')
 
         domains = []
-        if global_leaves:
+        if global_leaves := leaves_by_scope['global']:
             company_ids = global_leaves.company_id.ids
             domains.append(Domain('company_id', 'in', company_ids) if company_ids else Domain.TRUE)
-        if calendar_leaves:
+        if calendar_leaves := leaves_by_scope['calendar']:
             domains.append(Domain('resource_calendar_id', 'in', calendar_leaves.calendar_id.ids))
         if not domains:
             return []

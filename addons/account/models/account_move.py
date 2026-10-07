@@ -1870,15 +1870,17 @@ class AccountMove(models.Model):
         if self.id:
             # The move is stored so we can add the early payment discount lines directly to reduce the
             # tax amount without touching the untaxed amount.
-            epd_amls = self.line_ids.filtered(lambda line: line.display_type == 'epd')
-            base_lines += [self._prepare_epd_base_line_for_taxes_computation(line) for line in epd_amls]
-            cash_rounding_amls = self.line_ids \
-                .filtered(lambda line: line.display_type == 'rounding' and not line.tax_repartition_line_id)
-            base_lines += [self._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in cash_rounding_amls]
-            non_deductible_base_lines = self.line_ids.filtered(lambda line: line.display_type in ('non_deductible_product', 'non_deductible_product_total'))
-            base_lines += [self._prepare_non_deductible_base_line_for_taxes_computation(line) for line in non_deductible_base_lines]
+            amls_by_type = self.line_ids.grouped({
+                'epd': lambda line: line.display_type == 'epd',
+                'cash_rounding': lambda line: line.display_type == 'rounding' and not line.tax_repartition_line_id,
+                'non_deductible': lambda line: line.display_type in ('non_deductible_product', 'non_deductible_product_total'),
+                'tax': 'tax_repartition_line_id',
+            }, default='other')
+            base_lines += [self._prepare_epd_base_line_for_taxes_computation(line) for line in amls_by_type['epd']]
+            base_lines += [self._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in amls_by_type['cash_rounding']]
+            base_lines += [self._prepare_non_deductible_base_line_for_taxes_computation(line) for line in amls_by_type['non_deductible']]
             AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-            tax_amls = self.line_ids.filtered('tax_repartition_line_id')
+            tax_amls = amls_by_type['tax']
             tax_lines = [self._prepare_tax_line_for_taxes_computation(tax_line) for tax_line in tax_amls]
             if round_from_tax_lines == 'reapply_currency_rate':
                 for tax_line in tax_lines:
@@ -5230,9 +5232,14 @@ class AccountMove(models.Model):
             return target[list(source).index(tax_rep)]
 
         company = self.company_id
-        payment_term_line = self.line_ids.filtered(lambda x: x.display_type == 'payment_term')
-        tax_lines = self.line_ids.filtered('tax_repartition_line_id')
-        invoice_lines = self.line_ids.filtered(lambda x: x.display_type == 'product')
+        lines_by_type = self.line_ids.grouped({
+            'payment_term': lambda x: x.display_type == 'payment_term',
+            'product': lambda x: x.display_type == 'product',
+            'tax': 'tax_repartition_line_id',
+        }, default='other')
+        payment_term_line = lines_by_type['payment_term']
+        tax_lines = lines_by_type['tax']
+        invoice_lines = lines_by_type['product']
         payment_term = self.invoice_payment_term_id
         early_pay_discount_computation = payment_term.early_pay_discount_computation
         discount_percentage = payment_term.discount_percentage

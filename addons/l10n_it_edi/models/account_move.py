@@ -2125,16 +2125,17 @@ class AccountMove(models.Model):
 
         companies = self.mapped("company_id")
         companies_partners = companies.mapped("partner_id")
-        moves_full = self.filtered(lambda m: not m._l10n_it_edi_is_simplified())
-        moves_simplified = self.filtered(lambda m: m._l10n_it_edi_is_simplified())
+        moves_by_type = self.grouped({
+            'simplified': lambda m: m._l10n_it_edi_is_simplified(),
+        }, default='full')
         moves_simplified_errors = {
             k: v
-            for k, v in moves_simplified._l10n_it_edi_is_simplified_checks().items()
+            for k, v in moves_by_type['simplified']._l10n_it_edi_is_simplified_checks().items()
             if v.get('level') in ('error', 'warning')
         }
 
-        full = moves_full.mapped("commercial_partner_id").filtered(lambda p: p not in companies_partners)
-        simplified = moves_simplified.mapped("commercial_partner_id").filtered(lambda p: p not in companies_partners | full)
+        full = moves_by_type['full'].mapped("commercial_partner_id").filtered(lambda p: p not in companies_partners)
+        simplified = moves_by_type['simplified'].mapped("commercial_partner_id").filtered(lambda p: p not in companies_partners | full)
         representatives = companies.mapped("l10n_it_tax_representative_partner_id").filtered(lambda p: p not in companies_partners | simplified | full)
 
         return {
