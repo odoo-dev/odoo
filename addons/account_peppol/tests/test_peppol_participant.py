@@ -388,3 +388,18 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_no_recompute_peppol_eas_endpoint(self):
+        partner = self.env.company
+        wizard = self.env['peppol.registration'].with_context(allowed_company_ids=partner.ids).create({})
+        with self._mock_requests([
+            self._mock_can_connect(),
+            self._mock_connect(peppol_state='receiver'),
+        ]):
+            wizard.button_register_peppol_participant()
+
+        saved_peppol_eas = partner.peppol_eas
+        saved_peppol_endpoint = partner.peppol_endpoint
+        partner.company_registry = '0123.456.987'
+        self.assertEqual(saved_peppol_eas, partner.peppol_eas)
+        self.assertEqual(saved_peppol_endpoint, partner.peppol_endpoint)
