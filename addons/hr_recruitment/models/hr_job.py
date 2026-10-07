@@ -175,14 +175,11 @@ class HrJob(models.Model):
         if not employee:
             return
 
-        unfavorited_jobs = favorited_jobs = self.env['hr.job']
-        for job in self:
-            if employee in job.favorite_recruiter_ids:
-                unfavorited_jobs |= job
-            else:
-                favorited_jobs |= job
-        favorited_jobs.write({'favorite_recruiter_ids': [Command.link(employee.id)]})
-        unfavorited_jobs.write({'favorite_recruiter_ids': [Command.unlink(employee.id)]})
+        jobs_by_favorite = self.grouped({
+            'unfavorite': lambda job: employee in job.favorite_recruiter_ids,
+        }, default='favorite')
+        jobs_by_favorite['favorite'].write({'favorite_recruiter_ids': [Command.link(employee.id)]})
+        jobs_by_favorite['unfavorite'].write({'favorite_recruiter_ids': [Command.unlink(employee.id)]})
 
     def _compute_sql_is_favorite(self, table):
         employee = self.env.user.employee_id

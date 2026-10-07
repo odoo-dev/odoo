@@ -1930,17 +1930,14 @@ class HrLeave(models.Model):
 
     def action_approve(self, check_state=True):
         current_employee = self.env.user.employee_id
-        leave_to_approve = self.env['hr.leave']
-        leave_to_validate = self.env['hr.leave']
-        for leave in self:
-            if check_state and leave.can_validate or not check_state and leave.validation_type != "both":
-                leave_to_validate += leave
-            elif check_state and leave.can_approve or not check_state and leave.validation_type == 'both':
-                leave_to_approve += leave
-            else:
-                raise UserError(self.env._('You cannot approve this leave.'))
-        leave_to_approve.write({'state': 'validate1', 'first_approver_id': current_employee.id})
-        leave_to_validate._action_validate(check_state)
+        leaves_by_action = self.grouped({
+            'validate': lambda leave: (check_state and leave.can_validate) or (not check_state and leave.validation_type != "both"),
+            'approve': lambda leave: (check_state and leave.can_approve) or (not check_state and leave.validation_type == 'both'),
+        }, default='invalid')
+        if leaves_by_action['invalid']:
+            raise UserError(self.env._('You cannot approve this leave.'))
+        leaves_by_action['approve'].write({'state': 'validate1', 'first_approver_id': current_employee.id})
+        leaves_by_action['validate']._action_validate(check_state)
         if not self.env.context.get('leave_fast_create'):
             self.activity_update()
         return True
@@ -2077,17 +2074,12 @@ class HrLeave(models.Model):
         # skip_time_rules: resource.calendar.leaves doesn't exist yet so recompute after _validate_leave_request
         self.with_context(skip_time_rules=True).write({'state': 'validate'})
 
-        leaves_second_approver = self.env['hr.leave']
-        leaves_first_approver = self.env['hr.leave']
+        leaves_by_approver = self.grouped({
+            'second': lambda leave: leave.validation_type == 'both',
+        }, default='first')
 
-        for leave in self:
-            if leave.validation_type == 'both':
-                leaves_second_approver += leave
-            else:
-                leaves_first_approver += leave
-
-        leaves_second_approver.write({'second_approver_id': current_employee.id})
-        leaves_first_approver.write({'first_approver_id': current_employee.id})
+        leaves_by_approver['second'].write({'second_approver_id': current_employee.id})
+        leaves_by_approver['first'].write({'first_approver_id': current_employee.id})
 
         self._validate_leave_request()
         if not self.env.context.get('leave_fast_create'):

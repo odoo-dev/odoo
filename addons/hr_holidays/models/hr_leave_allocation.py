@@ -989,18 +989,15 @@ class HrLeaveAllocation(models.Model):
 
     def action_approve(self):
         current_employee = self.env.user.employee_id
-        allocation_to_approve = self.env['hr.leave.allocation']
-        allocation_to_validate = self.env['hr.leave.allocation']
-        for allocation in self:
-            if allocation.can_validate:
-                allocation_to_validate += allocation
-            elif allocation.can_approve:
-                allocation_to_approve += allocation
-            else:
-                raise UserError(_('Allocation must be "To Approve" in order to approve it.'))
+        allocations_by_action = self.grouped({
+            'validate': 'can_validate',
+            'approve': 'can_approve',
+        }, default='invalid')
+        if allocations_by_action['invalid']:
+            raise UserError(_('Allocation must be "To Approve" in order to approve it.'))
 
-        allocation_to_approve.write({'state': 'validate1', 'approver_id': current_employee.id})
-        allocation_to_validate._action_validate()
+        allocations_by_action['approve'].write({'state': 'validate1', 'approver_id': current_employee.id})
+        allocations_by_action['validate']._action_validate()
         self.activity_update()
         return True
 

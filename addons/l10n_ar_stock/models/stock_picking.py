@@ -44,20 +44,17 @@ class StockPicking(models.Model):
         """
         Create the delivery guide number and store CAI data for the selected stock pickings.
         """
-        already_generated = not_done = no_doc_type = self.env['stock.picking']
-        for picking in self:
-            if picking.l10n_ar_delivery_guide_number:
-                already_generated += picking
-            elif picking.state != 'done':
-                not_done += picking
-            elif not picking.picking_type_id.l10n_ar_document_type_id:
-                no_doc_type += picking
+        pickings_by_error = self.grouped({
+            'already_generated': 'l10n_ar_delivery_guide_number',
+            'not_done': lambda picking: picking.state != 'done',
+            'no_doc_type': lambda picking: not picking.picking_type_id.l10n_ar_document_type_id,
+        }, default='valid')
         errors = []
-        if already_generated:
+        if already_generated := pickings_by_error['already_generated']:
             errors.append(self.env._("- %(names)s already have a delivery guide.", names=already_generated.mapped('name')))
-        if not_done:
+        if not_done := pickings_by_error['not_done']:
             errors.append(self.env._("- %(names)s must be validated before generating a delivery guide.", names=not_done.mapped('name')))
-        if no_doc_type:
+        if no_doc_type := pickings_by_error['no_doc_type']:
             errors.append(self.env._("- The operation types on the deliveries are not configured for delivery guides: %(names)s.", names=no_doc_type.mapped('name')))
         if errors:
             raise UserError(self.env._("Cannot generate delivery guides for the following transfers:\n%(transfers)s", transfers="\n".join(errors)))
@@ -106,32 +103,26 @@ class StockPicking(models.Model):
 
     def _l10n_ar_validate_send_delivery_guide(self, do_async=False):
         """ Validate that all pickings in self are eligible for sending delivery guides. """
-        no_doc_type = no_number = no_email = already_queued = self.env['stock.picking']
-        for picking in self:
-            if not picking.picking_type_id.l10n_ar_document_type_id:
-                no_doc_type += picking
-            elif not picking.l10n_ar_delivery_guide_number:
-                no_number += picking
-            elif not picking.partner_id.email:
-                no_email += picking
-            elif picking.l10n_ar_delivery_guide_cron_user_id:
-                already_queued += picking
+        pickings_by_error = self.grouped({
+            'no_doc_type': lambda picking: not picking.picking_type_id.l10n_ar_document_type_id,
+            'no_number': lambda picking: not picking.l10n_ar_delivery_guide_number,
+            'no_email': lambda picking: not picking.partner_id.email,
+            'already_queued': 'l10n_ar_delivery_guide_cron_user_id',
+        }, default='valid')
         if do_async:
+            del pickings_by_error['valid']
             # We don't care about already_queued as this is call during the queued cron.
-            return {
-                'no_doc_type': no_doc_type,
-                'no_number': no_number,
-                'no_email': no_email,
-                'all_errors': no_doc_type + no_number + no_email,
-            }
+            del pickings_by_error['already_queued']
+            pickings_by_error['all_errors'] = self.browse().concat(pickings_by_error.values())
+            return pickings_by_error
         errors = []
-        if no_doc_type:
+        if no_doc_type := pickings_by_error['no_doc_type']:
             errors.append(self.env._("- The operation types on the deliveries are not configured for delivery guides: %(names)s.", names=no_doc_type.mapped('name')))
-        if no_number:
+        if no_number := pickings_by_error['no_number']:
             errors.append(self.env._("- No delivery guide has been generated yet for the following deliveries: %(names)s.", names=no_number.mapped('name')))
-        if no_email:
+        if no_email := pickings_by_error['no_email']:
             errors.append(self.env._("- The contacts on the following deliveries have no email address: %(names)s.", names=no_email.mapped('name')))
-        if already_queued:
+        if already_queued := pickings_by_error['already_queued']:
             errors.append(self.env._("- The following deliveries are already queued for sending: %(names)s.", names=already_queued.mapped('name')))
         if errors:
             raise UserError(self.env._("Cannot send delivery guides for the following transfers:\n%(transfers)s", transfers="\n".join(errors)))

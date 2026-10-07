@@ -1022,16 +1022,13 @@ class ProjectProject(models.Model):
         return action
 
     def toggle_favorite(self):
-        favorite_projects = not_fav_projects = self.env['project.project'].sudo()
-        for project in self:
-            if self.env.user in project.favorite_user_ids:
-                favorite_projects |= project
-            else:
-                not_fav_projects |= project
+        projects_by_favorite = self.sudo().grouped({
+            'favorite': lambda project: self.env.user in project.favorite_user_ids,
+        }, default='not_favorite')
 
         # Project User has no write access for project.
-        not_fav_projects.write({'favorite_user_ids': [(4, self.env.uid)]})
-        favorite_projects.write({'favorite_user_ids': [(3, self.env.uid)]})
+        projects_by_favorite['not_favorite'].write({'favorite_user_ids': [(4, self.env.uid)]})
+        projects_by_favorite['favorite'].write({'favorite_user_ids': [(3, self.env.uid)]})
 
     def action_view_tasks(self):
         action = self.env['ir.actions.act_window'].with_context(active_id=self.id)._for_xml_id('project.act_project_project_2_project_task_all')

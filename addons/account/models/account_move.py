@@ -5951,20 +5951,14 @@ class AccountMove(models.Model):
     def _unlink_or_reverse(self, default_values_list=None):
         if not self:
             return
-        to_unlink = self.env['account.move']
-        to_cancel = self.env['account.move']
-        to_reverse = self.env['account.move']
-        for move in self:
-            if not move._can_be_unlinked():
-                to_reverse += move
-            elif move._is_protected_by_audit_trail():
-                to_cancel += move
-            else:
-                to_unlink += move
-        to_unlink.filtered(lambda m: m.state in ('posted', 'cancel')).button_draft()
-        to_unlink.filtered(lambda m: m.state == 'draft').unlink()
-        to_cancel.filtered(lambda m: m.state != 'cancel').button_cancel()
-        return to_reverse._reverse_moves(default_values_list=default_values_list, cancel=True)
+        action2moves = self.grouped({
+            'reverse': lambda move: not move._can_be_unlinked(),
+            'cancel': lambda move: move._is_protected_by_audit_trail(),
+        }, default='unlink')
+        action2moves['unlink'].filtered(lambda m: m.state in ('posted', 'cancel')).button_draft()
+        action2moves['unlink'].filtered(lambda m: m.state == 'draft').unlink()
+        action2moves['cancel'].filtered(lambda m: m.state != 'cancel').button_cancel()
+        return action2moves['reverse']._reverse_moves(default_values_list=default_values_list, cancel=True)
 
     def _get_lines_with_wrong_partner(self):
         self.ensure_one()

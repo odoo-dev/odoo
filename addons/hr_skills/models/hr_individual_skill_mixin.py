@@ -268,13 +268,11 @@ class HrIndividualSkillMixin(models.AbstractModel):
         @return {List[COMMANDS]} List of WRITE, UNLINK commands
         """
         yesterday = fields.Date.context_today(self) - relativedelta(days=1)
-        to_remove = self.env[self._name]
-        to_archive = self.env[self._name]
-        for individual_skill in self:
-            if individual_skill.valid_from >= yesterday or (individual_skill.valid_to and individual_skill.valid_to <= yesterday):
-                to_remove += individual_skill
-            else:
-                to_archive += individual_skill
+        skills_by_action = self.grouped({
+            'remove': lambda individual_skill: individual_skill.valid_from >= yesterday or (individual_skill.valid_to and individual_skill.valid_to <= yesterday),
+        }, default='archive')
+        to_remove = skills_by_action['remove']
+        to_archive = skills_by_action['archive']
         if to_archive:
             overlapping_dict = self._get_overlapping_individual_skill([{
                     f"{self._linked_field_name()}": skill[self._linked_field_name()].id,

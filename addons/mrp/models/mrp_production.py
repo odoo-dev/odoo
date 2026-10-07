@@ -2062,18 +2062,15 @@ class MrpProduction(models.Model):
         return True
 
     def _post_inventory(self, cancel_backorder=False):
-        moves_to_do, moves_not_to_do, moves_to_cancel = OrderedSet(), OrderedSet(), OrderedSet()
-        for move in self.move_raw_ids:
-            if move.state == 'done':
-                moves_not_to_do.add(move.id)
-            elif not move.picked:
-                moves_to_cancel.add(move.id)
-            elif move.state != 'cancel':
-                moves_to_do.add(move.id)
+        moves_by_action = self.move_raw_ids.grouped({
+            'not_to_do': lambda move: move.state == 'done',
+            'cancel': lambda move: not move.picked,
+            'do': lambda move: move.state != 'cancel',
+        }, default='other')
 
-        self.with_context(skip_mo_check=True).env['stock.move'].browse(moves_to_do)._action_done(cancel_backorder=cancel_backorder)
-        self.with_context(skip_mo_check=True).env['stock.move'].browse(moves_to_cancel)._action_cancel()
-        moves_to_do = self.move_raw_ids.filtered(lambda x: x.state == 'done') - self.env['stock.move'].browse(moves_not_to_do)
+        moves_by_action['do'].with_context(skip_mo_check=True)._action_done(cancel_backorder=cancel_backorder)
+        moves_by_action['cancel'].with_context(skip_mo_check=True)._action_cancel()
+        moves_to_do = self.move_raw_ids.filtered(lambda x: x.state == 'done') - moves_by_action['not_to_do']
         # Create a dict to avoid calling filtered inside for loops.
         moves_to_do_by_order = defaultdict(lambda: self.env['stock.move'], [
             (key, self.env['stock.move'].concat(values))
