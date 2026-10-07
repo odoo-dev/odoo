@@ -69,13 +69,15 @@ class AccountDebitNote(models.TransientModel):
             default_values['line_ids'] = [(5, 0, 0)]
         return default_values
 
+    def _create_debit_move(self, move, default_values):
+        return move.copy(default=default_values)
+
     def create_debit(self):
         self.ensure_one()
         new_moves = self.env['account.move']
         for move in self.move_ids.with_context(include_business_fields=True): #copy sale/purchase links
             default_values = self._prepare_default_values(move)
-            new_move = move.copy(default=default_values)
-            new_moves |= new_move
+            new_moves |= self._create_debit_move(move, default_values)
 
         action = {
             'name': _('Debit Notes'),
