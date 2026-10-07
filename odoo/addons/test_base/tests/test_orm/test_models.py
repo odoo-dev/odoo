@@ -4,6 +4,7 @@ from pprint import pformat
 
 from odoo import Command, models
 from odoo.exceptions import AccessError, LockError
+from odoo.fields import Domain
 from odoo.tests.common import TransactionCase, tagged
 from odoo.tools import SQL, lazy, mute_logger, unique
 from odoo.tools.version_tag_reset import assign_version_tag
@@ -807,6 +808,42 @@ class TestRecordset(TestOrmPartnerCommon, TransactionCase):
 
         with self.assertQueries([]):
             _ = partners_grouped['@host.com'].name
+
+        # first match partition, all keys defined
+        partners_grouped = partners.grouped({
+            'guest': lambda p: p.email == '@guest.com',
+            'host': Domain('email', '=', '@host.com'),
+            'with_email': 'email',
+            'nobody': lambda p: False,
+        }, default='other')
+        self.assertEqual(list(partners_grouped), ['guest', 'host', 'with_email', 'nobody', 'other'])
+        self.assertEqual(partners_grouped['guest'], partners[0] + partners[2])
+        self.assertEqual(partners_grouped['host'], partners[1])
+        self.assertFalse(partners_grouped['with_email'])
+        self.assertFalse(partners_grouped['nobody'])
+        self.assertEqual(partners_grouped['other'], partners[3:])
+
+        # the default group is defined even when empty, and can be one of the keys
+        self.assertEqual(partners.grouped({'all': 'id'}, default='other'), {'all': partners, 'other': partners.browse()})
+        partners_grouped = partners.grouped({'host': Domain('email', '=', '@host.com')}, default='host')
+        self.assertEqual(partners_grouped, {'host': partners})
+
+        # groups share the prefetch set of self
+        partners_grouped = partners.grouped({'host': Domain('email', '=', '@host.com')}, default='other')
+        partners.invalidate_recordset(['website'])
+        with self.assertQueryCount(1):
+            partners_grouped['host'].website
+            partners[0].website
+
+        # a falsy predicate matches every record, like filtered()
+        self.assertEqual(partners.grouped({'all': None}, default='other'), {'all': partners, 'other': partners.browse()})
+
+        with self.assertRaisesRegex(TypeError, "Invalid function 42"):
+            partners.grouped({'invalid': 42}, default='other')
+        with self.assertRaisesRegex(TypeError, "requires a default group"):
+            partners.grouped({'host': 'email'})
+        with self.assertRaisesRegex(TypeError, "only accepts a default group"):
+            partners.grouped('email', default='other')
 
 
 @tagged('-at_install', 'post_install')

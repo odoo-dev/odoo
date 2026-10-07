@@ -50,7 +50,7 @@ from odoo.tools import (
 )
 from odoo.tools.constants import BIG_RECORDSET_SIZE
 from odoo.tools.lru import LRU
-from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
+from odoo.tools.misc import SENTINEL, ReversedIterable, exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES, safe_checker, safe_eval
 from odoo.tools.translate import _, LazyTranslate
 
@@ -5725,24 +5725,31 @@ class BaseModel(metaclass=MetaModel):
         if not func:
             # align with mapped()
             return self
-
-        if callable(func):
-            # normal function
-            pass
-        elif isinstance(func, str):
-            if '.' in func:
-                seq_fnames = func
-                func = lambda record: any(record.mapped(seq_fnames))  # noqa: E731
-            else:
-                # avoid costly mapped
-                func = self._fields[func].__get__
-        elif isinstance(func, Domain):
+        if isinstance(func, Domain):
             return self.filtered_domain(func)
-        else:
-            raise TypeError(f"Invalid function {func!r} to filter on {self._name}")
 
+        func = self._get_predicate(func)
         ids = tuple(id_ for id_, rec in zip(self._ids, self) if func(rec))
         return self.__class__(self.env, ids, self._prefetch_ids)
+
+    def _get_predicate(self, func: str | Callable[[Self], bool] | Domain | None) -> Callable[[Self], bool]:
+        """Return a function on a single record from anything accepted by
+        :meth:`filtered`.
+        """
+        if not func:
+            # align with filtered()
+            return lambda record: True
+        if isinstance(func, Domain):
+            return func._as_predicate(self)
+        if callable(func):
+            # normal function
+            return func
+        if isinstance(func, str):
+            if '.' in func:
+                return lambda record: any(record.mapped(func))
+            # avoid costly mapped
+            return self._fields[func].__get__
+        raise TypeError(f"Invalid function {func!r} to filter on {self._name}")
 
     @typing.overload
     def grouped(self, key: str) -> dict[typing.Any, Self]:
@@ -5752,8 +5759,12 @@ class BaseModel(metaclass=MetaModel):
     def grouped[T](self, key: Callable[[Self], T]) -> dict[T, Self]:
         ...
 
+    @typing.overload
+    def grouped[K](self, key: Mapping[K, str | Callable[[Self], bool] | Domain | None], *, default: K) -> dict[K, Self]:
+        ...
+
     @api.private
-    def grouped[T](self, key: str | Callable[[Self], T]) -> dict[typing.Any, Self]:
+    def grouped[T](self, key: str | Callable[[Self], T] | Mapping, *, default: typing.Any = SENTINEL) -> dict[typing.Any, Self]:
         """Eagerly groups the records of ``self`` by the ``key``, returning a
         dict from the ``key``'s result to recordsets. All the resulting
         recordsets are guaranteed to be part of the same prefetch-set.
@@ -5764,16 +5775,49 @@ class BaseModel(metaclass=MetaModel):
         .. note:: unlike :func:`itertools.groupby`, does not care about input
                   ordering, however the tradeoff is that it can not be lazy
 
-        :param key: either a callable from a :class:`Model` to a (hashable)
-                    value, or a field name. In the latter case, it is equivalent
-                    to ``itemgetter(key)`` (aka the named field's value)
-        """
-        if isinstance(key, str):
-            key = itemgetter(key)
+        :param key: one of
 
-        collator = defaultdict(list)
-        for record in self:
-            collator[key(record)].extend(record._ids)
+            * a callable from a :class:`Model` to a (hashable) value, used as
+              the group key;
+            * a field name, equivalent to ``itemgetter(key)`` (aka the named
+              field's value);
+            * a mapping from group keys to predicates (anything accepted by
+              :meth:`filtered`). Each record is assigned to the first group
+              whose predicate it satisfies, or to the group ``default`` if it
+              satisfies none of them. The result contains every key of the
+              mapping and ``default``, even when their group is empty.
+        :param default: the group key of the records satisfying no predicate;
+            required if and only if ``key`` is a mapping
+
+        .. code-block:: python3
+
+            groups = moves.grouped({
+                'invoices': lambda m: m.is_invoice(),
+                'posted': Domain('state', '=', 'posted'),  # posted non-invoices
+            }, default='other')
+            groups['invoices']  # always defined, possibly empty
+        """
+        if isinstance(key, Mapping):
+            if default is SENTINEL:
+                raise TypeError("grouped() requires a default group when key is a mapping")
+            predicates = [(group, self._get_predicate(func)) for group, func in key.items()]
+            collator = {group: [] for group in key}
+            collator.setdefault(default, [])
+            for record in self:
+                for group, predicate in predicates:
+                    if predicate(record):
+                        collator[group].extend(record._ids)
+                        break
+                else:
+                    collator[default].extend(record._ids)
+        else:
+            if default is not SENTINEL:
+                raise TypeError("grouped() only accepts a default group when key is a mapping")
+            if isinstance(key, str):
+                key = itemgetter(key)
+            collator = defaultdict(list)
+            for record in self:
+                collator[key(record)].extend(record._ids)
 
         browse = functools.partial(type(self), self.env, prefetch_ids=self._prefetch_ids)
         return {key: browse(tuple(ids)) for key, ids in collator.items()}
