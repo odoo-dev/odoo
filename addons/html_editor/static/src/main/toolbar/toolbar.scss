@@ -53,9 +53,11 @@
             --btn-padding-x: var(--o-bs-spacer-1, .25rem);
         }
 
-        /* Square icon buttons, glyph or SVG (block options are the icon). */
+        /* Square icon buttons, glyph or SVG (block options are the icon); the
+           height holds in a bar of icons only, where no text button sets it. */
         &:has(> .oi-fw:only-child, > svg:only-child), &.oi {
             min-width: var(--o-we-toolbar-btn-size);
+            min-height: var(--o-we-toolbar-btn-size);
         }
 
         &.disabled {
