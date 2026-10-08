@@ -69,13 +69,18 @@ class IrModuleModule(models.Model):
             TEMPLATE_REGISTER[self.name] = frozendict(sorted(templates.items(), key=lambda kv: kv[1]['sequence']))
         return TEMPLATE_REGISTER[self.name]
 
+    def _has_chart_template_functions(self):
+        """Whether the module extends the chart template, the only way to declare template functions."""
+        prefix = f'odoo.addons.{self.name}.'
+        return any(cls.__module__.startswith(prefix) for cls in self.env.registry['account.chart.template'].__mro__)
+
     def write(self, vals):
         # Instanciate the first template of the module on the current company upon installing the module
         was_installed = len(self) == 1 and self.state in ('installed', 'to upgrade', 'to remove')
         res = super().write(vals)
         is_installed = len(self) == 1 and self.state == 'installed'
         if not was_installed and is_installed:
-            if self.name != 'account':
+            if self.name != 'account' and self._has_chart_template_functions():
                 for demo in [False, True] if self.demo else [False]:
                     for company in self.env['res.company'].search([('chart_template', '!=', False)], order="parent_path"):
                         ChartTemplate = self.env['account.chart.template'].with_company(company)
