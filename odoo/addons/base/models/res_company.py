@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import re
+import traceback
 
 from psycopg2.extras import Json
 from zeep.cache import Base as ZeepCache
@@ -344,6 +346,21 @@ class ResCompany(models.CachedModel):
         for record in self:
             record.is_company_details_empty = not html2plaintext(record.company_details or '')
 
+    def _probe_log_company_create(self, companies):
+        frames = traceback.extract_stack()[:-2]
+        helpers = ('_create_company', 'setup_other_company', 'setup_independent_company')
+        test_frames = [
+            f for f in frames
+            if '/tests/' in f.filename and '/odoo/tests/' not in f.filename and f.name not in helpers
+        ]
+        origin = test_frames[-1] if test_frames else (frames[-1] if frames else None)
+        _logger.info(
+            "company_probe: test=%s class_setup=%s n=%d user=%s fallback=%s origin=%s:%s",
+            modules.module.current_test.canonical_tag, any(f.name == 'setUpClass' for f in frames), len(companies), self.env.user.login,
+            any(f.name == '_create_company' and f.filename.endswith('base/tests/common.py') for f in frames),
+            origin and re.sub(r'^.*/(addons|enterprise)/', '', origin.filename), origin and origin.lineno,
+        )
+
     @api.model_create_multi
     def create(self, vals_list):
 
@@ -378,6 +395,8 @@ class ResCompany(models.CachedModel):
                     vals.setdefault(fname, self._fields[fname].convert_to_write(parent[fname], parent))
 
         companies = super().create(vals_list)
+        if modules.module.current_test:
+            self._probe_log_company_create(companies)
 
         # The write is made on the user to set it automatically in the multi company group.
         if companies:
