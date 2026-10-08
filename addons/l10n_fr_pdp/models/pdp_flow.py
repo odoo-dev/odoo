@@ -244,12 +244,22 @@ class PdpFlow(models.Model):
             })
 
             # Log build completion
+<<<<<<< bcb203f31427dbe67606e1a4995933862d079173
             error_moves_len = len(valid_moves) < len(moves)
             if error_moves_len:
                 flow._message_post_once(self.env._(
+||||||| 436b018af5651fec531080d0d52a977072781118
+            error_moves_len = len(valid_moves) < len(moves)
+            if error_moves_len:
+                flow._message_post_once(_(
+=======
+            invalid_count = len(moves) - len(valid_moves)
+            if invalid_count:
+                flow._message_post_once(_(
+>>>>>>> 528f9457ea38efe43f17723d308a038d54ed7766
                     "Payload built with %(valid)s valid invoice(s) and %(invalid)s error(s).",
                     valid=len(valid_moves),
-                    invalid=error_moves_len,
+                    invalid=invalid_count,
                 ))
             else:
                 flow._message_post_once(self.env._(
