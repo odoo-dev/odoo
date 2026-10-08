@@ -1,0 +1,6 @@
+/* The secret is collapsed behind "Cannot scan it?" on desktop only. */
+@media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
+    #collapseTotpSecret {
+        display: block;
+    }
+}
