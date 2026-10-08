@@ -1,5 +1,8 @@
 .o_report_layout_bubble {
     #informations {
+        &:not(:has(*)) {
+            display: none !important;
+        }
         margin: 0;
         border: $border-width * 2 solid;
         border-radius: $border-radius-lg;
