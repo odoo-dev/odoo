@@ -388,6 +388,11 @@ class LinkTrackerClick(models.Model):
         click_values = dict((fname, route_values[fname]) for fname in self._fields if fname in route_values)
         if not click_values.get('country_id') and route_values.get('country_code'):
             click_values['country_id'] = self.env['res.country'].search([('code', '=', route_values['country_code'])], limit=1).id
+        disable_link_tracking = self.env['ir.config_parameter'].sudo().get_str('mail.disable_link_tracking', "False")
+        if disable_link_tracking.upper() in ['TRUE', '1', 'YES'] or self.env['res.country'].sudo().browse(click_values['country_id']).code == disable_link_tracking:
+            # remove trackable infos from the click without
+            del click_values['ip']
+            del click_values['country_id']
         return click_values
 
     @api.model

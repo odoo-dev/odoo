@@ -33,6 +33,15 @@ class MailMail(models.Model):
             mail_servers = mail_servers.filtered(lambda s: not s.owner_user_id)
         return mail_servers
 
+    def _personalize_outgoing_body(self, body, partner=False, doc_to_followers=None):
+        body = super()._personalize_outgoing_body(body, partner, doc_to_followers)
+        if partner:
+            disable_link_tracking = self.env['ir.config_parameter'].get_str('mail.disable_link_tracking', 'False')
+            if disable_link_tracking in ['TRUE', 'YES', '1'] or disable_link_tracking == partner.country_code:
+                tracking_url = self._get_tracking_url()
+                body.replace(f'<img src="{tracking_url}"/>', '')
+        return body
+
     def _prepare_outgoing_body(self):
         """ Override to add the tracking URL to the body and to add trace ID in
         shortened urls """
