@@ -90,6 +90,16 @@ export class ChannelMember extends Record {
             },
             { immediate: true }
         );
+        this.onChange(
+            () => [this.isSelf ? this.channel_id : undefined],
+            (channelAsSelf) => (this.channelAsSelf = channelAsSelf),
+            { immediate: true }
+        );
+        this.onChange(
+            () => [this.isTyping ? this.channel_id : undefined],
+            (channelAsTyping) => (this.channelAsTyping = channelAsTyping),
+            { immediate: true }
+        );
     }
 
     /** @type {string} */
@@ -124,14 +134,7 @@ export class ChannelMember extends Record {
      * @type {false|"owner"|"admin"}
      */
     channel_role;
-    channelAsSelf = fields.One("discuss.channel", {
-        /** @this {import("models").ChannelMember} */
-        compute() {
-            if (this.isSelf) {
-                return this.channel_id;
-            }
-        },
-    });
+    channelAsSelf = fields.One("discuss.channel");
     seen_message_id = fields.One("mail.message");
     hideUnreadBanner = false;
     message_unread_counter = 0;
@@ -155,12 +158,7 @@ export class ChannelMember extends Record {
             this.typingTimeoutDuration
         );
     }
-    channelAsTyping = fields.One("discuss.channel", {
-        compute() {
-            return this.isTyping ? this.channel_id : undefined;
-        },
-        eager: true,
-    });
+    channelAsTyping = fields.One("discuss.channel");
     /** @type {number} */
     typingTimeoutId;
     unpin_dt = fields.Datetime();

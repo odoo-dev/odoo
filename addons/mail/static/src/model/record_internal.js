@@ -205,13 +205,14 @@ export class RecordInternal {
         const record = this.record;
         // the last computed value, answered while a write is being applied
         let heldValue;
+        let hasValue = false;
         const { isUpdateInProgress } = record._rawStore._;
         const { isDeleted } = this;
         function computeValue() {
             if (isDeleted()) {
                 return heldValue;
             }
-            if (untrack(isUpdateInProgress)) {
+            if (hasValue && untrack(isUpdateInProgress)) {
                 // Hold while a write is being applied: the relations this
                 // reads are written one by one. An immediate onChange runs
                 // between writes, at depth 0, so it reads fresh values.
@@ -220,6 +221,7 @@ export class RecordInternal {
                 return heldValue;
             }
             heldValue = compute.call(record._proxy);
+            hasValue = true;
             return heldValue;
         }
         return this.ensureScope().run(() =>
