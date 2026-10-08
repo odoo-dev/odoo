@@ -767,7 +767,7 @@ describe("Mount processing", () => {
         patchWithCleanup(App.prototype, {
             createRoot(Root, config) {
                 const root = super.createRoot(...arguments);
-                if (Root.name !== "LabeledCounter") {
+                if (Root.name !== "EmbeddedComponentRoot" || config.props.component.name !== "LabeledCounter") {
                     return root;
                 }
                 const mount = root.mount;

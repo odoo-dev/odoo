@@ -1,4 +1,5 @@
 import {
+    Component,
     effect,
     onMounted,
     onPatched,
@@ -9,8 +10,21 @@ import {
     t,
     toRaw,
     useProps,
+    xml,
 } from "@odoo/owl";
-import { useEnv } from "@web/owl2/utils";
+import { useEnv, useSubEnv } from "@web/owl2/utils";
+
+class EmbeddedComponentRoot extends Component {
+    static template = xml`<t t-component="this.component" t-props="this.props"/>`;
+
+    component = useProps.static("component");
+    props = useProps.static("props");
+
+    setup() {
+        const env = useProps.static("env");
+        useSubEnv(env);
+    }
+}
 
 /**
  * @typedef {HTMLElement} HostElement host element for an embedded component
@@ -51,8 +65,8 @@ import { useEnv } from "@web/owl2/utils";
  * synchronously clear the host's children just before the component's rendered
  * HTML is inserted (i.e., just before the original `fiber.complete` runs).
  *
- * @param {import("@odoo/owl").App} app
- * @param {typeof import("@odoo/owl").Component} Component
+ * @param {import("@odoo/owl").Scope} scope
+ * @param {typeof import("@odoo/owl").Component} component
  * @param {HTMLElement} host
  * @param {Object} props
  * @param {Object} env
@@ -66,14 +80,17 @@ import { useEnv } from "@web/owl2/utils";
  * @returns {{ root: object, mountPromise: Promise }}
  */
 export function mountComponent(
-    app,
-    Component,
+    scope,
+    component,
     host,
     props,
     env,
     { onBeforeComplete, onAfterComplete } = {}
 ) {
-    const root = app.createRoot(Component, { props, env });
+    const root = scope.app.createRoot(EmbeddedComponentRoot, {
+        pluginManager: scope.pluginManager,
+        props: { component, props, env },
+    });
     const mountPromise = root.prepare().then(() => {
         if (root.destroyed || onBeforeComplete?.() === false) {
             return;

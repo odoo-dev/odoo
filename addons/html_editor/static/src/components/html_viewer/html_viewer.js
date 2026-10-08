@@ -13,7 +13,6 @@ import {
     proxy,
     signal,
     t,
-    useApp,
     useEffect,
     useProps,
     useScope,
@@ -25,7 +24,6 @@ import { memoize } from "@web/core/utils/functions";
 export class HtmlViewer extends Component {
     static template = "html_editor.HtmlViewer";
 
-    app = useApp();
     iframeRef = signal.ref();
     readonlyElementRef = signal.ref();
     props = useProps({
@@ -294,7 +292,7 @@ export class HtmlViewer extends Component {
         // embedded component descendant sometimes uses X from env which is set conditionally:
         // -> it will override the one one from the parent => OK.
         // -> it will not => the embedded component still has X in env because of its ancestors => Issue.
-        const env = Object.create(this.env);
+        const env = {};
         if (getEditableDescendants) {
             env.getEditableDescendants = getEditableDescendants;
         }
@@ -303,7 +301,7 @@ export class HtmlViewer extends Component {
             env,
             props,
         });
-        const { root, mountPromise } = mountComponent(this.app, Component, host, props, env, {
+        const { root, mountPromise } = mountComponent(this.scope, Component, host, props, env, {
             onBeforeComplete: () => {
                 if (this.scope.isDestroyed()) {
                     return false;

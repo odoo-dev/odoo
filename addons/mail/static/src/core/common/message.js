@@ -22,7 +22,6 @@ import {
     signal,
     t,
     untrack,
-    useApp,
     useProps,
     useScope,
 } from "@odoo/owl";
@@ -87,8 +86,6 @@ export class Message extends Component {
         Priority,
     };
     static template = "mail.Message";
-
-    app = useApp();
 
     scope = useScope();
 
@@ -583,11 +580,11 @@ export class Message extends Component {
             // so value becomes empty and highlighting loses the original code text.
             const props = getProps(el);
             const { root, mountPromise } = mountComponent(
-                this.app,
+                this.scope,
                 Component,
                 el,
                 props,
-                this.env,
+                {},
                 {
                     onBeforeComplete: () => {
                         if (this.scope.isDestroyed()) {
