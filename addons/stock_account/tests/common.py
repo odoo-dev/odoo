@@ -351,10 +351,7 @@ class TestStockValuationCommon(BaseCommon):
 
         # To move to stock common later
         cls.route_mto = cls.env.ref('stock.route_warehouse0_mto')
-        cls.company = cls.env['res.company'].create({'name': 'Inventory Test Company'})
-        cls.env["account.chart.template"]._load(
-            "generic_coa", cls.company, install_demo=False
-        )
+        cls.company = cls.add_class_company('base.test_company', {'name': 'Inventory Test Company'})
         cls.company = cls.company.with_company(cls.company.id)
         cls.env = cls.env(context=dict(cls.env.context, allowed_company_ids=[cls.company.id]))
         # We use the admin on tour.
@@ -394,7 +391,7 @@ class TestStockValuationCommon(BaseCommon):
             'name': 'Test Vendor',
             'company_id': cls.company.id,
         })
-        cls.other_company = cls._create_company(name="Other Company")
+        cls.other_company = cls.add_class_company('base.test_company_with_branch', {'name': "Other Company"})
         cls.branch = cls._create_company(name="Branch Company", parent_id=cls.company.id)
         # Several tests operate cross-company (other_company / branch); grant the
         # restricted test_user access to those companies too, otherwise the ORM
