@@ -10,7 +10,7 @@ export class NotificationContainer extends Component {
 
     static template = xml`
         <div class="o_notification_manager">
-            <t t-foreach="this.notificationPlugin.notifications.items()" t-as="notification" t-key="notification.id">
+            <t t-foreach="this.notificationPlugin.notifications()" t-as="notification" t-key="notification.id">
                 <Transition leaveDuration="0" immediate="true" name="'o_notification_fade'" t-slot-scope="transition">
                     <Notification t-props="notification_value.props" className="(notification_value.props.className || '') + ' ' + transition.className"/>
                 </Transition>
@@ -21,11 +21,13 @@ export class NotificationContainer extends Component {
 
 export class NotificationManagerPlugin extends Plugin {
     setup() {
-        registry.category("main_components").add(
-            NotificationContainer.name,
-            { Component: NotificationContainer },
-            { sequence: 100 }
-        );
+        registry
+            .category("main_components")
+            .add(
+                NotificationContainer.name,
+                { Component: NotificationContainer },
+                { sequence: 100 }
+            );
 
         onWillDestroy(() => {
             registry.category("main_components").remove(NotificationContainer.name);
