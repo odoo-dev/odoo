@@ -13,9 +13,6 @@
             padding: var(--field-spacing-unit) calc(1.5 * var(--field-spacing-unit));
             background-color: var(--o-view-background-color);
 
-            &:has(.o_field_widget.o_readonly_modifier):not(:has(.o_field_widget:not(.o_readonly_modifier))) {
-                background-color: var(--body-bg);
-            }
             &:has(.o_field_invalid):not(:has(:focus-within)) {
                 --o-field-box-border-color: #{o-text-color('danger')};
                 background-color: var(--o-input-invalid-bg);
