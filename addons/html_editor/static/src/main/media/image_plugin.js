@@ -64,7 +64,7 @@ export class ImagePlugin extends Plugin {
             {
                 id: "previewImage",
                 description: _t("Preview image"),
-                icon: "zoom_in",
+                icon: "visibility",
                 run: this.previewImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
@@ -130,7 +130,7 @@ export class ImagePlugin extends Plugin {
                     getDisplay: () => this.imageSize,
                     items: IMAGE_SIZE,
                     focusEditable: () => this.dependencies.selection.focusEditable(),
-                    icon: "resize",
+                    icon: "open_in_full",
                     onSelected: (item) => {
                         this.resizeImage({ size: item.value });
                         this.updateImageParams();
