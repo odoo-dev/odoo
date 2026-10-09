@@ -1,12 +1,16 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { after, describe, expect, test } from "@odoo/hoot";
 import {
     defineModels,
     getService,
     makeTestApp,
     models,
     onRpc,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 
+import { browser } from "@web/core/browser/browser";
+import { rpcBus } from "@web/core/network/rpc";
+import { session } from "@web/session";
 import { ViewPlugin } from "@web/views/view_plugin";
 
 describe.current.tags("headless");
@@ -102,4 +106,27 @@ test("clear cache when updating ir.ui.view", async () => {
     await getService("orm").unlink("take.five", [3]);
     await loadView();
     expect.verifySteps([]); // cache was not invalidated
+});
+
+test("clear cache when the views hash changed", async () => {
+    patchWithCleanup(session, { views_hash: "new hash" });
+    browser.localStorage.setItem("views_hash", "old hash");
+    const listener = (ev) => expect.step(`CLEAR-CACHES ${ev.detail}`);
+    rpcBus.addEventListener("CLEAR-CACHES", listener);
+    after(() => rpcBus.removeEventListener("CLEAR-CACHES", listener));
+
+    await makeTestApp();
+    expect.verifySteps(["CLEAR-CACHES get_views"]);
+    expect(browser.localStorage.getItem("views_hash")).toBe("new hash");
+});
+
+test("don't clear cache when the views hash is unchanged", async () => {
+    patchWithCleanup(session, { views_hash: "same hash" });
+    browser.localStorage.setItem("views_hash", "same hash");
+    const listener = (ev) => expect.step(`CLEAR-CACHES ${ev.detail}`);
+    rpcBus.addEventListener("CLEAR-CACHES", listener);
+    after(() => rpcBus.removeEventListener("CLEAR-CACHES", listener));
+
+    await makeTestApp();
+    expect.verifySteps([]);
 });

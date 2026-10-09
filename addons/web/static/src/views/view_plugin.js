@@ -1,3 +1,4 @@
+import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
@@ -5,6 +6,7 @@ import { ORM, UPDATE_METHODS } from "@web/core/orm_plugin";
 import { Plugin, useListener, usePlugin } from "@odoo/owl";
 import { UIPlugin } from "@web/core/ui/ui_plugin";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { session } from "@web/session";
 
 /**
  * @typedef {Object} IrFilter
@@ -53,6 +55,14 @@ export class ViewPlugin extends Plugin {
     debugMode = usePlugin(DebugModePlugin);
 
     setup() {
+        // views may have been modified by another user since the last visit
+        if (
+            session.views_hash &&
+            browser.localStorage.getItem("views_hash") !== session.views_hash
+        ) {
+            rpcBus.trigger("CLEAR-CACHES", "get_views");
+            browser.localStorage.setItem("views_hash", session.views_hash);
+        }
         useListener(rpcBus, "RPC:RESPONSE", (ev) => {
             const { model, method } = ev.detail.data.params;
             if (["ir.ui.view", "ir.filters"].includes(model) && !ev.detail.error) {

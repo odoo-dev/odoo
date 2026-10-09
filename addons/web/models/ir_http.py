@@ -118,6 +118,7 @@ class IrHttp(models.AbstractModel):
             "user_context": user_context,
             "db": self.env.cr.dbname,
             "registry_hash": hmac(self.env(su=True), "webclient-cache", self.env.registry.registry_sequence),
+            "views_hash": hmac(self.env(su=True), "webclient-views-cache", self.env.registry.get_sequences(self.env.cr)[1]['templates']),
             "user_settings": self.env['res.users.settings']._find_or_create_for_user(user)._res_users_settings_format(),
             "server_version": release.version,
             "server_version_info": release.version_info,
