@@ -229,8 +229,6 @@ class ProductProduct(models.Model):
                 'quantity': quantity,
                 'old_cost': old_value,
                 'new_cost': value,
-                'old_value': (old_value or 0) * quantity,
-                'new_value': value * quantity,
                 'value': value,
                 'company_id': product.company_id.id or self.env.company.id,
                 'date': date,
