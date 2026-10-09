@@ -298,8 +298,9 @@ msgstr "Date de début de l’annuaire"
 #: code:addons/l10n_fr_pdp/wizard/pdp_registration.py:0
 msgid ""
 "Another platform is already assigned to this identifier in the annuaire "
-"(Platform%(platform_name)s with ID %(platform_id)s). By registering, you "
-"confirm that you want to migrate to Odoo."
+"(Platform%(platform_name)s with ID %(platform_id)s). Registering as a "
+"receiver confirms that you want to migrate to Odoo. Sender-only registration "
+"leaves your current receiving platform unchanged."
 msgstr ""
 "Une autre platform est déjà assignée à cette identifiant dans l'annuaire "
 "(Platform%(platform_name)s avec ID%(platform_id)s). En vous enregistrant, "
@@ -429,6 +430,12 @@ msgstr ""
 #: code:addons/l10n_fr_pdp/wizard/pdp_registration.py:0
 msgid "Cannot register a user with a '%s' application"
 msgstr "Impossible d’inscrire un utilisateur avec une application '%s'"
+
+#. module: l10n_fr_pdp
+#. odoo-python
+#: code:addons/l10n_fr_pdp/wizard/pdp_registration.py:0
+msgid "Disconnect the existing French electronic invoicing connection before registering as sender-only."
+msgstr "Déconnectez la connexion de facturation électronique française existante avant de vous inscrire en tant qu’expéditeur uniquement."
 
 #. module: l10n_fr_pdp
 #. odoo-python
@@ -1982,6 +1989,16 @@ msgid ""
 msgstr ""
 "Envoyez des factures et recevez des factures fournisseurs automatiquement "
 "sur le réseau français de facturation électronique."
+
+#. module: l10n_fr_pdp
+#: model_terms:ir.ui.view,arch_db:l10n_fr_pdp.pdp_registration_form
+msgid "Register with Odoo to send invoices and credit notes only. Your current receiving platform will remain unchanged."
+msgstr "Inscrivez-vous auprès d’Odoo uniquement pour envoyer des factures et des avoirs. Votre plateforme de réception actuelle restera inchangée."
+
+#. module: l10n_fr_pdp
+#: model_terms:ir.ui.view,arch_db:l10n_fr_pdp.pdp_registration_form
+msgid "Register as sender only"
+msgstr "S’inscrire uniquement en tant qu’expéditeur"
 
 #. module: l10n_fr_pdp
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_res_company__l10n_fr_pdp_send_to_ppf

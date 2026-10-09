@@ -58,6 +58,7 @@ class PdpRegistration(models.TransientModel):
         string="Warnings",
         compute="_compute_warnings",
     )
+    pdp_sender_only_available = fields.Boolean(compute="_compute_warnings")
     siren_number = fields.Char(
         compute='_compute_siren_number',
         store=True,
@@ -123,6 +124,7 @@ class PdpRegistration(models.TransientModel):
     def _compute_warnings(self):
         for wizard in self:
             warnings = {}
+            wizard.pdp_sender_only_available = False
             # Check SIREN
             if not wizard.siren_number:
                 warnings['company_siren_warning'] = {
@@ -149,18 +151,24 @@ class PdpRegistration(models.TransientModel):
                                           "Please check if you entered the right identification number."),
                 }
             # Check whether the identifier is already associated with a platform on the annuaire
+            participant_info = (
+                wizard.company_id.partner_id._pdp_annuaire_lookup_participant(f"0225:{wizard.pdp_identifier}")
+                if wizard.pdp_identifier else None
+            )
             if (
-                wizard.pdp_identifier
-                and (participant_info := wizard.company_id.partner_id._pdp_annuaire_lookup_participant(f"0225:{wizard.pdp_identifier}")) is not None
+                participant_info
                 and participant_info.get('platform_id')
                 and not participant_info.get('receiver_on_odoo')
-               ):
+            ):
+                wizard.pdp_sender_only_available = (
+                    (participant_info.get('identifier') or '').lower() == (wizard.pdp_identifier or '').lower()
+                )
                 platform_name = f" '{name}'" if (name := participant_info.get("platform_name")) else ""
                 warnings["company_pdp_annuaire_warning"] = {
                     "level": "warning",
                     "message": self.env._(
                         "Another platform is already assigned to this identifier in the annuaire (Platform%(platform_name)s with ID %(platform_id)s). "
-                        "By registering, you confirm that you want to migrate to Odoo.",
+                        "Registering as a receiver confirms that you want to migrate to Odoo. Sender-only registration leaves your current receiving platform unchanged.",
                         platform_name=platform_name,
                         platform_id=participant_info.get("platform_id"),
                     ),
@@ -351,11 +359,22 @@ class PdpRegistration(models.TransientModel):
         }
 
     def button_register_pdp_participant(self):
+        return self._button_register_pdp_participant()
+
+    def button_register_pdp_sender(self):
+        return self._button_register_pdp_participant(sender_only=True)
+
+    def _button_register_pdp_participant(self, sender_only=False):
         self.ensure_one()
 
         self._ensure_mandatory_fields()
+        if sender_only and not self.pdp_sender_only_available:
+            raise UserError(self.env._("Sender-only registration is only available when this exact identifier is registered with another platform."))
 
-        if self.account_peppol_proxy_state in ('smp_registration', 'receiver'):
+        if sender_only and self.edi_user_id:
+            raise UserError(self.env._("Disconnect the existing French electronic invoicing connection before registering as sender-only."))
+
+        if self.account_peppol_proxy_state in ('smp_registration', 'receiver', 'sender'):
             pdp_state_translated = dict(self._fields['account_peppol_proxy_state']._description_selection(self.env))[self.account_peppol_proxy_state]
             raise UserError(self.env._("Cannot register a user with a '%s' application", pdp_state_translated))
 
@@ -366,7 +385,12 @@ class PdpRegistration(models.TransientModel):
             raise UserError(self.env._("The Identifier is not valid. The expected format is: SIREN, SIREN_SIRET, SIREN_SIRET_CodeRoutage or SIREN_SuffixeAdressage"))
 
         self.company_id.pdp_identifier = self.pdp_identifier  # For the initial compute the inverse is not triggered.
-        edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_id, 'pdp', self.edi_mode)
+        edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(
+            self.company_id,
+            'pdp',
+            self.edi_mode,
+            sender_only=sender_only,
+        )
 
         # if there is an error when activating the participant below,
         # the client side is rolled back and the edi user is deleted on the client side
@@ -375,14 +399,18 @@ class PdpRegistration(models.TransientModel):
         if not modules.module.current_test:
             self.env.cr.commit()
 
-        if self.account_peppol_proxy_state not in ('smp_registration', 'receiver'):
-            edi_user._peppol_register_receiver()
+        if sender_only:
+            self.company_id.account_peppol_proxy_state = 'sender'
+            self.invalidate_recordset()
+        elif self.account_peppol_proxy_state not in ('smp_registration', 'receiver'):
+            edi_user._pdp_register_receiver()
             self.invalidate_recordset()  # registering may i.e. have changed self.account_peppol_proxy_state
 
         notifications = {
             False: self.env._('Something went wrong.'),
             'smp_registration': self.env._('Your registration will be activated soon.'),
             'receiver': self.env._('You can now send and receive electronic invoices.'),
+            'sender': self.env._('You can now send electronic invoices via Odoo. Your existing reception platform is unchanged.'),
             'rejected': self.env._('Your registration has been rejected.'),
         }
         return self._action_send_notification(

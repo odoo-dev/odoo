@@ -158,6 +158,42 @@ class TestPdpUser(TestL10nFrPdpCommon):
             self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
             self.assertEqual(self.env.company.account_peppol_proxy_state, 'receiver')
 
+    def test_pdp_create_sender_only(self):
+        company = self.env.company
+        self.proxy_user.unlink()
+        company.pdp_kyc_status = 'success'
+        wizard = self.env['pdp.registration'].create(self._get_participant_vals())
+
+        with patch(
+            'odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._pdp_annuaire_lookup_participant',
+            return_value={
+                'identifier': wizard.pdp_identifier,
+                'platform_id': '5511',
+                'platform_name': 'Other platform',
+                'receiver_on_odoo': False,
+            },
+        ):
+            self.assertTrue(wizard.pdp_sender_only_available)
+            wizard.button_register_pdp_sender()
+
+        self.assertEqual(company.account_peppol_proxy_state, 'sender')
+        self.assertFalse(company.l10n_fr_f10_enable_reporting)
+
+    def test_sender_only_requires_disconnecting_existing_proxy_user(self):
+        company = self.env.company
+        company.pdp_kyc_status = 'success'
+        wizard = self.env['pdp.registration'].create(self._get_participant_vals())
+
+        with patch(
+            'odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._pdp_annuaire_lookup_participant',
+            return_value={
+                'identifier': wizard.pdp_identifier,
+                'platform_id': '5511',
+                'receiver_on_odoo': False,
+            },
+        ), self.assertRaisesRegex(UserError, "Disconnect the existing French electronic invoicing connection"):
+            wizard.button_register_pdp_sender()
+
     def test_pdp_create_reject_participant(self):
         # the account_peppol_proxy_state should change to rejected
         # if we reject the participant
