@@ -271,6 +271,22 @@ registry.category("web_tour.tours").add("PosComboSpecificProductProgram", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("test_combo_product_free_product_min_amount", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Office Combo"),
+            combo.select("Combo Product 1"),
+            combo.select("Combo Product 4"),
+            combo.select("Combo Product 6"),
+            Dialog.confirm(),
+            PosLoyalty.claimReward("Free Product - Whiteboard Pen"),
+            Order.hasLine({ productName: "Free Product - Whiteboard Pen" }),
+            PosLoyalty.finalizeOrder("Cash", "300"),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("PosCheapestProductTaxInclude", {
     steps: () =>
         [

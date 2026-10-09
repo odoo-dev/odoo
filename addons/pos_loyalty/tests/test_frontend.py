@@ -2469,6 +2469,38 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'PosComboSpecificProductProgram', login="pos_user")
 
+    def test_combo_product_free_product_min_amount(self):
+        """A combo's price lives on its child lines: the minimum amount of a rule
+        targeting the combo must be checked against them on the server too."""
+        setup_product_combo_items(self)
+        self.office_combo.write({'lst_price': 200})
+        self.env['loyalty.program'].search([]).write({'active': False})
+        self.env['loyalty.program'].create({
+            'name': 'Combo Free Product Promotion',
+            'program_type': 'promotion',
+            'trigger': 'auto',
+            'applies_on': 'current',
+            'rule_ids': [Command.create({
+                'reward_point_mode': 'order',
+                'reward_point_amount': 1,
+                'minimum_amount': 50,
+                'minimum_qty': 0,
+                'product_ids': self.office_combo.ids,
+            })],
+            'reward_ids': [Command.create({
+                'reward_type': 'product',
+                'reward_product_id': self.whiteboard_pen.product_variant_id.id,
+                'reward_product_qty': 1,
+                'required_points': 1,
+            })],
+        })
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'test_combo_product_free_product_min_amount', login="pos_user")
+        order = self.main_pos_config.current_session_id.order_ids
+        self.assertEqual(order.state, 'paid')
+        self.assertEqual(order.lines.filtered('is_reward_line').points_cost, 1)
+
     def test_apply_reward_on_product_scan(self):
         """
         Test that the rewards are correctly applied if the
