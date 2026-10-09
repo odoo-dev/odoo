@@ -1,5 +1,6 @@
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, signal, t, useProps } from "@odoo/owl";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { useService } from "@web/core/utils/hooks";
 import { getBasicEvalContext } from "@web/model/relational_model/utils";
 import { HelpCompiler } from "@web/views/help/help_compiler";
 import { HelpWidget } from "@web/views/help/help_widget";
@@ -30,6 +31,28 @@ export class ActionHelper extends Component {
             // buttons of the help are executed on an empty recordset, and the
             // view is reloaded afterwards
             useViewButtons(this.rootRef, { reload: () => this.env.searchModel?.search() });
+            // data of the help, returned by the `data_method` of the model
+            this.data = {};
+            if (this.helpArchInfo.dataMethod) {
+                this.orm = useService("orm");
+                onWillStart(() => this.loadData());
+                onWillUpdateProps(() => this.loadData());
+            }
+        }
+    }
+
+    /**
+     * Calls the `data_method` of the help with the current domain and context,
+     * if they changed since the last call.
+     */
+    async loadData() {
+        const { context, domain, resModel } = this.env.searchModel;
+        const key = JSON.stringify([domain, context]);
+        if (key !== this.dataKey) {
+            this.dataKey = key;
+            this.data = await this.orm.call(resModel, this.helpArchInfo.dataMethod, [domain], {
+                context,
+            });
         }
     }
 
@@ -39,11 +62,12 @@ export class ActionHelper extends Component {
 
     /**
      * Fake "record" given to the ViewButtons of the help, and used to evaluate
-     * `invisible` attributes: there is no record, only the action context.
+     * `invisible` attributes: there is no record, only the action context and
+     * the data of the help.
      */
     get helpRecord() {
         const context = this.env.searchModel?.context || {};
-        const evalContext = getBasicEvalContext({ context });
+        const evalContext = { ...getBasicEvalContext({ context }), data: this.data };
         return {
             context,
             evalContext,
@@ -56,6 +80,7 @@ export class ActionHelper extends Component {
     get renderingContext() {
         return {
             context: this.helpRecord.context,
+            data: this.data,
             __comp__: Object.assign(Object.create(this), { this: this }),
         };
     }
