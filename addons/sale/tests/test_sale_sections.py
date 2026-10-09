@@ -154,6 +154,40 @@ class TestSaleSections(SaleCommon):
         self.assertEqual(len(subsection_summary_lines), 1)
         self.assertEqual(subsection_summary_lines[0]["price_subtotal"], 10.00)
 
+    def test_duplicate_section_with_combo(self):
+        """Duplicating a section must link copied combo items to the copied combo line."""
+        product_a = self._create_product(name="Beefy burger")
+        combo = self.env["product.combo"].create({
+            "name": "Burger", "combo_item_ids": [Command.create({"product_id": product_a.id})],
+        })
+        product_combo = self._create_product(
+            name="Meal Menu", type="combo", combo_ids=[Command.set(combo.ids)]
+        )
+        order = self.sections_sale_order
+        order.order_line = [
+            Command.clear(),
+            Command.create({"name": "Sec1", "display_type": "line_section", "sequence": 1}),
+            Command.create({"product_id": product_combo.id, "virtual_id": "combo", "sequence": 2}),
+        ]
+        order.order_line = [
+            Command.create({
+                "product_id": product_a.id,
+                "combo_item_id": combo.combo_item_ids.id,
+                "linked_virtual_id": "combo",
+                "sequence": 3,
+            }),
+        ]
+        original_lines = order.order_line
+
+        res = order.duplicate_section("order_line", original_lines[0].id)
+
+        new_section, new_combo_line, new_item_line = (order.order_line - original_lines).sorted(
+            "sequence"
+        )
+        self.assertEqual(res["duplicated_section_id"], new_section.id)
+        self.assertEqual(new_item_line.linked_line_id, new_combo_line)
+        self.assertEqual(original_lines[2].linked_line_id, original_lines[1])
+
     def test_sale_order_sections_totals(self):
         """Ensure section totals are computed correctly.
 
