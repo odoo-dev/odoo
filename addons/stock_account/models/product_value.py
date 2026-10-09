@@ -80,17 +80,17 @@ class ProductValue(models.Model):
             product_value.current_value_description = product_value.move_id.value_justification
             product_value.computed_value_description = product_value.move_id.value_computed_justification
 
-    @api.depends('old_cost')
+    @api.depends('old_cost', 'quantity')
     def _compute_old_value(self):
         for product_value in self:
             product_value.old_value = (product_value.old_cost or 0) * product_value.quantity
 
-    @api.depends('new_cost')
+    @api.depends('new_cost', 'quantity')
     def _compute_new_value(self):
         for product_value in self:
             product_value.new_value = product_value.new_cost * product_value.quantity
 
-    @api.depends('value')
+    @api.depends('value', 'old_value', 'new_value', 'new_cost', 'old_cost', 'quantity')
     def _compute_adjustment(self):
         for product_value in self:
             if product_value.move_id:

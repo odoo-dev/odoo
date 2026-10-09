@@ -15,6 +15,39 @@ class FifoCandidate(NamedTuple):
     out_move: models.Model = None
 
 
+class PriceHistoryReplay:
+    """ Walks the ordered history of standalone `product.value` records (price changes with
+    no `move_id`) crossed while replaying a valuation, correcting each one's `old_cost` and
+    `quantity` against what the replay actually carried into it at that point.
+
+    `price_changes` is scoped to a single lot when `lot` is given: only that lot's own
+    changes and the product-level ones (`lot_id` unset) apply; otherwise only the
+    product-level ones do.
+    """
+
+    def __init__(self, price_changes, lot=False):
+        if lot:
+            price_changes = price_changes.filtered(lambda pv: not pv.lot_id or pv.lot_id == lot)
+        else:
+            price_changes = price_changes.filtered(lambda pv: not pv.lot_id)
+        self._iterator = iter(price_changes)
+        self._next = next(self._iterator, None)
+
+    def apply_until(self, date, cost, quantity):
+        """ Apply every change dated at or before `date` (all remaining ones if `date` is
+        None), correcting each one, and return `(new_cost, applied)`: the cost in effect
+        afterward, and whether any change was applied.
+        """
+        applied = False
+        while self._next and (date is None or self._next.date <= date):
+            if self._next.old_cost != cost or self._next.quantity != quantity:
+                self._next.write({'old_cost': cost, 'quantity': quantity})
+            cost = self._next.value
+            applied = True
+            self._next = next(self._iterator, None)
+        return cost, applied
+
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
@@ -280,22 +313,28 @@ class ProductProduct(models.Model):
             domain += [('move_line_ids.lot_id', 'in', lot.id)]
         return self.env['stock.move'].search(domain, order='product_id, date, id').grouped('product_id')
 
+    def _get_lot_scope_domain(self, lot):
+        """ Standalone product.value records (price changes) relevant to a replay scoped to
+        `lot` (or to the product as a whole when `lot` is falsy): the product-level ones,
+        plus this lot's own when a lot is given.
+        """
+        if lot:
+            return Domain(['|', ('lot_id', '=', lot.id), ('lot_id', '=', False)])
+        return Domain([('lot_id', '=', False)])
+
     def _get_std_price_history_by_product(self, from_date):
-        return self.env['product.value'].sudo().search([
+        domain = Domain([
             ('product_id', 'in', self.ids), ('move_id', '=', False), ('date', '>', from_date),
             ('company_id', '=', self.env.company.id),
-        ], order='product_id, date, id').grouped('product_id')
+        ])
+        return self.env['product.value'].sudo().search(domain, order='product_id, date, id').grouped('product_id')
 
     def _get_last_product_value(self, date=None, lot=False):
         domain = Domain([
             ('product_id', 'in', self.ids),
             ('move_id', '=', False),
             ('company_id', '=', self.env.company.id),
-        ])
-        if lot:
-            domain &= Domain(['|', ('lot_id', '=', lot.id), ('lot_id', '=', False)])
-        else:
-            domain &= Domain([('lot_id', '=', False)])
+        ]) & self._get_lot_scope_domain(lot)
         if date:
             domain &= Domain([('date', '<=', date)])
 
@@ -359,17 +398,17 @@ class ProductProduct(models.Model):
 
         for product in self:
             std_price = std_price_by_product_id.get(product.id, product.standard_price)
-            price_changes = iter(std_price_history_by_product.get(product, self.env['product.value']))
-            next_change = next(price_changes, None)
+            quantity = product.with_context(to_date=at_date).qty_available
+            price_history = PriceHistoryReplay(std_price_history_by_product.get(product, self.env['product.value']), lot=lot)
             for move in moves_by_product.get(product, self.env['stock.move']):
-                while next_change and next_change.date <= move.date:
-                    std_price = next_change.value
-                    next_change = next(price_changes, None)
+                std_price, __ = price_history.apply_until(move.date, std_price, quantity)
+                quantity += move._get_valued_qty(signed=True)
                 if move.is_in:
                     continue
                 new_value = move._get_valued_qty(signed=True) * std_price
                 if move.value != new_value:
                     move.value = new_value
+            price_history.apply_until(None, std_price, quantity)
 
         return std_price_by_product_id, value_by_product_id
 
@@ -450,7 +489,7 @@ class ProductProduct(models.Model):
 
             self.env['stock.move'].invalidate_model()
 
-        product = False
+        price_history_by_product_id = {}
         for moves_batch in split_every(batch_size, product_move_ids):
             moves_batch = self.env['stock.move'].browse(moves_batch)
             moves_batch.fetch(move_fields)
@@ -459,14 +498,15 @@ class ProductProduct(models.Model):
                 quantity = quantity_by_product_id.get(move.product_id.id, 0.0)
                 average_cost = std_price_by_product_id.get(move.product_id.id, move.value / move._get_valued_qty() if move._get_valued_qty() else 0)
                 value = value_by_product_id.get(move.product_id.id, 0.0)
-                if move.product_id != product:
-                    product = move.product_id
-                    price_changes = iter(std_price_history_by_product_id.get(product, self.env['product.value']) if correction else self.env['product.value'])
-                    next_change = next(price_changes, None)
-                while next_change and next_change.date <= move.date:
-                    average_cost = next_change.value
+                if move.product_id.id not in price_history_by_product_id:
+                    price_history_by_product_id[move.product_id.id] = PriceHistoryReplay(
+                        std_price_history_by_product_id.get(move.product_id, self.env['product.value']) if correction else self.env['product.value'],
+                        lot=lot,
+                    )
+                price_history = price_history_by_product_id[move.product_id.id]
+                average_cost, applied = price_history.apply_until(move.date, average_cost, quantity)
+                if applied:
                     value = average_cost * quantity
-                    next_change = next(price_changes, None)
                 if move.is_in:
                     in_qty = move._get_valued_qty()
                     in_value = move.value
@@ -503,6 +543,13 @@ class ProductProduct(models.Model):
 
             self.env['stock.move'].invalidate_model()  # Avoid keeping too many records in cache
             self.env['stock.move.line'].invalidate_model()
+
+        for product_id, price_history in price_history_by_product_id.items():
+            quantity = quantity_by_product_id.get(product_id, 0.0)
+            average_cost, applied = price_history.apply_until(None, std_price_by_product_id.get(product_id, 0.0), quantity)
+            if applied:
+                std_price_by_product_id[product_id] = average_cost
+                value_by_product_id[product_id] = average_cost * quantity
 
         return std_price_by_product_id, value_by_product_id
 
@@ -561,13 +608,12 @@ class ProductProduct(models.Model):
         for product in self:
             stack = stack_by_product[product]
             unit_price = std_price_by_product_id.get(product.id, product.standard_price)
-            price_changes = iter(std_price_history_by_product.get(product, self.env['product.value']))
-            next_change = next(price_changes, None)
+            price_history = PriceHistoryReplay(std_price_history_by_product.get(product, self.env['product.value']), lot=lot)
             for move in moves_by_product.get(product, self.env['stock.move']):
-                while next_change and next_change.date <= move.date:
-                    unit_price = next_change.value
-                    stack[:] = [FifoCandidate(m.quantity, m.quantity * unit_price, m.out_move) for m in stack]
-                    next_change = next(price_changes, None)
+                quantity = sum(candidate.quantity for candidate in stack)
+                unit_price, applied = price_history.apply_until(move.date, unit_price, quantity)
+                if applied:
+                    stack[:] = [FifoCandidate(c.quantity, c.quantity * unit_price, c.out_move) for c in stack]
 
                 if move.is_in:
                     full_in_qty = move._get_valued_qty()
@@ -609,6 +655,11 @@ class ProductProduct(models.Model):
                         move.value -= out_value
                     elif move.value != -out_value:
                         move.value = -out_value
+
+            quantity = sum(candidate.quantity for candidate in stack)
+            unit_price, applied = price_history.apply_until(None, unit_price, quantity)
+            if applied:
+                stack[:] = [FifoCandidate(c.quantity, c.quantity * unit_price, c.out_move) for c in stack]
 
             std_price_by_product_id[product.id] = unit_price
             value_by_product_id[product.id] = sum(stack_tuple.value for stack_tuple in stack)
