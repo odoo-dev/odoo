@@ -1,6 +1,6 @@
 /** @odoo-module alias=@web/../tests/mobile/core/action_swiper_tests default=false */
 
-import { beforeEach, expect, hover, mockTouch, queryFirst, test } from "@odoo/hoot";
+import { advanceTime, beforeEach, expect, hover, mockTouch, queryFirst, test } from "@odoo/hoot";
 import { Component, xml } from "@odoo/owl";
 import {
     contains,
@@ -638,6 +638,67 @@ test("the touched element gets a touchcancel once the swipe starts", async () =>
     expect.verifySteps([]);
     await moveTo(swiper, { position: { clientX: swiper.clientWidth / 2, clientY: 0 } });
     expect.verifySteps(["touchcancel"]);
+    await drop();
+    expect.verifySteps([]);
+});
+
+test("the touched element gets a touchcancel once a vertical scroll is detected", async () => {
+    class Parent extends Component {
+        static components = { ActionSwiper };
+        static template = xml`
+            <div class="d-flex">
+                <ActionSwiper onRightSwipe="{ action: () => {} }">
+                    <div class="target-component" style="width: 200px; height: 80px" t-on-touchcancel="() => this.onTouchCancel()">Test</div>
+                </ActionSwiper>
+            </div>
+        `;
+        onTouchCancel() {
+            expect.step("touchcancel");
+        }
+    }
+    await mountWithCleanup(Parent);
+    const swiper = queryFirst(".o_actionswiper");
+    const { moveTo, drop } = await contains(".target-component").drag({
+        position: { clientX: 0, clientY: 0 },
+        initialPointerMoveDistance: 0,
+    });
+    await moveTo(swiper, { position: { clientX: 0, clientY: 5 } });
+    expect.verifySteps([]);
+    await moveTo(swiper, { position: { clientX: 0, clientY: 40 } });
+    expect.verifySteps(["touchcancel"]);
+    await drop();
+    expect.verifySteps([]);
+});
+
+test("a long press disables the swiper even if the touch slightly moves", async () => {
+    class Parent extends Component {
+        static components = { ActionSwiper };
+        static template = xml`
+            <div class="d-flex">
+                <ActionSwiper onRightSwipe="{ action: () => this.onRightSwipe() }" enabledDuration="500">
+                    <div class="target-component" style="width: 200px; height: 80px" t-on-touchcancel="() => this.onTouchCancel()">Test</div>
+                </ActionSwiper>
+            </div>
+        `;
+        onRightSwipe() {
+            expect.step("onRightSwipe");
+        }
+        onTouchCancel() {
+            expect.step("touchcancel");
+        }
+    }
+    await mountWithCleanup(Parent);
+    const swiper = queryFirst(".o_actionswiper");
+    const { moveTo, drop } = await contains(".target-component").drag({
+        position: { clientX: 0, clientY: 0 },
+        initialPointerMoveDistance: 0,
+    });
+    await moveTo(swiper, { position: { clientX: 3, clientY: 0 } });
+    await advanceTime(500);
+    await moveTo(swiper, { position: { clientX: (3 * swiper.clientWidth) / 4, clientY: 0 } });
+    expect(queryFirst(".o_actionswiper_target_container").style.transform).not.toInclude(
+        "translateX"
+    );
     await drop();
     expect.verifySteps([]);
 });

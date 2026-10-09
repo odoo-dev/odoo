@@ -131,7 +131,6 @@ export class ActionSwiper extends Component {
             return;
         }
         if (this.isSwipeEnabled) {
-            browser.clearTimeout(this.enabledTimeoutId);
             const { onLeftSwipe, onRightSwipe } = this.localizedProps;
 
             // Determine the dominant axis of swiping to prevent scrolling on the vertical axis
@@ -147,9 +146,11 @@ export class ActionSwiper extends Component {
                     return; // not enough movement yet to decide, don't touch native scroll
                 }
 
+                browser.clearTimeout(this.enabledTimeoutId);
                 this.isVerticalScroll = Math.abs(deltaX) < Math.abs(deltaY);
                 if (this.isVerticalScroll) {
                     ev.stopPropagation();
+                    this.cancelTargetTouch(ev);
                     this._reset();
                     return;
                 }

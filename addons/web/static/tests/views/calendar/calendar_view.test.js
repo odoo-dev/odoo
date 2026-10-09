@@ -6332,8 +6332,9 @@ test(`swiping from a day cell changes the month without clicking on the day`, as
 });
 
 test.tags("desktop");
-test("swiping from an event being dragged on touch devices", async () => {
+test("a long press on an event drags it instead of swiping, even if the touch slightly moves", async () => {
     mockTouch(true);
+    onRpc("event", "write", ({ args }) => expect.step(["write", args]));
     await mountView({
         resModel: "event",
         type: "calendar",
@@ -6342,21 +6343,50 @@ test("swiping from an event being dragged on touch devices", async () => {
     expect(".o_calendar_header h5").toHaveText("December 2016");
 
     const eventEl = findEvent(2);
-    const swipeWidth = queryRect(".o_actionswiper").width;
+    const cellWidth = queryRect(`.o_calendar_day[data-date="2016-12-14"]`).width;
     const { moveTo, drop } = await drag(eventEl, { position: { x: 10 }, relative: true });
-    // move a bit before the swiper gets disabled
-    await moveTo(eventEl, { position: { x: 5 }, relative: true });
-    // long press: fullcalendar starts dragging the event
+    await moveTo(eventEl, { position: { x: 12 }, relative: true });
     await advanceTime(TOUCH_SELECTION_THRESHOLD);
     expect(".o_calendar_widget.o_interacting").toHaveCount(1);
 
-    // swipe to the next month: the calendar is re-rendered while the event is being dragged
-    await moveTo(eventEl, { position: { x: -swipeWidth }, relative: true });
+    await moveTo(eventEl, { position: { x: 10 + cellWidth / 2 }, relative: true });
+    await moveTo(eventEl, { position: { x: 10 + cellWidth }, relative: true });
     await drop();
     await advanceTime(1000);
     await animationFrame();
-    expect(".o_calendar_header h5").toHaveText("January 2017");
+    expect(".o_calendar_header h5").toHaveText("December 2016");
     expect(".o_interacting").toHaveCount(0);
+    expect.verifySteps([
+        ["write", [[2], { start: "2016-12-13 10:55:05", stop: "2016-12-13 14:55:05" }]],
+    ]);
+});
+
+test.tags("desktop");
+test("a long press on an event drags it vertically, even if the touch slightly moves", async () => {
+    mockTouch(true);
+    onRpc("event", "write", ({ args }) => expect.step(["write", args]));
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `<calendar date_start="start" date_stop="stop" mode="week"/>`,
+    });
+
+    const eventEl = findEvent(2);
+    const { moveTo, drop } = await drag(eventEl, { position: { x: 10, y: 10 }, relative: true });
+    await moveTo(eventEl, { position: { x: 12, y: 12 }, relative: true });
+    await advanceTime(TOUCH_SELECTION_THRESHOLD);
+    expect(".o_calendar_widget.o_interacting").toHaveCount(1);
+
+    await moveTo(eventEl, { position: { x: 12, y: 80 }, relative: true });
+    await moveTo(eventEl, { position: { x: 12, y: 120 }, relative: true });
+    await drop();
+    await advanceTime(1000);
+    await animationFrame();
+    expect(".o_interacting").toHaveCount(0);
+    expect(".o_calendar_event_mirror").toHaveCount(0);
+    expect.verifySteps([
+        ["write", [[2], { start: "2016-12-12 13:25:05", stop: "2016-12-12 17:25:05" }]],
+    ]);
 });
 
 test("Revert to the previous state if updateRecord fails (onEventResize)", async () => {
