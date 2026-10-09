@@ -125,7 +125,13 @@ export class ConfirmationPage extends Component {
         }
 
         const order = this.confirmedOrder;
-        await this.selfOrder.ticketPrinter.printOrderChanges({ order, webFallback: false });
+        const orderChange = order.uiState.pendingPrepChange;
+        delete order.uiState.pendingPrepChange;
+        await this.selfOrder.ticketPrinter.printOrderChanges({
+            order,
+            webFallback: false,
+            opts: { orderChange },
+        });
     }
 
     async printOrder() {

@@ -27,6 +27,13 @@ patch(SelfOrder.prototype, {
             order_access_token: this.currentOrder.access_token,
         });
 
+        if (status === "success" && this.config.self_ordering_mode === "kiosk") {
+            const changes = this.currentOrder.getChanges();
+            if (changes.addedQuantity.length || changes.removedQuantity.length) {
+                this.currentOrder.uiState.pendingPrepChange = changes;
+            }
+        }
+
         this.models.connectNewData(data);
         this.onlinePaymentStatus = status;
         this.paymentError = status === "fail";
