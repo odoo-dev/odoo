@@ -354,22 +354,6 @@ class IrActionsAct_Window(models.Model):
         for action in self:
             action.embedded_action_ids = embedded_actions.filtered(lambda rec: rec.parent_action_id == action)
 
-    def read(self, fields=None, load='_classic_read'):
-        """ call the method get_empty_list_help of the model and set the window action help message
-        """
-        result = super().read(fields, load=load)
-        if not fields or 'help' in fields:
-            for values in result:
-                model = values.get('res_model')
-                if model in self.env:
-                    eval_ctx = dict(self.env.context)
-                    try:
-                        ctx = safe_eval(values.get('context', '{}'), eval_ctx)
-                    except Exception:  # noqa: BLE001
-                        ctx = {}
-                    values['help'] = self.with_context(**ctx).env[model].get_empty_list_help(values.get('help', ''))
-        return result
-
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
