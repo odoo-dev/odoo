@@ -15,6 +15,7 @@ export class BillGuide extends Component {
     props = useProps({
         ...standardWidgetProps,
         record: t.object().optional(),
+        largeIcons: t.boolean().optional(),
     });
 
     setup() {
@@ -69,6 +70,7 @@ export class BillGuide extends Component {
 
 export const billGuide = {
     component: BillGuide,
+    extractProps: ({ attrs }) => ({ largeIcons: Boolean(attrs.large_icons) }),
 };
 
 registry.category("view_widgets").add("bill_upload_guide", billGuide);
