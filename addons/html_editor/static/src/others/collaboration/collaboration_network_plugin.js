@@ -1,7 +1,11 @@
 import { Plugin } from "@html_editor/plugin";
+import { rpc } from "@web/core/network/rpc";
 import { RequestError } from "./PeerToPeer";
 
 export { RequestError };
+
+// this is a local cache for ice server descriptions
+let ICE_SERVERS = null;
 
 /**
  * @typedef { Object } CollaborationNetworkShared
@@ -35,7 +39,16 @@ export class CollaborationNetworkPlugin extends Plugin {
     static id = "collaborationNetwork";
     static shared = ["ready", "join", "broadcast", "request", "getPeerIds", "fetchServerContent"];
 
-    setup() {}
+    setup() {
+        const { collaborationModelName, collaborationFieldName, collaborationResId } =
+            this.config.collaboration.collaborationChannel;
+        // Without a record to collaborate on (e.g. it is not saved yet), there
+        // is no channel to reach the other peers: the network stays unavailable.
+        if (!(collaborationModelName && collaborationFieldName && collaborationResId)) {
+            return;
+        }
+        this.peerToPeerLoading = this.loadPeerToPeer();
+    }
 
     destroy() {
         super.destroy();
@@ -52,7 +65,11 @@ export class CollaborationNetworkPlugin extends Plugin {
      *     the record is not saved yet) or has been destroyed.
      */
     async ready() {
-        return false;
+        if (!this.peerToPeerLoading) {
+            return false;
+        }
+        await this.peerToPeerLoading;
+        return !this.isDestroyed;
     }
 
     /**
@@ -111,7 +128,20 @@ export class CollaborationNetworkPlugin extends Plugin {
     /**
      * Fetch the ICE servers, then create the peer to peer connection manager.
      */
-    async loadPeerToPeer() {}
+    async loadPeerToPeer() {
+        if (!ICE_SERVERS) {
+            ICE_SERVERS = await rpc("/html_editor/get_ice_servers");
+        }
+        let iceServers = ICE_SERVERS;
+        if (!iceServers.length) {
+            iceServers = [
+                {
+                    urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+                },
+            ];
+        }
+        this.ptp = this.createPeerToPeer(iceServers);
+    }
 
     /**
      * @param {RTCIceServer[]} iceServers

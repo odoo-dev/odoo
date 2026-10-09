@@ -60,6 +60,7 @@ import { TextDirectionPlugin } from "./main/text_direction_plugin";
 import { ToolbarPlugin } from "./main/toolbar/toolbar_plugin";
 import { VideoPlugin } from "./main/media/video/video_plugin";
 import { PlaceholderPlugin } from "./main/placeholder_plugin";
+import { CollaborationNetworkPlugin } from "./others/collaboration/collaboration_network_plugin";
 import { CollaborationOdooPlugin } from "./others/collaboration/collaboration_odoo_plugin";
 import { CollaborationPlugin } from "./others/collaboration/collaboration_plugin";
 import { CollaborationSelectionAvatarPlugin } from "./others/collaboration/collaboration_selection_avatar_plugin";
@@ -165,6 +166,7 @@ export const MAIN_PLUGINS = [
 
 export const COLLABORATION_PLUGINS = [
     CollaborationPlugin,
+    CollaborationNetworkPlugin,
     CollaborationOdooPlugin,
     CollaborationSelectionPlugin,
     CollaborationSelectionAvatarPlugin,

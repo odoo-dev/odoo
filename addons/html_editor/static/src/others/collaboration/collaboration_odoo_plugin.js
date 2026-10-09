@@ -36,9 +36,6 @@ const PTP_MAX_RECOVERY_TIME = 500;
 
 const REQUEST_ERROR = Symbol("REQUEST_ERROR");
 
-// this is a local cache for ice server descriptions
-let ICE_SERVERS = null;
-
 /**
  * @typedef { Object } CollaborationOdooShared
  * @property { CollaborationOdooPlugin['getPeerMetadata'] } getPeerMetadata
@@ -53,6 +50,7 @@ export class CollaborationOdooPlugin extends Plugin {
         "domObserver",
         "collaboration",
         "selection",
+        "collaborationNetwork",
     ];
     static shared = ["getPeerMetadata"];
     /** @type {import("plugins").EditorResources} */
@@ -117,11 +115,9 @@ export class CollaborationOdooPlugin extends Plugin {
     destroy() {
         this.collaborationStopBus && this.collaborationStopBus();
         // If peer to peer is initializing, wait for properly closing it.
-        if (this.peerToPeerLoading) {
-            this.peerToPeerLoading.then(() => {
-                this.stopPeerToPeer();
-            });
-        }
+        this.dependencies.collaborationNetwork.ready().then(() => {
+            this.stopPeerToPeer();
+        });
         // todo: to implement
         // clearInterval(this.collaborationInterval);
         super.destroy();
@@ -167,7 +163,9 @@ export class CollaborationOdooPlugin extends Plugin {
                 if (payload.notificationName === "html_field_write") {
                     this.onServerLastIdUpdate(payload.notificationPayload.last_commit_id);
                 } else if (this.ptpJoined) {
-                    this.peerToPeerLoading.then(() => this.ptp.handleNotification(payload));
+                    this.dependencies.collaborationNetwork
+                        .ready()
+                        .then(() => this.ptp?.handleNotification(payload));
                 }
             }
         };
@@ -216,26 +214,6 @@ export class CollaborationOdooPlugin extends Plugin {
         //         }, CONSIDER_OFFLINE_TIME);
         //     }
         // }, CHECK_OFFLINE_TIME);
-
-        const loadPeerToPeer = async () => {
-            if (!ICE_SERVERS) {
-                ICE_SERVERS = await rpc("/html_editor/get_ice_servers");
-            }
-
-            let iceServers = ICE_SERVERS;
-            if (!iceServers.length) {
-                iceServers = [
-                    {
-                        urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
-                    },
-                ];
-            }
-            this.iceServers = iceServers;
-
-            this.ptp = this.getNewPtp();
-        };
-
-        this.peerToPeerLoading = loadPeerToPeer();
     }
 
     getNewPtp() {
@@ -415,22 +393,21 @@ export class CollaborationOdooPlugin extends Plugin {
         }
     }
 
-    joinPeerToPeer() {
+    async joinPeerToPeer() {
         this.editable.removeEventListener("focus", this.joinPeerToPeer);
-        if (this.peerToPeerLoading) {
-            return this.peerToPeerLoading.then(async () => {
-                this.joiningPtp = true;
-                if (this.isDocumentStale) {
-                    const success = await this.resetFromServerAndResyncWithPeers();
-                    if (!success) {
-                        return;
-                    }
-                }
-                this.ptp.notifyAllPeers("ptp_join");
-                this.joiningPtp = false;
-                this.ptpJoined = true;
-            });
+        if (!(await this.dependencies.collaborationNetwork.ready())) {
+            return;
         }
+        this.joiningPtp = true;
+        if (this.isDocumentStale) {
+            const success = await this.resetFromServerAndResyncWithPeers();
+            if (!success) {
+                return;
+            }
+        }
+        this.dependencies.collaborationNetwork.join();
+        this.joiningPtp = false;
+        this.ptpJoined = true;
     }
     isLastDocumentStale() {
         if (!this.serverLastCommitId) {
@@ -564,10 +541,7 @@ export class CollaborationOdooPlugin extends Plugin {
      * Get peer to peer peers.
      */
     getPtpPeers() {
-        const peers = Object.entries(this.ptp.peersInfos).map(([peerId, peerInfo]) => ({
-            id: peerId,
-            ...peerInfo,
-        }));
+        const peers = this.dependencies.collaborationNetwork.getPeerIds().map((id) => ({ id }));
         return peers.sort((a, b) => (isPeerFirst(a, b) ? -1 : 1));
     }
 

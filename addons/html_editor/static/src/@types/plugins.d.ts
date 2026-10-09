@@ -51,6 +51,7 @@ declare module "plugins" {
     import { shift_tab_overrides, tab_overrides, TabulationShared } from "@html_editor/main/tabulation_plugin";
     import { expandable_toolbar_namespaces_providers, toolbar_groups, toolbar_items, toolbar_namespace_providers, ToolbarShared } from "@html_editor/main/toolbar/toolbar_plugin";
 
+    import { CollaborationNetworkShared } from "@html_editor/others/collaboration/collaboration_network_plugin";
     import { CollaborationOdooShared } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
     import { CollaborationShared, on_remote_history_commits_applied_handlers } from "@html_editor/others/collaboration/collaboration_plugin";
     import { EmbeddedComponentShared, on_will_mount_component_handlers, on_component_mounted_handlers } from "@html_editor/others/embedded_component_plugin";
@@ -105,6 +106,7 @@ declare module "plugins" {
         imageSave: ImageSaveShared;
 
         // Others
+        collaborationNetwork: CollaborationNetworkShared;
         collaborationOdoo: CollaborationOdooShared;
         collaboration: CollaborationShared;
         embeddedComponents: EmbeddedComponentShared;
