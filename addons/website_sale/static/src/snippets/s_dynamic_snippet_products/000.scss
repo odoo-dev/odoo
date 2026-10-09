@@ -1,4 +1,8 @@
 .s_dynamic_snippet_products {
+    .carousel {
+        --o-carousel-gap: var(--o-wsale-products-grid-gap, 16px);
+    }
+
     .s_dynamic_snippet_row.row {
         --gutter-x: var(--o-wsale-products-grid-gap, 16px);
     }
