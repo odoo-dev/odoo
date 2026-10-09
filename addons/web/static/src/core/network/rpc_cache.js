@@ -1,5 +1,7 @@
 import { IDBQuotaExceededError, IndexedDB } from "@web/core/utils/indexed_db";
+import { browser } from "../browser/browser";
 import { router } from "../browser/router";
+import { ConnectionLostError } from "./rpc";
 import { deepCopy } from "../utils/objects";
 import { Crypto, CRYPTO_ALGO } from "../crypto";
 
@@ -45,6 +47,7 @@ function validateSettings({ type, update }) {
 
 const ONE_YEAR = luxon.Duration.fromObject({ years: 1 }).toMillis();
 const MAX_STORAGE_SIZE = 2 * 1024 * 1024 * 1024; // 2Gb
+const ALL_TABLES = "*";
 
 class RamCache {
     constructor() {
@@ -84,6 +87,7 @@ export class RPCCache {
     constructor(name, version, secret) {
         this.crypto = new Crypto(secret);
         this.indexedDB = new IndexedDB(name, version + CRYPTO_ALGO);
+        this.staleSinceKey = `${name}_stale_since`;
         this.ramCache = new RamCache();
         this.pendingRequests = {};
         this.checkSize(); // we want to control the disk space used by Odoo
@@ -95,6 +99,17 @@ export class RPCCache {
             console.log(`Deleting indexedDB database as maximum storage size is reached`);
             return this.indexedDB.deleteDatabase();
         }
+    }
+
+    _getStaleSince() {
+        return JSON.parse(browser.localStorage.getItem(this.staleSinceKey) || "{}");
+    }
+
+    _isStale(table, entry) {
+        // the entry timestamp is the time its request started: a request started before the
+        // invalidation (e.g. in another tab) writes a stale entry
+        const staleSince = this._getStaleSince();
+        return entry.timestamp <= Math.max(staleSince[table] || 0, staleSince[ALL_TABLES] || 0);
     }
 
     /**
@@ -143,6 +158,7 @@ export class RPCCache {
             const prom = new Promise((resolve, reject) => {
                 const fromCache = Promise.withResolvers();
                 let fromCacheValue;
+                let staleValue;
                 const onFullfilled = (result) => {
                     resolve(result);
                     // call the pending request callbacks with the result
@@ -188,6 +204,10 @@ export class RPCCache {
                         // promise has already been fullfilled with the cached value
                         throw error;
                     }
+                    if (staleValue && error instanceof ConnectionLostError) {
+                        resolve(staleValue);
+                        throw error;
+                    }
                     reject(error);
                 };
                 fallback().then(onFullfilled, onRejected);
@@ -219,6 +239,11 @@ export class RPCCache {
                                     // The data will be updated with the new cryptoKey.
                                     return;
                                 }
+                                if (this._isStale(table, result)) {
+                                    // only used offline, online we wait for the fresh value
+                                    staleValue = decrypted;
+                                    return;
+                                }
                                 resolve(decrypted);
                                 fromCacheValue = decrypted;
                             }
@@ -235,8 +260,20 @@ export class RPCCache {
         return ramValue.then((result) => deepCopy(result));
     }
 
+    /**
+     * Disk entries are kept so that they remain available offline, they are
+     * only marked as stale (in localStorage, to be shared with the other tabs
+     * and survive reloads).
+     *
+     * @param {string|string[]} [tables] if not given, all tables are invalidated
+     */
     invalidate(tables) {
-        this.indexedDB.invalidate(tables);
+        const now = Date.now();
+        const staleSince = tables ? this._getStaleSince() : {};
+        for (const table of tables ? [].concat(tables) : [ALL_TABLES]) {
+            staleSince[table] = now;
+        }
+        browser.localStorage.setItem(this.staleSinceKey, JSON.stringify(staleSince));
         this.ramCache.invalidate(tables);
         // flag the pending requests as invalidated s.t. we don't write their results in caches
         for (const key in this.pendingRequests) {

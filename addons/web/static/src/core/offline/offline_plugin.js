@@ -74,17 +74,6 @@ export class OfflinePlugin extends Plugin {
             this.setOffline(ev.detail.error instanceof ConnectionLostError);
         });
 
-        // When the "CLEAR-CACHES" event is triggered, the rpc cache is wiped out, so we must also
-        // clear the information about elements that are available offline, as they aren't anymore.
-        useListener(rpcBus, "CLEAR-CACHES", () => {
-            this._idb.invalidate([
-                OfflinePlugin.VISITED_UI_TABLE_NAME,
-                OfflinePlugin.VISITED_UI_TABLE_NAME_DEBUG,
-                new RegExp(`^${OfflinePlugin.MANY2X_TABLE_PREFIX}`),
-            ]);
-            this._visited.set({});
-        });
-
         this._updateScheduledORMList().then(async () => {
             if (!this.isOffline()) {
                 // wait a bit for the webclient to be started before synchronizing

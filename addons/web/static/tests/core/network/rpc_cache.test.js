@@ -10,6 +10,7 @@ import {
 } from "@odoo/hoot";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { startRouter } from "@web/core/browser/router";
+import { ConnectionLostError } from "@web/core/network/rpc";
 import { isRPCCacheDisabled, RPCCache } from "@web/core/network/rpc_cache";
 import { IDBQuotaExceededError, IndexedDB } from "@web/core/utils/indexed_db";
 import { redirect } from "@web/core/utils/urls";
@@ -208,9 +209,81 @@ test("invalidate table", async () => {
     rpcCache.invalidate("table");
     await microTick();
 
-    // `table` is empty
-    expect(rpcCache.indexedDB.mockIndexedDB.table).toEqual({});
+    // the disk entry is kept (to be available offline), the ram one is removed
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
+        'encrypted data:{"test":123}'
+    );
     expect(rpcCache.ramCache.ram.table).toEqual({});
+
+    // the stale disk value isn't returned, we wait for the fallback
+    const def = Promise.withResolvers();
+    const prom = rpcCache.read("table", "key", () => def.promise, { type: "disk" });
+    await tick();
+    expect(await promiseState(prom)).toEqual({ status: "pending" });
+    def.resolve({ test: 456 });
+    expect(await prom).toEqual({ test: 456 });
+});
+
+test("invalidate table: stale value is used when the connection is lost", async () => {
+    expect.errors(1);
+    const rpcCache = new RPCCache(
+        "mockRpc",
+        1,
+        "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
+    );
+    await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), { type: "disk" });
+    await microTick();
+    await microTick();
+
+    rpcCache.invalidate("table");
+    expect(
+        await rpcCache.read("table", "key", () => Promise.reject(new ConnectionLostError()), {
+            type: "disk",
+        })
+    ).toEqual({ test: 123 });
+    await tick();
+    await tick();
+    expect.verifyErrors(["Connection couldn't be established or was interrupted"]);
+
+    // the stale value isn't kept in ram, s.t. it is fetched again once back online
+    expect(rpcCache.ramCache.ram.table).toEqual({});
+    expect(
+        await rpcCache.read("table", "key", () => Promise.resolve({ test: 456 }), {
+            type: "disk",
+        })
+    ).toEqual({ test: 456 });
+});
+
+test("invalidate: stale mark is shared with other instances (other tabs, reload)", async () => {
+    const secret = "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b";
+    const rpcCache = new RPCCache("mockRpc", 1, secret);
+    await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), { type: "disk" });
+    await rpcCache.read("table2", "key", () => Promise.resolve({ test: 456 }), { type: "disk" });
+    await microTick();
+    await microTick();
+
+    rpcCache.invalidate("table");
+
+    const otherRpcCache = new RPCCache("mockRpc", 1, secret);
+    const def = Promise.withResolvers();
+    const prom = otherRpcCache.read("table", "key", () => def.promise, { type: "disk" });
+    await tick();
+    expect(await promiseState(prom)).toEqual({ status: "pending" });
+    // other tables aren't stale
+    expect(
+        await otherRpcCache.read("table2", "key", () => new Promise(() => {}), { type: "disk" })
+    ).toEqual({ test: 456 });
+
+    // invalidate all tables
+    otherRpcCache.invalidate();
+    const prom2 = new RPCCache("mockRpc", 1, secret).read(
+        "table2",
+        "key",
+        () => new Promise(() => {}),
+        { type: "disk" }
+    );
+    await tick();
+    expect(await promiseState(prom2)).toEqual({ status: "pending" });
 });
 
 test("invalidate multiple tables", async () => {
@@ -258,9 +331,13 @@ test("invalidate multiple tables", async () => {
     rpcCache.invalidate(["table", "table2"]);
     await microTick();
 
-    // `table` is empty
-    expect(rpcCache.indexedDB.mockIndexedDB.table).toEqual({});
-    expect(rpcCache.indexedDB.mockIndexedDB.table2).toEqual({});
+    // disk entries are kept (to be available offline), the ram ones are removed
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
+        'encrypted data:{"test":123}'
+    );
+    expect(rpcCache.indexedDB.mockIndexedDB.table2.key.data.ciphertext).toBe(
+        'encrypted data:{"test":456}'
+    );
     expect(rpcCache.ramCache.ram.table).toEqual({});
     expect(rpcCache.ramCache.ram.table2).toEqual({});
 });

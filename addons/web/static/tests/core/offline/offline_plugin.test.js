@@ -1,6 +1,6 @@
 import { Component, proxy, xml } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
-import { rpc } from "@web/core/network/rpc";
+import { rpc, rpcBus } from "@web/core/network/rpc";
 
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
 
@@ -243,6 +243,17 @@ test("isAvailableOffline", async () => {
 
     expect(getService(OfflinePlugin).isAvailableOffline(1, "list", 1)).toBe(true);
     expect(getService(OfflinePlugin).isAvailableOffline(1, "kanban", 3)).toBe(false);
+});
+
+test("isAvailableOffline: visited items are kept when caches are cleared", async () => {
+    await makeTestApp();
+    await getService(OfflinePlugin).setAvailableOffline(1, "list", { search: { key: 1 } });
+    rpcBus.trigger("CLEAR-CACHES", "get_views");
+    rpcBus.trigger("CLEAR-CACHES");
+
+    getService(OfflinePlugin).setOffline(true);
+    await getService(OfflinePlugin).getVisitedStatus();
+    expect(getService(OfflinePlugin).isAvailableOffline(1, "list")).toBe(true);
 });
 
 test("getAvailableSearches", async () => {
