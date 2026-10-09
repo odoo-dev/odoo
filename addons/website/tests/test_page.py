@@ -3,13 +3,14 @@
 from lxml import html
 from unittest.mock import patch
 
+import werkzeug
+
 from odoo.addons.website.controllers.main import Website
 from odoo.addons.website.tools import MockRequest
 from odoo.fields import Command
 from odoo.http import root
 from odoo.tests import common, HttpCase, tagged
-from odoo.tests.common import HOST
-from odoo.tools import config, mute_logger
+from odoo.tools import mute_logger
 
 
 @tagged('-at_install', 'post_install')
@@ -204,6 +205,29 @@ class TestPage(common.TransactionCase):
         self.assertEqual(len(pages), Website.search_count([]) - 1, "A specific page for every website should have been created, except for the one from where we deleted the generic one.")
         self.assertTrue(website_id not in pages.mapped('website_id').ids, "The website from which we deleted the generic page should not have a specific one.")
         self.assertTrue(website_id not in View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
+
+
+    def test_no_crypt_context_crash_if_password_is_falsy(self):
+        View = self.env['ir.ui.view']
+
+        # If a password protected page is duplicated, the duplicate one will
+        # have no password, but still be password protected.
+        empty_password_view = View.create({
+            'name': 'Broken clone',
+            'type': 'qweb',
+            'arch': '<div>clone</div>',
+            'key': 'test.broken_clone_view',
+            'visibility': 'password',
+        })
+
+        public_user = self.env.ref('base.public_user')
+        website = self.env['website'].browse(1)
+
+        with MockRequest(self.env(user=public_user), website=website) as mock_request:
+            mock_request.params = {'visibility_password': 'secret'}
+            self.assertFalse(empty_password_view._handle_visibility(do_raise = False))
+            with self.assertRaises(werkzeug.exceptions.Forbidden):
+                empty_password_view._handle_visibility(do_raise = True)
 
 
 @tagged('-at_install', 'post_install')
