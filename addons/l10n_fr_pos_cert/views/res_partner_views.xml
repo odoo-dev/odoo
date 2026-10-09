@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_pos_ui_l10n_fr" model="ir.ui.view">
+        <field name="name">res.partner.form.pos.ui.l10n_fr</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="point_of_sale.view_partner_form_pos_ui"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='accounting']" position="attributes">
+                <attribute name="invisible">'FR' not in fiscal_country_codes</attribute>
+            </xpath>
+            <xpath expr="//page[@name='internal_notes']" position="attributes">
+                <attribute name="invisible">'FR' not in fiscal_country_codes</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

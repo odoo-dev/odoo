@@ -90,6 +90,18 @@
                                     placeholder='e.g. "B2B", "VIP", "Consulting", ...'/>
                             </group>
                         </group>
+                        <notebook>
+                            <page string="Invoicing" name="accounting" invisible="1">
+                                <group string="Customer Invoices" name="accounting_entries">
+                                    <field name="invoice_sending_method"/>
+                                    <field name="invoice_edi_format"/>
+                                    <field name="qr_code_method"/>
+                                </group>
+                            </page>
+                            <page string="Notes" name="internal_notes" invisible="1">
+                                <field name="comment" placeholder="Internal notes..." nolabel="1"/>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>
