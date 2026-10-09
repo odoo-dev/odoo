@@ -71,6 +71,7 @@ const getSequence = () => sequence++;
  * @property {import("@web/env").OdooEnv} [env]
  * @property {boolean} [refreshStream] if true, the stream be requested from the device again instead of
  *     potentially reusing the current stream.
+ * @property {MediaStream} [sourceStream]
  */
 
 /**
@@ -1227,6 +1228,25 @@ export class Rtc extends Record {
         }
     }
 
+    /** @param {"camera" | "microphone" | "usermedia"} media */
+    supportsMediaCaptureElement(media) {
+        const constructor = {
+            camera: "HTMLCameraElement",
+            microphone: "HTMLMicrophoneElement",
+            usermedia: "HTMLUserMediaElement",
+        }[media];
+        return constructor in window;
+    }
+
+    /** @param {"camera" | "microphone"} media */
+    shouldShowMediaPermissionDialog(media) {
+        const permission = media === "camera" ? this.cameraPermission : this.microphonePermission;
+        return (
+            permission === "prompt" ||
+            (permission === "denied" && this.supportsMediaCaptureElement(media))
+        );
+    }
+
     /**
      * @param {"microphone" | "camera"} media
      * @param {Object} [configuration]
@@ -1234,8 +1254,7 @@ export class Rtc extends Record {
      * @param {ContextOptions & { onClose?: () => void }} [configuration.options]
      */
     showMediaPermissionDialog(media, { props = {}, options = {} } = {}) {
-        const permission = media === "camera" ? this.cameraPermission : this.microphonePermission;
-        if (permission === "denied") {
+        if (!this.shouldShowMediaPermissionDialog(media)) {
             // Bypass the permission dialog in this case: we still need to do
             // the potential thing that was supposed to be done once it closes.
             options.onClose?.();
@@ -1249,12 +1268,16 @@ export class Rtc extends Record {
             {
                 ...props,
                 media,
-                useMicrophone: async () => {
-                    await this.unmute();
+                useMicrophone: async (sourceStream) => {
+                    await this.unmute({ sourceStream });
                     await props.useMicrophone?.();
                 },
-                useCamera: async () => {
-                    await this.toggleVideo("camera", { force: true, refreshStream: true });
+                useCamera: async (sourceStream) => {
+                    await this.toggleVideo("camera", {
+                        force: true,
+                        refreshStream: true,
+                        sourceStream,
+                    });
                     await props.useCamera?.();
                 },
             },
@@ -1278,7 +1301,7 @@ export class Rtc extends Record {
      */
     async startMeetingCall(channel, { fullscreen = false } = {}) {
         await this.mediaPermissionsPromise;
-        const isMicrophonePermissionPending = this.microphonePermission === "prompt";
+        const isMicrophonePermissionPending = this.shouldShowMediaPermissionDialog("microphone");
         await this.toggleCall(channel, {
             camera: this.cameraPermission === "granted" || !isMicrophonePermissionPending,
             fullscreen,
@@ -1293,9 +1316,9 @@ export class Rtc extends Record {
      */
     async showMeetingMediaPermissionDialog() {
         await this.mediaPermissionsPromise;
-        if (this.microphonePermission === "prompt") {
+        if (this.shouldShowMediaPermissionDialog("microphone")) {
             this.showMediaPermissionDialog("microphone");
-        } else if (this.cameraPermission === "prompt") {
+        } else if (this.shouldShowMediaPermissionDialog("camera")) {
             this.showMediaPermissionDialog("camera");
         }
     }
@@ -1370,18 +1393,21 @@ export class Rtc extends Record {
     }
 
     /**
-     * @param {ContextOptions} [options]
+     * @param {ContextOptions & { sourceStream?: MediaStream }} [options]
      */
     async unmute(options = {}) {
+        const { sourceStream } = options;
         if (this.isRemote) {
+            closeStream(sourceStream);
             this._remoteAction({ is_muted: false });
             return;
         }
-        if (this.microphonePermission === "prompt") {
+        if (!sourceStream && this.shouldShowMediaPermissionDialog("microphone")) {
             this.showMediaPermissionDialog("microphone", { options });
             return;
         }
         if (this.micAudioTrack) {
+            closeStream(sourceStream);
             await this.setMute(false);
         } else {
             await this.resetMicAudioTrack({ force: true }, options);
@@ -2358,25 +2384,33 @@ export class Rtc extends Record {
         let force;
         let env;
         let refreshStream;
+        let sourceStream;
         if (typeof options === "boolean") {
             force = options;
         } else {
             force = options?.force;
             env = options?.env;
             refreshStream = options?.refreshStream;
+            sourceStream = options?.sourceStream;
         }
         if (this.isRemote) {
+            closeStream(sourceStream);
             this.notification.add(UNAVAILABLE_AS_REMOTE, {
                 type: "warning",
             });
             return;
         }
         if (!this.localChannel?.id) {
+            closeStream(sourceStream);
             return;
         }
         switch (type) {
             case "camera": {
-                if (this.cameraPermission === "prompt" && !this.cameraTrack) {
+                if (
+                    !sourceStream &&
+                    !this.cameraTrack &&
+                    this.shouldShowMediaPermissionDialog("camera")
+                ) {
                     this.showMediaPermissionDialog("camera", { options });
                     return;
                 }
@@ -2388,6 +2422,7 @@ export class Rtc extends Record {
                     env,
                     rootRef: options?.rootRef,
                     refreshStream,
+                    sourceStream,
                 });
                 break;
             }
@@ -2470,6 +2505,7 @@ export class Rtc extends Record {
      * @param {Boolean} [options.activateVideo=false] options
      * @param {import("@web/env").OdooEnv} [options.env]
      * @param {Boolean} [options.refreshStream] whether we are requesting a new stream
+     * @param {MediaStream} [options.sourceStream] stream acquired by a capability element
      */
     async setVideo(track, type, options) {
         let activateVideo;
@@ -2481,6 +2517,7 @@ export class Rtc extends Record {
             env = options?.env;
         }
         const stopVideo = () => {
+            closeStream(options?.sourceStream);
             if (track) {
                 track.stop();
             }
@@ -2511,11 +2548,13 @@ export class Rtc extends Record {
             return;
         }
         /** @type {MediaStream} */
-        let sourceStream;
+        let sourceStream = options?.sourceStream;
         const sourceWindow = env?.pipWindow ?? window;
         try {
             if (type === "camera") {
-                if (this.sourceCameraStream && !options?.refreshStream) {
+                if (sourceStream) {
+                    closeStream(this.sourceCameraStream);
+                } else if (this.sourceCameraStream && !options?.refreshStream) {
                     sourceStream = this.sourceCameraStream;
                 } else {
                     closeStream(this.sourceCameraStream);
@@ -2641,7 +2680,7 @@ export class Rtc extends Record {
     /**
      * @param {Object} param0
      * @param {boolean} [param0.force]
-     * @param {ContextOptions} [options]
+     * @param {ContextOptions & { sourceStream?: MediaStream }} [options]
      */
     async resetMicAudioTrack({ force = false }, options = {}) {
         this.disconnectMicAudioTrackListeners?.();
@@ -2651,6 +2690,7 @@ export class Rtc extends Record {
         this.audioTrack?.stop();
         this.audioTrack = undefined;
         if (!this.localChannel) {
+            closeStream(options.sourceStream);
             return;
         }
         if (this.localSession) {
@@ -2659,14 +2699,17 @@ export class Rtc extends Record {
         if (force) {
             let micAudioTrack;
             try {
-                const audioStream = await window.navigator.mediaDevices.getUserMedia({
-                    audio: this.store.settings.audioConstraints,
-                });
+                const audioStream =
+                    options.sourceStream ??
+                    (await window.navigator.mediaDevices.getUserMedia({
+                        audio: this.store.settings.audioConstraints,
+                    }));
                 micAudioTrack = audioStream.getAudioTracks()[0];
                 if (this.localSession) {
                     this.setMute(false);
                 }
             } catch {
+                closeStream(options.sourceStream);
                 this.showMediaUnavailableWarning({ microphone: true }, options);
                 return;
             }

@@ -264,16 +264,19 @@ export class CallPreview extends Component {
         return [callAudioActions, callVideoActions];
     });
 
-    async enableMicrophone() {
+    async enableMicrophone(sourceStream) {
         if (
+            !sourceStream &&
             this.rtc.microphonePermission !== "granted" &&
             !(await this.rtc.askForBrowserPermission({ audio: true }))
         ) {
             return;
         }
-        this.state.audioStream = await navigator.mediaDevices.getUserMedia({
-            audio: this.store.settings.audioConstraints,
-        });
+        this.state.audioStream =
+            sourceStream ??
+            (await navigator.mediaDevices.getUserMedia({
+                audio: this.store.settings.audioConstraints,
+            }));
         if (this.scope.isDestroyed()) {
             closeStream(this.state.audioStream);
             return;
@@ -298,27 +301,30 @@ export class CallPreview extends Component {
             this.disableMicrophone();
             return;
         }
-        if (this.rtc.microphonePermission === "prompt") {
+        if (this.rtc.shouldShowMediaPermissionDialog("microphone")) {
             this.dialog.add(CallPermissionDialog, {
                 media: "microphone",
-                useMicrophone: () => this.enableMicrophone(),
-                useCamera: () => this.enableCamera(),
+                useMicrophone: (sourceStream) => this.enableMicrophone(sourceStream),
+                useCamera: (sourceStream) => this.enableCamera(sourceStream),
             });
             return;
         }
         await this.enableMicrophone();
     }
 
-    async enableCamera() {
+    async enableCamera(sourceStream) {
         if (
+            !sourceStream &&
             this.rtc.cameraPermission !== "granted" &&
             !(await this.rtc.askForBrowserPermission({ video: true }))
         ) {
             return;
         }
-        this.state.videoStream = await navigator.mediaDevices.getUserMedia({
-            video: this.store.settings.cameraConstraints,
-        });
+        this.state.videoStream =
+            sourceStream ??
+            (await navigator.mediaDevices.getUserMedia({
+                video: this.store.settings.cameraConstraints,
+            }));
         if (this.scope.isDestroyed()) {
             closeStream(this.state.videoStream);
             return;
@@ -348,11 +354,11 @@ export class CallPreview extends Component {
             this.disableCamera();
             return;
         }
-        if (this.rtc.cameraPermission === "prompt") {
+        if (this.rtc.shouldShowMediaPermissionDialog("camera")) {
             this.dialog.add(CallPermissionDialog, {
                 media: "camera",
-                useMicrophone: () => this.enableMicrophone(),
-                useCamera: () => this.enableCamera(),
+                useMicrophone: (sourceStream) => this.enableMicrophone(sourceStream),
+                useCamera: (sourceStream) => this.enableCamera(sourceStream),
             });
             return;
         }
