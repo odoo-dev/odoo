@@ -104,7 +104,7 @@
         'web.assets_backend': [
             'point_of_sale/static/src/scss/pos_dashboard.scss',
             'point_of_sale/static/src/backend/tours/point_of_sale.js',
-            'point_of_sale/static/src/backend/pos_kanban_view/*',
+            'point_of_sale/static/src/backend/pos_onboarding_scenarios/*',
             'point_of_sale/static/src/backend/lna_checklist/*',
             'point_of_sale/static/src/backend/pos_payment_provider_cards/*',
             'point_of_sale/static/src/app/hooks/hooks.js',
