@@ -1,8 +1,11 @@
 # coding: utf-8
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
+import time
 import requests
+from urllib.parse import quote
 
+from odoo.tools import float_compare
 from odoo import api, fields, models, modules, _
 from odoo.exceptions import UserError, AccessError
 
@@ -141,6 +144,51 @@ class PosPaymentMethod(models.Model):
 
     def _load_pos_data_fields(self, config):
         return [*super()._load_pos_data_fields(config), 'viva_com_terminal_id']
+
+    def viva_com_confirm_app_payment(self, session_id, transaction_id):
+        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+            raise AccessError(_("Only 'group_pos_user' are allowed to confirm a Viva.com payment"))
+        self.ensure_one()
+        line = self.env['pos.payment'].search([
+            ('payment_method_id', '=', self.id),
+            ('viva_com_session_id', '=', session_id),
+        ], limit=1)
+        if not line:
+            return {'error': _("Payment %s not found", session_id)}
+        transaction = {}
+        for attempt in range(3):
+            if attempt:
+                time.sleep(1)
+            transaction = self._viva_com_get_transaction(transaction_id)
+            if transaction:
+                break
+        confirmed = (
+            transaction.get('StatusId') == 'F'
+            and transaction.get('MerchantTrns', '').startswith(session_id)
+            and float_compare(transaction.get('Amount', 0), abs(line.amount), precision_digits=2) == 0
+        )
+        if not confirmed:
+            return {'error': _("Viva.com did not confirm the payment %s", transaction_id)}
+        line.write({
+            'transaction_id': transaction_id,
+            'payment_status': 'done',
+            'card_type': transaction.get('BankId'),
+        })
+        return {'success': True, 'transactionId': transaction_id, 'cardType': transaction.get('BankId')}
+
+    def _viva_com_get_transaction(self, transaction_id):
+        # Deprecated Viva.com endpoint, but the only one to retrieve a transaction with the configured
+        # merchant ID and API key (the new one requires Smart Checkout credentials)
+        url = f"{self._viva_com_webhook_get_endpoint()}/api/transactions/{quote(transaction_id, safe='')}"
+        auth = requests.auth.HTTPBasicAuth(self.viva_com_merchant_id, self.sudo().viva_com_api_key)
+        try:
+            resp = get_viva_com_session(should_retry=False).get(url, auth=auth, timeout=TIMEOUT)
+        except requests.exceptions.RequestException as e:
+            _logger.warning("Could not retrieve Viva.com transaction %s: %s", transaction_id, e)
+            return {}
+        if resp.status_code != 200:
+            return {}
+        return next(iter(resp.json().get('Transactions') or []), {})
 
     def viva_com_send_payment_request(self, data):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):

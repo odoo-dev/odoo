@@ -10,12 +10,39 @@ patch(PaymentScreenPaymentLines.prototype, {
     },
 
     getPaymentActionState(line) {
-        if (this.vivaApp.isIntegrated(line)) {
+        if (this.vivaApp.isIntegrated(line) && line.getPaymentStatus() === "waiting") {
             return {
-                id: "viva_continue_app",
-                title: _t("Continue on Viva app"),
-                icon: "smartphone",
+                id: "viva_confirming",
+                title: _t("Confirming the payment"),
+                icon: "autorenew",
+                iconClass: "oi-spin",
+                actions: [],
+            };
+        }
+        if (this.vivaApp.isIntegrated(line) && line.getPaymentStatus() !== "force_done") {
+            const retry = line.getPaymentStatus() === "retry";
+            return {
+                id: retry ? "viva_retry_app" : "viva_continue_app",
+                title: retry ? _t("Payment not completed") : _t("Continue on Viva app"),
+                icon: retry ? "smartphone" : "autorenew",
+                iconClass: retry ? "" : "oi-spin",
                 actions: [
+                    ...(retry
+                        ? [
+                              {
+                                  id: "viva_retry",
+                                  label: _t("Retry"),
+                                  title: _t("Retry on the Viva app"),
+                                  action: () => this.vivaApp.retry(line),
+                              },
+                              {
+                                  id: "viva_cancel",
+                                  label: _t("Cancel"),
+                                  title: _t("Remove this payment"),
+                                  action: () => this.props.deleteLine(line.uuid),
+                              },
+                          ]
+                        : []),
                     {
                         id: "viva_reset_integration",
                         label: _t("Reset Integration"),

@@ -12,6 +12,7 @@ import { uuidv4 } from "@point_of_sale/utils";
 export const useVivaApp = (validateCallback) => {
     const pos = usePos();
     const dialog = useService("dialog");
+    const orm = useService("orm");
     const order = pos.getOrder();
 
     /**
@@ -32,45 +33,55 @@ export const useVivaApp = (validateCallback) => {
      * and update the payment line accordingly.
      */
     const process = async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get("status");
-        const action = urlParams.get("action");
-        const ref = urlParams.get("referenceNumber");
-        const bankId = urlParams.get("bankId");
-
-        if (!action || !status) {
+        const params = Object.fromEntries(new URLSearchParams(window.location.search));
+        if (!params.action || !params.status) {
             return;
         }
-
-        const order = pos.getOrder();
-        await pos.syncAllOrders({ orders: [order] });
-        const line = pos
-            .getOrder()
-            .payment_ids.find((l) => l.payment_method_id.payment_provider === "viva_com");
-
-        if (status === "success") {
-            line.payment_status = "done";
-            line.transaction_id = ref;
-            line.card_type = bankId;
-            await validateCallback({ isForceValidate: true });
-        } else {
-            // Used identifier is clientTransactionId which is sent during payment initiation
-            // If status is not success, the error message will be returned via message field
-            const message = urlParams.get("message");
-            line?.delete();
-            dialog.add(AlertDialog, {
-                title: _t("Viva Wallet Payment Error"),
-                body: _t(
-                    "Please note that your order has not been finalized, try again or choose another payment method. (%s)",
-                    message
-                ),
-            });
-        }
-
+        await settle(params);
         // Remove the URL parameters to avoid processing them again
         const newUrl = window.location.href.split("?")[0];
         window.history.replaceState({}, document.title, newUrl);
     };
+
+    const settle = async (params) => {
+        const order = pos.getOrder();
+        const line = order.payment_ids.find(
+            (l) => l.payment_method_id.payment_provider === "viva_com"
+        );
+        if (params.action === "abort") {
+            line?.delete();
+            return;
+        }
+        if (params.status !== "success") {
+            line?.setPaymentStatus("retry");
+            return;
+        }
+        line?.setPaymentStatus("waiting");
+        await pos.syncAllOrders({ orders: [order] });
+        const confirmation = line ? await confirm(line, params.transactionId) : {};
+        if (confirmation.success) {
+            line.payment_status = "done";
+            line.transaction_id = confirmation.transactionId;
+            line.card_type = confirmation.cardType || params.bankId;
+            await validateCallback({ isForceValidate: true });
+            return;
+        }
+        line?.setPaymentStatus("force_done");
+        dialog.add(AlertDialog, {
+            title: _t("Viva Wallet Payment Error"),
+            body: _t(
+                "Please note that your order has not been finalized, try again or choose another payment method. (%s)",
+                confirmation.error
+            ),
+        });
+    };
+
+    const confirm = (line, transactionId) =>
+        orm.call("pos.payment.method", "viva_com_confirm_app_payment", [
+            [line.payment_method_id.id],
+            line.viva_com_session_id,
+            transactionId,
+        ]);
 
     /**
      * This function is used to abort a payment already sent to the
@@ -79,9 +90,9 @@ export const useVivaApp = (validateCallback) => {
      * @param {Object} line
      */
     const abort = async (line) => {
-        const baseUrl = window.location.origin;
-        const callbackPath = `/pos_viva_com/${pos.config.id}/abort/${line.pos_order_id.uuid}`;
-        const callbackLink = `${baseUrl}${callbackPath}`;
+        const callbackLink =
+            pos.paymentAppCallback?.("viva_com") ||
+            `${window.location.origin}/pos_viva_com/${pos.config.id}/abort/${line.pos_order_id.uuid}`;
         const url =
             "vivapayclient://pay/v1" +
             "?appId=com.odoo.mobile" +
@@ -104,7 +115,13 @@ export const useVivaApp = (validateCallback) => {
             dialog.add(AlertDialog, { title: _t("Oh snap !"), body: addResult.data });
             return;
         }
-        const line = addResult.data;
+        await launch(addResult.data, isRefund);
+    };
+
+    const retry = (line) => launch(line, line.amount < 0);
+
+    const launch = async (line, isRefund) => {
+        const order = line.pos_order_id;
         try {
             line.viva_com_session_id = `${order.uuid}-${uuidv4()}`;
             const result = await pos.syncAllOrders({ orders: [order] });
@@ -115,17 +132,18 @@ export const useVivaApp = (validateCallback) => {
                 );
             }
 
-            const baseUrl = window.location.origin;
-            const callbackPath = `/pos_viva_com/${pos.config.id}/payment/${order.uuid}`;
-            const callbackLink = `${baseUrl}${callbackPath}`;
+            const appLink = pos.paymentAppCallback?.("viva_com");
+            const callbackLink =
+                appLink ||
+                `${window.location.origin}/pos_viva_com/${pos.config.id}/payment/${order.uuid}`;
 
             let url =
                 "vivapayclient://pay/v1" +
                 "?appId=com.odoo.mobile" +
                 `&amount=${roundPrecision(Math.abs(line.amount * 100))}` +
-                "&show_receipt=true" +
+                `&show_receipt=${!appLink}` +
                 "&show_transaction_result=true" +
-                "&show_rating=true" +
+                `&show_rating=${!appLink}` +
                 `&callback=${callbackLink}`;
 
             if (isRefund) {
@@ -181,7 +199,9 @@ export const useVivaApp = (validateCallback) => {
     return {
         use,
         process,
+        settle,
         start,
+        retry,
         abort,
         isIntegrated,
         resetIntegration,

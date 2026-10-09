@@ -41,7 +41,8 @@ test("getPaymentActionState", async () => {
     expect(normalizeActionState(comp.getPaymentActionState(paymentline))).toEqual({
         id: "viva_continue_app",
         title: "Continue on Viva app",
-        icon: "smartphone",
+        icon: "autorenew",
+        iconClass: "oi-spin",
         actions: [
             {
                 id: "viva_reset_integration",

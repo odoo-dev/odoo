@@ -1,6 +1,6 @@
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { patch } from "@web/core/utils/patch";
-import { onMounted, onWillStart } from "@odoo/owl";
+import { onMounted, onWillStart, useListener } from "@odoo/owl";
 import { useVivaApp } from "../../hooks/use_viva_app";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -21,6 +21,11 @@ patch(PaymentScreen.prototype, {
         });
 
         this.vivaApp = useVivaApp(this.onClickValidate.bind(this));
+        useListener(document, "odoo_mobile_link", ({ detail }) => {
+            if (detail?.path === "payment/viva_com") {
+                this.vivaApp.settle(detail.params || {});
+            }
+        });
         this.integrated = () => window.localStorage.getItem("vivawallet_app_answer") === "true";
         onWillStart(async () => {
             await this.vivaApp.process();
