@@ -201,7 +201,17 @@ export class CollaborationNetworkPlugin extends Plugin {
      * @returns {Promise<string>} the value of the collaborative field currently
      *     saved on the server.
      */
-    async fetchServerContent() {}
+    async fetchServerContent() {
+        const { ormService, collaborationChannel } = this.config.collaboration;
+        const { collaborationModelName, collaborationFieldName, collaborationResId } =
+            collaborationChannel;
+        const [record] = await ormService.read(
+            collaborationModelName,
+            [collaborationResId],
+            [collaborationFieldName]
+        );
+        return record[collaborationFieldName];
+    }
 
     // -------------------------------------------------------------------------
     // Private

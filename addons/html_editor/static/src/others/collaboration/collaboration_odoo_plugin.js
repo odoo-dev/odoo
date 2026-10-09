@@ -439,13 +439,11 @@ export class CollaborationOdooPlugin extends Plugin {
      */
     async resetFromServerAndResyncWithPeers() {
         let collaborationResetId = this.lastCollaborationResetId;
-        const record = await this.getCurrentRecord();
+        const content = await this.dependencies.collaborationNetwork.fetchServerContent();
         if (collaborationResetId !== this.lastCollaborationResetId) {
             return;
         }
 
-        const content =
-            record[this.config.collaboration.collaborationChannel.collaborationFieldName];
         // Reset the server id, as the html_field_write event can lag behind the record.
         this.serverLastCommitId = content && this.getLastHistoryCommitId(content);
 
@@ -625,14 +623,6 @@ export class CollaborationOdooPlugin extends Plugin {
         this.processMissingCommits(
             Array.isArray(missingCommits) ? missingCommits.concat(commit) : missingCommits
         );
-    }
-    async getCurrentRecord() {
-        const [record] = await this.config.collaboration.ormService.read(
-            this.config.collaboration.collaborationChannel.collaborationModelName,
-            [this.config.collaboration.collaborationChannel.collaborationResId],
-            [this.config.collaboration.collaborationChannel.collaborationFieldName]
-        );
-        return record;
     }
     attachHistoryIds(editable) {
         const historyIds = this.dependencies.collaboration.getBranchIds().join(",");

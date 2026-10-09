@@ -20,6 +20,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
  * @typedef { Object } CollaborationConfig
  * @property { string } collaboration.peerId
  * @property { Object } collaboration.busService
+ * @property { Object } collaboration.ormService
  * @property { Object } collaboration.collaborationChannel
  * @property { String } collaboration.collaborationChannel.collaborationModelName
  * @property { String } collaboration.collaborationChannel.collaborationFieldName
