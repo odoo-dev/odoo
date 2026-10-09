@@ -25,7 +25,7 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        on_collaboration_notification_handlers: this.handleCollaborationNotification.bind(this),
+        on_peer_disconnected_handlers: this.onPeerDisconnected.bind(this),
         on_remote_history_commits_applied_handlers: this.refreshSelection.bind(this),
         on_layout_geometry_change_handlers: this.refreshSelection.bind(this),
         on_movable_element_set_handlers: this.disableAvatarForElement.bind(this),
@@ -47,12 +47,12 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
             location.origin
         }/web/image?model=res.users&field=avatar_128&id=${encodeURIComponent(user.userId)}`;
     }
-    handleCollaborationNotification({ notificationName, notificationPayload }) {
-        switch (notificationName) {
-            case "ptp_remove":
-                this.selectionInfos.delete(notificationPayload);
-                this.refreshSelection();
-        }
+    /**
+     * @param {string} peerId
+     */
+    onPeerDisconnected(peerId) {
+        this.selectionInfos.delete(peerId);
+        this.refreshSelection();
     }
 
     /**

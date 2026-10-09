@@ -1,9 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
-import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
-import { Mutex } from "@web/core/utils/concurrency";
 import { debounce } from "@web/core/utils/timing";
-import { PeerToPeer, RequestError } from "./PeerToPeer";
+import { RequestError } from "./collaboration_network_plugin";
 import { ancestors } from "@html_editor/utils/dom_traversal";
 import { childNodeIndex } from "@html_editor/utils/position";
 import { localeCompare } from "@web/core/l10n/utils";
@@ -14,20 +12,6 @@ import { localeCompare } from "@web/core/l10n/utils";
  * @property {string} color
  * @property {string} peerId
  */
-
-// Time to consider a user offline in ms. This fixes the problem of the
-// navigator closing rtc connection when the mac laptop screen is closed.
-// const CONSIDER_OFFLINE_TIME = 1000;
-// Check wether the computer could be offline. This fixes the problem of the
-// navigator closing rtc connection when the mac laptop screen is closed.
-// This case happens on Mac OS on every browser when the user close it's laptop
-// screen. At first, the os/navigator closes all rtc connection, and after some
-// times, the os/navigator internet goes offline without triggering an
-// offline/online event.
-// However, if the laptop screen is open and the connection is properly remove
-// (e.g. disconnect wifi), the event is properly triggered.
-// const CHECK_OFFLINE_TIME = 1000;
-// const PTP_PEER_DISCONNECTED_STATES = ["failed", "closed", "disconnected"];
 
 // Time in ms to wait when trying to aggregate snapshots from other peers and
 // potentially recover from a missing commit before trying to apply those
@@ -56,18 +40,51 @@ export class CollaborationOdooPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         on_selectionchange_handlers: debounce(() => {
-            this.ptp?.notifyAllPeers(
+            this.dependencies.collaborationNetwork.broadcast(
                 "oe_history_set_selection",
-                this.getCurrentCollaborativeSelection(),
-                {
-                    transport: "rtc",
-                }
+                this.getCurrentCollaborativeSelection()
             );
         }, 50),
         clean_for_save_processors: (root) => this.attachHistoryIds(root),
         on_history_missing_parent_commit_handlers: this.onHistoryMissingParentCommit.bind(this),
         on_committed_to_history_handlers: (commit) =>
-            this.ptp?.notifyAllPeers("oe_history_commit", commit, { transport: "rtc" }),
+            this.dependencies.collaborationNetwork.broadcast("oe_history_commit", commit),
+        on_peer_connected_handlers: (peerId) => this.onPeerConnected(peerId),
+        on_peer_disconnected_handlers: (peerId) => this.peersMetadata.delete(peerId),
+        on_peer_message_handlers: (message) => this.onPeerMessage(message),
+        on_server_content_saved_handlers: ({ lastCommitId }) =>
+            this.onServerLastIdUpdate(lastCommitId),
+
+        // Arrow functions, so that the methods are looked up when called.
+        peer_request_providers: [
+            { type: "get_peer_metadata", provide: () => this.getMetadata() },
+            {
+                type: "get_missing_commits",
+                provide: (payload) =>
+                    this.dependencies.collaboration.historyGetMissingCommits(payload),
+            },
+            { type: "get_history_from_snapshot", provide: () => this.getHistorySnapshot() },
+            {
+                type: "get_collaborative_selection",
+                provide: () => this.getCurrentCollaborativeSelection(),
+            },
+            {
+                type: "recover_document",
+                provide: ({ serverDocumentId, fromCommitId }) => {
+                    if (
+                        !this.dependencies.collaboration.getBranchIds().includes(serverDocumentId)
+                    ) {
+                        return;
+                    }
+                    return {
+                        missingCommits: this.dependencies.collaboration.historyGetMissingCommits({
+                            fromCommitId,
+                        }),
+                        snapshot: this.getHistorySnapshot(),
+                    };
+                },
+            },
+        ],
     };
 
     setup() {
@@ -96,7 +113,15 @@ export class CollaborationOdooPlugin extends Plugin {
         // different history, we should not apply it.
         this.historyShareId = Math.floor(Math.random() * Math.pow(2, 52)).toString();
 
-        this.setupCollaboration(this.config.collaboration.collaborationChannel);
+        // Wether or not the history has been sent or received at least once.
+        this.historySyncAtLeastOnce = false;
+        // Remote commits received before the history is synchronized.
+        this.historyCommitsBuffer = [];
+        this.startCollaborationTime = new Date().getTime();
+        // Metadata (name, avatar, ...) of the connected peers, by peer id.
+        this.peersMetadata = new Map();
+        // Aborted (and replaced) by `resetCollabRequests`.
+        this.requestsAbortController = new AbortController();
 
         const collaborativeTrigger = this.config.collaboration.collaborativeTrigger;
         this.joinPeerToPeer = this.joinPeerToPeer.bind(this);
@@ -113,21 +138,10 @@ export class CollaborationOdooPlugin extends Plugin {
         this.handleHistoryIds();
     }
     destroy() {
-        this.collaborationStopBus && this.collaborationStopBus();
-        // If peer to peer is initializing, wait for properly closing it.
-        this.dependencies.collaborationNetwork.ready().then(() => {
-            this.stopPeerToPeer();
-        });
-        // todo: to implement
-        // clearInterval(this.collaborationInterval);
-        super.destroy();
-    }
-
-    stopPeerToPeer() {
         this.joiningPtp = false;
         this.ptpJoined = false;
         this.resetCollabRequests();
-        this.ptp && this.ptp.stop();
+        super.destroy();
     }
 
     getCurrentCollaborativeSelection() {
@@ -136,218 +150,81 @@ export class CollaborationOdooPlugin extends Plugin {
             peerId: this.config.collaboration.peerId,
         };
     }
-    setupCollaboration(collaborationChannel) {
-        const modelName = collaborationChannel.collaborationModelName;
-        const fieldName = collaborationChannel.collaborationFieldName;
-        const resId = collaborationChannel.collaborationResId;
-        const channelName = `editor_collaboration:${modelName}:${fieldName}:${resId}`;
-
-        if (
-            !(modelName && fieldName && resId)
-            // todo: handle this feature
-            // || Wysiwyg.activeCollaborationChannelNames.has(channelName)
-        ) {
+    /**
+     * Exchange the metadata with a newly connected peer and synchronize the
+     * history with it.
+     *
+     * @param {string} peerId
+     */
+    async onPeerConnected(peerId) {
+        const metadata = await this.requestPeer(peerId, "get_peer_metadata");
+        if (metadata === REQUEST_ERROR) {
             return;
         }
+        // The peer may have left in the meantime.
+        if (!this.dependencies.collaborationNetwork.getPeerIds().includes(peerId)) {
+            return;
+        }
+        this.peersMetadata.set(peerId, metadata);
 
-        this.collaborationChannelName = channelName;
-        this.historyCommitsBuffer = [];
-        // Wysiwyg.activeCollaborationChannelNames.add(channelName);
-
-        const collaborationBusListener = (payload) => {
-            if (
-                payload.model_name === modelName &&
-                payload.field_name === fieldName &&
-                payload.res_id === resId
-            ) {
-                if (payload.notificationName === "html_field_write") {
-                    this.onServerLastIdUpdate(payload.notificationPayload.last_commit_id);
-                } else if (this.ptpJoined) {
-                    this.dependencies.collaborationNetwork
-                        .ready()
-                        .then(() => this.ptp?.handleNotification(payload));
+        if (!this.historySyncAtLeastOnce) {
+            const localPeer = {
+                id: this.config.collaboration.peerId,
+                startTime: this.startCollaborationTime,
+            };
+            const remotePeer = {
+                id: peerId,
+                startTime: metadata.startTime,
+            };
+            if (isPeerFirst(localPeer, remotePeer)) {
+                this.historySyncAtLeastOnce = true;
+                this.historySyncFinished = true;
+            } else {
+                this.resetCollabRequests();
+                const response = await this.resetFromPeer(peerId, this.lastCollaborationResetId);
+                if (response === REQUEST_ERROR) {
+                    return;
                 }
             }
-        };
-        const { busService } = this.config.collaboration;
-        busService.subscribe("editor_collaboration", collaborationBusListener);
-        busService.addChannel(this.collaborationChannelName);
-        this.collaborationStopBus = () => {
-            // Wysiwyg.activeCollaborationChannelNames.delete(this.collaborationChannelName);
-            busService.unsubscribe("editor_collaboration", collaborationBusListener);
-            busService.deleteChannel(this.collaborationChannelName);
-        };
-
-        this.startCollaborationTime = new Date().getTime();
-
-        // this.checkConnectionChange = () => {
-        //     if (!this.ptp) {
-        //         return;
-        //     }
-        //     if (!navigator.onLine) {
-        //         this.signalOffline();
-        //     } else {
-        //         this.signalOnline();
-        //     }
-        // };
-
-        // window.addEventListener("online", this.checkConnectionChange);
-        // window.addEventListener("offline", this.checkConnectionChange);
-
-        // this.collaborationInterval = setInterval(async () => {
-        //     if (this.offlineTimeout || this.preSavePromise || !this.ptp) {
-        //         return;
-        //     }
-
-        //     const peersInfos = Object.values(this.ptp.peersInfos);
-        //     const couldBeDisconnected =
-        //         Boolean(peersInfos.length) &&
-        //         peersInfos.every((x) =>
-        //             PTP_PEER_DISCONNECTED_STATES.includes(
-        //                 x.peerConnection && x.peerConnection.connectionState
-        //             )
-        //         );
-
-        //     if (couldBeDisconnected) {
-        //         this.offlineTimeout = setTimeout(() => {
-        //             this.signalOffline();
-        //         }, CONSIDER_OFFLINE_TIME);
-        //     }
-        // }, CHECK_OFFLINE_TIME);
+        } else {
+            // Make both send their last commit to each other to ensure they
+            // are in sync.
+            this.dependencies.collaborationNetwork.broadcast(
+                "oe_history_commit",
+                this.dependencies.history.getCommits().at(-1)
+            );
+            this.resetCollaborativeSelection(peerId);
+        }
     }
-
-    getNewPtp() {
-        const rpcMutex = new Mutex();
-        const { collaborationChannel } = this.config.collaboration;
-        const modelName = collaborationChannel.collaborationModelName;
-        const fieldName = collaborationChannel.collaborationFieldName;
-        const resId = collaborationChannel.collaborationResId;
-
-        // Wether or not the history has been sent or received at least
-        // once.
-        this.historySyncAtLeastOnce = false;
-
-        return new PeerToPeer({
-            peerConnectionConfig: { iceServers: this.iceServers },
-            currentPeerId: this.config.collaboration.peerId,
-            broadcastAll: (rpcData) =>
-                rpcMutex.exec(async () =>
-                    rpc("/html_editor/bus_broadcast", {
-                        model_name: modelName,
-                        field_name: fieldName,
-                        res_id: resId,
-                        bus_data: rpcData,
-                    })
-                ),
-            onRequest: {
-                get_peer_metadata: this.getMetadata.bind(this),
-                get_missing_commits: (params) =>
-                    this.dependencies.collaboration.historyGetMissingCommits(params.requestPayload),
-                get_history_from_snapshot: () => this.getHistorySnapshot(),
-                get_collaborative_selection: () => this.getCurrentCollaborativeSelection(),
-                recover_document: (params) => {
-                    const { serverDocumentId, fromCommitId } = params.requestPayload;
-                    if (
-                        !this.dependencies.collaboration.getBranchIds().includes(serverDocumentId)
-                    ) {
-                        return;
-                    }
-                    return {
-                        missingCommits: this.dependencies.collaboration.historyGetMissingCommits({
-                            fromCommitId,
-                        }),
-                        snapshot: this.getHistorySnapshot(),
-                    };
-                },
-            },
-            onNotification: async (notification) => {
-                this.trigger("on_collaboration_notification_handlers", notification);
-                let { fromPeerId, notificationName, notificationPayload } = notification;
-                switch (notificationName) {
-                    case "ptp_remove":
-                        // todo: to implement
-                        // this.odooEditor.multiselectionRemove(notificationPayload);
-                        break;
-                    case "ptp_disconnect":
-                        this.ptp.removePeer(fromPeerId);
-                        // todo: to implement
-                        // this.odooEditor.multiselectionRemove(fromPeerId);
-                        break;
-                    case "rtc_data_channel_open": {
-                        fromPeerId = notificationPayload.connectionPeerId;
-                        const metadata = await this.requestPeer(
-                            fromPeerId,
-                            "get_peer_metadata",
-                            undefined,
-                            { transport: "rtc" }
-                        );
-                        if (metadata === REQUEST_ERROR) {
-                            return;
-                        }
-
-                        this.ptp.peersInfos[fromPeerId].metadata = metadata;
-
-                        if (!this.historySyncAtLeastOnce) {
-                            const localPeer = {
-                                id: this.config.collaboration.peerId,
-                                startTime: this.startCollaborationTime,
-                            };
-                            const remotePeer = {
-                                id: fromPeerId,
-                                startTime: metadata.startTime,
-                            };
-                            if (isPeerFirst(localPeer, remotePeer)) {
-                                this.historySyncAtLeastOnce = true;
-                                this.historySyncFinished = true;
-                            } else {
-                                this.resetCollabRequests();
-                                const response = await this.resetFromPeer(
-                                    fromPeerId,
-                                    this.lastCollaborationResetId
-                                );
-                                if (response === REQUEST_ERROR) {
-                                    return;
-                                }
-                            }
-                        } else {
-                            // Make both send their last commit to each other to
-                            // ensure they are in sync.
-                            this.ptp.notifyAllPeers(
-                                "oe_history_commit",
-                                this.dependencies.history.getCommits().at(-1),
-                                { transport: "rtc" }
-                            );
-                            this.resetCollaborativeSelection(fromPeerId);
-                        }
-                        break;
-                    }
-                    case "oe_history_commit":
-                        if (this.historySyncFinished) {
-                            this.dependencies.collaboration.insertRemoteHistoryCommits([
-                                notificationPayload,
-                            ]);
-                        } else {
-                            this.historyCommitsBuffer.push(notificationPayload);
-                        }
-                        break;
-                    case "oe_history_set_selection": {
-                        const peer = this.ptp.peersInfos[fromPeerId];
-                        if (!peer) {
-                            return;
-                        }
-                        const selection = notificationPayload;
-                        this.onRemoteMultiselectionUpdate(selection);
-                        break;
-                    }
+    /**
+     * @param {Object} message
+     * @param {string} message.type
+     * @param {any} message.payload
+     * @param {string} message.fromPeerId
+     */
+    onPeerMessage({ type, payload, fromPeerId }) {
+        switch (type) {
+            case "oe_history_commit":
+                if (this.historySyncFinished) {
+                    this.dependencies.collaboration.insertRemoteHistoryCommits([payload]);
+                } else {
+                    this.historyCommitsBuffer.push(payload);
                 }
-            },
-        });
+                break;
+            case "oe_history_set_selection": {
+                if (!this.dependencies.collaborationNetwork.getPeerIds().includes(fromPeerId)) {
+                    return;
+                }
+                this.onRemoteMultiselectionUpdate(payload);
+                break;
+            }
+        }
     }
     /**
      * @param {string} peerId
      */
     getPeerMetadata(peerId) {
-        return this.ptp.peersInfos[peerId]?.metadata;
+        return this.peersMetadata.get(peerId);
     }
     /**
      * @param {CollaborationSelection} selection
@@ -356,14 +233,18 @@ export class CollaborationOdooPlugin extends Plugin {
         this.trigger("on_collaborative_selection_updated_handlers", selection);
     }
 
-    async requestPeer(peerId, requestName, requestPayload, params) {
-        return this.ptp.requestPeer(peerId, requestName, requestPayload, params).catch((e) => {
-            if (e instanceof RequestError) {
-                return REQUEST_ERROR;
-            } else {
-                throw e;
-            }
-        });
+    async requestPeer(peerId, requestName, requestPayload) {
+        return this.dependencies.collaborationNetwork
+            .request(peerId, requestName, requestPayload, {
+                signal: this.requestsAbortController.signal,
+            })
+            .catch((e) => {
+                if (e instanceof RequestError) {
+                    return REQUEST_ERROR;
+                } else {
+                    throw e;
+                }
+            });
     }
     getMetadata() {
         const metadatas = {
@@ -464,15 +345,10 @@ export class CollaborationOdooPlugin extends Plugin {
             };
 
             for (const peerId of allPeers) {
-                this.requestPeer(
-                    peerId,
-                    "recover_document",
-                    {
-                        serverDocumentId: this.serverLastCommitId,
-                        fromCommitId: this.dependencies.collaboration.getBranchIds().at(-1),
-                    },
-                    { transport: "rtc" }
-                ).then((response) => {
+                this.requestPeer(peerId, "recover_document", {
+                    serverDocumentId: this.serverLastCommitId,
+                    fromCommitId: this.dependencies.collaboration.getBranchIds().at(-1),
+                }).then((response) => {
                     nbPendingResponses--;
                     if (
                         response === REQUEST_ERROR ||
@@ -552,11 +428,11 @@ export class CollaborationOdooPlugin extends Plugin {
 
     resetCollabRequests() {
         this.lastCollaborationResetId++;
-        // By aborting the current requests from ptp, we ensure that the ongoing
-        // `Wysiwyg.requestPeer` will return REQUEST_ERROR. Most requests that
-        // calls `Wysiwyg.requestPeer` might want to check if the response is
-        // REQUEST_ERROR.
-        this.ptp && this.ptp.abortCurrentRequests();
+        // By aborting the current requests, we ensure that the ongoing
+        // `requestPeer` will return REQUEST_ERROR. Most requests that calls
+        // `requestPeer` might want to check if the response is REQUEST_ERROR.
+        this.requestsAbortController.abort();
+        this.requestsAbortController = new AbortController();
     }
     /**
      * Reset the document from the server and resync with the peers.
@@ -687,12 +563,7 @@ export class CollaborationOdooPlugin extends Plugin {
     async resetFromPeer(fromPeerId, resetCollabCount) {
         this.historySyncFinished = false;
         this.historyCommitsBuffer = [];
-        const snapshot = await this.requestPeer(
-            fromPeerId,
-            "get_history_from_snapshot",
-            undefined,
-            { transport: "rtc" }
-        );
+        const snapshot = await this.requestPeer(fromPeerId, "get_history_from_snapshot");
         if (snapshot === REQUEST_ERROR) {
             return REQUEST_ERROR;
         }
@@ -735,12 +606,7 @@ export class CollaborationOdooPlugin extends Plugin {
     }
 
     async resetCollaborativeSelection(fromPeerId) {
-        const remoteSelection = await this.requestPeer(
-            fromPeerId,
-            "get_collaborative_selection",
-            undefined,
-            { transport: "rtc" }
-        );
+        const remoteSelection = await this.requestPeer(fromPeerId, "get_collaborative_selection");
         if (remoteSelection === REQUEST_ERROR) {
             return;
         }
@@ -749,18 +615,10 @@ export class CollaborationOdooPlugin extends Plugin {
         }
     }
     async onHistoryMissingParentCommit({ commit, fromCommitId }) {
-        if (!this.ptp) {
-            return;
-        }
-        const missingCommits = await this.requestPeer(
-            commit.data.peerId,
-            "get_missing_commits",
-            {
-                fromCommitId,
-                toCommitId: commit.id,
-            },
-            { transport: "rtc" }
-        );
+        const missingCommits = await this.requestPeer(commit.data.peerId, "get_missing_commits", {
+            fromCommitId,
+            toCommitId: commit.id,
+        });
         if (missingCommits === REQUEST_ERROR) {
             return;
         }

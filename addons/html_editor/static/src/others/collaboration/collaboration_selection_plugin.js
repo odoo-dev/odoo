@@ -16,7 +16,7 @@ export class CollaborationSelectionPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        on_collaboration_notification_handlers: this.handleCollaborationNotification.bind(this),
+        on_peer_disconnected_handlers: this.onPeerDisconnected.bind(this),
         on_layout_geometry_change_handlers: this.refreshSelection.bind(this),
         on_collaborative_selection_updated_handlers: this.updateSelection.bind(this),
 
@@ -29,13 +29,12 @@ export class CollaborationSelectionPlugin extends Plugin {
             this.dependencies.localOverlay.makeLocalOverlay("oe-selections-container");
         this.selectionColor = `hsl(${(Math.random() * 360).toFixed(0)}, 75%, 50%)`;
     }
-    handleCollaborationNotification({ notificationName, notificationPayload }) {
-        switch (notificationName) {
-            case "ptp_remove":
-                this.multiselectionRemove(notificationPayload);
-                this.selectionInfos.delete(notificationPayload);
-                break;
-        }
+    /**
+     * @param {string} peerId
+     */
+    onPeerDisconnected(peerId) {
+        this.multiselectionRemove(peerId);
+        this.selectionInfos.delete(peerId);
     }
     /**
      * @param {import("./collaboration_odoo_plugin").CollaborationSelection} selection

@@ -51,7 +51,7 @@ declare module "plugins" {
     import { shift_tab_overrides, tab_overrides, TabulationShared } from "@html_editor/main/tabulation_plugin";
     import { expandable_toolbar_namespaces_providers, toolbar_groups, toolbar_items, toolbar_namespace_providers, ToolbarShared } from "@html_editor/main/toolbar/toolbar_plugin";
 
-    import { CollaborationNetworkShared } from "@html_editor/others/collaboration/collaboration_network_plugin";
+    import { CollaborationNetworkShared, on_peer_connected_handlers, on_peer_disconnected_handlers, on_peer_message_handlers, on_server_content_saved_handlers, peer_request_providers } from "@html_editor/others/collaboration/collaboration_network_plugin";
     import { CollaborationOdooShared } from "@html_editor/others/collaboration/collaboration_odoo_plugin";
     import { CollaborationShared, on_remote_history_commits_applied_handlers } from "@html_editor/others/collaboration/collaboration_plugin";
     import { EmbeddedComponentShared, on_will_mount_component_handlers, on_component_mounted_handlers } from "@html_editor/others/embedded_component_plugin";
@@ -162,6 +162,9 @@ declare module "plugins" {
         on_media_replaced_handlers: on_media_replaced_handlers;
         on_movable_element_set_handlers: on_movable_element_set_handlers;
         on_pasted_handlers: on_pasted_handlers;
+        on_peer_connected_handlers: on_peer_connected_handlers;
+        on_peer_disconnected_handlers: on_peer_disconnected_handlers;
+        on_peer_message_handlers: on_peer_message_handlers;
         on_pending_mutations_normalized_handlers: on_pending_mutations_normalized_handlers;
         on_pending_mutations_staged_handlers: on_pending_mutations_staged_handlers;
         on_remote_history_commit_applied_handlers: on_remote_history_commit_applied_handlers;
@@ -170,6 +173,7 @@ declare module "plugins" {
         on_savepoint_restored_handlers: on_savepoint_restored_handlers;
         on_selection_leave_handlers: on_selection_leave_handlers;
         on_selectionchange_handlers: on_selectionchange_handlers;
+        on_server_content_saved_handlers: on_server_content_saved_handlers;
         on_will_delete_handlers: on_will_delete_handlers;
         on_will_break_line_handlers: on_will_break_line_handlers;
         on_will_filter_mutations_handlers: on_will_filter_mutations_handlers;
@@ -268,6 +272,7 @@ declare module "plugins" {
         hint_targets_providers: hint_targets_providers;
         image_name_providers: image_name_providers;
         paste_media_url_command_providers: paste_media_url_command_providers;
+        peer_request_providers: peer_request_providers;
         removable_descendants_providers: removable_descendants_providers;
         selectors_for_feff_providers: selectors_for_feff_providers;
         selected_background_color_providers: selected_background_color_providers;
