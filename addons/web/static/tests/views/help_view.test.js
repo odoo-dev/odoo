@@ -7,6 +7,8 @@ import {
     models,
     mountView,
     onRpc,
+    toggleMenuItem,
+    toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 import { registry } from "@web/core/registry";
 
@@ -14,6 +16,11 @@ class Foo extends models.Model {
     foo = fields.Char();
     date = fields.Date();
     _records = [];
+
+    get_help_data(domain) {
+        expect.step(`get_help_data ${JSON.stringify(domain)}`);
+        return { threshold: 20, show_more: true };
+    }
 }
 
 class User extends models.Model {
@@ -164,4 +171,84 @@ test(`help view of the action: the view's help view takes precedence`, async () 
     });
     expect(`.o_view_nocontent .o_help_title`).toHaveText("No foo yet");
     expect(`.o_view_nocontent .o_action_help_view`).toHaveCount(0);
+});
+
+const HELP_WITH_DATA = `
+    <help data_method="get_help_data">
+        <p class="o_help_threshold">Threshold: <b t-out="data.threshold"/></p>
+        <p class="o_help_more" invisible="not data.get('show_more')">More</p>
+        <p class="o_help_less" invisible="data.get('show_more')">Less</p>
+    </help>`;
+
+test(`help view: data in a list view`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/>${HELP_WITH_DATA}</list>`,
+    });
+    expect.verifySteps(["get_help_data []"]);
+    expect(`.o_view_nocontent .o_help_threshold`).toHaveText("Threshold: 20");
+    expect(`.o_view_nocontent .o_help_more`).toHaveCount(1);
+    expect(`.o_view_nocontent .o_help_less`).toHaveCount(0);
+});
+
+test(`help view: data in a grouped kanban view`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "kanban",
+        arch: `
+            <kanban>
+                <templates><t t-name="card"><field name="foo"/></t></templates>
+                ${HELP_WITH_DATA}
+            </kanban>`,
+        groupBy: ["foo"],
+    });
+    expect.verifySteps(["get_help_data []"]);
+    expect(`.o_view_nocontent .o_help_threshold`).toHaveText("Threshold: 20");
+});
+
+test(`help view: data in a graph view`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "graph",
+        arch: `<graph sample="1"><field name="date"/>${HELP_WITH_DATA}</graph>`,
+    });
+    expect.verifySteps(["get_help_data []"]);
+    expect(`.o_view_nocontent .o_help_threshold`).toHaveText("Threshold: 20");
+});
+
+test(`help view: data reloaded when the search changes`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/>${HELP_WITH_DATA}</list>`,
+        searchViewArch: `<search><filter name="my_foos" string="My Foos" domain="[('foo', '=', 'mine')]"/></search>`,
+    });
+    expect.verifySteps(["get_help_data []"]);
+
+    await toggleSearchBarMenu();
+    await toggleMenuItem("My Foos");
+    expect.verifySteps([`get_help_data [["foo","=","mine"]]`]);
+    expect(`.o_view_nocontent .o_help_threshold`).toHaveText("Threshold: 20");
+});
+
+test(`help view: data not requested when there are records`, async () => {
+    Foo._records = [{ id: 1, foo: "yop" }];
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/>${HELP_WITH_DATA}</list>`,
+    });
+    expect(`.o_data_row`).toHaveCount(1);
+    expect.verifySteps([]);
+});
+
+test(`help view: data not requested without data_method`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list><field name="foo"/>${HELP}</list>`,
+    });
+    expect(`.o_view_nocontent .o_help_title`).toHaveCount(1);
+    expect.verifySteps([]);
 });
