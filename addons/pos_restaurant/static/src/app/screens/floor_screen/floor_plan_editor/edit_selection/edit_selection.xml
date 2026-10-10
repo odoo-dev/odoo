@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_restaurant.floor_editor.edit_selection_properties">
+        <div class="fs-4 fw-bold mt-3 mb-2">Alignment</div>
+        <div class="d-flex flex-wrap gap-2">
+            <t t-foreach="this.alignActions" t-as="action" t-key="action.mode">
+                <button t-attf-class="btn btn-outline-secondary o_align_{{action.mode}}" t-att-title="action.title" t-on-click="() => this.props.align(action.mode)">
+                    <i class="oi oi-fw" t-att-class="{'o_fp_rotated_icon': action.rotated}" t-att-data-icon="action.icon"/>
+                </button>
+            </t>
+        </div>
+        <t t-if="this.decors.length">
+            <div class="border-bottom border-color mt-3"/>
+            <div class="fs-4 fw-bold d-flex justify-content-between mt-3 mb-2">
+                <span>Transparency</span>
+                <span class="fs-5 fw-normal" t-out="this.transparency"/>
+            </div>
+            <input min="0" max="90" class="w-100" type="range" t-att-value="this.transparency"
+                   t-on-input="(e) => this.setTransparency(e, true)"
+                   t-on-change="(e) => this.setTransparency(e)"/>
+        </t>
+        <t t-if="this.colorElements.length">
+            <div class="border-bottom border-color mt-3"/>
+            <DecorColors elements="this.colorElements" updateElements="this.props.updateElements"/>
+        </t>
+    </t>
+</templates>

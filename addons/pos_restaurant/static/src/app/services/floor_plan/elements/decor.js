@@ -51,10 +51,10 @@ export class Decor extends FloorElement {
     getCssStyle() {
         let style = super.getCssStyle();
 
-        if (this.allowBackground) {
-            if (this.color) {
-                style += `background-color: ${getColorRGBA(this.color, this.opacity)};`;
-            }
+        if (this.allowBackground && this.color) {
+            style += `background-color: ${getColorRGBA(this.color, this.opacity)};`;
+        } else if (this.opacity < 1) {
+            style += `opacity:${this.opacity};`;
         }
         if (this.allowBorder && this.borderWidth) {
             if (this.borderColor) {
@@ -63,10 +63,10 @@ export class Decor extends FloorElement {
                     this.borderColor
                 )};`;
             }
+        }
 
-            if ((this.shape === "rect" || this.shape === "square") && this.roundedCorner) {
-                style += `border-radius: ${this.roundedCorner}px;`;
-            }
+        if ((this.shape === "rect" || this.shape === "square") && this.roundedCorner) {
+            style += `border-radius: ${this.roundedCorner}px;`;
         }
 
         if (this.allowText) {
@@ -141,6 +141,8 @@ export class Decor extends FloorElement {
 
         if (this.allowBackground) {
             result.color = this.color;
+            result.opacity = this.opacity;
+        } else if (this.opacity !== 1) {
             result.opacity = this.opacity;
         }
         if (this.allowBorder) {

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_restaurant.floor_editor.custom_color_picker">
+        <label class="rounded-circle o_fp_color_item o_fp_color_picker m-0" title="Custom color"
+               t-att-class="{'selected': this.isCustom, 'o_fp_custom_color_empty': !this.isCustom}"
+               t-att-style="this.isCustom ? 'background-color: ' + this.props.value : ''">
+            <input type="color" t-att-value="this.hexValue"
+                   t-on-input="(e) => this.props.onPick(e.target.value, true)"
+                   t-on-change="(e) => this.props.onPick(e.target.value)"/>
+        </label>
+    </t>
+</templates>

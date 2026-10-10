@@ -83,6 +83,24 @@ function setBounds(bounds, left, top, right, bottom) {
     bounds.centerY = top + bounds.height / 2;
 }
 
+export function getElementsBounds(elements) {
+    const bounds = elements.map((element) => element.getBounds());
+    const left = Math.min(...bounds.map((b) => b.left));
+    const top = Math.min(...bounds.map((b) => b.top));
+    const right = Math.max(...bounds.map((b) => b.right));
+    const bottom = Math.max(...bounds.map((b) => b.bottom));
+    return {
+        left,
+        top,
+        right,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+        centerX: (left + right) / 2,
+        centerY: (top + bottom) / 2,
+    };
+}
+
 /**
  * Calculate element bounds using transform data and element properties
  * @param {Object} element - Floor element with left, top, width, height, rotation, scale

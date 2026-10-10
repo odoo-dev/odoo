@@ -1,159 +1,225 @@
 <odoo>
     <data noupdate="1">
 
-        <!-- Floors: Main Floor -->
+        <!-- Main Floor -->
         <record id="floor_main" model="restaurant.floor">
             <field name="name">Main Floor</field>
-            <field name="floor_plan_layout" eval="{'bgColor': 'texture-wood-v'}"></field>
+            <field name="floor_plan_layout" eval="{
+                'bgColor': 'texture-whitewashed-oak',
+                'decorations': [
+                {'shape': 'rect', 'onlyBorder': True, 'group': 'lw', 'left': 20, 'top': 20, 'width': 1120, 'height': 620, 'borderWidth': 2, 'borderColor': 'black', 'opacity': 0.65, 'uuid': '9e3779b1cdd7ac9a'},
+                {'shape': 'line', 'group': 'lw', 'left': 960, 'top': 19, 'width': 130, 'height': 2, 'rotation': 90, 'color': 'black', 'opacity': 0.65, 'uuid': '3c6ef36253c37705'},
+                {'shape': 'line', 'group': 'lw', 'left': 960, 'top': 149, 'width': 50, 'height': 2, 'color': 'black', 'opacity': 0.65, 'uuid': 'daa66d13d9af4170'},
+                {'shape': 'line', 'group': 'lw', 'left': 1070, 'top': 149, 'width': 70, 'height': 2, 'color': 'black', 'opacity': 0.65, 'uuid': '78dde6c45f9b0bdb'},
+                {'shape': 'image', 'name': 'kitchen.svg', 'left': 1020, 'top': 55, 'width': 60, 'height': 60, 'uuid': '17156075e586d646'},
+                {'shape': 'line', 'group': 'lw', 'left': 1010, 'top': 519, 'width': 60, 'height': 2, 'rotation': 90, 'color': 'black', 'opacity': 0.65, 'uuid': 'b54cda266b72a0b1'},
+                {'shape': 'line', 'group': 'lw', 'left': 1010, 'top': 519, 'width': 130, 'height': 2, 'color': 'black', 'opacity': 0.65, 'uuid': '538453d7f15e6b1c'},
+                {'shape': 'image', 'name': 'wc.svg', 'left': 1050, 'top': 555, 'width': 60, 'height': 60, 'uuid': 'f1bbcd88774a3587'},
+                {'shape': 'rect', 'left': 59, 'top': 34, 'width': 120, 'height': 104, 'color': '#a88f72', 'opacity': 0.2, 'borderWidth': 0, 'roundedCorner': 10, 'uuid': '8ff34739fd35fff2'},
+                {'shape': 'text', 'text': 'CASHIER', 'left': 69, 'top': 42, 'width': 100, 'height': 20, 'fontSize': 12, 'fontWeight': 700, 'textcolor': '#4a3b33', 'uuid': '2e2ac0ea8321ca5d'},
+                {'shape': 'image', 'name': 'cashier.svg', 'left': 94, 'top': 70, 'width': 50, 'height': 50, 'uuid': 'cc623a9b090d94c8'},
+                {'shape': 'image', 'name': 'bar-corner-left.svg', 'left': 255, 'top': 23, 'width': 59, 'height': 59, 'uuid': '6a99b44c8ef95f33', 'groupId': 'ea33ee14394a4d4b'},
+                {'shape': 'image', 'name': 'bar.svg', 'left': 313, 'top': 23, 'width': 206, 'height': 59, 'uuid': '08d12dfd14e5299e', 'groupId': 'ea33ee14394a4d4b'},
+                {'shape': 'image', 'name': 'bar-corner.svg', 'left': 518, 'top': 23, 'width': 59, 'height': 59, 'uuid': 'a708a7ae9ad0f409', 'groupId': 'ea33ee14394a4d4b'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 326, 'top': 92, 'width': 50, 'height': 50, 'uuid': '4540215f20bcbe74', 'groupId': '886b67c5bf3617b6'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 391, 'top': 92, 'width': 50, 'height': 50, 'uuid': 'e3779b10a6a888df', 'groupId': '886b67c5bf3617b6'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 456, 'top': 92, 'width': 50, 'height': 50, 'uuid': '81af14c12c94534a', 'groupId': '886b67c5bf3617b6'},
+                {'shape': 'image', 'name': 'cup.svg', 'left': 336, 'top': 38, 'width': 30, 'height': 30, 'uuid': '1fe68e72b2801db5', 'groupId': '26a2e1764521e221'},
+                {'shape': 'image', 'name': 'cup.svg', 'left': 401, 'top': 38, 'width': 30, 'height': 30, 'uuid': 'be1e0823386be820', 'groupId': '26a2e1764521e221'},
+                {'shape': 'image', 'name': 'cup.svg', 'left': 466, 'top': 38, 'width': 30, 'height': 30, 'uuid': '5c5581d4be57b28b', 'groupId': '26a2e1764521e221'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 665, 'top': 64, 'width': 50, 'height': 30, 'uuid': 'fa8cfb8544437cf6', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 745, 'top': 64, 'width': 50, 'height': 30, 'uuid': '98c47536ca2f4761', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 665, 'top': 166, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': '36fbeee7501b11cc', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 745, 'top': 166, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': 'd5336898d606dc37', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 614, 'top': 115, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '736ae2495bf2a6a2', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 796, 'top': 115, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '11a25bfae1de710d', 'groupId': '5a40a6db84002f88'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 145, 'top': 289, 'width': 50, 'height': 30, 'uuid': 'afd9d5ab67ca3b78', 'groupId': 'f878208c09ebf9f3'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 145, 'top': 391, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': '4e114f5cedb605e3', 'groupId': 'f878208c09ebf9f3'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 94, 'top': 340, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'ec48c90d73a1d04e', 'groupId': 'f878208c09ebf9f3'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 196, 'top': 340, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '8a8042bef98d9ab9', 'groupId': 'f878208c09ebf9f3'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 365, 'top': 289, 'width': 50, 'height': 30, 'uuid': '28b7bc6f7f796524', 'groupId': '96af9a3d8fd7c45e'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 365, 'top': 391, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': 'c6ef362005652f8f', 'groupId': '96af9a3d8fd7c45e'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 314, 'top': 340, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '6526afd18b50f9fa', 'groupId': '96af9a3d8fd7c45e'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 416, 'top': 340, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '035e2982113cc465', 'groupId': '96af9a3d8fd7c45e'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 585, 'top': 289, 'width': 50, 'height': 30, 'uuid': 'a195a33397288ed0', 'groupId': '34e713ee15c38ec9'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 585, 'top': 391, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': '3fcd1ce41d14593b', 'groupId': '34e713ee15c38ec9'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 534, 'top': 340, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'de049695a30023a6', 'groupId': '34e713ee15c38ec9'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 636, 'top': 340, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '7c3c104628ebee11', 'groupId': '34e713ee15c38ec9'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 805, 'top': 289, 'width': 50, 'height': 30, 'uuid': '1a7389f7aed7b87c', 'groupId': 'd31e8d9f9baf5934'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 805, 'top': 391, 'width': 50, 'height': 30, 'rotation': 180, 'uuid': 'b8ab03a834c382e7', 'groupId': 'd31e8d9f9baf5934'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 754, 'top': 340, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '56e27d59baaf4d52', 'groupId': 'd31e8d9f9baf5934'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 856, 'top': 340, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': 'f519f70a409b17bd', 'groupId': 'd31e8d9f9baf5934'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 105, 'top': 495, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': '935170bbc686e228', 'groupId': '71560750219b239f'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 185, 'top': 495, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': '3188ea6c4c72ac93', 'groupId': '71560750219b239f'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 185, 'top': 575, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': 'cfc0641dd25e76fe', 'groupId': '71560750219b239f'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 105, 'top': 575, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': '6df7ddce584a4169', 'groupId': '71560750219b239f'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 325, 'top': 495, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': '0c2f577fde360bd4', 'groupId': '0f8d8101a786ee0a'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 405, 'top': 495, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': 'aa66d1306421d63f', 'groupId': '0f8d8101a786ee0a'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 405, 'top': 575, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': '489e4ae1ea0da0aa', 'groupId': '0f8d8101a786ee0a'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 325, 'top': 575, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': 'e6d5c4926ff96b15', 'groupId': '0f8d8101a786ee0a'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 545, 'top': 495, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': '850d3e43f5e53580', 'groupId': 'adc4fab22d72b875'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 625, 'top': 495, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': '2344b7f47bd0ffeb', 'groupId': 'adc4fab22d72b875'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 625, 'top': 575, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': 'c17c31a501bcca56', 'groupId': 'adc4fab22d72b875'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 545, 'top': 575, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': '5fb3ab5687a894c1', 'groupId': 'adc4fab22d72b875'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 765, 'top': 495, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': 'fdeb25070d945f2c', 'groupId': '4bfc7463b35e82e0'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 845, 'top': 495, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': '9c229eb893802997', 'groupId': '4bfc7463b35e82e0'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 845, 'top': 575, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': '3a5a1869196bf402', 'groupId': '4bfc7463b35e82e0'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 765, 'top': 575, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': 'd891921a9f57be6d', 'groupId': '4bfc7463b35e82e0'},
+                {'shape': 'image', 'name': 'bench-half.svg', 'left': 1017, 'top': 315, 'width': 208, 'height': 30, 'rotation': 90, 'uuid': '76c90bcb254388d8'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 992, 'top': 245, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '1500857cab2f5343'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 992, 'top': 315, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'b337ff2d311b1dae'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 992, 'top': 385, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '516f78deb706e819'}
+                ],
+            }"/>
         </record>
 
         <record id="table_01" model="restaurant.table">
-            <field name="table_number">1</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': '9adce4d8fff5e0ed',
-                'color': 'green',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 407,
-                'top': 88,
-            }"/>
-        </record>
-
-        <record id="table_02" model="restaurant.table">
-            <field name="table_number">2</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'b7c4a91f3e2d4c88',
-                'color': 'green',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 582,
-                'top': 88,
-            }"/>
-        </record>
-
-        <record id="table_03" model="restaurant.table">
-            <field name="table_number">3</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'c4f2e8a97123bb10',
-                'color': 'green',
-                'shape': 'square',
-                'width': 165,
-                'height': 100,
-                'left': 762,
-                'top': 83,
-            }"/>
-        </record>
-
-        <record id="table_04" model="restaurant.table">
-            <field name="table_number">4</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'e38b6f2109ac44de',
-                'color': 'green',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 407,
-                'top': 247,
-            }"/>
-        </record>
-
-        <record id="table_05" model="restaurant.table">
-            <field name="table_number">5</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'f019d7c52a6be3af',
-                'color': 'green',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 582,
-                'top': 247,
-            }"/>
-        </record>
-
-        <record id="table_06" model="restaurant.table">
-            <field name="table_number">6</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'a6d40b2c89f1e735',
-                'color': 'green',
-                'shape': 'square',
-                'width': 165,
-                'height': 100,
-                'left': 762,
-                'top': 325,
-            }"/>
-        </record>
-
-        <record id="table_07" model="restaurant.table">
-            <field name="table_number">7</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': 'd9cbe71234ab88fe',
-                'color': 'red',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 407,
-                'top': 406,
-            }"/>
-        </record>
-
-        <record id="table_08" model="restaurant.table">
-            <field name="table_number">8</field>
-            <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">4</field>
-            <field name="floor_plan_layout" eval="{
-                'uuid': '0f41bd9a67c3e210',
-                'color': 'red',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 582,
-                'top': 406,
-            }"/>
-        </record>
-
-        <record id="table_09" model="restaurant.table">
             <field name="table_number">9</field>
             <field name="floor_id" ref="pos_restaurant.floor_main"/>
             <field name="seats">6</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '8b5a2ce4f7d1093a',
-                'color': 'red',
+                'uuid': 'efa6f28f3cf2b284',
+                'color': 'green',
+                'shape': 'rect',
+                'width': 160,
+                'height': 80,
+                'left': 650,
+                'top': 90,
+            }"/>
+        </record>
+
+        <record id="table_02" model="restaurant.table">
+            <field name="table_number">1</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': '8dde6c40c2de7cef',
+                'color': 'green',
                 'shape': 'square',
-                'width': 165,
-                'height': 100,
-                'left': 120,
-                'top': 560,
+                'width': 80,
+                'height': 80,
+                'left': 130,
+                'top': 315,
+            }"/>
+        </record>
+
+        <record id="table_03" model="restaurant.table">
+            <field name="table_number">2</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': '2c15e5f148ca475a',
+                'color': 'green',
+                'shape': 'square',
+                'width': 80,
+                'height': 80,
+                'left': 350,
+                'top': 315,
+            }"/>
+        </record>
+
+        <record id="table_04" model="restaurant.table">
+            <field name="table_number">3</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': 'ca4d5fa2ceb611c5',
+                'color': 'green',
+                'shape': 'square',
+                'width': 80,
+                'height': 80,
+                'left': 570,
+                'top': 315,
+            }"/>
+        </record>
+
+        <record id="table_05" model="restaurant.table">
+            <field name="table_number">4</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': '6884d95354a1dc30',
+                'color': 'green',
+                'shape': 'square',
+                'width': 80,
+                'height': 80,
+                'left': 790,
+                'top': 315,
+            }"/>
+        </record>
+
+        <record id="table_06" model="restaurant.table">
+            <field name="table_number">5</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': '06bc5304da8da69b',
+                'color': 'green',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 125,
+                'top': 505,
+            }"/>
+        </record>
+
+        <record id="table_07" model="restaurant.table">
+            <field name="table_number">6</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': 'a4f3ccb560797106',
+                'color': 'green',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 345,
+                'top': 505,
+            }"/>
+        </record>
+
+        <record id="table_08" model="restaurant.table">
+            <field name="table_number">7</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': '432b4666e6653b71',
+                'color': 'green',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 565,
+                'top': 505,
+            }"/>
+        </record>
+
+        <record id="table_09" model="restaurant.table">
+            <field name="table_number">8</field>
+            <field name="floor_id" ref="pos_restaurant.floor_main"/>
+            <field name="seats">4</field>
+            <field name="floor_plan_layout" eval="{
+                'uuid': 'e162c0176c5105dc',
+                'color': 'green',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 785,
+                'top': 505,
             }"/>
         </record>
 
         <record id="table_10" model="restaurant.table">
             <field name="table_number">10</field>
             <field name="floor_id" ref="pos_restaurant.floor_main"/>
-            <field name="seats">6</field>
+            <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '2e7f1acb90de54f1',
-                'color': 'red',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 407,
-                'top': 565,
+                'uuid': '7f9a39c8f23cd047',
+                'color': 'blue',
+                'shape': 'rect',
+                'width': 70,
+                'height': 56,
+                'left': 1028,
+                'top': 232,
             }"/>
         </record>
 
@@ -162,13 +228,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_main"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '7a13d9f0bc52e6d4',
-                'color': 'purple',
-                'shape': 'square',
-                'width': 90,
-                'height': 90,
-                'left': 582,
-                'top': 565,
+                'uuid': '1dd1b37978289ab2',
+                'color': 'blue',
+                'shape': 'rect',
+                'width': 70,
+                'height': 56,
+                'left': 1028,
+                'top': 302,
             }"/>
         </record>
 
@@ -177,35 +243,90 @@
             <field name="floor_id" ref="pos_restaurant.floor_main"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '1f8e03b6a4d2c7e9',
-                'color': 'purple',
-                'shape': 'square',
-                'width': 165,
-                'height': 100,
-                'left': 762,
-                'top': 560,
+                'uuid': 'bc092d2afe14651d',
+                'color': 'blue',
+                'shape': 'rect',
+                'width': 70,
+                'height': 56,
+                'left': 1028,
+                'top': 372,
             }"/>
         </record>
 
-        <!-- Restaurant Floor: Patio -->
+        <!-- Patio -->
         <record id="floor_patio" model="restaurant.floor">
             <field name="name">Patio</field>
+            <field name="floor_plan_layout" eval="{
+                'bgColor': 'texture-travertine',
+                'decorations': [
+                {'shape': 'image', 'name': 'tree.svg', 'left': 20, 'top': 20, 'width': 100, 'height': 100, 'uuid': '12201e13c579ac70'},
+                {'shape': 'image', 'name': 'tree.svg', 'left': 1040, 'top': 20, 'width': 100, 'height': 100, 'uuid': 'b05797c44b6576db'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 130, 'top': 30, 'width': 240, 'height': 60, 'uuid': '4e8f1175d1514146'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 790, 'top': 30, 'width': 240, 'height': 60, 'uuid': 'ecc68b26573d0bb1'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 160, 'top': 570, 'width': 240, 'height': 60, 'uuid': '8afe04d7dd28d61c'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 460, 'top': 570, 'width': 240, 'height': 60, 'uuid': '29357e886314a087'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 760, 'top': 570, 'width': 240, 'height': 60, 'uuid': 'c76cf839e9006af2'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': -60, 'top': 220, 'width': 240, 'height': 60, 'rotation': 90, 'uuid': '65a471ea6eec355d'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': -60, 'top': 480, 'width': 240, 'height': 60, 'rotation': 90, 'uuid': '03dbeb9bf4d7ffc8'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 980, 'top': 220, 'width': 240, 'height': 60, 'rotation': 90, 'uuid': 'a213654c7ac3ca33'},
+                {'shape': 'image', 'name': 'planter-3.svg', 'left': 980, 'top': 480, 'width': 240, 'height': 60, 'rotation': 90, 'uuid': '404adefd00af949e'},
+                {'shape': 'image', 'name': 'plant-small.svg', 'left': 98, 'top': 578, 'width': 56, 'height': 56, 'uuid': 'de8258ae869b5f09'},
+                {'shape': 'image', 'name': 'plant-small.svg', 'left': 1006, 'top': 578, 'width': 56, 'height': 56, 'uuid': '7cb9d25f0c872974'},
+                {'shape': 'image', 'name': 'bar-corner-left.svg', 'left': 400, 'top': 30, 'width': 64, 'height': 64, 'uuid': '1af14c109272f3df', 'groupId': '0a983e9f8779c434'},
+                {'shape': 'image', 'name': 'bar.svg', 'left': 463, 'top': 30, 'width': 194, 'height': 64, 'uuid': 'b928c5c1185ebe4a', 'groupId': '0a983e9f8779c434'},
+                {'shape': 'image', 'name': 'bar-corner.svg', 'left': 656, 'top': 30, 'width': 64, 'height': 64, 'uuid': '57603f729e4a88b5', 'groupId': '0a983e9f8779c434'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 430, 'top': 104, 'width': 50, 'height': 50, 'uuid': 'f597b92324365320', 'groupId': 'a8cfb8500d658e9f'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 500, 'top': 104, 'width': 50, 'height': 50, 'uuid': '93cf32d4aa221d8b', 'groupId': 'a8cfb8500d658e9f'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 570, 'top': 104, 'width': 50, 'height': 50, 'uuid': '3206ac85300de7f6', 'groupId': 'a8cfb8500d658e9f'},
+                {'shape': 'image', 'name': 'stool.svg', 'left': 640, 'top': 104, 'width': 50, 'height': 50, 'uuid': 'd03e2636b5f9b261', 'groupId': 'a8cfb8500d658e9f'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 124, 'top': 145, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '6e759fe73be57ccc', 'groupId': '9ffe8a53406c4730'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 226, 'top': 145, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '0cad1998c1d14737', 'groupId': '9ffe8a53406c4730'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 124, 'top': 260, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'aae4934947bd11a2', 'groupId': '3e360404c658119b'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 226, 'top': 260, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '491c0cfacda8dc0d', 'groupId': '3e360404c658119b'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 124, 'top': 375, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'e75386ab5394a678', 'groupId': 'dc6d7db54c43dc06'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 226, 'top': 375, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '858b005cd98070e3', 'groupId': 'dc6d7db54c43dc06'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 124, 'top': 490, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '23c27a0d5f6c3b4e', 'groupId': '7aa4f766d22fa671'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 226, 'top': 490, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': 'c1f9f3bee55805b9', 'groupId': '7aa4f766d22fa671'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 884, 'top': 145, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '60316d6f6b43d024', 'groupId': '18dc7117581b70dc'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 986, 'top': 145, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': 'fe68e720f12f9a8f', 'groupId': '18dc7117581b70dc'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 884, 'top': 260, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '9ca060d1771b64fa', 'groupId': 'b713eac8de073b47'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 986, 'top': 260, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '3ad7da82fd072f65', 'groupId': 'b713eac8de073b47'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 884, 'top': 375, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': 'd90f543382f2f9d0', 'groupId': '554b647963f305b2'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 986, 'top': 375, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': '7746cde408dec43b', 'groupId': '554b647963f305b2'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 884, 'top': 490, 'width': 50, 'height': 30, 'rotation': -90, 'uuid': '157e47958eca8ea6', 'groupId': 'f382de2ae9ded01d'},
+                {'shape': 'image', 'name': 'chair-tucked.svg', 'left': 986, 'top': 490, 'width': 50, 'height': 30, 'rotation': 90, 'uuid': 'b3b5c14614b65911', 'groupId': 'f382de2ae9ded01d'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 370, 'top': 200, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': '51ed3af79aa2237c', 'groupId': '91ba57db6fca9a88'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 450, 'top': 200, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': 'f024b4a8208dede7', 'groupId': '91ba57db6fca9a88'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 450, 'top': 280, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': '8e5c2e59a679b852', 'groupId': '91ba57db6fca9a88'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 370, 'top': 280, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': '2c93a80a2c6582bd', 'groupId': '91ba57db6fca9a88'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 630, 'top': 200, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': 'cacb21bbb2514d28', 'groupId': '2ff1d18cf5b664f3'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 710, 'top': 200, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': '69029b6c383d1793', 'groupId': '2ff1d18cf5b664f3'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 710, 'top': 280, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': '073a151dbe28e1fe', 'groupId': '2ff1d18cf5b664f3'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 630, 'top': 280, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': 'a5718ece4414ac69', 'groupId': '2ff1d18cf5b664f3'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 370, 'top': 410, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': '43a9087fca0076d4', 'groupId': 'ce294b3d7ba22f5e'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 450, 'top': 410, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': 'e1e082304fec413f', 'groupId': 'ce294b3d7ba22f5e'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 450, 'top': 490, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': '8017fbe1d5d80baa', 'groupId': 'ce294b3d7ba22f5e'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 370, 'top': 490, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': '1e4f75925bc3d615', 'groupId': 'ce294b3d7ba22f5e'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 630, 'top': 410, 'width': 50, 'height': 30, 'rotation': -45, 'uuid': 'bc86ef43e1afa080', 'groupId': '6c60c4ee018df9c9'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 710, 'top': 410, 'width': 50, 'height': 30, 'rotation': 45, 'uuid': '5abe68f4679b6aeb', 'groupId': '6c60c4ee018df9c9'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 710, 'top': 490, 'width': 50, 'height': 30, 'rotation': 135, 'uuid': 'f8f5e2a5ed873556', 'groupId': '6c60c4ee018df9c9'},
+                {'shape': 'image', 'name': 'chair-round-tucked.svg', 'left': 630, 'top': 490, 'width': 50, 'height': 30, 'rotation': 225, 'uuid': '972d5c567372ffc1', 'groupId': '6c60c4ee018df9c9'}
+                ],
+            }"/>
         </record>
-
-        <!-- Patio: Left table row -->
 
         <record id="table_21" model="restaurant.table">
             <field name="table_number">101</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '4c79a5e1d0b23f8a',
+                'uuid': '3564d607f95eca2c',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 100,
-                'top': 50,
+                'width': 80,
+                'height': 80,
+                'left': 160,
+                'top': 120,
             }"/>
         </record>
 
@@ -214,13 +335,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': 'e0b1c2d3f495a6b7',
+                'uuid': 'd39c4fb87f4a9497',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 100,
-                'top': 166,
+                'width': 80,
+                'height': 80,
+                'left': 160,
+                'top': 235,
             }"/>
         </record>
 
@@ -229,13 +350,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '5d7e9fa2103bc4e8',
+                'uuid': '71d3c96905365f02',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 100,
-                'top': 283,
+                'width': 80,
+                'height': 80,
+                'left': 160,
+                'top': 350,
             }"/>
         </record>
 
@@ -244,30 +365,28 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '9ac4b2e07d18f3a5',
+                'uuid': '100b431a8b22296d',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 100,
-                'top': 400,
+                'width': 80,
+                'height': 80,
+                'left': 160,
+                'top': 465,
             }"/>
         </record>
-
-        <!-- Patio: Right table row -->
 
         <record id="table_25" model="restaurant.table">
             <field name="table_number">105</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '3fb8a9c6d2e4017e',
+                'uuid': 'ae42bccb110df3d8',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 800,
-                'top': 50,
+                'width': 80,
+                'height': 80,
+                'left': 920,
+                'top': 120,
             }"/>
         </record>
 
@@ -276,13 +395,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': 'a1d2f304b5c6e789',
+                'uuid': '4c7a367c96f9be43',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 800,
-                'top': 166,
+                'width': 80,
+                'height': 80,
+                'left': 920,
+                'top': 235,
             }"/>
         </record>
 
@@ -291,13 +410,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': 'c8e1f0a297b3d654',
+                'uuid': 'eab1b02d1ce588ae',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 800,
-                'top': 283,
+                'width': 80,
+                'height': 80,
+                'left': 920,
+                'top': 350,
             }"/>
         </record>
 
@@ -306,30 +425,28 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">2</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '6e70b1c2d3f4a589',
+                'uuid': '88e929dea2d15319',
                 'color': 'green',
                 'shape': 'square',
-                'width': 130,
-                'height': 85,
-                'left': 800,
-                'top': 400,
+                'width': 80,
+                'height': 80,
+                'left': 920,
+                'top': 465,
             }"/>
         </record>
-
-        <!-- Patio: Center table block -->
 
         <record id="table_29" model="restaurant.table">
             <field name="table_number">109</field>
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': 'f4d1c2b3a596e780',
-                'color': 'yellow',
-                'shape': 'square',
-                'width': 130,
-                'height': 120,
-                'left': 330,
-                'top': 100,
+                'uuid': '2720a38f28bd1d84',
+                'color': 'blue',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 390,
+                'top': 210,
             }"/>
         </record>
 
@@ -338,13 +455,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '0a1b2c3d4e5f6789',
-                'color': 'yellow',
-                'shape': 'square',
-                'width': 130,
-                'height': 120,
-                'left': 560,
-                'top': 100,
+                'uuid': 'c5581d40aea8e7ef',
+                'color': 'blue',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 650,
+                'top': 210,
             }"/>
         </record>
 
@@ -353,13 +470,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': 'b9c8d7e6f5a40312',
-                'color': 'yellow',
-                'shape': 'square',
-                'width': 130,
-                'height': 120,
-                'left': 330,
-                'top': 315,
+                'uuid': '638f96f13494b25a',
+                'color': 'blue',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 390,
+                'top': 420,
             }"/>
         </record>
 
@@ -368,13 +485,13 @@
             <field name="floor_id" ref="pos_restaurant.floor_patio"/>
             <field name="seats">4</field>
             <field name="floor_plan_layout" eval="{
-                'uuid': '718293a4b5c6d7e8',
-                'color': 'yellow',
-                'shape': 'square',
-                'width': 130,
-                'height': 120,
-                'left': 560,
-                'top': 315,
+                'uuid': '01c710a2ba807cc5',
+                'color': 'blue',
+                'shape': 'circle',
+                'width': 90,
+                'height': 90,
+                'left': 650,
+                'top': 420,
             }"/>
         </record>
 

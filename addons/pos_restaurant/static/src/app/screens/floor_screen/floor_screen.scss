@@ -50,6 +50,22 @@ $o-fe-color-active-background-color: var(--background-color) !default;
   box-shadow: 0 0 0 1px $o-fe-color-active-border-color, inset 0 0 0 2px $o-fe-color-active-border-color, inset 0 0 0 4px $o-fe-handles-bg-color;
 }
 
+.o_fp_custom_color_empty {
+  background: conic-gradient(#e85d5d, #f2c14e, #7bc67b, #4aa8d8, #8c6bd9, #e85d5d);
+}
+
+.o_fp_color_picker {
+  cursor: pointer;
+  overflow: hidden;
+
+  input[type="color"] {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+}
+
 .o_fp_edit_menu{
   z-index: 1002;
   width: 320px;
@@ -428,6 +444,15 @@ $o-fe-color-active-background-color: var(--background-color) !default;
   }
 }
 
+.o_fp_marquee {
+  position: absolute;
+  display: none;
+  border: 1px dashed $o-fe-handles-accent-color;
+  background: rgba($o-fe-handles-accent-color, 0.08);
+  pointer-events: none;
+  z-index: 999;
+}
+
 .o_fp_shape {
   position: absolute;
   display: flex;
@@ -439,6 +464,11 @@ $o-fe-color-active-background-color: var(--background-color) !default;
 
   &.selected{
     cursor: move;
+  }
+
+  &.o_fp_multi_selected {
+    outline: 2px solid rgba($o-fe-handles-accent-color, 0.7);
+    outline-offset: 2px;
   }
 
   .text-label {
@@ -550,6 +580,10 @@ $o-fe-color-active-background-color: var(--background-color) !default;
   }
 }
 
+.o_fp_rotated_icon {
+  transform: rotate(-90deg);
+}
+
 .o_fp_action_menu {
   background: white;
   border-radius: 4px;
@@ -579,6 +613,55 @@ $o-fe-color-active-background-color: var(--background-color) !default;
      .decor_item{
         width: 36px;
         height: 36px;
+     }
+
+     .o_fp_library_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 104px);
+        gap: 12px;
+     }
+
+     .o_fp_library_item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px;
+
+        &.o_fp_library_item_wide {
+          grid-column: span 2;
+        }
+     }
+
+     .o_fp_library_preview_box {
+        width: 100%;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+     }
+
+     .o_fp_library_preview {
+        position: relative;
+
+        .o_fp_library_part {
+          position: absolute;
+        }
+
+        img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+     }
+
+     .o_fp_library_label {
+        max-width: 100%;
+        min-height: 2.4em;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        text-wrap: balance;
      }
 }
 

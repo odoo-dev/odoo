@@ -145,6 +145,11 @@ export class Handles extends Component {
         return true;
     }
 
+    get canRotate() {
+        const element = this.props.floorElement;
+        return !element || element.isRotationAllowed?.() !== false;
+    }
+
     startResize(event) {
         const handle = event.currentTarget;
         const position = handle.dataset.p || handle.dataset.pos;
@@ -152,10 +157,10 @@ export class Handles extends Component {
     }
 
     startDrag(event) {
-        this.props.onStartMove?.(event, this.props.floorElement?.id);
+        this.props.onStartMove?.(event, this.props.floorElement?.uuid);
     }
 
     startRotate(event) {
-        this.props.onStartRotate?.(event, this.props.floorElement?.id);
+        this.props.onStartRotate?.(event, this.props.floorElement?.uuid);
     }
 }

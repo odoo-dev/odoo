@@ -10,8 +10,18 @@ import {
     TEXT_MIN_WIDTH,
 } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/utils/text";
 import { STATIC_IMG_BASE_URL } from "@pos_restaurant/app/services/floor_plan/utils/utils";
+import { DECOR_LIBRARY } from "@pos_restaurant/app/services/floor_plan/utils/decor_library";
+import {
+    DECOR_COLORS,
+    getStaticSvgUrl,
+    getSvgAsset,
+    getSvgImageUrl,
+} from "@pos_restaurant/app/services/floor_plan/utils/decor_colors";
 
 const WALL_HEIGHT = 6;
+const PREVIEW_WIDTH = 88;
+const WIDE_PREVIEW_WIDTH = 204;
+const PREVIEW_HEIGHT = 56;
 
 export class AddDecorPopup extends Component {
     static template = "pos_restaurant.floor_editor.add_decor_popup";
@@ -26,6 +36,37 @@ export class AddDecorPopup extends Component {
         this.dialog = useService("dialog");
     }
 
+    isWide(item) {
+        return item.width / item.height > 3;
+    }
+
+    getPreviewScale(item) {
+        const maxWidth = this.isWide(item) ? WIDE_PREVIEW_WIDTH : PREVIEW_WIDTH;
+        return Math.min(1, maxWidth / item.width, PREVIEW_HEIGHT / item.height);
+    }
+
+    getPreviewStyle(item) {
+        const scale = this.getPreviewScale(item);
+        return `width:${Math.round(item.width * scale)}px;height:${Math.round(
+            item.height * scale
+        )}px`;
+    }
+
+    getPartStyle(item, part) {
+        const scale = this.getPreviewScale(item);
+        return ["left", "top", "width", "height"]
+            .map((key) => `${key}:${part[key] * scale}px`)
+            .join(";");
+    }
+
+    getPreviewUrl(name) {
+        const url = getStaticSvgUrl(name);
+        const asset = url && getSvgAsset(url);
+        return asset?.tokens.length
+            ? getSvgImageUrl(asset, (token) => DECOR_COLORS[token])
+            : this.getAssetUrl(name);
+    }
+
     addImage(data) {
         this.props.addDecor("image", data);
         this.props.close();
@@ -33,6 +74,27 @@ export class AddDecorPopup extends Component {
 
     addImageAsset(name) {
         this.addImage({ name: name });
+    }
+
+    get decorLibrary() {
+        return DECOR_LIBRARY;
+    }
+
+    addLibraryItem(item) {
+        if (item.parts) {
+            this.props.addDecor("group", {
+                parts: item.parts,
+                width: item.width,
+                height: item.height,
+            });
+            this.props.close();
+            return;
+        }
+        this.addImage({
+            name: item.name,
+            width: item.width,
+            height: item.height,
+        });
     }
 
     getAssetUrl(name) {

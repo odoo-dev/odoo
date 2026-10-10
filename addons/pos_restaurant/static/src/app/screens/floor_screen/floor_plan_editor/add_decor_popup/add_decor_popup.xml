@@ -71,18 +71,31 @@
                      </div>
                  </button>
              </div>
+             <h3 class="mb-3 mt-4">Furniture</h3>
+             <t t-foreach="this.decorLibrary" t-as="group" t-key="group.id">
+                 <h5 class="mb-2 mt-3 text-muted" t-out="group.label"/>
+                 <div class="o_fp_library_grid">
+                     <t t-foreach="group.items" t-as="item" t-key="item.name">
+                         <button class="btn btn-outline-secondary o_fp_library_item" t-att-class="{'o_fp_library_item_wide': this.isWide(item)}" t-att-title="item.label" t-on-click="()=>this.addLibraryItem(item)">
+                             <div class="o_fp_library_preview_box">
+                                 <div class="o_fp_library_preview" t-att-style="this.getPreviewStyle(item)">
+                                     <t t-if="item.parts">
+                                         <t t-foreach="item.parts" t-as="part" t-key="part_index">
+                                             <div class="o_fp_library_part" t-att-style="this.getPartStyle(item, part)">
+                                                 <img t-att-src="this.getPreviewUrl(part.name)" alt=""/>
+                                             </div>
+                                         </t>
+                                     </t>
+                                     <img t-else="" t-att-src="this.getPreviewUrl(item.name)" t-att-alt="item.label"/>
+                                 </div>
+                             </div>
+                             <span t-if="!group.hideLabels" class="o_fp_library_label" t-out="item.label"/>
+                         </button>
+                     </t>
+                 </div>
+             </t>
              <h3 class="mb-3 mt-4">Images</h3>
              <div class="d-flex flex-wrap gap-3 align-items-center ">
-                  <button class="btn btn-outline-secondary p-2" t-on-click="()=>this.addImageAsset('plant.svg')">
-                     <div class="d-flex justify-content-center align-items-center" style="width:50px; height:50px;">
-                         <img t-att-src="this.getAssetUrl('plant.svg')" style="width:50px"/>
-                     </div>
-                 </button>
-                  <button class="btn btn-outline-secondary p-2" t-on-click="()=>this.addImageAsset('toilet.svg')">
-                     <div class="d-flex justify-content-center align-items-center" style="width:50px; height:50px;">
-                         <img t-att-src="this.getAssetUrl('toilet.svg')" style="width:50px"/>
-                     </div>
-                 </button>
                 <button class="btn btn-lg btn-link " t-on-click="()=>this.addImage()">
                     <i class="oi me-1" data-icon="add"/>Add image
                 </button>

@@ -45,63 +45,26 @@ export class MoveOperation {
         this.floorElemGeo.left = Math.round(newLeft);
 
         let bounds = calculateBoundsFromTransform(this.floorElemGeo);
-
-        let xSnaps = [];
-        let ySnaps = [];
+        let xGuides = [];
+        let yGuides = [];
 
         // Skip snapping during autoscroll or when disabled
         if (!skipSnapping && !this.ctrlPressed) {
-            // Use optimized single-pass snap finding
-            const snapResults = this.snapping.findAllSnaps(this.floorElement, bounds);
-
-            // Convert snap results to the format needed for guide drawing
-            // For each snap, calculate the position delta needed
-            xSnaps = snapResults.xSnaps.map((snap) => ({
-                distance: snap.distance,
-                newLeft: newLeft + (snap.targetValue - snap.movingValue),
-                newTop: newTop,
-                guideLine: snap.targetValue,
-                targetBounds: snap.targetBounds,
-            }));
-
-            ySnaps = snapResults.ySnaps.map((snap) => ({
-                distance: snap.distance,
-                newLeft: newLeft,
-                newTop: newTop + (snap.targetValue - snap.movingValue),
-                guideLine: snap.targetValue,
-                targetBounds: snap.targetBounds,
-            }));
-        }
-
-        // Apply best snap and collect guides for all close snaps
-        const xGuides = [];
-        const yGuides = [];
-
-        if (xSnaps.length > 0) {
-            xSnaps.sort((a, b) => a.distance - b.distance);
-            newLeft = xSnaps[0].newLeft;
-            xSnaps.forEach(
-                (s) =>
-                    Math.abs(s.distance - xSnaps[0].distance) < 0.1 &&
-                    xGuides.push({ x: s.guideLine, targetBounds: s.targetBounds })
+            const snapped = snapPosition(
+                this.snapping,
+                this.floorElement,
+                this.floorElemGeo,
+                bounds
             );
+            ({ xGuides, yGuides } = snapped);
+            if (this.floorElemGeo.top !== snapped.top || this.floorElemGeo.left !== snapped.left) {
+                this.floorElemGeo.top = snapped.top;
+                this.floorElemGeo.left = snapped.left;
+                bounds = calculateBoundsFromTransform(this.floorElemGeo);
+            }
         }
-
-        if (ySnaps.length > 0) {
-            ySnaps.sort((a, b) => a.distance - b.distance);
-            newTop = ySnaps[0].newTop;
-            ySnaps.forEach(
-                (s) =>
-                    Math.abs(s.distance - ySnaps[0].distance) < 0.1 &&
-                    yGuides.push({ y: s.guideLine, targetBounds: s.targetBounds })
-            );
-        }
-
-        if (this.floorElemGeo.top !== newTop || this.floorElemGeo.left !== newLeft) {
-            this.floorElemGeo.top = newTop;
-            this.floorElemGeo.left = newLeft;
-            bounds = calculateBoundsFromTransform(this.floorElemGeo);
-        }
+        newLeft = this.floorElemGeo.left;
+        newTop = this.floorElemGeo.top;
 
         const position = constrainPositionToCanvas(newLeft, newTop, bounds, this.canvasEl);
 
@@ -254,6 +217,28 @@ export class MoveOperation {
 
         return false;
     }
+}
+
+export function snapPosition(snapping, floorElement, geo, bounds) {
+    const { xSnaps, ySnaps } = snapping.findAllSnaps(floorElement, bounds);
+    const best = (snaps) => {
+        if (!snaps.length) {
+            return { delta: 0, guides: [] };
+        }
+        snaps.sort((a, b) => a.distance - b.distance);
+        return {
+            delta: snaps[0].targetValue - snaps[0].movingValue,
+            guides: snaps.filter((s) => Math.abs(s.distance - snaps[0].distance) < 0.1),
+        };
+    };
+    const x = best(xSnaps);
+    const y = best(ySnaps);
+    return {
+        left: geo.left + x.delta,
+        top: geo.top + y.delta,
+        xGuides: x.guides.map((s) => ({ x: s.targetValue, targetBounds: s.targetBounds })),
+        yGuides: y.guides.map((s) => ({ y: s.targetValue, targetBounds: s.targetBounds })),
+    };
 }
 
 export function constrainPositionToCanvas(logicalLeft, logicalTop, bounds, canvasEl) {

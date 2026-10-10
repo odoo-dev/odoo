@@ -112,6 +112,7 @@ export class FloorElement {
                 rotation: this.rotation,
                 scale: this.scale,
                 shape: this.shape,
+                groupId: this.groupId,
             },
             defaults
         );

@@ -47,12 +47,15 @@ export class Snapping {
 
         // Single pass through all floor elements
         this.floorPlanStore.getAllFloorElements().forEach((floorEl) => {
-            if (floorEl.uuid === floorElement.uuid) {
+            if (
+                floorEl.uuid === floorElement.uuid ||
+                floorElement.excludeUuids?.has(floorEl.uuid)
+            ) {
                 return;
             }
 
             // Only snap tables to tables, and decor to decor
-            if (floorElement.isTable !== floorEl.isTable) {
+            if (!floorElement.isGroup && floorElement.isTable !== floorEl.isTable) {
                 return;
             }
 

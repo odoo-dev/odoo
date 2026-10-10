@@ -8,10 +8,12 @@ import { useService } from "@web/core/utils/hooks";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import { _t } from "@web/core/l10n/translation";
 import { FloorElement } from "@pos_restaurant/app/services/floor_plan/elements";
+import { DecorColors } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/edit_decor/decor_colors";
+import { CustomColorPicker } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/edit_decor/custom_color_picker";
 
 export class EditDecorProperties extends Component {
     static template = "pos_restaurant.floor_editor.edit_decor_properties";
-    static components = {};
+    static components = { DecorColors, CustomColorPicker };
     props = useProps({
         element: t.instanceOf(FloorElement).optional(),
         updateElement: t.function(),
@@ -31,12 +33,28 @@ export class EditDecorProperties extends Component {
         return getColors();
     }
 
+    setCustomColor(prop, value, batched = false) {
+        if (prop === "borderColor" && !batched) {
+            this.selectBorderColor(value);
+            return;
+        }
+        this.updateElement({ [prop]: value }, { batched });
+    }
+
+    get hasBorder() {
+        return Boolean(this.element.borderColor && this.element.borderWidth);
+    }
+
     selectBorderColor(color) {
         let bgColor = this.element.color;
         if (!color && !bgColor) {
             bgColor = "black";
         }
-        this.updateElement({ borderColor: color, color: bgColor });
+        const values = { borderColor: color, color: bgColor };
+        if (color && !this.element.borderWidth) {
+            values.borderWidth = 2;
+        }
+        this.updateElement(values);
     }
 
     updateElement(values, options = {}) {
@@ -126,5 +144,11 @@ export class EditDecorProperties extends Component {
 
     moveLayer(position) {
         this.props.moveLayer(this.element.uuid, position);
+    }
+
+    updateElements(updates, options) {
+        for (const { uuid, data } of updates) {
+            this.props.updateElement(uuid, data, options);
+        }
     }
 }

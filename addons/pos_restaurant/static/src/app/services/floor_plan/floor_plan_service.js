@@ -19,9 +19,19 @@ import { SIZES } from "@web/core/ui/ui_utils";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { applyDefaults, convertObjectUrlToDataUrl } from "./utils/utils";
+import { getElementsBounds } from "./utils/bounds_calculator";
 
 const DEFAULT_TABLE_COLOR_KEY = "green";
 const DEFAULT_SEATS_NUMBER = 2;
+const ALIGN_X_MODES = ["left", "center", "right"];
+const ALIGN_BOUNDS_KEY = {
+    left: "left",
+    center: "centerX",
+    right: "right",
+    top: "top",
+    middle: "centerY",
+    bottom: "bottom",
+};
 export class FloorPlanStore extends Reactive {
     constructor() {
         super();
@@ -193,6 +203,7 @@ export class FloorPlanStore extends Reactive {
                 historyTransactionMap: new Map(),
                 nextTableNumber,
                 selectedElement: null,
+                selectedElements: [],
                 elementEditMode: false,
                 floorEditMode: false,
                 imageObjectUrls: new Map(),
@@ -270,7 +281,7 @@ export class FloorPlanStore extends Reactive {
         this.selectFloorByUuid(floor.uuid);
 
         if (history) {
-            this.history.add({
+            this.addHistory({
                 type: "add_floor",
                 uuid: floor.uuid,
                 new: floor.raw,
@@ -320,7 +331,7 @@ export class FloorPlanStore extends Reactive {
         this.selectedFloor.addTable(table);
         this.selectElementByUuid(table.uuid);
 
-        this.history.add({
+        this.addHistory({
             type: "add_element",
             uuid: table.uuid,
             isTable: true,
@@ -332,6 +343,118 @@ export class FloorPlanStore extends Reactive {
         });
 
         return table;
+    }
+
+    addHistory(entry) {
+        if (this.batchedHistoryEntries) {
+            this.batchedHistoryEntries.push(entry);
+        } else {
+            this.history.add(entry);
+        }
+    }
+
+    batchHistory(fn) {
+        if (this.batchedHistoryEntries) {
+            return fn();
+        }
+        this.batchedHistoryEntries = [];
+        let result;
+        try {
+            result = fn();
+        } finally {
+            const entries = this.batchedHistoryEntries;
+            this.batchedHistoryEntries = null;
+            if (entries.length === 1) {
+                this.history.add(entries[0]);
+            } else if (entries.length > 1) {
+                this.history.add({ type: "batch", entries });
+            }
+        }
+        return result;
+    }
+
+    addDecorGroup(parts, { left, top }) {
+        const decors = this.batchHistory(() => {
+            const created = parts.map((part) =>
+                this.addDecor("image", { ...part, left: left + part.left, top: top + part.top })
+            );
+            this.groupElements(created.map((decor) => decor.uuid));
+            return created;
+        });
+        this.selectElementsByUuid(decors.map((decor) => decor.uuid));
+        return decors;
+    }
+
+    removeElements(uuids) {
+        this.batchHistory(() => {
+            for (const uuid of uuids) {
+                this.removeElement(uuid);
+            }
+        });
+    }
+
+    duplicateElements(uuids) {
+        const newGroupIds = new Map();
+        const elements = this.batchHistory(() =>
+            uuids
+                .map((elementUuid) => {
+                    const element = this.getElementByUuid(elementUuid);
+                    const overrides = {};
+                    if (element?.groupId) {
+                        if (!newGroupIds.has(element.groupId)) {
+                            newGroupIds.set(element.groupId, uuid());
+                        }
+                        overrides.groupId = newGroupIds.get(element.groupId);
+                    }
+                    return this.duplicateElement(elementUuid, overrides);
+                })
+                .filter(Boolean)
+        );
+        this.selectElements(elements);
+        return elements;
+    }
+
+    updateElements(updates, options = {}) {
+        this.batchHistory(() => {
+            for (const { uuid, data } of updates) {
+                this.updateElement(uuid, data, options);
+            }
+        });
+    }
+
+    alignElements(uuids, mode) {
+        const elements = uuids
+            .map((uuid) => this.selectedFloor?.getElementByUuid(uuid))
+            .filter(Boolean);
+        if (elements.length < 2) {
+            return;
+        }
+        const units = [];
+        const groups = new Map();
+        for (const element of elements) {
+            if (!element.groupId) {
+                units.push([element]);
+            } else if (groups.has(element.groupId)) {
+                groups.get(element.groupId).push(element);
+            } else {
+                const unit = [element];
+                groups.set(element.groupId, unit);
+                units.push(unit);
+            }
+        }
+        const key = ALIGN_BOUNDS_KEY[mode];
+        const axis = ALIGN_X_MODES.includes(mode) ? "left" : "top";
+        const target = getElementsBounds(elements)[key];
+        const updates = [];
+        for (const unit of units) {
+            const delta = Math.round(target - getElementsBounds(unit)[key]);
+            if (delta) {
+                for (const element of unit) {
+                    updates.push({ uuid: element.uuid, data: { [axis]: element[axis] + delta } });
+                }
+            }
+        }
+        this.updateElements(updates);
     }
 
     canUndo() {
@@ -353,8 +476,16 @@ export class FloorPlanStore extends Reactive {
         if (!data) {
             return;
         }
+        this.applyUndo(data);
+    }
 
+    applyUndo(data) {
         switch (data.type) {
+            case "batch":
+                for (let i = data.entries.length - 1; i >= 0; i--) {
+                    this.applyUndo(data.entries[i]);
+                }
+                break;
             case "add_element":
                 this.selectedFloor.removeElement(data.uuid);
                 break;
@@ -395,9 +526,17 @@ export class FloorPlanStore extends Reactive {
         if (!data) {
             return;
         }
+        this.applyRedo(data);
+    }
 
+    applyRedo(data) {
         this.restoreHistorySnapshot(data.store?.new);
         switch (data.type) {
+            case "batch":
+                for (const entry of data.entries) {
+                    this.applyRedo(entry);
+                }
+                break;
             case "add_element":
                 if (data.isTable) {
                     this.selectedFloor.addTable(this.createTable(data.new));
@@ -487,7 +626,7 @@ export class FloorPlanStore extends Reactive {
         this.selectedFloor.addDecor(decor);
         this.selectElementByUuid(decor.uuid);
 
-        this.history.add({
+        this.addHistory({
             type: "add_element",
             uuid: decor.uuid,
             store: {
@@ -546,8 +685,8 @@ export class FloorPlanStore extends Reactive {
             this.nextTableNumber--;
         }
 
-        if (element === this.selectedElement) {
-            this.selectElementByUuid(null);
+        if (this.selectedElements.includes(element)) {
+            this.selectElements(this.selectedElements.filter((el) => el !== element));
         }
 
         if (element.editing) {
@@ -555,7 +694,7 @@ export class FloorPlanStore extends Reactive {
         }
 
         this.historyTransactionMap.delete(uuid);
-        this.history.add({
+        this.addHistory({
             type: "remove_element",
             uuid: element.uuid,
             isTable: element.isTable,
@@ -598,7 +737,7 @@ export class FloorPlanStore extends Reactive {
         this.floors.splice(floorIndex, 1);
         this.selectFloorByUuid(this.floors[0]);
 
-        this.history.add({
+        this.addHistory({
             type: "remove_floor",
             uuid: floor.uuid,
 
@@ -632,25 +771,122 @@ export class FloorPlanStore extends Reactive {
         return this.selectedFloor;
     }
 
-    selectElementByUuid(uuid) {
+    selectElementByUuid(uuid, { toggle = false, expandGroups = true } = {}) {
+        if (toggle && uuid) {
+            this.toggleElementSelection(uuid, expandGroups);
+            return;
+        }
+
         const oldSelectedId = this.selectedElement?.uuid;
-        if (oldSelectedId === uuid) {
+        if (oldSelectedId === uuid && this.selectedElements.length <= 1) {
             return;
         }
 
         // Remember if we were in edit mode
         const wasInEditMode = this.elementEditMode;
 
-        if (this.selectedElement) {
-            this.endEditSelectedElement();
-        }
-
-        this.selectedElement = this.selectedFloor?.getElementByUuid(uuid);
+        const element = this.selectedFloor?.getElementByUuid(uuid);
+        this.selectElements(element ? [element] : [], element, expandGroups);
 
         // If we were in edit mode, automatically open edit mode for the new element
         if (wasInEditMode && this.selectedElement?.isEditable()) {
             this.startEditSelectedElement();
         }
+    }
+
+    toggleElementSelection(uuid, expandGroups = true) {
+        const element = this.selectedFloor?.getElementByUuid(uuid);
+        if (!element) {
+            return;
+        }
+        const members = expandGroups ? this.expandToGroups([element]) : [element];
+        const selected = this.selectedElements.filter((el) => !members.includes(el));
+        if (selected.length === this.selectedElements.length) {
+            selected.push(...members);
+        }
+        this.selectElements(selected, element, false);
+    }
+
+    selectElements(elements, primary = null, expandGroups = true) {
+        if (this.selectedElement) {
+            this.endEditSelectedElement();
+        }
+        if (expandGroups) {
+            elements = this.expandToGroups(elements);
+        }
+        if (primary && elements.includes(primary)) {
+            elements = [...elements.filter((el) => el !== primary), primary];
+        }
+        this.selectedElements = elements;
+        this.selectedElement = elements.length ? elements[elements.length - 1] : null;
+    }
+
+    selectElementsByUuid(uuids, expandGroups = true) {
+        const elements = uuids
+            .map((uuid) => this.selectedFloor?.getElementByUuid(uuid))
+            .filter(Boolean);
+        this.selectElements(elements, null, expandGroups);
+    }
+
+    expandToGroups(elements) {
+        const groupIds = new Set(elements.map((el) => el.groupId).filter(Boolean));
+        if (!groupIds.size) {
+            return elements;
+        }
+        const result = [...elements];
+        const uuids = new Set(elements.map((el) => el.uuid));
+        for (const element of this.getAllFloorElements()) {
+            if (groupIds.has(element.groupId) && !uuids.has(element.uuid)) {
+                result.push(element);
+            }
+        }
+        return result;
+    }
+
+    getGroupElements(groupId) {
+        return groupId ? this.getAllFloorElements().filter((el) => el.groupId === groupId) : [];
+    }
+
+    isElementSelected(element) {
+        return this.editState?.selectedElements.includes(element) || false;
+    }
+
+    get hasMultiSelection() {
+        return (this.editState?.selectedElements.length || 0) > 1;
+    }
+
+    get selectedElementUuids() {
+        return this.editState?.selectedElements.map((el) => el.uuid) || [];
+    }
+
+    get isSelectionGrouped() {
+        const elements = this.selectedElements;
+        const groupId = elements[0]?.groupId;
+        return (
+            !!groupId &&
+            elements.length > 1 &&
+            elements.every((el) => el.groupId === groupId) &&
+            this.getGroupElements(groupId).length === elements.length
+        );
+    }
+
+    get canGroupSelection() {
+        return this.hasMultiSelection && !this.isSelectionGrouped;
+    }
+
+    groupElements(uuids) {
+        if (uuids.length < 2) {
+            return null;
+        }
+        const groupId = uuid();
+        this.updateElements(uuids.map((elementUuid) => ({ uuid: elementUuid, data: { groupId } })));
+        return groupId;
+    }
+
+    ungroupElements(uuids) {
+        this.updateElements(
+            uuids.map((elementUuid) => ({ uuid: elementUuid, data: { groupId: null } }))
+        );
     }
 
     toggleEditSelectedElement() {
@@ -663,7 +899,7 @@ export class FloorPlanStore extends Reactive {
 
     startEditSelectedElement() {
         this.floorEditMode = false;
-        if (this.selectedElement) {
+        if (this.selectedElement && !this.hasMultiSelection) {
             this.selectedElement.onEdit(true);
         }
         this.elementEditMode = true;
@@ -719,7 +955,7 @@ export class FloorPlanStore extends Reactive {
         return element;
     }
 
-    duplicateElement(uuid) {
+    duplicateElement(uuid, overrides = {}) {
         let result;
         const element = this.getElementByUuid(uuid);
         if (element) {
@@ -728,6 +964,7 @@ export class FloorPlanStore extends Reactive {
                 left: element.left + 20,
                 top: element.top + 20,
                 uuid: null,
+                ...overrides,
             };
 
             if (element.isTable) {
@@ -761,7 +998,7 @@ export class FloorPlanStore extends Reactive {
         }
 
         const newPosition = this.selectedFloor.getDecorPosition(uuid);
-        this.history.add({
+        this.addHistory({
             type: "move_layer",
             floorUuid: this.selectedFloor.uuid,
             uuid: uuid,
@@ -831,7 +1068,7 @@ export class FloorPlanStore extends Reactive {
         }
 
         Object.assign(floor, changedData);
-        this.history.add({
+        this.addHistory({
             type: "update_floor",
             uuid: uuid,
             old: oldValues,
@@ -844,10 +1081,15 @@ export class FloorPlanStore extends Reactive {
         let historyTransaction = this.historyTransactionMap.get(uuid);
         if (!historyTransaction) {
             historyTransaction = {
-                oldValues: { ...el.raw },
+                oldValues: {},
                 newValues: {},
             };
             this.historyTransactionMap.set(uuid, historyTransaction);
+        }
+        for (const key in data) {
+            if (!(key in historyTransaction.oldValues)) {
+                historyTransaction.oldValues[key] = el[key];
+            }
         }
         Object.assign(historyTransaction.newValues, data);
         Object.assign(el, data);
@@ -922,7 +1164,7 @@ export class FloorPlanStore extends Reactive {
             };
         }
 
-        this.history.add({
+        this.addHistory({
             type: "update_element",
             uuid: uuid,
             old: oldValues,
@@ -989,6 +1231,14 @@ export class FloorPlanStore extends Reactive {
 
     set selectedElement(el) {
         this.editState.selectedElement = el;
+    }
+
+    get selectedElements() {
+        return this.editState?.selectedElements || [];
+    }
+
+    set selectedElements(elements) {
+        this.editState.selectedElements = elements;
     }
 
     get elementEditMode() {

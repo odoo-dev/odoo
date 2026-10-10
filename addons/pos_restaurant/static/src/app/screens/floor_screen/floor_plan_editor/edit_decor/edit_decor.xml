@@ -11,6 +11,7 @@
                             t-attf-style="background-color: {{color.value}}"
                             t-on-click='()=>this.updateElement({ color: color.key })'/>
                 </t>
+                <CustomColorPicker value="this.element.color" onPick="(value, batched) => this.setCustomColor('color', value, batched)"/>
             </div>
 
             <div class="fs-4 fw-bold d-flex justify-content-between mt-3 mb-2 ">
@@ -42,6 +43,7 @@
                     <div style="width:32px;height:4px;border-radius:999rem" class="my-2 bg-black"/>
                 </button>
             </div>
+            <t t-call="pos.floor_screen_edit_decor_properties.transparency"/>
             <t t-set="innerText" t-value="false"/>
             <t t-call="pos.floor_screen_edit_decor_properties.layers"/>
         </t>
@@ -50,9 +52,15 @@
             <button class="btn btn-outline-secondary fs-4 w-100 text-center mt-4" t-if="!this.props.isTextContentEditable" t-on-click="()=>this.editTextOnly()">Edit text</button>
             <t t-set="innerText" t-value="false"/>
             <t t-call="pos.floor_screen_edit_decor_properties.text"/>
+            <t t-if="!this.element.color" t-call="pos.floor_screen_edit_decor_properties.transparency"/>
             <t t-call="pos.floor_screen_edit_decor_properties.layers"/>
         </t>
         <t t-elif="this.element.shape === 'image'">
+            <t t-if="this.element.colorTokens.length">
+                <DecorColors elements="[this.element]" updateElements.bind="this.updateElements"/>
+                <div class="border-bottom border-color mt-3"/>
+            </t>
+            <t t-call="pos.floor_screen_edit_decor_properties.transparency"/>
             <t t-set="innerText" t-value="false"/>
             <t t-call="pos.floor_screen_edit_decor_properties.layers"/>
         </t>
@@ -60,17 +68,18 @@
             <div class="fs-4 fw-bold mt-3 mb-2">Border</div>
             <div class="d-flex flex-wrap gap-2 pt-1">
                 <button class="rounded-circle o_fp_color_item no-color"
-                        t-att-class="{'selected': !this.element.borderColor}"
+                        t-att-class="{'selected': !this.hasBorder}"
                         t-on-click='()=>this.selectBorderColor(null)'/>
                 <t t-foreach="this.getColors()" t-as="color" t-key="color.key">
                     <button class="rounded-circle o_fp_color_item"
-                            t-att-class="{'selected': this.element.borderColor === color.key}"
+                            t-att-class="{'selected': this.hasBorder and this.element.borderColor === color.key}"
                             t-attf-style="background-color: {{color.value}}"
                             t-on-click='()=>this.selectBorderColor(color.key)'/>
                 </t>
+                <CustomColorPicker value="this.hasBorder ? this.element.borderColor : null" onPick="(value, batched) => this.setCustomColor('borderColor', value, batched)"/>
             </div>
 
-            <t t-if="this.element.borderColor">
+            <t t-if="this.hasBorder">
                 <div class="fs-5 d-flex justify-content-between mt-3 mb-2 ">
                     <span>Thickness</span>
                     <span  t-out="this.element.borderWidth||0"/>
@@ -98,21 +107,23 @@
                     </button>
 
                 </div>
-                <t t-if="this.element.shape === 'square' || this.element.shape === 'rect'">
-                     <div class="fs-5 d-flex justify-content-between mt-3 mb-2 ">
-                        <span>Corner rounding</span>
-                        <span t-out="this.element.roundedCorner||0"/>
-                    </div>
-                    <input min="0" class="w-100" max="100" type="range" t-att-value="this.element.roundedCorner||0"
-                           t-on-input="(e)=>this.updateElementValueFromInput('roundedCorner',e)"
-                           t-on-change="(e)=>this.commitElementValueFromInput('roundedCorner',e)"/>
-                </t>
+                <div class="border-bottom border-color mt-3"/>
+            </t>
+
+            <t t-if="this.element.shape === 'square' || this.element.shape === 'rect'">
+                <div class="fs-4 fw-bold d-flex justify-content-between mt-3 mb-2">
+                    <span>Corner rounding</span>
+                    <span class="fs-5 fw-normal" t-out="this.element.roundedCorner||0"/>
+                </div>
+                <input min="0" class="w-100" max="100" type="range" t-att-value="this.element.roundedCorner||0"
+                       t-on-input="(e)=>this.updateElementValueFromInput('roundedCorner',e)"
+                       t-on-change="(e)=>this.commitElementValueFromInput('roundedCorner',e)"/>
                 <div class="border-bottom border-color mt-3"/>
             </t>
 
             <div class="fs-4 fw-bold mt-3 mb-2">Background</div>
             <div class="d-flex flex-wrap gap-2 pt-1">
-                <button class="rounded-circle o_fp_color_item no-color" t-if="this.element.borderColor"
+                <button class="rounded-circle o_fp_color_item no-color" t-if="this.hasBorder"
                         t-att-class="{'selected': !this.element.color}"
                         t-on-click='()=>this.updateElement({ color: null})'/>
 
@@ -122,6 +133,7 @@
                             t-attf-style="background-color: {{color.value}}"
                             t-on-click='()=>this.updateElement({ color: color.key})'/>
                 </t>
+                <CustomColorPicker value="this.element.color" onPick="(value, batched) => this.setCustomColor('color', value, batched)"/>
             </div>
             <t t-if="this.element.color">
                 <div class="fs-5 d-flex justify-content-between mt-3 mb-2 ">
@@ -151,6 +163,18 @@
 
         </t>
     </t>
+    <t t-name="pos.floor_screen_edit_decor_properties.transparency">
+        <div class="fs-4 fw-bold d-flex justify-content-between mt-3 mb-2">
+            <span>Transparency</span>
+            <span class="fs-5 fw-normal" t-out="this.getElementTransparency()"/>
+        </div>
+        <input min="0" max="90" class="w-100" type="range"
+               t-att-value="this.getElementTransparency()"
+               t-on-input="(e)=>this.updateElementValueFromInput('transparency',e)"
+               t-on-change="(e)=>this.commitElementValueFromInput('transparency',e)"/>
+        <div class="border-bottom border-color mt-3"/>
+    </t>
+
     <t t-name="pos.floor_screen_edit_decor_properties.layers">
         <t t-if="this.innerText">
             <t t-set="headerClass" t-value="'fs-5 mt-3'"/>
@@ -195,6 +219,7 @@
                         t-attf-style="background-color: {{color.value}}"
                         t-on-click='()=>this.updateElement({ textcolor: color.key})'/>
             </t>
+            <CustomColorPicker value="this.element.textcolor" onPick="(value, batched) => this.setCustomColor('textcolor', value, batched)"/>
         </div>
         <div t-attf-class="{{ headerClass }} mb-2 d-flex justify-content-between">
             <span>Size</span>
@@ -219,7 +244,7 @@
             <button class="btn btn-outline-secondary"
                     t-att-class="{'active': this.element.textDecoration  === 'underline'  }"
                     t-on-click="() => this.toggleElementValue('textDecoration', 'underline')" title="Underline">
-                <i class="oi oi-fw" data-icon="format_underline"/>
+                <i class="oi oi-fw" data-icon="format_underlined"/>
             </button>
         </div>
 

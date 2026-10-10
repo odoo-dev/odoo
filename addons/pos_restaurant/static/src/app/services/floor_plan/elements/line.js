@@ -16,6 +16,9 @@ const defaults = {
 
 export class Line extends Decor {
     constructor(data) {
+        data.borderStyle ??= data.style;
+        data.borderColor ??= data.color;
+        data.color ??= data.borderColor;
         super(applyDefaults(data, defaults));
         this.height = data.thickness || data.height || 20;
         this.width = data.width || 200;

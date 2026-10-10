@@ -3,6 +3,7 @@ import { onMounted, onWillUnmount, useListener, signal, useProps, t } from "@odo
 import { EditDecorProperties } from "./edit_decor/edit_decor";
 import { EditTableProperties } from "./edit_table/edit_table";
 import { EditFloorProperties } from "./edit_floor/edit_floor";
+import { EditSelectionProperties } from "./edit_selection/edit_selection";
 
 import { Handles } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/handles/handles";
 import {
@@ -10,8 +11,16 @@ import {
     ResizeOperation,
     RotationOperation,
     LineResizeOperation,
+    GroupMoveOperation,
+    GroupResizeOperation,
+    MarqueeOperation,
 } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/operations";
+import {
+    SelectionGroup,
+    SELECTION_GROUP_UUID,
+} from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/utils/selection_group";
 
+import { constrainPositionToCanvas } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/operations/move";
 import { KeydownMoveHandler } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/operations/keydown-move";
 import { TextEditHandler } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/operations/text_edit";
 import { useActionMenu } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/action_menu_hook";
@@ -27,6 +36,7 @@ import {
     loadImage,
     STATIC_IMG_BASE_URL,
 } from "@pos_restaurant/app/services/floor_plan/utils/utils";
+import { calculateBoundsFromTransform } from "@pos_restaurant/app/services/floor_plan/utils/bounds_calculator";
 import { SIZES } from "@web/core/ui/ui_utils";
 
 const SETTING_MENU_SPACE = 320;
@@ -38,13 +48,20 @@ const IMG_SIZE = 220;
 
 export class FloorPlanEditor extends FloorPlanBase {
     static template = "pos_restaurant.floor_plan_editor";
-    static components = { Handles, EditTableProperties, EditDecorProperties, EditFloorProperties };
+    static components = {
+        Handles,
+        EditTableProperties,
+        EditDecorProperties,
+        EditFloorProperties,
+        EditSelectionProperties,
+    };
     props = useProps({
         initActionHandler: t.function(),
     });
 
     snapGuidesRef = signal.ref();
     actionMenuRef = signal.ref();
+    marqueeRef = signal.ref();
 
     setup() {
         super.setup();
@@ -67,6 +84,8 @@ export class FloorPlanEditor extends FloorPlanBase {
         this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
         this.updateElement = this.updateElement.bind(this);
         this.moveLayer = this.moveLayer.bind(this);
+        this.updateElements = this.updateElements.bind(this);
+        this.alignSelected = this.alignSelected.bind(this);
 
         onMounted(() => {
             this.snapping = new Snapping(
@@ -112,13 +131,19 @@ export class FloorPlanEditor extends FloorPlanBase {
         );
 
         useLayoutEffect(
-            (selectedFloorEl) => {
+            (selectedFloorEl, selectionCount) => {
                 this.textEditHandler?.endEdit();
-                this.selectedDOMElement = this.getDOMFloorElement(selectedFloorEl?.uuid);
+                this.selectedDOMElement =
+                    selectionCount > 1
+                        ? this.canvasRef()?.querySelector(".o_fp_handles")
+                        : this.getDOMFloorElement(selectedFloorEl?.uuid);
                 this.updateActionMenu();
                 this.startEditText();
             },
-            () => [this.floorPlanStore.getSelectedElement()]
+            () => [
+                this.floorPlanStore.getSelectedElement(),
+                this.floorPlanStore.selectedElements.length,
+            ]
         ); //This use effect need to be declared before the action menu setup, so that selectedDOMElement is set before action menu uses it
 
         useLayoutEffect(
@@ -134,7 +159,7 @@ export class FloorPlanEditor extends FloorPlanBase {
         this.actionMenu = useActionMenu(
             this.actionMenuRef,
             this.containerRef,
-            () => ({ domElement: this.selectedDOMElement, floorElement: this.selectedElement }),
+            () => ({ domElement: this.selectedDOMElement, floorElement: this.handlesElement }),
             (direction) => {
                 this.state.actionMenuPosition = direction;
             }
@@ -147,6 +172,12 @@ export class FloorPlanEditor extends FloorPlanBase {
         useListener(document, "touchend", this.handleEnd.bind(this), { passive: false });
         useListener(document, "keydown", this.handleKeyDown.bind(this));
         useListener(window, "resize", useDebounced(this.handleWindowResize.bind(this), 100));
+        this.commitSelectionMove = useDebounced(
+            (uuids) =>
+                this.floorPlanStore.updateElements(uuids.map((uuid) => ({ uuid, data: {} }))),
+            300,
+            { execBeforeUnmount: true }
+        );
         useListener(window, "beforeunload", this.handleBeforeUnload.bind(this));
 
         onWillUnmount(() => {
@@ -165,6 +196,45 @@ export class FloorPlanEditor extends FloorPlanBase {
 
     handlesActions(handles) {
         this.handles = handles;
+    }
+
+    isCanvasBackground(target) {
+        return (
+            target === this.canvasRef() ||
+            target === this.snapGuidesRef() ||
+            target === this.containerRef()
+        );
+    }
+
+    isOnScrollbar(e) {
+        const container = this.containerRef();
+        return (
+            e.target === container &&
+            (e.offsetX >= container.clientWidth || e.offsetY >= container.clientHeight)
+        );
+    }
+
+    get isMultiSelectionEnabled() {
+        return !this.ui.isSmall;
+    }
+
+    onCanvasMouseDown(e) {
+        if (
+            !this.isMultiSelectionEnabled ||
+            this.operation ||
+            e.button !== 0 ||
+            !this.isCanvasBackground(e.target) ||
+            this.isOnScrollbar(e)
+        ) {
+            return;
+        }
+        e.preventDefault();
+        this.operation = new MarqueeOperation({
+            event: e,
+            canvasEl: this.canvasRef(),
+            marqueeEl: this.marqueeRef(),
+            floorPlanStore: this.floorPlanStore,
+        });
     }
 
     onCanvasClick(e) {
@@ -217,23 +287,54 @@ export class FloorPlanEditor extends FloorPlanBase {
             return;
         }
 
-        if (ctrlOrCmd && e.key.toLowerCase() === "v") {
-            if (this.copiedShapeId) {
-                this.duplicateShape(this.copiedShapeId);
+        if (ctrlOrCmd && key === "v") {
+            if (this.copiedShapeIds?.length) {
+                this.duplicateShapes(this.copiedShapeIds);
+            }
+            return;
+        }
+
+        if (ctrlOrCmd && key === "a" && this.isMultiSelectionEnabled) {
+            e.preventDefault();
+            this.floorPlanStore.selectElementsByUuid(
+                this.floorPlanStore.getAllFloorElements().map((el) => el.uuid)
+            );
+            return;
+        }
+
+        if (ctrlOrCmd && key === "g") {
+            e.preventDefault();
+            if (e.shiftKey) {
+                this.ungroupSelected();
+            } else if (this.floorPlanStore.canGroupSelection) {
+                this.groupSelected();
             }
             return;
         }
 
         if (selectedElement) {
             e.preventDefault();
-            if (ctrlOrCmd && e.key.toLowerCase() === "c") {
-                this.copiedShapeId = selectedElement.uuid;
+            if (ctrlOrCmd && key === "c") {
+                this.copiedShapeIds = this.floorPlanStore.selectedElementUuids;
                 return;
             }
 
             if (e.key === "Delete" || e.key === "Backspace") {
                 e.preventDefault();
                 this.deleteSelected();
+                return;
+            }
+
+            if (this.floorPlanStore.hasMultiSelection) {
+                const delta = {
+                    ArrowLeft: [-1, 0],
+                    ArrowRight: [1, 0],
+                    ArrowUp: [0, -1],
+                    ArrowDown: [0, 1],
+                }[e.key];
+                if (delta) {
+                    this.moveSelectionBy(...delta);
+                }
                 return;
             }
 
@@ -261,6 +362,11 @@ export class FloorPlanEditor extends FloorPlanBase {
         if (isTable) {
             data = this.floorPlanStore.addTable(type, {}, (table) =>
                 this.findBestPlacement(table.width, table.height)
+            );
+        } else if (type === "group") {
+            [data] = this.floorPlanStore.addDecorGroup(
+                shapeData.parts,
+                this.getCenterPosition(shapeData.width, shapeData.height)
             );
         } else {
             if (type === "image") {
@@ -294,20 +400,22 @@ export class FloorPlanEditor extends FloorPlanBase {
             name = imgData.name;
         }
         const aspectRatio = imgData.width / imgData.height;
-        let width, height;
+        let { width, height } = data || {};
 
-        if (aspectRatio === 1) {
-            // Square image
-            width = IMG_SQUARE_SIZE;
-            height = IMG_SQUARE_SIZE;
-        } else if (aspectRatio > 1) {
-            // Landscape
-            width = IMG_SIZE;
-            height = Math.round(IMG_SIZE / aspectRatio);
-        } else {
-            // Portrait
-            height = IMG_SIZE;
-            width = Math.round(IMG_SIZE * aspectRatio);
+        if (!width || !height) {
+            if (aspectRatio === 1) {
+                // Square image
+                width = IMG_SQUARE_SIZE;
+                height = IMG_SQUARE_SIZE;
+            } else if (aspectRatio > 1) {
+                // Landscape
+                width = IMG_SIZE;
+                height = Math.round(IMG_SIZE / aspectRatio);
+            } else {
+                // Portrait
+                height = IMG_SIZE;
+                width = Math.round(IMG_SIZE * aspectRatio);
+            }
         }
 
         return {
@@ -479,6 +587,35 @@ export class FloorPlanEditor extends FloorPlanBase {
             return;
         }
 
+        if (floorElemUuid === SELECTION_GROUP_UUID) {
+            this.startGroupMove(event);
+            return;
+        }
+
+        if (
+            this.isMultiSelectionEnabled &&
+            (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+        ) {
+            const uuid = this.canElementBeSelectedAtPoint(floorElemUuid, event)
+                ? floorElemUuid
+                : this.findElementAtPoint(event);
+            if (uuid) {
+                this.floorPlanStore.selectElementByUuid(uuid, {
+                    toggle: !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey,
+                    expandGroups: !event.altKey,
+                });
+            }
+            return;
+        }
+
+        if (
+            this.floorPlanStore.hasMultiSelection &&
+            this.floorPlanStore.selectedElementUuids.includes(floorElemUuid)
+        ) {
+            this.startGroupMove(event);
+            return;
+        }
+
         let startedOnTransparentArea = false;
         if (this.selectedElement?.uuid === floorElemUuid) {
             startedOnTransparentArea = !this.canElementBeSelectedAtPoint(floorElemUuid, event);
@@ -489,11 +626,29 @@ export class FloorPlanEditor extends FloorPlanBase {
                 this.floorPlanStore.selectElementByUuid(null);
                 return;
             }
-            this.floorPlanStore.selectElementByUuid(detectElementId);
+            this.floorPlanStore.selectElementByUuid(detectElementId, {
+                expandGroups: this.isMultiSelectionEnabled,
+            });
+            if (this.floorPlanStore.hasMultiSelection) {
+                this.startGroupMove(event);
+                return;
+            }
         }
 
         this.operation = new MoveOperation(this.getActionContext(event));
         this.operation.startedOnTransparentArea = startedOnTransparentArea;
+    }
+
+    groupSelected() {
+        this.floorPlanStore.groupElements(this.floorPlanStore.selectedElementUuids);
+    }
+
+    ungroupSelected() {
+        this.floorPlanStore.ungroupElements(this.floorPlanStore.selectedElementUuids);
+    }
+
+    startGroupMove(event) {
+        this.operation = new GroupMoveOperation(this.getActionContext(event));
     }
 
     onDblclick(event, floorElemUuid) {
@@ -514,6 +669,11 @@ export class FloorPlanEditor extends FloorPlanBase {
         }
         this.hideActionMenu();
 
+        if (this.floorPlanStore.hasMultiSelection) {
+            this.operation = new GroupResizeOperation(this.getActionContext(event, { position }));
+            return;
+        }
+
         // Check if this is a line element
         const selectedElement = this.floorPlanStore.getSelectedElement();
         if (
@@ -529,7 +689,7 @@ export class FloorPlanEditor extends FloorPlanBase {
     }
 
     startRotate(event) {
-        if (!this.selectedDOMElement || this.operation) {
+        if (!this.selectedDOMElement || this.operation || this.floorPlanStore.hasMultiSelection) {
             return;
         }
         this.hideActionMenu();
@@ -563,18 +723,30 @@ export class FloorPlanEditor extends FloorPlanBase {
 
         event.stopPropagation();
         event.preventDefault();
-        const data = this.operation.stop();
+        const operation = this.operation;
+        const data = operation.stop();
 
         this.cancelCanvasClick = true;
-        if (!data && this.operation.startedOnTransparentArea) {
+        if (operation instanceof MarqueeOperation) {
+            if (data) {
+                this.floorPlanStore.selectElementsByUuid(data.uuids);
+            } else if (!(event.ctrlKey || event.metaKey || event.shiftKey)) {
+                this.floorPlanStore.selectElementByUuid(null);
+                this.endEditFloor();
+            }
+        } else if (!data && operation.startedOnTransparentArea) {
             // The operation is not started and the user clicked on a transparent area
             // Find the first element at click point that should be selected
             const elementId = this.findElementAtPoint(event);
             if (elementId) {
-                this.floorPlanStore.selectElementByUuid(elementId);
+                this.floorPlanStore.selectElementByUuid(elementId, {
+                    expandGroups: this.isMultiSelectionEnabled,
+                });
             } else {
                 this.floorPlanStore.selectElementByUuid(null);
             }
+        } else if (data?.updates) {
+            this.floorPlanStore.updateElements(data.updates);
         } else if (data) {
             this.floorPlanStore.updateElement(this.floorPlanStore.selectedElementUuid, data);
         }
@@ -590,14 +762,59 @@ export class FloorPlanEditor extends FloorPlanBase {
     }
 
     deleteSelected() {
-        const floorElemId = this.floorPlanStore.selectedElementUuid;
-        if (floorElemId) {
-            this.floorPlanStore.removeElement(floorElemId);
+        const uuids = this.floorPlanStore.selectedElementUuids;
+        if (uuids.length) {
+            this.floorPlanStore.removeElements(uuids);
         }
     }
 
     duplicateSelected() {
-        this.duplicateShape(this.floorPlanStore.selectedElementUuid);
+        this.duplicateShapes(this.floorPlanStore.selectedElementUuids);
+    }
+
+    duplicateShapes(uuids) {
+        if (uuids.length === 1) {
+            this.duplicateShape(uuids[0]);
+        } else if (uuids.length > 1) {
+            this.floorPlanStore.duplicateElements(uuids);
+        }
+    }
+
+    alignSelected(mode) {
+        this.floorPlanStore.alignElements(this.floorPlanStore.selectedElementUuids, mode);
+    }
+
+    moveSelectionBy(dx, dy) {
+        const group = this.getSelectionGroup();
+        const geo = { ...group.getGeometry(), left: group.left + dx, top: group.top + dy };
+        const position = constrainPositionToCanvas(
+            geo.left,
+            geo.top,
+            calculateBoundsFromTransform(geo),
+            this.canvasRef()
+        );
+        dx = position.left - group.left;
+        dy = position.top - group.top;
+        if (!dx && !dy) {
+            return;
+        }
+        const updates = this.floorPlanStore.selectedElements.map((element) => ({
+            uuid: element.uuid,
+            data: { left: element.left + dx, top: element.top + dy },
+        }));
+        this.floorPlanStore.updateElements(updates, { batched: true });
+        this.commitSelectionMove(updates.map((update) => update.uuid));
+    }
+
+    getSelectionGroup() {
+        return new SelectionGroup(this.floorPlanStore.selectedElements);
+    }
+
+    get handlesElement() {
+        if (this.floorPlanStore.hasMultiSelection) {
+            return this.getSelectionGroup();
+        }
+        return this.selectedElement;
     }
 
     editSelected() {
@@ -657,6 +874,10 @@ export class FloorPlanEditor extends FloorPlanBase {
         }
 
         this.floorPlanStore.updateElement(uuid, values, options);
+    }
+
+    updateElements(updates, options) {
+        this.floorPlanStore.updateElements(updates, options);
     }
 
     moveLayer(uuid, position) {
@@ -759,6 +980,14 @@ export class FloorPlanEditor extends FloorPlanBase {
             handles: this.handles,
             actionMenu: this.actionMenu,
         };
+
+        if (this.floorPlanStore.hasMultiSelection) {
+            result.elements = this.floorPlanStore.selectedElements.map((floorElement) => ({
+                el: this.getDOMFloorElement(floorElement.uuid),
+                floorElement,
+            }));
+            result.selectionGroup = this.getSelectionGroup();
+        }
 
         if (args) {
             Object.assign(result, args);

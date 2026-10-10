@@ -34,6 +34,34 @@ FLOOR_TEXTURE.push({
     previewCss: "background-image:url('" + URL + "/tile-1p.png')",
 });
 
+FLOOR_TEXTURE.push({
+    id: FLOOR_TEXTURE_PREFIX + "grey-oak",
+    css: "background-image:url('" + URL + "/texture-grey-oak.svg')",
+    previewCss: "background-image:url('" + URL + "/texture-grey-oak.svg');background-size:48px",
+});
+
+FLOOR_TEXTURE.push({
+    id: FLOOR_TEXTURE_PREFIX + "whitewashed-oak",
+    css: "background-image:url('" + URL + "/texture-whitewashed-oak.svg')",
+    previewCss:
+        "background-image:url('" + URL + "/texture-whitewashed-oak.svg');background-size:48px",
+});
+
+FLOOR_TEXTURE.push({
+    id: FLOOR_TEXTURE_PREFIX + "whitewashed-oak-night",
+    css: "background-image:url('" + URL + "/texture-whitewashed-oak-night.svg')",
+    previewCss:
+        "background-image:url('" +
+        URL +
+        "/texture-whitewashed-oak-night.svg');background-size:48px",
+});
+
+FLOOR_TEXTURE.push({
+    id: FLOOR_TEXTURE_PREFIX + "travertine",
+    css: "background-image:url('" + URL + "/texture-travertine.svg')",
+    previewCss: "background-image:url('" + URL + "/texture-travertine.svg');background-size:48px",
+});
+
 export function isFloorTextureId(id) {
     return id?.startsWith(FLOOR_TEXTURE_PREFIX);
 }
