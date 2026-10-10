@@ -63,6 +63,10 @@ export const pttExtensionHookService = {
                         self.voiceActivated = false;
                         const isFirstPress = !rtc.selfSession?.isTalking;
                         rtc.onPushToTalk();
+                        if (isFirstPress) {
+                            // Wait for a repeat so a tap cannot trigger the muted warning.
+                            rtc.cancelPttMutedWarningDelay();
+                        }
                         if (rtc.selfSession?.isTalking) {
                             // Second key press is slow to come thus, the first timeout
                             // must be greater than the following ones.

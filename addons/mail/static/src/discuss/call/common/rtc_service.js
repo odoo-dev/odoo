@@ -91,6 +91,8 @@ function subscribe(target, event, f) {
 }
 
 export const PTT_RELEASE_DURATION = 200;
+/** How long the PTT key must be held while muted before warning the user. */
+export const PTT_MUTED_WARNING_DELAY = 500;
 const RECORDING_CONNECTION_TIMEOUT = 15_000;
 const SW_MESSAGE_TYPE = {
     POST_RTC_LOGS: "POST_RTC_LOGS",
@@ -345,6 +347,12 @@ export class Rtc extends Record {
     disconnectMicAudioTrackListeners;
     /** @type {ReturnType<setTimeout>} */
     pttReleaseTimeout;
+    /** Whether the warning about using PTT while the microphone is muted is displayed. */
+    showPttMutedWarning = false;
+    /** Whether the user closed the muted PTT warning, it is reset when the microphone is turned on. */
+    isPttMutedWarningDismissed = false;
+    /** @type {ReturnType<setTimeout>} */
+    pttMutedWarningDelayTimeout;
     /**
      * Whether the network fell back to p2p mode in a SFU call.
      */
@@ -665,6 +673,17 @@ export class Rtc extends Record {
             { initialRun: false }
         );
         this.onChange(
+            () => [this.selfSession?.isMute],
+            function onChangeSelfIsMute(isMute) {
+                if (!isMute) {
+                    this.cancelPttMutedWarningDelay();
+                    this.showPttMutedWarning = false;
+                    this.isPttMutedWarningDismissed = false;
+                }
+            },
+            { initialRun: false }
+        );
+        this.onChange(
             () => [this.store.settings.audioInputDeviceId],
             function onChangeAudioInputDeviceId(audioInputDeviceId) {
                 if (this.localSession) {
@@ -781,6 +800,7 @@ export class Rtc extends Record {
         if (!this.isPushToTalkRelease(ev)) {
             return;
         }
+        this.cancelPttMutedWarningDelay();
         this.setPttReleaseTimeout();
     }
 
@@ -788,16 +808,22 @@ export class Rtc extends Record {
         if (!this.isPushToTalkRelease()) {
             return;
         }
+        this.cancelPttMutedWarningDelay();
         this.setPttReleaseTimeout();
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
+        // While muted, there is no audio to keep active after releasing PTT.
+        const releaseDelay = this.localSession?.isMute
+            ? duration
+            : Math.max(this.store.settings.voiceActiveDuration || 0, duration);
         this.pttReleaseTimeout = window.setTimeout(() => {
+            this.cancelPttMutedWarningDelay();
             this.setTalking(false);
             if (!this.localSession?.isMute) {
                 this.soundEffectsService.play("ptt-release");
             }
-        }, Math.max(this.store.settings.voiceActiveDuration || 0, duration));
+        }, releaseDelay);
     }
 
     onPushToTalk() {
@@ -809,10 +835,31 @@ export class Rtc extends Record {
             return;
         }
         window.clearTimeout(this.pttReleaseTimeout);
-        if (!this.localSession.isTalking && !this.localSession.isMute) {
+        if (this.localSession.isMute) {
+            this.startPttMutedWarningDelay();
+        } else if (!this.localSession.isTalking) {
             this.soundEffectsService.play("ptt-press");
         }
         this.setTalking(true);
+    }
+
+    startPttMutedWarningDelay() {
+        if (this.pttMutedWarningDelayTimeout || this.isPttMutedWarningDismissed) {
+            return;
+        }
+        this.pttMutedWarningDelayTimeout = setTimeout(() => {
+            this.showPttMutedWarning = true;
+        }, PTT_MUTED_WARNING_DELAY);
+    }
+
+    cancelPttMutedWarningDelay() {
+        window.clearTimeout(this.pttMutedWarningDelayTimeout);
+        this.pttMutedWarningDelayTimeout = undefined;
+    }
+
+    dismissPttMutedWarning() {
+        this.isPttMutedWarningDismissed = true;
+        this.showPttMutedWarning = false;
     }
 
     async openPip(options) {
