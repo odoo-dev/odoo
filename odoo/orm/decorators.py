@@ -23,6 +23,7 @@ _logger = logging.getLogger('odoo.api')
 
 # The following attributes are used, and reflected on wrapping methods:
 #  - method._constrains: set by @constrains, specifies constraint dependencies
+#  - method._onmodify: set by @onmodify, specifies modification dependencies
 #  - method._depends: set by @depends, specifies compute dependencies
 #  - method._onchange: set by @onchange, specifies onchange fields
 #  - method._ondelete: set by @ondelete, used to raise errors for unlink operations
@@ -86,6 +87,47 @@ def constrains(*args) -> Decorator:
     if args and callable(args[0]):
         args = args[0]
     return attrsetter('_constrains', args)
+
+
+@typing.overload
+def onmodify(func: Callable[[BaseModel], Collection[str]], /) -> Decorator:
+    ...
+
+
+@typing.overload
+def onmodify(*args: str) -> Decorator:
+    ...
+
+
+def onmodify(*args) -> Decorator:
+    """Decorate a method to be invoked when some fields are modified.
+
+    Each argument must be a field name; the arguments are the same as for
+    :func:`constrains`::
+
+        @api.onmodify('date_start', 'date_end')
+        def _onmodify_dates(self):
+            for record in self:
+                record.duration = (record.date_end - record.date_start).days
+
+    Invoked on the records on which one of the named fields has been modified,
+    in the same situations as ``@constrains`` methods, but always *before*
+    them.  Contrary to ``@constrains`` methods, which should only check data,
+    ``@onmodify`` methods are meant to update data as a consequence of the
+    modification.  As a consequence, the constraint methods are able to
+    validate the final state of the records.
+
+    The same limitations as ``@constrains`` apply: dotted names are not
+    supported, and the method is only triggered if the declared fields are
+    included in the ``create`` or ``write`` call.
+
+    One may also pass a single function as argument.  In that case, the field
+    names are given by calling the function with a model instance.
+
+    """
+    if args and callable(args[0]):
+        args = args[0]
+    return attrsetter('_onmodify', args)
 
 
 def ondelete(*, at_uninstall: bool) -> Decorator:

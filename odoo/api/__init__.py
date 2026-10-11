@@ -12,6 +12,7 @@ from odoo.orm.decorators import (
     model_create_multi,
     onchange,
     ondelete,
+    onmodify,
     private,
     readonly,
 )

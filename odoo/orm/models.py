@@ -578,6 +578,36 @@ class BaseModel(metaclass=MetaModel):
         return methods
 
     @property
+    def _onmodify_methods(self):
+        """ Return a list of methods decorated with ``@onmodify``. """
+        def is_onmodify(func):
+            return callable(func) and hasattr(func, '_onmodify')
+
+        def wrap(func, names):
+            # wrap func into a proxy function with explicit '_onmodify'
+            @api.onmodify(*names)
+            def wrapper(self):
+                return func(self)
+            return wrapper
+
+        cls = self.env.registry[self._name]
+        methods = []
+        for attr, func in getmembers(cls, is_onmodify):
+            if callable(func._onmodify):
+                func = wrap(func, func._onmodify(self.sudo()))
+            for name in func._onmodify:
+                field = cls._fields.get(name)
+                if not field:
+                    _logger.warning("method %s.%s: @onmodify parameter %r is not a field name", cls._name, attr, name)
+                elif not (field.store or field.inverse or field.inherited):
+                    _logger.warning("method %s.%s: @onmodify parameter %r is not writeable", cls._name, attr, name)
+            methods.append(func)
+
+        # optimization: memoize result on cls, it will not be recomputed
+        cls._onmodify_methods = methods
+        return methods
+
+    @property
     def _ondelete_methods(self):
         """ Return a list of methods implementing checks before unlinking. """
         def is_ondelete(func):
@@ -1294,6 +1324,22 @@ class BaseModel(metaclass=MetaModel):
             converted = convert(record, functools.partial(_log, extras, stream_index))
 
             yield dbid, xid, converted, dict(extras, record=stream_index)
+
+    def _onmodify_fields(self, field_names: Iterable[str], excluded_names: Iterable[str] = ()) -> None:
+        """ Invoke the onmodify methods for which at least one field name is
+        in ``field_names`` and none is in ``excluded_names``.
+        """
+        methods = self._onmodify_methods
+        if not methods:
+            return
+        # run onmodify methods just like constrains, see _validate_fields()
+        records = self.sudo()
+        field_names = set(field_names)
+        excluded_names = set(excluded_names)
+        for update in methods:
+            if (not field_names.isdisjoint(update._onmodify)
+                    and excluded_names.isdisjoint(update._onmodify)):
+                update(records)
 
     def _validate_fields(self, field_names: Iterable[str], excluded_names: Iterable[str] = ()) -> None:
         """ Invoke the constraint methods for which at least one field name is
@@ -4025,8 +4071,9 @@ class BaseModel(metaclass=MetaModel):
             if self._parent_store and self._parent_name in vals:
                 self.flush_model([self._parent_name])
 
-            # validate non-inversed fields first
+            # process and validate non-inversed fields first
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
+            real_recs._onmodify_fields(vals, inverse_fields)
             real_recs._validate_fields(vals, inverse_fields)
 
             for fields in determine_inverses.values():
@@ -4056,7 +4103,8 @@ class BaseModel(metaclass=MetaModel):
             ):
                 self.env.transaction.invalidate_ormcache(cache_name)
 
-            # validate inversed fields
+            # process and validate inversed fields
+            real_recs._onmodify_fields(inverse_fields)
             real_recs._validate_fields(inverse_fields)
 
         if self._check_company_auto:
@@ -4298,6 +4346,8 @@ class BaseModel(metaclass=MetaModel):
         if cache_name := self._clear_cache_name:
             self.env.transaction.invalidate_ormcache(cache_name)
 
+        for data in data_list:
+            data['record']._onmodify_fields(data['inversed'], data['stored'])
         # check Python constraints for non-stored inversed fields
         for data in data_list:
             data['record']._validate_fields(data['inversed'], data['stored'])
@@ -4517,8 +4567,10 @@ class BaseModel(metaclass=MetaModel):
                 # mark fields to recompute
                 records.modified([field.name for field in other_fields], create=True)
 
-        # check Python constraints for stored fields
-        records._validate_fields(name for data in data_list for name in data['stored'])
+        stored_fnames = {name for data in data_list for name in data['stored']}
+        records._onmodify_fields(stored_fnames)
+         # check Python constraints for stored fields
+        records._validate_fields(stored_fnames)
         records.check_access('create')
         return records
 
@@ -4526,9 +4578,11 @@ class BaseModel(metaclass=MetaModel):
         determine(field.compute, self)
 
         if field.store and any(self._ids):
-            # check constraints of the fields that have been computed
             fnames = [f.name for f in self.pool.field_computed[field]]
-            self.filtered('id')._validate_fields(fnames)
+            records = self.filtered('id')
+            records._onmodify_fields(fnames)
+            # check constraints of the fields that have been computed
+            records._validate_fields(fnames)
 
     def _parent_store_create(self) -> None:
         """ Set the parent_path field on ``self`` after its creation. """
