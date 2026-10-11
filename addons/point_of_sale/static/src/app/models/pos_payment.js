@@ -184,6 +184,13 @@ export class PosPayment extends Base {
      */
     updateRefundPaymentLine(refundedPaymentLine) {}
 
+    canBeDeleted() {
+        if (this.isDone() && this.payment_status) {
+            return false;
+        }
+        return this.payment_interface?.canBeDeleted?.(this) ?? true;
+    }
+
     canBeAdjusted() {
         if (this.payment_interface) {
             return this.payment_interface.canBeAdjusted(this.uuid);

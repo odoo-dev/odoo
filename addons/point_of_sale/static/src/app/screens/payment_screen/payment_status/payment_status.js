@@ -3,6 +3,7 @@ import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/pr
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { _t } from "@web/core/l10n/translation";
+import { useService } from "@web/core/utils/hooks";
 
 export class PaymentScreenStatus extends Component {
     static template = "point_of_sale.PaymentScreenStatus";
@@ -13,6 +14,7 @@ export class PaymentScreenStatus extends Component {
 
     setup() {
         this.pos = usePos();
+        this.ui = useService("ui");
     }
 
     get currentTip() {

@@ -171,6 +171,25 @@ test("canBeAdjusted", async () => {
     expect(paymentline.canBeAdjusted()).toBe(false);
 });
 
+test("canBeDeleted", async () => {
+    const store = await setupPosEnv();
+    const order = await getFilledOrder(store);
+    const card = store.models["pos.payment.method"].get(2);
+    const paymentline = createPaymentLine(store, order, card);
+
+    expect(paymentline.canBeDeleted()).toBe(true);
+
+    paymentline.payment_status = "done";
+    expect(paymentline.canBeDeleted()).toBe(false);
+
+    paymentline.payment_status = "pending";
+    card.payment_interface = { canBeDeleted: () => false };
+    expect(paymentline.canBeDeleted()).toBe(false);
+
+    card.payment_interface = { canBeDeleted: () => true };
+    expect(paymentline.canBeDeleted()).toBe(true);
+});
+
 test("adjustAmount", async () => {
     const store = await setupPosEnv();
     const order = await getFilledOrder(store);

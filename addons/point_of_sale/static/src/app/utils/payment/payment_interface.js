@@ -116,6 +116,15 @@ export class PaymentInterface {
     }
 
     /**
+     * Return false to prevent the given payment line from being deleted
+     * (e.g. while the terminal cannot cancel the transaction anymore)
+     * @param {Object} line - The payment line object
+     */
+    canBeDeleted(line) {
+        return true;
+    }
+
+    /**
      * Called when the amount authorized by a payment request should
      * be adjusted to account for a new order line, it can only be called if
      * canBeAdjusted returns True

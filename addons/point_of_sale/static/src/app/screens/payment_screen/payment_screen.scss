@@ -12,14 +12,6 @@
   padding-inline: 150px;
 }
 
-.paymentmethods {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.paymentmethod:nth-child(odd):last-child {
-  grid-column: span 2;
-}
-
 .payment-method-icon {
     max-width: 50px;
     max-height: 50px;
@@ -32,7 +24,107 @@
 }
 
 .paymentlines-container .total {
-  font-size: clamp(24px, 3vw, 64px);
+  font-size: clamp(28px, 3vw, 64px);
+}
+
+@property --payment-screen-content-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes paymentScreenContentFade {
+  from { --payment-screen-content-fade: 56px; }
+  90% { --payment-screen-content-fade: 56px; }
+  to { --payment-screen-content-fade: 0px; }
+}
+
+.payment-screen-content {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--payment-screen-content-fade)), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--payment-screen-content-fade)), transparent);
+  animation: paymentScreenContentFade linear both;
+  animation-timeline: scroll(self);
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  .payment-method-display {
+    min-width: 0;
+  }
+
+  .paymentmethod-item:not(.paymentmethod-item-paid) .payment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .paymentmethod-item-paid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    border: $border-width solid $success;
+    border-radius: $btn-border-radius-lg;
+    background-color: rgba($success, 0.08);
+
+    > .paymentmethod {
+      flex: 1 1 0 !important;
+      min-width: 0;
+      border: 0;
+      background-color: transparent;
+    }
+
+    > .paymentmethod-currencies {
+      order: 1;
+      padding: 0 map-get($spacers, 2) map-get($spacers, 2);
+    }
+  }
+
+  .paymentlines-compact {
+    display: contents;
+
+    .paymentline {
+      border: 0;
+      background: none;
+      color: inherit;
+      padding-right: map-get($spacers, 1);
+    }
+
+    .paymentline ~ .paymentline {
+      flex-basis: 100%;
+      justify-content: flex-end;
+    }
+
+    .payment-infos {
+      font-size: $btn-font-size-lg;
+    }
+
+    .paymentline_show_qr_code,
+    .payment-spinner,
+    .delete-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 1.6rem;
+      color: var(--bs-secondary-color);
+    }
+
+    .paymentline_status {
+      flex-basis: 100%;
+      margin: 0 map-get($spacers, 2) map-get($spacers, 2);
+
+      &:not(:has(*)) {
+        display: none;
+      }
+    }
+  }
+}
+
+.payment-screen-status-mobile .payment-status-amount .amount {
+  font-size: 1.75rem;
 }
 
 @include media-breakpoint-down(md) {

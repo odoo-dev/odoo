@@ -18,6 +18,7 @@ export const paymentScreenPaymentLinesProps = {
     sendPaymentRequest: t.function(),
     updateSelectedPaymentline: t.function(),
     isRefundOrder: t.boolean(),
+    compact: t.boolean().optional(),
 };
 export class PaymentScreenPaymentLines extends Component {
     static template = "point_of_sale.PaymentScreenPaymentLines";

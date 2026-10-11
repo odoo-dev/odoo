@@ -130,6 +130,9 @@ export class PaymentScreen extends Component {
             .slice()
             .sort((a, b) => a.uiState.initStateDate - b.uiState.initStateDate);
     }
+    getPaymentLinesForMethod(paymentMethod) {
+        return this.sortedPaymentLines.filter((line) => line.payment_method_id === paymentMethod);
+    }
     get selectedPaymentLine() {
         return this.currentOrder.getSelectedPaymentline();
     }
@@ -289,6 +292,9 @@ export class PaymentScreen extends Component {
     }
     deletePaymentLine(uuid) {
         const line = this.paymentLines.find((line) => line.uuid === uuid);
+        if (!line.canBeDeleted()) {
+            return;
+        }
         if (line.payment_method_id.useBankQrCode) {
             this.currentOrder.removePaymentline(line);
             this.numberBuffer.reset();

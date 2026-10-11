@@ -4,20 +4,10 @@
     <t t-name="point_of_sale.PaymentScreen">
         <t t-if="this.ui.isSmall">
             <div class="payment-screen screen d-flex flex-column h-100 p-2 overflow-hidden gap-2">
-                <t t-call="point_of_sale.PaymentScreenDue" />
-                <div class="d-flex flex-column overflow-y-auto gap-1">
+                <div class="payment-screen-content d-flex flex-column flex-grow-1 gap-2 overflow-y-auto">
+                    <t t-call="point_of_sale.PaymentScreenDue" />
                     <t t-call="point_of_sale.PaymentScreenMethods" />
                 </div>
-                <PaymentScreenPaymentLines
-                    paymentLines="this.sortedPaymentLines"
-                    deleteLine.bind="this.deletePaymentLine"
-                    sendForceDone.bind="this.sendForceDone"
-                    sendForceCancel.bind="this.sendForceCancel"
-                    sendPaymentCancel.bind="this.sendPaymentCancel"
-                    sendPaymentRequest.bind="this.sendPaymentRequest"
-                    selectLine.bind="this.selectPaymentLine"
-                    updateSelectedPaymentline.bind="this.updateSelectedPaymentline"
-                    isRefundOrder="this.isRefundOrder" />
                 <div class="payment-screen-status-mobile">
                     <PaymentScreenStatus order="this.currentOrder" />
                 </div>
@@ -155,11 +145,13 @@
     </t>
 
     <t t-name="point_of_sale.PaymentScreenMethods">
-        <div class="paymentmethods-container" t-att-class="this.ui.isSmall ? 'rounded-3' : 'flex-grow-1'">
-        <!-- Add scrollbar if more than 4 payment methods are configured -->
-            <div class="paymentmethods gap-1 gap-lg-2" t-att-class="{ 'd-grid p-1 gap-1 overflow-y-auto rounded-3 bg-200': this.ui.isSmall, 'd-flex flex-column gap-lg-2': !this.ui.isSmall }" t-att-style="this.ui.isSmall ? 'max-height: 120px;' : ''">
+        <div class="paymentmethods-container" t-att-class="{ 'flex-grow-1': !this.ui.isSmall }">
+            <div class="paymentmethods d-flex flex-column gap-1 gap-lg-2">
                 <t t-foreach="this.payment_methods_from_config" t-as="paymentMethod" t-key="paymentMethod.id">
-                    <div t-if="this.showPaymentMethod(paymentMethod)">
+                    <t t-set="methodPaymentLines" t-value="this.ui.isSmall ? this.getPaymentLinesForMethod(paymentMethod) : []"/>
+                    <div t-if="this.showPaymentMethod(paymentMethod) or methodPaymentLines.length"
+                        class="paymentmethod-item"
+                        t-att-class="{ 'paymentmethod-item-paid': methodPaymentLines.length }">
                         <div class="d-flex paymentmethod justify-content-between align-items-center button btn btn-secondary btn-lg lh-lg flex-fill"
                             t-att-class="{ 'opacity-50': !paymentMethod.getPaymentInterfaceStates().status }"
                             t-on-click="() => this.addNewPaymentLine(paymentMethod)"
@@ -172,7 +164,7 @@
                             </div>
                             <span class="text-muted" t-out="this.pos.getPaymentMethodFmtAmount(paymentMethod, this.currentOrder)"/>
                         </div>
-                        <div class="w-100 gap-1" t-if="paymentMethod.availableCurrencies.length > 1">
+                        <div class="paymentmethod-currencies w-100 gap-1" t-if="paymentMethod.availableCurrencies.length > 1">
                             <button t-foreach="paymentMethod.availableCurrencies"
                                 t-as="currency"
                                 t-key="currency.id"
@@ -183,6 +175,17 @@
                                 <span t-out="currency.convertFormatted(this.currentOrder.totalDue)" />
                             </button>
                         </div>
+                        <PaymentScreenPaymentLines t-if="methodPaymentLines.length"
+                            compact="true"
+                            paymentLines="methodPaymentLines"
+                            deleteLine.bind="this.deletePaymentLine"
+                            sendForceDone.bind="this.sendForceDone"
+                            sendForceCancel.bind="this.sendForceCancel"
+                            sendPaymentCancel.bind="this.sendPaymentCancel"
+                            sendPaymentRequest.bind="this.sendPaymentRequest"
+                            selectLine.bind="this.selectPaymentLine"
+                            updateSelectedPaymentline.bind="this.updateSelectedPaymentline"
+                            isRefundOrder="this.isRefundOrder" />
                     </div>
                 </t>
             </div>
