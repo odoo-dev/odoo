@@ -11,7 +11,8 @@ class AccountJournal(models.Model):
 
     pos_payment_method_ids = fields.One2many('pos.payment.method', 'journal_id', string='Point of Sale Payment Methods')
 
-    @api.constrains('type')
+    # not deferred: only forbids the modification while payment methods exist
+    @api.constrains('type', deferred=False)
     def _check_type(self):
         methods = self.env['pos.payment.method'].sudo().search([("journal_id", "in", self.ids)])
         if methods:

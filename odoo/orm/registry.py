@@ -35,7 +35,7 @@ from odoo.tools.lru import LRU
 from odoo.tools.misc import Collector
 from odoo.tools.version_tag_reset import reset_classes_tp_versions_used
 
-from .utils import SUPERUSER_ID
+from .utils import SUPERUSER_ID, Constrain
 from . import model_classes
 
 if typing.TYPE_CHECKING:
@@ -320,6 +320,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         # constraint checks
         self.not_null_fields: set[Field] = set()
+        # Python constraints {model_name: (constrain, ...)}
+        self.constrains_by_model: dict[str, tuple[Constrain, ...]] = {}
 
         # Inter-process signaling:
         # The `orm_signaling_...` sequence indicates that the corresponding
@@ -391,6 +393,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
     def __delitem__(self, model_name: str):
         """ Remove a (custom) model from the registry. """
         del self.models[model_name]
+        self.constrains_by_model.pop(model_name, None)
         # the custom model can inherit from mixins ('mail.thread', ...)
         for Model in self.models.values():
             Model._inherit_children.discard(model_name)
@@ -493,6 +496,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
             self.field_depends.clear()
             self.field_depends_context.clear()
+            self.constrains_by_model.clear()
 
         else:
             # only mark impacted models for setup and invalidate related fields
@@ -566,6 +570,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 depends, depends_context = field.get_depends(model)
                 self.field_depends[field] = tuple(depends)
                 self.field_depends_context[field] = tuple(depends_context)
+            self.constrains_by_model[model_cls._name] = tuple(model_cls._get_constrains(env))
 
         # clean the lazy_property again in case they are cached by another ongoing registry readonly request
         reset_cached_properties(self)
@@ -682,7 +687,20 @@ class Registry(Mapping[str, type["BaseModel"]]):
             return
 
         for tree in self.get_field_trigger_tree(field).depth_first():
-            yield from tree.root
+            for dep in tree.root:
+                if not isinstance(dep, Constrain):
+                    yield dep
+
+    def get_field_constrains(self, field: Field) -> Iterator[Constrain]:
+        """ Return an iterable on the constraints of the model of ``field``
+        that directly depend on ``field``.
+        """
+        if field not in self._field_triggers:
+            return
+
+        for dep in self._field_triggers[field].get((), ()):
+            if isinstance(dep, Constrain):
+                yield dep
 
     def _discard_fields(self, fields: list[Field]) -> None:
         """ Discard the given fields from the registry's internal data structures. """
@@ -757,13 +775,18 @@ class Registry(Mapping[str, type["BaseModel"]]):
         """ Return the field triggers, i.e., the inverse of field dependencies,
         as a dictionary like ``{field: {path: fields}}``, where ``field`` is a
         dependency, ``path`` is a sequence of fields to inverse and ``fields``
-        is a collection of fields that depend on ``field``.
+        is a collection of fields and constraints (:class:`Constrain`) that
+        depend on ``field``.
         """
         triggers: defaultdict[Field, defaultdict[tuple[str, ...], OrderedSet[Field]]] = defaultdict(lambda: defaultdict(OrderedSet))
 
         for Model in self.models.values():
             if Model._abstract:
                 continue
+            for constrain in self.constrains_by_model.get(Model._name, ()):
+                for dependency in Model._resolve_constrains_depends(self, constrain):
+                    *path, dep_field = dependency
+                    triggers[dep_field][tuple(reversed(path))].add(constrain)
             for field in Model._fields.values():
                 try:
                     dependencies = list(field.resolve_depends(self))

@@ -11,7 +11,8 @@ class AccountCashRounding(models.Model):
         if self.env['pos.config'].search_count([('rounding_method', 'in', self.ids)], limit=1):
             raise UserError(_('You cannot delete a rounding method that is used in a Point of Sale configuration.'))
 
-    @api.constrains('rounding', 'rounding_method', 'strategy')
+    # not deferred: only forbids the modification while sessions are open
+    @api.constrains('rounding', 'rounding_method', 'strategy', deferred=False)
     def _check_session_state(self):
         open_session = self.env['pos.session'].search([('config_id.rounding_method', 'in', self.ids), ('state', '!=', 'closed')], limit=1)
         if open_session:

@@ -215,8 +215,6 @@ class LoyaltyProgram(models.Model):
 
     @api.constrains("reward_ids")
     def _constrains_reward_ids(self):
-        if self.env.context.get("loyalty_skip_reward_check"):
-            return
         if any(not program.reward_ids for program in self):
             raise ValidationError(self.env._("A program must have at least one reward."))
 
@@ -562,14 +560,9 @@ class LoyaltyProgram(models.Model):
             raise UserError(self.env._("You can not delete a program in an active state"))
 
     def write(self, vals):
-        # There is an issue when we change the program type, since we clear the rewards and create
-        # new ones. The ORM actually does it in this order upon writing, triggering the constraint
-        # before creating the new rewards. However, we can check that the result of reward_ids would
-        # actually be empty or not, and if not, skip the constraint.
         if "reward_ids" in vals and self._fields["reward_ids"].convert_to_cache(
             vals["reward_ids"], self.browse()
         ):
-            self = self.with_context(loyalty_skip_reward_check=True)
             # We need add the program type to the context to avoid getting the default value
             # ('discount') for reward type when calling the `default_get` method of
             # `loyalty.reward`.

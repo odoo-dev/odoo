@@ -65,7 +65,7 @@ from .fields_textual import Char, StoredTranslations
 from .identifiers import NewId
 from .query import Query, TableSQL
 from .utils import (
-    OriginIds, Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
+    Constrain, OriginIds, Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     SUPERUSER_ID,
 )
@@ -547,35 +547,63 @@ class BaseModel(metaclass=MetaModel):
 
         return SQL("%s", table_sql, to_flush=fields_to_flush)
 
-    @property
-    def _constraint_methods(self):
-        """ Return a list of methods implementing Python constraints. """
+    @classmethod
+    def _get_constrains(cls, env: Environment) -> Iterator[Constrain]:
+        """ Return the Python constraints of the model, as declared by the
+        methods decorated with ``@constrains``.  This is called during the setup
+        of the registry, see :meth:`Registry._setup_models__`.
+        """
         def is_constraint(func):
             return callable(func) and hasattr(func, '_constrains')
 
-        def wrap(func, names):
-            # wrap func into a proxy function with explicit '_constrains'
-            @api.constrains(*names)
-            def wrapper(self):
-                return func(self)
-            return wrapper
+        for method_name, func in getmembers(cls, is_constraint):
+            triggers, deferred = func._constrains
+            if callable(triggers):
+                triggers = triggers(cls(env, (), ()))
+            yield Constrain(cls._name, method_name, deferred, tuple(triggers))
 
-        cls = self.env.registry[self._name]
-        methods = []
-        for attr, func in getmembers(cls, is_constraint):
-            if callable(func._constrains):
-                func = wrap(func, func._constrains(self.sudo()))
-            for name in func._constrains:
-                field = cls._fields.get(name)
-                if not field:
-                    _logger.warning("method %s.%s: @constrains parameter %r is not a field name", cls._name, attr, name)
-                elif not (field.store or field.inverse or field.inherited):
-                    _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
-            methods.append(func)
+    @classmethod
+    def _resolve_constrains_depends(cls, registry: Registry, constrain: Constrain) -> Iterator[tuple[Field, ...]]:
+        """ Return the dependencies of ``constrain`` as a collection of field
+        tuples, like :meth:`Field.resolve_depends`.
+        """
+        for dotnames in constrain.triggers:
+            field_seq: list[Field] = []
+            model_name = cls._name
 
-        # optimization: memoize result on cls, it will not be recomputed
-        cls._constraint_methods = methods
-        return methods
+            for fname in dotnames.split('.'):
+                if not model_name:
+                    _logger.warning("constraint %s: @constrains parameter %r is not reachable", constrain, dotnames)
+                    break
+                Model = registry[model_name]
+                if cls._transient and not Model._transient:
+                    # modifying fields on regular models should not trigger
+                    # constraints on transient models
+                    break
+
+                field = Model._fields.get(fname)
+                if field is None:
+                    _logger.warning("constraint %s: @constrains parameter %r is not a field path", constrain, dotnames)
+                    break
+
+                if field_seq and not field_seq[-1]._description_searchable:
+                    # the field before this one is not searchable, so there is
+                    # no way to know on which records to check the constraint
+                    warnings.warn(
+                        f"Field {field_seq[-1]!r} in dependency of constraint {constrain} should be searchable. "
+                        f"This is necessary to determine which records to check when {field} is modified. "
+                        f"You should either make the field searchable, or simplify the field dependency.",
+                        stacklevel=1,
+                    )
+
+                field_seq.append(field)
+                yield tuple(field_seq)
+
+                if field.type == 'one2many':
+                    for inv_field in Model.pool.field_inverses[field]:
+                        yield tuple(field_seq) + (inv_field,)
+
+                model_name = field.comodel_name if field.relational else None
 
     @property
     def _onmodify_methods(self):
@@ -1332,7 +1360,7 @@ class BaseModel(metaclass=MetaModel):
         methods = self._onmodify_methods
         if not methods:
             return
-        # run onmodify methods just like constrains, see _validate_fields()
+        # run onmodify methods just like constrains, see _check_constrain()
         records = self.sudo()
         field_names = set(field_names)
         excluded_names = set(excluded_names)
@@ -1341,22 +1369,24 @@ class BaseModel(metaclass=MetaModel):
                     and excluded_names.isdisjoint(update._onmodify)):
                 update(records)
 
-    def _validate_fields(self, field_names: Iterable[str], excluded_names: Iterable[str] = ()) -> None:
-        """ Invoke the constraint methods for which at least one field name is
-        in ``field_names`` and none is in ``excluded_names``.
+    def _check_constrain(self, constrain: Constrain) -> None:
+        """ Check the given Python constraint on ``self``, and discard it from
+        the constraints to check on ``self``.
         """
-        methods = self._constraint_methods
-        if not methods:
-            return
+        self.env.remove_constrain_to_check(constrain, self)
         # run constrains just as sudoed computed-stored fields
         # see Field.compute_value()
         records = self.sudo()
-        field_names = set(field_names)
-        excluded_names = set(excluded_names)
-        for check in methods:
-            if (not field_names.isdisjoint(check._constrains)
-                    and excluded_names.isdisjoint(check._constrains)):
-                check(records)
+        try:
+            getattr(records, constrain.method_name)()
+        except MissingError:
+            # some records may have been deleted in the meantime, for instance
+            # by a cascading deletion in the database
+            existing = records.exists()
+            if existing == records:
+                raise
+            if existing:
+                getattr(existing, constrain.method_name)()
 
     @api.model
     def default_get(self, fields: Sequence[str]) -> ValuesType:
@@ -3772,13 +3802,15 @@ class BaseModel(metaclass=MetaModel):
                     'DELETE FROM %s WHERE "id" IN %s', sql_table, tuple(ids),
                 ))
 
-            # invalidate cache, dirty fields and recomputation of deleted records
+            # invalidate cache, dirty fields, recomputation and constraints of
+            # deleted records
             for records in all_deleted_records:
                 records.invalidate_recordset(flush=False)
                 for field in records._fields.values():
                     records.env.remove_to_compute(field, records)
                     if field in records.env._field_dirty:
                         records.env._field_dirty[field].difference_update(records._ids)
+                records.env.remove_to_check(records)
 
             # update the cache of the many2one fields that are set to NULL in database
             for field, records in cascade_many2one:
@@ -3799,6 +3831,9 @@ class BaseModel(metaclass=MetaModel):
         # process post-delete hooks (from ondelete methods)
         for post_delete in post_delete_hooks:
             post_delete()
+
+        # check the constraints that cannot be deferred
+        self.env.check_constrains(deferred=False)
 
         # auditing: deletions are infrequent and leave no trace in the database
         msg = 'User #%s deleted %s records with IDs: %r'
@@ -4071,10 +4106,9 @@ class BaseModel(metaclass=MetaModel):
             if self._parent_store and self._parent_name in vals:
                 self.flush_model([self._parent_name])
 
-            # process and validate non-inversed fields first
+            # process non-inversed fields first
             inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
             real_recs._onmodify_fields(vals, inverse_fields)
-            real_recs._validate_fields(vals, inverse_fields)
 
             for fields in determine_inverses.values():
                 # write again on non-stored fields that have been invalidated from cache
@@ -4103,9 +4137,11 @@ class BaseModel(metaclass=MetaModel):
             ):
                 self.env.transaction.invalidate_ormcache(cache_name)
 
-            # process and validate inversed fields
+            # process inversed fields
             real_recs._onmodify_fields(inverse_fields)
-            real_recs._validate_fields(inverse_fields)
+
+        # check the constraints that cannot be deferred
+        self.env.check_constrains(deferred=False)
 
         if self._check_company_auto:
             self._check_company(list(vals))
@@ -4348,9 +4384,9 @@ class BaseModel(metaclass=MetaModel):
 
         for data in data_list:
             data['record']._onmodify_fields(data['inversed'], data['stored'])
-        # check Python constraints for non-stored inversed fields
-        for data in data_list:
-            data['record']._validate_fields(data['inversed'], data['stored'])
+
+        # check the constraints that cannot be deferred
+        self.env.check_constrains(deferred=False)
 
         if self._check_company_auto:
             records._check_company()
@@ -4567,10 +4603,7 @@ class BaseModel(metaclass=MetaModel):
                 # mark fields to recompute
                 records.modified([field.name for field in other_fields], create=True)
 
-        stored_fnames = {name for data in data_list for name in data['stored']}
-        records._onmodify_fields(stored_fnames)
-         # check Python constraints for stored fields
-        records._validate_fields(stored_fnames)
+        records._onmodify_fields({name for data in data_list for name in data['stored']})
         records.check_access('create')
         return records
 
@@ -4578,11 +4611,14 @@ class BaseModel(metaclass=MetaModel):
         determine(field.compute, self)
 
         if field.store and any(self._ids):
-            fnames = [f.name for f in self.pool.field_computed[field]]
+            computed_fields = self.pool.field_computed[field]
             records = self.filtered('id')
-            records._onmodify_fields(fnames)
-            # check constraints of the fields that have been computed
-            records._validate_fields(fnames)
+            records._onmodify_fields([f.name for f in computed_fields])
+            # mark the constraints on the fields that have been computed, in
+            # case their computation was not triggered by a modification
+            for computed_field in computed_fields:
+                for constrain in self.pool.get_field_constrains(computed_field):
+                    self.env.add_constrain_to_check(constrain, records)
 
     def _parent_store_create(self) -> None:
         """ Set the parent_path field on ``self`` after its creation. """
@@ -6456,7 +6492,7 @@ class BaseModel(metaclass=MetaModel):
     def modified(self, fnames: Collection[str], create: bool = False, before: bool = False) -> None:
         """ Notify that fields will be or have been modified on ``self``. This
         invalidates the cache where necessary, and prepares the recomputation of
-        dependent stored fields.
+        dependent stored fields and the check of dependent constraints.
 
         :param fnames: iterable of field names modified on records ``self``
         :param create: whether called in the context of record creation
@@ -6509,6 +6545,11 @@ class BaseModel(metaclass=MetaModel):
             if not records:
                 continue
 
+            if isinstance(field, Constrain):
+                # mark the constraint to check on records (deferred or not)
+                self.env.add_constrain_to_check(field, records)
+                continue
+
             if field.recursive:
                 # discard already processed records, in order to avoid cycles
                 if field.compute and field.store:
@@ -6551,7 +6592,11 @@ class BaseModel(metaclass=MetaModel):
         # This allows us to discard subtrees from the merged tree when they
         # only contain such fields.
         def select(field):
-            return (field.compute and field.store) or bool(field._get_all_cache_ids(self.env))
+            return (
+                isinstance(field, Constrain)
+                or (field.compute and field.store)
+                or bool(field._get_all_cache_ids(self.env))
+            )
 
         tree = self.pool.get_trigger_tree(fields, select=select)
         if not tree:

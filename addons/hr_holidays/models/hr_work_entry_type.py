@@ -171,7 +171,9 @@ class HrWorkEntryType(models.Model):
             if leave.count_as == "working_time" and not leave.elligible_for_accrual_rate:
                 raise ValidationError(self.env._("leaves of type 'Worked Time' should be always eligible for accrual rate."))
 
-    @api.constrains('include_public_holidays_in_duration')
+    # not deferred: depends on the current company, and only forbids the modification
+    # while leaves exist
+    @api.constrains('include_public_holidays_in_duration', deferred=False)
     def _check_overlapping_public_holidays(self):
         # checking for the current user's company too
         public_holidays = self.env['resource.calendar.leaves'].search([
@@ -202,7 +204,8 @@ class HrWorkEntryType(models.Model):
                     raise ValidationError(self.env._("You cannot modify the 'Public Holiday Included' setting since one or more leaves for that \
 time type are overlapping with public holidays, meaning that the balance of those employees would be affected by this change."))
 
-    @api.constrains('count_days_as')
+    # not deferred: only forbids the modification while leaves exist
+    @api.constrains('count_days_as', deferred=False)
     def _check_leaves_for_count_days_as(self):
         leave_count = self.env['hr.leave'].search_count([
             ('work_entry_type_id', 'in', self.ids),
@@ -254,7 +257,9 @@ been taken for this time off type. Changing it now would affect existing employe
             values.pop('requires_allocation')
         return super()._load_records_write(values)
 
-    @api.constrains('requires_allocation')
+    # not deferred: depends on context key 'install_mode', and only forbids the
+    # modification while leaves exist
+    @api.constrains('requires_allocation', deferred=False)
     def check_allocation_requirement_edit_validity(self):
         if not self.env.context.get('install_mode') and self.env['hr.leave'].search_count([('work_entry_type_id', 'in', self.ids)], limit=1):
             raise UserError(_("The allocation requirement of a time type cannot be changed once leaves of that type have been taken. You should create a new time type instead."))

@@ -86,7 +86,8 @@ class PosPayment(models.Model):
             else:
                 payment.display_name = formatLang(self.env, payment.amount, currency_obj=payment.currency_id)
 
-    @api.constrains('amount')
+    # not deferred: only forbids the modification once the order is posted
+    @api.constrains('amount', deferred=False)
     def _check_amount(self):
         for payment in self:
             if payment.pos_order_id.state == 'done' or payment.pos_order_id.account_move:

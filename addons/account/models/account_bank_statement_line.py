@@ -314,7 +314,9 @@ class AccountBankStatementLine(models.Model):
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
-    @api.constrains('amount', 'amount_currency', 'currency_id', 'foreign_currency_id', 'journal_id')
+    # not deferred: _synchronize_to_moves() in write() requires consistent amounts
+    # and currencies
+    @api.constrains('amount', 'amount_currency', 'currency_id', 'foreign_currency_id', 'journal_id', deferred=False)
     def _check_amounts_currencies(self):
         """ Ensure the consistency the specified amounts and the currencies. """
 

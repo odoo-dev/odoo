@@ -29,7 +29,8 @@ class AccountJournal(models.Model):
         if other_journals := self - use_documents_journals:
             super(AccountJournal, other_journals)._compute_has_sequence_holes()
 
-    @api.constrains('l10n_latam_use_documents')
+    # not deferred: only forbids the modification while validated invoices exist
+    @api.constrains('l10n_latam_use_documents', deferred=False)
     def check_use_document(self):
         for rec in self:
             if rec.env['account.move'].search_count([('journal_id', '=', rec.id), ('posted_before', '=', True)], limit=1):

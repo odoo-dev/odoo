@@ -42,51 +42,59 @@ def attrsetter(attr, value) -> Decorator:
 
 
 @typing.overload
-def constrains(func: Callable[[BaseModel], Collection[str]], /) -> Decorator:
+def constrains(func: Callable[[BaseModel], Collection[str]], /, *, deferred: bool = True) -> Decorator:
     ...
 
 
 @typing.overload
-def constrains(*args: str) -> Decorator:
+def constrains(*args: str, deferred: bool = True) -> Decorator:
     ...
 
 
-def constrains(*args) -> Decorator:
+def constrains(*args, deferred=True) -> Decorator:
     """Decorate a constraint checker.
 
-    Each argument must be a field name used in the check::
+    Each argument must be a field name or a field path used in the check::
 
-        @api.constrains('name', 'description')
+        @api.constrains('name', 'description', 'partner_id.name')
         def _check_description(self):
             for record in self:
                 if record.name == record.description:
                     raise ValidationError("Fields name and description must be different")
 
-    Invoked on the records on which one of the named fields has been modified.
+    Invoked on the records on which one of the named fields has been modified
+    (by ``create``, ``write``, ``unlink`` or a recomputation), like the
+    dependencies of a stored computed field.  Upon creation, all the
+    constraints of the model are checked on the new records.
 
     Should raise :exc:`~odoo.exceptions.ValidationError` if the
     validation failed.
 
+    :param deferred: by default, the check is deferred: it is performed when
+        the environment is flushed (see :meth:`~odoo.api.Environment.flush_all`),
+        which happens at the latest before committing the transaction.  When
+        ``False``, the check is performed at the end of the ``create``,
+        ``write`` or ``unlink`` that modified the records.
+
     .. warning::
 
-        ``@constrains`` only supports simple field names, dotted names
-        (fields of relational fields e.g. ``partner_id.customer``) are not
-        supported and will be ignored.
-
-        ``@constrains`` will be triggered only if the declared fields in the
-        decorated method are included in the ``create`` or ``write`` call.
-        It implies that fields not present in a view will not trigger a call
-        during a record creation. A override of ``create`` is necessary to make
-        sure a constraint will always be triggered (e.g. to test the absence of
-        value).
+        A deferred constraint is checked in a different call stack than the
+        modification that triggered it.  Therefore, it should only depend on
+        the data, and not on the context of the modification.  Moreover, the
+        data may be temporarily inconsistent during the transaction, until
+        the constraint is checked.
 
     One may also pass a single function as argument.  In that case, the field
-    names are given by calling the function with a model instance.
+    names are given by calling the function with a model instance.  The
+    function should not depend on data, as it is called during the setup of
+    the registry.
 
     """
-    if args and callable(args[0]):
+    if not args:
+        raise TypeError("@constrains() requires at least one field name")
+    if callable(args[0]):
         args = args[0]
-    return attrsetter('_constrains', args)
+    return attrsetter('_constrains', (args, deferred))
 
 
 @typing.overload
@@ -117,9 +125,8 @@ def onmodify(*args) -> Decorator:
     modification.  As a consequence, the constraint methods are able to
     validate the final state of the records.
 
-    The same limitations as ``@constrains`` apply: dotted names are not
-    supported, and the method is only triggered if the declared fields are
-    included in the ``create`` or ``write`` call.
+    Dotted names are not supported, and the method is only triggered if the
+    declared fields are included in the ``create`` or ``write`` call.
 
     One may also pass a single function as argument.  In that case, the field
     names are given by calling the function with a model instance.

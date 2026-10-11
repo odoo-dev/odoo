@@ -50,8 +50,11 @@ class AnalyticPlanFieldsMixin(models.AbstractModel):
             return NotImplemented
         project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
         return Domain.OR([
-            [(plan._column_name(), operator, value)]
+            [(field_name, operator, value)]
             for plan in project_plan + other_plans
+            # Check that field_name exists on self, because during the creation of the
+            # x_plan<id> field we can fall into this method during flush_all()
+            if (field_name := plan._column_name()) and field_name in self
         ])
 
     def _get_plan_fnames(self):
@@ -90,9 +93,26 @@ class AnalyticPlanFieldsMixin(models.AbstractModel):
     def _get_account_node_context(self, plan):
         return {'default_plan_id': plan.id}
 
-    @api.constrains(lambda self: self._get_plan_fnames())
-    def _check_account_id(self):
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record, vals in zip(records, vals_list):
+            record._check_account_id(vals)
+        return records
+
+    def write(self, vals):
+        result = super().write(vals)
+        self._check_account_id(vals)
+        return result
+
+    def _check_account_id(self, vals):
+        """ Check that at least one analytic account is set when the plan
+        columns are modified.  This is not an ``@api.constrains`` because the
+        plan columns depend on data, while constraint dependencies cannot.
+        """
         fnames = self._get_plan_fnames()
+        if vals.keys().isdisjoint(fnames):
+            return
         for line in self:
             if not any(line[fname] for fname in fnames):
                 raise ValidationError(_("At least one analytic account must be set"))

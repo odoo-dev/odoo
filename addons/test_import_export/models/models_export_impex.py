@@ -345,7 +345,8 @@ class WithNonDemoConstraint(models.Model):
 
     name = fields.Char()
 
-    @api.constrains('name')
+    # not deferred: depends on context key 'install_mode'
+    @api.constrains('name', deferred=False)
     def _check_name_starts_with_uppercase_except_demo_data(self):
         if self.env.context.get('install_mode'):
             return  # skipped on demo data

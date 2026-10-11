@@ -10,7 +10,8 @@ class StockPicking(models.Model):
 
     country_code = fields.Char(related="company_id.account_fiscal_country_id.code")
 
-    @api.constrains("date_done")
+    # not deferred: only forbids the modification given the current lock dates
+    @api.constrains("date_done", deferred=False)
     def _check_backdate_allowed(self):
         if self.env['ir.config_parameter'].sudo().get_bool('stock_account.skip_lock_date_check'):
             return

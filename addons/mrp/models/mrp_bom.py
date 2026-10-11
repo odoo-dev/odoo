@@ -135,7 +135,8 @@ class MrpBom(models.Model):
             if warning:
                 return warning
 
-    @api.constrains('active', 'product_id', 'product_tmpl_id', 'bom_line_ids')
+    # not deferred: depends on context key 'company_id'
+    @api.constrains('active', 'product_id', 'product_tmpl_id', 'bom_line_ids', deferred=False)
     def _check_bom_cycle(self):
         subcomponents_dict = dict()
 

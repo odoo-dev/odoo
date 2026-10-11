@@ -50,7 +50,8 @@ class L10nInPanEntity(models.Model):
         'A PAN Entity with same PAN Number already exists.',
     )
 
-    @api.constrains('name')
+    # not deferred: depends on context key 'import_file'
+    @api.constrains('name', deferred=False)
     def _check_pan_name(self):
         if 'import_file' in self.env.context:
             return

@@ -675,7 +675,8 @@ class HrLeave(models.Model):
         versions = self.env['hr.version'].sudo().search(domain)
         return versions.filtered(lambda v: v._is_overlapping_period(self.request_date_from, self.request_date_to))
 
-    @api.constrains('date_from', 'date_to')
+    # not deferred: depends on context key 'skip_leave_version_check'
+    @api.constrains('date_from', 'date_to', deferred=False)
     def _check_contracts(self):
         """
             A leave cannot be set across multiple contracts.
@@ -1379,7 +1380,8 @@ class HrLeave(models.Model):
                     )
                 )
 
-    @api.constrains('date_from', 'date_to', 'employee_id', 'state')
+    # not deferred: depends on context key 'leave_skip_date_check'
+    @api.constrains('date_from', 'date_to', 'employee_id', 'state', deferred=False)
     def _check_date(self):
         if self.env.context.get('leave_skip_date_check', False):
             return
@@ -1389,7 +1391,8 @@ class HrLeave(models.Model):
             if holiday.dashboard_warning_message:
                 raise ValidationError(holiday.dashboard_warning_message)
 
-    @api.constrains('date_from', 'date_to', 'employee_id')
+    # not deferred: depends on context keys 'leave_skip_state_check' and 'import_file'
+    @api.constrains('date_from', 'date_to', 'employee_id', deferred=False)
     def _check_date_state(self):
         if self.env.context.get('leave_skip_state_check'):
             return

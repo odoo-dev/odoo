@@ -31,7 +31,8 @@ class ResPartner(models.Model):
             data_list[partner.id].append(stat_info)
         return data_list
 
-    @api.constrains('barcode')
+    # not deferred: notifies the current user
+    @api.constrains('barcode', deferred=False)
     def _check_barcode_prefix(self):
         for partner in self:
             if partner.barcode and not partner.barcode.startswith("042"):

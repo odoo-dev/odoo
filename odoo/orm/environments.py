@@ -31,6 +31,7 @@ if typing.TYPE_CHECKING:
     from weakref import ReferenceType
     from .identifiers import IdType
     from .types import BaseModel, Field
+    from .utils import Constrain
 
 _logger = logging.getLogger('odoo.api')
 _logger_signaling = logging.getLogger('odoo.registry')
@@ -393,16 +394,37 @@ class Environment(Mapping[str, "BaseModel"]):
             _logger.warning("Too many iterations for recomputing fields!")
 
     def flush_all(self) -> None:
-        """ Flush all pending computations and updates to the database. """
+        """ Flush all pending computations and updates to the database, and
+        check the pending Python constraints.
+        """
         for _ in range(MAX_FIXPOINT_ITERATIONS):
             self._recompute_all()
             model_names = OrderedSet(field.model_name for field in self._field_dirty)
-            if not model_names:
+            if model_names:
+                for model_name in model_names:
+                    self[model_name].flush_model()
+            elif self.transaction.to_check:
+                # check constraints on flushed data; this may modify data, so
+                # flush again afterwards
+                self.check_constrains()
+            else:
                 break
-            for model_name in model_names:
-                self[model_name].flush_model()
         else:
             _logger.warning("Too many iterations for flushing fields!")
+
+    def check_constrains(self, *, deferred: bool | None = None) -> None:
+        """ Check the pending Python constraints.
+
+        :param deferred: when given, only check the constraints with the
+            corresponding ``deferred`` attribute
+        """
+        to_check = self.transaction.to_check
+        for constrain in list(to_check):
+            if deferred is not None and constrain.deferred != deferred:
+                continue
+            # checking a constraint may flush, which checks other constraints
+            if ids := to_check.get(constrain):
+                self[constrain.model_name].browse(ids)._check_constrain(constrain)
 
     def is_protected(self, field: Field, record: BaseModel) -> bool:
         """ Return whether `record` is protected against invalidation or
@@ -410,21 +432,25 @@ class Environment(Mapping[str, "BaseModel"]):
         """
         return record.id in self._protected.get(field, ())
 
-    def protected(self, field: Field) -> BaseModel:
-        """ Return the recordset for which ``field`` should not be invalidated or recomputed. """
+    def protected(self, field: Field | Constrain) -> BaseModel:
+        """ Return the recordset for which ``field`` should not be invalidated
+        or recomputed, or for which the constraint ``field`` should not be checked.
+        """
         return self[field.model_name].browse(self._protected.get(field, ()))
 
     @typing.overload
-    def protecting(self, what: Collection[Field], records: BaseModel) -> typing.ContextManager[None]:
+    def protecting(self, what: Collection[Field | Constrain], records: BaseModel) -> typing.ContextManager[None]:
         ...
 
     @typing.overload
-    def protecting(self, what: Collection[tuple[Collection[Field], BaseModel]]) -> typing.ContextManager[None]:
+    def protecting(self, what: Collection[tuple[Collection[Field | Constrain], BaseModel]]) -> typing.ContextManager[None]:
         ...
 
     @contextmanager
     def protecting(self, what, records=None) -> Iterator[None]:
         """ Prevent the invalidation or recomputation of fields on records.
+        Constraints (:class:`~odoo.orm.utils.Constrain`) can also be protected,
+        in which case they are not marked to check on records.
         The parameters are either:
 
         - ``what`` a collection of fields and ``records`` a recordset, or
@@ -471,6 +497,28 @@ class Environment(Mapping[str, "BaseModel"]):
             return
         assert field.store and field.compute, "Cannot add to recompute no-store or no-computed field"
         self.transaction.tocompute[field].update(records._ids)
+
+    def add_constrain_to_check(self, constrain: Constrain, records: BaseModel) -> None:
+        """ Mark ``constrain`` to be checked on ``records``. """
+        if ids := [id_ for id_ in records._ids if id_]:
+            self.transaction.to_check[constrain].update(ids)
+
+    def remove_constrain_to_check(self, constrain: Constrain, records: BaseModel) -> None:
+        """ Mark ``constrain`` as checked on ``records``. """
+        to_check = self.transaction.to_check
+        ids = to_check.get(constrain)
+        if ids is None:
+            return
+        ids.difference_update(records._ids)
+        if not ids:
+            del to_check[constrain]
+
+    def remove_to_check(self, records: BaseModel) -> None:
+        """ Discard all the constraints to check on ``records``. """
+        to_check = self.transaction.to_check
+        for constrain in self.registry.constrains_by_model.get(records._name, ()):
+            if constrain in to_check:
+                self.remove_constrain_to_check(constrain, records)
 
     def remove_to_compute(self, field: Field, records: BaseModel) -> None:
         """ Mark ``field`` as computed on ``records``. """
@@ -584,7 +632,7 @@ class Transaction:
         '_state_stack__', '_weak_envs', '_wrote__',
         'access_read', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
-        'ormcaches__', 'protected', 'registry', 'tocompute',
+        'ormcaches__', 'protected', 'registry', 'to_check', 'tocompute',
     )
 
     def __init__(self, registry: Registry):
@@ -627,6 +675,8 @@ class Transaction:
         self.protected = StackMap["Field", OrderedSet["IdType"]]()
         # pending computations {field: ids}
         self.tocompute = defaultdict["Field", OrderedSet["IdType"]](OrderedSet)
+        # pending Python constraints to check {constrain: ids}
+        self.to_check = defaultdict["Constrain", OrderedSet["IdType"]](OrderedSet)
 
         # permission cache for record access by user
         # {access_context: {model_name: {record_id: bool}}}
@@ -866,6 +916,7 @@ class Transaction:
         self.field_data_patches.clear()
         self.field_dirty.clear()
         self.tocompute.clear()
+        self.to_check.clear()
         self._recent_envs.clear()
         self.compactify_envs()
         env = None

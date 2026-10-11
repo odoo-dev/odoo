@@ -194,7 +194,8 @@ class HrAttendance(models.Model):
                 if attendance.check_out < attendance.check_in:
                     raise exceptions.ValidationError(_('"Check Out" time cannot be earlier than "Check In" time.'))
 
-    @api.constrains('check_in', 'check_out', 'employee_id')
+    # not deferred: depends on context key 'skip_time_rules'
+    @api.constrains('check_in', 'check_out', 'employee_id', deferred=False)
     def _check_validity(self):
         """ Verifies the validity of the attendance record compared to the others from the same employee.
             For the same employee we must have :

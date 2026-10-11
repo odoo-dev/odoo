@@ -185,7 +185,8 @@ class StockPickingType(models.Model):
             if picking_type == picking_type.warehouse_id.pos_type_id:
                 picking_type.hide_reservation_method = True
 
-    @api.constrains('active')
+    # not deferred: depends on context key 'module'
+    @api.constrains('active', deferred=False)
     def _check_active(self):
         # The default for pos.config.picking_type_id may create picking types while
         # that column is still being added, so this constraint cannot query it yet.

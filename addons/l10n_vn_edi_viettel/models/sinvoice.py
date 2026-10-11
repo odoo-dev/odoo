@@ -54,7 +54,8 @@ class L10n_Vn_Edi_ViettelSinvoiceSymbol(models.Model):
         'The combination symbol/template must be unique per company!',
     )
 
-    @api.constrains('name', 'invoice_template_code')
+    # not deferred: only forbids the modification while sent invoices exist
+    @api.constrains('name', 'invoice_template_code', deferred=False)
     def _constrains_changes(self):
         """
         Multiple API endpoints will use these data, we should thus not allow changing them if they have been used

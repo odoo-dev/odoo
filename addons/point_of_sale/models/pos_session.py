@@ -364,7 +364,8 @@ class PosSession(models.Model):
         for session in self:
             session.order_count = sessions_data.get(session.id, 0)
 
-    @api.constrains('config_id')
+    # not deferred: depends on context key 'onboarding_creation'
+    @api.constrains('config_id', deferred=False)
     def _check_pos_config(self):
         onboarding_creation = self.env.context.get('onboarding_creation', False)
         for session in self:
@@ -376,7 +377,7 @@ class PosSession(models.Model):
 
     @api.constrains('start_at')
     def _check_start_date(self):
-        for record in self:
+        for record in self.filtered('start_at'):
             journal = record.config_id.journal_id
             company = journal.company_id
             start_date = record.start_at.date()

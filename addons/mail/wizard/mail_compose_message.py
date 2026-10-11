@@ -220,7 +220,8 @@ class MailComposeMessage(models.TransientModel):
     # template generation
     template_name = fields.Char('Template Name')
 
-    @api.constrains('res_ids')
+    # not deferred: depends on context keys 'composer_force_res_ids' and 'active_ids'
+    @api.constrains('res_ids', deferred=False)
     def _check_res_ids(self):
         """ Check res_ids is a valid list of integers (or Falsy). """
         for composer in self:

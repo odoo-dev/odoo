@@ -267,6 +267,28 @@ class Prefetch:
     union = PrefetchUnion
 
 
+class Constrain:
+    """ A Python constraint method of a model, as declared by ``@constrains``.
+
+    Instances are put in the field triggers of the registry, like computed
+    fields, in order to determine on which records the constraint must be
+    checked when its dependencies are modified.
+    """
+    __slots__ = ('deferred', 'method_name', 'model_name', 'triggers')
+
+    def __init__(self, model_name: str, method_name: str, deferred: bool, triggers: tuple[str, ...]):
+        self.model_name = model_name
+        self.method_name = method_name
+        self.deferred = deferred
+        self.triggers = triggers
+
+    def __repr__(self) -> str:
+        return f"<Constrain {self.model_name}.{self.method_name}>"
+
+    def __str__(self) -> str:
+        return f"{self.model_name}.{self.method_name}"
+
+
 @functools.total_ordering
 class ReversibleComparator:
     __slots__ = ('__item', '__none_first', '__reverse')

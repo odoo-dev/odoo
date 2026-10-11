@@ -561,7 +561,8 @@ class AccountTax(models.Model):
             ):
                 raise ValidationError(_('Nested group of taxes are not allowed.'))
 
-    @api.constrains('company_id')
+    # not deferred: depends on context key 'from_account_tax_creation'
+    @api.constrains('company_id', deferred=False)
     def _check_company_consistency(self):
         if self.env.context.get('from_account_tax_creation') is True:
             # we're creating a new tax, skip usage consistency check as there

@@ -843,35 +843,47 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
     def test_15_constraint_inverse(self):
         """ test constraint method on normal field and field with inverse """
-        log = []
-        model = self.env['test_orm.compute.inverse'].with_context(log=log, log_constraint=True)
+        model = self.env['test_orm.compute.inverse']
+        self.env.flush_all()
 
-        # create/write with normal field only
-        log.clear()
-        record = model.create({'baz': 'Hi'})
-        self.assertCountEqual(log, ['constraint'])
+        with patch.object(model.__class__, '_check_constraint') as check_constraint:
+            # constraints are deferred until the next flush
+            record = model.create({'baz': 'Hi'})
+            self.assertEqual(check_constraint.call_count, 0)
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 1)
 
-        log.clear()
-        record.write({'baz': 'Ho'})
-        self.assertCountEqual(log, ['constraint'])
+            record.write({'baz': 'Ho'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 2)
 
-        # create/write with inverse field only
-        log.clear()
-        record = model.create({'bar': 'Hi'})
-        self.assertCountEqual(log, ['inverse', 'constraint'])
+            # create/write with inverse field only
+            record = model.create({'bar': 'Hi'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 3)
 
-        log.clear()
-        record.write({'bar': 'Ho'})
-        self.assertCountEqual(log, ['inverse', 'constraint'])
+            record.write({'bar': 'Ho'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 4)
 
-        # create/write with both fields only
-        log.clear()
-        record = model.create({'bar': 'Hi', 'baz': 'Hi'})
-        self.assertCountEqual(log, ['inverse', 'constraint'])
+            # create/write with both fields
+            record = model.create({'bar': 'Hi', 'baz': 'Hi'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 5)
 
-        log.clear()
-        record.write({'bar': 'Ho', 'baz': 'Ho'})
-        self.assertCountEqual(log, ['inverse', 'constraint'])
+            record.write({'bar': 'Ho', 'baz': 'Ho'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 6)
+
+            # the check is batched on all the modified records
+            model.create({'bar': 'Hi', 'baz': 'Hi'})
+            model.create({'bar': 'Other'})
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 7)
+
+            # nothing left to check
+            self.env.flush_all()
+            self.assertEqual(check_constraint.call_count, 7)
 
     def test_16_compute_unassigned(self):
         model = self.env['test_orm.compute.unassigned']

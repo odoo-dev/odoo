@@ -555,10 +555,10 @@ actual arch.
                 view.mode != 'primary'):
                 raise ValidationError(_("Inherited view cannot have '%(attr)s' defined on the record. Use '%(attr)s' attributes inside the view definition", attr='groups'))
 
-    @api.constrains('inherit_id')
+    # not deferred: the other constraints loop forever in `_get_combined_arch`
+    # if there is a cycle
+    @api.constrains('inherit_id', deferred=False)
     def _check_000_inheritance(self):
-        # NOTE: constraints methods are check alphabetically. Always ensure this method will be
-        #       called before other constraint methods to avoid infinite loop in `_get_combined_arch`.
         if self._has_cycle('inherit_id'):
             raise ValidationError(_('You cannot create recursive inherited views.'))
 

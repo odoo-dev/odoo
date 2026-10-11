@@ -9,7 +9,9 @@ class StockLocation(models.Model):
 
     subcontractor_ids = fields.One2many('res.partner', 'property_stock_subcontractor')
 
-    @api.constrains('usage', 'location_id')
+    # not deferred: only forbids the modification of the company's subcontracting
+    # location once it is set
+    @api.constrains('usage', 'location_id', deferred=False)
     def _check_subcontracting_location(self):
         for location in self:
             if location == location.company_id.subcontracting_location_id:

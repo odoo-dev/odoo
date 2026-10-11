@@ -603,7 +603,8 @@ class ResPartner(models.Model):
             else:
                 partner.commercial_partner_id = partner.parent_id.commercial_partner_id
 
-    @api.constrains('parent_id')
+    # not deferred: _fields_sync() does not support cycles
+    @api.constrains('parent_id', deferred=False)
     def _check_parent_id(self):
         if self._has_cycle():
             raise ValidationError(_('You cannot create recursive Partner hierarchies.'))
@@ -1375,7 +1376,8 @@ class ResPartner(models.Model):
     # PARTNER IDENTIFIERS (VAT + additional identifiers)
     # -------------------------------------------------------------------------
 
-    @api.constrains('additional_identifiers')
+    # not deferred: depends on context key 'no_vat_validation'
+    @api.constrains('additional_identifiers', deferred=False)
     def _check_additional_identifiers(self):
         """Safety guard for paths that bypass `_clean_additional_identifiers`, so malformed values
         never reach the JSON.

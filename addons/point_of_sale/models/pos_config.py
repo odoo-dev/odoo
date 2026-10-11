@@ -1041,7 +1041,8 @@ class PosConfig(models.Model):
             res = self._check_before_creating_new_session()
             if res:
                 return res
-        self._validate_fields(self._fields)
+        for constrain in self.pool.constrains_by_model[self._name]:
+            self._check_constrain(constrain)
 
         self._check_company_has_fiscal_country()
         return self._action_to_open_ui()
