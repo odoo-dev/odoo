@@ -429,22 +429,23 @@ class PaymentProvider(models.Model):
 
     @api.constrains("capture_manually")
     def _check_manual_capture_supported_by_payment_methods(self):
-        if self.capture_manually:
-            incompatible_pms = self.payment_method_ids.filtered(
-                lambda method: (
-                    method.active
-                    and not method.primary_payment_method_id
-                    and method.support_manual_capture == "none"
-                )
-            )
-            if incompatible_pms:
-                raise ValidationError(
-                    self.env._(
-                        "The following payment methods must be disabled in order to enable manual"
-                        " capture: %s",
-                        ", ".join(incompatible_pms.mapped("name")),
+        for provider in self:
+            if provider.capture_manually:
+                incompatible_pms = provider.payment_method_ids.filtered(
+                    lambda method: (
+                        method.active
+                        and not method.primary_payment_method_id
+                        and method.support_manual_capture == "none"
                     )
                 )
+                if incompatible_pms:
+                    raise ValidationError(
+                        self.env._(
+                            "The following payment methods must be disabled in order to enable manual"
+                            " capture: %s",
+                            ", ".join(incompatible_pms.mapped("name")),
+                        )
+                    )
 
     # === CRUD METHODS === #
 

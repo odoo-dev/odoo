@@ -367,11 +367,12 @@ class PosSession(models.Model):
     @api.constrains('config_id')
     def _check_pos_config(self):
         onboarding_creation = self.env.context.get('onboarding_creation', False)
-        if not onboarding_creation and self.search_count([
-                ('state', '!=', 'closed'),
-                ('config_id', '=', self.config_id.id),
-            ]) > 1:
-            raise ValidationError(_("Another session is already opened for this point of sale."))
+        for session in self:
+            if not onboarding_creation and self.search_count([
+                    ('state', '!=', 'closed'),
+                    ('config_id', '=', session.config_id.id),
+                ]) > 1:
+                raise ValidationError(_("Another session is already opened for this point of sale."))
 
     @api.constrains('start_at')
     def _check_start_date(self):

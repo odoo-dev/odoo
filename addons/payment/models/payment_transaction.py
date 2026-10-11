@@ -231,10 +231,11 @@ class PaymentTransaction(models.Model):
     @api.constrains("token_id")
     def _check_token_is_active(self):
         """Check that the token used to create the transaction is active."""
-        if self.token_id and not self.token_id.active:
-            raise ValidationError(
-                self.env._("Creating a transaction from an archived token is forbidden.")
-            )
+        for tx in self:
+            if tx.token_id and not tx.token_id.active:
+                raise ValidationError(
+                    self.env._("Creating a transaction from an archived token is forbidden.")
+                )
 
     # === CRUD METHODS === #
 
