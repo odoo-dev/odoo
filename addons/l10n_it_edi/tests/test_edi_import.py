@@ -1096,3 +1096,195 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
                 self.vat_0_N1_purchase,
             ]
         )
+
+    def test_import_bill_auto_generate_pdf_preview(self):
+        """ Test that importing an XML bill without PDF generates a preview PDF
+            and sets it as message_main_attachment_id, unless disabled.
+        """
+        orig_journal = self.company_data_2['default_journal_purchase']
+        self.company_data_2['default_journal_purchase'] = orig_journal.with_context(force_report_rendering=True)
+        try:
+            invoice = self._assert_import_invoice('IT01234567890_FPR01.xml', [{
+                'move_type': 'in_invoice',
+                'amount_untaxed': 5.0,
+                'amount_tax': 1.1,
+            }])
+            self.assertTrue(invoice.message_main_attachment_id)
+            self.assertEqual(invoice.message_main_attachment_id.mimetype, 'application/pdf')
+            self.assertIn('Preview', invoice.message_main_attachment_id.name)
+
+            # Test disabling via config parameter
+            self.env['ir.config_parameter'].sudo().set_bool('l10n_it_edi.disable_pdf_in_xml', True)
+            invoice2 = self._assert_import_invoice('IT01234567890_FPR01.xml', [{
+                'move_type': 'in_invoice',
+                'amount_untaxed': 5.0,
+                'amount_tax': 1.1,
+            }])
+            pdf_attachments = invoice2.attachment_ids.filtered(lambda a: a.mimetype == 'application/pdf')
+            self.assertFalse(pdf_attachments)
+            self.env['ir.config_parameter'].sudo().set_bool('l10n_it_edi.disable_pdf_in_xml', False)
+        finally:
+            self.company_data_2['default_journal_purchase'] = orig_journal
+
+    def test_import_bill_with_allegati_pdf(self):
+        """ When the XML contains an Allegati with a PDF, that official PDF should become
+            the main attachment, and synthetic PDF generation should be skipped.
+        """
+        orig_journal = self.company_data_2['default_journal_purchase']
+        self.company_data_2['default_journal_purchase'] = orig_journal.with_context(force_report_rendering=True)
+        try:
+            dummy_pdf_content = b"%PDF-1.4 test official invoice"
+            dummy_pdf_b64 = base64.b64encode(dummy_pdf_content).decode('ascii')
+            applied_xml = f"""
+                <xpath expr="//FatturaElettronicaBody" position="inside">
+                    <Allegati>
+                        <NomeAttachment>vendor_invoice.pdf</NomeAttachment>
+                        <FormatoAttachment>PDF</FormatoAttachment>
+                        <Attachment>{dummy_pdf_b64}</Attachment>
+                    </Allegati>
+                </xpath>
+            """
+            invoice = self._assert_import_invoice('IT01234567890_FPR01.xml', [{
+                'move_type': 'in_invoice',
+                'amount_untaxed': 5.0,
+                'amount_tax': 1.1,
+            }], xml_to_apply=applied_xml)
+
+            self.assertTrue(invoice.message_main_attachment_id)
+            self.assertEqual(invoice.message_main_attachment_id.mimetype, 'application/pdf')
+            self.assertEqual(invoice.message_main_attachment_id.name, 'vendor_invoice.pdf')
+            # Ensure only the official PDF and XML are attached, no synthetic preview was generated
+            pdf_attachments = invoice.attachment_ids.filtered(lambda a: a.mimetype == 'application/pdf')
+            self.assertEqual(len(pdf_attachments), 1)
+        finally:
+            self.company_data_2['default_journal_purchase'] = orig_journal
+
+    def test_sdi_summary_values_11_rows(self):
+        """ Test SDI summary 11-row extraction and report rendering."""
+        applied_xml = """
+            <xpath expr="//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento" position="inside">
+                <DatiRitenuta>
+                    <TipoRitenuta>RT01</TipoRitenuta>
+                    <ImportoRitenuta>208.00</ImportoRitenuta>
+                    <AliquotaRitenuta>20.00</AliquotaRitenuta>
+                    <CausalePagamento>A</CausalePagamento>
+                </DatiRitenuta>
+                <DatiCassaPrevidenziale>
+                    <TipoCassa>TC01</TipoCassa>
+                    <AlCassa>4.00</AlCassa>
+                    <ImportoContributoCassa>40.00</ImportoContributoCassa>
+                    <ImponibileCassa>1000.00</ImponibileCassa>
+                    <AliquotaIVA>22.00</AliquotaIVA>
+                    <Ritenuta>SI</Ritenuta>
+                </DatiCassaPrevidenziale>
+                <DatiBollo>
+                    <BolloVirtuale>SI</BolloVirtuale>
+                    <ImportoBollo>2.00</ImportoBollo>
+                </DatiBollo>
+                <Arrotondamento>0.20</Arrotondamento>
+                <ImportoTotaleDocumento>1769.00</ImportoTotaleDocumento>
+            </xpath>
+            <xpath expr="//FatturaElettronicaBody/DatiBeniServizi" position="replace">
+                <DatiBeniServizi>
+                    <DettaglioLinee>
+                        <NumeroLinea>1</NumeroLinea>
+                        <Descrizione>Professional Service</Descrizione>
+                        <Quantita>1.00</Quantita>
+                        <PrezzoUnitario>1000.00</PrezzoUnitario>
+                        <PrezzoTotale>1000.00</PrezzoTotale>
+                        <Ritenuta>SI</Ritenuta>
+                        <AliquotaIVA>22.00</AliquotaIVA>
+                    </DettaglioLinee>
+                    <DettaglioLinee>
+                        <NumeroLinea>2</NumeroLinea>
+                        <Descrizione>Exempt Service</Descrizione>
+                        <Quantita>1.00</Quantita>
+                        <PrezzoUnitario>500.00</PrezzoUnitario>
+                        <PrezzoTotale>500.00</PrezzoTotale>
+                        <Ritenuta>NO</Ritenuta>
+                        <AliquotaIVA>0.00</AliquotaIVA>
+                        <Natura>N3.1</Natura>
+                    </DettaglioLinee>
+                    <DatiRiepilogo>
+                        <AliquotaIVA>22.00</AliquotaIVA>
+                        <ImponibileImporto>1040.00</ImponibileImporto>
+                        <Imposta>228.80</Imposta>
+                    </DatiRiepilogo>
+                    <DatiRiepilogo>
+                        <AliquotaIVA>0.00</AliquotaIVA>
+                        <Natura>N3.1</Natura>
+                        <ImponibileImporto>500.00</ImponibileImporto>
+                        <Imposta>0.00</Imposta>
+                        <RiferimentoNormativo>Non imponibile art. 8</RiferimentoNormativo>
+                    </DatiRiepilogo>
+                </DatiBeniServizi>
+            </xpath>
+            <xpath expr="//FatturaElettronicaBody/DatiPagamento/DettaglioPagamento/ImportoPagamento" position="replace">
+                <ImportoPagamento>1561.00</ImportoPagamento>
+            </xpath>
+        """
+        invoice = self._assert_import_invoice('IT01234567890_FPR01.xml', [{
+            'move_type': 'in_invoice',
+            'amount_untaxed': 1500.0,
+        }], xml_to_apply=applied_xml)
+
+        summary = invoice._l10n_it_edi_get_sdi_summary_values()
+        self.assertTrue(summary)
+
+        # 1. Untaxed amount
+        self.assertEqual(summary['untaxed_amount']['value'], 1500.00)
+
+        # 2 & 3. Pension Funds on <base> and notes
+        self.assertIsNotNone(summary['pension_funds'])
+        self.assertEqual(summary['pension_funds']['base'], 1000.00)
+        self.assertEqual(summary['pension_funds']['value'], 40.00)
+        self.assertEqual(len(summary['pension_funds']['notes']), 1)
+        self.assertIn('TC01', summary['pension_funds']['notes'][0])
+        self.assertIn('4%', summary['pension_funds']['notes'][0])
+        self.assertIn('VAT 22%', summary['pension_funds']['notes'][0])
+        self.assertIn('Withheld', summary['pension_funds']['notes'][0])
+
+        # 4, 5, 6. Tax / VAT rows
+        self.assertEqual(len(summary['tax_rows']), 2)
+        # Row 4: 22% VAT on 1040.00
+        self.assertEqual(summary['tax_rows'][0]['title'], '22% VAT')
+        self.assertEqual(summary['tax_rows'][0]['base'], 1040.00)
+        self.assertEqual(summary['tax_rows'][0]['value'], 228.80)
+        self.assertIsNone(summary['tax_rows'][0]['note'])
+        # Row 5 & 6: 0% N3.1 on 500.00 with legal reference
+        self.assertEqual(summary['tax_rows'][1]['title'], '0% N3.1')
+        self.assertEqual(summary['tax_rows'][1]['base'], 500.00)
+        self.assertEqual(summary['tax_rows'][1]['value'], 0.00)
+        self.assertEqual(summary['tax_rows'][1]['note'], 'Non imponibile art. 8')
+
+        # 7. Rounding
+        self.assertIsNotNone(summary['rounding'])
+        self.assertEqual(summary['rounding']['value'], 0.20)
+
+        # 8. Withholdings Excluded
+        self.assertIsNotNone(summary['withholdings_excluded'])
+        self.assertEqual(summary['withholdings_excluded']['value'], 1769.00)
+
+        # 9. Withholdings on <base>
+        self.assertIsNotNone(summary['withholdings'])
+        self.assertEqual(summary['withholdings']['base'], 1040.00)  # 1000 line + 40 fund
+        self.assertEqual(summary['withholdings']['value'], -208.00)
+
+        # 10. Stamp duty
+        self.assertIsNotNone(summary['stamp_duty'])
+        self.assertEqual(summary['stamp_duty']['value'], 2.00)
+
+        # 11. Total
+        self.assertEqual(summary['total']['value'], 1561.00)  # 1769 - 208
+
+        # Test report rendering
+        html, _ = self.env['ir.actions.report']._render_qweb_html(
+            'l10n_it_edi.action_report_account_invoice_sdi_preview',
+            [invoice.id]
+        )
+        html_str = html.decode()
+        self.assertIn('Preview', html_str)
+        self.assertIn('This is a visual representation of the xml content', html_str)
+        self.assertIn('1,500.00', html_str)
+        self.assertIn('1,561.00', html_str)
+
