@@ -6,3 +6,19 @@ patch(PosPaymentMethod.prototype, {
         return [...super._load_pos_data_fields(), "stripe_serial_number"];
     },
 });
+
+PosPaymentMethod._records = [
+    ...PosPaymentMethod._records,
+    {
+        id: 5,
+        name: "Stripe",
+        payment_provider: "stripe",
+        type: "bank",
+        image: false,
+        sequence: 1,
+        payment_method_type: "terminal",
+        stripe_serial_number: "SIMULATOR",
+        default_qr: false,
+        currency_ids: [],
+    },
+];
