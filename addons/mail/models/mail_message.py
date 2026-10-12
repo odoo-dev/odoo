@@ -1011,9 +1011,14 @@ class MailMessage(models.Model):
         if search_term:
             # we replace every space by a % to avoid hard spacing matching
             search_term = search_term.replace(" ", "%")
+            attachment_domain = Domain("name", "ilike", search_term)
+            if thread:
+                # attachments of a message are linked to the thread: use the res_model/res_id
+                # index instead of scanning every attachment of the database
+                attachment_domain &= Domain("res_model", "=", thread._name) & Domain("res_id", "=", thread.id)
             message_domain = Domain.OR([
                 # sudo: access to attachment is allowed if you have access to the parent model
-                [("attachment_ids", "in", self.env["ir.attachment"].sudo()._search([("name", "ilike", search_term)]))],
+                [("attachment_ids", "in", self.env["ir.attachment"].sudo()._search(attachment_domain))],
                 # sudo: res.partner - allow searching by author name
                 [("author_id", "in", self.env["res.partner"].sudo()._search([("name", "ilike", search_term)]))],
                 # sudo: mail.guest - allow searching by guest name
