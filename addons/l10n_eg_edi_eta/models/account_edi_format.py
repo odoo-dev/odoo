@@ -274,10 +274,11 @@ class AccountEdiFormat(models.Model):
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
 
         date_string = invoice.invoice_date.strftime('%Y-%m-%dT%H:%M:%SZ')
+        document_type = self._l10n_eg_eta_get_document_type(invoice)
         eta_invoice = {
             'issuer': self._l10n_eg_eta_prepare_address_data(invoice.journal_id.l10n_eg_branch_id, invoice, issuer=True,),
             'receiver': self._l10n_eg_eta_prepare_address_data(invoice.partner_id, invoice),
-            'documentType': 'i' if invoice.move_type == 'out_invoice' else 'c' if invoice.move_type == 'out_refund' else 'd' if invoice.move_type == 'in_refund' else '',
+            'documentType': document_type,
             'documentTypeVersion': '1.0',
             'dateTimeIssued': date_string,
             'taxpayerActivityCode': invoice.journal_id.l10n_eg_activity_type_id.code,
@@ -299,11 +300,16 @@ class AccountEdiFormat(models.Model):
             'totalAmount': self._l10n_eg_edi_round(sum(x['base_amount'] + x['tax_amount'] for x in values_per_grouping_key_total_amount.values())),
             'extraDiscountAmount': 0.0,
             'totalItemsDiscountAmount': 0.0,
+            'serviceDeliveryDate': self._l10n_eg_eta_get_service_delivery_date(invoice),
         })
         if invoice.ref:
             eta_invoice['purchaseOrderReference'] = invoice.ref
         if invoice.invoice_origin:
             eta_invoice['salesOrderReference'] = invoice.invoice_origin
+        if document_type in ['ec', 'ed']:
+            origin = invoice.reversed_entry_id or invoice.debit_origin_id
+            if origin and origin.l10n_eg_uuid:
+                eta_invoice['references'] = [origin.l10n_eg_uuid]
         return eta_invoice
 
     @api.model
@@ -357,6 +363,9 @@ class AccountEdiFormat(models.Model):
             if invoice.currency_id != self.env.ref('base.EGP'):
                 lines[-1]['unitValue']['currencyExchangeRate'] = self._l10n_eg_edi_round(invoice._l10n_eg_edi_exchange_currency_rate())
                 lines[-1]['unitValue']['amountSold'] = line.price_unit
+            if self._l10n_eg_eta_is_export(invoice) and line.product_id.weight:
+                lines[-1]['weightUnitType'] = 'KGM'
+                lines[-1]['weightQuantity'] = self._l10n_eg_edi_round(line.product_id.weight * abs(line.quantity))
         return lines, totals
 
     @api.model
@@ -367,6 +376,26 @@ class AccountEdiFormat(models.Model):
             return 'B' if partner_id.commercial_partner_id.is_company else 'P'
         else:
             return 'F'
+
+    def _l10n_eg_eta_is_export(self, invoice):
+        return self._l10n_eg_get_partner_tax_type(invoice.partner_id) == 'F'
+
+    def _l10n_eg_eta_get_document_type(self, invoice):
+        document_type = {
+            'out_invoice': 'd' if invoice._fields.get('debit_origin_id') and invoice.debit_origin_id else 'i',
+            'out_refund': 'c',
+            'in_refund': 'd',
+        }.get(invoice.move_type, '')
+        if self._l10n_eg_eta_is_export(invoice) and document_type:
+            document_type = 'e' + document_type  # ei / ec / ed
+        return document_type
+
+    def _l10n_eg_eta_get_service_delivery_date(self, invoice):
+        if not self._l10n_eg_eta_is_export(invoice):
+            return invoice.delivery_date and invoice.delivery_date.strftime('%Y-%m-%d')
+        elif origin := invoice.reversed_entry_id or invoice._fields.get('debit_origin_id') and invoice.debit_origin_id:
+            response_data = origin.l10n_eg_eta_json_doc_file and json.loads(base64.b64decode(origin.l10n_eg_eta_json_doc_file)).get('response')
+            return getattr(response_data, 'l10n_eg_uuid', None)
 
     @api.model
     def _l10n_eg_eta_prepare_address_data(self, partner, invoice, issuer=False):
