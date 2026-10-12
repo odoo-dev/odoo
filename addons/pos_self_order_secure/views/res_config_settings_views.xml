@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_pos_self_order_secure" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos_self_order_secure</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="priority">25</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='self-payment-after']" position="after">
+                <div class="content-group row" invisible="pos_self_ordering_mode != 'mobile' or pos_self_ordering_pay_after != 'meal'">
+                    <label string="Session Timeout" for="pos_self_order_session_timeout_minutes" class="col-lg-4"/>
+                    <field name="pos_self_order_session_timeout_minutes" placeholder="minutes"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
