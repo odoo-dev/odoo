@@ -42,4 +42,34 @@ export class ProjectTaskControlPanel extends ControlPanel {
             ? "selected"
             : "";
     }
+
+    async onClickShowProjectTopMenu() {
+        const state = this.embeddedPanelState;
+        const { embeddedInfos, configHandler } = state;
+
+        if (
+            !embeddedInfos.showEmbedded &&
+            !configHandler.hasEmbeddedActionsConfig() &&
+            configHandler.parentResModel === "project.project"
+        ) {
+            const overview = embeddedInfos.embeddedActions.find(
+                (action) => action.python_method === "action_open_project_form"
+            );
+
+            if (overview) {
+                const currentId = embeddedInfos.currentEmbeddedAction?.id ?? false;
+                for (const id of [false, overview.id]) {
+                    if (
+                        id !== currentId &&
+                        embeddedInfos.embeddedActions.some((action) => action.id === id) &&
+                        !embeddedInfos.visibleEmbeddedActions.includes(id)
+                    ) {
+                        embeddedInfos.visibleEmbeddedActions.push(id);
+                    }
+                }
+            }
+        }
+
+        return state.onClickShowEmbedded();
+    }
 }

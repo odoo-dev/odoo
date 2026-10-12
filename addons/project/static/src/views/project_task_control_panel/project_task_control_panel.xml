@@ -14,7 +14,7 @@
                         </DropdownItem>
                         <DropdownItem t-if="this.embeddedPanelState.embeddedInfos.embeddedActions?.length and !this.uiService.isSmall"
                             class="this.embeddedPanelState.embeddedInfos.showEmbedded ? 'selected' : ''"
-                            onSelected="() => this.embeddedPanelState.onClickShowEmbedded()"
+                            onSelected="() => this.onClickShowProjectTopMenu()"
                         >
                             Top Menu
                         </DropdownItem>
