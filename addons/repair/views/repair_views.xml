@@ -87,6 +87,9 @@
                             class="oe_stat_button"
                             icon="sync_alt"
                             invisible="not(move_ids or move_id) or state != 'done'"/>
+                        <button name="action_see_move_scrap" type="object" icon="height" class="oe_stat_button" invisible="not scrap_count">
+                            <field name="scrap_count" widget="statinfo" string="Scraps"/>
+                        </button>
                         <!-- No groups attribute on the next button as "stock.group_stock_user" is needed for Repair, and as this group is granted 'sale.order' read/write accesses in sale_stock module (forcefully loaded as transitive dependency) -->
                         <button name="action_view_sale_order" type="object" string="Sale Order" icon="attach_money" class="oe_stat_button" invisible="not sale_order_id">
                             <div class="o_field_widget o_stat_info">
@@ -429,6 +432,17 @@
             <field name="code">
             if records:
                 records.action_unreserve()</field>
+        </record>
+
+        <record id="action_repair_order_scrap" model="ir.actions.server">
+            <field name="name">Scrap</field>
+            <field name="model_id" ref="repair.model_repair_order"/>
+            <field name="binding_model_id" ref="repair.model_repair_order"/>
+            <field name="binding_view_types">form</field>
+            <field name="state">code</field>
+            <field name="code">
+            if records:
+                action = records.action_scrap()</field>
         </record>
 
         <menuitem id="menu_repair_order" groups="stock.group_stock_user" name="Repairs" sequence="165"
