@@ -1,4 +1,4 @@
-import { Component, onWillStart, onWillUpdateProps, signal, t, useProps } from "@odoo/owl";
+import { Component, onWillStart, onWillUpdateProps, proxy, signal, t, useProps } from "@odoo/owl";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";
 import { getBasicEvalContext } from "@web/model/relational_model/utils";
@@ -32,7 +32,7 @@ export class ActionHelper extends Component {
             // view is reloaded afterwards
             useViewButtons(this.rootRef, { reload: () => this.env.searchModel?.search() });
             // data of the help, returned by the `data_method` of the model
-            this.data = {};
+            this.state = proxy({ data: {} });
             if (this.helpArchInfo.dataMethod) {
                 this.orm = useService("orm");
                 onWillStart(() => this.loadData());
@@ -43,16 +43,30 @@ export class ActionHelper extends Component {
 
     /**
      * Calls the `data_method` of the help with the current domain and context,
-     * if they changed since the last call.
+     * if they changed since the last call. The result is cached: the cached data
+     * are displayed directly, and updated if the server returns other ones.
      */
     async loadData() {
         const { context, domain, resModel } = this.env.searchModel;
         const key = JSON.stringify([domain, context]);
         if (key !== this.dataKey) {
             this.dataKey = key;
-            this.data = await this.orm.call(resModel, this.helpArchInfo.dataMethod, [domain], {
+            const orm = this.orm.cache({
+                type: "disk",
+                update: "always",
+                callback: (result, hasChanged) => {
+                    if (hasChanged && key === this.dataKey) {
+                        this.state.data = result;
+                    }
+                },
+            });
+            const data = await orm.call(resModel, this.helpArchInfo.dataMethod, [domain], {
                 context,
             });
+            // ignore the result if the search changed in the meantime
+            if (key === this.dataKey) {
+                this.state.data = data;
+            }
         }
     }
 
@@ -67,7 +81,7 @@ export class ActionHelper extends Component {
      */
     get helpRecord() {
         const context = this.env.searchModel?.context || {};
-        const evalContext = { ...getBasicEvalContext({ context }), data: this.data };
+        const evalContext = { ...getBasicEvalContext({ context }), data: this.state?.data || {} };
         return {
             context,
             evalContext,
@@ -80,7 +94,7 @@ export class ActionHelper extends Component {
     get renderingContext() {
         return {
             context: this.helpRecord.context,
-            data: this.data,
+            data: this.state?.data || {},
             __comp__: Object.assign(Object.create(this), { this: this }),
         };
     }
