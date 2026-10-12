@@ -22,16 +22,16 @@ class TestHrEmployeeRights(TestHrCommon):
         return cls.env['res.country'].search([('code', 'in', country_codes)])
 
     def test_new_employee_group_hr_user(self):
-        for country in self._get_payroll_l10n_countries():
-            company = self.env['res.company'].create({
-                'name': f'Company {country.name}',
-                'country_id': country.id,
-            })
-            self.res_users_hr_officer.company_ids |= company
+        companies = self.env['res.company'].create([{
+            'name': f'Company {country.name}',
+            'country_id': country.id,
+        } for country in self._get_payroll_l10n_countries()])
+        self.res_users_hr_officer.company_ids |= companies
+        for company in companies:
             self.res_users_hr_officer.company_id = company
 
             with Form(self.env['hr.employee'].with_user(self.res_users_hr_officer)) as employee_form:
-                employee_form.name = f'Employee {country.name}'
+                employee_form.name = f'Employee {company.country_id.name}'
                 employee_form.birthday = '1989-11-09'
                 employee_form.contract_date_start = '2020-01-01'
                 employee_form.company_id = company
