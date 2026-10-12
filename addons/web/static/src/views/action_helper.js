@@ -50,7 +50,8 @@ export class ActionHelper extends Component {
         const key = JSON.stringify([domain, context]);
         if (key !== this.dataKey) {
             this.dataKey = key;
-            this.data = await this.orm.call(resModel, this.helpArchInfo.dataMethod, [domain], {
+            const { dataMethod, dataModel } = this.helpArchInfo;
+            this.data = await this.orm.call(dataModel || resModel, dataMethod, [domain], {
                 context,
             });
         }
