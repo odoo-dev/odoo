@@ -1,4 +1,4 @@
-import { useProps } from "@odoo/owl";
+import { useProps, t } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { SelectionField, selectionField, selectionFieldProps } from "@web/views/fields/selection/selection_field";
 
@@ -7,7 +7,7 @@ export class SelectorDays extends SelectionField {
 
     props = useProps({
         ...selectionFieldProps,
-        relatedMonth: String(),
+        relatedMonth: t.string(),
     });
 
     get options() {
