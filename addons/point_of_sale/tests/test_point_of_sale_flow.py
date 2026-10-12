@@ -497,7 +497,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         )
         payment_amount = payment_term.mapped('amount_currency')
         self.assertEqual(len(payment_term), 2)
-        self.assertEqual(payment_amount, [-50.0, 500.0])
+        self.assertEqual(payment_amount, [500.0, -50.0])
 
     def test_paid_order_synced_twice_no_duplicate_change(self):
         """A paid order that reaches the server twice (e.g. a retried/duplicated
@@ -1481,8 +1481,7 @@ class TestPointOfSaleFlow(CommonPosTest):
                 None, product_id=product, tax_ids=product.taxes_id, price_unit=product.lst_price,
                 quantity=quantity, currency_id=company.currency_id, rate=1.0,
             )]
-            AccountTax._add_tax_details_in_base_lines(base_lines, company)
-            AccountTax._round_base_lines_tax_details(base_lines, company)
+            AccountTax._add_tax_details(base_lines, company)
             line = AccountTax._prepare_global_discount_lines(base_lines, company, 'percent', 10.0)[0]
             return {
                 'product_id': product.id,

@@ -519,7 +519,7 @@ class AccountMove(models.Model):
                 description = base_line['name']
             else:
                 line = base_line['record']
-                description = line.name
+                description = (line.with_context(display_default_code=False).label or '').replace('\n', ' ')
                 if not is_downpayment and price_subtotal < 0:
                     downpayment_moves = line._get_downpayment_lines().move_id
                     if downpayment_moves:

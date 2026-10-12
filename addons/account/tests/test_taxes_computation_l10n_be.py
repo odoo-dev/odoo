@@ -241,9 +241,9 @@ class TestTaxesComputationL10nBe(TestTaxesComputation):
         # So the global discount will be based on 31.58 + 6.63 = 38.21
         # 38.21 * 0.02 ~= 0.76
         expected_base_line_tax_details_global_discount = {
-            'raw_total_excluded_currency': -0.64256,
+            'raw_total_excluded_currency': -0.63456,
             'raw_total_excluded': -0.315,
-            'raw_total_included_currency': -0.7766406611570248,
+            'raw_total_included_currency': -0.7672522314049587,
             'raw_total_included': -0.38,
             'total_excluded_currency': -0.63,
             'total_excluded': -0.31,
@@ -254,9 +254,9 @@ class TestTaxesComputationL10nBe(TestTaxesComputation):
             'taxes_data': [
                 {
                     'tax_id': tax_21.id,
-                    'raw_base_amount_currency': -0.64256,
+                    'raw_base_amount_currency': -0.63456,
                     'raw_base_amount': -0.315,
-                    'raw_tax_amount_currency': -0.1340806611570248,
+                    'raw_tax_amount_currency': -0.1326922314049587,
                     'raw_tax_amount': -0.065,
                     'base_amount_currency': -0.63,
                     'base_amount': -0.32,

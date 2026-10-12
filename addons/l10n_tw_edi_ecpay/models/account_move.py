@@ -469,10 +469,11 @@ class AccountMove(models.Model):
         tax_type, _, _ = self._l10n_tw_edi_determine_tax_types()
         for index, line in enumerate(self.invoice_line_ids.filtered(lambda line: line.display_type == "product"), start=1):
             base_line = self._prepare_product_base_line_for_taxes_computation(line)
-            rate = base_line['rate']
             if is_allowance and self.reversed_entry_id.currency_id == self.currency_id:
-                rate = self.reversed_entry_id.invoice_currency_rate  # replace the rate by the original invoice's rate
+                base_line['rate'] = self.reversed_entry_id.invoice_currency_rate  # replace the rate by the original invoice's rate
+            rate = base_line['rate']
             AccountTax._add_tax_details([base_line], self.company_id, rounding_method='no_round')
+            base_lines.append(base_line)
 
             twd_excluded_amount = base_line['tax_details']['raw_total_excluded_currency'] / rate if rate else 0.0
             twd_included_amount = base_line['tax_details']['raw_total_included_currency'] / rate if rate else 0.0
@@ -526,14 +527,13 @@ class AccountMove(models.Model):
                 })
             if self.l10n_tw_edi_is_b2b:
                 sale_amount += item_amount
-                tax_amount += base_line["tax_details"]["taxes_data"][0]['raw_tax_amount_currency'] / rate if rate else 0.0
             else:
                 sale_amount += item_amount_taxed
 
-            if self.l10n_tw_edi_is_b2b:
-                # Only B2B reports TaxAmount/ItemTax to ECPay. Round per tax record here,
-                # like the invoice itself does, so the totals actually match it.
-                AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        if self.l10n_tw_edi_is_b2b:
+            # Only B2B reports TaxAmount/ItemTax to ECPay. Round per tax record here,
+            # like the invoice itself does, so the totals actually match it.
+            AccountTax._add_tax_details(base_lines, self.company_id)
 
         # Sale amount adjustment
         amount_on_invoice = self.amount_untaxed_signed if self.l10n_tw_edi_is_b2b and tax_type != "4" else self.amount_total_signed

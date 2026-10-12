@@ -19,6 +19,8 @@ class TestL10nTHTaxInvoice(AccountTestInvoicingCommon):
         cls.th_company_1.l10n_th_is_vat_registered = True
         cls.env = cls.env(context=dict(cls.env.context, allowed_company_ids=(cls.env.company + cls.th_company_1).ids))
 
+        cls.tax_armageddon = cls.setup_armageddon_tax('complex_tax', cls.company_data)
+        cls.tax_armageddon.children_tax_ids[0].price_include_override = 'tax_included'
         cls.tax_on_invoice = cls.env['account.tax'].create({
             'name': 'VAT On Invoice',
             'amount_type': 'percent',

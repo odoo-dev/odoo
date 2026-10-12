@@ -62,8 +62,7 @@ class AccountWithholdingLine(models.AbstractModel):
             partner_id=self._get_comodel_partner(),
             calculate_withholding_taxes=True,
         )
-        AccountTax._add_tax_details_in_base_line(base_line, self.company_id)
-        AccountTax._round_base_lines_tax_details([base_line], self.company_id)
+        AccountTax._add_tax_details([base_line], self.company_id)
         return -base_line['tax_details']['taxes_data'][0]['tax_amount_currency']
 
     def _l10n_ar_get_payment(self):

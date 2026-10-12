@@ -46,6 +46,7 @@ class AccountTestInvoicingCommon(ProductCommon):
 
     chart_template = False
     country_code = False
+    tax_number = 0
     extra_tags = ('-standard', 'external') if 'EXTERNAL_MODE' in (config['test_tags'] or {}) else ()
 
     @classmethod
@@ -74,6 +75,10 @@ class AccountTestInvoicingCommon(ProductCommon):
             return wrapper
 
         return _decorator
+
+    def setUp(self):
+        super().setUp()
+        self.addCleanup(setattr, type(self), 'tax_number', self.tax_number)
 
     @classmethod
     def setUpClass(cls):

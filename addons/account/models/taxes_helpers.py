@@ -116,15 +116,14 @@ def sum_and_distribute_amounts_to(amounts, factors, rounding=None, round_distr=T
     neg_factors = [x for x in factors if x['factor'] < 0]
     sum_plus_factor = sum(x['factor'] for x in plus_factors)
     sum_neg_factor = sum(x['factor'] for x in neg_factors)
-    abs_sum_factor = abs(sum_plus_factor + sum_neg_factor)
 
-    len_amounts = len(amounts)
-    if len_amounts == 1 and len_amounts != len(factors) and abs_sum_factor:
-        amount = amounts[0]
-        amounts = [amount * abs(sum_plus_factor) / abs_sum_factor, amount * abs(sum_neg_factor) / abs_sum_factor]
-
-    sum_plus_amount = sum(x for x in amounts if x >= 0)
-    sum_neg_amount = sum(x for x in amounts if x < 0)
+    sum_factor = sum_plus_factor + sum_neg_factor
+    if len(amounts) == 1 and len(factors) != 1 and sum_factor:
+        sum_plus_amount = amounts[0] * sum_plus_factor / sum_factor
+        sum_neg_amount = amounts[0] * sum_neg_factor / sum_factor
+    else:
+        sum_plus_amount = sum(x for x in amounts if x >= 0)
+        sum_neg_amount = sum(x for x in amounts if x < 0)
     distr_rounding = rounding if round_distr else None
 
     sum_amount = sum(amounts)

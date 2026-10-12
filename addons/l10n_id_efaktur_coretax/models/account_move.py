@@ -432,7 +432,7 @@ class AccountMove(models.Model):
                 base_line['special_type'] = 'global_discount'
 
         base_lines = self.env['account.tax']._dispatch_global_discount_lines(base_lines, self.company_id)
-        self.env['account.tax']._squash_global_discount_lines(base_lines, self.company_id)
+        base_lines = self.env['account.tax']._squash_global_discount_lines(base_lines, self.company_id)
         self.env['account.tax']._add_and_round_raw_gross_total_excluded_and_discount(base_lines, self.company_id, in_foreign_currency=False)
         self.env['account.tax']._round_raw_gross_total_excluded_and_discount(base_lines, self.company_id, in_foreign_currency=False)
 

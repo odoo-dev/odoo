@@ -717,10 +717,9 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
             },
         }], partner=self.partner_a, to_invoice=True, is_refund=True, shipping_date='2023-01-01')
         pos_order_refund_record = self.env['pos.order'].browse(pos_order_refund_id)
-        self.assertEqual(sale_order.order_line.qty_delivered, 5)
-        pickings = pos_order_refund_record.picking_ids
-        while ready := pickings.filtered(lambda p: p.state == 'assigned'):
-            ready.button_validate()
+        # For both the normal refund and ship later + refund cases, we will create a picking with a negative quantity and validate it immediately.
+        self.assertEqual(len(pos_order_refund_record.picking_ids), 1)
+        self.assertEqual(pos_order_refund_record.picking_ids.state, 'done')
         self.assertEqual(sale_order.order_line.qty_delivered, 2)
 
     def test_amount_unpaid_with_downpayment_and_credit_note(self):

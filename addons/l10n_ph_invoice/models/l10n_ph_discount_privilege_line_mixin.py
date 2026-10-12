@@ -123,6 +123,8 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
             new_price_unit = tax_ids._adapt_price_unit_to_another_taxes(
                 price_unit=self.l10n_ph_original_price_unit or price_unit,
                 product=None,
+                currency=self.currency_id,
+                company=self.company_id or self.env.company,
                 original_taxes=tax_ids,
                 new_taxes=taxes_after_fp,
                 document_tax_mode=document_tax_mode,

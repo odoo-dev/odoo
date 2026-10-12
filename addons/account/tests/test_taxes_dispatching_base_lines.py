@@ -93,7 +93,7 @@ class TestTaxesDispatchingBaseLines(TestTaxCommon):
 
         # Dispatch the return of product on the others base lines.
         base_lines = AccountTax._dispatch_return_of_merchandise_lines(document['lines'], self.env.company)
-        AccountTax._squash_return_of_merchandise_lines(base_lines, self.env.company)
+        base_lines = AccountTax._squash_return_of_merchandise_lines(base_lines, self.env.company)
         self.assertEqual(len(base_lines), 2)
         self.assertEqual(base_lines[0]['quantity'], 0)
         self.assertEqual(base_lines[1]['quantity'], 8)
@@ -280,53 +280,53 @@ class TestTaxesDispatchingBaseLines(TestTaxCommon):
         base_lines = new_document['lines']
         base_lines[-1]['special_type'] = 'global_discount'
         base_lines = AccountTax._dispatch_global_discount_lines(base_lines, self.env.company)
-        AccountTax._squash_global_discount_lines(base_lines, self.env.company)
+        base_lines = AccountTax._squash_global_discount_lines(base_lines, self.env.company)
         self.assertEqual(len(base_lines), 2)
         new_document = copy.deepcopy(document)
         new_document['lines'] = base_lines
         AccountTax._add_tax_details(new_document['lines'], self.env.company)
 
         expected_base_line_tax_details_values_1 = {
-            'raw_total_excluded_currency': 335.8,
-            'raw_total_included_currency': 404.4490534275348,
+            'raw_total_excluded_currency': 268.64,
+            'raw_total_included_currency': 337.1544,
             'total_excluded_currency': 268.64,
             'total_included_currency': 337.15,
             'delta_total_excluded_currency': 0.0,
             'taxes_data': [
                 {
                     'tax_id': tax1.id,
-                    'raw_base_amount_currency': 335.8,
+                    'raw_base_amount_currency': 268.64,
                     'raw_tax_amount_currency': 10.0,
                     'base_amount_currency': 268.64,
                     'tax_amount_currency': 10.0,
                 },
                 {
                     'tax_id': tax2.id,
-                    'raw_base_amount_currency': 345.8,
-                    'raw_tax_amount_currency': 58.649053427534845,
+                    'raw_base_amount_currency': 278.64,
+                    'raw_tax_amount_currency': 58.5144,
                     'base_amount_currency': 278.64,
                     'tax_amount_currency': 58.51,
                 },
             ],
         }
         expected_base_line_tax_details_values_2 = {
-            'raw_total_excluded_currency': 167.9,
-            'raw_total_included_currency': 208.07254657246511,
+            'raw_total_excluded_currency': 134.32,
+            'raw_total_included_currency': 174.6272,
             'total_excluded_currency': 134.32,
             'total_included_currency': 174.63,
             'delta_total_excluded_currency': 0.0,
             'taxes_data': [
                 {
                     'tax_id': tax1.id,
-                    'raw_base_amount_currency': 167.9,
+                    'raw_base_amount_currency': 134.32,
                     'raw_tax_amount_currency': 10.0,
                     'base_amount_currency': 134.32,
                     'tax_amount_currency': 10.0,
                 },
                 {
                     'tax_id': tax2.id,
-                    'raw_base_amount_currency': 177.9,
-                    'raw_tax_amount_currency': 30.17254657246515,
+                    'raw_base_amount_currency': 144.32,
+                    'raw_tax_amount_currency': 30.3072,
                     'base_amount_currency': 144.32,
                     'tax_amount_currency': 30.31,
                 },
@@ -361,7 +361,7 @@ class TestTaxesDispatchingBaseLines(TestTaxCommon):
         # Should fail to dispatch the global discount on the others base lines.
         self.assertEqual(len(base_lines), 3)
         base_lines = AccountTax._dispatch_global_discount_lines(base_lines, self.env.company)
-        AccountTax._squash_global_discount_lines(base_lines, self.env.company)
+        base_lines = AccountTax._squash_global_discount_lines(base_lines, self.env.company)
         self.assertEqual(len(base_lines), 3)
 
     def test_dispatch_global_discount_lines_raw_gross_total_excluded_and_discount(self):
@@ -400,7 +400,7 @@ class TestTaxesDispatchingBaseLines(TestTaxCommon):
         )
 
         base_lines = AccountTax._dispatch_global_discount_lines(document['lines'], company)
-        AccountTax._squash_global_discount_lines(base_lines, company)
+        base_lines = AccountTax._squash_global_discount_lines(base_lines, company)
         new_document = copy.deepcopy(document)
         new_document['lines'] = base_lines
         self.assert_base_lines_tax_details(

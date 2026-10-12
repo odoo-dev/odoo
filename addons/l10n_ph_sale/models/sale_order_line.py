@@ -30,8 +30,7 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
         company = self.company_id or self.env.company
         base_line = self._prepare_base_line_for_taxes_computation(discount=0.0)
-        self.env["account.tax"]._add_tax_details_in_base_line(base_line, company)
-        self.env["account.tax"]._round_base_lines_tax_details([base_line], company)
+        self.env["account.tax"]._add_tax_details([base_line], company)
         gross_price_subtotal = base_line["tax_details"]["raw_total_excluded_currency"]
         gross_price_total = base_line["tax_details"]["raw_total_included_currency"]
         return (

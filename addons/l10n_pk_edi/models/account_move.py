@@ -183,9 +183,7 @@ class AccountMove(models.Model):
         # base line opts in. They are safe to include: that module forces them to 'tax_excluded'
         # and forbids the 'group' and 'division' types, so they cannot disturb the other taxes.
         base_lines['calculate_withholding_taxes'] = True
-        self.env['account.tax']._add_tax_details_in_base_line(
-            base_lines, self.company_id,
-        )
+        self.env['account.tax']._add_tax_details([base_lines], self.company_id)
 
         tax_lines = self._l10n_pk_edi_tax_details_by_line(base_lines.get('tax_details', {}))
 

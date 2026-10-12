@@ -72,8 +72,20 @@ class AccountTax(models.Model):
 
     @api.model
     def _prepare_base_line_for_taxes_computation(self, record, **kwargs):
+        """
+        Withholding taxes should not affect the tax computation unless explicitly required (via a specific key in the base line).
+        This requires to adapt the tax computation slightly to achieve this behavior.
+        """
         # EXTENDS 'account'
-        if not kwargs.get('calculate_withholding_taxes'):
-            filter_tax_function = kwargs.get('filter_tax_function') or (lambda t: True)
-            kwargs['filter_tax_function'] = lambda t: filter_tax_function(t) and not t.is_withholding_tax
-        return super()._prepare_base_line_for_taxes_computation(record, **kwargs)
+        if isinstance(record, dict) and record.get('calculate_withholding_taxes'):
+            kwargs.setdefault('calculate_withholding_taxes', True)
+        base_line = super()._prepare_base_line_for_taxes_computation(record, **kwargs)
+        filter_tax_function = base_line['filter_tax_function']
+
+        def filter_withholding_taxes(tax):
+            if filter_tax_function and not filter_tax_function(tax):
+                return False
+            return base_line.get('calculate_withholding_taxes') or not tax.is_withholding_tax
+
+        base_line['filter_tax_function'] = filter_withholding_taxes
+        return base_line

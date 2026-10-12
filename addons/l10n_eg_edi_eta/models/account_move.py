@@ -461,8 +461,7 @@ class AccountMove(models.Model):
         base_lines = [self._prepare_product_base_line_for_taxes_computation(aml) for aml in base_amls]
         tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [self._prepare_tax_line_for_taxes_computation(aml) for aml in tax_amls]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
+        AccountTax._add_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_base_line)
         invoice_line_data, totals = self._l10n_eg_eta_prepare_invoice_lines_data(base_lines_aggregated_values)

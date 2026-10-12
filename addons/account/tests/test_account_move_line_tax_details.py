@@ -315,24 +315,6 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
             [
                 {
                     'base_line_id': base_lines[0].id,
-                    'tax_line_id': tax_lines[2].id,
-                    'base_amount': -100.0,
-                    'tax_amount': -10.0,
-                },
-                {
-                    'base_line_id': base_lines[0].id,
-                    'tax_line_id': tax_lines[3].id,
-                    'base_amount': -100.0,
-                    'tax_amount': -10.0,
-                },
-                {
-                    'base_line_id': base_lines[0].id,
-                    'tax_line_id': tax_lines[3].id,
-                    'base_amount': -110.0,
-                    'tax_amount': -11.0,
-                },
-                {
-                    'base_line_id': base_lines[0].id,
                     'tax_line_id': tax_lines[0].id,
                     'base_amount': -1000.0,
                     'tax_amount': -100.0,
@@ -362,13 +344,13 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                     'tax_amount': -100.0,
                 },
                 {
-                    'base_line_id': tax_lines[1].id,
+                    'base_line_id': tax_lines[0].id,
                     'tax_line_id': tax_lines[2].id,
                     'base_amount': -100.0,
                     'tax_amount': -10.0,
                 },
                 {
-                    'base_line_id': tax_lines[1].id,
+                    'base_line_id': tax_lines[0].id,
                     'tax_line_id': tax_lines[3].id,
                     'base_amount': -100.0,
                     'tax_amount': -10.0,
@@ -380,7 +362,7 @@ class TestAccountTaxDetailsReport(AccountTestInvoicingCommon):
                     'tax_amount': -11.0,
                 },
                 {
-                    'base_line_id': tax_lines[0].id,
+                    'base_line_id': tax_lines[1].id,
                     'tax_line_id': tax_lines[3].id,
                     'base_amount': -100.0,
                     'tax_amount': -10.0,

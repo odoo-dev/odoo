@@ -99,8 +99,7 @@ class AccountMove(models.Model):
             AccountTax._prepare_base_line_for_taxes_computation(line, filter_tax_function=lambda t: not t.is_withholding_tax)
             for line in lines
         ]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        AccountTax._add_tax_details(base_lines, self.company_id)
         return base_lines
 
     def _get_th_tax_invoice_totals(self, base_lines, tax_exigibility):
@@ -114,7 +113,7 @@ class AccountMove(models.Model):
         total_excluded = total_tax_amount = 0.0
         for base_line in base_lines:
             tax_details = base_line['tax_details']
-            total_excluded += tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+            total_excluded += base_line['currency_id'].round(tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency'])
             for tax_data in tax_details['taxes_data']:
                 if tax_data['tax'].tax_exigibility != tax_exigibility:
                     continue
@@ -149,7 +148,7 @@ class AccountMove(models.Model):
                 for tax_data in tax_details['taxes_data']
                 if tax_data['tax'].tax_exigibility == tax_exigibility
             )
-            total_excluded = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+            total_excluded = base_line['currency_id'].round(tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency'])
             total_tax_included_amount += exigible_tax_amount + total_excluded
             tax_invoice_lines.append({
                 "name": base_line['record'].name,

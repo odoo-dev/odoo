@@ -170,9 +170,19 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         # OVERRIDE
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
-        suffix = '_currency' if in_foreign_currency else ''
         currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
-        price_amount = base_line['tax_details'][f'raw_gross_price_unit{suffix}']
+        AccountTax = self.env['account.tax']
+        raw_gross_total_excluded = AccountTax._get_gross_total_without_tax(
+            base_line=base_line,
+            company=vals['company'],
+            in_foreign_currency=in_foreign_currency,
+        )
+        price_amount = AccountTax._get_price_unit_without_tax(
+            base_line=base_line,
+            company=vals['company'],
+            raw_gross_total_excluded=raw_gross_total_excluded,
+            in_foreign_currency=in_foreign_currency,
+        )
 
         line_node['cac:Price'] = {
             'cbc:PriceAmount': {

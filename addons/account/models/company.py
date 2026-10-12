@@ -1252,7 +1252,6 @@ class ResCompany(models.Model):
             if not allow_raising:
                 return False
             raise UserError(_("Some documents are being sent by another process already."))
-        records.invalidate_recordset()
         return True
 
     def compute_fiscalyear_dates(self, current_date):

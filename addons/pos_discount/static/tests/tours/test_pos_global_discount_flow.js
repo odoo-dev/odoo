@@ -8,7 +8,17 @@ import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as NumberPopup from "@point_of_sale/../tests/generic_helpers/number_popup_util";
 import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
 import { registry } from "@web/core/registry";
-import { addDiscount } from "./test_taxes_global_discount";
+
+function addDiscount(discount, type = "percent") {
+    return [
+        ProductScreen.clickControlButton("Discount"),
+        NumberPopup.enterValue(discount),
+        NumberPopup.clickType(type),
+        NumberPopup.isShown(type === "percent" ? `${discount} %` : `$ ${discount}`),
+        NumberPopup.hasTypeSelected(type),
+        Dialog.confirm(),
+    ];
+}
 
 registry.category("web_tour.tours").add("test_pos_global_discount_sell_and_refund", {
     steps: () =>
