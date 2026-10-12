@@ -2,6 +2,9 @@
 
 import re
 from contextlib import contextmanager
+from datetime import datetime, timezone
+
+from freezegun import freeze_time
 
 from odoo.http.router import root
 from odoo.tests.common import TransactionCase, tagged
@@ -60,6 +63,68 @@ class TestQweb(TransactionCaseWithUserDemo):
 
         rendered = self.env['ir.qweb'].with_context(website_id=self.ref('base.default_website'))._render(template.id)
         self.assertEqual(rendered.strip(), result.strip(), 'Fourth rendering (with website_id=default)')
+
+    def test_render_visibility_datetime_range(self):
+        view = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''
+                <t t-name="visibility-datetime-range">
+                    <div>
+                        <section class="past" data-visibility-until="1000000000"/>
+                        <section class="current" data-visibility-from="1000000000" data-visibility-until="3000000000"/>
+                        <section class="future" data-visibility-from="3000000000"/>
+                        <section class="invalid" data-visibility-from="not-a-timestamp"/>
+                    </div>
+                </t>
+            '''
+        })
+        QWeb = self.env['ir.qweb'].with_context(website_id=self.ref('base.default_website'))
+
+        with freeze_time(datetime.fromtimestamp(2000000000, timezone.utc)):
+            rendered = str(QWeb._render(view.id))
+            self.assertNotIn('class="past"', rendered)
+            self.assertIn('class="current"', rendered)
+            self.assertNotIn('class="future"', rendered)
+            self.assertIn('class="invalid"', rendered)
+
+            for context in ({'inherit_branding': True}, {'edit_translations': True}):
+                rendered = str(QWeb.with_context(**context)._render(view.id))
+                for name in ('past', 'current', 'future', 'invalid'):
+                    self.assertIn(f'class="{name}"', rendered)
+
+    def test_html_field_visibility_datetime_range_tail(self):
+        past = 'data-visibility-until="1000000000"'
+        current = 'data-visibility-from="1000000000"'
+        cases = [
+            # first child, parent without text
+            (f'<p><b {past}>x</b>tail</p>', '<p>tail</p>'),
+            # first child, parent with text
+            (f'<p>text<b {past}>x</b>tail</p>', '<p>texttail</p>'),
+            # previous sibling without tail
+            (f'<p><i>i</i><b {past}>x</b>tail</p>', '<p><i>i</i>tail</p>'),
+            # previous sibling with tail
+            (f'<p><i>i</i>text<b {past}>x</b>tail</p>', '<p><i>i</i>texttail</p>'),
+            # previous sibling is a comment
+            (f'<p><!-- c --><b {past}>x</b>tail</p>', '<p><!-- c -->tail</p>'),
+            # no tail
+            (f'<p><i>i</i><b {past}>x</b></p>', '<p><i>i</i></p>'),
+            # consecutive removed elements
+            (f'<p>text<b {past}>x</b>one<b {past}>y</b>two</p>', '<p>textonetwo</p>'),
+            # removed element directly in the field value
+            (f'<section {past}>x</section><p>after</p>', '<p>after</p>'),
+            # removed element inside a removed element
+            (f'<p>text<span {past}>a<b {past}>x</b>inner</span>tail</p>', '<p>texttail</p>'),
+            # removed element inside a kept element
+            (f'<p><span>a<b {past}>x</b>inner</span>tail</p>', '<p><span>ainner</span>tail</p>'),
+            # kept element
+            (f'<p><b {current}>x</b>tail</p>', f'<p><b {current}>x</b>tail</p>'),
+        ]
+        HtmlConverter = self.env['ir.qweb.field.html']
+        with freeze_time(datetime.fromtimestamp(2000000000, timezone.utc)):
+            for value, expected in cases:
+                with self.subTest(value=value):
+                    self.assertEqual(HtmlConverter.value_to_html(value, {}), expected)
 
     def test_render_query_count(self):
         """

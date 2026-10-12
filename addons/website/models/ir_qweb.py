@@ -1,10 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import re
+import time
 
 from collections import OrderedDict
 
 from odoo import models
 from odoo.http import request
+from odoo.addons.base.models.ir_qweb import indent_code
 from odoo.addons.website.tools import add_form_signature
 
 
@@ -117,3 +119,48 @@ class IrQweb(models.AbstractModel):
         if isinstance(atts.get('style'), str) and 'background-image' in atts['style']:
             atts['style'] = re_background_image.sub(lambda m: '%s%s' % (m[1], url_adapter(m[2])), atts['style'])
         return atts
+
+    def _parse_visibility_timestamp(self, value):
+        """ Parse a POSIX timestamp in seconds, as stored by the
+        BuilderDateTimePicker. Return None when the value is empty or invalid. """
+        if not value:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+    def _is_now_in_datetime_range(self, visible_from, visible_until):
+        now = time.time()
+        return (visible_from is None or visible_from <= now) and (visible_until is None or now < visible_until)
+
+    def _compile_directive_datetime_range(self, el, compile_context, level):
+        el.attrib.pop('t-datetime-range')
+        visible_from = self._parse_visibility_timestamp(el.get('data-visibility-from'))
+        visible_until = self._parse_visibility_timestamp(el.get('data-visibility-until'))
+        code = self._flush_text(compile_context, level)
+        code.append(indent_code(f"if self._is_now_in_datetime_range({visible_from!r}, {visible_until!r}):", level))
+        code.extend([
+            *self._compile_directives(el, compile_context, level + 1),
+            *self._flush_text(compile_context, level + 1, rstrip=True),
+        ] or [indent_code('pass', level + 1)])
+        return code
+
+    def _directives_eval_order(self):
+        directives = super()._directives_eval_order()
+        directives.insert(directives.index('if') + 1, 'datetime-range')
+        return directives
+
+    def _compile_node(self, el, compile_context, level):
+        """ Add `t-datetime-range="True"` to nodes having a visibility datetime
+        range (`data-visibility-from` and/or `data-visibility-until`). Skip if
+        branding is active, meaning that an admin or a website editor is logged
+        in, or in translation mode, so that the element can still be edited or
+        translated. The presence of `t-datetime-range` triggers
+        `_compile_directive_datetime_range` which will render or not the element
+        based on the current time. This way, an element is never visible in the
+        page source code outside its visibility datetime range. """
+        is_branded = compile_context.get("inherit_branding") or compile_context.get("edit_translations")
+        if not is_branded and ("data-visibility-from" in el.attrib or "data-visibility-until" in el.attrib):
+            el.set('t-datetime-range', 'True')
+        return super()._compile_node(el, compile_context, level)

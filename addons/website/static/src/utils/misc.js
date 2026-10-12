@@ -49,6 +49,24 @@ export function unhideConditionalElements() {
     }
 }
 
+/**
+ * Hide elements whose visibility datetime range excludes the current time.
+ * These elements are directly stripped out of the HTML before the page is
+ * delivered to the user, unless the page is branded. In this case, we still
+ * want to keep them hidden outside edit mode.
+ */
+export function hideOutOfDatetimeRangeElements() {
+    const conditionalEls = document.querySelectorAll('[data-visibility="conditional"]');
+    const now = Math.floor(Date.now() / 1000);
+    for (const conditionalEl of conditionalEls) {
+        const visibleFrom = Number(conditionalEl.dataset.visibilityFrom) || null;
+        const visibleUntil = Number(conditionalEl.dataset.visibilityUntil) || null;
+        if ((visibleFrom && now < visibleFrom) || (visibleUntil && now >= visibleUntil)) {
+            conditionalEl.classList.add("o_datetime_range_hidden");
+        }
+    }
+}
+
 export function setUtmsHtmlDataset() {
     const htmlEl = document.documentElement;
     const cookieNamesToDataNames = {
