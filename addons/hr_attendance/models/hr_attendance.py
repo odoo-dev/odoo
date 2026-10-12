@@ -715,3 +715,74 @@ class HrAttendance(models.Model):
         employee_id = self.env.context.get('employee_id', False)
         employee = self.env['hr.employee'].browse(employee_id) if employee_id else self.env.user.employee_id
         return employee.sudo(False)._get_unusual_days(date_from, date_to)
+
+    @api.model
+    def get_working_hours_for_calendar(self, employee_id, date_from, date_to):
+        employee = self.env["hr.employee"].browse(employee_id)
+        if not employee.exists():
+            return []
+
+        timezone = ZoneInfo(self.env.user.tz or "UTC")
+        start_period = datetime.fromisoformat(date_from).replace(
+            hour=0,
+            minute=0,
+            second=0,
+            tzinfo=timezone,
+        )
+        stop_period = datetime.fromisoformat(date_to).replace(
+            hour=23,
+            minute=59,
+            second=59,
+            tzinfo=timezone,
+        )
+
+        working_intervals = employee._get_expected_attendances(
+            start_period,
+            stop_period,
+        )
+
+        business_hours = []
+        for working_interval in working_intervals:
+            start = working_interval[0].astimezone(timezone)
+            stop = working_interval[1].astimezone(timezone)
+
+            if stop <= start_period or start >= stop_period:
+                continue
+
+            start = max(start, start_period)
+            stop = min(stop, stop_period)
+
+            if start.date() == stop.date():
+                business_hours.append({
+                    "daysOfWeek": [(start.weekday() + 1) % 7],
+                    "startTime": start.strftime("%H:%M"),
+                    "endTime": stop.strftime("%H:%M"),
+                })
+                continue
+
+            # First day.
+            business_hours.append({
+                "daysOfWeek": [(start.weekday() + 1) % 7],
+                "startTime": start.strftime("%H:%M"),
+                "endTime": "23:59",
+            })
+
+            # Full days between the first and last day.
+            current_day = start.date() + relativedelta(days=1)
+            while current_day < stop.date():
+                business_hours.append({
+                    "daysOfWeek": [(current_day.weekday() + 1) % 7],
+                    "startTime": "00:00",
+                    "endTime": "23:59",
+                })
+                current_day += relativedelta(days=1)
+
+            # Last day.
+            if stop.time() != time.min:
+                business_hours.append({
+                    "daysOfWeek": [(stop.weekday() + 1) % 7],
+                    "startTime": "00:00",
+                    "endTime": stop.strftime("%H:%M"),
+                })
+
+        return business_hours

@@ -158,6 +158,7 @@ export class TimeOffCalendarModel extends CalendarModel {
 
     async updateData(data) {
         const prom = super.updateData(data);
+
         data.mandatoryDays = await this._mandatoryDaysCache.read(data);
         return prom;
     }
