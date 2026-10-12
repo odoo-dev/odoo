@@ -144,11 +144,11 @@
                         <div class="container">
                             <div class="row align-items-center">
                                 <div class="col-lg-4 pb32">
-                                    <img class="img img-fluid mx-auto" src="/html_editor/shape/http_routing/404.svg?c2=o-color-2" alt=""/>
+                                    <img class="img img-fluid mx-auto" src="/html_editor/shape/http_routing/404_001.svg?c1=%233AAADA&amp;c2=%23653358&amp;c3=%23200C51&amp;c4=o-color-4&amp;c5=o-color-5" alt=""/>
                                 </div>
                                 <div class="col-lg-8 text-lg-start text-center my-auto">
                                     <h1 class="visually-hidden">Error 404</h1>
-                                    <h2>We couldn't find the page you're looking for!</h2>
+                                    <h2>Wow! We weren't expecting that!</h2>
                                     <p></p>
                                     <p><b>Don't panic.</b> If you think it's our mistake, please send us a message on <a href="/contactus">this page</a>.</p>
                                 </div>
