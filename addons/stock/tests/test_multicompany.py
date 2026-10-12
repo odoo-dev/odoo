@@ -873,3 +873,24 @@ class TestMultiCompany(TransactionCase):
         domain = Domain.AND([base_domain, self.env['stock.quant'].with_company(self.branch_company_a)._get_quants_action()['domain']])
         quants_branch = self.env['stock.quant'].with_company(self.branch_company_a).search(domain)
         self.assertTrue(quants_branch)
+
+    def test_multicompany_transfer_deadline_from_orderpoint(self):
+        """Test that an orderpoint's company determines its receipt's deadline."""
+        self.company_b.horizon_days = 30
+        product = self.env['product.product'].create({
+            'name': 'Test Storable Product',
+            'is_storable': True,
+            'company_id': self.company_a.id,
+        })
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'location_id': self.stock_location_a.id,
+            'product_id': product.id,
+            'company_id': self.company_a.id,
+            'product_min_qty': 5,
+            'product_max_qty': 10,
+        })
+        for company in (self.company_b, self.company_a):
+            orderpoint.with_company(company).action_replenish()
+            receipt = self.env['stock.picking'].search([('origin', '=', orderpoint.name), ('state', '!=', 'cancel')])
+            self.assertEqual(receipt.date_deadline.date(), orderpoint.deadline_date)
+            receipt.action_cancel()
