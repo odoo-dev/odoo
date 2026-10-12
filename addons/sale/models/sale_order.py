@@ -643,7 +643,7 @@ class SaleOrder(models.Model):
             else:
                 record.tax_country_id = record.company_id.account_fiscal_country_id
 
-    @api.depends('invoice_ids.state', 'currency_id', 'amount_total')
+    @api.depends('invoice_ids.state', 'currency_id', 'amount_total', 'order_line.qty_delivered')
     def _compute_amount_to_invoice(self):
         for order in self:
             # If the invoice status is 'Fully Invoiced' force the amount to invoice to equal zero and return early.
@@ -656,6 +656,24 @@ class SaleOrder(models.Model):
             # Care has to be taken when summing amount_to_invoice of multiple orders.
             # E.g. consider one invoiced order with -100 and one uninvoiced order of 100: 100 + -100 = 0
             order.amount_to_invoice = order.amount_total - invoices._get_sale_order_invoiced_amount(order)
+
+            # Delivered goods that were invoiced, then returned and refunded, are no longer owed by
+            # the customer: they must not count as still to invoice.
+            lines = order.order_line.filtered(
+                lambda sol: sol.product_id.invoice_policy == 'delivery' and sol.product_uom_qty
+            )
+            for line in lines:
+                invoiced_qty = refunded_qty = 0.0
+                for invoice_line in line.invoice_lines.filtered(lambda aml: aml.move_id in invoices):
+                    qty = invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
+                    if invoice_line.move_id.move_type == 'out_invoice':
+                        invoiced_qty += qty
+                    elif invoice_line.move_id.move_type == 'out_refund':
+                        refunded_qty += qty
+                returned_qty = invoiced_qty - line.qty_delivered
+                cancelled_qty = min(refunded_qty, returned_qty, line.product_uom_qty - line.qty_delivered)
+                if cancelled_qty > 0:
+                    order.amount_to_invoice -= cancelled_qty * line.price_total / line.product_uom_qty
 
     @api.depends('amount_total', 'amount_to_invoice')
     def _compute_amount_invoiced(self):

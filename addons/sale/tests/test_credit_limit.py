@@ -148,6 +148,28 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
         # Check that the credit note is accounted for correctly for the amount_to_invoice
         self.assertEqual(sale_order.amount_to_invoice, sale_order.amount_total)
 
+    def test_credit_limit_returned_and_refunded(self):
+        """Delivered goods that were invoiced, then returned and refunded, are no longer owed."""
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': self.company_data['product_service_delivery'].id,
+                'product_uom_qty': 5,
+                'price_unit': 200.0,
+                'tax_id': False,
+            })],
+        })
+        sale_order.action_confirm()
+        sale_order.order_line.qty_delivered = 5
+        sale_order._create_invoices().action_post()
+
+        sale_order.order_line.qty_delivered = 0
+        sale_order._create_invoices(final=True).action_post()
+
+        self.assertEqual(sale_order.amount_to_invoice, 0.0)
+        self.partner_a.invalidate_recordset(['credit', 'credit_to_invoice'])
+        self.assertRecordValues(self.partner_a, [{'credit': 0.0, 'credit_to_invoice': 0.0}])
+
     def test_credit_limit_multicurrency(self):
         self.partner_a.credit_limit = 50
 
