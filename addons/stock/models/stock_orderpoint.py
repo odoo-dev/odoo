@@ -182,6 +182,7 @@ class StockWarehouseOrderpoint(models.Model):
         orderpoints_to_compute = self.filtered(lambda orderpoint: orderpoint.product_id and orderpoint.location_id)
         for orderpoint in orderpoints_to_compute.with_context(bypass_delay_description=True):
             values = orderpoint._get_lead_days_values()
+            values['orderpoint_id'] = orderpoint
             lead_days, dummy = orderpoint.rule_ids._get_lead_days(orderpoint.product_id, **values)
             orderpoint.lead_horizon_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days['total_delay'] + lead_days['horizon_time'])
             orderpoint.lead_days = lead_days['total_delay']
