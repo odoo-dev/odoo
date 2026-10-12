@@ -3563,3 +3563,10 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'request_date_to': '2025-09-02',
         })
         self.assertEqual(other_leave.state, 'validate')
+
+    @users('enguerran')
+    def test_create_leave_from_uploads(self):
+        attachment = self.env['ir.attachment'].create({'name': 'certificate.pdf', 'raw': b'certificate'})
+        action = self.env['hr.leave'].action_create_from_uploads(attachment.ids)
+        self.assertEqual(action['context'], {'default_attachment_ids': attachment.ids})
+        self.assertEqual(attachment.res_model, 'hr.leave')
