@@ -776,11 +776,14 @@ export function makeActionManager(env, router = _router) {
         viewProps.noBreadcrumbs =
             "_noBreadcrumbs" in action ? action._noBreadcrumbs : target === "new";
 
-        const embeddedActions =
-            view.type === "form"
-                ? []
-                : context.parent_action_embedded_actions || action.embedded_action_ids;
-        const parentActionId = (view.type !== "form" && context.parent_action_id) || false;
+        // a form view only displays the embedded actions if it is the view of the action itself,
+        // not a record opened from a multi-record view of the action or in a dialog
+        const hideEmbeddedActions =
+            view.type === "form" && (target === "new" || views.some((v) => v.multiRecord));
+        const embeddedActions = hideEmbeddedActions
+            ? []
+            : context.parent_action_embedded_actions || action.embedded_action_ids;
+        const parentActionId = (!hideEmbeddedActions && context.parent_action_id) || false;
         const currentEmbeddedActionId = context.current_embedded_action_id || false;
         return {
             props: viewProps,
