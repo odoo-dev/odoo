@@ -155,11 +155,10 @@ class SaleOrder(models.Model):
         }
 
     def _prepare_delivery_line_vals(self, carrier, price_unit):
-        context = {}
-        if self.partner_id:
-            # set delivery detail in the customer language
-            context["lang"] = self.partner_id.lang
-            carrier = carrier.with_context(lang=self.partner_id.lang)
+        customer_lang = self._get_lang()
+
+        self = self.with_lang(customer_lang)
+        carrier = carrier.with_lang(customer_lang)
 
         # Apply fiscal position
         taxes = carrier.product_id.taxes_id._filter_taxes_by_company(self.company_id)
@@ -187,7 +186,6 @@ class SaleOrder(models.Model):
             values["name"] = self.env._("%s\nFree Shipping", values["name"])
         if self.order_line:
             values["sequence"] = self.order_line[-1].sequence + 1
-        del context
         return values
 
     def _create_delivery_line(self, carrier, price_unit):

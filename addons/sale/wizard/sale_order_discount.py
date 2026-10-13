@@ -129,7 +129,7 @@ class SaleOrderDiscount(models.TransientModel):
 
     def _create_discount_lines(self):
         self.ensure_one()
-        self = self.with_context(lang=self.sale_order_id._get_lang())
+        self = self.with_lang(self.sale_order_id._get_lang())
 
         discount_product = self._get_discount_product()
 

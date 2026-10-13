@@ -84,8 +84,8 @@ class StockMove(models.Model):
         super()._compute_description_picking()
         for move in self:
             if move.sale_line_id and not move.description_picking_manual:
-                sale_line_id = move.sale_line_id.with_context(lang=move.sale_line_id.order_id.partner_id.lang)
-                multiline_description = sale_line_id._get_sale_order_line_multiline_description_variants()
+                sale_line = move.sale_line_id.with_lang(move.sale_line_id.order_id._get_lang())
+                multiline_description = sale_line._get_sale_order_line_multiline_description_variants()
                 if move.description_picking == move.product_id.display_name and multiline_description:
                     move.description_picking = ''
                 move.description_picking = (multiline_description + '\n' + move.description_picking).strip()
@@ -113,15 +113,12 @@ class StockMove(models.Model):
                 quantity *= -1
 
             so_line_vals = {
-                'move_ids': [(4, move.id, 0)],
-                'name': product.with_context(
-                    lang=sale_order.partner_id.lang
-                ).get_product_multiline_description_sale(with_display_name=False),
-                'order_id': sale_order.id,
-                'product_id': product.id,
-                'product_uom_qty': 0,
-                'qty_delivered': quantity,
-                'product_uom_id': move.uom_id.id,
+                "move_ids": [(4, move.id, 0)],
+                "order_id": sale_order.id,
+                "product_id": product.id,
+                "product_uom_qty": 0,
+                "qty_delivered": quantity,
+                "product_uom_id": move.uom_id.id,
             }
             so_line = sale_order.order_line.filtered(lambda sol: sol.product_id == product)
             if product.invoice_policy == 'delivery':

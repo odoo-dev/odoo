@@ -446,8 +446,8 @@ class SaleOrderLine(models.Model):
     def _compute_display_name(self):
         name_per_id = self._additional_name_per_id()
         for so_line in self.sudo():
-            if so_line.order_partner_id.lang:
-                so_line = so_line.with_context(lang=so_line.order_id._get_lang())
+            if so_line.order_id:
+                so_line = so_line.with_lang(so_line.order_id._get_lang())
 
             description = (so_line.name or "").split("\n", 1)[0]
             default_name = so_line._get_sale_order_line_multiline_description_sale()
@@ -481,8 +481,8 @@ class SaleOrderLine(models.Model):
         if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
         domain = Domain("product_id.product_tmpl_id", operator, value)
-        if operator == 'in' and False in value:  # relation may be falsy
-            domain |= Domain('product_id', '=', False)
+        if operator == "in" and False in value:  # relation may be falsy
+            domain |= Domain("product_id", "=", False)
         return domain
 
     @api.depends("product_id")
@@ -524,10 +524,7 @@ class SaleOrderLine(models.Model):
             if not line.product_id and not line.is_downpayment:
                 continue
 
-            lang = line.order_id._get_lang()
-            if lang != self.env.lang:
-                line = line.with_context(lang=lang)
-
+            line = line.with_lang(line.order_id._get_lang())
             if line.product_id:
                 line.name = line._get_sale_order_line_multiline_description_sale()
                 continue
@@ -654,7 +651,7 @@ class SaleOrderLine(models.Model):
                 line.label = line.name
                 continue
 
-            product_with_lang = line.product_id.with_context(lang=line.order_id._get_lang())
+            product_with_lang = line.product_id.with_lang(line.order_id._get_lang())
             if not line.name:
                 line.label = product_with_lang.display_name
             elif line.name.splitlines()[0] == product_with_lang.display_name:
@@ -666,9 +663,7 @@ class SaleOrderLine(models.Model):
     def _inverse_label(self):
         for line in self:
             if line.product_id and line.label:
-                display_name = line.product_id.with_context(
-                    lang=line.order_id._get_lang()
-                ).display_name
+                display_name = line.product_id.with_lang(line.order_id._get_lang()).display_name
                 line.name = line.label.removeprefix(display_name).removeprefix("\n")
             else:
                 line.name = line.label
@@ -1562,9 +1557,7 @@ class SaleOrderLine(models.Model):
 
             line.untaxed_amount_to_invoice = amount_to_invoice
 
-    @api.depends(
-        "discount", "price_total", "product_uom_qty", "qty_invoiced_posted"
-    )
+    @api.depends("discount", "price_total", "product_uom_qty", "qty_invoiced_posted")
     def _compute_amount_to_invoice(self):
         for line in self:
             if line.product_uom_qty:

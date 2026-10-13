@@ -184,19 +184,16 @@ class CustomerPortal(payment_portal.PaymentPortal):
             if session_obj_date != today:
                 # store the date as a string in the session to allow serialization
                 request.session["view_quote_%s" % order_sudo.id] = today
-                # The "Quotation viewed by customer" log note is an information
-                # dedicated to the salesman and shouldn't be translated in the customer/website lgg
-                context = {
-                    "lang": order_sudo.user_id.partner_id.lang
-                    or order_sudo.company_id.partner_id.lang
-                }
                 author = (
                     order_sudo.partner_id
                     if self.env.user._is_public()
                     else self.env.user.partner_id
                 )
-                msg = self.env._("Quotation viewed by customer %s", author.name)
-                del context
+                msg = self.with_lang(
+                    # The "Quotation viewed by customer" log note is an information dedicated to
+                    # the salesman and shouldn't be translated in the customer/website language
+                    order_sudo.user_id.partner_id.lang or order_sudo.company_id.partner_id.lang
+                ).env._("Quotation viewed by customer %s", author.name)
                 order_sudo.with_user(SUPERUSER_ID).message_post(
                     body=msg, message_type="notification", subtype_xmlid="sale.mt_order_viewed"
                 )
@@ -204,7 +201,7 @@ class CustomerPortal(payment_portal.PaymentPortal):
         backend_url = f"/odoo/action-{order_sudo._get_portal_return_action().id}/{order_sudo.id}"
         prepayment_available = order_sudo.prepayment_percent and order_sudo.prepayment_percent < 1.0
         values = {
-            "sale_order": order_sudo.with_context(lang=order_sudo._get_lang()),
+            "sale_order": order_sudo.with_lang(order_sudo._get_lang()),
             "product_documents": order_sudo._get_product_documents(),
             "message": message,
             "report_type": "html",

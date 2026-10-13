@@ -275,7 +275,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
         :return:        The values to create a new invoice line.
         """
         self.ensure_one()
-        self = self.with_context(lang=order._get_lang())
+        self = self.with_lang(order._get_lang())
 
         name = self.env._("Down Payment")
 

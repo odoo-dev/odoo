@@ -290,7 +290,7 @@ class SaleOrderLine(models.Model):
             'warehouse_id': self.sudo().warehouse_id,  # sudo() in case cross-company warehouse
             'partner_id': self.order_id.partner_shipping_id.id,
             'forecasted_location_id': self._get_location_final(),
-            'product_description_variants': self.with_context(lang=self.order_id.partner_id.lang)._get_sale_order_line_multiline_description_variants().strip(),
+            'product_description_variants': self.with_lang(self.order_id._get_lang())._get_sale_order_line_multiline_description_variants().strip(),
             'company_id': self.sudo().warehouse_id.company_id or self.order_id.company_id,  # sudo() in case cross-company warehouse
             'sequence': self.sequence,
             'never_product_template_attribute_value_ids': self.product_no_variant_attribute_value_ids,

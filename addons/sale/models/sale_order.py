@@ -571,15 +571,11 @@ class SaleOrder(models.Model):
         for order in self:
             if order.state != "draft":
                 continue
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id).with_lang(order._get_lang())
             if order.terms_type == "html" and order.env.company.invoice_terms_html:
                 baseurl = html_keep_url(order._get_note_url() + "/terms")
-                context = {"lang": order.partner_id.lang or self.env.user.lang}
                 order.note = order.env._("Terms & Conditions: %s", baseurl)
-                del context
             elif not is_html_empty(order.env.company.invoice_terms):
-                if order.partner_id.lang:
-                    order = order.with_context(lang=order.partner_id.lang)
                 order.note = order.env.company.invoice_terms
 
     def _inverse_note(self):
@@ -2055,9 +2051,7 @@ class SaleOrder(models.Model):
         invoice_vals_list = []
         invoice_item_sequence = 0  # Incremental sequencing to keep the lines order on the invoice.
         for order in self:
-            if order.partner_invoice_id.lang:
-                order = order.with_context(lang=order.partner_invoice_id.lang)
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id).with_lang(order.partner_invoice_id.lang)
 
             invoice_vals = order._prepare_invoice()
             invoiceable_lines = order._get_invoiceable_lines(final)
@@ -2529,8 +2523,8 @@ class SaleOrder(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        context = {"lang": self.partner_id.lang}
-        down_payments_section_line = {
+        self = self.with_lang(self._get_lang())
+        return {
             "display_type": "line_section",
             "name": self.env._("Down Payments"),
             "product_id": False,
@@ -2541,8 +2535,6 @@ class SaleOrder(models.Model):
             "account_id": False,
             **optional_values,
         }
-        del context
-        return down_payments_section_line
 
     def _create_down_payment_lines_from_base_lines(self, down_payment_base_lines):
         """Add the base lines passed as parameter as sale order lines into the current sale order.

@@ -5584,6 +5584,17 @@ class BaseModel(metaclass=MetaModel):
         return self.with_env(self.env(context=context))
 
     @api.private
+    def with_lang(self, lang: str|None|False) -> Self:
+        """Return a new version of this recordset with a modified context, such that::
+
+            result.env.lang = lang
+        """  # noqa: D208, D400
+        if not lang:
+            return self
+
+        return self.with_context(lang=lang)
+
+    @api.private
     def with_prefetch(self, prefetch_ids: Reversible[IdType] | None = None) -> Self:
         """ Return a new version of this recordset that uses the given prefetch ids,
         or ``self``'s ids if not given.

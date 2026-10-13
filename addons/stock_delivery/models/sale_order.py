@@ -23,20 +23,16 @@ class SaleOrder(models.Model):
 
     def _create_delivery_line(self, carrier, price_unit):
         sol = super()._create_delivery_line(carrier, price_unit)
-        context = {}
-        if self.partner_id:
-            # set delivery detail in the customer language
-            context['lang'] = self.partner_id.lang
         if carrier.invoice_policy == 'real':
             sol.update({
                 'price_unit': 0,
-                'name': _(
+                # set delivery detail in the customer language
+                'name': self.with_lang(self._get_lang()).env._(
                     "%(name)s (Estimated Cost: %(cost)s)",
                     name=sol["name"],
                     cost=self.currency_id.format(price_unit),
                 ),
             })
-        del context
         return sol
 
 

@@ -783,17 +783,14 @@ class PurchaseOrder(models.Model):
 
     def _prepare_down_payment_section_values(self):
         self.ensure_one()
-        context = {'lang': self.partner_id.lang}
-        res = {
+        return {
             'product_qty': 0.0,
             'order_id': self.id,
             'display_type': 'line_section',
             'is_downpayment': True,
             'sequence': (self.order_line[-1:].sequence or 9) + 1,
-            'name': _("Down Payments"),
+            'name': self.with_lang(self.partner_id.lang).env._("Down Payments"),
         }
-        del context
-        return res
 
     def _create_downpayments(self, line_vals):
         self.ensure_one()

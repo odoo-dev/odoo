@@ -2071,9 +2071,7 @@ class AccountMove(models.Model):
                 narration = move.company_id.with_context(lang=lang).invoice_terms if not is_html_empty(move.company_id.invoice_terms) else ''
             else:
                 baseurl = self.env.company.get_base_url() + '/terms'
-                context = {'lang': lang}
-                narration = _('Terms & Conditions: %s', baseurl)
-                del context
+                narration = self.with_lang(lang).env._('Terms & Conditions: %s', baseurl)
             move.narration = narration or False
 
     def _inverse_narration(self):

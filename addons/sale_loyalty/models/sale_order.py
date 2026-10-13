@@ -982,8 +982,9 @@ class SaleOrder(models.Model):
 
     def _get_reward_line_values(self, reward, coupon, **kwargs):
         self.ensure_one()
-        self = self.with_context(lang=self._get_lang())
-        reward = reward.with_context(lang=self._get_lang())
+        customer_lang = self._get_lang()
+        self = self.with_lang(customer_lang)
+        reward = reward.with_lang(customer_lang)
         if reward.reward_type == "discount":
             return self._get_reward_values_discount(reward, coupon, **kwargs)
         if reward.reward_type == "product":
@@ -1850,4 +1851,6 @@ class SaleOrder(models.Model):
                     if mail_template.exists():
                         send_context["mail_template"] = mail_template
 
-                self.env['account.move.send']._generate_and_send_invoices_post_commit(invoice, **send_context)
+                self.env["account.move.send"]._generate_and_send_invoices_post_commit(
+                    invoice, **send_context
+                )

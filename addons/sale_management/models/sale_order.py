@@ -32,7 +32,7 @@ class SaleOrder(models.Model):
     def _compute_note(self):
         super()._compute_note()
         for order in self.filtered("sale_order_template_id"):
-            template = order.sale_order_template_id.with_context(lang=order.partner_id.lang)
+            template = order.sale_order_template_id.with_lang(order._get_lang())
             order.note = template.note if not is_html_empty(template.note) else order.note
 
     @api.depends("sale_order_template_id")
@@ -68,9 +68,9 @@ class SaleOrder(models.Model):
         if not self.sale_order_template_id:
             return
 
-        sale_order_template = self.sale_order_template_id.with_context(
-            lang=self.partner_id.lang
-        ).with_company(self.company_id)
+        sale_order_template = self.sale_order_template_id.with_lang(self._get_lang()).with_company(
+            self.company_id
+        )
 
         order_lines_data = [Command.clear()]
         order_lines_data += [

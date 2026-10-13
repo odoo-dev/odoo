@@ -55,12 +55,14 @@ class SaleOrder(models.Model):
         ]
 
     def _get_reward_line_values(self, reward, coupon, **kwargs):
+        if reward.reward_type != "shipping":
+            return super()._get_reward_line_values(reward, coupon, **kwargs)
+
         self.ensure_one()
-        if reward.reward_type == "shipping":
-            self = self.with_context(lang=self._get_lang())
-            reward = reward.with_context(lang=self._get_lang())
-            return self._get_reward_values_free_shipping(reward, coupon, **kwargs)
-        return super()._get_reward_line_values(reward, coupon, **kwargs)
+        customer_lang = self._get_lang()
+        self = self.with_lang(customer_lang)
+        reward = reward.with_lang(customer_lang)
+        return self._get_reward_values_free_shipping(reward, coupon, **kwargs)
 
     def _get_claimable_rewards(self, forced_coupons=None):
         res = super()._get_claimable_rewards(forced_coupons)
