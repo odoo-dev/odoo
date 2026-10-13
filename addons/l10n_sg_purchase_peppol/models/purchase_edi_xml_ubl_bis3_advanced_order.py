@@ -60,16 +60,63 @@ class PurchaseEdiXmlUbl_Bis3_Order(models.AbstractModel):
             None
         )
 
+    def _add_purchase_order_config_vals(self, vals):
+        """EXTENDS `purchase.edi.xml.ubl_bis3`: the shipping partner is the dropship address, or the
+        company's delivery address when it has exactly one. Empty when the seller should deliver to
+        the buyer, instead of falling back to the buyer itself.
+        """
+        super()._add_purchase_order_config_vals(vals)
+        purchase_order = vals['purchase_order']
+        delivery_addresses = vals['customer'].child_ids.filtered(lambda child: child.type == 'delivery')
+        vals['partner_shipping'] = (
+            purchase_order.dest_address_id
+            or (delivery_addresses if len(delivery_addresses) == 1 else self.env['res.partner'])
+        )
+
     def _add_purchase_order_delivery_nodes(self, document_node, vals):
         """
-        EXTENDS `purchase.edi.xml.ubl_bis3`
+        OVERRIDE `purchase.edi.xml.ubl_bis3`: the delivery partner's address goes to the delivery
+        location and its contact details to the delivery party.
         """
-        super()._add_purchase_order_delivery_nodes(document_node, vals)
+        partner = vals['partner_shipping']
+        if not partner:
+            document_node['cac:Delivery'] = None
+            return
 
-        delivery_party = document_node['cac:Delivery']['cac:DeliveryParty']
-        delivery_party.pop('cbc:EndpointID', None)
-        delivery_party.pop('cac:PartyTaxScheme', None)
-        delivery_party.pop('cac:PartyLegalEntity', None)
+        location_node = {
+            'cbc:ID': {
+                'schemeID': '0088' if partner.global_location_number else None,
+                '_text': partner.global_location_number,
+            },
+            'cac:Address': None,
+        }
+        if partner.country_id:
+            location_node['cac:Address'] = {
+                'cbc:StreetName': {'_text': partner.street},
+                'cbc:AdditionalStreetName': {'_text': partner.street2},
+                'cbc:CityName': {'_text': partner.city},
+                'cbc:PostalZone': {'_text': partner.zip},
+                'cbc:CountrySubentity': {'_text': partner.state_id.name},
+                'cac:Country': {'cbc:IdentificationCode': {'_text': partner.country_id.code}},
+            }
+
+        party_node = None
+        if partner.name and (
+            partner.phone or partner.email or partner.name != partner.commercial_partner_id.name
+        ):
+            party_node = {
+                'cac:PartyName': {'cbc:Name': {'_text': partner.name}},
+                'cac:Contact': {
+                    'cbc:Name': {'_text': partner.name},
+                    'cbc:Telephone': {'_text': partner.phone},
+                    'cbc:ElectronicMail': {'_text': partner.email},
+                },
+            }
+
+        document_node['cac:Delivery'] = {
+            'cac:DeliveryLocation': location_node,
+            'cac:DeliveryParty': party_node,
+        }
 
     def _add_purchase_order_tax_total_nodes(self, document_node, vals):
         """
