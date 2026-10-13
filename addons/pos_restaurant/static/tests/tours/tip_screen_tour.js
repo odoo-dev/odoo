@@ -141,7 +141,7 @@ registry.category("web_tour.tours").add("PosResTipScreenTour", {
             ReceiptScreen.isShown(),
 
             // order 5
-            // Click directly on "settle" without selecting a Tip
+            // Tip 15% from the tip screen
             ReceiptScreen.clickNextOrder(),
             FloorScreen.clickTable("2"),
             ProductScreen.addOrderline("Minute Maid", "3", "2"),
@@ -150,6 +150,8 @@ registry.category("web_tour.tours").add("PosResTipScreenTour", {
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
             TipScreen.isShown(),
+            TipScreen.clickPercentTip("15%"),
+            TipScreen.inputAmountIs("0.90"),
             TipScreen.clickSettle(),
             ReceiptScreen.isShown(),
             ReceiptScreen.clickNextOrder(),

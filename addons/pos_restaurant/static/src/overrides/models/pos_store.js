@@ -367,4 +367,35 @@ patch(PosStore.prototype, {
     get showSaveOrderButton() {
         return super.showSaveOrderButton && !this.config.module_pos_restaurant;
     },
+    async setTipAfterPayment(order, amount) {
+        if (!amount) {
+            await this.data.write("pos.order", [order.id], { is_tipped: true, tip_amount: 0 });
+            return;
+        }
+        order.state = "draft";
+        this.selectedOrderUuid = order.uuid;
+        const tipLine = await this.set_tip(amount);
+        order.state = "paid";
+
+        const paymentline = order.payment_ids[0];
+        paymentline.amount += amount;
+        if (paymentline.payment_method_id.payment_terminal) {
+            await paymentline.payment_method_id.payment_terminal.send_payment_adjust(
+                paymentline.uuid
+            );
+        }
+
+        const serializedTipLine = tipLine.serialize({ orm: true });
+        tipLine.delete();
+        const serverTipLine = await this.data.create("pos.order.line", [serializedTipLine]);
+        await this.data.write("pos.payment", [paymentline.id], { amount: paymentline.amount });
+        order.recomputeOrderData();
+        await this.data.write("pos.order", [order.id], {
+            is_tipped: true,
+            tip_amount: serverTipLine[0].price_subtotal_incl,
+            amount_paid: order.amount_paid,
+            amount_tax: order.amount_tax,
+            amount_total: order.amount_total,
+        });
+    },
 });

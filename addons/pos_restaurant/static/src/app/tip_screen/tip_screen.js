@@ -61,12 +61,6 @@ export class TipScreen extends Component {
             return;
         }
 
-        if (!amount) {
-            await this.pos.data.write("pos.order", [serverId], { is_tipped: true, tip_amount: 0 });
-            this.goNextScreen();
-            return;
-        }
-
         if (amount > 0.25 * this.totalAmount) {
             const confirmed = await ask(this.dialog, {
                 title: _t("Are you sure?"),
@@ -80,26 +74,7 @@ export class TipScreen extends Component {
             }
         }
 
-        order.state = "draft";
-        await this.pos.set_tip(amount);
-        order.state = "paid";
-
-        const paymentline = this.pos.get_order().payment_ids[0];
-        if (paymentline.payment_method_id.payment_terminal) {
-            paymentline.amount += amount;
-            await paymentline.payment_method_id.payment_terminal.send_payment_adjust(
-                paymentline.uuid
-            );
-        }
-
-        const serializedTipLine = order.get_selected_orderline().serialize({ orm: true });
-        order.get_selected_orderline().delete();
-        const serverTipLine = await this.pos.data.create("pos.order.line", [serializedTipLine]);
-        await this.pos.data.write("pos.order", [serverId], {
-            is_tipped: true,
-            tip_amount: serverTipLine[0].price_subtotal_incl,
-        });
-
+        await this.pos.setTipAfterPayment(order, amount);
         this.goNextScreen();
     }
     goNextScreen() {

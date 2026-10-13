@@ -50,7 +50,6 @@ patch(TicketScreen.prototype, {
         this.closeTicketScreen();
     },
     async settleTips() {
-        const promises = [];
         for (const order of this.getFilteredOrderList()) {
             const amount = this.env.utils.parseValidFloat(order.uiState.TipScreen.inputTipAmount);
 
@@ -61,40 +60,9 @@ patch(TicketScreen.prototype, {
                 continue;
             }
 
-            order.state = "draft";
-            this.pos.selectedOrderUuid = order.uuid;
-            this.pos.set_tip(amount);
-            order.state = "paid";
             order.uiState.screen_data.value = { name: "", props: {} };
-
-            const serializedTipLine = order.get_selected_orderline().serialize({ orm: true });
-            order.get_selected_orderline().delete();
-
-            promises.push(
-                new Promise((resolve) => {
-                    const fn = async () => {
-                        const tipLine = await this.pos.data.create("pos.order.line", [
-                            serializedTipLine,
-                        ]);
-                        const state = await this.pos.data.ormWrite("pos.order", [order.id], {
-                            is_tipped: true,
-                            tip_amount: tipLine[0].price_unit,
-                        });
-
-                        if (state) {
-                            order.update({
-                                isTipped: true,
-                                tipAmount: tipLine[0].price_unit,
-                            });
-                        }
-                        resolve();
-                    };
-                    fn();
-                })
-            );
+            await this.pos.setTipAfterPayment(order, amount);
         }
-
-        await Promise.all(promises);
     },
     _getOrderStates() {
         const result = super._getOrderStates(...arguments);

@@ -263,7 +263,13 @@ class TestFrontend(TestFrontendCommon):
 
         # orders order can be different depending on which module is install so we sort the tips
         order_tips.sort()
-        self.assertEqual(order_tips, [0.0, 0.4, 1.0, 1.0, 1.5])
+        self.assertEqual(order_tips, [0.4, 0.9, 1.0, 1.0, 1.5])
+        for order in orders.filtered('tip_amount'):
+            tip_line = order.lines.filtered(lambda line: line.product_id == self.pos_config.tip_product_id)
+            self.assertEqual(tip_line.price_subtotal_incl, order.tip_amount)
+            self.assertEqual(order.amount_total, sum(order.lines.mapped('price_subtotal_incl')))
+            self.assertEqual(order.amount_paid, order.amount_total)
+            self.assertEqual(sum(order.payment_ids.mapped('amount')), order.amount_total)
 
         order4 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-0004')], limit=1, order='id desc')
         self.assertEqual(order4.customer_count, 2)
