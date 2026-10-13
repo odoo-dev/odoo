@@ -144,6 +144,7 @@ export class SplitBillScreen extends Component {
         });
         newOrder.setPricelist(originalOrder.pricelist_id);
         newOrder.floating_order_name = newOrderName;
+        newOrder.split_table_id = originalOrder.table_id || originalOrder.split_table_id
         newOrder.uiState.splittedOrderUuid = curOrderUuid;
         originalOrder.uiState.splittedOrderUuid = newOrder.uuid;
 
@@ -217,6 +218,7 @@ export class SplitBillScreen extends Component {
             line.delete();
         }
         await this.handleDiscountLines(originalOrder, newOrder);
+        debugger
         return newOrder;
     }
     async createSplittedOrder() {

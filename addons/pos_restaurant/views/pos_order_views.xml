@@ -7,7 +7,8 @@
         <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"></field>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='order_fields']" position="inside">
-                <field name="table_id"/>
+                <field name="table_id" invisible="split_table_id"/>
+                <field name="split_table_id" invisible="not split_table_id"/>
                 <field name="customer_count"/>
             </xpath>
         </field>

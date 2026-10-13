@@ -15,7 +15,7 @@ patch(TicketScreen.prototype, {
         });
     },
     getTableTag(order) {
-        return order.table_id?.table_number;
+        return order.table_id?.table_number || order.split_table_id?.table_number;
     },
     getTable(order) {
         const table = order.getTable();

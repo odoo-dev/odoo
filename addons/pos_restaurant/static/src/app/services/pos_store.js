@@ -939,6 +939,7 @@ patch(PosStore.prototype, {
         }
     },
     async mergeTableOrders(orderUuid, destinationTable) {
+        console.log("========================== mergeTabel  ")
         const sourceOrder = this.models["pos.order"].getBy("uuid", orderUuid);
 
         if (!(await this.prepareOrderTransfer(sourceOrder, destinationTable))) {
