@@ -7,7 +7,7 @@
 # Cécile Collart <cco@odoo.com>, 2023
 # Martin Trigaux, 2023
 # Jolien De Paepe, 2023
-# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025, 2026.
 # "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 # jura <julienraway@hotmail.com>, 2025.
@@ -17,10 +17,10 @@ msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-25 17:37+0000\n"
-"PO-Revision-Date: 2026-09-24 12:16+0000\n"
-"Last-Translator: \"Cécile Collart (cco)\" <cco@odoo.com>\n"
-"Language-Team: French <https://translate.odoo.com/projects/odoo-20/project/"
-"fr/>\n"
+"PO-Revision-Date: 2026-10-13 13:07+0000\n"
+"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"Language-Team: French <https://translate.odoo.com/projects/test-odoo-20/"
+"project/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -180,7 +180,7 @@ msgstr ""
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_9
 msgid "<b>Tip: Access your project easily</b>"
-msgstr ""
+msgstr "<b>Astuce : Accedez à votre projet facilement</b>"
 
 #. module: project
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_1
@@ -6735,179 +6735,3 @@ msgstr "👤 Non assigné"
 #: code:addons/project/static/src/components/project_many2one_field/project_many2one_field.js:0
 msgid "🔒 Private"
 msgstr "🔒 Privé"
-
-#~ msgid "<i title=\"Private Task\" class=\"oi\" data-icon=\"lock\"/>"
-#~ msgstr "<i title=\"Tâche privée\" class=\"oi\" data-icon=\"lock\"/>"
-
-#~ msgid "<span class=\"oi me-2\" data-icon=\"schedule\" title=\"Dates\"/>"
-#~ msgstr "<span class=\"oi me-2\" data-icon=\"schedule\" title=\"Dates\"/>"
-
-#~ msgid ""
-#~ "<span class=\"oi oi-filled me-2\" data-icon=\"person\" aria-"
-#~ "label=\"Partner\" title=\"Partner\"/>"
-#~ msgstr ""
-#~ "<span class=\"oi oi-filled me-2\" data-icon=\"person\" aria-"
-#~ "label=\"Partner\" title=\"Partenaire\"/>"
-
-#~ msgid "Average Rating: Happy"
-#~ msgstr "Note moyenne : Satisfait"
-
-#~ msgid "Average Rating: Neutral"
-#~ msgstr "Note moyenne : Neutre"
-
-#~ msgid "Average Rating: Unhappy"
-#~ msgstr "Note moyenne : Insatisfait"
-
-#~ msgid "Happy face"
-#~ msgstr "Visage souriant"
-
-#~ msgid "Neutral face"
-#~ msgstr "Visage neutre"
-
-#~ msgid "SAVE"
-#~ msgstr "ENREGISTRER"
-
-#~ msgid "Unhappy face"
-#~ msgstr "Visage insatisfait"
-
-#~ msgid "<i class=\"oi pe-2\" data-icon=\"warning\" title=\"Warning\"/>"
-#~ msgstr ""
-#~ "<i class=\"oi pe-2\" data-icon=\"warning\" title=\"Avertissement\"/>"
-
-#~ msgid "Choose one of the following access modes for your collaborators:"
-#~ msgstr ""
-#~ "Choisissez l'un des modes d'accès suivants pour vos collaborateurs :"
-
-#~ msgid "Customers will be added to the followers of their project and tasks."
-#~ msgstr ""
-#~ "Les clients seront ajoutés aux abonnés de leur projet et de leurs tâches."
-
-#~ msgid "Edit with limited access"
-#~ msgstr "Modifier avec un accès limité"
-
-#~ msgid ""
-#~ "Edit with limited access: collaborators can view and edit tasks they "
-#~ "follow in the Kanban view."
-#~ msgstr ""
-#~ "Modifier avec un accès limité : les collaborateurs peuvent visualiser et "
-#~ "modifier les tâches qu'ils suivent dans la vue Kanban."
-
-#~ msgid ""
-#~ "Edit: collaborators can view and edit all tasks in the Kanban view. "
-#~ "Additionally, they can choose which tasks they want to follow."
-#~ msgstr ""
-#~ "Modifier : les collaborateurs peuvent consulter et modifier toutes les "
-#~ "tâches dans la vue Kanban. Ils peuvent également choisir les tâches "
-#~ "qu'ils souhaitent suivre."
-
-#~ msgid ""
-#~ "Grant employees access to your project or tasks by adding them as "
-#~ "followers. Employees automatically get access to the tasks they are "
-#~ "assigned to."
-#~ msgstr ""
-#~ "Accordez à vos employés accès à votre projet ou vos tâches en les "
-#~ "ajoutant en tant qu'abonnés. Les employés ont immédiatement accès aux "
-#~ "tâches auxquelles ils sont assignés."
-
-#~ msgid ""
-#~ "Grant users access by adding them as followers — either to the project or "
-#~ "individual tasks. Internal users automatically gain access to tasks they "
-#~ "are assigned to."
-#~ msgstr ""
-#~ "Donnez aux utilisateurs l’accès en les ajoutant comme abonnés — soit au "
-#~ "projet, soit aux tâches individuelles. Les utilisateurs internes "
-#~ "obtiennent automatiquement l’accès aux tâches qui leur sont assignées."
-
-#~ msgid "Invited internal and portal users"
-#~ msgstr "Utilisateurs internes et portail invités"
-
-#~ msgid "Invited internal users"
-#~ msgstr "Utilisateurs internes invités"
-
-#~ msgid ""
-#~ "Portal users will be removed from the followers of the project and its "
-#~ "tasks."
-#~ msgstr ""
-#~ "Les utilisateurs du portail seront supprimés des abonnés du projet et de "
-#~ "ses tâches."
-
-#~ msgid ""
-#~ "Project and Task Visibility:\n"
-#~ "- Invited internal users: Can access only the project or tasks they "
-#~ "follow. Assignees automatically get access.\n"
-#~ "- Invited internal and portal users: Same as above, extended to portal "
-#~ "users.\n"
-#~ "- All internal users: Full access to the project and all its tasks.\n"
-#~ "- All internal and invited portal users: Internal users get full access. "
-#~ "Portal users can access only the project or tasks they follow.\n"
-#~ "\n"
-#~ "Portal Access Levels:\n"
-#~ "- Read-only: Portal users see tasks via their portal but can’t edit "
-#~ "them.\n"
-#~ "- Edit (limited): Portal users access kanban/list views and can edit "
-#~ "limited fields on followed tasks.\n"
-#~ "- Edit: Same as above, with access to all tasks.\n"
-#~ "\n"
-#~ "Other Rules:\n"
-#~ "- Internal users can open a task from a direct link, even without project "
-#~ "access.\n"
-#~ "- Project admins have access to private projects, even if not followers.\n"
-#~ msgstr ""
-#~ "Visibilité du projet et des tâches :\n"
-#~ "- Utilisateurs internes invités : ont accès uniquement au projet ou aux "
-#~ "tâches qu’ils suivent. Les assignés obtiennent automatiquement l’accès.\n"
-#~ "- Utilisateurs internes et portail invités : même fonctionnement que ci-"
-#~ "dessus, étendu aux utilisateurs portail.\n"
-#~ "- Tous les utilisateurs internes : accès complet au projet et à toutes "
-#~ "ses tâches.\n"
-#~ "- Tous les utilisateurs internes et utilisateurs portail invités : les "
-#~ "utilisateurs internes ont un accès complet. Les utilisateurs portail "
-#~ "n’ont accès qu’au projet ou aux tâches qu’ils suivent.\n"
-#~ "\n"
-#~ "Niveaux d’accès portail :\n"
-#~ "- Lecture seule : les utilisateurs portail voient les tâches via leur "
-#~ "portail mais ne peuvent pas les modifier.\n"
-#~ "- Modification (limitée) : les utilisateurs portail accèdent aux vues "
-#~ "kanban/liste et peuvent modifier certains champs des tâches suivies.\n"
-#~ "- Modification : identique ci-dessus, avec accès à toutes les tâches.\n"
-#~ "\n"
-#~ "Autres règles :\n"
-#~ "- Les utilisateurs internes peuvent ouvrir une tâche via un lien direct, "
-#~ "même sans accès au projet.\n"
-#~ "- Les administrateurs du projet ont accès aux projets privés, même s’ils "
-#~ "ne sont pas abonnés.\n"
-
-#~ msgid "Read"
-#~ msgstr "Lecture"
-
-#~ msgid "Read: collaborators can view tasks but cannot edit them."
-#~ msgstr ""
-#~ "Lecture : les collaborateurs peuvent voir les tâches mais ne peuvent pas "
-#~ "les modifier."
-
-#~ msgid ""
-#~ "Read: collaborators can view tasks but cannot edit them.\n"
-#~ "Edit with limited access: collaborators can view and edit tasks they "
-#~ "follow in the Kanban view.\n"
-#~ "Edit: collaborators can view and edit all tasks in the Kanban view. "
-#~ "Additionally, they can choose which tasks they want to follow."
-#~ msgstr ""
-#~ "Lecture : les collaborateurs peuvent voir les tâches mais ne peuvent pas "
-#~ "les modifier.\n"
-#~ "Modifier avec un accès limité : les collaborateurs peuvent visualiser et "
-#~ "modifier les tâches qu'ils suivent dans la vue Kanban.\n"
-#~ "Modifier : les collaborateurs peuvent consulter et modifier toutes les "
-#~ "tâches dans la vue Kanban. Ils peuvent également choisir les tâches "
-#~ "qu'ils souhaitent suivre."
-
-#~ msgid "Sharing is not available with this project visibility setting."
-#~ msgstr ""
-#~ "Le partage n'est pas disponible avec ce paramètre de visibilité du projet."
-
-#~ msgid ""
-#~ "To give portal users access to your project, add them as followers. For "
-#~ "task access, add them as followers for each task."
-#~ msgstr ""
-#~ "Pour donner aux utilisateurs du portail l'accès à votre projet, ajoutez-"
-#~ "les en tant que suiveurs. Pour l'accès aux tâches, ajoutez-les comme "
-#~ "suiveurs de chaque tâche."
