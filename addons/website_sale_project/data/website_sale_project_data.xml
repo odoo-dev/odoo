@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <function model="ir.model.fields" name="formbuilder_whitelist">
-        <value>withdrawal.request</value>
-        <value eval="['project_id']"/>
-    </function>
-</odoo>
