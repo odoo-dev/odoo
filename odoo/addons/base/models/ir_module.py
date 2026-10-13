@@ -82,6 +82,7 @@ class IrModuleCategory(models.Model):
     _description = "Application"
     _order = 'sequence, name, id'
     _allow_sudo_commands = False
+    _clear_cache_name = 'groups'
 
     name = fields.Char(string='Name', required=True, translate=True)
     parent_id = fields.Many2one('ir.module.category', string='Parent Application', index=True)
