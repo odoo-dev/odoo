@@ -7736,10 +7736,14 @@ class AccountMove(models.Model):
         return res
 
     def _get_discount_allocation_account(self):
+        account = None
         if self.is_sale_document(include_receipts=True) and self.company_id.account_discount_expense_allocation_id:
-            return self.company_id.account_discount_expense_allocation_id
+            account = self.company_id.account_discount_expense_allocation_id
         if self.is_purchase_document(include_receipts=True) and self.company_id.account_discount_income_allocation_id:
-            return self.company_id.account_discount_income_allocation_id
+            account = self.company_id.account_discount_income_allocation_id
+
+        if account and self.fiscal_position_id:
+            return self.fiscal_position_id.map_account(account) or account
         return None
 
     def _get_available_invoice_template_pdf_report_ids(self):
