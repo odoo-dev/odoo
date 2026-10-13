@@ -3382,6 +3382,13 @@ class AccountMoveLine(models.Model):
                 or self._get_exchange_account(company, amount_residual_to_fix).id
             )
 
+            fiscal_position = line.move_id.fiscal_position_id
+            if fiscal_position:
+                original_account = self.env['account.account'].browse(exchange_line_account_id)
+                mapped_account = fiscal_position.map_account(original_account)
+                if mapped_account:
+                    exchange_line_account_id = mapped_account.id
+
             sequence = len(move_vals['line_ids'])
             line_vals = [
                 {
