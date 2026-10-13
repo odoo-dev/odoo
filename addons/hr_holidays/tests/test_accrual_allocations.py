@@ -36,6 +36,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             'allocation_validation_type': 'no',
             'request_unit': 'day',
         })
+        cls.leave_type
         cls.accrual_plan_monthly_end = cls.env['hr.leave.accrual.plan'].create({
             'name': 'Accrual Plan For Test',
             'is_based_on_worked_time': False,
@@ -3076,3 +3077,73 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
     def test_get_allocation_future_leaves_regular2(self):
         self._test_get_allocation_future_leaves_regular(regular_before=True)
+
+    def test_monthlyyyy(self):
+        def assert_future_balance(expected, target_date, employee, leave_type, allocation):
+            data = employee._get_consumed_leaves(leave_type, target_date)
+            consumed_data = data[0][employee][leave_type][allocation]
+            excess_data = data[1][employee][leave_type]
+            if expected > 0:
+                self.assertAlmostEqual(consumed_data['remaining_leaves'], expected, delta=0.01)
+                self.assertAlmostEqual(len(excess_data['excess_days']), 0, delta=0.01)
+            else:
+                self.assertAlmostEqual(consumed_data['remaining_leaves'], 0, delta=0.01)
+                exceeding_sum = sum(excess['amount'] for excess in excess_data['excess_days'].values())
+                self.assertAlmostEqual(exceeding_sum, -expected)
+
+        self.leave_type_day.write({
+            'allows_negative': True,
+            'max_allowed_negative': 10,
+        })
+        leave_type = self.leave_type_day
+        employee = self.employee_emp
+
+        with freeze_time('2025-10-31'):
+            accrual_plan = self.env['hr.leave.accrual.plan'].create({
+                'name': 'Accrual Plan For Test',
+                'accrued_gain_time': 'end',
+                'carryover_date': 'allocation',
+                'level_ids': [
+                    Command.create({
+                        'start_count': 0,
+                        'added_value': 1.68,
+                        'added_value_type': 'day',
+                        'first_day': 31,
+                        'frequency': 'monthly',
+                        'action_with_unused_accruals': 'maximum',
+                        'postpone_max_days': 5,
+                        'cap_accrued_time': True,
+                        'maximum_leave': 25,
+                    })
+                ],
+            })
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation for employee',
+                'accrual_plan_id': accrual_plan.id,
+                'allocation_type': 'accrual',
+                'employee_id': employee.id,
+                'holiday_status_id': leave_type.id,
+                'number_of_days': 16.75,
+                'holiday_type': 'employee',
+            })
+            allocation.action_validate()
+            assert_future_balance(16.75 + 1.68, date(2025, 11, 30), employee, leave_type, allocation)
+
+            self._take_leave_and_validate(employee, leave_type, date(2025, 11, 3), date(2025, 11, 25))
+            second_leave_end = date(2026, 1, 2)
+            self._take_leave_and_validate(employee, leave_type, date(2025, 12, 25), second_leave_end)
+
+            test_values = [
+                (expected := 16.75 + 1.68 - 17, date(2025, 11, 30)),
+                (expected := expected - 7, date(2025, 12, 25)),
+                (expected := expected + 1.68, date(2025, 12, 31)),
+                (expected, date(2026, 1, 1)),
+                (expected := expected + 1.68, date(2026, 1, 31)),
+            ]
+            for expected, target_date in test_values:
+                assert_future_balance(expected, target_date, employee, leave_type, allocation)
+
+        for expected, target_date in test_values:
+            with freeze_time(target_date):
+                allocation._update_accrual()
+                assert_future_balance(expected, target_date, employee, leave_type, allocation)
