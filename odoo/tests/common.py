@@ -1607,8 +1607,13 @@ class TransactionCase(BaseCase):
             yield
 
 
-class ChromeBrowserException(Exception):
+class BrowserException(Exception):
     pass
+
+
+# backward compatibility
+ChromeBrowserException = BrowserException
+
 
 def run(gen_func):
     def done(f):
@@ -1655,9 +1660,118 @@ else:
     _preexec = None
 
 
-class ChromeBrowser:
-    """ Helper object to control a Chrome headless process. """
-    remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
+class BidiTransport:
+    """ Exchanges WebDriver BiDi messages with a browser over a websocket.
+
+    This is the transport for browsers implementing BiDi natively, which
+    expose it on a websocket endpoint (e.g. Firefox's ``/session``).
+    """
+    def __init__(self, ws: websocket.WebSocket, logger: logging.Logger):
+        self.ws = ws
+        self._logger = logger
+
+    @property
+    def connected(self) -> bool:
+        return self.ws.connected
+
+    def send(self, message: dict) -> None:
+        self.ws.send(json.dumps(message))
+
+    def recv(self) -> dict | None:
+        """ Returns the next BiDi message, or ``None`` if nothing was received.
+
+        Raises the websocket errors, notably ``WebSocketTimeoutException``
+        and ``WebSocketConnectionClosedException``.
+        """
+        msg = self.ws.recv()
+        return json.loads(msg) if msg else None
+
+
+class MapperBidiTransport(BidiTransport):
+    """ Tunnels WebDriver BiDi through the Chrome DevTools Protocol.
+
+    Chrome only speaks CDP, its BiDi implementation (chromium-bidi) is a
+    "mapper" translating BiDi to CDP from inside a dedicated tab. This is how
+    chromedriver provides BiDi: the mapper is loaded in a new tab given access
+    to the browser's CDP connection, BiDi commands are delivered by calling
+    ``onBidiMessage`` in that tab, and BiDi responses and events come back
+    through the ``sendBidiResponse`` binding.
+
+    ``ws`` must be connected to the *browser* CDP endpoint.
+    """
+    def __init__(self, ws: websocket.WebSocket, logger: logging.Logger, mapper_source: str):
+        super().__init__(ws, logger)
+        self._cdp_ids = itertools.count(1)
+        target_id = self._cdp_request('Target.createTarget', {'url': 'about:blank', 'background': True})['targetId']
+        self.session_id = self._cdp_request('Target.attachToTarget', {'targetId': target_id, 'flatten': True})['sessionId']
+        self._cdp_request('Target.exposeDevToolsProtocol', {'targetId': target_id, 'bindingName': 'cdp'})
+        self._cdp_request('Runtime.enable', session_id=self.session_id)
+        self._cdp_request('Runtime.addBinding', {'name': 'sendBidiResponse'}, session_id=self.session_id)
+        for expression in [mapper_source, f'window.runMapperInstance({json.dumps(target_id)})']:
+            result = self._cdp_request('Runtime.evaluate', {
+                'expression': expression,
+                'awaitPromise': True,
+            }, session_id=self.session_id)
+            if details := result.get('exceptionDetails'):
+                raise unittest.SkipTest(f"Failed to start the BiDi mapper: {details.get('exception', details)}")
+
+    def _cdp_send(self, method, params=None, session_id=None):
+        message_id = next(self._cdp_ids)
+        message = {'id': message_id, 'method': method, 'params': params or {}}
+        if session_id:
+            message['sessionId'] = session_id
+        self.ws.send(json.dumps(message))
+        return message_id
+
+    def _cdp_request(self, method, params=None, session_id=None, timeout=10.0):
+        """ Synchronous CDP request, only usable before messages are consumed
+        by the receiver, CDP events received meanwhile are dropped.
+        """
+        message_id = self._cdp_send(method, params, session_id)
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            try:
+                msg = self.ws.recv()
+            except websocket.WebSocketTimeoutException:
+                continue
+            res = json.loads(msg) if msg else {}
+            if res.get('id') == message_id:
+                if 'error' in res:
+                    raise BrowserException(f"{method}: {res['error']['message']}")
+                return res['result']
+        raise TimeoutError(f'{method}({params or ""})')
+
+    def send(self, message: dict) -> None:
+        self._cdp_send('Runtime.evaluate', {
+            'expression': f'onBidiMessage({json.dumps(json.dumps(message))})',
+        }, session_id=self.session_id)
+
+    def recv(self) -> dict | None:
+        msg = self.ws.recv()
+        if not msg:
+            return None
+        res = json.loads(msg)
+        if res.get('sessionId') != self.session_id:
+            return None
+        match res.get('method'):
+            case 'Runtime.bindingCalled' if res['params']['name'] == 'sendBidiResponse':
+                return json.loads(res['params']['payload'])
+            case 'Runtime.exceptionThrown':
+                self._logger.warning("BiDi mapper error: %s", res['params']['exceptionDetails'])
+            case None if 'error' in res:
+                self._logger.warning("Failed to deliver BiDi message: %s", res['error'])
+        return None
+
+
+class Browser:
+    """ Helper object to control a browser through WebDriver BiDi.
+
+    The browser-agnostic part: subclasses launch the browser, and provide the
+    transport to its BiDi endpoint (:meth:`_start`) as well as browser
+    specific capabilities (e.g. CPU throttling, screencasts).
+    """
+    name = 'Browser'
+    log_prefix = 'browser_log_'
 
     def __init__(self, test_case: HttpCase, success_signal: str = DEFAULT_SUCCESS_SIGNAL, headless: bool = True, debug: bool = False):
         self.cleanup = ExitStack()
@@ -1670,26 +1784,27 @@ class ChromeBrowser:
             raise unittest.SkipTest("websocket-client module is not installed")
         self.user_data_dir = self.cleanup.enter_context(
             tempfile.TemporaryDirectory(
-                suffix='_chrome_odoo',
+                suffix=f'_{self.name.lower()}_odoo',
                 ignore_cleanup_errors=True,
             )
         )
         self.cleanup.callback(
             self._logger.info,
-            'Removing chrome user profile "%s"',
+            'Removing %s user profile "%s"',
+            self.name,
             self.user_data_dir,
         )
-        self.chrome_log_level = logging.RUNBOT
+        self.browser_log_level = logging.RUNBOT
         self.cleanup.callback(
             lambda: save_test_file(
                 self.test_case._testMethodName,
                 self.read_log(),
-                prefix='chrome_log_',
+                prefix=self.log_prefix,
                 extension='txt',
-                document_type="Chrome Log",
+                document_type=f"{self.name} Log",
                 logger=self._logger,
-                loglevel=self.chrome_log_level,
-                directory='chrome_logs',
+                loglevel=self.browser_log_level,
+                directory=self.log_prefix.rstrip('_') + 's',
             )
         )
 
@@ -1699,18 +1814,19 @@ class ChromeBrowser:
                 signal.signal, signal.SIGXCPU, sigxcpu_handler)
 
         test_case.browser_size = test_case.browser_size.replace('x', ',')
+        try:
+            self._connect(headless, debug)
+        except BaseException:
+            self.stop()
+            raise
 
-        self.chrome, self.devtools_port = self.cleanup.enter_context(self._chrome_start(
-            user_data_dir=self.user_data_dir,
+    def _connect(self, headless, debug):
+        test_case = self.test_case
+        self.transport = self.cleanup.enter_context(self._start(
             touch_enabled=test_case.touch_enabled,
             headless=headless,
             debug=debug,
         ))
-        self.ws = self.cleanup.enter_context(self._open_websocket())
-        if scs := odoo.tools.config['screencasts']:
-            self.screencaster = self.cleanup.enter_context(Screencaster(self, scs))
-        else:
-            self.screencaster = self.cleanup.enter_context(NoScreencast())
 
         self._request_id = itertools.count()
         self._result = Future()
@@ -1718,66 +1834,94 @@ class ChromeBrowser:
         self.had_failure = False
         # maps request_id to Futures
         self._responses = {}
-        # maps frame ids to callbacks
-        self._frames = {}
         self._handlers = {
-            'Fetch.requestPaused': self._handle_request_paused,
-            'Runtime.consoleAPICalled': self._handle_console,
-            'Runtime.exceptionThrown': self._handle_exception,
-            'Page.frameStoppedLoading': self._handle_frame_stopped_loading,
-            'Page.screencastFrame': self.screencaster,
+            'log.entryAdded': self._handle_log_entry,
+            'network.beforeRequestSent': self._handle_before_request_sent,
         }
         self._receiver = threading.Thread(
             target=self._receive,
-            name="WebSocket events consumer",
+            name="BiDi events consumer",
             args=(get_db_name(),)
         )
         self._receiver.start()
-        self._logger.info('Enable chrome headless console log notification')
-        self._websocket_send('Runtime.enable')
-        self._websocket_request('Fetch.enable')
-        self._logger.info('Chrome headless enable page notifications')
-        self._websocket_send('Page.enable')
-        self._websocket_send('Page.setDownloadBehavior', params={
-            'behavior': 'deny',
-            'eventsEnabled': False,
-        })
-        self._websocket_send('Emulation.setFocusEmulationEnabled', params={'enabled': True})
-        emulated_device = {
-            'mobile': False,
-            'width': None,
-            'height': None,
-            'deviceScaleFactor': 1,
-        }
-        emulated_device['width'], emulated_device['height'] = [int(size) for size in test_case.browser_size.split(",")]
-        self._websocket_request('Emulation.setDeviceMetricsOverride', params=emulated_device)
-        self.cleanup.callback(self._ws_winddown)
 
-    def _ws_winddown(self):
+        capabilities = self._request('session.new', params={
+            'capabilities': {'alwaysMatch': self._capabilities()},
+        })['capabilities']
+        self._logger.info('Browser: %s %s', capabilities['browserName'], capabilities['browserVersion'])
+        contexts = self._request('browsingContext.getTree', params={'maxDepth': 0})['contexts']
+        if contexts:
+            self.context = contexts[0]['context']
+        else:
+            self.context = self._request('browsingContext.create', params={'type': 'tab'})['context']
+        self._setup()
+        self.cleanup.callback(self._winddown)
+
+        if scs := odoo.tools.config['screencasts']:
+            self.screencaster = self.cleanup.enter_context(self._screencaster(scs))
+        else:
+            self.screencaster = self.cleanup.enter_context(NoScreencast())
+
+    def _capabilities(self) -> dict:
+        """ Capabilities requested for the BiDi session. """
+        return {
+            'acceptInsecureCerts': False,
+            'webSocketUrl': True,
+        }
+
+    def _setup(self):
+        """ Configures the BiDi session, and the browser itself. """
+        self._logger.info('Enable browser log and network notifications')
+        self._request('session.subscribe', params={'events': list(self._handlers)})
+        # Only requests to external servers are proxied, but as intercepts
+        # can't exclude urls all requests are paused and checked.
+        self._request('network.addIntercept', params={'phases': ['beforeRequestSent']})
+        self._request('script.addPreloadScript', params={'functionDeclaration': PRELOAD_CONSOLE})
         try:
-            self._websocket_request('Page.stopLoading')
-            self._websocket_request('Runtime.evaluate', params={'expression': """
-            ('serviceWorker' in navigator) &&
-                navigator.serviceWorker.getRegistrations().then(
-                    registrations => Promise.all(registrations.map(r => r.unregister()))
-                )
-            """, 'awaitPromise': True})
+            self._request('browser.setDownloadBehavior', params={
+                'downloadBehavior': {'type': 'denied'},
+            })
+        except BrowserException as e:
+            self._logger.info("Could not deny downloads: %s", e)
+        width, height = [int(size) for size in self.test_case.browser_size.split(",")]
+        self._request('browsingContext.setViewport', params={
+            'context': self.context,
+            'viewport': {'width': width, 'height': height},
+            'devicePixelRatio': 1,
+        })
+
+    def _winddown(self):
+        try:
+            self._request('script.evaluate', params={
+                'expression': """
+                window.stop();
+                ('serviceWorker' in navigator) &&
+                    navigator.serviceWorker.getRegistrations().then(
+                        registrations => Promise.all(registrations.map(r => r.unregister()))
+                    )
+                """,
+                'target': {'context': self.context},
+                'awaitPromise': True,
+                'resultOwnership': 'none',
+            })
             # wait for the screenshot or whatever
             wait(self._responses.values(), 10)
             self._result.cancel()
 
-            self._logger.info("Closing chrome headless with pid %s", self.chrome.pid)
-            self._websocket_request('Browser.close')
-        except ChromeBrowserException as e:
-            _logger.runbot("WS error during browser shutdown: %s", e)
-            self.chrome_log_level = logging.RUNBOT
+            self._logger.info("Closing %s with pid %s", self.name, self.process.pid)
+            with contextlib.suppress(CancelledError):
+                # the connection may get closed before the response is received
+                self._request('browser.close')
+        except BrowserException as e:
+            _logger.runbot("BiDi error during browser shutdown: %s", e)
+            self.browser_log_level = logging.RUNBOT
         except Exception:  # noqa: BLE001
             _logger.warning("Error during browser shutdown", exc_info=True)
-            self.chrome_log_level = logging.RUNBOT
+            self.browser_log_level = logging.RUNBOT
 
     def signal_handler(self, sig, frame):
         if sig == signal.SIGXCPU:
-            _logger.info('CPU time limit reached, stopping Chrome and shutting down')
+            _logger.info('CPU time limit reached, stopping %s and shutting down', self.name)
             self.stop()
             exit()
 
@@ -1787,10 +1931,597 @@ class ChromeBrowser:
 
         assert 1 <= factor <= 50  # arbitrary upper limit
         self.throttling_factor = factor
-        self._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': factor})
+        self._throttle(factor)
+
+    def _throttle(self, factor: int) -> None:
+        self._logger.warning("CPU throttling is not supported by %s, only timeouts are extended", self.name)
 
     def stop(self):
         self.cleanup.close()
+
+    @contextlib.contextmanager
+    def _start(self, touch_enabled: bool, headless=True, debug=False) -> typing.Iterator[BidiTransport]:
+        """ Launches the browser (as ``self.process``) and yields a transport
+        connected to its BiDi endpoint.
+        """
+        raise NotImplementedError
+
+    def read_log(self) -> bytes:
+        return b''
+
+    def _screencaster(self, directory: str) -> NoScreencast:
+        self._logger.warning("Screencasts are not supported by %s", self.name)
+        return NoScreencast()
+
+    def _log_heap_usage(self) -> None:
+        """ Logs the heap usage of the page, when the browser supports it. """
+
+    def _receive(self, dbname):
+        threading.current_thread().dbname = dbname
+        # BiDi messages are either command responses {type: success | error, id, ...}
+        # or events {type: event, method, params}
+        while True:  # or maybe until `self._result` is `done()`?
+            try:
+                res = self.transport.recv()
+                if not res:
+                    continue
+                self._logger.debug('\n<- %s', res)
+            except websocket.WebSocketTimeoutException:
+                continue
+            except websocket.WebSocketConnectionClosedException as e:
+                if not self._result.done():
+                    self._result.set_exception(e)
+                del self.transport
+                while True:
+                    try:
+                        _, f = self._responses.popitem()
+                    except KeyError:
+                        break
+                    else:
+                        f.cancel()
+                return
+            except Exception as e:
+                if isinstance(e, ConnectionResetError) and self._result.done():
+                    return
+                # if the socket is still connected something bad happened,
+                # otherwise the client was just shut down
+                if self.transport.connected:
+                    self._result.set_exception(e)
+                    raise
+                self._result.cancel()
+                return
+
+            try:
+                match res.get('type'):
+                    case 'event':
+                        if handler := self._handlers.get(res['method']):
+                            handler(**res['params'])
+                    case 'success':
+                        if f := self._responses.pop(res['id'], None):
+                            f.set_result(res['result'])
+                    case 'error':
+                        f = self._responses.pop(res.get('id'), None)
+                        error = BrowserException(f"{res['error']}: {res.get('message', '')}")
+                        if f:
+                            f.set_exception(error)
+                        elif res.get('id') is None:
+                            self._logger.warning("BiDi error: %s", error)
+                        else:
+                            # e.g. continuing a request cancelled meanwhile
+                            self._logger.debug("BiDi error: %s", error)
+            except Exception:
+                _logger.exception(
+                    "While processing message %s",
+                    shorten(str(res), 500, placeholder='...'),
+                )
+
+    def _request(self, method, *, params=None, timeout=10.0):
+        assert threading.get_ident() != self._receiver.ident,\
+            "_request must not be called from the consumer thread"
+        if not hasattr(self, 'transport'):
+            return None
+        if DISABLE_TIMEOUTS:
+            timeout = None
+        else:
+            timeout *= self.throttling_factor
+
+        f = self._send(method, params=params, with_future=True)
+        try:
+            return f.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError(f'{method}({params or ""})')
+
+    def _send(self, method, *, params=None, with_future=False):
+        """send BiDi commands through the transport
+
+        If ``with_future`` is set, returns a ``Future`` for the operation.
+        """
+        if not hasattr(self, 'transport'):
+            return None
+
+        result = None
+        request_id = next(self._request_id)
+        if with_future:
+            result = self._responses[request_id] = Future()
+        payload = {'id': request_id, 'method': method, 'params': params or {}}
+        self._logger.debug('\n-> %s', payload)
+        self.transport.send(payload)
+        return result
+
+    def _handle_before_request_sent(self, request, isBlocked=False, **kw):
+        if not isBlocked:
+            return
+        url = request['url']
+        if url.startswith(f'http://{HOST}'):
+            cmd = 'network.continueRequest'
+            params = {}
+        else:
+            cmd = 'network.provideResponse'
+            response = self.test_case.fetch_proxy(url)
+            params = {
+                'statusCode': response['responseCode'],
+                'headers': [
+                    {'name': header['name'], 'value': {'type': 'string', 'value': header['value']}}
+                    for header in response['responseHeaders']
+                ],
+                'body': {'type': 'base64', 'value': response['body']},
+            }
+        try:
+            self._send(cmd, params={'request': request['request'], **params})
+        except websocket.WebSocketConnectionClosedException:
+            pass
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            # this can happen if the browser is closed. Just ignore it.
+            _logger.info("Websocket error while handling request %s", url)
+
+    def _handle_log_entry(self, type, level, source, text=None, stackTrace=None, method=None, args=None, **kw):  # pylint: disable=redefined-builtin
+        if 'context' not in source:
+            # not from a page (e.g. a worker)
+            self._logger.debug("Ignored log entry from %s: %s", source, text)
+            return
+        if type == 'javascript':
+            self._handle_exception(text, stackTrace)
+        else:
+            self._handle_console(method or level, args, stackTrace, text)
+
+    def _handle_console(self, method, args=None, stackTrace=None, text=None):
+        # console formatting differs somewhat from Python's, if args[0] has
+        # format modifiers that many of args[1:] get formatted in, missing
+        # args are replaced by empty strings and extra args are concatenated
+        # (space-separated)
+        #
+        # current version modifies the args in place which could and should
+        # probably be improved
+        if args:
+            arg0, args = str(self._from_remote_value(args[0])), args[1:]
+        else:
+            arg0, args = text or '', []
+        formatted = [re.sub(r'%[%sdfoOc]', self.console_formatter(args), arg0)]
+        # formatter consumes args it uses, leaves unformatted args untouched
+        formatted.extend(str(self._from_remote_value(arg)) for arg in args)
+        message = ' '.join(formatted)
+        if method == 'trace':
+            stack = ''.join(self._format_stack(stackTrace))
+            if stack:
+                message += '\n' + stack
+
+        log_type = method
+        _logger = self._logger.getChild('browser')
+        if self._result.done() and IGNORED_MSGS(message):
+            log_type = 'dir'
+        _logger.log(
+            self._TO_LEVEL.get(log_type, logging.INFO),
+            "%s%s",
+            "Error received after termination: " if self._result.done() else "",
+            message # might still have %<x> characters
+        )
+
+        if log_type == 'error':
+            self.had_failure = True
+            if self._result.done():
+                return
+            if not self.error_checker or self.error_checker(message):
+                self.take_screenshot()
+                try:
+                    self._result.set_exception(BrowserException(message))
+                except CancelledError:
+                    ...
+                except InvalidStateError:
+                    self._logger.warning(
+                        "Trying to set result to failed (%s) but found the future settled (%s)",
+                        message, self._result
+                    )
+        elif message == self.success_signal:
+            self._log_heap_usage()
+
+            @run
+            def _check_form():
+                dirty = False
+
+                with contextlib.suppress(Exception):
+                    r = yield self._send('script.evaluate', params={
+                        'expression': "!!document.querySelector('.o_form_dirty')",
+                        'target': {'context': self.context},
+                        'awaitPromise': False,
+                        'resultOwnership': 'none',
+                    }, with_future=True)
+                    dirty = r.get('result') == {'type': 'boolean', 'value': True}
+
+                if dirty:
+                    self.take_screenshot("unsaved_form_")
+                    msg = """\
+Tour finished with a dirty form view being open.
+
+Dirty form views are automatically saved when the page is closed, \
+which leads to stray network requests and inconsistencies."""
+                    if self._result.done():
+                        _logger.error("%s", msg)
+                    else:
+                        self._result.set_exception(BrowserException(msg))
+                    return
+
+                if not self._result.done():
+                    self._result.set_result(True)
+                elif self._result.exception() is None:
+                    _logger.error("Tried to make the tour successful twice.")
+
+    def _handle_exception(self, text, stackTrace=None):
+        message = text or 'Uncaught exception'
+        stack = ''.join(self._format_stack(stackTrace))
+        if stack:
+            message += '\n' + stack
+
+        if self._result.done():
+            if not IGNORED_MSGS(message):
+                self._logger.getChild('browser').error(
+                    "Exception received after termination: %s", message)
+            return
+
+        self.take_screenshot()
+        try:
+            self._result.set_exception(BrowserException(message))
+        except CancelledError:
+            ...
+        except InvalidStateError:
+            self._logger.warning(
+                "Trying to set result to failed (%s) but found the future settled (%s)",
+                message, self._result
+            )
+
+    _TO_LEVEL = {
+        'debug': logging.DEBUG,
+        'log': logging.INFO,
+        'info': logging.INFO,
+        'warn': logging.WARNING,
+        'error': logging.ERROR,
+        'dir': logging.RUNBOT,
+        # TODO: what do with
+        # dirxml, table, trace, clear, group, groupCollapsed, groupEnd,
+        # assert, profile, profileEnd, count, countReset, time, timeLog, timeEnd
+    }
+
+    def take_screenshot(self, prefix='sc_') -> Future[dict]:
+        def handler(f):
+            try:
+                base_png = f.result(timeout=0)['data']
+            except Exception as e:
+                self._logger.runbot("Couldn't capture screenshot: %s", e)
+                return
+            if not base_png:
+                self._logger.runbot("Couldn't capture screenshot: expected image data, got %r", base_png)
+                return
+            decoded = binascii.a2b_base64(base_png)
+            save_test_file(self.test_case._testMethodName, decoded, prefix, logger=self._logger, directory='screenshots')
+
+        self._logger.info('Asking for screenshot')
+        f = self._send('browsingContext.captureScreenshot', params={'context': self.context}, with_future=True)
+        if f:
+            f.add_done_callback(handler)
+        return f
+
+    def set_cookie(self, name, value, path, domain):
+        self._request('storage.setCookie', params={'cookie': {
+            'name': name,
+            'value': {'type': 'string', 'value': value},
+            'path': path,
+            'domain': domain,
+        }})
+
+    def delete_cookie(self, name, **kwargs):
+        cookie_filter = {k: v for k, v in kwargs.items() if k in ['domain', 'path']}
+        if 'url' in kwargs and 'domain' not in cookie_filter:
+            cookie_filter['domain'] = urlsplit(kwargs['url']).hostname
+        cookie_filter['name'] = name
+        self._request('storage.deleteCookies', params={'filter': cookie_filter})
+
+    def _evaluate(self, expression, timeout):
+        return self._request('script.evaluate', params={
+            'expression': expression,
+            'target': {'context': self.context},
+            'awaitPromise': True,
+            'resultOwnership': 'none',
+        }, timeout=timeout)
+
+    def _wait_ready(self, ready_code=None, timeout=60):
+        if timeout:
+            timeout *= self.throttling_factor
+        ready_code = ready_code or "document.readyState === 'complete'"
+        self._logger.info('Evaluate ready code "%s"', ready_code)
+        start_time = time.time()
+        result = None
+        while True:
+            taken = time.time() - start_time
+            if taken > timeout:
+                break
+
+            try:
+                result = self._evaluate("try { %s } catch {}" % ready_code, timeout=timeout - taken).get('result')
+            except CancelledError:
+                exc = self._result.done() and self._result.exception()
+                if exc:
+                    raise exc from None
+                result = "cancelled"
+            except BrowserException as e:
+                # e.g. the realm got destroyed by a navigation
+                result = str(e)
+
+            if result == {'type': 'boolean', 'value': True}:
+                time_to_ready = time.time() - start_time
+                if taken > 2:
+                    self._logger.info('The ready code tooks too much time : %s', time_to_ready)
+                return True
+
+        exc = self._result.done() and self._result.exception()
+        if exc:
+            raise exc from None
+        self.take_screenshot(prefix='sc_failed_ready_')
+        self._logger.info('Ready code last try result: %s', result)
+        return False
+
+    def _wait_code_ok(self, code, timeout, error_checker=None):
+        if timeout:
+            timeout *= self.throttling_factor
+        self.error_checker = error_checker
+        self._logger.info('Evaluate test code "%s"', code)
+        start = time.time()
+        res = self._evaluate(code, timeout=timeout)
+        if res['type'] == 'exception' or res['result']['type'] == 'error':
+            raise BrowserException("Running code returned an error: %s" % res)
+
+        err = BrowserException("failed")
+        try:
+            # if the runcode was a promise which took some time to execute,
+            # discount that from the timeout
+            if self._result.result(time.time() - start + timeout) and not self.had_failure:
+                self.browser_log_level = logging.INFO
+                return
+        except CancelledError:
+            # regular-ish shutdown
+            self.browser_log_level = logging.INFO
+            return
+        except BrowserException:
+            self.screencaster.save()
+            raise
+        except Exception as e:
+            err = e
+
+        self.take_screenshot()
+        self.screencaster.save()
+
+        if isinstance(err, concurrent.futures.TimeoutError):
+            raise BrowserException('Script timeout exceeded') from err
+        raise BrowserException("Unknown error") from err
+
+    def navigate_to(self, url, wait_stop=False):
+        self._logger.info('Navigating to: "%s"', url)
+        timeout = 1e6 if DISABLE_TIMEOUTS else 20.0
+        if wait_stop:
+            self._logger.info('Waiting for %r to stop loading', url)
+            timeout += 10
+        try:
+            nav_result = self._request('browsingContext.navigate', params={
+                'context': self.context,
+                'url': url,
+                'wait': 'complete' if wait_stop else 'none',
+            }, timeout=timeout)
+        except TimeoutError:
+            if not wait_stop:
+                raise
+            self._logger.info('Page %r did not stop loading', url)
+        else:
+            self._logger.info("Navigation result: %s", nav_result)
+
+    def _from_remote_value(self, arg, nested=False):
+        """ attempts to make a BiDi RemoteValue comprehensible
+
+        Top-level objects and arrays are displayed with their (non-recursive)
+        content, nested ones as their type.
+        """
+        objtype = arg['type']
+        value = arg.get('value')
+        match objtype:
+            case 'undefined' | 'null':
+                return objtype
+            case 'string':
+                return repr(value) if nested else value
+            case 'boolean':
+                return 'true' if value else 'false'
+            case 'number':
+                return value
+            case 'bigint':
+                return f'{value}n'
+            case 'date':
+                return value
+            case 'regexp':
+                return f"/{value['pattern']}/{value.get('flags', '')}"
+            case 'node':
+                return f"<{value['localName']}>" if value and value.get('localName') else 'Node'
+            case 'array' | 'set' if nested:
+                return 'Array' if objtype == 'array' else 'Set'
+            case 'array' | 'set':
+                return '[%s]' % ', '.join(
+                    str(self._from_remote_value(item, nested=True))
+                    for item in value or []
+                )
+            case 'object' | 'map' if nested:
+                return 'Object' if objtype == 'object' else 'Map'
+            case 'object' | 'map':
+                return '%s(%s)' % (
+                    'Object' if objtype == 'object' else 'Map',
+                    ', '.join(
+                        '%s=%s' % (
+                            key if isinstance(key, str) else self._from_remote_value(key),
+                            self._from_remote_value(val, nested=True),
+                        )
+                        for key, val in value or []
+                    ),
+                )
+        # error, function, symbol, promise, window, ...
+        return objtype.capitalize()
+
+    LINE_PATTERN = '\tat %(functionName)s (%(url)s:%(lineNumber)d:%(columnNumber)d)\n'
+
+    def _format_stack(self, stack_trace):
+        if stack_trace:
+            for f in stack_trace['callFrames']:
+                yield self.LINE_PATTERN % f
+
+    def console_formatter(self, args):
+        """ Formats similarly to the console API:
+
+        * if there are no args, don't format (return string as-is)
+        * %% -> %
+        * %c -> replace by styling directives (ignore for us)
+        * other known formatters -> replace by corresponding argument
+        * leftover known formatters (args exhausted) -> replace by empty string
+        * unknown formatters -> return as-is
+        """
+        if not args:
+            return lambda m: m[0]
+
+        def replacer(m):
+            fmt = m[0][1]
+            if fmt == '%':
+                return '%'
+            if fmt in 'sdfoOc':
+                if not args:
+                    return ''
+                repl = args.pop(0)
+                if fmt == 'c':
+                    return ''
+                return str(self._from_remote_value(repl))
+            return m[0]
+        return replacer
+
+
+# Normalizes console messages before they get serialized for BiDi:
+# * errors are formatted with their stack, as with CDP: BiDi serializes them
+#   as an opaque {type: "error"}
+# * format strings are applied when their specifiers don't match the
+#   arguments, otherwise chromium-bidi fails to format the message's text and
+#   drops the log entry
+PRELOAD_CONSOLE = """() => {
+    const toString = Object.prototype.toString;
+    const formatError = (arg) => {
+        if (!(arg instanceof Error || toString.call(arg) === "[object Error]")) {
+            return arg;
+        }
+        const head = String(arg);
+        const stack = typeof arg.stack === "string" ? arg.stack : "";
+        return stack.startsWith(head) ? stack : [head, stack].filter(Boolean).join("\\n");
+    };
+    const SPECIFIERS = /%[sdifoOc]/g;
+    const formatArgs = (args) => {
+        const [first, ...rest] = args;
+        const count = typeof first === "string" ? (first.match(SPECIFIERS) || []).length : 0;
+        if (count === rest.length) {
+            return args;
+        }
+        const text = first.replace(SPECIFIERS, (specifier) => {
+            if (!rest.length) {
+                return "";
+            }
+            const arg = rest.shift();
+            switch (specifier) {
+                case "%c":
+                    return "";
+                case "%d":
+                case "%i":
+                    return String(parseInt(arg, 10));
+                case "%f":
+                    return String(parseFloat(arg));
+                default:
+                    return String(arg);
+            }
+        });
+        return [text, ...rest];
+    };
+    for (const method of ["debug", "dir", "error", "info", "log", "warn"]) {
+        const original = console[method];
+        console[method] = function (...args) {
+            return original.apply(this, formatArgs(args.map(formatError)));
+        };
+    }
+}"""
+
+
+class ChromeBrowser(Browser):
+    """ Helper object to control a Chrome headless process.
+
+    Chrome doesn't implement BiDi natively, it is provided by the
+    chromium-bidi mapper, see :class:`MapperBidiTransport`. Chrome specific
+    features unavailable in BiDi go through the mapper's ``goog:cdp``
+    extension module.
+    """
+    name = 'Chrome'
+    log_prefix = 'chrome_log_'
+    remote_debugging_port = 0  # 9222, change it in a non-git-tracked file
+
+    def _setup(self):
+        super()._setup()
+        self._cdp_session = self._request('goog:cdp.getSession', params={'context': self.context})['session']
+        self._cdp_request('Emulation.setFocusEmulationEnabled', {'enabled': True})
+
+    def _cdp_send(self, method, params=None) -> Future | None:
+        """ Sends a CDP command to the page, returns a future of its result. """
+        f = self._send('goog:cdp.sendCommand', params={
+            'method': method,
+            'params': params or {},
+            'session': self._cdp_session,
+        }, with_future=True)
+        if f is None:
+            return None
+        result = Future()
+
+        def unwrap(f):
+            if f.cancelled():
+                result.cancel()
+            elif exc := f.exception():
+                result.set_exception(exc)
+            else:
+                result.set_result(f.result()['result'])
+        f.add_done_callback(unwrap)
+        return result
+
+    def _cdp_request(self, method, params=None):
+        return self._request('goog:cdp.sendCommand', params={
+            'method': method,
+            'params': params or {},
+            'session': self._cdp_session,
+        })['result']
+
+    def _throttle(self, factor):
+        self._cdp_request('Emulation.setCPUThrottlingRate', {'rate': factor})
+
+    def _screencaster(self, directory):
+        return Screencaster(self, directory)
+
+    def _log_heap_usage(self):
+        @run
+        def _get_heap():
+            yield self._cdp_send("HeapProfiler.collectGarbage")
+            r = yield self._cdp_send("Runtime.getHeapUsage")
+            self._logger.getChild('browser').info("heap %d (allocated %d)", r['usedSize'], r['totalSize'])
 
     @property
     def executable(self):
@@ -1805,7 +2536,7 @@ class ChromeBrowser:
         proc = subprocess.Popen(
             cmd,
             stderr=subprocess.DEVNULL,
-            preexec_fn=_preexec,
+            preexec_fn=_preexec,  # ruff: ignore[subprocess-popen-preexec-fn]
             env={**os.environ, 'TMPDIR': self.user_data_dir},
         )  # noqa: PLW1509
 
@@ -1834,7 +2565,19 @@ class ChromeBrowser:
             _logger.warning('DevToolsActivePort not found')
         self.stop()
 
-        raise unittest.SkipTest(f'Failed to detect chrome devtools port after {BROWSER_WAIT :.1f}s.')
+        raise unittest.SkipTest(f'Failed to detect chrome devtools port after {BROWSER_WAIT:.1f}s.')
+
+    @contextlib.contextmanager
+    def _start(self, touch_enabled, headless=True, debug=False):
+        mapper_source = _read_bidi_mapper()
+        with self._chrome_start(
+            user_data_dir=self.user_data_dir,
+            touch_enabled=touch_enabled,
+            headless=headless,
+            debug=debug,
+        ) as (self.process, self.devtools_port), self._open_websocket() as ws:
+            self._logger.info('Starting the BiDi mapper')
+            yield MapperBidiTransport(ws, self._logger, mapper_source)
 
     @contextlib.contextmanager
     def _chrome_start(
@@ -1874,7 +2617,7 @@ class ChromeBrowser:
             '--disable-default-apps': '',  # Disable installation of default apps
             '--disable-domain-reliability': '',  # Stop tracking and sending telemetry for failed network requests
             '--disable-search-engine-choice-screen': '',  # Bypass the EU search engine selection prompt on startup
-            '--disable-features': ','.join([
+            '--disable-features': ','.join([  # ruff: ignore[static-join-to-f-string]
                 'Translate',  # Disables Chrome translation
                 'MediaRouter',  # Stop scanning for local Cast or media devices
                 'InterestFeedContentSuggestions',  # Disables the Discover feed on NTP
@@ -1937,7 +2680,7 @@ class ChromeBrowser:
                 for p in alive:
                     p.kill()
                 psutil.wait_procs(alive, 1)
-                self.chrome_log_level = logging.RUNBOT
+                self.browser_log_level = logging.RUNBOT
 
     def read_log(self) -> bytes:
         try:
@@ -1972,7 +2715,7 @@ class ChromeBrowser:
         failure_info = None
         message = None
         while timeout > 0:
-            if self.chrome.poll() is not None:
+            if self.process.poll() is not None:
                 message = 'Chrome crashed at startup'
                 break
             try:
@@ -1991,7 +2734,7 @@ class ChromeBrowser:
             timeout -= delay
             delay = delay * 1.5
             tries += 1
-        self._logger.error("%s after %s tries" % (message, tries))
+        self._logger.error("%s after %s tries", message, tries)
         if failure_info:
             self._logger.info(failure_info)
         self.stop()
@@ -2001,22 +2744,7 @@ class ChromeBrowser:
     def _open_websocket(self):
         version = self._json_command('version')
         self._logger.info('Browser version: %s', version['Browser'])
-
-        start = time.time()
-        while (time.time() - start) < 5.0:
-            ws_url = next((
-                target['webSocketDebuggerUrl']
-                for target in self._json_command('')
-                if target['type'] == 'page'
-                if target['url'] == 'about:blank'
-            ), None)
-            if ws_url:
-                break
-
-            time.sleep(0.1)
-        else:
-            self.stop()
-            raise unittest.SkipTest("Error during Chrome connection: never found 'page' target")
+        ws_url = version['webSocketDebuggerUrl']
 
         self._logger.info('Websocket url found: %s', ws_url)
         ws = websocket.create_connection(ws_url, enable_multithread=True, suppress_origin=True)
@@ -2029,426 +2757,6 @@ class ChromeBrowser:
             self._logger.info("Closing websocket connection")
             ws.close()
 
-    def _receive(self, dbname):
-        threading.current_thread().dbname = dbname
-        # So CDT uses a streamed JSON-RPC structure, meaning a request is
-        # {id, method, params} and eventually a {id, result | error} should
-        # arrive the other way, however for events it uses "notifications"
-        # meaning request objects without an ``id``, but *coming from the server
-        while True: # or maybe until `self._result` is `done()`?
-            try:
-                msg = self.ws.recv()
-                if not msg:
-                    continue
-                self._logger.debug('\n<- %s', msg)
-            except websocket.WebSocketTimeoutException:
-                continue
-            except websocket.WebSocketConnectionClosedException as e:
-                if not self._result.done():
-                    del self.ws
-                    self._result.set_exception(e)
-                    while True:
-                        try:
-                            _, f = self._responses.popitem()
-                        except KeyError:
-                            break
-                        else:
-                            f.cancel()
-                return
-            except Exception as e:
-                if isinstance(e, ConnectionResetError) and self._result.done():
-                    return
-                # if the socket is still connected something bad happened,
-                # otherwise the client was just shut down
-                if self.ws.connected:
-                    self._result.set_exception(e)
-                    raise
-                self._result.cancel()
-                return
-
-            res = json.loads(msg)
-            request_id = res.get('id')
-            try:
-                if request_id is None:
-                    if handler := self._handlers.get(res['method']):
-                        handler(**res['params'])
-                elif f := self._responses.pop(request_id, None):
-                    if 'result' in res:
-                        f.set_result(res['result'])
-                    else:
-                        f.set_exception(ChromeBrowserException(res['error']['message']))
-            except Exception:
-                _logger.exception(
-                    "While processing message %s",
-                    shorten(str(msg), 500, placeholder='...'),
-                )
-
-    def _websocket_request(self, method, *, params=None, timeout=10.0):
-        assert threading.get_ident() != self._receiver.ident,\
-            "_websocket_request must not be called from the consumer thread"
-        if not hasattr(self, 'ws'):
-            return None
-        if DISABLE_TIMEOUTS:
-            timeout = None
-        else:
-            timeout *= self.throttling_factor
-
-        f = self._websocket_send(method, params=params, with_future=True)
-        try:
-            return f.result(timeout=timeout)
-        except concurrent.futures.TimeoutError:
-            raise TimeoutError(f'{method}({params or ""})')
-
-    def _websocket_send(self, method, *, params=None, with_future=False):
-        """send chrome devtools protocol commands through websocket
-
-        If ``with_future`` is set, returns a ``Future`` for the operation.
-        """
-        if not hasattr(self, 'ws'):
-            return None
-
-        result = None
-        request_id = next(self._request_id)
-        if with_future:
-            result = self._responses[request_id] = Future()
-        payload = {'method': method, 'id': request_id}
-        if params:
-            payload['params'] = params
-        self._logger.debug('\n-> %s', payload)
-        self.ws.send(json.dumps(payload))
-        return result
-
-    def _handle_request_paused(self, **params):
-        url = params['request']['url']
-        if url.startswith(f'http://{HOST}'):
-            cmd = 'Fetch.continueRequest'
-            response = {}
-        else:
-            cmd = 'Fetch.fulfillRequest'
-            response = self.test_case.fetch_proxy(url)
-        try:
-            self._websocket_send(cmd, params={'requestId': params['requestId'], **response})
-        except websocket.WebSocketConnectionClosedException:
-            pass
-        except (BrokenPipeError, ConnectionResetError, OSError):
-            # this can happen if the browser is closed. Just ignore it.
-            _logger.info("Websocket error while handling request %s", params['request']['url'])
-
-    def _handle_console(self, type, args=None, stackTrace=None, **kw): # pylint: disable=redefined-builtin
-        # console formatting differs somewhat from Python's, if args[0] has
-        # format modifiers that many of args[1:] get formatted in, missing
-        # args are replaced by empty strings and extra args are concatenated
-        # (space-separated)
-        #
-        # current version modifies the args in place which could and should
-        # probably be improved
-        if args:
-            arg0, args = str(self._from_remoteobject(args[0])), args[1:]
-        else:
-            arg0, args = '', []
-        formatted = [re.sub(r'%[%sdfoOc]', self.console_formatter(args), arg0)]
-        # formatter consumes args it uses, leaves unformatted args untouched
-        formatted.extend(str(self._from_remoteobject(arg)) for arg in args)
-        message = ' '.join(formatted)
-        stack = ''.join(self._format_stack({'type': type, 'stackTrace': stackTrace}))
-        if stack:
-            message += '\n' + stack
-
-        log_type = type
-        _logger = self._logger.getChild('browser')
-        if self._result.done() and IGNORED_MSGS(message):
-            log_type = 'dir'
-        _logger.log(
-            self._TO_LEVEL.get(log_type, logging.INFO),
-            "%s%s",
-            "Error received after termination: " if self._result.done() else "",
-            message # might still have %<x> characters
-        )
-
-        if log_type == 'error':
-            self.had_failure = True
-            if self._result.done():
-                return
-            if not self.error_checker or self.error_checker(message):
-                self.take_screenshot()
-                try:
-                    self._result.set_exception(ChromeBrowserException(message))
-                except CancelledError:
-                    ...
-                except InvalidStateError:
-                    self._logger.warning(
-                        "Trying to set result to failed (%s) but found the future settled (%s)",
-                        message, self._result
-                    )
-        elif message == self.success_signal:
-            @run
-            def _get_heap():
-                yield self._websocket_send("HeapProfiler.collectGarbage", with_future=True)
-                r = yield self._websocket_send("Runtime.getHeapUsage", with_future=True)
-                _logger.info("heap %d (allocated %d)", r['usedSize'], r['totalSize'])
-
-            @run
-            def _check_form():
-                node_id = 0
-
-                with contextlib.suppress(Exception):
-                    d = yield self._websocket_send('DOM.getDocument', params={'depth': 0}, with_future=True)
-                    form = yield self._websocket_send("DOM.querySelector", params={
-                        'nodeId': d['root']['nodeId'],
-                        'selector': '.o_form_dirty',
-                    }, with_future=True)
-                    node_id = form['nodeId']
-
-                if node_id:
-                    self.take_screenshot("unsaved_form_")
-                    msg = """\
-Tour finished with a dirty form view being open.
-
-Dirty form views are automatically saved when the page is closed, \
-which leads to stray network requests and inconsistencies."""
-                    if self._result.done():
-                        _logger.error("%s", msg)
-                    else:
-                        self._result.set_exception(ChromeBrowserException(msg))
-                    return
-
-                if not self._result.done():
-                    self._result.set_result(True)
-                elif self._result.exception() is None:
-                    _logger.error("Tried to make the tour successful twice.")
-
-
-    def _handle_exception(self, exceptionDetails, timestamp):
-        message = exceptionDetails['text']
-        exception = exceptionDetails.get('exception')
-        if exception:
-            message += str(self._from_remoteobject(exception))
-        exceptionDetails['type'] = 'trace'  # fake this so _format_stack works
-        stack = ''.join(self._format_stack(exceptionDetails))
-        if stack:
-            message += '\n' + stack
-
-        if self._result.done():
-            if not IGNORED_MSGS(message):
-                self._logger.getChild('browser').error(
-                    "Exception received after termination: %s", message)
-            return
-
-        self.take_screenshot()
-        try:
-            self._result.set_exception(ChromeBrowserException(message))
-        except CancelledError:
-            ...
-        except InvalidStateError:
-            self._logger.warning(
-                "Trying to set result to failed (%s) but found the future settled (%s)",
-                message, self._result
-            )
-
-    def _handle_frame_stopped_loading(self, frameId):
-        wait = self._frames.pop(frameId, None)
-        if wait:
-            wait()
-
-    _TO_LEVEL = {
-        'debug': logging.DEBUG,
-        'log': logging.INFO,
-        'info': logging.INFO,
-        'warning': logging.WARNING,
-        'error': logging.ERROR,
-        'dir': logging.RUNBOT,
-        # TODO: what do with
-        # dir, dirxml, table, trace, clear, startGroup, startGroupCollapsed,
-        # endGroup, assert, profile, profileEnd, count, timeEnd
-    }
-
-    def take_screenshot(self, prefix='sc_') -> Future[dict]:
-        def handler(f):
-            try:
-                base_png = f.result(timeout=0)['data']
-            except Exception as e:
-                self._logger.runbot("Couldn't capture screenshot: %s", e)
-                return
-            if not base_png:
-                self._logger.runbot("Couldn't capture screenshot: expected image data, got %r", base_png)
-                return
-            decoded = binascii.a2b_base64(base_png)
-            save_test_file(self.test_case._testMethodName, decoded, prefix, logger=self._logger, directory='screenshots')
-
-        self._logger.info('Asking for screenshot')
-        f = self._websocket_send('Page.captureScreenshot', with_future=True)
-        if f:
-            f.add_done_callback(handler)
-        return f
-
-    def set_cookie(self, name, value, path, domain):
-        params = {'name': name, 'value': value, 'path': path, 'domain': domain}
-        self._websocket_request('Network.setCookie', params=params)
-
-    def delete_cookie(self, name, **kwargs):
-        params = {k: v for k, v in kwargs.items() if k in ['url', 'domain', 'path']}
-        params['name'] = name
-        self._websocket_request('Network.deleteCookies', params=params)
-
-    def _wait_ready(self, ready_code=None, timeout=60):
-        if timeout:
-            timeout *= self.throttling_factor
-        ready_code = ready_code or "document.readyState === 'complete'"
-        self._logger.info('Evaluate ready code "%s"', ready_code)
-        start_time = time.time()
-        result = None
-        while True:
-            taken = time.time() - start_time
-            if taken > timeout:
-                break
-
-            try:
-                result = self._websocket_request('Runtime.evaluate', params={
-                    'expression': "try { %s } catch {}" % ready_code,
-                    'awaitPromise': True,
-                }, timeout=timeout-taken)['result']
-            except CancelledError:
-                exc = self._result.done() and self._result.exception()
-                if exc:
-                    raise exc from None
-                result = "cancelled"
-
-            if result == {'type': 'boolean', 'value': True}:
-                time_to_ready = time.time() - start_time
-                if taken > 2:
-                    self._logger.info('The ready code tooks too much time : %s', time_to_ready)
-                return True
-
-        exc = self._result.done() and self._result.exception()
-        if exc:
-            raise exc from None
-        self.take_screenshot(prefix='sc_failed_ready_')
-        self._logger.info('Ready code last try result: %s', result)
-        return False
-
-    def _wait_code_ok(self, code, timeout, error_checker=None):
-        if timeout:
-            timeout *= self.throttling_factor
-        self.error_checker = error_checker
-        self._logger.info('Evaluate test code "%s"', code)
-        start = time.time()
-        res = self._websocket_request('Runtime.evaluate', params={
-            'expression': code,
-            'awaitPromise': True,
-        }, timeout=timeout)['result']
-        if res.get('subtype') == 'error':
-            raise ChromeBrowserException("Running code returned an error: %s" % res)
-
-        err = ChromeBrowserException("failed")
-        try:
-            # if the runcode was a promise which took some time to execute,
-            # discount that from the timeout
-            if self._result.result(time.time() - start + timeout) and not self.had_failure:
-                self.chrome_log_level = logging.INFO
-                return
-        except CancelledError:
-            # regular-ish shutdown
-            self.chrome_log_level = logging.INFO
-            return
-        except ChromeBrowserException:
-            self.screencaster.save()
-            raise
-        except Exception as e:
-            err = e
-
-        self.take_screenshot()
-        self.screencaster.save()
-
-        if isinstance(err, concurrent.futures.TimeoutError):
-            raise ChromeBrowserException('Script timeout exceeded') from err
-        raise ChromeBrowserException("Unknown error") from err
-
-    def navigate_to(self, url, wait_stop=False):
-        self._logger.info('Navigating to: "%s"', url)
-        timeout = 1e6 if DISABLE_TIMEOUTS else 20.0
-        nav_result = self._websocket_request('Page.navigate', params={'url': url}, timeout=timeout)
-        self._logger.info("Navigation result: %s", nav_result)
-        if wait_stop:
-            frame_id = nav_result['frameId']
-            e = threading.Event()
-            self._frames[frame_id] = e.set
-            self._logger.info('Waiting for frame %r to stop loading', frame_id)
-            e.wait(10)
-
-    def _from_remoteobject(self, arg):
-        """ attempts to make a CDT RemoteObject comprehensible
-        """
-        objtype = arg['type']
-        subtype = arg.get('subtype')
-        if objtype == 'undefined':
-            # the undefined remoteobject is literally just {type: undefined}...
-            return 'undefined'
-        elif objtype != 'object' or subtype not in (None, 'array'):
-            # value is the json representation for json object
-            # otherwise fallback on the description which is "a string
-            # representation of the object" e.g. the traceback for errors, the
-            # source for functions, ... finally fallback on the entire arg mess
-            return arg.get('value', arg.get('description', arg))
-        elif subtype == 'array':
-            # apparently value is *not* the JSON representation for arrays
-            # instead it's just Array(3) which is useless, however the preview
-            # properties are the same as object which is useful (just ignore the
-            # name which is the index)
-            return '[%s]' % ', '.join(
-                repr(p['value']) if p['type'] == 'string' else str(p['value'])
-                for p in arg.get('preview', {}).get('properties', [])
-                if re.match(r'\d+', p['name'])
-            )
-        # all that's left is type=object, subtype=None aka custom or
-        # non-standard objects, print as TypeName(param=val, ...), sadly because
-        # of the way Odoo widgets are created they all appear as Class(...)
-        # nb: preview properties are *not* recursive, the value is *all* we get
-        return '%s(%s)' % (
-            arg.get('className') or 'object',
-            ', '.join(
-                '%s=%s' % (p['name'], repr(p['value']) if p['type'] == 'string' else p['value'])
-                for p in arg.get('preview', {}).get('properties', [])
-                if p.get('value') is not None
-            )
-        )
-
-    LINE_PATTERN = '\tat %(functionName)s (%(url)s:%(lineNumber)d:%(columnNumber)d)\n'
-    def _format_stack(self, logrecord):
-        if logrecord['type'] not in ['trace']:
-            return
-
-        trace = logrecord.get('stackTrace')
-        while trace:
-            for f in trace['callFrames']:
-                yield self.LINE_PATTERN % f
-            trace = trace.get('parent')
-
-    def console_formatter(self, args):
-        """ Formats similarly to the console API:
-
-        * if there are no args, don't format (return string as-is)
-        * %% -> %
-        * %c -> replace by styling directives (ignore for us)
-        * other known formatters -> replace by corresponding argument
-        * leftover known formatters (args exhausted) -> replace by empty string
-        * unknown formatters -> return as-is
-        """
-        if not args:
-            return lambda m: m[0]
-
-        def replacer(m):
-            fmt = m[0][1]
-            if fmt == '%':
-                return '%'
-            if fmt in 'sdfoOc':
-                if not args:
-                    return ''
-                repl = args.pop(0)
-                if fmt == 'c':
-                    return ''
-                return str(self._from_remoteobject(repl))
-            return m[0]
-        return replacer
 
 class NoScreencast:
     def start(self):
@@ -2463,11 +2771,9 @@ class NoScreencast:
     def save(self):
         pass
 
-    def __call__(self, sessionId, data, metadata):
-        pass
-
 
 class Screencaster:
+    """ Records the page using CDP's screencast, BiDi has no equivalent. """
     def __init__(self, browser: ChromeBrowser, directory: str):
         self.stopped = False
         self.browser: ChromeBrowser = browser
@@ -2477,13 +2783,18 @@ class Screencaster:
         self.frames_dir = self.directory / f'frames-{ts:%Y%m%dT%H%M%S.%f}'
         self.frames_dir.mkdir(parents=True, exist_ok=True)
         self.frames = []
+        browser._handlers['goog:cdp.Page.screencastFrame'] = self._handle_frame
 
     def start(self):
         self._logger.info('Starting screencast')
-        self.browser._websocket_send('Page.startScreencast')
+        self.browser._request('session.subscribe', params={'events': ['goog:cdp.Page.screencastFrame']})
+        self.browser._cdp_send('Page.startScreencast')
+
+    def _handle_frame(self, params, **kw):
+        self(**params)
 
     def __call__(self, sessionId, data, metadata):
-        self.browser._websocket_send('Page.screencastFrameAck', params={'sessionId': sessionId})
+        self.browser._cdp_send('Page.screencastFrameAck', {'sessionId': sessionId})
         if self.stopped:
             # if already stopped, drop the frames as we might have removed the directory already
             return
@@ -2501,7 +2812,7 @@ class Screencaster:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.browser._websocket_send('Page.stopScreencast')
+        self.browser._cdp_send('Page.stopScreencast')
         self.stopped = True
         if self.frames_dir.is_dir():
             shutil.rmtree(self.frames_dir, ignore_errors=True)
@@ -2509,7 +2820,7 @@ class Screencaster:
     def save(self):
         if self.stopped:
             return
-        self.browser._websocket_send('Page.stopScreencast')
+        self.browser._cdp_send('Page.stopScreencast')
         # Wait for frames just in case, ideally we'd wait for the Browse.close
         # event or something but that doesn't exist.
         time.sleep(5)
@@ -2554,6 +2865,18 @@ class Screencaster:
             concat_script_path.unlink()
             shutil.rmtree(self.frames_dir, ignore_errors=True)
             self._logger.runbot('Screencast in: %s', outfile)
+
+
+@cache
+def _read_bidi_mapper() -> str:
+    """ Returns the source of chromium-bidi's mapper (``mapperTab.js``),
+    which provides WebDriver BiDi on top of CDP for Chrome.
+
+    The vendored version is used unless ``ODOO_BROWSER_BIDI_MAPPER`` points
+    to another one, e.g. to match an older or newer Chrome.
+    """
+    path = os.environ.get('ODOO_BROWSER_BIDI_MAPPER') or pathlib.Path(__file__).with_name('lib') / 'chromium_bidi' / 'mapperTab.js'
+    return pathlib.Path(path).read_text(encoding='utf-8')
 
 
 @cache
@@ -2680,6 +3003,7 @@ class JsonRpcException(Exception):
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
     browser = None
+    browser_class: type[Browser] = ChromeBrowser
     browser_size = '1366x768'
     touch_enabled = False
     session: OdooHttpSession = None
@@ -2745,12 +3069,12 @@ class HttpCase(TransactionCase):
         yield
 
     @contextmanager
-    def allow_requests(self, browser: ChromeBrowser | None = None, all_requests=False):
+    def allow_requests(self, browser: Browser | None = None, all_requests=False):
         """
         Allows HTTP requests for the scope of the context.
 
         Params:
-            browser (ChromeBrowser | None): if given, add the cookie to the browser.
+            browser (Browser | None): if given, add the cookie to the browser.
             all_requests (bool): if True, allows all requests regardless of cookie.
         """
         with ExitStack() as defer:
@@ -2857,7 +3181,7 @@ class HttpCase(TransactionCase):
         self.session['context'].update(**items)
         session_store().save(self.session)
 
-    def authenticate(self, user, password, *, browser: ChromeBrowser = None, session_extra=()):
+    def authenticate(self, user, password, *, browser: Browser | None = None, session_extra=()):
         if getattr(self, 'session', None):
             session_store().delete(self.session)
 
@@ -2988,7 +3312,7 @@ class HttpCase(TransactionCase):
         if watch:
             self._logger.warning('watch mode is only suitable for local testing')
 
-        browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
+        browser = self.browser_class(self, headless=not watch, success_signal=success_signal, debug=debug)
         with self.allow_requests(browser=browser), contextlib.ExitStack() as atexit:
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
@@ -3050,8 +3374,8 @@ class HttpCase(TransactionCase):
             error = None
             try:
                 browser._wait_code_ok(code, timeout, error_checker=error_checker)
-            except ChromeBrowserException as chrome_browser_exception:
-                error = chrome_browser_exception
+            except BrowserException as browser_exception:
+                error = browser_exception
             if error:  # dont keep initial traceback, keep that outside of except
                 self.fail(str(error))
 
