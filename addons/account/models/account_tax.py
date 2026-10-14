@@ -51,7 +51,7 @@ class AccountTaxGroup(models.Model):
             group.country_id = group.company_id.account_fiscal_country_id or group.company_id.country_id
 
 
-class AccountTax(models.Model):
+class AccountTax(models.CachedModel):
     _name = 'account.tax'
     _inherit = ['mail.thread']
     _description = 'Tax'
@@ -59,6 +59,15 @@ class AccountTax(models.Model):
     _check_company_auto = True
     _rec_names_search = ('name', 'description', 'invoice_label')
     _check_company_domain = models.check_company_domain_parent_of
+    # master data: read on every price computation, almost never written
+    @property
+    def _cached_data_fields(self):
+        return (
+            *self._get_cacheable_field_names(),
+            'children_tax_ids',
+            'invoice_repartition_line_ids',
+            'refund_repartition_line_ids',
+        )
 
     name = fields.Char(string='Tax Name', required=True, translate=True, tracking=True)
     type_tax_use = fields.Selection(TYPE_TAX_USE, string='Tax Type', required=True, default="sale", tracking=True,
@@ -5183,12 +5192,16 @@ class AccountTax(models.Model):
                     break
 
 
-class AccountTaxRepartitionLine(models.Model):
+class AccountTaxRepartitionLine(models.CachedModel):
     _name = 'account.tax.repartition.line'
     _description = "Tax Repartition Line"
     _order = 'document_type, repartition_type, sequence, id'
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
+    # master data: read on every tax computation, almost never written
+    @property
+    def _cached_data_fields(self):
+        return (*self._get_cacheable_field_names(), 'tag_ids')
 
     factor_percent = fields.Float(
         string="%",

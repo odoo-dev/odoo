@@ -4,9 +4,13 @@ from odoo.tools import SQL
 from odoo.exceptions import UserError
 
 
-class AccountAccountTag(models.Model):
+class AccountAccountTag(models.CachedModel):
     _name = 'account.account.tag'
     _description = 'Account Tag'
+    # master data: read on every tax computation, almost never written
+    @property
+    def _cached_data_fields(self):
+        return self._get_cacheable_field_names()
 
     name = fields.Char('Tag Name', required=True, translate=True)
     applicability = fields.Selection([('accounts', 'Accounts'), ('taxes', 'Taxes'), ('products', 'Products')], required=True, default='accounts')

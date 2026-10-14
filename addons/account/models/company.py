@@ -74,6 +74,17 @@ class ResCompany(models.Model):
     _name = 'res.company'
     _inherit = ["res.company", "mail.thread"]
 
+    @property
+    def _cached_data_fields(self):
+        # accounting settings are read on every price computation
+        return (
+            *super()._cached_data_fields,
+            'tax_calculation_rounding_method',
+            'account_price_include',
+            'account_fiscal_country_id',
+            'tax_exigibility',
+        )
+
     fiscalyear_last_day = fields.Integer(default=31, required=True)
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
     fiscalyear_lock_date = fields.Date(
