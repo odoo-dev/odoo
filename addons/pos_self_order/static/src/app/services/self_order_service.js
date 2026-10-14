@@ -742,12 +742,18 @@ export class SelfOrder {
             .forEach((o) => this.data.localDeleteCascade(o));
     }
 
+    getAddressInput() {
+        return registry
+            .category("pos_self_order.address_inputs")
+            .getAll()
+            .find((addressInput) => addressInput.isAvailable(this));
+    }
+
     isValidSelection(slot, partner) {
         const preset = this.currentOrder.preset_id || {};
-        const { id, name, email, phone, street, city, country_id, zip } = partner || {};
-        const partnerInfo = this.config._has_google_places_api_key
-            ? name && phone && street && city && country_id && zip
-            : name && phone && street;
+        const { id, name, email, phone } = partner || {};
+        const addressFields = this.getAddressInput()?.requiredFields || ["street"];
+        const partnerInfo = name && phone && addressFields.every((field) => partner[field]);
 
         const selectedPartner = typeof id === "number" && !isNaN(id);
         const validPartnerInfos = partnerInfo || selectedPartner;

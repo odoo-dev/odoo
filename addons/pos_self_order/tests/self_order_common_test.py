@@ -353,3 +353,32 @@ class SelfOrderCommonTest(odoo.tests.HttpCase):
             f'/pos-self-order/process-order/{device_type}', order_data,
         )
         return self.env['pos.order'].browse(data['pos.order'][0]['id'])
+
+
+class SelfOrderPresetCommonTest(SelfOrderCommonTest):
+    def setUp(self):
+        super().setUp()
+        self.env.company.country_id = self.env.ref('base.be')
+        self.preset_dine_in = self.env['pos.preset'].create({
+            'name': 'Dine in',
+            'available_in_self': True,
+            'service_at': 'table',
+        })
+        self.preset_takeaway = self.env['pos.preset'].create({
+            'name': 'Takeaway',
+            'available_in_self': True,
+            'service_at': 'counter',
+            'identification': 'name',
+        })
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'available_in_self': True,
+            'service_at': 'delivery',
+            'identification': 'address',
+        })
+        self.pos_config.write({
+            'self_ordering_mode': 'mobile',
+            'use_presets': True,
+            'default_preset_id': self.preset_dine_in.id,
+            'available_preset_ids': [(6, 0, [self.preset_takeaway.id, self.preset_delivery.id])],
+        })

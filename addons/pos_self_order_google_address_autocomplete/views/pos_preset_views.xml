@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_preset_form" model="ir.ui.view">
+        <field name="name">pos.preset.form.inherit.google.address.autocomplete</field>
+        <field name="model">pos.preset</field>
+        <field name="inherit_id" ref="pos_self_order_geolocalize.view_pos_preset_form"/>
+        <field name="arch" type="xml">
+            <field name="delivery_from_street" position="attributes">
+                <attribute name="widget">google_address_autocomplete</attribute>
+                <attribute name="options">{'street': 'delivery_from_street', 'city': 'delivery_from_city', 'zip': 'delivery_from_zip', 'state_id': 'delivery_from_state_id', 'country_id': 'delivery_from_country_id'}</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

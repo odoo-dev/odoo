@@ -1,7 +1,4 @@
-import math
-
 from odoo import http
-from odoo.addons.google_address_autocomplete.controllers.google_address_autocomplete import AutoCompleteController
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.http.stream import content_disposition
@@ -9,19 +6,6 @@ from odoo.service.model import call_kw
 from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Unauthorized
 from odoo.exceptions import MissingError
 from odoo.tools import consteq
-
-
-def _haversine_distance(lat1, long1, lat2, long2):
-    """Compute the straight-line distance in km between two lat/long points."""
-    R = 6371  # earth's radius in km
-    dlat = math.radians(lat2 - lat1)
-    dlong = math.radians(long2 - long1)
-    arcsin = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2))
-        * math.sin(dlong / 2) ** 2
-    )
-    return 2 * R * math.atan2(math.sqrt(arcsin), math.sqrt(1 - arcsin))
 
 
 class PosSelfOrderController(http.Controller):
@@ -122,16 +106,13 @@ class PosSelfOrderController(http.Controller):
     @http.route('/pos-self-order/validate-partner', auth='public', type='jsonrpc', website=True)
     def validate_partner(self, access_token, name, phone, street, zip, city, country_id, state_id=None, partner_id=None, email=None, preset_id=None):
         pos_config = self._verify_pos_config(access_token)
-        preset = pos_config.env['pos.preset'].browse(int(preset_id)) if preset_id else False
+        preset = pos_config.env['pos.preset'].browse(int(preset_id) if preset_id else []).exists()
         POSOrder = pos_config.env['pos.order']
         existing_partner = POSOrder._get_self_partner_from_token(pos_config, partner_id)
-        google_places_api_key = request.env['ir.config_parameter'].sudo().get_str('google_address_autocomplete.google_places_api_key') or None
 
         if existing_partner and existing_partner.exists():
-            if google_places_api_key and preset and preset.exists() and preset.service_at == 'delivery':
-                error = self._check_delivery_address_for_partner(preset, existing_partner)
-                if error:
-                    return {'error': error}
+            if error := self._check_partner_for_preset(preset, existing_partner):
+                return {'error': error}
             return {
                 'res.partner': [{'id': partner_id}],
             }
@@ -149,36 +130,15 @@ class PosSelfOrderController(http.Controller):
             'state_id': state_id.id if state_id else False,
             'company_id': pos_config.company_id.id,
         })
-        if google_places_api_key and preset and preset.exists() and preset.service_at == 'delivery':
-            error = self._check_delivery_address_for_partner(preset, partner_sudo)
-            if error:
-                return {'error': error}
+        if error := self._check_partner_for_preset(preset, partner_sudo):
+            return {'error': error}
 
         return {
             'res.partner': [{'id': POSOrder._get_signed_self_partner_id(pos_config, partner_sudo.id)}],
         }
 
-    def _check_delivery_address_for_partner(self, preset, partner):
-        if not partner.partner_latitude and not partner.partner_longitude:
-            partner.geo_localize()
-        if not partner.partner_latitude and not partner.partner_longitude:
-            return {
-                'type': 'address',
-                'message': self.env._("We couldn't locate this address. Please enter a complete address with a street number."),
-            }
-        if not preset.delivery_from_address:
-            return None
-        distance_km = _haversine_distance(
-            partner.partner_latitude, partner.partner_longitude,
-            preset.delivery_from_latitude, preset.delivery_from_longitude,
-        )
-        max_distance = preset.delivery_max_distance_km
-        max_distance_km = max_distance * 1.60934 if preset.delivery_distance_unit == 'mi' else max_distance
-        if max_distance_km and distance_km > max_distance_km:
-            return {
-                'type': 'delivery',
-                'message': self.env._("Delivery isn't available for this address. You can still place your order using another method."),
-            }
+    def _check_partner_for_preset(self, preset, partner):
+        """Return an error ``{'type', 'message'}`` when the partner cannot order with the preset, else None."""
         return None
 
     @http.route('/pos-self-order/remove-order', auth='public', type='jsonrpc', website=True)
@@ -311,22 +271,6 @@ class PosSelfOrderController(http.Controller):
         amount_untaxed = sum(lines.mapped('price_subtotal'))
         amount_total = sum(lines.mapped('price_subtotal_incl'))
         return amount_total, amount_untaxed
-
-    @http.route('/pos-self/autocomplete/address', methods=['POST'], type='jsonrpc', auth='public', website=True)
-    def pos_self_order_autocomplete_address(self, access_token, partial_address, **kwargs):
-        self._verify_pos_config(access_token)
-        google_places_api_key = request.env['ir.config_parameter'].sudo().get_str('google_address_autocomplete.google_places_api_key') or None
-        if not google_places_api_key:
-            return {'results': []}
-        return AutoCompleteController()._perform_place_search(partial_address, api_key=google_places_api_key)
-
-    @http.route('/pos-self/autocomplete/address_full', methods=['POST'], type='jsonrpc', auth='public', website=True)
-    def pos_self_order_autocomplete_address_full(self, access_token, address, google_place_id=None, **kwargs):
-        self._verify_pos_config(access_token)
-        google_places_api_key = request.env['ir.config_parameter'].sudo().get_str('google_address_autocomplete.google_places_api_key') or None
-        if not google_places_api_key:
-            return {'address': None}
-        return AutoCompleteController()._perform_complete_place_search(address, api_key=google_places_api_key, google_place_id=google_place_id)
 
     def _verify_pos_config(self, access_token):
         """

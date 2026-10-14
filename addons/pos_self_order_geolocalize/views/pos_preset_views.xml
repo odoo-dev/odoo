@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_preset_form" model="ir.ui.view">
+        <field name="name">pos.preset.form.inherit.geolocalize</field>
+        <field name="model">pos.preset</field>
+        <field name="inherit_id" ref="pos_self_order.view_pos_preset_form"/>
+        <field name="arch" type="xml">
+            <field name="service_at" position="after">
+                <label for="delivery_from_street" string="Sender address" invisible="not available_in_self or service_at != 'delivery'"/>
+                <div class="o_address_format" invisible="not available_in_self or service_at != 'delivery'">
+                    <field name="delivery_from_street" placeholder="Street..." class="o_address_street"/>
+                    <field name="delivery_from_city" placeholder="City" class="o_address_city"/>
+                    <field name="delivery_from_state_id" placeholder="State" class="o_address_state" domain="[('country_id', '=?', delivery_from_country_id)]" options="{'no_open': True, 'no_quick_create': True}"/>
+                    <field name="delivery_from_zip" placeholder="ZIP" class="o_address_zip"/>
+                    <field name="delivery_from_country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_create': True}"/>
+                </div>
+            </field>
+            <field name="free_delivery_min_amount" position="after">
+                <label for="delivery_max_distance_km" invisible="not available_in_self or service_at != 'delivery'"/>
+                <div class="d-flex" invisible="not available_in_self or service_at != 'delivery'">
+                    <field name="delivery_max_distance_km" nolabel="1" class="oe_inline"/>
+                    <field name="delivery_distance_unit" nolabel="1" class="oe_inline"/>
+                </div>
+            </field>
+        </field>
+    </record>
+</odoo>

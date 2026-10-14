@@ -2,7 +2,6 @@
 
 import json
 from datetime import datetime, timedelta
-from unittest.mock import patch
 
 import odoo.tests
 from odoo import Command, fields
@@ -260,96 +259,6 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertEqual(len(data['pos.order']), 1)
         self.assertEqual(data['pos.order'][0]['id'], pos_order.id)
 
-    def test_validate_partner_delivery_distance_accepts_within_limit(self):
-        self.pos_config.self_ordering_mode = 'mobile'
-        self.pos_config.with_user(self.pos_user).open_ui()
-        self.pos_config.current_session_id.set_opening_control(0, '')
-        self.env['ir.config_parameter'].sudo().set_str('google_address_autocomplete.google_places_api_key', 'test_api_key')
-
-        with patch('odoo.addons.base_geolocalize.models.base_geocoder.BaseGeocoder.geo_find', return_value=(50.0, 4.0)):
-            self.delivery_preset.write({
-                'delivery_from_address': 'Main St 1',
-                'delivery_from_city': 'Test City',
-                'delivery_from_zip': '1000',
-                'delivery_from_country_id': self.env.ref('base.be').id,
-                'delivery_max_distance_km': 5.0,
-            })
-
-        customer = self.env['res.partner'].create({
-            'name': 'Customer',
-            'street': 'Main St 2',
-            'city': 'Test City',
-            'zip': '1000',
-            'country_id': self.env.ref('base.be').id,
-            'partner_latitude': 50.001,
-            'partner_longitude': 4.001,
-        })
-
-        params = {
-            'access_token': self.pos_config.access_token,
-            'preset_id': self.delivery_preset.id,
-            'partner_id': self.env['pos.order']._get_signed_self_partner_id(self.pos_config, customer.id),
-            'name': customer.name,
-            'phone': customer.phone,
-            'street': customer.street,
-            'zip': customer.zip,
-            'city': customer.city,
-            'country_id': customer.country_id.id,
-            'state_id': customer.state_id.id,
-            'email': customer.email,
-        }
-
-        with patch('odoo.addons.base_geolocalize.models.res_partner.ResPartner.geo_localize', return_value=True):
-            data = self.make_request_to_controller('/pos-self-order/validate-partner', params)
-
-        self.assertIn('res.partner', data)
-        self.assertNotIn('error', data)
-
-    def test_validate_partner_delivery_distance_rejects_outside_limit(self):
-        self.pos_config.self_ordering_mode = 'mobile'
-        self.pos_config.with_user(self.pos_user).open_ui()
-        self.pos_config.current_session_id.set_opening_control(0, '')
-        self.env['ir.config_parameter'].sudo().set_str('google_address_autocomplete.google_places_api_key', 'test_api_key')
-
-        with patch('odoo.addons.base_geolocalize.models.base_geocoder.BaseGeocoder.geo_find', return_value=(0.0, 0.0)):
-            self.delivery_preset.write({
-                'delivery_from_address': 'Main St 1',
-                'delivery_from_city': 'Test City',
-                'delivery_from_zip': '1000',
-                'delivery_from_country_id': self.env.ref('base.be').id,
-                'delivery_max_distance_km': 1.0,
-            })
-
-        customer = self.env['res.partner'].create({
-            'name': 'Customer Far',
-            'street': 'Far St 1',
-            'city': 'Test City',
-            'zip': '1000',
-            'country_id': self.env.ref('base.be').id,
-            'partner_latitude': 1.0,
-            'partner_longitude': 0.0,
-        })
-
-        params = {
-            'access_token': self.pos_config.access_token,
-            'preset_id': self.delivery_preset.id,
-            'partner_id': self.env['pos.order']._get_signed_self_partner_id(self.pos_config, customer.id),
-            'name': customer.name,
-            'phone': customer.phone,
-            'street': customer.street,
-            'zip': customer.zip,
-            'city': customer.city,
-            'country_id': customer.country_id.id,
-            'state_id': customer.state_id.id,
-            'email': customer.email,
-        }
-
-        with patch('odoo.addons.base_geolocalize.models.res_partner.ResPartner.geo_localize', return_value=True):
-            data = self.make_request_to_controller('/pos-self-order/validate-partner', params)
-
-        self.assertIn('error', data)
-        self.assertEqual(data['error']['type'], 'delivery')
-
     def test_free_delivery_threshold_edge_cases(self):
         """Test free delivery threshold at exactly the minimum, below, and above"""
         self.pos_config.self_ordering_mode = 'mobile'
@@ -365,16 +274,10 @@ class TestSelfOrderController(SelfOrderCommonTest):
         })
 
         # Configure delivery preset with free delivery threshold at 50.0
-        with patch('odoo.addons.base_geolocalize.models.base_geocoder.BaseGeocoder.geo_find', return_value=(0.0, 0.0)):
-            self.delivery_preset.write({
-                'delivery_from_address': 'Main St 1',
-                'delivery_from_city': 'Brussels',
-                'delivery_from_zip': '1000',
-                'delivery_from_country_id': self.env.ref('base.be').id,
-                'delivery_max_distance_km': 10.0,
-                'delivery_product_id': delivery_template.product_variant_id.id,
-                'free_delivery_min_amount': 50.0,
-            })
+        self.delivery_preset.write({
+            'delivery_product_id': delivery_template.product_variant_id.id,
+            'free_delivery_min_amount': 50.0,
+        })
 
         # Test 1: Order total exactly at threshold (50.0) - should qualify for free delivery
         self.assertEqual(self.delivery_preset.free_delivery_min_amount, 50.0)
