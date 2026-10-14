@@ -25,15 +25,16 @@ class TestESLint(LintCase):
 
     longMessage = True
 
-    def _test_eslint(self, modules, config_path):
-        """ Test that there are no eslint errors in javascript files """
+    def _test_eslint(self, modules, config_path, extension='js', exclude=None):
+        """ Test that there are no eslint errors in the javascript or css files """
 
         files_to_check = [
-            p for p in self.iter_module_files('**/static/**/*.js', modules=modules)
+            p for p in self.iter_module_files(f'**/static/**/*.{extension}', modules=modules)
             if not re.match('.*/libs?/.*', p)  # don't check libraries
-            if not re.match('.*/o_spreadsheet/o_spreadsheet.js', p) # don't check generated code
+            if not re.match(f'.*/o_spreadsheet/o_spreadsheet.{extension}', p) # don't check generated code
+            if not (exclude and re.match(exclude, p))
         ]
-        _logger.info('Testing %s js files', len(files_to_check))
+        _logger.info('Testing %s %s files', len(files_to_check), extension)
         cmd = [eslint, '--no-ignore', '-c', config_path] + files_to_check
         # eslint skips files outside of the working directory, the addons may be anywhere
         process = subprocess.run(cmd, capture_output=True, encoding="utf-8", check=False, cwd='/')
@@ -50,3 +51,11 @@ stderr: {process.stderr}
             strict_test.append(module) if re.search(r'^point_of_sale$|^pos_.*$|^.*_pos$|^.*_pos_.*$|^iot$|^iot_.*$|^obox$|^obox_.*$', module) else basic_test.append(module)
         self._test_eslint(basic_test, file_path('test_lint/tests/eslint_basic.config.cjs'))
         self._test_eslint(strict_test, file_path('web/tooling/_eslint.config.cjs'))
+
+    def test_eslint_css(self):
+        self._test_eslint(
+            get_modules(),
+            file_path('web/tooling/_eslint.config.cjs'),
+            extension='css',
+            exclude='.*/static/invalid_src/.*',  # invalid on purpose
+        )
