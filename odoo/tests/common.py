@@ -1849,11 +1849,7 @@ class Browser:
             'capabilities': {'alwaysMatch': self._capabilities()},
         })['capabilities']
         self._logger.info('Browser: %s %s', capabilities['browserName'], capabilities['browserVersion'])
-        contexts = self._request('browsingContext.getTree', params={'maxDepth': 0})['contexts']
-        if contexts:
-            self.context = contexts[0]['context']
-        else:
-            self.context = self._request('browsingContext.create', params={'type': 'tab'})['context']
+        self.context = self._open_context()
         self._setup()
         self.cleanup.callback(self._winddown)
 
@@ -1861,6 +1857,13 @@ class Browser:
             self.screencaster = self.cleanup.enter_context(self._screencaster(scs))
         else:
             self.screencaster = self.cleanup.enter_context(NoScreencast())
+
+    def _open_context(self) -> str:
+        """ Returns the browsing context (tab) to run the tests in. """
+        contexts = self._request('browsingContext.getTree', params={'maxDepth': 0})['contexts']
+        if contexts:
+            return contexts[0]['context']
+        return self._request('browsingContext.create', params={'type': 'tab'})['context']
 
     def _capabilities(self) -> dict:
         """ Capabilities requested for the BiDi session. """
@@ -1948,6 +1951,26 @@ class Browser:
 
     def read_log(self) -> bytes:
         return b''
+
+    def _terminate(self, proc: subprocess.Popen) -> None:
+        """ Terminates the browser process and its descendants. """
+        self._logger.info("Terminating %s with pid %s", self.name, proc.pid)
+        main = psutil.Process(proc.pid)
+        procs = [main] + main.children(recursive=True)
+        proc.terminate()
+        _, alive = psutil.wait_procs(procs, 5)
+        if alive:
+            self._logger.warning(
+                "Killing %s descendants-or-self of %s: %d remaining%s",
+                self.name,
+                proc.pid,
+                len(alive),
+                "".join(f"\n- {p.name()} ({p.status()})" for p in alive),
+            )
+            for p in alive:
+                p.kill()
+            psutil.wait_procs(alive, 1)
+            self.browser_log_level = logging.RUNBOT
 
     def _screencaster(self, directory: str) -> NoScreencast:
         self._logger.warning("Screencasts are not supported by %s", self.name)
@@ -2204,7 +2227,7 @@ which leads to stray network requests and inconsistencies."""
         def handler(f):
             try:
                 base_png = f.result(timeout=0)['data']
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001  done callback, must not raise
                 self._logger.runbot("Couldn't capture screenshot: %s", e)
                 return
             if not base_png:
@@ -2302,7 +2325,7 @@ which leads to stray network requests and inconsistencies."""
         except BrowserException:
             self.screencaster.save()
             raise
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001  reported as an unknown error below
             err = e
 
         self.take_screenshot()
@@ -2420,6 +2443,7 @@ which leads to stray network requests and inconsistencies."""
 # * format strings are applied when their specifiers don't match the
 #   arguments, otherwise chromium-bidi fails to format the message's text and
 #   drops the log entry
+# * styles (%c) are dropped, Firefox splits the message's text on them
 PRELOAD_CONSOLE = """() => {
     const toString = Object.prototype.toString;
     const formatError = (arg) => {
@@ -2433,9 +2457,22 @@ PRELOAD_CONSOLE = """() => {
     const SPECIFIERS = /%[sdifoOc]/g;
     const formatArgs = (args) => {
         const [first, ...rest] = args;
-        const count = typeof first === "string" ? (first.match(SPECIFIERS) || []).length : 0;
-        if (count === rest.length) {
+        if (typeof first !== "string") {
             return args;
+        }
+        const count = (first.match(SPECIFIERS) || []).length;
+        if (count === rest.length) {
+            let index = 0;
+            const styles = new Set();
+            const text = first.replace(SPECIFIERS, (specifier) => {
+                if (specifier === "%c") {
+                    styles.add(index++);
+                    return "";
+                }
+                index++;
+                return specifier;
+            });
+            return [text, ...rest.filter((_, i) => !styles.has(i))];
         }
         const text = first.replace(SPECIFIERS, (specifier) => {
             if (!rest.length) {
@@ -2665,22 +2702,7 @@ class ChromeBrowser(Browser):
         try:
             yield proc, devtools_port
         finally:
-            self._logger.info("Terminating chrome headless with pid %s", proc.pid)
-            main = psutil.Process(proc.pid)
-            procs = [main] + main.children(recursive=True)
-            proc.terminate()
-            _, alive = psutil.wait_procs(procs, 5)
-            if alive:  # can't early exit, it suppresses the finally'd exception if any
-                self._logger.warning(
-                    "Killing chrome descendants-or-self of %s: %d remaining%s",
-                    proc.pid,
-                    len(alive),
-                    "".join(f"\n- {p.name()} ({p.status()})" for p in alive),
-                )
-                for p in alive:
-                    p.kill()
-                psutil.wait_procs(alive, 1)
-                self.browser_log_level = logging.RUNBOT
+            self._terminate(proc)
 
     def read_log(self) -> bytes:
         try:
@@ -2756,6 +2778,137 @@ class ChromeBrowser(Browser):
         finally:
             self._logger.info("Closing websocket connection")
             ws.close()
+
+
+class FirefoxBrowser(Browser):
+    """ Helper object to control a Firefox headless process.
+
+    Firefox implements WebDriver BiDi natively, so it is used directly. CDP
+    specific features (CPU throttling, screencasts, heap usage) are not
+    available.
+    """
+    name = 'Firefox'
+    log_prefix = 'firefox_log_'
+    remote_debugging_port = 0  # change it in a non-git-tracked file
+
+    preferences = {
+        'browser.aboutwelcome.enabled': False,  # Skip the welcome screen
+        'browser.sessionstore.resume_from_crash': False,  # Don't offer to restore the previous session
+        'browser.shell.checkDefaultBrowser': False,  # Bypass the prompt asking to make Firefox the default browser
+        'browser.startup.homepage_override.mstone': 'ignore',  # Skip the "what's new" page
+        'browser.startup.page': 0,  # Start with a blank page
+        'browser.tabs.warnOnClose': False,  # Don't ask for confirmation when closing tabs
+        'browser.translations.enable': False,  # Disable Firefox translation
+        'datareporting.policy.dataSubmissionEnabled': False,  # Disable telemetry and its first-run notice
+        'dom.disable_open_during_load': False,  # Disable the popup blocker
+        'dom.max_script_run_time': 0,  # Never show the slow script dialog
+        'media.autoplay.blocking_policy': 0,  # Allow media autoplay without requiring a user click
+        'media.autoplay.default': 0,
+        'network.proxy.type': 0,  # Force a direct connection, bypassing any system proxies
+        'signon.rememberSignons': False,  # Don't offer to save the passwords
+    }
+
+    @property
+    def executable(self):
+        try:
+            return _find_firefox_executable()
+        except Exception:
+            self._logger.warning('Firefox executable not found')
+            raise
+
+    def _open_context(self):
+        # in headless mode the initial tab never gets the focus, so focus
+        # events aren't dispatched in it: the tests run in a new tab
+        initial_context = super()._open_context()
+        context = self._request('browsingContext.create', params={'type': 'tab'})['context']
+        self._request('browsingContext.close', params={'context': initial_context})
+        return context
+
+    def _handle_log_entry(self, type, level, source, text=None, stackTrace=None, **kw):  # pylint: disable=redefined-builtin
+        if type == 'javascript' and stackTrace is None:
+            # Firefox also reports the errors which aren't script exceptions
+            # (e.g. failed font downloads, CSS errors), without stack trace,
+            # Chrome doesn't report them at all
+            self._logger.getChild('browser').info("%s", text)
+            return
+        super()._handle_log_entry(type, level, source, text=text, stackTrace=stackTrace, **kw)
+
+    @contextlib.contextmanager
+    def _start(self, touch_enabled, headless=True, debug=False):
+        preferences = dict(self.preferences)
+        if touch_enabled:
+            # expose touch events, notably "'ontouchstart' in window"
+            preferences['dom.w3c_touch_events.enabled'] = 1
+            preferences['dom.w3c_touch_events.legacy_apis.enabled'] = True
+        pathlib.Path(self.user_data_dir, 'user.js').write_text(''.join(
+            f'user_pref({json.dumps(name)}, {json.dumps(value)});\n'
+            for name, value in preferences.items()
+        ), encoding='utf-8')
+
+        cmd = [
+            self.executable,
+            '--no-remote',
+            '--profile', self.user_data_dir,
+            '--remote-debugging-port', str(self.remote_debugging_port),
+        ]
+        if headless:
+            cmd.append('--headless')
+        if debug is not False:
+            cmd.append('--devtools')
+        cmd.append('about:blank')
+        try:
+            with pathlib.Path(self.user_data_dir, 'firefox.log').open('wb') as log:
+                # pylint: disable=subprocess-popen-preexec-fn
+                self.process = subprocess.Popen(
+                    cmd,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    preexec_fn=_preexec,  # noqa: PLW1509
+                    env={**os.environ, 'TMPDIR': self.user_data_dir, 'MOZ_CRASHREPORTER_DISABLE': '1'},
+                )
+        except OSError:
+            raise unittest.SkipTest("%s not found" % cmd[0])
+        self._logger.info('Firefox pid: %s', self.process.pid)
+        self._logger.info('Firefox headless temporary profile dir: %s', self.user_data_dir)
+        try:
+            ws_url = self._wait_bidi_server()
+            self._logger.info('Websocket url found: %s', ws_url)
+            ws = websocket.create_connection(ws_url, enable_multithread=True, suppress_origin=True)
+            ws.settimeout(0.01)
+            try:
+                yield BidiTransport(ws, self._logger)
+            finally:
+                self._logger.info("Closing websocket connection")
+                ws.close()
+        finally:
+            self._terminate(self.process)
+
+    def _wait_bidi_server(self) -> str:
+        """ Returns the url of the BiDi endpoint, from the file Firefox writes
+        in the profile once its server listens.
+        """
+        server_file = pathlib.Path(self.user_data_dir, 'WebDriverBiDiServer.json')
+        for _ in range(CHECK_BROWSER_ITERATIONS):
+            time.sleep(CHECK_BROWSER_SLEEP)
+            if self.process.poll() is not None:
+                break
+            try:
+                server = json.loads(server_file.read_text('utf-8'))
+            except (FileNotFoundError, ValueError):
+                continue
+            return f"ws://{server['ws_host']}:{server['ws_port']}/session"
+
+        self._logger.warning(
+            'Firefox headless failed to start:\n%s',
+            self.read_log().decode(errors='replace'),
+        )
+        raise unittest.SkipTest(f'Failed to detect the Firefox BiDi server after {BROWSER_WAIT:.1f}s.')
+
+    def read_log(self) -> bytes:
+        try:
+            return pathlib.Path(self.user_data_dir, 'firefox.log').read_bytes()
+        except FileNotFoundError:
+            return b''
 
 
 class NoScreencast:
@@ -2880,9 +3033,40 @@ def _read_bidi_mapper() -> str:
 
 
 @cache
+def _browser_bin() -> tuple[str | None, bool]:
+    """ Returns the browser executable set by ``ODOO_BROWSER_BIN``, if any,
+    and whether it is Firefox (otherwise it is assumed to be Chrome).
+
+    ``ODOO_BROWSER_BIN`` is used for testing specific browser builds, or
+    another browser than Chrome.
+    """
+    browser_bin_path = os.environ.get('ODOO_BROWSER_BIN')
+    if not (browser_bin_path and os.path.exists(browser_bin_path)):
+        return None, False
+    if platform.system() == 'Windows':
+        # the browsers don't print their version on Windows
+        return browser_bin_path, 'firefox' in pathlib.Path(browser_bin_path).name.lower()
+    try:
+        version = subprocess.run(
+            [browser_bin_path, '--version'],
+            capture_output=True, text=True, timeout=10, check=False,
+        ).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        version = ''
+    return browser_bin_path, 'Firefox' in version
+
+
+def _get_browser_class() -> type[Browser]:
+    """ Returns the browser running the browser tests: Firefox if
+    ``ODOO_BROWSER_BIN`` is a Firefox, Chrome otherwise.
+    """
+    return FirefoxBrowser if _browser_bin()[1] else ChromeBrowser
+
+
+@cache
 def _find_executable():
-    browser_bin_path = os.environ.get('ODOO_BROWSER_BIN')  # used for testing specific Chrome builds
-    if browser_bin_path and os.path.exists(browser_bin_path):
+    browser_bin_path, is_firefox = _browser_bin()
+    if browser_bin_path and not is_firefox:
         return browser_bin_path
     system = platform.system()
     if system == 'Linux':
@@ -2913,6 +3097,37 @@ def _find_executable():
                 return bin_
 
     raise unittest.SkipTest("Chrome executable not found")
+
+
+@cache
+def _find_firefox_executable():
+    browser_bin_path, is_firefox = _browser_bin()
+    if browser_bin_path and is_firefox:
+        return browser_bin_path
+    system = platform.system()
+    if system == 'Linux':
+        for bin_ in ['firefox', 'firefox-esr']:
+            try:
+                return find_in_path(bin_)
+            except OSError:
+                continue
+
+    elif system == 'Darwin':
+        bin_ = '/Applications/Firefox.app/Contents/MacOS/firefox'
+        if os.path.exists(bin_):
+            return bin_
+
+    elif system == 'Windows':
+        bins = [
+            '%ProgramFiles%\\Mozilla Firefox\\firefox.exe',
+            '%ProgramFiles(x86)%\\Mozilla Firefox\\firefox.exe',
+        ]
+        for bin_ in bins:
+            bin_ = os.path.expandvars(bin_)
+            if os.path.exists(bin_):
+                return bin_
+
+    raise unittest.SkipTest("Firefox executable not found")
 
 
 class Opener(requests.Session):
@@ -3003,7 +3218,7 @@ class JsonRpcException(Exception):
 class HttpCase(TransactionCase):
     """ Transactional HTTP TestCase with url_open and Chrome headless helpers. """
     browser = None
-    browser_class: type[Browser] = ChromeBrowser
+    browser_class: type[Browser] | None = None  # defaults to the ODOO_BROWSER_BIN one, see _get_browser_class
     browser_size = '1366x768'
     touch_enabled = False
     session: OdooHttpSession = None
@@ -3312,7 +3527,8 @@ class HttpCase(TransactionCase):
         if watch:
             self._logger.warning('watch mode is only suitable for local testing')
 
-        browser = self.browser_class(self, headless=not watch, success_signal=success_signal, debug=debug)
+        browser_class = self.browser_class or _get_browser_class()
+        browser = browser_class(self, headless=not watch, success_signal=success_signal, debug=debug)
         with self.allow_requests(browser=browser), contextlib.ExitStack() as atexit:
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
