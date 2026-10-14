@@ -5285,6 +5285,9 @@ class AccountMove(models.Model):
         else:
             cash_discount_account = company.account_journal_early_pay_discount_gain_account_id
 
+        if cash_discount_account and self.fiscal_position_id:
+            cash_discount_account = self.fiscal_position_id.map_account(cash_discount_account)
+
         epd_analytic_distribution = self.env['account.analytic.distribution.model']._get_distribution({
             'account_prefix': cash_discount_account.code,
             'company_id': self.company_id.id,
