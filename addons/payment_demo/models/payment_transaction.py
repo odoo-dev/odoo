@@ -108,6 +108,23 @@ class PaymentTransaction(models.Model):
         payment_data = {"reference": self.reference, "simulated_state": "done"}
         self._record(payment_data)
 
+    def _charge_delegated_token(self, credential_token):
+        """Override of `payment` to simulate a delegated-token charge (demo only).
+
+        The credential is opaque and never dereferenced; this only mimics the PSP round
+        trip. As a test affordance, a credential containing ``"decline"`` simulates a
+        declined charge, so callers can exercise the handoff branch; anything else succeeds.
+        """
+        if self.provider_code != "demo":
+            return super()._charge_delegated_token(credential_token)
+
+        simulated_state = "error" if "decline" in (credential_token or "") else "done"
+        self.with_context(
+            payment_safe_write=True  # No API call was made; safe to replay
+        )._process({"reference": self.reference, "simulated_state": simulated_state})
+        # Post-process immediately, as the state change skipped the processing cron
+        self._try_post_process()
+
     def _apply_updates(self, payment_data):
         """Override of `payment` to update the transaction based on the payment data."""
         if self.provider_code != "demo":
