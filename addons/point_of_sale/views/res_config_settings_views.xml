@@ -242,7 +242,7 @@
                             </block>
                             <block title="Accounting" id="pos_accounting_section">
                                 <setting id="pos_accounting" title="Accounting" help="Accounting settings for PoS">
-                                    <label string="Closing entries" for="pos_session_closing_mode" />
+                                    <label string="Closing Entries" for="pos_session_closing_mode" />
                                     <div class="text-muted">
                                         Generate the accounting entries for your PoS orders.
                                     </div>

@@ -58,7 +58,6 @@ class TestUi(TestPosStockHttpCommon):
             'preparation_printer_ids': [Command.set([preparation_printer.id])],
             'other_devices': True,
             'preparation_devices': True,
-            'use_order_printer': True,
         })
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_03_pos_with_lots', login="pos_user")
 

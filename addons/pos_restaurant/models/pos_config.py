@@ -56,12 +56,12 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_bar_scenario(self, with_demo_data=True):
-        journal, payment_methods_ids = self._create_journal_and_payment_methods(cash_journal_vals={'name': 'Cash Bar', 'show_on_dashboard': False})
+        journal, payment_methods = self._create_journal_and_payment_methods(cash_journal_vals={'name': 'Cash Bar', 'show_on_dashboard': False})
         config = self.env['pos.config'].create({
             'name': 'Bar',
             'company_id': self.env.company.id,
             'journal_id': journal.id,
-            'payment_method_ids': payment_methods_ids,
+            'payment_method_ids': payment_methods.ids,
             'module_pos_restaurant': True,
             'default_screen': 'register'
         })
@@ -96,7 +96,7 @@ class PosConfig(models.Model):
 
     @api.model
     def load_onboarding_restaurant_scenario(self, with_demo_data=True):
-        journal, payment_methods_ids = self._create_journal_and_payment_methods(cash_journal_vals={'name': _('Cash Restaurant'), 'show_on_dashboard': False})
+        journal, payment_methods = self._create_journal_and_payment_methods(cash_journal_vals={'name': _('Cash Restaurant'), 'show_on_dashboard': False})
         presets = self.get_record_by_ref([
             'pos_restaurant.pos_takein_preset',
             'pos_restaurant.pos_takeout_preset',
@@ -106,7 +106,7 @@ class PosConfig(models.Model):
             'name': _('Restaurant'),
             'company_id': self.env.company.id,
             'journal_id': journal.id,
-            'payment_method_ids': payment_methods_ids,
+            'payment_method_ids': payment_methods.ids,
             'module_pos_restaurant': True,
             'use_presets': bool(presets),
             'default_preset_id': presets[0] if presets else False,

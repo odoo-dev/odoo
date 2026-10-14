@@ -800,7 +800,6 @@ test("test_combo_preparation_receipt: combo parent above children, category coun
 
 test("MultiPreparationPrinter: only printer with matching category prints, no empty receipt", async () => {
     const store = await setupAndMountPosApp({
-        use_order_printer: true,
         set_tip_after_payment: false,
     });
     store.models["pos.printer"].create({
@@ -825,7 +824,7 @@ test("MultiPreparationPrinter: only printer with matching category prints, no em
         contentDocument: { body: { innerHTML: "" } },
         style: {},
     });
-    store.ticketPrinter.setIframeSizeFromPrinter = () => {};
+    store.ticketPrinter.setIframeSizeFromPrinter = () => { };
     store.ticketPrinter.generateImage = async () => "mock-image";
 
     await Utils.clickTable("1");
@@ -1005,7 +1004,6 @@ test("test_combo_apply_after_preparation: apply combo groups standalone lines, p
 
 test("test_multiple_preparation_printer_different_categories: both printers triggered, then pay without warning", async () => {
     const store = await setupAndMountPosApp({
-        use_order_printer: true,
         set_tip_after_payment: false,
     });
     store.models["pos.printer"].create({
@@ -1030,7 +1028,7 @@ test("test_multiple_preparation_printer_different_categories: both printers trig
         contentDocument: { body: { innerHTML: "" } },
         style: {},
     });
-    store.ticketPrinter.setIframeSizeFromPrinter = () => {};
+    store.ticketPrinter.setIframeSizeFromPrinter = () => { };
     store.ticketPrinter.generateImage = async () => "mock-image";
 
     await Utils.clickTable("1");

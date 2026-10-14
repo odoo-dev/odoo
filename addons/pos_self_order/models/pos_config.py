@@ -111,7 +111,7 @@ class PosConfig(models.Model):
             'rounding_method', 'cash_rounding', 'only_round_cash_method',
             'available_preset_ids', 'default_preset_id', 'use_presets', 'iface_tax_included',
             'status', 'self_ordering_image_background_ids', 'preparation_printer_ids',
-            'receipt_printer_ids', 'use_order_printer', 'other_devices', 'pos_snooze_ids', 'self_ordering_primary_color',
+            'receipt_printer_ids', 'other_devices', 'pos_snooze_ids', 'self_ordering_primary_color',
             'logo', 'receipt_address', 'phone', 'email', 'website', 'tip_product_id', 'module_pos_discount'
         ]
 
@@ -434,20 +434,17 @@ class PosConfig(models.Model):
         if not bool(self.env.company.chart_template):
             return
 
-        journal, payment_methods_ids = self._create_journal_and_payment_methods()
+        journal, payment_methods = self._create_journal_and_payment_methods()
         restaurant_categories = self.get_record_by_ref([
             'pos_restaurant.food',
             'pos_restaurant.drinks',
         ])
-        not_cash_payment_methods_ids = self.env['pos.payment.method'].search([
-            ('type', '!=', 'cash'),
-            ('id', 'in', payment_methods_ids),
-        ]).ids
+        not_cash_payment_methods = payment_methods.filtered(lambda pm: pm.type != 'cash')
         config = self.env['pos.config'].create({
             'name': _('Kiosk'),
             'company_id': self.env.company.id,
             'journal_id': journal.id,
-            'payment_method_ids': not_cash_payment_methods_ids,
+            'payment_method_ids': not_cash_payment_methods.ids,
             'limit_categories': True,
             'iface_available_categ_ids': restaurant_categories,
             'module_pos_restaurant': True,

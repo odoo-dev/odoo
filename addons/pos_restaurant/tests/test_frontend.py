@@ -51,7 +51,6 @@ class TestFrontendCommon(TestPointOfSaleHttpCommon, CommonPosTest):
             'name': 'Bar Prout',
             'module_pos_restaurant': True,
             'iface_printbill': True,
-            'use_order_printer': True,
             'preparation_printer_ids': [(4, printer.id)],
             'iface_tipproduct': False,
             'company_id': cls.env.company.id,
@@ -375,7 +374,6 @@ class TestFrontend(TestFrontendCommon):
             'taxes_id': self.tax_sale_a,
             'pos_categ_ids': [(4, drinks_category.id)]
         })
-        self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_tax_in_merge_table_order_line_tour', login="pos_admin")
         line_1 = self.env['pos.order.line'].search([('full_product_name', '=', 'product_1')])
@@ -384,7 +382,6 @@ class TestFrontend(TestFrontendCommon):
         self.assertEqual(line_2.tax_ids, self.tax_sale_a)
 
     def test_no_ghost_floor(self):
-        self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('no_ghost_floor', login="pos_admin")
 
@@ -498,7 +495,6 @@ class TestFrontend(TestFrontendCommon):
         self.main_pos_config.write({
             'use_fast_payment': True,
             'fast_payment_method_ids': [(6, 0, self.bank_payment_method.ids)],
-            'use_order_printer': True,
             'preparation_printer_ids': [Command.set([preparation_printer.id])],
             'receipt_printer_ids': [Command.set([receipt_printer.id])],
             'iface_print_auto': True,
@@ -523,7 +519,6 @@ class TestFrontend(TestFrontendCommon):
         self.main_pos_config.write({
             'use_fast_payment': True,
             'fast_payment_method_ids': [(6, 0, self.bank_payment_method.ids)],
-            'use_order_printer': True,
             'preparation_printer_ids': [Command.set(pos_printer.ids)],
             'other_devices': True,
         })
@@ -613,7 +608,6 @@ class TestFrontend(TestFrontendCommon):
            if this is not the case, the combo lines would lose their link to the parent combo line and appear as
            normal line"""
         setup_product_combo_items(self)
-        self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_combo_synchronisation')
 
@@ -841,7 +835,6 @@ class TestFrontend(TestFrontendCommon):
         })
         self.main_pos_config.write({
             'use_presets': True,
-            'use_order_printer': False,  # avoid the preparation printer dialog
             'default_preset_id': preset_percentage_service_fee.id,
             'available_preset_ids': [(6, 0, [])],
         })
@@ -862,7 +855,6 @@ class TestFrontend(TestFrontendCommon):
         })
         self.main_pos_config.write({
             'use_presets': True,
-            'use_order_printer': False,  # avoid the preparation printer dialog when paying
             'default_preset_id': preset_percentage_service_fee.id,
             'available_preset_ids': [(6, 0, [])],
         })

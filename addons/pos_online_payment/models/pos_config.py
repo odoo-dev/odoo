@@ -39,7 +39,5 @@ class PosConfig(models.Model):
     @api.model
     def _create_journal_and_payment_methods(self, cash_ref=None, cash_journal_vals=None):
         online_pm = self._create_online_payment_demo()
-        journal, payment_method_ids = super()._create_journal_and_payment_methods(cash_ref, cash_journal_vals)
-        if online_pm:
-            payment_method_ids.append(online_pm.id)
-        return journal, payment_method_ids
+        journal, payment_methods = super()._create_journal_and_payment_methods(cash_ref, cash_journal_vals)
+        return journal, payment_methods | online_pm

@@ -1102,15 +1102,15 @@ class TestPointOfSaleFlow(CommonPosTest):
         foreign-currency journal."""
         self.env['pos.payment.method'].search([]).write({'active': False})
         self.company_data['default_journal_bank'].currency_id = self.company.currency_id
-        _, pm_ids = self.pos_config_usd._create_journal_and_payment_methods()
-        bank_pm = self.env['pos.payment.method'].browse(pm_ids).filtered(lambda pm: pm.name == 'Card')
+        _, payment_methods = self.pos_config_usd._create_journal_and_payment_methods()
+        bank_pm = payment_methods.filtered(lambda pm: pm.name == 'Card')
         self.assertEqual(bank_pm.journal_id, self.company_data['default_journal_bank'])
 
     def test_payment_method_sequence(self):
         self.env['pos.payment.method'].search([]).write({'active': False})
-        _, pm_ids = self.pos_config_usd._create_journal_and_payment_methods()
+        _, payment_methods = self.pos_config_usd._create_journal_and_payment_methods()
         # The 4th one is the online payment method, which is not created without demo data,
-        methods = self.env['pos.payment.method'].browse(pm_ids)[:3]
+        methods = payment_methods[:3]
         self.assertEqual(methods.mapped('name'), ['Cash', 'Card', 'Customer Account'])
         self.assertEqual(methods.mapped('sequence'), [1, 2, 4])
         new_pm = self.env['pos.payment.method'].create({'name': 'Quick Pay', 'type': 'bank'})
