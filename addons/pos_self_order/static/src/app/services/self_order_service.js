@@ -742,10 +742,23 @@ export class SelfOrder {
             .forEach((o) => this.data.localDeleteCascade(o));
     }
 
+    /**
+     * Returns the address input to show instead of the plain street input, if
+     * any. Modules register them in the "pos_self_order.address_inputs"
+     * registry as `{ Component, isAvailable(selfOrder) }`; the component gets
+     * the preset info popup state as `state` prop and fills its address fields.
+     */
+    getAddressInput() {
+        return registry
+            .category("pos_self_order.address_inputs")
+            .getAll()
+            .find((addressInput) => addressInput.isAvailable(this));
+    }
+
     isValidSelection(slot, partner) {
         const preset = this.currentOrder.preset_id || {};
         const { id, name, email, phone, street, city, country_id, zip } = partner || {};
-        const partnerInfo = this.config._has_google_places_api_key
+        const partnerInfo = this.getAddressInput()
             ? name && phone && street && city && country_id && zip
             : name && phone && street;
 

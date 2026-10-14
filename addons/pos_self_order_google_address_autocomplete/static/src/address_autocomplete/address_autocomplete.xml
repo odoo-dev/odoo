@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order_google_address_autocomplete.SelfOrderAddressInput">
+        <div t-att-class="'o_field_widget o_field_google_address_autocomplete' + (this.props.state.validationError?.type === 'delivery' ? ' address-delivery-error' : '')">
+            <SelfOrderAddressAutoComplete t-props="this.autoCompleteProps"/>
+            <div class="d-flex justify-content-end mt-1">
+                <img src="/google_address_autocomplete/static/src/img/powered_by_google_on_white.png"
+                    alt="Powered by Google"
+                    style="height: 18px;"/>
+            </div>
+        </div>
+    </t>
+</templates>
