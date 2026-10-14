@@ -89,6 +89,9 @@ class PaymentProvider(models.Model):
     support_tokenization = fields.Boolean(
         string="Tokenization", compute="_compute_feature_support_fields"
     )
+    support_delegated_payment = fields.Boolean(
+        string="Delegated Payment", compute="_compute_feature_support_fields"
+    )
     support_express_checkout = fields.Boolean(
         string="Express Checkout", compute="_compute_feature_support_fields"
     )
@@ -333,6 +336,10 @@ class PaymentProvider(models.Model):
           `'full_only'`, or `'partial'`. `None` by default.
         - `support_tokenization`: Whether the "tokenization feature" is supported. `False` by
           default.
+        - `support_delegated_payment`: Whether the provider can charge a platform-supplied,
+          single-use delegated payment credential (e.g. a Shared Payment Token), with the card
+          vaulted off-merchant. `False` by default. See
+          :meth:`payment.transaction._charge_delegated_token`.
 
         For a provider to specify that it supports additional features, it must override this method
         and set the related feature support fields to the desired value on the appropriate
@@ -344,6 +351,7 @@ class PaymentProvider(models.Model):
             "support_express_checkout": None,
             "support_manual_capture": None,
             "support_tokenization": None,
+            "support_delegated_payment": None,
             "support_refund": "none",
         })
 

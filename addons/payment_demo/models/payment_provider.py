@@ -21,6 +21,7 @@ class PaymentProvider(models.Model):
             "support_manual_capture": "partial",
             "support_refund": "partial",
             "support_tokenization": True,
+            "support_delegated_payment": True,
         })
 
     # === CONSTRAINT METHODS ===#

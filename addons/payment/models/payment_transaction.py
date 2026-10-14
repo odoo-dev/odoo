@@ -730,6 +730,27 @@ class PaymentTransaction(models.Model):
         """
         return
 
+    def _charge_delegated_token(self, credential_token):
+        """Charge the transaction against a platform-supplied delegated credential.
+
+        This backs "delegated payment": the buyer's card is vaulted off-merchant (by a
+        shopping agent or wallet), which presents a single-use, merchant-scoped delegated
+        token (e.g. a Shared Payment Token) instead of a stored `payment.token`. The provider
+        exchanges/charges it with its PSP and sets the transaction state. The merchant only
+        ever handles the opaque `credential_token`, never raw card data.
+
+        The base implementation does nothing, leaving the transaction unprocessed so the caller
+        can fall back (e.g. to a hosted-payment page). A provider advertising
+        `support_delegated_payment` overrides this. Read `self.state` for the outcome.
+
+        Note: `self.ensure_one()`
+
+        :param str credential_token: The opaque delegated payment credential.
+        :return: None
+        """
+        self.ensure_one()
+        return
+
     def _capture(self, amount_to_capture=None):
         """Capture the authorized amount.
 
