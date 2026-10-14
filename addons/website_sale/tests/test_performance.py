@@ -60,9 +60,8 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
     def _get_shop_page_queries(self):
         res = defaultdict(int)
         res.update({
-            "account_account_tag": 2,
-            "account_tax": 2,
-            "account_tax_repartition_line": 2,
+            "account_account_tag": 1,
+            "account_tax": 1,
             "ir_ui_view": 2,
             "product_attribute": 1,
             "product_attribute_value": 3,
@@ -74,19 +73,16 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_tag": 1,
             "product_template": 2,
             "product_template_attribute_line": 2,
-            "res_company": 2,
-            "res_currency": 1,
+            "res_company": 1,
             "res_partner": 2,
             "res_users": 1,
             "website_menu": 1,
             "website_page": 1,
         })
-        if self._has_demo_data():
-            res["res_company"] += 1
-            if "website_sale_stock" in self.installed_modules:
-                res["product_template"] += 1
-                # Out of Stock Ribbon in demo data
-                res["product_ribbon"] += 1
+        if self._has_demo_data() and "website_sale_stock" in self.installed_modules:
+            res["product_template"] += 1
+            # Out of Stock Ribbon in demo data
+            res["product_ribbon"] += 1
         if "website_helpdesk" in self.installed_modules:
             # Additional query used to check whether "Helpdesk" menu should be visible
             res["helpdesk_team"] += 1
@@ -104,9 +100,8 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
     def _get_product_page_queries(self):
         res = defaultdict(int)
         res.update({
-            "account_account_tag": 2,
-            "account_tax": 2,
-            "account_tax_repartition_line": 2,
+            "account_account_tag": 1,
+            "account_tax": 1,
             "ir_attachment": 1,
             "ir_ui_view": 1,
             "product_attribute": 1,
@@ -121,8 +116,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_template": 3,
             "product_template_attribute_line": 2,
             "product_template_attribute_value": 4,
-            "res_company": 2,
-            "res_currency": 1,
             "res_partner": 2,
             "res_users": 1,
             "website_menu": 1,
@@ -258,12 +251,6 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
         res["product_pricelist_item"] += 1
-        if "website_sale_subscription" not in self.installed_modules:
-            # FIXME VFE magic comeback when sub is installed makes no **** sense
-            # Seems to come from the `website_sale` template, not the sub override strangely
-            # The rules are fixed, product currency (through _get_main_company) does not have to be
-            # computed anymore
-            res["res_company"] -= 1
         return res
 
     def test_product_page_generation(self):

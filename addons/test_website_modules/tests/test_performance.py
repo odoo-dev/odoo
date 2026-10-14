@@ -305,7 +305,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
 
         # To add queries here you must ask the permission to al
         queries = {
-            'res_company': 2,
+            'res_company': 1,
             'product_pricelist': 4,
             'product_template': 3,
             'product_tag': 1,
@@ -317,7 +317,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_category': 1,
             'product_pricelist_item': 1,
             'account_tax': 1,
-            'res_currency': 1,
+            'account_account_tag': 1,
             'product_ribbon': 1,
             'product_attribute_value': 3,
             'product_attribute': 1,
@@ -332,17 +332,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         if 'website_helpdesk' in addons:
             queries['helpdesk_team'] = 1
 
-        tax = self.env.ref(f'account.{self.env.company.id}_sale_tax_template', raise_if_not_found=False)
-        if tax and tax.name == '15%':
-            queries['account_tax_repartition_line'] = 2
-
         if self._has_demo_data():
             queries['product_product'] += 2
             queries['product_ribbon'] += 1
-            queries['res_company'] += 1
-
-        if self.env['res.groups']._is_feature_enabled('uom.group_uom'):
-            queries['uom_uom'] = 1
 
         # To add queries count you must ask the permission to al
         return queries
@@ -359,8 +351,6 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             queries['product_product'] += 1
 
         if self._has_demo_data():
-            queries['account_tax'] += 1
-            queries['account_account_tag'] = 1
             queries['product_ribbon'] += -1
             queries['product_template_attribute_value'] = 2
 
@@ -381,12 +371,6 @@ class TestWebsiteAllPerformanceShop(TestWebsiteAllPerformance):
     def test_perf_sql_queries_shop(self):
         # To increase the query count you must ask the permission to al
         queries = self._get_queries_shop()
-
-        queries['account_tax'] += 1
-        queries['account_account_tag'] = 2
-
-        if self.env['res.groups']._is_feature_enabled('uom.group_uom'):
-            queries['uom_uom'] += 1
 
         if self._has_demo_data():
             queries['ir_attachment'] += -1
