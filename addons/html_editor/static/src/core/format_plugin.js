@@ -561,6 +561,11 @@ export class FormatPlugin extends Plugin {
                 fillEmpty(currentElement);
             }
         }
+        // The ZWS is only needed while editing, so don't save it.
+        for (const element of selectElements(root, "[data-oe-zws-empty-inline]")) {
+            delete element.dataset.oeZwsEmptyInline;
+            this.cleanZWS(element, { preserveSelection });
+        }
         this.mergeAdjacentInlines(root, { preserveSelection });
     }
 
@@ -597,7 +602,10 @@ export class FormatPlugin extends Plugin {
             this.cleanZWS(element, { preserveSelection });
             return;
         }
-        if (this.getResource("unremovable_node_predicates").some((p) => p(element))) {
+        const isUnremovable = (node) =>
+            this.getResource("unremovable_node_predicates").some((p) => p(node));
+        // Removing the element would also remove the unremovable nodes inside it.
+        if (isUnremovable(element) || descendants(element).some(isUnremovable)) {
             return;
         }
         if (

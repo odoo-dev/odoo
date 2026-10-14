@@ -149,7 +149,7 @@ describe("Selection collapsed", () => {
                     '<p data-selection-placeholder=""><br></p>' +
                     '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>' +
                     '<p data-selection-placeholder=""><br></p>',
-                contentAfter: '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>',
+                contentAfter: '<div><p>uv</p><br><span class="style">[]</span></div>',
             });
         });
 
@@ -239,7 +239,7 @@ describe("Selection collapsed", () => {
                 },
                 contentAfterEdit:
                     '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
-                contentAfter: '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
+                contentAfter: '<p>ab<span class="style">[]</span>ef</p>',
             });
         });
 
@@ -1729,7 +1729,7 @@ describe("Selection not collapsed", () => {
                 '<p data-selection-placeholder=""><br></p>' +
                 '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>' +
                 '<p data-selection-placeholder=""><br></p>',
-            contentAfter: '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
+            contentAfter: '<div><p>ab <span class="style">[]</span> d</p></div>',
         });
     });
 
@@ -2290,7 +2290,7 @@ describe("Selection not collapsed", () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
             stepFunction: deleteBackward,
-            contentAfter: '<p>ab<b class="oe_unremovable" data-oe-zws-empty-inline="">[]\u200B</b>ef</p>',
+            contentAfter: '<p>ab<b class="oe_unremovable">[]</b>ef</p>',
         });
     });
 
@@ -2365,7 +2365,7 @@ describe("Selection not collapsed", () => {
         await testEditor({
             contentBefore: '<p>a<span class="style-class">[bcde]</span>f</p>',
             stepFunction: deleteBackward,
-            contentAfter: '<p>a<span class="style-class" data-oe-zws-empty-inline="">[]\u200B</span>f</p>',
+            contentAfter: '<p>a<span class="style-class">[]</span>f</p>',
         });
     });
 

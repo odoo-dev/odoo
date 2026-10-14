@@ -1,4 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
+import { isBlock } from "@html_editor/utils/blocks";
+import { isVisible } from "@html_editor/utils/dom_info";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
 
@@ -60,6 +62,17 @@ export class SetupEditorPlugin extends Plugin {
                 el.setAttribute("data-editor-message", _t("DRAG BUILDING BLOCKS HERE"));
             }
         });
+
+        // Put a ZWS in empty inline fields so the cursor can be placed in them.
+        const fieldEls = this.editable.querySelectorAll(
+            '.o_editable[data-oe-type="text"], .o_editable[data-oe-type="char"]'
+        );
+        for (const fieldEl of fieldEls) {
+            if (!isVisible(fieldEl) && !isBlock(fieldEl)) {
+                fieldEl.append(this.document.createTextNode("\u200B"));
+                fieldEl.setAttribute("data-oe-zws-empty-inline", "");
+            }
+        }
     }
 
     getEditableElements(selector) {
