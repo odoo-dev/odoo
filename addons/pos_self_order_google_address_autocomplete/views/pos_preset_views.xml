@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_preset_form" model="ir.ui.view">
+        <field name="name">pos.preset.form.inherit.google.address.autocomplete</field>
+        <field name="model">pos.preset</field>
+        <field name="inherit_id" ref="pos_self_order_geolocalize.view_pos_preset_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//label[@for='delivery_from_street']" position="replace"/>
+            <xpath expr="//div[hasclass('o_address_format')]" position="replace">
+                <field
+                    name="delivery_from_address"
+                    readonly="False"
+                    widget="google_address_autocomplete"
+                    invisible="not available_in_self or service_at != 'delivery'"
+                    options="{'street': 'delivery_from_street', 'city': 'delivery_from_city', 'zip': 'delivery_from_zip', 'state_id': 'delivery_from_state_id', 'country_id': 'delivery_from_country_id'}"
+                />
+                <field name="delivery_from_street" invisible="1" /> <!-- Needed for the google_address_autocomplete widget to work but hidden as it's not useful to show it in the form -->
+                <field name="delivery_from_address" invisible="1" /> <!-- Needed to store the full address but hidden as it's not useful to show it in the form -->
+                <field name="delivery_from_city" invisible="1" /> <!-- Needed for the google_address_autocomplete widget to work but hidden as it's not useful to show it in the form -->
+                <field name="delivery_from_zip" invisible="1" /> <!-- Needed for the google_address_autocomplete widget to work but hidden as it's not useful to show it in the form -->
+                <field name="delivery_from_state_id" invisible="1" /> <!-- Needed for the google_address_autocomplete widget to work but hidden as it's not useful to show it in the form -->
+                <field name="delivery_from_country_id" invisible="1" /> <!-- Needed for the google_address_autocomplete widget to work but hidden as it's not useful to show it in the form -->
+            </xpath>
+        </field>
+    </record>
+</odoo>

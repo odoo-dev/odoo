@@ -1,10 +1,9 @@
-import { Component, EventBus, proxy, useProps, signal, t } from "@odoo/owl";
+import { Component, proxy, useProps, signal, t } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { Dialog } from "@web/core/dialog/dialog";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { isValidPhone } from "@point_of_sale/utils";
-import { AddressAutoComplete } from "@google_address_autocomplete/address_autocomplete/google_address_autocomplete";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PillsSelectionPopup } from "@pos_self_order/app/components/pills_selection_popup/pills_selection_popup";
 import { _t } from "@web/core/l10n/translation";
@@ -20,89 +19,11 @@ class NoPrefillSelectMenu extends SelectMenu {
     }
 }
 
-class SelfOrderAddressAutoComplete extends AddressAutoComplete {
-    setup() {
-        super.setup();
-        this.selfOrder = useService("self_order");
-    }
-
-    get sources() {
-        return [
-            {
-                options: async (partialAddress) => {
-                    if (partialAddress.length <= 5) {
-                        return [];
-                    }
-                    const result = await rpc("/pos-self/autocomplete/address", {
-                        access_token: this.selfOrder.access_token,
-                        partial_address: partialAddress,
-                    });
-                    return (result.results || []).map((r) => ({
-                        label: r.formatted_address,
-                        onSelect: () => this.selectAddressProposition(r),
-                    }));
-                },
-                optionSlot: "option",
-                placeholder: _t("Searching for addresses..."),
-            },
-        ];
-    }
-
-    async selectAddressProposition(option) {
-        const address = await rpc("/pos-self/autocomplete/address_full", {
-            access_token: this.selfOrder.access_token,
-            address: option.formatted_address,
-            google_place_id: option.google_place_id,
-        });
-        const fieldToDetail = {
-            street: "formatted_street_number",
-            country_id: "country",
-            state_id: "state",
-        };
-        const fieldsToUpdate = [
-            "street",
-            "street2",
-            "city",
-            "state_id",
-            "zip",
-            "country_id",
-            "city_id",
-        ];
-        const activeFields = this.props.record.activeFields;
-        const fields = this.props.record.fields;
-        const addressFieldMap = this.props.addressFieldMap;
-        const valuesToUpdate = {};
-        const rest = [];
-        fieldsToUpdate.forEach((fieldName) => {
-            const addressField = fieldToDetail[fieldName] || fieldName;
-            let value = address[addressField];
-            const recordFieldName = addressFieldMap[fieldName] || fieldName;
-            if (recordFieldName in activeFields) {
-                if (fields[recordFieldName].type === "many2one") {
-                    value = value && { id: value[0], display_name: value[1] };
-                } else if (Array.isArray(value)) {
-                    value = value[1];
-                }
-                valuesToUpdate[recordFieldName] = value || false;
-            } else if (!(recordFieldName in fields) && value) {
-                value = Array.isArray(value) ? value[1] : value;
-                rest.push(value);
-            }
-        });
-        if (!(this.props.name in valuesToUpdate) && rest.length) {
-            valuesToUpdate[this.props.name] = rest.join(" ");
-        }
-        this.props.record.update(valuesToUpdate);
-        await this.props.record.update({ [this.props.name]: option.formatted_address });
-    }
-}
-
 const { DateTime } = luxon;
 export class PresetInfoPopup extends Component {
     static template = "pos_self_order.PresetInfoPopup";
     static components = {
         Dialog,
-        AddressAutoComplete: SelfOrderAddressAutoComplete,
         SelectMenu: NoPrefillSelectMenu,
     };
     props = useProps({
@@ -135,7 +56,6 @@ export class PresetInfoPopup extends Component {
             validationError: null,
             isSubmitting: false,
         });
-        this.addressRecord = this.makeAddressRecord();
     }
 
     async setInformations() {
@@ -197,46 +117,6 @@ export class PresetInfoPopup extends Component {
         this.selfOrder.currentOrder.partner_id = partner;
     }
 
-    makeAddressRecord() {
-        const bus = new EventBus();
-        const invalidFields = new Set();
-        return {
-            data: this.state,
-            fields: {
-                street: { type: "char", trim: false, size: false, translate: false },
-                city: { type: "char", trim: false, size: false, translate: false },
-                zip: { type: "char", trim: false, size: false, translate: false },
-                countryId: { type: "many2one" },
-                stateId: { type: "many2one" },
-            },
-            activeFields: {
-                street: true,
-                city: true,
-                zip: true,
-                countryId: true,
-                stateId: true,
-            },
-            model: { bus },
-            isValid: true,
-            resetFieldValidity: (name) => invalidFields.delete(name),
-            setInvalidField: (name) => invalidFields.add(name),
-            isFieldInvalid: (name) => invalidFields.has(name),
-            isFieldTranslatable: () => false,
-            update: async (values) => {
-                for (const [key, value] of Object.entries(values)) {
-                    if (key === "countryId") {
-                        this.state.countryId = value?.id || value || null;
-                    } else if (key === "stateId") {
-                        this.state.stateId = value?.id || value || null;
-                    } else {
-                        this.state[key] = value || "";
-                    }
-                }
-                this.state.validationError = null;
-            },
-        };
-    }
-
     get otherPresets() {
         const currentPresetId = this.selfOrder.currentOrder?.preset_id?.id;
         return this.selfOrder.models["pos.preset"].filter((p) => p.id !== currentPresetId);
@@ -273,21 +153,6 @@ export class PresetInfoPopup extends Component {
                 this.state.selectedSlot = result;
             }
         }
-    }
-
-    get addressAutoCompleteProps() {
-        return {
-            record: this.addressRecord,
-            name: "street",
-            placeholder: _t("Address"),
-            addressFieldMap: {
-                street: "street",
-                city: "city",
-                zip: "zip",
-                country_id: "countryId",
-                state_id: "stateId",
-            },
-        };
     }
 
     close() {
