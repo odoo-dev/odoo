@@ -8,6 +8,27 @@ from odoo import models, fields, api
 class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = ['res.partner', 'website.published.multi.mixin']
+    # see `res.users`: the partner of a website public user is read on every
+    # frontend request, and so is the partner of the company (the fiscal
+    # position, the taxes...).  Neither ever changes.
+    _clear_cache_name = 'default'
+
+    @property
+    def _cached_data_domain(self):
+        website = self.env['website'].sudo().get_all()
+        return [('id', 'in', (
+            website.user_id.partner_id | website.company_id.partner_id
+        ).ids)]
+
+    @property
+    def _cached_data_fields(self):
+        return self._get_cacheable_field_names()
+
+    @api.ormcache(cache='default')
+    def _cached_data(self):
+        # method is overridden to use the cache 'default' instead of 'stable'
+        # hack: retrieve the original method to skip the ormcache wrapper
+        return super()._cached_data.__cache__.method(self)
 
     visitor_ids = fields.One2many('website.visitor', 'partner_id', string='Visitors')
 

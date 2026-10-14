@@ -264,7 +264,7 @@ class ResPartnerCategory(models.Model):
         return domain
 
 
-class ResPartner(models.Model):
+class ResPartner(models.CachedModel):
     _name = 'res.partner'
     _description = 'Contact'
     _explanation = "Foundational model for all people and companies (customers, vendors, employees, etc.). Used for identifying individuals or organizations."

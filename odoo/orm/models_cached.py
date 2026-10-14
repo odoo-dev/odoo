@@ -45,6 +45,7 @@ class CachedModel(Model):
 
     @api.model
     @api.private
+    @api.ormcache(cache='stable')
     def _get_cacheable_field_names(self) -> tuple[str, ...]:
         """ Return the names of the fields that can safely be put in the cache:
         stored columns, prefetched with the record, not restricted to some
@@ -53,6 +54,8 @@ class CachedModel(Model):
 
         This is meant to be used to build ``_cached_data_fields``, so that a
         field added by another module does not silently cost a query again.
+        The result only depends on the registry, and is read on every fetch of
+        a cached model, so it is kept in the cache.
         """
         field_depends_context = self.env._field_depends_context
         return tuple(

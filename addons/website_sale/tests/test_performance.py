@@ -74,8 +74,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_template": 2,
             "product_template_attribute_line": 2,
             "res_company": 1,
-            "res_partner": 2,
-            "res_users": 1,
             "website_menu": 1,
             "website_page": 1,
         })
@@ -116,8 +114,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             "product_template": 3,
             "product_template_attribute_line": 2,
             "product_template_attribute_value": 4,
-            "res_partner": 2,
-            "res_users": 1,
             "website_menu": 1,
             "website_page": 1,
             "website_sale_extra_field": 1,

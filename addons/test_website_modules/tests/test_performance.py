@@ -312,8 +312,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_public_category': 2,
             'product_product': 1,
             'product_template_attribute_line': 2,
-            'res_users': 1,
-            'res_partner': 2,
+            # the public user and its partner are kept in the cache
             'product_category': 1,
             'product_pricelist_item': 1,
             'account_tax': 1,

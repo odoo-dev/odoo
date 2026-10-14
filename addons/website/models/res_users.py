@@ -10,6 +10,24 @@ _logger = logging.getLogger(__name__)
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
+    # The public user of a website is read on every frontend request and never
+    # changes: keep it in the cache.  The 'default' cache is used rather than
+    # the 'stable' one so that a change of `website.user_id` invalidates it.
+    _clear_cache_name = 'default'
+
+    @property
+    def _cached_data_domain(self):
+        return [('id', 'in', self.env['website'].sudo().get_all().user_id.ids)]
+
+    @property
+    def _cached_data_fields(self):
+        return self._get_cacheable_field_names()
+
+    @api.ormcache(cache='default')
+    def _cached_data(self):
+        # method is overridden to use the cache 'default' instead of 'stable'
+        # hack: retrieve the original method to skip the ormcache wrapper
+        return super()._cached_data.__cache__.method(self)
 
     website_id = fields.Many2one('website', related='partner_id.website_id', store=True, related_sudo=False, readonly=False)
 

@@ -163,7 +163,7 @@ class ResUsersLog(models.Model):
         _logger.info("GC'd %d user log entries", self.env.cr.rowcount)
 
 
-class ResUsers(models.Model):
+class ResUsers(models.CachedModel):
     """ User class. A res.users record models an OpenERP user and is different
         from an employee.
 
