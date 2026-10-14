@@ -13,11 +13,11 @@ from odoo.tests import tagged, Form
 class TestStockQuant(TestStockCommon):
 
     _test_user_groups = (
-        'product.group_product_manager',  # FIXME: use base.group_user
-        'stock.group_stock_manager',
+        'product.group_product_manager',
+        'stock.group_stock_user',
     )
 
-    _test_user_name = 'Test Product Manager'
+    _test_user_name = 'Test Stock User & Product Manager'
 
     @classmethod
     def setUpClass(cls):
@@ -50,6 +50,11 @@ class TestStockQuant(TestStockCommon):
     def gather_relevant(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         quants = self.env['stock.quant']._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return quants.filtered(lambda q: not (q.quantity == 0 and q.reserved_quantity == 0))
+
+    def _get_relocate_wizard(self, quants):
+        # Relocating quants requires the Inventory Administrator rights
+        quants = quants.with_user(self.user_stock_manager)
+        return Form.from_action(quants.env, quants.action_stock_quant_relocate())
 
     def test_copy_quant(self):
         """
@@ -201,7 +206,7 @@ class TestStockQuant(TestStockCommon):
         the reserved quanntity for the same product.
         TODO: this test is currently always skipped, even with demo data.
         """
-        stock_location = self.env['stock.location'].create({
+        stock_location = self.env['stock.location'].sudo().create({
             'name': 'stock_location',
             'usage': 'internal',
         })
@@ -250,7 +255,7 @@ class TestStockQuant(TestStockCommon):
     def test_increase_available_quantity_6(self):
         """ Increasing the available quantity in a view location should be forbidden.
         """
-        location1 = self.env['stock.location'].create({
+        location1 = self.env['stock.location'].sudo().create({
             'name': 'viewloc1',
             'usage': 'view',
             'location_id': self.stock_location.id,
@@ -294,7 +299,7 @@ class TestStockQuant(TestStockCommon):
         the reserved quantity for the same product.
         TODO: this test is currently always skipped, even with demo data.
         """
-        stock_location = self.env['stock.location'].create({
+        stock_location = self.env['stock.location'].sudo().create({
             'name': 'stock_location',
             'usage': 'internal',
         })
@@ -637,7 +642,7 @@ class TestStockQuant(TestStockCommon):
         at different times for a tracked product.
         """
         lifo_strategy = self.env['product.removal'].search([('method', '=', 'lifo')])
-        self.stock_location.removal_strategy_id = lifo_strategy
+        self.stock_location.sudo().removal_strategy_id = lifo_strategy
         lot1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.product_serial.id,
@@ -719,7 +724,7 @@ class TestStockQuant(TestStockCommon):
         self.env.user.write({'group_ids': [Command.link(grp_multi_loc.id)]})
 
         closest_strategy = self.env['product.removal'].search([('method', '=', 'closest')])
-        self.stock_location.removal_strategy_id = closest_strategy
+        self.stock_location.sudo().removal_strategy_id = closest_strategy
         lot1 = self.env['stock.lot'].create({
             'name': 'lot1',
             'product_id': self.product_serial.id,
@@ -750,7 +755,7 @@ class TestStockQuant(TestStockCommon):
         """ Check that the Closest location strategy correctly applies when you have multiple products received
         at different locations for untracked products."""
         closest_strategy = self.env['product.removal'].search([('method', '=', 'closest')])
-        self.stock_location.removal_strategy_id = closest_strategy
+        self.stock_location.sudo().removal_strategy_id = closest_strategy
         # Add 2 units of product into stock_location/shelf_1
         self.env['stock.quant'].create({
             'product_id': self.productA.id,
@@ -1003,18 +1008,16 @@ class TestStockQuant(TestStockCommon):
 
     def test_relocate(self):
         """ Test the relocation wizard. """
-        def _get_relocate_wizard(quant_ids):
-            return Form.from_action(self.env, quant_ids.action_stock_quant_relocate())
-
         self.env['stock.package'].search([]).unlink()
         self.env.user.write({'group_ids': [(4, self.env.ref('stock.group_tracking_lot').id)]})
+        self.user_stock_manager.sudo().group_ids += self.env.ref('stock.group_tracking_lot')
         package_01 = self.env['stock.package'].create({})
         package_02 = self.env['stock.package'].create({})
         self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10, package_id=package_01)
         quant_a = self.env['stock.quant'].search([('product_id', '=', self.productA.id)])
 
         # testing assigning a package to a quant
-        relocate_wizard = _get_relocate_wizard(quant_a)
+        relocate_wizard = self._get_relocate_wizard(quant_a)
         relocate_wizard.dest_package_id = package_02
         action = relocate_wizard.save().action_relocate_quants()
         self.assertEqual(action['type'], 'ir.actions.act_window')
@@ -1024,7 +1027,7 @@ class TestStockQuant(TestStockCommon):
         self.assertEqual(new_quant_a.package_id, package_02)
 
         # testing moving a packed quant to a new location
-        relocate_wizard = _get_relocate_wizard(new_quant_a)
+        relocate_wizard = self._get_relocate_wizard(new_quant_a)
         self.assertEqual(relocate_wizard.is_partial_package, False)
         relocate_wizard.dest_location_id = self.shelf_2
         relocate_wizard.save().action_relocate_quants()
@@ -1045,7 +1048,7 @@ class TestStockQuant(TestStockCommon):
         self.env['stock.quant']._update_available_quantity(product_c, self.stock_location, 10, package_id=package_01)
 
         quants_ab = self.env['stock.quant'].search([('product_id', 'in', (self.productA.id, product_b.id)), ('quantity', '=', 10)])
-        relocate_wizard = _get_relocate_wizard(quants_ab)
+        relocate_wizard = self._get_relocate_wizard(quants_ab)
         self.assertEqual(relocate_wizard.is_partial_package, True)
 
         relocate_wizard.dest_location_id = self.shelf_1
@@ -1070,7 +1073,7 @@ class TestStockQuant(TestStockCommon):
             'name': 'company B',
             'currency_id': self.env.ref('base.USD').id
         })
-        self.env.user.sudo().company_ids += company_B
+        (self.env.user | self.user_stock_manager).sudo().company_ids += company_B
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=[self.env.company.id, company_B.id]))
         location_company_B = self.env['stock.location'].sudo().create({
             'name': 'stock location company B',
@@ -1092,12 +1095,12 @@ class TestStockQuant(TestStockCommon):
 
         # testing the available packs from company B
         quant_b_B = self.env['stock.quant'].search([('product_id', '=', product_b_company_B.id), ('quantity', '=', 10)])
-        relocate_wizard = _get_relocate_wizard(quant_b_B)
+        relocate_wizard = self._get_relocate_wizard(quant_b_B)
         self.assertEqual(relocate_wizard.dest_package_id.search(literal_eval(relocate_wizard.dest_package_id_domain)), package_03+package_04)
 
         # testing the available packs from company A with multiple quants
         quants_ab_A = self.env['stock.quant'].search([('product_id', 'in', (self.productA.id, product_b.id)), ('quantity', '=', 10)])
-        relocate_wizard = _get_relocate_wizard(quants_ab_A)
+        relocate_wizard = self._get_relocate_wizard(quants_ab_A)
         self.assertEqual(relocate_wizard.dest_package_id.search(literal_eval(relocate_wizard.dest_package_id_domain)), package_02+package_04)
 
         # testing the recomputation of available packages
@@ -1107,7 +1110,7 @@ class TestStockQuant(TestStockCommon):
         # testing calling the wizard with quants from multiple companies
         quants_bab_AB = quant_b_B + quants_ab_A
         with self.assertRaises(UserError):
-            _get_relocate_wizard(quants_bab_AB)
+            self._get_relocate_wizard(quants_bab_AB)
 
     def test_relocate_reserved_entire_package(self):
         """Ensure that a package reserved for a move can still be relocated.
@@ -1133,9 +1136,9 @@ class TestStockQuant(TestStockCommon):
         self.assertEqual(delivery.move_ids.state, 'assigned')
         self.assertEqual(delivery.move_line_ids.result_package_id, package)
 
-        relocate_wizard = Form.from_action(self.env, quant.action_stock_quant_relocate())
+        relocate_wizard = self._get_relocate_wizard(quant)
         relocate_wizard.dest_location_id = self.shelf_1
-        relocate_wizard.save().with_user(self.user_stock_manager).action_relocate_quants()
+        relocate_wizard.save().action_relocate_quants()
 
         relocated_quant = self.env['stock.quant'].search([('product_id', '=', self.productA.id)])
         self.assertEqual(relocated_quant.location_id, self.shelf_1)
@@ -1577,7 +1580,7 @@ class TestStockQuant(TestStockCommon):
             ('product_id', '=', self.productA.id),
             ('location_id', '=', self.stock_location.id),
         ])
-        relocate_wizard = Form.from_action(self.env, quant.action_stock_quant_relocate())
+        relocate_wizard = self._get_relocate_wizard(quant)
         relocate_wizard.dest_location_id = self.shelf_1
         relocate_wizard.save().action_relocate_quants()
 
@@ -1596,11 +1599,11 @@ class TestStockQuant(TestStockCommon):
 class TestStockQuantRemovalStrategy(TestStockCommon):
 
     _test_user_groups = (
-        'product.group_product_manager',  # FIXME: use base.group_user
+        'product.group_product_manager',
         'stock.group_stock_user',
     )
 
-    _test_user_name = 'Test Product Manager'
+    _test_user_name = 'Test Stock User & Product Manager'
 
     @classmethod
     def setUpClass(cls):

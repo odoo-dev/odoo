@@ -15,11 +15,11 @@ from odoo.tests import Form, tagged
 
 class TestVirtualAvailable(TestStockCommon):
     _test_user_groups = (
-        'product.group_product_manager',  # FIXME: use base.group_user
-        'stock.group_stock_manager',
+        'product.group_product_manager',
+        'stock.group_stock_user',
     )
 
-    _test_user_name = 'Test Product Manager'
+    _test_user_name = 'Test Stock User & Product Manager'
 
     @classmethod
     def setUpClass(cls):
@@ -105,15 +105,17 @@ class TestVirtualAvailable(TestStockCommon):
 
     def test_archive_product_2(self):
         """Archiving a product should archive its reordering rules"""
+        user = self.user_stock_manager
+        user.sudo().group_ids += self.env.ref('product.group_product_manager')
         self.assertTrue(self.product_3.active)
-        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
+        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'].with_user(user))
         orderpoint_form.product_id = self.product_3
         orderpoint_form.location_id = self.stock_location
         orderpoint_form.product_min_qty = 0.0
         orderpoint_form.product_max_qty = 5.0
         orderpoint = orderpoint_form.save()
         self.assertTrue(orderpoint.active)
-        self.product_3.active = False
+        self.product_3.with_user(user).active = False
         self.assertFalse(orderpoint.active)
 
     def test_change_product_company(self):
@@ -290,8 +292,8 @@ class TestVirtualAvailable(TestStockCommon):
         main_loc = main_warehouse.lot_stock_id
         other_loc = other_warehouse.lot_stock_id
 
-        (main_loc | other_loc).name = 'Stock'
-        sub_loc01, sub_loc02, sub_loc03 = self.env['stock.location'].create([{
+        (main_loc | other_loc).sudo().name = 'Stock'
+        sub_loc01, sub_loc02, sub_loc03 = self.env['stock.location'].sudo().create([{
             'name': 'Sub0%s' % (i + 1),
             'location_id': main_loc.id,
         } for i in range(3)])
@@ -474,11 +476,11 @@ class TestVirtualAvailable(TestStockCommon):
 @tagged('post_install', '-at_install')
 class TestProductPostInstall(TestStockCommon):
     _test_user_groups = (
-        'product.group_product_manager',  # FIXME: use base.group_user
-        'stock.group_stock_manager',
+        'product.group_product_manager',
+        'stock.group_stock_user',
     )
 
-    _test_user_name = 'Test Product Manager'
+    _test_user_name = 'Test Stock User & Product Manager'
 
     def test_change_product_inventory_tracking_inventory_adjustment(self):
         """
@@ -490,7 +492,7 @@ class TestProductPostInstall(TestStockCommon):
         product = self.product
         self.assertFalse(product.is_storable)
         product.uom_ids += self.uom_dozen
-        transit_location = self.env['stock.location'].create({
+        transit_location = self.env['stock.location'].sudo().create({
             'name': 'Lovely transit-location',
             'usage': 'transit',
             'location_id': self.stock_location.id,
@@ -579,11 +581,8 @@ class TestProductPostInstall(TestStockCommon):
         product = self.productA
         product.tracking = 'lot'
 
-        user = self.user_stock_manager
-        user.sudo().group_ids += self.env.ref('product.group_product_manager')
-
-        product.with_user(user).write({
-            'serial_prefix_format': 'TCLPP'
+        product.write({
+            'serial_prefix_format': 'TCLPP',
         })
 
         self.assertEqual(product.serial_prefix_format, 'TCLPP')
