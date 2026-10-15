@@ -91,7 +91,7 @@ class ProductPricelistItem(models.Model):
     # Price Related Fields
     base = fields.Selection(
         selection=[
-            ('list_price', 'Sales Price'),
+            ('list_price', 'Price'),
             ('standard_price', 'Cost'),
             ('pricelist', 'Other Pricelist'),
         ],
@@ -99,8 +99,8 @@ class ProductPricelistItem(models.Model):
         default='list_price',
         required=True,
         help="Base price for computation.\n"
-             "Sales Price: The base price will be the Sales Price.\n"
-             "Cost Price: The base price will be the cost price.\n"
+             "Price: The base price will be the product's Price.\n"
+             "Cost: The base price will be the cost price.\n"
              "Other Pricelist: Computation of the base price based on another Pricelist.")
     base_pricelist_id = fields.Many2one('product.pricelist', 'Other Pricelist', check_company=True)
 

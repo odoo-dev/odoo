@@ -457,6 +457,7 @@
                     <field name="cost_currency_id" column_invisible="True"/> <!-- currency for the standard_price monetary column in this list -->
                     <field
                         name="lst_price"
+                        string="Price"
                         optional="show"
                         options="{'currency_field': 'currency_id'}"
                         widget="monetary"
@@ -547,9 +548,6 @@
                    <attribute name="invisible">1</attribute>
                    <attribute name="readonly">product_variant_count &gt; 1</attribute>
                 </field>
-                <label for="list_price" position="replace">
-                    <label for="lst_price"/>
-                </label>
                 <field name="list_price" position="after">
                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
