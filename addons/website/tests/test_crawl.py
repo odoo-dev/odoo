@@ -6,12 +6,33 @@ import time
 
 import lxml.html
 from werkzeug import urls
+from werkzeug.datastructures import ResponseCacheControl
+from werkzeug.http import parse_cache_control_header
 
 import odoo
+from odoo.http.stream import STATIC_CACHE
+from odoo.tools import BinaryBytes
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from odoo.addons.base.tests.files import PNG_RAW
 
 _logger = logging.getLogger(__name__)
+
+CSS_URL_RE = re.compile(r'url\((?:&quot;|["\'])?([^)"\']+)')
+STATIC_RE = re.compile(r'/[^/]+/static/|/web/assets/')
+# Known resources without a cache lifetime, to fix in their own change:
+# - images addressed by xmlid (snippet default images, library and theme
+#   images): their URL is copied into the saved page HTML, so a `unique` in
+#   the snippets wouldn't reach existing pages; this needs a cache rule on the
+#   server side.
+UNCACHEABLE_RE = re.compile(r'/web/image/[a-z0-9_]+\.\w+(/\d+x\d+)?')
+# Avatars of users the visitor can't read (e.g. the author of a forum post)
+# are served as the placeholder, private on purpose: a logged-in user gets the
+# real image at the same URL. They must still have a cache lifetime.
+PRIVATE_AVATAR_RE = re.compile(r'/web/image/res\.users/\d+/avatar_\d+')
+# Images inlined as data URIs above this size (in characters) weigh on every
+# page view and can't be cached: they should be served by URL.
+INLINE_IMAGE_MAX_SIZE = 2048
 
 
 @odoo.tests.common.tagged('post_install', '-at_install', 'crawl')
@@ -35,6 +56,12 @@ class Crawler(HttpCaseWithUserDemo):
             'social_tiktok': 'https://www.tiktok.com/@odoo',
             'social_discord': 'https://discord.com/servers/discord-town-hall-169256939211980800',
         })
+
+        # Second language with a custom flag, shown in the footer
+        lang_fr = self.env['res.lang']._activate_lang('fr_FR')
+        lang_fr.flag_image = BinaryBytes(PNG_RAW)
+        self.env.ref('base.default_website').language_ids |= lang_fr
+        self.env.ref('website.footer_language_selector_flag').active = True
 
         if hasattr(self.env['res.partner'], 'grade_id'):
             # Create at least one published parter, so that /partners doesn't
@@ -63,7 +90,56 @@ class Crawler(HttpCaseWithUserDemo):
 
         return clean_url
 
-    def crawl(self, url, seen=None, msg=''):
+    def _resource_urls(self, doc):
+        """ Local resources loaded by the page: images, stylesheets, icons and
+        css backgrounds. """
+        yield from doc.xpath('//img/@src')
+        for value in doc.xpath('//img/@srcset | //source/@srcset'):
+            yield from (part.split()[0] for part in value.split(',') if part.strip())
+        for link in doc.xpath('//link[@href]'):
+            if set(link.get('rel', '').split()) & {'stylesheet', 'icon', 'apple-touch-icon', 'preload', 'image_src'}:
+                yield link.get('href')
+        for value in doc.xpath('//*/@style'):
+            yield from CSS_URL_RE.findall(value)
+
+    def check_resources_cacheable(self, doc, page_url, resources):
+        """ Fetch each local dynamic resource once, and record the ones that
+        browsers and CDNs can't keep: private, or neither immutable nor a long
+        max-age. Permanent redirects are followed, as they are cached
+        themselves; other redirects are requested again on every page view.
+        Large inline images are recorded too. """
+        for resource in self._resource_urls(doc):
+            if resource.startswith('data:'):
+                if len(resource) > INLINE_IMAGE_MAX_SIZE:
+                    mimetype = resource[5:].split(';', 1)[0].split(',', 1)[0]
+                    resources.setdefault(f'{resource[:40]}...{resource[-8:]} ({len(resource)} chars)', (page_url, '', 'inline', mimetype, ''))
+                continue
+            parts = urls.url_parse(resource)
+            if parts.netloc or parts.scheme or not parts.path.startswith('/') \
+                    or STATIC_RE.match(parts.path) or UNCACHEABLE_RE.fullmatch(parts.path) \
+                    or resource in resources:
+                continue
+            r = self.url_open(resource, allow_redirects=False)
+            target = ''
+            while r.status_code in (301, 308):
+                location = urls.url_parse(r.headers['Location'])
+                if location.netloc and location.netloc != urls.url_parse(self.base_url()).netloc:
+                    break
+                target = location.path
+                r = self.url_open(location.replace(scheme='', netloc='').to_url(), allow_redirects=False)
+            if r.status_code in (301, 308):
+                # permanent redirect to another site, out of scope
+                resources[resource] = None
+                continue
+            cache_control = parse_cache_control_header(r.headers.get('Cache-Control'), cls=ResponseCacheControl)
+            private_avatar = PRIVATE_AVATAR_RE.match(parts.path) \
+                and 'placeholder' in r.headers.get('Content-Disposition', '')
+            cacheable = (not cache_control.private or private_avatar) and (
+                cache_control.immutable or (cache_control.max_age or 0) >= STATIC_CACHE)
+            resources[resource] = None if cacheable else (
+                page_url, target, r.status_code, r.headers.get('Content-Type', ''), cache_control.to_header())
+
+    def crawl(self, url, seen=None, msg='', resources=None):
         if seen is None:
             seen = set()
 
@@ -88,6 +164,8 @@ class Crawler(HttpCaseWithUserDemo):
 
         if r.headers['Content-Type'].startswith('text/html'):
             doc = lxml.html.fromstring(r.content)
+            if resources is not None:
+                self.check_resources_cacheable(doc, url, resources)
             for link in doc.xpath('//a[@href]'):
                 href = link.get('href')
 
@@ -104,7 +182,7 @@ class Crawler(HttpCaseWithUserDemo):
                    (parts.scheme and parts.scheme not in ('http', 'https')):
                     continue
 
-                self.crawl(href, seen, msg)
+                self.crawl(href, seen, msg, resources)
         return seen
 
     def test_05_test_clean_url(self):
@@ -147,11 +225,19 @@ class Crawler(HttpCaseWithUserDemo):
     def test_10_crawl_public(self):
         t0 = time.time()
         t0_sql = self.cr.sql_log_count
-        seen = self.crawl('/', msg='Anonymous Coward')
+        resources = {}
+        seen = self.crawl('/', msg='Anonymous Coward', resources=resources)
         count = len(seen)
         duration = time.time() - t0
         sql = self.cr.sql_log_count - t0_sql
         _logger.runbot("public crawled %s urls in %.2fs %s queries, %.3fs %.2fq per request, ", count, duration, sql, duration / count, float(sql) / count)
+
+        uncacheable = {url: info for url, info in resources.items() if info}
+        if uncacheable:
+            self.fail("Resources of public pages must be cacheable by CDNs (not private, with a `unique` URL):\n%s" % '\n'.join(
+                f"{url}{f' -> {target}' if target else ''}  [{status} {content_type} | {cache_control}]  on {page}"
+                for url, (page, target, status, content_type, cache_control) in sorted(uncacheable.items())
+            ))
 
     def test_20_crawl_demo(self):
         # Demo user without sales/crm/helpdesk/... rights won't be able to access to
