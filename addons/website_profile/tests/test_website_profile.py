@@ -36,6 +36,18 @@ class TestWebsiteProfile(HttpCaseGamification):
                 mock_request.httprequest.headers = {'Referer': f'{base_url_other}{referer}' if referer else None}
                 self.assertEqual(controller._prepare_url_from_info(), {'url_from': None, 'url_from_label': None})
 
+    def test_profile_avatar_cache(self):
+        published = odoo.tests.new_test_user(self.env, 'published', karma=10, website_published=True)
+        private = odoo.tests.new_test_user(self.env, 'private', karma=10)
+        for user, cache_control in (
+            (published, 'public, max-age=31536000, immutable'),
+            # served with the visitor's rights: it may differ between visitors
+            (private, 'no-cache, private'),
+        ):
+            with self.subTest(user=user.name):
+                response = self.url_open(f'/profile/avatar/{user.id}?field=avatar_128&unique=1')
+                self.assertEqual(response.headers['Cache-Control'], cache_control)
+
     def test_save_change_description(self):
         odoo.tests.new_test_user(
             self.env, 'test_user',

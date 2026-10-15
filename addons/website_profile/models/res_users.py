@@ -23,6 +23,16 @@ class ResUsers(models.Model):
     website_description = fields.Html(related='partner_id.website_description', inherited=True, readonly=False, user_writeable=True)
     website_published = fields.Boolean(related='partner_id.website_published', inherited=True, readonly=False, user_writeable=True)
 
+    def _get_profile_avatar_url(self, field='avatar_128'):
+        """ Cacheable URL of the user's avatar on public pages. The image, the
+        name (initials of the placeholder) and the publication are stored on the
+        partner, the karma on the user: their write dates change with them. """
+        self.ensure_one()
+        user_sudo = self.sudo()
+        write_dates = f'{user_sudo.write_date}-{user_sudo.partner_id.write_date}'
+        unique = hashlib.sha512(write_dates.encode()).hexdigest()[:7]
+        return f'/profile/avatar/{self.id}?field={field}&unique={unique}'
+
     @api.model
     def _generate_profile_token(self, user_id, email):
         """Return a token for email validation. This token is valid for the day
