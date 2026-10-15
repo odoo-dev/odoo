@@ -209,7 +209,7 @@
                                 <span class="text-nowrap">% on</span>
                                 <field name="base_pricelist_id"
                                     class="oe_inline"
-                                    placeholder="sales price"
+                                    placeholder="Price"
                                     domain="[('id', '!=', pricelist_id)]"
                                     groups="product.group_product_pricelist"/>
                             </div>
