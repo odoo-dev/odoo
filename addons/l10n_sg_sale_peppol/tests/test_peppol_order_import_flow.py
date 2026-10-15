@@ -386,3 +386,102 @@ class TestPeppolOrderImportFlow(TestPeppolMessage):
         }])
         # Verify order remains active (not cancelled) after rejecting the cancellation
         self.assertNotEqual(order.state, 'cancel')
+
+    def test_order_delivery_partner_import(self):
+        """Test the delivery information of an order is resolved to the buyer, one of its contacts
+        or a known GLN partner, and becomes a new delivery address of the buyer otherwise."""
+        env = self.env(su=True)
+        parser = env['sale.edi.xml.ubl_bis3_advanced_order']
+        singapore = env.ref('base.sg')
+        buyer = env['res.partner'].create({
+            'name': 'Buyer',
+            'is_company': True,
+            'street': '1 Buyer Road',
+            'zip': '111111',
+            'country_id': singapore.id,
+        })
+        warehouse = env['res.partner'].create({
+            'name': 'Buyer Warehouse',
+            'type': 'delivery',
+            'parent_id': buyer.id,
+            'street': '2 Warehouse Road',
+            'zip': '222222',
+            'country_id': singapore.id,
+        })
+        end_customer = env['res.partner'].create({'name': 'End Customer', 'global_location_number': '5880000000010'})
+        order = env['sale.order'].create({'partner_id': buyer.id})
+
+        def import_delivery_partner(delivery_xml):
+            return parser._import_order_delivery_partner(order, etree.fromstring(
+                f'<Order xmlns="urn:oasis:names:specification:ubl:schema:xsd:Order-2"'
+                f' xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"'
+                f' xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">'
+                f'<cbc:ID>ORDER-1</cbc:ID>{delivery_xml}</Order>'
+            ))[0]
+
+        def make_address_xml(street, zip_code, tag='Address'):
+            return (
+                f'<cac:{tag}><cbc:StreetName>{street}</cbc:StreetName><cbc:PostalZone>{zip_code}</cbc:PostalZone>'
+                f'<cac:Country><cbc:IdentificationCode>SG</cbc:IdentificationCode></cac:Country></cac:{tag}>'
+            )
+
+        def make_party_xml(name, inner=''):
+            return f'<cac:DeliveryParty>{inner}<cac:PartyName><cbc:Name>{name}</cbc:Name></cac:PartyName></cac:DeliveryParty>'
+
+        # Without delivery information, the order is delivered to the buyer.
+        self.assertEqual(import_delivery_partner(''), buyer)
+        self.assertEqual(import_delivery_partner(
+            '<cac:Delivery><cac:RequestedDeliveryPeriod><cbc:EndDate>2024-02-01</cbc:EndDate>'
+            '</cac:RequestedDeliveryPeriod></cac:Delivery>'
+        ), buyer)
+
+        # Delivery information repeating the buyer's address resolves to the buyer.
+        self.assertEqual(import_delivery_partner(
+            f'<cac:Delivery><cac:DeliveryLocation>{make_address_xml(" 1  buyer road", "111111")}</cac:DeliveryLocation>'
+            f'{make_party_xml("Buyer")}</cac:Delivery>'
+        ), buyer)
+
+        # An address of a known contact resolves to it, from the location or the party address.
+        self.assertEqual(import_delivery_partner(
+            f'<cac:Delivery><cac:DeliveryLocation>{make_address_xml("2 Warehouse Road", "222222")}</cac:DeliveryLocation></cac:Delivery>'
+        ), warehouse)
+        self.assertEqual(import_delivery_partner(
+            f'<cac:Delivery>{make_party_xml("Buyer Warehouse", make_address_xml("2 Warehouse Road", "222222", "PostalAddress"))}</cac:Delivery>'
+        ), warehouse)
+
+        # A contact name alone resolves to that contact.
+        self.assertEqual(import_delivery_partner(f'<cac:Delivery>{make_party_xml("Buyer Warehouse")}</cac:Delivery>'), warehouse)
+
+        # A known GLN resolves to its partner, even outside the buyer's contacts.
+        self.assertEqual(import_delivery_partner(
+            '<cac:Delivery><cac:DeliveryLocation><cbc:ID schemeID="0088">5880000000010</cbc:ID>'
+            f'{make_address_xml("3 Elsewhere Road", "333333")}</cac:DeliveryLocation></cac:Delivery>'
+        ), end_customer)
+
+        # An unknown delivery location becomes a new delivery address of the buyer.
+        new_address = import_delivery_partner(
+            '<cac:Delivery><cac:DeliveryLocation><cbc:ID schemeID="0088">5880000000027</cbc:ID>'
+            f'{make_address_xml("4 New Road", "444444")}</cac:DeliveryLocation>'
+            f'{make_party_xml("Site Office", "")}</cac:Delivery>'
+        )
+        self.assertRecordValues(new_address, [{
+            'name': 'Site Office',
+            'type': 'delivery',
+            'parent_id': buyer.id,
+            'street': '4 New Road',
+            'zip': '444444',
+            'country_id': singapore.id,
+            'global_location_number': '5880000000027',
+        }])
+
+        # An invalid GLN is ignored.
+        new_address = import_delivery_partner(
+            '<cac:Delivery><cac:DeliveryLocation><cbc:ID schemeID="0088">1234</cbc:ID>'
+            f'{make_address_xml("5 New Road", "555555")}</cac:DeliveryLocation></cac:Delivery>'
+        )
+        self.assertRecordValues(new_address, [{
+            'type': 'delivery',
+            'parent_id': buyer.id,
+            'street': '5 New Road',
+            'global_location_number': False,
+        }])

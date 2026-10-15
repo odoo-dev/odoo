@@ -148,6 +148,105 @@ class SaleEdiXmlUbl_Bis3_AdvancedOrder(models.AbstractModel):
             })
         return line_vals
 
+    def _import_order_delivery_partner(self, order, tree):
+        """ OVERRIDE of `sale_edi_ubl.sale.edi.xml.ubl_bis3`: the delivery information is matched
+        against the buyer and its contacts rather than all partners, and becomes a new delivery
+        address of the buyer when nothing matches. Without delivery information, the order is
+        delivered to the buyer.
+        """
+        buyer = order.partner_id
+        delivery_vals = self._import_retrieve_delivery_vals(tree)
+        if not buyer or not delivery_vals:
+            return buyer, []
+
+        commercial_partner = buyer.commercial_partner_id
+        candidates = buyer | self.env['res.partner'].search(
+            [('id', 'child_of', commercial_partner.id)],
+        ).sorted(lambda partner: partner.type != 'delivery')
+
+        if gln := delivery_vals.get('global_location_number'):
+            partner = (
+                candidates.filtered(lambda partner: partner.global_location_number == gln)[:1]
+                or self.env['res.partner']._retrieve_partner(
+                    additional_identifiers={'EAN_GLN': gln}, company=order.company_id,
+                )
+            )
+            if partner:
+                return partner, []
+
+        def normalize(value):
+            return ' '.join(str(value or '').split()).casefold()
+
+        has_address = 'country_id' in delivery_vals
+        if has_address:
+            address_fields = ['street', 'street2', 'city', 'zip', 'state_id', 'country_id']
+            delivery_address = [normalize(delivery_vals.get(field)) for field in address_fields]
+            candidates = candidates.filtered(lambda partner: delivery_address == [
+                normalize(value)
+                for value in partner._convert_to_write({field: partner[field] for field in address_fields}).values()
+            ])
+        if name := normalize(delivery_vals.get('name')):
+            partner = candidates.filtered(lambda partner: normalize(partner.name) == name)[:1]
+            if partner:
+                return partner, []
+        if has_address and candidates:
+            return candidates[0], []
+
+        partner = self.env['res.partner'].create({
+            **delivery_vals,
+            'parent_id': commercial_partner.id,
+            'type': 'delivery',
+        })
+        order._message_log(body=Markup("<b>%s</b>") % self.env._(
+            "Created new delivery address '%(address)s' under '%(company_name)s' from the order's delivery information.",
+            address=partner.display_name, company_name=commercial_partner.display_name,
+        ))
+        return partner, []
+
+    def _import_retrieve_delivery_vals(self, tree):
+        """ Read the order's delivery location and party as `res.partner` values. The address and GLN
+        are read from the delivery location first, then from the delivery party.
+        :return: the partner values, empty when the order has no delivery information.
+        """
+        delivery_node = tree.find('./{*}Delivery')
+        if delivery_node is None:
+            return {}
+
+        ResPartner = self.env['res.partner']
+        gln = (
+            delivery_node.findtext("./{*}DeliveryLocation/{*}ID[@schemeID='0088']")
+            or delivery_node.findtext("./{*}DeliveryParty/{*}PartyIdentification/{*}ID[@schemeID='0088']")
+        )
+        gln_validation = ResPartner._validate_identifier('EAN_GLN', gln)
+        vals = {
+            'name': (
+                delivery_node.findtext('./{*}DeliveryParty/{*}PartyName/{*}Name')
+                or delivery_node.findtext('./{*}DeliveryLocation/{*}Name')
+            ),
+            'phone': delivery_node.findtext('./{*}DeliveryParty/{*}Contact/{*}Telephone'),
+            'email': delivery_node.findtext('./{*}DeliveryParty/{*}Contact/{*}ElectronicMail'),
+            'global_location_number': gln_validation['value'] if gln_validation['valid'] else None,
+        }
+
+        address_node = delivery_node.find('./{*}DeliveryLocation/{*}Address')
+        if address_node is None:
+            address_node = delivery_node.find('./{*}DeliveryParty/{*}PostalAddress')
+        country_code = address_node is not None and address_node.findtext('./{*}Country/{*}IdentificationCode')
+        if country := country_code and self.env['res.country'].search([('code', '=', country_code.strip().upper())], limit=1):
+            subentity = (address_node.findtext('./{*}CountrySubentity') or '').strip()
+            vals.update({
+                'street': address_node.findtext('./{*}StreetName'),
+                'street2': address_node.findtext('./{*}AdditionalStreetName'),
+                'city': address_node.findtext('./{*}CityName'),
+                'zip': address_node.findtext('./{*}PostalZone'),
+                'country_id': country.id,
+                'state_id': subentity and self.env['res.country.state'].search([
+                    ('country_id', '=', country.id),
+                    '|', ('code', '=', subentity), ('name', '=ilike', subentity),
+                ], limit=1).id,
+            })
+        return {field: value for field, value in vals.items() if value}
+
     def _parse_ubl_datetime(self, date_str, time_str, tz, end_of_day=False):
         """Combine UBL cbc:*Date and cbc:*Time values into a naive UTC datetime, as stored by Odoo.
 
