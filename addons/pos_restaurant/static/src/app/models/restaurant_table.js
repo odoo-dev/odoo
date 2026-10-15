@@ -51,7 +51,13 @@ export class RestaurantTable extends Base {
     }
     startDateForDuration() {
         const order = this.getOrder();
-        return order ? order.create_date : null;
+        if (order?.course_ids?.length) {
+            return order.course_ids
+                .map((course) => course.fired_date)
+                .filter(Boolean)
+                .sort()?.[0];
+        }
+        return order?.create_date;
     }
     orderDuration() {
         const startTime = this.startDateForDuration();

@@ -2,6 +2,24 @@ import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 
+function formatDuration(milliseconds) {
+    const seconds = Math.floor(milliseconds / 1000);
+    if (seconds <= 0) {
+        return "";
+    }
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainder = seconds % 60;
+
+    if (hours) {
+        return _t("%sh%s'%s\"", hours, minutes, remainder);
+    }
+    if (minutes) {
+        return _t("%s'%s\"", minutes, remainder);
+    }
+    return _t('%s"', remainder);
+}
+
 patch(PosOrder.prototype, {
     setup(_defaultObj, options) {
         super.setup(...arguments);
@@ -157,6 +175,20 @@ patch(PosOrder.prototype, {
             // Neither has sequence sort by index
             return a.index - b.index;
         });
+    },
+    getCourseDurations() {
+        const firedCourses = this.course_ids
+            .filter((course) => course.fired && course.fired_date)
+            .sort((a, b) => new Date(a.fired_date) - new Date(b.fired_date));
+        const now = Date.now();
+        const durations = new Map();
+        firedCourses.forEach((course, index) => {
+            const nextCourse = firedCourses[index + 1];
+            const end = nextCourse ? new Date(nextCourse.fired_date).getTime() : now;
+            const start = new Date(course.fired_date).getTime();
+            durations.set(course.uuid, formatDuration(end - start));
+        });
+        return durations;
     },
     get isTippedAfterPayment() {
         if (

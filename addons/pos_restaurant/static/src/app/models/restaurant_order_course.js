@@ -16,6 +16,10 @@ export class RestaurantOrderCourse extends Base {
     isReadyToFire() {
         return !this.fired && !this.isEmpty();
     }
+
+    getDuration() {
+        return this.order_id?.getCourseDurations()?.get(this.uuid) ?? "";
+    }
 }
 
 registry
