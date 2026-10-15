@@ -5,7 +5,7 @@ import { Domain } from '@web/core/domain';
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
-import { useService } from "@web/core/utils/hooks";
+import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 
 /**
  * Filter event by calendars. eg. 'My Calendar' or 'Work Calendar'
@@ -20,6 +20,8 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
     setup() {
         super.setup();
         this.action = useService('action');
+        this.addDialog = useOwnedDialogs();
+        this.orm = useService("orm");
         this.state.activityFilterChecked = this.showActivities;
     }
 
@@ -55,22 +57,23 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
     * Add a 'Create Calendar' and 'All calendars' options to the selection
     * Override onSelect behavior to use existing calendar.user record
     */
-    async loadSource(request) {
-        const options = await super.loadSource(request);
-
-        options.push({
-            cssClass: "o_calendar_dropdown_option",
-            label: _t("Create Calendar"),
-            onSelect: () => this.createCalendar(request),
-        })
-
-        options.push({
-            cssClass: "o_calendar_dropdown_option",
-            label: _t("All calendars"),
-            onSelect: () => this.action.doAction("calendar.action_calendar_calendar")
-        })
-
-        return options;
+    get otherSources() {
+        return [
+            {
+                options: (request) => [
+                    {
+                        cssClass: "o_calendar_dropdown_option",
+                        label: _t("Create Calendar"),
+                        onSelect: () => this.createCalendar(request),
+                    },
+                    {
+                        cssClass: "o_calendar_dropdown_option",
+                        label: _t("All calendars"),
+                        onSelect: () => this.action.doAction("calendar.action_calendar_calendar"),
+                    },
+                ],
+            },
+        ];
     }
 
     getFilterDomain(activeIds) {
@@ -78,8 +81,9 @@ export class AttendeeCalendarCalendarFilterSection extends CalendarFilterSection
         return Domain.and([domain, [["calendar_user_ids", "any", [["user_id", "=", user.userId]]]]]).toList();
     }
 
-    async onFilterSelected(filterRecord) {
-        await this.orm.call('calendar.calendar', 'add_filter_to_list', [filterRecord[0]])
+    async onFilterSelected(ids) {
+        const idsList = ids.map((id) => id.id);
+        await this.orm.call("calendar.calendar", "add_filter_to_list", idsList);
         await this.props.model.load();
     }
 

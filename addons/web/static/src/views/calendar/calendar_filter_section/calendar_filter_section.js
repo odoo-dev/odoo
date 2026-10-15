@@ -1,9 +1,8 @@
 import { render } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { Transition } from "@web/core/transition";
-import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
+import { Record } from "@web/model/record";
+import { Field } from "@web/views/fields/field";
 import { getColor } from "../utils";
 import { Component, proxy, t, useProps } from "@odoo/owl";
 
@@ -11,7 +10,8 @@ let nextId = 1;
 
 export class CalendarFilterSection extends Component {
     static components = {
-        AutoComplete,
+        Field,
+        Record,
         Transition,
     };
     static template = "web.CalendarFilterSection";
@@ -27,27 +27,53 @@ export class CalendarFilterSection extends Component {
     setup() {
         this.state = proxy({
             collapsed: false,
-            fieldRev: 1,
         });
-        this.addDialog = useOwnedDialogs();
-        this.orm = useService("orm");
     }
 
-    get autoCompleteProps() {
+    /**
+     * The section is displayed through the widget of the field (e.g. to search
+     * the employees the user has access to), in a record that is never saved:
+     * the selected records are turned into filters instead.
+     */
+    get recordProps() {
+        const { fieldName } = this.section;
+        const field = this.props.model.fields[fieldName];
         return {
-            autoSelect: true,
-            resetOnSelect: true,
-            placeholder: this.props.placeholder ?? _t("+ Add %s", this.section.label),
-            sources: [
-                {
-                    placeholder: _t("Loading..."),
-                    options: (request) => this.loadSource(request),
-                    optionSlot: "option",
-                },
-            ],
-            value: "",
-            class: "mt-1",
+            resModel: this.props.model.resModel,
+            fields: {
+                [fieldName]: { ...field, type: "many2one", readonly: false, required: false },
+            },
+            activeFields: { [fieldName]: this.fieldInfo },
+            mode: "edit",
+            values: {},
         };
+    }
+
+    get fieldInfo() {
+        return this.section.fieldInfo;
+    }
+
+    get fieldProps() {
+        return {
+            fieldInfo: this.fieldInfo,
+            canCreate: false,
+            canCreateEdit: false,
+            canOpen: false,
+            canQuickCreate: false,
+            context: this.section.context,
+            domain: () => this.getFilterDomain(this.section.filters.map((f) => f.value)),
+            otherSources: this.otherSources,
+            placeholder: this.props.placeholder ?? _t("+ Add %s", this.section.label),
+            string: this.section.label,
+            updateMany: (records) => this.onFilterSelected(records),
+        };
+    }
+
+    /**
+     * Additional autocomplete sources, displayed after the records.
+     */
+    get otherSources() {
+        return [];
     }
 
     get isAllActive() {
@@ -90,50 +116,21 @@ export class CalendarFilterSection extends Component {
         });
     }
 
-    async loadSource(request) {
-        const resModel = this.props.model.fields[this.section.fieldName].relation;
-        const activeIds = this.section.filters.map((f) => f.value);
-        const domain = this.getFilterDomain(activeIds);
-        const records = await this.orm.call(resModel, "name_search", [], {
-            name: request,
-            operator: "ilike",
-            domain: domain,
-            limit: 8,
-            context: this.section.context,
-        });
-
-        const options = records.map((result) => ({
-            data: {
-                id: result[0],
-            },
-            label: result[1],
-            onSelect: () => this.onFilterSelected(result),
-        }));
-
-        if (records.length > 7) {
-            options.push({
-                cssClass: "o_calendar_dropdown_option",
-                label: _t("Search More..."),
-                onSelect: () => this.onSearchMore(resModel, domain, request),
-            });
+    getFilterAvatar(filter) {
+        if (!this.section.hasAvatar || !filter.hasAvatar) {
+            return null;
         }
-
-        if (records.length === 0) {
-            options.push({
-                cssClass: "o_m2o_no_result",
-                label: _t("No records"),
-            });
-        }
-
-        return options;
+        const { field, model } = this.section.avatar;
+        return { src: `/web/image/${model}/${filter.value}/${field}` };
     }
 
-    onFilterSelected(filterRecord) {
-        this.props.model.createFilter(this.section.fieldName, filterRecord[0])
+    onFilterSelected(ids) {
+        const idsList = ids.map((id) => id.id);
+        return this.props.model.createFilter(this.section.fieldName, idsList);
     }
 
     getFilterDomain(activeIds) {
-        return [["id", "not in", activeIds]]
+        return [["id", "not in", activeIds]];
     }
 
     toggleSection() {
@@ -157,31 +154,5 @@ export class CalendarFilterSection extends Component {
             this.props.model.unlinkFilter(this.section.fieldName, filter.recordId);
             render(this);
         }
-    }
-
-    async onSearchMore(resModel, domain, request) {
-        const dynamicFilters = [];
-        if (request.length) {
-            const nameGets = await this.orm.call(resModel, "name_search", [], {
-                name: request,
-                domain: domain,
-                operator: "ilike",
-                context: this.section.context,
-            });
-            dynamicFilters.push({
-                description: _t("Quick search: %s", request),
-                domain: [["id", "in", nameGets.map((nameGet) => nameGet[0])]],
-            });
-        }
-        this.addDialog(SelectCreateDialog, {
-            title: _t("Search: %s", this.section.label),
-            noCreate: true,
-            multiSelect: true,
-            resModel,
-            context: this.section.context,
-            domain,
-            onSelected: (resId) => this.props.model.createFilter(this.section.fieldName, resId),
-            dynamicFilters,
-        });
     }
 }

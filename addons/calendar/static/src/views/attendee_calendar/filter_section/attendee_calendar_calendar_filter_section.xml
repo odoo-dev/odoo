@@ -21,7 +21,7 @@
             <attribute name="class" remove="o-checkbox form-check" add="mt-2" separator=" "/>
         </xpath>
         <!-- "My Activities" filter -->
-        <xpath expr="//AutoComplete" position="before">
+        <xpath expr="//Record" position="before">
             <div t-if="this.showActivityFilter" class="o-checkbox form-check position-relative w-100">
                 <input
                     id="show_activities_checkbox"

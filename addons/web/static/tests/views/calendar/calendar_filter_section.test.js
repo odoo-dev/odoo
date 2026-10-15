@@ -90,8 +90,11 @@ test(`filters with placeholder`, async () => {
             placeholder: "Custom placeholder",
         },
     });
-    expect(`.o_calendar_filter .o-autocomplete--input`).toHaveAttribute("placeholder", "Custom placeholder");
-})
+    expect(`.o_calendar_filter .o_field_widget input`).toHaveAttribute(
+        "placeholder",
+        "Custom placeholder"
+    );
+});
 
 test(`filters without placeholder`, async () => {
     await mountWithCleanup(CalendarFilterSection, {
@@ -100,8 +103,11 @@ test(`filters without placeholder`, async () => {
             section: FAKE_FILTER_SECTIONS[0],
         },
     });
-    expect(`.o_calendar_filter .o-autocomplete--input`).toHaveAttribute("placeholder", "+ Add Attendees");
-})
+    expect(`.o_calendar_filter .o_field_widget input`).toHaveAttribute(
+        "placeholder",
+        "+ Add Attendees"
+    );
+});
 
 test(`filter can have remove button`, async () => {
     await mountWithCleanup(CalendarFilterSection, {

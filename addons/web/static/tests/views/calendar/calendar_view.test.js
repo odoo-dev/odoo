@@ -418,15 +418,13 @@ test(`simple calendar rendering on desktop`, async () => {
 
     // test search bar in filter
     await contains(`.o_calendar_sidepanel input[type=text]`).click();
-    expect(`.dropdown-item`).toHaveCount(2);
-    expect(queryAllTexts`.dropdown-item`).toEqual(["partner 3", "partner 4"]);
+    expect(queryAllTexts`.dropdown-item`).toEqual(["partner 3", "partner 4", "Search more..."]);
 
     await contains(`.dropdown-item:eq(0)`).click();
     expect(`.o_calendar_filter:eq(0) .o_calendar_filter_item`).toHaveCount(3);
 
     await contains(`.o_calendar_sidepanel input[type=text]`).click();
-    expect(`.dropdown-item`).toHaveCount(1);
-    expect(`.dropdown-item`).toHaveText("partner 4");
+    expect(queryAllTexts`.dropdown-item`).toEqual(["partner 4", "Search more..."]);
 
     await removeFilter("attendee_ids", "2");
     expect(`.o_calendar_filter:eq(0) .o_calendar_filter_item`).toHaveCount(2);
@@ -434,6 +432,9 @@ test(`simple calendar rendering on desktop`, async () => {
 
 test.tags("mobile");
 test(`simple calendar rendering on mobile`, async () => {
+    CalendarPartner._views = {
+        kanban: `<kanban><templates><t t-name="card"><field name="name"/></t></templates></kanban>`,
+    };
     Event._fields.partner_id = fields.Many2one({ relation: "calendar.partner" });
     Event._records.push(
         {
@@ -510,7 +511,7 @@ test(`simple calendar rendering on mobile`, async () => {
 
     expect(`.o_calendar_filter:eq(0)`).toBeVisible();
     expect(`.o_calendar_filter:eq(0) .o_calendar_filter_item`).toHaveCount(2);
-    expect(`.o_calendar_filter:eq(0) .o-autocomplete`).toHaveCount(1);
+    expect(`.o_calendar_filter:eq(0) .o_field_many2one input`).toHaveCount(1);
     await hideCalendarPanel();
     await toggleFilter("attendee_ids", "1");
     expect(`.o_event`).toHaveCount(6);
@@ -518,23 +519,27 @@ test(`simple calendar rendering on mobile`, async () => {
     await toggleFilter("attendee_ids", "2");
     expect(`.o_event`).toHaveCount(0);
 
-    // test search bar in filter
+    // on mobile, filters are added through the search dialog
     await displayCalendarPanel();
     await contains(`.o_calendar_sidepanel input[type=text]`).click();
-    expect(`.dropdown-item`).toHaveCount(2);
-    expect(queryAllTexts`.dropdown-item`).toEqual(["partner 3", "partner 4"]);
+    expect(queryAllTexts`.modal .o_kanban_record:not(.o_kanban_ghost)`).toEqual([
+        "partner 3",
+        "partner 4",
+    ]);
 
-    await contains(`.dropdown-item:eq(0)`).click();
+    await contains(`.modal .o_kanban_record:eq(0)`).click();
+    expect(`.modal`).toHaveCount(0);
     expect(`.o_calendar_filter:eq(0) .o_calendar_filter_item`).toHaveCount(3);
 
     await contains(`.o_calendar_sidepanel input[type=text]`).click();
-    expect(`.dropdown-item`).toHaveCount(1);
-    expect(`.dropdown-item`).toHaveText("partner 4");
+    expect(queryAllTexts`.modal .o_kanban_record:not(.o_kanban_ghost)`).toEqual(["partner 4"]);
+    await contains(`.modal .o_form_button_cancel`).click();
 
     await removeFilter("attendee_ids", "2");
     expect(`.o_calendar_filter:eq(0) .o_calendar_filter_item`).toHaveCount(2);
 });
 
+test.tags("desktop");
 test(`filter panel autocomplete: updates when typing`, async () => {
     await mountView({
         resModel: "event",
@@ -552,17 +557,19 @@ test(`filter panel autocomplete: updates when typing`, async () => {
 
     await contains(`${root} .o-autocomplete--input`).click();
     expect(`${root} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${root} .o-autocomplete--dropdown-item`).toHaveCount(2);
     expect(queryAllTexts(`${root} .o-autocomplete--dropdown-item`)).toEqual([
         "partner 3",
         "partner 4",
+        "Search more...",
     ]);
 
     await contains(`${root} .o-autocomplete--input`).edit("partner 3", { confirm: false });
     await advanceTime(500);
     expect(`${root} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${root} .o-autocomplete--dropdown-item`).toHaveCount(1);
-    expect(queryAllTexts(`${root} .o-autocomplete--dropdown-item`)).toEqual(["partner 3"]);
+    expect(queryAllTexts(`${root} .o-autocomplete--dropdown-item`)).toEqual([
+        "partner 3",
+        "Search more...",
+    ]);
 
     await contains(`${root} .o-autocomplete--input`).edit(
         "a string that would yield to no result as it is too very much convoluted",
@@ -574,6 +581,7 @@ test(`filter panel autocomplete: updates when typing`, async () => {
     expect(queryAllTexts(`${root} .o-autocomplete--dropdown-item`)).toEqual(["No records"]);
 });
 
+test.tags("desktop");
 test(`check the avatar of the attendee in the calendar filter panel`, async () => {
     CalendarPartner._views = {
         list: `<list><field name="name"/></list>`,
@@ -612,7 +620,10 @@ test(`check the avatar of the attendee in the calendar filter panel`, async () =
     await contains(`${section} .o-autocomplete--input`).click();
     await runAllTimers();
     expect(".o-autocomplete--dropdown-item:first-child").toHaveText("partner 3");
-    expect(`.o-autocomplete--dropdown-item:first-child .dropdown-item img`).toHaveClass("o_avatar");
+    expect(`.o-autocomplete--dropdown-item:first-child .o_avatar img`).toHaveAttribute(
+        "data-src",
+        "/web/image/calendar.partner/3/avatar_128"
+    );
 
     await contains(".o-autocomplete--dropdown-item:first-child").click();
     expect(".o_calendar_filter_item:eq(-1)").toHaveText("partner 3");
@@ -664,7 +675,7 @@ test(`Select multiple attendees in the calendar filter panel autocomplete on des
         "foo partner 8",
         "foo partner 9",
         "foo partner 10",
-        "Search More...",
+        "Search more...",
     ]);
 
     await contains(`.o-autocomplete--dropdown-item:last-child`).click();
@@ -731,7 +742,7 @@ test(`add a filter with the search more dialog on desktop`, async () => {
         "foo partner 8",
         "foo partner 9",
         "foo partner 10",
-        "Search More...",
+        "Search more...",
     ]);
 
     // Change the search term
@@ -748,7 +759,7 @@ test(`add a filter with the search more dialog on desktop`, async () => {
         "foo partner 10",
         "foo partner 11",
         "foo partner 12",
-        "Search More...",
+        "Search more...",
     ]);
 
     // Open the search more dialog
@@ -802,7 +813,7 @@ test(`add a filter with the search more dialog on desktop`, async () => {
         "foo partner 10",
         "foo partner 11",
         "foo partner 12",
-        "Search More...",
+        "Search more...",
     ]);
 
     // Change the search term
@@ -819,7 +830,7 @@ test(`add a filter with the search more dialog on desktop`, async () => {
         "foo partner 12",
         "foo partner 13",
         "foo partner 14",
-        "Search More...",
+        "Search more...",
     ]);
 
     // Open the search more dialog
@@ -850,7 +861,7 @@ test(`add a filter with the search more dialog on desktop`, async () => {
         "partner 1",
         "partner 2",
     ]);
-    expect(`.o-autocomplete--input`).toHaveValue("");
+    expect(`${section} .o_field_many2one input`).toHaveValue("");
 });
 
 test.tags("desktop");
@@ -889,7 +900,7 @@ test(`add a filter with the search more dialog (field with a context)`, async ()
     await advanceTime(500);
     expect(
         `.o_calendar_filter[data-name="attendee_ids"] .o-autocomplete--dropdown-item:last-child`
-    ).toHaveText("Search More...");
+    ).toHaveText("Search more...");
     await contains(
         `.o_calendar_filter[data-name="attendee_ids"] .o-autocomplete--dropdown-item:last-child`
     ).click();
@@ -930,48 +941,12 @@ test(`add a filter with the search more dialog on mobile`, async () => {
     expect(`${section} .o_calendar_filter_item`).toHaveCount(2);
     expect(queryAllTexts`.o_calendar_filter_item`).toEqual(["partner 1", "partner 2"]);
 
-    // Open the autocomplete dropdown
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(0);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(0);
-    await contains(`${section} .o-autocomplete--input`).click();
-    await advanceTime(500);
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(9);
-    expect(queryAllTexts`.o-autocomplete--dropdown-item`).toEqual([
+    // On mobile, the input directly opens the search dialog
+    await contains(`${section} .o_field_many2one input`).click();
+    expect(`.modal`).toHaveCount(1);
+    expect(queryAllTexts`.modal .o_data_row`).toEqual([
         "partner 3",
         "partner 4",
-        "foo partner 5",
-        "foo partner 6",
-        "foo partner 7",
-        "foo partner 8",
-        "foo partner 9",
-        "foo partner 10",
-        "Search More...",
-    ]);
-
-    // Change the search term
-    await contains(`.o-autocomplete--input`).edit("foo", { confirm: false });
-    await advanceTime(500);
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(9);
-    expect(queryAllTexts`.o-autocomplete--dropdown-item`).toEqual([
-        "foo partner 5",
-        "foo partner 6",
-        "foo partner 7",
-        "foo partner 8",
-        "foo partner 9",
-        "foo partner 10",
-        "foo partner 11",
-        "foo partner 12",
-        "Search More...",
-    ]);
-
-    // Open the search more dialog
-    expect(`.modal`).toHaveCount(0);
-    await contains(`${section} .o-autocomplete--dropdown-item:last-child`).click();
-    expect(`.modal`).toHaveCount(1);
-    expect(`.modal .o_data_row`).toHaveCount(10);
-    expect(queryAllTexts`.modal .o_data_row`).toEqual([
         "foo partner 5",
         "foo partner 6",
         "foo partner 7",
@@ -983,11 +958,14 @@ test(`add a filter with the search more dialog on mobile`, async () => {
         "foo partner 13",
         "foo partner 14",
     ]);
-    await contains(".o_data_row:eq(0)").click();
-    await contains(`.o-autocomplete--input`).edit("foo", { confirm: false });
-    await advanceTime(500);
-    await contains(`${section} .o-autocomplete--dropdown-item:last-child`).click();
-    await contains(".o_data_row:eq(0)").click();
+    await contains(".modal .o_data_row:eq(2)").click();
+    expect(`.modal`).toHaveCount(0);
+
+    // Already added records are not proposed anymore
+    await contains(`${section} .o_field_many2one input`).click();
+    expect(`.modal .o_data_row`).toHaveCount(11);
+    expect(".modal .o_data_row:eq(2)").toHaveText("foo partner 6");
+    await contains(".modal .o_data_row:eq(2)").click();
     expect("o_dialog").toHaveCount(0);
 
     expect(`.o_calendar_sidepanel .o_calendar_filter`).toHaveCount(1);
@@ -999,48 +977,11 @@ test(`add a filter with the search more dialog on mobile`, async () => {
         "partner 2",
     ]);
 
-    // Open the autocomplete dropdown
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(0);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(0);
-    await contains(`${section} .o-autocomplete--input`).click();
-    await advanceTime(500);
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(9);
-    expect(queryAllTexts`.o-autocomplete--dropdown-item`).toEqual([
+    // Closing the dialog doesn't add any filter
+    await contains(`${section} .o_field_many2one input`).click();
+    expect(queryAllTexts`.modal .o_data_row`).toEqual([
         "partner 3",
         "partner 4",
-        "foo partner 7",
-        "foo partner 8",
-        "foo partner 9",
-        "foo partner 10",
-        "foo partner 11",
-        "foo partner 12",
-        "Search More...",
-    ]);
-
-    // Change the search term
-    await contains(`.o-autocomplete--input`).edit("foo", { confirm: false });
-    await advanceTime(500);
-    expect(`${section} .o-autocomplete--dropdown-menu`).toHaveCount(1);
-    expect(`${section} .o-autocomplete--dropdown-item`).toHaveCount(9);
-    expect(queryAllTexts`.o-autocomplete--dropdown-item`).toEqual([
-        "foo partner 7",
-        "foo partner 8",
-        "foo partner 9",
-        "foo partner 10",
-        "foo partner 11",
-        "foo partner 12",
-        "foo partner 13",
-        "foo partner 14",
-        "Search More...",
-    ]);
-
-    // Open the search more dialog
-    expect(`.modal`).toHaveCount(0);
-    await contains(`${section} .o-autocomplete--dropdown-item:last-child`).click();
-    expect(`.modal`).toHaveCount(1);
-    expect(`.modal .o_data_row`).toHaveCount(8);
-    expect(queryAllTexts`.modal .o_data_row`).toEqual([
         "foo partner 7",
         "foo partner 8",
         "foo partner 9",
@@ -1059,7 +1000,7 @@ test(`add a filter with the search more dialog on mobile`, async () => {
         "partner 1",
         "partner 2",
     ]);
-    expect(`.o-autocomplete--input`).toHaveValue("");
+    expect(`${section} .o_field_many2one input`).toHaveValue("");
 });
 
 test(`delete attribute on calendar doesn't show delete button in popover`, async () => {

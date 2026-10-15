@@ -1,7 +1,7 @@
 import { evaluateExpr } from "@web/core/py_js/py";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { visitXML } from "@web/core/utils/xml";
-import { Field } from "@web/views/fields/field";
+import { Field, getFieldFromRegistry } from "@web/views/fields/field";
 
 const FIELD_ATTRIBUTE_NAMES = ["date_start", "date_stop", "all_day", "create_name_field", "color"];
 const SCALES = ["day", "week", "month", "year"];
@@ -9,6 +9,27 @@ const SCALES = ["day", "week", "month", "year"];
 export class CalendarParseArchError extends Error {}
 
 export class CalendarArchParser {
+    /**
+     * Filters are added one record at a time, through a many2one input which is
+     * always editable, whatever the type and modifiers of the field.
+     */
+    getFilterFieldInfo(node, fieldInfo, jsClass) {
+        const filterFieldInfo = { ...fieldInfo, readonly: "False", required: "False" };
+        if (fieldInfo.type !== "many2one" || !fieldInfo.widget) {
+            const widget = node.hasAttribute("avatar_field") ? "many2one_avatar" : null;
+            Object.assign(filterFieldInfo, {
+                type: "many2one",
+                widget,
+                field: getFieldFromRegistry("many2one", widget, "calendar", jsClass),
+                options: fieldInfo.type === "many2one" ? fieldInfo.options : {},
+                views: undefined,
+                viewMode: undefined,
+                relatedFields: undefined,
+            });
+        }
+        return filterFieldInfo;
+    }
+
     parse(xmlDoc, models, modelName) {
         const fields = models[modelName].fields;
         const fieldNames = new Set(fields.display_name ? ["display_name"] : []);
@@ -103,6 +124,7 @@ export class CalendarArchParser {
                         filterInfo.filterFieldName = node.getAttribute("filter_field") || null;
                         filterInfo.writeFieldName = node.getAttribute("write_field") || null;
                         filterInfo.writeResModel = node.getAttribute("write_model") || null;
+                        filterInfo.fieldInfo = this.getFilterFieldInfo(node, fieldInfo, jsClass);
                     }
                     break;
                 }

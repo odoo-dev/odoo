@@ -3,6 +3,9 @@ import { FAKE_FIELDS } from "./calendar_test_helpers";
 
 import { parseXML } from "@web/core/utils/xml";
 import { CalendarArchParser } from "@web/views/calendar/calendar_arch_parser";
+import { many2OneAvatarField } from "@web/views/fields/many2one_avatar/many2one_avatar_field";
+import "@web/views/fields/many2many_tags/many2many_tags_field";
+import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 
 describe.current.tags("headless");
 
@@ -218,4 +221,22 @@ test("showUnusualDays", () => {
     expect(parseWith({ show_unusual_days: "false" }).showUnusualDays).toBe(false);
     expect(parseWith({ show_unusual_days: "False" }).showUnusualDays).toBe(false);
     expect(parseWith({ show_unusual_days: "0" }).showUnusualDays).toBe(false);
+});
+
+test("filters are added through an editable many2one", () => {
+    const { filtersInfo } = parseArch(`
+        <calendar date_start="start_date">
+            <field name="user_id" widget="many2one_avatar" readonly="1" write_model="filter_user" write_field="user_id"/>
+            <field name="partner_ids" widget="many2many_tags" write_model="filter_partner" write_field="partner_id"/>
+        </calendar>
+    `);
+    const userFieldInfo = filtersInfo.user_id.fieldInfo;
+    expect(userFieldInfo.widget).toBe("many2one_avatar");
+    expect(userFieldInfo.field).toBe(many2OneAvatarField);
+    expect(userFieldInfo.readonly).toBe("False");
+
+    const partnerFieldInfo = filtersInfo.partner_ids.fieldInfo;
+    expect(partnerFieldInfo.type).toBe("many2one");
+    expect(partnerFieldInfo.widget).toBe(null);
+    expect(partnerFieldInfo.field.component).toBe(Many2OneField);
 });

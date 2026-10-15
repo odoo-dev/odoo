@@ -942,6 +942,7 @@ export class CalendarModel extends Model {
             },
             canAddFilter: !!filterInfo.writeResModel,
             context: makeContext([filterInfo.context, this.meta.context]),
+            fieldInfo: filterInfo.fieldInfo,
         };
     }
     /**

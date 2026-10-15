@@ -105,10 +105,12 @@ export const many2OneFieldProps = {
     domain: t.or([t.array(), t.function()]).optional(),
     nameCreateField: t.string().optional(),
     openActionContext: t.string().optional(),
+    otherSources: t.array().optional(),
     placeholder: t.string().optional(),
     searchLimit: t.number().optional(),
     searchThreshold: t.number().optional(),
     string: t.string().optional(),
+    updateMany: t.function().optional(),
 };
 
 export class Many2OneField extends Component {

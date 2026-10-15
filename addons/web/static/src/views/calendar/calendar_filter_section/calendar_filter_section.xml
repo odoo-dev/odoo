@@ -39,14 +39,9 @@
                         <t t-call="{{ this.constructor.subTemplates.filter }}" filterId="this.nextFilterId"/>
                     </t>
                 </div>
-                <AutoComplete t-if="this.section.canAddFilter" t-props="this.autoCompleteProps">
-                    <t t-set-slot="option" t-slot-scope="optionScope">
-                        <t t-if="optionScope.data.id and this.section.avatar.field">
-                            <img class="rounded me-1 o_avatar" t-attf-src="/web/image/{{ this.section.avatar.model }}/{{ optionScope.data.id }}/{{ this.section.avatar.field }}"/>
-                        </t>
-                        <t t-out="optionScope.label" />
-                    </t>
-                </AutoComplete>
+                <Record t-if="this.section.canAddFilter" t-props="this.recordProps" t-slot-scope="data">
+                    <Field t-props="this.fieldProps" name="this.section.fieldName" record="data.record" class="'mt-1'"/>
+                </Record>
             </t>
         </div>
     </t>
@@ -70,14 +65,19 @@
                 class="d-flex align-items-center gap-1 cursor-pointer"
                 t-attf-for="o_calendar_filter_item_{{filterId}}"
             >
-                <t t-if="this.section.hasAvatar and filter.hasAvatar">
-                    <img
-                        class="o_calendar_filter_avatar o_avatar rounded"
-                        t-attf-src="/web/image/{{ this.section.avatar.model }}/{{ filter.value }}/{{ this.section.avatar.field }}"
-                        loading="lazy"
-                        alt="Avatar"
-                    />
-                </t>
+                <t t-set="avatar" t-value="this.getFilterAvatar(filter)"/>
+                <img
+                    t-if="avatar and avatar.src"
+                    class="o_calendar_filter_avatar o_avatar rounded"
+                    t-att-src="avatar.src"
+                    loading="lazy"
+                    alt="Avatar"
+                />
+                <i
+                    t-elif="avatar and avatar.icon"
+                    class="o_calendar_filter_avatar o_avatar rounded oi"
+                    t-att-data-icon="avatar.icon"
+                />
                 <span
                     class="o_calendar_filter_title flex-grow-1 text-truncate lh-base"
                     t-out="filter.label"

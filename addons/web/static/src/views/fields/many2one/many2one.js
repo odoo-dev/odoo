@@ -47,6 +47,7 @@ export function computeM2OProps(fieldProps) {
         id: fieldProps.id,
         linkCssClass: computeLinkCssClass(),
         nameCreateField: fieldProps.nameCreateField,
+        otherSources: fieldProps.otherSources,
         openActionContext: () => {
             const { context, name, openActionContext, record } = fieldProps;
             return makeContext(
@@ -62,6 +63,7 @@ export function computeM2OProps(fieldProps) {
         string: fieldProps.string || fieldProps.record.fields[fieldProps.name].string || "",
         update: (value, options = {}) =>
             fieldProps.record.update({ [fieldProps.name]: value }, options),
+        updateMany: fieldProps.updateMany,
         willOpenRecordInDialog: () => fieldProps.record.save(),
         onRecordSaved: () => fieldProps.record.load(),
         value: toRaw(fieldProps.record.data[fieldProps.name]),
@@ -99,6 +101,7 @@ export const many2OneProps = {
     specification: t.object().optional(),
     string: t.string().optional(""),
     update: t.function(),
+    updateMany: t.function().optional(),
     willOpenRecordInDialog: t.function().optional(() => () => true),
     onRecordSaved: t.function().optional(() => {}),
     value: t.or([t.array(), t.object(), t.literal(false)]).optional(),
@@ -137,6 +140,7 @@ export class Many2One extends Component {
         return {
             create: this.props.canCreate,
             createEdit: this.props.canCreateEdit,
+            link: !!this.props.updateMany,
             write: this.props.canWrite,
         };
     }
@@ -150,6 +154,7 @@ export class Many2One extends Component {
             fieldString: this.props.string,
             getDomain: this.props.domain,
             id: this.props.id,
+            isToMany: !!this.props.updateMany,
             nameCreateField: this.props.nameCreateField,
             otherSources: this.props.otherSources,
             placeholder: this.props.placeholder,
@@ -164,6 +169,9 @@ export class Many2One extends Component {
             slots: this.props.slots,
             specification: this.props.specification,
             update: (records) => {
+                if (this.props.updateMany) {
+                    return records && this.props.updateMany(records);
+                }
                 const idNamePair = records && records[0] ? extractData(records[0]) : false;
                 return this.update(idNamePair);
             },
