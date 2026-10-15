@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
 from odoo.http import Response
-from odoo.tests import Form, tagged
+from odoo.tests import Form, HttpCase, tagged
 from odoo.tools.misc import file_open
 
 from odoo.addons.sale_management.tests.common import SaleManagementCommon
@@ -21,7 +21,7 @@ from .files import forms_pdf, plain_pdf
 
 
 @tagged('-at_install', 'post_install')
-class TestPDFQuoteBuilder(SaleManagementCommon):
+class TestPDFQuoteBuilder(SaleManagementCommon, HttpCase):
 
     @classmethod
     def setUpClass(cls):
@@ -368,6 +368,18 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
             login='admin',
         )
         # Assert documents are selected
+
+    def test_quote_builder_confirmed_order(self):
+        """Check that the quote builder stays editable on confirmed orders whose documents are
+        still printed."""
+        self.env['ir.config_parameter'].set_param('sale.always_include_selected_documents', True)
+        self.sale_order.action_confirm()
+        self.start_tour(
+            f'/odoo/sales/{self.sale_order.id}',
+            'quote_builder_confirmed_order_tour',
+            login='admin',
+        )
+        self.assertEqual(self.sale_order.quotation_document_ids, self.header)
 
     def test_quotation_document_is_added_iff_default(self):
         self.assertFalse(self._create_so().quotation_document_ids)
