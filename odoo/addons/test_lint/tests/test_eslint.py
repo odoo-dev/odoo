@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import os
 import re
 import subprocess
 from unittest import skipIf
@@ -25,6 +26,13 @@ class TestESLint(LintCase):
 
     longMessage = True
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        version = subprocess.run([eslint, '--version'], capture_output=True, encoding="utf-8", check=False).stdout
+        # ESLint 8 only reads the eslintrc configs, kept until the CI runs ESLint 10
+        cls.legacy_eslint = int(re.search(r'\d+', version).group()) < 9
+
     def _test_eslint(self, modules, config_path, extension='js', exclude=None):
         """ Test that there are no eslint errors in the javascript or css files """
 
@@ -35,9 +43,14 @@ class TestESLint(LintCase):
             if not (exclude and re.match(exclude, p))
         ]
         _logger.info('Testing %s %s files', len(files_to_check), extension)
-        cmd = [eslint, '--no-ignore', '-c', config_path] + files_to_check
+        if self.legacy_eslint:
+            cmd = [eslint, '--no-eslintrc', '--resolve-plugins-relative-to', os.getcwd()]
+            env = {**os.environ, 'ESLINT_USE_FLAT_CONFIG': 'false'}
+        else:
+            cmd, env = [eslint], None
+        cmd += ['--no-ignore', '-c', config_path] + files_to_check
         # eslint skips files outside of the working directory, the addons may be anywhere
-        process = subprocess.run(cmd, capture_output=True, encoding="utf-8", check=False, cwd='/')
+        process = subprocess.run(cmd, capture_output=True, encoding="utf-8", check=False, cwd='/', env=env)
         self.assertEqual(process.returncode, 0, msg=f"""
 stdout: {process.stdout}
 Perhaps you might benefit from installing the tooling found at:
@@ -49,10 +62,16 @@ stderr: {process.stderr}
         basic_test, strict_test = [], []
         for module in get_modules():
             strict_test.append(module) if re.search(r'^point_of_sale$|^pos_.*$|^.*_pos$|^.*_pos_.*$|^iot$|^iot_.*$|^obox$|^obox_.*$', module) else basic_test.append(module)
-        self._test_eslint(basic_test, file_path('test_lint/tests/eslint_basic.config.cjs'))
-        self._test_eslint(strict_test, file_path('web/tooling/_eslint.config.cjs'))
+        if self.legacy_eslint:
+            self._test_eslint(basic_test, file_path('test_lint/tests/eslintrc'))
+            self._test_eslint(strict_test, file_path('test_lint/tests/eslintrc_strict'))
+        else:
+            self._test_eslint(basic_test, file_path('test_lint/tests/eslint_basic.config.cjs'))
+            self._test_eslint(strict_test, file_path('web/tooling/_eslint.config.cjs'))
 
     def test_eslint_css(self):
+        if self.legacy_eslint:
+            self.skipTest("linting css needs ESLint 9 or later")
         self._test_eslint(
             get_modules(),
             file_path('web/tooling/_eslint.config.cjs'),
