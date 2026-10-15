@@ -1,4 +1,5 @@
 import functools
+import inspect
 import logging
 from collections.abc import Iterable
 from typing import Literal, NamedTuple, get_args
@@ -42,7 +43,9 @@ class StoreHandlerRegistry:
         self._validate_func_name(func_name)
         self._items[name] = StoreHandler(audience=audience, func_name=func_name, readonly=readonly)
 
-    def execute_for_user(self, controller: Controller, store: Store, fetch_params: Iterable | str):
+    def execute_for_user(
+        self, controller: Controller, store: Store, fetch_params: Iterable | str, **handler_kwargs
+    ):
         for fetch_param in fetch_params:
             name, params, data_id = self._parse_fetch_param(fetch_param)
             store.data_id = data_id
@@ -68,14 +71,20 @@ class StoreHandlerRegistry:
                     # getattr: used to ensure we get the inherited method when the controller is extended,
                     # controller must be a Controller instance and func_name must start with "store_".
                     handler = getattr(controller, entry.func_name)
+                    # forward server-provided kwargs only to the handlers that declare them
+                    kwargs = {
+                        key: value
+                        for key, value in handler_kwargs.items()
+                        if key in inspect.signature(handler).parameters
+                    }
                     if params is None:
-                        handler(store)
+                        handler(store, **kwargs)
                     elif isinstance(params, dict):
-                        handler(store, **params)
+                        handler(store, **{**params, **kwargs})
                     elif isinstance(params, list):
-                        handler(store, *params)
+                        handler(store, *params, **kwargs)
                     else:
-                        handler(store, params)
+                        handler(store, params, **kwargs)
                 else:
                     _logger.warning('User does not have access to store handler "%s"', name)
             finally:
