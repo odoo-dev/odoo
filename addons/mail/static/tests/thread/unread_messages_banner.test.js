@@ -173,8 +173,9 @@ test("keep banner after mark as unread when scrolling to bottom", async () => {
     await openDiscuss(channelId);
     await click("[title='Expand']", { parent: [".o-mail-Message", { text: "message 29" }] });
     await click(".o-mail-Message-moreMenu [title='Mark as Unread']");
+    await contains(".o-mail-Thread-banner", { text: "1 new message" });
     await scroll(".o-mail-Thread", "bottom");
-    await contains(".o-mail-Thread-banner", { text: "30 new messages" });
+    await contains(".o-mail-Thread-banner", { text: "1 new message" });
 });
 
 test("sidebar and banner counters display same value", async () => {
