@@ -45,10 +45,9 @@ class PosConfig(models.Model):
         preserve_current_advanced = 'manager_employee_ids' not in vals
         if preserve_current_advanced:
             vals['manager_employee_ids'] = []
-        pos_manager_group = self.sudo()._get_group_pos_manager()
         for config in self:
             config_vals = dict(vals)
-            group_users = pos_manager_group.with_company(config.company_id).user_ids.filtered(
+            group_users = self.env.ref('point_of_sale.group_pos_manager').sudo().with_company(config.company_id).user_ids.filtered(
                 lambda u: config.company_id in u.company_ids
             )
             allowed_employees = group_users.employee_id

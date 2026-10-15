@@ -824,7 +824,7 @@ test("MultiPreparationPrinter: only printer with matching category prints, no em
         contentDocument: { body: { innerHTML: "" } },
         style: {},
     });
-    store.ticketPrinter.setIframeSizeFromPrinter = () => { };
+    store.ticketPrinter.setIframeSizeFromPrinter = () => {};
     store.ticketPrinter.generateImage = async () => "mock-image";
 
     await Utils.clickTable("1");
@@ -1028,7 +1028,7 @@ test("test_multiple_preparation_printer_different_categories: both printers trig
         contentDocument: { body: { innerHTML: "" } },
         style: {},
     });
-    store.ticketPrinter.setIframeSizeFromPrinter = () => { };
+    store.ticketPrinter.setIframeSizeFromPrinter = () => {};
     store.ticketPrinter.generateImage = async () => "mock-image";
 
     await Utils.clickTable("1");

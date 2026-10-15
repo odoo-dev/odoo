@@ -134,10 +134,6 @@ class PosConfig(models.Model):
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_demo_session.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}
 
-    @api.depends('floor_plan_settings')
-    def _compute_local_data_integrity(self):
-        super()._compute_local_data_integrity()
-
     def _load_restaurant_demo_data(self, with_demo_data=True):
         self.ensure_one()
         convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_category_data.xml', idref=None, mode='init', noupdate=True)

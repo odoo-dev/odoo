@@ -40,4 +40,6 @@ class PosConfig(models.Model):
     def _create_journal_and_payment_methods(self, cash_ref=None, cash_journal_vals=None):
         online_pm = self._create_online_payment_demo()
         journal, payment_methods = super()._create_journal_and_payment_methods(cash_ref, cash_journal_vals)
-        return journal, payment_methods | online_pm
+        if online_pm:
+            return journal, payment_methods | online_pm
+        return journal, payment_methods

@@ -77,7 +77,7 @@ class ResConfigSettings(models.TransientModel):
     pos_cash_control = fields.Boolean(related='pos_config_id.cash_control')
     pos_cash_rounding = fields.Boolean(related='pos_config_id.cash_rounding', readonly=False, string="Total Rounding (PoS)")
     pos_company_has_template = fields.Boolean(related='pos_config_id.company_has_template')
-    pos_default_bill_ids = fields.Many2many(related='pos_config_id.default_bill_ids', readonly=False)
+    # pos_default_bill_ids = fields.Many2many(related='pos_config_id.default_bill_ids', readonly=False)
     pos_default_fiscal_position_id = fields.Many2one('account.fiscal.position', string='Default Fiscal Position', compute='_compute_pos_fiscal_positions', readonly=False, store=True, check_company=True)
     pos_fiscal_position_ids = fields.Many2many('account.fiscal.position', string='Fiscal Positions', compute='_compute_pos_fiscal_positions', readonly=False, store=True, check_company=True)
     pos_has_active_session = fields.Boolean(related='pos_config_id.has_active_session')

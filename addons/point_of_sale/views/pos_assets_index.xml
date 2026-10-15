@@ -20,7 +20,6 @@
                 '__session_info__': session_info,
                 'from_backend': from_backend,
                 'pos_session_id': pos_session_id,
-                'last_data_change': last_data_change,
                 'pos_config_id': pos_config_id,
                 'access_token': access_token,
                 'urls_to_cache': urls_to_cache,
