@@ -34,23 +34,7 @@ class ProductWishlist(models.Model):
         website = self.env.website
         if not request or not website:
             return self
-
-        if website.is_public_user():
-            wish = self.sudo().search([("id", "in", request.session.get("wishlist_ids", []))])
-        else:
-            wish = self.search([
-                ("partner_id", "=", self.env.user.partner_id.id),
-                ("website_id", "=", website.id),
-            ])
-
-        # TODO for /shop page, no need to check _has_ecommerce_sellable_variants as it's only used to see
-        # whether the product is in the wishlist.
-        return wish.filtered(
-            lambda wish: (
-                wish.sudo().product_id._is_published()
-                and wish.sudo().product_id.product_tmpl_id._has_ecommerce_sellable_variants()
-            )
-        )
+        return website._get_current_wishlist()
 
     @api.model
     def _add_to_wishlist(
@@ -68,7 +52,12 @@ class ProductWishlist(models.Model):
     @api.model
     def _check_wishlist_from_session(self):
         """Assign all wishlist withtout partner from this the current session."""
-        session_wishes = self.sudo().search([("id", "in", request.session.get("wishlist_ids", []))])
+        # Only the visitor's items: the session also holds the items of a logged in user, e.g. when
+        # re-checking the credentials to change the password.
+        session_wishes = self.sudo().search([
+            ("id", "in", request.session.get("wishlist_ids", [])),
+            ("partner_id", "=", False),
+        ])
         partner_wishes = self.sudo().search([("partner_id", "=", self.env.user.partner_id.id)])
         partner_products = partner_wishes.mapped("product_id")
         # Remove session products already present for the user
@@ -79,6 +68,7 @@ class ProductWishlist(models.Model):
         duplicated_wishes.unlink()
         # Assign the rest to the user
         session_wishes.write({"partner_id": self.env.user.partner_id.id})
+        # Reload the user's wishlist, including the merged items, on the next request
         request.session.pop("wishlist_ids")
 
     @api.autovacuum

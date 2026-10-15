@@ -337,7 +337,10 @@ class ProductProduct(models.Model):
         if not self:
             return False
         self.ensure_one()
-        return self in self.env["product.wishlist"].current().mapped("product_id")
+        website = self.env.website
+        if not website:
+            return False
+        return self.id in website._get_wishlist_product_ids()
 
     def _prepare_categories_for_display(self):
         """On the comparison page group on the same line the values of each
@@ -540,7 +543,10 @@ class ProductProduct(models.Model):
                 or website.company_id.email_formatted
             )
             email_template.with_user(website.salesperson_id).sudo().with_context(
-                customer_name=partner.name, lang=partner.lang, website_id=website.id, product_price=product_price,
+                customer_name=partner.name,
+                lang=partner.lang,
+                website_id=website.id,
+                product_price=product_price,
             ).send_mail(
                 product.id,
                 force_send=True,

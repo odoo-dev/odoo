@@ -287,9 +287,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_additional_shop_values(self, _values, **_kwargs):
         """Update values used for rendering website_sale.products template."""
-        wished_products = self.env["product.wishlist"].current().product_id
+        wished_products = self.env["product.product"].browse(
+            self.env.website._get_wishlist_product_ids()
+        )
         return {
-            # TODO lazy to avoid queries when wishlist disabled on shop page ?
             "products_in_wishlist": wished_products,
             "templates_in_wishlist": wished_products.product_tmpl_id,
         }

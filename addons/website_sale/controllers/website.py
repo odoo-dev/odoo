@@ -57,6 +57,8 @@ class Website(main.Website):
         request.session.pop(PRICELIST_SESSION_CACHE_KEY, None)
         request.session.pop(FISCAL_POSITION_SESSION_CACHE_KEY, None)
         request.session.pop(PRICELIST_SELECTED_SESSION_CACHE_KEY, None)
+        # The visitor's items were merged into the user's wishlist (see `res.users`): load it
+        request.session.pop("wishlist_ids", None)
         return super()._login_redirect(uid, redirect=redirect)
 
     @route()
@@ -70,7 +72,8 @@ class Website(main.Website):
         max_nb_chars=999,
         options=None,
     ):
-        """Override `website` to add `display_currency` set as the website's currency to the options params.
+        """Override `website` to add `display_currency` set as the website's currency to the options
+        params.
 
         Read by `product.template._search_fetch` to format prices.
         """

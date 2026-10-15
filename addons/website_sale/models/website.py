@@ -861,6 +861,81 @@ class Website(models.Model):
 
         return fpos_sudo
 
+    def _get_and_cache_wishlist_ids(self):
+        """Retrieve the ids of the current wishlist items, cached in the session.
+
+        For a logged in user, the saved wishlist is loaded once, then the session is kept up to date
+        when items are added or removed. A visitor's wishlist only exists in the session: it starts
+        empty, without any query.
+
+        Note: self.ensure_one()
+
+        :return: The ids of the `product.wishlist` records.
+        :rtype: list[int]
+        """
+        self.ensure_one()
+
+        if not request:
+            return []
+        if "wishlist_ids" not in request.session:
+            if self.is_public_user():
+                return []
+            request.session["wishlist_ids"] = (
+                self
+                .env["product.wishlist"]
+                .search([
+                    ("partner_id", "=", self.env.user.partner_id.id),
+                    ("website_id", "=", self.id),
+                ])
+                .ids
+            )
+        return request.session["wishlist_ids"]
+
+    def _get_wishlist_product_ids(self):
+        """Retrieve the ids of the wishlisted products, to display the state of the wishlist.
+
+        Note: self.ensure_one()
+
+        :return: The ids of the wishlisted products.
+        :rtype: list[int]
+        """
+        self.ensure_one()
+
+        if not (wishlist_ids := self._get_and_cache_wishlist_ids()):
+            return []
+        # Sudo as visitors can't read the wishlist; the ids come from the user's own session.
+        return (
+            self
+            .env["product.wishlist"]
+            .sudo()
+            .search_fetch([("id", "in", wishlist_ids)], ["product_id"])
+            .product_id.ids
+        )
+
+    def _get_current_wishlist(self):
+        """Retrieve the wishlist items of the current user or session.
+
+        Unpublished products are filtered out.
+
+        Note: self.ensure_one()
+
+        :return: The wishlist items, sudoed for the public user.
+        :rtype: product.wishlist
+        """
+        self.ensure_one()
+
+        Wishlist = self.env["product.wishlist"]
+        if self.is_public_user():
+            Wishlist = Wishlist.sudo()
+        wishes = Wishlist.search([("id", "in", self._get_and_cache_wishlist_ids())])
+
+        return wishes.filtered(
+            lambda wish: (
+                wish.sudo().product_id._is_published()
+                and wish.sudo().product_id.product_tmpl_id._has_ecommerce_sellable_variants()
+            )
+        )
+
     def _get_and_cache_current_cart(self):
         """Retrieve and cache the current cart for the session.
 

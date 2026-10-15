@@ -13,6 +13,9 @@ class ProductWishlist(Controller):
 
         price = product._get_combination_info_variant()["price"]
 
+        # Load the current wishlist before adding the new item to it
+        wishlist_ids = self.env.website._get_and_cache_wishlist_ids()
+
         Wishlist = self.env["product.wishlist"]
         if self.env.website.is_public_user():
             Wishlist = Wishlist.sudo()
@@ -29,8 +32,7 @@ class ProductWishlist(Controller):
             partner_id,
         )
 
-        if not partner_id:
-            request.session["wishlist_ids"] = request.session.get("wishlist_ids", []) + [wish.id]
+        request.session["wishlist_ids"] = wishlist_ids + [wish.id]
 
         return wish
 
@@ -52,21 +54,22 @@ class ProductWishlist(Controller):
     @route("/shop/wishlist/remove/<int:wish_id>", type="jsonrpc", auth="public", website=True)
     def remove_from_wishlist(self, wish_id, **_kw):
         wish = self.env["product.wishlist"].browse(wish_id)
+        wishlist_ids = request.session.get("wishlist_ids") or []
         if self.env.website.is_public_user():
-            wish_ids = request.session.get("wishlist_ids") or []
-            if wish_id in wish_ids:
-                request.session["wishlist_ids"].remove(wish_id)
-                touch(request.session)
-                wish.sudo().unlink()
-        else:
-            wish.unlink()
+            if wish_id not in wishlist_ids:
+                return True
+            wish = wish.sudo()
+        wish.unlink()
+        if wish_id in wishlist_ids:
+            request.session["wishlist_ids"].remove(wish_id)
+            touch(request.session)
         return True
 
     @route(
         "/shop/wishlist/get_product_ids", type="jsonrpc", auth="public", website=True, replica=True
     )
     def shop_wishlist_get_product_ids(self):
-        return self.env["product.wishlist"].current().product_id.ids
+        return self.env.website._get_wishlist_product_ids()
 
     @route("/shop/add/stock_notification", type="jsonrpc", auth="public", website=True)
     def add_stock_email_notification(self, email, product_id):
