@@ -5,6 +5,8 @@ import {
 import { contains, setupChatHub, start, startServer } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
 import { Command, makeMockEnv, serverState } from "@web/../tests/web_test_helpers";
+import { deserializeDateTime } from "@web/core/l10n/dates";
+import { getOrigin } from "@web/core/utils/urls";
 
 describe.current.tags("desktop");
 defineLivechatModels();
@@ -35,4 +37,27 @@ test("Do not show bot IM status", async () => {
     await contains(".o-mail-ChatBubble[name='Mitchell'] .o-mail-ImStatus");
     await contains(".o-mail-ChatBubble[name='Dummy']");
     await contains(".o-mail-ChatBubble[name='Dummy'] .o-mail-ImStatus", { count: 0 });
+});
+
+test("Agent sees the visitor avatar on the chat bubble of a live chat", async () => {
+    const pyEnv = await startServer();
+    await loadDefaultEmbedConfig();
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor 11" });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "Visitor 11",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId, livechat_member_type: "agent" }),
+            Command.create({ guest_id: guestId, livechat_member_type: "visitor" }),
+        ],
+        channel_type: "livechat",
+        livechat_operator_id: serverState.partnerId,
+    });
+    setupChatHub({ folded: [channelId] });
+    await start();
+    const [guest] = pyEnv["mail.guest"].read(guestId);
+    await contains(
+        `.o-mail-ChatBubble img[data-src='${getOrigin()}/web/image/mail.guest/${guestId}/avatar_128?unique=${
+            deserializeDateTime(guest.write_date).ts
+        }']`
+    );
 });
