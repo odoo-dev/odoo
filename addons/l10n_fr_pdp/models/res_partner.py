@@ -33,6 +33,7 @@ class ResPartner(models.Model):
         string='E-Invoicing State',
         compute="_compute_pdp_verification_display_state",
     )
+    commercial_partner_country_code = fields.Char(related='commercial_partner_id.country_code')
 
     @api.model
     def fields_get(self, allfields=None, attributes=None):

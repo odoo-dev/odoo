@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="res_partner_form_l10n_fr_pdp_invoicing" model="ir.ui.view">
+        <field name="name">res.partner.form.l10n.fr.pdp.invoicing</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='accounting_disabled']/div" position="attributes">
+                <attribute name="invisible">country_code == 'FR' or country_code != commercial_partner_country_code</attribute>
+            </xpath>
+            <xpath expr="//page[@name='accounting_disabled']/div" position="after">
+                <group string="Customer Invoices"
+                       invisible="country_code != 'FR' and country_code == commercial_partner_country_code"
+                       groups="account.group_account_invoice,account.group_account_readonly">
+                    <field name="invoice_sending_method"/>
+                    <field name="display_invoice_edi_format" invisible="1"/>
+                    <field name="invoice_edi_format" placeholder="XML format"
+                           invisible="not display_invoice_edi_format"/>
+                    <field name="available_peppol_eas" invisible="1"/>
+                    <field name="peppol_eas"
+                           placeholder="Peppol ID"
+                           widget="filterable_selection"
+                           options="{'whitelist_fname': 'available_peppol_eas'}"/>
+                    <field name="peppol_endpoint"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
     <record id="res_partner_form_l10n_fr_pdp" model="ir.ui.view">
         <field name="name">res.partner.form.l10n.fr.pdp</field>
             <field name="model">res.partner</field>
