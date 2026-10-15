@@ -93,12 +93,14 @@ class MessagingMenuController(WebclientController):
         filter_ids=None,
         exclude_ids=None,
         search_term=None,
+        message_collector=None,
     ):
         domain = self._get_menu_load_more_domain(tab_id, filter_ids, exclude_ids)
         messages = self._resolve_messages(
             store,
             domain=domain,
             fetch_params={"limit": limit, "search_term": search_term},
+            message_collector=message_collector,
         )
         if messages:
             request.update_context(add_inbox_fields=True)

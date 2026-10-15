@@ -32,5 +32,5 @@ class StoreController(http.Controller):
         fetch_params = request.get_json_data().get("params", {}).get("fetch_params", [])
         return store_handler_registry.is_fetch_readonly(fetch_params)
 
-    def _process_request_loop(self, store: Store, fetch_params):
-        store_handler_registry.execute_for_user(self, store, fetch_params)
+    def _process_request_loop(self, store: Store, fetch_params, **handler_kwargs):
+        store_handler_registry.execute_for_user(self, store, fetch_params, **handler_kwargs)

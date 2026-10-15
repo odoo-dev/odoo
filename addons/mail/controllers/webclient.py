@@ -14,33 +14,42 @@ class WebclientController(ThreadController):
     """Generic store handlers for the web client."""
 
     def _process_request_loop(self, store: Store, fetch_params):
-        # aggregate of messages to return, to batch them in a single query when all the fetch
-        # params have been processed
-        request.update_context(messages=request.env["mail.message"], add_inbox_fields=False, add_chatter_fields=False)
-        super()._process_request_loop(store, fetch_params)
-        if messages := request.env.context["messages"]:
-            fields_params = {
-                **({"inbox_fields": True} if request.env.context["add_inbox_fields"] else {}),
-                **({"chatter_fields": True} if request.env.context["add_chatter_fields"] else {}),
-            }
-            if request.env.context["add_inbox_fields"]:
-                # sudo: bus.bus: reading non-sensitive last id
-                bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
-                store.add(messages, "_store_message_fields", fields_params=fields_params)
-                for records in messages._records_by_model_name().values():
-                    if not isinstance(records, request.env.registry["mail.thread"]):
-                        continue
-                    store.add(
-                        records,
-                        lambda res: (
-                            # sudo: mail.thread: users can read their own message_needaction_counter on the thread
-                            res.attr("message_needaction_counter", sudo=True),
-                            res.attr("message_needaction_counter_bus_id", bus_last_id),
-                        ),
-                        as_thread=True,
-                    )
-            else:
-                store.add(messages, "_store_message_fields", fields_params=fields_params)
+        # Container passed down to the message handlers to collect the fetched messages, grouped
+        # by the env they were fetched in, so they can be batched when all the fetch params have
+        # been processed. It is a plain object (not the context) so each fetch's env stays clean.
+        # Each group is then formatted in its own env: a token/sudo fetch keeps the access it was
+        # granted (so fields it may legitimately see are returned) while a non-sudo fetch never
+        # leaks env-restricted fields.
+        message_collector = {}
+        request.update_context(add_inbox_fields=False, add_chatter_fields=False)
+        super()._process_request_loop(store, fetch_params, message_collector=message_collector)
+        fields_params = {
+            **({"inbox_fields": True} if request.env.context["add_inbox_fields"] else {}),
+            **({"chatter_fields": True} if request.env.context["add_chatter_fields"] else {}),
+        }
+        bus_last_id = None
+        if request.env.context["add_inbox_fields"]:
+            # sudo: bus.bus: reading non-sensitive last id
+            bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
+        for env, fetched in message_collector.items():
+            messages = env["mail.message"].union(fetched)
+            if not messages:
+                continue
+            store.add(messages, "_store_message_fields", fields_params=fields_params)
+            if not request.env.context["add_inbox_fields"]:
+                continue
+            for records in messages._records_by_model_name().values():
+                if not isinstance(records, request.env.registry["mail.thread"]):
+                    continue
+                store.add(
+                    records,
+                    lambda res: (
+                        # sudo: mail.thread: users can read their own message_needaction_counter on the thread
+                        res.attr("message_needaction_counter", sudo=True),
+                        res.attr("message_needaction_counter_bus_id", bus_last_id),
+                    ),
+                    as_thread=True,
+                )
 
     @store_handler("mail.thread", audience="everyone")
     def store_mail_thread(
@@ -143,6 +152,7 @@ class WebclientController(ThreadController):
         thread_id,
         fetch_params=None,
         access_params=None,
+        message_collector=None,
     ):
         request.update_context(add_chatter_fields=True)
         if thread := self._get_thread_with_access(
@@ -164,6 +174,7 @@ class WebclientController(ThreadController):
                 thread=thread,
                 fetch_params=fetch_params,
                 sudo=thread.env.su,
+                message_collector=message_collector,
             )
             if not request.env.user._is_public():
                 messages.set_message_done()
@@ -218,6 +229,7 @@ class WebclientController(ThreadController):
         fetch_params=None,
         add_to_store=True,
         sudo=False,
+        message_collector=None,
     ):
         fetch_res = (
             request.env["mail.message"]
@@ -225,8 +237,10 @@ class WebclientController(ThreadController):
             ._message_fetch(domain, thread=thread, **(fetch_params or {}))
         )
         messages = fetch_res.pop("messages")
-        if add_to_store:
-            request.update_context(messages=request.env.context["messages"] | messages)
+        if add_to_store and message_collector is not None:
+            # group by the env this fetch ran in, so _process_request_loop formats each group
+            # in its own env (keeping token/sudo access, never leaking under a non-sudo fetch)
+            message_collector.setdefault(messages.env, []).append(messages)
         store.resolve_data_request(
             lambda res: (
                 [res.attr(k, v) for k, v in fetch_res.items()],

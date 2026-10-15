@@ -108,13 +108,21 @@ class DiscussChannelWebclientController(WebclientController):
             channel.message_post(body=notification, subtype_xmlid="mail.mt_important_notification")
 
     @store_handler("/discuss/channel/messages", audience="everyone", readonly=False)
-    def store_get_discuss_channel_messages(self, store: Store, channel_id, fetch_params=None, is_prefetch=False):
+    def store_get_discuss_channel_messages(
+        self,
+        store: Store,
+        channel_id,
+        fetch_params=None,
+        is_prefetch=False,
+        message_collector=None,
+    ):
         channel = request.env["discuss.channel"].search([("id", "=", channel_id)])
         if channel:
             messages = self._resolve_messages(
                 store,
                 thread=channel,
                 fetch_params=fetch_params,
+                message_collector=message_collector,
             )
             # Prefetched messages are not seen yet. They are marked as done when read.
             if not is_prefetch:
