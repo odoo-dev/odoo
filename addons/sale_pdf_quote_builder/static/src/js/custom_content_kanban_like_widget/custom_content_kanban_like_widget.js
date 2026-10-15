@@ -27,13 +27,13 @@ export class CustomContentKanbanLikeWidget extends Component {
             this.updateState();
         }, () => [this.props.record.data.sale_order_template_id]);
 
-        // Make quotation tab readonly on confirmation
-        useEffect((saleOrderState) => {
-            if (saleOrderState === 'sale') {
+        // Make quotation tab readonly on confirmation, unless documents are still printed
+        useEffect((isReadonly) => {
+            if (isReadonly) {
                 this.props.readonly = true;
                 this.props.record.save(); // trigger refresh to update form
             }
-        }, () => [this.props.record.data.state]);
+        }, () => [this.props.record.data.is_pdf_quote_builder_readonly]);
 
     }
 
@@ -129,6 +129,7 @@ export class CustomContentKanbanLikeWidget extends Component {
 
 export const customContentKanbanLikeWidget = {
     component: CustomContentKanbanLikeWidget,
+    fieldDependencies: [{ name: "is_pdf_quote_builder_readonly", type: "boolean" }],
 };
 
 registry.category("view_widgets").add(

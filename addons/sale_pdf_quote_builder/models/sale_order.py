@@ -3,6 +3,7 @@
 import json
 
 from odoo import _, api, fields, models
+from odoo.tools import str2bool
 
 
 class SaleOrder(models.Model):
@@ -22,6 +23,9 @@ class SaleOrder(models.Model):
     )
     is_pdf_quote_builder_available = fields.Boolean(
         compute='_compute_is_pdf_quote_builder_available',
+    )
+    is_pdf_quote_builder_readonly = fields.Boolean(
+        compute='_compute_is_pdf_quote_builder_readonly',
     )
     quotation_document_ids = fields.Many2many(
         string="Headers/Footers",
@@ -60,6 +64,14 @@ class SaleOrder(models.Model):
                 order.available_quotation_document_ids
                 or order.order_line.available_product_document_ids
             )
+
+    @api.depends('state')
+    def _compute_is_pdf_quote_builder_readonly(self):
+        # Selected documents are only printed on confirmed orders if this parameter is set.
+        ICP = self.env['ir.config_parameter'].sudo()
+        always_include = str2bool(ICP.get_param('sale.always_include_selected_documents'))
+        for order in self:
+            order.is_pdf_quote_builder_readonly = order.state == 'sale' and not always_include
 
     # === ONCHANGE METHODS === #
 

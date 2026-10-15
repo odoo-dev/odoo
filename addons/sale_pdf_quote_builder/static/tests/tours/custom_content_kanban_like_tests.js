@@ -20,3 +20,17 @@ registry.category("web_tour.tours").add('custom_content_kanban_like_tour', {
         // TODO VCR: Finish this
     ]
 });
+
+registry.category("web_tour.tours").add('quote_builder_confirmed_order_tour', {
+    steps: () => [
+        {
+            trigger: ".o_notebook_headers a[name='pdf_quote_builder']",
+            run: "click",
+        },
+        {
+            trigger: "label:contains(Header)",
+            run: "click",
+        },
+        ...stepUtils.saveForm(),
+    ]
+});
