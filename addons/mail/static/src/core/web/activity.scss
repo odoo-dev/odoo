@@ -1,7 +1,32 @@
-.o-mail-Activity-sidebar {
-    flex-basis: var(--o-mail-Message-sidebarWidth);
-    max-width: var(--o-mail-Message-sidebarWidth);
+.o-mail-Activity {
+        // --#{$prefix}border-style: dashed;
+        // border-bottom: $border-width dashed $border-color;
+        // padding-bottom: var(--o-bs-spacer-3);
+
+    // &:hover {
+    //     background: rgba(0,0,0, .05);
+    // }
+
+    // .o-mail-ActivityList-inner:hover & {
+    //     opacity: .5;
+    // }
+
+    // --bg-opacity: 0;
+    // --border-color: #{rgba($border-color, var(--bg-opacity))};
+
+    // &:hover {
+    //     --bg-opacity: 1;
+    // }
+
+    .o-mail-Activity-info-popover {
+        cursor: help;
+    }
 }
+
+// .o-mail-Activity-sidebar {
+//     flex-basis: var(--o-mail-Message-sidebarWidth);
+//     max-width: var(--o-mail-Message-sidebarWidth);
+// }
 
 .o-mail-Activity-avatarContainer {
     width: var(--o-mail-Avatar-size);
@@ -12,23 +37,23 @@
     margin-bottom: var(--o-bs-spacer-0);
 }
 
-.o-mail-Activity-iconContainer {
-    box-shadow: 0 0 0 2px var(--o-view-background-color);
-}
+// .o-mail-Activity-iconContainer {
+//     box-shadow: 0 0 0 2px var(--o-view-background-color);
+// }
 
 .o-mail-Activity-avatar {
     --Avatar-size: var(--o-mail-Avatar-size);
 }
 
 .o-mail-Activity-copy {
-    opacity: 0;
+    // opacity: 0;
 
     > span:last-child {
         @include visually-hidden();
     }
 }
 
-.o-mail-Activity-phoneNumber:hover .o-mail-Activity-copy,
-.o-mail-Activity-phoneNumber:focus-within .o-mail-Activity-copy {
-    opacity: 1;
-}
+// .o-mail-Activity-phoneNumber:hover .o-mail-Activity-copy,
+// .o-mail-Activity-phoneNumber:focus-within .o-mail-Activity-copy {
+//     opacity: 1;
+// }

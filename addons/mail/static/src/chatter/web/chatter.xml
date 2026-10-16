@@ -149,6 +149,7 @@
         <t t-if="this.state.showActivities">
             <t t-foreach="this.activities" t-as="activity" t-key="activity.id">
                 <Activity activity="activity" onActivityChanged="this.onActivityChanged" reloadParentView="this.reloadParentView"/>
+                <span class="o-mail-Activity-separator d-block mx-2 my-3 border-bottom" t-if="!activity_last"/>
             </t>
         </t>
     </div>

@@ -24,7 +24,7 @@
         <record id="mail_activity_data_todo" model="mail.activity.type">
             <field name="name">To-Do</field>
             <field name="summary">To-Do</field>
-            <field name="icon">check</field>
+            <field name="icon">task</field>
             <field name="delay_count">5</field>
             <field name="sequence">2</field>
         </record>
