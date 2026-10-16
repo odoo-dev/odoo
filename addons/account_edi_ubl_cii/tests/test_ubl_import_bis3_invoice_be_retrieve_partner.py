@@ -37,6 +37,61 @@ class TestUblImportBis3InvoiceBERetrievePartner(TestUblImportBis3InvoiceBE):
         self.assertRecordValues(invoice.partner_id, [{'id': partner.id}])
 
     @freeze_time('2020-01-01')
+    def test_import_partner_stored_vat_no_prefix(self):
+        """
+        Ensure that a partner whose VAT is stored without the country prefix is matched by VAT
+        and kept, instead of being considered as a VAT mismatch and creating a duplicate.
+        """
+        self.partner_be.vat = '0477472701'
+        partner_count = self.env['res.partner'].search_count([])
+        invoice = self._import_invoice_as_attachment_on(
+            test_name='test_import_partner_creation',
+            journal=self.company_data['default_journal_sale'],
+        )
+        self.assertEqual(invoice.partner_id, self.partner_be)
+        self.assertEqual(self.env['res.partner'].search_count([]), partner_count)
+
+    @freeze_time('2020-01-01')
+    def test_import_partner_document_vat_no_prefix(self):
+        """
+        Ensure that a document giving the VAT without the country prefix (the country being only
+        given by the address) matches the partner whose VAT is stored with the prefix.
+        """
+        self.partner_be.vat = 'BE0477472701'
+        partner_count = self.env['res.partner'].search_count([])
+        invoice = self._import_invoice_as_attachment_on(
+            test_name='test_import_partner_document_vat_no_prefix',
+            journal=self.company_data['default_journal_sale'],
+        )
+        self.assertEqual(invoice.partner_id, self.partner_be)
+        self.assertEqual(self.env['res.partner'].search_count([]), partner_count)
+
+    def test_check_vat_match_country_prefixes(self):
+        """ Ensure that the VAT comparison ignores the country prefixes, including VAT-specific ones. """
+        AccountEdiCommon = self.env['account.edi.common']
+        for country_code, stored_vat, document_vat, expected in (
+            ('BE', '0477472701', 'BE0477472701', True),
+            ('BE', 'BE0477472701', '0477472701', True),
+            ('GR', '047747270', 'EL047747270', True),
+            ('GR', 'EL047747270', '047747270', True),
+            ('GB', 'GB123456789', 'XI123456789', True),
+            ('GB', 'XI123456789', 'GB123456789', True),
+            ('BE', '0477472701', 'BE0403170701', False),
+        ):
+            with self.subTest(country_code=country_code, stored_vat=stored_vat, document_vat=document_vat):
+                partner = self.env['res.partner'].with_context(no_vat_validation=True).create(
+                    {
+                        'name': "Test Partner",
+                        'vat': stored_vat,
+                    }
+                )
+                collected_values = {'customer_values': {'country_code': country_code}}
+                self.assertEqual(
+                    AccountEdiCommon._check_customer_vat_match(partner, document_vat, collected_values),
+                    expected,
+                )
+
+    @freeze_time('2020-01-01')
     def test_import_partner_creation_ch(self):
         """
         Ensure that a CH partner can be created and re-matched on subsequent imports,
