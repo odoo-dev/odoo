@@ -5,13 +5,21 @@ import { registry } from "@web/core/registry";
 
 export class SetWebsiteNameAction extends BuilderAction {
     static id = "setWebsiteName";
+    static dependencies = ["websiteBrandingPlugin"];
 
     getValue() {
         return this.services.website.currentWebsite?.name || "";
     }
 
-    apply({ value }) {
+    apply({ editingElement, value }) {
         console.log("New Website Name entered:", value);
+        const doc = editingElement?.ownerDocument;
+        const brand = doc.querySelector(".navbar-brand");
+        if (brand) {
+            brand.textContent = value;
+        }
+
+        this.dependencies.websiteBrandingPlugin.stageChange(value);
     }
 }
 
@@ -27,6 +35,15 @@ export class ThemeWebsiteIdentificationOption extends BaseOptionComponent {
 
 export class WebsiteBrandingPlugin extends Plugin {
     static id = "websiteBrandingPlugin";
+    static shared = ["stageChange"]; // Expose la méthode aux dépendances
+
+    setup() {
+        this.newWebsiteName = null;
+    }
+    stageChange(value) {
+        this.newWebsiteName = value;
+        console.log("Nom en attente :", this.newWebsiteName);
+    }
 
     resources = {
         // Register the option component so the builder can render it
