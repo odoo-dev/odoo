@@ -57,38 +57,38 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
 
         this.videoSettingsOverlay = this.videoEmbedProps.createOverlay(VideoSettings, {
             positionOptions: {
-                position: "right-start",
+                position: "top-end",
             },
             className: "video-overlay",
             closeOnPointerdown: false,
         });
 
-        useListener(this.videoBlock, "pointerenter", () => {
-            this.videoSettingsOverlay.open({
-                target: this.videoBlock,
-                props: {
-                    videoBlock: this.videoBlock,
-                    overlay: this.videoSettingsOverlay,
-                    replaceVideo: () => {
-                        this.videoEmbedProps.openVideoSelectorDialog((media) => {
-                            this.replaceVideo(media);
-                        }, this.playerRef());
-                    },
-                    removeVideo: () => {
-                        this.videoBlock.remove();
-                        this.videoEmbedProps.commit();
-                    },
-                    focusEditable: this.videoEmbedProps.focusEditable,
-                    dropdown: this.dropdown,
+        // useListener(this.videoBlock, "pointerenter", () => {
+        this.videoSettingsOverlay.open({
+            target: this.videoBlock,
+            props: {
+                videoBlock: this.videoBlock,
+                overlay: this.videoSettingsOverlay,
+                replaceVideo: () => {
+                    this.videoEmbedProps.openVideoSelectorDialog((media) => {
+                        this.replaceVideo(media);
+                    }, this.playerRef());
                 },
-            });
+                removeVideo: () => {
+                    this.videoBlock.remove();
+                    this.videoEmbedProps.commit();
+                },
+                focusEditable: this.videoEmbedProps.focusEditable,
+                dropdown: this.dropdown,
+            },
         });
+        // });
 
         useListener(this.videoBlock, "pointerleave", (e) => {
             if (this.dropdown.isOpen || e.relatedTarget?.closest(".video-overlay")) {
                 return;
             }
-            this.videoSettingsOverlay.close();
+            // this.videoSettingsOverlay.close();
         });
 
         onWillDestroy(() => {
@@ -147,7 +147,7 @@ export class VideoSettings extends Component {
         onMounted(() => {
             this.menuRef()?.addEventListener("pointerleave", () => {
                 if (!this.props.dropdown.isOpen) {
-                    this.props.overlay.close();
+                    // this.props.overlay.close();
                 }
             });
         });
@@ -156,7 +156,7 @@ export class VideoSettings extends Component {
             if (this.props.dropdown.isOpen) {
                 return;
             }
-            this.props.overlay.close();
+            // this.props.overlay.close();
         });
 
         onWillUnmount(() => {
