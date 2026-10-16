@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import typing
 from datetime import datetime
 
@@ -13,6 +14,11 @@ if typing.TYPE_CHECKING:
     from odoo.sql_db import PsycoConnection as _base_PsycoConnection
 else:
     _base_PsycoConnection = object
+
+
+class TestCursorInterrupted(Exception):
+    """ Raised in a request that outlived its test, see ``release_test_lock``. """
+    loglevel = logging.INFO  # how odoo.http logs it: the test reports the error
 
 
 class TestCursor(Cursor):
@@ -37,6 +43,8 @@ class TestCursor(Cursor):
         +------------------------+---------------------------------------------------+
     """
     _cursors_stack: list[TestCursor] = []
+    # while set, queries raise TestCursorInterrupted with that message
+    _interrupted: str = ''
     _cnx: MockedPsycoConnection
 
     def __init__(self, cursor: Cursor, lock: threading.RLock, readonly: bool):
@@ -78,10 +86,17 @@ class TestCursor(Cursor):
     def execute(self, *args, **kwargs) -> None:
         if self.closed:
             raise psycopg2.InterfaceError("Cursor already closed")
+        if self._interrupted:
+            raise TestCursorInterrupted(self._interrupted)
         if self._now is None:
             self._now = datetime.now()
-        self._cnx._check_savepoint()
-        return super().execute(*args, **kwargs)
+        try:
+            self._cnx._check_savepoint()
+            return super().execute(*args, **kwargs)
+        except psycopg2.Error as exc:
+            if self._interrupted:  # the query was cancelled
+                raise TestCursorInterrupted(self._interrupted) from exc
+            raise
 
     def _close(self):
         try:

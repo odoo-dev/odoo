@@ -46,6 +46,7 @@ from xmlrpc import client as xmlrpclib
 
 import freezegun
 import psutil
+import psycopg2
 import requests
 from lxml import etree, html
 from passlib.context import CryptContext
@@ -146,6 +147,23 @@ class RegistryRLock(threading._RLock):
     def count(self):
         return self._count  # Expose private attribute
 
+    @property
+    def owner(self):
+        return self._owner  # Expose private attribute
+
+
+class RegistryTestLockReclaimed(Exception):
+    """ The current test thread has succesfully taken back the test lock from a
+    request that outlived it.
+    The current test must fail, see ``_reclaim_test_lock_and_fail``.
+    """
+
+
+class ClassTransactionLost(Exception):
+    """ Reported when a test class cannot continue because of a lost
+    transaction, see ``BaseCase._lose_class_transaction``.
+    """
+
 
 # The lock should only be released when new test cursors are meant to be opened.
 # Further filtering on cursors can be done by extending `assertCanOpenTestCursor`.
@@ -165,9 +183,61 @@ def release_test_lock(check_acquired=False):
         _registry_test_lock.release()
         yield
     finally:
-        if not _registry_test_lock.acquire(timeout=60):
-            tag = odoo.modules.module.current_test.canonical_tag
-            exit(f'Could not re-acquire the registry lock during {tag}, exiting...')
+        test = odoo.modules.module.current_test
+        timeout = test.test_cursor_lock_timeout
+        if not _registry_test_lock.acquire(timeout=timeout):
+            _logger.error(
+                "A request still holds the registry test lock %ss after %s, interrupting it",
+                timeout, test.canonical_tag,
+            )
+            # the lock owner (the request), and this thread (the test) at the end of the released block
+            odoo.tools.misc.dumpstacks(
+                thread_idents=[_registry_test_lock.owner, threading.get_ident()],
+                log_level=logging.ERROR,
+            )
+            _reclaim_test_lock_and_fail(timeout)
+
+
+def _reclaim_test_lock_and_fail(timeout):
+    """ Interrupt threads through fault injection, take the lock back, roll the transaction back to
+    the savepoint of the test class, then fail the current test.
+    """
+    test = odoo.modules.module.current_test
+    tag = test.canonical_tag
+    # In practice a single connection shared by every test cursor of the class.
+    # Empty when the lock holder has no test cursor open: nothing to interrupt.
+    connections = {cursor._cnx._cursor._cnx for cursor in test_cursor.TestCursor._cursors_stack}
+    test_cursor.TestCursor._interrupted = f"A request outlived {tag}, its test cursor was interrupted"
+    for connection in connections:
+        try:
+            # cancel() only affects a running query, the raised exception faults the next query
+            connection.cancel()
+            with connection.cursor() as cr:
+                cr.execute("DO $$ BEGIN RAISE EXCEPTION 'registry test lock reclaimed from a request'; END $$")
+        except psycopg2.Error:
+            pass  # the transaction is in error, as expected
+    if not _registry_test_lock.acquire(timeout=timeout):
+        exit(f'Could not re-acquire the registry lock during {tag}, exiting...')
+    test_cursor.TestCursor._interrupted = ''
+    if connections and not _restore_test_transaction(test):
+        type(test)._lose_class_transaction(f"{tag} lost the transaction of {type(test).__name__}")
+    raise RegistryTestLockReclaimed(f"A request held the registry test lock more than {timeout}s after {tag}")
+
+
+def _restore_test_transaction(test) -> bool:
+    """ Roll the transaction of ``test`` back to the savepoint of its class (``TransactionCase.savepoint``).
+    The rollback fails if the transaction is lost: it was ended (a commit or rollback on the connection
+    itself), or the connection is closed or broken.
+    """
+    savepoint = getattr(test, 'savepoint', None)
+    if savepoint is None:
+        return False
+    try:
+        # No release to keep classCleanup happy.
+        savepoint.rollback()
+    except psycopg2.Error:
+        return False
+    return True
 
 
 @contextmanager
@@ -597,6 +667,8 @@ class BaseCase(case.TestCase):
     _registry_readonly_enabled = True
     _monitored_create_models = (('res.company', 'stats'),)
     test_cursor_lock_timeout: int = 3600 if DISABLE_TIMEOUTS else 20
+    # why the transaction of the class was lost, see _lose_class_transaction
+    _transaction_lost = ''
 
     @classmethod
     def __init_subclass__(cls):
@@ -674,6 +746,26 @@ class BaseCase(case.TestCase):
         super().setUp()
         self.http_request_key: str = ''
         self.http_request_allow_all: bool = False
+        if self._transaction_lost:
+            self.skipTest(self._transaction_lost)
+
+    @classmethod
+    def _lose_class_transaction(cls, reason):
+        """ Skip the remaining tests of the class. """
+        # WARN: Must be *reset* to falsy at the end of the class transaction!
+        # This attribute is inherited by subclasses and it outlives the class in the process.
+        # If not reset, the tests of a subclass would all be skipped unconditionally.
+        #
+        # Retrying the test-method using ODOO_TEST_FAILURE_RETRIES will skip the test from
+        # second attempt instead.
+        cls._transaction_lost = reason
+
+        def report():
+            cls._transaction_lost = ''
+            # The class savepoint is gone, cleanups usually fail the test.
+            # Raise a dedicated exception in case cleanup doesn't raise.
+            raise ClassTransactionLost(f"{reason}, its remaining tests were skipped")
+        cls.addClassCleanup(report)
 
     def cursor(self):
         return self.registry.cursor()
