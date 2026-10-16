@@ -188,7 +188,9 @@ class WebsiteSnippetFilter(models.Model):
                 "name": cat.name,
                 "unpublished": not cat.has_published_products,
                 "cover_image": (
-                    self.env.website.image_url(cat, "cover_image") if cat.cover_image else default_img_url
+                    self.env.website.image_url(cat, "cover_image")
+                    if cat.cover_image
+                    else default_img_url
                 ),
             }
             for cat in categories

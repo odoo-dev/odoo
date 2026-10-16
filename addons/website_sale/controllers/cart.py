@@ -153,10 +153,12 @@ class Cart(PaymentPortal):
                 len(combo_item_products) != len(combos_sudo)
                 or set(selected_combos_sudo.ids) != set(combos_sudo.ids)
             ):
-                raise UserError(self.env._(
-                    "The number of selected combo items must match the number of available"
-                    " combo choices."
-                ))
+                raise UserError(
+                    self.env._(
+                        "The number of selected combo items must match the number of available"
+                        " combo choices."
+                    )
+                )
 
         if product.sudo().type == "combo":
             check_selected_combo_items(product, linked_products)
@@ -292,7 +294,7 @@ class Cart(PaymentPortal):
             "currency": order_sudo.currency_id.name,
         }
 
-    def _get_product_user_error(self, product):
+    def _get_product_user_error(self, product):  # noqa: ARG002
         return self.env._("The given product does not exist therefore it cannot be added to cart.")
 
     @route(
@@ -369,7 +371,8 @@ class Cart(PaymentPortal):
         :params dict kwargs: additional parameters given to _cart_update_line_quantity calls.
         """
         if order_sudo := request.cart:
-            order_sudo._check_not_partially_paid()  # Prevent modifying the cart if it's partially paid
+            # Prevent modifying the cart if it's partially paid
+            order_sudo._check_not_partially_paid()
         quantity = int(quantity)  # Do not allow float values in ecommerce by default
 
         # This method must be only called from the cart page BUT in some advanced logic

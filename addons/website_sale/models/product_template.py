@@ -60,7 +60,9 @@ class ProductTemplate(models.Model):
         """
         start_sequence = 10000
         # Schema initialization may evaluate the default before adding the column.
-        if self.env.context.get('module') and not column_exists(self.env.cr, self._table, 'website_sequence'):
+        if self.env.context.get("module") and not column_exists(
+            self.env.cr, self._table, "website_sequence"
+        ):
             return start_sequence
         self.env.cr.execute(
             SQL("SELECT MAX(website_sequence) FROM %s", SQL.identifier(self._table))
@@ -1361,7 +1363,7 @@ class ProductTemplate(models.Model):
             self.set_sequence_top()
 
     def set_sequence_down(self):
-        next_prodcut_tmpl = self.search(
+        next_product_tmpl = self.search(
             [
                 ("website_sequence", ">", self.website_sequence),
                 ("website_published", "=", self.website_published),
@@ -1369,10 +1371,10 @@ class ProductTemplate(models.Model):
             order="website_sequence ASC",
             limit=1,
         )
-        if next_prodcut_tmpl:
-            next_prodcut_tmpl.website_sequence, self.website_sequence = (
+        if next_product_tmpl:
+            next_product_tmpl.website_sequence, self.website_sequence = (
                 self.website_sequence,
-                next_prodcut_tmpl.website_sequence,
+                next_product_tmpl.website_sequence,
             )
         else:
             return self.set_sequence_bottom()

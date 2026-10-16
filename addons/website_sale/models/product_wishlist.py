@@ -43,8 +43,8 @@ class ProductWishlist(models.Model):
                 ("website_id", "=", website.id),
             ])
 
-        # TODO for /shop page, no need to check _has_ecommerce_sellable_variants as it's only used to see
-        # whether the product is in the wishlist.
+        # TODO for /shop page, no need to check _has_ecommerce_sellable_variants as it's only used
+        # to see whether the product is in the wishlist.
         return wish.filtered(
             lambda wish: (
                 wish.sudo().product_id._is_published()

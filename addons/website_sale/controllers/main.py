@@ -877,7 +877,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             image_ids = self.env["ir.attachment"].browse(i["id"] for i in media)
             media_create_data = [
                 Command.create({
-                    "name": image.name,  # Images uploaded from url do not have any datas.
+                    "name": image.name,  # Images uploaded from url do not have any data.
                     # This recovers them manually.
                     "image_1920": image.raw
                     or self.env["ir.qweb.field.image"].load_remote_url(image.url),
@@ -1547,7 +1547,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             with self.env.protecting([order_sudo._fields["pricelist_id"]], order_sudo):
                 order_sudo.partner_id = new_partner_sudo
         elif not self._are_same_addresses(billing_address, order_sudo.partner_invoice_id):
-            # Check if a child partner doesn't already exist with the same informations. The
+            # Check if a child partner doesn't already exist with the same information. The
             # phone isn't always checked because it isn't sent in shipping information with
             # Google Pay.
             child_partner_id = self._find_child_partner(
@@ -1775,9 +1775,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route("/shop/payment/validate", type="http", auth="public", website=True, sitemap=False)
     def shop_payment_validate(self, sale_order_id=None, **_post):
-        """Server calls this method when receiving an update for a transaction. State at this point:
-        - UDPATE ME.
-        """
+        """Server calls this method when receiving an update for a transaction."""
         if sale_order_id is None:
             order_sudo = request.cart
             if not order_sudo and "sale_last_order_id" in request.session:
@@ -1827,7 +1825,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         list_as_website_content=_lt("Shop Confirmation"),
     )
     def shop_payment_confirmation(self, **_post):
-        """End of checkout process controller. Confirmation is basically seing
+        """End of checkout process controller. Confirmation is basically seeing
         the status of a sale.order. State at this point:
          - should not have any context / session info: clean them
          - take a sale.order id, because we request a sale.order and are not
@@ -1883,7 +1881,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         sale_order_id = request.session.get("sale_last_order_id")
         if sale_order_id:
             sale_order = self.env["sale.order"].sudo().browse(sale_order_id)
-            filename = "%s.pdf" % (f"Order - {sale_order.name}" or "Order")
+            filename = "%s.pdf" % (f"Order - {sale_order.name}")
             pdf, _ = (
                 self
                 .env["ir.actions.report"]
