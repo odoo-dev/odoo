@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import datetime
+from unittest.mock import patch
 
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
@@ -138,3 +139,65 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                 )
             )
         self.assertEqual(combination_info["free_qty"], 1)
+
+    def test_filter_sold_out(self):
+        """Only the storable products that can't be sold out of stock are checked."""
+        in_stock = self._create_product(is_storable=True, allow_out_of_stock_order=False)
+        self._add_product_qty_to_wh(in_stock.id, 5, self.warehouse.lot_stock_id.id)
+        sold_out = self._create_product(is_storable=True, allow_out_of_stock_order=False)
+        not_storable = self._create_product(is_storable=False)
+        templates = (
+            self.product_oos_order_allowed
+            + self.product_oos_order_not_allowed
+            + in_stock
+            + not_storable
+            + sold_out
+        ).product_tmpl_id
+
+        ProductTemplate = self.env.registry["product.template"]
+        is_sold_out = ProductTemplate._is_sold_out
+        checked = self.env["product.template"]
+
+        def spy(template):
+            nonlocal checked
+            checked |= template
+            return is_sold_out(template)
+
+        with self.mock_request() as request, patch.object(ProductTemplate, "_is_sold_out", spy):
+            templates = templates.with_env(request.env)
+            self.assertEqual(
+                templates._filter_sold_out(),
+                (self.product_oos_order_not_allowed + sold_out).product_tmpl_id,
+            )
+            self.assertEqual(
+                checked, (self.product_oos_order_not_allowed + in_stock + sold_out).product_tmpl_id
+            )
+            self.assertEqual(
+                templates._filter_sold_out(limit=1),
+                self.product_oos_order_not_allowed.product_tmpl_id,
+            )
+
+    def test_shop_in_stock_filter(self):
+        self.env["product.ribbon"].create({"name": "Out of stock", "assign": "out_of_stock"})
+        in_stock = self._create_product(
+            name="Stockfilter In Stock", is_storable=True, allow_out_of_stock_order=False
+        )
+        self._add_product_qty_to_wh(in_stock.id, 5, self.warehouse.lot_stock_id.id)
+        sold_out = self._create_product(
+            name="Stockfilter Sold Out", is_storable=True, allow_out_of_stock_order=False
+        )
+        names = {in_stock.name, sold_out.name}
+
+        def shop(**params):
+            response = self.url_open("/shop", params={"search": "Stockfilter", **params})
+            response.raise_for_status()
+            return (
+                {name for name in names if name in response.text},
+                'aria-label="Filter by in stock products"' in response.text,
+            )
+
+        self.assertEqual(shop(), (names, True))
+        self.assertEqual(shop(in_stock=1), ({in_stock.name}, True))
+
+        self._add_product_qty_to_wh(sold_out.id, 5, self.warehouse.lot_stock_id.id)
+        self.assertEqual(shop(), (names, False))

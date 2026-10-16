@@ -42,6 +42,7 @@ from . import (
     test_sale_process,
     test_settings,
     test_shop_redirects,
+    test_shop_ribbon_filters,
     test_show_compare_list_price,
     test_sitemap,
     test_snippets,

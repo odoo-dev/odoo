@@ -835,6 +835,34 @@ class ProductTemplate(models.Model):
 
         return res
 
+    def _filter_on_sale(self, pricelist_sudo, fiscal_position_sudo, website, limit=None):
+        """Return the templates of `self` that `_get_sales_prices` gives a `base_price` to.
+
+        Only a discount rule of the pricelist or a comparison price can give a `base_price`: the
+        prices of the templates that can't get one are not computed. With a `limit`, the prices are
+        computed by growing batches, until enough templates are found.
+
+        :param int limit: the maximum number of templates to return
+        :return: the templates on sale, in the order of `self`
+        :rtype: product.template
+        """
+        templates = self
+        if not any(rule._show_discount_on_shop() for rule in pricelist_sudo.item_ids):
+            if not self.env["res.groups"]._is_feature_enabled(
+                "website_sale.group_product_price_comparison"
+            ):
+                return self.browse()
+            templates = templates._filter_in_db(Domain("compare_list_price", "!=", False))
+
+        on_sale_ids = []
+        start, batch_size = 0, 64 if limit else len(templates)
+        while start < len(templates) and not (limit and len(on_sale_ids) >= limit):
+            batch = templates.browse(templates._ids[start : start + batch_size])
+            prices = batch._get_sales_prices(pricelist_sudo, fiscal_position_sudo, website)
+            on_sale_ids.extend(id_ for id_ in batch._ids if "base_price" in prices[id_])
+            start, batch_size = start + batch_size, batch_size * 2
+        return self.browse(on_sale_ids[:limit])
+
     def _is_purchasable(self, product=None) -> bool:  # noqa: ARG002
         """Determine whether the given product can be sold through the eCommerce shop."""
         self.ensure_one()
@@ -1970,6 +1998,43 @@ class ProductTemplate(models.Model):
         return not self.product_variant_ids or all(
             variant._is_sold_out() for variant in self.product_variant_ids
         )
+
+    def _filter_sold_out(self, limit=None):
+        """Return the templates of `self` that are sold out, see `_is_sold_out`.
+
+        Only the storable templates that can't be sold when out of stock can be sold out: the
+        others are discarded in SQL, so that the whole catalogue doesn't have to be loaded.
+
+        :param int limit: the maximum number of templates to return
+        :return: the sold out templates, in the order of `self`
+        :rtype: product.template
+        """
+        sold_out_ids = []
+        candidates = self._filter_in_db(
+            Domain("is_storable", "=", True) & Domain("allow_out_of_stock_order", "=", False)
+        )
+        for template in candidates:
+            if template._is_sold_out():
+                sold_out_ids.append(template.id)
+                if len(sold_out_ids) == limit:
+                    break
+        return self.browse(sold_out_ids)
+
+    def _filter_in_db(self, domain):
+        """Return the records of `self` matching `domain`, in the order of `self`.
+
+        Unlike `filtered_domain`, the domain is evaluated in SQL: `self` is not loaded.
+        """
+        if not self:
+            return self
+        matching_ids = set(
+            self
+            .sudo()
+            .with_context(active_test=False)
+            ._search(Domain("id", "in", self.ids) & domain)
+            .get_result_ids()
+        )
+        return self.browse([id_ for id_ in self._ids if id_ in matching_ids])
 
     @api.model
     def _get_additional_configurator_data(

@@ -525,29 +525,27 @@ class WebsiteSale(payment_portal.PaymentPortal):
         auto_assign_ribbons = self.env["product.ribbon"].sudo().search([("assign", "!=", "manual")])
         ribbon_assign_values = set(auto_assign_ribbons.mapped("assign"))
 
-        on_sale_ids = set()
-        sold_out_ids = set()
+        # A filter is shown as soon as one product matches: the whole catalogue is only checked
+        # when the filter is applied.
+        show_on_sale_filter = show_in_stock_filter = False
+        unfiltered_products = search_product
         if "sale" in ribbon_assign_values:
-            sales_prices = search_product._get_sales_prices(
+            pricing_args = (
                 request.pricelist.with_context(self.env.context),
                 request.fiscal_position.with_context(self.env.context),
                 website.with_context(self.env.context),
             )
-            on_sale_ids = {pid for pid, prices in sales_prices.items() if "base_price" in prices}
+            if on_sale_active:
+                search_product = search_product._filter_on_sale(*pricing_args)
+                show_on_sale_filter = True
+            else:
+                show_on_sale_filter = bool(search_product._filter_on_sale(*pricing_args, limit=1))
         if "out_of_stock" in ribbon_assign_values:
-            sold_out_ids = {p.id for p in search_product if p._is_sold_out()}
-
-        show_on_sale_filter = bool(on_sale_ids) or (
-            on_sale_active and "sale" in ribbon_assign_values
-        )
-        show_in_stock_filter = bool(sold_out_ids) or (
-            in_stock_active and "out_of_stock" in ribbon_assign_values
-        )
-
-        if on_sale_active and "sale" in ribbon_assign_values:
-            search_product = search_product.filtered(lambda p: p.id in on_sale_ids)
-        if in_stock_active and "out_of_stock" in ribbon_assign_values:
-            search_product = search_product.filtered(lambda p: p.id not in sold_out_ids)
+            if in_stock_active:
+                search_product -= search_product._filter_sold_out()
+                show_in_stock_filter = True
+            else:
+                show_in_stock_filter = bool(unfiltered_products._filter_sold_out(limit=1))
         if on_sale_active or in_stock_active:
             product_count = len(search_product)
 
