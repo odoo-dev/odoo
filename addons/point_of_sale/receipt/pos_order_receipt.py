@@ -70,9 +70,13 @@ class PosOrderReceipt(models.AbstractModel):
         order_data = self.read(order_fields, load=False)[0]
         foreign_currency = self.payment_ids and self.payment_ids[0].foreign_currency_id
         order_data['amount_return_currency'] = 0 if not foreign_currency else order_data['amount_return'] * foreign_currency.rate
+        config_data = self.config_id.read(config_fields, load=False)[0]
+        for field in ['phone', 'email', 'website', 'receipt_address']:
+            if not self.config_id.use_custom_receipt_info or not config_data.get(field):
+                config_data[field] = self.company_id[field]
         return {
             'order': order_data,
-            'config': self.config_id.read(config_fields, load=False)[0],
+            'config': config_data,
             'company': self.company_id.read(company_fields, load=False)[0],
             'partner': self.partner_id.read(partner_fields, load=False)[0] if self.partner_id else False,
             'preset': self.preset_id.read(preset_fields, load=False)[0] if self.preset_id else False,
@@ -213,7 +217,7 @@ class PosOrderReceipt(models.AbstractModel):
         self.ensure_one()
 
         use_qr_code = self.company_id.point_of_sale_ticket_portal_url_display_mode != 'url' and self.state != 'draft'
-        config_logo = image_data_uri(self.config_id.logo) if self.config_id.logo else False
+        config_logo = image_data_uri(self.config_id.logo) if (self.config_id.use_custom_receipt_info and self.config_id.logo) else (image_data_uri(self.company_id.logo) if self.company_id.logo else False)
         qr_code_value = f"{self.env.company.get_base_url()}/pos/ticket?order_uuid={self.uuid}"
         tip_percentage = [self.config_id.tip_percentage_1, self.config_id.tip_percentage_2, self.config_id.tip_percentage_3] if self.config_id.set_tip_after_payment and self.amount_total > 0 else False
 

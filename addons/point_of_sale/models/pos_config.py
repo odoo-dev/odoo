@@ -164,7 +164,7 @@ class PosConfig(models.Model):
         comodel_name='pos.payment.method',
         string='Payment Methods',
         bypass_search_access=True,
-        default=_default_payment_methods,
+        default=lambda self: self._default_payment_methods(),
         check_company=True,
         ondelete='restrict',
         copy=False,
@@ -189,16 +189,11 @@ class PosConfig(models.Model):
         help="Display the breakdown of sales lines by product in the automatically generated closing entry.")
     fallback_nomenclature_id = fields.Many2one('barcode.nomenclature', string="Fallback Nomenclature")
     use_custom_receipt_info = fields.Boolean(string="Customise Info", help="Fill in if your shop does not have the same info as your company")
-    custom_email = fields.Char(string="Email")
     email = fields.Char(string="Receipt email", compute="_compute_custom_info", store=True, readonly=False)
-    custom_website = fields.Char(string="Website")
     website = fields.Char(string="Receipt website", compute="_compute_custom_info", store=True, readonly=False)
-    custom_receipt_address = fields.Char(string="Address")
     receipt_address = fields.Char(string="Receipt address", compute="_compute_custom_info", store=True, readonly=False)
-    custom_logo_name = fields.Char(string='Logo Name')
-    custom_logo = fields.Image(string="Logo")
     logo = fields.Image(string="Receipt logo", compute="_compute_custom_info", store=True, readonly=False)
-    custom_phone = fields.Char(string="Phone Number")
+    logo_name = fields.Char(string="Logo Name")
     phone = fields.Char(string="Receipt Phone", compute="_compute_custom_info", store=True, readonly=False)
     use_fast_payment = fields.Boolean('Fast Payment Validation', help="Enable fast payment methods to validate orders on the product screen.")
     fast_payment_method_ids = fields.Many2many(
@@ -206,7 +201,7 @@ class PosConfig(models.Model):
         store=True, help="These payment methods will be available for fast payment", readonly=False)
     statistics_for_current_session = fields.Json(string="Session Statistics", compute="_compute_statistics_for_session")
     kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
-    iface_printbill = fields.Boolean(string='Bill Printing', help="Allows to print the Bill before payment.")
+    iface_printbill = fields.Boolean(string='Early Receipt Printing', help="Allows to print the Bill before payment.")
     pos_snooze_ids = fields.One2many('pos.snooze', 'pos_config_id', string='Snoozed Records')
     use_download_invoice = fields.Boolean(
         string='Download Invoice',
@@ -325,8 +320,7 @@ class PosConfig(models.Model):
         record["_unit_uom_id"] = self.env.ref('uom.product_uom_unit').id
         record['_limited_partner_count'] = config._get_limited_partner_count()
 
-        session = config.current_session_id
-        last_opening = config._get_opening_balance() if session else 0.0
+        last_opening = config._get_opening_balance() if config.current_session_id else 0.0
         record['_last_opening_balance'] = last_opening
 
         # Add custom fields for 'formula' taxes.
@@ -341,13 +335,16 @@ class PosConfig(models.Model):
         record['_IS_VAT'] = self.env.company.country_id.id in self.env.ref("base.europe").country_ids.ids
         return read_records
 
-    @api.depends('custom_logo', 'custom_phone', 'custom_receipt_address', 'custom_email', 'custom_website', 'company_id', 'use_custom_receipt_info',
-                 'company_id.logo', 'company_id.phone', 'company_id.street', 'company_id.city', 'company_id.state_id', 'company_id.zip', 'company_id.email', 'company_id.website')
+    @api.depends('company_id', 'use_custom_receipt_info', 'company_id.logo', 'company_id.phone', 'company_id.street', 'company_id.city',
+                 'company_id.state_id', 'company_id.zip', 'company_id.email', 'company_id.website')
     def _compute_custom_info(self):
         fields = ['logo', 'phone', 'receipt_address', 'email', 'website']
         for config in self:
             for field in fields:
-                config[field] = config[f'custom_{field}'] if config.use_custom_receipt_info and config[f'custom_{field}'] else config.company_id[field]
+                if config.use_custom_receipt_info:
+                    config[field] = config[field] or config.company_id[field]
+                else:
+                    config[field] = config.company_id[field]
 
     @api.depends('payment_method_ids')
     def _compute_fast_payment_method_ids(self):
@@ -359,9 +356,9 @@ class PosConfig(models.Model):
     @api.depends('payment_method_ids')
     def _compute_cash_control(self):
         for config in self:
-            config.cash_control = bool(config.payment_method_ids.filtered(lambda pm: pm.type == 'cash'))
+            config.cash_control = any(pm.type == 'cash' for pm in config.payment_method_ids)
 
-    @api.depends('company_id')
+    @api.depends('company_id', 'company_id.chart_template')
     def _compute_company_has_template(self):
         for config in self:
             config.company_has_template = config.company_id.root_id.sudo()._existing_accounting() or config.company_id.chart_template
@@ -380,7 +377,7 @@ class PosConfig(models.Model):
             company = pos_config.journal_id.company_id or pos_config.company_id
             pos_config.currency_id = pos_config.journal_id.currency_id.id or company.sudo().currency_id.id
 
-    @api.depends('session_ids', 'session_ids.state')
+    @api.depends('session_ids', 'session_ids.state', 'session_ids.user_id', 'session_ids.start_at')
     def _compute_current_session(self):
         """
         If there is an open session, store it to current_session_id / current_session_state / current_user_id / pos_session_duration / has_active_session.
@@ -406,7 +403,7 @@ class PosConfig(models.Model):
     def _compute_statistics_for_session(self):
         for config in self:
             session = config.current_session_id
-            if not session or not session.exists():
+            if not session:
                 config.statistics_for_current_session = False
                 continue
             config.statistics_for_current_session = config.get_statistics_for_session(session)
@@ -519,32 +516,32 @@ class PosConfig(models.Model):
             else:
                 pos_config.last_session_closing_date = False
 
-    def action_cash_bank_statement(self):
-        self.ensure_one()
-        cash_method = self.payment_method_ids.filtered(lambda pm: pm.type == 'cash')
-        statement = cash_method.account_bank_statement_id
-        if not statement:
-            raise UserError(_("The cash payment method must have a linked bank statement to open the cash control."))
-        return {
-            'name': _('Cash Control - %s', self.name),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.bank.statement',
-            'view_mode': 'form',
-            'res_id': statement.id,
-            'target': 'current',
-        }
+    # def action_cash_bank_statement(self):
+    #     self.ensure_one()
+    #     cash_method = self._get_cash_payment_method()
+    #     statement = cash_method.account_bank_statement_id
+    #     if not statement:
+    #         raise UserError(_("The cash payment method must have a linked bank statement to open the cash control."))
+    #     return {
+    #         'name': _('Cash Control - %s', self.name),
+    #         'type': 'ir.actions.act_window',
+    #         'res_model': 'account.bank.statement',
+    #         'view_mode': 'form',
+    #         'res_id': statement.id,
+    #         'target': 'current',
+    #     }
 
     @api.constrains('payment_method_ids')
     def _check_payment_methods(self):
         for config in self:
-            cash_methods = config.payment_method_ids.filtered(lambda pm: pm.type == 'cash')
+            cash_methods = config._get_cash_payment_method()
             if len(cash_methods) > 1:
                 raise ValidationError(_("You cannot have more than one cash payment method on a point of sale configuration."))
 
     @api.depends('payment_method_ids.account_bank_statement_id.balance_end')
     def _compute_current_cash_register_balance(self):
         for pos_config in self:
-            if cash_method := pos_config.payment_method_ids.filtered(lambda pm: pm.type == 'cash'):
+            if cash_method := pos_config._get_cash_payment_method():
                 pos_config.current_cash_register_balance = cash_method.journal_id.current_statement_balance
             else:
                 pos_config.current_cash_register_balance = 0
@@ -1404,18 +1401,13 @@ class PosConfig(models.Model):
         cash_pm = self.sudo()._get_cash_payment_method()
         if not cash_pm:
             return 0
-        amount = cash_pm.journal_id.current_statement_balance
-        return amount or 0
+        return cash_pm.journal_id.current_statement_balance
 
     def _get_cash_payment_method(self):
         self.ensure_one()
         cash_pm = self.payment_method_ids.filtered(
             lambda pm: pm.type == 'cash',
         )
-        if len(cash_pm) > 1:
-            raise UserError(_(
-                "There is more than one cash payment method for this PoS Config. Please correct your configuration.",
-            ))
         return cash_pm
 
     def _get_rounding_method_for_invoice(self, orders):

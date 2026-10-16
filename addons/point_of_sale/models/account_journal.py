@@ -53,6 +53,7 @@ class AccountJournal(models.Model):
 
     @api.model
     def _ensure_pos_journal(self, code, name):
+        self.ensure_one()
         journal = self.search([
             ('code', '=', code),
             ('type', '=', 'sale'),
