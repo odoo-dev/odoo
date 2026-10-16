@@ -11,8 +11,6 @@ from . import (
     portal,
     product_configurator,
     product_feed,
-    reorder,
-    sale,
     thread,
     variant,
     website,
