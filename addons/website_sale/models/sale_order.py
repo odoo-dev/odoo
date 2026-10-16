@@ -101,7 +101,7 @@ class SaleOrder(models.Model):
     @api.depends("website_id", "date_order", "order_line", "state", "partner_id")
     def _compute_abandoned_cart(self):
         for order in self:
-            # a quotation can be considered as an abandonned cart if it is linked to a website,
+            # a quotation can be considered as an abandoned cart if it is linked to a website,
             # is in the 'draft' state and has an expiration date
             if order.website_id and order.state == "draft" and order.date_order:
                 public_partner_id = order.website_id.user_id.partner_id
@@ -485,7 +485,7 @@ class SaleOrder(models.Model):
             request.session[FISCAL_POSITION_SESSION_CACHE_KEY] = new_fpos.id
             request.fiscal_position = new_fpos
 
-        # If user explicitely selected a valid pricelist, we don't want to change it
+        # If user explicitly selected a valid pricelist, we don't want to change it
         if selected_pricelist_id := request.session.get(PRICELIST_SELECTED_SESSION_CACHE_KEY):
             selected_pricelist = (
                 self.env["product.pricelist"].browse(selected_pricelist_id).exists()
@@ -523,7 +523,7 @@ class SaleOrder(models.Model):
         :return: values used by the cart service to give feedback to the customer.
         """
         self.ensure_one()
-        self = self.with_company(self.company_id)
+        self = self.with_company(self.company_id)  # noqa: PLW0642
 
         self._check_not_partially_paid()  # Prevent modifying the cart if it's partially paid
 

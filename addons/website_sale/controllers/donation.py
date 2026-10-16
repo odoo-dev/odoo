@@ -1,8 +1,10 @@
-from odoo import http
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo.http import Controller, route
 
 
-class WebsiteSaleDonation(http.Controller):
-    @http.route("/shop/donation/info", type="jsonrpc", auth="public", website=True, readonly=True)
+class WebsiteSaleDonation(Controller):
+    @route("/shop/donation/info", type="jsonrpc", auth="public", website=True, readonly=True)
     def donation_info(self):
         """Return the donation values needed by the donation snippet.
 
@@ -12,10 +14,12 @@ class WebsiteSaleDonation(http.Controller):
         donation_product = self.env.ref("website_sale.product_donation", raise_if_not_found=False)
         if not donation_product:
             return {}
+
         # Unpublished, sudo to allow public users to read it
         donation_product_sudo = donation_product.sudo()
         if not donation_product_sudo.active:
             return {}
+
         return {
             "product_template_id": donation_product_sudo.id,
             "product_id": donation_product_sudo.product_variant_id.id,
