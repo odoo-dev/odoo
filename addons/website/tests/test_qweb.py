@@ -2,6 +2,7 @@
 
 import re
 from contextlib import contextmanager
+from unittest.mock import patch
 
 from odoo.http.router import root
 from odoo.tests.common import TransactionCase, tagged
@@ -383,6 +384,58 @@ class TestQwebProcessAtt(TransactionCase):
             match.reset_calls()
             self._test_att(request.env, '/x?y#z', {'href': '/x?y#z'})
             match.assert_called_with('/x', method='POST', query_args='y')
+
+    @contextmanager
+    def _count_post_processing(self):
+        """ Count the actual (uncached) post-processings. """
+        IrQweb = self.registry['ir.qweb']
+        with patch.object(
+            IrQweb, '_post_process_website_att', autospec=True,
+            side_effect=IrQweb._post_process_website_att,
+        ) as post_process:
+            yield post_process
+
+    def test_process_att_cache(self):
+        with self._count_post_processing() as post_process, \
+                MockRequest(self.env, website=self.website, context={'lang': 'fr_FR'}) as request:
+            for _i in range(3):
+                self._test_att(request.env, '/', {'href': '/fr'})
+                self._test_att(request.env, '/a', {'href': 'http://test.cdn/fr/a'})
+            self.assertEqual(post_process.call_count, 2, "each attribute set is post-processed once")
+
+            # the tag and the debug mode are part of the key
+            self._test_att(request.env, '/', {'src': '/fr', 'loading': 'lazy'}, tag='img', attribute='src')
+            request.session.debug = '1'
+            self._test_att(request.env, '/', {'href': '/'})
+            self.assertEqual(post_process.call_count, 4)
+
+        # so is the language of the request
+        with self._count_post_processing() as post_process, \
+                MockRequest(self.env, website=self.website, context={'lang': 'en_US'}) as request:
+            self._test_att(request.env, '/', {'href': '/'})
+            self.assertEqual(post_process.call_count, 1)
+
+    def test_process_att_cache_value_types(self):
+        with MockRequest(self.env, website=self.website) as request:
+            QWeb = request.env['ir.qweb']
+            for value in (1, True, 1.0, '1'):
+                result = QWeb._post_processing_att('div', {'data-value': value})
+                self.assertIs(type(result['data-value']), type(value))
+
+    def test_process_att_cache_relative_url(self):
+        """ A relative URL is resolved against the path of the current page. """
+        with self._count_post_processing() as post_process:
+            with MockRequest(self.env, website=self.website, path='/shop/') as request:
+                self._test_att(request.env, 'cart', {'href': '/shop/cart'})
+            with MockRequest(self.env, website=self.website, path='/blog/') as request:
+                self._test_att(request.env, 'cart', {'href': '/blog/cart'})
+            self.assertEqual(post_process.call_count, 2)
+
+    def test_process_att_cache_invalidation(self):
+        with MockRequest(self.env, website=self.website) as request:
+            self._test_att(request.env, '/a', {'href': 'http://test.cdn/a'})
+            self.website.cdn_activated = False
+            self._test_att(request.env, '/a', {'href': '/a'})
 
 
 @tagged('-at_install', 'post_install')
