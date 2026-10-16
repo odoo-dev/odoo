@@ -166,7 +166,7 @@ class TestAzVatReportFlows(AccountTestInvoicingCommon):
         self.env['account.payment.register'].with_context(
             active_model='account.move', active_ids=invoice.ids,
         ).create({'payment_date': '2024-01-20'})._create_payments()
-        self.assertEqual(invoice.payment_state, 'paid')
+        self.assertEqual(invoice.payment_state, invoice._get_invoice_in_payment_state())
 
         caba_move = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
         self.assertEqual(len(caba_move), 1)

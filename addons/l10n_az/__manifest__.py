@@ -10,6 +10,7 @@ This module provides the basic accounting configuration required to use Odoo Acc
 * Tax groups, taxes and tax grids
 * Withholding taxes
 * Fiscal Positions
+* Electronic invoice (E-Qaimə Faktura, EQF) XML export, to be uploaded on the e-taxes.gov.az portal
 
 The module is designed to provide a standard accounting setup for companies operating in Azerbaijan and can be extended further based on specific business or legal requirements.
     """,
@@ -23,6 +24,10 @@ The module is designed to provide a standard accounting setup for companies oper
         'data/account_tax_report_withholding_data.xml',
         'data/account_tax_report_vat_data.xml',
         'data/account_tax_report_tit_data.xml',
+        'views/account_move_views.xml',
+        'views/account_tax_views.xml',
+        'views/product_template_views.xml',
+        'views/res_company_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
