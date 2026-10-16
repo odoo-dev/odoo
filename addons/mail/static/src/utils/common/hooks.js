@@ -1,4 +1,5 @@
 import {
+    Component,
     onMounted,
     onPatched,
     onWillUnmount,
@@ -6,6 +7,7 @@ import {
     useEffect,
     useRef,
     useState,
+    xml,
 } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
@@ -116,6 +118,16 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
         },
         _count: 0,
         _isHover: false,
+        addTarget(target) {
+            targets.push(target);
+            target.ref.el.addEventListener("mouseenter", onmouseenter, true);
+            target.ref.el.addEventListener("mouseleave", onmouseleave, true);
+            return () => {
+                target.ref.el.removeEventListener("mouseenter", onmouseenter, true);
+                target.ref.el.removeEventListener("mouseleave", onmouseleave, true);
+                targets.splice(targets.indexOf(target), 1);
+            };
+        },
     });
     function setHover(hovering) {
         if (hovering && !wasHovering) {
@@ -198,6 +210,21 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
         }, stateObserver);
     }
     return state;
+}
+
+export class UseHoverOverlay extends Component {
+    static props = ["slots", "hover"];
+    static template = xml`<div t-ref="root"><t t-slot="default"/></div>`;
+
+    setup() {
+        super.setup();
+        this.root = useRef("root");
+        let removeTarget;
+        onMounted(() => {
+            removeTarget = this.props.hover.addTarget({ ref: { el: this.root.el } });
+        });
+        onWillUnmount(() => removeTarget?.());
+    }
 }
 
 /**
