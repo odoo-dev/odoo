@@ -46,7 +46,8 @@ class Website(models.Model):
 
         if website_event_menu and new_page.get('view_id'):
             website_event_menu.view_id = new_page['view_id']
-            website_event_menu.view_id.key = f'website_event.{website_event_menu.event_id.name}-{name.split("/")[-1]}'
+            page_slug = new_page['url'].rstrip('/').split('/')[-1]
+            website_event_menu.view_id.key = f'website_event.{website_event_menu.event_id.name}-{page_slug}'
 
             arch = website_event_menu.view_id.arch
             if arch:

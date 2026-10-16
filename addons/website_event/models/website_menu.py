@@ -45,8 +45,6 @@ class WebsiteMenu(models.Model):
     @api.model
     def save(self, website_id, data):
         """
-        Method context:
-
         This method takes a data argument that follows the following format:
          [
            { 'id': 4, url: '/mypage' },
@@ -65,14 +63,27 @@ class WebsiteMenu(models.Model):
          If we find a website.event.menu item that has the same parent as the menu we just created
          -> it means that we just created a menu inside an event.
 
-         Once we have identified that, we force its URL to be part of the event pages, and we create
-         a matching website.event.menu record for it. """
-
+         When requested through the `return_menu_ids` context key, return a mapping
+         between temporary menu IDs and database IDs.
+        """
+        temporary_menus = {
+            menu['id']: menu
+            for menu in data['data']
+            if isinstance(menu['id'], str)
+        }
         old_menu_ids = [menu['id'] for menu in data['data'] if isinstance(menu['id'], int)]
-        has_new_menus = any(isinstance(menu['id'], str) for menu in data['data'])
+        has_new_menus = bool(temporary_menus)
+
         res = super().save(website_id, data)
 
+        id_mapping = {
+            temporary_id: menu['id']
+            for temporary_id, menu in temporary_menus.items()
+        }
+
         if not has_new_menus:
+            if self.env.context.get('return_menu_ids'):
+                return {'result': res, 'id_mapping': {}}
             return res
 
         menus_by_parent_id = {}
@@ -81,18 +92,15 @@ class WebsiteMenu(models.Model):
                 continue
             if not menus_by_parent_id.get(menu['parent_id']):
                 menus_by_parent_id[menu['parent_id']] = []
-
             menus_by_parent_id[menu['parent_id']].append(menu)
 
         for parent_id, menus in menus_by_parent_id.items():
             new_menus = filter(lambda menu: menu['id'] not in old_menu_ids, menus)
             if not new_menus:
                 continue
-
             parent = self.env['website.menu'].browse(parent_id)
             while parent.parent_id:  # get the top-most parent to handle sub-menus
                 parent = parent.parent_id
-
             if parent_event_menu := self.env['website.event.menu'].search([
                 ('menu_id.parent_id', '=', parent.id)
             ], limit=1):
@@ -104,7 +112,6 @@ class WebsiteMenu(models.Model):
                     if not menu_record_url or menu_record_url == '#':
                         # prevent blank URLs, use 't' prefix to avoid slug syntax
                         menu_record_url = f"t{int(datetime.now().timestamp())}"
-
                     menu_record.write({
                         'url': f'{event_url}/page/{menu_record_url}'
                     })
@@ -113,9 +120,10 @@ class WebsiteMenu(models.Model):
                         'event_id': parent_event_menu.event_id.id,
                         'menu_type': 'other',
                     })
-
                 # if the current user can create website.menu, then he should be able to
                 # create website.event.menu (e.g: website designer group)
                 self.env['website.event.menu'].sudo().create(event_menu_values)
 
+        if self.env.context.get('return_menu_ids'):
+            return {'result': res, 'id_mapping': id_mapping}
         return res

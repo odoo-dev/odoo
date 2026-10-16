@@ -368,7 +368,7 @@ export class EditMenuDialog extends Component {
         }
     }
 
-    async onClickSave(goToWebsite = true, url) {
+    async onClickSave(goToWebsite = true, url, saveOnly = false) {
         const data = [];
         this.map.forEach((menu, id) => {
             if (this.state.rootMenu.fields["id"] !== id) {
@@ -383,7 +383,7 @@ export class EditMenuDialog extends Component {
             }
         });
 
-        await this.orm.call(
+        const result = await this.orm.call(
             "website.menu",
             "save",
             [
@@ -393,8 +393,18 @@ export class EditMenuDialog extends Component {
                     to_delete: this.toDelete,
                 },
             ],
-            { context: { lang: this.website.currentWebsite.metadata.lang } }
+            {
+                context: {
+                    lang: this.website.currentWebsite.metadata.lang,
+                    return_menu_ids: saveOnly,
+                },
+            }
         );
+
+        if (saveOnly) {
+            return result;
+        }
+
         if (this.props.save) {
             this.props.save(url);
         } else if (goToWebsite) {
@@ -404,8 +414,31 @@ export class EditMenuDialog extends Component {
 
     async createPage(id) {
         const menu = this.map.get(id);
-        let url = menu.fields["url"];
-        url = url.startsWith("/") ? url : "/" + url;
+
+        // Save the menu first and retrieve its real database ID.
+        const result = await this.onClickSave(false, undefined, true);
+        const realId = result.id_mapping?.[id];
+
+        if (!realId) {
+            throw new Error(
+                `Could not resolve the database ID for menu ${id}`
+            );
+        }
+
+        // Replace the temporary frontend ID with the real database ID.
+        menu.fields["id"] = realId;
+        this.map.delete(id);
+        this.map.set(realId, menu);
+
+        // Read the URL assigned by the server.
+        const [savedMenu] = await this.orm.read(
+            "website.menu",
+            [realId],
+            ["url"]
+        );
+
+        const url = savedMenu.url;
+
         this.dialogs.add(AddPageDialog, {
             onAddPage: ({ createdUrl }) => {
                 if (createdUrl) {
