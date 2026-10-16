@@ -29,10 +29,24 @@ class ResUsers(models.Model):
     def _compute_im_status(self):
         super()._compute_im_status()
         dayfield = self.env['hr.employee']._get_current_day_location_field()
+        employee_by_user = self._get_im_status_employee_by_user()
         for user in self:
-            location_type = user[dayfield].location_type
+            location_type = employee_by_user[user][dayfield].location_type
             if not location_type:
                 continue
             im_status = user.im_status
             if im_status in ["online", "away", "busy", "offline"]:
                 user.im_status = location_type + "_" + im_status
+
+    def _get_im_status_employee_by_user(self):
+        # sudo: hr.employee - can read the work location of users to show their IM status
+        users = self.sudo().with_context(active_test=True)
+        # one status for every viewer: the employee of the user's company, else the newest one
+        employee_by_user = {user: user.with_company(user.company_id).employee_id for user in users}
+        if users_without_employee := users.filtered(lambda user: not employee_by_user[user]):
+            employees = users.env["hr.employee"].search(
+                [("user_id", "in", users_without_employee.ids)],
+                order="id",
+            )
+            employee_by_user.update((employee.user_id, employee) for employee in employees)
+        return employee_by_user

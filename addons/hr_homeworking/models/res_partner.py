@@ -8,9 +8,10 @@ class ResPartner(models.Model):
 
     def _compute_im_status(self):
         super()._compute_im_status()
+        employee_by_user = self.user_ids._get_im_status_employee_by_user()
         for user in self.user_ids:
             dayfield = self.env['hr.employee']._get_current_day_location_field()
-            location_type = user[dayfield].location_type
+            location_type = employee_by_user[user][dayfield].location_type
             if not location_type:
                 continue
             im_status = user.partner_id.im_status
