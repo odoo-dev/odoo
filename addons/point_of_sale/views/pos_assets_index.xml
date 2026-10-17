@@ -12,7 +12,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, interactive-widget=resizes-content"/>
         <link rel="icon" href="/point_of_sale/static/src/img/favicon.ico" type="image/x-icon"/>
 
-        <style> body { background: #222; } </style>
+        <style t-if="request.cookies.get('pos_color_scheme') == 'dark'"> body { background: #1f1f23; } </style>
+        <style t-else=""> body { background: #f8f9fa; } </style>
 
         <script type="text/javascript">
             var odoo = <t t-out="json.dumps({
