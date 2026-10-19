@@ -495,7 +495,7 @@ class TestDiscussChannelAccess(MailCommon):
             if membership == "member":
                 channel._add_members(users=user, guests=guest)
         elif channel_key == "chat":
-            channel = DiscussChannel._get_or_create_chat(partners.ids)
+            channel = DiscussChannel._get_or_create_chat(partners_to=partners.ids)
         else:
             channel = DiscussChannel._create_channel("Channel", group_id=None)
             if membership == "member":
