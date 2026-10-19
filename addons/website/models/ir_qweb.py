@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import re
+import threading
+import weakref
 
 from collections import OrderedDict
 from urllib.parse import urlsplit
@@ -8,6 +10,7 @@ from markupsafe import Markup
 
 from odoo import models
 from odoo.http import request
+from odoo.tools.lru import LRU
 from odoo.addons.website.tools import add_form_signature
 
 
@@ -16,6 +19,15 @@ re_translate_span = re.compile(r'<span.+?data-oe-translation-source-sha.+?>(.+?)
 
 # types of the attribute values whose post-processing can be cached, see `_post_processing_att`
 CACHEABLE_ATT_TYPES = frozenset({str, Markup, int, float, bool, type(None)})
+
+# Process cache of `_post_processing_att`: {routing map: LRU({key: items})}.
+# It is never invalidated: everything the post-processing reads from the
+# database is a value of the key, except the URL rewriting, which depends on
+# the routing map of the website. A new routing map is built each time the
+# routing is invalidated, and the entries of the previous one are dropped with
+# it, as it is only weakly referenced.
+POST_PROCESSED_ATTS = weakref.WeakKeyDictionary()
+POST_PROCESSED_ATTS_LOCK = threading.Lock()
 
 
 class IrQweb(models.AbstractModel):
@@ -80,25 +92,24 @@ class IrQweb(models.AbstractModel):
         key = self._get_post_processing_att_cache_key(tagName, atts)
         if key is None:
             return self._post_process_website_att(tagName, atts)
-        # The registry cache is used directly rather than through `api.ormcache`:
-        # this is called hundreds of times per page, and the statistics kept by
-        # `ormcache` on each lookup cost as much as the post-processing itself.
-        cache = self.env.transaction.ormcaches__['templates.attrs']
+        cache, key = key
         items = cache.get(key)
         if items is None:
             items = cache[key] = tuple(self._post_process_website_att(tagName, atts).items())
         return dict(items)
 
     def _get_post_processing_att_cache_key(self, tagName, atts):
-        """ Return the key under which the post-processing of the attributes of
-        a dynamic node is cached, or ``None`` if it must not be cached.
+        """ Return the cache and the key under which the post-processing of the
+        attributes of a dynamic node is cached, or ``None`` if it must not be
+        cached.
 
-        The result only depends on the website, the template options, the debug
-        mode, whether third-party trackers are removed, and the attributes
-        themselves: it is the same for every page, visitor and record rendering
-        those attributes. Not cached: static nodes (post-processed once, at
-        compile time), values that are not plain values (e.g. the lazy content
-        of a ``t-set``), and URLs resolved against the current path.
+        The key holds the values of everything the post-processing depends on,
+        so that the cache never has to be invalidated: the template options,
+        the debug mode, the CDN and third-party trackers settings of the
+        website, the languages of the request, and the attributes themselves.
+        Not cached: static nodes (post-processed once, at compile time), values
+        that are not plain values (e.g. the lazy content of a ``t-set``), and
+        URLs resolved against the current path.
         """
         if not request or atts.get('__is_static_node') or atts.get('data-no-post-process'):
             return None
@@ -114,8 +125,9 @@ class IrQweb(models.AbstractModel):
             return None  # `_url_for` joins it with the current path
         if 'background-image' in str(atts.get('style') or ''):
             return None  # the URLs of the style are rewritten as well
-        return (
-            self._get_post_processing_att_env_key(),
+        cache, env_key = self._get_post_processing_att_env_key()
+        return cache, (
+            env_key,
             bool(request.session.debug),
             tagName,
             tuple(atts.items()),
@@ -124,27 +136,47 @@ class IrQweb(models.AbstractModel):
         )
 
     def _get_post_processing_att_env_key(self):
-        """ Return the part of the cache key of `_post_processing_att` that
-        depends on the environments: the rendering one, and the one of the
-        request, whose language and website are used to rewrite the URLs. It
-        is computed once per pair of environments and transaction.
+        """ Return the process cache of `_post_processing_att` and the part of
+        its key that depends on the environments: the rendering one, and the
+        one of the request, whose languages and routing are used to rewrite
+        the URLs. It is computed once per pair of environments and transaction,
+        and again after the settings it reads are modified: those invalidate
+        the 'default' or the 'routing' caches, whose layers are part of the key.
         """
         env, request_env = self.env, request.env
         env_keys = env.cr.cache.setdefault('website.post_processing_att', {})
-        key = env_keys.get((env, request_env))
-        if key is None:
-            website = env.website
-            context = env.context
-            key = env_keys[env, request_env] = (
-                website.id,
-                bool(website) and website._should_remove_third_party_trackers(),
-                tuple(context.get(name) for name in self._get_template_cache_keys()),
-                context.get('rendering_bundle'),
-                context.get('debug'),
-                request_env.context.get('lang'),
-                request_env.website.id,
-            )
-        return key
+        ormcaches = env.transaction.ormcaches__
+        layers = (ormcaches['default'], ormcaches['routing'])
+        memo = env_keys.get((env, request_env))
+        if memo is not None and memo[0] is layers[0] and memo[1] is layers[1]:
+            return memo[2]
+
+        website = env.website
+        context = env.context
+        remove_trackers = bool(website) and bool(website._should_remove_third_party_trackers())
+        Lang = request_env['res.lang']
+        lang_code = request_env.context.get('lang')
+        env_key = (
+            bool(website),
+            website.cdn_activated and (website.cdn_url, website.cdn_filters),
+            remove_trackers and website.blocked_third_party_domains,
+            tuple(context.get(name) for name in self._get_template_cache_keys()),
+            context.get('rendering_bundle'),
+            context.get('debug'),
+            lang_code,
+            Lang._get_data(code=lang_code).url_code,
+            tuple(info.url_code for info in Lang._get_frontend().values()),
+            request_env['ir.http']._get_default_lang().url_code,
+        )
+        # the URL rewriting depends on the routing map of the website of the request
+        routing_map = request_env['ir.http'].routing_map()
+        cache = POST_PROCESSED_ATTS.get(routing_map)
+        if cache is None:
+            with POST_PROCESSED_ATTS_LOCK:
+                cache = POST_PROCESSED_ATTS.setdefault(routing_map, LRU(16384))
+        result = (cache, env_key)
+        env_keys[env, request_env] = (*layers, result)
+        return result
 
     @staticmethod
     def _is_path_relative_url(url):
