@@ -317,7 +317,10 @@ class StockMove(models.Model):
             raise UserError('\n'.join(error_message_lines))
 
         for move in moves_to_assign:
-            move.quantity = move.product_uom_qty
+            if move.product_id.tracking != 'none' and move.origin_returned_move_id:
+                move._add_mls_from_returned_move()
+            else:
+                move.quantity = move.product_uom_qty
         moves_remaining = self - moves_to_assign
         existing_lots = moves_remaining._create_production_lots_for_pos_order(related_order_lines)
         move_lines_to_create = []
@@ -369,6 +372,32 @@ class StockMove(models.Model):
                             if existing_lot:
                                 move._update_reserved_quantity(qty, move.location_id, lot_id=existing_lot)
                                 continue
+
+    def _add_mls_from_returned_move(self):
+        """ Return the lots taken by the original move, minus what previous returns already brought back.
+            Used when the lots are not encoded in the PoS, so the refund has no other way to know them.
+        """
+        self.ensure_one()
+        qty_by_lot = defaultdict(float)
+        for ml in self.origin_returned_move_id.move_line_ids.filtered('lot_id'):
+            qty_by_lot[ml.lot_id] += ml.quantity_product_uom
+        previous_returns = (self.origin_returned_move_id.returned_move_ids - self).filtered(lambda m: m.state == 'done')
+        for ml in previous_returns.move_line_ids:
+            qty_by_lot[ml.lot_id] -= ml.quantity_product_uom
+
+        uom = self.product_id.uom_id
+        qty_left = self.product_uom._compute_quantity(self.product_uom_qty, uom)
+        move_lines_vals = []
+        for lot, lot_qty in qty_by_lot.items():
+            if not lot or uom.compare(lot_qty, 0) <= 0 or uom.compare(qty_left, 0) <= 0:
+                continue
+            qty = min(lot_qty, qty_left)
+            qty_left -= qty
+            move_lines_vals.append({**self._prepare_move_line_vals(qty), 'lot_id': lot.id})
+        if uom.compare(qty_left, 0) > 0:
+            move_lines_vals.append(self._prepare_move_line_vals(qty_left))
+        self.move_line_ids.unlink()
+        self.env['stock.move.line'].create(move_lines_vals)
 
     def _get_lot_line_qty(self, line, move, lines_data):
         return 1 if line.product_id.tracking == 'serial' else abs(line.qty)
