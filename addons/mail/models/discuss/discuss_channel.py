@@ -1789,21 +1789,35 @@ class DiscussChannel(models.Model):
         return action
 
     @api.model
-    def _get_or_create_chat(self, partners_to):
-        """ Get the canonical private channel between some partners, create it if needed.
-            :param partners_to : list of res.partner ids to add to the conversation
-            :param pin : True if getting the channel should pin it for the current user
-            :returns: channel_info of the created or existing channel
-            :rtype: dict
+    def _get_or_create_chat(self, users_to=None, partners_to=None):
+        """Get the private channel between some users or partners, create it if needed.
+
+        The current user is always part of the chat. Users are still added as
+        members through their partner.
+
+        :param users_to: list of res.users ids to add to the channel
+        :param partners_to: list of res.partner ids to add to the channel
+        :returns: the created or existing channel
+        :rtype: discuss.channel
         """
+        users = (
+            self.env["res.users"]
+            .with_context(active_test=False)
+            .search([("id", "in", users_to or [])])
+            .with_env(self.env)
+        )
         partners = (
             self.env["res.partner"]
             .with_context(active_test=False)
-            .search([("id", "in", partners_to)])
+            .search([("id", "in", partners_to or [])])
             .with_env(self.env)
-        ) | self.env.user.partner_id
+        ) | users.partner_id | self.env.user.partner_id
         if len(partners) > 2:
-            raise UserError(_("A chat should not be created with more than 2 persons. Create a group instead."))
+            raise UserError(
+                self.env._(
+                    "A chat should not be created with more than 2 people. Create a group instead."
+                )
+            )
         other_partner = partners - self.env.user.partner_id
         # sudo: discuss.channel - a chat of the current user is not readable while its members are gone
         channel = self.env["discuss.channel"].sudo().search_fetch(
@@ -1850,7 +1864,7 @@ class DiscussChannel(models.Model):
                 )
         except psycopg2.errors.UniqueViolation:
             # the chat was created concurrently, join it rather than failing on its unique index
-            return self._get_or_create_chat(partners_to)
+            return self._get_or_create_chat(users_to=users_to, partners_to=partners_to)
         channel._broadcast(partners.with_context(active_test=True).user_ids)
         return channel
 
