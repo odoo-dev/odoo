@@ -47,6 +47,27 @@ class ResConfigSettings(models.TransientModel):
             return super().action_open_peppol_form()
         return self.action_open_pdp_form()
 
+    def button_peppol_smp_registration(self):
+        self.ensure_one()
+        if self.account_peppol_edi_user.proxy_type != 'pdp':
+            return super().button_peppol_smp_registration()
+
+        result = super().button_peppol_smp_registration()
+        if self.account_peppol_proxy_state != 'smp_registration':
+            return result
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': self.env._("Receiver registration started."),
+                'type': 'success',
+                'message': self.env._(
+                    "Your receiver registration is pending. Its status will update in Settings once it is active."
+                ),
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }
+
     @api.depends('company_id.l10n_fr_pdp_pilot_phase')
     def _compute_l10n_fr_pdp_pilot_phase(self):
         for record in self:

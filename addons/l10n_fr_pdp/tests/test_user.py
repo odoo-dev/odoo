@@ -1,11 +1,13 @@
 from contextlib import contextmanager
 from requests import PreparedRequest, Response, Session
+from unittest.mock import patch
+from uuid import uuid4
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import tagged
 from odoo.tools import mute_logger
 
-from .common import ID_CLIENT, FAKE_UUID, TestL10nFrPdpCommon
+from .common import FAKE_UUID, TestL10nFrPdpCommon
 
 
 @tagged('-at_install', 'post_install', 'post_install_l10n')
@@ -17,11 +19,12 @@ class TestPdpUser(TestL10nFrPdpCommon):
         return {
             '/api/pdp/1/connect': {
                 'result': {
-                    'id_client': ID_CLIENT,
+                    'id_client':  str(uuid4()),
                     'refresh_token': FAKE_UUID,
                 }
             },
             '/api/pdp/1/register_receiver': {'result': {}},
+            '/api/pdp/1/register_sender_as_receiver': {'result': {}},
             '/api/pdp/1/update_user': {'result': {}},
             '/api/pdp/2/participant_status': {
                 'result': {
@@ -38,9 +41,9 @@ class TestPdpUser(TestL10nFrPdpCommon):
 
         url = r.path_url
         responses = cls._get_mock_responses()
-
         if url not in responses:
             return super()._request_handler(s, r, **kw)
+
         response.json = lambda: responses[url]
         return response
 
@@ -159,6 +162,38 @@ class TestPdpUser(TestL10nFrPdpCommon):
             self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
             self.assertEqual(self.env.company.account_peppol_proxy_state, 'receiver')
 
+    def _test_wizard_lookup(self, company, expected_available):
+        with patch.object(
+            self.env.registry["res.partner"],
+            '_pdp_annuaire_lookup_participant',
+            return_value={
+                'identifier': '123456789_ACHATS',
+                'platform_id': '5511',
+                'platform_name': 'Other Platform',
+                'receiver_on_odoo': False,
+            },
+        ):
+            wizard = self.env['pdp.registration'].create({
+                'company_id': company.id,
+                'contact_email': 'yourcompany@test.example.com',
+            })
+            self.assertEqual(wizard.pdp_sender_only_available, expected_available)
+        return wizard
+
+    def test_pdp_create_participant_sender_only(self):
+        company = self.setup_other_company(name='sender_only')['company']
+        company.pdp_identifier = '123456789_ACHATS'
+
+        wizard = self._test_wizard_lookup(company, expected_available=True)
+        wizard.button_register_pdp_sender()
+
+        self.assertEqual(company.account_peppol_proxy_state, 'sender')
+        self.assertTrue(
+            company.account_edi_proxy_client_ids.filtered(
+                lambda user: user.proxy_type == 'pdp',
+            )
+        )
+
     def test_pdp_create_reject_participant(self):
         # the account_peppol_proxy_state should change to rejected
         # if we reject the participant
@@ -242,3 +277,18 @@ class TestPdpUser(TestL10nFrPdpCommon):
             'edi_mode': 'test',
         }])
         self.assertTrue(other2_peppol_user)
+
+    def test_pdp_sender_only_requires_exact_external_identifier(self):
+        company = self.setup_other_company(name='sender_only_unavailable')['company']
+        company.pdp_identifier = '123456789_achats'
+
+        wizard = self._test_wizard_lookup(company, expected_available=False)
+
+        with self.assertRaisesRegex(UserError, "Sender-only registration is only available"):
+            wizard.button_register_pdp_sender()
+
+        self.assertFalse(
+            company.account_edi_proxy_client_ids.filtered(
+                lambda user: user.proxy_type == 'pdp',
+            )
+        )

@@ -150,7 +150,7 @@ class AccountEdiProxyClientUser(models.Model):
         return f'0225:{company.pdp_identifier}'
 
     @handle_demo
-    def _register_proxy_user(self, company, proxy_type, edi_mode):
+    def _register_proxy_user(self, company, proxy_type, edi_mode, sender_only=False):
         """ Override to avoid using the deprecated route on IAP """
         if proxy_type != 'pdp':
             return super()._register_proxy_user(company, proxy_type, edi_mode)
@@ -172,7 +172,8 @@ class AccountEdiProxyClientUser(models.Model):
                     'peppol_identifier': peppol_identifier,
                     'public_key': private_key_sudo._get_public_key_bytes(encoding='pem').decode(),
                     'auth_url_hash': company.pdp_authentication_uuid,
-                    'mobility_registration': True,
+                    'mobility_registration': not sender_only,  # no platform migration needed for sender-only registration
+                    'sender_only': sender_only,
                 })
             except AccountEdiProxyError as e:
                 raise UserError(e.message)
@@ -204,6 +205,29 @@ class AccountEdiProxyClientUser(models.Model):
 
         super()._peppol_register_receiver()
 
+        datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
+        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
+
+    def _peppol_register_sender_as_receiver(self):
+        self.ensure_one()
+        if self.proxy_type != 'pdp':
+            return super()._peppol_register_sender_as_receiver()
+
+        company = self.company_id
+        if company.account_peppol_proxy_state != 'sender':
+            state = dict(
+                company._fields['account_peppol_proxy_state']._description_selection(self.env)
+            )[company.account_peppol_proxy_state]
+            raise UserError(self.env._("Cannot register a user with a %s application", state))
+        params = {
+            'company_details': self._get_company_details(),
+            'supported_identifiers': list(company._peppol_supported_document_types()),
+        }
+        self._call_peppol_proxy(
+            endpoint=self._get_peppol_proxy_endpoint('1/register_sender_as_receiver'),
+            params=params,
+        )
+        company.account_peppol_proxy_state = 'smp_registration'
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
         self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
 
@@ -955,9 +979,9 @@ class AccountEdiProxyClientUser(models.Model):
     # -------------------------------------------------------------------------
 
     def _cron_pdp_get_regulatory_documents(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'receiver'), ('proxy_type', '=', 'pdp')])
+        edi_users = self.search([('company_id.account_peppol_proxy_state', 'in', ('sender', 'receiver')), ('proxy_type', '=', 'pdp')])
         edi_users._pdp_get_regulatory_documents()
 
     def _cron_pdp_send_lifecycles(self):
-        edi_users = self.search([('company_id.account_peppol_proxy_state', '=', 'receiver'), ('proxy_type', '=', 'pdp')])
+        edi_users = self.search([('company_id.account_peppol_proxy_state', 'in', ('sender', 'receiver')), ('proxy_type', '=', 'pdp')])
         edi_users._pdp_send_lifecycles()
