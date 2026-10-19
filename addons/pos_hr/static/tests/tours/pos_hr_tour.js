@@ -422,3 +422,22 @@ registry.category("web_tour.tours").add("test_switch_cashier_with_badge", {
             TicketScreen.nthRowContains(2, "Test Employee 3", false),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_trusted_config_cashiers_not_selectable", {
+    steps: () =>
+        [
+            Chrome.clickBtn("Unlock Register"),
+            PosHr.login("Pos Employee1", "2580"),
+            Chrome.clickOrders(),
+            TicketScreen.selectFilter("Paid"),
+            TicketScreen.nthRowContains(1, "Trusted Shop Cashier", false),
+            PosHr.clickLockButton(),
+            Chrome.clickBtn("Unlock Register"),
+            PosHr.clickLoginButton(),
+            SelectionPopup.has("Test Manager 1"),
+            {
+                content: "cashier of the trusted config is not selectable",
+                trigger: negate(`.selection-item:contains("Trusted Shop Cashier")`),
+            },
+        ].flat(),
+});

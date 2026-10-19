@@ -293,3 +293,52 @@ class TestUi(TestPosHrHttpCommon):
             "test_switch_cashier_with_badge",
             login="pos_user",
         )
+
+    def test_trusted_config_cashiers_not_selectable(self):
+        """
+        Cashiers of orders loaded from a trusted config must not be selectable
+        as cashier when they are not assigned to the current config.
+        """
+        trusted_config = self.env['pos.config'].create({
+            'name': 'Trusted Shop',
+            'module_pos_hr': True,
+            'payment_method_ids': [Command.set(self.bank_payment_method.ids)],
+        })
+        trusted_cashier = self.env['hr.employee'].create({
+            'name': 'Trusted Shop Cashier',
+            'company_id': self.env.company.id,
+            'pin': '9999',
+        })
+        trusted_config.basic_employee_ids = trusted_cashier
+        self.main_pos_config.trusted_config_ids = trusted_config
+
+        trusted_config.with_user(self.pos_admin).open_ui()
+        trusted_session = trusted_config.current_session_id
+        trusted_session.set_opening_control(0, None)
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': trusted_session.id,
+            'employee_id': trusted_cashier.id,
+            'lines': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'qty': 1,
+                    'price_subtotal': 100.0,
+                    'price_subtotal_incl': 100.0,
+                }),
+            ],
+            'amount_tax': 0.0,
+            'amount_total': 100.0,
+            'amount_paid': 0.0,
+            'amount_return': 0.0,
+        })
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        order_payment = self.env['pos.make.payment'].with_context(**payment_context).create({
+            'amount': 100,
+            'payment_method_id': self.bank_payment_method.id,
+        })
+        order_payment.with_context(**payment_context).check()
+
+        self.main_pos_config.with_user(self.pos_admin).open_ui()
+        self.main_pos_config.current_session_id.set_opening_control(0, None)
+        self.start_pos_tour("test_trusted_config_cashiers_not_selectable", login="pos_admin")

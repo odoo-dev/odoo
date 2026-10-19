@@ -73,8 +73,10 @@ export function useCashierSelector({ exclusive, onScan } = { onScan: () => {}, e
         };
 
         let employee = false;
+        // Employees without `_role` were not loaded for this config but only as
+        // relations of other records (e.g. orders of trusted configs)
         const allEmployees = pos.models["hr.employee"].filter(
-            (employee) => employee.id !== pos.getCashier()?.id
+            (employee) => employee._role && employee.id !== pos.getCashier()?.id
         );
         const pinMatchEmployees = allEmployees.filter(
             (employee) => !pin || Sha1.hash(pin) === employee._pin
