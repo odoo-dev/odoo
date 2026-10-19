@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LessonPointer">
+        <t t-if="this.visible">
+            <div class="o_learning_pointer_ring" t-att-style="this.ringStyle" t-key="this.recovery.hintCount()"/>
+            <div class="o_learning_pointer_bubble"
+                 t-att-style="this.bubbleStyle" t-out="this.runner.step().bubble"/>
+        </t>
+    </t>
+
+</templates>

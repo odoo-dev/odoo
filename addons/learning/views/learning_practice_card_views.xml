@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="learning_practice_card_view_list" model="ir.ui.view">
+        <field name="name">learning.practice.card.list</field>
+        <field name="model">learning.practice.card</field>
+        <field name="arch" type="xml">
+            <list string="Practice Cards">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="kind"/>
+                <field name="done"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="learning_practice_card_view_form" model="ir.ui.view">
+        <field name="name">learning.practice.card.form</field>
+        <field name="model">learning.practice.card</field>
+        <field name="arch" type="xml">
+            <form string="Practice Card">
+                <sheet>
+                    <widget name="web_ribbon" title="Practice" bg_color="o_learning_ribbon"/>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Buy copper pipes"/></h1>
+                    </div>
+                    <group>
+                        <field name="date"/>
+                        <field name="kind"/>
+                        <field name="done"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="learning_practice_card_view_search" model="ir.ui.view">
+        <field name="name">learning.practice.card.search</field>
+        <field name="model">learning.practice.card</field>
+        <field name="arch" type="xml">
+            <search string="Practice Cards">
+                <field name="name"/>
+                <filter string="Done" name="done" domain="[('done', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Kind" name="group_by_kind" context="{'group_by': 'kind'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="learning_practice_card_action" model="ir.actions.act_window">
+        <field name="name">Practice Cards</field>
+        <field name="res_model">learning.practice.card</field>
+        <field name="view_mode">list,form</field>
+        <field name="path">practice-cards</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first practice card</p>
+            <p>Practice cards are only for learning: try anything, nothing can break.</p>
+        </field>
+    </record>
+</odoo>

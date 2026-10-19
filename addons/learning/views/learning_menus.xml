@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_learning_root" name="Learning" sequence="1"
+              web_icon="learning,static/description/icon.png"
+              groups="learning.group_learning_mode"/>
+    <menuitem id="menu_learning_map" name="Learning Map" parent="menu_learning_root"
+              action="learning_map_action" sequence="10"/>
+    <menuitem id="menu_learning_practice_card" name="Practice Cards" parent="menu_learning_root"
+              action="learning_practice_card_action" sequence="20"/>
+</odoo>

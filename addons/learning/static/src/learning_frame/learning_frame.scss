@@ -1,0 +1,7 @@
+.o_learning_frame {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    border: 3px solid var(--learning-accent);
+    pointer-events: none;
+}

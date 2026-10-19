@@ -1,0 +1,47 @@
+.o_learning_show_me_shield {
+    position: fixed;
+    inset: 0;
+    z-index: 1097;
+    cursor: wait;
+}
+
+.o_learning_show_me_cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1098;
+    pointer-events: none;
+    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+
+    svg {
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+        transition: transform 0.15s;
+    }
+
+    .o_learning_show_me_ripple {
+        position: absolute;
+        top: -14px;
+        left: -14px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(232, 160, 32, 0.6);
+        transform: scale(0);
+        transition: transform 0.25s;
+    }
+
+    &.o_learning_show_me_touch .o_learning_show_me_ripple {
+        transform: scale(1);
+        border: 3px solid var(--learning-accent-strong);
+    }
+
+    &.o_learning_show_me_pressing {
+        svg {
+            transform: scale(0.85);
+        }
+
+        .o_learning_show_me_ripple {
+            transform: scale(1.6);
+        }
+    }
+}

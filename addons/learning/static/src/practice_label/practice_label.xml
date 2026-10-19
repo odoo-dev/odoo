@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.PracticeLabel">
+        <span t-if="this.isPractice" class="o_learning_practice_label"
+              title="This record only exists for learning. It is removed when you finish learning mode.">
+            Practice
+        </span>
+    </t>
+
+</templates>

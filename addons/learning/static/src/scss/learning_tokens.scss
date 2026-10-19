@@ -1,0 +1,63 @@
+// Visual identity of everything that belongs to the tutorial: one warm amber
+// accent that Odoo itself never uses, so a learner can always tell the
+// tutorial apart from the real screens.
+:root {
+    --learning-accent: #e8a020;
+    --learning-accent-strong: #a8650a;
+    --learning-surface: #fff7e6;
+    --learning-ink: #3d2a05;
+    --learning-bar-height: 76px;
+    --learning-radius: 14px;
+    --learning-font-size: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-color-scheme="light"]) {
+        --learning-surface: #3a2c12;
+        --learning-ink: #fff3db;
+    }
+}
+
+body.o_learning_mode .o_web_client {
+    padding-bottom: var(--learning-bar-height);
+}
+
+// Shared look of the tutorial's own buttons: never mistaken for Odoo buttons.
+.o_learning_button {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 2px solid var(--learning-accent-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--learning-ink);
+    font-size: var(--learning-font-size);
+    font-weight: 600;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--learning-accent);
+        color: #000;
+    }
+
+    &.o_learning_button_main {
+        background: var(--learning-accent);
+        color: #000;
+    }
+}
+
+// Focus mode: what the lesson does not need yet is dimmed, never hidden.
+.o_learning_dimmed {
+    opacity: 0.4;
+    filter: grayscale(1);
+    transition: opacity 0.2s;
+
+    &:hover,
+    &:focus-within {
+        opacity: 0.75;
+    }
+}
+
+.ribbon .o_learning_ribbon {
+    background-color: var(--learning-accent);
+    color: #000;
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LessonIntro">
+        <KeyMomentCard t-if="this.runner.state.status === 'intro'" title="this.runner.lesson().name">
+            <p t-out="this.runner.lesson().intro"/>
+            <p>You will do it yourself, on the real screens. You can ask for help at any moment.</p>
+            <t t-set-slot="actions">
+                <button class="o_learning_button o_learning_button_main" t-on-click="this.start">Start</button>
+                <button class="o_learning_button" t-on-click="this.startWithDemo">Show me first</button>
+                <button class="o_learning_button" t-on-click="() => this.runner.close()">Not now</button>
+            </t>
+        </KeyMomentCard>
+    </t>
+
+</templates>

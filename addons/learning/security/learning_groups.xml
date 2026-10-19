@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Given to users while learning mode is on: shows the "Learning" menu. -->
+    <record id="group_learning_mode" model="res.groups">
+        <field name="name">Learning Mode</field>
+    </record>
+</odoo>

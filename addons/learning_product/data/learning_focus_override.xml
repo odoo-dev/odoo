@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Grouped by in the search view, but meaningless for a beginner. -->
+    <record id="focus_override_product_properties" model="learning.focus.override">
+        <field name="model">product.template</field>
+        <field name="field_name">product_properties</field>
+        <field name="focus">out</field>
+    </record>
+</odoo>

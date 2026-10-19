@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LearningFrame">
+        <div t-if="this.learning.active()" class="o_learning_frame" aria-hidden="true"/>
+    </t>
+
+</templates>

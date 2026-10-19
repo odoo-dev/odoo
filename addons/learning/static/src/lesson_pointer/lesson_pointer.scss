@@ -1,0 +1,28 @@
+@keyframes o_learning_pulse {
+    0% { box-shadow: 0 0 0 0 rgba(232, 160, 32, 0.7); }
+    70% { box-shadow: 0 0 0 14px rgba(232, 160, 32, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(232, 160, 32, 0); }
+}
+
+.o_learning_pointer_ring {
+    position: fixed;
+    z-index: 1095;
+    border: 3px solid var(--learning-accent);
+    border-radius: 10px;
+    pointer-events: none;
+    animation: o_learning_pulse 1.6s ease-out infinite;
+}
+
+.o_learning_pointer_bubble {
+    position: fixed;
+    z-index: 1096;
+    max-width: 280px;
+    padding: 8px 14px;
+    border-radius: var(--learning-radius);
+    background: var(--learning-accent);
+    color: #000;
+    font-size: var(--learning-font-size);
+    font-weight: 700;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}

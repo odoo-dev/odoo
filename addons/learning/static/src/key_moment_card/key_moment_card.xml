@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.KeyMomentCard">
+        <div class="o_learning_key_moment">
+            <div class="o_learning_key_moment_card" role="dialog" aria-modal="true" t-att-aria-label="this.props.title">
+                <div class="o_learning_key_moment_icon" aria-hidden="true" t-out="this.props.icon"/>
+                <h2 class="o_learning_key_moment_title" t-out="this.props.title"/>
+                <div class="o_learning_key_moment_body">
+                    <t t-call-slot="default"/>
+                </div>
+                <div class="o_learning_key_moment_actions">
+                    <t t-call-slot="actions"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

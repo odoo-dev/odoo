@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LearningBar">
+        <div t-if="this.learning.active()" class="o_learning_bar" role="region" aria-label="Learning mode">
+            <span class="o_learning_bar_icon" aria-hidden="true">💡</span>
+            <t t-if="this.ui.isSmall()">
+                <p class="o_learning_bar_text">Turn your tablet sideways or use a larger screen to continue learning.</p>
+            </t>
+            <t t-elif="this.showHelp">
+                <RecoveryPanel/>
+            </t>
+            <t t-elif="this.running">
+                <div class="o_learning_bar_lesson">
+                    <div class="o_learning_bar_title">
+                        <strong t-out="this.runner.lesson().name"/>
+                        <span class="o_learning_bar_dots" aria-hidden="true">
+                            <t t-foreach="this.dots" t-as="dot" t-key="dot_index">
+                                <span t-attf-class="o_learning_bar_dot o_learning_bar_dot_{{ dot }}"/>
+                            </t>
+                        </span>
+                    </div>
+                    <p class="o_learning_bar_text" aria-live="polite" t-out="this.runner.step().content"/>
+                </div>
+                <div class="o_learning_bar_actions">
+                    <button t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-att-disabled="this.runner.state.demoRunning" t-on-click="() => this.recovery.showMe()">Show me</button>
+                    <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.openHelp()">I'm lost</button>
+                    <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.runner.close()">Pause</button>
+                </div>
+            </t>
+            <t t-else="">
+                <p class="o_learning_bar_text o_learning_bar_lesson">Learning mode is on. Pick a lesson on the learning map, or keep working: fields you don't need yet are dimmed.</p>
+                <div class="o_learning_bar_actions">
+                    <button t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-on-click="this.openMap">Learning map</button>
+                    <button t-if="this.focus.openForms() > 0" t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.focus.showAll.set(!this.focus.showAll())">
+                        <t t-if="this.focus.showAll()">Dim what I don't need</t>
+                        <t t-else="">Show all fields</t>
+                    </button>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

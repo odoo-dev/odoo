@@ -1,0 +1,17 @@
+.o_learning_recovery {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.o_learning_recovery_message {
+    margin: 0;
+    font-weight: 600;
+}
+
+.o_learning_recovery_actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}

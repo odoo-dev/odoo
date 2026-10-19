@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.ShowMeCursor">
+        <t t-if="this.cursor.visible">
+            <div class="o_learning_show_me_shield"/>
+            <div class="o_learning_show_me_cursor" t-att-style="this.style"
+                 t-att-class="{ o_learning_show_me_pressing: this.cursor.pressing, o_learning_show_me_touch: this.cursor.touch }">
+                <svg t-if="!this.cursor.touch" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 2 L4 20 L9 15 L12.5 22 L15.5 20.5 L12 13.5 L19 13.5 Z" fill="#e8a020" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                <span class="o_learning_show_me_ripple"/>
+            </div>
+        </t>
+    </t>
+
+</templates>

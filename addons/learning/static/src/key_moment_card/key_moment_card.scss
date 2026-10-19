@@ -1,0 +1,39 @@
+.o_learning_key_moment {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.o_learning_key_moment_card {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px 32px;
+    border: 3px solid var(--learning-accent);
+    border-radius: var(--learning-radius);
+    background: var(--learning-surface);
+    color: var(--learning-ink);
+    font-size: var(--learning-font-size);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.o_learning_key_moment_icon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.o_learning_key_moment_title {
+    margin: 12px 0;
+    color: var(--learning-ink);
+}
+
+.o_learning_key_moment_actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}

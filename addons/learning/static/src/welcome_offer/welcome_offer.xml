@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.WelcomeOffer">
+        <KeyMomentCard t-if="this.learning.offerPending()" title.translate="New to Odoo?">
+            <p>Learning mode shows you, step by step, how to do the everyday things: create, copy, organise your products, make quotes.</p>
+            <p>You practise on your real screens with practice data, so nothing can break. You can turn it off at any moment from your user menu.</p>
+            <t t-set-slot="actions">
+                <button class="o_learning_button o_learning_button_main" t-on-click="() => this.learning.setActive(true)">Start learning mode</button>
+                <button class="o_learning_button" t-on-click="() => this.learning.dismissOffer()">No thanks</button>
+            </t>
+        </KeyMomentCard>
+    </t>
+
+</templates>

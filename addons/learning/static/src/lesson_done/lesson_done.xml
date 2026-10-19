@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LessonDone">
+        <KeyMomentCard t-if="this.runner.state.status === 'done'" title.translate="Well done!" icon="'🎉'">
+            <p>You finished “<t t-out="this.runner.lesson().name"/>”. You can replay it any time from the learning map.</p>
+            <p t-if="this.nextLesson">Next: <strong t-out="this.nextLesson.name"/></p>
+            <t t-set-slot="actions">
+                <button t-if="this.nextLesson" class="o_learning_button o_learning_button_main" t-on-click="this.startNext">Next lesson</button>
+                <button class="o_learning_button" t-on-click="this.openMap">Learning map</button>
+                <button class="o_learning_button" t-on-click="() => this.runner.close()">Close</button>
+            </t>
+        </KeyMomentCard>
+    </t>
+
+</templates>

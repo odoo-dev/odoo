@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.LearningMap">
+        <div class="o_action o_learning_map">
+            <header class="o_learning_map_header">
+                <h1>Your learning map</h1>
+                <p>Each lesson takes a few minutes. You do it yourself, on the real screens, with practice data.</p>
+            </header>
+            <section t-foreach="this.levels" t-as="level" t-key="level.key" class="o_learning_map_level">
+                <h2><span class="o_learning_map_level_key" t-out="level.key"/> <t t-out="level.name"/></h2>
+                <ol class="o_learning_map_lessons">
+                    <li t-foreach="level.lessons" t-as="lesson" t-key="lesson.key"
+                        class="o_learning_map_lesson"
+                        t-att-class="{ o_learning_map_lesson_done: this.isDone(lesson), o_learning_map_lesson_next: lesson.key === this.nextLessonKey }">
+                        <span class="o_learning_map_lesson_state" aria-hidden="true">
+                            <t t-if="this.isDone(lesson)">✓</t>
+                            <t t-elif="lesson.key === this.nextLessonKey">→</t>
+                        </span>
+                        <div class="o_learning_map_lesson_text">
+                            <strong t-out="lesson.name"/>
+                            <p t-out="lesson.intro"/>
+                        </div>
+                        <button class="o_learning_button" t-att-class="{ o_learning_button_main: lesson.key === this.nextLessonKey }"
+                                t-on-click="() => this.runner.open(lesson.key)">
+                            <t t-if="this.isDone(lesson)">Replay</t>
+                            <t t-else="">Start</t>
+                        </button>
+                    </li>
+                </ol>
+            </section>
+            <footer class="o_learning_map_footer">
+                <button class="o_learning_button" t-on-click="() => this.learning.cleanupPractice()">Remove my practice data</button>
+                <button class="o_learning_button" t-on-click="() => this.learning.setActive(false)">Turn off learning mode</button>
+            </footer>
+        </div>
+    </t>
+
+</templates>

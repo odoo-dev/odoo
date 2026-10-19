@@ -1,0 +1,70 @@
+.o_learning_map {
+    overflow: auto;
+    padding: 32px 16px;
+    font-size: var(--learning-font-size);
+
+    > * {
+        max-width: 860px;
+        margin-inline: auto;
+    }
+}
+
+.o_learning_map_level {
+    margin-top: 32px;
+}
+
+.o_learning_map_level_key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--learning-accent);
+    color: #000;
+}
+
+.o_learning_map_lessons {
+    padding: 0;
+    list-style: none;
+}
+
+.o_learning_map_lesson {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 16px;
+    border: 2px solid var(--learning-accent);
+    border-radius: var(--learning-radius);
+
+    p {
+        margin: 4px 0 0;
+    }
+
+    &.o_learning_map_lesson_done {
+        border-style: dashed;
+    }
+
+    &.o_learning_map_lesson_next {
+        background: var(--learning-surface);
+        color: var(--learning-ink);
+    }
+}
+
+.o_learning_map_lesson_state {
+    width: 24px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.o_learning_map_lesson_text {
+    flex: 1 1 auto;
+}
+
+.o_learning_map_footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 40px;
+}

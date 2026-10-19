@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="learning.RecoveryPanel">
+        <div class="o_learning_recovery" role="group" aria-label="Help">
+            <p class="o_learning_recovery_message" aria-live="assertive" t-out="this.message"/>
+            <div class="o_learning_recovery_actions">
+                <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.hint()">Where do I click?</button>
+                <button t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-on-click="() => this.recovery.showMe()">Show me</button>
+                <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.takeMeBack()">Take me back</button>
+                <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.restart()">Start this lesson again</button>
+                <button t-if="this.recovery.helpOpen()" t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.closeHelp()">Close</button>
+            </div>
+        </div>
+    </t>
+
+</templates>
