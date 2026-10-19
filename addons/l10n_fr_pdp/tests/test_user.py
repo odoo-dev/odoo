@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from requests import PreparedRequest, Response, Session
+from unittest import mock
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import tagged
@@ -158,6 +159,65 @@ class TestPdpUser(TestL10nFrPdpCommon):
         with self._set_context({'participant_state': 'receiver'}):
             self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
             self.assertEqual(self.env.company.account_peppol_proxy_state, 'receiver')
+
+    def test_pdp_create_participant_sender_only(self):
+        company = self.setup_other_company(name='sender_only')['company']
+        company.pdp_identifier = '123456789'
+        participant_info = {
+            'identifier': '123456789',
+            'platform_id': '5511',
+            'platform_name': 'Other Platform',
+            'receiver_on_odoo': False,
+        }
+        with (
+            mock.patch(
+                'odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._pdp_annuaire_lookup_participant',
+                return_value=participant_info,
+            ),
+            mock.patch(
+                'odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user.AccountEdiProxyClientUser._make_request',
+                return_value={'id_client': 'sender-only-client', 'refresh_token': FAKE_UUID[0]},
+            ) as proxy_request,
+        ):
+            wizard = self.env['pdp.registration'].create({
+                'company_id': company.id,
+                'contact_email': 'yourcompany@test.example.com',
+            })
+            self.assertTrue(wizard.pdp_sender_only_available)
+            wizard.button_register_pdp_sender()
+
+        self.assertEqual(company.account_peppol_proxy_state, 'sender')
+        self.assertTrue(company.account_edi_proxy_client_ids.filtered(lambda user: user.proxy_type == 'pdp'))
+        connect_params = proxy_request.call_args.kwargs['params']
+        self.assertTrue(connect_params['sender_only'])
+        self.assertFalse(connect_params['mobility_registration'])
+
+    def test_pdp_sender_only_requires_exact_external_identifier(self):
+        company = self.setup_other_company(name='sender_only_unavailable')['company']
+        company.pdp_identifier = '123456789'
+        with (
+            mock.patch(
+                'odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._pdp_annuaire_lookup_participant',
+                return_value={
+                    'identifier': '123456789_suffix',
+                    'platform_id': '5511',
+                    'platform_name': 'Other Platform',
+                    'receiver_on_odoo': False,
+                },
+            ),
+            mock.patch(
+                'odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user.AccountEdiProxyClientUser._make_request',
+            ) as proxy_request,
+        ):
+            wizard = self.env['pdp.registration'].create({
+                'company_id': company.id,
+                'contact_email': 'yourcompany@test.example.com',
+            })
+            self.assertFalse(wizard.pdp_sender_only_available)
+            with self.assertRaisesRegex(UserError, "Sender-only registration is only available"):
+                wizard.button_register_pdp_sender()
+
+        proxy_request.assert_not_called()
 
     def test_pdp_create_reject_participant(self):
         # the account_peppol_proxy_state should change to rejected
