@@ -30,6 +30,48 @@ class TestMailMessage(common.MailCommon, HttpCase):
         self.make_jsonrpc_request("/mail/store", {"fetch_params": ["remove_all_bookmarks"]})
         self.assertNotIn(self.env.user.partner_id, message.bookmarked_partner_ids)
 
+    def test_inbox_fields_scoped_to_inbox_fetch(self):
+        chatter_record = self.env["res.partner"].create({"name": "Chatter Partner"})
+        chatter_record.message_post(
+            body="chatter message", message_type="comment", subtype_xmlid="mail.mt_comment"
+        )
+        inbox_record = self.env["res.partner"].create({"name": "Inbox Partner"})
+        inbox_record.message_post(
+            body="inbox notification",
+            message_type="comment",
+            partner_ids=[self.partner_employee.id],
+            subtype_xmlid="mail.mt_comment",
+        )
+        self.authenticate(self.user_employee.login, self.user_employee.login)
+        res = self.make_jsonrpc_request(
+            "/mail/store",
+            {
+                "fetch_params": [
+                    [
+                        "/mail/thread/messages",
+                        {"thread_model": "res.partner", "thread_id": chatter_record.id},
+                    ],
+                    [
+                        "/mail/messaging_menu/mail.message/load_more",
+                        {"tab_id": "notification", "limit": 20},
+                    ],
+                ],
+            },
+        )
+        threads = res.get("mail.thread", [])
+        chatter = next((t for t in threads if t["id"] == chatter_record.id), {})
+        inbox = next((t for t in threads if t["id"] == inbox_record.id), {})
+        self.assertIn("display_name", chatter, "chatter fetch should have added its record")
+        self.assertIn("display_name", inbox, "inbox fetch should have added its record")
+        for field in (
+            "message_needaction_counter",
+            "message_needaction_counter_bus_id",
+            "module_icon",
+            "selfFollower",
+        ):
+            self.assertIn(field, inbox, f"inbox record must get {field}")
+            self.assertNotIn(field, chatter, f"{field} must not reach the chatter fetch")
+
     def test_mail_message_read_inexisting(self):
         user = new_test_user(self.env, login="Bob", email="bob@test.com")
         inexisting_message = self.env['mail.message'].with_user(user).browse(-434264)

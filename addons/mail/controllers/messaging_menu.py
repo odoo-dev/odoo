@@ -99,9 +99,8 @@ class MessagingMenuController(WebclientController):
             store,
             domain=domain,
             fetch_params={"limit": limit, "search_term": search_term},
+            fields_params={"inbox_fields": True},
         )
-        if messages:
-            request.update_context(add_inbox_fields=True)
         store.resolve_data_request(
             lambda res: res.attr("is_fully_loaded", len(messages) < limit),
         )
