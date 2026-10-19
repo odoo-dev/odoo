@@ -241,7 +241,7 @@ class TestOrmCacheSignaling(BaseCase):
             transaction.reset()
         self.assertEqual(
             logs.output,
-            ["INFO:odoo.registry:Invalidating caches after database signaling: ['assets', 'templates.cached_values']"],
+            ["INFO:odoo.registry:Invalidating caches after database signaling: ['assets', 'templates.attrs', 'templates.cached_values']"],
         )
 
     def test_signaling_01_multiple(self):
@@ -279,7 +279,7 @@ class TestOrmCacheSignaling(BaseCase):
             transaction.reset()
         self.assertEqual(
             logs.output,
-            ["INFO:odoo.registry:Invalidating caches after database signaling: ['assets', 'default', 'templates.cached_values']"],
+            ["INFO:odoo.registry:Invalidating caches after database signaling: ['assets', 'default', 'templates.attrs', 'templates.cached_values']"],
         )
 
 
