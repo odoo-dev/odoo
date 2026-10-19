@@ -21,7 +21,17 @@ export class Store extends Record {
 
     /** @param {() => any} fn */
     MAKE_UPDATE(fn) {
-        this._.raiseUpdateDepth();
+        // A write nested in the drain does not raise the depth, so the flag of
+        // the depth does not flip at each of them. Only immediate onChange
+        // wait for it, and computes already run unheld between those writes.
+        const isDrainWrite = this._.isDraining;
+        if (isDrainWrite) {
+            if (this._.drainWrites++ === 0) {
+                this._.isDrainWriteInProgress.set(true);
+            }
+        } else {
+            this._.raiseUpdateDepth();
+        }
         this._.UPDATE++;
         let res;
         try {
@@ -30,10 +40,15 @@ export class Store extends Record {
             this.handleError(err);
         }
         this._.UPDATE--;
-        this._.lowerUpdateDepth();
+        if (!isDrainWrite) {
+            this._.lowerUpdateDepth();
+        } else if (--this._.drainWrites === 0) {
+            this._.isDrainWriteInProgress.set(false);
+        }
         if (this._.UPDATE === 0) {
             // pretend an increased update cycle so that nothing in queue creates many small update cycles
             this._.UPDATE++;
+            this._.isDraining = true;
             while (
                 this._.FC_QUEUE.size > 0 ||
                 this._.FA_QUEUE.size > 0 ||
@@ -122,6 +137,7 @@ export class Store extends Record {
                     }
                 }
             }
+            this._.isDraining = false;
             this._.UPDATE--;
             if (this._.ERRORS.length) {
                 if (this.warnErrors) {

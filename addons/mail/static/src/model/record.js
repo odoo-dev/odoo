@@ -465,13 +465,17 @@ export class Record {
                     return;
                 }
                 const effectFn = immediate ? immediateEffect : effect;
-                const { isUpdateInProgress } = record._rawStore._;
+                const { isDrainWriteInProgress, isUpdateInProgress } = record._rawStore._;
                 const disposeFn = untrack(() =>
                     effectFn(function runOnChange() {
                         const values = deps() ?? [];
-                        if (immediate && untrack(isUpdateInProgress)) {
+                        if (
+                            immediate &&
+                            (untrack(isUpdateInProgress) || untrack(isDrainWriteInProgress))
+                        ) {
                             // Wait for the applied write, subscribed only meanwhile.
                             void isUpdateInProgress();
+                            void isDrainWriteInProgress();
                             firstValues ??= values;
                             return;
                         }

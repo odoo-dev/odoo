@@ -46,6 +46,15 @@ export class StoreInternal extends RecordInternal {
      * held field only recomputes when this flips, not on every nested raise.
      */
     isUpdateInProgress = computed(() => this.updateDepth() > 0);
+    /** Whether the queues are being drained. See {@link Store#MAKE_UPDATE}. */
+    isDraining = false;
+    /** Number of writes running nested in the drain. */
+    drainWrites = 0;
+    /**
+     * Whether a write nested in the drain is being applied. Unlike the depth,
+     * only the immediate onChange blocked by such a write watch it.
+     */
+    isDrainWriteInProgress = signal(false);
     /**
      * Current version context used in the current store insert operation.
      *
