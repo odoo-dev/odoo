@@ -437,6 +437,31 @@ class TestQwebProcessAtt(TransactionCase):
             self.website.cdn_activated = False
             self._test_att(request.env, '/a', {'href': '/a'})
 
+    def test_process_att_direct_output(self):
+        """ Only the dynamic nodes whose attributes may be modified by the
+        post-processing go through it. """
+        view = self.env['ir.ui.view'].create({'name': 'test', 'type': 'qweb', 'arch': """<t t-name="test">
+            <div t-att-class="'a'" t-att-data-src="'/a'"/>
+            <span t-attf-style="color: {{ 'red' }}"/>
+            <form t-att-action="'/a'"/>
+            <img t-att-alt="'a'"/>
+            <div t-attf-style="background-image: url({{ '/a' }})"/>
+            <div t-attf-class="{{ 'x' }} s_map"/>
+            <link t-att-data-href="'/a'"/>
+        </t>"""})
+        IrQweb = self.registry['ir.qweb']
+        with patch.object(IrQweb, '_post_processing_att', autospec=True, side_effect=IrQweb._post_processing_att) as post_processing, \
+                MockRequest(self.env, website=self.website) as request:
+            html = str(request.env['ir.qweb']._render(view.id))
+        self.assertEqual(
+            [call.args[1] for call in post_processing.call_args_list], ['form', 'img', 'div', 'div', 'link'],
+            "URLs, images, background images and iframe containers are post-processed",
+        )
+        self.assertIn('<div class="a" data-src="/a"></div>', html)
+        self.assertIn('<form action="http://test.cdn/a"></form>', html)
+        self.assertIn('<img alt="a" loading="lazy"/>', html)
+        self.assertIn('url(http://test.cdn/a)', html)
+
 
 @tagged('-at_install', 'post_install')
 class TestQwebDataSnippet(TransactionCase):
