@@ -42,6 +42,7 @@ class ResourceCalendarLeaves(models.Model):
                     }
                 }
         """
+        user_tz = timezone(self.env.user.tz or self._context.get('tz') or self.company_id.resource_calendar_id.tz or 'UTC')
         resource_calendars = resource_calendars or self._get_resource_calendars()
         # to easily find the calendar with its id.
         calendars_dict = {calendar.id: calendar for calendar in resource_calendars}
@@ -56,8 +57,8 @@ class ResourceCalendarLeaves(models.Model):
         cal_attendance_intervals_dict = {}
         for calendar, leaves, resources, date_from_min, date_to_max in leaves_read_group:
             calendar_data = {
-                'date_from': utc.localize(date_from_min),
-                'date_to': utc.localize(date_to_max),
+                'date_from': utc.localize(date_from_min).astimezone(user_tz),
+                'date_to': utc.localize(date_to_max).astimezone(user_tz),
                 'resources': resources,
                 'leaves': leaves,
             }
@@ -75,8 +76,8 @@ class ResourceCalendarLeaves(models.Model):
                 calendar_data = cal_attendance_intervals_dict.get(calendar_id)
                 if calendar_data is None:
                     calendar_data = {
-                        'date_from': utc.localize(date_from_min),
-                        'date_to': utc.localize(date_to_max),
+                        'date_from': utc.localize(date_from_min).astimezone(user_tz),
+                        'date_to': utc.localize(date_to_max).astimezone(user_tz),
                         'resources': resources,
                         'leaves': leaves,
                     }
@@ -100,7 +101,7 @@ class ResourceCalendarLeaves(models.Model):
                 cal_attendance_intervals_params_entry['date_from'],
                 cal_attendance_intervals_params_entry['date_to'],
                 cal_attendance_intervals_params_entry['resources'],
-                tz=utc
+                tz=user_tz
             )
             for leave in cal_attendance_intervals_params_entry['leaves']:
                 leave_date_from = utc.localize(leave.date_from)
