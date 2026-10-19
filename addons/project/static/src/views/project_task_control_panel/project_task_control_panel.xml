@@ -2,6 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="project.ProjectTaskControlPanel" t-inherit="web.ControlPanel">
+        <xpath expr="//EmbeddedActionsPanel[not(@id)]" position="attributes">
+            <attribute name="autoOpenDropdownThreshold">2</attribute>
+        </xpath>
         <xpath expr="//button[@name='embedded_actions']" position="replace">
             <t t-if="this.showTaskOptions and (!this.uiService.isSmall or !this.embeddedPanelState.embeddedInfos.embeddedActions?.length)">
                 <Dropdown>
@@ -14,7 +17,7 @@
                         </DropdownItem>
                         <DropdownItem t-if="this.embeddedPanelState.embeddedInfos.embeddedActions?.length and !this.uiService.isSmall"
                             class="this.embeddedPanelState.embeddedInfos.showEmbedded ? 'selected' : ''"
-                            onSelected="() => this.embeddedPanelState.onClickShowEmbedded()"
+                            onSelected="() => this.embeddedPanelState.onClickShowEmbedded(this.defaultVisibleEmbeddedActionIds)"
                         >
                             Top Menu
                         </DropdownItem>

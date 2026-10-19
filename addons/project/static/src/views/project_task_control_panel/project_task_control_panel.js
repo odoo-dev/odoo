@@ -29,6 +29,15 @@ export class ProjectTaskControlPanel extends ControlPanel {
         return _t("Show sub-tasks");
     }
 
+    get defaultVisibleEmbeddedActionIds() {
+        return this.embeddedPanelState.embeddedInfos.embeddedActions
+            .filter(
+                (action) =>
+                    action.id === false || action.python_method === "action_open_project_form"
+            )
+            .map((action) => action.id);
+    }
+
     onClickShowSubtasks(ev) {
         this.embeddedPanelState.showSubtasks = !this.embeddedPanelState.showSubtasks;
         browser.localStorage.setItem(this.showSubtasksKey, this.embeddedPanelState.showSubtasks);

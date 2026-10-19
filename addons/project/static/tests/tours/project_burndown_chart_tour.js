@@ -1,20 +1,7 @@
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add('burndown_chart_tour', {
-    steps: () => [stepUtils.showAppsMenuItem(), {
-    trigger: '.o_app[data-menu-xmlid="project.menu_main_pm"]',
-    run: "click",
-}, {
-    content: 'Open "Burndown Chart Test" project menu',
-            trigger: ".o_kanban_record:contains(Burndown Chart Test)",
-    run: `hover && click .o_kanban_record:contains(Burndown Chart Test) .o_dropdown_kanban .dropdown-toggle`,
-}, {
-    content: `Open "Burndown Chart Test" project's "Burndown Chart" view`,
-    trigger: '.o_kanban_manage_reporting div[role="menuitem"] a:contains("Burndown Chart")',
-    run: "click",
-},
-{
+    steps: () => [{
     trigger: ".o_graph_renderer",
 },
 {

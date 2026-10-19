@@ -125,7 +125,9 @@ export class EmbeddedActionsState {
         }
     }
 
-    async onClickShowEmbedded() {
+    async onClickShowEmbedded(
+        defaultVisibleActionIds = [this.embeddedInfos.currentEmbeddedAction?.id || false]
+    ) {
         if (!this.embeddedInfos.showEmbedded && !this.configHandler.hasEmbeddedActionsConfig()) {
             const embeddedSettings = await this.configHandler.fetchEmbeddedActionsConfig();
             if (this.configHandler.embeddedActionsKey in embeddedSettings) {
@@ -142,18 +144,11 @@ export class EmbeddedActionsState {
             } else {
                 const config = {
                     res_model: this.embeddedInfos.currentEmbeddedAction.parent_res_model,
-                    embedded_actions_visibility: [],
+                    embedded_actions_visibility: defaultVisibleActionIds,
                     embedded_visibility: true,
                     embedded_actions_order: [],
                 };
-                if (this.embeddedInfos.embeddedActions?.length > 0) {
-                    const embeddedActionKey = this.embeddedInfos.currentEmbeddedAction?.id || false;
-                    if (!this.embeddedInfos.visibleEmbeddedActions.includes(embeddedActionKey)) {
-                        this.embeddedInfos.visibleEmbeddedActions.push(embeddedActionKey);
-                        config.embedded_actions_visibility =
-                            this.embeddedInfos.visibleEmbeddedActions;
-                    }
-                }
+                this.embeddedInfos.visibleEmbeddedActions = defaultVisibleActionIds;
                 this.configHandler.setEmbeddedActionsConfig(config);
             }
         } else {
@@ -392,7 +387,10 @@ export class EmbeddedActionsPanel extends Component {
         AccordionItem,
         CheckBox,
     };
-    props = useProps({ state: t.object() });
+    props = useProps({
+        state: t.object(),
+        autoOpenDropdownThreshold: t.number().optional(1),
+    });
 
     root = signal.ref();
     newActionNameRef = signal.ref();
@@ -420,7 +418,9 @@ export class EmbeddedActionsPanel extends Component {
             const timer = setTimeout(() => {
                 if (
                     embeddedInfos.showEmbedded &&
-                    embeddedInfos.visibleEmbeddedActions.length === 1
+                    embeddedInfos.visibleEmbeddedActions.length > 0 &&
+                    embeddedInfos.visibleEmbeddedActions.length <=
+                        this.props.autoOpenDropdownThreshold
                 ) {
                     this.root().querySelector(".btn[name='openEmbeddedActions']")?.click();
                 }

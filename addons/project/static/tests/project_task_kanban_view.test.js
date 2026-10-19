@@ -1,13 +1,19 @@
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import { animationFrame, click, edit, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, click, edit, queryAllTexts, waitFor } from "@odoo/hoot-dom";
 import {
     contains,
+    defineActions,
+    getService,
+    mountWithCleanup,
     fields,
     models,
     mountView,
     onRpc,
     toggleKanbanColumnActions,
 } from "@web/../tests/web_test_helpers";
+
+import { user } from "@web/core/user";
+import { WebClient } from "@web/webclient/webclient";
 
 import { defineProjectModels, projectModels } from "./project_models";
 
@@ -202,4 +208,45 @@ test("delete existing stage", async () => {
     await click("button[name=action_unlink]");
     await animationFrame();
     expect(".o_column_title").toHaveCount(0, { mesage: "The stage should have been deleted." });
+});
+
+test("top menu initially displays Tasks and Overview and preserves the user's selection", async () => {
+    defineActions([
+        {
+            id: 1,
+            name: "Tasks",
+            res_model: "project.task",
+            views: [[false, "kanban"]],
+        },
+        {
+            id: 2,
+            name: "Overview",
+            parent_res_model: "project.project",
+            type: "ir.embedded.actions",
+            parent_action_id: 1,
+            python_method: "action_open_project_form",
+        },
+    ]);
+    user.updateUserSettings("embedded_actions_config_ids", {});
+    onRpc("res.users.settings", "get_embedded_actions_settings", () => ({}));
+    onRpc("res.users.settings", "set_embedded_actions_setting", () => true);
+    await mountWithCleanup(WebClient);
+    await getService("action").doActionButton({
+        name: 1,
+        type: "action",
+        resId: 1,
+        resModel: "project.project",
+    });
+    await contains("button[title='Show sub-tasks & top menu']").click();
+    await contains(".o-dropdown-item:contains(Top Menu)").click();
+    expect(queryAllTexts(".o_embedded_actions > button > span")).toEqual(["Tasks", "Overview"]);
+    await contains(".o_embedded_actions_dropdown_menu .o-dropdown-item:contains(Overview)").click();
+    expect(queryAllTexts(".o_embedded_actions > button > span")).toEqual(["Tasks"]);
+
+    await contains("button[title='Show sub-tasks & top menu']").click();
+    await contains(".o-dropdown-item:contains(Top Menu)").click();
+    await waitFor(".o_control_panel:not(:has(.o_embedded_actions))");
+    await contains("button[title='Show sub-tasks & top menu']").click();
+    await contains(".o-dropdown-item:contains(Top Menu)").click();
+    expect(queryAllTexts(".o_embedded_actions > button > span")).toEqual(["Tasks"]);
 });

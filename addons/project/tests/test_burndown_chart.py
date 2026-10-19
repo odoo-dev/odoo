@@ -365,5 +365,6 @@ class TestBurndownChart(TestBurndownChartCommon):
 class TestBurndownChartTour(HttpCase, TestBurndownChartCommon):
 
     def test_burndown_chart_tour(self):
-        # Test customizing personal stages as a project user
-        self.start_tour('/odoo', 'burndown_chart_tour', login="admin")
+        action = self.env.ref('project.action_project_task_burndown_chart_report')
+        action.context = self.project.action_project_task_burndown_chart_report()['context']
+        self.start_tour(f'/odoo/action-{action.id}', 'burndown_chart_tour', login="admin")
