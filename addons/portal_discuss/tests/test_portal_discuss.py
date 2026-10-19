@@ -10,7 +10,7 @@ class TestPortalDiscuss(HttpCaseWithUserPortal):
         """A portal user should be able to open a chat they share with an internal user
         from My Account > Discuss without hitting an access error."""
         admin = self.env.ref("base.user_admin")
-        channel = self.env["discuss.channel"].with_user(admin)._get_or_create_chat(partners_to=self.partner_portal.ids)
+        channel = self.env["discuss.channel"].with_user(admin)._get_or_create_chat(users_to=self.user_portal.ids)
         channel.with_user(admin).message_post(body="Hello")
 
         self.authenticate("portal", "portal")

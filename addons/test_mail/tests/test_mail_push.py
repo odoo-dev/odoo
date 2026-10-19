@@ -370,7 +370,7 @@ class TestWebPushNotification(SMSCommon):
         self.user_inbox.lang = 'fr_FR'
         inviting_user = self.env.ref('base.test_user')
         chat = self.env['discuss.channel'].with_user(inviting_user)._get_or_create_chat(
-            partners_to=[self.user_email.partner_id.id])
+            users_to=self.user_email.ids)
         group = self.env['discuss.channel'].with_user(inviting_user)._create_group(
             users_to=self.user_email + self.user_inbox,
         )
