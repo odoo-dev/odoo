@@ -570,19 +570,6 @@ class AccountPartialReconcile(models.Model):
 
                     # Percentage expressed in the foreign currency.
                     amount_currency = line.currency_id.round(line.amount_currency * partial_values['percentage'])
-                    if (
-                        caba_treatment == 'tax'
-                        and (
-                            move_values['is_fully_paid']
-                            or line.currency_id.compare_amounts(abs(line.amount_residual_currency), abs(amount_currency)) < 0
-                        )
-                        and partial_values == move_values['partials'][-1]
-                    ):
-                        # If the move is supposed to be fully paid, and we're on the last partial for it,
-                        # put the remaining amount to avoid rounding issues
-                        amount_currency = amount_residual_per_tax_line[line.id]
-                    if caba_treatment == 'tax':
-                        amount_residual_per_tax_line[line.id] -= amount_currency
                     balance = partial_values['payment_rate'] and amount_currency / partial_values['payment_rate'] or 0.0
 
                     # ==========================================================================
