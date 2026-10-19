@@ -166,7 +166,7 @@ class TestAvatarCardTour(MailCommon, HttpCase):
     @users("employee")
     def test_get_employee_data_from_inaccessible_company(self):
         self.authenticate(self.env.user.login, self.env.user.login)
-        channel = self.env["discuss.channel"]._get_or_create_chat(partners_to=self.user_employee_c2.partner_id.id)
+        channel = self.env["discuss.channel"]._get_or_create_chat(users_to=self.user_employee_c2.ids)
         members_data = self.make_jsonrpc_request(
             "/mail/store",
             {"fetch_params": [["/discuss/channel/members", {"channel_id": channel.id, "known_member_ids": []}]]},

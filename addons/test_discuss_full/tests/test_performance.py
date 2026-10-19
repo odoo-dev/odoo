@@ -256,10 +256,10 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
         )
         self.channel_channel_group_4._add_members(users=self.users[0] | self.users[2])
         # create chats
-        self.channel_chat_1 = Channel._get_or_create_chat(partners_to=(self.users[0] + self.users[14]).partner_id.ids)
-        self.channel_chat_2 = Channel._get_or_create_chat(partners_to=(self.users[0] + self.users[15]).partner_id.ids)
-        self.channel_chat_3 = Channel._get_or_create_chat(partners_to=(self.users[0] + self.users[2]).partner_id.ids)
-        self.channel_chat_4 = Channel._get_or_create_chat(partners_to=(self.users[0] + self.users[3]).partner_id.ids)
+        self.channel_chat_1 = Channel._get_or_create_chat(users_to=(self.users[0] + self.users[14]).ids)
+        self.channel_chat_2 = Channel._get_or_create_chat(users_to=(self.users[0] + self.users[15]).ids)
+        self.channel_chat_3 = Channel._get_or_create_chat(users_to=(self.users[0] + self.users[2]).ids)
+        self.channel_chat_4 = Channel._get_or_create_chat(users_to=(self.users[0] + self.users[3]).ids)
         # create groups
         self.channel_group_1 = Channel._create_group(self.users[0] + self.users[12])
         # create livechats
