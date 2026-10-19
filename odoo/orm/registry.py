@@ -58,19 +58,18 @@ _REGISTRY_CACHES = {
     'routing': 1024,  # 2 entries per website
     'routing.rewrites': 8192,  # url_rewrite entries
     'templates.cached_values': 2048, # arbitrary
-    'templates.attrs': 16384,  # post-processed attributes, ~2 KB each
     'groups': 64,  # see res.groups
 }
 
 # cache invalidation dependencies, as follows:
 # { 'cache_key': ('cache_container_1', 'cache_container_3', ...) }
 _CACHES_BY_KEY = {
-    'default': ('default', 'templates.cached_values', 'templates.attrs'),
-    'assets': ('assets', 'templates.cached_values', 'templates.attrs'),
-    'stable': ('stable', 'default', 'templates.cached_values', 'templates.attrs'),
-    'templates': ('templates', 'templates.cached_values', 'templates.attrs'),
-    'routing': ('routing', 'routing.rewrites', 'templates.cached_values', 'templates.attrs'),
-    'groups': ('groups', 'default', 'templates', 'templates.cached_values', 'templates.attrs'),  # The processing of groups is saved in the view
+    'default': ('default', 'templates.cached_values'),
+    'assets': ('assets', 'templates.cached_values'),
+    'stable': ('stable', 'default', 'templates.cached_values'),
+    'templates': ('templates', 'templates.cached_values'),
+    'routing': ('routing', 'routing.rewrites', 'templates.cached_values'),
+    'groups': ('groups', 'default', 'templates', 'templates.cached_values'),  # The processing of groups is saved in the view
 }
 
 _REPLICA_RETRY_TIME = 20 * 60  # 20 minutes

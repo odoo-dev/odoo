@@ -2116,7 +2116,7 @@ class IrQweb(models.AbstractModel):
             code.append(indent_code(f"""
                 if attrs:
                     tagName = {el.tag!r}
-                    for name, value in self._post_processing_att(tagName, attrs).items():
+                    for name, value in self._post_processing_dynamic_att(tagName, attrs, process).items():
                         if value or isinstance(value, str):
                             yield f' {{escape(str(name))}}="{{escape(str(value))}}"'
                     attrs = None
@@ -2841,6 +2841,14 @@ class IrQweb(models.AbstractModel):
             __import__(debugger).set_trace()
         else:
             raise ValueError(f"unsupported t-debug value: {debugger}")
+
+    def _post_processing_dynamic_att(self, tagName, atts, process):
+        """ Post-process the attributes of a dynamic node, rendered during the
+            rendering ``process`` (see `_render`).
+
+            @returns dict
+        """
+        return self._post_processing_att(tagName, atts)
 
     def _post_processing_att(self, tagName, atts):
         """ Method called at compile time for the static node and called at

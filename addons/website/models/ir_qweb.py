@@ -2,7 +2,6 @@
 import re
 
 from collections import OrderedDict
-from urllib.parse import urlsplit
 
 from markupsafe import Markup
 
@@ -14,7 +13,7 @@ from odoo.addons.website.tools import add_form_signature
 re_background_image = re.compile(r"(background-image\s*:\s*url\(\s*['\"]?\s*)([^)'\"]+)")
 re_translate_span = re.compile(r'<span.+?data-oe-translation-source-sha.+?>(.+?)</span>')
 
-# types of the attribute values whose post-processing can be cached, see `_post_processing_att`
+# types of the attribute values whose post-processing can be cached, see `_post_processing_dynamic_att`
 CACHEABLE_ATT_TYPES = frozenset({str, Markup, int, float, bool, type(None)})
 
 
@@ -76,85 +75,37 @@ class IrQweb(models.AbstractModel):
                         atts['data-oe-translate-{}'.format(att.removesuffix('.translate'))] = value
                         atts[att] = match.group(1)
 
-    def _post_processing_att(self, tagName, atts):
-        key = self._get_post_processing_att_cache_key(tagName, atts)
-        if key is None:
-            return self._post_process_website_att(tagName, atts)
-        # The registry cache is used directly rather than through `api.ormcache`:
-        # this is called hundreds of times per page, and the statistics kept by
-        # `ormcache` on each lookup cost as much as the post-processing itself.
-        cache = self.env.transaction.ormcaches__['templates.attrs']
-        items = cache.get(key)
-        if items is None:
-            items = cache[key] = tuple(self._post_process_website_att(tagName, atts).items())
-        return dict(items)
-
-    def _get_post_processing_att_cache_key(self, tagName, atts):
-        """ Return the key under which the post-processing of the attributes of
-        a dynamic node is cached, or ``None`` if it must not be cached.
-
-        The result only depends on the website, the template options, the debug
-        mode, whether third-party trackers are removed, and the attributes
-        themselves: it is the same for every page, visitor and record rendering
-        those attributes. Not cached: static nodes (post-processed once, at
-        compile time), values that are not plain values (e.g. the lazy content
-        of a ``t-set``), and URLs resolved against the current path.
+    def _post_processing_dynamic_att(self, tagName, atts, process):
+        """ The post-processing of the attributes of a dynamic node is cached
+        on the rendering ``process``: the same attributes are rendered many
+        times on a page (e.g. once per product), and their result cannot change
+        during one rendering, so that the cache never has to be invalidated.
+        Not cached: values that are not plain values (e.g. the lazy content of
+        a ``t-set``).
         """
-        if not request or atts.get('__is_static_node') or atts.get('data-no-post-process'):
-            return None
         only_strings = True
         for value in atts.values():
             value_type = type(value)
             if value_type is not str and value_type is not Markup:
                 if value_type not in CACHEABLE_ATT_TYPES:
-                    return None
+                    return super()._post_processing_dynamic_att(tagName, atts, process)
                 only_strings = False
-        url = atts.get(self.URL_ATTRS.get(tagName))
-        if isinstance(url, str) and self._is_path_relative_url(url):
-            return None  # `_url_for` joins it with the current path
-        if 'background-image' in str(atts.get('style') or ''):
-            return None  # the URLs of the style are rewritten as well
-        return (
-            self._get_post_processing_att_env_key(),
-            bool(request.session.debug),
+        key = (
+            self.env,
             tagName,
             tuple(atts.items()),
             # 1, 1.0 and True are equal keys, but are not rendered the same
             None if only_strings else tuple(map(type, atts.values())),
         )
+        cache = process.get('website_post_processed_atts')
+        if cache is None:
+            cache = process['website_post_processed_atts'] = {}
+        items = cache.get(key)
+        if items is None:
+            items = cache[key] = tuple(super()._post_processing_dynamic_att(tagName, atts, process).items())
+        return dict(items)
 
-    def _get_post_processing_att_env_key(self):
-        """ Return the part of the cache key of `_post_processing_att` that
-        depends on the environments: the rendering one, and the one of the
-        request, whose language and website are used to rewrite the URLs. It
-        is computed once per pair of environments and transaction.
-        """
-        env, request_env = self.env, request.env
-        env_keys = env.cr.cache.setdefault('website.post_processing_att', {})
-        key = env_keys.get((env, request_env))
-        if key is None:
-            website = env.website
-            context = env.context
-            key = env_keys[env, request_env] = (
-                website.id,
-                bool(website) and website._should_remove_third_party_trackers(),
-                tuple(context.get(name) for name in self._get_template_cache_keys()),
-                context.get('rendering_bundle'),
-                context.get('debug'),
-                request_env.context.get('lang'),
-                request_env.website.id,
-            )
-        return key
-
-    @staticmethod
-    def _is_path_relative_url(url):
-        try:
-            parts = urlsplit(url.strip())
-        except ValueError:
-            return False
-        return not parts.scheme and not parts.netloc and bool(parts.path) and not parts.path.startswith('/')
-
-    def _post_process_website_att(self, tagName, atts):
+    def _post_processing_att(self, tagName, atts):
         if atts.get('data-no-post-process'):
             return atts
 

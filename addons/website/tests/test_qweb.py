@@ -390,52 +390,39 @@ class TestQwebProcessAtt(TransactionCase):
         """ Count the actual (uncached) post-processings. """
         IrQweb = self.registry['ir.qweb']
         with patch.object(
-            IrQweb, '_post_process_website_att', autospec=True,
-            side_effect=IrQweb._post_process_website_att,
+            IrQweb, '_post_processing_att', autospec=True,
+            side_effect=IrQweb._post_processing_att,
         ) as post_process:
             yield post_process
 
+    def _render(self, env, arch):
+        view = self.env['ir.ui.view'].create({'name': 'test', 'type': 'qweb', 'arch': arch})
+        return str(env['ir.qweb']._render(view.id))
+
     def test_process_att_cache(self):
+        arch = """<t t-name="test">
+            <a t-foreach="range(3)" t-as="i" t-att-href="'/a'"/>
+            <img t-foreach="range(3)" t-as="i" t-att-src="'/a'"/>
+            <a t-att-href="'/b'"/>
+        </t>"""
         with self._count_post_processing() as post_process, \
                 MockRequest(self.env, website=self.website, context={'lang': 'fr_FR'}) as request:
-            for _i in range(3):
-                self._test_att(request.env, '/', {'href': '/fr'})
-                self._test_att(request.env, '/a', {'href': 'http://test.cdn/fr/a'})
-            self.assertEqual(post_process.call_count, 2, "each attribute set is post-processed once")
+            html = self._render(request.env, arch)
+            self.assertEqual(html.count('href="http://test.cdn/fr/a"'), 3)
+            self.assertEqual(html.count('src="http://test.cdn/fr/a" loading="lazy"'), 3)
+            self.assertEqual(post_process.call_count, 3, "each tag and attribute set is post-processed once")
 
-            # the tag and the debug mode are part of the key
-            self._test_att(request.env, '/', {'src': '/fr', 'loading': 'lazy'}, tag='img', attribute='src')
-            request.session.debug = '1'
-            self._test_att(request.env, '/', {'href': '/'})
-            self.assertEqual(post_process.call_count, 4)
-
-        # so is the language of the request
-        with self._count_post_processing() as post_process, \
-                MockRequest(self.env, website=self.website, context={'lang': 'en_US'}) as request:
-            self._test_att(request.env, '/', {'href': '/'})
-            self.assertEqual(post_process.call_count, 1)
+            # the cache lives as long as one rendering
+            self._render(request.env, arch)
+            self.assertEqual(post_process.call_count, 6)
 
     def test_process_att_cache_value_types(self):
+        arch = """<t t-name="test">
+            <t t-foreach="[1, True, 1.0, '1', 1, True, 1.0, '1']" t-as="value"><div t-att-data-value="value"/></t>
+        </t>"""
         with MockRequest(self.env, website=self.website) as request:
-            QWeb = request.env['ir.qweb']
-            for value in (1, True, 1.0, '1'):
-                result = QWeb._post_processing_att('div', {'data-value': value})
-                self.assertIs(type(result['data-value']), type(value))
-
-    def test_process_att_cache_relative_url(self):
-        """ A relative URL is resolved against the path of the current page. """
-        with self._count_post_processing() as post_process:
-            with MockRequest(self.env, website=self.website, path='/shop/') as request:
-                self._test_att(request.env, 'cart', {'href': '/shop/cart'})
-            with MockRequest(self.env, website=self.website, path='/blog/') as request:
-                self._test_att(request.env, 'cart', {'href': '/blog/cart'})
-            self.assertEqual(post_process.call_count, 2)
-
-    def test_process_att_cache_invalidation(self):
-        with MockRequest(self.env, website=self.website) as request:
-            self._test_att(request.env, '/a', {'href': 'http://test.cdn/a'})
-            self.website.cdn_activated = False
-            self._test_att(request.env, '/a', {'href': '/a'})
+            html = self._render(request.env, arch)
+            self.assertEqual(re.findall(r'data-value="([^"]*)"', html), ['1', 'True', '1.0', '1'] * 2)
 
 
 @tagged('-at_install', 'post_install')
