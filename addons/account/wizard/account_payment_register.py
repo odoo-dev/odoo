@@ -4,7 +4,7 @@ from datetime import date
 import markupsafe
 
 from odoo import Command, _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import OrderedSet, frozendict
 from odoo.tools.misc import clean_context
 
@@ -83,11 +83,15 @@ class AccountPaymentRegister(models.TransientModel):
     custom_user_amount = fields.Monetary(currency_field='currency_id')
     custom_user_currency_id = fields.Many2one(comodel_name='res.currency')
     unreconciled_paid_amount = fields.Monetary(currency_field="currency_id", compute="_compute_unreconciled_paid_amount")
+    expected_exchange_rate = fields.Float(
+        compute="_compute_expected_exchange_rate",
+        digits=0,
+    )
     exchange_rate = fields.Float(
         compute="_compute_exchange_rate",
-        digits=(12, 6),
-        readonly=True,
-        store=False
+        digits=0,
+        readonly=False,
+        store=True
     )
 
     # == Fields given through the context ==
@@ -651,11 +655,26 @@ class AccountPaymentRegister(models.TransientModel):
                 total_amount += currency._convert(amount_residual_currency, comp_curr, self.company_id, self.payment_date)
             elif currency == comp_curr and wizard_curr != comp_curr:
                 # Company currency on source line but a foreign currency one on the opposite line.
-                total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, self.payment_date)
+                # total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, self.payment_date)
+                total_amount += self._convert_from_company_currency(amount_residual)
             else:
                 # Foreign currency on payment different than the one set on the journal entries.
-                total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, self.payment_date)
+                # total_amount += comp_curr._convert(amount_residual, wizard_curr, self.company_id, self.payment_date)
+                total_amount += self._convert_from_company_currency(amount_residual)
         return total_amount
+
+    def _convert_from_company_currency(self, amount):
+        self.ensure_one()
+        if self.currency_id == self.company_currency_id or not self.exchange_rate:
+            return self.company_currency_id._convert(amount, self.currency_id, self.company_id, self.payment_date)
+        return self.currency_id.round(amount * self.exchange_rate)
+
+    def _convert_to_company_currency(self, amount_currency):
+        self.ensure_one()
+        if self.currency_id == self.company_currency_id or not self.exchange_rate:
+            return self.currency_id._convert(amount_currency, self.company_currency_id, self.company_id, self.payment_date)
+        return self.company_currency_id.round(amount_currency / self.exchange_rate)
+
 
     def _get_total_amounts_to_pay(self, batch_results):
         self.ensure_one()
@@ -769,7 +788,7 @@ class AccountPaymentRegister(models.TransientModel):
 
         self.amount = self.custom_user_amount
 
-    @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date', 'installments_mode', 'unreconciled_paid_amount')
+    @api.depends('can_edit_wizard', 'source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date', 'installments_mode', 'unreconciled_paid_amount', 'exchange_rate')
     def _compute_amount(self):
         for wizard in self:
             if not wizard.journal_id or not wizard.currency_id or not wizard.payment_date or wizard.custom_user_amount:
@@ -865,7 +884,7 @@ class AccountPaymentRegister(models.TransientModel):
                     )
                 )
 
-    @api.depends('can_edit_wizard', 'amount', 'installments_mode')
+    @api.depends('can_edit_wizard', 'amount', 'installments_mode', 'exchange_rate')
     def _compute_payment_difference(self):
         for wizard in self:
             if wizard.payment_date:
@@ -959,24 +978,47 @@ class AccountPaymentRegister(models.TransientModel):
                     payment.amount,
                     wizard.currency_id,
                     wizard.company_id,
-                    payment.date
+                    payment.date,
                 )
                 for payment in paid_payments
             )
 
     @api.depends('company_currency_id', 'source_currency_id', 'currency_id', 'payment_date', 'company_id')
-    def _compute_exchange_rate(self):
+    def _compute_expected_exchange_rate(self):
         for wizard in self:
             target_currency = wizard.currency_id if wizard.currency_id != wizard.company_currency_id else wizard.source_currency_id
-            if target_currency != wizard.company_currency_id:
-                wizard.exchange_rate = self.env['res.currency']._get_conversion_rate(
+            if target_currency and target_currency != wizard.company_currency_id:
+                wizard.expected_exchange_rate = self.env['res.currency']._get_conversion_rate(
                     from_currency=wizard.company_currency_id,
                     to_currency=target_currency,
                     company=wizard.company_id,
-                    date=wizard.payment_date,
+                    date=wizard.payment_date or fields.Date.context_today(wizard),
                 )
             else:
-                wizard.exchange_rate = 1.0
+                wizard.expected_exchange_rate = 1.0
+
+    @api.depends('company_currency_id', 'source_currency_id', 'currency_id', 'payment_date', 'company_id')
+    def _compute_exchange_rate(self):
+        for wizard in self:
+            wizard.exchange_rate = wizard.expected_exchange_rate
+
+    @api.constrains('exchange_rate')
+    def _check_exchange_rate(self):
+        for wizard in self:
+            if wizard.currency_id != wizard.company_currency_id and wizard.exchange_rate <= 0:
+                raise ValidationError(_("The currency rate must be strictly positive."))
+
+    def refresh_exchange_rate(self):
+        # An action must be returned, otherwise the JS defaults to closing the wizard dialog.
+        self.ensure_one()
+        self.exchange_rate = self.expected_exchange_rate
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': self._name,
+            'res_id': self.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
 
     def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
         """ Retrieve move ids for possible duplicates of payments. Duplicates moves:
@@ -1082,6 +1124,8 @@ class AccountPaymentRegister(models.TransientModel):
             'destination_account_id': self.line_ids[0].account_id.id,
             'write_off_line_vals': [],
         }
+        if self.currency_id != self.company_currency_id:
+            payment_vals['currency_rate'] = self.exchange_rate
 
         if self.payment_difference_handling == 'reconcile':
             if self.early_payment_discount_mode:
@@ -1091,11 +1135,13 @@ class AccountPaymentRegister(models.TransientModel):
                         epd_aml_values_list.append({
                             'aml': aml,
                             'amount_currency': -aml.amount_residual_currency,
-                            'balance': aml.currency_id._convert(-aml.amount_residual_currency, aml.company_currency_id, date=self.payment_date),
+                            # 'balance': aml.currency_id._convert(-aml.amount_residual_currency, aml.company_currency_id, date=self.payment_date),
+                            'balance': self._convert_to_company_currency(-aml.amount_residual_currency),
                         })
 
                 open_amount_currency = self.payment_difference * (-1 if self.payment_type == 'outbound' else 1)
-                open_balance = self.currency_id._convert(open_amount_currency, self.company_id.currency_id, self.company_id, self.payment_date)
+                # open_balance = self.currency_id._convert(open_amount_currency, self.company_id.currency_id, self.company_id, self.payment_date)
+                open_balance = self._convert_to_company_currency(open_amount_currency)
                 early_payment_values = self.env['account.move']._get_invoice_counterpart_amls_for_early_payment_discount(epd_aml_values_list, open_balance)
                 for aml_values_list in early_payment_values.values():
                     payment_vals['write_off_line_vals'] += aml_values_list
@@ -1122,7 +1168,8 @@ class AccountPaymentRegister(models.TransientModel):
                         'partner_id': self.partner_id.commercial_partner_id.id,
                         'currency_id': self.currency_id.id,
                         'amount_currency': write_off_amount_currency,
-                        'balance': self.currency_id._convert(write_off_amount_currency, self.company_id.currency_id, self.company_id, self.payment_date),
+                        # 'balance': self.currency_id._convert(write_off_amount_currency, self.company_id.currency_id, self.company_id, self.payment_date),
+                        'balance': self._convert_to_company_currency(write_off_amount_currency),
                     })
 
         return payment_vals

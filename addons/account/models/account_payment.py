@@ -136,6 +136,16 @@ class AccountPayment(models.Model):
         compute='_compute_currency_id', store=True, readonly=False, precompute=True,
         help="The payment's currency.")
     company_currency_id = fields.Many2one(string="Company Currency", related='company_id.currency_id')
+    # Add new field for supporting the custom or dynamic conversion rate
+    expected_currency_rate = fields.Float(compute='_compute_expected_currency_rate', digits=0)
+    currency_rate = fields.Float(string='Currency Rate',
+        compute='_compute_currency_rate',
+        store=True,
+        precompute=True,
+        readonly=False,
+        copy=False,
+        digits=0)
+
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string="Customer/Vendor",
@@ -246,6 +256,12 @@ class AccountPayment(models.Model):
     @api.model
     def _get_valid_payment_account_types(self):
         return ['asset_receivable', 'liability_payable']
+
+    def _convert_to_company_currency(self, amount_currency):
+        self.ensure_one()
+        if self.currency_id == self.company_currency_id or not self.currency_rate:
+            return self.currency_id._convert(amount_currency, self.company_currency_id, self.company_id, self.date)
+        return self.company_currency_id.round(amount_currency / self.currency_rate)
 
     def _seek_for_lines(self):
         ''' Helper used to dispatch the journal items between:
@@ -579,19 +595,37 @@ class AccountPayment(models.Model):
                 payment.show_partner_bank_account = payment.payment_method_code in self._get_method_codes_using_bank_account()
             payment.require_partner_bank_account = payment.state == 'draft' and payment.payment_method_code in self._get_method_codes_needing_bank_account()
 
-    @api.depends('move_id.amount_total_signed', 'amount', 'payment_type', 'currency_id', 'date', 'company_id', 'company_currency_id')
+    @api.depends('move_id.amount_total_signed', 'amount', 'payment_type', 'currency_rate', 'currency_id', 'date', 'company_id', 'company_currency_id')
     def _compute_amount_company_currency_signed(self):
         for payment in self:
             if payment.move_id:
                 liquidity_lines = payment._seek_for_lines()[0]
                 payment.amount_company_currency_signed = sum(liquidity_lines.mapped('balance'))
             else:
-                payment.amount_company_currency_signed = payment.currency_id._convert(
-                    from_amount=payment.amount_signed,
-                    to_currency=payment.company_currency_id,
+                payment.amount_company_currency_signed = payment._convert_to_company_currency(payment.amount_signed)
+                #     from_amount=payment.amount_signed,
+                #     to_currency=payment.company_currency_id,
+                #     company=payment.company_id,
+                #     date=payment.date,
+                # )
+
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'date')
+    def _compute_expected_currency_rate(self):
+        for payment in self:
+            if payment.currency_id and payment.company_id:
+                payment.expected_currency_rate = self.env['res.currency']._get_conversion_rate(
+                    from_currency=payment.company_currency_id,
+                    to_currency=payment.currency_id,
                     company=payment.company_id,
-                    date=payment.date,
+                    date=payment.date or fields.Date.context_today(payment),
                 )
+            else:
+                payment.expected_currency_rate = 1
+
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'date')
+    def _compute_currency_rate(self):
+        for payment in self:
+            payment.currency_rate = payment.expected_currency_rate
 
     @api.depends('amount', 'payment_type')
     def _compute_amount_signed(self):
@@ -1139,7 +1173,7 @@ class AccountPayment(models.Model):
     def _get_trigger_fields_to_synchronize(self):
         return (
             'date', 'amount', 'payment_type', 'partner_type', 'payment_reference',
-            'currency_id', 'partner_id', 'destination_account_id', 'partner_bank_id', 'journal_id'
+            'currency_id', 'currency_rate', 'partner_id', 'destination_account_id', 'partner_bank_id', 'journal_id',
         )
 
     def _generate_journal_entry(self, write_off_line_vals=None, force_balance=None, line_ids=None):
@@ -1245,6 +1279,10 @@ class AccountPayment(models.Model):
     def action_draft(self):
         self.state = 'draft'
         self.move_id.button_draft()
+
+    def refresh_currency_rate(self):
+        for payment in self:
+            payment.currency_rate = payment.expected_currency_rate
 
     def button_open_invoices(self):
         ''' Redirect the user to the invoice(s) paid by this payment.
