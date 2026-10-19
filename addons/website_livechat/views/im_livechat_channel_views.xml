@@ -7,7 +7,9 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@name='design_theme_sync']" position="before">
                 <field name="website_theme_sync_url" invisible="1"/>
+                <!-- Whether a website is followed, used in the invisible conditions below. -->
                 <field name="theme_colors_synced" invisible="1"/>
+                <!-- Whether the colors match the website, used in the invisible conditions below. -->
             </xpath>
             <xpath expr="//widget[@name='colors_reset_button']" position="attributes">
                 <attribute name="invisible">website_theme_sync_url and theme_colors_synced</attribute>

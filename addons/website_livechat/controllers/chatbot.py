@@ -53,7 +53,7 @@ class WebsiteLivechatChatbotScriptController(http.Controller):
         store.add_global_values(request.env.user.sudo(False)._store_init_global_fields)
         store.add(chatbot_script, "_store_script_fields")
         # Preview the script with the colors visitors of this website would see.
-        livechat_channel = request.website.channel_id.sudo()
+        livechat_channel = request.env['website'].get_current_website().channel_id.sudo()
         livechat_colors = request.env['im_livechat.channel']._get_default_colors()
         if livechat_channel:
             livechat_colors = {field: livechat_channel[field] for field in livechat_colors}
