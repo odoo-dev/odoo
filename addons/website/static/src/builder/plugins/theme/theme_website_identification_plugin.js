@@ -10,8 +10,8 @@ import { registry } from "@web/core/registry";
 /**
  * Met à jour le branding dans le DOM en respectant la structure QWeb d'Odoo.
  */
-function updateOdooBrandingDOM(targetDoc, name) {
-    if (!targetDoc || !name) {
+function updateOdooBrandingDOM(targetDoc, newName, oldName, titleService) {
+    if (!targetDoc || !newName) {
         return;
     }
 
@@ -19,43 +19,48 @@ function updateOdooBrandingDOM(targetDoc, name) {
     for (const brand of brands) {
         const logoImg = brand.querySelector("img, svg");
         if (logoImg) {
-            // Site avec logo visuel : on ne modifie que les métadonnées pour ne pas casser le layout
-            logoImg.setAttribute("alt", name);
-            logoImg.setAttribute("title", name);
+            // Preview visuelle du alt/title
+            logoImg.setAttribute("alt", newName);
+            logoImg.setAttribute("title", newName);
         } else {
-            // Site textuel : recherche en priorité du champ QWeb Odoo
             const qwebField = brand.querySelector(
                 '[data-oe-field="name"], [data-oe-expression="website.name"]'
             );
             if (qwebField) {
-                qwebField.textContent = name;
+                qwebField.textContent = newName;
             } else {
-                brand.textContent = name;
+                // Cas de fallback extrême
+                brand.textContent = newName;
             }
         }
     }
 
-    // Mise à jour de l'onglet de navigation
-    updateDocumentTitle(targetDoc, name);
+    // Mise à jour de l'onglet
+    syncDocumentTitle(targetDoc, newName, oldName, titleService);
 }
 
-function updateDocumentTitle(doc, name) {
-    const currentTitle = doc.title || "";
-    const parts = currentTitle.split(" | ");
-
-    // Format standard Odoo : "Nom de la page | Nom du site"
-    doc.title = parts.length > 1 ? `${parts.slice(0, -1).join(" | ")} | ${name}` : name;
-
-    try {
-        if (window.top && window.top.document !== doc) {
-            window.top.document.title = doc.title;
-        }
-    } catch {
-        // Protection iframe cross-origin
+function syncDocumentTitle(targetDoc, newName, oldName, titleService) {
+    if (!titleService?.getParts || !titleService?.setParts || !newName || !oldName) {
+        return;
     }
-}
 
-// ============================================================================
+    const currentActionTitle = titleService.getParts().action;
+
+    if (typeof currentActionTitle === "string") {
+        const lastIndex = currentActionTitle.lastIndexOf(oldName);
+
+        if (lastIndex !== -1) {
+            // On découpe la string juste avant et juste après la dernière occurrence de l'ancien nom
+            const updatedTitle =
+                currentActionTitle.substring(0, lastIndex) +
+                newName +
+                currentActionTitle.substring(lastIndex + oldName.length);
+
+            titleService.setParts({ action: updatedTitle });
+        }
+        targetDoc.title = newName;
+    }
+} // ============================================================================
 // ACTION & OPTION (Couche UI Builder)
 // ============================================================================
 
@@ -82,41 +87,93 @@ export class ThemeWebsiteIdentificationOption extends BaseOptionComponent {
 // PLUGIN (Orchestration State & ORM)
 // ============================================================================
 
+// export class WebsiteBrandingPlugin extends Plugin {
+//     static id = "websiteBrandingPlugin";
+//     static shared = ["stageWebsiteName"];
+
+//     setup() {
+//         this.stagedName = null;
+//         // Document résolu une seule fois via l'environnement de l'éditeur
+//         this.editorDoc = this.document || this.editable?.ownerDocument || document;
+//     }
+
+//     /**
+//      * Preview immédiate sans toucher aux mécanismes de sauvegarde
+//      */
+//     stageWebsiteName(value) {
+//         this.stagedName = value;
+//         updateOdooBrandingDOM(this.editorDoc, value, this.services.title);
+//     }
+
+//     /**
+//      * Persistance : uniquement ORM et état OWL (aucun touch DOM ici)
+//      */
+//     async onWillSave() {
+//         if (!this.stagedName) {
+//             return;
+//         }
+
+//         const currentWebsite = this.services.website?.currentWebsite;
+//         if (currentWebsite) {
+//             // 1. Sauvegarde réelle en base de données
+//             await this.services.orm.write("website", [currentWebsite.id], {
+//                 name: this.stagedName,
+//             });
+
+//             // 2. Synchronisation de la réactivité OWL
+//             currentWebsite.name = this.stagedName;
+//         }
+
+//         this.stagedName = null;
+//     }
+
+//     resources = {
+//         builder_options: [ThemeWebsiteIdentificationOption],
+//         builder_actions: {
+//             SetWebsiteNameAction,
+//         },
+//         on_will_save_handlers: this.onWillSave.bind(this),
+//     };
+// }
+
 export class WebsiteBrandingPlugin extends Plugin {
     static id = "websiteBrandingPlugin";
     static shared = ["stageWebsiteName"];
 
     setup() {
         this.stagedName = null;
-        // Document résolu une seule fois via l'environnement de l'éditeur
         this.editorDoc = this.document || this.editable?.ownerDocument || document;
+
+        // On mémorise le nom officiel actuel (celui en base de données)
+        this.originalWebsiteName = this.services.website?.currentWebsite?.name || "";
     }
 
-    /**
-     * Preview immédiate sans toucher aux mécanismes de sauvegarde
-     */
     stageWebsiteName(value) {
         this.stagedName = value;
-        updateOdooBrandingDOM(this.editorDoc, value);
+        // On met à jour le DOM visuellement
+        updateOdooBrandingDOM(this.editorDoc, value, this.originalWebsiteName, this.services.title);
     }
 
-    /**
-     * Persistance : uniquement ORM et état OWL (aucun touch DOM ici)
-     */
     async onWillSave() {
-        if (!this.stagedName) {
+        if (!this.stagedName || this.stagedName === this.originalWebsiteName) {
             return;
         }
 
         const currentWebsite = this.services.website?.currentWebsite;
+
+        // 1. ROLLBACK DOM : On remet l'ancien nom dans le DOM pour que l'éditeur
+        // sauvegarde le QWeb d'origine sans l'écraser avec une valeur hardcodée.
+        updateOdooBrandingDOM(this.editorDoc, this.originalWebsiteName, this.stagedName, null);
+
         if (currentWebsite) {
-            // 1. Sauvegarde réelle en base de données
+            // 2. Sauvegarde propre en base de données
             await this.services.orm.write("website", [currentWebsite.id], {
                 name: this.stagedName,
             });
 
-            // 2. Synchronisation de la réactivité OWL
+            // 3. Mise à jour de l'état
             currentWebsite.name = this.stagedName;
+            this.originalWebsiteName = this.stagedName; // Le nouveau nom devient l'officiel
         }
 
         this.stagedName = null;
