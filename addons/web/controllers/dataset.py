@@ -7,7 +7,7 @@ from odoo import http
 from odoo.http import request
 from odoo.service.model import call_kw
 
-from .utils import clean_action
+from .utils import add_hub_info, clean_action
 
 
 class DataSet(http.Controller):
@@ -37,5 +37,11 @@ class DataSet(http.Controller):
             threading.current_thread().rpc_model_method = f'{model}.{method}'
         action = call_kw(request.env[model], method, args, kwargs)
         if isinstance(action, dict) and action.get('type') != '':  # noqa: PLC1901
+            res_ids = args[0] if args and isinstance(args[0], list) else []
+            if len(res_ids) == 1:
+                add_hub_info(action, request.env, [
+                    ('python_method', '=', method),
+                    ('hub_id.res_model', '=', model),
+                ], res_ids[0])
             return clean_action(action, env=request.env)
         return False

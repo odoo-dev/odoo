@@ -64,6 +64,17 @@ def clean_action(action, env):
     return cleaned_action
 
 
+def add_hub_info(action, env, item_domain, res_id):
+    hub_item = env['ir.actions.hub.item'].search(item_domain, limit=1)
+    if not hub_item:
+        return
+    hub = hub_item.hub_id.sudo().with_context(active_id=res_id)
+    action['hub_action'] = hub._get_action_dict()
+    pinned_items = env['res.users.settings.hub']._get_pinned_items(hub, res_id)
+    action['hub_action']['pinned_item_ids'] = pinned_items.ids
+    action['hub_action']['active_item_id'] = hub_item.id
+
+
 def ensure_db(redirect='/web/database/selector', db=None):
     # This helper should be used in web client auth="none" routes
     # if those routes needs a db to work with.
