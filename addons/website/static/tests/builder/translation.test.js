@@ -218,6 +218,37 @@ test("color span is inserted in a.btn (and s_badge) with a background to show th
     expect(":iframe .s_badge .o_translation_state_inner_span").toHaveCount(1);
 });
 
+test("replacing the whole file name in translate mode does not add a line break", async () => {
+    const resultSave = [];
+    onRpc("/website/field/translation/update", async (data) => {
+        const { params } = await data.json();
+        resultSave.push(params.translations.fr_BE.sourceSha);
+        return true;
+    });
+    // The inline `display: flex` is needed because bootstrap is not loaded in
+    // the test iframe, so `d-flex` alone has no effect.
+    const { getEditor } = await setupSidebarBuilderForTranslation({
+        websiteContent: getTranslateEditable({
+            inWrap: `<span class="o_file_box o-contenteditable-false" contenteditable="false"><span class="alert alert-info d-flex"><span class="o_file_name_container d-flex" style="display: flex;"><a class="o_link_readonly o_translate_inline" href="/web/content/1?download=true" contenteditable="false">file.txt</a></span></span></span>`,
+        }),
+    });
+    expect(":iframe .o_file_name_container .o_translation_state_inner_span").toHaveCount(0);
+    const editor = getEditor();
+    const link = editor.editable.querySelector(".o_link_readonly");
+    await contains(":iframe .o_link_readonly").click();
+    setSelection({
+        anchorNode: link.firstChild,
+        anchorOffset: 0,
+        focusNode: link.firstChild,
+        focusOffset: link.firstChild.length,
+    });
+    await insertText(editor, "new");
+    await contains(".o-snippets-top-actions button:contains(Save)").click();
+    expect(resultSave.length).toBe(1);
+    expect(resultSave[0]).toInclude(">new</a>");
+    expect(resultSave[0]).not.toInclude("<br>");
+});
+
 test("adjacent s_badge elements should not be merged in translate mode", async () => {
     const { getEditor } = await setupSidebarBuilderForTranslation({
         websiteContent: getTranslateEditable({

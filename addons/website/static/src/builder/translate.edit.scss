@@ -8,7 +8,7 @@ html[lang] > body.editor_enable [data-oe-translation-state] {
         --text-translate-highlight-color: #{rgba($o-we-translated-content-color, 0.5)};
     }
 
-    &, .o_translation_select_option, .oe_translated, &[data-oe-field="mega_menu_content"] *, .o_translation_state_inner_span {
+    &, .o_translation_select_option, .oe_translated, &[data-oe-field="mega_menu_content"] *, .o_translation_state_inner_span, .alert > .o_file_name_container {
         background-color: var(--text-translate-highlight-color) !important;
     }
 }
