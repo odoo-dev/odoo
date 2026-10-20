@@ -1,7 +1,13 @@
 import { Plugin } from "@html_editor/plugin";
-import { closestElement, selectElements } from "@html_editor/utils/dom_traversal";
+import { childNodes, closestElement, selectElements } from "@html_editor/utils/dom_traversal";
 import { removeClass } from "@html_editor/utils/dom";
-import { isProtected, isProtecting } from "@html_editor/utils/dom_info";
+import {
+    isElement,
+    isEmptyTextNode,
+    isProtected,
+    isProtecting,
+    isZwnbsp,
+} from "@html_editor/utils/dom_info";
 
 /*
     This plugin solves selection issues around links (allowing the cursor at the
@@ -10,10 +16,13 @@ import { isProtected, isProtecting } from "@html_editor/utils/dom_info";
     Every link receives 4 zero-width non-breaking spaces (unicode FEFF
     characters, hereafter referred to as ZWNBSP):
     - one before the link
-    - one as the link's first child
-    - one as the link's last child
+    - one before the first leaf of the link
+    - one after the last leaf of the link
     - one after the link
     like so: `//ZWNBSP//<a>//ZWNBSP//label//ZWNBSP//</a>//ZWNBSP`.
+    The inner ones go inside the formats of the label, like so:
+    `<a><s>//ZWNBSP//label//ZWNBSP//</s></a>`, so that text typed at the inner
+    edges of the link keeps them.
 
     A visual indication ( `o_link_in_selection` class) is added to a link when
     the selection is contained within it.
@@ -42,6 +51,7 @@ export class LinkSelectionPlugin extends Plugin {
         /** Processors */
         clean_for_save_processors: (root) => this.clearLinkInSelectionClass(root),
         normalize_processors: (root) => {
+            this.updateLinkFeffs(root);
             this.resetLinkInSelection();
             return root;
         },
@@ -49,13 +59,95 @@ export class LinkSelectionPlugin extends Plugin {
         /** Providers */
         feff_providers: this.addFeffsToLinks.bind(this),
 
+        /** Predicates */
+        would_feff_be_legit_predicates: (node) => {
+            // In a link, only the FEFFs of its provider and the ones following
+            // a line break are legit.
+            const link = closestElement(node, "a");
+            if (
+                link &&
+                this.isLinkEligibleForZwnbsp(link) &&
+                node.previousSibling?.nodeName !== "BR"
+            ) {
+                return false;
+            }
+        },
+
         system_classes: ["o_link_in_selection"],
     };
 
+    /**
+     * Updates the FEFFs of the whole link holding the root, as its inner FEFFs
+     * can be outside the root.
+     *
+     * @param {Element} root
+     */
+    updateLinkFeffs(root) {
+        const link = closestElement(root, "a");
+        if (link && link !== root) {
+            this.dependencies.feff.updateFeffs(link);
+        }
+    }
+
     addFeffsToLinks(root, cursors) {
-        return selectElements(root, "a")
+        // The inner FEFFs of the link holding the root can be in the root.
+        return selectElements(closestElement(root, "a") || root, "a")
             .filter(this.isLinkEligibleForZwnbsp.bind(this))
-            .flatMap((link) => this.dependencies.feff.surroundWithFeffs(link, cursors));
+            .flatMap((link) =>
+                this.dependencies.feff.surroundWithFeffs(
+                    link,
+                    cursors,
+                    this.getInnerFeffParents(link)
+                )
+            );
+    }
+
+    /**
+     * Returns the parents of the inner FEFFs of the link, at the start and at
+     * the end of its label: the deepest splittable inline elements holding
+     * these edges.
+     *
+     * Such an element emptied of its text gets a zero-width space, as the other
+     * empty inlines do, so that it is removed on save if no text is typed in it.
+     *
+     * @param {HTMLAnchorElement} link
+     * @returns {Element[]}
+     */
+    getInnerFeffParents(link) {
+        const { anchorNode } = this.dependencies.selection.getEditableSelection();
+        // Skip the FEFFs, the empty text nodes, and the nodes holding only
+        // FEFFs unless the selection is in them.
+        const getContentNodes = (element) =>
+            childNodes(element).filter(
+                (node) =>
+                    !isZwnbsp(node) &&
+                    !isEmptyTextNode(node) &&
+                    (!/^\ufeff+$/.test(node.textContent) || node.contains(anchorNode))
+            );
+        const getInnerFeffParent = (index) => {
+            let parent = link;
+            let edgeNode = getContentNodes(parent).at(index);
+            while (
+                isElement(edgeNode) &&
+                edgeNode.hasChildNodes() &&
+                // Not in unsplittable elements (e.g. non-editable elements, QWeb
+                // directives), nor in the empty inlines waiting for text.
+                (this.checkPredicates("is_node_splittable_predicates", edgeNode) ?? true) &&
+                !edgeNode.matches("[data-oe-zws-empty-inline]")
+            ) {
+                const innerEdgeNode = getContentNodes(edgeNode).at(index);
+                if (!innerEdgeNode) {
+                    edgeNode.append(this.document.createTextNode("\u200B"));
+                    edgeNode.setAttribute("data-oe-zws-empty-inline", "");
+                    break;
+                }
+                parent = edgeNode;
+                edgeNode = innerEdgeNode;
+            }
+            return parent;
+        };
+        // At the first and at the last content node of the label.
+        return [getInnerFeffParent(0), getInnerFeffParent(-1)];
     }
 
     isLinkEligibleForZwnbsp(link) {
