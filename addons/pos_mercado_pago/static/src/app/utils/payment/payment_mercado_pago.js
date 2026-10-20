@@ -23,6 +23,7 @@ export class PaymentMercadoPago extends PaymentInterface {
         return await this.callPaymentMethod("mp_order_create", [
             [line.payment_method_id.id],
             infos,
+            line.terminal_id?.id || null,
         ]);
     }
     async getLastOrderStatus() {

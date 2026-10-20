@@ -14,14 +14,15 @@ export class QFPay {
         this.errorCallback = errorCallback;
     }
 
-    async makeQFPayRequest(endpoint, payload) {
+    async makeQFPayRequest(endpoint, payload, terminal) {
         try {
             const signedPayload = await this.orm.call("pos.payment.method", "qfpay_sign_request", [
                 this.paymentMethod.id,
                 payload,
+                terminal.id,
             ]);
             const result = await fetch(
-                `https://${this.paymentMethod.qfpay_terminal_ip_address}:9001/api/pos/${endpoint}`,
+                `https://${terminal.qfpay_terminal_ip_address}:9001/api/pos/${endpoint}`,
                 {
                     method: "POST",
                     headers: {

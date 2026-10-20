@@ -33,10 +33,10 @@ export class PaymentSumup extends PaymentInterface {
 
         const isRefund = line.amount < 0;
         const method = isRefund ? "sumup_refund" : "sumup_pay";
-        const params = [[this.payment_method_id.id], line.amount];
-        if (isRefund) {
-            params.push(line.transaction_id);
-        }
+        // A refund is processed by the merchant account, not by a reader
+        const params = isRefund
+            ? [[this.payment_method_id.id], line.amount, line.transaction_id]
+            : [[this.payment_method_id.id], line.amount, line.terminal_id?.id || null];
 
         const response = await this.callPaymentMethod(method, params);
         if (response?.error) {
@@ -68,6 +68,7 @@ export class PaymentSumup extends PaymentInterface {
         this._stopPolling(line);
         const cancelSumup = await this.callPaymentMethod("sumup_cancel", [
             [this.payment_method_id.id],
+            line.terminal_id?.id || null,
         ]);
         if (cancelSumup) {
             line.setPaymentStatus("retry");
@@ -94,6 +95,7 @@ export class PaymentSumup extends PaymentInterface {
         const response = await this.callPaymentMethod("sumup_get_checkout_status", [
             [this.payment_method_id.id],
             pending.checkoutId,
+            line.terminal_id?.id || null,
         ]);
         if (!response) {
             return;

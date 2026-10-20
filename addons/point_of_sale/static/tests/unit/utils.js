@@ -619,3 +619,23 @@ export function addTestTerminals(store, count = 2) {
     store.paymentMethods.initDefaults();
     return terminals;
 }
+
+/**
+ * Adds terminals to a payment method, so that a default terminal can be
+ * selected for it.
+ */
+export function addPaymentMethodTerminals(store, paymentMethod, count = 2) {
+    const terminals = [];
+    for (let i = 1; i <= count; i++) {
+        terminals.push(
+            store.models["pos.payment.terminal"].create({
+                id: 1200 + store.models["pos.payment.terminal"].length + 1,
+                name: `Terminal ${paymentMethod.terminal_ids.length + 1}`,
+                payment_method_id: paymentMethod,
+                sequence: paymentMethod.terminal_ids.length + 1,
+            })
+        );
+    }
+    store.paymentMethods.initDefaults();
+    return terminals;
+}

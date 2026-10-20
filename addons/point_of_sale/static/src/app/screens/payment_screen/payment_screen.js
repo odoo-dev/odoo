@@ -112,7 +112,7 @@ export class PaymentScreen extends Component {
             if (!this.showPaymentMethod(pm)) {
                 continue;
             }
-            if (!groups[pm.payment_provider]?.includes(pm)) {
+            if (!groups[pm.payment_provider]?.some((option) => option.paymentMethod === pm)) {
                 displayed.push(pm);
                 continue;
             }
@@ -198,7 +198,10 @@ export class PaymentScreen extends Component {
             return;
         }
 
-        const result = this.currentOrder.addPaymentline(paymentMethod, args);
+        const result = this.currentOrder.addPaymentline(paymentMethod, {
+            terminal: this.pos.paymentMethods.getTerminal(paymentMethod),
+            ...args,
+        });
         if (result.status) {
             this.numberBuffer.set(result.data.amount.toString());
             if (

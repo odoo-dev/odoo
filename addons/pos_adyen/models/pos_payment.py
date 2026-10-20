@@ -16,4 +16,4 @@ class PosPayment(models.Model):
             'merchantAccount': self.payment_method_id.adyen_merchant_account,
         }
 
-        return self.payment_method_id.proxy_adyen_request(data, 'capture')
+        return self.payment_method_id.proxy_adyen_request(data, 'capture', self.terminal_id.id)

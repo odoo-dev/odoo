@@ -165,7 +165,7 @@ class PosSession(models.Model):
     def _load_pos_data_models(self, config):
         return [
             'pos.config', 'pos.preset', 'resource.calendar.attendance', 'pos.order',
-            'pos.order.line', 'pos.payment', 'pos.payment.method', 'pos.printer',
+            'pos.order.line', 'pos.payment', 'pos.payment.method', 'pos.payment.terminal', 'pos.printer',
             'pos.category', 'pos.bill', 'res.company', 'account.tax', 'account.tax.group',
             'product.template', 'product.product', 'product.attribute', 'product.attribute.custom.value',
             'product.template.attribute.line', 'product.template.attribute.value',

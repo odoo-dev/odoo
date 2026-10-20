@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_payment_terminal_view_list" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.list.inherit.pos_pine_labs</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_list"/>
+        <field name="arch" type="xml">
+            <list position="inside">
+                <field name="pine_labs_store" column_invisible="parent.payment_provider != 'pine_labs'" required="parent.payment_provider == 'pine_labs'"/>
+                <field name="pine_labs_client" column_invisible="parent.payment_provider != 'pine_labs'" required="parent.payment_provider == 'pine_labs'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="pos_payment_terminal_view_form" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.form.inherit.pos_pine_labs</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_form"/>
+        <field name="arch" type="xml">
+            <group name="settings" position="after">
+                <group name="pine_labs_settings" invisible="payment_provider != 'pine_labs'">
+                    <field name="pine_labs_store" required="payment_provider == 'pine_labs'"/>
+                    <field name="pine_labs_client" required="payment_provider == 'pine_labs'"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

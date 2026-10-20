@@ -25,7 +25,9 @@ const setupMollie = async () => {
         (pm) => pm.payment_provider === "mollie"
     );
     const mollie = paymentMethod.payment_interface;
-    const paymentLine = order.addPaymentline(paymentMethod).data;
+    const paymentLine = order.addPaymentline(paymentMethod, {
+        terminal: store.paymentMethods.getTerminal(paymentMethod),
+    }).data;
 
     const mockMollieCreatePaymentWithStatus = (status) => {
         onRpc("pos.payment.method", "mollie_create_payment", ({ args }) => {
@@ -33,6 +35,7 @@ const setupMollie = async () => {
             expect(args[1]).toBe(595);
             expect(args[2]).toBe(paymentLine.uuid);
             expect(args[3]).toBe(order.session_id.id);
+            expect(args[4]).toBe(4);
             return { id: fakeMollieId, status, _links: {} };
         });
     };
@@ -95,4 +98,17 @@ test("shows error on expired payment", async () => {
 
     await expect(result).resolves.toBe(false);
     expect(lastError).toBe("The payment has timed out.");
+});
+
+test("payment requests are sent to the terminal of the payment line", async () => {
+    const { mollie, paymentLine } = await setupMollie();
+    expect(paymentLine.terminal_id.id).toBe(4);
+
+    onRpc("pos.payment.method", "mollie_cancel_payment", ({ args }) => {
+        expect.step(args);
+        return true;
+    });
+    paymentLine.transaction_id = fakeMollieId;
+    await expect(mollie.sendPaymentCancel(paymentLine)).resolves.toBe(true);
+    expect.verifySteps([[4, fakeMollieId, 4]]);
 });

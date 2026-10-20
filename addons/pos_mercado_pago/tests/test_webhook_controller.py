@@ -5,6 +5,7 @@ import uuid
 from unittest.mock import patch
 from urllib.parse import urlencode
 
+from odoo import Command
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
@@ -34,7 +35,7 @@ class TestMercadoPagoWebhook(TestPointOfSaleHttpCommon):
                 'payment_provider': 'mercado_pago',
                 'mp_bearer_token': 'APP_USR-test',
                 'mp_webhook_secret_key': 'secret-test',
-                'mp_id_point_smart': '1494126963',
+                'terminal_ids': [Command.create({'mp_id_point_smart': '1494126963'})],
             })
 
         cls.config = cls.env['pos.config'].sudo().create({

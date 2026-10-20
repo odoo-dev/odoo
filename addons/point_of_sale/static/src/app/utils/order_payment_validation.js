@@ -29,7 +29,9 @@ export default class OrderPaymentValidation {
             .slice()
             .sort((a, b) => a.sequence - b.sequence);
         if (vals.fastPaymentMethod) {
-            this.order.addPaymentline(vals.fastPaymentMethod);
+            this.order.addPaymentline(vals.fastPaymentMethod, {
+                terminal: this.pos.paymentMethods.getTerminal(vals.fastPaymentMethod),
+            });
         }
     }
 

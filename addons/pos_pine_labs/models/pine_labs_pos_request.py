@@ -16,16 +16,16 @@ ALLOWED_PAYMENT_MODES_MAPPING = {
 _logger = logging.getLogger(__name__)
 
 
-def call_pine_labs(payment_method: object, endpoint: str, payload: dict) -> dict:
+def call_pine_labs(terminal: object, endpoint: str, payload: dict) -> dict:
     """
-    Make a request to Pine Labs POS API.
+    Make a request to Pine Labs POS API for the given `pos.payment.terminal`.
 
     :return The content of the response parsed from json
     """
     if endpoint not in ALLOWED_ENDPOINTS:
         raise ValueError(f"Invalid endpoint: '{endpoint}'. Allowed endpoints are: {ALLOWED_ENDPOINTS}")
-    payload |= pine_labs_request_body(endpoint == 'UploadBilledTransaction', payment_method=payment_method)
-    pine_labs_url = _get_pine_labs_url(payment_method=payment_method)
+    payload |= pine_labs_request_body(endpoint == 'UploadBilledTransaction', terminal=terminal)
+    pine_labs_url = _get_pine_labs_url(payment_method=terminal.payment_method_id)
     url = pine_labs_url + endpoint
     try:
         response = requests.post(url, json=payload, timeout=REQUEST_TIMEOUT)
@@ -44,17 +44,19 @@ def call_pine_labs(payment_method: object, endpoint: str, payload: dict) -> dict
         _logger.warning('JSONDecodeError: %r', error)
         return {'errorMessage': error}
 
-def pine_labs_request_body(payment_mode: bool, payment_method: object) -> dict:
+
+def pine_labs_request_body(payment_mode: bool, terminal: object) -> dict:
     """
     :param payment_mode: If set, includes allowed payment mode and auto-cancel duration in
                         the request body for `UploadBilledTransaction` endpoint.
 
     rtype: dict
     """
+    payment_method = terminal.payment_method_id
     request_parameters = {
         'MerchantID': payment_method.pine_labs_merchant,
-        'StoreID': payment_method.pine_labs_store,
-        'ClientID': payment_method.pine_labs_client,
+        'StoreID': terminal.pine_labs_store,
+        'ClientID': terminal.pine_labs_client,
         'SecurityToken': payment_method.sudo().pine_labs_security_token
     }
     if payment_mode:
@@ -65,6 +67,7 @@ def pine_labs_request_body(payment_mode: bool, payment_method: object) -> dict:
             'AutoCancelDurationInMinutes': pine_labs_auto_cancel_duration
         })
     return request_parameters
+
 
 def _get_pine_labs_url(payment_method) -> str:
     if endpoint := payment_method.env['ir.config_parameter'].sudo().get_str('pos_pine_labs.pine_labs_proxy_endpoint'):

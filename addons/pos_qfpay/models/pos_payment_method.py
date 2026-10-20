@@ -15,8 +15,9 @@ class PosPaymentMethod(models.Model):
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('qfpay', 'QFPay')]
 
-    qfpay_terminal_ip_address = fields.Char('QFPay Terminal IP Address', copy=False)
-    qfpay_pos_key = fields.Char('QFPay POS Key', copy=False, groups='point_of_sale.group_pos_manager')
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['qfpay']
+
     qfpay_notification_key = fields.Char(string='QFPay Notification Key', copy=False, groups='point_of_sale.group_pos_manager')
     qfpay_latest_response = fields.Char(copy=False, groups='point_of_sale.group_pos_manager')
     qfpay_payment_type = fields.Selection([
@@ -34,7 +35,7 @@ class PosPaymentMethod(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         params = super()._load_pos_data_fields(config)
-        params += ['qfpay_terminal_ip_address', 'qfpay_payment_type']
+        params += ['qfpay_payment_type']
         return params
 
     @api.constrains('payment_provider')
@@ -42,7 +43,7 @@ class PosPaymentMethod(models.Model):
         if any(record.payment_provider == 'qfpay' and record.company_id.currency_id.name != 'HKD' for record in self):
             raise UserError(_('QFPay is only valid for HKD Currency'))
 
-    def qfpay_sign_request(self, payload):
+    def qfpay_sign_request(self, payload, terminal_id: int | None = None):
         self.ensure_one()
         if not self.env.su and not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessDenied()
@@ -50,7 +51,7 @@ class PosPaymentMethod(models.Model):
         if self.payment_provider != 'qfpay':
             raise UserError(_('This method can only be used with QFPay payment terminal.'))
 
-        key = self.sudo().qfpay_pos_key
+        key = self._get_payment_terminal(terminal_id).sudo().qfpay_pos_key
         # AES IV is a constant as stated in the documentation
         aes_iv = 'qfpay202306_hjsh'
 

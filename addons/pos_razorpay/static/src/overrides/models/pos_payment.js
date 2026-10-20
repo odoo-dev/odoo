@@ -11,11 +11,16 @@ patch(PosPayment.prototype, {
             ...this.uiState,
             transaction_id: null,
             razorpay_p2p_request_id: null,
+            razorpay_refunded_terminal: null,
         };
     },
     updateRefundPaymentLine(refundedPaymentLine) {
         super.updateRefundPaymentLine(refundedPaymentLine);
         this.uiState.transaction_id = refundedPaymentLine?.transaction_id;
         this.uiState.razorpay_p2p_request_id = refundedPaymentLine?.razorpay_p2p_request_id;
+        this.uiState.razorpay_refunded_terminal =
+            refundedPaymentLine?.payment_method_id === this.payment_method_id
+                ? refundedPaymentLine.terminal_id
+                : null;
     },
 });

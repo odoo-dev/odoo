@@ -21,6 +21,7 @@ class PosSelfOrderControllerRazorpay(PosSelfOrderController):
             order.add_payment({
                 'amount': order.amount_total,
                 'payment_method_id': payment_method.id,
+                'terminal_id': payment_method._get_payment_terminal().id,
                 'card_type': razorpay_status_response.get('paymentCardType'),
                 'cardholder_name': razorpay_status_response.get('nameOnCard'),
                 'transaction_id': razorpay_status_response.get('txnId'),

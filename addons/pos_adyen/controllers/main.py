@@ -34,8 +34,8 @@ class PosAdyenController(http.Controller):
 
         terminal_identifier = msg_header['POIID']
         response_name = 'PaymentResponse' if msg_header.get('MessageCategory') == 'Payment' else 'ReversalResponse'
-        adyen_pm_sudo = request.env['pos.payment.method'].sudo().search([('adyen_terminal_identifier', '=', terminal_identifier)], limit=1)
-        if not adyen_pm_sudo:
+        adyen_terminal_sudo = request.env['pos.payment.terminal'].sudo().search([('adyen_terminal_identifier', '=', terminal_identifier)], limit=1)
+        if not adyen_terminal_sudo:
             _logger.warning('Received an Adyen event notification for a terminal not registered in Odoo: %s', terminal_identifier)
             return
 
@@ -43,7 +43,7 @@ class PosAdyenController(http.Controller):
             adyen_additional_response = data['SaleToPOIResponse'][response_name]['Response']['AdditionalResponse']
             pos_hmac = PosAdyenController._get_additional_data_from_unparsed(adyen_additional_response, 'metadata.pos_hmac')
 
-            if not pos_hmac or not consteq(pos_hmac, adyen_pm_sudo._get_hmac(msg_header['SaleID'], msg_header['ServiceID'], msg_header['POIID'], data['SaleToPOIResponse']['PaymentResponse']['SaleData']['SaleTransactionID']['TransactionID'])):
+            if not pos_hmac or not consteq(pos_hmac, adyen_terminal_sudo.payment_method_id._get_hmac(msg_header['SaleID'], msg_header['ServiceID'], msg_header['POIID'], data['SaleToPOIResponse']['PaymentResponse']['SaleData']['SaleTransactionID']['TransactionID'])):
                 _logger.warning('Received an invalid Adyen event notification (invalid hmac): \n%s', pprint.pformat(data))
                 return
 
@@ -55,7 +55,7 @@ class PosAdyenController(http.Controller):
             _logger.warning('Received an invalid Adyen event notification: \n%s', pprint.pformat(data))
             return
 
-        return self._process_payment_response(data, adyen_pm_sudo)
+        return self._process_payment_response(data, adyen_terminal_sudo)
 
     @staticmethod
     def _get_additional_data_from_unparsed(adyen_additional_response, data_key):
@@ -67,7 +67,7 @@ class PosAdyenController(http.Controller):
         data_value = parsed_adyen_additional_response.get(data_key)
         return data_value[0] if data_value and len(data_value) == 1 else None
 
-    def _process_payment_response(self, data, adyen_pm_sudo):
+    def _process_payment_response(self, data, adyen_terminal_sudo):
         transaction_id = data['SaleToPOIResponse']['PaymentResponse']['SaleData']['SaleTransactionID']['TransactionID']
         if not transaction_id:
             return
@@ -76,6 +76,6 @@ class PosAdyenController(http.Controller):
             return
         pos_session_id = int(transaction_id_parts[1])
         pos_session_sudo = request.env["pos.session"].sudo().browse(pos_session_id)
-        adyen_pm_sudo.adyen_latest_response = json.dumps(data)
-        pos_session_sudo.config_id._notify("ADYEN_LATEST_RESPONSE", pos_session_sudo.config_id.id)
+        adyen_terminal_sudo.adyen_latest_response = json.dumps(data)
+        pos_session_sudo.config_id._notify("ADYEN_LATEST_RESPONSE", {'terminal_id': adyen_terminal_sudo.id})
         return request.make_json_response('[accepted]') # https://docs.adyen.com/point-of-sale/design-your-integration/choose-your-architecture/cloud/#guarantee

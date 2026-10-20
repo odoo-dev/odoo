@@ -14,6 +14,7 @@ export class PosPaymentMethod extends models.ServerModel {
             "payment_method_type",
             "default_qr",
             "currency_ids",
+            "terminal_ids",
         ];
     }
 

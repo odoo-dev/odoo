@@ -5,6 +5,7 @@
     "summary": "Integrate your POS with a SumUp payment terminal",
     "data": [
         "views/pos_payment_method_views.xml",
+        "views/pos_payment_terminal_views.xml",
     ],
     "depends": ["point_of_sale"],
     "assets": {

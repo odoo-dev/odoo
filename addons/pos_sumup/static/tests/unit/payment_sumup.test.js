@@ -1,6 +1,11 @@
 import { test, expect, describe, beforeEach, waitUntil } from "@odoo/hoot";
 import { advanceTime } from "@odoo/hoot-mock";
-import { setupPosEnv, createPaymentLine, getFilledOrder } from "@point_of_sale/../tests/unit/utils";
+import {
+    setupPosEnv,
+    createPaymentLine,
+    getFilledOrder,
+    addPaymentMethodTerminals,
+} from "@point_of_sale/../tests/unit/utils";
 import { definePosModels } from "@point_of_sale/../tests/unit/data/generate_model_definitions";
 import { onRpc } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
@@ -44,11 +49,13 @@ describe("sendPaymentRequest: payment", () => {
         const paymentLine = createPaymentLine(store, order, paymentMethod, {
             amount: 10,
             payment_status: "waiting",
+            terminal_id: paymentMethod.terminal_ids[0],
         });
 
         onRpc("pos.payment.method", "sumup_pay", ({ args }) => {
             expect(args[0]).toEqual([paymentMethod.id]);
             expect(args[1]).toBe(10);
+            expect(args[2]).toBe(4);
             return { data: { client_transaction_id: "ctid1", checkout_id: "chk1" } };
         });
 
@@ -263,5 +270,41 @@ describe("sendPaymentCancel", () => {
 
         await advanceTime(POLLING_START_DELAY_MS + POLLING_INTERVAL_MS * 3);
         expect(checkoutStatusCalls).toBe(0);
+    });
+});
+
+describe("terminals", () => {
+    test("requests to the reader are sent to the terminal of the payment line", async () => {
+        const { store, order, paymentMethod, sumup } = await setupSumup();
+        const [, terminal] = addPaymentMethodTerminals(store, paymentMethod);
+        const paymentLine = createPaymentLine(store, order, paymentMethod, {
+            amount: 10,
+            payment_status: "waiting",
+            terminal_id: terminal,
+        });
+
+        onRpc("pos.payment.method", "sumup_pay", ({ args }) => {
+            expect.step(["sumup_pay", args[2]]);
+            return { data: { client_transaction_id: "ctid1", checkout_id: "chk1" } };
+        });
+        onRpc("pos.payment.method", "sumup_get_checkout_status", ({ args }) => {
+            expect.step(["sumup_get_checkout_status", args[2]]);
+            return { data: { status: "pending" } };
+        });
+        onRpc("pos.payment.method", "sumup_cancel", ({ args }) => {
+            expect.step(["sumup_cancel", args[1]]);
+            return true;
+        });
+
+        sumup.sendPaymentRequest(paymentLine);
+        await waitUntil(() => paymentLine.transaction_id === "ctid1");
+        await advanceTime(POLLING_START_DELAY_MS + POLLING_INTERVAL_MS);
+        await sumup.sendPaymentCancel(paymentLine);
+
+        expect.verifySteps([
+            ["sumup_pay", terminal.id],
+            ["sumup_get_checkout_status", terminal.id],
+            ["sumup_cancel", terminal.id],
+        ]);
     });
 });

@@ -7,11 +7,12 @@ REQUEST_TIMEOUT = 10
 _logger = logging.getLogger(__name__)
 
 class RazorpayPosRequest:
-    def __init__(self, payment_method):
+    def __init__(self, terminal):
+        payment_method = terminal.payment_method_id
         self.razorpay_test_mode = payment_method.razorpay_test_mode
         self.razorpay_api_key = payment_method.sudo().razorpay_api_key
-        self.razorpay_username = payment_method.razorpay_username
-        self.razorpay_tid = payment_method.razorpay_tid
+        self.razorpay_username = terminal.razorpay_username
+        self.razorpay_tid = terminal.razorpay_tid
         self.razorpay_allowed_payment_modes = payment_method.razorpay_allowed_payment_modes
         self.payment_method = payment_method
         self.session = requests.Session()

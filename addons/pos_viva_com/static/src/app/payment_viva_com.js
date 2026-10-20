@@ -50,8 +50,8 @@ export class PaymentVivaCom extends PaymentInterface {
         return this.pos.accessRight?.loggedCashier?.name?.trim() || this.pos.config.name;
     }
 
-    _call_viva_com(data, action, paymentLine) {
-        return this.callPaymentMethod(action, [[this.payment_method_id.id], data]).catch(
+    _call_viva_com(args, action, paymentLine) {
+        return this.callPaymentMethod(action, [[this.payment_method_id.id], ...args]).catch(
             this._handleOdooConnectionFailure.bind(this, paymentLine)
         );
     }
@@ -92,7 +92,6 @@ export class PaymentVivaCom extends PaymentInterface {
         var data = {
             sessionId: line.viva_com_session_id,
             parentSessionId: line.uiState.vivaComParentSessionId,
-            terminalId: line.payment_method_id.viva_com_terminal_id,
             cashRegisterId,
             amount: roundPrecision(Math.abs(line.amount * 100)),
             currencyCode: this.pos.currency.iso_numeric.toString(),
@@ -106,7 +105,9 @@ export class PaymentVivaCom extends PaymentInterface {
         const action =
             line.amount < 0 ? "viva_com_send_refund_request" : "viva_com_send_payment_request";
 
-        return this._call_viva_com(data, action, line).then((data) =>
+        // The server sends the request to the Viva.com terminal of the payment line
+        const args = [data, line.terminal_id?.id || null];
+        return this._call_viva_com(args, action, line).then((data) =>
             this._viva_com_handle_response(data, line)
         );
     }
@@ -117,7 +118,7 @@ export class PaymentVivaCom extends PaymentInterface {
             sessionId: line.viva_com_session_id,
             cashRegisterId,
         };
-        return this._call_viva_com(data, "viva_com_send_payment_cancel", line).then((data) => {
+        return this._call_viva_com([data], "viva_com_send_payment_cancel", line).then((data) => {
             if (data.error) {
                 this._show_error(data.error);
             }

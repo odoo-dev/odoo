@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_payment_terminal_view_list" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.list.inherit.pos_mollie</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_list"/>
+        <field name="arch" type="xml">
+            <list position="inside">
+                <field name="mollie_payment_provider_id" column_invisible="parent.payment_provider != 'mollie'" required="parent.payment_provider == 'mollie'"/>
+                <field name="mollie_terminal_id" column_invisible="parent.payment_provider != 'mollie'" required="parent.payment_provider == 'mollie'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="pos_payment_terminal_view_form" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.form.inherit.pos_mollie</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_form"/>
+        <field name="arch" type="xml">
+            <group name="settings" position="after">
+                <group name="mollie_settings" invisible="payment_provider != 'mollie'">
+                    <field name="mollie_payment_provider_id" required="payment_provider == 'mollie'"/>
+                    <field name="mollie_terminal_id" required="payment_provider == 'mollie'"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

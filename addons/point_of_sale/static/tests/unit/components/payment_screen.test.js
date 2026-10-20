@@ -1,7 +1,13 @@
 import { test, expect, animationFrame } from "@odoo/hoot";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
-import { setupPosEnv, getFilledOrder, expectFormattedPrice, addTestTerminals } from "../utils";
+import {
+    setupPosEnv,
+    getFilledOrder,
+    expectFormattedPrice,
+    addTestTerminals,
+    addPaymentMethodTerminals,
+} from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
 import { queryOne } from "@odoo/hoot-dom";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
@@ -182,4 +188,31 @@ test("Caba pay later always invoice", async () => {
     expect(order.isToInvoice()).toBe(true);
     const res2 = await validation2.isOrderValid();
     expect(res2).toBe(true);
+});
+
+test("addNewPaymentLine uses the terminal of the device", async () => {
+    const store = await setupPosEnv();
+    const order = await getFilledOrder(store);
+    const [paymentMethod] = addTestTerminals(store, 1);
+    const [terminal1, terminal2] = addPaymentMethodTerminals(store, paymentMethod);
+    const comp = await mountWithCleanup(PaymentScreen, {
+        props: { orderUuid: order.uuid },
+    });
+
+    // The payment method is replaced by a provider button until a terminal is selected
+    expect(comp.displayedPaymentMethods.map((pm) => pm.name)).toEqual([
+        "Cash",
+        "Card",
+        "Test Provider",
+    ]);
+
+    // Without default, the first terminal is used
+    await comp.addNewPaymentLine(paymentMethod);
+    expect(order.payment_ids.at(-1).terminal_id).toBe(terminal1);
+
+    store.paymentMethods.setDefault("test_terminal", `${paymentMethod.id}-${terminal2.id}`);
+    expect(comp.displayedPaymentMethods.at(-1)).toBe(paymentMethod);
+    order.removePaymentline(order.payment_ids.at(-1));
+    await comp.addNewPaymentLine(paymentMethod);
+    expect(order.payment_ids.at(-1).terminal_id).toBe(terminal2);
 });

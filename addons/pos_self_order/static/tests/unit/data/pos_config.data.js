@@ -24,6 +24,7 @@ patch(PosConfig.prototype, {
             "pos.order.line",
             "pos.payment",
             "pos.payment.method",
+            "pos.payment.terminal",
             "res.partner",
             "res.currency",
             "pos.category",

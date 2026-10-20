@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_payment_terminal_view_list" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.list.inherit.pos_sumup</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_list"/>
+        <field name="arch" type="xml">
+            <list position="inside">
+                <field name="sumup_terminal_id" column_invisible="parent.payment_provider != 'sumup'"/>
+                <field name="sumup_pairing_code" column_invisible="parent.payment_provider != 'sumup'" invisible="sumup_terminal_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="pos_payment_terminal_view_form" model="ir.ui.view">
+        <field name="name">pos.payment.terminal.form.inherit.pos_sumup</field>
+        <field name="model">pos.payment.terminal</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_terminal_view_form"/>
+        <field name="arch" type="xml">
+            <group name="settings" position="after">
+                <group name="sumup_settings" invisible="payment_provider != 'sumup'">
+                    <field name="sumup_terminal_id"/>
+                    <field name="sumup_pairing_code" invisible="sumup_terminal_id"/>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

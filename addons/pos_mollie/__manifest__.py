@@ -5,7 +5,7 @@
     'summary': 'Integrate your POS with a Mollie payment terminal',
     'depends': ['point_of_sale', 'payment_mollie'],
     'data': [
-        'views/pos_payment_method_views.xml',
+        'views/pos_payment_terminal_views.xml',
     ],
     'assets': {
         'point_of_sale.payment_terminals': [

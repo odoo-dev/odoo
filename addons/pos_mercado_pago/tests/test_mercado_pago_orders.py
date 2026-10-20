@@ -1,8 +1,12 @@
 from unittest.mock import patch
 
+from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
 
-from odoo.addons.pos_mercado_pago.models.mercado_pago_pos_request import MercadoPagoPosRequest
+from odoo.addons.pos_mercado_pago.models.mercado_pago_pos_request import (
+    MercadoPagoPosRequest,
+)
 from odoo.addons.pos_mercado_pago.models.pos_payment_method import PosPaymentMethod
 
 
@@ -17,9 +21,9 @@ class TestMercadoPagoOrders(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Setting mp_bearer_token triggers _find_terminal on create, which
-        # would hit MP for real — short-circuit it.
-        with patch.object(PosPaymentMethod, '_find_terminal', return_value='PAX_A910__SMARTPOS0123456789'):
+        # Creating the terminals triggers _find_terminal, which would hit MP
+        # for real — short-circuit it.
+        with cls._mock_find_terminal():
             cls.method = cls.env['pos.payment.method'].create({
                 'name': 'Mercado Pago test',
                 'type': 'bank',
@@ -27,8 +31,19 @@ class TestMercadoPagoOrders(TransactionCase):
                 'payment_provider': 'mercado_pago',
                 'mp_bearer_token': 'APP_USR-test',
                 'mp_webhook_secret_key': 'secret-test',
-                'mp_id_point_smart': '1494126963',
+                'terminal_ids': [
+                    Command.create({'mp_id_point_smart': '0123456789'}),
+                    Command.create({'mp_id_point_smart': '9876543210'}),
+                ],
             })
+        cls.terminal_1, cls.terminal_2 = cls.method.terminal_ids
+
+    @classmethod
+    def _mock_find_terminal(cls):
+        return patch.object(
+            PosPaymentMethod, '_find_terminal',
+            side_effect=lambda token, point_smart: f'PAX_A910__SMARTPOS{point_smart}',
+        )
 
     def test_create_order_payload(self):
         captured = {}
@@ -40,6 +55,7 @@ class TestMercadoPagoOrders(TransactionCase):
             })
             return {'id': 'ORD01TEST', 'status': 'created'}
 
+        # Without terminal (e.g. from the Self Order Kiosk), the first terminal is used
         with patch.object(MercadoPagoPosRequest, 'call_mercado_pago', fake_call):
             resp = self.method.mp_order_create({
                 'type': 'point',
@@ -144,3 +160,56 @@ class TestMercadoPagoOrders(TransactionCase):
         self.assertEqual(captured['method'], 'get')
         self.assertEqual(captured['endpoint'], '/terminals/v1/list')
         self.assertEqual(resolved, 'PAX_A910__SMARTPOS0123456789')
+
+    def test_create_order_uses_terminal(self):
+        captured = {}
+
+        def fake_call(self, method, endpoint, payload, idempotent=False):
+            captured.update({'payload': payload})
+            return {'id': 'ORD01TEST', 'status': 'created'}
+
+        with patch.object(MercadoPagoPosRequest, 'call_mercado_pago', fake_call):
+            self.method.mp_order_create({'type': 'point'}, self.terminal_2.id)
+        self.assertEqual(
+            captured['payload']['config']['point']['terminal_id'],
+            'PAX_A910__SMARTPOS9876543210',
+        )
+
+        with self._mock_find_terminal():
+            other_terminal = self.method.copy().terminal_ids[0]
+        with patch.object(MercadoPagoPosRequest, 'call_mercado_pago', fake_call), self.assertRaises(ValidationError):
+            self.method.mp_order_create({'type': 'point'}, other_terminal.id)
+
+    def test_find_terminal_on_terminal_and_token_change(self):
+        with self._mock_find_terminal() as mock_find_terminal:
+            self.terminal_2.mp_id_point_smart = '5555555555'
+        mock_find_terminal.assert_called_once_with('APP_USR-test', '5555555555')
+        self.assertEqual(self.terminal_2.mp_id_point_smart_complet, 'PAX_A910__SMARTPOS5555555555')
+
+        with self._mock_find_terminal() as mock_find_terminal:
+            self.method.mp_bearer_token = 'APP_USR-other'
+        self.assertEqual(
+            [call.args for call in mock_find_terminal.call_args_list],
+            [('APP_USR-other', '0123456789'), ('APP_USR-other', '5555555555')],
+        )
+
+    def test_force_pdv_sets_all_terminals(self):
+        captured = {}
+
+        def fake_call(self, method, endpoint, payload, idempotent=False):
+            captured.update({'method': method, 'endpoint': endpoint, 'payload': payload})
+            return {'terminals': [{**terminal, 'operating_mode': 'PDV'} for terminal in payload['terminals']]}
+
+        with patch.object(MercadoPagoPosRequest, 'call_mercado_pago', fake_call):
+            self.method.force_pdv()
+
+        self.assertEqual(captured['method'], 'patch')
+        self.assertEqual(captured['endpoint'], '/terminals/v1/setup')
+        self.assertEqual(captured['payload'], {'terminals': [
+            {'id': 'PAX_A910__SMARTPOS0123456789', 'operating_mode': 'PDV'},
+            {'id': 'PAX_A910__SMARTPOS9876543210', 'operating_mode': 'PDV'},
+        ]})
+
+    def test_terminal_required(self):
+        with self.assertRaises(ValidationError):
+            self.method.terminal_ids = [Command.clear()]

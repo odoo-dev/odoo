@@ -21,6 +21,7 @@ class PosSelfOrderPineLabsController(PosSelfOrderController):
             order.add_payment({
                 'amount': order.amount_total,
                 'payment_method_id': payment_method.id,
+                'terminal_id': payment_method._get_payment_terminal().id,
                 'cardholder_name': data.get('Card Holder Name'),
                 'transaction_id': data.get('TransactionLogId'),
                 'payment_status': 'done',

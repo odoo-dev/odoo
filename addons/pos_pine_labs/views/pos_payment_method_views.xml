@@ -5,20 +5,22 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'pine_labs'">
-                    <page name="settings" string="Pine Labs">
-                        <group>
-                            <field name="pine_labs_merchant" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
-                            <field name="pine_labs_store" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
-                            <field name="pine_labs_client" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
-                            <field name="pine_labs_security_token" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'" password="True"/>
-                            <field name="pine_labs_allowed_payment_mode" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
-                            <field name="pine_labs_test_mode" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
-                        </group>
-                    </page>
-                </notebook>
-            </xpath>
+            <page name="terminals" position="attributes">
+                <attribute name="invisible" add="payment_provider == 'pine_labs'" separator=" or "/>
+            </page>
+            <page name="terminals" position="before">
+                <page name="pine_labs_settings" string="Pine Labs" invisible="payment_provider != 'pine_labs'">
+                    <separator string="Credentials" style="margin-top: 0.5rem !important;"/>
+                    <group>
+                        <field name="pine_labs_merchant" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
+                        <field name="pine_labs_security_token" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'" password="True"/>
+                        <field name="pine_labs_allowed_payment_mode" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
+                        <field name="pine_labs_test_mode" invisible="payment_provider != 'pine_labs'" required="payment_provider == 'pine_labs'"/>
+                    </group>
+                    <separator string="Terminals"/>
+                    <field name="terminal_ids" widget="pos_payment_terminals"/>
+                </page>
+            </page>
         </field>
     </record>
 </odoo>

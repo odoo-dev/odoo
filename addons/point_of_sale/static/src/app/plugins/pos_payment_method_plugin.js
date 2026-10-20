@@ -14,7 +14,7 @@ export class PosPaymentMethodPlugin extends Plugin {
 
     setup() {
         this.defaultGroups = {};
-        this.defaultIds = proxy({});
+        this.defaultKeys = proxy({});
     }
 
     get config() {
@@ -40,7 +40,7 @@ export class PosPaymentMethodPlugin extends Plugin {
         this.defaultGroups = this.computeDefaultGroups();
         for (const provider of Object.keys(this.defaultGroups)) {
             const key = this.getDefaultStorageKey(provider);
-            this.defaultIds[provider] = Number(localStorage.getItem(key)) || false;
+            this.defaultKeys[provider] = localStorage.getItem(key) || false;
         }
     }
 
@@ -48,45 +48,84 @@ export class PosPaymentMethodPlugin extends Plugin {
         const groups = {};
         for (const pm of this.config.paymentMethods) {
             if (pm.payment_interface) {
-                (groups[pm.payment_provider] ||= []).push(pm);
+                (groups[pm.payment_provider] ||= []).push(...this.getSelectableTerminals(pm));
             }
         }
-        return Object.fromEntries(Object.entries(groups).filter(([, pms]) => pms.length > 1));
+        return Object.fromEntries(
+            Object.entries(groups).filter(([, terminals]) => terminals.length > 1)
+        );
+    }
+
+    // The terminals of a payment method that can be selected as default
+    getSelectableTerminals(paymentMethod) {
+        const terminals = paymentMethod.terminal_ids;
+        if (terminals.length > 1) {
+            return terminals.map((terminal) => ({
+                key: `${paymentMethod.id}-${terminal.id}`,
+                name: `${paymentMethod.name} - ${terminal.name}`,
+                paymentMethod,
+                terminal,
+            }));
+        }
+        return [
+            {
+                key: `${paymentMethod.id}`,
+                name: paymentMethod.name,
+                paymentMethod,
+                terminal: terminals[0],
+            },
+        ];
     }
 
     getDefaultStorageKey(provider) {
         return `pos_default_payment_method_id_${provider}_${this.config.id}_${odoo.info?.db}`;
     }
 
-    getDefault(provider) {
-        const pmId = this.defaultIds[provider];
-        return this.defaultGroups[provider]?.find((pm) => pm.id === pmId);
+    getDefaultTerminal(provider) {
+        const key = this.defaultKeys[provider];
+        return this.defaultGroups[provider]?.find((terminal) => terminal.key === key);
     }
 
-    setDefault(provider, pmId) {
+    getDefault(provider) {
+        return this.getDefaultTerminal(provider)?.paymentMethod;
+    }
+
+    /**
+     * The terminal used by this device for the payment method: the default
+     * one of its provider, or its first terminal.
+     */
+    getTerminal(paymentMethod) {
+        const defaultTerminal = this.getDefaultTerminal(paymentMethod.payment_provider);
+        if (defaultTerminal?.paymentMethod === paymentMethod) {
+            return defaultTerminal.terminal;
+        }
+        return paymentMethod.terminal_ids[0];
+    }
+
+    setDefault(provider, terminalKey) {
         const key = this.getDefaultStorageKey(provider);
-        if (pmId) {
-            localStorage.setItem(key, pmId);
+        if (terminalKey) {
+            localStorage.setItem(key, terminalKey);
         } else {
             localStorage.removeItem(key);
         }
-        this.defaultIds[provider] = pmId || false;
+        this.defaultKeys[provider] = terminalKey ? String(terminalKey) : false;
     }
 
     async selectDefaults(providers = Object.keys(this.defaultGroups)) {
         const selection = await makeAwaitable(this.dialog, SelectDefaultPaymentMethodPopup, {
             groups: providers.map((provider) => ({
                 provider,
-                name: this.defaultGroups[provider][0]._payment_provider_name,
-                paymentMethods: this.defaultGroups[provider],
-                selectedId: this.getDefault(provider)?.id || false,
+                name: this.defaultGroups[provider][0].paymentMethod._payment_provider_name,
+                terminals: this.defaultGroups[provider].map(({ key, name }) => ({ key, name })),
+                selectedKey: this.getDefaultTerminal(provider)?.key || false,
             })),
         });
         if (!selection) {
             return false;
         }
-        for (const [provider, pmId] of Object.entries(selection)) {
-            this.setDefault(provider, pmId);
+        for (const [provider, terminalKey] of Object.entries(selection)) {
+            this.setDefault(provider, terminalKey);
         }
         return true;
     }

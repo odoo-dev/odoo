@@ -5,18 +5,20 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'stripe'">
-                    <page name="settings" string="Stripe">
-                        <group>
-                            <field name="stripe_serial_number" invisible="payment_provider != 'stripe'" required="payment_provider == 'stripe'"/>
-                            <div colspan="2" class="mt16" invisible="payment_provider != 'stripe'" required="payment_provider == 'stripe'">
-                                <button name="action_stripe_key" type="object" icon="east" string="Don't forget to complete Stripe connect before using this payment method." class="btn-link"/>
-                            </div>
-                        </group>
-                    </page>
-                </notebook>
-            </xpath>
+            <page name="terminals" position="attributes">
+                <attribute name="invisible" add="payment_provider == 'stripe'" separator=" or "/>
+            </page>
+            <page name="terminals" position="before">
+                <page name="stripe_settings" string="Stripe" invisible="payment_provider != 'stripe'">
+                    <group>
+                        <div colspan="2" class="mt16" invisible="payment_provider != 'stripe'" required="payment_provider == 'stripe'">
+                            <button name="action_stripe_key" type="object" icon="east" string="Don't forget to complete Stripe connect before using this payment method." class="btn-link"/>
+                        </div>
+                    </group>
+                    <separator string="Terminals"/>
+                    <field name="terminal_ids" widget="pos_payment_terminals"/>
+                </page>
+            </page>
         </field>
     </record>
 </odoo>

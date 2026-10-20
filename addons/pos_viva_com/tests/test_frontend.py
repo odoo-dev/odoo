@@ -1,10 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+from unittest.mock import patch
+
+import odoo.tests
+from odoo import Command
+from odoo.tools import mute_logger
+
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.addons.pos_viva_com.models.pos_payment_method import PosPaymentMethod
-from unittest.mock import patch
-from odoo import Command
-import odoo.tests
 
 
 @odoo.tests.tagged('post_install', '-at_install')
@@ -26,7 +30,7 @@ class TestVivaComHttpCommon(TestPointOfSaleHttpCommon):
             'viva_com_api_key': 'test-api-key',
             'viva_com_client_id': 'test-client-id',
             'viva_com_client_secret': 'test-client-secret',
-            'viva_com_terminal_id': '01234543210',
+            'terminal_ids': [Command.create({'viva_com_terminal_id': '01234543210'})],
         })
         payment_methods = cls.main_pos_config.payment_method_ids | viva_payment_method
         cls.main_pos_config.write({'payment_method_ids': [Command.set(payment_methods.ids)]})
@@ -81,3 +85,40 @@ class TestVivaComHttpCommon(TestPointOfSaleHttpCommon):
                 'VivaComKioskTour',
                 login="accountman",
             )
+
+    def _post_viva_notification(self, company, terminal_id):
+        return self.url_open(
+            f'/pos_viva_com/notification?company_id={company.id}&token=viva_com_test',
+            data=json.dumps({'EventTypeId': 1796, 'EventData': {'TerminalId': terminal_id, 'MerchantTrns': '123/1'}}),
+            headers={'Content-Type': 'application/json'},
+        )
+
+    def test_viva_com_webhook_resolves_terminal(self):
+        other_viva_payment_method = self.env['pos.payment.method'].create({
+            'name': 'Viva 2',
+            'type': 'bank',
+            'journal_id': self.bank_journal.id,
+            'payment_provider': 'viva_com',
+            'viva_com_merchant_id': 'test-merchant-id',
+            'viva_com_api_key': 'test-api-key',
+            'viva_com_client_id': 'test-client-id',
+            'viva_com_client_secret': 'test-client-secret',
+            'terminal_ids': [
+                Command.create({'viva_com_terminal_id': '11111111'}),
+                Command.create({'viva_com_terminal_id': '22222222'}),
+            ],
+        })
+        company = other_viva_payment_method.company_id
+
+        with patch.object(PosPaymentMethod, '_retrieve_session_id', autospec=True) as mock_retrieve:
+            response = self._post_viva_notification(company, '22222222')
+        self.assertEqual(response.json(), {'Key': 'viva_com_test'})
+        self.assertEqual(mock_retrieve.call_count, 1)
+        self.assertEqual(mock_retrieve.call_args.args[0], other_viva_payment_method)
+        self.assertEqual(mock_retrieve.call_args.args[1]['TerminalId'], '22222222')
+
+        with patch.object(PosPaymentMethod, '_retrieve_session_id', autospec=True) as mock_retrieve, \
+                mute_logger('odoo.addons.pos_viva_com.controllers.main'):
+            response = self._post_viva_notification(company, '33333333')
+        self.assertEqual(response.json(), {'Key': 'viva_com_test'})
+        mock_retrieve.assert_not_called()

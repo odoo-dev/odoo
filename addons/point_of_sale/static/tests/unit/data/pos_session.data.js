@@ -14,6 +14,7 @@ export class PosSession extends models.ServerModel {
             "pos.order.line",
             "pos.payment",
             "pos.payment.method",
+            "pos.payment.terminal",
             "pos.printer",
             "pos.category",
             "pos.bill",

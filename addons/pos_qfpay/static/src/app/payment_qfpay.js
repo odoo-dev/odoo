@@ -64,13 +64,13 @@ export class PaymentQFpay extends PaymentInterface {
                 );
                 return false;
             }
-            this.callQFPay(uuid, "cancel", {
+            this.callQFPay(line, "cancel", {
                 func_type: 1002,
                 orderId: originalPayment.transaction_id,
                 refund_amount: (-line.amount).toFixed(2),
             });
         } else {
-            this.callQFPay(uuid, "trade", {
+            this.callQFPay(line, "trade", {
                 func_type: 1001,
                 amt: line.amount,
                 channel: this.payment_method_id.qfpay_payment_type,
@@ -90,14 +90,15 @@ export class PaymentQFpay extends PaymentInterface {
 
     async sendPaymentCancel(line) {
         super.sendPaymentCancel(...arguments);
-        this.callQFPay(line.uuid, "cancel_request", { func_type: 5001 });
+        this.callQFPay(line, "cancel_request", { func_type: 5001 });
         return Promise.resolve(true);
     }
 
-    async callQFPay(uuid, endpoint, payload) {
-        const response = await this.qfpay.makeQFPayRequest(endpoint, payload);
+    async callQFPay(line, endpoint, payload) {
+        const terminal = line.terminal_id || this.payment_method_id.terminal_ids[0];
+        const response = await this.qfpay.makeQFPayRequest(endpoint, payload, terminal);
         if (!response) {
-            const resolver = this.paymentLineResolvers[uuid];
+            const resolver = this.paymentLineResolvers[line.uuid];
             resolver && resolver(false);
         }
         return response;

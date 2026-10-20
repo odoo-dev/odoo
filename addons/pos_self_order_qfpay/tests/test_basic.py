@@ -27,12 +27,15 @@ class TestSelfOrderKioskQFPay(TestPointOfSaleHttpCommon, AccountTestInvoicingCom
             'payment_method_ids': [Command.create({
                 'name': 'Qfpay',
                 'type': 'bank',
-                "qfpay_pos_key": "my_qfpay_pos_key",
                 "qfpay_notification_key": "my_qfpay_notification_key",
                 "payment_provider": "qfpay",
                 "payment_method_type": "terminal",
                 "qfpay_payment_type": "card_payment",
                 "journal_id": cls.bank_journal.id,
+                "terminal_ids": [
+                    Command.create({"qfpay_terminal_ip_address": "192.168.1.10", "qfpay_pos_key": "my_qfpay_pos_key"}),
+                    Command.create({"qfpay_terminal_ip_address": "192.168.1.11", "qfpay_pos_key": "other_qfpay_key!"}),
+                ],
             })],
             'self_ordering_default_user_id': cls.pos_admin.id,
         })
@@ -41,6 +44,7 @@ class TestSelfOrderKioskQFPay(TestPointOfSaleHttpCommon, AccountTestInvoicingCom
             'name': 'Qfpay 2',
             'payment_provider': 'qfpay',
             'type': 'bank',
+            'terminal_ids': [Command.create({})],
         })
 
     def test_kiosk_qfpay(self):

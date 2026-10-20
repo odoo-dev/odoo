@@ -10,6 +10,7 @@ import { PosOrder } from "./pos_order.data";
 import { PosOrderLine } from "./pos_order_line.data";
 import { PosPayment } from "./pos_payment.data";
 import { PosPaymentMethod } from "./pos_payment_method.data";
+import { PosPaymentTerminal } from "./pos_payment_terminal.data";
 import { PosPrinter } from "./pos_printer.data";
 import { PosCategory } from "./pos_category.data";
 import { PosBill } from "./pos_bill.data";
@@ -66,6 +67,7 @@ export const hootPosModels = [
     PosOrderLine,
     PosPayment,
     PosPaymentMethod,
+    PosPaymentTerminal,
     PosPrinter,
     PosCategory,
     PosBill,

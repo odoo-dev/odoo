@@ -7,6 +7,7 @@
     'data': [
         'views/res_config_settings_views.xml',
         'views/pos_payment_method_views.xml',
+        'views/pos_payment_terminal_views.xml',
     ],
     'depends': ['point_of_sale', 'payment_adyen'],
     'assets': {
@@ -21,7 +22,7 @@
             'pos_adyen/static/tests/tours/**/*',
         ],
         'web.assets_unit_tests': [
-            'pos_adyen/static/tests/unit/data/**/*'
+            'pos_adyen/static/tests/unit/**/*',
         ],
     },
     'author': 'Odoo S.A.',

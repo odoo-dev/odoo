@@ -2,7 +2,8 @@ from unittest.mock import patch
 
 from requests import Response
 
-from odoo.exceptions import UserError
+from odoo import Command
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import TransactionCase, tagged
 
 DEMO_P2P_URL = 'https://demo.ezetap.com/api/3.0/p2padapter/'
@@ -20,12 +21,21 @@ class TestRazorpayPosRequest(TransactionCase):
             'type': 'bank',
             'payment_method_type': 'terminal',
             'payment_provider': 'razorpay',
-            'razorpay_tid': 'my_razorpay_device_serial_no',
+            'terminal_ids': [
+                Command.create({
+                    'razorpay_tid': 'my_razorpay_device_serial_no',
+                    'razorpay_username': 'my_razorpay_username',
+                }),
+                Command.create({
+                    'razorpay_tid': 'my_razorpay_device_serial_no_2',
+                    'razorpay_username': 'my_razorpay_username_2',
+                }),
+            ],
             'razorpay_allowed_payment_modes': 'card',
-            'razorpay_username': 'my_razorpay_username',
             'razorpay_api_key': 'my_razorpay_api_key',
             'razorpay_test_mode': True,
         })
+        cls.terminal_1, cls.terminal_2 = cls.payment_method.terminal_ids
 
     def _mock_razorpay(self, payload):
         """ Patch the razorpay session and record the calls it makes. """
@@ -61,6 +71,41 @@ class TestRazorpayPosRequest(TransactionCase):
             'amount': 100,
             'externalRefNumber': 'Hoot/ORDER0001',
         })
+
+    def test_payment_request_sends_to_given_terminal(self):
+        calls, mocked = self._mock_razorpay({'success': True, 'p2pRequestId': 12345})
+        with mocked:
+            self.payment_method.razorpay_make_payment_request({
+                'amount': 100,
+                'referenceId': 'Hoot/ORDER0001',
+            }, self.terminal_2.id)
+            self.payment_method.razorpay_fetch_payment_status({'p2pRequestId': '250102'}, self.terminal_2.id)
+            self.payment_method.razorpay_cancel_payment_request({'p2pRequestId': '250102'}, self.terminal_2.id)
+            self.payment_method.razorpay_make_refund_request({
+                'refund_type': 'void',
+                'transaction_id': '250102070624795E020088174',
+            }, self.terminal_2.id)
+
+        self.assertEqual(calls[0]['json']['pushTo'], {'deviceId': 'my_razorpay_device_serial_no_2|ezetap_android'})
+        self.assertEqual(calls[2]['json']['pushTo'], {'deviceId': 'my_razorpay_device_serial_no_2|ezetap_android'})
+        self.assertEqual([call['json']['username'] for call in calls], ['my_razorpay_username_2'] * 4)
+        self.assertEqual([call['json']['appKey'] for call in calls], ['my_razorpay_api_key'] * 4)
+
+    def test_payment_request_with_unknown_terminal(self):
+        other_method = self.env['pos.payment.method'].create({
+            'name': 'Other RazorPay',
+            'type': 'bank',
+            'payment_method_type': 'terminal',
+            'payment_provider': 'razorpay',
+            'terminal_ids': [Command.create({'razorpay_tid': 'other_device', 'razorpay_username': 'other_username'})],
+        })
+        _calls, mocked = self._mock_razorpay({'success': True, 'p2pRequestId': 12345})
+        with mocked, self.assertRaises(ValidationError):
+            self.payment_method.razorpay_make_payment_request({'amount': 100}, other_method.terminal_ids.id)
+
+    def test_payment_method_requires_terminal(self):
+        with self.assertRaises(ValidationError):
+            self.payment_method.terminal_ids = [Command.clear()]
 
     def test_payment_request_reports_error_message(self):
         _calls, mocked = self._mock_razorpay({
@@ -167,4 +212,5 @@ class TestRazorpayPosRequest(TransactionCase):
                 'type': 'bank',
                 'payment_method_type': 'terminal',
                 'payment_provider': 'razorpay',
+                'terminal_ids': [Command.create({'razorpay_tid': 'eur_device', 'razorpay_username': 'eur_username'})],
             })

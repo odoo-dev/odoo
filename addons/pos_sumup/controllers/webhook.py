@@ -2,6 +2,7 @@ import json
 import logging
 
 from odoo import http
+from odoo.exceptions import ValidationError
 from odoo.http import request
 from odoo.tools import verify_hash_signed
 
@@ -40,6 +41,15 @@ class PosSumupController(http.Controller):
         if not payment_method_sudo or payment_method_sudo.payment_provider != "sumup":
             _logger.warning(
                 "Received a SumUp notification for an unknown payment method: %s",
+                payload.get("client_transaction_id"),
+            )
+            return
+
+        try:
+            payment_method_sudo._get_payment_terminal(decoded_token.get("terminal_id"))
+        except ValidationError:
+            _logger.warning(
+                "Received a SumUp notification for an unknown terminal: %s",
                 payload.get("client_transaction_id"),
             )
             return

@@ -6,6 +6,7 @@
     'summary': 'Integrate your POS with a Stripe payment terminal',
     'data': [
         'views/pos_payment_method_views.xml',
+        'views/pos_payment_terminal_views.xml',
     ],
     'depends': ['point_of_sale', 'payment_stripe'],
     'assets': {
@@ -17,7 +18,7 @@
             'pos_stripe/static/src/overrides/models/pos_payment.js',
         ],
         'web.assets_unit_tests': [
-            'pos_stripe/static/tests/unit/data/**/*'
+            'pos_stripe/static/tests/unit/**/*',
         ],
     },
     'author': 'Odoo S.A.',

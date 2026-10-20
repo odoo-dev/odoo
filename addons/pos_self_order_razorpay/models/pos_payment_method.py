@@ -14,4 +14,5 @@ class PosPaymentMethod(models.Model):
             'amount': order.amount_total,
             'referenceId': f'{reference_prefix}/Order/{order.id}/{uuid.uuid4().hex}',
         }
-        return self.razorpay_make_payment_request(data)
+        # The kiosk doesn't select a terminal, the first one of the payment method is used
+        return self.razorpay_make_payment_request(data, self._get_payment_terminal().id)

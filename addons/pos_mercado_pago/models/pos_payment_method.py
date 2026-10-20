@@ -1,6 +1,6 @@
 import logging
 
-from odoo import api, fields, models, _
+from odoo import _, fields, models
 from odoo.exceptions import AccessError, UserError
 
 from .mercado_pago_pos_request import MERCADO_PAGO_PLATFORM_ID, MercadoPagoPosRequest
@@ -19,14 +19,13 @@ class PosPaymentMethod(models.Model):
         string="Production secret key",
         help='Mercado Pago production secret key from integration application: https://www.mercadopago.com.mx/developers/panel/app',
         groups="point_of_sale.group_pos_manager")
-    mp_id_point_smart = fields.Char(
-        string="Terminal S/N",
-        help="Enter your Point Smart terminal serial number written on the back of your terminal (after the S/N:)")
-    mp_id_point_smart_complet = fields.Char()
     mp_webhook_endpoint = fields.Char(string="Mercado Pago Webhook Endpoint", compute='_compute_mp_webhook_endpoint', readonly=True)
 
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('mercado_pago', 'Mercado Pago')]
+
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['mercado_pago']
 
     def _allowed_actions_in_self_order(self):
         return super()._allowed_actions_in_self_order() + ['mp_order_create', 'mp_order_get']
@@ -43,33 +42,39 @@ class PosPaymentMethod(models.Model):
     def force_pdv(self):
         """
         Triggered in debug mode when the user wants to force the "PDV" mode.
-        It calls the Mercado Pago API to set the terminal mode to "PDV".
+        It calls the Mercado Pago API to set the mode of all the terminals of the
+        payment method to "PDV".
         """
+        self.ensure_one()
         self._check_special_access()
 
         mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
         _logger.info('Calling Mercado Pago to force the terminal mode to "PDV"')
 
-        payload = {"terminals": [{"id": self.mp_id_point_smart_complet, "operating_mode": "PDV"}]}
+        payload = {"terminals": [
+            {"id": terminal.mp_id_point_smart_complet, "operating_mode": "PDV"}
+            for terminal in self.sudo().terminal_ids
+        ]}
         resp = mercado_pago.call_mercado_pago("patch", "/terminals/v1/setup", payload)
         terminals = resp.get("terminals")
-        if not terminals or terminals[0].get("operating_mode") != "PDV":
+        if not terminals or any(terminal.get("operating_mode") != "PDV" for terminal in terminals):
             raise UserError(_("Unexpected Mercado Pago response: %s", resp))
         _logger.debug("Successfully set the terminal mode to 'PDV'.")
 
-    def mp_order_create(self, infos):
+    def mp_order_create(self, infos, terminal_id: int | None = None):
         """
-        Called from frontend to create an order in Mercado Pago
+        Called from frontend to create an order in Mercado Pago, processed by the given terminal
         """
         self._check_special_access()
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
 
         mercado_pago = MercadoPagoPosRequest(self.sudo().mp_bearer_token)
-        # Identify Odoo as the integrator
         infos['config'] = {
             'point': {
-                'terminal_id': self.mp_id_point_smart_complet,
+                'terminal_id': terminal_sudo.mp_id_point_smart_complet,
             },
         }
+        # Identify Odoo as the integrator
         infos['integration_data'] = {
             'platform_id': MERCADO_PAGO_PLATFORM_ID,
         }
@@ -125,17 +130,8 @@ class PosPaymentMethod(models.Model):
     def write(self, vals):
         records = super().write(vals)
 
-        if 'mp_id_point_smart' in vals or 'mp_bearer_token' in vals:
-            self.mp_id_point_smart_complet = self._find_terminal(self.mp_bearer_token, self.mp_id_point_smart)
-
-        return records
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
-
-        for record in records:
-            if record.mp_bearer_token:
-                record.mp_id_point_smart_complet = record._find_terminal(record.mp_bearer_token, record.mp_id_point_smart)
+        if 'mp_bearer_token' in vals:
+            # The terminals are found with the token, see `pos.payment.terminal` for their creation
+            self.terminal_ids._mp_find_point_smart()
 
         return records

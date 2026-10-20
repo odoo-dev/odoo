@@ -28,6 +28,10 @@ class PosPaymentMethod(models.Model):
     def _get_provider_selection(self):
         return self._get_terminal_provider_selection() + self._get_external_qr_provider_selection() + self._get_cash_machine_selection()
 
+    def _get_providers_with_terminals(self):
+        """ Return the providers that require at least one terminal in `terminal_ids` """
+        return []
+
     def _get_payment_method_type(self):
         selection = [
             ('none', self.env._('None required')),
@@ -100,6 +104,8 @@ class PosPaymentMethod(models.Model):
     payment_provider = fields.Selection(selection=lambda self: self._get_provider_selection(), string='Payment Provider', help='Payment provider that will be used to process payments made with this payment method.')
     available_payment_providers = fields.Json(compute='_compute_available_payment_providers')
     currency_ids = fields.Many2many('res.currency', string="Currencies")
+    terminal_ids = fields.One2many('pos.payment.terminal', 'payment_method_id', string="Terminals", copy=True)
+    use_terminals = fields.Boolean(compute='_compute_use_terminals', help="Technical field: whether the provider is configured on terminals.")
 
     @api.model
     def get_provider_status(self):
@@ -140,7 +146,7 @@ class PosPaymentMethod(models.Model):
     def _load_pos_data_fields(self, config):
         return [
             'id', 'name', 'payment_provider', 'type', 'image', 'sequence', 'payment_method_type',
-            'default_qr', 'currency_ids',
+            'default_qr', 'currency_ids', 'terminal_ids',
         ]
 
     @api.model
@@ -174,7 +180,14 @@ class PosPaymentMethod(models.Model):
         terminal_selection = [pm[0] for pm in self._get_terminal_provider_selection()]
         external_qr_selection = [pm[0] for pm in self._get_external_qr_provider_selection()]
         cash_machine_selection = [pm[0] for pm in self._get_cash_machine_selection()]
+        providers_with_terminals = self._get_providers_with_terminals()
         for payment_method in self:
+            # The terminals hold settings specific to the previous provider
+            terminal_commands = [Command.clear()] if payment_method.terminal_ids else []
+            if payment_method.payment_provider in providers_with_terminals:
+                terminal_commands.append(Command.create({}))
+            if terminal_commands:
+                payment_method.terminal_ids = terminal_commands
             if payment_method.payment_provider in terminal_selection and payment_method.payment_method_type != 'terminal':
                 payment_method.payment_method_type = 'terminal'
             elif payment_method.payment_provider in external_qr_selection and payment_method.payment_method_type != 'external_qr':
@@ -186,6 +199,13 @@ class PosPaymentMethod(models.Model):
     def _compute_open_session_ids(self):
         for payment_method in self:
             payment_method.open_session_ids = self.env['pos.session'].search([('config_id', 'in', payment_method.config_ids.ids), ('state', '!=', 'closed')])
+
+    @api.constrains('payment_provider', 'terminal_ids')
+    def _check_terminal_ids(self):
+        providers_with_terminals = self._get_providers_with_terminals()
+        for payment_method in self:
+            if payment_method.payment_provider in providers_with_terminals and not payment_method.terminal_ids:
+                raise ValidationError(self.env._("At least one terminal must be configured on the payment method %s.", payment_method.name))
 
     @api.constrains('type', 'currency_ids')
     def _check_currency_ids(self):
@@ -254,6 +274,12 @@ class PosPaymentMethod(models.Model):
             if pm.journal_id and pm.journal_id.type == 'bank':
                 chart_template = self.with_context(allowed_company_ids=self.env.company.root_id.ids).env['account.chart.template']
                 pm.outstanding_account_id = chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False) or self.company_id.transfer_account_id
+
+    @api.depends('payment_provider')
+    def _compute_use_terminals(self):
+        providers_with_terminals = self._get_providers_with_terminals()
+        for payment_method in self:
+            payment_method.use_terminals = payment_method.payment_provider in providers_with_terminals
 
     def _compute_all_providers_installed(self):
         providers_status = self.get_provider_status()
@@ -413,6 +439,14 @@ class PosPaymentMethod(models.Model):
         # It is defined here rather than in `pos_self_order` so that
         # the payment terminal modules don't need to depend on it.
         return []
+
+    def _get_payment_terminal(self, terminal_id=None):
+        """ Return the given terminal, or the first one if none is given (e.g. Self Order Kiosk) """
+        self.ensure_one()
+        terminal = self.terminal_ids.filtered(lambda t: t.id == terminal_id) if terminal_id else self.terminal_ids[:1]
+        if not terminal:
+            raise ValidationError(self.env._("The terminal of the payment method %s could not be found.", self.name))
+        return terminal
 
     def get_qr_code_value(self, amount, free_communication, structured_communication, currency, debtor_partner):
         """ Returns the payment payload to encode in the QR-code.

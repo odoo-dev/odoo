@@ -1,5 +1,6 @@
 import json
 from unittest.mock import patch
+from urllib.parse import parse_qs, urlsplit
 
 import requests
 from requests import Response
@@ -7,7 +8,7 @@ from requests import Response
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import tagged
-from odoo.tools import hash_sign
+from odoo.tools import hash_sign, verify_hash_signed
 
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 
@@ -35,7 +36,10 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
                             "payment_method_type": "terminal",
                             "sumup_api_key": "test_api_key",
                             "sumup_merchant_code": "MTEST01",
-                            "sumup_terminal_id": "rdr_test123",
+                            "terminal_ids": [
+                                Command.create({"sumup_terminal_id": "rdr_test123"}),
+                                Command.create({"sumup_terminal_id": "rdr_test456"}),
+                            ],
                             "journal_id": cls.bank_journal.id,
                         },
                     ),
@@ -45,6 +49,7 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
         cls.sumup_pm = cls.main_pos_config.payment_method_ids.filtered(
             lambda pm: pm.payment_provider == "sumup",
         )
+        cls.terminal_1, cls.terminal_2 = cls.sumup_pm.terminal_ids
         cls.currency = (
             cls.sumup_pm.journal_id.currency_id or cls.sumup_pm.company_id.currency_id
         )
@@ -79,10 +84,68 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
                     "name": "SumUp 2",
                     "type": "bank",
                     "payment_provider": "sumup",
-                    "sumup_terminal_id": self.sumup_pm.sumup_terminal_id,
+                    "terminal_ids": [Command.create({"sumup_terminal_id": self.terminal_1.sumup_terminal_id})],
                     "journal_id": self.bank_journal.id,
                 },
             )
+        with self.assertRaises(ValidationError):
+            self.terminal_2.sumup_terminal_id = self.terminal_1.sumup_terminal_id
+
+    def test_sumup_terminal_required(self):
+        with self.assertRaises(ValidationError):
+            self.sumup_pm.terminal_ids = [Command.clear()]
+
+    def test_sumup_pair_reader_on_terminal_create(self):
+        with patch(
+            "odoo.addons.pos_sumup.models.pos_payment_terminal.requests.post",
+        ) as mock_post:
+            mock_post.return_value = _response(200, {"id": "rdr_paired789"})
+            self.sumup_pm.terminal_ids = [Command.create({"sumup_pairing_code": "PAIR1"})]
+
+        url = mock_post.call_args.args[0]
+        kwargs = mock_post.call_args.kwargs
+        self.assertIn("/merchants/MTEST01/readers", url)
+        self.assertEqual(kwargs["headers"]["Authorization"], "Bearer test_api_key")
+        self.assertEqual(kwargs["json"]["pairing_code"], "PAIR1")
+        self.assertRecordValues(
+            self.sumup_pm.terminal_ids,
+            [
+                {"sumup_terminal_id": "rdr_test123", "sumup_pairing_code": False},
+                {"sumup_terminal_id": "rdr_test456", "sumup_pairing_code": False},
+                {"sumup_terminal_id": "rdr_paired789", "sumup_pairing_code": False},
+            ],
+        )
+
+    def test_sumup_pair_reader_on_terminal_write(self):
+        with patch(
+            "odoo.addons.pos_sumup.models.pos_payment_terminal.requests.post",
+        ) as mock_post:
+            mock_post.return_value = _response(200, {"id": "rdr_paired789"})
+            self.sumup_pm.write({
+                "sumup_merchant_code": "MTEST02",
+                "terminal_ids": [Command.update(self.terminal_2.id, {"sumup_pairing_code": "PAIR2"})],
+            })
+
+        # The reader is paired with the new merchant code of the payment method
+        self.assertIn("/merchants/MTEST02/readers", mock_post.call_args.args[0])
+        self.assertEqual(mock_post.call_args.kwargs["json"]["pairing_code"], "PAIR2")
+        self.assertRecordValues(
+            self.terminal_1 + self.terminal_2,
+            [
+                {"sumup_terminal_id": "rdr_test123", "sumup_pairing_code": False},
+                {"sumup_terminal_id": "rdr_paired789", "sumup_pairing_code": False},
+            ],
+        )
+
+    def test_sumup_pair_reader_error(self):
+        with (
+            patch(
+                "odoo.addons.pos_sumup.models.pos_payment_terminal.requests.post",
+            ) as mock_post,
+            self.assertRaises(UserError),
+        ):
+            mock_post.return_value = _response(400, {"detail": "Invalid pairing code"})
+            self.terminal_2.sumup_pairing_code = "WRONG"
 
     def test_sumup_pay_sends_correct_request(self):
         with patch(
@@ -92,11 +155,11 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
                 200,
                 {"data": {"client_transaction_id": "ctid1", "checkout_id": "chk1"}},
             )
-            result = self.sumup_pm.sumup_pay(12.30)
+            result = self.sumup_pm.sumup_pay(12.30, self.terminal_2.id)
 
         url = mock_post.call_args.args[0]
         kwargs = mock_post.call_args.kwargs
-        self.assertIn("/merchants/MTEST01/readers/rdr_test123/checkout", url)
+        self.assertIn("/merchants/MTEST01/readers/rdr_test456/checkout", url)
         self.assertEqual(kwargs["headers"]["Authorization"], "Bearer test_api_key")
         self.assertEqual(
             kwargs["json"]["total_amount"],
@@ -107,6 +170,26 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
             },
         )
         self.assertEqual(result["data"]["client_transaction_id"], "ctid1")
+
+        # The notification webhook is routed back to the terminal
+        token = parse_qs(urlsplit(kwargs["json"]["return_url"]).query)["token"][0]
+        decoded_token = verify_hash_signed(self.env(su=True), "pos_sumup", token)
+        self.assertEqual(decoded_token["terminal_id"], self.terminal_2.id)
+
+    def test_sumup_pay_without_terminal(self):
+        # Without a terminal, the first terminal of the payment method is used
+        with patch(
+            "odoo.addons.pos_sumup.models.pos_payment_method.requests.post",
+        ) as mock_post:
+            mock_post.return_value = _response(200, {"data": {}})
+            self.sumup_pm.sumup_pay(12.30)
+
+        self.assertIn("/readers/rdr_test123/checkout", mock_post.call_args.args[0])
+
+    def test_sumup_pay_with_unknown_terminal(self):
+        other_terminal = self.env["pos.payment.terminal"].create({"payment_method_id": self.bank_payment_method.id})
+        with self.assertRaises(ValidationError):
+            self.sumup_pm.sumup_pay(12.30, other_terminal.id)
 
     def test_sumup_pay_network_error(self):
         with patch(
@@ -171,27 +254,27 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
             "odoo.addons.pos_sumup.models.pos_payment_method.requests.post",
         ) as mock_post:
             mock_post.return_value = _response(200, {})
-            self.sumup_pm.sumup_cancel()
+            self.sumup_pm.sumup_cancel(self.terminal_2.id)
 
         url = mock_post.call_args.args[0]
-        self.assertIn("/readers/rdr_test123/terminate", url)
+        self.assertIn("/readers/rdr_test456/terminate", url)
 
     def test_sumup_get_checkout_status(self):
         with patch(
             "odoo.addons.pos_sumup.models.pos_payment_method.requests.get",
         ) as mock_get:
             mock_get.return_value = _response(200, {"status": "successful"})
-            result = self.sumup_pm.sumup_get_checkout_status("chk1")
+            result = self.sumup_pm.sumup_get_checkout_status("chk1", self.terminal_2.id)
 
         url = mock_get.call_args.args[0]
-        self.assertIn("/readers/rdr_test123/checkout/chk1", url)
+        self.assertIn("/readers/rdr_test456/checkout/chk1", url)
         self.assertEqual(result, {"status": "successful"})
 
     def test_webhook_notification_notifies_the_bus(self):
         token = hash_sign(
             self.env,
             "pos_sumup",
-            {"payment_method_id": self.sumup_pm.id},
+            {"payment_method_id": self.sumup_pm.id, "terminal_id": self.terminal_2.id},
             expiration_hours=1,
         )
         payload = {"client_transaction_id": "ctid1", "status": "successful"}
@@ -207,6 +290,35 @@ class TestSumupPaymentMethod(TestPointOfSaleHttpCommon):
 
         self.assertEqual(response.status_code, 200)
         mock_notify.assert_called_once_with("SUMUP_LATEST_RESPONSE", payload)
+
+    def test_webhook_notification_ignores_unknown_terminal(self):
+        token = hash_sign(
+            self.env,
+            "pos_sumup",
+            {"payment_method_id": self.sumup_pm.id, "terminal_id": self.terminal_2.id},
+            expiration_hours=1,
+        )
+        self.terminal_2.unlink()
+        payload = {
+            "payload": {"client_transaction_id": "ctid1", "status": "successful"},
+        }
+
+        with (
+            self.assertLogs(
+                "odoo.addons.pos_sumup.controllers.webhook",
+                level="WARNING",
+            ),
+            patch(
+                "odoo.addons.point_of_sale.models.pos_bus_mixin.PosBusMixin._notify",
+            ) as mock_notify,
+        ):
+            self.url_open(
+                f"/pos_sumup/notification?token={token}",
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+            )
+
+        mock_notify.assert_not_called()
 
     def test_webhook_notification_ignores_invalid_token(self):
         payload = {

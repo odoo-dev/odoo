@@ -7,17 +7,21 @@ from .razorpay_pos_request import RazorpayPosRequest
 class PosPaymentMethod(models.Model):
     _inherit = 'pos.payment.method'
 
-    razorpay_tid = fields.Char(string='Razorpay Device Serial No', help='Device Serial No \n ex: 7000012300')
     razorpay_allowed_payment_modes = fields.Selection(selection=[('all', 'All'), ('card', 'Card'), ('upi', 'UPI'), ('bharatqr', 'BHARATQR')], default='all', help='Choose allow payment mode: \n All/Card/UPI or QR')
-    razorpay_username = fields.Char(string='Razorpay Username', help='Username(Device Login) \n ex: 1234500121')
     razorpay_api_key = fields.Char(string='Razorpay API Key', help='Used when connecting to Razorpay: https://razorpay.com/docs/payments/dashboard/account-settings/api-keys/', groups='point_of_sale.group_pos_manager')
     razorpay_test_mode = fields.Boolean(string='Razorpay Test Mode', default=False, help='Turn it on when in Test Mode')
 
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('razorpay', 'Razorpay')]
 
-    def razorpay_make_refund_request(self, data):
-        razorpay = RazorpayPosRequest(self)
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['razorpay']
+
+    def _razorpay_request(self, terminal_id):
+        return RazorpayPosRequest(self._get_payment_terminal(terminal_id))
+
+    def razorpay_make_refund_request(self, data, terminal_id: int | None = None):
+        razorpay = self._razorpay_request(terminal_id)
         request_body = razorpay._razorpay_get_request_parameters()
         if data.get('refund_type') == 'refund':
             request_body.update({
@@ -50,8 +54,8 @@ class PosPaymentMethod(models.Model):
         error = response.get('errorMessage') or default_error_msg
         return {'error': str(error)}
 
-    def razorpay_make_payment_request(self, data):
-        razorpay = RazorpayPosRequest(self)
+    def razorpay_make_payment_request(self, data, terminal_id: int | None = None):
+        razorpay = self._razorpay_request(terminal_id)
         body = razorpay._razorpay_get_payment_request_body(payment_mode=True)
         body.update({
             'amount': data.get('amount'),
@@ -67,8 +71,8 @@ class PosPaymentMethod(models.Model):
         error = response.get('errorMessage') or default_error_msg
         return {'error': str(error)}
 
-    def razorpay_fetch_payment_status(self, data):
-        razorpay = RazorpayPosRequest(self)
+    def razorpay_fetch_payment_status(self, data, terminal_id: int | None = None):
+        razorpay = self._razorpay_request(terminal_id)
         body = razorpay._razorpay_get_request_parameters()
         body.update({'origP2pRequestId': data.get('p2pRequestId')})
         response = razorpay._call_razorpay(endpoint='status', payload=body)
@@ -106,8 +110,8 @@ class PosPaymentMethod(models.Model):
         error = response.get('errorMessage') or default_error_msg
         return {'error': str(error)}
 
-    def razorpay_cancel_payment_request(self, data):
-        razorpay = RazorpayPosRequest(self)
+    def razorpay_cancel_payment_request(self, data, terminal_id: int | None = None):
+        razorpay = self._razorpay_request(terminal_id)
         body = razorpay._razorpay_get_payment_request_body(payment_mode=False)
         body.update({'origP2pRequestId': data.get('p2pRequestId')})
         response = razorpay._call_razorpay(endpoint='cancel', payload=body)

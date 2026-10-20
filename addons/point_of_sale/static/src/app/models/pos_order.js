@@ -431,6 +431,7 @@ export class PosOrder extends PosOrderAccounting {
         const newPaymentLine = this.models["pos.payment"].create({
             pos_order_id: this,
             payment_method_id: payment_method,
+            terminal_id: args.terminal,
             foreign_currency_id: args.currency,
         });
         this.selectPaymentline(newPaymentLine);

@@ -31,15 +31,15 @@ export class PaymentMollie extends PaymentInterface {
 
     async sendPaymentRequest(line) {
         if (line.amount < 0) {
-            const originalPaymentId = this._findOriginalPaymentId(line);
-            if (!originalPaymentId) {
+            const originalPaymentLine = this._findOriginalPaymentLine(line);
+            if (!originalPaymentLine) {
                 this._showMollieError(
                     _t("You can only refund an order that was paid for with Mollie.")
                 );
                 return false;
             }
 
-            return this._createMollieRefund(line, originalPaymentId);
+            return this._createMollieRefund(line, originalPaymentLine);
         }
 
         return this._createMolliePayment(line);
@@ -50,6 +50,7 @@ export class PaymentMollie extends PaymentInterface {
             await this.callPaymentMethod("mollie_cancel_payment", [
                 this.payment_method_id.id,
                 line.transaction_id,
+                line.terminal_id?.id || null,
             ]);
             return true;
         } catch (error) {
@@ -65,6 +66,7 @@ export class PaymentMollie extends PaymentInterface {
                 paymentLine.amount,
                 paymentLine.uuid,
                 this.pos.session.id,
+                paymentLine.terminal_id?.id || null,
             ]);
             if (!["open", "pending"].includes(data.status)) {
                 this._showMollieError(_t("Failed to initiate payment: %s", data.status));
@@ -85,14 +87,19 @@ export class PaymentMollie extends PaymentInterface {
         }
     }
 
-    async _createMollieRefund(refundPaymentLine, originalPaymentId) {
+    async _createMollieRefund(refundPaymentLine, originalPaymentLine) {
         try {
+            // The refund is processed by the Mollie account of the original payment
+            const originalTerminal =
+                originalPaymentLine.payment_method_id === this.payment_method_id &&
+                originalPaymentLine.terminal_id;
             const data = await this.callPaymentMethod("mollie_create_refund", [
                 this.payment_method_id.id,
-                originalPaymentId,
+                originalPaymentLine.transaction_id,
                 Math.abs(refundPaymentLine.amount),
                 refundPaymentLine.uuid,
                 this.pos.session.id,
+                originalTerminal?.id || null,
             ]);
 
             if (!["queued", "pending"].includes(data.status)) {
@@ -108,7 +115,7 @@ export class PaymentMollie extends PaymentInterface {
         }
     }
 
-    _findOriginalPaymentId(refundPaymentLine) {
+    _findOriginalPaymentLine(refundPaymentLine) {
         const currentOrder = refundPaymentLine.pos_order_id;
         const orderToRefund = currentOrder.lines[0]?.refunded_orderline_id?.order_id;
         if (!orderToRefund) {
@@ -121,7 +128,7 @@ export class PaymentMollie extends PaymentInterface {
                 line.payment_method_id.payment_provider === "mollie" && line.amount <= amountDue
         );
 
-        return matchedPaymentLine?.transaction_id ?? null;
+        return matchedPaymentLine?.transaction_id ? matchedPaymentLine : null;
     }
 
     _waitForPaymentConfirmation(paymentLine) {
@@ -143,6 +150,7 @@ export class PaymentMollie extends PaymentInterface {
                 const result = await this.callPaymentMethod("mollie_get_payment", [
                     this.payment_method_id.id,
                     transactionId,
+                    paymentLine.terminal_id?.id || null,
                 ]);
                 connectionLost = false;
                 if (!["open", "pending"].includes(result.status) && isPaymentStillValid()) {

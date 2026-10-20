@@ -19,7 +19,6 @@ class PosPaymentMethod(models.Model):
     dpopay_client_id = fields.Char(string='DPO Pay Client ID', help="The Client ID provided by DPO Pay for authenticating requests.")
     dpopay_client_secret = fields.Char(string='DPO Pay Client Secret', help="The Client Secret provided by DPO Pay for secure access. Keep it confidential.", groups="point_of_sale.group_pos_manager")
     dpopay_mid = fields.Char(string='DPO Pay Merchant ID', help="Enter the Merchant ID assigned by DPO Pay (e.g., 123456789012).")
-    dpopay_tid = fields.Char(string='DPO Pay Terminal ID', help="Enter the unique Terminal ID (TID) of your DPO Pay POS terminal (e.g., XXXXXXXX).")
     dpopay_payment_mode = fields.Selection(
         selection=[('card', 'Card'), ('momo', 'Mobile Money')],
         default='card',
@@ -32,24 +31,29 @@ class PosPaymentMethod(models.Model):
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('dpopay', 'DPO Pay')]
 
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['dpopay']
+
     def _get_dpopay_transaction_type(self):
         if self.dpopay_payment_mode == 'momo':
             return 'pushPaymentDpoMomoSale'
         return 'pushPaymentSale'
 
-    def send_dpopay_request(self, data, endpoint):
+    def send_dpopay_request(self, data, endpoint, terminal_id: int | None = None):
         self.ensure_one()
+        terminal = self._get_payment_terminal(terminal_id)
         if endpoint == 'start-transaction':
             data['transactionType'] = self._get_dpopay_transaction_type()
-        return self._execute_dpopay_api_request(data, endpoint)
+        return self._execute_dpopay_api_request(data, endpoint, terminal)
 
-    def _get_dpopay_base_url(self, is_token=False):
+    def _get_dpopay_base_url(self, terminal=None, is_token=False):
+        """ Return the URL of the token API, or of the push payment API of the terminal. """
         self.ensure_one()
         host = (self.dpopay_test_mode and 'api-dev.network.global') or 'api.network.global'
 
         if is_token:
             return f'https://{host}/v1'
-        return f'https://{host}/ngenius-webapi/payments/push/v1/tid:{self.dpopay_tid}/mid:{self.dpopay_mid}'
+        return f'https://{host}/ngenius-webapi/payments/push/v1/tid:{terminal.dpopay_tid}/mid:{self.dpopay_mid}'
 
     def _dpopay_headers(self, token_expired=False):
         self.ensure_one()
@@ -78,13 +82,13 @@ class PosPaymentMethod(models.Model):
         self.sudo().write({'dpopay_bearer_token': access_token})
         return access_token
 
-    def _execute_dpopay_api_request(self, payload, endpoint):
+    def _execute_dpopay_api_request(self, payload, endpoint, terminal):
         self.ensure_one()
         if endpoint not in ('start-transaction', 'get-result', 'get-status', 'cancel-transaction'):
             raise UserError(_('Invalid endpoint'))
 
         mode = 'Test' if self.dpopay_test_mode else 'Production'
-        url = f'{self._get_dpopay_base_url()}/{endpoint}'
+        url = f'{self._get_dpopay_base_url(terminal)}/{endpoint}'
         try:
             def _send_request(token_expired=False):
                 headers = self._dpopay_headers(token_expired)

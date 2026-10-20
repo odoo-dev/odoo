@@ -1,6 +1,5 @@
 import { Component, proxy, useProps, t } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
-import { PosPaymentMethod } from "@point_of_sale/app/models/pos_payment_method";
 
 export class SelectDefaultPaymentMethodPopup extends Component {
     static template = "point_of_sale.SelectDefaultPaymentMethodPopup";
@@ -10,8 +9,8 @@ export class SelectDefaultPaymentMethodPopup extends Component {
             t.object({
                 provider: t.string(),
                 name: t.string(),
-                paymentMethods: t.array(t.instanceOf(PosPaymentMethod)),
-                selectedId: t.or([t.number(), t.literal(false)]),
+                terminals: t.array(t.object({ key: t.string(), name: t.string() })),
+                selectedKey: t.or([t.string(), t.literal(false)]),
             })
         ),
         close: t.function(),
@@ -20,14 +19,18 @@ export class SelectDefaultPaymentMethodPopup extends Component {
 
     setup() {
         this.state = proxy({
+            // Without default yet, the first terminal is selected
             selection: Object.fromEntries(
-                this.props.groups.map((group) => [group.provider, group.selectedId])
+                this.props.groups.map((group) => [
+                    group.provider,
+                    group.selectedKey || group.terminals[0].key,
+                ])
             ),
         });
     }
 
-    select(provider, pmId) {
-        this.state.selection[provider] = pmId;
+    select(provider, terminalKey) {
+        this.state.selection[provider] = terminalKey;
     }
 
     confirmSelection() {

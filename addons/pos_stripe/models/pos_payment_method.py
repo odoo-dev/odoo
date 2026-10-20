@@ -1,8 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import werkzeug
 
-from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError, UserError, AccessError
+from odoo import _, api, models
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 
 class PosPaymentMethod(models.Model):
@@ -11,29 +11,11 @@ class PosPaymentMethod(models.Model):
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('stripe', 'Stripe')]
 
-    # Stripe
-    stripe_serial_number = fields.Char(help='[Serial number of the Stripe terminal], for example: WSC513105011295', copy=False)
-
-    @api.model
-    def _load_pos_data_fields(self, config):
-        params = super()._load_pos_data_fields(config)
-        params += ['stripe_serial_number']
-        return params
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['stripe']
 
     def _allowed_actions_in_self_order(self):
         return super()._allowed_actions_in_self_order() + ['stripe_connection_token', 'stripe_payment_intent', 'stripe_capture_payment']
-
-    @api.constrains('stripe_serial_number')
-    def _check_stripe_serial_number(self):
-        for payment_method in self:
-            if not payment_method.stripe_serial_number:
-                continue
-            existing_payment_method = self.search([('id', '!=', payment_method.id),
-                                                   ('stripe_serial_number', '=', payment_method.stripe_serial_number)],
-                                                  limit=1)
-            if existing_payment_method:
-                raise ValidationError(_('Terminal %(terminal)s is already used on payment method %(payment_method)s.',
-                     terminal=payment_method.stripe_serial_number, payment_method=existing_payment_method.display_name))
 
     def _get_stripe_payment_provider(self):
         stripe_payment_provider = self.env['payment.provider'].search([

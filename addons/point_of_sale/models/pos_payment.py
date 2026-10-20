@@ -38,6 +38,7 @@ class PosPayment(models.Model):
     )
     currency_rate = fields.Float(string='Conversion Rate', help='Conversion rate from company currency to order currency.')
     payment_method_id = fields.Many2one('pos.payment.method', string='Payment Method', required=True)
+    terminal_id = fields.Many2one('pos.payment.terminal', string='Terminal', ondelete='set null', help='Terminal of the payment method used to process the payment.')
     payment_date = fields.Datetime(string='Date', required=True, readonly=True, default=lambda self: fields.Datetime.now())
     partner_id = fields.Many2one('res.partner', string='Customer', related='pos_order_id.partner_id')
     session_id = fields.Many2one('pos.session', string='Session', related='pos_order_id.session_id', store=True, index=True)
@@ -99,3 +100,9 @@ class PosPayment(models.Model):
                 raise ValidationError(_('The payment method selected is not allowed in the config of the POS session.'))
             if payment.payment_method_id.type == "pay_later" and not payment.partner_id:
                 raise ValidationError(_("A customer must be set on the order to pay with a customer account."))
+
+    @api.constrains('payment_method_id', 'terminal_id')
+    def _check_terminal_id(self):
+        for payment in self:
+            if payment.terminal_id and payment.terminal_id.payment_method_id != payment.payment_method_id:
+                raise ValidationError(self.env._("The terminal of a payment must belong to its payment method"))

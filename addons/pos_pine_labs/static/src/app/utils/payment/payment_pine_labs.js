@@ -32,9 +32,13 @@ export class PaymentPineLabs extends PaymentInterface {
         return this._pineLabsCancel();
     }
 
-    _callPineLabs(data, action) {
+    _callPineLabs(data, action, paymentLine) {
         return this.pos.data
-            .call("pos.payment.method", action, [[this.payment_method_id.id], data])
+            .call("pos.payment.method", action, [
+                [this.payment_method_id.id],
+                data,
+                paymentLine.terminal_id?.id || null,
+            ])
             .catch((error) => {
                 const line = this.pendingPineLabsPaymentLine();
                 if (line) {
@@ -155,7 +159,11 @@ export class PaymentPineLabs extends PaymentInterface {
             amount: paymentLine.amount * 100, // We need to provide the amount in paisa since Pine Labs processes amounts in paisa.
         };
 
-        const response = await this._callPineLabs(data, "pine_labs_cancel_payment_request");
+        const response = await this._callPineLabs(
+            data,
+            "pine_labs_cancel_payment_request",
+            paymentLine
+        );
 
         return this._paymentCancelRequestHandler(response);
     }
@@ -188,7 +196,11 @@ export class PaymentPineLabs extends PaymentInterface {
             transactionNumber: paymentLine.payment_ref_no,
             sequenceNumber: sequenceNumber, // In the case of multiple transactions for the same order, it is important to follow the correct sequence of transactions.
         };
-        const response = await this._callPineLabs(data, "pine_labs_make_payment_request");
+        const response = await this._callPineLabs(
+            data,
+            "pine_labs_make_payment_request",
+            paymentLine
+        );
         return await this._makePaymentRequestHandler(response);
     }
 
@@ -230,7 +242,11 @@ export class PaymentPineLabs extends PaymentInterface {
             if (paymentLine.payment_status == "retry") {
                 return resolve(false);
             }
-            const response = await this._callPineLabs(data, "pine_labs_fetch_payment_status");
+            const response = await this._callPineLabs(
+                data,
+                "pine_labs_fetch_payment_status",
+                paymentLine
+            );
             return this._paymentStatusRequestHandler(
                 response,
                 pineLabsFetchPaymentStatus,

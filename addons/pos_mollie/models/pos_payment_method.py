@@ -1,8 +1,8 @@
-from odoo import fields, models
+from odoo import models
 from odoo.exceptions import ValidationError
-from odoo.addons.payment_mollie import const
-
 from odoo.tools import hash_sign
+
+from odoo.addons.payment_mollie import const
 
 
 class PosPaymentMethod(models.Model):
@@ -14,13 +14,14 @@ class PosPaymentMethod(models.Model):
     def _allowed_actions_in_self_order(self):
         return super()._allowed_actions_in_self_order() + ["mollie_create_payment", "mollie_create_refund", "mollie_cancel_payment", "mollie_get_payment"]
 
-    mollie_terminal_id = fields.Char("Mollie Terminal ID", copy=False)
-    mollie_payment_provider_id = fields.Many2one("payment.provider", domain=[("code", "=", "mollie")])
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ["mollie"]
 
-    def mollie_create_payment(self, amount: float, payment_uuid: str, pos_session_id: int):
+    def mollie_create_payment(self, amount: float, payment_uuid: str, pos_session_id: int, terminal_id: int | None = None):
         self.ensure_one()
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
 
-        if not self.sudo().mollie_payment_provider_id.mollie_api_key:
+        if not terminal_sudo.mollie_payment_provider_id.mollie_api_key:
             raise ValidationError(self.env._("Please set the API key on the Mollie payment provider before making a payment."))
 
         user_lang = self.env.context.get("lang")
@@ -28,6 +29,7 @@ class PosPaymentMethod(models.Model):
         payload = {
             "payment_uuid": payment_uuid,
             "payment_method_id": self.id,
+            "terminal_id": terminal_sudo.id,
             "pos_session_id": pos_session_id,
         }
         signed_payload = hash_sign(self.sudo().env, "pos_mollie", payload, expiration_hours=27)  # Mollie webhooks can retry for up to 26 hours
@@ -41,12 +43,13 @@ class PosPaymentMethod(models.Model):
             "redirectUrl": f"{self.get_base_url()}",  # Not used for POS payments but required by Mollie API
             "webhookUrl": f"{self.get_base_url()}/pos_mollie/webhook?payload={signed_payload}",
             "method": "pointofsale",
-            "terminalId": self.mollie_terminal_id
+            "terminalId": terminal_sudo.mollie_terminal_id,
         }
-        return self.sudo().mollie_payment_provider_id._send_api_request("POST", "/payments", json=payment_request)
+        return terminal_sudo.mollie_payment_provider_id._send_api_request("POST", "/payments", json=payment_request)
 
-    def mollie_create_refund(self, original_payment_id: str, amount: float, payment_uuid: str, pos_session_id: int):
+    def mollie_create_refund(self, original_payment_id: str, amount: float, payment_uuid: str, pos_session_id: int, terminal_id: int | None = None):
         self.ensure_one()
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
 
         currency = self.journal_id.currency_id or self.company_id.currency_id
         payment_request = {
@@ -56,12 +59,14 @@ class PosPaymentMethod(models.Model):
             },
             "description": f"pos_session_id={pos_session_id},payment_uuid={payment_uuid}",
         }
-        return self.sudo().mollie_payment_provider_id._send_api_request("POST", f"/payments/{original_payment_id}/refunds", json=payment_request)
+        return terminal_sudo.mollie_payment_provider_id._send_api_request("POST", f"/payments/{original_payment_id}/refunds", json=payment_request)
 
-    def mollie_cancel_payment(self, payment_id: str):
+    def mollie_cancel_payment(self, payment_id: str, terminal_id: int | None = None):
         self.ensure_one()
-        return self.sudo().mollie_payment_provider_id._send_api_request("DELETE", f"/payments/{payment_id}")
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
+        return terminal_sudo.mollie_payment_provider_id._send_api_request("DELETE", f"/payments/{payment_id}")
 
-    def mollie_get_payment(self, payment_id: str):
+    def mollie_get_payment(self, payment_id: str, terminal_id: int | None = None):
         self.ensure_one()
-        return self.sudo().mollie_payment_provider_id._send_api_request("GET", f"/payments/{payment_id}")
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
+        return terminal_sudo.mollie_payment_provider_id._send_api_request("GET", f"/payments/{payment_id}")

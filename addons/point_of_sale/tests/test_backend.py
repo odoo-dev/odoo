@@ -1,6 +1,8 @@
 from unittest.mock import patch
 
 import odoo
+from odoo import Command
+from odoo.exceptions import ValidationError
 
 from odoo.addons.point_of_sale.models.pos_payment_method import PosPaymentMethod
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
@@ -99,3 +101,44 @@ class TestBackend(TestPoSCommon):
             pm.payment_method_type = 'none'
             pm._onchange_payment_method_type()
             self.assertFalse(pm.payment_provider)
+
+    def test_payment_terminals(self):
+        pm = self.env['pos.payment.method'].create({
+            'name': 'Test PM',
+            'type': 'bank',
+            'terminal_ids': [Command.create({})],
+        })
+        pm.terminal_ids = [Command.create({})]
+        self.assertEqual(pm.terminal_ids.mapped('name'), ['Terminal 1', 'Terminal 2'])
+        self.assertEqual(len(pm.copy().terminal_ids), 2)
+
+        # The terminals keep their name when they are reordered
+        first_terminal, second_terminal = pm.terminal_ids
+        second_terminal.sequence = first_terminal.sequence - 1
+        self.assertEqual(first_terminal.name, 'Terminal 1')
+        self.assertEqual(second_terminal.name, 'Terminal 2')
+
+        # A terminal can be given another name
+        pm.terminal_ids = [Command.create({'name': 'Kiosk'})]
+        self.assertEqual(pm.terminal_ids.sorted('id').mapped('name'), ['Terminal 1', 'Terminal 2', 'Kiosk'])
+
+        # The terminals hold settings of the provider, they are removed when it changes
+        with patch.object(PosPaymentMethod, '_get_terminal_provider_selection', return_value=[('terminal_1', 'Terminal 1')]):
+            pm.payment_provider = 'terminal_1'
+            pm._onchange_payment_provider()
+        self.assertFalse(pm.terminal_ids)
+
+    def test_payment_terminal_belongs_to_payment_method(self):
+        self.config = self.basic_config
+        self.open_new_session()
+        product = self.create_product('Product', self.categ_basic, 10.0)
+        order = next(iter(self._create_orders([{
+            'pos_order_lines_ui_args': [(product, 1)],
+            'payments': [(self.bank_pm1, 10.0)],
+        }]).values()))
+        self.bank_pm1.terminal_ids = [Command.create({})]
+        order.payment_ids.terminal_id = self.bank_pm1.terminal_ids
+
+        other_terminal = self.env['pos.payment.terminal'].create({'payment_method_id': self.bank_split_pm1.id})
+        with self.assertRaises(ValidationError):
+            order.payment_ids.terminal_id = other_terminal

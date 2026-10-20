@@ -15,7 +15,9 @@ patch(PosStore.prototype, {
             if (Math.abs(currentOrder.totalDue) === refundedOrder.amount_total) {
                 paymentIds.forEach((pi) => {
                     if (pi.payment_method_id) {
-                        const result = currentOrder.addPaymentline(pi.payment_method_id);
+                        const result = currentOrder.addPaymentline(pi.payment_method_id, {
+                            terminal: this.paymentMethods.getTerminal(pi.payment_method_id),
+                        });
                         if (!result.status) {
                             return;
                         }
@@ -33,7 +35,9 @@ patch(PosStore.prototype, {
                 razorpayPaymentlines.forEach((pi) => {
                     const currentDue = currentOrder.remainingDue;
                     if (currentDue < 0) {
-                        const result = currentOrder.addPaymentline(pi.payment_method_id);
+                        const result = currentOrder.addPaymentline(pi.payment_method_id, {
+                            terminal: this.paymentMethods.getTerminal(pi.payment_method_id),
+                        });
                         if (!result.status) {
                             return false;
                         }
@@ -50,9 +54,12 @@ patch(PosStore.prototype, {
                             pi.payment_method_id &&
                             pi.payment_method_id.payment_provider !== "razorpay"
                         ) {
-                            currentOrder
-                                .addPaymentline(pi.payment_method_id)
-                                .setAmount(-Math.min(Math.abs(currentDue), pi.amount));
+                            const result = currentOrder.addPaymentline(pi.payment_method_id, {
+                                terminal: this.paymentMethods.getTerminal(pi.payment_method_id),
+                            });
+                            if (result.status) {
+                                result.data.setAmount(-Math.min(Math.abs(currentDue), pi.amount));
+                            }
                         }
                     });
                 }

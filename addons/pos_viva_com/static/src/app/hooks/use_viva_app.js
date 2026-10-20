@@ -99,7 +99,9 @@ export const useVivaApp = (validateCallback) => {
      * @param {Boolean} isRefund
      */
     const start = async (paymentMethod, isRefund = false) => {
-        const addResult = order.addPaymentline(paymentMethod);
+        const addResult = order.addPaymentline(paymentMethod, {
+            terminal: pos.paymentMethods.getTerminal(paymentMethod),
+        });
         if (!addResult.status) {
             dialog.add(AlertDialog, { title: _t("Oh snap !"), body: addResult.data });
             return;

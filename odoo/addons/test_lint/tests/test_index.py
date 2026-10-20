@@ -61,6 +61,7 @@ BTREE_INDEX_IGNORE_MODELS = {  # model._name
     'payment.provider',
     'pos.config',
     'pos.payment.method',
+    'pos.payment.terminal',
     'pos.preset',
     'pos.printer',
     'product.pricelist',

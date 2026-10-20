@@ -5,18 +5,20 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'sumup'">
-                    <page name="settings" string="SumUp">
-                        <group>
-                            <field name="sumup_api_key" invisible="payment_provider != 'sumup'" required="payment_provider == 'sumup'" password="True"/>
-                            <field name="sumup_merchant_code" invisible="payment_provider != 'sumup'" required="payment_provider == 'sumup'"/>
-                            <field name="sumup_terminal_id" invisible="payment_provider != 'sumup'"/>
-                            <field name="sumup_pairing_code" invisible="payment_provider != 'sumup' or sumup_terminal_id"/>
-                        </group>
-                    </page>
-                </notebook>
-            </xpath>
+            <page name="terminals" position="attributes">
+                <attribute name="invisible" add="payment_provider == 'sumup'" separator=" or "/>
+            </page>
+            <page name="terminals" position="before">
+                <page name="sumup_settings" string="SumUp" invisible="payment_provider != 'sumup'">
+                    <separator string="Credentials" style="margin-top: 0.5rem !important;"/>
+                    <group>
+                        <field name="sumup_api_key" invisible="payment_provider != 'sumup'" required="payment_provider == 'sumup'" password="True"/>
+                        <field name="sumup_merchant_code" invisible="payment_provider != 'sumup'" required="payment_provider == 'sumup'"/>
+                    </group>
+                    <separator string="Terminals"/>
+                    <field name="terminal_ids" widget="pos_payment_terminals"/>
+                </page>
+            </page>
         </field>
     </record>
 </odoo>

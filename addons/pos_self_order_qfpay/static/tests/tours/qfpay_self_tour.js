@@ -8,11 +8,18 @@ import { mockQFPayWebhook } from "@pos_qfpay/../tests/tours/utils/common";
 
 // Patch QFPay to validate the request that would be sent to the terminal
 patch(QFPay.prototype, {
-    makeQFPayRequest: async function (endpoint, payload) {
+    makeQFPayRequest: async function (endpoint, payload, terminal) {
         if (endpoint !== "trade") {
             throw new Error("Only 'trade' endpoint is supported on self checkout");
         }
         const paymentMethod = posmodel.models["pos.payment.method"].getAll()[0];
+        // The kiosk uses the first terminal of the payment method
+        if (
+            terminal !== paymentMethod.terminal_ids[0] ||
+            terminal.qfpay_terminal_ip_address !== "192.168.1.10"
+        ) {
+            throw new Error("The request is not sent to the first terminal");
+        }
         const order = posmodel.currentOrder;
         const sessionId = posmodel.config.current_session_id.id;
         const expectedPayload = {

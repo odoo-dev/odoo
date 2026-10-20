@@ -28,7 +28,6 @@ class PosPaymentMethod(models.Model):
         string="Client secret", help="Log into Viva.com then navigate to Settings > API Access > POS APIs Credentials",
         groups="point_of_sale.group_pos_manager"
     )
-    viva_com_terminal_id = fields.Char(string="Terminal ID", help='[ID of the Viva.com terminal], e.g. 16002169')
     viva_com_bearer_token = fields.Char(default='Bearer Token', groups="point_of_sale.group_pos_manager")
     viva_com_webhook_verification_key = fields.Char(groups="point_of_sale.group_pos_manager")
     viva_com_test_mode = fields.Boolean(string="Test mode", help="Run transactions in the test environment.")
@@ -60,6 +59,9 @@ class PosPaymentMethod(models.Model):
 
     def _get_terminal_provider_selection(self):
         return super()._get_terminal_provider_selection() + [('viva_com', 'Viva.com')]
+
+    def _get_providers_with_terminals(self):
+        return super()._get_providers_with_terminals() + ['viva_com']
 
     @api.model
     def _allowed_actions_in_self_order(self):
@@ -139,22 +141,24 @@ class PosPaymentMethod(models.Model):
                 'primaryAccountNumberMasked': data.get('primaryAccountNumberMasked'),
             })
 
-    def _load_pos_data_fields(self, config):
-        return [*super()._load_pos_data_fields(config), 'viva_com_terminal_id']
+    def _viva_com_set_terminal(self, data, terminal_id):
+        """ Set the Viva.com terminal processing the transaction in the request data. """
+        terminal_sudo = self._get_payment_terminal(terminal_id).sudo()
+        return {**data, 'terminalId': terminal_sudo.viva_com_terminal_id}
 
-    def viva_com_send_payment_request(self, data):
+    def viva_com_send_payment_request(self, data, terminal_id: int | None = None):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to send a Viva.com payment request"))
 
         endpoint = "transactions:sale"
-        return self._call_viva_com(endpoint, 'post', data)
+        return self._call_viva_com(endpoint, 'post', self._viva_com_set_terminal(data, terminal_id))
 
-    def viva_com_send_refund_request(self, data):
+    def viva_com_send_refund_request(self, data, terminal_id: int | None = None):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to send a Viva.com refund request"))
 
         endpoint = "transactions:refund" if data.get("parentSessionId") else "transactions:unreferenced-refund"
-        return self._call_viva_com(endpoint, 'post', data)
+        return self._call_viva_com(endpoint, 'post', self._viva_com_set_terminal(data, terminal_id))
 
     def viva_com_send_payment_cancel(self, data):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
@@ -202,20 +206,20 @@ class PosPaymentMethod(models.Model):
 
         return records
 
-    @api.constrains('payment_provider')
+    @api.constrains('payment_provider', 'terminal_ids')
     def _check_viva_com_credentials(self):
         for record in self:
-            if (
-                record.payment_provider == 'viva_com'
-                and not all(record[f] for f in [
-                    'viva_com_merchant_id',
-                    'viva_com_api_key',
-                    'viva_com_client_id',
-                    'viva_com_client_secret',
-                    'viva_com_terminal_id',
-                ])
-            ):
+            if record.payment_provider != 'viva_com':
+                continue
+            if not all(record[f] for f in [
+                'viva_com_merchant_id',
+                'viva_com_api_key',
+                'viva_com_client_id',
+                'viva_com_client_secret',
+            ]):
                 raise UserError(_('It is essential to provide API key for the use of Viva.com'))
+            if not all(record.terminal_ids.mapped('viva_com_terminal_id')):
+                raise UserError(_('Please set the Terminal ID of each Viva.com terminal.'))
 
 
 def get_viva_com_session(should_retry=True):

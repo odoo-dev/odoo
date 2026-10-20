@@ -33,9 +33,14 @@ export class PaymentStripe extends PaymentInterface {
         }
     }
 
-    async discoverReaders() {
+    // Returns the line's terminal, or the payment method's first terminal
+    _getTerminal(line) {
+        return line?.terminal_id || this.payment_method_id.terminal_ids[0];
+    }
+
+    async discoverReaders(serialNumber) {
         const discoverResult = await this.terminal.discoverReaders({
-            simulated: this.payment_method_id.stripe_serial_number === "SIMULATOR",
+            simulated: serialNumber === "SIMULATOR",
         });
         if (discoverResult.error) {
             this._showError(_t("Failed to discover: %s", discoverResult.error));
@@ -48,7 +53,7 @@ export class PaymentStripe extends PaymentInterface {
         }
     }
 
-    async checkReader() {
+    async checkReader(line) {
         try {
             if (!this.terminal) {
                 const createStripeTerminal = await this.createStripeTerminal();
@@ -63,11 +68,12 @@ export class PaymentStripe extends PaymentInterface {
             this._showError(error);
             return false;
         }
-        const line = this.pos.getOrder().getSelectedPaymentline();
         // Because the reader can only connect to one instance of the SDK at a time.
-        // We need the disconnect this reader if we want to use another one
+        // We need the disconnect this reader if we want to use another one, e.g.
+        // when the device switched to another terminal of the payment method.
+        const serialNumber = this._getTerminal(line).stripe_serial_number;
         if (
-            this.pos.connectedReader != this.payment_method_id.stripe_serial_number &&
+            this.pos.connectedReader != serialNumber &&
             this.terminal.getConnectionStatus() == "connected"
         ) {
             const disconnectResult = await this.terminal.disconnectReader();
@@ -76,22 +82,22 @@ export class PaymentStripe extends PaymentInterface {
                 line.setPaymentStatus("retry");
                 return false;
             } else {
-                return await this.connectReader();
+                return await this.connectReader(line);
             }
         } else if (this.terminal.getConnectionStatus() == "not_connected") {
-            return await this.connectReader();
+            return await this.connectReader(line);
         } else {
             return true;
         }
     }
 
-    async connectReader() {
-        const line = this.pos.getOrder().getSelectedPaymentline();
+    async connectReader(line) {
+        const serialNumber = this._getTerminal(line).stripe_serial_number;
         this.pos.discoveredReaders = "[]";
-        await this.discoverReaders();
+        await this.discoverReaders(serialNumber);
         const discoveredReaders = JSON.parse(this.pos.discoveredReaders);
         for (const selectedReader of discoveredReaders) {
-            if (selectedReader.serial_number == this.payment_method_id.stripe_serial_number) {
+            if (selectedReader.serial_number == serialNumber) {
                 try {
                     const connectResult = await this.terminal.connectReader(selectedReader, {
                         fail_if_in_use: true,
@@ -99,7 +105,7 @@ export class PaymentStripe extends PaymentInterface {
                     if (connectResult.error) {
                         throw connectResult;
                     }
-                    this.pos.connectedReader = this.payment_method_id.stripe_serial_number;
+                    this.pos.connectedReader = serialNumber;
                     return true;
                 } catch (error) {
                     logPosMessage(
@@ -119,12 +125,7 @@ export class PaymentStripe extends PaymentInterface {
                 }
             }
         }
-        this._showError(
-            _t(
-                "Stripe readers %s not listed in your account",
-                this.payment_method_id.stripe_serial_number
-            )
-        );
+        this._showError(_t("Stripe readers %s not listed in your account", serialNumber));
     }
 
     _getCapturedCardAndTransactionId(processPayment) {
@@ -337,7 +338,7 @@ export class PaymentStripe extends PaymentInterface {
 
         line.setPaymentStatus("waiting");
         try {
-            if (await this.checkReader()) {
+            if (await this.checkReader(line)) {
                 if (isRefund) {
                     return await this.collectRefund(line.amount);
                 } else {

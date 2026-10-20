@@ -14,6 +14,7 @@
                         <field name="amount_currency" readonly="0" widget="monetary"/>
                         <field name="foreign_currency_id" />
                         <field name="payment_method_id"/>
+                        <field name="terminal_id" invisible="not terminal_id"/>
                         <field name="payment_method_payment_mode" invisible="not payment_method_payment_mode"/>
                         <field name="card_type" invisible="not card_type or not card_no"/>
                         <field name="card_brand" string="Card's Brand" invisible="not card_brand or not card_no"/>

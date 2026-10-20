@@ -45,6 +45,14 @@
                             <widget name="pos_payment_provider_cards" invisible="all_providers_installed or payment_provider or payment_method_type not in ['terminal', 'external_qr', 'cash_machine']" />
                         </div>
                     </group>
+                    <!-- A provider module with settings adds its own page, holding them and
+                         the terminals, and hides this one. The terminals list is
+                         `pos_payment_terminal_view_list`. -->
+                    <notebook name="terminals" invisible="not use_terminals">
+                        <page name="terminals" string="Terminals">
+                            <field name="terminal_ids" widget="pos_payment_terminals"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

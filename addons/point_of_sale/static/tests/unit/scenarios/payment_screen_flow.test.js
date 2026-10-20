@@ -265,6 +265,26 @@ test("AutofillCashCount: cash count autofill with comma decimal separator", asyn
     expect(document.querySelector(".close-pos-popup .cash-input input").value).toBe("123.456,00");
 });
 
+test("Default payment method: the first option is selected when there is no default", async () => {
+    const store = await setupAndMountPosApp({
+        module_pos_restaurant: false,
+        available_preset_ids: [],
+        fast_payment_method_ids: [],
+    });
+    const [terminal1] = addTestTerminals(store);
+
+    await Utils.clickDisplayedProduct("TEST");
+    await Utils.clickPayButton();
+    await waitFor(".payment-screen");
+
+    // Confirming without changing the selection keeps the first option
+    await Utils.clickPaymentMethod("Test Provider");
+    await contains(".modal-footer button:contains('Confirm')").click();
+    await animationFrame();
+    expect(store.paymentMethods.getDefault("test_terminal")).toBe(terminal1);
+    expect(Utils.selectedPaymentline().name).toBe("Test Terminal 1");
+});
+
 test("Default payment method: selected once, then used directly", async () => {
     const store = await setupAndMountPosApp({
         module_pos_restaurant: false,

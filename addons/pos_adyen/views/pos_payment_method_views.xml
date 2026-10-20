@@ -5,19 +5,22 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'adyen'">
-                    <page name="settings" string="Adyen">
-                        <group>
-                            <field name="adyen_api_key" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'" password="True"/>
-                            <field name="adyen_terminal_identifier" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'"/>
-                            <field name="adyen_merchant_account" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'"/>
-                            <field name="adyen_event_url" invisible="payment_provider != 'adyen'" widget="CopyClipboardChar"/>
-                            <field name="adyen_test_mode" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'"/>
-                        </group>
-                    </page>
-                </notebook>
-            </xpath>
+            <page name="terminals" position="attributes">
+                <attribute name="invisible" add="payment_provider == 'adyen'" separator=" or "/>
+            </page>
+            <page name="terminals" position="before">
+                <page name="adyen_settings" string="Adyen" invisible="payment_provider != 'adyen'">
+                    <separator string="Credentials" style="margin-top: 0.5rem !important;"/>
+                    <group>
+                        <field name="adyen_api_key" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'" password="True"/>
+                        <field name="adyen_merchant_account" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'"/>
+                        <field name="adyen_event_url" invisible="payment_provider != 'adyen'" widget="CopyClipboardChar"/>
+                        <field name="adyen_test_mode" invisible="payment_provider != 'adyen'" required="payment_provider == 'adyen'"/>
+                    </group>
+                    <separator string="Terminals"/>
+                    <field name="terminal_ids" widget="pos_payment_terminals"/>
+                </page>
+            </page>
         </field>
     </record>
 </odoo>

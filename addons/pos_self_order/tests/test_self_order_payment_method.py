@@ -14,6 +14,7 @@ class TestSelfOrderPaymentMethod(SelfOrderCommonTest):
             'journal_id': self.bank_journal.id,
             'type': 'bank',
             'payment_provider': 'stripe',
+            'terminal_ids': [Command.create({})],
         })
         self.cash_journal = self.env['account.journal'].create({
             'name': 'Cash',

@@ -1,6 +1,6 @@
 import { test, expect } from "@odoo/hoot";
 import { patch } from "@web/core/utils/patch";
-import { setupPosEnv, addTestTerminals } from "../utils";
+import { setupPosEnv, addTestTerminals, addPaymentMethodTerminals } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
 import { SelectDefaultPaymentMethodPopup } from "@point_of_sale/app/components/popups/select_default_payment_method_popup/select_default_payment_method_popup";
@@ -31,7 +31,9 @@ test("computeDefaultGroups", async () => {
     store.config.payment_method_ids = [...store.config.payment_method_ids, terminal2];
     plugin.initDefaults();
     expect(Object.keys(plugin.defaultGroups)).toEqual(["test_terminal"]);
-    expect(plugin.defaultGroups.test_terminal.map((pm) => pm.id)).toEqual([1102, terminal1.id]);
+    expect(plugin.defaultGroups.test_terminal.map((terminal) => terminal.paymentMethod.id)).toEqual(
+        [1102, terminal1.id]
+    );
 });
 
 test("getDefault and setDefault", async () => {
@@ -47,7 +49,7 @@ test("getDefault and setDefault", async () => {
     expect(localStorage.getItem(key)).toBe(String(terminal2.id));
 
     // The default is restored from the local storage
-    plugin.defaultIds.test_terminal = false;
+    plugin.defaultKeys.test_terminal = false;
     plugin.initDefaults();
     expect(plugin.getDefault("test_terminal")).toBe(terminal2);
 
@@ -75,8 +77,11 @@ test("selectDefaults", async () => {
             const [group] = props.groups;
             expect(group.provider).toBe("test_terminal");
             expect(group.name).toBe("Test Provider");
-            expect(group.paymentMethods.map((pm) => pm.id)).toEqual([terminal1.id, terminal2.id]);
-            expect(group.selectedId).toBe(terminal1.id);
+            expect(group.terminals).toEqual([
+                { key: String(terminal1.id), name: "Test Terminal 1" },
+                { key: String(terminal2.id), name: "Test Terminal 2" },
+            ]);
+            expect(group.selectedKey).toBe(String(terminal1.id));
             if (response) {
                 props.getPayload(response);
             } else {
@@ -91,7 +96,38 @@ test("selectDefaults", async () => {
     expect(plugin.getDefault("test_terminal")).toBe(terminal1);
 
     // Confirmed: the default is updated
-    response = { test_terminal: terminal2.id };
+    response = { test_terminal: String(terminal2.id) };
     expect(await plugin.selectDefaults()).toBe(true);
     expect(plugin.getDefault("test_terminal")).toBe(terminal2);
+});
+
+test("terminals of a payment method", async () => {
+    const store = await setupPosEnv();
+    const plugin = store.paymentMethods;
+    const [paymentMethod] = addTestTerminals(store, 1);
+
+    // A single terminal is not grouped, but used by the payment method
+    const [terminal1] = addPaymentMethodTerminals(store, paymentMethod, 1);
+    expect(plugin.defaultGroups).toEqual({});
+    expect(plugin.getTerminal(paymentMethod)).toBe(terminal1);
+
+    // Several terminals are grouped, each one being selectable
+    const [terminal2] = addPaymentMethodTerminals(store, paymentMethod, 1);
+    const terminals = plugin.defaultGroups.test_terminal;
+    expect(terminals.map((terminal) => terminal.key)).toEqual([
+        `${paymentMethod.id}-${terminal1.id}`,
+        `${paymentMethod.id}-${terminal2.id}`,
+    ]);
+    expect(terminals.map((terminal) => terminal.name)).toEqual([
+        "Test Terminal 1 - Terminal 1",
+        "Test Terminal 1 - Terminal 2",
+    ]);
+
+    // Without default, the first terminal is used
+    expect(plugin.getTerminal(paymentMethod)).toBe(terminal1);
+
+    // With a default, its terminal is used
+    plugin.setDefault("test_terminal", `${paymentMethod.id}-${terminal2.id}`);
+    expect(plugin.getDefault("test_terminal")).toBe(paymentMethod);
+    expect(plugin.getTerminal(paymentMethod)).toBe(terminal2);
 });

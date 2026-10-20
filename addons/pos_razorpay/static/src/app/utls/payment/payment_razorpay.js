@@ -30,10 +30,22 @@ export class PaymentRazorpay extends PaymentInterface {
         return this._razorpayCancel();
     }
 
-    _callRazorpay(data, action) {
+    _callRazorpay(data, action, terminal) {
         return this.env.services.orm.silent
-            .call("pos.payment.method", action, [[this.payment_method_id.id], data])
+            .call("pos.payment.method", action, [
+                [this.payment_method_id.id],
+                data,
+                terminal?.id || null,
+            ])
             .catch(this._handleOdooConnectionFailure.bind(this));
+    }
+
+    /**
+     * The terminal processing the requests of a payment line. A refund is processed with the
+     * terminal of the original payment when it was made with the same payment method.
+     */
+    _getRazorpayTerminal(line) {
+        return line.uiState.razorpay_refunded_terminal || line.terminal_id;
     }
 
     _handleOdooConnectionFailure(data = {}) {
@@ -76,7 +88,11 @@ export class PaymentRazorpay extends PaymentInterface {
     _razorpayCancel() {
         const line = this.pendingRazorpayline();
         const data = { p2pRequestId: line.razorpay_p2p_request_id };
-        return this._callRazorpay(data, "razorpay_cancel_payment_request").then((data) => {
+        return this._callRazorpay(
+            data,
+            "razorpay_cancel_payment_request",
+            this._getRazorpayTerminal(line)
+        ).then((data) => {
             // This proficiently tackles scenarios where payment initiation is in progress and close to the completion phase
             if (data.errorMessage) {
                 this._showError(data.errorMessage);
@@ -186,17 +202,21 @@ export class PaymentRazorpay extends PaymentInterface {
             } else {
                 return false;
             }
-            return this._callRazorpay(data, "razorpay_make_refund_request").then((data) =>
-                this._razorpayHandleRefundResponse(data)
-            );
+            return this._callRazorpay(
+                data,
+                "razorpay_make_refund_request",
+                this._getRazorpayTerminal(line)
+            ).then((data) => this._razorpayHandleRefundResponse(data));
         } else {
             const data = {
                 amount: line.amount,
                 referenceId: line.payment_ref_no,
             };
-            return this._callRazorpay(data, "razorpay_make_payment_request").then((data) =>
-                this._razorpayHandleResponse(data)
-            );
+            return this._callRazorpay(
+                data,
+                "razorpay_make_payment_request",
+                this._getRazorpayTerminal(line)
+            ).then((data) => this._razorpayHandleResponse(data));
         }
     }
 
@@ -206,7 +226,11 @@ export class PaymentRazorpay extends PaymentInterface {
      */
     async _checkPaymentStatus(line) {
         const data = { p2pRequestId: line?.uiState.razorpay_p2p_request_id };
-        const response = await this._callRazorpay(data, "razorpay_fetch_payment_status");
+        const response = await this._callRazorpay(
+            data,
+            "razorpay_fetch_payment_status",
+            this._getRazorpayTerminal(line)
+        );
         return response;
     }
 
@@ -241,7 +265,11 @@ export class PaymentRazorpay extends PaymentInterface {
                 return resolve(false);
             }
 
-            const response = await this._callRazorpay(data, "razorpay_fetch_payment_status");
+            const response = await this._callRazorpay(
+                data,
+                "razorpay_fetch_payment_status",
+                this._getRazorpayTerminal(paymentLine)
+            );
             if (response.error) {
                 return this._razorpayHandleResponse(response);
             }

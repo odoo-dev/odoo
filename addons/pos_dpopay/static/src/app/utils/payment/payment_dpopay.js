@@ -29,7 +29,7 @@ export class PaymentDPOPay extends PaymentInterface {
 
     async sendPaymentCancel(line) {
         await super.sendPaymentCancel(...arguments);
-        return this._cancelPaymentRequest({ sourceId: line.transaction_id });
+        return this._cancelPaymentRequest({ sourceId: line.transaction_id }, line);
     }
 
     async _processPaymentRequest() {
@@ -40,7 +40,7 @@ export class PaymentDPOPay extends PaymentInterface {
             return false;
         }
 
-        const isReady = await this._checkTerminalStatus();
+        const isReady = await this._checkTerminalStatus(paymentLine);
 
         if (!isReady) {
             return false;
@@ -76,7 +76,7 @@ export class PaymentDPOPay extends PaymentInterface {
             sourceId: paymentLine.transaction_id,
         };
 
-        const response = await this._callDpoPayMakeRequest(data, "start-transaction");
+        const response = await this._callDpoPayMakeRequest(data, "start-transaction", paymentLine);
         return await this._makePaymentRequestHandler(response);
     }
 
@@ -109,7 +109,7 @@ export class PaymentDPOPay extends PaymentInterface {
             }
 
             if (this.paymentStopped) {
-                await this._cancelPaymentRequest(data);
+                await this._cancelPaymentRequest(data, paymentLine);
                 paymentLine.setPaymentStatus("retry");
                 return resolve(false);
             }
@@ -118,7 +118,7 @@ export class PaymentDPOPay extends PaymentInterface {
                 return resolve(false);
             }
 
-            const response = await this._callDpoPayMakeRequest(data, "get-status");
+            const response = await this._callDpoPayMakeRequest(data, "get-status", paymentLine);
             return this._paymentStatusRequestHandler(
                 response,
                 dpopayFetchPaymentStatus,
@@ -133,7 +133,7 @@ export class PaymentDPOPay extends PaymentInterface {
     async _attemptTransactionRecovery(paymentLine) {
         const data = { sourceId: paymentLine.transaction_id };
 
-        const statusResponse = await this._callDpoPayMakeRequest(data, "get-status");
+        const statusResponse = await this._callDpoPayMakeRequest(data, "get-status", paymentLine);
         if (!statusResponse || statusResponse.errorMessage) {
             if (statusResponse.errorMessage === "Transaction not found") {
                 return false;
@@ -145,7 +145,7 @@ export class PaymentDPOPay extends PaymentInterface {
             return false;
         }
 
-        const resultResponse = await this._callDpoPayMakeRequest(data, "get-result");
+        const resultResponse = await this._callDpoPayMakeRequest(data, "get-result", paymentLine);
         if (!resultResponse || resultResponse.errorMessage) {
             this._handleError(resultResponse, _t("Failed to fetch last transaction result."));
             return null;
@@ -158,8 +158,8 @@ export class PaymentDPOPay extends PaymentInterface {
         return true;
     }
 
-    async _checkTerminalStatus() {
-        const response = await this._callDpoPayMakeRequest({}, "get-status");
+    async _checkTerminalStatus(paymentLine) {
+        const response = await this._callDpoPayMakeRequest({}, "get-status", paymentLine);
 
         if (!response || response.errorMessage) {
             this._handleError(response, _t("Unable to reach DPO Pay terminal."));
@@ -206,7 +206,8 @@ export class PaymentDPOPay extends PaymentInterface {
 
             const resp = await this._callDpoPayMakeRequest(
                 { sourceId: response.sourceid },
-                "get-result"
+                "get-result",
+                line
             );
 
             if (!resp?.success) {
@@ -246,8 +247,8 @@ export class PaymentDPOPay extends PaymentInterface {
         this._removePaymentHandler();
     }
 
-    async _cancelPaymentRequest(data) {
-        const response = await this._callDpoPayMakeRequest(data, "cancel-transaction");
+    async _cancelPaymentRequest(data, paymentLine) {
+        const response = await this._callDpoPayMakeRequest(data, "cancel-transaction", paymentLine);
         return await this._paymentCancelRequestHandler(response);
     }
 
@@ -261,12 +262,13 @@ export class PaymentDPOPay extends PaymentInterface {
         return !this.pollingInProgress;
     }
 
-    async _callDpoPayMakeRequest(data, action) {
+    async _callDpoPayMakeRequest(data, action, paymentLine) {
         try {
             return await this.pos.data.call("pos.payment.method", "send_dpopay_request", [
                 [this.payment_method_id.id],
                 data,
                 action,
+                paymentLine?.terminal_id?.id || null,
             ]);
         } catch (error) {
             const line = this._pendingDPOPaymentLine();

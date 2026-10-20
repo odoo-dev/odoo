@@ -14,9 +14,13 @@ const { DateTime } = luxon;
 
 // Patch QFPay to validate the request that would be sent to the terminal
 patch(QFPay.prototype, {
-    makeQFPayRequest: async function (endpoint, payload) {
+    makeQFPayRequest: async function (endpoint, payload, terminal) {
         const paymentLine = posmodel.getPendingPaymentLine("qfpay");
         const paymentMethod = paymentLine.payment_method_id;
+        // The device selected the second terminal of the payment method
+        if (terminal !== paymentLine.terminal_id || terminal !== paymentMethod.terminal_ids[1]) {
+            throw new Error("The request is not sent to the terminal selected by the device");
+        }
         let expectedPayload;
         if (endpoint === "trade") {
             const uuid = paymentLine.uuid;
@@ -60,7 +64,14 @@ registry.category("web_tour.tours").add("qfpay_order_and_refund", {
             // ORDER
             ProductScreen.addOrderline("Desk Pad"),
             ProductScreen.clickPayButton(),
+            // The payment method has 2 terminals, the device selects the one it uses
             PaymentScreen.clickPaymentMethod("Qfpay"),
+            {
+                content: "Select the second terminal as default",
+                trigger: ".modal button:contains('Terminal 2')",
+                run: "click",
+            },
+            Dialog.confirm("Confirm"),
             PaymentScreen.clickSendButton(),
             {
                 content: "Waiting for Qfpay payment to be processed",

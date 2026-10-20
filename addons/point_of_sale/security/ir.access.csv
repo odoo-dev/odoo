@@ -37,6 +37,9 @@ rule_pos_payment_multi_company,PoS Payment,pos.payment,,crud,"[('company_id', 'i
 access_pos_payment_method_user,pos.payment.method user,pos.payment.method,point_of_sale.group_pos_user,r,
 access_pos_payment_method_manager,pos.payment.method manager,pos.payment.method,point_of_sale.group_pos_manager,crud,
 rule_pos_payment_method_multi_company,PoS Payment Method,pos.payment.method,,crud,"[('company_id', 'in', company_ids)]"
+access_pos_payment_terminal_user,pos.payment.terminal user,pos.payment.terminal,point_of_sale.group_pos_user,r,
+access_pos_payment_terminal_manager,pos.payment.terminal manager,pos.payment.terminal,point_of_sale.group_pos_manager,crud,
+rule_pos_payment_terminal_multi_company,PoS Payment Terminal,pos.payment.terminal,,crud,"[('payment_method_id.company_id', 'in', company_ids)]"
 access_product_combo_pos_user,product.combo user,product.combo,point_of_sale.group_pos_user,r,
 access_product_combo_item_pos_user,product.combo.item user,product.combo.item,point_of_sale.group_pos_user,r,
 access_pos_details_wizard,access.pos.details.wizard,pos.details.wizard,point_of_sale.group_pos_manager,cru,

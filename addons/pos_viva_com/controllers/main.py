@@ -18,27 +18,28 @@ class PosVivaComController(http.Controller):
             ('payment_provider', '=', 'viva_com'),
             ('company_id.id', '=', int(company_id))
         ])
-        payment_method_sudo = next(
-            (pm for pm in viva_payment_methods if consteq(pm.viva_com_webhook_verification_key, token)),
-            None
+        # All the payment methods of the Viva.com merchant account share its verification key
+        payment_methods_sudo = viva_payment_methods.filtered(
+            lambda pm: pm.viva_com_webhook_verification_key and consteq(pm.viva_com_webhook_verification_key, token),
         )
 
-        if payment_method_sudo:
+        if payment_methods_sudo:
             if request.httprequest.data:
                 data = request.get_json_data()
                 terminal_id = data.get('EventData', {}).get('TerminalId', '')
                 event_type = data.get('EventTypeId')
                 data_webhook = data.get('EventData', {})
+                terminal_sudo = terminal_id and request.env['pos.payment.terminal'].sudo().search([
+                    ('payment_method_id', 'in', payment_methods_sudo.ids),
+                    ('viva_com_terminal_id', '=', terminal_id),
+                ], limit=1)
                 if event_type != 1796:  # Transaction Payment Created
                     _logger.warning('received a message with an unknown event type "%s". See https://developer.viva.com/webhooks-for-payments/#webhook-events.', event_type)
-                elif terminal_id:
-                    payment_method_sudo = request.env['pos.payment.method'].sudo().search(
-                        [('viva_com_terminal_id', '=', terminal_id)], limit=1
-                    )
-                    payment_method_sudo._retrieve_session_id(data_webhook)
+                elif terminal_sudo:
+                    terminal_sudo.payment_method_id._retrieve_session_id(data_webhook)
                 else:
-                    _logger.error(_('received a message for a terminal not registered in Odoo: %s', terminal_id))
-            return json.dumps({'Key': payment_method_sudo.viva_com_webhook_verification_key})
+                    _logger.error('received a message for a terminal not registered in Odoo: %s', terminal_id)
+            return json.dumps({'Key': payment_methods_sudo[0].viva_com_webhook_verification_key})
         else:
             _logger.error(_('received a message for a pos payment provider not registered.'))
 

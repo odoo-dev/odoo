@@ -5,19 +5,21 @@
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <notebook invisible="payment_provider != 'razorpay'">
-                    <page name="settings" string="Razorpay">
-                        <group>
-                            <field name="razorpay_username" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
-                            <field name="razorpay_tid" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
-                            <field name="razorpay_api_key" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
-                            <field name="razorpay_test_mode" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
-                            <field name="razorpay_allowed_payment_modes" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
-                        </group>
-                    </page>
-                </notebook>
-            </xpath>
+            <page name="terminals" position="attributes">
+                <attribute name="invisible" add="payment_provider == 'razorpay'" separator=" or "/>
+            </page>
+            <page name="terminals" position="before">
+                <page name="razorpay_settings" string="Razorpay" invisible="payment_provider != 'razorpay'">
+                    <separator string="Credentials" style="margin-top: 0.5rem !important;"/>
+                    <group>
+                        <field name="razorpay_api_key" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
+                        <field name="razorpay_test_mode" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
+                        <field name="razorpay_allowed_payment_modes" invisible="payment_provider != 'razorpay'" required="payment_provider == 'razorpay'"/>
+                    </group>
+                    <separator string="Terminals"/>
+                    <field name="terminal_ids" widget="pos_payment_terminals"/>
+                </page>
+            </page>
         </field>
     </record>
 </odoo>

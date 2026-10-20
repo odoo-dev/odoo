@@ -8,11 +8,11 @@
             <div t-foreach="this.props.groups" t-as="group" t-key="group.provider">
                 <h4 class="mb-2" t-out="group.name"/>
                 <div class="d-flex flex-wrap gap-2">
-                    <button t-foreach="group.paymentMethods" t-as="pm" t-key="pm.id"
+                    <button t-foreach="group.terminals" t-as="terminal" t-key="terminal.key"
                         class="btn btn-secondary btn-lg lh-lg"
-                        t-att-class="{ 'border-primary text-primary bg-primary-subtle': pm.id === this.state.selection[group.provider] }"
-                        t-on-click="() => this.select(group.provider, pm.id)"
-                        t-out="pm.name"/>
+                        t-att-class="{ 'border-primary text-primary bg-primary-subtle': terminal.key === this.state.selection[group.provider] }"
+                        t-on-click="() => this.select(group.provider, terminal.key)"
+                        t-out="terminal.name"/>
                 </div>
             </div>
             <t t-set-slot="footer">
