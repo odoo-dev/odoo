@@ -861,8 +861,8 @@
                         <thead class="d-none d-lg-contents">
                             <tr>
                                 <th t-if="line_counter" id="line_number_header" class="text-start" style="width: 1%; white-space: nowrap;">#</th>
-                                <th class="text-start" id="product_name_header" aria-label="Description"/>
-                                <th class="text-end" id="product_qty_header" aria-label="Quantity"/>
+                                <th class="text-start" id="product_name_header" aria-label="Description">Description</th>
+                                <th class="text-end" id="product_qty_header" aria-label="Quantity">Quantity</th>
                                 <th t-if="display_discount" class="text-end d-none d-sm-table-cell" id="product_discount_header">
                                     <span>Discount</span>
                                 </th>
