@@ -28,9 +28,10 @@ const CONSOLE_COLOR = "#28ffeb";
 // Requests that can be safely aborted and replayed: read-only ones and
 // idempotent calls (sync_from_ui matches existing orders by uuid).
 const HEARTBEAT_INTERVAL = 10000;
-const HEARTBEAT_RETRY_INTERVAL = 3000;
+const HEARTBEAT_RETRY_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 10000;
 const HEARTBEAT_MAX_FAILED_ATTEMPTS = 3;
+const HEARTBEAT_MAX_PENDING_PINGS = 3;
 
 export class PosDataPlugin extends Plugin {
     // Must stay above LocalizationPlugin (10) since loading records needs translations.
@@ -56,8 +57,9 @@ export class PosDataPlugin extends Plugin {
         this.connectivity = {
             failedAttempts: 0,
             promises: new Map(),
-            current: null,
+            pings: new Map(),
             timeout: null,
+            lastFailure: 0,
         };
 
         this.mutex = markRaw(new Mutex());
@@ -101,16 +103,28 @@ export class PosDataPlugin extends Plugin {
         if (error instanceof ConnectionAbortedError) {
             return;
         }
+        const probing = this.connectivity.pings.size > 0;
         if (error instanceof ConnectionLostError) {
-            if (!this.connectivity.failedAttempts) {
+            if (!this.connectivity.failedAttempts && !probing) {
                 this.heartbeat();
             }
         } else if (this.network.offline) {
-            this.heartbeat();
+            if (!probing) {
+                this.heartbeat();
+            }
         } else {
+            this.cancelPings();
             this.connectivity.failedAttempts = 0;
             this.scheduleHeartbeat();
         }
+    }
+
+    cancelPings() {
+        for (const [ping, timer] of this.connectivity.pings) {
+            clearTimeout(timer);
+            ping.abort(false);
+        }
+        this.connectivity.pings.clear();
     }
 
     goOffline() {
@@ -126,17 +140,20 @@ export class PosDataPlugin extends Plugin {
      * After 1 successful heartbeat, the browser will be considered online again.
      */
     async heartbeat() {
-        if (this.connectivity.current) {
+        const { pings } = this.connectivity;
+        clearTimeout(this.connectivity.timeout);
+        this.connectivity.timeout = setTimeout(() => this.heartbeat(), HEARTBEAT_RETRY_INTERVAL);
+        if (pings.size >= HEARTBEAT_MAX_PENDING_PINGS) {
             return;
         }
 
-        clearTimeout(this.connectivity.timeout);
-        this.connectivity.current = rpc("/pos/ping", {}, { silent: true });
-        const timer = setTimeout(() => this.connectivity.current.abort(), HEARTBEAT_TIMEOUT);
+        const ping = rpc("/pos/ping", {}, { silent: true });
+        const timer = setTimeout(() => ping.abort(), HEARTBEAT_TIMEOUT);
+        pings.set(ping, timer);
         let reachable = true;
 
         try {
-            await this.connectivity.current;
+            await ping;
         } catch (error) {
             // Any other error means the server answered, so it is reachable
             reachable = !(
@@ -144,21 +161,29 @@ export class PosDataPlugin extends Plugin {
             );
         } finally {
             clearTimeout(timer);
-            this.connectivity.current = null;
+            pings.delete(ping);
         }
 
         if (!reachable) {
-            this.connectivity.failedAttempts += 1;
+            const now = Date.now();
+            // Pings failing at the same time (e.g. network change) count as a single failure
+            if (now - this.connectivity.lastFailure >= HEARTBEAT_RETRY_INTERVAL / 2) {
+                this.connectivity.failedAttempts += 1;
+                this.connectivity.lastFailure = now;
+            }
             if (
                 this.connectivity.failedAttempts >= HEARTBEAT_MAX_FAILED_ATTEMPTS &&
                 !this.network.offline
             ) {
                 this.goOffline();
             }
-            this.scheduleHeartbeat();
+            if (!pings.size) {
+                this.scheduleHeartbeat();
+            }
             return;
         }
 
+        this.cancelPings();
         this.connectivity.failedAttempts = 0;
         this.network.warningTriggered = false;
 

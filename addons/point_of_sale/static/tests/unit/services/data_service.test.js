@@ -1,9 +1,41 @@
 import { test, expect, describe } from "@odoo/hoot";
+import { advanceTime } from "@odoo/hoot-mock";
 import { patchWithCleanup, MockServer } from "@web/../tests/web_test_helpers";
+import { ConnectionAbortedError, ConnectionLostError, rpc } from "@web/core/network/rpc";
 import { getFilledOrder, setupPosEnv } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
 
 definePosModels();
+
+const mockUnreachableServer = ({ onlyPings = false } = {}) => {
+    const pings = [];
+    patchWithCleanup(rpc, {
+        _rpc(url) {
+            if (onlyPings && url !== "/pos/ping") {
+                return super._rpc(...arguments);
+            }
+            let resolve;
+            let reject;
+            const promise = new Promise((res, rej) => {
+                resolve = res;
+                reject = rej;
+            });
+            promise.abort = (rejectError = true) => {
+                promise.aborted = true;
+                if (rejectError) {
+                    reject(new ConnectionAbortedError());
+                }
+            };
+            promise.answer = () => resolve({});
+            promise.fail = () => reject(new ConnectionLostError(url));
+            if (url === "/pos/ping") {
+                pings.push(promise);
+            }
+            return promise;
+        },
+    });
+    return pings;
+};
 
 describe("data_service", () => {
     test("localDeleteCascade", async () => {
@@ -85,5 +117,88 @@ describe("data_service", () => {
         expect(capturedRequests.length).toBeGreaterThan(0);
         const allRequestedModels = capturedRequests.flatMap((req) => req.models);
         expect(allRequestedModels).toInclude("product.product");
+    });
+
+    test("heartbeat: overlapping pings detect an unreachable server", async () => {
+        const store = await setupPosEnv();
+        const data = store.data;
+        const pings = mockUnreachableServer();
+
+        data.heartbeat();
+        expect(pings).toHaveLength(1);
+
+        await advanceTime(5000);
+        expect(pings).toHaveLength(2);
+        expect(data.connectivity.pings.size).toBe(2);
+
+        await advanceTime(5000);
+        expect(data.connectivity.failedAttempts).toBe(1);
+        expect(data.network.offline).toBe(false);
+
+        await advanceTime(5000);
+        expect(data.connectivity.failedAttempts).toBe(2);
+        expect(data.network.offline).toBe(false);
+
+        await advanceTime(5000);
+        expect(data.connectivity.failedAttempts).toBe(3);
+        expect(data.network.offline).toBe(true);
+
+        const pendingPings = pings.filter((ping) => !ping.aborted);
+        expect(pendingPings).toHaveLength(2);
+        pendingPings[0].answer();
+        await advanceTime(0);
+        expect(data.network.offline).toBe(false);
+        expect(data.connectivity.pings.size).toBe(0);
+        expect(pendingPings[1].aborted).toBe(true);
+    });
+
+    test("heartbeat: a slow answer keeps the POS online", async () => {
+        const store = await setupPosEnv();
+        const data = store.data;
+        const pings = mockUnreachableServer();
+
+        data.heartbeat();
+        await advanceTime(7000);
+        expect(pings).toHaveLength(2);
+
+        pings[0].answer();
+        await advanceTime(0);
+        expect(data.network.offline).toBe(false);
+        expect(data.connectivity.failedAttempts).toBe(0);
+        expect(data.connectivity.pings.size).toBe(0);
+        expect(pings[1].aborted).toBe(true);
+    });
+
+    test("heartbeat: pings failing at the same time count as one failure", async () => {
+        const store = await setupPosEnv();
+        const data = store.data;
+        const pings = mockUnreachableServer();
+
+        data.heartbeat();
+        data.heartbeat();
+        expect(pings).toHaveLength(2);
+
+        pings[0].fail();
+        pings[1].fail();
+        await advanceTime(0);
+        expect(data.connectivity.failedAttempts).toBe(1);
+        expect(data.network.offline).toBe(false);
+    });
+
+    test("heartbeat: a successful RPC cancels pending pings", async () => {
+        const store = await setupPosEnv();
+        const data = store.data;
+        const pings = mockUnreachableServer({ onlyPings: true });
+
+        data.heartbeat();
+        data.heartbeat();
+        expect(data.connectivity.pings.size).toBe(2);
+
+        await data.orm.searchCount("res.partner", []);
+        expect(data.connectivity.pings.size).toBe(0);
+        expect(pings.every((ping) => ping.aborted)).toBe(true);
+
+        await advanceTime(15000);
+        expect(data.connectivity.failedAttempts).toBe(0);
     });
 });
