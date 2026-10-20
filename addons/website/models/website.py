@@ -1205,6 +1205,7 @@ class Website(models.Model):
 
     def get_unique_path(self, page_url):
         """ Given an url, return that url suffixed by counter if it already exists
+            (archived pages do not hold their url)
             :param page_url : the url to be checked for uniqueness
         """
         inc = 0
@@ -1214,7 +1215,7 @@ class Website(models.Model):
         website_id = self.env.context.get('website_id', False) or self.get_current_website().id
         domain_static = [('website_id', '=', website_id)]  # .website_domain()
         page_temp = page_url
-        while self.env['website.page'].with_context(active_test=False).sudo().search([('url', '=', page_temp)] + domain_static):
+        while self.env['website.page'].sudo().search([('url', '=', page_temp)] + domain_static):
             inc += 1
             page_temp = page_url + (inc and "-%s" % inc or "")
         return page_temp

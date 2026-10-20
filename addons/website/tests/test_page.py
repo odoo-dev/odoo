@@ -205,6 +205,30 @@ class TestPage(common.TransactionCase):
         self.assertTrue(website_id not in pages.mapped('website_id').ids, "The website from which we deleted the generic page should not have a specific one.")
         self.assertTrue(website_id not in View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
 
+    def test_url_of_archived_page_is_reusable(self):
+        website = self.env['website'].browse(1)
+        Page = self.env['website.page'].with_context(website_id=website.id)
+        default_home = Page.search([('url', '=', '/'), ('website_id', '=', website.id)])
+        self.assertTrue(default_home, "The website should have its own homepage page")
+        page = Page.create({
+            'name': 'Home 2',
+            'type': 'qweb',
+            'arch': '<div>Home 2</div>',
+            'key': 'test.home_2',
+            'url': '/home-2',
+            'website_id': website.id,
+        })
+        website.homepage_url = page.url
+
+        page.url = '/'
+        self.assertEqual(page.url, '/-1', "An active page already uses '/'")
+        page.url = '/home-2'
+
+        default_home.view_id.active = False
+        page.url = ''
+        self.assertEqual(page.url, '/', "An archived page should not hold its URL")
+        self.assertFalse(website.homepage_url, "'/' is the default homepage URL")
+
 
 @tagged('-at_install', 'post_install')
 class WithContext(HttpCase):
