@@ -109,7 +109,7 @@ test("can create a read-only channel", async () => {
 test("can make a DM chat", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Mario" });
-    pyEnv["res.users"].create({ partner_id: partnerId });
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId });
     onRpcBefore((route, args) => {
         if (
             (route.startsWith("/mail") || route.startsWith("/discuss")) &&
@@ -154,7 +154,7 @@ test("can make a DM chat", async () => {
     const [channelId] = pyEnv["discuss.channel"].search([["name", "=", "Mario, Mitchell Admin"]]);
     await waitStoreFetch(
         [
-            ["/discuss/get_or_create_chat", { partners_to: [partnerId] }],
+            ["/discuss/get_or_create_chat", { users_to: [userId] }],
             [
                 "/discuss/channel/messages",
                 { channel_id: channelId, fetch_params: { limit: 60, around: 0 } },

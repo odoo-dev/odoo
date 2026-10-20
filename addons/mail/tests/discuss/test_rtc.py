@@ -53,7 +53,7 @@ class TestChannelRTC(MailCommon, HttpCase):
             cls.env["discuss.channel"]
             .with_user(cls.user_employee)
             ._get_or_create_chat(
-                partners_to=cls.test_user.partner_id.ids,
+                users_to=cls.test_user,
             )
         )
         cls.member_of_employee_in_chat = cls.chat.self_member_id

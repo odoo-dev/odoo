@@ -347,7 +347,7 @@ class TestWebPushNotification(SMSCommon):
     def test_notify_call_invitation(self, push_to_end_point):
         inviting_user = self.env.ref('base.test_user')
         channel = self.env['discuss.channel'].with_user(inviting_user)._get_or_create_chat(
-            partners_to=[self.user_email.partner_id.id])
+            users_to=self.user_email)
         inviting_channel_member = channel.with_user(inviting_user).self_member_id
         inviting_channel_member.sudo()._rtc_join_call()
         self.assertEqual(push_to_end_point.call_count, 2)

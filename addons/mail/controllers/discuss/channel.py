@@ -131,9 +131,9 @@ class DiscussChannelWebclientController(WebclientController):
         self.store_has_hidden_channels(store)
 
     @store_handler("/discuss/get_or_create_chat", audience="everyone", readonly=False)
-    def store_get_or_create_chat(self, store: Store, partners_to):
+    def store_get_or_create_chat(self, store: Store, *, users_to):
         if resolve_channel := request.env["discuss.channel"]._get_or_create_chat(
-            partners_to=partners_to,
+            users_to=request.env["res.users"].with_context(active_test=False).search_fetch([("id", "in", users_to)]),
         ):
             store.resolve_data_request(
                 lambda res: res.one("channel", "_store_channel_fields", value=resolve_channel),

@@ -412,11 +412,11 @@ export class DiscussChannel extends models.ServerModel {
     }
 
     /**
-     * @param {number[]} partners_to
+     * @param {number[]} users_to
      */
-    _get_or_create_chat(partners_to) {
-        const kwargs = getKwArgs(arguments, "partners_to");
-        partners_to = kwargs.partners_to || [];
+    _get_or_create_chat(users_to) {
+        const kwargs = getKwArgs(arguments, "users_to");
+        users_to = kwargs.users_to || [];
 
         /** @type {import("mock_models").DiscussChannel} */
         const DiscussChannel = this.env["discuss.channel"];
@@ -424,7 +424,10 @@ export class DiscussChannel extends models.ServerModel {
         const DiscussChannelMember = this.env["discuss.channel.member"];
         /** @type {import("mock_models").ResPartner} */
         const ResPartner = this.env["res.partner"];
+        /** @type {import("mock_models").ResUsers} */
+        const ResUsers = this.env["res.users"];
 
+        const partners_to = ResUsers.browse(users_to).map((user) => user.partner_id);
         if (!partners_to.includes(this.env.user.partner_id)) {
             partners_to.push(this.env.user.partner_id);
         }

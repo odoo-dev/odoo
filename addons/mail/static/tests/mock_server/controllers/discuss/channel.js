@@ -154,7 +154,7 @@ registerStoreHandler(
     function store_get_or_create_chat(store, params) {
         /** @type {import("mock_models").DiscussChannel} */
         const DiscussChannel = this.env["discuss.channel"];
-        const channelId = DiscussChannel._get_or_create_chat(params.partners_to);
+        const channelId = DiscussChannel._get_or_create_chat(params.users_to);
         if (channelId) {
             store.resolve_data_request((res) =>
                 res.one("channel", "_store_channel_fields", { value: channelId })

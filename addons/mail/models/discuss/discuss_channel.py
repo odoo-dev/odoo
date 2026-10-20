@@ -1789,19 +1789,12 @@ class DiscussChannel(models.Model):
         return action
 
     @api.model
-    def _get_or_create_chat(self, partners_to):
-        """ Get the canonical private channel between some partners, create it if needed.
-            :param partners_to : list of res.partner ids to add to the conversation
-            :param pin : True if getting the channel should pin it for the current user
-            :returns: channel_info of the created or existing channel
-            :rtype: dict
+    def _get_or_create_chat(self, users_to):
+        """ Get the canonical private channel between some users, create it if needed.
+            :param users_to: res.users recordset to add to the conversation
+            :returns: the created or existing channel
         """
-        partners = (
-            self.env["res.partner"]
-            .with_context(active_test=False)
-            .search([("id", "in", partners_to)])
-            .with_env(self.env)
-        ) | self.env.user.partner_id
+        partners = users_to.partner_id | self.env.user.partner_id
         if len(partners) > 2:
             raise UserError(_("A chat should not be created with more than 2 persons. Create a group instead."))
         other_partner = partners - self.env.user.partner_id
@@ -1850,7 +1843,7 @@ class DiscussChannel(models.Model):
                 )
         except psycopg2.errors.UniqueViolation:
             # the chat was created concurrently, join it rather than failing on its unique index
-            return self._get_or_create_chat(partners_to)
+            return self._get_or_create_chat(users_to)
         channel._broadcast(partners.with_context(active_test=True).user_ids)
         return channel
 

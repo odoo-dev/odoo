@@ -99,13 +99,16 @@ const storeServicePatch = {
     async startChat(partnerIds) {
         const partners_to = [...new Set([this.self.id, ...partnerIds])];
         if (partners_to.length === 1) {
-            const chat = await this.joinChat(partners_to[0], true);
+            const chat = await this.joinChat(this.self_user.id, true);
             chat.open({ focus: true, bypassCompact: true });
         } else if (partners_to.length === 2) {
             const correspondentId = partners_to.find(
                 (partnerId) => partnerId !== this.store.self_user?.partner_id?.id
             );
-            const chat = await this.joinChat(correspondentId, true);
+            const chat = await this.joinChat(
+                this["res.partner"].get(correspondentId).main_user_id.id,
+                true
+            );
             chat.open({ focus: true, bypassCompact: true });
         } else {
             const users_to = [

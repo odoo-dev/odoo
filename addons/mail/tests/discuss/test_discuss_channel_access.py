@@ -481,21 +481,17 @@ class TestDiscussChannelAccess(MailCommon):
 
     def _get_channel_id(self, user_key, channel_key, membership, sub_channel):
         user = self.env["res.users"] if user_key == "public" else self.users[user_key]
-        partner = user.partner_id
         guest = self.guest if user_key == "public" else self.env["mail.guest"]
-        partners = self.other_user.partner_id
-        if membership == "member":
-            partners += partner
         DiscussChannel = self.env["discuss.channel"].with_user(self.other_user)
+        users_to = self.other_user
+        if membership == "member":
+            users_to = self.other_user | user
         if channel_key == "group":
-            users_to = self.other_user
-            if membership == "member":
-                users_to = self.other_user | user
             channel = DiscussChannel._create_group(users_to)
             if membership == "member":
                 channel._add_members(users=user, guests=guest)
         elif channel_key == "chat":
-            channel = DiscussChannel._get_or_create_chat(partners.ids)
+            channel = DiscussChannel._get_or_create_chat(users_to)
         else:
             channel = DiscussChannel._create_channel("Channel", group_id=None)
             if membership == "member":

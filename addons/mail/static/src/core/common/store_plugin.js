@@ -518,8 +518,9 @@ export class Store extends BaseStore {
      */
     async getChat({ userId, partnerId }) {
         let partner;
+        let user;
         if (userId) {
-            const user = await this["res.users"].getOrFetch(userId, ["partner_id"]);
+            user = await this["res.users"].getOrFetch(userId, ["partner_id"]);
             if (!user?.partner_id) {
                 this.env.services.notification.add(_t("You can only chat with existing users."), {
                     type: "warning",
@@ -536,13 +537,14 @@ export class Store extends BaseStore {
                 );
                 return;
             }
+            user = partner.main_user_id;
         }
         if (!partner) {
             return;
         }
         let chat = partner.searchChat();
         if (!chat?.self_member_id?.is_pinned) {
-            chat = await this.joinChat(partner.id);
+            chat = await this.joinChat(user.id);
         }
         if (!chat) {
             this.env.services.notification.add(
@@ -775,10 +777,10 @@ export class Store extends BaseStore {
         return lastMessageId + temporaryIdOffset;
     }
 
-    async joinChat(id, forceOpen = false) {
+    async joinChat(userId, forceOpen = false) {
         const { channel } = await this.fetchStoreData(
             "/discuss/get_or_create_chat",
-            { partners_to: [id] },
+            { users_to: [userId] },
             { requestData: true }
         );
         if (forceOpen) {
