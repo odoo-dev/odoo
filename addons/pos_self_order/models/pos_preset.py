@@ -1,5 +1,8 @@
+from datetime import UTC, datetime, timedelta
+
 from odoo import models, api, fields, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.date_utils import float_to_time
 
 ADDRESS_FIELDS = ('delivery_from_street', 'delivery_from_zip', 'delivery_from_city', 'delivery_from_state_id', 'delivery_from_country_id')
 
@@ -162,6 +165,28 @@ class PosPreset(models.Model):
             self.delivery_from_longitude = result[1]
         else:
             raise ValidationError(_("The delivery address could not be geolocated. Please check the address. If the address is valid, your geolocation service may be unavailable or unable to resolve it"))
+
+    def _get_next_available_slot(self, start):
+        self.ensure_one()
+        if self.interval_time <= 0:
+            return False
+        tz = self.env.tz
+        usage = self._compute_slots_usage()
+        interval = timedelta(minutes=self.interval_time)
+        local_start = start.replace(tzinfo=UTC).astimezone(tz)
+        for day in range(7):
+            date = (local_start + timedelta(days=day)).date()
+            attendances = self.attendance_ids.filtered(lambda a: a.dayofweek == str(date.weekday()))
+            for attendance in attendances.sorted('hour_from'):
+                slot = datetime.combine(date, float_to_time(attendance.hour_from))
+                closing = datetime.combine(date, float_to_time(attendance.hour_to))
+                while slot <= closing:
+                    utc_slot = slot.replace(tzinfo=tz).astimezone(UTC).replace(tzinfo=None)
+                    slot_usage = usage.get(utc_slot.strftime("%Y-%m-%d %H:%M:%S")) or []
+                    if utc_slot >= start and len(slot_usage) < self.slots_per_interval:
+                        return utc_slot
+                    slot += interval
+        return False
 
     # will be overridden.
     @api.model

@@ -267,6 +267,8 @@ export class PresetInfoPopup extends Component {
                 title: _t("Select a hour"),
                 subtitle: _t("Please choose a time slot for your order."),
                 selectionType: "time",
+                isOptionValid: (slot) =>
+                    this.selfOrder.isSlotSelectable(preset, DateTime.fromSQL(slot)),
             });
             if (result) {
                 this.selfOrder.currentOrder.preset_time = DateTime.fromSQL(result);
@@ -348,7 +350,7 @@ export class PresetInfoPopup extends Component {
     }
 
     get validSelection() {
-        return this.selfOrder.isValidSelection(this.selfOrder.currentOrder.raw.preset_time, {
+        return this.selfOrder.isValidPartnerInfo({
             id: parseInt(this.state.selectedPartnerId),
             name: this.state.name,
             email: this.state.email,

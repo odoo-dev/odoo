@@ -1357,10 +1357,10 @@ test("test_slot_limit_orders: slot limit order test", async () => {
     await Utils.clickProduct("Free");
     await Utils.clickBtn("Checkout");
     await Utils.clickBtn("Order");
-    await Utils.selectSpecificSlot("12:00");
     await Utils.fillInput("Name", "Dr Dre");
     await Utils.fillInput("Phone", "490904390");
     await Utils.clickBtn("Continue");
+    await Utils.selectSpecificSlot("12:00");
     await Utils.clickBtn("Close");
     await Utils.clickOrderNow();
     await Utils.selectLocation("Out");
@@ -1369,6 +1369,9 @@ test("test_slot_limit_orders: slot limit order test", async () => {
     await Utils.clickProduct("Free");
     await Utils.clickBtn("Checkout");
     await Utils.clickBtn("Order");
+    await Utils.fillInput("Name", "Dr Dre");
+    await Utils.fillInput("Phone", "490904390");
+    await Utils.clickBtn("Continue");
     await Utils.checkSlotDisabled("12:00");
 });
 

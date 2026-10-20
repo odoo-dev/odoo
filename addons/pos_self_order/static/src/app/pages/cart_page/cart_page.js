@@ -427,19 +427,21 @@ export class CartPage extends Component {
         return !lastChange ? line.qty : line.getPendingQtyDelta();
     }
 
-    async pay() {
-        const presets = this.selfOrder.models["pos.preset"].getAll();
+    // Read on demand: the customer can switch preset in the PresetInfoPopup during pay(),
+    // when delivery isn't available for their address
+    get orderingMode() {
         const config = this.selfOrder.config;
-        const type = config.self_ordering_mode;
-        const orderingMode =
-            config.use_presets && presets.length > 1
-                ? this.selfOrder.currentOrder.preset_id?.service_at
-                : config.self_ordering_service_mode;
-        const isTableService = orderingMode === "table" || orderingMode === "dynamic_qr";
-        const useTiming =
-            config.use_presets &&
-            presets.length > 0 &&
-            this.selfOrder.currentOrder.preset_id?.use_timing;
+        return config.use_presets && this.selfOrder.models["pos.preset"].length > 1
+            ? this.selfOrder.currentOrder.preset_id?.service_at
+            : config.self_ordering_service_mode;
+    }
+
+    get isTableService() {
+        return this.orderingMode === "table" || this.orderingMode === "dynamic_qr";
+    }
+
+    async pay() {
+        const type = this.selfOrder.config.self_ordering_mode;
 
         if (this.selfOrder.rpcLoading || !this.selfOrder.verifyCart()) {
             return;
@@ -459,8 +461,7 @@ export class CartPage extends Component {
 
         const order = this.selfOrder.currentOrder;
         const partner = order.partner_id || {};
-        const time = order.preset_time ? order.preset_time.toSQL() : null;
-        const isValidRequiredInfo = this.selfOrder.isValidSelection(time, {
+        const isValidRequiredInfo = this.selfOrder.isValidPartnerInfo({
             id: parseInt(partner.id),
             name: partner.name || order.floating_order_name,
             email: partner.email || order.email,
@@ -472,25 +473,7 @@ export class CartPage extends Component {
             zip: partner.zip,
         });
 
-        if (!isValidRequiredInfo && !isTableService) {
-            let result = null;
-
-            // Show timing selection popup only if preset uses timing
-            if (useTiming) {
-                await this.selfOrder.syncPresetSlotAvaibility(order.preset_id);
-                result = await makeAwaitable(this.dialog, PillsSelectionPopup, {
-                    options: this.presetTimingOptions,
-                    title: _t("Select a hour"),
-                    subtitle: _t("Please choose a time slot for your order."),
-                    selectionType: "time",
-                });
-                if (!result) {
-                    return;
-                }
-                this.selfOrder.currentOrder.preset_time = DateTime.fromSQL(result);
-            }
-
-            // Always show preset info popup when requirements aren't filled
+        if (!isValidRequiredInfo && !this.isTableService) {
             const infos = await makeAwaitable(this.dialog, PresetInfoPopup, {});
             if (!infos) {
                 return;
@@ -503,8 +486,30 @@ export class CartPage extends Component {
         }
 
         if (
+            this.selfOrder.config.use_presets &&
+            order.preset_id?.needsSlot &&
+            !this.isTableService &&
+            !order.isSynced &&
+            !this.selfOrder.isSlotSelectable(order.preset_id, order.preset_time)
+        ) {
+            await this.selfOrder.syncPresetSlotAvaibility(order.preset_id);
+            const result = await makeAwaitable(this.dialog, PillsSelectionPopup, {
+                options: this.presetTimingOptions,
+                title: _t("Select a hour"),
+                subtitle: _t("Please choose a time slot for your order."),
+                selectionType: "time",
+                isOptionValid: (slot) =>
+                    this.selfOrder.isSlotSelectable(order.preset_id, DateTime.fromSQL(slot)),
+            });
+            if (!result) {
+                return;
+            }
+            order.preset_time = DateTime.fromSQL(result);
+        }
+
+        if (
             type === "mobile" &&
-            orderingMode === "table" &&
+            this.orderingMode === "table" &&
             !this.selfOrder.currentTable &&
             this.selfOrder.config.module_pos_restaurant
         ) {

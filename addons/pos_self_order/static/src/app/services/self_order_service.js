@@ -316,6 +316,11 @@ export class SelfOrder extends Reactive {
         newLine.full_product_name = deliveryTemplate.name;
     }
 
+    isSlotSelectable(preset, datetime) {
+        // Leave at least one interval to prepare the order
+        return datetime >= DateTime.now().plus({ minutes: preset.interval_time });
+    }
+
     getTimingOptions(preset) {
         const availabilities = preset.availabilities;
         const options = { categories: {} };
@@ -325,6 +330,9 @@ export class SelfOrder extends Reactive {
                 subCategories: {},
             };
             for (const slot of Object.values(slots)) {
+                if (!this.isSlotSelectable(preset, slot.datetime)) {
+                    continue;
+                }
                 if (!options.categories[date].subCategories[slot.periode]) {
                     let periodeName = _t("Full Day");
                     switch (slot.periode) {
@@ -735,7 +743,7 @@ export class SelfOrder extends Reactive {
             .forEach((o) => this.data.localDeleteCascade(o));
     }
 
-    isValidSelection(slot, partner) {
+    isValidPartnerInfo(partner) {
         const preset = this.currentOrder.preset_id || {};
         const { id, name, email, phone, street, city, country_id, zip } = partner || {};
         const partnerInfo = this.config._has_google_places_api_key
@@ -746,7 +754,6 @@ export class SelfOrder extends Reactive {
         const validPartnerInfos = partnerInfo || selectedPartner;
 
         return (
-            (!preset.needsSlot || DateTime.fromSQL(slot).isValid) &&
             (!preset.needsName || name) &&
             (!preset.needsEmail || selectedPartner || isValidEmail(email)) &&
             (!preset.needsPartner || validPartnerInfos) &&

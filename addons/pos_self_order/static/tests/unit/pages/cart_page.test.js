@@ -1,4 +1,4 @@
-import { test, expect, mockUserAgent } from "@odoo/hoot";
+import { test, expect, mockDate, mockUserAgent } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
 import { contains, mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { CartPage } from "@pos_self_order/app/pages/cart_page/cart_page";
@@ -7,9 +7,12 @@ import { setupSelfPosEnv, getFilledSelfOrder, addComboProduct } from "../utils";
 import { definePosSelfModels } from "../data/generate_model_definitions";
 import { ChooseComboPopup } from "@pos_self_order/app/components/choose_combo_popup/choose_combo_popup";
 import { NumberPopup } from "@pos_self_order/app/components/number_popup/number_popup";
+import { PillsSelectionPopup } from "@pos_self_order/app/components/pills_selection_popup/pills_selection_popup";
 import * as Utils from "@pos_self_order/../tests/unit/ui_utils";
 
 definePosSelfModels();
+
+const { DateTime } = luxon;
 
 test("removeLine", async () => {
     const store = await setupSelfPosEnv();
@@ -65,6 +68,41 @@ test("pay blocked when cannot proceed", async () => {
     await comp.pay();
     expect.verifySteps([]);
     expect(store.rpcLoading).toBe(false);
+});
+
+test("pay asks for a new slot when the selected one is too close", async () => {
+    mockDate("2026-05-15 11:55:00", 0);
+    const store = await setupSelfPosEnv();
+    const order = await getFilledSelfOrder(store);
+    order.preset_id = store.models["pos.preset"].get(2);
+    order.preset_time = DateTime.fromSQL("2026-05-15 12:00:00");
+    const comp = await mountWithCleanup(CartPage, {});
+
+    patchWithCleanup(comp.dialog, {
+        add(component, props) {
+            if (component === PillsSelectionPopup) {
+                expect.step("slot popup");
+                expect(props.isOptionValid("2026-05-15 12:00:00")).toBe(false);
+                props.getPayload("2026-05-15 12:20:00");
+            } else {
+                expect.step("info popup");
+                props.getPayload({});
+            }
+        },
+    });
+
+    // 12:00 is less than one interval (20 min) away, the popup must refuse it too
+    await comp.pay();
+    expect.verifySteps(["slot popup"]);
+    expect(order.preset_time.toFormat("yyyy-MM-dd HH:mm:ss")).toBe("2026-05-15 12:20:00");
+    expect(order.isSynced).toBe(true);
+
+    // The synced order keeps its slot: the server already has it
+    mockDate("2026-05-15 13:00:00", 0);
+    expect(store.currentOrder).toBe(order);
+    await comp.pay();
+    expect.verifySteps([]);
+    expect(order.preset_time.toFormat("yyyy-MM-dd HH:mm:ss")).toBe("2026-05-15 12:20:00");
 });
 
 test("canChangeQuantity", async () => {

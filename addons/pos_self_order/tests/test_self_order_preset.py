@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import odoo.tests
+from odoo.tests import freeze_time
 from odoo.addons.google_address_autocomplete.controllers.google_address_autocomplete import AutoCompleteController
 from unittest.mock import patch
 from odoo.addons.pos_self_order.tests.self_order_common_test import SelfOrderCommonTest
@@ -115,3 +118,54 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         last_order = self.env["pos.order"].search([], limit=1, order="id desc")
         self.assertEqual(last_order.floating_order_name, 'Dr Dre')
         self.assertNotEqual(last_order.preset_time, False)
+
+    def test_paid_order_moves_to_next_slot_with_preparation_time(self):
+        self.env.company.tz = 'Europe/Brussels'
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'dayofweek': str(day),
+                'hour_from': 12,
+                'hour_to': 15,
+            }) for day in range(7)],
+        })
+        self.preset_takeaway.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar,
+            'interval_time': 20,
+            'slots_per_interval': 1,
+        })
+        terminal_payment_method = self.env['pos.payment.method'].create({
+            'name': 'Terminal',
+            'journal_id': self.bank_journal.id,
+            'type': 'bank',
+            'payment_provider': 'stripe',
+        })
+        self.pos_config.write({
+            'self_ordering_mode': 'kiosk',
+            'payment_method_ids': [(4, terminal_payment_method.id)],
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, "")
+
+        # Times are UTC, Brussels is UTC+2: slots at 12:00, 12:20 and 12:40 local
+        orders = self.env['pos.order']
+        for preset_time in ('2026-05-15 10:00:00', '2026-05-15 10:20:00'):
+            orders |= self.process_self_order(
+                [{'product': self.cola, 'qty': 1, 'price_unit': self.cola.lst_price}],
+                preset=self.preset_takeaway,
+                floating_order_name='Dr Dre',
+                preset_time=preset_time,
+            )
+        order = orders[0]
+
+        # Paid at 11:55 local: 12:00 is too close and 12:20 is full
+        with freeze_time('2026-05-15 09:55:00'):
+            order.add_payment({
+                'amount': order.amount_total,
+                'payment_method_id': terminal_payment_method.id,
+                'pos_order_id': order.id,
+            })
+            order.action_pos_order_paid()
+        self.assertEqual(order.state, 'paid')
+        self.assertEqual(order.preset_time, datetime(2026, 5, 15, 10, 40))

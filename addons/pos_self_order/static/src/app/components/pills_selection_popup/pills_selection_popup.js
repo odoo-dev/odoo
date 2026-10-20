@@ -11,6 +11,7 @@ import { getDisplayDateInfo } from "@point_of_sale/utils";
  * @props subtitle: string
  * @props close: function
  * @props getPayload: function
+ * @props isOptionValid: function, optional: checked on confirm, rejects options that expired since opening
  * @props options: {
  *   categories: {
  *     [categoryId]: {
@@ -35,6 +36,7 @@ export class PillsSelectionPopup extends Component {
         close: t.function(),
         getPayload: t.function(),
         selectionType: t.string(),
+        isOptionValid: t.function().optional(),
     });
 
     categoryListRef = signal.ref();
@@ -45,6 +47,7 @@ export class PillsSelectionPopup extends Component {
         this.state = proxy({
             selectedCategoryId: this.categories.length > 0 ? this.categories[0].id : null,
             selectedOptionId: null,
+            rejectedOptionIds: [],
         });
 
         this.onClickScrollTracked = scrollToSelected(
@@ -68,7 +71,13 @@ export class PillsSelectionPopup extends Component {
     }
 
     confirmSelection() {
-        this.props.getPayload(this.state.selectedOptionId);
+        const optionId = this.state.selectedOptionId;
+        if (this.props.isOptionValid && !this.props.isOptionValid(optionId)) {
+            this.state.rejectedOptionIds.push(optionId);
+            this.state.selectedOptionId = null;
+            return;
+        }
+        this.props.getPayload(optionId);
         this.props.close();
     }
 

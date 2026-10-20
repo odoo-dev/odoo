@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import math
+from datetime import timedelta
 
 from odoo import Command, models, fields, api, _
 from odoo.exceptions import UserError, ValidationError, LockError
@@ -93,6 +94,27 @@ class PosOrder(models.Model):
             return True
 
         return not self.config_id.has_valid_self_payment_method() or super()._should_send_to_preparation()
+
+    def action_pos_order_paid(self):
+        if (
+            self.source in ('kiosk', 'mobile')
+            and self.state == 'draft'
+            and self.preset_id.use_timing
+            and self.preset_time
+            and not self._should_send_to_preparation()
+        ):
+            self._postpone_preset_time()
+        return super().action_pos_order_paid()
+
+    def _postpone_preset_time(self):
+        self.ensure_one()
+        earliest = fields.Datetime.now() + timedelta(minutes=self.preset_id.interval_time)
+        if self.preset_time >= earliest:
+            return
+        preset = self.preset_id.with_context(tz=self.company_id.tz)
+        next_slot = preset._get_next_available_slot(earliest)
+        if next_slot:
+            self.preset_time = next_slot
 
     def _send_payment_result(self, payment_result):
         self.ensure_one()
