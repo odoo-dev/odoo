@@ -14,6 +14,7 @@ import { withSequence } from "../utils/resource";
  * @property { FeffPlugin['addFeff'] } addFeff
  * @property { FeffPlugin['removeFeffs'] } removeFeffs
  * @property { FeffPlugin['surroundWithFeffs'] } surroundWithFeffs
+ * @property { FeffPlugin['updateFeffs'] } updateFeffs
  */
 
 /**
@@ -32,7 +33,7 @@ import { withSequence } from "../utils/resource";
 export class FeffPlugin extends Plugin {
     static id = "feff";
     static dependencies = ["selection"];
-    static shared = ["addFeff", "removeFeffs", "surroundWithFeffs"];
+    static shared = ["addFeff", "removeFeffs", "surroundWithFeffs", "updateFeffs"];
 
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -100,8 +101,17 @@ export class FeffPlugin extends Plugin {
      * @param {Element} root
      * @param {Cursors} [cursors]
      * @param {Object} [options]
+     * @param {(node: Node) => boolean} [options.exclude] the FEFFs to keep, by
+     * default the ones of the focused link
      */
-    removeFeffs(root, cursors, { exclude = () => false, excludeLegit = true } = {}) {
+    removeFeffs(
+        root,
+        cursors,
+        {
+            exclude = (node) => closestElement(node, "a.o_link_in_selection"),
+            excludeLegit = true,
+        } = {}
+    ) {
         if (excludeLegit) {
             const excludeParam = exclude;
             exclude = (node) =>
@@ -109,9 +119,7 @@ export class FeffPlugin extends Plugin {
                 (this.checkPredicates("would_feff_be_legit_predicates", node) ?? false);
         }
         const isEditable = (node) => node.parentElement.isContentEditable;
-        const isFocusedLink = (node) => closestElement(node, "a.o_link_in_selection");
-        const composedFilter = (node) =>
-            this.hasFeff(node) && isEditable(node) && !exclude(node) && !isFocusedLink(node);
+        const composedFilter = (node) => this.hasFeff(node) && isEditable(node) && !exclude(node);
 
         for (const node of descendants(root).filter(composedFilter)) {
             // Remove all FEFF within a `prepareUpdate` to make sure to make <br>
@@ -143,26 +151,33 @@ export class FeffPlugin extends Plugin {
         return feff;
     }
 
-    surroundWithFeffs(node, cursors) {
-        const addFeff = (position) => {
+    /**
+     * @param {Element} node
+     * @param {Cursors} [cursors]
+     * @param {Element[]} [innerFeffParents] the elements that get the inner
+     * FEFFs, at the start and at the end of the node content
+     * @returns {Node[]}
+     */
+    surroundWithFeffs(node, cursors, [startFeffParent, endFeffParent] = [node, node]) {
+        const addFeff = (element, position) => {
             // skip cursor update for append, we want to keep it before
             // the added FEFF
             const c = position === "append" ? null : cursors;
-            return this.addFeff(node, position, c);
+            return this.addFeff(element, position, c);
         };
 
         const zwnbspNodes = [];
-        for (const [position, relation] of [
-            ["before", "previousSibling"],
-            ["after", "nextSibling"],
-            ["prepend", "firstChild"],
-            ["append", "lastChild"],
+        for (const [element, position, relation] of [
+            [node, "before", "previousSibling"],
+            [node, "after", "nextSibling"],
+            [startFeffParent, "prepend", "firstChild"],
+            [endFeffParent, "append", "lastChild"],
         ]) {
-            const candidate = node[relation];
+            const candidate = element[relation];
             const feff =
                 isZwnbsp(candidate) && !zwnbspNodes.includes(candidate)
                     ? candidate
-                    : addFeff(position);
+                    : addFeff(element, position);
             zwnbspNodes.push(feff);
         }
         return zwnbspNodes;
