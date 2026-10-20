@@ -234,7 +234,8 @@ $o-color-combinations-preset-number: 1;
 // work for one level of nesting. Note: snippets which can contain other
 // snippets will have problem because of this; this is a limitation of the
 // system until a better solution is found.
-$o-color-extras-nesting-selector: '&, .o_colored_level &';
+$o-color-extras-nesting-selectors: ('&', '.o_colored_level &');
+$o-color-extras-nesting-selector: #{$o-color-extras-nesting-selectors};
 
 // Function which returns if a color has contrast enough in comparaison to
 // another given color.
