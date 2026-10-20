@@ -1,7 +1,10 @@
 import { localization } from "@web/core/l10n/localization";
 import { translatedTermsGlobal } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { clickOnEditAndWaitEditMode } from "@website/js/tours/tour_utils";
+import {
+    clickOnEditAndWaitEditMode,
+    waitForConfiguratorWebsite,
+} from "@website/js/tours/tour_utils";
 
 const themeSelectionCard =
     ".o_theme_selection_screen:not(.o_wsale_configurator_screen) .theme_preview .button_area";
@@ -46,16 +49,7 @@ function runConfiguratorFlow(industrySearchText) {
             run: "click",
             isActive: [themeSelectionCard],
         },
-        {
-            id: "loader",
-            content: "Loader should be shown",
-            trigger: ".o_website_loader_container",
-            expectUnloadPage: true,
-        },
-        {
-            content: "Wait for the editor to load after redirect",
-            trigger: ":iframe [data-view-xmlid='website.homepage']",
-        },
+        ...waitForConfiguratorWebsite(),
         {
             content: "Check that the editor, not translation mode, is opened",
             trigger:

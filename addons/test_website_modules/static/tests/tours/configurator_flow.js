@@ -1,4 +1,5 @@
 import { registry } from "@web/core/registry";
+import { waitForConfiguratorWebsite } from "@website/js/tours/tour_utils";
 
 const themeSelectionCard =
     ".o_theme_selection_screen:not(.o_wsale_configurator_screen) .theme_preview .button_area";
@@ -72,16 +73,7 @@ registry.category("web_tour.tours").add("configurator_flow", {
             trigger: ".o_configurator_screen:contains(product page) .button_area",
             run: "click",
         },
-        {
-            content: "Loader should be shown",
-            trigger: ".o_website_loader_container",
-            expectUnloadPage: true,
-        },
-        {
-            content: "Wait for the editor to load after redirect",
-            trigger: ":iframe [data-view-xmlid='website.homepage']",
-            timeout: 30000,
-        },
+        ...waitForConfiguratorWebsite(),
         {
             content: "check menu and footer links are correct",
             trigger: "body:not(.editor_enable)", // edit mode left

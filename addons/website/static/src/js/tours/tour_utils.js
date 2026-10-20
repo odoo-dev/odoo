@@ -227,6 +227,34 @@ export function clickOnEditAndWaitEditMode() {
 }
 
 /**
+ * Waits for the configurator to build the website, then for the editor to
+ * load after the redirect. Both are slow: `configurator_apply` is a long RPC,
+ * and the new website compiles its own asset bundles on first display.
+ * The "loader" step id is used by other modules to insert their configurator
+ * screens' steps before it.
+ */
+export function waitForConfiguratorWebsite() {
+    return [
+        {
+            id: "loader",
+            content: "Loader should be shown",
+            trigger: ".o_website_loader_container",
+        },
+        {
+            content: "Wait for the website to be built",
+            trigger: ".o_website_loader_container:not(:has(.fa-circle-o-notch))",
+            timeout: 60000,
+            expectUnloadPage: true,
+        },
+        {
+            content: "Wait for the editor to load after redirect",
+            trigger: ":iframe [data-view-xmlid='website.homepage']",
+            timeout: 60000,
+        },
+    ];
+}
+
+/**
  * Click on the top right edit dropdown, then click on the edit dropdown item
  * and wait for the edit mode
  *

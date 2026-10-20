@@ -95,6 +95,12 @@ class TestConfiguratorCommon(odoo.tests.HttpCase):
         )
         self.startPatcher(patcher)
 
+    def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
+        # The website created by the configurator compiles its own asset
+        # bundles (palette-dependent SCSS, backend JS) on first display.
+        kwargs.setdefault('timeout', 180)
+        return super().start_tour(url_path, tour_name, step_delay, **kwargs)
+
 
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestConfigurator(TestConfiguratorCommon):
@@ -175,7 +181,6 @@ class TestConfiguratorTranslation(TestConfiguratorCommon):
             '/website/force/%s?path=%%2Fwebsite%%2Fconfigurator' % website_fr.id,
             'configurator_translation',
             login='admin',
-            timeout=120,
         )
 
 
