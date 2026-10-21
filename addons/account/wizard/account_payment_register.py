@@ -675,7 +675,6 @@ class AccountPaymentRegister(models.TransientModel):
             return self.currency_id._convert(amount_currency, self.company_currency_id, self.company_id, self.payment_date)
         return self.company_currency_id.round(amount_currency / self.exchange_rate)
 
-
     def _get_total_amounts_to_pay(self, batch_results):
         self.ensure_one()
         next_payment_date = self._get_next_payment_date_in_context()
