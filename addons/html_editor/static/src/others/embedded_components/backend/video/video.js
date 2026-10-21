@@ -15,6 +15,7 @@ import {
     useListener,
     useProps,
 } from "@odoo/owl";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -35,6 +36,7 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
     setup() {
         super.setup();
         this.videoBlock = this.videoEmbedProps.host;
+        this.isMobileOS = isMobileOS();
         this.state = useEmbeddedState(this.videoBlock);
 
         if (!this.state.platform || !this.state.videoId) {
@@ -57,13 +59,24 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
 
         this.videoSettingsOverlay = this.videoEmbedProps.createOverlay(VideoSettings, {
             positionOptions: {
-                position: "right-start",
+                position: this.isMobileOS ? "top-end" : "right-start",
+                flip: !this.isMobileOS,
             },
             className: "video-overlay",
             closeOnPointerdown: false,
         });
 
+        if (this.isMobileOS) {
+            this.videoSettingsOverlay.open({
+                target: this.videoBlock,
+                props: this.videoSettingsProps,
+            });
+        }
+
         useListener(this.videoBlock, "pointerenter", () => {
+            if (this.isMobileOS) {
+                return;
+            }
             this.videoSettingsOverlay.open({
                 target: this.videoBlock,
                 props: {
@@ -85,6 +98,9 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
         });
 
         useListener(this.videoBlock, "pointerleave", (e) => {
+            if (this.isMobileOS) {
+                return;
+            }
             if (this.dropdown.isOpen || e.relatedTarget?.closest(".video-overlay")) {
                 return;
             }
@@ -99,6 +115,26 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
     get embedUrl() {
         const platFormClass = PLATFORMS[this.state.platform];
         return platFormClass.getEmbedUrl(this.state.videoId, this.state.params);
+    }
+
+    get videoSettingsProps() {
+        return {
+            videoBlock: this.videoBlock,
+            ...(!this.isMobileOS && {
+                overlay: this.videoSettingsOverlay,
+            }),
+            replaceVideo: () => {
+                this.videoEmbedProps.openVideoSelectorDialog((media) => {
+                    this.replaceVideo(media);
+                }, this.playerRef());
+            },
+            removeVideo: () => {
+                this.videoBlock.remove();
+                this.videoEmbedProps.commit();
+            },
+            focusEditable: this.videoEmbedProps.focusEditable,
+            dropdown: this.dropdown,
+        };
     }
 
     /**
@@ -134,7 +170,7 @@ export class VideoSettings extends Component {
     static components = { Dropdown, DropdownItem };
     props = useProps({
         videoBlock: t.instanceOf(HTMLElement),
-        overlay: t.object(),
+        overlay: t.object().optional(),
         replaceVideo: t.function(),
         removeVideo: t.function(),
         focusEditable: t.function(),
@@ -146,14 +182,14 @@ export class VideoSettings extends Component {
     setup() {
         onMounted(() => {
             this.menuRef()?.addEventListener("pointerleave", () => {
-                if (!this.props.dropdown.isOpen) {
+                if (this.props.overlay && !this.props.dropdown.isOpen) {
                     this.props.overlay.close();
                 }
             });
         });
 
         useListener(document, "pointerdown", (ev) => {
-            if (this.props.dropdown.isOpen) {
+            if (!this.props.overlay || this.props.dropdown.isOpen) {
                 return;
             }
             this.props.overlay.close();

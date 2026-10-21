@@ -2,7 +2,7 @@
 <templates>
     <!-- video settings template -->
     <t t-name="html_editor.VideoSettings">
-        <Dropdown state="this.props.dropdown">
+        <Dropdown state="this.props.dropdown" bottomSheet="false">
             <button t-ref="this.menuRef" class="btn btn-light shadow border py-1 px-1 ms-1 video-options-button" title="More options">
                 <i class="oi oi-fw" data-icon="more_vert"/>
             </button>
@@ -16,4 +16,5 @@
             </t>
         </Dropdown>
     </t>
+
 </templates>
