@@ -5876,7 +5876,6 @@ class BaseModel(metaclass=MetaModel):
         ]
         return lambda rec: tuple(fn(rec) for fn in item_makers)
 
-    @typing.final
     @api.private
     def update(self, values: ValuesType) -> None:
         """ Update the records in ``self`` with ``values``. """
