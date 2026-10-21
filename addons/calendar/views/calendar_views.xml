@@ -367,7 +367,7 @@
                     keep the last computed duration in the front-end model and send it with "start"
                     when it changes-->
                     <!--field is also used for custom behavior in default_get, check before removing-->
-                    <i class="oi oi-filled mt-1" data-icon="schedule" title="Dates"/>
+                    <i class="oi oi-filled mt-1 d-touch-none" data-icon="schedule" title="Dates"/>
                     <field name="duration" invisible="1" force_save="1"/>
                     <field name="start" nolabel="1" class="text-nowrap flex-grow-1"
                         widget="daterange" options="{'end_date_field': 'stop'}"
