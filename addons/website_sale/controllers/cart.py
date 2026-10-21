@@ -299,9 +299,13 @@ class Cart(PaymentPortal):
         route="/shop/cart/quick_add", type="jsonrpc", auth="user", methods=["POST"], website=True
     )
     def quick_add(self, product_template_id, product_id, quantity=1.0, **kwargs):
+        order_alerts = request.cart.alerts
         values = self.add_to_cart(product_template_id, product_id, quantity=quantity, **kwargs)
 
         order_sudo = request.cart
+        # The warning is shown right away as a notification, don't keep it for the next page load.
+        if order_sudo.alerts != order_alerts:
+            order_sudo.alerts = order_alerts
         values.update(self._get_updated_cart_page_values(order_sudo))
         # If the cart was empty, no cart summary was rendered on the page. However, we just
         # added a product, so render it now.
