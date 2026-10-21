@@ -1,8 +1,10 @@
+import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { FormController } from "@web/views/form/form_controller";
 import { useArchiveOrUnlinkCalendarEvent } from "@calendar/views/hooks";
 import { useAskRecurrenceUpdatePolicy } from "@calendar/views/ask_recurrence_update_policy_hook";
 import { useService } from "@web/core/utils/hooks";
+import { executeButtonCallback } from "@web/views/view_button/view_button_hook";
 
 export class CalendarEventFormController extends FormController {
     setup() {
@@ -36,6 +38,16 @@ export class CalendarEventFormController extends FormController {
             };
         }
         return actionMenuItems;
+    }
+
+    get diasableRecurrenceDialogProps() {
+        return {
+            title: _t("Disable recurrence"),
+            body: _t("Turning off the recurrence on this event will delete any occurence of it.\nProceed ?"),
+            confirmLabel: _t("Disable"),
+            confirm: () => {return true},
+            cancel: () => {},
+        };
     }
 
     /**
@@ -87,5 +99,39 @@ export class CalendarEventFormController extends FormController {
             [record.resId], recurrenceUpdate
         ]);
         this.env.config.historyBack();
+    }
+
+    async save(params) {
+        const record = this.model.root;
+        let recurrenceUpdate = false;
+        let saved = false;
+        if (record.data.recurrence_id && !record.data.recurrency) {
+            const disableRecurrence = this.dialogService.add(ConfirmationDialog, this.diasableRecurrenceDialogProps);
+            if (!disableRecurrence) {
+                return saved;
+            } else {
+                recurrenceUpdate = "all_events"
+                record.update({"recurrence_update" : recurrenceUpdate});
+            }
+        } else if (record.data.recurrence_id) {
+            recurrenceUpdate = await this.askRecurrenceUpdatePolicy();
+            record.update({"recurrence_update" : recurrenceUpdate});
+        }
+        if (this.props.saveRecord) {
+            saved = await this.props.saveRecord(record, params);
+        } else {
+            saved = await record.save({
+                onError: (error, options) => this.onSaveError(error, options, false),
+                ...params,
+            });
+        }
+        if (saved && this.props.onSave) {
+            this.props.onSave(record, params);
+        }
+        return saved;
+    }
+
+    saveButtonClicked(params = {}) {
+        return executeButtonCallback(this.ui.activeElement, () => this.save(params));
     }
 }
