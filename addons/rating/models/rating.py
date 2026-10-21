@@ -139,6 +139,7 @@ class RatingRating(models.Model):
 
     def unlink(self):
         # OPW-2181568: Delete the chatter message too
+        # XXX m2o_reference?
         self.env['mail.message'].search([('rating_ids', 'in', self.ids)]).unlink()
         return super().unlink()
 
