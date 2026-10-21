@@ -699,7 +699,14 @@ export class WysiwygAdapterComponent extends Wysiwyg {
         // over all further inactive tabs when using Chrome.
         // grep: .s_tabs
         const doc = this.websiteService.pageDocument;
-        return [...doc.querySelectorAll('.tab-pane > .oe_structure')].map(el => el.parentNode);
+        const tabPanes = [...doc.querySelectorAll('.tab-pane > .oe_structure')].map(el => el.parentNode);
+        // Deleting a carousel indicator would desynchronize it from its slide
+        // and break the carousel navigation.
+        // grep: .s_image_gallery, .s_quotes_carousel, .s_carousel_intro
+        const carouselIndicators = doc.querySelectorAll(
+            ".s_image_gallery .carousel-indicators, .s_quotes_carousel .carousel-indicators, .s_carousel_intro .carousel-indicators"
+        );
+        return [...tabPanes, ...carouselIndicators];
     }
     _getUnremovableElements() {
         return [];

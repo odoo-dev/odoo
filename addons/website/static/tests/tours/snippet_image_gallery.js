@@ -5,6 +5,7 @@ import {
     changeOption,
     clickOnSave,
     clickOnSnippet,
+    goBackToBlocks,
     insertSnippet,
     registerWebsitePreviewTour,
     assertCssVariable,
@@ -172,3 +173,54 @@ registerWebsitePreviewTour("snippet_image_gallery_thumbnail_update", {
     content: "Check that the thumbnail of the first image has not been changed",
     trigger: ":iframe .s_image_gallery div.carousel-indicators button:first-child[style='background-image: url(/web/image/website.library_image_08)']",
 }]);
+
+function checkIndicatorsNotDeletable({ id, name, groupName, selector }) {
+    return [
+        ...insertSnippet({ id, name, groupName }),
+        ...clickOnSnippet(selector),
+        {
+            content: `Check that the indicators of ${name} are not editable`,
+            trigger: `:iframe ${selector} .carousel-indicators[contenteditable='false']`,
+        },
+        {
+            content: "Select the second indicator and try to delete it",
+            trigger: `:iframe ${selector} .carousel-indicators`,
+            run() {
+                const indicators = this.anchor;
+                const selection = indicators.ownerDocument.getSelection();
+                selection.setBaseAndExtent(indicators, 1, indicators, 2);
+                indicators.ownerDocument.execCommand("delete");
+            },
+        },
+        {
+            content: "Check that no indicator has been deleted",
+            trigger: `:iframe ${selector} .carousel-indicators:has(button:nth-child(3))`,
+        },
+    ];
+}
+
+registerWebsitePreviewTour("snippet_image_gallery_indicators_not_editable", {
+    url: "/",
+    edition: true,
+}, () => [
+    ...checkIndicatorsNotDeletable({
+        id: "s_image_gallery",
+        name: "Image Gallery",
+        groupName: "Images",
+        selector: ".s_image_gallery",
+    }),
+    goBackToBlocks(),
+    ...checkIndicatorsNotDeletable({
+        id: "s_quotes_carousel_minimal",
+        name: "Quotes Minimal",
+        groupName: "People",
+        selector: ".s_quotes_carousel",
+    }),
+    goBackToBlocks(),
+    ...checkIndicatorsNotDeletable({
+        id: "s_carousel_intro",
+        name: "Carousel Intro",
+        groupName: "Intro",
+        selector: ".s_carousel_intro",
+    }),
+]);
