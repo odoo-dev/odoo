@@ -69,7 +69,8 @@ class AccountMoveSendWizard(models.TransientModel):
                     else:
                         updated_identifier = min(identifiers, key=len)
 
-                partner.write({
+                # `invoice_edi_format` is company dependent: store it for the invoice's company
+                partner.with_company(move.company_id).write({
                     'peppol_eas': '0225',
                     'peppol_endpoint': updated_identifier,
                     'invoice_edi_format': 'ubl_21_fr',

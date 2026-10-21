@@ -24,7 +24,11 @@ class AccountMoveSend(models.AbstractModel):
             and move.partner_id._get_pdp_receiver_identification_info()[0] == 'pdp'
         ):
             return 'ubl_21_fr'
-        return super()._get_default_invoice_edi_format(move, **kwargs)
+        invoice_edi_format = super()._get_default_invoice_edi_format(move, **kwargs)
+        if invoice_edi_format == 'ubl_21_fr' and move.company_id._get_peppol_proxy_type() != 'pdp':
+            # The French E-Invoicing format requires an issuer registered on the Approved Platform
+            return move.commercial_partner_id.with_company(move.company_id)._get_suggested_peppol_edi_format()
+        return invoice_edi_format
 
     def _is_applicable_to_company(self, method, company):
         # EXTENDS 'account'
