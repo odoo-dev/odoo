@@ -93057,13 +93057,15 @@ const stores = {
 	ViewportsStore,
 	ClipboardStore,
 	ZoomStore,
+	FigureRendererStore,
 	globalStores
 };
 const owlPlugins = {
 	PopoverContainerPlugin,
 	NotificationPlugin,
 	NavigatorClipboardPlugin,
-	ModelPlugin
+	ModelPlugin,
+	SpreadsheetPrintPlugin
 };
 function addFunction(functionName, functionDescription) {
 	functionRegistry.add(functionName, functionDescription);
