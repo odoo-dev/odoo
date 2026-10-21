@@ -20,9 +20,8 @@ class MailTemplate(models.Model):
             domain = Domain('model', '=', 'event.registration') & Domain(domain)
         return super()._search(domain, *args, **kwargs)
 
-    def unlink(self):
-        res = super().unlink()
-        domain = ('template_ref', 'in', [f"{template._name},{template.id}" for template in self])
-        self.env['event.mail'].sudo().search([domain]).unlink()
-        self.env['event.type.mail'].sudo().search([domain]).unlink()
-        return res
+    def _delete_extra(self):
+        yield from super()._delete_extra()
+        domain = Domain('template_ref', 'in', [f"{template._name},{template.id}" for template in self])
+        yield self.env['event.mail'].search(domain)
+        yield self.env['event.type.mail'].search(domain)
