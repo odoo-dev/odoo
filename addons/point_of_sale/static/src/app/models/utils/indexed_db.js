@@ -139,41 +139,39 @@ export default class IndexedDB {
 
     async promises(storeName, arrData, method) {
         if (!arrData?.length) {
-            return;
+            return true;
         }
 
         // Batch processing for large arrays to avoid performance issues
         // or transaction failures due to large data sets
         for (let i = 0; i < arrData.length; i += BATCH_SIZE) {
             let timeoutId;
-            let finished = false;
 
             const batch = arrData.slice(i, i + BATCH_SIZE);
             const transaction = this.getNewTransaction([storeName], "readwrite");
 
             if (!transaction) {
-                return;
+                return false;
             }
 
-            const doneMethod = () => {
-                finished = true;
-                clearTimeout(timeoutId);
-                this.activeTransactions.delete(transaction);
-            };
+            const batchSucceeded = await new Promise((resolve) => {
+                let settled = false;
+                const settle = (ok) => {
+                    if (!settled) {
+                        settled = true;
+                        clearTimeout(timeoutId);
+                        this.activeTransactions.delete(transaction);
+                        resolve(ok);
+                    }
+                };
+                transaction.oncomplete = () => settle(true);
+                transaction.onabort = () => settle(false);
+                transaction.onerror = () => settle(false);
 
-            // Mark transaction as finished in all cases
-            transaction.oncomplete = doneMethod;
-            transaction.onabort = doneMethod;
-            transaction.onerror = doneMethod;
-            transaction.onsuccess = doneMethod;
-
-            const batchPromise = new Promise((resolve, reject) => {
                 const store = transaction.objectStore(storeName);
-                let completed = 0;
-                let hasError = false;
 
                 timeoutId = setTimeout(() => {
-                    if (!finished) {
+                    if (!settled) {
                         logPosMessage(
                             "IndexedDB",
                             `promises.timeout.${method}`,
@@ -182,7 +180,7 @@ export default class IndexedDB {
                             [],
                             true
                         );
-                        reject(new Error("IndexedDB transaction timeout"));
+                        settle(false);
                         try {
                             transaction.abort();
                         } catch (e) {
@@ -208,28 +206,16 @@ export default class IndexedDB {
                         const deepCloned = JSON.parse(JSON.stringify(data));
                         const request = store[method](deepCloned);
 
-                        request.onsuccess = () => {
-                            completed++;
-                            if (completed === batch.length && !hasError && !finished) {
-                                clearTimeout(timeoutId);
-                                resolve();
-                            }
-                        };
-
                         request.onerror = (event) => {
-                            hasError = true;
-                            clearTimeout(timeoutId);
                             logPosMessage(
                                 "IndexedDB",
                                 method,
                                 `Error processing ${method} for ${storeName}: ${event.target?.error}`,
                                 CONSOLE_COLOR
                             );
-                            reject(event.target?.error || "Unknown error");
+                            settle(false);
                         };
-                    } catch (e) {
-                        hasError = true;
-                        clearTimeout(timeoutId);
+                    } catch {
                         logPosMessage(
                             "IndexedDB",
                             method,
@@ -238,19 +224,22 @@ export default class IndexedDB {
                             [],
                             true
                         );
-                        reject(e);
+                        settle(false);
                         try {
                             transaction.abort();
                         } catch {
                             // transaction may already be aborted/completed
                         }
+                        break;
                     }
                 }
             });
 
-            // Batch failures are already logged, keep processing the next ones
-            await batchPromise.catch(() => {});
+            if (!batchSucceeded) {
+                return false;
+            }
         }
+        return true;
     }
 
     getNewTransaction(dbStore, mode = "readwrite") {
@@ -410,11 +399,11 @@ export default class IndexedDB {
         });
     }
 
-    create(storeName, arrData) {
+    async create(storeName, arrData) {
         if (!arrData?.length) {
-            return;
+            return { ok: true };
         }
-        return this.promises(storeName, arrData, "put");
+        return { ok: await this.promises(storeName, arrData, "put") };
     }
     async readAllExceptStores(storeToIgnores = []) {
         const allStoreNames = this.dbStores.map((store) => store[1]);

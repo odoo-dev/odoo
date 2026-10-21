@@ -202,6 +202,7 @@ export class PosDataPlugin extends Plugin {
         const modelsParams = Object.entries(this.opts.databaseTable);
         const data = {};
         const dataToKeep = {};
+        const writeFailures = [];
         let orderlinesToKeep = [];
 
         for (const [model, params] of modelsParams) {
@@ -216,10 +217,13 @@ export class PosDataPlugin extends Plugin {
                 data[model] = recordsToPut;
 
                 if (recordsToPut.length) {
-                    await this.indexedDB.create(
+                    const result = await this.indexedDB.create(
                         model,
                         recordsToPut.map((r) => r.serializeForIndexedDB())
                     );
+                    if (result?.ok === false) {
+                        writeFailures.push(model);
+                    }
                     dataToKeep[model] = recordsToPut.map((r) => r[params.key]);
                 }
             }
@@ -236,28 +240,42 @@ export class PosDataPlugin extends Plugin {
 
                     data[model] = uniqueRecords;
 
-                    await this.indexedDB.create(
+                    const result = await this.indexedDB.create(
                         model,
                         uniqueRecords.map((r) => r.serializeForIndexedDB())
                     );
+                    if (result?.ok === false) {
+                        writeFailures.push(model);
+                    }
                     dataToKeep[model] = uniqueRecords.map((r) => r[params.key]);
                 }
             }
         }
 
-        this.indexedDB.readAll(Object.keys(this.opts.databaseTable)).then((data) => {
-            if (!data) {
-                return;
-            }
+        if (writeFailures.length) {
+            logPosMessage(
+                "DataService",
+                "synchronizeLocalDataInIndexedDB",
+                `Failed to persist ${writeFailures.join(", ")}; skipping local data pruning`,
+                CONSOLE_COLOR,
+                [],
+                true
+            );
+            return data;
+        }
 
-            for (const [model, records] of Object.entries(data)) {
+        const idbData = await this.indexedDB.readAll(Object.keys(this.opts.databaseTable));
+        if (idbData) {
+            for (const [model, records] of Object.entries(idbData)) {
                 const key = this.opts.databaseTable[model].key;
                 const keysToDelete = [];
 
                 for (const record of records) {
                     const localRecord = this.models[model].get(record.id);
                     if (!localRecord) {
-                        keysToDelete.push(record[key]);
+                        if (typeof record.id === "number") {
+                            keysToDelete.push(record[key]);
+                        }
                         continue;
                     }
                     if (!dataToKeep[model] || !dataToKeep[model].includes(record[key])) {
@@ -300,10 +318,10 @@ export class PosDataPlugin extends Plugin {
                 }
 
                 if (keysToDelete.length) {
-                    this.indexedDB.delete(model, keysToDelete);
+                    await this.indexedDB.delete(model, keysToDelete);
                 }
             }
-        });
+        }
 
         return data;
     }
