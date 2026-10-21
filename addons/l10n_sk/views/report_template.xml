@@ -63,4 +63,31 @@
             </div>
         </xpath>
     </template>
+
+    <template id="l10n_sk_external_layout_din5008" inherit_id="l10n_din5008.external_layout_din5008">
+        <xpath expr="//div[hasclass('colored_address')]" position="after">
+            <div t-if="company.account_fiscal_country_id.code == 'SK'" class="sk_company_identifiers">
+                <div t-if="company.company_registry">
+                    ID: <span t-field="company.company_registry"/>
+                </div>
+                <div t-if="company.income_tax_id">
+                    Tax ID: <span t-field="company.income_tax_id"/>
+                </div>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[hasclass('company_details')]//li[span[@t-field='company.company_registry']]" position="replace">
+            <li t-if="company.account_fiscal_country_id.code == 'SK'">
+                <div t-if="company.company_registry">
+                    ID: <span t-field="company.company_registry"/>
+                </div>
+                <div t-if="company.income_tax_id">
+                    Tax ID: <span t-field="company.income_tax_id"/>
+                </div>
+            </li>
+            <li t-else="">
+                <span t-field="company.company_registry"/>
+            </li>
+        </xpath>
+    </template>
 </odoo>
