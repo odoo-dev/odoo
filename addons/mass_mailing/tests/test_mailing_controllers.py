@@ -685,7 +685,8 @@ class TestMailingTracking(TestMailingControllersCommon):
         Mailing contact's stats (eg: last_opened_datetime, etc..) should also be
         updated."""
         mailing = self.test_mailing_on_lists.with_env(self.env)
-        with self.mock_mail_gateway(mail_unlink_sent=False):
+        with self.mock_mail_gateway(mail_unlink_sent=False), \
+             self.mock_datetime_and_now(self._reference_now - datetime.timedelta(minutes=5)):
             mailing.action_send_mail()
 
         mail = self._find_mail_mail_wrecord(self.test_contact)
