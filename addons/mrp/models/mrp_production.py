@@ -1203,10 +1203,11 @@ class MrpProduction(models.Model):
 
     def unlink(self):
         self.action_cancel()
-        workorders_to_delete = self.workorder_ids.filtered(lambda wo: wo.state != 'done')
-        if workorders_to_delete:
-            workorders_to_delete.unlink()
-        return super(MrpProduction, self).unlink()
+        return super().unlink()
+
+    def _delete_extra(self):
+        yield self.workorder_ids.filtered(lambda wo: wo.state != 'done')
+        yield from super()._delete_extra()
 
     @api.ondelete(at_uninstall=True)
     def _unlink_if_not_done(self):

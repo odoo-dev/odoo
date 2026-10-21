@@ -378,12 +378,12 @@ class LoyaltyReward(models.Model):
             self.discount_line_product_id.update_field_translations('name', translations, source_lang=source_lang)
         return res
 
-    def unlink(self):
-        programs = self.program_id
-        res = super().unlink()
+    @api.ondelete(at_uninstall=False)
+    def _unlink_check_rewards(self):
         # Not guaranteed to trigger the constraint
-        programs._constrains_reward_ids()
-        return res
+        if programs := self.program_id:
+            return programs._constrains_reward_ids
+        return None
 
     def _get_discount_product_values(self):
         return [
