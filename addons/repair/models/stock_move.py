@@ -191,7 +191,7 @@ class StockMove(models.Model):
 
         self.env['sale.order.line'].create(so_line_vals)
 
-    @api.ondelete(at_uninstall=False)
+    @api.ondelete(at_uninstall=False, cascade_sudo=True)
     def _clean_repair_linked_lines(self):
         if self.repair_id.invoice_ids:
             self.filtered(

@@ -60,7 +60,7 @@ class RepairServiceLine(models.Model):
             lines_to_update._update_repair_linked_line()
         return res
 
-    @api.ondelete(at_uninstall=True)
+    @api.ondelete(at_uninstall=True, cascade_sudo=True)
     def _unlink_repair_service_line(self):
         self.filtered(
             lambda r: r.repair_id and r.sale_line_id

@@ -16,7 +16,7 @@ class AccountMove(models.Model):
         self.expense_ids._sale_expense_reset_sol_quantities()
         return super().button_draft()
 
-    @api.ondelete(at_uninstall=False)
+    @api.ondelete(at_uninstall=False, cascade_sudo=True)
     def _unlink_set_sol_quantities(self):
         # EXTENDS sale
         self.expense_ids._sale_expense_reset_sol_quantities()

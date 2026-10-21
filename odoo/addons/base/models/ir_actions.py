@@ -108,7 +108,7 @@ class IrActionsActions(models.Model):
         for record in self:
             record.xml_id = res.get(record.id)
 
-    @api.ondelete(at_uninstall=True)
+    @api.ondelete(at_uninstall=True, cascade_sudo=True)
     def _unlink_reset_todo_open_menu(self):
         try:
             todo_open_menu = self.env.ref('base.open_menu')
@@ -121,7 +121,7 @@ class IrActionsActions(models.Model):
 
     @api.ondelete(at_uninstall=True)
     def _unlink_check_home_action(self):
-        self.env['res.users'].with_context(active_test=False).search([('action_id', 'in', self.ids)]).sudo().write({'action_id': None})
+        self.env['res.users'].sudo().with_context(active_test=False).search([('action_id', 'in', self.ids)]).write({'action_id': None})
 
     @api.model
     def _get_eval_context(self, action=None):
