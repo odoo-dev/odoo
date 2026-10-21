@@ -33,3 +33,20 @@ class TestProductLessonTours(LessonTourCase):
         product.categ_id = self.env['product.category'].create({'name': "Somewhere"})
         self.assertEqual(Setup.run('product_categories', 'product'), location)
         self.assertFalse(product.categ_id)
+
+    def test_first_product(self):
+        self.play_checkpoint('first_product', 'start')
+        product = self.env['product.template'].search([('name', '=', "Copper elbow 15mm")])
+        self.assertEqual(product.list_price, 4.5)
+
+    def test_copy_product(self):
+        self.play_checkpoint('copy_product', 'start')
+        copy = self.env['product.template'].search([('name', '=', "Copper pipe 22mm")])
+        self.assertEqual(copy.list_price, 12)
+        self.assertEqual(self.env['product.template'].search([('name', '=', "Copper pipe 15mm")]).list_price, 8.5)
+
+    def test_labour_service(self):
+        self.play_checkpoint('labour_service', 'start')
+        labour = self.env['product.template'].search([('name', '=', "Labour (per hour)")])
+        self.assertEqual(labour.type, 'service')
+        self.assertEqual(labour.uom_id, self.env.ref('uom.product_uom_hour'))

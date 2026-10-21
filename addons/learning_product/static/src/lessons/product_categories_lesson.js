@@ -2,6 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { findTarget } from "@learning/core/dom_target";
 import { formSaved } from "@learning/core/step_conditions";
 import { lessonRegistry } from "@learning/lessons/lesson_registry";
+import { menuSteps } from "@learning/lessons/menu_steps";
 
 const CATEGORY_INPUT = ".o_form_view .o_field_widget[name=categ_id] input";
 const PARENT_INPUT = ".o_dialog .o_field_widget[name=parent_id] input";
@@ -9,7 +10,6 @@ const PARENT_OPTION = ".o_dialog .o_field_widget[name=parent_id] .o-autocomplete
 const PRODUCT_RECORD = ".o_kanban_record, .o_data_row .o_data_cell";
 
 const valueOf = (selector) => document.querySelector(selector)?.value || "";
-const menuItem = ({ xmlid }) => `[data-menu-xmlid="${xmlid}"]`;
 
 /**
  * From wherever the learner is to the product's form, through the menus of
@@ -18,39 +18,7 @@ const menuItem = ({ xmlid }) => `[data-menu-xmlid="${xmlid}"]`;
  * @param {{menuPath: {xmlid: string, name: string}[], productName: string}} params
  */
 function findProductSteps({ menuPath = [], productName = "" }) {
-    const steps = [];
-    if (menuPath.length) {
-        const [app, ...items] = menuPath;
-        steps.push(
-            {
-                trigger: ".o_navbar_apps_menu button, .o_menu_toggle",
-                bubble: _t("Open the apps"),
-                content: _t("Your products are in the %s app. First, show all your apps.", app.name),
-                run: "click",
-                // skipped when the apps are already shown
-                until: menuItem(app),
-            },
-            {
-                trigger: menuItem(app),
-                bubble: _t("Open %s", app.name),
-                content: _t("Click %s.", app.name),
-                run: "click",
-                until: menuItem(items[0]),
-            }
-        );
-        items.forEach((item, index) => {
-            const next = items[index + 1];
-            steps.push({
-                trigger: menuItem(item),
-                bubble: _t("Click %s", item.name),
-                content: next
-                    ? _t("Menus at the top lead to the lists of the app. Click “%s”.", item.name)
-                    : _t("Click “%s”: the list of all your products.", item.name),
-                run: "click",
-                until: next ? menuItem(next) : { trigger: ".o_last_breadcrumb_item", text: item.name },
-            });
-        });
-    }
+    const steps = menuSteps(menuPath, _t("your products"));
     steps.push(
         {
             trigger: ".o_searchview_input",
@@ -63,7 +31,7 @@ function findProductSteps({ menuPath = [], productName = "" }) {
         {
             trigger: PRODUCT_RECORD,
             text: productName,
-            bubble: _t("Open it"),
+            bubble: _t("Open “%s”", productName),
             content: _t("Here it is. Click “%s” to open it.", productName),
             run: "click",
             until: CATEGORY_INPUT,
@@ -118,7 +86,7 @@ lessonRegistry.add("product_categories", {
                 {
                     trigger: PARENT_OPTION,
                     text: "Plumbing",
-                    bubble: _t("Click it"),
+                    bubble: _t("Pick “Plumbing”"),
                     content: _t(
                         "Typing is not enough: pick “Plumbing” in the list. If it does not exist yet, Create “Plumbing” makes it right away, and you stay in this window."
                     ),

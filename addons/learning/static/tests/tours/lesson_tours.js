@@ -27,11 +27,31 @@ async function waitUntilDone(step) {
     }
 }
 
+/**
+ * Learners look at the bubble first: when a step expects a value to type or
+ * an item to pick, the bubble must say which one.
+ */
+function checkBubble(step) {
+    const [action, ...words] = (step.run || "").split(" ");
+    const expected = ["edit", "search"].includes(action) ? words.join(" ") : step.text;
+    if (expected && !String(step.bubble).toLowerCase().includes(String(expected).toLowerCase())) {
+        throw new Error(`The bubble "${step.bubble}" must show "${expected}" (step: ${step.content})`);
+    }
+}
+
 function toTourStep(step) {
+    checkBubble(step);
     return {
         content: String(step.content),
         trigger: "body",
         async run() {
+            if (step.acknowledge) {
+                // an explanation: what it explains must be on screen
+                if (!(await waitForTarget(step, TIMEOUT))) {
+                    throw new Error(`Explained element not found: ${step.content}`);
+                }
+                return;
+            }
             const alreadyDone =
                 step.until && typeof step.until !== "function" && isStepDone(step, { clicked: false });
             if (alreadyDone) {

@@ -10,9 +10,12 @@ const FORM_SAVE_BUTTON = ".o_form_status_indicator .o_form_button_save";
  * Whether a lesson step is done.
  *
  * @param {import("../lessons/lesson_registry").LessonStep} step
- * @param {{target: HTMLElement|null, clicked: boolean, idleMs: number}} context
+ * @param {{target: HTMLElement|null, clicked: boolean, idleMs: number, acknowledged?: boolean}} context
  */
 export function isStepDone(step, context) {
+    if (step.acknowledge) {
+        return Boolean(context.acknowledged);
+    }
     const { until } = step;
     if (!until) {
         return context.clicked;

@@ -41,7 +41,10 @@ export class LessonRunnerPlugin extends Plugin {
         stepIndex: 0,
         /** "idle" | "intro" | "running" | "done" */
         status: "idle",
-        /** false | "lost" (no target on screen) | "invalid" (a field blocks saving) */
+        /**
+         * false | "lost" (no target on screen) | "invalid" (a field blocks saving)
+         * | "window" (the target is behind a window the lesson did not open)
+         */
         stuck: false,
         demoRunning: false,
         checkpointStartedAt: null,
@@ -68,6 +71,7 @@ export class LessonRunnerPlugin extends Plugin {
 
     setup() {
         this.clicked = false;
+        this.acknowledged = false;
         this.lastInputAt = 0;
         this.lastTargetSeenAt = Date.now();
         this.restore();
@@ -124,6 +128,7 @@ export class LessonRunnerPlugin extends Plugin {
     }
 
     advance() {
+        this.wrapUpStep(this.step());
         this.state.stepIndex++;
         if (this.state.stepIndex >= this.steps().length) {
             if (this.state.checkpointIndex + 1 < this.lesson().checkpoints.length) {
@@ -138,6 +143,22 @@ export class LessonRunnerPlugin extends Plugin {
         }
         this.resetStepTracking();
         this.persist();
+    }
+
+    /** What a step leaves behind for the next ones (see `remember`, `closeSuggestions`). */
+    wrapUpStep(step) {
+        if (step.remember) {
+            const { key, from } = step.remember;
+            const value = document.querySelector(from)?.value?.trim();
+            if (value) {
+                this.state.params = { ...this.state.params, [key]: value };
+            }
+        }
+        if (step.closeSuggestions) {
+            // suggestions close when the input loses the focus (not Escape:
+            // in forms and lines, it can discard changes)
+            document.activeElement?.blur?.();
+        }
     }
 
     async finish() {
@@ -181,7 +202,13 @@ export class LessonRunnerPlugin extends Plugin {
 
     resetStepTracking() {
         this.clicked = false;
+        this.acknowledged = false;
         this.lastTargetSeenAt = Date.now();
+    }
+
+    /** The learner read an explanation step ("Got it"). */
+    acknowledge() {
+        this.acknowledged = true;
     }
 
     onDocumentClick(ev) {
@@ -201,7 +228,13 @@ export class LessonRunnerPlugin extends Plugin {
         if (target !== this.target()) {
             this.target.set(target && markRaw(target));
         }
-        if (isStepDone(step, { target, clicked: this.clicked, idleMs: now - this.lastInputAt })) {
+        const context = {
+            target,
+            clicked: this.clicked,
+            acknowledged: this.acknowledged,
+            idleMs: now - this.lastInputAt,
+        };
+        if (isStepDone(step, context)) {
             this.advance();
             return;
         }
@@ -211,6 +244,8 @@ export class LessonRunnerPlugin extends Plugin {
         let stuck = false;
         if (document.querySelector(".o_field_invalid, .o_invalid_cell")) {
             stuck = "invalid";
+        } else if (!target && findTarget(step, { anyLayer: true })) {
+            stuck = "window";
         } else if (now - this.lastTargetSeenAt > STUCK_DELAY) {
             stuck = "lost";
         }

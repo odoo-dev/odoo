@@ -46,3 +46,20 @@ class TestLessonTours(LessonTourCase):
     def test_copy_card(self):
         self.play_checkpoint('copy_card', 'start')
         self.assertTrue(self.env['learning.practice.card'].search([('name', '=', "Buy brass fittings")]))
+
+    def test_find_card(self):
+        self.play_checkpoint('find_card', 'start')
+
+    def test_archive_card(self):
+        self.play_checkpoint('archive_card', 'start')
+        card = self.env['learning.practice.card'].with_context(active_test=False).search([('name', '=', "Old idea")])
+        self.assertTrue(card.active, "archived, then brought back")
+
+    def test_delete_card(self):
+        self.play_checkpoint('delete_card', 'start')
+        self.assertFalse(self.env['learning.practice.card'].with_context(active_test=False).search([('name', '=', "Card to throw away")]))
+
+    def test_card_lines(self):
+        self.play_checkpoint('card_lines', 'start')
+        card = self.env['learning.practice.card'].search([('name', '=', "Bathroom renovation")])
+        self.assertEqual(card.line_ids.mapped('name'), ["Lay new tiles"])

@@ -1,12 +1,15 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import mute_logger
 
 _logger = logging.getLogger(__name__)
 
-# Deleting can fail because practice records depend on each other (e.g. a
-# category still used by a practice product): retry a few rounds, then archive.
+# Practice records are deleted in order (see `_cleanup_rank`). Deleting can
+# still fail when they depend on each other in unforeseen ways: retry a few
+# rounds, then archive.
 CLEANUP_ROUNDS = 3
+DEFAULT_CLEANUP_RANK = 50
 
 
 class LearningPracticeRecord(models.Model):
@@ -59,14 +62,24 @@ class LearningPracticeRecord(models.Model):
         cards.unlink()
         return count
 
+    @api.model
+    def _cleanup_rank(self, res_model):
+        """Deletion order of practice records: lower first. Documents come
+        before what they use (an order before its customer, a journal before
+        its account). Modules adding lessons override it for their models."""
+        return DEFAULT_CLEANUP_RANK
+
     def _cleanup(self):
-        pending = self
+        # most recent first within a model: what was created later usually
+        # depends on what was created before
+        pending = self.sorted(lambda entry: (self._cleanup_rank(entry.res_model), -entry.id))
         for _round in range(CLEANUP_ROUNDS):
             failed = self.browse()
             for entry in pending:
                 record = self.env[entry.res_model].sudo().browse(entry.res_id).exists()
                 try:
-                    with self.env.cr.savepoint():
+                    # a failure is expected and handled: keep it out of the logs
+                    with self.env.cr.savepoint(), mute_logger('odoo.sql_db'):
                         record.unlink()
                 except Exception:  # noqa: BLE001 - any failure is retried, then archived
                     failed |= entry
@@ -77,7 +90,7 @@ class LearningPracticeRecord(models.Model):
         for entry in pending:
             record = self.env[entry.res_model].sudo().browse(entry.res_id).exists()
             try:
-                with self.env.cr.savepoint():
+                with self.env.cr.savepoint(), mute_logger('odoo.sql_db'):
                     record.active = False
             except Exception:  # noqa: BLE001 - no "active" field, or archiving refused
                 _logger.warning("Could not remove practice record %s(%s)", entry.res_model, entry.res_id)

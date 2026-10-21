@@ -9,7 +9,7 @@ from odoo.addons.learning import uninstall_hook
 class TestPracticeRecord(BaseCommon):
 
     def test_register_is_idempotent(self):
-        partner = self.env['res.partner'].create({'name': "Practice customer"})
+        partner = self.env['res.partner'].sudo().create({'name': "Practice customer"})
         Practice = self.env['learning.practice.record']
         Practice.register('res.partner', partner.ids)
         Practice.register('res.partner', partner.ids)
@@ -17,7 +17,7 @@ class TestPracticeRecord(BaseCommon):
 
     def test_register_recent_only_takes_the_users_new_records(self):
         since = self.env.cr.now()
-        partner = self.env['res.partner'].create({'name': "Created during the lesson"})
+        partner = self.env['res.partner'].sudo().create({'name': "Created during the lesson"})
         self.env['learning.practice.record'].register_recent('res.partner', since)
         self.assertIn(partner.id, self.env['learning.practice.record'].get_practice_ids('res.partner'))
         self.assertNotIn(self.env.user.partner_id.id, self.env['learning.practice.record'].get_practice_ids('res.partner'))
@@ -25,8 +25,8 @@ class TestPracticeRecord(BaseCommon):
     def test_cleanup_deletes_dependents_first(self):
         # the company is registered first, but its contact must be deleted
         # before it: cleanup retries in later rounds
-        company = self.env['res.partner'].create({'name': "Practice company", 'is_company': True})
-        person = self.env['res.partner'].create({'name': "Practice person", 'parent_id': company.id})
+        company = self.env['res.partner'].sudo().create({'name': "Practice company"})
+        person = self.env['res.partner'].sudo().create({'name': "Practice person", 'parent_id': company.id})
         card = self.env['learning.practice.card'].create({'name': "My card"})
         self.env['learning.practice.record'].register('res.partner', (company + person).ids)
         self.assertEqual(self.env['learning.practice.record'].cleanup(), 3)
@@ -35,7 +35,7 @@ class TestPracticeRecord(BaseCommon):
         self.assertFalse(self.env['learning.practice.record'].search([]))
 
     def test_cleanup_archives_what_cannot_be_deleted(self):
-        partner = self.env['res.partner'].create({'name': "Still in use"})
+        partner = self.env['res.partner'].sudo().create({'name': "Still in use"})
         self.env['learning.practice.record'].register('res.partner', partner.ids)
 
         def unlink(records):
@@ -47,9 +47,9 @@ class TestPracticeRecord(BaseCommon):
         self.assertFalse(partner.active)
 
     def test_uninstall_hook_removes_every_users_practice_records(self):
-        other_user = self.env['res.users'].create({'name': "Other learner", 'login': 'other_learner'})
-        mine = self.env['res.partner'].create({'name': "Mine"})
-        theirs = self.env['res.partner'].with_user(other_user).sudo().create({'name': "Theirs"})
+        other_user = self.env['res.users'].sudo().create({'name': "Other learner", 'login': 'other_learner'})
+        mine = self.env['res.partner'].sudo().create({'name': "Mine"})
+        theirs = self.env['res.partner'].sudo().create({'name': "Theirs"})
         self.env['learning.practice.record'].register('res.partner', mine.ids)
         self.env['learning.practice.record'].with_user(other_user).sudo().create({
             'res_model': 'res.partner', 'res_id': theirs.id, 'user_id': other_user.id,

@@ -19,16 +19,42 @@ describe("findTarget", () => {
         expect(findTarget({ trigger: ".b", text: "Delete" })).toBe(null);
     });
 
+    test("points at an element inside the matched one", () => {
+        render(`
+            <table>
+                <tr class="row"><td>Copper pipe</td><td class="qty">3</td></tr>
+                <tr class="row"><td>Labour</td><td class="qty">2</td></tr>
+            </table>
+        `);
+        expect(findTarget({ trigger: ".row", text: "labour", child: ".qty" }).textContent).toBe("2");
+        expect(findTarget({ trigger: ".row", text: "labour", child: ".missing" })).toBe(null);
+    });
+
+    test("can also look behind open windows", () => {
+        render(`
+            <button class="b">Page</button>
+            <div class="o_dialog"><div class="modal d-block"><span>Window</span></div></div>
+        `);
+        expect(findTarget({ trigger: ".b" })).toBe(null);
+        expect(findTarget({ trigger: ".b" }, { anyLayer: true }).textContent).toBe("Page");
+    });
+
     test("only looks in the dialog on top", () => {
         render(`
             <button class="b">Page</button>
-            <div class="o_dialog"><div class="modal"><button class="b">Dialog</button></div></div>
+            <div class="o_dialog"><div class="modal d-block"><button class="b">Dialog</button></div></div>
         `);
         expect(findTarget({ trigger: ".b" }).textContent).toBe("Dialog");
     });
 });
 
 describe("isStepDone", () => {
+    test("explanation: done when the learner clicked Got it", () => {
+        const step = { acknowledge: true, until: ".anything" };
+        expect(isStepDone(step, { clicked: true })).toBe(false);
+        expect(isStepDone(step, { acknowledged: true })).toBe(true);
+    });
+
     test("without condition: done when the target was clicked", () => {
         expect(isStepDone({}, { clicked: false })).toBe(false);
         expect(isStepDone({}, { clicked: true })).toBe(true);

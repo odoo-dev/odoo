@@ -5,6 +5,7 @@
         <div class="o_learning_recovery" role="group" aria-label="Help">
             <p class="o_learning_recovery_message" aria-live="assertive" t-out="this.message"/>
             <div class="o_learning_recovery_actions">
+                <button t-if="this.runner.state.stuck === 'window'" t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-on-click="() => this.recovery.closeWindows()">Close the window</button>
                 <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.hint()">Where do I click?</button>
                 <button t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-on-click="() => this.recovery.showMe()">Show me</button>
                 <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.takeMeBack()">Take me back</button>

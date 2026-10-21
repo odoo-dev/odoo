@@ -19,7 +19,8 @@ class TestImportance(BaseCommon):
         self.assertNotIn('image', profile)
 
     def test_overrides(self):
-        self.env['learning.focus.override'].create([
+        # overrides are data shipped by modules, managed by administrators
+        self.env['learning.focus.override'].sudo().create([
             {'model': 'learning.practice.card', 'field_name': 'image', 'focus': 'in'},
             {'model': 'learning.practice.card', 'field_name': 'done', 'focus': 'out'},
         ])

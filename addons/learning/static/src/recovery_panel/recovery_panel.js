@@ -19,6 +19,9 @@ export class RecoveryPanel extends Component {
         if (this.runner.state.stuck === "invalid") {
             return _t("A field in red is missing or wrong, so Odoo cannot save. Fill it in, or let me take you back.");
         }
+        if (this.runner.state.stuck === "window") {
+            return _t("A window is open on top of the lesson. Close it to continue.");
+        }
         if (this.runner.state.stuck === "lost") {
             return _t("I can't find the next step on this screen. Do you need help?");
         }

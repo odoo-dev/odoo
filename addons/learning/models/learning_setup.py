@@ -60,7 +60,7 @@ class LearningSetup(models.AbstractModel):
             while path[0].parent_id:
                 path.insert(0, path[0].parent_id)
             paths.append(path)
-        xmlids = Menu.union(*(menu for path in paths for menu in path))._get_menuitems_xmlids()
+        xmlids = Menu.union(menu for path in paths for menu in path)._get_menuitems_xmlids()
         # menus are found by their xmlid on screen, and all must be visible
         paths = [path for path in paths if all(menu in visible and menu.id in xmlids for menu in path)]
         if not paths:
@@ -72,6 +72,14 @@ class LearningSetup(models.AbstractModel):
 
         best = min(paths, key=lambda path: (app_rank(path), len(path)))
         return [{'xmlid': xmlids[menu.id], 'name': menu.name} for menu in best]
+
+    def _menu_location(self, res_model, fallback_action_xmlid, preferred_apps=(), **params):
+        """Checkpoint result for lessons that start by finding a list through
+        the menus, from wherever the learner is (see ``menuSteps`` in the web
+        client). Without any menu leading there, open the list directly."""
+        menu_path = self._menu_path(res_model, preferred_apps)
+        location = False if menu_path else self.env['ir.actions.act_window']._for_xml_id(fallback_action_xmlid)
+        return {'location': location, 'params': {'menuPath': menu_path, **params}}
 
     def _form_location(self, record, action_xmlid):
         """Open ``record`` as if the learner came from the list of
@@ -105,3 +113,38 @@ class LearningSetup(models.AbstractModel):
 
     def _setup_copy_card_start(self):
         return self._practice_card_form()
+
+    def _practice_card(self, name, **values):
+        """The user's practice card named ``name``, created if needed, reset
+        to ``values`` (and active) so the lesson can be replayed."""
+        Card = self.env['learning.practice.card'].with_context(active_test=False)
+        card = Card.search([('user_id', '=', self.env.uid), ('name', '=', name)], limit=1)
+        if not card:
+            card = Card.create({'name': name})
+        card.write({'active': True, **values})
+        return card
+
+    def _setup_find_card_start(self):
+        # enough cards for searching to make sense
+        for name in (
+            self.env._("Buy brass fittings"),
+            self.env._("Call the tiler"),
+            self.env._("Order bathroom tiles"),
+            self.env._("Send the quote to Mrs Martin"),
+        ):
+            self._practice_card(name)
+        self._practice_card(self.env._("Check the boiler"), done=True)
+        return self.env['ir.actions.act_window']._for_xml_id('learning.learning_practice_card_action')
+
+    def _setup_archive_card_start(self):
+        card = self._practice_card(self.env._("Old idea"), kind='idea')
+        return self._form_location(card, 'learning.learning_practice_card_action')
+
+    def _setup_delete_card_start(self):
+        card = self._practice_card(self.env._("Card to throw away"))
+        return self._form_location(card, 'learning.learning_practice_card_action')
+
+    def _setup_card_lines_start(self):
+        card = self._practice_card(self.env._("Bathroom renovation"), kind='task')
+        card.line_ids.unlink()
+        return self._form_location(card, 'learning.learning_practice_card_action')

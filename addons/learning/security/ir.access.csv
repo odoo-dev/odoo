@@ -1,5 +1,6 @@
 id,name,model_id,group_id/id,operation,domain
 access_learning_practice_card_own,Own practice cards,learning.practice.card,base.group_user,crud,"[('user_id', '=', user.id)]"
+access_learning_practice_card_line_own,Own practice card lines,learning.practice.card.line,base.group_user,crud,"[('card_id.user_id', '=', user.id)]"
 access_learning_practice_record_own,Own practice records,learning.practice.record,base.group_user,crud,"[('user_id', '=', user.id)]"
 access_learning_progress_own,Own lesson progress,learning.progress,base.group_user,crud,"[('user_id', '=', user.id)]"
 access_learning_focus_override_read,Read focus overrides,learning.focus.override,base.group_user,r,

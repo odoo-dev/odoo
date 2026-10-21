@@ -1,4 +1,5 @@
 import { Plugin, signal, usePlugin } from "@odoo/owl";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import { services } from "@web/core/services";
 import { findTarget, waitForTarget } from "../core/dom_target";
 import { playDemo } from "../show_me_cursor/show_me";
@@ -10,6 +11,7 @@ import { LessonRunnerPlugin } from "./lesson_runner_plugin";
  */
 export class LessonRecoveryPlugin extends Plugin {
     runner = usePlugin(LessonRunnerPlugin);
+    dialog = usePlugin(DialogPlugin);
 
     /** The learner asked for help ("I'm lost"). */
     helpOpen = signal(false);
@@ -29,6 +31,14 @@ export class LessonRecoveryPlugin extends Plugin {
         this.runner.target()?.scrollIntoView({ block: "center", behavior: "smooth" });
         this.runner.resetStepTracking();
         this.runner.state.stuck = false;
+        this.closeHelp();
+    }
+
+    /** Closes the windows opened on top of the lesson's screen. */
+    closeWindows() {
+        this.dialog.closeAll();
+        this.runner.state.stuck = false;
+        this.runner.resetStepTracking();
         this.closeHelp();
     }
 

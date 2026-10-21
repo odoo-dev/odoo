@@ -10,7 +10,7 @@ const LEVEL_NAMES = {
     A: _t("The basics"),
     B: _t("Your contacts"),
     C: _t("Your products"),
-    D: _t("From quote to invoice"),
+    D: _t("Working with documents"),
 };
 
 /**

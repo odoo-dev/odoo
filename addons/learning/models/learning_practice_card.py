@@ -20,6 +20,7 @@ class LearningPracticeCard(models.Model):
     image = fields.Image(string="Picture", max_width=512, max_height=512)
     active = fields.Boolean(default=True)
     user_id = fields.Many2one('res.users', string="Owner", required=True, index=True, ondelete='cascade', default=lambda self: self.env.user)
+    line_ids = fields.One2many('learning.practice.card.line', 'card_id', string="To-do List", copy=True)
 
     def copy_data(self, default=None):
         # Make the copy recognisable: the "Make a copy" lesson asks to rename it.

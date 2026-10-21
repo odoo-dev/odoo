@@ -21,9 +21,13 @@
                         </span>
                     </div>
                     <p class="o_learning_bar_text" aria-live="polite" t-out="this.runner.step().content"/>
+                    <p t-if="this.runner.step().pointOfNoReturn" class="o_learning_bar_warning">
+                        ⚠ This button really does it, and it cannot simply be undone. Here it is practice data: nothing can go wrong. With real data, take a second to check before clicking.
+                    </p>
                 </div>
                 <div class="o_learning_bar_actions">
-                    <button t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-att-disabled="this.runner.state.demoRunning" t-on-click="() => this.recovery.showMe()">Show me</button>
+                    <button t-if="this.runner.step().acknowledge" t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-on-click="() => this.runner.acknowledge()">Got it</button>
+                    <button t-else="" t-on-mousedown.prevent="() => {}" class="o_learning_button o_learning_button_main" t-att-disabled="this.runner.state.demoRunning" t-on-click="() => this.recovery.showMe()">Show me</button>
                     <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.recovery.openHelp()">I'm lost</button>
                     <button t-on-mousedown.prevent="() => {}" class="o_learning_button" t-on-click="() => this.runner.close()">Pause</button>
                 </div>
