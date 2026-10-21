@@ -713,3 +713,26 @@ class StockMove(models.Model):
         else:
             res['raw_material_production_id'] = self.production_id.id
         return res
+
+    def _is_deferred_scrap(self):
+        self.ensure_one()
+        mo = self.production_id
+        if not mo or mo.state in ('done', 'cancel'):
+            return False
+        finished_products = mo.move_finished_ids.filtered(
+            lambda m: m != self and not m.is_scrap
+        ).product_id
+        return self.product_id in finished_products
+
+    def _action_scrap(self):
+        deferred = self.filtered(lambda m: m._is_deferred_scrap())
+        # breakpoint()
+        if deferred:
+            deferred._check_company()
+            deferred.is_scrap = True
+            for move in deferred:
+                move.write(move._prepare_scrap_move_vals())
+        rest = self - deferred
+        if rest:
+            return super()._action_scrap()
+        return deferred

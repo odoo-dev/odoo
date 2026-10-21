@@ -2022,6 +2022,12 @@ class MrpProduction(models.Model):
             self.workorder_ids.action_cancel()
         finish_moves = self.move_finished_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
         raw_moves = self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+        deferred_scraps = self.env['stock.move'].search([
+            ('is_scrap', '=', True),
+            ('state', '=', 'assigned'),
+            ('production_id', 'in', self.ids),
+        ])
+        deferred_scraps.with_context(skip_mo_check=True)._action_cancel()
         (finish_moves | raw_moves).with_context(skip_mo_check=True)._action_cancel()
         picking_ids = self.picking_ids.filtered(lambda x: x.state not in ('done', 'cancel') and not (x.move_ids.move_dest_ids or any(mo.state == 'done' for mo in x.production_ids)))
         picking_ids.action_cancel()
@@ -2387,6 +2393,25 @@ class MrpProduction(models.Model):
                 production.set_qty_producing()
             if production.product_tracking not in ['lot', 'serial']:
                 continue
+            if not production.lot_producing_ids:
+                deferred_scraps = self.env['stock.move'].search([
+                    ('production_id', '=', production.id),
+                    ('is_scrap', '=', True),
+                    ('state', 'not in', ('done', 'cancel')),
+                    ('product_id', 'in', self.move_finished_ids.product_id.ids),
+                ])
+                scrap_lots = deferred_scraps.lot_ids
+                if scrap_lots:
+                    existing_lot = [Command.link(lot.id) for lot in scrap_lots]
+                    remaining_qty = int(production.product_qty - production.qty_produced) - len(scrap_lots)
+                    if remaining_qty > 0 and production.product_tracking == 'serial':
+                        new_lots = [Command.create(production._prepare_stock_lot_values()) for _ in range(remaining_qty)]
+                        production.lot_producing_ids = existing_lot + new_lots
+                    else:
+                        production.lot_producing_ids = existing_lot
+                    production.qty_producing = len(
+                        production.lot_producing_ids) if production.product_tracking == 'serial' else production.product_qty
+                    production.set_qty_producing()
             if production.lot_producing_ids:
                 if production.product_tracking == 'serial' and production.qty_producing and int(production.qty_producing) != len(production.lot_producing_ids):
                     raise UserError(_("Please specify the produced serial numbers."))
@@ -2443,6 +2468,8 @@ class MrpProduction(models.Model):
                 'is_locked': True,
                 'state': 'done',
             })
+        # breakpoint()
+        self._action_done_deferred_scraps()
 
         # It is prudent to reserve any quantity that has become available to the backorder
         # production's move_raw_ids after the production which spawned them has been marked done.
@@ -2519,6 +2546,25 @@ class MrpProduction(models.Model):
             }
         return another_action
 
+    def _action_done_deferred_scraps(self):
+        for mo in self:
+            finished_products = mo.move_finished_ids.product_id
+            scraps = self.env['stock.move'].search([
+                ('is_scrap', '=', True),
+                ('state', 'not in', ('done', 'cancel')),
+                ('production_id', '=', mo.id),
+                ('product_id', 'in', finished_products.ids),
+            ])
+            for scrap in scraps:
+                qty = scrap.quantity
+                lots = scrap.lot_ids
+                scrap.move_line_ids.unlink()
+                scrap.write({'location_id': mo.location_dest_id.id})
+                scrap._set_quantity_done(qty)
+                if lots:
+                    scrap.lot_ids = lots
+                scrap._action_scrap()
+
     def pre_button_mark_done(self):
         self._button_mark_done_sanity_checks()
         production_auto_ids = set()
@@ -2575,6 +2621,7 @@ class MrpProduction(models.Model):
 
     def action_scrap(self):
         self.ensure_one()
+        is_from_workorder = self.env.context.get('from_workorder', False)
         return {
             'name': _('Scrap Products'),
             'view_mode': 'form',
@@ -2582,8 +2629,12 @@ class MrpProduction(models.Model):
             'views': [[self.env.ref('stock.view_scrap_move_form').id, 'form']],
             'type': 'ir.actions.act_window',
             'context': {
-                'from_order': True,
-                'product_ids': (self.move_raw_ids.filtered(lambda x: x.state not in ('done', 'cancel')) | self.move_finished_ids.filtered(lambda x: x.state == 'done')).mapped('product_id').ids,
+                'from_order': not is_from_workorder,
+                'from_workorder': is_from_workorder,
+                'product_ids': (
+                    (self.move_raw_ids | self.move_finished_ids) if self.state not in ('done', 'cancel')
+                    else self.move_finished_ids.filtered(lambda x: x.state == 'done')
+                ).mapped('product_id').ids,
                 'default_is_scrap': True,
                 'default_production_id': self.id,
                 'default_company_id': self.company_id.id,
