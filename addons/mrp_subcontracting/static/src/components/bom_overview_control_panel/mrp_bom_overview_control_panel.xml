@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mrp_subcontracting.BomOverviewControlPanel" t-inherit="mrp.BomOverviewControlPanel" t-inherit-mode="extension">
+        <xpath expr="//t[@t-set-slot='control-panel-actions']" position="inside">
+            <div t-if="this.props.showsubcontractors" class="input-group align-items-center d-print-none">
+                <div class="col-4 col-md-auto pe-2 fw-bold">Subcontractor</div>
+                <div class="col">
+                    <Many2XAutocomplete
+                        value="this.props.subcontractors[this.props.currentSubcontractorId]"
+                        getDomain.bind="this.getSubDomain"
+                        resModel="'res.partner'"
+                        fieldString="this.props.data.name"
+                        activeActions="{}"
+                        update.bind="(ev) => this.props.changesubcontractor(ev[0]?.id)"
+                    />
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

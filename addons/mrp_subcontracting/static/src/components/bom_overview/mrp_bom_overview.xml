@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mrp_subcontracting.BomOverviewComponent" t-inherit="mrp.BomOverviewComponent" t-inherit-mode="extension">
+        <xpath expr="//BomOverviewControlPanel" position="attributes">
+            <attribute name="showsubcontractors">this.showsubcontractors</attribute>
+            <attribute name="subcontractors">this.subcontractors</attribute>
+            <attribute name="changesubcontractor.bind">this.onChangeSubcontractor</attribute>
+            <attribute name="currentSubcontractorId">this.state.currentSubcontractorId</attribute>
+        </xpath>
+    </t>
+
+</templates>

@@ -105,6 +105,7 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
             'variants': bom_product_variants,
             'bom_uom_name': bom_uom_name,
             'bom_qty': bom_quantity,
+            'action_name': self._get_action_name(bom),
             'is_variant_applied': self.env.user.has_group('product.group_product_variant') and len(bom_product_variants) > 1,
             'is_uom_applied': self.env.user.has_group('uom.group_uom'),
             'precision': self.env['decimal.precision'].precision_get('Product Unit'),
@@ -113,6 +114,10 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
     @api.model
     def _get_component_forecast_available_qty(self, quantities_info, parent_bom=False):
         return quantities_info.get("free_qty", 0)
+
+    @api.model
+    def _get_action_name(self, bom):
+        return 'Manufacture'
 
     @api.model
     def _get_components_closest_forecasted(self, lines, line_quantities, parent_bom, product_info, parent_product, ignore_stock=False):

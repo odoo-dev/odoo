@@ -21,6 +21,7 @@ export class BomOverviewComponent extends Component {
         this.variants = [];
         this.warehouses = [];
         this.showVariants = false;
+        this.action_name = "";
         this.uomName = "";
         this.unfoldedIds = new Set();
 
@@ -71,11 +72,16 @@ export class BomOverviewComponent extends Component {
         this.uomName = bomData["bom_uom_name"];
         this.variants = bomData["variants"];
         this.showVariants = bomData["is_variant_applied"];
+        this.action_name = bomData["action_name"];
         if (this.showVariants) {
             this.state.currentVariantId ||= this.state.bomData.product_id;
         }
         this.state.precision = bomData["precision"];
         this.state.foldable = bomData["lines"]["foldable"];
+    }
+
+    getExtraContext() {
+        return { ...this.context};
     }
 
     async getBomData() {
@@ -84,7 +90,7 @@ export class BomOverviewComponent extends Component {
             this.state.bomQuantity,
             this.state.currentVariantId,
         ];
-        const context = { ...this.context};
+        const context = this.getExtraContext();
         if (this.state.currentWarehouse) {
             context.warehouse_id = this.state.currentWarehouse.id;
         }

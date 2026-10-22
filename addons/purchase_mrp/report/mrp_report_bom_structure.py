@@ -46,3 +46,9 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
             supplier_delay = route_info.get('supplier_delay', 0)
             return ('expected', supplier_delay)
         return super()._get_resupply_availability(route_info, components)
+
+    @api.model
+    def _get_action_name(self, bom):
+        if bom.product_tmpl_id.seller_ids:
+            return 'Buy'
+        return super()._get_action_name(bom)

@@ -21,6 +21,11 @@ from purchase order.
     'demo': [
         'data/purchase_mrp_demo.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'purchase_mrp/static/src/components/**/*',
+        ],
+    },
     'depends': ['mrp', 'purchase_stock'],
     'auto_install': True,
     'author': 'Odoo S.A.',

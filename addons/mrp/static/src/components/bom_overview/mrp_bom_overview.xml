@@ -10,6 +10,7 @@
             data="this.state.bomData"
             showOptions="this.state.showOptions"
             showVariants="this.showVariants"
+            actionName="this.action_name"
             currentWarehouse="this.state.currentWarehouse"
             warehouses="this.warehouses"
             print.bind="this.onClickPrint"

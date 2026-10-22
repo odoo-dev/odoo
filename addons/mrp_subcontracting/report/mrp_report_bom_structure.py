@@ -26,6 +26,17 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
             qty += component.get('subcontract_free_qty', 0)
         return qty
 
+    @api.model
+    def _get_report_data(self, bom_id, searchQty=0, searchVariant=False):
+        bom_data = super()._get_report_data(bom_id, searchQty, searchVariant)
+        if bom_data['lines']['bom'].type == 'subcontract':
+            bom_subcontractors = {}
+            for subcontractor in bom_data['lines']['subcontractor_ids']:
+                bom_subcontractors[subcontractor.id] = subcontractor.display_name
+            bom_data['showsubcontractors'] = len(bom_data['lines']['subcontractor_ids']) > 1
+            bom_data['subcontractors'] = bom_subcontractors
+        return bom_data
+
     def _get_pdf_doc(self, bom_id, data, quantity, product_variant_id=None):
         doc = super()._get_pdf_doc(bom_id, data, quantity, product_variant_id)
         doc['is_subcontract'] = any(line.get('type') == 'subcontract' for line in doc.get('lines'))
@@ -41,11 +52,16 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
     def _get_bom_data(self, bom, warehouse, product=False, line_qty=False, bom_line=False, level=0, parent_bom=False, parent_product=False, index=0, product_info=False, ignore_stock=False, simulated_leaves_per_workcenter=False):
         res = super()._get_bom_data(bom, warehouse, product, line_qty, bom_line, level, parent_bom, parent_product, index, product_info, ignore_stock, simulated_leaves_per_workcenter)
         if (bom.type == 'subcontract' or (parent_bom and parent_bom.type == 'subcontract')) and not self.env.context.get('minimized', False):
+            res['subcontractor_ids'] = bom.subcontractor_ids
             seller_info = {}
             if not res['product']:
                 seller_info = bom.product_tmpl_id.seller_ids.filtered(lambda s: s.partner_id in bom.subcontractor_ids)[:1]._get_seller_info()
             elif bom.type == 'subcontract':
-                seller_info = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+                subcontract_id = self.env.context.get('subcontract_id')
+                if subcontract_id:
+                    seller_info = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.uom_id, params={'subcontractor_ids': self.env['res.partner'].browse(subcontract_id)})
+                else:
+                    seller_info = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
             if seller_info:
                 res['subcontracting'] = self._get_subcontracting_line(bom, seller_info, level + 1, res['quantity'])
                 if not self.env.context.get('minimized', False):
@@ -133,7 +149,11 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         res = super()._format_route_info(rules, rules_delay, warehouse, product, bom, quantity)
         subcontract_rules = [rule for rule in rules if rule.action == 'buy' and bom and bom.type == 'subcontract']
         if subcontract_rules:
-            seller_info = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+            subcontract_id = self.env.context.get('subcontract_id')
+            if subcontract_id:
+                seller_info = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': self.env['res.partner'].browse(subcontract_id)})
+            else:
+                seller_info = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
             if not seller_info:
                 # If no vendor found for the right quantity, we still want to display a vendor for the lead times
                 seller_info = product._select_seller(quantity=None, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
@@ -172,6 +192,7 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
                 product_info[product.id]['consumptions'][stock_loc] = 0
             quantities_info['subcontract_free_qty'] = max(product.uom_id._compute_quantity(subloc_product.free_qty, bom_uom), 0)
             quantities_info['subcontract_qty_on_hand'] = product.uom_id._compute_quantity(subloc_product.qty_available, bom_uom)
+            breakpoint()
             quantities_info['stock_loc'] = quantities_info['subcontracting_loc'] = stock_loc
             quantities_info['forecasted_qty'] = subloc_product.virtual_available
         return quantities_info

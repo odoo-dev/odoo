@@ -7,6 +7,27 @@ import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { Component, onMounted, useProps, signal, t } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
+export const bomOverviewControlPanelProps = {
+    bomQuantity: t.number(),
+    showOptions: t.object(),
+    showVariants: t.boolean().optional(),
+    actionName: t.string().optional(),
+    variants: t.object().optional({}),
+    data: t.object().optional(),
+    uomName: t.string().optional(),
+    currentWarehouse: t.object().optional(),
+    warehouses: t.array().optional([]),
+    print: t.function(),
+    changeWarehouse: t.function(),
+    changeVariant: t.function(),
+    changeBomQuantity: t.function(),
+    changeMode: t.function(),
+    precision: t.number(),
+    foldable: t.boolean(),
+    allFolded: t.boolean(),
+};
+
+
 export class BomOverviewControlPanel extends Component {
     static template = "mrp.BomOverviewControlPanel";
     static components = {
@@ -16,24 +37,7 @@ export class BomOverviewControlPanel extends Component {
         BomOverviewDisplayFilter,
         Many2XAutocomplete,
     };
-    props = useProps({
-        bomQuantity: t.number(),
-        showOptions: t.object(),
-        showVariants: t.boolean().optional(),
-        variants: t.object().optional({}),
-        data: t.object().optional(),
-        uomName: t.string().optional(),
-        currentWarehouse: t.object().optional(),
-        warehouses: t.array().optional([]),
-        print: t.function(),
-        changeWarehouse: t.function(),
-        changeVariant: t.function(),
-        changeBomQuantity: t.function(),
-        changeMode: t.function(),
-        precision: t.number(),
-        foldable: t.boolean(),
-        allFolded: t.boolean(),
-    });
+    props = useProps(bomOverviewControlPanelProps);
 
     quantity = signal.ref();
 
