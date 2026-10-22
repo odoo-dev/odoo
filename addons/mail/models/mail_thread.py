@@ -4022,23 +4022,22 @@ class MailThread(models.AbstractModel):
 
         # prepare headers (as sudo as accessing mail.alias.domain, restricted)
         headers = base_mail_values.get('headers') or {}
-        # prepare external emails to modify Msg[To] and enable Reply-All by
-        # including external people (aka share partners to notify + emails
-        # notified by incoming email (incoming_email_cc and incoming_email_to)
-        # that were not transformed into partners to notify
-        external_emails_info = [
-            (formataddr((r['name'], r['email_normalized'])), r['is_cc'])
-            for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
-        ]
-        external_emails_normalized = [
-            r['email_normalized']
-            for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
-        ]
+        # prepare emails to add in Msg[To] and Msg[Cc] (through X-Msg-To-Add and
+        # X-Msg-Cc-Add) so that each recipient sees the others and Reply-All
+        # works: external people (aka share partners to notify), partners
+        # explicitly in Cc even if internal, and emails notified by incoming
+        # email (incoming_email_cc and incoming_email_to) that were not
+        # transformed into partners to notify
+        filtered_recipients_data = [
+            r for r in recipients_data if r['active'] and r['email_normalized'] and (r['share'] or r['is_cc'])]
+        external_emails_info = [(formataddr((r['name'], r['email_normalized'])), r['is_cc'])
+                                for r in filtered_recipients_data]
+        external_emails_normalized_set = {r['email_normalized'] for r in filtered_recipients_data}
         external_emails_info += list({
             (email, is_cc) for email, is_cc in chain(
                 zip(email_split_and_format_normalize(message_sudo.incoming_email_to or ''), repeat(False)),
                 zip(email_split_and_format_normalize(message_sudo.incoming_email_cc or ''), repeat(True)))
-            if email_normalize(email) not in external_emails_normalized
+            if email_normalize(email) not in external_emails_normalized_set
         })
         if external_emails_info and len(external_emails_info) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
             headers['X-Msg-To-Add'] = ','.join(email for email, is_cc in external_emails_info if not is_cc)

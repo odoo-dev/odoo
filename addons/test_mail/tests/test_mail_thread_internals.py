@@ -1187,6 +1187,40 @@ class TestChatterTweaks(ThreadRecipients):
                     },
                 )
 
+    @users('employee')
+    def test_post_headers_recipients_internal_cc(self):
+        """ Internal partners explicitly set in Cc are displayed to external
+        recipients, while internal followers and internal partners in To are
+        not. """
+        self.assertEqual(self.user_employee_2.notification_type, 'email')
+        test_record = self.test_record.with_env(self.env)
+        test_record.message_subscribe(self.partner_admin.ids)
+
+        with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
+            message = test_record.message_post(
+                body='With Internal Cc',
+                message_type='comment',
+                partner_cc_ids=self.partner_employee_2.ids,
+                partner_ids=(self.test_partner + self.partner_admin).ids,
+                subtype_xmlid='mail.mt_comment',
+            )
+
+        headers = {
+            'Return-Path': f'{self.mail_alias_domain.bounce_email}',
+            'X-Custom': 'Done',  # model override
+            'X-Msg-Cc-Add': self.partner_employee_2.email_formatted,
+            'X-Msg-To-Add': self.test_partner.email_formatted,
+            'X-Odoo-Objects': f'{test_record._name}-{test_record.id}',
+        }
+        self.assertMailMail(
+            self.test_partner,
+            'sent',
+            author=self.partner_employee,
+            mail_message=message,
+            email_values={'headers': headers},
+            fields_values={'headers': headers},
+        )
+
     def test_post_no_subscribe_author(self):
         original = self.test_record.message_follower_ids
         self.test_record.with_user(self.user_employee).with_context({'mail_post_autofollow_author_skip': True}).message_post(
