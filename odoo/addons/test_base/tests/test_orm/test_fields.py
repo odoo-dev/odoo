@@ -1102,6 +1102,83 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             for record in records:
                 self.check_monetary(record, amount, currency, 'multi write(monetary)')
 
+    def test_20_monetary_in_company_search(self):
+        """ Test that .in_company property correctly converts and sorts monetary fields using _search """
+        Model = self.env['test_orm.mixed']
+        curr_1 = self.env['res.currency'].create({'name': 'C1', 'symbol': 'C1'})
+        curr_2 = self.env['res.currency'].create({'name': 'C2', 'symbol': 'C2'})
+        self.env['res.currency.rate'].create([
+            {'name': '2026-01-01', 'rate': 1.0, 'currency_id': curr_1.id, 'company_id': self.env.company.id},
+            {'name': '2026-01-01', 'rate': 0.5, 'currency_id': curr_2.id, 'company_id': self.env.company.id},
+        ])
+        rec1 = Model.create({'currency_id': curr_1.id, 'amount': 100})
+        rec2 = Model.create({'currency_id': curr_2.id, 'amount': 60})
+        records = Model.search(
+            [('id', 'in', (rec1 + rec2).ids)],
+            order='amount.in_company ASC'
+        )
+        self.assertEqual(records.ids, [rec1.id, rec2.id])
+
+    def test_21_monetary_in_company_web_read_group(self):
+        """ Test that web_read_group implicitly sorts monetary fields using .in_company for group records """
+        Model = self.env['test_orm.mixed']
+        curr_1 = self.env['res.currency'].create({'name': 'C1', 'symbol': 'C1'})
+        curr_2 = self.env['res.currency'].create({'name': 'C2', 'symbol': 'C2'})
+
+        self.env['res.currency.rate'].create([
+            {'name': '2026-01-01', 'rate': 1.0, 'currency_id': curr_1.id, 'company_id': self.env.company.id},
+            {'name': '2026-01-01', 'rate': 0.5, 'currency_id': curr_2.id, 'company_id': self.env.company.id},
+        ])
+        rec1 = Model.create({'currency_id': curr_1.id, 'amount': 100})
+        rec2 = Model.create({'currency_id': curr_2.id, 'amount': 60})
+        result = Model.web_read_group(
+            domain=[('id', 'in', (rec1 + rec2).ids)],
+            groupby=['create_uid'],
+            order='amount DESC',
+            auto_unfold=True
+        )
+        groups = result.get('groups', [])
+        self.assertEqual(len(groups), 1, "Records should be grouped into one user.")
+        records = groups[0].get('__records', [])
+        self.assertEqual(len(records), 2, "Group should contain both records.")
+        self.assertEqual(
+            records[0]['id'],
+            rec2.id,
+            "web_read_group failed to intercept and sort by amount.in_company. Expected rec2 (120 base) first."
+        )
+        self.assertEqual(
+            records[1]['id'],
+            rec1.id,
+            "web_read_group failed to intercept and sort by amount.in_company. Expected rec1 (100 base) second."
+        )
+
+    def test_20_monetary_opw_2223134(self):
+        """ test monetary fields with cache override """
+        model = self.env['test_orm.monetary_order']
+        currency = self.env.ref('base.USD')
+
+        def check(value):
+            self.assertEqual(record.total, value)
+            self.env.flush_all()
+            self.cr.execute('SELECT total FROM test_orm_monetary_order WHERE id=%s', [record.id])
+            [total] = self.cr.fetchone()
+            self.assertEqual(total, value)
+
+        # create, and compute amount
+        record = model.create({
+            'currency_id': currency.id,
+            'line_ids': [Command.create({'subtotal': 1.0})],
+        })
+        check(1.0)
+
+        # delete and add a line: the deletion of the line clears the cache, then
+        # the recomputation of 'total' must prefetch record.currency_id without
+        # screwing up the new value in cache
+        record.write({
+            'line_ids': [Command.delete(record.line_ids.id), Command.create({'subtotal': 1.0})],
+        })
+        check(1.0)
+
     def test_20_monetary_related(self):
         """ test value rounding with related currency """
         currency = self.env.ref('base.USD')
