@@ -182,6 +182,19 @@ $display-1-line-height: o-website-value('display-1-line-height') or $headings-li
 $display-2-line-height: o-website-value('display-2-line-height') or $headings-line-height !default;
 $display-3-line-height: o-website-value('display-3-line-height') or $headings-line-height !default;
 $display-4-line-height: o-website-value('display-4-line-height') or $headings-line-height !default;
+// Letter spacings are custom variables. An em letter-spacing is inherited as
+// an absolute length: headings reset it so the body one does not leak in.
+$body-letter-spacing: o-website-letter-spacing('body-letter-spacing') !default;
+$headings-letter-spacing: o-website-letter-spacing('headings-letter-spacing') or if($body-letter-spacing, 0, null) !default;
+$h2-letter-spacing: o-website-letter-spacing('h2-letter-spacing') or $headings-letter-spacing !default;
+$h3-letter-spacing: o-website-letter-spacing('h3-letter-spacing') or $headings-letter-spacing !default;
+$h4-letter-spacing: o-website-letter-spacing('h4-letter-spacing') or $headings-letter-spacing !default;
+$h5-letter-spacing: o-website-letter-spacing('h5-letter-spacing') or $headings-letter-spacing !default;
+$h6-letter-spacing: o-website-letter-spacing('h6-letter-spacing') or $headings-letter-spacing !default;
+$display-1-letter-spacing: o-website-letter-spacing('display-1-letter-spacing') or $headings-letter-spacing !default;
+$display-2-letter-spacing: o-website-letter-spacing('display-2-letter-spacing') or $headings-letter-spacing !default;
+$display-3-letter-spacing: o-website-letter-spacing('display-3-letter-spacing') or $headings-letter-spacing !default;
+$display-4-letter-spacing: o-website-letter-spacing('display-4-letter-spacing') or $headings-letter-spacing !default;
 // H1~H6 top margins are custom variables.
 $headings-margin-top: o-website-value('headings-margin-top') or 0 !default;
 $h2-margin-top: o-website-value('h2-margin-top') or $headings-margin-top !default;

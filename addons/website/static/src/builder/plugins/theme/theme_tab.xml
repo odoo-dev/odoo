@@ -115,6 +115,9 @@
             <!-- "×": \u00D7\u2000 -->
             <BuilderNumberInput action="'customizeWebsiteVariable'" actionParam="'body-line-height'" default="null" unit="'✕'" saveUnit="''"/>
         </BuilderRow>
+        <BuilderRow label.translate="Letter Spacing" tooltip.translate="Space between letters, relative to the font size (e.g. -0.02 tighter, 0.1 wider)">
+            <BuilderNumberInput action="'customizeWebsiteVariable'" actionParam="'body-letter-spacing'" default="null" unit="'em'" saveUnit="''" step="0.01"/>
+        </BuilderRow>
         <BuilderRow label.translate="Margins" action="'customizeWebsiteVariable'">
             <BuilderNumberInput title.translate="Top" actionParam="'paragraph-margin-top'" unit="'px'" saveUnit="'px'"/>
             <BuilderNumberInput title.translate="Bottom" actionParam="'paragraph-margin-bottom'" unit="'px'" saveUnit="'px'"/>

@@ -68,6 +68,18 @@
     @include print-variable('display-2-line-height', $display-2-line-height);
     @include print-variable('display-3-line-height', $display-3-line-height);
     @include print-variable('display-4-line-height', $display-4-line-height);
+    // Printed unitless for the editor, 0 being the font's own spacing.
+    @include print-variable('body-letter-spacing', o-strip-unit($body-letter-spacing or 0));
+    @include print-variable('headings-letter-spacing', o-strip-unit($headings-letter-spacing or 0));
+    @include print-variable('h2-letter-spacing', o-strip-unit($h2-letter-spacing or 0));
+    @include print-variable('h3-letter-spacing', o-strip-unit($h3-letter-spacing or 0));
+    @include print-variable('h4-letter-spacing', o-strip-unit($h4-letter-spacing or 0));
+    @include print-variable('h5-letter-spacing', o-strip-unit($h5-letter-spacing or 0));
+    @include print-variable('h6-letter-spacing', o-strip-unit($h6-letter-spacing or 0));
+    @include print-variable('display-1-letter-spacing', o-strip-unit($display-1-letter-spacing or 0));
+    @include print-variable('display-2-letter-spacing', o-strip-unit($display-2-letter-spacing or 0));
+    @include print-variable('display-3-letter-spacing', o-strip-unit($display-3-letter-spacing or 0));
+    @include print-variable('display-4-letter-spacing', o-strip-unit($display-4-letter-spacing or 0));
     // We cannot rely on $o-theme-hx-font because they contain the list of
     // fallback fonts (unicode...).
     $-headings-or-main-font: o-website-value('headings-font') or o-website-value('font');
@@ -696,6 +708,18 @@ $heading-line-heights: map-merge((
     "display-3": $display-3-line-height,
     "display-4": $display-4-line-height,
 ), $heading-line-heights);
+$heading-letter-spacings: () !default;
+$heading-letter-spacings: map-merge((
+    "h2": $h2-letter-spacing,
+    "h3": $h3-letter-spacing,
+    "h4": $h4-letter-spacing,
+    "h5": $h5-letter-spacing,
+    "h6": $h6-letter-spacing,
+    "display-1": $display-1-letter-spacing,
+    "display-2": $display-2-letter-spacing,
+    "display-3": $display-3-letter-spacing,
+    "display-4": $display-4-letter-spacing,
+), $heading-letter-spacings);
 $heading-margin-tops: () !default;
 $heading-margin-tops: map-merge((
     "h2": $h2-margin-top,
@@ -723,6 +747,7 @@ $heading-margin-bottoms: map-merge((
 
 h1, h2, h3, h4, h5, h6 {
     line-height: $headings-line-height;
+    letter-spacing: $headings-letter-spacing;
     margin-top: $headings-margin-top;
     margin-bottom: $headings-margin-bottom;
 }
@@ -735,6 +760,9 @@ h1, h2, h3, h4, h5, h6 {
         }
         @if ($headings-line-height != map-get($heading-line-heights, $map-key)) {
             line-height: map-get($heading-line-heights, $map-key);
+        }
+        @if ($headings-letter-spacing != map-get($heading-letter-spacings, $map-key)) {
+            letter-spacing: map-get($heading-letter-spacings, $map-key);
         }
         @if ($headings-margin-top != map-get($heading-margin-tops, $map-key)) {
             margin-top: map-get($heading-margin-tops, $map-key);
@@ -752,6 +780,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 // Texts
+body {
+    letter-spacing: $body-letter-spacing;
+}
 p {
     margin-top: $paragraph-margin-top;
 }

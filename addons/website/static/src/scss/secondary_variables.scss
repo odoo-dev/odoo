@@ -75,6 +75,16 @@ $o-website-values: $-actual-user-website-values-palette !default;
     @return map-get($o-website-values, $key);
 }
 
+// Letter spacings are expressed in em. The editor saves them unitless as its
+// number input cannot read "em" values back.
+@function o-website-letter-spacing($key) {
+    $-value: o-website-value($key);
+    @if type-of($-value) == 'number' and unitless($-value) {
+        @return $-value * 1em;
+    }
+    @return $-value;
+}
+
 $o-theme-navbar-logo-height: o-website-value('logo-height') !default;
 $o-theme-navbar-fixed-logo-height: o-website-value('fixed-logo-height') !default;
 

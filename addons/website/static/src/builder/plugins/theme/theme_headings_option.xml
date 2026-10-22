@@ -68,6 +68,21 @@
                 </t>
             </t>
         </BuilderRow>
+        <BuilderRow label.translate="Letter Spacing" tooltip.translate="Space between letters, relative to the font size (e.g. -0.02 tighter, 0.1 wider)" action="'customizeWebsiteVariable'">
+            <BuilderNumberInput title.translate="Heading 1" actionParam="'headings-letter-spacing'" default="null" unit="'em'" saveUnit="''" step="0.01"/>
+            <t t-set-slot="collapse">
+                <t t-foreach="[2, 3, 4, 5, 6]" t-as="depth" t-key="depth">
+                    <BuilderRow level="1" label="heading_label + ' ' + depth">
+                        <BuilderNumberInput actionParam="'h' + depth + '-letter-spacing'" default="null" unit="'em'" saveUnit="''" step="0.01"/>
+                    </BuilderRow>
+                </t>
+                <t t-foreach="used_display_font_sizes" t-as="depth" t-key="depth">
+                    <BuilderRow level="1" label="display_label + ' ' + depth">
+                        <BuilderNumberInput actionParam="'display-' + depth + '-letter-spacing'" default="null" unit="'em'" saveUnit="''" step="0.01"/>
+                    </BuilderRow>
+                </t>
+            </t>
+        </BuilderRow>
         <BuilderRow label.translate="Margins" tooltip.translate="Heading 1" action="'customizeWebsiteVariable'">
             <BuilderNumberInput title.translate="Top" actionParam="'headings-margin-top'" unit="'px'" saveUnit="'px'"/>
             <BuilderNumberInput title.translate="Bottom" actionParam="'headings-margin-bottom'" unit="'px'" saveUnit="'px'"/>
