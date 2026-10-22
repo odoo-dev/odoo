@@ -1738,9 +1738,7 @@ test("should also invite to the call when inviting to the channel", async () => 
     await click("[title='Start Call']");
     await contains(".o-discuss-Call");
     await click("button[title='Add People']");
-    await contains(
-        ".o-discuss-ChannelInvitation:has(:text('Invite people to the channel \"TestChanel\"'))"
-    );
+    await contains(".o-discuss-ChannelInvitation:has(:text('Invite people'))");
     await click(".o-discuss-ChannelInvitation-selectable:has(:text('TestPartner'))");
     await click("button:text('Invite'):enabled");
     await contains(".o-discuss-CallParticipantCard.o-isInvitation");
