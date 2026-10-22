@@ -231,6 +231,25 @@ test("can share user camera", async () => {
     await contains("video", { count: 0 });
 });
 
+test("video element releases its stream when the call video is destroyed", async () => {
+    mockGetMedia();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    await start();
+    await openDiscuss(channelId);
+    await click("[title='Start a Call']");
+    await click("[title='Turn camera on']");
+    await contains("video");
+    const video = queryFirst("video");
+    expect(video.srcObject).not.toBe(null);
+    await click("[title='Stop camera']");
+    await contains("video", { count: 0 });
+    // a media element that is still loading is kept alive by the browser, with its listeners and
+    // thus the whole component tree
+    expect(video.srcObject).toBe(null);
+    expect(video.networkState).toBe(HTMLMediaElement.NETWORK_EMPTY);
+});
+
 test("Card should remain in focus after Share Screen is toggled", async () => {
     mockGetMedia();
     const pyEnv = await startServer();
