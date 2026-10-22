@@ -1,6 +1,6 @@
 import { Discuss } from "@mail/core/public_web/discuss_app/discuss_app";
 
-import { asyncComputed, proxy, useOnChange } from "@odoo/owl";
+import { asyncComputed, onWillStart, proxy, useOnChange } from "@odoo/owl";
 
 import { useService } from "@web/core/utils/hooks";
 import { FormRenderer } from "@web/views/form/form_renderer";
@@ -18,6 +18,7 @@ export class LivechatSessionFormRenderer extends FormRenderer {
         this.channel = asyncComputed(() =>
             this.store["discuss.channel"].getOrFetch(this.props.record.resId)
         );
+        onWillStart(() => this.channel.currentPromise());
         useOnChange(
             () => [this.channel()],
             (channel) => {
