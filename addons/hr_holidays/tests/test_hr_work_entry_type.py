@@ -418,3 +418,7 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         })
 
         self.assertEqual(leave._get_durations()[leave.id], (0.125, 3.0))
+
+    def test_search_virtual_remaining_leaves(self):
+        operation = self.env['hr.work.entry.type'].search(domain=[('virtual_remaining_leaves', '>', 0)])
+        self.assertIsNotNone(operation)
