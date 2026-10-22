@@ -56,7 +56,7 @@ export class TextEffectPlugin extends Plugin {
                 applyTextEffect: this.applyTextEffect.bind(this),
                 previewTextEffect: this.previewTextEffect.bind(this),
                 revertTextEffect: this.revertTextEffect.bind(this),
-                getRememberedEffects: () => [...this.rememberedCustomEffects.values()],
+                getLastCustomEffect: () => this.lastCustomEffect,
                 updateState: () => {
                     this.toolbarIconState.isActive = this.isTextEffectActive();
                     this.toolbarIconState.isDisabled = this.isTextEffectDisabled();
@@ -100,10 +100,9 @@ export class TextEffectPlugin extends Plugin {
             isActive: undefined,
             isDisabled: undefined,
         });
-        // Custom effects a preset replaced, by hash: they stay offered as
-        // presets until the editor closes, even when the page no longer uses
-        // them.
-        this.rememberedCustomEffects = new Map();
+        // The last custom effect a preset replaced: the Custom tile brings it
+        // back until the editor closes, even when the page no longer uses it.
+        this.lastCustomEffect = undefined;
     }
     /**
      * Returns the element that is a text with an effect that corresponds to the
@@ -212,8 +211,18 @@ export class TextEffectPlugin extends Plugin {
         this.completeTextEffectSelection();
         return this.getTextEffectState();
     }
-    applyTextEffect(effectJson) {
+    /**
+     * @param {string} effectJson
+     * @param {Object} [options]
+     * @param {boolean} [options.keepReplaced=true] false when the replaced
+     *      effect is not one to bring back (its last shadow was removed)
+     */
+    applyTextEffect(effectJson, { keepReplaced = true } = {}) {
+        const lastCustomEffect = this.lastCustomEffect;
         this.previewableApplyTextEffect.commit(effectJson);
+        if (!keepReplaced) {
+            this.lastCustomEffect = lastCustomEffect;
+        }
         return this.getTextEffectState();
     }
     previewTextEffect(effectJson) {
@@ -240,7 +249,7 @@ export class TextEffectPlugin extends Plugin {
         const textEffect = JSON.parse(element.dataset.textEffect || "{}");
         if (textEffect.preset === "custom" && hasConfiguredTextEffect(textEffect)) {
             const presetHash = getTextEffectPresetId(textEffect);
-            this.rememberedCustomEffects.set(presetHash, { ...textEffect, presetHash });
+            this.lastCustomEffect = { ...textEffect, presetHash };
         }
     }
     _applyTextEffect(effectJson) {
