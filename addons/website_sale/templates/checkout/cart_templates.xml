@@ -33,6 +33,12 @@
 
     <!-- Lines that show items in the cart. Called in `website_sale.cart`. -->
     <template id="website_sale.cart_lines" name="Shopping Cart Lines">
+        <t t-if='website_sale_order'>
+            <div t-if='website_sale_order._get_shop_warning(clear=False)' class="alert alert-warning js_cart_lines" role="alert">
+                <strong>Warning!</strong>
+                <div t-out="website_sale_order._get_shop_warning()" class="text-prewrap"/>
+            </div>
+        </t>
         <div
             t-if="not website_sale_order or not website_sale_order.website_order_line"
             class="js_cart_lines w-100"
@@ -47,12 +53,6 @@
                 </a>
             </p>
         </div>
-        <t t-if='website_sale_order'>
-            <div t-if='website_sale_order._get_shop_warning(clear=False)' class="alert alert-warning js_cart_lines" role="alert">
-                <strong>Warning!</strong>
-                <div t-out="website_sale_order._get_shop_warning()" class="text-prewrap"/>
-            </div>
-        </t>
         <div id="cart_products"
              t-if="website_sale_order and website_sale_order.website_order_line"
              class="js_cart_lines d-flex flex-column mb32">
