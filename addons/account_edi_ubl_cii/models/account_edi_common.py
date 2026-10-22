@@ -1766,3 +1766,55 @@ class AccountEdiCommon(models.AbstractModel):
         except Exception:  # noqa: BLE001
             _logger.exception("Error while generating substitute PDF attachment for invoice %s", invoice.id)
         return additional_docs
+
+    def _import_cii_invoice_line_add_price_unit_quantity_discount(self, collected_values):
+        file_document_sign = collected_values['file_document_sign']
+        currency = collected_values['currency_values']['currency']
+
+        line_total_amount_str = collected_values['line_total_amount']
+        net_price_amount_str = collected_values['net_price_amount']
+        billed_quantity_str = collected_values['billed_quantity']
+        base_quantity_str = collected_values['base_quantity']
+
+        line_total_amount = line_total_amount_str and float(line_total_amount_str) * file_document_sign
+        net_price_amount = net_price_amount_str and float(net_price_amount_str)
+        billed_quantity = billed_quantity_str and float(billed_quantity_str) * file_document_sign
+        base_quantity = base_quantity_str and float(base_quantity_str)
+
+        total_line_allowances = sum(allowance['amount'] for allowance in collected_values['allowances'])
+        total_line_charges = sum(charge['amount'] for charge in collected_values['charges'])
+
+        # Expected net price amount, computed from the line total amount and the line allowances/charges.
+        expected_net_price_amount = (line_total_amount + total_line_allowances - total_line_charges) * base_quantity / billed_quantity
+
+        if net_price_amount and currency.is_zero(currency.round(net_price_amount) - currency.round(expected_net_price_amount)):
+            collected_values['logs'].append(self.env._(
+                "The net price amount (%(net_price_amount).2f) does not match the expected value (%(expected_net_price_amount).2f) "
+                "computed from the line total amount (%(line_total_amount).2f), the line allowances (%(total_line_allowances).2f) "
+                "and the line charges (%(total_line_charges).2f).",
+                net_price_amount=net_price_amount,
+                expected_net_price_amount=expected_net_price_amount,
+                line_total_amount=line_total_amount,
+                total_line_allowances=total_line_allowances,
+                total_line_charges=total_line_charges,
+            ))
+
+        # Computed gross price amount, obtained from the computed net price amount
+        # and the product level allowances/charges. Use the expected net price amount
+        # instead of the retrieved net price amount to maintain higher precision and
+        # avoid rounding issues.
+        if price_allowance_values := collected_values.get('price_allowance_values', {}):
+            price_allowance_amount = price_allowance_values['amount']
+            gross_price_amount = expected_net_price_amount - price_allowance_values.get('charge_indicator_sign') * price_allowance_amount
+        else:
+            gross_price_amount = expected_net_price_amount
+
+        # Turn total line and product allowances/charges to a percentage
+        expected_line_total_amount_without_discount = gross_price_amount * (billed_quantity * base_quantity)
+        discount = (1 - (line_total_amount / expected_line_total_amount_without_discount)) * 100 if expected_line_total_amount_without_discount else 0.0
+
+        to_write = collected_values['to_write']
+        to_write['quantity'] = billed_quantity * base_quantity
+        to_write['price_unit'] = gross_price_amount
+        to_write['discount'] = discount
+        to_write['balance'] = line_total_amount
