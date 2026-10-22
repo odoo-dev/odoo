@@ -13,6 +13,9 @@
 
     .o_hierarchy_node_button_container {
         height: 30px;
+        position: absolute;
+        right: 0;
+        top: 0;
     }
 
     &.o_hierarchy_dragged {

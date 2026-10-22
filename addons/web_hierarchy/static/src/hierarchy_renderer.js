@@ -3,6 +3,7 @@ import { Component, onPatched, signal, t, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { scrollTo } from "@web/core/utils/scrolling";
+import { Record } from "@web/model/record";
 
 import { HierarchyCard } from "./hierarchy_card";
 import { useHierarchyNodeDraggable } from "./hierarchy_node_draggable";
@@ -10,6 +11,7 @@ import { useHierarchyNodeDraggable } from "./hierarchy_node_draggable";
 export class HierarchyRenderer extends Component {
     static components = {
         HierarchyCard,
+        Record,
     };
     static template = "web_hierarchy.HierarchyRenderer";
 

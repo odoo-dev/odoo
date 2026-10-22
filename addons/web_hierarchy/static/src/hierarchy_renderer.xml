@@ -25,11 +25,23 @@
                         t-att-data-row-id="row_index"
                     >
                         <t t-foreach="row.nodes" t-as="node" t-key="node.id">
-                            <HierarchyCard
-                                node="node"
-                                openRecord="this.props.openRecord"
-                                archInfo="this.props.archInfo"
-                            />
+                            <Record
+                                resModel="node.model.resModel"
+                                resId="node.resId"
+                                fields="node.model.fields"
+                                activeFields="node.model.activeFields"
+                                values="node.data"
+                                t-slot-scope="data"
+                            >
+                                <div class="o_hierarchy_node_container">
+                                    <HierarchyCard
+                                        archInfo="this.props.archInfo.cardArchInfo"
+                                        node="node"
+                                        openRecord="this.props.openRecord"
+                                        record="data.record"
+                                    />
+                                </div>
+                            </Record>
                         </t>
                     </div>
                 </t>

@@ -1,30 +1,25 @@
 import { visitXML } from "@web/core/utils/xml";
 import { stringToOrderBy } from "@web/search/utils/order_by";
-import { Field } from "@web/views/fields/field";
-import { getActiveActions } from "@web/views/utils";
+import { CardArchParser } from "@web/views/card/card_arch_parser";
 import { exprToBoolean } from "@web/core/utils/strings";
+
 
 export class HierarchyArchParser {
     parse(xmlDoc, models, modelName) {
+        const cardArchInfo = new CardArchParser().parse(xmlDoc, models, modelName);
+
         const archInfo = {
-            activeActions: getActiveActions(xmlDoc),
+            ...cardArchInfo,
+            cardArchInfo,
             avatarField: null,
-            label: null,
             defaultOrder: stringToOrderBy(xmlDoc.getAttribute("default_order") || null),
             draggable: false,
             parentFieldName: "parent_id",
-            fieldNodes: {},
-            templateDocs: {},
-            xmlDoc,
         };
-        const fieldNextIds = {};
+        
         const fields = models[modelName].fields;
 
         visitXML(xmlDoc, (node) => {
-            if (node.hasAttribute("t-name")) {
-                archInfo.templateDocs[node.getAttribute("t-name")] = node;
-                return;
-            }
             if (node.tagName === "hierarchy") {
                 if (node.hasAttribute("parent_field")) {
                     const parentFieldName = node.getAttribute("parent_field");
@@ -58,25 +53,8 @@ export class HierarchyArchParser {
                     }
                     archInfo.avatarField = avatarField;
                 }
-                if (node.hasAttribute("label")) {
-                    archInfo.label = node.getAttribute("label");
-                }
-            } else if (node.tagName === "field") {
-                const fieldInfo = Field.parseFieldNode(node, models, modelName, "hierarchy");
-                const name = fieldInfo.name;
-                if (!(name in fieldNextIds)) {
-                    fieldNextIds[name] = 0;
-                }
-                const fieldId = `${name}_${fieldNextIds[name]++}`;
-                archInfo.fieldNodes[fieldId] = fieldInfo;
-                node.setAttribute("field_id", fieldId);
             }
         });
-
-        const cardDoc = archInfo.templateDocs["hierarchy-box"];
-        if (!cardDoc) {
-            throw new Error("Missing 'hierarchy-box' template.");
-        }
 
         return archInfo;
     }

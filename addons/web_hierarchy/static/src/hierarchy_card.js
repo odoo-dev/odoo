@@ -1,53 +1,23 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { useProps, t } from "@odoo/owl";
 
-import { evaluateBooleanExpr } from "@web/core/py_js/py";
-import { Field } from "@web/views/fields/field";
-import { Record } from "@web/model/record";
-import { ViewButton } from "@web/views/view_button/view_button";
-import { useViewCompiler } from "@web/views/view_compiler";
+import { CardRenderer, cardRendererProps } from "@web/views/card/card_renderer";
 
-import { HierarchyCompiler } from "./hierarchy_compiler";
-import { getFormattedRecord } from "@web/views/kanban/kanban_record";
+export class HierarchyCard extends CardRenderer {
+    static template = "web_hierarchy.HierarchyCard";
 
-export class HierarchyCard extends Component {
-    static components = {
-        Record,
-        Field,
-        ViewButton,
-    };
     props = useProps({
+        ...cardRendererProps,
         node: t.object(),
         openRecord: t.function(),
-        archInfo: t.object(),
         classNames: t.string().optional(""),
     });
-    static template = "web_hierarchy.HierarchyCard";
-    static Compiler = HierarchyCompiler;
 
-    setup() {
-        const { archInfo } = this.props;
-        this.templates = useViewCompiler(this.constructor.Compiler, archInfo.templateDocs);
-        this.evaluateBooleanExpr = evaluateBooleanExpr;
-    }
-
-    get classNames() {
-        const classNames = [this.props.classNames];
+    getCardClasses() {
+        const classes = ['bg-view', super.getCardClasses(), this.props.classNames];
         if (this.props.node.nodes.length) {
-            classNames.push("o_hierarchy_node_unfolded");
+            classes.push("o_hierarchy_node_unfolded");
         }
-        return classNames.join(" ");
-    }
-
-    getRenderingContext(data) {
-        const record = getFormattedRecord(data.record);
-        return {
-            context: this.props.node.context,
-            JSON,
-            luxon,
-            record,
-            __comp__: Object.assign(Object.create(this), { this: this }),
-            __record__: data.record,
-        };
+        return classes.join(" ");
     }
 
     onGlobalClick(ev, newWindow) {
@@ -55,10 +25,6 @@ export class HierarchyCard extends Component {
             return;
         }
         this.props.openRecord(this.props.node, newWindow);
-    }
-
-    onClickArrowUp(ev) {
-        this.props.node.fetchParentNode();
     }
 
     onClickArrowDown(ev) {

@@ -129,23 +129,6 @@ export class HierarchyNode {
     }
 
     /**
-     * Can show parent node
-     *
-     * Knows if the parent node can be fetched and displayed inside the view
-     *
-     * @returns {Boolean} True if the current node has a parent node but it is not yet displayed and the data of the
-     *                    current node is not already displayed in another node.
-     */
-    get canShowParentNode() {
-        return (
-            Boolean(this.parentResId) &&
-            this.parentResId !== this.resId &&
-            !this.parentNode &&
-            this.tree.forest.resIds.filter((resId) => resId === this.resId).length === 1
-        );
-    }
-
-    /**
      * Can show child nodes
      *
      * Knows if the child nodes can be fetched and displayed inside the view
