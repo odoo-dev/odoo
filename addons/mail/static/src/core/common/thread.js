@@ -70,6 +70,7 @@ export class Thread extends Component {
     /** @type {number} */
     smoothScrollingTimeout;
     isSmoothScrolling = false;
+    hasShownMessages = false;
 
     setup() {
         super.setup();
@@ -219,6 +220,9 @@ export class Thread extends Component {
         useEffect(
             (isLoaded) => {
                 this.state.mountedAndLoaded = isLoaded;
+                if (isLoaded) {
+                    this.hasShownMessages = true;
+                }
             },
             /**
              * `reset()` forces `mountedAndLoaded` false and this effect writes
@@ -257,6 +261,7 @@ export class Thread extends Component {
         onWillUpdateProps((nextProps) => {
             if (nextProps.thread.notEq(this.props.thread)) {
                 this.lastJumpPresent = nextProps.jumpPresent;
+                this.hasShownMessages = false;
             }
             if (!this.env.chatter || this.env.chatter?.fetchMessages) {
                 if (this.env.chatter) {
@@ -675,7 +680,9 @@ export class Thread extends Component {
     get orderedMessages() {
         const messages = this.state.mountedAndLoaded
             ? this.props.thread.messages
-            : this.props.thread.phantomMessages;
+            : this.hasShownMessages
+            ? this.props.thread.phantomMessages
+            : [];
         return this.props.order === "asc" ? [...messages] : [...messages].reverse();
     }
 

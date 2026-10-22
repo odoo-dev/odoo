@@ -669,7 +669,11 @@ export class Thread extends Record {
     async loadAround(messageId) {
         if (
             this.status === "loading" ||
-            (this.isLoaded && this.messages.some(({ id }) => id === messageId))
+            (this.isLoaded &&
+                (this.self_member_id
+                    ? messageId >= this.oldestPersistentMessage?.id &&
+                      messageId <= this.newestPersistentMessage?.id
+                    : this.messages.some(({ id }) => id === messageId)))
         ) {
             return;
         }

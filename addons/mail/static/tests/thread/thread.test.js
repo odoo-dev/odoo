@@ -16,13 +16,14 @@ import {
     start,
     startServer,
     triggerEvents,
+    triggerHotkey,
     waitStoreFetch,
 } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
 
 import { describe, expect, test } from "@odoo/hoot";
 import { press, queryFirst, queryOne, queryValue } from "@odoo/hoot-dom";
-import { Deferred, mockDate, tick } from "@odoo/hoot-mock";
+import { animationFrame, Deferred, mockDate, tick } from "@odoo/hoot-mock";
 import {
     asyncStep,
     Command,
@@ -965,6 +966,134 @@ test("message received while loading thread on last read message is shown once a
     await scroll(".o-mail-Thread", "bottom");
     await contains(".o-mail-Message-content:has(:text('msg54'))");
     await contains(".o-mail-Message-content:has(:text('Hello'))");
+});
+
+test("reopening a loaded channel shows the new message without loading it again", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        name: "General",
+    });
+    pyEnv["discuss.channel"].create({ name: "Other" });
+    const messageIds = pyEnv["mail.message"].create(
+        Array.from({ length: 30 }, (_, i) => ({
+            author_id: partnerId,
+            body: `msg${i} ${"Non Empty Body ".repeat(25)}`,
+            message_type: "comment",
+            model: "discuss.channel",
+            res_id: channelId,
+        }))
+    );
+    const [selfMemberId] = pyEnv["discuss.channel.member"].search([
+        ["channel_id", "=", channelId],
+        ["partner_id", "=", serverState.partnerId],
+    ]);
+    pyEnv["discuss.channel.member"].write([selfMemberId], {
+        new_message_separator: messageIds.at(-1) + 1,
+    });
+    let fetchDeferred;
+    onRpcAfter("/discuss/channel/messages", async () => {
+        asyncStep("fetch messages");
+        await fetchDeferred;
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Message", { count: 30 });
+    await waitForSteps(["fetch messages"]);
+    await click(".o-mail-DiscussSidebarChannel", { text: "Other" });
+    await waitForSteps(["fetch messages"]);
+    fetchDeferred = new Deferred();
+    // Simulate a busy server: the id after the last seen message is not in the channel.
+    pyEnv["mail.message"].create({ body: "elsewhere", model: "res.partner", res_id: partnerId });
+    await withUser(userId, () =>
+        rpc("/mail/message/post", {
+            post_data: { body: "Hello", message_type: "comment" },
+            thread_id: channelId,
+            thread_model: "discuss.channel",
+        })
+    );
+    await contains(
+        ".o-mail-DiscussSidebarChannel:has(:text('General')) .o-mail-DiscussSidebar-unreadIndicator"
+    );
+    await click(".o-mail-DiscussSidebarChannel", { text: "General" });
+    await contains(".o-mail-Message", { count: 31 });
+    await isInViewportOf(".o-mail-Message:has(:text('Hello'))", ".o-mail-Thread");
+    await waitForSteps([]);
+});
+
+test("reopening a channel loaded around an older message shows no old message while loading", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Demo" });
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        name: "General",
+    });
+    pyEnv["discuss.channel"].create({ name: "Other" });
+    const messageIds = pyEnv["mail.message"].create(
+        Array.from({ length: 100 }, (_, i) => ({
+            author_id: partnerId,
+            body: i === 10 ? "needle" : `msg${i}`,
+            message_type: "comment",
+            model: "discuss.channel",
+            res_id: channelId,
+        }))
+    );
+    const [selfMemberId] = pyEnv["discuss.channel.member"].search([
+        ["channel_id", "=", channelId],
+        ["partner_id", "=", serverState.partnerId],
+    ]);
+    pyEnv["discuss.channel.member"].write([selfMemberId], {
+        new_message_separator: messageIds.at(-1) + 1,
+    });
+    let fetchDeferred;
+    let isFetchHeld = false;
+    onRpcAfter("/discuss/channel/messages", async () => {
+        if (fetchDeferred) {
+            if (!isFetchHeld) {
+                isFetchHeld = true;
+                asyncStep("fetch messages");
+            }
+            await fetchDeferred;
+        }
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Message", { count: 30 });
+    await click("button[title='Search Messages']");
+    await insertText(".o_searchview_input", "needle");
+    triggerHotkey("Enter");
+    await click(".o-mail-SearchMessagesPanel .o-mail-MessageCard-jump");
+    await contains(".o-mail-Thread .o-mail-Message.o-highlighted:has(:text('needle'))");
+    await click(".o-mail-DiscussSidebarChannel", { text: "Other" });
+    await contains(".o-mail-Thread-empty");
+    fetchDeferred = new Deferred();
+    await withUser(userId, () =>
+        rpc("/mail/message/post", {
+            post_data: { body: "Hello", message_type: "comment" },
+            thread_id: channelId,
+            thread_model: "discuss.channel",
+        })
+    );
+    await contains(
+        ".o-mail-DiscussSidebarChannel:has(:text('General')) .o-mail-DiscussSidebar-unreadIndicator"
+    );
+    await click(".o-mail-DiscussSidebarChannel", { text: "General" });
+    await waitForSteps(["fetch messages"]);
+    await contains(".o-mail-DiscussContent-threadName", { value: "General" });
+    await animationFrame();
+    await animationFrame(); // wait for the render of the loading thread
+    await contains(".o-mail-Message", { count: 0 });
+    fetchDeferred.resolve();
+    await isInViewportOf(".o-mail-Message:has(:text('Hello'))", ".o-mail-Thread");
 });
 
 test("New message separator not appearing after showing composer on thread", async () => {
