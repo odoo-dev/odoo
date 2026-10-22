@@ -302,6 +302,11 @@ class Cart(PaymentPortal):
         values = self.add_to_cart(product_template_id, product_id, quantity=quantity, **kwargs)
 
         order_sudo = request.cart
+        # The checkout alerts are only rendered on page load, return them to display them right
+        # away and clear them, as the page would do once they have been displayed.
+        values["checkout_alerts"] = order_sudo._get_alerts()
+        if values["checkout_alerts"]:
+            order_sudo.alerts = False
         values.update(self._get_updated_cart_page_values(order_sudo))
         # If the cart was empty, no cart summary was rendered on the page. However, we just
         # added a product, so render it now.

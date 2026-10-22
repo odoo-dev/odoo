@@ -15,7 +15,9 @@ export class QuickReorder extends Interaction {
             't-on-input': this.updateQuantityAndPrice,
             't-on-keydown': this.triggerReorderOnEnter,
         },
-        '.o_wsale_quick_reorder_product_button': { 't-on-click': this.reorderProduct },
+        '.o_wsale_quick_reorder_product_button': {
+            't-on-click': this.locked(this.reorderProduct, true),
+        },
     };
 
     /**
@@ -158,10 +160,33 @@ export class QuickReorder extends Interaction {
         wSaleUtils.updateQuickReorderSidebar(data);
         this.services['public.interactions'].startInteractions(cart);
         this.services['public.interactions'].startInteractions(cartSummary);
-        this.services.cart.showWarning(data.warning);
+        this._updateCheckoutAlerts(data.checkout_alerts);
 
         // Move the focus to the next quantity input.
         this._focusNextQuantityInput(currentButtonIndex);
+    }
+
+    /**
+     * Replace the displayed checkout alerts with the given ones, as they would be rendered on page
+     * load.
+     *
+     * @private
+     * @param {Object[]} alerts - The alerts of the cart.
+     * @return {void}
+     */
+    _updateCheckoutAlerts(alerts) {
+        const alertsEl = document.getElementById('checkout_alerts');
+        if (!alertsEl || !alerts?.length) return;
+
+        const alertEls = alerts.map(alert => {
+            const alertEl = document.createElement('owl-component');
+            alertEl.setAttribute('name', 'website_sale.AlertBanner');
+            alertEl.setAttribute('props', JSON.stringify({ ...alert, className: 'col-12' }));
+            return alertEl;
+        });
+        this.services['public.interactions'].stopInteractions(alertsEl);
+        alertsEl.replaceChildren(...alertEls);
+        this.services['public.interactions'].startInteractions(alertsEl);
     }
 
     /**
