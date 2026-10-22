@@ -69,7 +69,7 @@ class PortalWebClientController(WebclientController):
             thread=thread,
             fetch_params=fetch_params,
             add_to_store=False,
-            sudo=True,
+            sudo=thread.env.su,
         )
         for message_data in messages.portal_message_format(options=params):
             store.add_model_values("mail.message", message_data)
