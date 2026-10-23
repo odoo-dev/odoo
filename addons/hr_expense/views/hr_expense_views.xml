@@ -284,8 +284,8 @@
                                 <field name="label_currency_rate"/>
                             </div>
 
-                            <label for="tax_ids"/>
-                            <div class="o_row">
+                            <label for="tax_ids" groups="base.group_user_regular"/>
+                            <div class="o_row" groups="base.group_user_regular">
                                 <field name="tax_ids"
                                        force_save="1"
                                        widget="many2many_tax_tags"
@@ -293,14 +293,19 @@
                                        options="{'no_create': True}"/>
                                 <field name="tax_amount_currency"/>
                             </div>
-                            <field name="employee_id" groups="!hr.group_hr_user"
-                                   context="{'default_company_id': company_id}" widget="many2one_avatar_employee"
-                                   options="{'relation': 'hr.employee.public', 'no_create': True}"
-                                   readonly="not is_editable" required="1"/>
-                            <field name="employee_id" groups="hr.group_hr_user"
-                                   context="{'default_company_id': company_id}" widget="many2one_avatar_employee"
-                                   options="{'relation': 'hr.employee'}"
-                               readonly="not is_editable" required="1"/>
+                            <label for="employee_id" groups="base.group_user_regular"/>
+                            <div groups="base.group_user_regular">
+                                <field name="employee_id" groups="!hr.group_hr_user"
+                                       context="{'default_company_id': company_id}" widget="many2one_avatar_employee"
+                                       options="{'relation': 'hr.employee.public', 'no_create': True}"
+                                       readonly="not is_editable" required="1"/>
+                                <field name="employee_id" groups="hr.group_hr_user"
+                                       context="{'default_company_id': company_id}" widget="many2one_avatar_employee"
+                                       options="{'relation': 'hr.employee'}"
+                                       readonly="not is_editable" required="1"/>
+                            </div>
+                            <!-- Light users can only create their own expenses, but the default value is still needed -->
+                            <field name="employee_id" invisible="1" groups="!base.group_user_regular"/>
                             <label id="lo" for="payment_mode"/>
                             <div id="payment_mode">
                                 <field name="payment_mode" widget="radio" readonly="state != 'draft'"/>
