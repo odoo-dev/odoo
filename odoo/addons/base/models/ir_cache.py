@@ -71,12 +71,13 @@ class IrCache(models.Model):
     _log_access = False
     _allow_sudo_commands = False
 
-    create_date = fields.Datetime(readonly=True)
-    kind = fields.Char(required=True, help="Type of the entry, e.g. 'qweb'")
+    create_date = fields.Datetime(string="Create Date", readonly=True)
+    kind = fields.Char(string="Type of the entry", required=True, help="Type of the entry, e.g. 'qweb'")
     key = fields.Char(required=True)
-    key_id = fields.Binary(attachment=False, required=True, help="Identifier of the key signing the entry")
-    control = fields.Json(required=True, help="Data identifying the source of the entry, e.g. view ids")
-    hash = fields.Char(required=True, help="Hash of the source (computed from the control) when the entry was created")
+    key = fields.Char(string="Cache Key", required=True, help="Cache Key, e.g. 'website.layout'")
+    key_id = fields.Binary(string="Identifier of the key signing the entry", attachment=False, required=True)
+    control = fields.Json(string="Validation data identifying", required=True, help="Data identifying the source of the entry, e.g. view ids")
+    hash = fields.Char(string="Validation Hash", required=True, help="Hash of the source (computed from the control) when the entry was created")
     data = fields.Binary(attachment=False, required=True)
     signature = fields.Binary(attachment=False, required=True)
 
